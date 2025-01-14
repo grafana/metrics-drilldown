@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -18,4 +21,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: grafana/plugin-actions/bundle-size@main
+      - name: Get Node.js version from package.json
+        id: node-version
+        run: |
+          NODE_VERSION=$(node -p "require('./package.json').engines.node.replace('>=', '')")
+          echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate bundle stats
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: grafana/plugin-actions/bundle-size@main
+        with:
+          node-version: ${{ steps.node-version.outputs.version }}
+
+      - name: Compare bundle stats
+        if: github.event_name == 'pull_request'
+        uses: grafana/plugin-actions/bundle-size@main
+        with:
+          node-version: ${{ steps.node-version.outputs.version }}
