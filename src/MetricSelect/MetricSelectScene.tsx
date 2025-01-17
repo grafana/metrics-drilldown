@@ -69,6 +69,7 @@ export interface MetricSelectSceneState extends SceneObjectState {
   metricNamesLoading?: boolean;
   metricNamesError?: string;
   metricNamesWarning?: string;
+  missingOtelTargets?: boolean;
 }
 
 const ROW_PREVIEW_HEIGHT = '175px';
@@ -233,7 +234,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     const filters: AdHocVariableFilter[] = [];
 
     const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    const adhocFilters = filtersVar instanceof AdHocFiltersVariable ? (filtersVar?.state.filters ?? []) : [];
+    const adhocFilters = filtersVar instanceof AdHocFiltersVariable ? filtersVar?.state.filters ?? [] : [];
     if (adhocFilters.length > 0) {
       filters.push(...adhocFilters);
     }
@@ -251,8 +252,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     this.setState({ metricNamesLoading: true, metricNamesError: undefined, metricNamesWarning: undefined });
 
     try {
-      const jobsList = trail.state.useOtelExperience ? (trail.state.otelTargets?.jobs ?? []) : [];
-      const instancesList = trail.state.useOtelExperience ? (trail.state.otelTargets?.instances ?? []) : [];
+      const jobsList = trail.state.useOtelExperience ? trail.state.otelTargets?.jobs ?? [] : [];
+      const instancesList = trail.state.useOtelExperience ? trail.state.otelTargets?.instances ?? [] : [];
 
       const response = await getMetricNames(
         datasourceUid,
@@ -290,10 +291,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
         metricNamesWarning = undefined;
       }
 
-      if (response.missingOtelTargets) {
-        metricNamesWarning = `${metricNamesWarning ?? ''} The list of metrics is not complete. Select more OTel resource attributes to see a full list of metrics.`;
-      }
-
       let bodyLayout = this.state.body;
 
       // generate groups based on the search metrics input
@@ -306,6 +303,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
         metricNamesLoading: false,
         metricNamesWarning,
         metricNamesError: response.error,
+        missingOtelTargets: response.missingOtelTargets,
       });
     } catch (err: unknown) {
       let error = 'Unknown error';
@@ -504,15 +502,23 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   };
 
   public static Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
-    const { body, metricNames, metricNamesError, metricNamesLoading, metricNamesWarning, rootGroup, metricPrefix } =
-      model.useState();
+    const {
+      body,
+      metricNames,
+      metricNamesError,
+      metricNamesLoading,
+      metricNamesWarning,
+      rootGroup,
+      metricPrefix,
+      missingOtelTargets,
+    } = model.useState();
     const { children } = body.useState();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles);
 
     const [warningDismissed, dismissWarning] = useReducer(() => true, false);
 
-    const { metricSearch, useOtelExperience, hasOtelResources, isStandardOtel, metric } = trail.useState();
+    const { metricSearch, useOtelExperience, hasOtelResources, isStandardOtel } = trail.useState();
 
     const tooStrict = children.length === 0 && metricSearch;
     const noMetrics = !metricNamesLoading && metricNames && metricNames.length === 0;
@@ -521,6 +527,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     const blockingMessage = isLoading
       ? undefined
+      : missingOtelTargets
+      ? 'There are no metrics found. Please adjust your filters based on your OTel resource attributes.'
       : (noMetrics && 'There are no results found. Try a different time range or a different data source.') ||
         (tooStrict && 'There are no results found. Try adjusting your search or filters.') ||
         undefined;
@@ -571,9 +579,10 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 },
                 ...Array.from(rootGroup?.groups.keys() ?? []).map((g) => ({ label: `${g}_`, value: g })),
               ]}
+              className="explore-metrics-metric-prefix-select"
             />
           </Field>
-          {!metric && hasOtelResources && (
+          {hasOtelResources && (
             <Field
               label={
                 <>
@@ -609,7 +618,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 <InlineSwitch
                   disabled={!isStandardOtel}
                   showLabel={true}
-                  label="Otel experience"
+                  label="OTel experience"
                   value={useOtelExperience}
                   onChange={model.onToggleOtelExperience}
                 />
