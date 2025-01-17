@@ -27,14 +27,7 @@ jobs:
           NODE_VERSION=$(node -p "require('./package.json').engines.node.replace('>=', '')")
           echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Generate bundle stats
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: grafana/plugin-actions/bundle-size@main
-        with:
-          node-version: ${{ steps.node-version.outputs.version }}
-
       - name: Compare bundle stats
-        if: github.event_name == 'pull_request'
         uses: grafana/plugin-actions/bundle-size@main
         with:
           node-version: ${{ steps.node-version.outputs.version }}
