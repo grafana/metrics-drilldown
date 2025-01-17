@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "Scaffold-Explore-Metrics",
-  "id": "grafana-scaffoldexploremetrics-app",
+  "name": "Explore-Metrics",
+  "id": "grafana-exploremetrics-app",
   "info": {
     "keywords": ["app"],
     "description": "",
