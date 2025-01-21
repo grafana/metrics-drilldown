@@ -1,7 +1,7 @@
 import { PanelBuilders } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode } from '@grafana/schema/dist/esm/index';
 
-import { HeatmapColorMode } from '../../../plugins/panel/heatmap/panelcfg.gen';
+import { HeatmapColorMode } from '@grafana/schema/dist/esm/raw/composable/heatmap/panelcfg/x/HeatmapPanelCfg_types.gen';
 
 export type CommonVizParams = {
   title: string;
