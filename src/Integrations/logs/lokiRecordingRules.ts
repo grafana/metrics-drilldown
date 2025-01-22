@@ -1,8 +1,9 @@
 import { lastValueFrom } from 'rxjs';
 
-import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
+import { parser, Selector, PipelineExpr, MetricExpr } from '@grafana/lezer-logql';
+import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
 import { getBackendSrv, type BackendSrvRequest, type FetchResponse } from '@grafana/runtime';
-import { getLogQueryFromMetricsQuery } from 'app/plugins/datasource/loki/queryUtils';
+import { SyntaxNode } from '@lezer/common';
 
 import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsScene';
 
@@ -193,3 +194,85 @@ const createLokiRecordingRulesConnector = () => {
 };
 
 export const lokiRecordingRulesConnector = createLokiRecordingRulesConnector();
+
+/**
+ * Returns whether the given query is a logs query (not a metrics query)
+ * A query that's at least 3 characters long and doesn't contain a MetricExpr node is considered a logs query
+ */
+function isLogsQuery(query: string): boolean {
+  if (query.trim().length <= 2) {
+    return false;
+  }
+
+  let hasMetricExpr = false;
+  const tree = parser.parse(query);
+
+  tree.iterate({
+    enter: ({ type }): false | void => {
+      if (type.id === MetricExpr) {
+        hasMetricExpr = true;
+        return false;
+      }
+    },
+  });
+
+  return !hasMetricExpr;
+}
+
+/**
+ * Gets a node of the specified type from a LogQL query string
+ * Returns undefined if no node of that type is found
+ */
+function getNodeFromQuery(query: string, nodeType: number): SyntaxNode | undefined {
+  let foundNode: SyntaxNode | undefined;
+  const tree = parser.parse(query);
+
+  tree.iterate({
+    enter: (node): false | void => {
+      if (node.type.id === nodeType) {
+        foundNode = node.node;
+        return false;
+      }
+    },
+  });
+
+  return foundNode;
+}
+
+/**
+ * Extracts the underlying log query from a metrics query
+ * For metrics queries, it returns the selector and pipeline parts
+ * For logs queries, it returns the original query unchanged
+ * Returns an empty string if no valid query can be extracted
+ *
+ * @example
+ * // Returns '{foo="bar"} |= "error"'
+ * getLogQueryFromMetricsQuery('rate({foo="bar"} |= "error"[5m])')
+ *
+ * // Returns '{foo="bar"}'
+ * getLogQueryFromMetricsQuery('sum(rate({foo="bar"}[5m]))')
+ *
+ * // Returns original query unchanged
+ * getLogQueryFromMetricsQuery('{foo="bar"} |= "error"')
+ */
+export function getLogQueryFromMetricsQuery(query: string): string {
+  // If it's already a logs query, return as-is
+  if (isLogsQuery(query)) {
+    return query;
+  }
+
+  // Get the selector node which contains the log query matchers
+  const selectorNode = getNodeFromQuery(query, Selector);
+  if (!selectorNode) {
+    return '';
+  }
+
+  const selector = query.substring(selectorNode.from, selectorNode.to);
+
+  // Get the pipeline expression node if it exists (contains filters, parsers etc.)
+  const pipelineExprNode = getNodeFromQuery(query, PipelineExpr);
+  const pipelineExpr = pipelineExprNode ? query.substring(pipelineExprNode.from, pipelineExprNode.to) : '';
+
+  // Combine selector with pipeline expression if it exists
+  return `${selector} ${pipelineExpr}`.trim();
+}
