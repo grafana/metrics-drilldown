@@ -4,7 +4,7 @@ import { sceneGraph, CustomVariable } from '@grafana/scenes';
 import { DataTrail } from '../../DataTrail';
 import { reportExploreMetrics } from '../../interactions';
 import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_DEPLOYMENT_ENV } from '../../shared';
-import { isAdHocFiltersVariable } from 'utils/variables';
+import { isAdHocFiltersVariable, isCustomVariable } from 'utils/variables';
 
 /**
  * Migration for the otel deployment environment variable.
@@ -67,9 +67,7 @@ export function migrateOtelDeploymentEnvironment(trail: DataTrail, urlParams: Ur
   const otelAndMetricsFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, trail);
   const deploymentEnvironmentVariable = sceneGraph.lookupVariable(VAR_OTEL_DEPLOYMENT_ENV, trail);
 
-  if (
-    !(isAdHocFiltersVariable(otelAndMetricsFiltersVariable) && deploymentEnvironmentVariable instanceof CustomVariable)
-  ) {
+  if (!(isAdHocFiltersVariable(otelAndMetricsFiltersVariable) && isCustomVariable(deploymentEnvironmentVariable))) {
     return;
   }
 

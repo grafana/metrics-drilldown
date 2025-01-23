@@ -1,4 +1,11 @@
-import { AdHocFiltersVariable, ConstantVariable, SceneObject, SceneTimeRange, SceneVariable } from '@grafana/scenes';
+import {
+  AdHocFiltersVariable,
+  ConstantVariable,
+  CustomVariable,
+  SceneObject,
+  SceneTimeRange,
+  SceneVariable,
+} from '@grafana/scenes';
 
 type MaybeVariable = SceneVariable | null | undefined;
 
@@ -8,6 +15,10 @@ export function isConstantVariable(variable: MaybeVariable): variable is Constan
 
 export function isAdHocFiltersVariable(variable: MaybeVariable): variable is AdHocFiltersVariable {
   return variable !== null && variable?.state.type === 'adhoc';
+}
+
+export function isCustomVariable(variable: MaybeVariable): variable is CustomVariable {
+  return variable !== null && variable?.state.type === 'custom';
 }
 
 //won't be a variable. might go into separate file utils/timerange.ts. need to do things a lil differently. SceneVariable is a superset of diff var types. SceneVariable is base type. AdHoc extends, etc. go to def for SceneTimeRange, see SceneTimeRangeLike.
