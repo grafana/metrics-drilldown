@@ -61,7 +61,7 @@ import {
   VAR_OTEL_RESOURCES,
 } from './shared';
 import { getTrailFor, limitAdhocProviders } from './utils';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/variables';
+import { isAdHocFiltersVariable, isConstantVariable, isSceneQueryRunner } from 'utils/variables';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -534,7 +534,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   public getQueries(): PromQuery[] {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const sqrs = sceneGraph.findAllObjects(this, (b) => b instanceof SceneQueryRunner) as SceneQueryRunner[];
+    const sqrs = sceneGraph.findAllObjects(this, (b) => isSceneQueryRunner(b)) as SceneQueryRunner[];
 
     return sqrs.reduce<PromQuery[]>((acc, sqr) => {
       acc.push(

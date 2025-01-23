@@ -5,6 +5,7 @@ import {
   QueryVariable,
   SceneLayout,
   SceneObject,
+  SceneQueryRunner,
   SceneTimeRange,
   SceneVariable,
 } from '@grafana/scenes';
@@ -43,4 +44,8 @@ export function isSceneCSSGridLayout(input: SceneObject | null | undefined): inp
 
 export function isSceneFlexLayout(input: SceneObject | null | undefined): input is SceneLayout {
   return typeof input !== 'undefined' && input !== null && 'toggleDirection' in input && 'flex' in input.state;
+}
+
+export function isSceneQueryRunner(input: SceneObject | null | undefined): input is SceneQueryRunner {
+  return typeof input !== 'undefined' && input !== null && 'runQueries' in input && 'state' in input;
 }
