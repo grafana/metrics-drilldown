@@ -18,6 +18,7 @@ import {
 
 import { getFilteredResourceAttributes, totalOtelResources } from './api';
 import { OtelResourcesObject } from './types';
+import { isConstantVariable } from 'utils/variables';
 
 export const blessedList = (): Record<string, number> => {
   return {
@@ -248,9 +249,9 @@ export async function updateOtelJoinWithGroupLeft(trail: DataTrail, metric: stri
   const otelJoinQueryVariable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, trail);
   const missingOtelTargetsVariable = sceneGraph.lookupVariable(VAR_MISSING_OTEL_TARGETS, trail);
   if (
-    !(otelGroupLeft instanceof ConstantVariable) ||
-    !(otelJoinQueryVariable instanceof ConstantVariable) ||
-    !(missingOtelTargetsVariable instanceof ConstantVariable)
+    !isConstantVariable(otelGroupLeft) ||
+    !isConstantVariable(otelJoinQueryVariable) ||
+    !isConstantVariable(missingOtelTargetsVariable)
   ) {
     return;
   }
@@ -376,7 +377,7 @@ export async function updateOtelData(
       otelResourcesVariable instanceof AdHocFiltersVariable &&
       filtersVariable instanceof AdHocFiltersVariable &&
       otelAndMetricsFiltersVariable instanceof AdHocFiltersVariable &&
-      otelJoinQueryVariable instanceof ConstantVariable
+      isConstantVariable(otelJoinQueryVariable)
     )
   ) {
     return;

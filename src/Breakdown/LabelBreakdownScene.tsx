@@ -61,6 +61,7 @@ import { SortByScene, SortCriteriaChanged } from './SortByScene';
 import { BreakdownLayoutChangeCallback, BreakdownLayoutType } from './types';
 import { getLabelOptions } from './utils';
 import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
+import { isConstantVariable } from 'utils/variables';
 
 const MAX_PANELS_IN_ALL_LABELS_BREAKDOWN = 60;
 
@@ -154,7 +155,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
     // OTEL
     const resourceAttributes = sceneGraph.lookupVariable(VAR_OTEL_GROUP_LEFT, trail);
-    if (resourceAttributes instanceof ConstantVariable) {
+    if (isConstantVariable(resourceAttributes)) {
       resourceAttributes?.subscribeToState((newState, oldState) => {
         // wait for the resource attributes to be loaded
         if (newState.value !== oldState.value) {

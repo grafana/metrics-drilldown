@@ -23,6 +23,7 @@ import {
   updateOtelData,
   manageOtelAndMetricFilters,
 } from './util';
+import { isConstantVariable } from 'utils/variables';
 
 jest.mock('./api', () => ({
   totalOtelResources: jest.fn(() => ({ job: 'oteldemo', instance: 'instance' })),
@@ -196,7 +197,7 @@ describe('updateOtelJoinWithGroupLeft', () => {
 
   function getOtelJoinQueryVar(trail: DataTrail) {
     const variable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, trail);
-    if (variable instanceof ConstantVariable) {
+    if (isConstantVariable(variable)) {
       return variable;
     }
     throw new Error('getDepEnvVar failed');
@@ -314,7 +315,7 @@ describe('util functions that rely on trail and variable setup', () => {
 
   function getOtelGroupLeftVar(trail: DataTrail) {
     const variable = sceneGraph.lookupVariable(VAR_OTEL_GROUP_LEFT, trail);
-    if (variable instanceof ConstantVariable) {
+    if (isConstantVariable(variable)) {
       return variable;
     }
     throw new Error('getOtelGroupLeftVar failed');

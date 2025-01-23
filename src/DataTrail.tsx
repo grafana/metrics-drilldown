@@ -61,6 +61,7 @@ import {
   VAR_OTEL_RESOURCES,
 } from './shared';
 import { getTrailFor, limitAdhocProviders } from './utils';
+import { isConstantVariable } from 'utils/variables';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -480,7 +481,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         otelResourcesVariable instanceof AdHocFiltersVariable &&
         filtersVariable instanceof AdHocFiltersVariable &&
         otelAndMetricsFiltersVariable instanceof AdHocFiltersVariable &&
-        otelJoinQueryVariable instanceof ConstantVariable
+        isConstantVariable(otelJoinQueryVariable)
       )
     ) {
       return;

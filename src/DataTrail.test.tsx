@@ -16,6 +16,7 @@ import {
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
 } from './shared';
+import { isConstantVariable } from 'utils/variables';
 
 jest.mock('./otel/api', () => ({
   totalOtelResources: jest.fn(() => ({ job: 'oteldemo', instance: 'instance' })),
@@ -496,7 +497,7 @@ describe('DataTrail', () => {
 
     function getOtelJoinQueryVar(trail: DataTrail) {
       const variable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, trail);
-      if (variable instanceof ConstantVariable) {
+      if (isConstantVariable(variable)) {
         return variable;
       }
       throw new Error('getOtelJoinQueryVar failed');
@@ -512,7 +513,7 @@ describe('DataTrail', () => {
 
     function getOtelGroupLeftVar(trail: DataTrail) {
       const variable = sceneGraph.lookupVariable(VAR_OTEL_GROUP_LEFT, trail);
-      if (variable instanceof ConstantVariable) {
+      if (isConstantVariable(variable)) {
         return variable;
       }
       throw new Error('getOtelGroupLeftVar failed');
