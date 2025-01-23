@@ -156,7 +156,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToEvent(SceneObjectStateChangedEvent, (evt) => {
-        if (evt.payload.changedObject instanceof SceneTimeRange) {
+        if (isSceneTimeRangeState(evt.payload.changedObject)) {
           const { prevState, newState } = evt.payload;
 
           if (isSceneTimeRangeState(prevState) && isSceneTimeRangeState(newState)) {
