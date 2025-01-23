@@ -50,7 +50,7 @@ import { getMetricNames } from './api';
 import { getPreviewPanelFor } from './previewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
-import { isAdHocFiltersVariable } from 'utils/variables';
+import { isAdHocFiltersVariable, isSceneCSSGridLayout, isSceneFlexLayout } from 'utils/variables';
 
 interface MetricPanel {
   name: string;
@@ -644,8 +644,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
           </Alert>
         )}
         <StatusWrapper {...{ isLoading, blockingMessage }}>
-          {body instanceof SceneFlexLayout && <body.Component model={body} />}
-          {body instanceof SceneCSSGridLayout && <body.Component model={body} />}
+          {isSceneFlexLayout(body) && <body.Component model={body} />}
+          {isSceneCSSGridLayout(body) && <body.Component model={body} />}
         </StatusWrapper>
       </div>
     );

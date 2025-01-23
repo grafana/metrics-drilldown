@@ -3,6 +3,7 @@ import {
   ConstantVariable,
   CustomVariable,
   QueryVariable,
+  SceneLayout,
   SceneObject,
   SceneTimeRange,
   SceneVariable,
@@ -34,4 +35,12 @@ export function isSceneTimeRange(input: SceneObject | null | undefined): input i
     'from' in input.state &&
     'to' in input.state
   );
+}
+
+export function isSceneCSSGridLayout(input: SceneObject | null | undefined): input is SceneLayout {
+  return typeof input !== 'undefined' && input !== null && 'isDraggable' in input && 'grid' in input.state;
+}
+
+export function isSceneFlexLayout(input: SceneObject | null | undefined): input is SceneLayout {
+  return typeof input !== 'undefined' && input !== null && 'toggleDirection' in input && 'flex' in input.state;
 }
