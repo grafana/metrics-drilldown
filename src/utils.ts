@@ -34,6 +34,7 @@ import { getTrailStore } from './TrailStore/TrailStore';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { sortResources } from './otel/util';
 import { LOGS_METRIC, TRAILS_ROUTE, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
+import { isAdHocFiltersVariable } from 'utils/variables';
 
 export function isAdHocVariable(variable: SceneVariable | null): variable is AdHocFiltersVariable {
   return variable !== null && variable.state.type === 'adhoc';
@@ -142,7 +143,7 @@ export function isSceneTimeRangeState(state: SceneObjectState): state is SceneTi
 
 export function getFilters(scene: SceneObject) {
   const filters = sceneGraph.lookupVariable('filters', scene);
-  if (filters instanceof AdHocFiltersVariable) {
+  if (isAdHocFiltersVariable(filters)) {
     return filters.state.filters;
   }
   return null;
@@ -167,7 +168,7 @@ export function limitAdhocProviders(
   limitedFilterVariable: SceneVariable<SceneVariableState> | null,
   datasourceHelper: MetricDatasourceHelper
 ) {
-  if (!(limitedFilterVariable instanceof AdHocFiltersVariable)) {
+  if (!isAdHocFiltersVariable(limitedFilterVariable)) {
     return;
   }
 

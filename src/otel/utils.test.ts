@@ -1,6 +1,6 @@
 import { AdHocVariableFilter, MetricFindValue } from '@grafana/data';
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
-import { AdHocFiltersVariable, ConstantVariable, sceneGraph } from '@grafana/scenes';
+import { sceneGraph } from '@grafana/scenes';
 import { MockDataSourceSrv, DataSourceType } from '../mocks/datasource';
 import { activateFullSceneTree } from '../utils/utils.test';
 
@@ -23,7 +23,7 @@ import {
   updateOtelData,
   manageOtelAndMetricFilters,
 } from './util';
-import { isConstantVariable } from 'utils/variables';
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/variables';
 
 jest.mock('./api', () => ({
   totalOtelResources: jest.fn(() => ({ job: 'oteldemo', instance: 'instance' })),
@@ -299,7 +299,7 @@ describe('util functions that rely on trail and variable setup', () => {
 
   function getOtelAndMetricsVar(trail: DataTrail) {
     const variable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, trail);
-    if (variable instanceof AdHocFiltersVariable) {
+    if (isAdHocFiltersVariable(variable)) {
       return variable;
     }
     throw new Error('getOtelAndMetricsVar failed');
@@ -307,7 +307,7 @@ describe('util functions that rely on trail and variable setup', () => {
 
   function getOtelResourcesVar(trail: DataTrail) {
     const variable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
-    if (variable instanceof AdHocFiltersVariable) {
+    if (isAdHocFiltersVariable(variable)) {
       return variable;
     }
     throw new Error('getOtelResourcesVar failed');
@@ -323,7 +323,7 @@ describe('util functions that rely on trail and variable setup', () => {
 
   function getFilterVar() {
     const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
-    if (variable instanceof AdHocFiltersVariable) {
+    if (isAdHocFiltersVariable(variable)) {
       return variable;
     }
     throw new Error('getFilterVar failed');

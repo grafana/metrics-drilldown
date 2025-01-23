@@ -6,6 +6,7 @@ import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { sortResources } from './otel/util';
 import { VAR_OTEL_AND_METRIC_FILTERS } from './shared';
 import { getDatasourceForNewTrail, limitAdhocProviders } from './utils';
+import { isAdHocFiltersVariable } from 'utils/variables';
 
 jest.mock('./TrailStore/TrailStore', () => ({
   getTrailStore: jest.fn(),
@@ -79,7 +80,7 @@ describe('limitAdhocProviders', () => {
   it('should limit the number of tag keys returned in the variable to 10000', async () => {
     limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
 
-    if (filtersVariable instanceof AdHocFiltersVariable && filtersVariable.state.getTagKeysProvider) {
+    if (isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.getTagKeysProvider) {
       console.log = jest.fn();
 
       const result = await filtersVariable.state.getTagKeysProvider(filtersVariable, null);
@@ -91,7 +92,7 @@ describe('limitAdhocProviders', () => {
   it('should limit the number of tag values returned in the variable to 10000', async () => {
     limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
 
-    if (filtersVariable instanceof AdHocFiltersVariable && filtersVariable.state.getTagValuesProvider) {
+    if (isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.getTagValuesProvider) {
       const result = await filtersVariable.state.getTagValuesProvider(filtersVariable, {
         key: 'testKey',
         operator: '=',
@@ -104,7 +105,7 @@ describe('limitAdhocProviders', () => {
 
   it('should call sort resources and sort the promoted otel resources list if using the otel and metrics filter', async () => {
     limitAdhocProviders(dataTrail, otelAndMetricsVariable, datasourceHelper);
-    if (otelAndMetricsVariable instanceof AdHocFiltersVariable && otelAndMetricsVariable.state.getTagKeysProvider) {
+    if (isAdHocFiltersVariable(otelAndMetricsVariable) && otelAndMetricsVariable.state.getTagKeysProvider) {
       await otelAndMetricsVariable.state.getTagKeysProvider(otelAndMetricsVariable, null);
     }
     expect(sortResources).toHaveBeenCalled();

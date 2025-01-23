@@ -5,7 +5,6 @@ import { SyntheticEvent, useReducer } from 'react';
 import { AdHocVariableFilter, GrafanaTheme2, RawTimeRange, SelectableValue } from '@grafana/data';
 import { config, isFetchError } from '@grafana/runtime';
 import {
-  AdHocFiltersVariable,
   PanelBuilders,
   SceneComponentProps,
   SceneCSSGridItem,
@@ -51,6 +50,7 @@ import { getMetricNames } from './api';
 import { getPreviewPanelFor } from './previewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
+import { isAdHocFiltersVariable } from 'utils/variables';
 
 interface MetricPanel {
   name: string;
@@ -235,7 +235,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     const filters: AdHocVariableFilter[] = [];
 
     const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    const adhocFilters = filtersVar instanceof AdHocFiltersVariable ? filtersVar?.state.filters ?? [] : [];
+    const adhocFilters = isAdHocFiltersVariable(filtersVar) ? filtersVar?.state.filters ?? [] : [];
     if (adhocFilters.length > 0) {
       filters.push(...adhocFilters);
     }

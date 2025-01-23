@@ -1,11 +1,12 @@
 import { DataSourceWithBackend, locationService, setDataSourceSrv } from '@grafana/runtime';
-import { AdHocFiltersVariable, sceneGraph, sceneUtils } from '@grafana/scenes';
+import { sceneGraph, sceneUtils } from '@grafana/scenes';
 
 import { DataTrail } from '../DataTrail';
 import { TRAIL_BOOKMARKS_KEY, RECENT_TRAILS_KEY, VAR_FILTERS } from '../shared';
 
 import { SerializedTrail, getTrailStore } from './TrailStore';
 import { MockDataSourceSrv, DataSourceType } from '../mocks/datasource';
+import { isAdHocFiltersVariable } from 'utils/variables';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
@@ -293,7 +294,7 @@ describe('TrailStore', () => {
 
     function getFilterVar(trail: DataTrail) {
       const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
-      if (variable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(variable)) {
         return variable;
       }
       throw new Error('getFilterVar failed');
@@ -301,7 +302,7 @@ describe('TrailStore', () => {
 
     function getStepFilterVar(trail: DataTrail, step: number) {
       const variable = trail.state.history.state.steps[step].trailState.$variables?.getByName(VAR_FILTERS);
-      if (variable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(variable)) {
         return variable;
       }
       throw new Error(`getStepFilterVar failed for step ${step}`);

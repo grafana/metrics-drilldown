@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
 import { dateTimeFormat, GrafanaTheme2 } from '@grafana/data';
-import { AdHocFiltersVariable, sceneGraph } from '@grafana/scenes';
+import { sceneGraph } from '@grafana/scenes';
 import { Card, IconButton, useStyles2 } from '@grafana/ui';
 import { Trans } from 'app/core/internationalization';
 
@@ -10,6 +10,7 @@ import { DataTrail } from './DataTrail';
 import { getTrailStore, DataTrailBookmark } from './TrailStore/TrailStore';
 import { VAR_FILTERS } from './shared';
 import { getMetricName } from './utils';
+import { isAdHocFiltersVariable } from 'utils/variables';
 
 export type Props = {
   trail?: DataTrail;
@@ -39,7 +40,7 @@ export function DataTrailCard(props: Props) {
     }
 
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail)!;
-    if (!(filtersVariable instanceof AdHocFiltersVariable)) {
+    if (!isAdHocFiltersVariable(filtersVariable)) {
       return null;
     }
 

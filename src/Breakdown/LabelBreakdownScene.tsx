@@ -7,7 +7,6 @@ import { DataFrame, FieldType, GrafanaTheme2, PanelData, SelectableValue } from 
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import {
-  ConstantVariable,
   PanelBuilders,
   QueryVariable,
   SceneComponentProps,
