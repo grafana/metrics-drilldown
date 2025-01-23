@@ -4,7 +4,8 @@ import { sceneGraph } from '@grafana/scenes';
 
 import { findHealthyLokiDataSources, RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared';
-import { getTrailFor, isAdHocVariable } from '../../utils';
+import { getTrailFor } from '../../utils';
+import { isAdHocFiltersVariable } from '../../utils/variables';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 
@@ -83,7 +84,7 @@ export const createLabelsCrossReferenceConnector = (scene: RelatedLogsScene) => 
       const trail = getTrailFor(scene);
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
 
-      if (!isAdHocVariable(filtersVariable) || !filtersVariable.state.filters.length) {
+      if (!isAdHocFiltersVariable(filtersVariable) || !filtersVariable.state.filters.length) {
         return [];
       }
 
@@ -106,7 +107,7 @@ export const createLabelsCrossReferenceConnector = (scene: RelatedLogsScene) => 
       const trail = getTrailFor(scene);
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
 
-      if (!isAdHocVariable(filtersVariable) || !filtersVariable.state.filters.length) {
+      if (!isAdHocFiltersVariable(filtersVariable) || !filtersVariable.state.filters.length) {
         return '';
       }
 

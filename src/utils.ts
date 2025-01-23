@@ -36,18 +36,6 @@ import { sortResources } from './otel/util';
 import { LOGS_METRIC, TRAILS_ROUTE, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
 import { isAdHocFiltersVariable } from 'utils/variables';
 
-export function isAdHocVariable(variable: SceneVariable | null): variable is AdHocFiltersVariable {
-  return variable !== null && variable.state.type === 'adhoc';
-}
-
-export function isCustomVariable(variable: SceneVariable | null): variable is CustomVariable {
-  return variable !== null && variable.state.type === 'custom';
-}
-
-export function isConstantVariable(variable: SceneVariable | null): variable is ConstantVariable {
-  return variable !== null && variable.state.type === 'constant';
-}
-
 export function getTrailFor(model: SceneObject): DataTrail {
   return sceneGraph.getAncestor(model, DataTrail);
 }
