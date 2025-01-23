@@ -60,7 +60,7 @@ import { SortByScene, SortCriteriaChanged } from './SortByScene';
 import { BreakdownLayoutChangeCallback, BreakdownLayoutType } from './types';
 import { getLabelOptions } from './utils';
 import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
-import { isConstantVariable } from 'utils/variables';
+import { isConstantVariable, isQueryVariable } from 'utils/variables';
 
 const MAX_PANELS_IN_ALL_LABELS_BREAKDOWN = 60;
 
@@ -220,7 +220,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
   private getVariable(): QueryVariable {
     const variable = sceneGraph.lookupVariable(VAR_GROUP_BY, this)!;
-    if (!(variable instanceof QueryVariable)) {
+    if (!isQueryVariable(variable)) {
       throw new Error('Group by variable not found');
     }
 

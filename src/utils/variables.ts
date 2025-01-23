@@ -2,6 +2,7 @@ import {
   AdHocFiltersVariable,
   ConstantVariable,
   CustomVariable,
+  QueryVariable,
   SceneObject,
   SceneTimeRange,
   SceneVariable,
@@ -21,8 +22,9 @@ export function isCustomVariable(variable: MaybeVariable): variable is CustomVar
   return variable !== null && variable?.state.type === 'custom';
 }
 
-//won't be a variable. might go into separate file utils/timerange.ts. need to do things a lil differently. SceneVariable is a superset of diff var types. SceneVariable is base type. AdHoc extends, etc. go to def for SceneTimeRange, see SceneTimeRangeLike.
-// look at type for it. what are the things we actually care about being on this thing. how can we check for it?
+export function isQueryVariable(variable: MaybeVariable): variable is QueryVariable {
+  return variable !== null && variable?.state.type === 'query';
+}
 
 export function isSceneTimeRange(input: SceneObject | null | undefined): input is SceneTimeRange {
   return (
