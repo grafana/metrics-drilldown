@@ -45,3 +45,6 @@ ci/
 .idea
 
 .eslintcache
+
+# MacOS
+.DS_Store

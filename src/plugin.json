@@ -1,11 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "Explore-Metrics",
+  "name": "Explore Metrics",
   "id": "grafana-exploremetrics-app",
   "info": {
-    "keywords": ["app"],
-    "description": "",
+    "keywords": ["app", "mimir", "prometheus", "metrics"],
+    "description": "Queryless metrics explorer for Prometheus data sources",
     "author": {
       "name": "Grafana"
     },
@@ -15,40 +15,30 @@
     },
     "screenshots": [],
     "version": "%VERSION%",
-    "updated": "%TODAY%"
+    "updated": "%TODAY%",
+    "links": [
+      {
+        "name": "GitHub",
+        "url": "https://github.com/grafana/explore-metrics"
+      },
+      {
+        "name": "Report a bug",
+        "url": "https://github.com/grafana/explore-metrics/issues/new"
+      }
+    ]
   },
   "includes": [
     {
       "type": "page",
-      "name": "Home",
+      "name": "Metrics App",
       "path": "/a/%PLUGIN_ID%/home",
+      "action": "datasources:explore",
       "addToNav": true,
       "defaultNav": true
-    },
-    {
-      "type": "page",
-      "name": "Page with tabs",
-      "path": "/a/%PLUGIN_ID%/page-with-tabs",
-      "addToNav": true,
-      "defaultNav": false
-    },
-    {
-      "type": "page",
-      "name": "Page with drilldown",
-      "path": "/a/%PLUGIN_ID%/page-with-drilldown",
-      "addToNav": true,
-      "defaultNav": false
-    },
-    {
-      "type": "page",
-      "name": "Hello world",
-      "path": "/a/%PLUGIN_ID%/hello-world",
-      "addToNav": true,
-      "defaultNav": false
     }
   ],
   "dependencies": {
-    "grafanaDependency": ">=10.4.0",
+    "grafanaDependency": ">=11.0.0",
     "plugins": []
   }
 }
