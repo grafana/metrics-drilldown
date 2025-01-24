@@ -4,17 +4,22 @@ import {
   DataSourceGetTagValuesOptions,
   MetricFindValue,
 } from '@grafana/data';
-import {
-  PrometheusDatasource,
-  PromMetricsMetadata,
-  PromMetricsMetadataItem,
-  PromQlLanguageProvider,
-  PromQuery,
-} from '@grafana/prometheus';
+import { PrometheusDatasource, PromMetricsMetadata, PromMetricsMetadataItem, PromQuery } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 
-import { DataTrail } from '../../DataTrail';
-import { VAR_DATASOURCE_EXPR } from '../../shared';
+import { DataTrail } from '../DataTrail';
+import { VAR_DATASOURCE_EXPR } from '../shared';
+
+function isPrometheusDatasource(ds: DataSourceApi<any>): ds is PrometheusDatasource {
+  return (
+    ds.type === 'prometheus' &&
+    'getTagKeys' in ds &&
+    'getTagValues' in ds &&
+    'languageProvider' in ds &&
+    'metricsMetadata' in ds.languageProvider &&
+    'loadMetricsMetadata' in ds.languageProvider
+  );
+}
 
 export class MetricDatasourceHelper {
   constructor(trail: DataTrail) {
@@ -30,15 +35,20 @@ export class MetricDatasourceHelper {
 
   private _trail: DataTrail;
 
-  private _datasource?: Promise<DataSourceApi>;
+  private _datasource?: PrometheusDatasource;
 
   private async getDatasource() {
-    if (!this._datasource) {
-      this._datasource = getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this._trail } });
+    if (this._datasource) {
+      return this._datasource;
     }
 
-    const ds = await this._datasource;
-    return ds;
+    const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this._trail } });
+
+    if (isPrometheusDatasource(ds)) {
+      this._datasource = ds;
+    }
+
+    return this._datasource;
   }
 
   _metricsMetadata?: Promise<PromMetricsMetadata | undefined>;
@@ -46,14 +56,15 @@ export class MetricDatasourceHelper {
   private async _getMetricsMetadata() {
     const ds = await this.getDatasource();
 
-    if (ds.languageProvider instanceof PromQlLanguageProvider) {
-      if (!ds.languageProvider.metricsMetadata) {
-        await ds.languageProvider.loadMetricsMetadata();
-      }
-
-      return ds.languageProvider.metricsMetadata!;
+    if (!ds) {
+      return undefined;
     }
-    return undefined;
+
+    if (!ds.languageProvider.metricsMetadata) {
+      await ds.languageProvider.loadMetricsMetadata();
+    }
+
+    return ds.languageProvider.metricsMetadata!;
   }
 
   public async getMetricMetadata(metric?: string) {
@@ -83,7 +94,7 @@ export class MetricDatasourceHelper {
    */
   public async initializeHistograms() {
     const ds = await this.getDatasource();
-    if (Object.keys(this._classicHistograms).length === 0 && ds instanceof PrometheusDatasource) {
+    if (ds && Object.keys(this._classicHistograms).length === 0) {
       const classicHistogramsCall = ds.metricFindQuery('metrics(.*_bucket)');
       const allMetricsCall = ds.metricFindQuery('metrics(.*)');
 
@@ -137,12 +148,12 @@ export class MetricDatasourceHelper {
   public async getTagKeys(options: DataSourceGetTagKeysOptions<PromQuery>): Promise<MetricFindValue[]> {
     const ds = await this.getDatasource();
 
-    if (ds instanceof PrometheusDatasource) {
-      const keys = await ds.getTagKeys(options);
-      return keys;
+    if (!ds) {
+      return [];
     }
 
-    return [];
+    const keys = await ds.getTagKeys(options);
+    return keys;
   }
 
   /**
@@ -153,13 +164,13 @@ export class MetricDatasourceHelper {
   public async getTagValues(options: DataSourceGetTagValuesOptions<PromQuery>) {
     const ds = await this.getDatasource();
 
-    if (ds instanceof PrometheusDatasource) {
-      options.key = unwrapQuotes(options.key);
-      const keys = await ds.getTagValues(options);
-      return keys;
+    if (!ds) {
+      return [];
     }
 
-    return [];
+    options.key = unwrapQuotes(options.key);
+    const keys = await ds.getTagValues(options);
+    return keys;
   }
 }
 
