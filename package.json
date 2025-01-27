@@ -71,7 +71,7 @@
     "@grafana/data": "^11.4.0",
     "@grafana/lezer-logql": "^0.2.7",
     "@grafana/prometheus": "^11.5.0-219654",
-    "@grafana/runtime": "^11.5.0-220034",
+    "@grafana/runtime": "^11.4.0",
     "@grafana/scenes": "^5.28.1",
     "@grafana/schema": "^11.3.2",
     "@grafana/ui": "^11.3.2",

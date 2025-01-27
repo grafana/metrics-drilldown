@@ -108,6 +108,7 @@ function DataTrailView({ trail }: { trail: DataTrail }) {
   return (
     <UrlSyncContextProvider scene={trail}>
       <Page navId="explore/metrics" pageNav={{ text: getMetricName(metric) }} layout={PageLayoutType.Custom}>
+        {/* @ts-expect-error */}
         {config.featureToggles.enableScopesInMetricsExplore && (
           <AppChromeUpdate
             actions={
@@ -127,6 +128,7 @@ let dataTrailsApp: DataTrailsApp;
 
 export function getDataTrailsApp() {
   if (!dataTrailsApp) {
+    // @ts-expect-error
     const $behaviors = config.featureToggles.enableScopesInMetricsExplore
       ? [
           new ScopesFacade({

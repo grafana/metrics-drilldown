@@ -18,6 +18,7 @@ export async function getMetricNames(
   instances: string[],
   limit?: number
 ): Promise<SuggestionsResponse & { limitReached: boolean; missingOtelTargets: boolean }> {
+  // @ts-expect-error
   if (!config.featureToggles.enableScopesInMetricsExplore) {
     return await getMetricNamesWithoutScopes(dataSourceUid, timeRange, filters, jobs, instances, limit);
   }
@@ -33,6 +34,7 @@ export async function getMetricNamesWithoutScopes(
   instances: string[],
   limit?: number
 ) {
+  // @ts-expect-error
   const matchTerms = config.featureToggles.prometheusSpecialCharsInLabelValues
     ? adhocFilters.map((filter) =>
         removeBrackets(queryModeller.renderLabels([{ label: filter.key, op: filter.operator, value: filter.value }]))

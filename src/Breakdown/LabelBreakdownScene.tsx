@@ -100,6 +100,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
     const variable = this.getVariable();
 
+    // @ts-expect-error
     if (config.featureToggles.enableScopesInMetricsExplore) {
       this._subs.add(
         this.subscribeToEvent(RefreshMetricsEvent, () => {
