@@ -10,7 +10,7 @@ import { DataTrail } from './DataTrail';
 import { getTrailStore, DataTrailBookmark } from './TrailStore/TrailStore';
 import { VAR_FILTERS } from './shared';
 import { getMetricName } from './utils';
-import { isAdHocFiltersVariable } from 'utils/variables';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 export type Props = {
   trail?: DataTrail;

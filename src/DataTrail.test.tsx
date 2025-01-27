@@ -16,7 +16,7 @@ import {
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
 } from './shared';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/variables';
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
 
 jest.mock('./otel/api', () => ({
   totalOtelResources: jest.fn(() => ({ job: 'oteldemo', instance: 'instance' })),

@@ -50,7 +50,7 @@ import { getMetricNames } from './api';
 import { getPreviewPanelFor } from './previewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
-import { isAdHocFiltersVariable, isSceneCSSGridLayout, isSceneFlexLayout } from 'utils/variables';
+import { isAdHocFiltersVariable, isSceneCSSGridLayout, isSceneFlexLayout } from 'utils/utils.variables';
 
 interface MetricPanel {
   name: string;

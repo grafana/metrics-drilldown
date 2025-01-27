@@ -23,7 +23,7 @@ import {
   updateOtelData,
   manageOtelAndMetricFilters,
 } from './util';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/variables';
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
 
 jest.mock('./api', () => ({
   totalOtelResources: jest.fn(() => ({ job: 'oteldemo', instance: 'instance' })),

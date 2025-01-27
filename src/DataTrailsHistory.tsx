@@ -29,7 +29,7 @@ import { SerializedTrailHistory } from './TrailStore/TrailStore';
 import { reportExploreMetrics } from './interactions';
 import { VAR_FILTERS, VAR_OTEL_DEPLOYMENT_ENV, VAR_OTEL_RESOURCES } from './shared';
 import { getTrailFor, isSceneTimeRangeState } from './utils';
-import { isSceneTimeRange } from 'utils/variables';
+import { isSceneTimeRange } from 'utils/utils.variables';
 
 export interface DataTrailsHistoryState extends SceneObjectState {
   currentStep: number;

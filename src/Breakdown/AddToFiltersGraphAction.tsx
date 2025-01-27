@@ -5,7 +5,7 @@ import { Button } from '@grafana/ui';
 import { reportExploreMetrics } from '../interactions';
 import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_GROUP_LEFT, VAR_OTEL_RESOURCES } from '../shared';
 import { getTrailFor } from '../utils';
-import { isAdHocFiltersVariable } from 'utils/variables';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 export interface AddToFiltersGraphActionState extends SceneObjectState {
   frame: DataFrame;

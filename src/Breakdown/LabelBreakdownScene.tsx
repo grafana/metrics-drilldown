@@ -60,7 +60,7 @@ import { SortByScene, SortCriteriaChanged } from './SortByScene';
 import { BreakdownLayoutChangeCallback, BreakdownLayoutType } from './types';
 import { getLabelOptions } from './utils';
 import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
-import { isConstantVariable, isQueryVariable } from 'utils/variables';
+import { isConstantVariable, isQueryVariable } from 'utils/utils.variables';
 
 const MAX_PANELS_IN_ALL_LABELS_BREAKDOWN = 60;
 

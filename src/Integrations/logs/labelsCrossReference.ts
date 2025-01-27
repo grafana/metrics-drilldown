@@ -5,7 +5,7 @@ import { sceneGraph } from '@grafana/scenes';
 import { findHealthyLokiDataSources, RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared';
 import { getTrailFor } from '../../utils';
-import { isAdHocFiltersVariable } from '../../utils/variables';
+import { isAdHocFiltersVariable } from '../../utils/utils.variables';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 
