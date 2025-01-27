@@ -5,7 +5,6 @@ import { SceneComponentProps, SceneObjectBase, SceneObjectState } from '@grafana
 import { IconButton, Select } from '@grafana/ui';
 import { Field, useStyles2 } from '@grafana/ui/';
 
-import { Trans } from '../../../core/internationalization';
 import { getSortByPreference, setSortByPreference } from '../services/store';
 
 export interface SortBySceneState extends SceneObjectState {
@@ -14,10 +13,7 @@ export interface SortBySceneState extends SceneObjectState {
 }
 
 export class SortCriteriaChanged extends BusEventBase {
-  constructor(
-    public target: 'fields' | 'labels',
-    public sortBy: string
-  ) {
+  constructor(public target: 'fields' | 'labels', public sortBy: string) {
     super();
   }
 
@@ -75,7 +71,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
         htmlFor="sort-by-criteria"
         label={
           <div className={styles.sortByTooltip}>
-            <Trans i18nKey="explore-metrics.breakdown.sortBy">Sort by</Trans>
+            Sort by
             <IconButton
               name={'info-circle'}
               size="sm"
