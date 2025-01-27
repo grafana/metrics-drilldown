@@ -5,7 +5,6 @@ import { SyntheticEvent, useReducer } from 'react';
 import { AdHocVariableFilter, GrafanaTheme2, RawTimeRange, SelectableValue } from '@grafana/data';
 import { config, isFetchError } from '@grafana/runtime';
 import {
-  AdHocFiltersVariable,
   PanelBuilders,
   SceneComponentProps,
   SceneCSSGridItem,
@@ -21,7 +20,6 @@ import {
   SceneObjectUrlSyncConfig,
   SceneObjectUrlValues,
   SceneObjectWithUrlSync,
-  SceneTimeRange,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
@@ -43,7 +41,7 @@ import {
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
 } from '../shared';
-import { getFilters, getTrailFor, isSceneTimeRangeState } from '../utils';
+import { getFilters, getTrailFor } from '../utils';
 
 import { AddToExplorationButton } from './AddToExplorationsButton';
 import { SelectMetricAction } from './SelectMetricAction';
@@ -51,6 +49,9 @@ import { getMetricNames } from './api';
 import { getPreviewPanelFor } from './previewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { isSceneCSSGridLayout, isSceneFlexLayout } from 'utils/utils.layout';
+import { isSceneTimeRange, isSceneTimeRangeState } from 'utils/utils.timerange';
 
 interface MetricPanel {
   name: string;
@@ -156,7 +157,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToEvent(SceneObjectStateChangedEvent, (evt) => {
-        if (evt.payload.changedObject instanceof SceneTimeRange) {
+        if (isSceneTimeRange(evt.payload.changedObject)) {
           const { prevState, newState } = evt.payload;
 
           if (isSceneTimeRangeState(prevState) && isSceneTimeRangeState(newState)) {
@@ -235,7 +236,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     const filters: AdHocVariableFilter[] = [];
 
     const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    const adhocFilters = filtersVar instanceof AdHocFiltersVariable ? filtersVar?.state.filters ?? [] : [];
+    const adhocFilters = isAdHocFiltersVariable(filtersVar) ? filtersVar?.state.filters ?? [] : [];
     if (adhocFilters.length > 0) {
       filters.push(...adhocFilters);
     }
@@ -267,7 +268,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       );
       const searchRegex = createJSRegExpFromSearchTerms(getMetricSearch(this));
       let metricNames = searchRegex
-        ? response.data.filter((metric) => !searchRegex || searchRegex.test(metric))
+        ? response.data.filter((metric: string) => !searchRegex || searchRegex.test(metric))
         : response.data;
 
       // use this to generate groups for metric prefix
@@ -644,8 +645,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
           </Alert>
         )}
         <StatusWrapper {...{ isLoading, blockingMessage }}>
-          {body instanceof SceneFlexLayout && <body.Component model={body} />}
-          {body instanceof SceneCSSGridLayout && <body.Component model={body} />}
+          {isSceneFlexLayout(body) && <body.Component model={body} />}
+          {isSceneCSSGridLayout(body) && <body.Component model={body} />}
         </StatusWrapper>
       </div>
     );

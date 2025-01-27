@@ -1,7 +1,7 @@
 import { AdHocVariableFilter, MetricFindValue, RawTimeRange, VariableHide } from '@grafana/data';
 import { isValidLegacyName } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
-import { AdHocFiltersVariable, ConstantVariable, sceneGraph, SceneObject } from '@grafana/scenes';
+import { AdHocFiltersVariable, sceneGraph, SceneObject } from '@grafana/scenes';
 
 import { DataTrail } from '../DataTrail';
 import { reportChangeInLabelFilters } from '../interactions';
@@ -18,6 +18,7 @@ import {
 
 import { getFilteredResourceAttributes, totalOtelResources } from './api';
 import { OtelResourcesObject } from './types';
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
 
 export const blessedList = (): Record<string, number> => {
   return {
@@ -102,7 +103,7 @@ export function getOtelResourcesObject(scene: SceneObject, firstQueryVal?: strin
   const otelResources = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, scene);
   let otelResourcesObject = { labels: '', filters: '' };
 
-  if (otelResources instanceof AdHocFiltersVariable) {
+  if (isAdHocFiltersVariable(otelResources)) {
     // get the collection of adhoc filters
     const otelFilters = otelResources.state.filters;
 
@@ -248,9 +249,9 @@ export async function updateOtelJoinWithGroupLeft(trail: DataTrail, metric: stri
   const otelJoinQueryVariable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, trail);
   const missingOtelTargetsVariable = sceneGraph.lookupVariable(VAR_MISSING_OTEL_TARGETS, trail);
   if (
-    !(otelGroupLeft instanceof ConstantVariable) ||
-    !(otelJoinQueryVariable instanceof ConstantVariable) ||
-    !(missingOtelTargetsVariable instanceof ConstantVariable)
+    !isConstantVariable(otelGroupLeft) ||
+    !isConstantVariable(otelJoinQueryVariable) ||
+    !isConstantVariable(missingOtelTargetsVariable)
   ) {
     return;
   }
@@ -270,7 +271,7 @@ export async function updateOtelJoinWithGroupLeft(trail: DataTrail, metric: stri
   const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
   const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
   let excludeFilterKeys: string[] = [];
-  if (filtersVariable instanceof AdHocFiltersVariable && otelResourcesVariable instanceof AdHocFiltersVariable) {
+  if (isAdHocFiltersVariable(filtersVariable) && isAdHocFiltersVariable(otelResourcesVariable)) {
     // do not include the following
     // 1. pre selected label filters
     // 2. pre selected otel resource attribute filters
@@ -373,10 +374,10 @@ export async function updateOtelData(
 
   if (
     !(
-      otelResourcesVariable instanceof AdHocFiltersVariable &&
-      filtersVariable instanceof AdHocFiltersVariable &&
-      otelAndMetricsFiltersVariable instanceof AdHocFiltersVariable &&
-      otelJoinQueryVariable instanceof ConstantVariable
+      isAdHocFiltersVariable(otelResourcesVariable) &&
+      isAdHocFiltersVariable(filtersVariable) &&
+      isAdHocFiltersVariable(otelAndMetricsFiltersVariable) &&
+      isConstantVariable(otelJoinQueryVariable)
     )
   ) {
     return;

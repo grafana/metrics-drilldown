@@ -7,7 +7,6 @@ import { DataFrame, FieldType, GrafanaTheme2, PanelData, SelectableValue } from 
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import {
-  ConstantVariable,
   PanelBuilders,
   QueryVariable,
   SceneComponentProps,
@@ -61,6 +60,7 @@ import { SortByScene, SortCriteriaChanged } from './SortByScene';
 import { BreakdownLayoutChangeCallback, BreakdownLayoutType } from './types';
 import { getLabelOptions } from './utils';
 import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
+import { isConstantVariable, isQueryVariable } from 'utils/utils.variables';
 
 const MAX_PANELS_IN_ALL_LABELS_BREAKDOWN = 60;
 
@@ -154,7 +154,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
     // OTEL
     const resourceAttributes = sceneGraph.lookupVariable(VAR_OTEL_GROUP_LEFT, trail);
-    if (resourceAttributes instanceof ConstantVariable) {
+    if (isConstantVariable(resourceAttributes)) {
       resourceAttributes?.subscribeToState((newState, oldState) => {
         // wait for the resource attributes to be loaded
         if (newState.value !== oldState.value) {
@@ -220,7 +220,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
   private getVariable(): QueryVariable {
     const variable = sceneGraph.lookupVariable(VAR_GROUP_BY, this)!;
-    if (!(variable instanceof QueryVariable)) {
+    if (!isQueryVariable(variable)) {
       throw new Error('Group by variable not found');
     }
 

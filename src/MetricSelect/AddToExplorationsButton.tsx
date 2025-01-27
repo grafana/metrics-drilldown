@@ -1,11 +1,12 @@
 import { DataFrame, TimeRange } from '@grafana/data';
 import { usePluginLinks } from '@grafana/runtime';
-import { SceneComponentProps, sceneGraph, SceneObjectBase, SceneObjectState, SceneQueryRunner } from '@grafana/scenes';
+import { SceneComponentProps, sceneGraph, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
 import { DataQuery, DataSourceRef } from '@grafana/schema';
 import { IconButton } from '@grafana/ui';
 
 import MimirLogo from '../../../plugins/datasource/prometheus/img/mimir_logo.svg';
-import { VAR_DATASOURCE_EXPR } from '../../shared';
+import { VAR_DATASOURCE_EXPR } from '../shared';
+import { isSceneQueryRunner } from 'utils/utils.queries';
 
 export const explorationsPluginId = 'grafana-explorations-app';
 export const extensionPointId = 'grafana-explore-metrics/exploration/v1';
@@ -56,9 +57,9 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
 
   private readonly getQueries = () => {
     const data = sceneGraph.getData(this);
-    const queryRunner = sceneGraph.findObject(data, isQueryRunner);
+    const queryRunner = sceneGraph.findObject(data, isSceneQueryRunner);
 
-    if (isQueryRunner(queryRunner)) {
+    if (isSceneQueryRunner(queryRunner)) {
       const filter = this.state.frame ? getFilter(this.state.frame) : null;
       const queries = queryRunner.state.queries.map((q) => ({
         ...q,
@@ -130,7 +131,3 @@ const getFilter = (frame: DataFrame) => {
   const name = keys[0];
   return { name, value: filterNameAndValueObj[name] };
 };
-
-function isQueryRunner(o: unknown): o is SceneQueryRunner {
-  return o instanceof SceneQueryRunner;
-}

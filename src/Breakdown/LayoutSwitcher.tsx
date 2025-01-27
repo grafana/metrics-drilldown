@@ -10,9 +10,9 @@ import {
 } from '@grafana/scenes';
 import { RadioButtonGroup } from '@grafana/ui';
 
-import { reportExploreMetrics } from '../../interactions';
+import { reportExploreMetrics } from '../interactions';
 import { getVewByPreference, setVewByPreference } from '../services/store';
-import { MakeOptional } from '../../shared';
+import { MakeOptional } from '../shared';
 
 import { BreakdownLayoutChangeCallback, BreakdownLayoutType, isBreakdownLayoutType } from './types';
 

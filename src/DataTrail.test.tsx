@@ -1,6 +1,6 @@
 import { VariableHide } from '@grafana/data';
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
-import { AdHocFiltersVariable, ConstantVariable, sceneGraph } from '@grafana/scenes';
+import { sceneGraph } from '@grafana/scenes';
 
 import { MockDataSourceSrv, DataSourceType } from './mocks/datasource';
 import { activateFullSceneTree } from './utils/utils.test';
@@ -16,6 +16,7 @@ import {
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
 } from './shared';
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
 
 jest.mock('./otel/api', () => ({
   totalOtelResources: jest.fn(() => ({ job: 'oteldemo', instance: 'instance' })),
@@ -46,7 +47,7 @@ describe('DataTrail', () => {
 
     function getFilterVar() {
       const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
-      if (variable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(variable)) {
         return variable;
       }
       throw new Error('getFilterVar failed');
@@ -54,7 +55,7 @@ describe('DataTrail', () => {
 
     function getStepFilterVar(step: number) {
       const variable = trail.state.history.state.steps[step].trailState.$variables?.getByName(VAR_FILTERS);
-      if (variable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(variable)) {
         return variable;
       }
       throw new Error(`getStepFilterVar failed for step ${step}`);
@@ -488,7 +489,7 @@ describe('DataTrail', () => {
 
     function getOtelAndMetricsVar(trail: DataTrail) {
       const variable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, trail);
-      if (variable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(variable)) {
         return variable;
       }
       throw new Error('getOtelAndMetricsVar failed');
@@ -496,7 +497,7 @@ describe('DataTrail', () => {
 
     function getOtelJoinQueryVar(trail: DataTrail) {
       const variable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, trail);
-      if (variable instanceof ConstantVariable) {
+      if (isConstantVariable(variable)) {
         return variable;
       }
       throw new Error('getOtelJoinQueryVar failed');
@@ -504,7 +505,7 @@ describe('DataTrail', () => {
 
     function getOtelResourcesVar(trail: DataTrail) {
       const variable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
-      if (variable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(variable)) {
         return variable;
       }
       throw new Error('getOtelResourcesVar failed');
@@ -512,7 +513,7 @@ describe('DataTrail', () => {
 
     function getOtelGroupLeftVar(trail: DataTrail) {
       const variable = sceneGraph.lookupVariable(VAR_OTEL_GROUP_LEFT, trail);
-      if (variable instanceof ConstantVariable) {
+      if (isConstantVariable(variable)) {
         return variable;
       }
       throw new Error('getOtelGroupLeftVar failed');
@@ -520,7 +521,7 @@ describe('DataTrail', () => {
 
     function getFilterVar() {
       const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
-      if (variable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(variable)) {
         return variable;
       }
       throw new Error('getFilterVar failed');

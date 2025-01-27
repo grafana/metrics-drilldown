@@ -20,6 +20,7 @@ import { reportExploreMetrics } from '../interactions';
 import { updateOtelJoinWithGroupLeft } from '../otel/util';
 import { VAR_DATASOURCE_EXPR, VAR_GROUP_BY, VAR_OTEL_GROUP_LEFT } from '../shared';
 import { getMetricSceneFor, getTrailFor } from '../utils';
+import { isQueryVariable } from 'utils/utils.variables';
 
 export interface MetricOverviewSceneState extends SceneObjectState {
   metadata?: PromMetricsMetadataItem;
@@ -42,7 +43,7 @@ export class MetricOverviewScene extends SceneObjectBase<MetricOverviewSceneStat
 
   private getVariable(): QueryVariable {
     const variable = sceneGraph.lookupVariable(VAR_GROUP_BY, this)!;
-    if (!(variable instanceof QueryVariable)) {
+    if (!isQueryVariable(variable)) {
       throw new Error('Group by variable not found');
     }
 
@@ -168,7 +169,7 @@ export class MetricOverviewScene extends SceneObjectBase<MetricOverviewSceneStat
                     event.stopPropagation();
                     sceneGraph.getAncestor(model, MetricScene).setActionView('breakdown');
                     const groupByVar = sceneGraph.lookupVariable(VAR_GROUP_BY, model);
-                    if (groupByVar instanceof QueryVariable && l.label != null) {
+                    if (isQueryVariable(groupByVar) && l.label != null) {
                       reportExploreMetrics('label_selected', { label: l.label, cause: 'overview_link' });
                       groupByVar.setState({ value: l.value });
                     }

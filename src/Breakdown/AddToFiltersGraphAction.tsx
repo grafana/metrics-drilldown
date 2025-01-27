@@ -1,16 +1,11 @@
 import { DataFrame } from '@grafana/data';
-import {
-  SceneObjectState,
-  SceneObjectBase,
-  SceneComponentProps,
-  sceneGraph,
-  AdHocFiltersVariable,
-} from '@grafana/scenes';
+import { SceneObjectState, SceneObjectBase, SceneComponentProps, sceneGraph } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 
 import { reportExploreMetrics } from '../interactions';
 import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_GROUP_LEFT, VAR_OTEL_RESOURCES } from '../shared';
 import { getTrailFor } from '../utils';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 export interface AddToFiltersGraphActionState extends SceneObjectState {
   frame: DataFrame;
@@ -19,7 +14,7 @@ export interface AddToFiltersGraphActionState extends SceneObjectState {
 export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphActionState> {
   public onClick = () => {
     const variable = sceneGraph.lookupVariable('filters', this);
-    if (!(variable instanceof AdHocFiltersVariable)) {
+    if (!isAdHocFiltersVariable(variable)) {
       return;
     }
 
@@ -58,11 +53,7 @@ export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphAc
       // add to OTel resource var filters
       const otelResourcesVar = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
       const otelAndMetricsResourcesVar = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, trail);
-      if (
-        !(
-          otelResourcesVar instanceof AdHocFiltersVariable && otelAndMetricsResourcesVar instanceof AdHocFiltersVariable
-        )
-      ) {
+      if (!(isAdHocFiltersVariable(otelResourcesVar) && isAdHocFiltersVariable(otelAndMetricsResourcesVar))) {
         return;
       }
 

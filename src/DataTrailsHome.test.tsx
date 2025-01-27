@@ -6,6 +6,7 @@ import { DataTrail } from './DataTrail';
 import { DataTrailsHome } from './DataTrailsHome';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { VAR_FILTERS } from './shared';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 jest.mock('./TrailStore/TrailStore', () => ({
   getTrailStore: jest.fn(),
@@ -52,7 +53,7 @@ describe('DataTrailsHome', () => {
     const trail = new DataTrail({});
     function getFilterVar() {
       const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
-      if (variable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(variable)) {
         return variable;
       }
       throw new Error('getFilterVar failed');

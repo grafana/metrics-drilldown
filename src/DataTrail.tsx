@@ -61,7 +61,8 @@ import {
   VAR_OTEL_RESOURCES,
 } from './shared';
 import { getTrailFor, limitAdhocProviders } from './utils';
-
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
+import { isSceneQueryRunner } from 'utils/utils.queries';
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
@@ -148,7 +149,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(MetricSelectedEvent, this._handleMetricSelectedEvent.bind(this));
 
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    if (filtersVariable instanceof AdHocFiltersVariable) {
+    if (isAdHocFiltersVariable(filtersVariable)) {
       this._subs.add(
         filtersVariable?.subscribeToState((newState, prevState) => {
           if (!this._addingFilterWithoutReportingInteraction) {
@@ -165,9 +166,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const otelAndMetricsFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
     const otelFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, this);
     if (
-      otelAndMetricsFiltersVariable instanceof AdHocFiltersVariable &&
-      otelFiltersVariable instanceof AdHocFiltersVariable &&
-      filtersVariable instanceof AdHocFiltersVariable
+      isAdHocFiltersVariable(otelAndMetricsFiltersVariable) &&
+      isAdHocFiltersVariable(otelFiltersVariable) &&
+      isAdHocFiltersVariable(filtersVariable)
     ) {
       this._subs.add(
         otelAndMetricsFiltersVariable?.subscribeToState((newState, prevState) => {
@@ -196,7 +197,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // Save the current trail as a recent (if the browser closes or reloads) if user selects a metric OR applies filters to metric select view
     const saveRecentTrail = () => {
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-      const hasFilters = filtersVariable instanceof AdHocFiltersVariable && filtersVariable.state.filters.length > 0;
+      const hasFilters = isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.filters.length > 0;
       if (this.state.metric || hasFilters) {
         getTrailStore().setRecentTrail(this);
       }
@@ -252,10 +253,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   public addFilterWithoutReportingInteraction(filter: AdHocVariableFilter) {
     const variable = sceneGraph.lookupVariable('filters', this);
     const otelAndMetricsFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
-    if (
-      !(variable instanceof AdHocFiltersVariable) ||
-      !(otelAndMetricsFiltersVariable instanceof AdHocFiltersVariable)
-    ) {
+    if (!isAdHocFiltersVariable(variable) || !isAdHocFiltersVariable(otelAndMetricsFiltersVariable)) {
       return;
     }
 
@@ -345,7 +343,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     // Add metric to adhoc filters baseFilter
     const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    if (filterVar instanceof AdHocFiltersVariable) {
+    if (isAdHocFiltersVariable(filterVar)) {
       filterVar.setState({
         baseFilters: getBaseFiltersForMetric(evt.payload),
       });
@@ -431,7 +429,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       // loading from the url with otel resources selected will result in turning on OTel experience
       const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
       let previouslyUsedOtelResources = false;
-      if (otelResourcesVariable instanceof AdHocFiltersVariable) {
+      if (isAdHocFiltersVariable(otelResourcesVariable)) {
         previouslyUsedOtelResources = otelResourcesVariable.state.filters.length > 0;
       }
 
@@ -477,10 +475,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     if (
       !(
-        otelResourcesVariable instanceof AdHocFiltersVariable &&
-        filtersVariable instanceof AdHocFiltersVariable &&
-        otelAndMetricsFiltersVariable instanceof AdHocFiltersVariable &&
-        otelJoinQueryVariable instanceof ConstantVariable
+        isAdHocFiltersVariable(otelResourcesVariable) &&
+        isAdHocFiltersVariable(filtersVariable) &&
+        isAdHocFiltersVariable(otelAndMetricsFiltersVariable) &&
+        isConstantVariable(otelJoinQueryVariable)
       )
     ) {
       return;
@@ -536,7 +534,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   public getQueries(): PromQuery[] {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const sqrs = sceneGraph.findAllObjects(this, (b) => b instanceof SceneQueryRunner) as SceneQueryRunner[];
+    const sqrs = sceneGraph.findAllObjects(this, (b) => isSceneQueryRunner(b)) as SceneQueryRunner[];
 
     return sqrs.reduce<PromQuery[]>((acc, sqr) => {
       acc.push(
