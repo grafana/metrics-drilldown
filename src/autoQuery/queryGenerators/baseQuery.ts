@@ -1,4 +1,4 @@
-import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR, VAR_OTEL_JOIN_QUERY_EXPR } from '../../../shared';
+import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR, VAR_OTEL_JOIN_QUERY_EXPR } from '../../shared';
 
 // For usual non-utf8-metrics we use filters in the curly braces
 // metric_name{filter_label="filter_value"}

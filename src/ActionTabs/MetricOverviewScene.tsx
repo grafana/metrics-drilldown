@@ -13,13 +13,13 @@ import {
 import { Stack, Text, TextLink } from '@grafana/ui';
 import { Trans } from 'app/core/internationalization';
 
-import { MetricScene } from '../../MetricScene';
-import { StatusWrapper } from '../../StatusWrapper';
+import { MetricScene } from '../MetricScene';
+import { StatusWrapper } from '../StatusWrapper';
 import { getUnitFromMetric } from '../autoQuery/units';
-import { reportExploreMetrics } from '../../interactions';
+import { reportExploreMetrics } from '../interactions';
 import { updateOtelJoinWithGroupLeft } from '../otel/util';
-import { VAR_DATASOURCE_EXPR, VAR_GROUP_BY, VAR_OTEL_GROUP_LEFT } from '../../shared';
-import { getMetricSceneFor, getTrailFor } from '../../utils';
+import { VAR_DATASOURCE_EXPR, VAR_GROUP_BY, VAR_OTEL_GROUP_LEFT } from '../shared';
+import { getMetricSceneFor, getTrailFor } from '../utils';
 
 export interface MetricOverviewSceneState extends SceneObjectState {
   metadata?: PromMetricsMetadataItem;

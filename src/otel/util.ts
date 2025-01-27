@@ -3,8 +3,8 @@ import { isValidLegacyName } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import { AdHocFiltersVariable, ConstantVariable, sceneGraph, SceneObject } from '@grafana/scenes';
 
-import { DataTrail } from '../../DataTrail';
-import { reportChangeInLabelFilters } from '../../interactions';
+import { DataTrail } from '../DataTrail';
+import { reportChangeInLabelFilters } from '../interactions';
 import { getOtelExperienceToggleState } from '../services/store';
 import {
   VAR_DATASOURCE_EXPR,
@@ -14,7 +14,7 @@ import {
   VAR_OTEL_GROUP_LEFT,
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
-} from '../../shared';
+} from '../shared';
 
 import { getFilteredResourceAttributes, totalOtelResources } from './api';
 import { OtelResourcesObject } from './types';

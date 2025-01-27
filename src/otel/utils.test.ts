@@ -1,18 +1,17 @@
 import { AdHocVariableFilter, MetricFindValue } from '@grafana/data';
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { AdHocFiltersVariable, ConstantVariable, sceneGraph } from '@grafana/scenes';
-import { mockDataSource, MockDataSourceSrv } from 'app/features/alerting/unified/mocks';
-import { DataSourceType } from 'app/features/alerting/unified/utils/datasource';
-import { activateFullSceneTree } from 'app/features/dashboard-scene/utils/test-utils';
+import { MockDataSourceSrv, DataSourceType } from '../mocks/datasource';
+import { activateFullSceneTree } from '../utils/utils.test';
 
-import { DataTrail } from '../../DataTrail';
+import { DataTrail } from '../DataTrail';
 import {
   VAR_FILTERS,
   VAR_OTEL_AND_METRIC_FILTERS,
   VAR_OTEL_GROUP_LEFT,
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
-} from '../../shared';
+} from '../shared';
 
 import {
   sortResources,
@@ -207,10 +206,11 @@ describe('updateOtelJoinWithGroupLeft', () => {
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
     setDataSourceSrv(
       new MockDataSourceSrv({
-        prom: mockDataSource({
+        prom: {
           name: 'Prometheus',
           type: DataSourceType.Prometheus,
-        }),
+          uid: 'ds',
+        },
       })
     );
     trail = new DataTrail({
@@ -276,10 +276,11 @@ describe('util functions that rely on trail and variable setup', () => {
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
     setDataSourceSrv(
       new MockDataSourceSrv({
-        prom: mockDataSource({
+        prom: {
           name: 'Prometheus',
           type: DataSourceType.Prometheus,
-        }),
+          uid: 'ds',
+        },
       })
     );
   });

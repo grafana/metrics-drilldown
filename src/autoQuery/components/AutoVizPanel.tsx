@@ -1,8 +1,8 @@
 import { SceneObjectState, SceneObjectBase, SceneComponentProps, VizPanel, SceneQueryRunner } from '@grafana/scenes';
 
 import { AddToExplorationButton } from '../../MetricSelect/AddToExplorationsButton';
-import { MDP_METRIC_OVERVIEW, trailDS } from '../../../shared';
-import { getMetricSceneFor } from '../../../utils';
+import { MDP_METRIC_OVERVIEW, trailDS } from '../../shared';
+import { getMetricSceneFor } from '../../utils';
 import { AutoQueryDef } from '../types';
 
 import { AutoVizPanelQuerySelector } from './AutoVizPanelQuerySelector';

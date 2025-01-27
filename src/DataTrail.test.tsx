@@ -1,10 +1,9 @@
 import { VariableHide } from '@grafana/data';
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { AdHocFiltersVariable, ConstantVariable, sceneGraph } from '@grafana/scenes';
-import { DataSourceType } from 'app/features/alerting/unified/utils/datasource';
 
-import { MockDataSourceSrv, mockDataSource } from '../alerting/unified/mocks';
-import { activateFullSceneTree } from '../dashboard-scene/utils/test-utils';
+import { MockDataSourceSrv, DataSourceType } from './mocks/datasource';
+import { activateFullSceneTree } from './utils/utils.test';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene';
@@ -28,10 +27,11 @@ describe('DataTrail', () => {
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
     setDataSourceSrv(
       new MockDataSourceSrv({
-        prom: mockDataSource({
+        prom: {
           name: 'Prometheus',
           type: DataSourceType.Prometheus,
-        }),
+          uid: 'ds',
+        },
       })
     );
   });

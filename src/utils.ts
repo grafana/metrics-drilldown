@@ -25,9 +25,7 @@ import {
   SceneVariable,
   SceneVariableState,
 } from '@grafana/scenes';
-import { getClosestScopesFacade } from 'app/features/scopes';
-
-import { getDatasourceSrv } from '../plugins/datasource_srv';
+import { getClosestScopesFacade } from './utils/utils.scopes';
 
 import { DataTrail } from './DataTrail';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -117,7 +115,7 @@ export function getDatasourceForNewTrail(): string | undefined {
       return prevDataSource;
     }
   }
-  const promDatasources = getDatasourceSrv().getList({ type: 'prometheus' });
+  const promDatasources = getDataSourceSrv().getList({ type: 'prometheus' });
   if (promDatasources.length > 0) {
     const defaultDatasource = promDatasources.find((mds) => mds.isDefault);
 

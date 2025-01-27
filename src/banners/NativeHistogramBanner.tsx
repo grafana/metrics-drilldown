@@ -5,9 +5,9 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2, useTheme2, Alert, Button } from '@grafana/ui';
 import { t, Trans } from '@grafana/ui/src/utils/i18n';
 
-import { DataTrail } from '../../DataTrail';
-import { reportExploreMetrics } from '../../interactions';
-import { MetricSelectedEvent } from '../../shared';
+import { DataTrail } from '../DataTrail';
+import { reportExploreMetrics } from '../interactions';
+import { MetricSelectedEvent } from '../shared';
 
 interface NativeHistogramInfoProps {
   histogramsLoaded: boolean;

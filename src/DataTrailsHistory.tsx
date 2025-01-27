@@ -1,8 +1,15 @@
 import { css, cx } from '@emotion/css';
 import { useMemo } from 'react';
 
-import { getTimeZoneInfo, GrafanaTheme2, InternalTimeZones, TIME_FORMAT } from '@grafana/data';
-import { convertRawToRange } from '@grafana/data/src/datetime/rangeutil';
+import {
+  BusEventWithPayload,
+  EventBusSrv,
+  getTimeZoneInfo,
+  GrafanaTheme2,
+  InternalTimeZones,
+  rangeUtil,
+  TIME_FORMAT,
+} from '@grafana/data';
 import { config } from '@grafana/runtime';
 import {
   SceneComponentProps,
@@ -16,8 +23,6 @@ import {
   SceneVariableValueChangedEvent,
 } from '@grafana/scenes';
 import { Stack, Tooltip, useStyles2 } from '@grafana/ui';
-import { appEvents } from 'app/core/app_events';
-import { RecordHistoryEntryEvent } from 'app/types/events';
 
 import { DataTrail, DataTrailState, getTopSceneFor } from './DataTrail';
 import { SerializedTrailHistory } from './TrailStore/TrailStore';
@@ -66,6 +71,8 @@ const stepDescriptionMap: Record<TrailStepType, string> = {
 };
 
 export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
+  _appEvents = new EventBusSrv();
+
   public constructor(state: Partial<DataTrailsHistoryState>) {
     super({
       steps: state.steps ?? [],
@@ -161,7 +168,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
           this.addTrailStep(trail, 'time', tooltip);
 
           if (config.featureToggles.unifiedHistory) {
-            appEvents.publish(
+            this._appEvents.publish(
               new RecordHistoryEntryEvent({
                 name: 'Time range changed',
                 description: tooltip,
@@ -318,6 +325,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
           return (
             <Tooltip content={() => model.renderStepTooltip(step)} key={index}>
               <button
+                aria-label={`History step: ${step.description} ${step.detail}`}
                 className={cx(
                   // Base for all steps
                   styles.step,
@@ -349,7 +357,7 @@ export function parseTimeTooltip(urlValues: SceneObjectUrlValues): string {
     return '';
   }
 
-  const range = convertRawToRange({
+  const range = rangeUtil.convertRawToRange({
     from: urlValues.from,
     to: urlValues.to,
   });
@@ -533,4 +541,15 @@ function createAlternatePredecessorStyle(index: number, parent: number) {
       background: 'none',
     },
   });
+}
+
+interface HistoryEntryView {
+  name: string;
+  description: string;
+  url: string;
+  time: number;
+}
+
+class RecordHistoryEntryEvent extends BusEventWithPayload<HistoryEntryView> {
+  static type = 'record-history-entry';
 }

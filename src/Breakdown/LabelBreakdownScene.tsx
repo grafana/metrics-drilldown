@@ -31,13 +31,13 @@ import { Alert, Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/u
 import { Trans } from 'app/core/internationalization';
 
 import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
-import { DataTrail } from '../../DataTrail';
-import { MetricScene } from '../../MetricScene';
+import { DataTrail } from '../DataTrail';
+import { MetricScene } from '../MetricScene';
 import { AddToExplorationButton } from '../MetricSelect/AddToExplorationsButton';
-import { StatusWrapper } from '../../StatusWrapper';
+import { StatusWrapper } from '../StatusWrapper';
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { AutoQueryDef } from '../autoQuery/types';
-import { reportExploreMetrics } from '../../interactions';
+import { reportExploreMetrics } from '../interactions';
 import { updateOtelJoinWithGroupLeft } from '../otel/util';
 import { getSortByPreference } from '../services/store';
 import { ALL_VARIABLE_VALUE } from '../services/variables';

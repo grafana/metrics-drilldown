@@ -1,4 +1,4 @@
-import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../../shared';
+import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../shared';
 
 import { CommonQueryInfoParams, generateCommonAutoQueryInfo } from './common';
 
