@@ -3,7 +3,6 @@ import { useState } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { Button, useStyles2, useTheme2 } from '@grafana/ui';
-import { Trans } from 'app/core/internationalization';
 
 import { DataTrail } from './DataTrail';
 import { DataTrailCard } from './DataTrailCard';
@@ -28,9 +27,7 @@ export function DataTrailsRecentMetrics({ onSelect }: Props) {
   return (
     <>
       <div className={styles.recentExplorationHeader}>
-        <div className={styles.header}>
-          <Trans i18nKey="trails.recent-metrics.or-view-a-recent-exploration">Or view a recent exploration</Trans>
-        </div>
+        <div className={styles.header}>Or view a recent exploration</div>
       </div>
       <div className={css(styles.trailList, styles.bottomGap24)}>
         {getTrailStore()

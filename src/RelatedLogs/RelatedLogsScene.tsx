@@ -17,7 +17,6 @@ import {
   type SceneVariable,
 } from '@grafana/scenes';
 import { Stack, LinkButton } from '@grafana/ui';
-import { Trans } from 'app/core/internationalization';
 
 import { MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
@@ -177,7 +176,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
               size="sm"
               onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_explore_logs' })}
             >
-              <Trans i18nKey="explore-metrics.related-logs.openExploreLogs">Open Explore Logs</Trans>
+              Open Explore Logs
             </LinkButton>
           </Stack>
           <body.Component model={body} />

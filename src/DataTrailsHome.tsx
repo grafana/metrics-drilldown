@@ -3,9 +3,7 @@ import { useState } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { SceneComponentProps, sceneGraph, SceneObject, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
-import { Box, Button, Icon, Stack, TextLink, useStyles2, useTheme2 } from '@grafana/ui';
-import { Text } from '@grafana/ui/src/components/Text/Text';
-import { Trans } from 'app/core/internationalization';
+import { Box, Button, Icon, Stack, Text, TextLink, useStyles2, useTheme2 } from '@grafana/ui';
 
 import { DataTrail } from './DataTrail';
 import { DataTrailsBookmarks } from './DataTrailBookmarks';
@@ -62,27 +60,23 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
           <Stack direction="column" alignItems="center">
             <div>{theme.isDark ? <DarkModeRocket /> : <LightModeRocket />}</div>
             <Text element="h1" textAlignment="center" weight="medium">
-              <Trans i18nKey="trails.home.start-your-metrics-exploration">Start your metrics exploration!</Trans>
+              Start your metrics exploration!
             </Text>
             <Box>
               <Text element="p" textAlignment="center" color="secondary">
-                <Trans i18nKey="trails.home.subtitle">
-                  Explore your Prometheus-compatible metrics without writing a query.
-                </Trans>
+                Explore your Prometheus-compatible metrics without writing a query.
                 <TextLink
                   href="https://grafana.com/docs/grafana/latest/explore/explore-metrics/"
                   external
                   style={{ marginLeft: '8px' }}
                 >
-                  <Trans i18nKey="trails.home.learn-more">Learn more</Trans>
+                  Learn more
                 </TextLink>
               </Text>
             </Box>
             <div className={styles.gap24}>
               <Button size="lg" variant="primary" onClick={model.onNewMetricsTrail}>
-                <div className={styles.startButton}>
-                  <Trans i18nKey="trails.home.lets-start">Let&apos;s start!</Trans>
-                </div>
+                <div className={styles.startButton}>Let&apos;s start!</div>
                 <Icon name="arrow-right" size="lg" style={{ marginLeft: '8px' }} />
               </Button>
             </div>

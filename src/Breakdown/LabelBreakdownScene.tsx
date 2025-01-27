@@ -27,7 +27,6 @@ import {
 } from '@grafana/scenes';
 import { DataQuery, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { Alert, Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
-import { Trans } from 'app/core/internationalization';
 
 import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
 import { DataTrail } from '../DataTrail';
@@ -395,11 +394,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
               onRemove={() => updateDismissOtelWarning(true)}
               className={styles.truncatedOTelResources}
             >
-              <Trans i18nKey={'explore-metrics.breakdown.missing-otel-labels'}>
-                This metric has too many job and instance label values to call the Prometheus label_values endpoint with
-                the match[] parameter. These label values are used to join the metric with target_info, which contains
-                the resource attributes. Please include more resource attributes filters.
-              </Trans>
+              This metric has too many job and instance label values to call the Prometheus label_values endpoint with
+              the match[] parameter. These label values are used to join the metric with target_info, which contains the
+              resource attributes. Please include more resource attributes filters.
             </Alert>
           )}
 

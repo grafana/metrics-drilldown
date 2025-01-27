@@ -24,7 +24,6 @@ import {
   VariableDependencyConfig,
 } from '@grafana/scenes';
 import { Alert, Badge, Field, Icon, IconButton, InlineSwitch, Input, Select, Tooltip, useStyles2 } from '@grafana/ui';
-import { Trans } from 'app/core/internationalization';
 import { getSelectedScopes } from '../utils/utils.scopes';
 
 import { MetricScene } from '../MetricScene';
@@ -563,7 +562,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
           <Field
             label={
               <div className={styles.displayOptionTooltip}>
-                <Trans i18nKey="explore-metrics.viewBy">View by</Trans>
+                View by
                 <IconButton name={'info-circle'} size="sm" variant={'secondary'} tooltip={viewByTooltip} />
               </div>
             }
@@ -589,23 +588,15 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
               label={
                 <>
                   <div className={styles.displayOptionTooltip}>
-                    <Trans i18nKey="trails.metric-select.filter-by">Filter by</Trans>
+                    Filter by
                     <IconButton
                       name={'info-circle'}
                       size="sm"
                       variant={'secondary'}
-                      tooltip={
-                        <Trans i18nKey="trails.metric-select.otel-switch">
-                          This switch enables filtering by OTel resources for OTel native data sources.
-                        </Trans>
-                      }
+                      tooltip="This switch enables filtering by OTel resources for OTel native data sources."
                     />
                     <div>
-                      <Badge
-                        text={<Trans i18nKey="trails.metric-select.new-badge">New</Trans>}
-                        color={'blue'}
-                        className={styles.badgeStyle}
-                      ></Badge>
+                      <Badge text="New" color={'blue'} className={styles.badgeStyle}></Badge>
                     </div>
                   </div>
                 </>
