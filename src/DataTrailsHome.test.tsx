@@ -6,7 +6,7 @@ import { DataTrail } from './DataTrail';
 import { DataTrailsHome } from './DataTrailsHome';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { VAR_FILTERS } from './shared';
-import { isAdHocFiltersVariable } from 'utils/variables';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 jest.mock('./TrailStore/TrailStore', () => ({
   getTrailStore: jest.fn(),

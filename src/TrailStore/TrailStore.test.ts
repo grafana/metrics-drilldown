@@ -6,7 +6,7 @@ import { TRAIL_BOOKMARKS_KEY, RECENT_TRAILS_KEY, VAR_FILTERS } from '../shared';
 
 import { SerializedTrail, getTrailStore } from './TrailStore';
 import { MockDataSourceSrv, DataSourceType } from '../mocks/datasource';
-import { isAdHocFiltersVariable } from 'utils/variables';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),

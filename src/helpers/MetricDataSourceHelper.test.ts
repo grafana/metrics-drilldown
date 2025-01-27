@@ -1,4 +1,4 @@
-import { DataTrail } from '../../DataTrail';
+import { DataTrail } from '../DataTrail';
 
 import { MetricDatasourceHelper } from './MetricDatasourceHelper';
 

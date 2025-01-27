@@ -18,7 +18,7 @@ import {
 
 import { getFilteredResourceAttributes, totalOtelResources } from './api';
 import { OtelResourcesObject } from './types';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/variables';
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
 
 export const blessedList = (): Record<string, number> => {
   return {

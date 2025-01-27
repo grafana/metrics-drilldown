@@ -34,7 +34,7 @@ import { getTrailStore } from './TrailStore/TrailStore';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { sortResources } from './otel/util';
 import { LOGS_METRIC, TRAILS_ROUTE, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
-import { isAdHocFiltersVariable } from 'utils/variables';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 export function getTrailFor(model: SceneObject): DataTrail {
   return sceneGraph.getAncestor(model, DataTrail);
@@ -123,11 +123,6 @@ export type SceneTimeRangeState = SceneObjectState & {
   to: string;
   timeZone?: string;
 };
-
-export function isSceneTimeRangeState(state: SceneObjectState): state is SceneTimeRangeState {
-  const keys = Object.keys(state);
-  return keys.includes('from') && keys.includes('to');
-}
 
 export function getFilters(scene: SceneObject) {
   const filters = sceneGraph.lookupVariable('filters', scene);

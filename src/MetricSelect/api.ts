@@ -3,7 +3,7 @@ import { getPrometheusTime, PromQueryModeller, utf8Support } from '@grafana/prom
 import { config, getBackendSrv } from '@grafana/runtime';
 
 import { limitOtelMatchTerms } from '../otel/util';
-import { callSuggestionsApi, SuggestionsResponse } from '../../utils';
+import { callSuggestionsApi, SuggestionsResponse } from '../utils';
 
 const LIMIT_REACHED = 'results truncated due to limit';
 

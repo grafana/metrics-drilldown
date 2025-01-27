@@ -20,7 +20,7 @@ import { reportExploreMetrics } from '../interactions';
 import { updateOtelJoinWithGroupLeft } from '../otel/util';
 import { VAR_DATASOURCE_EXPR, VAR_GROUP_BY, VAR_OTEL_GROUP_LEFT } from '../shared';
 import { getMetricSceneFor, getTrailFor } from '../utils';
-import { isQueryVariable } from 'utils/variables';
+import { isQueryVariable } from 'utils/utils.variables';
 
 export interface MetricOverviewSceneState extends SceneObjectState {
   metadata?: PromMetricsMetadataItem;

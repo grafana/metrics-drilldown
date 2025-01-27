@@ -24,7 +24,7 @@ import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labels
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { reportExploreMetrics } from '../interactions';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC, VAR_METRIC_EXPR } from '../../shared';
-import { isConstantVariable, isCustomVariable } from '../utils';
+import { isConstantVariable, isCustomVariable } from 'utils/utils.variables';
 
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
 

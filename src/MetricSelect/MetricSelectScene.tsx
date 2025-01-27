@@ -20,7 +20,6 @@ import {
   SceneObjectUrlSyncConfig,
   SceneObjectUrlValues,
   SceneObjectWithUrlSync,
-  SceneTimeRange,
   SceneVariableSet,
   VariableDependencyConfig,
 } from '@grafana/scenes';
@@ -42,7 +41,7 @@ import {
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
 } from '../shared';
-import { getFilters, getTrailFor, isSceneTimeRangeState } from '../utils';
+import { getFilters, getTrailFor } from '../utils';
 
 import { AddToExplorationButton } from './AddToExplorationsButton';
 import { SelectMetricAction } from './SelectMetricAction';
@@ -50,7 +49,9 @@ import { getMetricNames } from './api';
 import { getPreviewPanelFor } from './previewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
-import { isAdHocFiltersVariable, isSceneCSSGridLayout, isSceneFlexLayout } from 'utils/variables';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { isSceneCSSGridLayout, isSceneFlexLayout } from 'utils/utils.layout';
+import { isSceneTimeRange, isSceneTimeRangeState } from 'utils/utils.timerange';
 
 interface MetricPanel {
   name: string;
@@ -156,7 +157,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToEvent(SceneObjectStateChangedEvent, (evt) => {
-        if (isSceneTimeRangeState(evt.payload.changedObject)) {
+        if (isSceneTimeRange(evt.payload.changedObject)) {
           const { prevState, newState } = evt.payload;
 
           if (isSceneTimeRangeState(prevState) && isSceneTimeRangeState(newState)) {
@@ -267,7 +268,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       );
       const searchRegex = createJSRegExpFromSearchTerms(getMetricSearch(this));
       let metricNames = searchRegex
-        ? response.data.filter((metric) => !searchRegex || searchRegex.test(metric))
+        ? response.data.filter((metric: string) => !searchRegex || searchRegex.test(metric))
         : response.data;
 
       // use this to generate groups for metric prefix
