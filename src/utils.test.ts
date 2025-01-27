@@ -1,7 +1,5 @@
 import { AdHocFiltersVariable, SceneObjectRef } from '@grafana/scenes';
 
-import { getDatasourceSrv } from '../plugins/datasource_srv';
-
 import { DataTrail } from './DataTrail';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
@@ -13,8 +11,28 @@ jest.mock('./TrailStore/TrailStore', () => ({
   getTrailStore: jest.fn(),
 }));
 
-jest.mock('../plugins/datasource_srv', () => ({
-  getDatasourceSrv: jest.fn(),
+const getListSpy = jest.fn();
+const fetchSpy = jest.fn();
+
+// Mock the entire @grafana/runtime module
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  getDataSourceSrv: () => ({
+    getList: getListSpy,
+    get: jest.fn(),
+    getInstanceSettings: jest.fn(),
+    reload: jest.fn(),
+  }),
+  getBackendSrv: () => ({
+    fetch: fetchSpy,
+    delete: jest.fn(),
+    get: jest.fn().mockResolvedValue({ status: 'OK' }), // Mock successful health checks
+    patch: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    request: jest.fn(),
+    datasourceRequest: jest.fn(),
+  }),
 }));
 
 jest.mock('./otel/util', () => ({
@@ -99,12 +117,10 @@ describe('getDatasourceForNewTrail', () => {
       bookmarks: [],
       recent: [],
     }));
-    (getDatasourceSrv as jest.Mock).mockImplementation(() => ({
-      getList: jest.fn().mockReturnValue([
-        { uid: 'prom1', isDefault: true },
-        { uid: 'prom2', isDefault: false },
-      ]),
-    }));
+    getListSpy.mockReturnValue([
+      { uid: 'prom1', isDefault: true },
+      { uid: 'prom2', isDefault: false },
+    ]);
   });
 
   it('should return the most recent exploration data source', () => {
@@ -124,13 +140,11 @@ describe('getDatasourceForNewTrail', () => {
   });
 
   it('should return the most recently added Prom data source if no default exists and no recent exploration', () => {
-    (getDatasourceSrv as jest.Mock).mockImplementation(() => ({
-      getList: jest.fn().mockReturnValue([
-        { uid: 'newProm', isDefault: false },
-        { uid: 'prom1', isDefault: false },
-        { uid: 'prom2', isDefault: false },
-      ]),
-    }));
+    getListSpy.mockReturnValue([
+      { uid: 'newProm', isDefault: false },
+      { uid: 'prom1', isDefault: false },
+      { uid: 'prom2', isDefault: false },
+    ]);
     const result = getDatasourceForNewTrail();
     expect(result).toBe('newProm');
   });

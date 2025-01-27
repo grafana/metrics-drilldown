@@ -95,6 +95,7 @@ export async function getDeploymentEnvironments(
   timeRange: RawTimeRange,
   scopes: Scope[]
 ): Promise<string[]> {
+  // @ts-expect-error
   if (!config.featureToggles.enableScopesInMetricsExplore) {
     return getDeploymentEnvironmentsWithoutScopes(dataSourceUid, timeRange);
   }

@@ -1,4 +1,4 @@
-import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../../shared';
+import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../shared';
 import { heatmapGraphBuilder, percentilesGraphBuilder, simpleGraphBuilder } from '../graphBuilders';
 import { AutoQueryContext, AutoQueryDef } from '../types';
 

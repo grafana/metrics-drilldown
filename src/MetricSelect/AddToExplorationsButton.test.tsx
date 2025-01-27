@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { PluginExtensionTypes } from '@grafana/data';
 import { setPluginLinksHook } from '@grafana/runtime';
 
-import { mockPluginLinkExtension } from '../../alerting/unified/mocks';
+import { mockPluginLinkExtension } from '../mocks/plugin';
 
 import { AddToExplorationButton, addToExplorationsButtonLabel, explorationsPluginId } from './AddToExplorationsButton';
 

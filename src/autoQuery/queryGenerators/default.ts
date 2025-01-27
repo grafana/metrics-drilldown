@@ -1,4 +1,4 @@
-import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../../shared';
+import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../shared';
 import { AutoQueryContext, AutoQueryInfo } from '../types';
 import { getPerSecondRateUnit, getUnit } from '../units';
 

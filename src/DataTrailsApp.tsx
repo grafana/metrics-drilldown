@@ -12,7 +12,6 @@ import { config, locationService } from '@grafana/runtime';
 import { SceneComponentProps, SceneObjectBase, SceneObjectState, UrlSyncContextProvider } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui/';
 import { Page } from 'app/core/components/Page/Page';
-import { getClosestScopesFacade, ScopesFacade, ScopesSelector } from 'app/features/scopes';
 
 import { AppChromeUpdate } from '../../core/components/AppChrome/AppChromeUpdate';
 
@@ -21,6 +20,7 @@ import { DataTrailsHome } from './DataTrailsHome';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { HOME_ROUTE, RefreshMetricsEvent, TRAILS_ROUTE } from './shared';
 import { getMetricName, getUrlForTrail, newMetricsTrail } from './utils';
+import { getClosestScopesFacade, ScopesFacade, ScopesSelector } from 'utils/utils.scopes';
 
 export interface DataTrailsAppState extends SceneObjectState {
   trail: DataTrail;
@@ -108,6 +108,7 @@ function DataTrailView({ trail }: { trail: DataTrail }) {
   return (
     <UrlSyncContextProvider scene={trail}>
       <Page navId="explore/metrics" pageNav={{ text: getMetricName(metric) }} layout={PageLayoutType.Custom}>
+        {/* @ts-expect-error */}
         {config.featureToggles.enableScopesInMetricsExplore && (
           <AppChromeUpdate
             actions={
@@ -127,6 +128,7 @@ let dataTrailsApp: DataTrailsApp;
 
 export function getDataTrailsApp() {
   if (!dataTrailsApp) {
+    // @ts-expect-error
     const $behaviors = config.featureToggles.enableScopesInMetricsExplore
       ? [
           new ScopesFacade({

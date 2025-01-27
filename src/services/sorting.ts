@@ -3,7 +3,7 @@ import { memoize } from 'lodash';
 
 import { DataFrame, doStandardCalcs, fieldReducers, FieldType, outerJoinDataFrames, ReducerID } from '@grafana/data';
 
-import { reportExploreMetrics } from '../../interactions';
+import { reportExploreMetrics } from '../interactions';
 
 import { getLabelValueFromDataFrame } from './levels';
 

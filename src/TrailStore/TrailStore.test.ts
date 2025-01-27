@@ -1,15 +1,19 @@
-import { locationService, setDataSourceSrv } from '@grafana/runtime';
+import { DataSourceWithBackend, locationService, setDataSourceSrv } from '@grafana/runtime';
 import { AdHocFiltersVariable, sceneGraph, sceneUtils } from '@grafana/scenes';
-import { DataSourceType } from 'app/features/alerting/unified/utils/datasource';
 
-import { MockDataSourceSrv, mockDataSource } from '../../alerting/unified/mocks';
 import { DataTrail } from '../DataTrail';
 import { TRAIL_BOOKMARKS_KEY, RECENT_TRAILS_KEY, VAR_FILTERS } from '../shared';
 
 import { SerializedTrail, getTrailStore } from './TrailStore';
+import { MockDataSourceSrv, DataSourceType } from '../mocks/datasource';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
+  getDataSourceSrv: jest.fn(() => {
+    return {
+      get: (ds: DataSourceWithBackend) => Promise.resolve(ds),
+    };
+  }),
   getTemplateSrv: () => ({
     getAdhocFilters: jest.fn().mockReturnValue([{ key: 'origKey', operator: '=', value: '' }]),
   }),
@@ -33,11 +37,11 @@ describe('TrailStore', () => {
     // Having the mock service set up is required for activating the loaded trails
     setDataSourceSrv(
       new MockDataSourceSrv({
-        prom: mockDataSource({
+        prom: {
           name: 'Prometheus',
           type: DataSourceType.Prometheus,
           uid: 'ds',
-        }),
+        },
       })
     );
   });

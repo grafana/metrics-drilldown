@@ -27,13 +27,13 @@ import {
 } from '@grafana/scenes';
 import { Alert, Badge, Field, Icon, IconButton, InlineSwitch, Input, Select, Tooltip, useStyles2 } from '@grafana/ui';
 import { Trans } from 'app/core/internationalization';
-import { getSelectedScopes } from 'app/features/scopes';
+import { getSelectedScopes } from '../utils/utils.scopes';
 
-import { MetricScene } from '../../MetricScene';
-import { StatusWrapper } from '../../StatusWrapper';
+import { MetricScene } from '../MetricScene';
+import { StatusWrapper } from '../StatusWrapper';
 import { Node, Parser } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
-import { reportExploreMetrics } from '../../interactions';
+import { reportExploreMetrics } from '../interactions';
 import { setOtelExperienceToggleState } from '../services/store';
 import {
   getVariablesWithMetricConstant,
@@ -42,8 +42,8 @@ import {
   VAR_DATASOURCE,
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
-} from '../../shared';
-import { getFilters, getTrailFor, isSceneTimeRangeState } from '../../utils';
+} from '../shared';
+import { getFilters, getTrailFor, isSceneTimeRangeState } from '../utils';
 
 import { AddToExplorationButton } from './AddToExplorationsButton';
 import { SelectMetricAction } from './SelectMetricAction';
@@ -212,6 +212,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       })
     );
 
+    // @ts-expect-error
     if (config.featureToggles.enableScopesInMetricsExplore) {
       this._subs.add(
         trail.subscribeToEvent(RefreshMetricsEvent, () => {
@@ -276,7 +277,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       const metricPrefix = this.state.metricPrefix;
       if (metricPrefix && metricPrefix !== 'all') {
         const prefixRegex = new RegExp(`(^${metricPrefix}.*)`, 'igy');
-        metricNames = metricNames.filter((metric) => !prefixRegex || prefixRegex.test(metric));
+        metricNames = metricNames.filter((metric: string) => !prefixRegex || prefixRegex.test(metric));
       }
 
       let metricNamesWarning = response.limitReached

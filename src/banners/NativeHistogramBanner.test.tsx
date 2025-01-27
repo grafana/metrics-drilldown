@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 
-import { DataTrail } from '../../DataTrail';
-import { MetricSelectedEvent } from '../../shared';
+import { DataTrail } from '../DataTrail';
+import { MetricSelectedEvent } from '../shared';
 
 import { NativeHistogramBanner } from './NativeHistogramBanner';
 

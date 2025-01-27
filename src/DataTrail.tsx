@@ -31,7 +31,7 @@ import {
   VariableValueSelectors,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import { getSelectedScopes } from 'app/features/scopes';
+import { getSelectedScopes } from './utils/utils.scopes';
 
 import { DataTrailSettings } from './DataTrailSettings';
 import { DataTrailHistory } from './DataTrailsHistory';
@@ -564,7 +564,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight();
-    const styles = useStyles2(getStyles, embedded ? 0 : (chromeHeaderHeight ?? 0));
+    const styles = useStyles2(getStyles, embedded ? 0 : chromeHeaderHeight ?? 0);
     const showHeaderForFirstTimeUsers = getTrailStore().recent.length < 2;
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
     model.initializeHistograms();

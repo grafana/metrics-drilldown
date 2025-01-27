@@ -1,20 +1,29 @@
 import { DataSourceApi, PanelMenuItem } from '@grafana/data';
 import { PromQuery } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { SceneTimeRangeState, VizPanel } from '@grafana/scenes';
+import { SceneObject, SceneObjectState, SceneTimeRangeState, VizPanel } from '@grafana/scenes';
 import { DataQuery, DataSourceRef } from '@grafana/schema';
-import { getQueryRunnerFor } from 'app/features/dashboard-scene/utils/utils';
 
-import { DashboardScene } from '../../dashboard-scene/scene/DashboardScene';
-import { MetricScene } from '../../MetricScene';
-import { reportExploreMetrics } from '../../interactions';
+import { getQueryRunnerFor } from '../utils/utils.queries';
+import { MetricScene } from '../MetricScene';
+import { reportExploreMetrics } from '../interactions';
 
 import { DataTrailEmbedded, DataTrailEmbeddedState } from './DataTrailEmbedded';
 import { SceneDrawerAsScene } from './SceneDrawer';
 import { getQueryMetrics, QueryMetric } from './getQueryMetrics';
 import { createAdHocFilters, getQueryMetricLabel, getTimeRangeStateFromDashboard } from './utils';
 
-export async function addDataTrailPanelAction(dashboard: DashboardScene, panel: VizPanel, items: PanelMenuItem[]) {
+export interface DashboardSceneInterface extends SceneObject {
+  // Add only the properties and methods we actually use
+  showModal: (scene: SceneObject<SceneObjectState>) => void;
+  closeModal: () => void;
+}
+
+export async function addDataTrailPanelAction(
+  dashboard: DashboardSceneInterface,
+  panel: VizPanel,
+  items: PanelMenuItem[]
+) {
   if (panel.state.pluginId !== 'timeseries') {
     return;
   }
@@ -82,7 +91,7 @@ function getUnique<T extends { text: string }>(items: T[]) {
 }
 
 function getEmbeddedTrailsState(
-  { metric, labelFilters, query }: QueryMetric,
+  { metric, labelFilters }: QueryMetric,
   timeRangeState: SceneTimeRangeState,
   dataSourceUid: string | undefined
 ) {
@@ -96,7 +105,7 @@ function getEmbeddedTrailsState(
   return state;
 }
 
-function createCommonEmbeddedTrailStateProps(item: QueryMetric, dashboard: DashboardScene, ds: DataSourceRef) {
+function createCommonEmbeddedTrailStateProps(item: QueryMetric, dashboard: DashboardSceneInterface, ds: DataSourceRef) {
   const timeRangeState = getTimeRangeStateFromDashboard(dashboard);
   const trailState = getEmbeddedTrailsState(item, timeRangeState, ds.uid);
   const embeddedTrail: DataTrailEmbedded = new DataTrailEmbedded(trailState);
@@ -115,7 +124,7 @@ function createCommonEmbeddedTrailStateProps(item: QueryMetric, dashboard: Dashb
   return commonProps;
 }
 
-function createClickHandler(item: QueryMetric, dashboard: DashboardScene, ds: DataSourceRef) {
+function createClickHandler(item: QueryMetric, dashboard: DashboardSceneInterface, ds: DataSourceRef) {
   return () => {
     const commonProps = createCommonEmbeddedTrailStateProps(item, dashboard, ds);
     const drawerScene = new SceneDrawerAsScene({

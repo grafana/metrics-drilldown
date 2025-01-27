@@ -22,9 +22,9 @@ import { Trans } from 'app/core/internationalization';
 import { MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
-import { reportExploreMetrics } from '../../interactions';
+import { reportExploreMetrics } from '../interactions';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC, VAR_METRIC_EXPR } from '../../shared';
-import { isConstantVariable, isCustomVariable } from '../../utils';
+import { isConstantVariable, isCustomVariable } from '../utils';
 
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
 
