@@ -18,7 +18,6 @@ import {
   SceneObjectStateChangedEvent,
   SceneObjectUrlValue,
   SceneObjectUrlValues,
-  SceneTimeRange,
   sceneUtils,
   SceneVariableValueChangedEvent,
 } from '@grafana/scenes';
@@ -28,8 +27,8 @@ import { DataTrail, DataTrailState, getTopSceneFor } from './DataTrail';
 import { SerializedTrailHistory } from './TrailStore/TrailStore';
 import { reportExploreMetrics } from './interactions';
 import { VAR_FILTERS, VAR_OTEL_DEPLOYMENT_ENV, VAR_OTEL_RESOURCES } from './shared';
-import { getTrailFor, isSceneTimeRangeState } from './utils';
-import { isSceneTimeRange } from 'utils/utils.variables';
+import { getTrailFor } from './utils';
+import { isSceneTimeRange, isSceneTimeRangeState } from 'utils/utils.timerange';
 
 export interface DataTrailsHistoryState extends SceneObjectState {
   currentStep: number;

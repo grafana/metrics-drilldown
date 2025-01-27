@@ -7,7 +7,7 @@ import {
   SceneTimeRangeState,
 } from '@grafana/scenes';
 
-import { DataTrail } from '../../DataTrail';
+import { DataTrail } from '../DataTrail';
 
 export interface DataTrailEmbeddedState extends SceneObjectState {
   timeRangeState: SceneTimeRangeState;

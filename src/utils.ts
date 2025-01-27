@@ -124,11 +124,6 @@ export type SceneTimeRangeState = SceneObjectState & {
   timeZone?: string;
 };
 
-export function isSceneTimeRangeState(state: SceneObjectState): state is SceneTimeRangeState {
-  const keys = Object.keys(state);
-  return keys.includes('from') && keys.includes('to');
-}
-
 export function getFilters(scene: SceneObject) {
   const filters = sceneGraph.lookupVariable('filters', scene);
   if (isAdHocFiltersVariable(filters)) {

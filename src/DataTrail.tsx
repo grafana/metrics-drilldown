@@ -61,8 +61,8 @@ import {
   VAR_OTEL_RESOURCES,
 } from './shared';
 import { getTrailFor, limitAdhocProviders } from './utils';
-import { isAdHocFiltersVariable, isConstantVariable, isSceneQueryRunner } from 'utils/utils.variables';
-
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
+import { isSceneQueryRunner } from 'utils/utils.queries';
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;

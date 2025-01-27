@@ -1,12 +1,12 @@
 import { DataFrame, TimeRange } from '@grafana/data';
 import { usePluginLinks } from '@grafana/runtime';
-import { SceneComponentProps, sceneGraph, SceneObjectBase, SceneObjectState, SceneQueryRunner } from '@grafana/scenes';
+import { SceneComponentProps, sceneGraph, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
 import { DataQuery, DataSourceRef } from '@grafana/schema';
 import { IconButton } from '@grafana/ui';
 
 import MimirLogo from '../../../plugins/datasource/prometheus/img/mimir_logo.svg';
-import { VAR_DATASOURCE_EXPR } from '../../shared';
-import { isSceneQueryRunner } from 'utils/utils.variables';
+import { VAR_DATASOURCE_EXPR } from '../shared';
+import { isSceneQueryRunner } from 'utils/utils.queries';
 
 export const explorationsPluginId = 'grafana-explorations-app';
 export const extensionPointId = 'grafana-explore-metrics/exploration/v1';

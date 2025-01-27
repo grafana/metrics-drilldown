@@ -1,9 +1,9 @@
 import { AdHocVariableFilter, UrlQueryValue, UrlQueryMap } from '@grafana/data';
-import { sceneGraph, CustomVariable } from '@grafana/scenes';
+import { sceneGraph } from '@grafana/scenes';
 
-import { DataTrail } from '../../DataTrail';
-import { reportExploreMetrics } from '../../interactions';
-import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_DEPLOYMENT_ENV } from '../../shared';
+import { DataTrail } from '../DataTrail';
+import { reportExploreMetrics } from '../interactions';
+import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_DEPLOYMENT_ENV } from '../shared';
 import { isAdHocFiltersVariable, isCustomVariable } from 'utils/utils.variables';
 
 /**

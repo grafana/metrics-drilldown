@@ -7,13 +7,21 @@ export function getQueryRunnerFor(sceneObject: SceneObject | undefined): SceneQu
 
   const dataProvider = sceneObject.state.$data ?? sceneObject.parent?.state.$data;
 
-  if (dataProvider instanceof SceneQueryRunner) {
+  if (isSceneQueryRunner(dataProvider)) {
     return dataProvider;
   }
 
-  if (dataProvider instanceof SceneDataTransformer) {
+  if (isSceneDataTransformer(dataProvider)) {
     return getQueryRunnerFor(dataProvider);
   }
 
   return undefined;
+}
+
+export function isSceneQueryRunner(input: SceneObject | null | undefined): input is SceneQueryRunner {
+  return typeof input !== 'undefined' && input !== null && 'state' in input && 'runQueries' in input;
+}
+
+export function isSceneDataTransformer(input: SceneObject | null | undefined): input is SceneDataTransformer {
+  return typeof input !== 'undefined' && input !== null && 'state' in input && 'transformations' in input.state;
 }
