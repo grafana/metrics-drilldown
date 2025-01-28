@@ -1,5 +1,5 @@
 import { DataSourceApi, PluginType, type DataSourceInstanceSettings } from '@grafana/data';
-import { type DataSourceSrv, type RuntimeDataSourceRegistration } from '@grafana/runtime';
+import { type DataSourceSrv } from '@grafana/runtime';
 
 export const mockDataSource: DataSourceApi = {
   name: 'Prometheus',
@@ -116,10 +116,6 @@ export class MockDataSourceSrv implements DataSourceSrv {
 
   reload() {
     return Promise.resolve();
-  }
-
-  registerRuntimeDataSource(entry: RuntimeDataSourceRegistration): void {
-    this.datasources[entry.dataSource.uid] = entry.dataSource;
   }
 }
 
