@@ -48,8 +48,8 @@ import {
   VAR_GROUP_BY_EXP,
   VAR_MISSING_OTEL_TARGETS,
   VAR_OTEL_GROUP_LEFT,
-} from '../../shared';
-import { getColorByIndex, getTrailFor } from '../../utils';
+} from '../shared';
+import { getColorByIndex, getTrailFor } from '../utils';
 
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { BreakdownSearchReset, BreakdownSearchScene } from './BreakdownSearchScene';
@@ -646,7 +646,7 @@ export class SelectLabelAction extends SceneObjectBase<SelectLabelActionState> {
   public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     return (
       <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
-        <Trans i18nKey="explore-metrics.breakdown.labelSelect">Select</Trans>
+        Select
       </Button>
     );
   };
