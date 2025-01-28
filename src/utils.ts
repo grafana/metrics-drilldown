@@ -14,8 +14,6 @@ import { getPrometheusTime } from '@grafana/prometheus';
 import { config, FetchResponse, getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
-  ConstantVariable,
-  CustomVariable,
   sceneGraph,
   SceneObject,
   SceneObjectState,
