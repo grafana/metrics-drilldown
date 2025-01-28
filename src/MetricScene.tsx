@@ -3,6 +3,7 @@ import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import {
+  getExploreURL,
   QueryVariable,
   SceneComponentProps,
   sceneGraph,
@@ -14,15 +15,19 @@ import {
 } from '@grafana/scenes';
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 
-import { getExploreUrl } from '../../core/utils/explore';
-
 import { buildMetricOverviewScene } from './ActionTabs/MetricOverviewScene';
 import { buildRelatedMetricsScene } from './ActionTabs/RelatedMetricsScene';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
-import { MAIN_PANEL_MAX_HEIGHT, MAIN_PANEL_MIN_HEIGHT, MetricGraphScene } from './MetricGraphScene';
+import {
+  MAIN_PANEL_MAX_HEIGHT,
+  MAIN_PANEL_MIN_HEIGHT,
+  METRIC_AUTOVIZPANEL_KEY,
+  MetricGraphScene,
+} from './MetricGraphScene';
 import { buildRelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import { ShareTrailButton } from './ShareTrailButton';
 import { useBookmarkState } from './TrailStore/useBookmarkState';
+import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { AutoQueryDef, AutoQueryInfo } from './autoQuery/types';
 import { reportExploreMetrics } from './interactions';
@@ -37,7 +42,7 @@ import {
   VAR_GROUP_BY,
   VAR_METRIC_EXPR,
 } from './shared';
-import { getDataSource, getTrailFor, getUrlForTrail } from './utils';
+import { getTrailFor, getUrlForTrail } from './utils';
 
 // @ts-expect-error
 const relatedLogsFeatureEnabled = config.featureToggles.exploreMetricsRelatedLogs;
@@ -150,18 +155,17 @@ export interface MetricActionBarState extends SceneObjectState {}
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
   public getLinkToExplore = async () => {
     const metricScene = sceneGraph.getAncestor(this, MetricScene);
-    const trail = getTrailFor(this);
-    const dsValue = getDataSource(trail);
+    const autoVizPanel = sceneGraph.findByKeyAndType(this, METRIC_AUTOVIZPANEL_KEY, AutoVizPanel);
+    const panelData =
+      typeof autoVizPanel.state.panel !== 'undefined'
+        ? sceneGraph.getData(autoVizPanel.state.panel).state.data
+        : undefined;
 
-    const queries = metricScene.state.queryDef?.queries || [];
-    const timeRange = sceneGraph.getTimeRange(this);
+    if (!panelData) {
+      throw new Error('Cannot get link to explore, no panel data found');
+    }
 
-    return getExploreUrl({
-      queries,
-      dsRef: { uid: dsValue },
-      timeRange: timeRange.state.value,
-      scopedVars: { __sceneObject: { value: metricScene } },
-    });
+    return getExploreURL(panelData, metricScene, panelData.timeRange);
   };
 
   public openExploreLink = async () => {

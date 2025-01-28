@@ -19,6 +19,7 @@ import { getTrailFor, getTrailSettings } from './utils';
 
 export const MAIN_PANEL_MIN_HEIGHT = 280;
 export const MAIN_PANEL_MAX_HEIGHT = '40%';
+export const METRIC_AUTOVIZPANEL_KEY = 'metric-graph';
 
 export interface MetricGraphSceneState extends SceneObjectState {
   topView: SceneFlexLayout;
@@ -38,7 +39,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const { stickyMainGraph } = getTrailSettings(model).useState();
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0));
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0);
 
     return (
       <div className={styles.container}>
@@ -83,7 +84,7 @@ function buildGraphTopView() {
       new SceneFlexItem({
         minHeight: MAIN_PANEL_MIN_HEIGHT,
         maxHeight: MAIN_PANEL_MAX_HEIGHT,
-        body: new AutoVizPanel({}),
+        body: new AutoVizPanel({ key: METRIC_AUTOVIZPANEL_KEY }),
       }),
       new SceneFlexItem({
         ySizing: 'content',
