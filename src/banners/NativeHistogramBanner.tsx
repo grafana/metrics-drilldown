@@ -3,7 +3,6 @@ import { useState, type Dispatch, type SetStateAction } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { useStyles2, useTheme2, Alert, Button } from '@grafana/ui';
-import { t, Trans } from '@grafana/ui/src/utils/i18n';
 
 import { DataTrail } from '../DataTrail';
 import { reportExploreMetrics } from '../interactions';
@@ -37,10 +36,8 @@ export function NativeHistogramBanner(props: NativeHistogramInfoProps) {
         >
           <div className={styles.histogramRow}>
             <div className={styles.histogramSentence}>
-              <Trans i18nKey="trails.native-histogram-banner.sentence">
-                Prometheus native histograms offer high resolution, high precision, simple usage in instrumentation and
-                a way to combine and manipulate histograms in queries and in Grafana.
-              </Trans>
+              Prometheus native histograms offer high resolution, high precision, simple usage in instrumentation and a
+              way to combine and manipulate histograms in queries and in Grafana.
             </div>
             <div className={styles.histogramLearnMore}>
               <div>
@@ -50,7 +47,7 @@ export function NativeHistogramBanner(props: NativeHistogramInfoProps) {
                   }
                   className={styles.button}
                 >
-                  <Trans i18nKey="trails.native-histogram-banner.learn-more">Learn more</Trans>
+                  Learn more
                 </Button>
               </div>
             </div>
@@ -98,9 +95,7 @@ const NativeHistogramExamplesButton = ({
           setShowHistogramExamples(!showHistogramExamples);
         }}
       >
-        {showHistogramExamples
-          ? t(`trails.native-histogram-banner.hide-examples`, `Hide examples`)
-          : t(`trails.native-histogram-banner.see-examples`, `> See examples`)}
+        {showHistogramExamples ? 'Hide examples' : '> See examples'}
       </Button>
     </div>
   );
@@ -138,35 +133,23 @@ const NativeHistogramExamples = ({ trail, nativeHistograms, setHistogramMessage 
     <>
       <div className={`${styles.histogramRow} ${styles.seeExamplesRow}`}>
         <div className={styles.histogramImageCol}>
-          <div>
-            <Trans i18nKey="trails.native-histogram-banner.now">Now:</Trans>
-          </div>
+          <div>Now:</div>
         </div>
         <div className={`${styles.histogramImageCol} ${styles.rightCol}`}>
-          <div>
-            <Trans i18nKey="trails.native-histogram-banner.previously">Previously:</Trans>
-          </div>
+          <div>Previously:</div>
         </div>
       </div>
       <div className={`${styles.histogramRow} ${styles.seeExamplesRow}`}>
         <div className={styles.histogramImageCol}>
           <div className={styles.histogramRow}>
             <div className={`${styles.histogramImageCol} ${styles.fontSmall}`}>
-              <div className={styles.imageText}>
-                <Trans i18nKey="trails.native-histogram-banner.nh-heatmap">
-                  Native Histogram displayed as heatmap:
-                </Trans>
-              </div>
+              <div className={styles.imageText}>Native Histogram displayed as heatmap:</div>
               <div>
                 <img width="100%" src={images.nativeHeatmap} alt="Native Histogram displayed as heatmap" />
               </div>
             </div>
             <div className={`${styles.histogramImageCol} ${styles.fontSmall}`}>
-              <div className={styles.imageText}>
-                <Trans i18nKey="trails.native-histogram-banner.nh-histogram">
-                  Native Histogram displayed as histogram:
-                </Trans>
-              </div>
+              <div className={styles.imageText}>Native Histogram displayed as histogram:</div>
               <div>
                 <img width="100%" src={images.nativeHistogram} alt="Native Histogram displayed as histogram" />
               </div>
@@ -176,21 +159,13 @@ const NativeHistogramExamples = ({ trail, nativeHistograms, setHistogramMessage 
         <div className={`${styles.histogramImageCol} ${styles.rightImageCol} ${styles.rightCol}`}>
           <div className={styles.histogramRow}>
             <div className={`${styles.histogramImageCol} ${styles.fontSmall}`}>
-              <div className={styles.imageText}>
-                <Trans i18nKey="trails.native-histogram-banner.ch-heatmap">
-                  Classic Histogram displayed as heatmap:
-                </Trans>
-              </div>
+              <div className={styles.imageText}>Classic Histogram displayed as heatmap:</div>
               <div>
                 <img width="100%" src={images.classicHeatmap} alt="Classic Histogram displayed as heatmap" />
               </div>
             </div>
             <div className={`${styles.histogramImageCol} ${styles.fontSmall}`}>
-              <div className={styles.imageText}>
-                <Trans i18nKey="trails.native-histogram-banner.ch-histogram">
-                  Classic Histogram displayed as histogram:
-                </Trans>
-              </div>
+              <div className={styles.imageText}>Classic Histogram displayed as histogram:</div>
               <div>
                 <img width="100%" src={images.classicHistogram} alt="Classic Histogram displayed as histogram" />
               </div>
@@ -199,11 +174,7 @@ const NativeHistogramExamples = ({ trail, nativeHistograms, setHistogramMessage 
         </div>
       </div>
       <br />
-      <div>
-        <Trans i18nKey="trails.native-histogram-banner.click-histogram">
-          Click any of the native histograms below to explore them:
-        </Trans>
-      </div>
+      <div>Click any of the native histograms below to explore them:</div>
       <div>
         {nativeHistograms.map((el) => {
           return (
@@ -219,7 +190,7 @@ const NativeHistogramExamples = ({ trail, nativeHistograms, setHistogramMessage 
                 fill="text"
                 className={`native-histogram-example-clicked`}
               >
-                {t('trails.native-histogram-banner.metric-examples', el)}
+                {el}
               </Button>
             </div>
           );

@@ -11,7 +11,6 @@ import {
   VariableValueOption,
 } from '@grafana/scenes';
 import { Stack, Text, TextLink } from '@grafana/ui';
-import { Trans } from 'app/core/internationalization';
 
 import { MetricScene } from '../MetricScene';
 import { StatusWrapper } from '../StatusWrapper';
@@ -119,45 +118,21 @@ export class MetricOverviewScene extends SceneObjectBase<MetricOverviewSceneStat
         <Stack gap={6}>
           <>
             <Stack direction="column" gap={0.5}>
-              <Text weight={'medium'}>
-                <Trans i18nKey="trails.metric-overview.description-label">Description</Trans>
-              </Text>
+              <Text weight={'medium'}>Description</Text>
               <div style={{ maxWidth: 360 }}>
-                {metadata?.help ? (
-                  <div>{metadata?.help}</div>
-                ) : (
-                  <i>
-                    <Trans i18nKey="trails.metric-overview.no-description">No description available</Trans>
-                  </i>
-                )}
+                {metadata?.help ? <div>{metadata?.help}</div> : <i>No description available</i>}
               </div>
             </Stack>
             <Stack direction="column" gap={0.5}>
-              <Text weight={'medium'}>
-                <Trans i18nKey="trails.metric-overview.type-label">Type</Trans>
-              </Text>
-              {metadata?.type ? (
-                <div>{metadata?.type}</div>
-              ) : (
-                <i>
-                  <Trans i18nKey="trails.metric-overview.unknown-type">Unknown</Trans>
-                </i>
-              )}
+              <Text weight={'medium'}>Type</Text>
+              {metadata?.type ? <div>{metadata?.type}</div> : <i>Unknown</i>}
             </Stack>
             <Stack direction="column" gap={0.5}>
-              <Text weight={'medium'}>
-                <Trans i18nKey="trails.metric-overview.unit-label">Unit</Trans>
-              </Text>
+              <Text weight={'medium'}>Unit</Text>
               {metadata?.unit ? <div>{metadata?.unit}</div> : <i>{unit}</i>}
             </Stack>
             <Stack direction="column" gap={0.5}>
-              <Text weight={'medium'}>
-                {useOtelExperience ? (
-                  <Trans i18nKey="trails.metric-overview.metric-attributes">Attributes</Trans>
-                ) : (
-                  <Trans i18nKey="trails.metric-overview.labels">Labels</Trans>
-                )}
-              </Text>
+              <Text weight={'medium'}>{useOtelExperience ? 'Attributes' : 'Labels'}</Text>
               {allLabelOptions.length === 0 && 'Unable to fetch labels.'}
               {allLabelOptions.map((l) => (
                 <TextLink

@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 
 import { GrafanaTheme2 } from '@grafana/data';
 import { IconButton, useStyles2 } from '@grafana/ui';
-import { Trans } from 'app/core/internationalization';
 
 import { DataTrailCard } from './DataTrailCard';
 import { getTrailStore, getBookmarkKey } from './TrailStore/TrailStore';
@@ -33,7 +32,7 @@ export function DataTrailsBookmarks({ onSelect, onDelete }: Props) {
       <div className={styles.horizontalLine} />
       <div className={css(styles.gap20, styles.bookmarkHeader, styles.bottomGap24)}>
         <div className={styles.header} style={{ marginRight: '8px' }}>
-          <Trans i18nKey="trails.bookmarks.or-view-bookmarks">Or view bookmarks</Trans>
+          Or view bookmarks
         </div>
         <IconButton
           name={toggleBookmark ? 'angle-up' : 'angle-down'}

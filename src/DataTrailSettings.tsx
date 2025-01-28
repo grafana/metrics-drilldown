@@ -3,7 +3,6 @@ import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { SceneComponentProps, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
 import { Dropdown, Switch, ToolbarButton, useStyles2 } from '@grafana/ui';
-import { Trans } from '@grafana/ui/src/utils/i18n';
 
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
@@ -48,24 +47,17 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
 
     const renderPopover = () => {
       return (
-        /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
         <div className={styles.popover} onClick={(evt) => evt.stopPropagation()}>
           <div className={styles.heading}>Settings</div>
           {topScene instanceof MetricScene && (
             <div className={styles.options}>
-              <div>
-                <Trans i18nKey="trails.settings.always-keep-selected-metric-graph-in-view">
-                  Always keep selected metric graph in-view
-                </Trans>
-              </div>
+              <div>Always keep selected metric graph in-view</div>
               <Switch value={stickyMainGraph} onChange={model.onToggleStickyMainGraph} />
             </div>
           )}
           {topScene instanceof MetricSelectScene && (
             <div className={styles.options}>
-              <div>
-                <Trans i18nKey="trails.settings.show-previews-of-metric-graphs">Show previews of metric graphs</Trans>
-              </div>
+              <div>Show previews of metric graphs</div>
               <Switch value={showPreviews} onChange={model.onTogglePreviews} />
             </div>
           )}

@@ -5,8 +5,8 @@ export function getSelectedScopes(): Scope[] {
   return [];
 }
 
-export function getClosestScopesFacade(_scene: SceneObject): null {
-  return null;
+export function getClosestScopesFacade(_scene: SceneObject): ScopesFacade {
+  return new ScopesFacade({});
 }
 
 interface SelectedScope {

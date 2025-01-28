@@ -17,13 +17,12 @@ import {
   type SceneVariable,
 } from '@grafana/scenes';
 import { Stack, LinkButton } from '@grafana/ui';
-import { Trans } from 'app/core/internationalization';
 
 import { MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { reportExploreMetrics } from '../interactions';
-import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC, VAR_METRIC_EXPR } from '../../shared';
+import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC, VAR_METRIC_EXPR } from '../shared';
 import { isConstantVariable, isCustomVariable } from 'utils/utils.variables';
 
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
@@ -177,7 +176,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
               size="sm"
               onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_explore_logs' })}
             >
-              <Trans i18nKey="explore-metrics.related-logs.openExploreLogs">Open Explore Logs</Trans>
+              Open Explore Logs
             </LinkButton>
           </Stack>
           <body.Component model={body} />

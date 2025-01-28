@@ -14,7 +14,6 @@ import {
   SceneReactObject,
 } from '@grafana/scenes';
 import { Alert, Button } from '@grafana/ui';
-import { Trans } from 'app/core/internationalization';
 
 import { getLabelValueFromDataFrame } from '../services/levels';
 import { fuzzySearch } from '../services/search';
@@ -169,11 +168,9 @@ function buildNoResultsScene(filter: string, clearFilter: () => void) {
           reactNode: (
             <div className={styles.alertContainer}>
               <Alert title="" severity="info" className={styles.noResultsAlert}>
-                <Trans i18nKey="explore-metrics.breakdown.noMatchingValue">
-                  No values found matching; {{ filter }}
-                </Trans>
+                No values found matching: {filter}
                 <Button className={styles.clearButton} onClick={clearFilter}>
-                  <Trans i18nKey="explore-metrics.breakdown.clearFilter">Clear filter</Trans>
+                  Clear filter
                 </Button>
               </Alert>
             </div>
