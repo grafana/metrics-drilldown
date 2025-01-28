@@ -3,8 +3,8 @@ import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { SceneComponentProps, SceneObjectBase, SceneObject, SceneObjectState } from '@grafana/scenes';
 import { Drawer, useStyles2 } from '@grafana/ui';
-import appEvents from 'app/core/app_events';
-import { ShowModalReactEvent } from 'app/types/events';
+import { getAppEvents } from '@grafana/runtime';
+import { ShowModalReactEvent } from 'utils/util.events';
 
 export type SceneDrawerProps = {
   scene: SceneObject;
@@ -45,7 +45,7 @@ export function launchSceneDrawerInGlobalModal(props: Omit<SceneDrawerProps, 'on
     props,
   };
 
-  appEvents.publish(new ShowModalReactEvent(payload));
+  getAppEvents().publish(new ShowModalReactEvent(payload));
 }
 
 function getStyles(theme: GrafanaTheme2) {
