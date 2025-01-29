@@ -1,23 +1,27 @@
 import { css } from '@emotion/css';
-
-import { GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import {
   getExploreURL,
   QueryVariable,
-  SceneComponentProps,
   sceneGraph,
   SceneObjectBase,
-  SceneObjectState,
   SceneObjectUrlSyncConfig,
-  SceneObjectUrlValues,
   SceneVariableSet,
+  type SceneComponentProps,
+  type SceneObjectState,
+  type SceneObjectUrlValues,
 } from '@grafana/scenes';
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
+import React from 'react';
 
 import { buildMetricOverviewScene } from './ActionTabs/MetricOverviewScene';
 import { buildRelatedMetricsScene } from './ActionTabs/RelatedMetricsScene';
+import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
+import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
+import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
+import { reportExploreMetrics } from './interactions';
 import {
   MAIN_PANEL_MAX_HEIGHT,
   MAIN_PANEL_MIN_HEIGHT,
@@ -25,23 +29,19 @@ import {
   MetricGraphScene,
 } from './MetricGraphScene';
 import { buildRelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
-import { ShareTrailButton } from './ShareTrailButton';
-import { useBookmarkState } from './TrailStore/useBookmarkState';
-import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
-import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
-import { AutoQueryDef, AutoQueryInfo } from './autoQuery/types';
-import { reportExploreMetrics } from './interactions';
 import {
-  ActionViewDefinition,
-  ActionViewType,
   getVariablesWithMetricConstant,
-  MakeOptional,
   MetricSelectedEvent,
   RefreshMetricsEvent,
   trailDS,
   VAR_GROUP_BY,
   VAR_METRIC_EXPR,
+  type ActionViewDefinition,
+  type ActionViewType,
+  type MakeOptional,
 } from './shared';
+import { ShareTrailButton } from './ShareTrailButton';
+import { useBookmarkState } from './TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from './utils';
 
 // @ts-expect-error

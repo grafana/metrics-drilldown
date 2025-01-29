@@ -1,12 +1,12 @@
 import { css } from '@emotion/css';
-
-import { GrafanaTheme2 } from '@grafana/data';
-import { SceneComponentProps, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
+import { type GrafanaTheme2 } from '@grafana/data';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Dropdown, Switch, ToolbarButton, useStyles2 } from '@grafana/ui';
+import React from 'react';
 
+import { reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
-import { reportExploreMetrics } from './interactions';
 import { getTrailFor } from './utils';
 
 export interface DataTrailSettingsState extends SceneObjectState {
@@ -81,7 +81,7 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       background: theme.colors.background.primary,
       boxShadow: theme.shadows.z3,
-      borderRadius: theme.shape.borderRadius(),
+      borderRadius: theme.shape.radius.default,
       border: `1px solid ${theme.colors.border.weak}`,
       zIndex: 1,
       marginRight: theme.spacing(2),

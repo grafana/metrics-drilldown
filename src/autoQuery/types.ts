@@ -1,5 +1,5 @@
-import { PromQuery } from '@grafana/prometheus';
-import { VizPanelBuilder } from '@grafana/scenes';
+import { type PromQuery } from '@grafana/prometheus';
+import { type VizPanelBuilder } from '@grafana/scenes';
 
 export interface AutoQueryDef {
   variant: string;

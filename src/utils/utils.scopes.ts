@@ -1,5 +1,5 @@
 import { type Scope } from '@grafana/data';
-import { SceneObject, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
+import { SceneObjectBase, type SceneObject, type SceneObjectState } from '@grafana/scenes';
 
 export function getSelectedScopes(): Scope[] {
   return [];

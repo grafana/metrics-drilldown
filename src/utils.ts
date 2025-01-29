@@ -1,38 +1,37 @@
-import { lastValueFrom } from 'rxjs';
-
 import {
-  AdHocVariableFilter,
-  GetTagResponse,
-  MetricFindValue,
-  RawTimeRange,
-  Scope,
   scopeFilterOperatorMap,
-  ScopeSpecFilter,
   urlUtil,
+  type AdHocVariableFilter,
+  type GetTagResponse,
+  type MetricFindValue,
+  type RawTimeRange,
+  type Scope,
+  type ScopeSpecFilter,
 } from '@grafana/data';
 import { getPrometheusTime } from '@grafana/prometheus';
-import { config, FetchResponse, getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { config, getBackendSrv, getDataSourceSrv, type FetchResponse } from '@grafana/runtime';
 import {
-  AdHocFiltersVariable,
   sceneGraph,
-  SceneObject,
-  SceneObjectState,
-  SceneObjectUrlValues,
   SceneTimeRange,
   sceneUtils,
-  SceneVariable,
-  SceneVariableState,
+  type AdHocFiltersVariable,
+  type SceneObject,
+  type SceneObjectState,
+  type SceneObjectUrlValues,
+  type SceneVariable,
+  type SceneVariableState,
 } from '@grafana/scenes';
-import { getClosestScopesFacade } from './utils/utils.scopes';
+import { lastValueFrom } from 'rxjs';
 
 import { DataTrail } from './DataTrail';
-import { DataTrailSettings } from './DataTrailSettings';
+import { type DataTrailSettings } from './DataTrailSettings';
+import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { MetricScene } from './MetricScene';
-import { getTrailStore } from './TrailStore/TrailStore';
-import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { sortResources } from './otel/util';
 import { LOGS_METRIC, TRAILS_ROUTE, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { getTrailStore } from './TrailStore/TrailStore';
+import { getClosestScopesFacade } from './utils/utils.scopes';
+import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 export function getTrailFor(model: SceneObject): DataTrail {
   return sceneGraph.getAncestor(model, DataTrail);

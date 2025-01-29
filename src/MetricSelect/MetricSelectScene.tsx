@@ -1,37 +1,39 @@
 import { css } from '@emotion/css';
-import { debounce, isEqual } from 'lodash';
-import { SyntheticEvent, useReducer } from 'react';
-
-import { AdHocVariableFilter, GrafanaTheme2, RawTimeRange, SelectableValue } from '@grafana/data';
+import { type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange, type SelectableValue } from '@grafana/data';
 import { config, isFetchError } from '@grafana/runtime';
 import {
   PanelBuilders,
-  SceneComponentProps,
   SceneCSSGridItem,
   SceneCSSGridLayout,
-  SceneFlexItem,
-  SceneFlexLayout,
   sceneGraph,
-  SceneObject,
   SceneObjectBase,
-  SceneObjectRef,
-  SceneObjectState,
   SceneObjectStateChangedEvent,
   SceneObjectUrlSyncConfig,
-  SceneObjectUrlValues,
-  SceneObjectWithUrlSync,
   SceneVariableSet,
   VariableDependencyConfig,
+  type SceneComponentProps,
+  type SceneFlexItem,
+  type SceneFlexLayout,
+  type SceneObject,
+  type SceneObjectRef,
+  type SceneObjectState,
+  type SceneObjectUrlValues,
+  type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
 import { Alert, Badge, Field, Icon, IconButton, InlineSwitch, Input, Select, Tooltip, useStyles2 } from '@grafana/ui';
-import { getSelectedScopes } from '../utils/utils.scopes';
+import { debounce, isEqual } from 'lodash';
+import React, { useReducer, type SyntheticEvent } from 'react';
 
-import { MetricScene } from '../MetricScene';
-import { StatusWrapper } from '../StatusWrapper';
-import { Node, Parser } from '../groop/parser';
+import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
+import { MetricScene } from '../MetricScene';
+import { getMetricNames } from './api';
 import { setOtelExperienceToggleState } from '../services/store';
+import { getFilters, getTrailFor } from '../utils';
+import { AddToExplorationButton } from './AddToExplorationsButton';
+import { getPreviewPanelFor } from './previewPanel';
+import { SelectMetricAction } from './SelectMetricAction';
 import {
   getVariablesWithMetricConstant,
   MetricSelectedEvent,
@@ -40,17 +42,13 @@ import {
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
 } from '../shared';
-import { getFilters, getTrailFor } from '../utils';
-
-import { AddToExplorationButton } from './AddToExplorationsButton';
-import { SelectMetricAction } from './SelectMetricAction';
-import { getMetricNames } from './api';
-import { getPreviewPanelFor } from './previewPanel';
+import { StatusWrapper } from '../StatusWrapper';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
-import { isSceneCSSGridLayout, isSceneFlexLayout } from 'utils/utils.layout';
-import { isSceneTimeRange, isSceneTimeRangeState } from 'utils/utils.timerange';
+import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
+import { getSelectedScopes } from '../utils/utils.scopes';
+import { isSceneTimeRange, isSceneTimeRangeState } from '../utils/utils.timerange';
+import { isAdHocFiltersVariable } from '../utils/utils.variables';
 
 interface MetricPanel {
   name: string;

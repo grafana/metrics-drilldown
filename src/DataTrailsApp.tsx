@@ -1,26 +1,29 @@
 import { css } from '@emotion/css';
-import { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom-v5-compat';
-
 import {
-  DataQueryRequest,
-  DataSourceGetTagKeysOptions,
-  DataSourceGetTagValuesOptions,
   PageLayoutType,
+  type DataQueryRequest,
+  type DataSourceGetTagKeysOptions,
+  type DataSourceGetTagValuesOptions,
 } from '@grafana/data';
 import { config, locationService } from '@grafana/runtime';
-import { SceneComponentProps, SceneObjectBase, SceneObjectState, UrlSyncContextProvider } from '@grafana/scenes';
+import {
+  SceneObjectBase,
+  UrlSyncContextProvider,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui/';
 import { Page } from 'app/core/components/Page/Page';
-
-import { AppChromeUpdate } from '../../core/components/AppChrome/AppChromeUpdate';
+import React, { useEffect, useState } from 'react';
+import { Route, Routes } from 'react-router-dom-v5-compat';
 
 import { DataTrail } from './DataTrail';
 import { DataTrailsHome } from './DataTrailsHome';
-import { getTrailStore } from './TrailStore/TrailStore';
 import { HOME_ROUTE, RefreshMetricsEvent, TRAILS_ROUTE } from './shared';
+import { getTrailStore } from './TrailStore/TrailStore';
 import { getMetricName, getUrlForTrail, newMetricsTrail } from './utils';
-import { getClosestScopesFacade, ScopesFacade, ScopesSelector } from 'utils/utils.scopes';
+import { getClosestScopesFacade, ScopesFacade, ScopesSelector } from './utils/utils.scopes';
+import { AppChromeUpdate } from '../../core/components/AppChrome/AppChromeUpdate';
 
 export interface DataTrailsAppState extends SceneObjectState {
   trail: DataTrail;

@@ -1,20 +1,20 @@
 import { css } from '@emotion/css';
-
-import { DashboardCursorSync, GrafanaTheme2 } from '@grafana/data';
+import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   behaviors,
-  SceneComponentProps,
   SceneFlexItem,
   SceneFlexLayout,
-  SceneObject,
   SceneObjectBase,
-  SceneObjectState,
+  type SceneComponentProps,
+  type SceneObject,
+  type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
+import React from 'react';
 
-import { MetricActionBar } from './MetricScene';
 import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
+import { MetricActionBar } from './MetricScene';
 import { getTrailFor, getTrailSettings } from './utils';
 
 export const MAIN_PANEL_MIN_HEIGHT = 280;

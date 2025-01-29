@@ -1,4 +1,4 @@
-export { lookupNode, lookup, collectValues };
+export { collectValues, lookup, lookupNode };
 
 import { prefixDelimited } from './parser';
 

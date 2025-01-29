@@ -3,7 +3,7 @@ import { isValidLegacyName } from '@grafana/prometheus';
 import { createDefaultMetricQueryDefs } from './queryGenerators/default';
 import { createHistogramMetricQueryDefs } from './queryGenerators/histogram';
 import { createSummaryMetricQueryDefs } from './queryGenerators/summary';
-import { AutoQueryContext, AutoQueryInfo } from './types';
+import { type AutoQueryContext, type AutoQueryInfo } from './types';
 import { getUnit } from './units';
 
 export function getAutoQueriesForMetric(metric: string, nativeHistogram?: boolean): AutoQueryInfo {

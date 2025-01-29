@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { getScene } from './helloWorldScene';
 
 const HelloWorld = () => {

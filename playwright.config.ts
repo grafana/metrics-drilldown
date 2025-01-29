@@ -1,6 +1,8 @@
-import type { PluginOptions } from '@grafana/plugin-e2e';
-import { defineConfig, devices } from '@playwright/test';
 import { dirname } from 'node:path';
+
+import { defineConfig, devices } from '@playwright/test';
+
+import type { PluginOptions } from '@grafana/plugin-e2e';
 
 const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
 

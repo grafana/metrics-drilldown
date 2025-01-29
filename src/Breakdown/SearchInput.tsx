@@ -1,7 +1,6 @@
 import { css } from '@emotion/css';
-import { HTMLProps } from 'react';
-
 import { Icon, Input } from '@grafana/ui';
+import React, { type HTMLProps } from 'react';
 
 interface Props extends Omit<HTMLProps<HTMLInputElement>, 'width'> {
   onClear(): void;

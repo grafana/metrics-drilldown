@@ -1,10 +1,11 @@
-import { useState, ChangeEvent } from 'react';
-import { Button, Field, Input, useStyles2, FieldSet, SecretInput } from '@grafana/ui';
-import { PluginConfigPageProps, AppPluginMeta, PluginMeta, GrafanaTheme2 } from '@grafana/data';
-import { getBackendSrv, locationService } from '@grafana/runtime';
 import { css } from '@emotion/css';
-import { testIds } from '../testIds';
+import { type AppPluginMeta, type GrafanaTheme2, type PluginConfigPageProps, type PluginMeta } from '@grafana/data';
+import { getBackendSrv, locationService } from '@grafana/runtime';
+import { Button, Field, FieldSet, Input, SecretInput, useStyles2 } from '@grafana/ui';
+import React, { useState, type ChangeEvent } from 'react';
 import { lastValueFrom } from 'rxjs';
+
+import { testIds } from '../testIds';
 
 type JsonData = {
   apiUrl?: string;

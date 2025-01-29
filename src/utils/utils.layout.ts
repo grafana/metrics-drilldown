@@ -1,4 +1,4 @@
-import { SceneLayout, SceneCSSGridLayout, SceneFlexLayout } from '@grafana/scenes';
+import { type SceneCSSGridLayout, type SceneFlexLayout, type SceneLayout } from '@grafana/scenes';
 
 type MaybeLayout = SceneLayout | null | undefined;
 

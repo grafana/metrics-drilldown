@@ -1,11 +1,10 @@
-import { AdHocVariableFilter, UrlQueryMap, UrlQueryValue } from '@grafana/data';
+import { type AdHocVariableFilter, type UrlQueryMap, type UrlQueryValue } from '@grafana/data';
 import { sceneGraph } from '@grafana/scenes';
 
 import { DataTrail } from '../DataTrail';
 import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_DEPLOYMENT_ENV } from '../shared';
-
-import { migrateOtelDeploymentEnvironment, migrateAdHocFilters } from './otelDeploymentEnvironment';
-import { isAdHocFiltersVariable, isCustomVariable } from 'utils/utils.variables';
+import { migrateAdHocFilters, migrateOtelDeploymentEnvironment } from './otelDeploymentEnvironment';
+import { isAdHocFiltersVariable, isCustomVariable } from '../utils/utils.variables';
 
 describe('migrate old dep env var to otel and metrics var', () => {
   describe('migrateOtelDeploymentEnvironment', () => {

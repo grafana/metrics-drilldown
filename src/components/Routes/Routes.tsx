@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { prefixRoute } from '../../utils/utils.routing';
+
 import { ROUTES } from '../../constants';
-const HomePage = React.lazy(() => import('../../pages/Home/Home'));
-const PageWithTabs = React.lazy(() => import('../../pages/WithTabs/WithTabs'));
-const WithDrilldown = React.lazy(() => import('../../pages/WithDrilldown/WithDrilldown'));
-const HelloWorld = React.lazy(() => import('../../pages/HelloWorld/HelloWorld'));
+import { prefixRoute } from '../../utils/utils.routing';
+const HomePage = lazy(() => import('../../pages/Home/Home'));
+const PageWithTabs = lazy(() => import('../../pages/WithTabs/WithTabs'));
+const WithDrilldown = lazy(() => import('../../pages/WithDrilldown/WithDrilldown'));
+const HelloWorld = lazy(() => import('../../pages/HelloWorld/HelloWorld'));
 
 export const Routes = () => {
   return (

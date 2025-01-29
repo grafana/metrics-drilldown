@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
 import { SceneApp, SceneAppPage } from '@grafana/scenes';
+import React, { useMemo } from 'react';
+
 import { ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/utils.routing';
 import { getBasicScene } from '../Home/scenes';

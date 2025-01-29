@@ -1,6 +1,6 @@
 import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../shared';
 import { simpleGraphBuilder } from '../graphBuilders';
-import { AutoQueryInfo } from '../types';
+import { type AutoQueryInfo } from '../types';
 
 export type CommonQueryInfoParams = {
   description: string;

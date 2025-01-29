@@ -1,4 +1,4 @@
-import { SceneObjectUrlValues } from '@grafana/scenes';
+import { type SceneObjectUrlValues } from '@grafana/scenes';
 
 import { parseFilterTooltip, parseTimeTooltip } from './DataTrailsHistory';
 

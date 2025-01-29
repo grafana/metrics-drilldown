@@ -1,13 +1,18 @@
 import {
-  DataSourceApi,
-  DataSourceGetTagKeysOptions,
-  DataSourceGetTagValuesOptions,
-  MetricFindValue,
+  type DataSourceApi,
+  type DataSourceGetTagKeysOptions,
+  type DataSourceGetTagValuesOptions,
+  type MetricFindValue,
 } from '@grafana/data';
-import { PrometheusDatasource, PromMetricsMetadata, PromMetricsMetadataItem, PromQuery } from '@grafana/prometheus';
+import {
+  type PrometheusDatasource,
+  type PromMetricsMetadata,
+  type PromMetricsMetadataItem,
+  type PromQuery,
+} from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 
-import { DataTrail } from '../DataTrail';
+import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 
 function isPrometheusDatasource(ds: DataSourceApi<any>): ds is PrometheusDatasource {

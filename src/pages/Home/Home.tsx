@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
-
-import { SceneApp, SceneAppPage } from '@grafana/scenes';
-import { getBasicScene } from './scenes';
-import { prefixRoute } from '../../utils/utils.routing';
-import { DATASOURCE_REF, ROUTES } from '../../constants';
 import { config } from '@grafana/runtime';
+import { SceneApp, SceneAppPage } from '@grafana/scenes';
 import { Alert } from '@grafana/ui';
+import React, { useMemo } from 'react';
+
+import { getBasicScene } from './scenes';
+import { DATASOURCE_REF, ROUTES } from '../../constants';
+import { prefixRoute } from '../../utils/utils.routing';
 
 const getScene = () => {
   return new SceneApp({

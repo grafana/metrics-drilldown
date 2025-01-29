@@ -1,5 +1,5 @@
 import { FieldType, LoadingState } from '@grafana/data';
-import { SceneCSSGridItem, sceneGraph } from '@grafana/scenes';
+import { sceneGraph, type SceneCSSGridItem } from '@grafana/scenes';
 
 import { MetricSelectScene } from './MetricSelectScene';
 

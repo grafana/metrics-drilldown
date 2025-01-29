@@ -1,5 +1,4 @@
 import { DataTrail } from '../DataTrail';
-
 import { MetricDatasourceHelper } from './MetricDatasourceHelper';
 
 jest.mock('@grafana/runtime', () => ({

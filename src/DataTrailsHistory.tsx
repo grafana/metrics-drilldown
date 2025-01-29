@@ -1,34 +1,33 @@
 import { css, cx } from '@emotion/css';
-import { useMemo } from 'react';
-
 import {
   BusEventWithPayload,
   EventBusSrv,
   getTimeZoneInfo,
-  GrafanaTheme2,
   InternalTimeZones,
   rangeUtil,
   TIME_FORMAT,
+  type GrafanaTheme2,
 } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import {
-  SceneComponentProps,
   SceneObjectBase,
-  SceneObjectState,
   SceneObjectStateChangedEvent,
-  SceneObjectUrlValue,
-  SceneObjectUrlValues,
   sceneUtils,
   SceneVariableValueChangedEvent,
+  type SceneComponentProps,
+  type SceneObjectState,
+  type SceneObjectUrlValue,
+  type SceneObjectUrlValues,
 } from '@grafana/scenes';
 import { Stack, Tooltip, useStyles2 } from '@grafana/ui';
+import React, { useMemo } from 'react';
 
-import { DataTrail, DataTrailState, getTopSceneFor } from './DataTrail';
-import { SerializedTrailHistory } from './TrailStore/TrailStore';
+import { getTopSceneFor, type DataTrail, type DataTrailState } from './DataTrail';
 import { reportExploreMetrics } from './interactions';
 import { VAR_FILTERS, VAR_OTEL_DEPLOYMENT_ENV, VAR_OTEL_RESOURCES } from './shared';
+import { type SerializedTrailHistory } from './TrailStore/TrailStore';
 import { getTrailFor } from './utils';
-import { isSceneTimeRange, isSceneTimeRangeState } from 'utils/utils.timerange';
+import { isSceneTimeRange, isSceneTimeRangeState } from './utils/utils.timerange';
 
 export interface DataTrailsHistoryState extends SceneObjectState {
   currentStep: number;

@@ -1,10 +1,16 @@
-import { SceneObjectState, SceneObjectBase, SceneComponentProps, VizPanel, SceneQueryRunner } from '@grafana/scenes';
+import {
+  SceneObjectBase,
+  SceneQueryRunner,
+  type SceneComponentProps,
+  type SceneObjectState,
+  type VizPanel,
+} from '@grafana/scenes';
+import React from 'react';
 
 import { AddToExplorationButton } from '../../MetricSelect/AddToExplorationsButton';
 import { MDP_METRIC_OVERVIEW, trailDS } from '../../shared';
 import { getMetricSceneFor } from '../../utils';
-import { AutoQueryDef } from '../types';
-
+import { type AutoQueryDef } from '../types';
 import { AutoVizPanelQuerySelector } from './AutoVizPanelQuerySelector';
 
 export interface AutoVizPanelState extends SceneObjectState {

@@ -1,4 +1,4 @@
-import { SceneDataTransformer, SceneObject, SceneQueryRunner } from '@grafana/scenes';
+import { type SceneDataTransformer, type SceneObject, type SceneQueryRunner } from '@grafana/scenes';
 
 export function getQueryRunnerFor(sceneObject: SceneObject | undefined): SceneQueryRunner | undefined {
   if (!sceneObject) {

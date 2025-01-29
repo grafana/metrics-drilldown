@@ -2,12 +2,10 @@ import { VariableHide } from '@grafana/data';
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
-import { MockDataSourceSrv, DataSourceType } from './mocks/datasource';
-import { activateFullSceneTree } from './utils/utils.test';
-
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
+import { DataSourceType, MockDataSourceSrv } from './mocks/datasource';
 import {
   MetricSelectedEvent,
   VAR_FILTERS,
@@ -16,7 +14,8 @@ import {
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
 } from './shared';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
+import { activateFullSceneTree } from './utils/utils.test';
+import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
 
 jest.mock('./otel/api', () => ({
   totalOtelResources: jest.fn(() => ({ job: 'oteldemo', instance: 'instance' })),

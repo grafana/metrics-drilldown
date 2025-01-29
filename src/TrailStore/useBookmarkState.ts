@@ -1,11 +1,9 @@
+import { SceneObjectStateChangedEvent } from '@grafana/scenes';
 import { useEffect, useState } from 'react';
 
-import { SceneObjectStateChangedEvent } from '@grafana/scenes';
-
-import { DataTrail } from '../DataTrail';
+import { type DataTrail } from '../DataTrail';
 import { isDataTrailsHistoryState } from '../DataTrailsHistory';
 import { reportExploreMetrics } from '../interactions';
-
 import { getTrailStore } from './TrailStore';
 
 export function useBookmarkState(trail: DataTrail) {

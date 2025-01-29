@@ -1,9 +1,8 @@
 import { css } from '@emotion/css';
-
-import { BusEventBase, GrafanaTheme2, SelectableValue } from '@grafana/data';
-import { SceneComponentProps, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
-import { IconButton, Select } from '@grafana/ui';
-import { Field, useStyles2 } from '@grafana/ui/';
+import { BusEventBase, type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import { Field, IconButton, Select, useStyles2 } from '@grafana/ui';
+import React from 'react';
 
 import { getSortByPreference, setSortByPreference } from '../services/store';
 
