@@ -1,8 +1,8 @@
 import { css } from '@emotion/css';
-
-import { GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase } from '@grafana/scenes';
 import { Badge, useStyles2 } from '@grafana/ui';
+import React from 'react';
 
 export class NativeHistogramBadge extends SceneObjectBase {
   public static Component = () => {

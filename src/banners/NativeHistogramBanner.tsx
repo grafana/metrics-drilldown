@@ -1,10 +1,9 @@
 import { css } from '@emotion/css';
-import { useState, type Dispatch, type SetStateAction } from 'react';
+import { type GrafanaTheme2 } from '@grafana/data';
+import { Alert, Button, useStyles2, useTheme2 } from '@grafana/ui';
+import React, { useState, type Dispatch, type SetStateAction } from 'react';
 
-import { GrafanaTheme2 } from '@grafana/data';
-import { useStyles2, useTheme2, Alert, Button } from '@grafana/ui';
-
-import { DataTrail } from '../DataTrail';
+import { type DataTrail } from '../DataTrail';
 import { reportExploreMetrics } from '../interactions';
 import { MetricSelectedEvent } from '../shared';
 
@@ -229,7 +228,7 @@ function getStyles(theme: GrafanaTheme2, _chromeHeaderHeight: number) {
       flex: '1',
     }),
     fontSmall: css({
-      fontSize: theme.typography.size.sm,
+      fontSize: theme.typography.bodySmall.fontSize,
     }),
     imageText: css({
       paddingBottom: '4px',

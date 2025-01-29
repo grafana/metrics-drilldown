@@ -1,9 +1,8 @@
-import { useState } from 'react';
-
 import { config } from '@grafana/runtime';
 import { ToolbarButton } from '@grafana/ui';
+import React, { useState } from 'react';
 
-import { DataTrail } from './DataTrail';
+import { type DataTrail } from './DataTrail';
 import { reportExploreMetrics } from './interactions';
 import { getUrlForTrail } from './utils';
 

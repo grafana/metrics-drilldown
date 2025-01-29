@@ -1,8 +1,9 @@
-import { SceneObjectState, SceneObjectBase, SceneComponentProps } from '@grafana/scenes';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { RadioButtonGroup } from '@grafana/ui';
+import React from 'react';
 
 import { getMetricSceneFor } from '../../utils';
-import { AutoQueryDef } from '../types';
+import { type AutoQueryDef } from '../types';
 
 interface QuerySelectorState extends SceneObjectState {
   queryDef: AutoQueryDef;

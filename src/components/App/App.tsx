@@ -1,4 +1,6 @@
-import { AppRootProps } from '@grafana/data';
+import { type AppRootProps } from '@grafana/data';
+import React from 'react';
+
 import { PluginPropsContext } from '../../utils/utils.plugin';
 import { Routes } from '../Routes/Routes';
 

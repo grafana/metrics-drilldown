@@ -1,5 +1,4 @@
-import { AutoQueryContext } from '../types';
-
+import { type AutoQueryContext } from '../types';
 import { createDefaultMetricQueryDefs } from './default';
 
 describe('createDefaultMetricQueryDefs', () => {

@@ -1,11 +1,11 @@
 import { BusEventWithPayload } from '@grafana/data';
 import {
   FieldConfigBuilders,
-  SceneCSSGridItem,
-  SceneDataProvider,
   sceneGraph,
-  SceneStatelessBehavior,
   VizPanel,
+  type SceneCSSGridItem,
+  type SceneDataProvider,
+  type SceneStatelessBehavior,
 } from '@grafana/scenes';
 
 import { LabelBreakdownScene } from './LabelBreakdownScene';

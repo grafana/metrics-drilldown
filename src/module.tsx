@@ -1,6 +1,7 @@
-import { Suspense, lazy } from 'react';
 import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { LoadingPlaceholder } from '@grafana/ui';
+import React, { lazy, Suspense } from 'react';
+
 import type { AppConfigProps } from './components/AppConfig/AppConfig';
 
 const LazyApp = lazy(() => import('./components/App/App'));

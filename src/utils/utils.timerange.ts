@@ -1,4 +1,9 @@
-import { SceneObject, SceneObjectState, SceneTimeRange, SceneTimeRangeState } from '@grafana/scenes';
+import {
+  type SceneObject,
+  type SceneObjectState,
+  type SceneTimeRange,
+  type SceneTimeRangeState,
+} from '@grafana/scenes';
 
 export function isSceneTimeRange(input: SceneObject | null | undefined): input is SceneTimeRange {
   return typeof input !== 'undefined' && input !== null && 'getTimeZone' in input && isSceneTimeRangeState(input.state);

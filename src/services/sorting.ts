@@ -1,10 +1,15 @@
-import { OutlierDetector, OutlierOutput } from '@bsull/augurs/outlier';
+import { OutlierDetector, type OutlierOutput } from '@bsull/augurs/outlier';
+import {
+  doStandardCalcs,
+  fieldReducers,
+  FieldType,
+  outerJoinDataFrames,
+  ReducerID,
+  type DataFrame,
+} from '@grafana/data';
 import { memoize } from 'lodash';
 
-import { DataFrame, doStandardCalcs, fieldReducers, FieldType, outerJoinDataFrames, ReducerID } from '@grafana/data';
-
 import { reportExploreMetrics } from '../interactions';
-
 import { getLabelValueFromDataFrame } from './levels';
 
 export const sortSeries = memoize(

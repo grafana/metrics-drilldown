@@ -1,5 +1,4 @@
-import { AutoQueryContext } from '../types';
-
+import { type AutoQueryContext } from '../types';
 import { createHistogramMetricQueryDefs } from './histogram';
 
 describe('createHistogramMetricQueryDefs utf8=false', () => {

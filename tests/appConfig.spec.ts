@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { expect, test } from './fixtures';
 
 test('should be possible to save app configuration', async ({ appConfigPage, page }) => {
   const saveButton = page.getByRole('button', { name: /Save API settings/i });

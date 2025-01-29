@@ -1,13 +1,12 @@
-import { debounce, isEqual } from 'lodash';
-
 import { urlUtil } from '@grafana/data';
-import { SceneObject, SceneObjectRef, SceneObjectUrlValues, sceneUtils } from '@grafana/scenes';
+import { sceneUtils, type SceneObject, type SceneObjectRef, type SceneObjectUrlValues } from '@grafana/scenes';
+import { debounce, isEqual } from 'lodash';
 
 import { createBookmarkSavedNotification } from './utils';
 
 import { DataTrail } from '../DataTrail';
-import { TrailStepType } from '../DataTrailsHistory';
-import { TRAIL_BOOKMARKS_KEY, RECENT_TRAILS_KEY } from '../shared';
+import { type TrailStepType } from '../DataTrailsHistory';
+import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY } from '../shared';
 import { newMetricsTrail } from '../utils';
 
 const MAX_RECENT_TRAILS = 20;

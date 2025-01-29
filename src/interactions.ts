@@ -1,9 +1,9 @@
-import { AdHocVariableFilter } from '@grafana/data';
+import { type AdHocVariableFilter } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 
-import { BreakdownLayoutType } from './Breakdown/types';
-import { TrailStepType } from './DataTrailsHistory';
-import { ActionViewType } from './shared';
+import { type BreakdownLayoutType } from './Breakdown/types';
+import { type TrailStepType } from './DataTrailsHistory';
+import { type ActionViewType } from './shared';
 
 // prettier-ignore
 type Interactions = {

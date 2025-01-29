@@ -1,7 +1,6 @@
-import { ChangeEvent } from 'react';
-
 import { BusEventBase } from '@grafana/data';
-import { SceneComponentProps, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import React, { type ChangeEvent } from 'react';
 
 import { ByFrameRepeater } from './ByFrameRepeater';
 import { LabelBreakdownScene } from './LabelBreakdownScene';

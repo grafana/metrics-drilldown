@@ -1,4 +1,4 @@
-import { buildVisualQueryFromString, QueryBuilderLabelFilter } from '@grafana/prometheus';
+import { buildVisualQueryFromString, type QueryBuilderLabelFilter } from '@grafana/prometheus';
 
 import { isEquals } from './utils';
 

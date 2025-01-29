@@ -1,17 +1,16 @@
-import { DataSourceApi, PanelMenuItem } from '@grafana/data';
-import { PromQuery } from '@grafana/prometheus';
+import { type DataSourceApi, type PanelMenuItem } from '@grafana/data';
+import { type PromQuery } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { SceneObject, SceneObjectState, SceneTimeRangeState, VizPanel } from '@grafana/scenes';
-import { DataQuery, DataSourceRef } from '@grafana/schema';
+import { type SceneObject, type SceneObjectState, type SceneTimeRangeState, type VizPanel } from '@grafana/scenes';
+import { type DataQuery, type DataSourceRef } from '@grafana/schema';
 
-import { getQueryRunnerFor } from '../utils/utils.queries';
-import { MetricScene } from '../MetricScene';
 import { reportExploreMetrics } from '../interactions';
-
-import { DataTrailEmbedded, DataTrailEmbeddedState } from './DataTrailEmbedded';
+import { MetricScene } from '../MetricScene';
+import { DataTrailEmbedded, type DataTrailEmbeddedState } from './DataTrailEmbedded';
+import { getQueryMetrics, type QueryMetric } from './getQueryMetrics';
 import { SceneDrawerAsScene } from './SceneDrawer';
-import { getQueryMetrics, QueryMetric } from './getQueryMetrics';
 import { createAdHocFilters, getQueryMetricLabel, getTimeRangeStateFromDashboard } from './utils';
+import { getQueryRunnerFor } from '../utils/utils.queries';
 
 export interface DashboardSceneInterface extends SceneObject {
   // Add only the properties and methods we actually use

@@ -12,8 +12,9 @@ import {
   SceneVariableSet,
   VariableValueSelectors,
 } from '@grafana/scenes';
-import { DATASOURCE_REF } from '../../constants';
+
 import { CustomSceneObject } from './CustomSceneObject';
+import { DATASOURCE_REF } from '../../constants';
 
 export function getBasicScene(templatised = true, seriesToShow = '__server_names') {
   const timeRange = new SceneTimeRange({

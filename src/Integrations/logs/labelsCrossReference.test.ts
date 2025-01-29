@@ -1,12 +1,11 @@
 import { type AdHocVariableFilter } from '@grafana/data';
-import { AdHocFiltersVariable, sceneGraph } from '@grafana/scenes';
-
-import { DataTrail } from '../../DataTrail';
-import { RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
-import { VAR_FILTERS } from '../../shared';
-import * as utils from '../../utils';
+import { sceneGraph, type AdHocFiltersVariable } from '@grafana/scenes';
 
 import { createLabelsCrossReferenceConnector } from './labelsCrossReference';
+import { DataTrail } from '../../DataTrail';
+import { type RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
+import { VAR_FILTERS } from '../../shared';
+import * as utils from '../../utils';
 
 // Create multiple mock Loki datasources with different behaviors
 const mockLokiDS1 = {

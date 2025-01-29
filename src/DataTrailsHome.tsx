@@ -1,17 +1,22 @@
 import { css } from '@emotion/css';
-import { useState } from 'react';
-
-import { GrafanaTheme2 } from '@grafana/data';
-import { SceneComponentProps, sceneGraph, SceneObject, SceneObjectBase, SceneObjectState } from '@grafana/scenes';
+import { type GrafanaTheme2 } from '@grafana/data';
+import {
+  sceneGraph,
+  SceneObjectBase,
+  type SceneComponentProps,
+  type SceneObject,
+  type SceneObjectState,
+} from '@grafana/scenes';
 import { Box, Button, Icon, Stack, Text, TextLink, useStyles2, useTheme2 } from '@grafana/ui';
+import React, { useState } from 'react';
 
-import { DataTrail } from './DataTrail';
+import { DarkModeRocket, LightModeRocket } from './assets/rockets';
+import { type DataTrail } from './DataTrail';
 import { DataTrailsBookmarks } from './DataTrailBookmarks';
 import { DataTrailsApp } from './DataTrailsApp';
 import { DataTrailsRecentMetrics } from './DataTrailsRecentMetrics';
-import { getTrailStore } from './TrailStore/TrailStore';
-import { LightModeRocket, DarkModeRocket } from './assets/rockets';
 import { reportExploreMetrics } from './interactions';
+import { getTrailStore } from './TrailStore/TrailStore';
 import { getDatasourceForNewTrail, newMetricsTrail } from './utils';
 
 export interface DataTrailsHomeState extends SceneObjectState {}

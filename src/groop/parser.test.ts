@@ -1,6 +1,7 @@
-import { describe, expect, it } from '@jest/globals';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+
+import { describe, expect, it } from '@jest/globals';
 
 import { lookupNode } from './lookup';
 import { Parser, prefixDelimited } from './parser';

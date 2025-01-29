@@ -1,12 +1,12 @@
 import { AdHocFiltersVariable, SceneObjectRef } from '@grafana/scenes';
 
 import { DataTrail } from './DataTrail';
-import { getTrailStore } from './TrailStore/TrailStore';
-import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
+import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { sortResources } from './otel/util';
 import { VAR_OTEL_AND_METRIC_FILTERS } from './shared';
+import { getTrailStore } from './TrailStore/TrailStore';
 import { getDatasourceForNewTrail, limitAdhocProviders } from './utils';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 jest.mock('./TrailStore/TrailStore', () => ({
   getTrailStore: jest.fn(),

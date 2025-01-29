@@ -1,11 +1,12 @@
-import { DataFrame } from '@grafana/data';
-import { SceneObjectState, SceneObjectBase, SceneComponentProps, sceneGraph } from '@grafana/scenes';
+import { type DataFrame } from '@grafana/data';
+import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
+import React from 'react';
 
 import { reportExploreMetrics } from '../interactions';
 import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_GROUP_LEFT, VAR_OTEL_RESOURCES } from '../shared';
 import { getTrailFor } from '../utils';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { isAdHocFiltersVariable } from '../utils/utils.variables';
 
 export interface AddToFiltersGraphActionState extends SceneObjectState {
   frame: DataFrame;

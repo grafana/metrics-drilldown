@@ -1,4 +1,5 @@
-// Libraries
+import React from 'react';
+
 import { getDataTrailsApp } from './DataTrailsApp';
 
 export function DataTrailsPage() {

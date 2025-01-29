@@ -1,13 +1,11 @@
+import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
+import { MetricExpr, parser, PipelineExpr, Selector } from '@grafana/lezer-logql';
+import { getBackendSrv, type BackendSrvRequest, type FetchResponse } from '@grafana/runtime';
+import { type SyntaxNode } from '@lezer/common';
 import { lastValueFrom } from 'rxjs';
 
-import { parser, Selector, PipelineExpr, MetricExpr } from '@grafana/lezer-logql';
-import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
-import { getBackendSrv, type BackendSrvRequest, type FetchResponse } from '@grafana/runtime';
-import { SyntaxNode } from '@lezer/common';
-
-import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsScene';
-
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
+import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsScene';
 
 export interface RecordingRuleGroup {
   name: string;

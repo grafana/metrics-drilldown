@@ -1,6 +1,5 @@
 import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../shared';
-import { AutoQueryContext, AutoQueryInfo } from '../types';
-
+import { type AutoQueryContext, type AutoQueryInfo } from '../types';
 import { generateBaseQuery } from './baseQuery';
 import { generateCommonAutoQueryInfo } from './common';
 
