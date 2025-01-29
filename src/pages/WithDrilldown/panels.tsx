@@ -1,4 +1,4 @@
-import { ReducerID } from '@grafana/data';
+import { type ReducerID } from '@grafana/data';
 import {
   PanelBuilders,
   SceneByFrameRepeater,

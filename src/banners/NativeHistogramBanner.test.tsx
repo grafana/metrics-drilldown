@@ -1,8 +1,8 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 
-import { DataTrail } from '../DataTrail';
+import { type DataTrail } from '../DataTrail';
 import { MetricSelectedEvent } from '../shared';
-
 import { NativeHistogramBanner } from './NativeHistogramBanner';
 
 const mockTrail = {

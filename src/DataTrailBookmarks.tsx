@@ -1,11 +1,10 @@
 import { css } from '@emotion/css';
-import { useState, useEffect } from 'react';
-
-import { GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { IconButton, useStyles2 } from '@grafana/ui';
+import React, { useEffect, useState } from 'react';
 
 import { DataTrailCard } from './DataTrailCard';
-import { getTrailStore, getBookmarkKey } from './TrailStore/TrailStore';
+import { getBookmarkKey, getTrailStore } from './TrailStore/TrailStore';
 
 type Props = {
   onSelect: (index: number) => void;

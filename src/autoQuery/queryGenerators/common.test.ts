@@ -1,6 +1,5 @@
+import { generateCommonAutoQueryInfo, type CommonQueryInfoParams } from './common';
 import { VAR_GROUP_BY_EXP, VAR_METRIC_EXPR } from '../../shared';
-
-import { CommonQueryInfoParams, generateCommonAutoQueryInfo } from './common';
 
 describe('generateCommonAutoQueryInfo', () => {
   const params: CommonQueryInfoParams = {

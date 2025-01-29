@@ -6,7 +6,7 @@ export type OtelResponse = {
           job: string;
           instance: string;
         };
-      },
+      }
     ];
   };
   status: 'success' | 'error';

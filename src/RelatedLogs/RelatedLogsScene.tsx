@@ -1,4 +1,3 @@
-import { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
 import { config, getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import {
   CustomVariable,
@@ -6,26 +5,28 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
-  SceneObject,
   SceneObjectBase,
   SceneQueryRunner,
   SceneVariableSet,
   VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectState,
   type SceneVariable,
 } from '@grafana/scenes';
-import { Stack, LinkButton } from '@grafana/ui';
+import { LinkButton, Stack } from '@grafana/ui';
+import React from 'react';
 
-import { MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { reportExploreMetrics } from '../interactions';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC, VAR_METRIC_EXPR } from '../shared';
-import { isConstantVariable, isCustomVariable } from 'utils/utils.variables';
-
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
+import { isConstantVariable, isCustomVariable } from '../utils/utils.variables';
+
+import type { MetricsLogsConnector } from '../Integrations/logs/base';
+import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
 
 export interface RelatedLogsSceneState extends SceneObjectState {
   controls: SceneObject[];

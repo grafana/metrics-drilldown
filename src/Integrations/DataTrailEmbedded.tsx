@@ -1,11 +1,12 @@
-import { AdHocVariableFilter } from '@grafana/data';
+import { type AdHocVariableFilter } from '@grafana/data';
 import {
-  SceneComponentProps,
   SceneObjectBase,
-  SceneObjectState,
   SceneTimeRange,
-  SceneTimeRangeState,
+  type SceneComponentProps,
+  type SceneObjectState,
+  type SceneTimeRangeState,
 } from '@grafana/scenes';
+import React from 'react';
 
 import { DataTrail } from '../DataTrail';
 

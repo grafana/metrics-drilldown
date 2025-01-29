@@ -1,5 +1,6 @@
-import { SceneObjectState, SceneObjectBase, SceneComponentProps } from '@grafana/scenes';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
+import React from 'react';
 
 import { MetricSelectedEvent } from '../shared';
 

@@ -1,9 +1,9 @@
-import { AdHocVariableFilter, RawTimeRange, Scope } from '@grafana/data';
+import { type AdHocVariableFilter, type RawTimeRange, type Scope } from '@grafana/data';
 import { getPrometheusTime, PromQueryModeller, utf8Support } from '@grafana/prometheus';
 import { config, getBackendSrv } from '@grafana/runtime';
 
 import { limitOtelMatchTerms } from '../otel/util';
-import { callSuggestionsApi, SuggestionsResponse } from '../utils';
+import { callSuggestionsApi, type SuggestionsResponse } from '../utils';
 
 const LIMIT_REACHED = 'results truncated due to limit';
 

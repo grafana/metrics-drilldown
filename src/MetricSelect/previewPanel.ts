@@ -1,14 +1,13 @@
-import { PromQuery } from '@grafana/prometheus';
+import { type PromQuery } from '@grafana/prometheus';
 import { SceneCSSGridItem, SceneQueryRunner, SceneVariableSet } from '@grafana/scenes';
 
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS } from '../shared';
 import { getColorByIndex } from '../utils';
-
 import { AddToExplorationButton } from './AddToExplorationsButton';
+import { hideEmptyPreviews } from './hideEmptyPreviews';
 import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { SelectMetricAction } from './SelectMetricAction';
-import { hideEmptyPreviews } from './hideEmptyPreviews';
 
 export function getPreviewPanelFor(
   metric: string,

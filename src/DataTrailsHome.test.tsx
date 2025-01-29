@@ -1,12 +1,12 @@
-import { render, screen } from '@testing-library/react';
-
 import { AdHocFiltersVariable, sceneGraph, SceneObjectRef, SceneVariableSet } from '@grafana/scenes';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { DataTrail } from './DataTrail';
 import { DataTrailsHome } from './DataTrailsHome';
-import { getTrailStore } from './TrailStore/TrailStore';
 import { VAR_FILTERS } from './shared';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { getTrailStore } from './TrailStore/TrailStore';
+import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 jest.mock('./TrailStore/TrailStore', () => ({
   getTrailStore: jest.fn(),

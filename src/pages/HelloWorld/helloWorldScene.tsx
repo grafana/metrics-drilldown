@@ -1,4 +1,4 @@
-import { EmbeddedScene, SceneFlexLayout, SceneFlexItem, PanelBuilders } from '@grafana/scenes';
+import { EmbeddedScene, PanelBuilders, SceneFlexItem, SceneFlexLayout } from '@grafana/scenes';
 
 export function getScene() {
   return new EmbeddedScene({

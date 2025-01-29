@@ -1,10 +1,9 @@
-import { AdHocVariableFilter, MetricFindValue } from '@grafana/data';
+import { type AdHocVariableFilter, type MetricFindValue } from '@grafana/data';
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
-import { MockDataSourceSrv, DataSourceType } from '../mocks/datasource';
-import { activateFullSceneTree } from '../utils/utils.test';
 
 import { DataTrail } from '../DataTrail';
+import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
 import {
   VAR_FILTERS,
   VAR_OTEL_AND_METRIC_FILTERS,
@@ -12,18 +11,18 @@ import {
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
 } from '../shared';
-
 import {
-  sortResources,
-  getOtelJoinQuery,
   blessedList,
-  limitOtelMatchTerms,
-  updateOtelJoinWithGroupLeft,
+  getOtelJoinQuery,
   getProdOrDefaultEnv,
-  updateOtelData,
+  limitOtelMatchTerms,
   manageOtelAndMetricFilters,
+  sortResources,
+  updateOtelData,
+  updateOtelJoinWithGroupLeft,
 } from './util';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
+import { activateFullSceneTree } from '../utils/utils.test';
+import { isAdHocFiltersVariable, isConstantVariable } from '../utils/utils.variables';
 
 jest.mock('./api', () => ({
   totalOtelResources: jest.fn(() => ({ job: 'oteldemo', instance: 'instance' })),

@@ -1,50 +1,47 @@
 import { css } from '@emotion/css';
-import { useEffect, useRef } from 'react';
-
-import { AdHocVariableFilter, GrafanaTheme2, RawTimeRange, urlUtil, VariableHide } from '@grafana/data';
-import { PromQuery } from '@grafana/prometheus';
+import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
+import { type PromQuery } from '@grafana/prometheus';
 import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
   CustomVariable,
   DataSourceVariable,
-  SceneComponentProps,
   SceneControlsSpacer,
   sceneGraph,
-  SceneObject,
   SceneObjectBase,
-  SceneObjectState,
   SceneObjectUrlSyncConfig,
-  SceneObjectUrlValues,
-  SceneObjectWithUrlSync,
-  SceneQueryRunner,
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
   sceneUtils,
-  SceneVariable,
   SceneVariableSet,
   UrlSyncContextProvider,
   UrlSyncManager,
   VariableDependencyConfig,
   VariableValueSelectors,
+  type SceneComponentProps,
+  type SceneObject,
+  type SceneObjectState,
+  type SceneObjectUrlValues,
+  type SceneObjectWithUrlSync,
+  type SceneQueryRunner,
+  type SceneVariable,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import { getSelectedScopes } from './utils/utils.scopes';
+import React, { useEffect, useRef } from 'react';
 
+import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
 import { DataTrailHistory } from './DataTrailsHistory';
+import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
+import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { MetricsHeader } from './MetricsHeader';
-import { getTrailStore } from './TrailStore/TrailStore';
-import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
-import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { migrateOtelDeploymentEnvironment } from './migrations/otelDeploymentEnvironment';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
-import { OtelTargetType } from './otel/types';
+import { type OtelTargetType } from './otel/types';
 import { manageOtelAndMetricFilters, updateOtelData, updateOtelJoinWithGroupLeft } from './otel/util';
 import {
   getVariablesWithOtelJoinQueryConstant,
@@ -60,9 +57,11 @@ import {
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
 } from './shared';
+import { getTrailStore } from './TrailStore/TrailStore';
 import { getTrailFor, limitAdhocProviders } from './utils';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
-import { isSceneQueryRunner } from 'utils/utils.queries';
+import { isSceneQueryRunner } from './utils/utils.queries';
+import { getSelectedScopes } from './utils/utils.scopes';
+import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;

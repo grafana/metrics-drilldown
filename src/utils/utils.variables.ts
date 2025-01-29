@@ -1,4 +1,10 @@
-import { AdHocFiltersVariable, ConstantVariable, CustomVariable, QueryVariable, SceneVariable } from '@grafana/scenes';
+import {
+  type AdHocFiltersVariable,
+  type ConstantVariable,
+  type CustomVariable,
+  type QueryVariable,
+  type SceneVariable,
+} from '@grafana/scenes';
 
 type MaybeVariable = SceneVariable | null | undefined;
 

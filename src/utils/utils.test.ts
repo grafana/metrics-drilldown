@@ -1,4 +1,4 @@
-import { SceneDeactivationHandler, SceneObject } from '@grafana/scenes';
+import { type SceneDeactivationHandler, type SceneObject } from '@grafana/scenes';
 
 /**
  * Useful from tests to simulate mounting a full scene. Children are activated before parents to simulate the real order

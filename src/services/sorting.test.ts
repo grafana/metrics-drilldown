@@ -1,4 +1,4 @@
-import { toDataFrame, FieldType, ReducerID } from '@grafana/data';
+import { FieldType, ReducerID, toDataFrame } from '@grafana/data';
 
 import { sortSeries } from './sorting';
 

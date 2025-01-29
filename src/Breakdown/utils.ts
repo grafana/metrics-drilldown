@@ -1,8 +1,8 @@
-import { SelectableValue } from '@grafana/data';
-import { QueryVariable, sceneGraph, SceneObject } from '@grafana/scenes';
+import { type SelectableValue } from '@grafana/data';
+import { sceneGraph, type QueryVariable, type SceneObject } from '@grafana/scenes';
 
 import { VAR_FILTERS } from '../shared';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { isAdHocFiltersVariable } from '../utils/utils.variables';
 
 export function getLabelOptions(scenObject: SceneObject, variable: QueryVariable) {
   const labelFilters = sceneGraph.lookupVariable(VAR_FILTERS, scenObject);

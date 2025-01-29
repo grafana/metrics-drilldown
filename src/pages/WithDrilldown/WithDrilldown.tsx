@@ -1,6 +1,3 @@
-import { useMemo } from 'react';
-import { prefixRoute } from '../../utils/utils.routing';
-import { DATASOURCE_REF, ROUTES } from '../../constants';
 import {
   EmbeddedScene,
   SceneApp,
@@ -11,8 +8,12 @@ import {
   SceneTimePicker,
   SceneTimeRange,
 } from '@grafana/scenes';
-import { getHumidityOverviewScene, getTemperatureOverviewScene } from './scenes';
+import React, { useMemo } from 'react';
+
 import { getRoomsTemperatureStats, getRoomsTemperatureTable } from './panels';
+import { getHumidityOverviewScene, getTemperatureOverviewScene } from './scenes';
+import { DATASOURCE_REF, ROUTES } from '../../constants';
+import { prefixRoute } from '../../utils/utils.routing';
 
 const roomsTemperatureQuery = {
   refId: 'Rooms temperature',

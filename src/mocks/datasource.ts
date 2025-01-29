@@ -1,4 +1,4 @@
-import { DataSourceApi, PluginType, type DataSourceInstanceSettings } from '@grafana/data';
+import { PluginType, type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
 import { type DataSourceSrv } from '@grafana/runtime';
 
 export const mockDataSource: DataSourceApi = {

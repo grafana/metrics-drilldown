@@ -1,4 +1,5 @@
-import { AppConfigPage, AppPage, test as base } from '@grafana/plugin-e2e';
+import { test as base, type AppConfigPage, type AppPage } from '@grafana/plugin-e2e';
+
 import pluginJson from '../src/plugin.json';
 
 type AppTestFixture = {

@@ -1,7 +1,7 @@
-import { QueryBuilderLabelFilter } from '@grafana/prometheus';
+import { type QueryBuilderLabelFilter } from '@grafana/prometheus';
 
-import { QueryMetric } from './getQueryMetrics'; // We only support label filters with the '=' operator
-import { DashboardSceneInterface } from './dashboardIntegration';
+import { type DashboardSceneInterface } from './dashboardIntegration';
+import { type QueryMetric } from './getQueryMetrics'; // We only support label filters with the '=' operator
 
 // We only support label filters with the '=' operator
 export function isEquals(labelFilter: QueryBuilderLabelFilter) {

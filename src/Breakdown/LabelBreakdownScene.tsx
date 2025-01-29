@@ -1,41 +1,47 @@
 import init from '@bsull/augurs/outlier';
 import { css } from '@emotion/css';
-import { isNumber, max, min, throttle } from 'lodash';
-import { useEffect, useState } from 'react';
-
-import { DataFrame, FieldType, GrafanaTheme2, PanelData, SelectableValue } from '@grafana/data';
+import { FieldType, type DataFrame, type GrafanaTheme2, type PanelData, type SelectableValue } from '@grafana/data';
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import {
   PanelBuilders,
-  QueryVariable,
-  SceneComponentProps,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
   SceneFlexItem,
-  SceneFlexItemLike,
   SceneFlexLayout,
   sceneGraph,
-  SceneObject,
   SceneObjectBase,
-  SceneObjectState,
   SceneQueryRunner,
   SceneReactObject,
   VariableDependencyConfig,
-  VizPanel,
+  type QueryVariable,
+  type SceneComponentProps,
+  type SceneFlexItemLike,
+  type SceneObject,
+  type SceneObjectState,
+  type VizPanel,
 } from '@grafana/scenes';
-import { DataQuery, SortOrder, TooltipDisplayMode } from '@grafana/schema';
+import { SortOrder, TooltipDisplayMode, type DataQuery } from '@grafana/schema';
 import { Alert, Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
+import { isNumber, max, min, throttle } from 'lodash';
+import React, { useEffect, useState } from 'react';
 
-import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
-import { DataTrail } from '../DataTrail';
-import { MetricScene } from '../MetricScene';
-import { AddToExplorationButton } from '../MetricSelect/AddToExplorationsButton';
-import { StatusWrapper } from '../StatusWrapper';
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
-import { AutoQueryDef } from '../autoQuery/types';
+import { type AutoQueryDef } from '../autoQuery/types';
+import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
+import { type DataTrail } from '../DataTrail';
 import { reportExploreMetrics } from '../interactions';
+import { MetricScene } from '../MetricScene';
+import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
+import { BreakdownSearchReset, BreakdownSearchScene } from './BreakdownSearchScene';
+import { ByFrameRepeater } from './ByFrameRepeater';
+import { LayoutSwitcher } from './LayoutSwitcher';
+import { SortByScene, SortCriteriaChanged } from './SortByScene';
+import { type BreakdownLayoutChangeCallback, type BreakdownLayoutType } from './types';
+import { getLabelOptions } from './utils';
+import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
+import { AddToExplorationButton } from '../MetricSelect/AddToExplorationsButton';
 import { updateOtelJoinWithGroupLeft } from '../otel/util';
 import { getSortByPreference } from '../services/store';
 import { ALL_VARIABLE_VALUE } from '../services/variables';
@@ -49,17 +55,9 @@ import {
   VAR_MISSING_OTEL_TARGETS,
   VAR_OTEL_GROUP_LEFT,
 } from '../shared';
+import { StatusWrapper } from '../StatusWrapper';
 import { getColorByIndex, getTrailFor } from '../utils';
-
-import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
-import { BreakdownSearchReset, BreakdownSearchScene } from './BreakdownSearchScene';
-import { ByFrameRepeater } from './ByFrameRepeater';
-import { LayoutSwitcher } from './LayoutSwitcher';
-import { SortByScene, SortCriteriaChanged } from './SortByScene';
-import { BreakdownLayoutChangeCallback, BreakdownLayoutType } from './types';
-import { getLabelOptions } from './utils';
-import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
-import { isConstantVariable, isQueryVariable } from 'utils/utils.variables';
+import { isConstantVariable, isQueryVariable } from '../utils/utils.variables';
 
 const MAX_PANELS_IN_ALL_LABELS_BREAKDOWN = 60;
 

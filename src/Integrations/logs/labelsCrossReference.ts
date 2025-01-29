@@ -1,13 +1,12 @@
-import { TimeRange, type AdHocVariableFilter } from '@grafana/data';
+import { type AdHocVariableFilter, type TimeRange } from '@grafana/data';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
-import { findHealthyLokiDataSources, RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
+import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
+import { findHealthyLokiDataSources, type RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared';
 import { getTrailFor } from '../../utils';
 import { isAdHocFiltersVariable } from '../../utils/utils.variables';
-
-import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 
 const knownLabelNameDiscrepancies = {
   job: 'service_name', // `service.name` is `job` in Mimir and `service_name` in Loki

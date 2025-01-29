@@ -1,20 +1,20 @@
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 import {
-  SceneComponentProps,
-  SceneObject,
   SceneObjectBase,
-  SceneObjectState,
   SceneObjectUrlSyncConfig,
-  SceneObjectUrlValues,
-  SceneObjectWithUrlSync,
+  type SceneComponentProps,
+  type SceneObject,
+  type SceneObjectState,
+  type SceneObjectUrlValues,
+  type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
 import { RadioButtonGroup } from '@grafana/ui';
+import React from 'react';
 
 import { reportExploreMetrics } from '../interactions';
 import { getVewByPreference, setVewByPreference } from '../services/store';
-import { MakeOptional } from '../shared';
-
-import { BreakdownLayoutChangeCallback, BreakdownLayoutType, isBreakdownLayoutType } from './types';
+import { type MakeOptional } from '../shared';
+import { isBreakdownLayoutType, type BreakdownLayoutChangeCallback, type BreakdownLayoutType } from './types';
 
 export interface LayoutSwitcherState extends SceneObjectState {
   activeBreakdownLayout: BreakdownLayoutType;

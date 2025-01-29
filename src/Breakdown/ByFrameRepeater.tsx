@@ -1,26 +1,25 @@
 import { css } from '@emotion/css';
-
-import { DataFrame, LoadingState, PanelData } from '@grafana/data';
+import { LoadingState, type DataFrame, type PanelData } from '@grafana/data';
 import {
-  SceneByFrameRepeater,
-  SceneComponentProps,
   SceneDataNode,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
-  SceneLayout,
   SceneObjectBase,
-  SceneObjectState,
   SceneReactObject,
+  type SceneByFrameRepeater,
+  type SceneComponentProps,
+  type SceneLayout,
+  type SceneObjectState,
 } from '@grafana/scenes';
 import { Alert, Button } from '@grafana/ui';
-
-import { getLabelValueFromDataFrame } from '../services/levels';
-import { fuzzySearch } from '../services/search';
-import { sortSeries } from '../services/sorting';
+import React from 'react';
 
 import { BreakdownSearchReset } from './BreakdownSearchScene';
 import { findSceneObjectsByType } from './utils';
+import { getLabelValueFromDataFrame } from '../services/levels';
+import { fuzzySearch } from '../services/search';
+import { sortSeries } from '../services/sorting';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;

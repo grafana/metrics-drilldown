@@ -1,10 +1,12 @@
-import { AdHocVariableFilter, MetricFindValue, RawTimeRange, VariableHide } from '@grafana/data';
+import { VariableHide, type AdHocVariableFilter, type MetricFindValue, type RawTimeRange } from '@grafana/data';
 import { isValidLegacyName } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
-import { AdHocFiltersVariable, sceneGraph, SceneObject } from '@grafana/scenes';
+import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 
-import { DataTrail } from '../DataTrail';
+import { type DataTrail } from '../DataTrail';
 import { reportChangeInLabelFilters } from '../interactions';
+import { getFilteredResourceAttributes, totalOtelResources } from './api';
+import { type OtelResourcesObject } from './types';
 import { getOtelExperienceToggleState } from '../services/store';
 import {
   VAR_DATASOURCE_EXPR,
@@ -15,10 +17,7 @@ import {
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
 } from '../shared';
-
-import { getFilteredResourceAttributes, totalOtelResources } from './api';
-import { OtelResourcesObject } from './types';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
+import { isAdHocFiltersVariable, isConstantVariable } from '../utils/utils.variables';
 
 export const blessedList = (): Record<string, number> => {
   return {

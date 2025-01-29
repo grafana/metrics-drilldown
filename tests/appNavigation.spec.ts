@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { expect, test } from './fixtures';
 import { ROUTES } from '../src/constants';
 
 test.describe('navigating app', () => {

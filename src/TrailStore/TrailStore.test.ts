@@ -1,12 +1,11 @@
-import { DataSourceWithBackend, locationService, setDataSourceSrv } from '@grafana/runtime';
+import { locationService, setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 import { sceneGraph, sceneUtils } from '@grafana/scenes';
 
 import { DataTrail } from '../DataTrail';
-import { TRAIL_BOOKMARKS_KEY, RECENT_TRAILS_KEY, VAR_FILTERS } from '../shared';
-
-import { SerializedTrail, getTrailStore } from './TrailStore';
-import { MockDataSourceSrv, DataSourceType } from '../mocks/datasource';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
+import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY, VAR_FILTERS } from '../shared';
+import { getTrailStore, type SerializedTrail } from './TrailStore';
+import { isAdHocFiltersVariable } from '../utils/utils.variables';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),

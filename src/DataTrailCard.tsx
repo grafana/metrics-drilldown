@@ -1,15 +1,14 @@
 import { css } from '@emotion/css';
-import { useMemo } from 'react';
-
-import { dateTimeFormat, GrafanaTheme2 } from '@grafana/data';
+import { dateTimeFormat, type GrafanaTheme2 } from '@grafana/data';
 import { sceneGraph } from '@grafana/scenes';
 import { Card, IconButton, useStyles2 } from '@grafana/ui';
+import React, { useMemo } from 'react';
 
-import { DataTrail } from './DataTrail';
-import { getTrailStore, DataTrailBookmark } from './TrailStore/TrailStore';
+import { type DataTrail } from './DataTrail';
 import { VAR_FILTERS } from './shared';
+import { getTrailStore, type DataTrailBookmark } from './TrailStore/TrailStore';
 import { getMetricName } from './utils';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 export type Props = {
   trail?: DataTrail;
@@ -114,7 +113,6 @@ export function getStyles(theme: GrafanaTheme2) {
       borderRight: `1px solid ${theme.colors.border.weak}`,
       borderLeft: `1px solid ${theme.colors.border.weak}`,
       borderBottom: 'none', // Remove the bottom border
-      // eslint-disable-next-line @grafana/no-border-radius-literal
       borderRadius: '2px 2px 0 0', // Top-left and top-right corners are 2px, bottom-left and bottom-right are 0; cannot use theme.shape.radius.default because need bottom corners to be 0
     }),
     secondary: css({
@@ -123,7 +121,6 @@ export function getStyles(theme: GrafanaTheme2) {
     }),
     date: css({
       border: `1px solid ${theme.colors.border.weak}`,
-      // eslint-disable-next-line @grafana/no-border-radius-literal
       borderRadius: '0 0 2px 2px',
       padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
       backgroundColor: theme.colors.background.primary,

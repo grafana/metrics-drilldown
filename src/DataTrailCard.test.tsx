@@ -1,8 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 
 import { DataTrail } from './DataTrail';
 import { DataTrailCard } from './DataTrailCard';
-import { DataTrailBookmark } from './TrailStore/TrailStore';
+import { type DataTrailBookmark } from './TrailStore/TrailStore';
 
 jest.mock('./utils', () => ({
   ...jest.requireActual('./utils'),

@@ -1,10 +1,9 @@
-import { RawTimeRange, Scope } from '@grafana/data';
+import { type RawTimeRange, type Scope } from '@grafana/data';
 import { getPrometheusTime, isValidLegacyName } from '@grafana/prometheus';
 import { config, getBackendSrv } from '@grafana/runtime';
 
 import { callSuggestionsApi } from '../utils';
-
-import { OtelResponse, LabelResponse, OtelTargetType } from './types';
+import { type LabelResponse, type OtelResponse, type OtelTargetType } from './types';
 import { limitOtelMatchTerms, sortResources } from './util';
 
 const OTEL_RESOURCE_EXCLUDED_FILTERS = ['__name__']; // name is handled by metric search metrics bar
