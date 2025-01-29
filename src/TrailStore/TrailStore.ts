@@ -3,6 +3,8 @@ import { debounce, isEqual } from 'lodash';
 import { urlUtil } from '@grafana/data';
 import { SceneObject, SceneObjectRef, SceneObjectUrlValues, sceneUtils } from '@grafana/scenes';
 
+import { createBookmarkSavedNotification } from './utils';
+
 import { DataTrail } from '../DataTrail';
 import { TrailStepType } from '../DataTrailsHistory';
 import { TRAIL_BOOKMARKS_KEY, RECENT_TRAILS_KEY } from '../shared';
@@ -217,8 +219,7 @@ export class TrailStore {
     this._bookmarks.unshift(bookmarkState);
     this._refreshBookmarkIndexMap();
     this._save();
-    // TODO: After the bookmark is saved, we need to notify the user that the bookmark has been saved
-    // We can do this using the Alert component (https://developers.grafana.com/ui/latest/index.html?path=/docs/overlays-alert-inlinebanner--docs).
+    createBookmarkSavedNotification();
   }
 
   removeBookmark(index: number) {
