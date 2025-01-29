@@ -5,7 +5,7 @@ import { Button, Field, FieldSet, Input, SecretInput, useStyles2 } from '@grafan
 import React, { useState, type ChangeEvent } from 'react';
 import { lastValueFrom } from 'rxjs';
 
-import { testIds } from '../testIds';
+import { testIds } from './testIds';
 
 type JsonData = {
   apiUrl?: string;

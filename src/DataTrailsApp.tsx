@@ -1,6 +1,4 @@
-import { css } from '@emotion/css';
 import {
-  PageLayoutType,
   type DataQueryRequest,
   type DataSourceGetTagKeysOptions,
   type DataSourceGetTagValuesOptions,
@@ -12,8 +10,6 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui/';
-import { Page } from 'app/core/components/Page/Page';
 import React, { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom-v5-compat';
 
@@ -21,9 +17,8 @@ import { DataTrail } from './DataTrail';
 import { DataTrailsHome } from './DataTrailsHome';
 import { HOME_ROUTE, RefreshMetricsEvent, TRAILS_ROUTE } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
-import { getMetricName, getUrlForTrail, newMetricsTrail } from './utils';
-import { getClosestScopesFacade, ScopesFacade, ScopesSelector } from './utils/utils.scopes';
-import { AppChromeUpdate } from '../../core/components/AppChrome/AppChromeUpdate';
+import { getUrlForTrail, newMetricsTrail } from './utils';
+import { getClosestScopesFacade, ScopesFacade } from './utils/utils.scopes';
 
 export interface DataTrailsAppState extends SceneObjectState {
   trail: DataTrail;
@@ -65,12 +60,15 @@ export class DataTrailsApp extends SceneObjectBase<DataTrailsAppState> {
   }
 
   static Component = ({ model }: SceneComponentProps<DataTrailsApp>) => {
-    const { trail, home } = model.useState();
+    const {
+      trail,
+      // home
+    } = model.useState();
 
     return (
       <Routes>
         {/* The routes are relative to the HOME_ROUTE */}
-        <Route
+        {/* <Route
           path={'/'}
           element={
             <Page
@@ -83,17 +81,17 @@ export class DataTrailsApp extends SceneObjectBase<DataTrailsAppState> {
               <home.Component model={home} />
             </Page>
           }
-        />
+        /> */}
         <Route path={TRAILS_ROUTE.replace(HOME_ROUTE, '')} element={<DataTrailView trail={trail} />} />
       </Routes>
     );
   };
 }
 
-function DataTrailView({ trail }: { trail: DataTrail }) {
-  const styles = useStyles2(getStyles);
+export function DataTrailView({ trail }: { trail: DataTrail }) {
+  // const styles = useStyles2(getStyles);
   const [isInitialized, setIsInitialized] = useState(false);
-  const { metric } = trail.useState();
+  // const { metric } = trail.useState();
 
   useEffect(() => {
     if (!isInitialized) {
@@ -110,8 +108,8 @@ function DataTrailView({ trail }: { trail: DataTrail }) {
 
   return (
     <UrlSyncContextProvider scene={trail}>
-      <Page navId="explore/metrics" pageNav={{ text: getMetricName(metric) }} layout={PageLayoutType.Custom}>
-        {/* @ts-expect-error */}
+      <></>
+      {/* <Page navId="explore/metrics" pageNav={{ text: getMetricName(metric) }} layout={PageLayoutType.Custom}>
         {config.featureToggles.enableScopesInMetricsExplore && (
           <AppChromeUpdate
             actions={
@@ -122,7 +120,7 @@ function DataTrailView({ trail }: { trail: DataTrail }) {
           />
         )}
         <trail.Component model={trail} />
-      </Page>
+      </Page> */}
     </UrlSyncContextProvider>
   );
 }
@@ -157,12 +155,12 @@ export function getDataTrailsApp() {
   return dataTrailsApp;
 }
 
-const getStyles = () => ({
-  topNavContainer: css({
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyItems: 'flex-start',
-  }),
-});
+// const getStyles = () => ({
+//   topNavContainer: css({
+//     width: '100%',
+//     height: '100%',
+//     display: 'flex',
+//     flexDirection: 'row',
+//     justifyItems: 'flex-start',
+//   }),
+// });

@@ -31,7 +31,7 @@
     {
       "type": "page",
       "name": "Metrics App",
-      "path": "/a/%PLUGIN_ID%/home",
+      "path": "/a/%PLUGIN_ID%/",
       "action": "datasources:explore",
       "addToNav": true,
       "defaultNav": true

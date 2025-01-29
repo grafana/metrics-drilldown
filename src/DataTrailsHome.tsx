@@ -1,6 +1,8 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
+  EmbeddedScene,
+  SceneAppPage,
   sceneGraph,
   SceneObjectBase,
   type SceneComponentProps,
@@ -10,7 +12,10 @@ import {
 import { Box, Button, Icon, Stack, Text, TextLink, useStyles2, useTheme2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
+import { prefixRoute } from 'utils/utils.routing';
+
 import { DarkModeRocket, LightModeRocket } from './assets/rockets';
+import { ROUTES } from './constants';
 import { type DataTrail } from './DataTrail';
 import { DataTrailsBookmarks } from './DataTrailBookmarks';
 import { DataTrailsApp } from './DataTrailsApp';
