@@ -23,12 +23,15 @@ import {
 } from '@grafana/scenes';
 import { lastValueFrom } from 'rxjs';
 
+import { prefixRoute } from 'utils/utils.routing';
+
+import { ROUTES } from './constants';
 import { DataTrail } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { MetricScene } from './MetricScene';
 import { sortResources } from './otel/util';
-import { LOGS_METRIC, TRAILS_ROUTE, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
+import { LOGS_METRIC, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getClosestScopesFacade } from './utils/utils.scopes';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
@@ -56,7 +59,7 @@ export function getUrlForTrail(trail: DataTrail) {
 }
 
 export function getUrlForValues(values: SceneObjectUrlValues) {
-  return urlUtil.renderUrl(TRAILS_ROUTE, values);
+  return urlUtil.renderUrl(prefixRoute(ROUTES.Trail), values);
 }
 
 export function getMetricSceneFor(model: SceneObject): MetricScene {

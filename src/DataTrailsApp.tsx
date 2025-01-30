@@ -1,4 +1,6 @@
+// import { css } from '@emotion/css';
 import {
+  // PageLayoutType,
   type DataQueryRequest,
   type DataSourceGetTagKeysOptions,
   type DataSourceGetTagValuesOptions,
@@ -10,6 +12,8 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
+// import { useStyles2 } from '@grafana/ui/';
+// import { Page } from 'app/core/components/Page/Page';
 import React, { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom-v5-compat';
 
@@ -17,8 +21,17 @@ import { DataTrail } from './DataTrail';
 import { DataTrailsHome } from './DataTrailsHome';
 import { HOME_ROUTE, RefreshMetricsEvent, TRAILS_ROUTE } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
-import { getUrlForTrail, newMetricsTrail } from './utils';
-import { getClosestScopesFacade, ScopesFacade } from './utils/utils.scopes';
+import {
+  // getMetricName,
+  getUrlForTrail,
+  newMetricsTrail,
+} from './utils';
+import {
+  getClosestScopesFacade,
+  ScopesFacade,
+  // ScopesSelector
+} from './utils/utils.scopes';
+// import { AppChromeUpdate } from '../../core/components/AppChrome/AppChromeUpdate';
 
 export interface DataTrailsAppState extends SceneObjectState {
   trail: DataTrail;
@@ -60,10 +73,7 @@ export class DataTrailsApp extends SceneObjectBase<DataTrailsAppState> {
   }
 
   static Component = ({ model }: SceneComponentProps<DataTrailsApp>) => {
-    const {
-      trail,
-      // home
-    } = model.useState();
+    const { trail } = model.useState();
 
     return (
       <Routes>

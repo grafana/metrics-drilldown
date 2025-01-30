@@ -1,7 +1,18 @@
-import { SceneApp, useSceneApp } from '@grafana/scenes';
+import { EmbeddedScene, SceneApp, SceneAppPage, useSceneApp } from '@grafana/scenes';
 import React, { useEffect, useState } from 'react';
 
-import { makeHomePage } from '../DataTrailsHome';
+import { DataTrailsHome } from '../DataTrailsHome';
+
+const makeHomePage = () => {
+  return new SceneAppPage({
+    title: '',
+    url: '/',
+    getScene: () =>
+      new EmbeddedScene({
+        body: new DataTrailsHome({}),
+      }),
+  });
+};
 
 const getSceneApp = () =>
   new SceneApp({

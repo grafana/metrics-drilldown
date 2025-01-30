@@ -1,56 +1,55 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import {
-  EmbeddedScene,
-  SceneAppPage,
-  sceneGraph,
-  SceneObjectBase,
-  type SceneComponentProps,
-  type SceneObject,
-  type SceneObjectState,
-} from '@grafana/scenes';
+import { locationService } from '@grafana/runtime';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Box, Button, Icon, Stack, Text, TextLink, useStyles2, useTheme2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
-import { prefixRoute } from 'utils/utils.routing';
-
 import { DarkModeRocket, LightModeRocket } from './assets/rockets';
-import { ROUTES } from './constants';
 import { type DataTrail } from './DataTrail';
 import { DataTrailsBookmarks } from './DataTrailBookmarks';
-import { DataTrailsApp } from './DataTrailsApp';
 import { DataTrailsRecentMetrics } from './DataTrailsRecentMetrics';
 import { reportExploreMetrics } from './interactions';
 import { getTrailStore } from './TrailStore/TrailStore';
-import { getDatasourceForNewTrail, newMetricsTrail } from './utils';
+import { getDatasourceForNewTrail, getUrlForTrail, newMetricsTrail } from './utils';
 
-export interface DataTrailsHomeState extends SceneObjectState {}
+export interface DataTrailsHomeState extends SceneObjectState {
+  onTrailSelected?: (trail: DataTrail) => void;
+}
 
 export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
   public constructor(state: DataTrailsHomeState) {
     super(state);
   }
 
+  private navigateToTrail = (trail: DataTrail) => {
+    const { onTrailSelected } = this.state;
+    if (onTrailSelected) {
+      onTrailSelected(trail);
+    } else {
+      // Fallback to direct URL navigation if no callback provided
+      locationService.push(getUrlForTrail(trail));
+    }
+  };
+
   public onNewMetricsTrail = () => {
-    const app = getAppFor(this);
     const trail = newMetricsTrail(getDatasourceForNewTrail(), true);
     reportExploreMetrics('exploration_started', { cause: 'new_clicked' });
-    app.goToUrlForTrail(trail);
+    getTrailStore().setRecentTrail(trail);
+    this.navigateToTrail(trail);
   };
 
   public onSelectRecentTrail = (trail: DataTrail) => {
-    const app = getAppFor(this);
     reportExploreMetrics('exploration_started', { cause: 'recent_clicked' });
     getTrailStore().setRecentTrail(trail);
-    app.goToUrlForTrail(trail);
+    this.navigateToTrail(trail);
   };
 
   public onSelectBookmark = (bookmarkIndex: number) => {
-    const app = getAppFor(this);
     reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
     const trail = getTrailStore().getTrailForBookmarkIndex(bookmarkIndex);
     getTrailStore().setRecentTrail(trail);
-    app.goToUrlForTrail(trail);
+    this.navigateToTrail(trail);
   };
 
   static Component = ({ model }: SceneComponentProps<DataTrailsHome>) => {
@@ -97,10 +96,6 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
       </article>
     );
   };
-}
-
-function getAppFor(model: SceneObject) {
-  return sceneGraph.getAncestor(model, DataTrailsApp);
 }
 
 function getStyles(theme: GrafanaTheme2) {
