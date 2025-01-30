@@ -1,74 +1,35 @@
 import { type AppRootProps } from '@grafana/data';
-// import { EmbeddedScene, SceneAppPage } from '@grafana/scenes';
-import React from 'react';
+import { locationService } from '@grafana/runtime';
+import React, { createContext, useState } from 'react';
 
-// import { newMetricsTrail } from 'utils';
-// import { prefixRoute } from 'utils/utils.routing';
+import { type DataTrail } from 'DataTrail';
+import { getUrlForTrail, newMetricsTrail } from 'utils';
 
-// import { ROUTES } from '../constants';
-// import { DataTrailView } from '../DataTrailsApp';
-// import { MetricsExplorerPlugin } from '../DataTrailsAppNew';
-// import { makeHomePage } from '../DataTrailsHome';
-// import { DataTrailsHome } from '../DataTrailsHome';
 import { AppRoutes } from './Routes';
 import { PluginPropsContext } from '../utils/utils.plugin';
 
-// const makeHomePage = () => {
-//   return new SceneAppPage({
-//     title: '', // 'Home' ?
-//     url: prefixRoute(ROUTES.Home),
-//     getScene: () =>
-//       new EmbeddedScene({
-//         body: new DataTrailsHome({}),
-//       }),
-//   });
-// };
+interface MetricsAppContext {
+  trail: DataTrail;
+  goToUrlForTrail: (trail: DataTrail) => void;
+}
 
-// const makeTrailPage = () => {
-//   return new SceneAppPage({
-//     title: '', // 'Trail' ?
-//     url: prefixRoute(ROUTES.Trail),
-//     getScene: () =>
-//       new EmbeddedScene({
-//         body: DataTrailView({ trail: newMetricsTrail() }),
-//       }),
-//   });
-// };
-
-// const getSceneApp = () =>
-//   new SceneApp({
-//     pages: [
-//       makeHomePage(),
-//       // makeTrailPage()
-//     ],
-//     urlSyncOptions: {
-//       createBrowserHistorySteps: true,
-//       updateUrlOnInit: true,
-//     },
-//   });
-
-// function MetricsExplorationView() {
-//   const [isInitialized, setIsInitialized] = useState(false);
-
-//   const scene = useSceneApp(getSceneApp);
-
-//   useEffect(() => {
-//     if (!isInitialized) {
-//       setIsInitialized(true);
-//     }
-//   }, [scene, isInitialized]);
-
-//   if (!isInitialized) {
-//     return null;
-//   }
-
-//   return <scene.Component model={scene} />;
-// }
+export const MetricsContext = createContext<MetricsAppContext>({
+  trail: newMetricsTrail(undefined, true),
+  goToUrlForTrail: (trail: DataTrail) => {},
+});
 
 function App(props: AppRootProps) {
+  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined, true));
+  const goToUrlForTrail = (trail: DataTrail) => {
+    locationService.push(getUrlForTrail(trail));
+    setTrail(trail);
+  };
+
   return (
     <PluginPropsContext.Provider value={props}>
-      <AppRoutes />
+      <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
+        <AppRoutes />
+      </MetricsContext.Provider>
     </PluginPropsContext.Provider>
   );
 }
