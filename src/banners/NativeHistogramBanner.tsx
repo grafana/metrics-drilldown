@@ -32,6 +32,7 @@ export function NativeHistogramBanner(props: NativeHistogramInfoProps) {
           onRemove={() => {
             setHistogramMessage(false);
           }}
+          className={styles.banner}
         >
           <div className={styles.histogramRow}>
             <div className={styles.histogramSentence}>
@@ -201,6 +202,9 @@ const NativeHistogramExamples = ({ trail, nativeHistograms, setHistogramMessage 
 
 function getStyles(theme: GrafanaTheme2, _chromeHeaderHeight: number) {
   return {
+    banner: css({
+      flexGrow: 0,
+    }),
     histogramRow: css({
       display: 'flex',
       flexDirection: 'row',
