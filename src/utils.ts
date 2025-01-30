@@ -23,8 +23,6 @@ import {
 } from '@grafana/scenes';
 import { lastValueFrom } from 'rxjs';
 
-import { prefixRoute } from 'utils/utils.routing';
-
 import { ROUTES } from './constants';
 import { DataTrail } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
@@ -59,7 +57,7 @@ export function getUrlForTrail(trail: DataTrail) {
 }
 
 export function getUrlForValues(values: SceneObjectUrlValues) {
-  return urlUtil.renderUrl(prefixRoute(ROUTES.Trail), values);
+  return urlUtil.renderUrl(ROUTES.Trail, values);
 }
 
 export function getMetricSceneFor(model: SceneObject): MetricScene {
