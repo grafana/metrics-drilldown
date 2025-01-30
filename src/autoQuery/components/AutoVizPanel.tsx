@@ -1,12 +1,8 @@
-import {
-  SceneObjectBase,
-  SceneQueryRunner,
-  type SceneComponentProps,
-  type SceneObjectState,
-  type VizPanel,
-} from '@grafana/scenes';
+import { SceneComponentProps, SceneObjectBase, SceneObjectState, SceneQueryRunner, VizPanel } from '@grafana/scenes';
+
 import React from 'react';
 
+import { PanelMenu } from '../../Menu/PanelMenu';
 import { AddToExplorationButton } from '../../MetricSelect/AddToExplorationsButton';
 import { MDP_METRIC_OVERVIEW, trailDS } from '../../shared';
 import { getMetricSceneFor } from '../../utils';
@@ -52,10 +48,9 @@ export class AutoVizPanel extends SceneObjectBase<AutoVizPanelState> {
           queries: def.queries,
         })
       )
-      .setHeaderActions([
-        new AutoVizPanelQuerySelector({ queryDef: def, onChangeQuery: this.onChangeQuery }),
-        new AddToExplorationButton({ labelName: metric ?? this.state.metric }),
-      ])
+      .setHeaderActions([new AutoVizPanelQuerySelector({ queryDef: def, onChangeQuery: this.onChangeQuery })])
+      .setShowMenuAlways(true)
+      .setMenu(new PanelMenu({ labelName: metric ?? this.state.metric }))
       .build();
   }
 
