@@ -41,7 +41,7 @@ import { SortByScene, SortCriteriaChanged } from './SortByScene';
 import { type BreakdownLayoutChangeCallback, type BreakdownLayoutType } from './types';
 import { getLabelOptions } from './utils';
 import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
-import { AddToExplorationButton } from '../MetricSelect/AddToExplorationsButton';
+import { PanelMenu } from '../Menu/PanelMenu';
 import { updateOtelJoinWithGroupLeft } from '../otel/util';
 import { getSortByPreference } from '../services/store';
 import { ALL_VARIABLE_VALUE } from '../services/variables';
@@ -474,10 +474,9 @@ export function buildAllLayout(
           ],
         })
       )
-      .setHeaderActions([
-        new SelectLabelAction({ labelName: String(option.value) }),
-        new AddToExplorationButton({ labelName: String(option.value) }),
-      ])
+      .setHeaderActions([new SelectLabelAction({ labelName: String(option.value) })])
+      .setShowMenuAlways(true)
+      .setMenu(new PanelMenu({ labelName: String(option.value) }))
       .setUnit(unit)
       .setBehaviors([fixLegendForUnspecifiedLabelValueBehavior])
       .build();
@@ -528,10 +527,9 @@ function buildNormalLayout(
       .setTitle(getLabelValue(frame))
       .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
       .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
-      .setHeaderActions([
-        new AddToFiltersGraphAction({ frame }),
-        new AddToExplorationButton({ labelName: getLabelValue(frame) }),
-      ])
+      .setHeaderActions([new AddToFiltersGraphAction({ frame })])
+      .setShowMenuAlways(true)
+      .setMenu(new PanelMenu({ labelName: getLabelValue(frame) }))
       .setUnit(unit)
       .build();
 
