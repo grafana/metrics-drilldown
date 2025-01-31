@@ -209,7 +209,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       })
     );
 
-    // @ts-expect-error
     if (config.featureToggles.enableScopesInMetricsExplore) {
       this._subs.add(
         trail.subscribeToEvent(RefreshMetricsEvent, () => {

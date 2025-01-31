@@ -117,6 +117,10 @@ export class MockDataSourceSrv implements DataSourceSrv {
   reload() {
     return Promise.resolve();
   }
+
+  registerRuntimeDataSource(dataSource: any): void {
+    // No-op implementation for mock
+  }
 }
 
 export enum DataSourceType {
