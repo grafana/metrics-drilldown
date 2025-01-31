@@ -125,7 +125,6 @@ export function getOtelResourcesObject(scene: SceneObject, firstQueryVal?: strin
         allFilters += ',';
       }
 
-      // @ts-expect-error
       if (config.featureToggles.prometheusSpecialCharsInLabelValues) {
         allFilters += `${labelName}${op}'${labelValue}'`;
       } else {

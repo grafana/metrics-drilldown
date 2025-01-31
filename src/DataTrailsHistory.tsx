@@ -166,7 +166,6 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
 
           this.addTrailStep(trail, 'time', tooltip);
 
-          // @ts-expect-error
           if (config.featureToggles.unifiedHistory) {
             this._appEvents.publish(
               new RecordHistoryEntryEvent({
