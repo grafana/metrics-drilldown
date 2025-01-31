@@ -15,7 +15,7 @@ interface MetricsAppContext {
 
 export const MetricsContext = createContext<MetricsAppContext>({
   trail: newMetricsTrail(undefined, true),
-  goToUrlForTrail: (trail: DataTrail) => {},
+  goToUrlForTrail: () => {},
 });
 
 function App(props: AppRootProps) {
