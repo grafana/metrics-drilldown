@@ -8,8 +8,7 @@ Requires Grafana 11.3.0 or newer.
 
 ## Getting Started
 
-See the [getting started](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/logs/get-started/) for more info using Explore Logs.
-For instructions installing, see the [access and installation instructions](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/logs/access/)
+See the [docs](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/#standalone-experience) for more info using Explore Metrics.
 
 ## Documentation
 
@@ -19,8 +18,7 @@ For instructions installing, see the [access and installation instructions](http
 
 ## Contributing
 
-We love accepting contributions!
-If your change is minor, please feel free submit a [pull request](https://help.github.com/articles/about-pull-requests/). If your change is larger, or adds a feature, please file an issue beforehand so that we can discuss the change. You're welcome to file an implementation pull request immediately as well, although we generally lean towards discussing the change and then reviewing the implementation separately.
+We love accepting contributions! If your change is minor, please feel free submit a [pull request](https://help.github.com/articles/about-pull-requests/). If your change is larger, or adds a feature, please file an issue beforehand so that we can discuss the change. You're welcome to file an implementation pull request immediately as well, although we generally lean towards discussing the change and then reviewing the implementation separately.
 
 ### Bugs
 
