@@ -3,7 +3,6 @@ import { sceneUtils, type SceneObject, type SceneObjectRef, type SceneObjectUrlV
 import { debounce, isEqual } from 'lodash';
 
 import { createBookmarkSavedNotification } from './utils';
-
 import { DataTrail } from '../DataTrail';
 import { type TrailStepType } from '../DataTrailsHistory';
 import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY } from '../shared';
