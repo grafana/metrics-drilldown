@@ -14,7 +14,7 @@ import {
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
 } from './shared';
-import { activateFullSceneTree } from './utils/utils.test';
+import { activateFullSceneTree } from './utils/utils.testing';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
 
 jest.mock('./otel/api', () => ({

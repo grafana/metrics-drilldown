@@ -1,8 +1,9 @@
 import { locationService, setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 import { sceneGraph, sceneUtils } from '@grafana/scenes';
+import { type DataSourceRef } from '@grafana/schema';
 
 import { DataTrail } from '../DataTrail';
-import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
+import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
 import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY, VAR_FILTERS } from '../shared';
 import { getTrailStore, type SerializedTrail } from './TrailStore';
 import { isAdHocFiltersVariable } from '../utils/utils.variables';
@@ -12,8 +13,19 @@ jest.mock('@grafana/runtime', () => ({
   getDataSourceSrv: jest.fn(() => {
     return {
       get: (ds: DataSourceWithBackend) => Promise.resolve(ds),
+      getList: () => [mockDataSource],
+      getInstanceSettings: (ref: DataSourceRef) => ({
+        id: 1,
+        uid: 'ds',
+        type: DataSourceType.Prometheus,
+        name: 'Prometheus',
+        jsonData: {},
+        access: 'proxy',
+        readOnly: false,
+      }),
     };
   }),
+
   getTemplateSrv: () => ({
     getAdhocFilters: jest.fn().mockReturnValue([{ key: 'origKey', operator: '=', value: '' }]),
   }),

@@ -21,7 +21,7 @@ import {
   updateOtelData,
   updateOtelJoinWithGroupLeft,
 } from './util';
-import { activateFullSceneTree } from '../utils/utils.test';
+import { activateFullSceneTree } from '../utils/utils.testing';
 import { isAdHocFiltersVariable, isConstantVariable } from '../utils/utils.variables';
 
 jest.mock('./api', () => ({
