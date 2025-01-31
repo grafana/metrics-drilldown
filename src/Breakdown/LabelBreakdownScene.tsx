@@ -31,7 +31,6 @@ import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef } from '../autoQuery/types';
 import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
 import { type DataTrail } from '../DataTrail';
-import { PanelMenu } from '../Menu/PanelMenu';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
@@ -42,6 +41,7 @@ import { SortByScene, SortCriteriaChanged } from './SortByScene';
 import { type BreakdownLayoutChangeCallback, type BreakdownLayoutType } from './types';
 import { getLabelOptions } from './utils';
 import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
+import { PanelMenu } from '../Menu/PanelMenu';
 import { updateOtelJoinWithGroupLeft } from '../otel/util';
 import { getSortByPreference } from '../services/store';
 import { ALL_VARIABLE_VALUE } from '../services/variables';
@@ -476,7 +476,7 @@ export function buildAllLayout(
       )
       .setHeaderActions([new SelectLabelAction({ labelName: String(option.value) })])
       .setShowMenuAlways(true)
-      .setMenu(new PanelMenu({ labelName: String(option.value) }))      .
+      .setMenu(new PanelMenu({ labelName: String(option.value) }))
       .setUnit(unit)
       .setBehaviors([fixLegendForUnspecifiedLabelValueBehavior])
       .build();
