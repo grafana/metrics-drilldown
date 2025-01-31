@@ -13,7 +13,7 @@ import {
 import { getQueryRunnerFor } from '../utils/utils.queries';
 
 import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
-import { getDataSource, getTrailFor } from '../utils';
+import { getTrailFor } from '../utils';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
@@ -38,6 +38,10 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
       let exploreUrl: Promise<string | undefined> | undefined;
       try {
         const viz = sceneGraph.getAncestor(this, VizPanel);
+        const panelData = sceneGraph.getData(viz).state.data;
+        if (!panelData) {
+          throw new Error('Cannot get link to explore, no panel data found');
+        }
         const queryRunner = getQueryRunnerFor(viz);
         const queries = queryRunner?.state.queries ?? [];
         queries.forEach((query) => {
@@ -45,14 +49,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           delete query.legendFormat;
         });
         const trail = getTrailFor(this);
-        const dsValue = getDataSource(trail);
-        const timeRange = sceneGraph.getTimeRange(this);
-        exploreUrl = getExploreURL({
-          queries,
-          dsRef: { uid: dsValue },
-          timeRange: timeRange.state.value,
-          scopedVars: { __sceneObject: { value: viz } },
-        });
+        exploreUrl = getExploreURL(panelData, trail, panelData.timeRange);
       } catch (e) {}
 
       // Navigation options (all panels)
