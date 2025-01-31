@@ -10,7 +10,7 @@ const LazyApp = lazy(async () => {
 
   if (wasmSupported()) {
     await initOutlier();
-    console.info('wasmSupported');
+    console.info('WASM supported');
   }
 
   return import('./App/App');
