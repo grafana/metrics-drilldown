@@ -1,0 +1,4 @@
+dist/
+playwright/
+playwright-report/
+test-results/

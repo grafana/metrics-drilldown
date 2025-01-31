@@ -24,6 +24,7 @@ describe('DataTrailsHome', () => {
       $variables: new SceneVariableSet({
         variables: [filtersVariable],
       }),
+      onTrailSelected: jest.fn(),
     });
   });
 
