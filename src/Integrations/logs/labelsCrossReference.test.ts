@@ -5,7 +5,7 @@ import { createLabelsCrossReferenceConnector } from './labelsCrossReference';
 import { DataTrail } from '../../DataTrail';
 import { type RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared';
-import * as utils from '../../utils';
+import { getTrailFor } from '../../utils';
 
 // Create multiple mock Loki datasources with different behaviors
 const mockLokiDS1 = {
@@ -73,7 +73,14 @@ jest.mock('@grafana/runtime', () => ({
   }),
 }));
 
-const getTrailForSpy = jest.spyOn(utils, 'getTrailFor');
+jest.mock('../../utils', () => {
+  const actualModule = jest.requireActual('../../utils');
+  return {
+    ...actualModule,
+    getTrailFor: jest.fn(actualModule.getTrailFor),
+  };
+});
+
 const sceneGraphSpy = jest.spyOn(sceneGraph, 'lookupVariable');
 
 const mockScene = {
@@ -85,7 +92,7 @@ describe('LabelsCrossReferenceConnector', () => {
   beforeEach(() => {
     getListSpy.mockClear();
     sceneGraphSpy.mockClear();
-    getTrailForSpy.mockReturnValue(new DataTrail({}));
+    (getTrailFor as jest.Mock).mockReturnValue(new DataTrail({}));
     [mockLokiDS1, mockLokiDS2, mockLokiDS3].forEach((mockLokiDs) => {
       mockLokiDs.getTagKeys.mockClear();
       mockLokiDs.getTagValues.mockClear();

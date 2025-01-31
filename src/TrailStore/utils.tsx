@@ -1,6 +1,7 @@
 import { AppEvents } from '@grafana/data';
 import { getAppEvents } from '@grafana/runtime';
 import { LinkButton, Stack } from '@grafana/ui';
+import React from 'react';
 
 import { HOME_ROUTE } from '../shared';
 

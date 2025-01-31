@@ -2,10 +2,17 @@ import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
 
-import type { AppConfigProps } from './components/AppConfig/AppConfig';
+const LazyApp = lazy(async () => {
+  const { wasmSupported } = await import('./services/sorting');
+  const { default: initOutlier } = await import('@bsull/augurs/outlier');
 
-const LazyApp = lazy(() => import('./components/App/App'));
-const LazyAppConfig = lazy(() => import('./components/AppConfig/AppConfig'));
+  if (wasmSupported()) {
+    await initOutlier();
+    console.info('WASM supported');
+  }
+
+  return import('./App/App');
+});
 
 const App = (props: AppRootProps) => (
   <Suspense fallback={<LoadingPlaceholder text="" />}>
@@ -13,15 +20,4 @@ const App = (props: AppRootProps) => (
   </Suspense>
 );
 
-const AppConfig = (props: AppConfigProps) => (
-  <Suspense fallback={<LoadingPlaceholder text="" />}>
-    <LazyAppConfig {...props} />
-  </Suspense>
-);
-
-export const plugin = new AppPlugin<{}>().setRootPage(App).addConfigPage({
-  title: 'Configuration',
-  icon: 'cog',
-  body: AppConfig,
-  id: 'configuration',
-});
+export const plugin = new AppPlugin<{}>().setRootPage(App);

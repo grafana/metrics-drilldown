@@ -3,6 +3,7 @@
   "type": "app",
   "name": "Explore Metrics",
   "id": "grafana-exploremetrics-app",
+  "autoEnabled": true,
   "info": {
     "keywords": ["app", "mimir", "prometheus", "metrics"],
     "description": "Queryless metrics explorer for Prometheus data sources",
@@ -31,14 +32,22 @@
     {
       "type": "page",
       "name": "Metrics App",
-      "path": "/a/%PLUGIN_ID%/home",
+      "path": "/a/%PLUGIN_ID%/",
       "action": "datasources:explore",
       "addToNav": true,
       "defaultNav": true
     }
   ],
   "dependencies": {
-    "grafanaDependency": ">=11.0.0",
+    "grafanaDependency": ">=11.3.0",
     "plugins": []
+  },
+  "extensions": {
+    "addedLinks": [],
+    "extensionPoints": [
+      {
+        "id": "grafana-exploremetrics-app/exploration/v1"
+      }
+    ]
   }
 }

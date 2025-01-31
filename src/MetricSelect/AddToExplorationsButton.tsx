@@ -7,11 +7,12 @@ import React from 'react';
 
 import MimirLogo from 'img/logo.svg';
 
+import pluginJson from '../plugin.json';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 import { isSceneQueryRunner } from '../utils/utils.queries';
 
 export const explorationsPluginId = 'grafana-explorations-app';
-export const extensionPointId = 'grafana-explore-metrics/exploration/v1';
+export const extensionPointId = `${pluginJson.id}/exploration/v1`;
 export const addToExplorationsButtonLabel = 'add panel to exploration';
 
 export interface AddToExplorationButtonState extends SceneObjectState {

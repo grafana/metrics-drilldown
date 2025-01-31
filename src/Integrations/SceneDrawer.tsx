@@ -5,7 +5,7 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObject, type Scene
 import { Drawer, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { ShowModalReactEvent } from 'utils/util.events';
+import { ShowModalReactEvent } from '../utils/utils.events';
 
 export type SceneDrawerProps = {
   scene: SceneObject;
