@@ -11,10 +11,10 @@ import { DataTrailsBookmarks } from './DataTrailBookmarks';
 import { DataTrailsRecentMetrics } from './DataTrailsRecentMetrics';
 import { reportExploreMetrics } from './interactions';
 import { getTrailStore } from './TrailStore/TrailStore';
-import { getDatasourceForNewTrail, getUrlForTrail, newMetricsTrail } from './utils';
+import { getDatasourceForNewTrail, newMetricsTrail } from './utils';
 
 export interface DataTrailsHomeState extends SceneObjectState {
-  onTrailSelected?: (trail: DataTrail) => void;
+  onTrailSelected: (trail: DataTrail) => void;
 }
 
 export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
@@ -22,34 +22,24 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
     super(state);
   }
 
-  private navigateToTrail = (trail: DataTrail) => {
-    const { onTrailSelected } = this.state;
-    if (onTrailSelected) {
-      onTrailSelected(trail);
-    } else {
-      // Fallback to direct URL navigation if no callback provided
-      locationService.push(getUrlForTrail(trail));
-    }
-  };
-
   public onNewMetricsTrail = () => {
     const trail = newMetricsTrail(getDatasourceForNewTrail(), true);
     reportExploreMetrics('exploration_started', { cause: 'new_clicked' });
     getTrailStore().setRecentTrail(trail);
-    this.navigateToTrail(trail);
+    this.state.onTrailSelected(trail);
   };
 
   public onSelectRecentTrail = (trail: DataTrail) => {
     reportExploreMetrics('exploration_started', { cause: 'recent_clicked' });
     getTrailStore().setRecentTrail(trail);
-    this.navigateToTrail(trail);
+    this.state.onTrailSelected(trail);
   };
 
   public onSelectBookmark = (bookmarkIndex: number) => {
     reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
     const trail = getTrailStore().getTrailForBookmarkIndex(bookmarkIndex);
     getTrailStore().setRecentTrail(trail);
-    this.navigateToTrail(trail);
+    this.state.onTrailSelected(trail);
   };
 
   static Component = ({ model }: SceneComponentProps<DataTrailsHome>) => {
