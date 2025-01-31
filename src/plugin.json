@@ -40,5 +40,13 @@
   "dependencies": {
     "grafanaDependency": ">=11.3.0",
     "plugins": []
+  },
+  "extensions": {
+    "addedLinks": [],
+    "extensionPoints": [
+      {
+        "id": "grafana-exploremetrics-app/exploration/v1"
+      }
+    ]
   }
 }
