@@ -1,8 +1,8 @@
 import { type PromQuery } from '@grafana/prometheus';
 import { SceneCSSGridItem, SceneQueryRunner, SceneVariableSet } from '@grafana/scenes';
-import { PanelMenu } from '../Menu/PanelMenu';
 
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
+import { PanelMenu } from '../Menu/PanelMenu';
 import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS } from '../shared';
 import { getColorByIndex } from '../utils';
 import { hideEmptyPreviews } from './hideEmptyPreviews';
