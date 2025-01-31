@@ -9,7 +9,7 @@ export default function Trail({ trail }: { trail: DataTrail }) {
 
   useEffect(() => {
     if (!isInitialized) {
-      if (trail.state.metric !== undefined) {
+      if (trail.state.metric) {
         getTrailStore().setRecentTrail(trail);
       }
       setIsInitialized(true);
