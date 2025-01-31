@@ -30,13 +30,6 @@ jobs:
           fetch-depth: 0
           clean: true
 
-      - name: Debug directory
-        run: |
-          pwd
-          ls -la
-          git branch --show-current
-          git status
-
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
@@ -46,8 +39,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Remove tsbuildinfo
-        run: rm -rf tsconfig.tsbuildinfo
       - name: Check types
         run: npm run typecheck
       - name: Lint
