@@ -1,8 +1,9 @@
+import path from 'path';
+
+import { NormalModuleReplacementPlugin, type Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
 
 import grafanaConfig from './.config/webpack/webpack.config';
-
-import type { Configuration } from 'webpack';
 
 const config = async (env): Promise<Configuration> => {
   const baseConfig = await grafanaConfig(env);
@@ -16,6 +17,13 @@ const config = async (env): Promise<Configuration> => {
     output: {
       asyncChunks: true,
     },
+    plugins: [
+      new NormalModuleReplacementPlugin(/monaco-editor/, path.resolve(__dirname, 'src/stubs/monaco-editor.ts')),
+      new NormalModuleReplacementPlugin(
+        /@grafana\/plugin-ui/,
+        path.resolve(__dirname, 'src/stubs/grafana-plugin-ui.ts')
+      ),
+    ],
   });
 };
 
