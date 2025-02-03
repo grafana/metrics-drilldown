@@ -46,7 +46,7 @@
     "addedLinks": [],
     "extensionPoints": [
       {
-        "id": "grafana-metricsdrilldown-app/exploration/v1"
+        "id": "grafana-exploremetrics-app/exploration/v1"
       }
     ]
   }
