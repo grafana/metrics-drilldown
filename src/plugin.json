@@ -1,11 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "Explore Metrics",
-  "id": "grafana-exploremetrics-app",
+  "name": "Metrics Drilldown",
+  "id": "grafana-metricsdrilldown-app",
   "autoEnabled": true,
   "info": {
-    "keywords": ["app", "mimir", "prometheus", "metrics"],
+    "keywords": ["app", "mimir", "prometheus", "metrics", "drilldown"],
     "description": "Queryless metrics explorer for Prometheus data sources",
     "author": {
       "name": "Grafana"
@@ -20,11 +20,11 @@
     "links": [
       {
         "name": "GitHub",
-        "url": "https://github.com/grafana/explore-metrics"
+        "url": "https://github.com/grafana/metrics-drilldown"
       },
       {
         "name": "Report a bug",
-        "url": "https://github.com/grafana/explore-metrics/issues/new"
+        "url": "https://github.com/grafana/metrics-drilldown/issues/new"
       }
     ]
   },
@@ -46,7 +46,7 @@
     "addedLinks": [],
     "extensionPoints": [
       {
-        "id": "grafana-exploremetrics-app/exploration/v1"
+        "id": "grafana-metricsdrilldown-app/exploration/v1"
       }
     ]
   }
