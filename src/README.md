@@ -22,7 +22,7 @@ We love accepting contributions! If your change is minor, please feel free submi
 
 ### Bugs
 
-If your issue is a bug, please open one [here](https://github.com/grafana/explore-metrics/issues/new).
+If your issue is a bug, please open one [here](https://github.com/grafana/metrics-drilldown/issues/new).
 
 ### Changes
 
