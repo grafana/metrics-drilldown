@@ -20,10 +20,10 @@ services:
       - 'host.docker.internal:host-gateway'
     environment:
       NODE_ENV: development
-      GF_LOG_FILTERS: plugin.grafana-exploremetrics-app:debug
+      GF_LOG_FILTERS: plugin.grafana-metricsdrilldown-app:debug
       GF_LOG_LEVEL: debug
       GF_DATAPROXY_LOGGING: 1
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: grafana-exploremetrics-app
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: grafana-metricsdrilldown-app
 
   prometheus:
     image: prom/prometheus:v3.1.0
