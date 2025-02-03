@@ -44,7 +44,6 @@ import { ShareTrailButton } from './ShareTrailButton';
 import { useBookmarkState } from './TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from './utils';
 
-// @ts-expect-error
 const relatedLogsFeatureEnabled = config.featureToggles.exploreMetricsRelatedLogs;
 
 export interface MetricSceneState extends SceneObjectState {
@@ -78,7 +77,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.setActionView('overview');
     }
 
-    // @ts-expect-error
     if (config.featureToggles.enableScopesInMetricsExplore) {
       // Push the scopes change event to the tabs
       // The event is not propagated because the tabs are not part of the scene graph
