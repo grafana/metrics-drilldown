@@ -14,7 +14,20 @@
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
-    "screenshots": [],
+    "screenshots": [
+      {
+        "name": "homepage",
+        "path": "img/homepage.png"
+      },
+      {
+        "name": "metricselect",
+        "path": "img/metricselect.png"
+      },
+      {
+        "name": "breakdown",
+        "path": "img/breakdown.png"
+      }
+    ],
     "version": "%VERSION%",
     "updated": "%TODAY%",
     "links": [
