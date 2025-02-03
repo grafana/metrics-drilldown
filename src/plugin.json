@@ -18,6 +18,10 @@
       {
         "name": "homepage",
         "path": "img/homepage.png"
+      },
+      {
+        "name": "breakdown",
+        "path": "img/breakdown.png"
       }
     ],
     "version": "%VERSION%",
