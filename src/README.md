@@ -13,8 +13,8 @@ See the [docs](https://grafana.com/docs/grafana-cloud/visualizations/simplified-
 ## Documentation
 
 - [DOCS](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/)
-- [CHANGELOG](https://github.com/grafana/explore-metrics/releases)
-- [GITHUB](https://github.com/grafana/explore-metrics/)
+- [CHANGELOG](https://github.com/grafana/metrics-drilldown/releases)
+- [GITHUB](https://github.com/grafana/metrics-drilldown/)
 
 ## Contributing
 
@@ -27,4 +27,4 @@ If your issue is a bug, please open one [here](https://github.com/grafana/metric
 ### Changes
 
 We do not have a formal proposal process for changes or feature requests. If you have a change you would like to see in
-Explore Metrics, please [file an issue](https://github.com/grafana/explore-metrics/issues/new) with the necessary details.
+Explore Metrics, please [file an issue](https://github.com/grafana/metrics-drilldown/issues/new) with the necessary details.
