@@ -16,14 +16,7 @@ import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 
 function isPrometheusDatasource(ds: DataSourceApi<any>): ds is PrometheusDatasource {
-  return (
-    ds.type === 'prometheus' &&
-    'getTagKeys' in ds &&
-    'getTagValues' in ds &&
-    'languageProvider' in ds &&
-    'metricsMetadata' in ds.languageProvider &&
-    'loadMetricsMetadata' in ds.languageProvider
-  );
+  return ds.type === 'prometheus';
 }
 
 export class MetricDatasourceHelper {

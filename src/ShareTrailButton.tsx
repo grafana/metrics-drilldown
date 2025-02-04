@@ -2,6 +2,7 @@ import { config } from '@grafana/runtime';
 import { ToolbarButton } from '@grafana/ui';
 import React, { useState } from 'react';
 
+import { PLUGIN_BASE_URL } from './constants';
 import { type DataTrail } from './DataTrail';
 import { reportExploreMetrics } from './interactions';
 import { getUrlForTrail } from './utils';
@@ -17,7 +18,7 @@ export const ShareTrailButton = ({ trail }: ShareTrailButtonState) => {
     if (navigator.clipboard) {
       reportExploreMetrics('selected_metric_action_clicked', { action: 'share_url' });
       const appUrl = config.appUrl.endsWith('/') ? config.appUrl.slice(0, -1) : config.appUrl;
-      const url = appUrl + getUrlForTrail(trail);
+      const url = `${appUrl}${PLUGIN_BASE_URL}/${getUrlForTrail(trail)}`;
       navigator.clipboard.writeText(url);
       setTooltip('Copied!');
       setTimeout(() => {
