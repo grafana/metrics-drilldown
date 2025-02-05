@@ -1,4 +1,4 @@
-import { css, injectGlobal } from '@emotion/css';
+import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { useStyles2 } from '@grafana/ui';
