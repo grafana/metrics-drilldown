@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css, injectGlobal } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { useStyles2 } from '@grafana/ui';
@@ -44,6 +44,9 @@ export default App;
 function getStyles(theme: GrafanaTheme2) {
   return {
     appContainer: css({
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh', // Ensure full page height
       backgroundColor: theme.colors.background.primary,
     }),
   };
