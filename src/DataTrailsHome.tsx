@@ -96,6 +96,7 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       height: '100%',
       boxSizing: 'border-box', // Ensure padding doesn't cause overflow
+      marginBottom: theme.spacing(6), // Prevent last row of cards from touching page bottom
     }),
     homepageBox: css({
       backgroundColor: theme.colors.background.secondary,
