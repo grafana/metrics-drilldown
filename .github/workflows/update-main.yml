@@ -77,11 +77,10 @@ jobs:
           parent: false
 
   deploy-main-to-dev-and-ops:
-    name: Deploy
     needs: build-latest-version
     uses: ./.github/workflows/deploy-to-env.yml
     # Make deployments available only from main
-    if: github.event_name == 'push'
+    if: ${{ github.ref == 'refs/heads/main' }}
     secrets: inherit
     strategy:
       matrix:
