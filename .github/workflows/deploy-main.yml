@@ -6,8 +6,9 @@ on:
       - main
 
 permissions:
-  contents: 'read'
+  contents: 'write'
   id-token: 'write'
+  attestations: 'write'
 
 jobs:
   ci-cd:
