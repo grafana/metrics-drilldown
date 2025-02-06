@@ -21,7 +21,7 @@ export const MetricsContext = createContext<MetricsAppContext>({
 });
 
 function App(props: AppRootProps) {
-  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined, true));
+  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined, false));
   const styles = useStyles2(getStyles);
   const goToUrlForTrail = (trail: DataTrail) => {
     locationService.push(getUrlForTrail(trail));
