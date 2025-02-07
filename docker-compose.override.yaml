@@ -1,0 +1,5 @@
+services:
+  grafana:
+    # Use either the GRAFANA_PORT defined in `.env`, or port 3000 if not defined
+    ports: !override
+      - '${GRAFANA_PORT:-3000}:3000'
