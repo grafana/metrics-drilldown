@@ -5,6 +5,8 @@ services:
       file: .config/docker-compose-base.yaml
       service: grafana
     container_name: 'grafana'
+    environment:
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
 
   prometheus:
     container_name: 'prometheus'
