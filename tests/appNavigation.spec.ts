@@ -1,38 +1,39 @@
 import { expect, test } from './fixtures';
+import { testIds } from '../src/App/testIds';
 import { ROUTES } from '../src/constants';
-import { TEST_IDS, UI_TEXT } from '../src/constants/ui';
+import { UI_TEXT } from '../src/constants/ui';
 
 test.describe('Metrics Drilldown', () => {
   test('home page renders with core elements', async ({ gotoPage, page }) => {
     await gotoPage(`/${ROUTES.Home}`);
 
     // Verify main container and title
-    const container = page.getByTestId(TEST_IDS.HOME.CONTAINER);
+    const container = page.getByTestId(testIds.pageHome.container);
     await expect(container).toBeVisible();
     await expect(page.getByText(UI_TEXT.HOME.TITLE)).toBeVisible();
     await expect(page.getByText(UI_TEXT.HOME.SUBTITLE)).toBeVisible();
 
     // Verify start button
-    const startButton = page.getByTestId(TEST_IDS.HOME.START_BUTTON);
+    const startButton = page.getByTestId(testIds.pageHome.startButton);
     await expect(startButton).toBeVisible();
     await expect(startButton).toContainText(UI_TEXT.HOME.START_BUTTON);
   });
 
   test('start button navigates to trail page', async ({ gotoPage, page }) => {
     await gotoPage(`/${ROUTES.Home}`);
-    await page.getByTestId(TEST_IDS.HOME.START_BUTTON).click();
+    await page.getByTestId(testIds.pageHome.startButton).click();
     await expect(page.getByText(UI_TEXT.SEARCH.TITLE)).toBeVisible();
   });
 
   test('bookmarks state persists', async ({ gotoPage, page }) => {
     // Only run if bookmarks exist
     await gotoPage(`/${ROUTES.Home}`);
-    const bookmarksToggle = page.getByTestId(TEST_IDS.HOME.BOOKMARKS_TOGGLE);
+    const bookmarksToggle = page.getByTestId(testIds.pageHome.bookmarksToggle);
 
     if (await bookmarksToggle.isVisible()) {
       // Toggle bookmarks
       await bookmarksToggle.click();
-      const bookmarksList = page.getByTestId(TEST_IDS.HOME.BOOKMARKS_LIST);
+      const bookmarksList = page.getByTestId(testIds.pageHome.bookmarksList);
       await expect(bookmarksList).toBeVisible();
 
       // Refresh page
@@ -52,6 +53,6 @@ test.describe('Metrics Drilldown', () => {
 test.describe('navigating app', () => {
   test('trail page should render successfully', async ({ gotoPage, page }) => {
     await gotoPage(`/${ROUTES.Trail}`);
-    await expect(page.getByText('Search metrics')).toBeVisible();
+    await expect(page.getByText(UI_TEXT.SEARCH.TITLE)).toBeVisible();
   });
 });

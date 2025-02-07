@@ -4,7 +4,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Box, Button, Icon, Stack, Text, TextLink, useStyles2, useTheme2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
-import { TEST_IDS, UI_TEXT } from 'constants/ui';
+import { testIds } from 'App/testIds';
+import { UI_TEXT } from 'constants/ui';
 
 import { DarkModeRocket, LightModeRocket } from './assets/rockets';
 import { type DataTrail } from './DataTrail';
@@ -55,7 +56,7 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
     };
 
     return (
-      <article className={styles.container} data-testid={TEST_IDS.HOME.CONTAINER}>
+      <article className={styles.container} data-testid={testIds.pageHome.container}>
         <section className={styles.homepageBox}>
           <Stack direction="column" alignItems="center">
             <div>{theme.isDark ? <DarkModeRocket /> : <LightModeRocket />}</div>
@@ -79,7 +80,7 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
                 size="lg"
                 variant="primary"
                 onClick={model.onNewMetricsTrail}
-                data-testid={TEST_IDS.HOME.START_BUTTON}
+                data-testid={testIds.pageHome.startButton}
               >
                 <div className={styles.startButton}>{UI_TEXT.HOME.START_BUTTON}</div>
                 <Icon name="arrow-right" size="lg" style={{ marginLeft: '8px' }} />

@@ -10,13 +10,3 @@ export const UI_TEXT = {
     TITLE: 'Search metrics',
   },
 };
-
-export const TEST_IDS = {
-  HOME: {
-    CONTAINER: 'home-container',
-    START_BUTTON: 'start-button',
-    BOOKMARKS_TOGGLE: 'bookmarks-toggle',
-    BOOKMARKS_LIST: 'bookmarks-list',
-    RECENT_LIST: 'recent-list',
-  },
-};
