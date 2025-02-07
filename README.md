@@ -20,7 +20,7 @@ To learn more about @grafana/scenes usage please refer to the [documentation](ht
 
 ### Configuration
 
-If you'd like to customize the exposed port of the Grafana instance that is used for development (created with `npm run server`), you can do so by setting the `GRAFANA_PORT` environment variable in the `.env` file.
+If you'd like to customize the exposed port of the Grafana instance that is used for development (created with `npm run server`), you can do so by setting the `GRAFANA_PORT` environment variable in the `.env` file. For reference, see `.env.example`.
 
 ```bash
 # .env
