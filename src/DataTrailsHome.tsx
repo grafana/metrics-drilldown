@@ -4,6 +4,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Box, Button, Icon, Stack, Text, TextLink, useStyles2, useTheme2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
+import { TEST_IDS, UI_TEXT } from 'constants/ui';
+
 import { DarkModeRocket, LightModeRocket } from './assets/rockets';
 import { type DataTrail } from './DataTrail';
 import { DataTrailsBookmarks } from './DataTrailBookmarks';
@@ -53,16 +55,16 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
     };
 
     return (
-      <article className={styles.container}>
+      <article className={styles.container} data-testid={TEST_IDS.HOME.CONTAINER}>
         <section className={styles.homepageBox}>
           <Stack direction="column" alignItems="center">
             <div>{theme.isDark ? <DarkModeRocket /> : <LightModeRocket />}</div>
             <Text element="h1" textAlignment="center" weight="medium">
-              Start your metrics exploration!
+              {UI_TEXT.HOME.TITLE}
             </Text>
             <Box>
               <Text element="p" textAlignment="center" color="secondary">
-                Explore your Prometheus-compatible metrics without writing a query.
+                {UI_TEXT.HOME.SUBTITLE}
                 <TextLink
                   href="https://grafana.com/docs/grafana/latest/explore/explore-metrics/"
                   external
@@ -73,8 +75,13 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
               </Text>
             </Box>
             <div className={styles.gap24}>
-              <Button size="lg" variant="primary" onClick={model.onNewMetricsTrail}>
-                <div className={styles.startButton}>Let&apos;s start!</div>
+              <Button
+                size="lg"
+                variant="primary"
+                onClick={model.onNewMetricsTrail}
+                data-testid={TEST_IDS.HOME.START_BUTTON}
+              >
+                <div className={styles.startButton}>{UI_TEXT.HOME.START_BUTTON}</div>
                 <Icon name="arrow-right" size="lg" style={{ marginLeft: '8px' }} />
               </Button>
             </div>
