@@ -1,30 +1,10 @@
 name: 'metrics-drilldown'
 services:
   grafana:
+    extends:
+      file: .config/docker-compose-base.yaml
+      service: grafana
     container_name: 'grafana'
-    user: root
-
-    build:
-      context: ./.config
-      args:
-        grafana_image: ${GRAFANA_IMAGE:-grafana}
-        grafana_version: ${GRAFANA_VERSION:-latest}
-        development: ${DEVELOPMENT:-false}
-        anonymous_auth_enabled: ${ANONYMOUS_AUTH_ENABLED:-true}
-    ports:
-      - 3001:3000/tcp
-    volumes:
-      - ./dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
-      - ./provisioning:/etc/grafana/provisioning
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
-    environment:
-      NODE_ENV: development
-      GF_LOG_FILTERS: plugin.grafana-metricsdrilldown-app:debug
-      GF_LOG_LEVEL: debug
-      GF_DATAPROXY_LOGGING: 1
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: grafana-metricsdrilldown-app
-      GF_SERVER_ROOT_URL: http://localhost:3001
 
   prometheus:
     container_name: 'prometheus'

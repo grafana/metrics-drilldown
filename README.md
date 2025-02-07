@@ -18,6 +18,15 @@ To learn more about @grafana/scenes usage please refer to the [documentation](ht
 1. An example of a scene with tabs. See [Scene with tabs](./src/pages/WithTabs/WithTabs.tsx)
 1. An example of a scene with drill down. See [Scene with drill down](./src/pages/WithDrilldown/WithDrilldown.tsx)
 
+### Configuration
+
+If you'd like to customize the exposed port of the Grafana instance that is used for development (created with `npm run server`), you can do so by setting the `GRAFANA_PORT` environment variable in the `.env` file.
+
+```bash
+# .env
+GRAFANA_PORT=3001
+```
+
 ### Frontend
 
 1. Install dependencies
