@@ -13,9 +13,9 @@
     "e2e": "playwright test",
     "e2e:fast": "playwright test --retries=2 --workers=3 -x --trace on",
     "e2e:debug": "playwright test --debug -x --trace on /test",
-    "server": "docker compose -f devenv/docker-compose.yaml up --build",
-    "server:ci": "docker compose -f devenv/docker-compose.yaml up --build -d",
-    "server:ci:down": "docker compose -f devenv/docker-compose.yaml down",
+    "server": "docker compose -f docker-compose.yaml up --build",
+    "server:ci": "docker compose -f docker-compose.yaml up --build -d",
+    "server:down": "docker compose -f docker-compose.yaml down",
     "sign": "npx --yes @grafana/sign-plugin@latest"
   },
   "author": "Grafana",
