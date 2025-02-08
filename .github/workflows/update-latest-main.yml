@@ -229,7 +229,7 @@ jobs:
 
   upload-to-gcs:
     runs-on: ubuntu-latest
-    needs: build-latest-version
+    needs: [build-latest-version, playwright-tests]
 
     steps:
       - uses: actions/checkout@v4
