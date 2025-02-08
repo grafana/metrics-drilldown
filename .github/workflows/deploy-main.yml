@@ -1,7 +1,11 @@
 name: main - build, upload, deploy to dev+ops
 
 on:
-  push:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['update-latest-main']
+    types:
+      - completed
     branches:
       - main
 
@@ -11,8 +15,8 @@ permissions:
   attestations: 'write'
 
 jobs:
-  ci-cd:
-    name: CI/CD
+  CD:
+    name: Deploy to dev+ops
     uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
     with:
       environment: 'ops' # also deploys to dev
