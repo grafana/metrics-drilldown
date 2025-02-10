@@ -6,9 +6,7 @@ import { config } from 'dotenv';
 import type { PluginOptions } from '@grafana/plugin-e2e';
 
 const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
-// Set Grafana credentials
-process.env.GRAFANA_USER = 'admin';
-process.env.GRAFANA_PASS = 'admin';
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -37,9 +35,6 @@ export default defineConfig<PluginOptions>({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    extraHTTPHeaders: {
-      'X-Grafana-Org-Id': '1',
-    },
   },
 
   /* Configure projects for major browsers */
