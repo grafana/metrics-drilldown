@@ -1,25 +1,25 @@
+name: 'metrics-drilldown'
 services:
   grafana:
-    user: root
-    container_name: 'grafana-metricsdrilldown-app'
-
-    build:
-      context: ./.config
-      args:
-        grafana_image: ${GRAFANA_IMAGE:-grafana-enterprise}
-        grafana_version: ${GRAFANA_VERSION:-11.3.2}
-        development: ${DEVELOPMENT:-false}
-        anonymous_auth_enabled: ${ANONYMOUS_AUTH_ENABLED:-true}
-    ports:
-      - 3000:3000/tcp
-    volumes:
-      - ./dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
-      - ./provisioning:/etc/grafana/provisioning
-      - .:/root/grafana-metricsdrilldown-app
-
+    extends:
+      file: .config/docker-compose-base.yaml
+      service: grafana
+    container_name: 'grafana'
     environment:
-      NODE_ENV: development
-      GF_LOG_FILTERS: plugin.grafana-metricsdrilldown-app:debug
-      GF_LOG_LEVEL: debug
-      GF_DATAPROXY_LOGGING: 1
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: grafana-metricsdrilldown-app
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
+
+  prometheus:
+    container_name: 'prometheus'
+    image: prom/prometheus:v3.1.0
+    ports:
+      - '9099:9090'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    command: >
+      --enable-feature=remote-write-receiver
+      --enable-feature=exemplar-storage
+      --enable-feature=native-histograms
+      --config.file=/etc/prometheus/prometheus.yml
+      --storage.tsdb.path=/prometheus
+    volumes:
+      - ./config/prometheus.yaml:/etc/prometheus/prometheus.yml

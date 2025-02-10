@@ -1,0 +1,77 @@
+name: Build plugin
+description: 'Builds, tests, and packages the plugin'
+
+outputs:
+  plugin-id:
+    description: 'The plugin ID'
+    value: ${{ steps.metadata.outputs.plugin-id }}
+  archive:
+    description: 'The packaged and signed plugin artifact'
+    value: ${{ steps.metadata.outputs.archive }}
+
+inputs:
+  policy_token:
+    description: 'Grafana access policy token. https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin#generate-an-access-policy-token'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+      # Only build and release if the repository is grafana/metrics-drilldown (not a fork)
+      if: github.repository == 'grafana/metrics-drilldown'
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Build frontend
+      shell: bash
+      run: |
+        if { [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" ]; } && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          npm run build -- --profile --json stats.json
+        else
+          npm run build
+        fi
+
+    - name: Sign plugin
+      run: npm run sign
+      shell: bash
+      env:
+        GRAFANA_ACCESS_POLICY_TOKEN: ${{ inputs.policy_token }}
+      if: ${{ inputs.policy_token != '' }}
+
+    - name: Get plugin metadata
+      id: metadata
+      shell: bash
+      run: |
+        sudo apt-get install jq
+
+        export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
+        export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-latest.zip
+
+        echo "plugin-id=${GRAFANA_PLUGIN_ID}" >> $GITHUB_OUTPUT
+        echo "archive=${GRAFANA_PLUGIN_ARTIFACT}" >> $GITHUB_OUTPUT
+
+        echo "archive=${GRAFANA_PLUGIN_ARTIFACT}"
+
+    - name: Package plugin
+      id: package-plugin
+      shell: bash
+      run: |
+        mv dist ${{ steps.metadata.outputs.plugin-id }}
+        zip ${{ steps.metadata.outputs.archive }} ${{ steps.metadata.outputs.plugin-id }} -r
+
+    - name: Archive Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.metadata.outputs.archive }}
+        path: ${{ steps.metadata.outputs.archive }}
+        retention-days: 5
