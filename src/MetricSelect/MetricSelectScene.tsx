@@ -24,6 +24,8 @@ import { Alert, Badge, Field, Icon, IconButton, InlineSwitch, Input, Select, Too
 import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
+import { UI_TEXT } from 'constants/ui';
+
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
@@ -545,9 +547,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <Field label={'Search metrics'} className={styles.searchField}>
+          <Field label={UI_TEXT.SEARCH.TITLE} className={styles.searchField}>
             <Input
-              placeholder="Search metrics"
+              placeholder={UI_TEXT.SEARCH.TITLE}
               prefix={<Icon name={'search'} />}
               value={metricSearch}
               onChange={model.onSearchQueryChange}
