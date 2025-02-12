@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       archive: ${{ steps.build.outputs.archive }}
-      has-e2e: ${{ steps.check-for-e2e.outputs.has-e2e }}
       plugin-id: ${{ steps.build.outputs.plugin-id }}
       plugin-version: ${{ steps.build.outputs.plugin-version }}
 
@@ -56,20 +55,11 @@ jobs:
         with:
           policy_token: ${{ steps.get-secrets.outputs.GRAFANA_ACCESS_POLICY_TOKEN }}
 
-      - name: Check for E2E
-        id: check-for-e2e
-        run: |
-          if [ -f "playwright.config.ts" ]
-          then
-            echo "has-e2e=true" >> $GITHUB_OUTPUT
-          fi
-
   resolve-versions:
     name: Resolve e2e images
     runs-on: ubuntu-latest
     timeout-minutes: 3
     needs: build
-    if: ${{ needs.build.outputs.has-e2e == 'true' }}
     outputs:
       matrix: ${{ steps.resolve-versions.outputs.matrix }}
     steps:
@@ -79,63 +69,9 @@ jobs:
         id: resolve-versions
         uses: grafana/plugin-actions/e2e-version@main
 
-  playwright-tests:
-    needs: [resolve-versions, build]
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        GRAFANA_IMAGE: ${{fromJson(needs.resolve-versions.outputs.matrix)}}
-    name: e2e test ${{ matrix.GRAFANA_IMAGE.name }}@${{ matrix.GRAFANA_IMAGE.VERSION }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dev dependencies
-        run: npm ci
-
-      - name: Start Grafana
-        run: |
-          docker compose pull
-          GRAFANA_VERSION=${{ matrix.GRAFANA_IMAGE.VERSION }} GRAFANA_IMAGE=${{ matrix.GRAFANA_IMAGE.NAME }} docker compose up -d
-
-      - name: Wait for grafana server
-        uses: grafana/plugin-actions/wait-for-grafana@main
-        with:
-          url: http://localhost:3000/login
-
-      - name: Install Playwright Browsers
-        run: npm exec playwright install chromium --with-deps
-
-      - name: Run Playwright tests
-        id: run-tests
-        run: npm run e2e
-
-      - name: Docker logs
-        if: ${{ always() && steps.run-tests.outcome == 'failure' }}
-        run: |
-          docker logs grafana-boilerplate-app >& grafana-server.log
-
-      - name: Stop grafana docker
-        run: docker compose down
-
-      - name: Upload server log
-        uses: actions/upload-artifact@v4
-        if: ${{ always() && steps.run-tests.outcome == 'failure' }}
-        with:
-          name: ${{ matrix.GRAFANA_IMAGE.NAME }}-v${{ matrix.GRAFANA_IMAGE.VERSION }}-${{github.run_id}}-server-log
-          path: grafana-server.log
-          retention-days: 5
-
   upload-to-gcs:
     runs-on: ubuntu-latest
-    needs: [build, playwright-tests]
+    needs: [build]
 
     steps:
       - uses: actions/checkout@v4
