@@ -243,8 +243,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     this.updateBody(variable);
   }
 
+  debugger;
   private updateBody(variable: QueryVariable) {
-    const options = getLabelOptions(this, variable);
+    const options = getLabelOptions(this, variable); // where we deliver labels to update the body
 
     const trail = getTrailFor(this);
 
@@ -254,6 +255,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     }
 
     const stateUpdate: Partial<LabelBreakdownSceneState> = {
+      // where we update the state
       loading: variable.state.loading,
       value: String(variable.state.value),
       labels: allLabelOptions,
@@ -261,13 +263,19 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       blockingMessage: undefined,
     };
 
-    if (!variable.state.loading && variable.state.options.length) {
-      stateUpdate.body = variable.hasAllValue()
-        ? buildAllLayout(allLabelOptions, this._query!, this.onBreakdownLayoutChange, trail.state.useOtelExperience)
-        : buildNormalLayout(this._query!, this.onBreakdownLayoutChange, this.state.search);
-    } else if (!variable.state.loading) {
-      stateUpdate.body = undefined;
-      stateUpdate.blockingMessage = 'Unable to retrieve label options for currently selected metric.';
+    if (!variable.state.loading) {
+      // Check if we only have the "All" option
+      if (allLabelOptions.length === 1 && allLabelOptions[0].value === '$__all') {
+        stateUpdate.body = undefined;
+        stateUpdate.blockingMessage = 'No labels available for breakdown.';
+      } else if (variable.state.options.length) {
+        stateUpdate.body = variable.hasAllValue()
+          ? buildAllLayout(allLabelOptions, this._query!, this.onBreakdownLayoutChange, trail.state.useOtelExperience)
+          : buildNormalLayout(this._query!, this.onBreakdownLayoutChange, this.state.search);
+      } else {
+        stateUpdate.body = undefined;
+        stateUpdate.blockingMessage = 'Unable to retrieve label options for currently selected metric.';
+      }
     }
 
     this.clearBreakdownPanelAxisValues();
