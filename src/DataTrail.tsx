@@ -663,6 +663,11 @@ function getVariableSet(
         baseFilters: getBaseFiltersForMetric(metric),
         applyMode: 'manual',
         allowCustomValue: true,
+        expressionBuilder: (filters: AdHocVariableFilter[]) => {
+          return [...getBaseFiltersForMetric(metric), ...filters]
+            .map((filter) => `${filter.key}${filter.operator}"${filter.value}"`)
+            .join(',');
+        },
       }),
       ...getVariablesWithOtelJoinQueryConstant(otelJoinQuery ?? ''),
       new ConstantVariable({
