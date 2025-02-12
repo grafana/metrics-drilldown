@@ -55,20 +55,6 @@ jobs:
         with:
           policy_token: ${{ steps.get-secrets.outputs.GRAFANA_ACCESS_POLICY_TOKEN }}
 
-  resolve-versions:
-    name: Resolve e2e images
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    needs: build
-    outputs:
-      matrix: ${{ steps.resolve-versions.outputs.matrix }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Resolve Grafana E2E versions
-        id: resolve-versions
-        uses: grafana/plugin-actions/e2e-version@main
-
   upload-to-gcs:
     runs-on: ubuntu-latest
     needs: [build]
@@ -103,7 +89,8 @@ jobs:
         with:
           credentials_json: '${{ env.GCP_UPLOAD_ARTIFACTS_KEY }}'
 
-      - name: Rename zip file
+      - name: Rename zip file if tagged version
+        if: ${{ steps.set-suffix.outputs.suffix != 'latest' }}
         run: |
           mv ${{ needs.build.outputs.archive }} ${{ needs.build.outputs.plugin-id }}-${{ steps.set-suffix.outputs.suffix }}.zip
 
