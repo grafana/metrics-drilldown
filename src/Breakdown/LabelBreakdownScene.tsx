@@ -243,9 +243,8 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     this.updateBody(variable);
   }
 
-  debugger;
   private updateBody(variable: QueryVariable) {
-    const options = getLabelOptions(this, variable); // where we deliver labels to update the body
+    const options = getLabelOptions(this, variable);
 
     const trail = getTrailFor(this);
 
@@ -255,7 +254,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     }
 
     const stateUpdate: Partial<LabelBreakdownSceneState> = {
-      // where we update the state
       loading: variable.state.loading,
       value: String(variable.state.value),
       labels: allLabelOptions,
