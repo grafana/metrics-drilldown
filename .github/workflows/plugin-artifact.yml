@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
 
 permissions:
   contents: 'read'
@@ -21,6 +23,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
@@ -239,6 +242,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set filename suffix
+        id: set-suffix
+        run: |
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            # For tags, use the version number without the 'v' prefix
+            echo "suffix=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          else
+            # For main branch pushes, use 'latest'
+            echo "suffix=latest" >> $GITHUB_OUTPUT
+          fi
+
       - name: Download zip
         uses: actions/download-artifact@v4
         with:
@@ -255,10 +269,14 @@ jobs:
         with:
           credentials_json: '${{ env.GCP_UPLOAD_ARTIFACTS_KEY }}'
 
+      - name: Rename zip file
+        run: |
+          mv ${{ needs.build-latest-version.outputs.plugin-id }}-latest.zip ${{ needs.build-latest-version.outputs.plugin-id }}-${{ steps.set-suffix.outputs.suffix }}.zip
+
       - id: 'upload-to-gcs'
         name: 'Upload assets to main'
         uses: 'google-github-actions/upload-cloud-storage@v1'
         with:
-          path: ./${{ needs.build-latest-version.outputs.plugin-id }}-latest.zip
+          path: ./${{ needs.build-latest-version.outputs.plugin-id }}-${{ steps.set-suffix.outputs.suffix }}.zip
           destination: 'integration-artifacts/${{ needs.build-latest-version.outputs.plugin-id }}/'
           parent: false

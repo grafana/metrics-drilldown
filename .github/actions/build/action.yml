@@ -12,7 +12,7 @@ outputs:
 inputs:
   policy_token:
     description: 'Grafana access policy token. https://grafana.com/developers/plugin-tools/publish-a-plugin/sign-a-plugin#generate-an-access-policy-token'
-    required: false
+    required: true
     default: ''
 
 runs:
