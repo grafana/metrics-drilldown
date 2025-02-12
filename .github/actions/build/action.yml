@@ -5,6 +5,9 @@ outputs:
   plugin-id:
     description: 'The plugin ID'
     value: ${{ steps.metadata.outputs.plugin-id }}
+  plugin-version:
+    description: 'The plugin version'
+    value: ${{ steps.metadata.outputs.plugin-version }}
   archive:
     description: 'The packaged and signed plugin artifact'
     value: ${{ steps.metadata.outputs.archive }}
@@ -55,9 +58,11 @@ runs:
         sudo apt-get install jq
 
         export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
+        export GRAFANA_PLUGIN_VERSION=$(cat dist/plugin.json | jq -r .info.version)
         export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-latest.zip
 
         echo "plugin-id=${GRAFANA_PLUGIN_ID}" >> $GITHUB_OUTPUT
+        echo "plugin-version=${GRAFANA_PLUGIN_VERSION}" >> $GITHUB_OUTPUT
         echo "archive=${GRAFANA_PLUGIN_ARTIFACT}" >> $GITHUB_OUTPUT
 
         echo "archive=${GRAFANA_PLUGIN_ARTIFACT}"

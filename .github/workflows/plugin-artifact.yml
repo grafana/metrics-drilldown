@@ -1,4 +1,4 @@
-name: build & upload latest plugin artifact to GCS
+name: build & upload plugin artifact to GCS
 
 on:
   push:
@@ -16,13 +16,15 @@ jobs:
     name: Build, lint and unit tests
     runs-on: ubuntu-latest
     outputs:
-      plugin-id: ${{ steps.metadata.outputs.plugin-id }}
-      plugin-version: ${{ steps.metadata.outputs.plugin-version }}
+      archive: ${{ steps.build.outputs.archive }}
       has-e2e: ${{ steps.check-for-e2e.outputs.has-e2e }}
-      has-backend: ${{ steps.check-for-backend.outputs.has-backend }}
+      plugin-id: ${{ steps.build.outputs.plugin-id }}
+      plugin-version: ${{ steps.build.outputs.plugin-version }}
 
     steps:
       - uses: actions/checkout@v4
+        # Only build and release if the repository is grafana/metrics-drilldown (not a fork)
+        if: github.repository == 'grafana/metrics-drilldown'
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
@@ -35,45 +37,24 @@ jobs:
 
       - name: Check types
         run: npm run typecheck
+
       - name: Lint
         run: npm run lint
+
       - name: Unit tests
         run: npm run test:ci
-      - name: Build frontend
-        run: |
-          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            npm run build -- --profile --json stats.json
-          else
-            npm run build
-          fi
 
-      - name: Check for backend
-        id: check-for-backend
-        run: |
-          if [ -f "Magefile.go" ]
-          then
-            echo "has-backend=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Setup Go environment
-        if: steps.check-for-backend.outputs.has-backend == 'true'
-        uses: actions/setup-go@v5
+      - id: get-secrets
+        uses: grafana/shared-workflows/actions/get-vault-secrets@main
         with:
-          go-version: '1.22'
+          common_secrets: |
+            GRAFANA_ACCESS_POLICY_TOKEN=plugins/sign-plugin-access-policy-token:token
 
-      - name: Test backend
-        if: steps.check-for-backend.outputs.has-backend == 'true'
-        uses: magefile/mage-action@v3
+      - name: Call shared build action
+        id: build
+        uses: ./.github/actions/build
         with:
-          version: latest
-          args: coverage
-
-      - name: Build backend
-        if: steps.check-for-backend.outputs.has-backend == 'true'
-        uses: magefile/mage-action@v3
-        with:
-          version: latest
-          args: buildAll
+          policy_token: ${{ steps.get-secrets.outputs.GRAFANA_ACCESS_POLICY_TOKEN }}
 
       - name: Check for E2E
         id: check-for-e2e
@@ -82,56 +63,6 @@ jobs:
           then
             echo "has-e2e=true" >> $GITHUB_OUTPUT
           fi
-
-      - id: get-secrets
-        uses: grafana/shared-workflows/actions/get-vault-secrets@main
-        with:
-          common_secrets: |
-            GRAFANA_ACCESS_POLICY_TOKEN=plugins/sign-plugin-access-policy-token:token
-
-      - name: Sign plugin
-        if: ${{ steps.get-secrets.outputs.GRAFANA_ACCESS_POLICY_TOKEN != '' }}
-        run: npm run sign
-
-      - name: Get plugin metadata
-        id: metadata
-        run: |
-          sudo apt-get install jq
-
-          export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
-          export GRAFANA_PLUGIN_VERSION=$(cat dist/plugin.json | jq -r .info.version)
-          export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-${GRAFANA_PLUGIN_VERSION}.zip
-
-          echo "plugin-id=${GRAFANA_PLUGIN_ID}" >> $GITHUB_OUTPUT
-          echo "plugin-version=${GRAFANA_PLUGIN_VERSION}" >> $GITHUB_OUTPUT
-          echo "archive=${GRAFANA_PLUGIN_ARTIFACT}" >> $GITHUB_OUTPUT
-
-      - name: Package plugin
-        id: package-plugin
-        run: |
-          mv dist ${{ steps.metadata.outputs.plugin-id }}
-          zip ${{ steps.metadata.outputs.archive }} ${{ steps.metadata.outputs.plugin-id }} -r
-
-      - name: Check plugin.json
-        run: |
-          docker run --pull=always \
-            -v $PWD/${{ steps.metadata.outputs.archive }}:/archive.zip \
-            grafana/plugin-validator-cli -analyzer=metadatavalid /archive.zip
-
-      - name: Archive Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.metadata.outputs.plugin-id }}-${{ steps.metadata.outputs.plugin-version }}
-          path: ${{ steps.metadata.outputs.plugin-id }}
-          retention-days: 5
-
-      - name: Upload stats.json artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v4
-        with:
-          name: main-branch-stats
-          path: stats.json
-          overwrite: true
 
   resolve-versions:
     name: Resolve e2e images
@@ -165,11 +96,6 @@ jobs:
         with:
           path: dist
           name: ${{ needs.build.outputs.plugin-id }}-${{ needs.build.outputs.plugin-version }}
-
-      - name: Execute permissions on binary
-        if: needs.build.outputs.has-backend == 'true'
-        run: |
-          chmod +x ./dist/gpx_*
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
@@ -213,31 +139,9 @@ jobs:
           path: grafana-server.log
           retention-days: 5
 
-  build-latest-version:
-    runs-on: ubuntu-latest
-    outputs:
-      plugin-id: ${{ steps.build.outputs.plugin-id }}
-
-    steps:
-      - uses: actions/checkout@v4
-        # Only build and release if the repository is grafana/metrics-drilldown (not a fork)
-        if: github.repository == 'grafana/metrics-drilldown'
-
-      - id: get-secrets
-        uses: grafana/shared-workflows/actions/get-vault-secrets@main
-        with:
-          common_secrets: |
-            GRAFANA_ACCESS_POLICY_TOKEN=plugins/sign-plugin-access-policy-token:token
-
-      - name: Call shared build action
-        id: build
-        uses: ./.github/actions/build
-        with:
-          policy_token: ${{ steps.get-secrets.outputs.GRAFANA_ACCESS_POLICY_TOKEN }}
-
   upload-to-gcs:
     runs-on: ubuntu-latest
-    needs: [build-latest-version, playwright-tests]
+    needs: [build, playwright-tests]
 
     steps:
       - uses: actions/checkout@v4
@@ -256,7 +160,7 @@ jobs:
       - name: Download zip
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.build-latest-version.outputs.plugin-id }}-latest.zip
+          name: ${{ needs.build.outputs.archive }}
 
       - id: get-secrets
         uses: grafana/shared-workflows/actions/get-vault-secrets@main
@@ -271,12 +175,12 @@ jobs:
 
       - name: Rename zip file
         run: |
-          mv ${{ needs.build-latest-version.outputs.plugin-id }}-latest.zip ${{ needs.build-latest-version.outputs.plugin-id }}-${{ steps.set-suffix.outputs.suffix }}.zip
+          mv ${{ needs.build.outputs.archive }} ${{ needs.build.outputs.plugin-id }}-${{ steps.set-suffix.outputs.suffix }}.zip
 
       - id: 'upload-to-gcs'
         name: 'Upload assets to main'
         uses: 'google-github-actions/upload-cloud-storage@v1'
         with:
-          path: ./${{ needs.build-latest-version.outputs.plugin-id }}-${{ steps.set-suffix.outputs.suffix }}.zip
-          destination: 'integration-artifacts/${{ needs.build-latest-version.outputs.plugin-id }}/'
+          path: ./${{ needs.build.outputs.plugin-id }}-${{ steps.set-suffix.outputs.suffix }}.zip
+          destination: 'integration-artifacts/${{ needs.build.outputs.plugin-id }}/'
           parent: false
