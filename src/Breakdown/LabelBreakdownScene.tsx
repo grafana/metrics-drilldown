@@ -267,7 +267,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
         : buildNormalLayout(this._query!, this.onBreakdownLayoutChange, this.state.search);
     } else if (!variable.state.loading) {
       stateUpdate.body = undefined;
-      stateUpdate.blockingMessage = 'Unable to retrieve label options for currently selected metric.';
+      stateUpdate.blockingMessage = 'There are no labels found for this metric.';
     }
 
     this.clearBreakdownPanelAxisValues();
