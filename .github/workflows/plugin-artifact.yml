@@ -1,6 +1,7 @@
 name: build & upload plugin artifact to GCS
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -53,7 +54,7 @@ jobs:
         id: build
         uses: ./.github/actions/build
         with:
-          policy_token: ${{ steps.get-secrets.outputs.GRAFANA_ACCESS_POLICY_TOKEN }}
+          policy_token: ${{ env.GRAFANA_ACCESS_POLICY_TOKEN }}
 
   upload-to-gcs:
     runs-on: ubuntu-latest
