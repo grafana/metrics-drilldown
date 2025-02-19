@@ -3,7 +3,7 @@ import { setPluginLinksHook } from '@grafana/runtime';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { AddToExplorationButton, addToExplorationsButtonLabel, explorationsPluginId } from './AddToExplorationsButton';
+import { AddToExplorationButton, addToExplorationsButtonLabel, investigationsPluginId } from './AddToExplorationsButton';
 import { mockPluginLinkExtension } from '../mocks/plugin';
 
 jest.mock('@grafana/runtime', () => ({
@@ -48,8 +48,8 @@ describe('AddToExplorationButton', () => {
         mockPluginLinkExtension({
           description: addToExplorationsButtonLabel, // this overrides the aria-label
           onClick: () => {},
-          path: '/a/grafana-explorations-app',
-          pluginId: explorationsPluginId,
+          path: '/a/grafana-investigations-app',
+          pluginId: investigationsPluginId,
           title: 'Explorations',
           type: PluginExtensionTypes.link,
         }),
