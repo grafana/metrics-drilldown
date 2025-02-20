@@ -59,7 +59,7 @@
     "addedLinks": [],
     "extensionPoints": [
       {
-        "id": "grafana-exploremetrics-app/exploration/v1"
+        "id": "grafana-exploremetrics-app/investigation/v1"
       }
     ]
   }

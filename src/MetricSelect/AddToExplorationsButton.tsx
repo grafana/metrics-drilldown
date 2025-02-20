@@ -11,8 +11,8 @@ import pluginJson from '../plugin.json';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 import { isSceneQueryRunner } from '../utils/utils.queries';
 
-export const explorationsPluginId = 'grafana-explorations-app';
-export const extensionPointId = `${pluginJson.id}/exploration/v1`;
+export const investigationsPluginId = 'grafana-investigations-app';
+export const extensionPointId = `${pluginJson.id}/investigation/v1`;
 export const addToExplorationsButtonLabel = 'add panel to exploration';
 
 export interface AddToExplorationButtonState extends SceneObjectState {
@@ -103,7 +103,7 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
   public static Component = ({ model }: SceneComponentProps<AddToExplorationButton>) => {
     const { context } = model.useState();
     const { links } = usePluginLinks({ extensionPointId, context, limitPerPlugin: 1 });
-    const link = links.find((link) => link.pluginId === explorationsPluginId);
+    const link = links.find((link) => link.pluginId === investigationsPluginId);
 
     if (!link) {
       return null;
