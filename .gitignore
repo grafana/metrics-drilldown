@@ -2,6 +2,10 @@
 .env*
 !.env.example
 
+# Local provisioned datasources
+provisioning/datasources/
+!provisioning/datasources/default.yaml
+
 # Logs
 logs
 !src/**/logs
