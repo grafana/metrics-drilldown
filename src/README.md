@@ -1,6 +1,6 @@
-# Explore-Metrics
+# Metrics-Drilldown
 
-Explore Metrics provides a query-less experience for browsing Prometheus-compatible metrics. Quickly find related metrics without writing PromQL queries.
+Metrics Drilldown provides a query-less experience for browsing Prometheus-compatible metrics. Quickly find related metrics without writing PromQL queries.
 
 ## Requirements
 
@@ -8,7 +8,7 @@ Requires Grafana 11.3.0 or newer.
 
 ## Getting Started
 
-See the [docs](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/#standalone-experience) for more info using Explore Metrics.
+See the [docs](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/#standalone-experience) for more info using Metrics Drilldown.
 
 ## Documentation
 
@@ -27,4 +27,4 @@ If your issue is a bug, please open one [here](https://github.com/grafana/metric
 ### Changes
 
 We do not have a formal proposal process for changes or feature requests. If you have a change you would like to see in
-Explore Metrics, please [file an issue](https://github.com/grafana/metrics-drilldown/issues/new) with the necessary details.
+Metrics Drilldown, please [file an issue](https://github.com/grafana/metrics-drilldown/issues/new) with the necessary details.
