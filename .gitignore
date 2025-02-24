@@ -49,6 +49,10 @@ ci/
 /playwright/.cache/
 /playwright/.auth/
 
+e2e/provisioning/prometheus/data*
+!e2e/provisioning/prometheus/data.zip
+tests/**/*darwin.png
+
 # Editor
 .idea
 

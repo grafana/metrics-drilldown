@@ -3,6 +3,8 @@ import { dirname, resolve } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 import { config } from 'dotenv';
 
+import { CHROMIUM_VIEWPORT } from './e2e/config/constants';
+
 import type { PluginOptions } from '@grafana/plugin-e2e';
 
 const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
@@ -48,7 +50,11 @@ export default defineConfig<PluginOptions>({
     // 2. Run tests in Google Chrome. Every test will start authenticated as admin user.
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/admin.json' },
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/admin.json',
+        viewport: CHROMIUM_VIEWPORT,
+      },
       dependencies: ['auth'],
     },
   ],

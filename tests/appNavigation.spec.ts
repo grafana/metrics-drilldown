@@ -54,5 +54,10 @@ test.describe('navigating app', () => {
   test('trail page should render successfully', async ({ gotoPage, page }) => {
     await gotoPage(`/${ROUTES.Trail}`);
     await expect(page.getByText(UI_TEXT.SEARCH.TITLE)).toBeVisible();
+
+    await expect(page.getByTestId('scene-body')).toBeVisible();
+    await expect(page.getByTestId('scene')).toHaveScreenshot({
+      stylePath: './e2e/fixtures/css/hide-app-controls.css',
+    });
   });
 });

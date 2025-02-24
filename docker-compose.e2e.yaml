@@ -1,0 +1,31 @@
+name: 'metrics-drilldown-e2e'
+services:
+  grafana:
+    extends:
+      file: .config/docker-compose-base.yaml
+      service: grafana
+    container_name: 'grafana-e2e'
+    # Use either the GRAFANA_PORT defined in `.env`, or port 3000 if not defined
+    ports: !override
+      - '${GRAFANA_PORT:-3000}:3000'
+    environment:
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
+      # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
+      GF_PLUGINS_PREINSTALL_DISABLED: true
+
+  prometheus:
+    container_name: 'prometheus-e2e'
+    build:
+      dockerfile: ./e2e/provisioning/prometheus/Dockerfile
+      context: .
+    ports:
+      - '9099:9090'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    command: >
+      --enable-feature=remote-write-receiver
+      --enable-feature=exemplar-storage
+      --enable-feature=native-histograms
+      --config.file=/etc/prometheus/prometheus.yml
+      --storage.tsdb.path=/prometheus/data
+      --storage.tsdb.retention.time=42y
