@@ -79,7 +79,36 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       }
     });
 
-    this.setupLogsPanel();
+    // If we don't have datasources yet, wait for them
+    if (!this.state.lokiDataSources?.length) {
+      // Show loading state
+      const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
+      logsPanelContainer.setState({
+        body: new SceneFlexLayout({
+          direction: 'column',
+          children: [
+            new SceneFlexItem({
+              body: PanelBuilders.text()
+                .setTitle('Loading related logs...')
+                .setOption('content', 'Checking for related logs...')
+                .build(),
+            }),
+          ],
+        }),
+      });
+
+      // Subscribe to state changes to detect when datasources are loaded
+      const subscription = this.subscribeToState((state) => {
+        if (state.lokiDataSources?.length) {
+          // Datasources are now available, set up the logs panel
+          subscription.unsubscribe();
+          this.setupLogsPanel();
+        }
+      });
+    } else {
+      // Datasources are already available, set up the logs panel
+      this.setupLogsPanel();
+    }
   }
 
   private setupLogsPanel(): void {
