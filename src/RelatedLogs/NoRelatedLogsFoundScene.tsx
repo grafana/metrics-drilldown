@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneObjectState } from '@grafana/scenes';
-import { Stack, Text, TextLink, useStyles2 } from '@grafana/ui';
+import { Alert, Stack, Text, TextLink, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 export class NoRelatedLogsScene extends SceneObjectBase<SceneObjectState> {
@@ -9,19 +9,26 @@ export class NoRelatedLogsScene extends SceneObjectBase<SceneObjectState> {
     const styles = useStyles2(getStyles);
 
     return (
-      <Stack direction="column" gap={1}>
-        <Text color="warning">Related logs is an experimental feature.</Text>
+      <Stack direction="column" gap={2}>
+        <Alert title="No related logs found" severity="info">
+          We couldn't find any logs related to the current metric with your selected filters.
+        </Alert>
         <Text>
-          No related logs found. To see related logs, you can either:
+          To find related logs, you can try:
           <ul className={styles.list}>
-            <li>adjust the label filter to find logs with the same labels as the currently-selected metric</li>
+            <li>Selecting labels that are shared by the current metric and your logs</li>
             <li>
-              select a metric created by a{' '}
+              Selecting a metric created by a{' '}
               <TextLink external href="https://grafana.com/docs/loki/latest/alert/#recording-rules">
                 Loki Recording Rule
               </TextLink>
             </li>
+            <li>Adjusting the time range to include more data</li>
           </ul>
+        </Text>
+        <Text variant="bodySmall" color="secondary">
+          Note: Related logs is an experimental feature that attempts to find logs with labels matching your current
+          metric selection.
         </Text>
       </Stack>
     );
@@ -32,6 +39,7 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     list: css({
       paddingLeft: theme.spacing(2),
+      marginTop: theme.spacing(1),
     }),
   };
 }
