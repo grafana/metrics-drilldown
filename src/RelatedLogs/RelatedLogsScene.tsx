@@ -21,9 +21,10 @@ import React from 'react';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { reportExploreMetrics } from '../interactions';
-import pluginJson from '../plugin.json';
-import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC, VAR_METRIC_EXPR } from '../shared';
+import { MetricScene } from '../MetricScene';
+import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC } from '../shared';
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
+import pluginJson from '../plugin.json';
 import { isConstantVariable, isCustomVariable } from '../utils/utils.variables';
 
 import type { MetricsLogsConnector } from '../Integrations/logs/base';
@@ -33,12 +34,16 @@ export interface RelatedLogsSceneState extends SceneObjectState {
   controls: SceneObject[];
   body: SceneFlexLayout;
   connectors: MetricsLogsConnector[];
+  lokiDataSources?: Array<DataSourceInstanceSettings<DataSourceJsonData>>;
+  onLogsCountChange?: (count: number, scene: SceneObject) => void;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
 const RELATED_LOGS_QUERY_KEY = 'related_logs/logs_query';
 
 export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
+  private _queryRunner?: SceneQueryRunner;
+
   constructor(state: Partial<RelatedLogsSceneState>) {
     super({
       controls: [],
@@ -56,58 +61,80 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       ...state,
     });
 
-    this.addActivationHandler(this.onActivate.bind(this));
+    this.addActivationHandler(this._onActivate.bind(this));
   }
 
-  private onActivate() {
-    this.setState({
-      connectors: [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(this)],
-    });
-    this.setLogsDataSourceVar();
-  }
+  private _onActivate() {
+    // Set up connectors once
+    if (!this.state.connectors.length) {
+      this.setState({
+        connectors: [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(this)],
+      });
+    }
 
-  private setLogsDataSourceVar(): Promise<void> {
-    const selectedMetric = sceneGraph.interpolate(this, VAR_METRIC_EXPR);
-    return Promise.all(this.state.connectors.map((connector) => connector.getDataSources(selectedMetric))).then(
-      (results) => {
-        const lokiDataSources = results.flat().slice(0, 10); // limit to the first ten matching Loki data sources
-        const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
-
-        if (!lokiDataSources?.length) {
-          logsPanelContainer.setState({
-            body: new NoRelatedLogsScene({}),
-          });
-          this.setState({ $variables: undefined, controls: undefined });
-        } else {
-          logsPanelContainer.setState({
-            body: PanelBuilders.logs()
-              .setTitle('Logs')
-              .setData(
-                new SceneQueryRunner({
-                  datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
-                  queries: [],
-                  key: RELATED_LOGS_QUERY_KEY,
-                })
-              )
-              .build(),
-          });
-          this.setState({
-            $variables: new SceneVariableSet({
-              variables: [
-                new CustomVariable({
-                  name: VAR_LOGS_DATASOURCE,
-                  label: 'Logs data source',
-                  query: lokiDataSources?.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
-                }),
-              ],
-            }),
-            controls: [new VariableValueSelectors({ layout: 'vertical' })],
-          });
-        }
+    // Set up cleanup
+    this._subs.add(() => {
+      if (this._queryRunner) {
+        this._queryRunner.setState({ queries: [] });
       }
-    );
+    });
+
+    this.setupLogsPanel();
   }
 
+  private setupLogsPanel(): void {
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
+    const { lokiDataSources } = this.state;
+
+    if (!lokiDataSources?.length) {
+      logsPanelContainer.setState({
+        body: new NoRelatedLogsScene({}),
+      });
+      this.setState({ $variables: undefined, controls: undefined });
+      this.state.onLogsCountChange?.(0, this);
+      return;
+    }
+
+    // Initialize query runner once
+    if (!this._queryRunner) {
+      this._queryRunner = new SceneQueryRunner({
+        datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
+        queries: [],
+        key: RELATED_LOGS_QUERY_KEY,
+      });
+
+      // Only set up subscription once
+      this._queryRunner.subscribeToState((state) => {
+        if (state.data?.series) {
+          const totalRows = state.data.series.reduce((sum: number, frame) => sum + frame.length, 0);
+          this.state.onLogsCountChange?.(totalRows, this);
+        }
+      });
+
+      // Initialize the UI once
+      logsPanelContainer.setState({
+        body: PanelBuilders.logs().setTitle('Logs').setData(this._queryRunner).build(),
+      });
+
+      this.setState({
+        $variables: new SceneVariableSet({
+          variables: [
+            new CustomVariable({
+              name: VAR_LOGS_DATASOURCE,
+              label: 'Logs data source',
+              query: lokiDataSources?.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
+            }),
+          ],
+        }),
+        controls: [new VariableValueSelectors({ layout: 'vertical' })],
+      });
+    }
+
+    // Update Loki query (safe to call multiple times)
+    this.updateLokiQuery();
+  }
+
+  // Only update query when necessary to prevent loops
   private updateLokiQuery() {
     const selectedDatasourceVar = sceneGraph.lookupVariable(VAR_LOGS_DATASOURCE, this);
     const selectedMetricVar = sceneGraph.lookupVariable(VAR_METRIC, this);
@@ -123,17 +150,21 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       return;
     }
 
+    // Only generate queries if we have a query runner
+    if (!this._queryRunner) {
+      return;
+    }
+
     const lokiQueries = this.state.connectors.reduce<Record<string, string>>((acc, connector, idx) => {
       const lokiExpr = connector.getLokiQueryExpr(selectedMetric, selectedDatasourceUid);
-
       if (lokiExpr) {
         acc[connector.name ?? `connector-${idx}`] = lokiExpr;
       }
-
       return acc;
     }, {});
-    const relatedLogsQuery = sceneGraph.findByKeyAndType(this, RELATED_LOGS_QUERY_KEY, SceneQueryRunner);
-    relatedLogsQuery.setState({
+
+    // Update queries
+    this._queryRunner.setState({
       queries: Object.keys(lokiQueries).map((connectorName) => ({
         refId: `RelatedLogs-${connectorName}`,
         expr: lokiQueries[connectorName],
@@ -143,17 +174,13 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     });
   }
 
+  // Simplify variable dependency to avoid update loops
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_LOGS_DATASOURCE, VAR_FILTERS],
     onReferencedVariableValueChanged: (variable: SceneVariable) => {
-      const { name } = variable.state;
-
-      if (name === VAR_LOGS_DATASOURCE) {
+      // Only update if scene is active to prevent loops
+      if (this.isActive) {
         this.updateLokiQuery();
-      }
-
-      if (name === VAR_FILTERS) {
-        this.setLogsDataSourceVar().then(() => this.updateLokiQuery());
       }
     },
   });
@@ -189,8 +216,16 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   };
 }
 
-export function buildRelatedLogsScene() {
-  return new RelatedLogsScene({});
+export function buildRelatedLogsScene(props?: Partial<RelatedLogsSceneState>) {
+  return new RelatedLogsScene({
+    ...props,
+    onLogsCountChange: (count: number, scene: SceneObject) => {
+      const metricScene = sceneGraph.getAncestor(scene, MetricScene);
+      if (metricScene && metricScene.state.relatedLogsCount !== count) {
+        metricScene.setState({ relatedLogsCount: count });
+      }
+    },
+  });
 }
 
 export async function findHealthyLokiDataSources() {
