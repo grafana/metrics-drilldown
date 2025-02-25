@@ -1,9 +1,9 @@
 import { type AdHocVariableFilter, type TimeRange } from '@grafana/data';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { sceneGraph } from '@grafana/scenes';
+import { sceneGraph, type SceneObject } from '@grafana/scenes';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { findHealthyLokiDataSources, type RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
+import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared';
 import { getTrailFor } from '../../utils';
 import { isAdHocFiltersVariable } from '../../utils/utils.variables';
@@ -76,7 +76,7 @@ async function hasMatchingLabels(datasourceUid: string, filters: AdHocVariableFi
   return results.every(Boolean);
 }
 
-export const createLabelsCrossReferenceConnector = (scene: RelatedLogsScene) => {
+export const createLabelsCrossReferenceConnector = (scene: SceneObject) => {
   return createMetricsLogsConnector({
     name: 'labelsCrossReference',
     async getDataSources(): Promise<FoundLokiDataSource[]> {
