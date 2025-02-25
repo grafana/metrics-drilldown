@@ -76,122 +76,13 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
     onReferencedVariableValueChanged: () => {
-      // When filters change, re-initialize the logs count check for all datasources
-      if (this.state.lokiDataSources?.length) {
-        // Reset counts and re-check all datasources
+      // When filters change, we need to re-check for logs
+      if (relatedLogsFeatureEnabled && this.state.lokiDataSources !== undefined) {
+        // Reset logs count
         this.updateRelatedLogsCount(0);
 
-        // If the Related logs tab is active, we need special handling
-        if (this.state.actionView === 'related_logs' && this.state.body.state.selectedTab) {
-          // Create a new RelatedLogsScene with loading state
-          const loadingScene = buildRelatedLogsScene({
-            lokiDataSources: [], // Empty datasources to show loading state
-          });
-
-          // Replace the current scene with the loading scene
-          this.state.body.setState({
-            selectedTab: loadingScene,
-          });
-
-          // Create background connectors
-          this._logsConnectors = [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(this)];
-
-          // Track datasources with logs and checked datasources
-          const datasourcesWithLogs: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
-          const checkedDatasources = new Set<string>();
-          let totalLogsCount = 0;
-
-          // Create individual query runners for each datasource
-          this.state.lokiDataSources.forEach((datasource) => {
-            const queryRunner = new SceneQueryRunner({
-              datasource: { uid: datasource.uid },
-              queries: [],
-              key: `logs_check_${datasource.uid}`,
-            });
-
-            // Build queries for this datasource
-            const lokiQueries = this._logsConnectors!.reduce<Record<string, string>>((acc, connector, idx) => {
-              const lokiExpr = connector.getLokiQueryExpr(this.state.metric, datasource.uid);
-              if (lokiExpr) {
-                acc[connector.name ?? `connector-${idx}`] = lokiExpr;
-              }
-              return acc;
-            }, {});
-
-            // Set queries
-            queryRunner.setState({
-              queries: Object.keys(lokiQueries).map((connectorName) => ({
-                refId: `RelatedLogs-${connectorName}`,
-                expr: lokiQueries[connectorName],
-                maxLines: 100, // Get a reasonable number of logs for counting
-              })),
-            });
-
-            // Subscribe to results
-            this._subs.add(
-              queryRunner.subscribeToState((state) => {
-                // Mark this datasource as checked
-                checkedDatasources.add(datasource.uid);
-
-                if (state.data?.series) {
-                  const rowCount = state.data.series.reduce((sum: number, frame) => sum + frame.length, 0);
-                  if (rowCount > 0) {
-                    // This datasource has logs
-                    if (!datasourcesWithLogs.includes(datasource)) {
-                      datasourcesWithLogs.push(datasource);
-
-                      // Update total count
-                      totalLogsCount += rowCount;
-                      this.updateRelatedLogsCount(totalLogsCount);
-
-                      // Update available datasources in MetricScene
-                      this.setState({
-                        lokiDataSources: datasourcesWithLogs,
-                      });
-
-                      // Update the scene with the new datasources
-                      // Only if we're still on the related logs tab
-                      if (this.state.actionView === 'related_logs') {
-                        const updatedScene = buildRelatedLogsScene({
-                          lokiDataSources: datasourcesWithLogs,
-                        });
-                        this.state.body.setState({ selectedTab: updatedScene });
-                      }
-                    }
-                  }
-                }
-
-                // Check if all datasources have been processed
-                if (checkedDatasources.size === this.state.lokiDataSources!.length) {
-                  // All datasources checked, clean up the query runner
-                  queryRunner.setState({ queries: [] });
-
-                  // If no datasources have logs, update with empty state
-                  if (datasourcesWithLogs.length === 0 && this.state.actionView === 'related_logs') {
-                    this.setState({ lokiDataSources: [] });
-                    const emptyScene = buildRelatedLogsScene({ lokiDataSources: [] });
-                    this.state.body.setState({ selectedTab: emptyScene });
-                  }
-                }
-              })
-            );
-
-            // Activate query
-            queryRunner.activate();
-
-            // Clean up
-            this._subs.add(() => queryRunner.setState({ queries: [] }));
-          });
-
-          // If we have a main query runner already, clean it up
-          if (this._logsQueryRunner) {
-            this._logsQueryRunner.setState({ queries: [] });
-            this._logsQueryRunner = undefined;
-          }
-        } else {
-          // Normal case - just initialize logs count
-          this._initializeLogsCount();
-        }
+        // Re-initialize logs count
+        this._initializeLogsCount();
       }
     },
   });
@@ -239,68 +130,46 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       relatedLogsCount: 0,
     });
 
-    // If we have Loki datasources, initialize a background query to get counts
-    if (lokiDataSources.length > 0) {
-      // If the Related logs tab is active, we need to wait for filtering before updating
-      if (this.state.actionView === 'related_logs') {
-        // Create a promise that will resolve when filtering is complete
-        const filteringComplete = new Promise<void>((resolve) => {
-          // Store the original datasources
-          const allDatasources = [...lokiDataSources];
-
-          // Set up a subscription to watch for datasource updates
-          const subscription = this.subscribeToState((state) => {
-            // If datasources have been filtered (length changed), we're done
-            if (state.lokiDataSources && state.lokiDataSources.length !== allDatasources.length) {
-              subscription.unsubscribe();
-
-              // Update the RelatedLogsScene with the filtered datasources
-              if (this.state.body.state.selectedTab) {
-                (this.state.body.state.selectedTab as RelatedLogsScene).setState({
-                  lokiDataSources: state.lokiDataSources,
-                });
-              }
-
-              resolve();
-            }
-          });
-
-          // Start the filtering process
-          this._initializeLogsCount();
-
-          // Set a timeout in case filtering takes too long
-          setTimeout(() => {
-            subscription.unsubscribe();
-            resolve();
-          }, 5000);
-        });
-
-        // Wait for filtering to complete
-        await filteringComplete;
-      } else {
-        // Normal case - just initialize logs count
-        this._initializeLogsCount();
-      }
-    } else if (this.state.actionView === 'related_logs' && this.state.body.state.selectedTab) {
-      // No datasources available, update the RelatedLogsScene
+    // If the Related logs tab is active, update it directly
+    if (this.state.actionView === 'related_logs' && this.state.body.state.selectedTab) {
+      // Pass ALL datasources to RelatedLogsScene
       (this.state.body.state.selectedTab as RelatedLogsScene).setState({
-        lokiDataSources: [],
+        lokiDataSources: lokiDataSources,
       });
+    }
+
+    // Then check which ones have logs
+    if (lokiDataSources.length > 0) {
+      this._initializeLogsCount();
     }
   }
 
   private _initializeLogsCount() {
     const { lokiDataSources } = this.state;
-    if (!lokiDataSources?.length) {
+    if (!lokiDataSources) {
       return;
     }
 
     // Create background connectors
     this._logsConnectors = [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(this)];
 
-    // Track datasources with logs
+    // Check each datasource for logs
     const datasourcesWithLogs: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
     let totalLogsCount = 0;
+    let totalChecked = 0;
+
+    // If no datasources to check, update immediately
+    if (lokiDataSources.length === 0) {
+      this.updateRelatedLogsCount(0);
+
+      // Update the RelatedLogsScene if active
+      if (this.state.actionView === 'related_logs' && this.state.body.state.selectedTab) {
+        (this.state.body.state.selectedTab as RelatedLogsScene).setState({
+          lokiDataSources: [],
+        });
+      }
+      return;
+    }
 
     // Check each datasource for logs
     lokiDataSources.forEach((datasource) => {
@@ -324,27 +193,36 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         queries: Object.keys(lokiQueries).map((connectorName) => ({
           refId: `RelatedLogs-${connectorName}`,
           expr: lokiQueries[connectorName],
-          maxLines: 100, // Get a reasonable number of logs for counting
+          maxLines: 100,
         })),
       });
 
       // Subscribe to results
       this._subs.add(
         queryRunner.subscribeToState((state) => {
-          if (state.data?.series) {
-            const rowCount = state.data.series.reduce((sum: number, frame) => sum + frame.length, 0);
-            if (rowCount > 0) {
-              // This datasource has logs
-              if (!datasourcesWithLogs.includes(datasource)) {
-                datasourcesWithLogs.push(datasource);
+          if (state.data?.state === 'Done') {
+            totalChecked++;
 
-                // Update total count (add this datasource's logs to the total)
+            // Check if we found logs in this datasource
+            if (state.data?.series) {
+              const rowCount = state.data.series.reduce((sum: number, frame) => sum + frame.length, 0);
+              if (rowCount > 0) {
+                // This datasource has logs
+                datasourcesWithLogs.push(datasource);
                 totalLogsCount += rowCount;
                 this.updateRelatedLogsCount(totalLogsCount);
+              }
+            }
 
-                // Update available datasources
-                this.setState({
-                  lokiDataSources: datasourcesWithLogs,
+            // When all datasources have been checked
+            if (totalChecked === lokiDataSources.length) {
+              // Clean up query runner
+              queryRunner.setState({ queries: [] });
+
+              // Update the RelatedLogsScene if it's active
+              if (this.state.actionView === 'related_logs' && this.state.body.state.selectedTab) {
+                (this.state.body.state.selectedTab as RelatedLogsScene).setState({
+                  lokiDataSources: datasourcesWithLogs.length > 0 ? datasourcesWithLogs : [],
                 });
               }
             }
@@ -358,12 +236,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       // Clean up
       this._subs.add(() => queryRunner.setState({ queries: [] }));
     });
-
-    // If we have a main query runner already, clean it up
-    if (this._logsQueryRunner) {
-      this._logsQueryRunner.setState({ queries: [] });
-      this._logsQueryRunner = undefined;
-    }
   }
 
   public updateRelatedLogsCount(count: number) {
@@ -396,10 +268,21 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       // reduce max height for main panel to reduce height flicker
       body.state.topView.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
 
-      const scene =
-        actionViewDef.value === 'related_logs' && lokiDataSources
-          ? actionViewDef.getScene({ lokiDataSources })
-          : actionViewDef.getScene();
+      let scene;
+      if (actionViewDef.value === 'related_logs') {
+        // When switching to Related Logs tab, initialize a scene
+        // with the current datasources (or empty array if none yet)
+        scene = buildRelatedLogsScene({
+          lokiDataSources: lokiDataSources || [],
+        });
+
+        // Initialize datasources if needed
+        if (lokiDataSources === undefined) {
+          this._initializeLokiDatasources();
+        }
+      } else {
+        scene = actionViewDef.getScene();
+      }
 
       body.setState({ selectedTab: scene });
       this.setState({ actionView: actionViewDef.value });
