@@ -3,7 +3,7 @@ import { reportInteraction } from '@grafana/runtime';
 
 import { type BreakdownLayoutType } from './Breakdown/types';
 import { type TrailStepType } from './DataTrailsHistory';
-import { type ActionViewType } from './shared';
+import { type ActionViewType } from './MetricScene';
 
 // prettier-ignore
 type Interactions = {

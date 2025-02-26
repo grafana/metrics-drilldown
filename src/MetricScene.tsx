@@ -7,7 +7,6 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
-  SceneQueryRunner,
   SceneVariableSet,
   VariableDependencyConfig,
   type SceneComponentProps,
@@ -18,16 +17,12 @@ import {
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type MetricsLogsConnector } from 'Integrations/logs/base';
-
 import { buildMetricOverviewScene } from './ActionTabs/MetricOverviewScene';
 import { buildRelatedMetricsScene } from './ActionTabs/RelatedMetricsScene';
 import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
-import { createLabelsCrossReferenceConnector } from './Integrations/logs/labelsCrossReference';
-import { lokiRecordingRulesConnector } from './Integrations/logs/lokiRecordingRules';
 import { reportExploreMetrics } from './interactions';
 import {
   MAIN_PANEL_MAX_HEIGHT,
@@ -35,11 +30,8 @@ import {
   METRIC_AUTOVIZPANEL_KEY,
   MetricGraphScene,
 } from './MetricGraphScene';
-import {
-  buildRelatedLogsScene,
-  findHealthyLokiDataSources,
-  type RelatedLogsScene,
-} from './RelatedLogs/RelatedLogsScene';
+import { RelatedLogsManager } from './RelatedLogs/RelatedLogsManager';
+import { buildRelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import {
   getVariablesWithMetricConstant,
   MetricSelectedEvent,
@@ -48,8 +40,6 @@ import {
   VAR_FILTERS,
   VAR_GROUP_BY,
   VAR_METRIC_EXPR,
-  type ActionViewDefinition as BaseActionViewDefinition,
-  type ActionViewType,
   type MakeOptional,
 } from './shared';
 import { ShareTrailButton } from './ShareTrailButton';
@@ -70,25 +60,21 @@ export interface MetricSceneState extends SceneObjectState {
   lokiDataSources?: Array<DataSourceInstanceSettings<DataSourceJsonData>>;
 }
 
+export type ActionViewType = 'overview' | 'breakdown' | 'related_logs' | 'related';
+
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
+  protected _relatedLogsManager?: RelatedLogsManager;
 
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
     onReferencedVariableValueChanged: () => {
-      // When filters change, we need to re-check for logs
-      if (relatedLogsFeatureEnabled && this.state.lokiDataSources !== undefined) {
-        // Reset logs count
-        this.updateRelatedLogsCount(0);
-
-        // Re-initialize logs count
-        this._initializeLogsCount();
+      // When filters change, we need to re-check for related logs
+      if (relatedLogsFeatureEnabled && this._relatedLogsManager) {
+        this._relatedLogsManager.handleFiltersChange();
       }
     },
   });
-
-  private _logsQueryRunner?: SceneQueryRunner;
-  private _logsConnectors?: MetricsLogsConnector[];
 
   public constructor(state: MakeOptional<MetricSceneState, 'body' | 'autoQuery'>) {
     const autoQuery = state.autoQuery ?? getAutoQueriesForMetric(state.metric, state.nativeHistogram);
@@ -109,7 +95,17 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
 
     if (relatedLogsFeatureEnabled) {
-      this._initializeLokiDatasources();
+      // Initialize the RelatedLogsManager
+      this._relatedLogsManager = new RelatedLogsManager(this);
+      this._relatedLogsManager.initializeLokiDatasources();
+
+      // Set up cleanup
+      this._subs.add(() => {
+        if (this._relatedLogsManager) {
+          this._relatedLogsManager.dispose();
+          this._relatedLogsManager = undefined;
+        }
+      });
     }
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
@@ -123,124 +119,8 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
   }
 
-  private async _initializeLokiDatasources() {
-    const lokiDataSources = await findHealthyLokiDataSources();
-    this.setState({
-      lokiDataSources,
-      relatedLogsCount: 0,
-    });
-
-    // If the Related logs tab is active, update it directly
-    if (this.state.actionView === 'related_logs' && this.state.body.state.selectedTab) {
-      // Pass ALL datasources to RelatedLogsScene
-      (this.state.body.state.selectedTab as RelatedLogsScene).setState({
-        lokiDataSources: lokiDataSources,
-      });
-    }
-
-    // Then check which ones have logs
-    if (lokiDataSources.length > 0) {
-      this._initializeLogsCount();
-    }
-  }
-
-  private _initializeLogsCount() {
-    const { lokiDataSources } = this.state;
-    if (!lokiDataSources) {
-      return;
-    }
-
-    // Create background connectors
-    this._logsConnectors = [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(this)];
-
-    // Check each datasource for logs
-    const datasourcesWithLogs: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
-    let totalLogsCount = 0;
-    let totalChecked = 0;
-
-    // If no datasources to check, update immediately
-    if (lokiDataSources.length === 0) {
-      this.updateRelatedLogsCount(0);
-
-      // Update the RelatedLogsScene if active
-      if (this.state.actionView === 'related_logs' && this.state.body.state.selectedTab) {
-        (this.state.body.state.selectedTab as RelatedLogsScene).setState({
-          lokiDataSources: [],
-        });
-      }
-      return;
-    }
-
-    // Check each datasource for logs
-    lokiDataSources.forEach((datasource) => {
-      const queryRunner = new SceneQueryRunner({
-        datasource: { uid: datasource.uid },
-        queries: [],
-        key: `logs_check_${datasource.uid}`,
-      });
-
-      // Build queries for this datasource
-      const lokiQueries = this._logsConnectors!.reduce<Record<string, string>>((acc, connector, idx) => {
-        const lokiExpr = connector.getLokiQueryExpr(this.state.metric, datasource.uid);
-        if (lokiExpr) {
-          acc[connector.name ?? `connector-${idx}`] = lokiExpr;
-        }
-        return acc;
-      }, {});
-
-      // Set queries
-      queryRunner.setState({
-        queries: Object.keys(lokiQueries).map((connectorName) => ({
-          refId: `RelatedLogs-${connectorName}`,
-          expr: lokiQueries[connectorName],
-          maxLines: 100,
-        })),
-      });
-
-      // Subscribe to results
-      this._subs.add(
-        queryRunner.subscribeToState((state) => {
-          if (state.data?.state === 'Done') {
-            totalChecked++;
-
-            // Check if we found logs in this datasource
-            if (state.data?.series) {
-              const rowCount = state.data.series.reduce((sum: number, frame) => sum + frame.length, 0);
-              if (rowCount > 0) {
-                // This datasource has logs
-                datasourcesWithLogs.push(datasource);
-                totalLogsCount += rowCount;
-                this.updateRelatedLogsCount(totalLogsCount);
-              }
-            }
-
-            // When all datasources have been checked
-            if (totalChecked === lokiDataSources.length) {
-              // Clean up query runner
-              queryRunner.setState({ queries: [] });
-
-              // Update the RelatedLogsScene if it's active
-              if (this.state.actionView === 'related_logs' && this.state.body.state.selectedTab) {
-                (this.state.body.state.selectedTab as RelatedLogsScene).setState({
-                  lokiDataSources: datasourcesWithLogs.length > 0 ? datasourcesWithLogs : [],
-                });
-              }
-            }
-          }
-        })
-      );
-
-      // Activate query
-      queryRunner.activate();
-
-      // Clean up
-      this._subs.add(() => queryRunner.setState({ queries: [] }));
-    });
-  }
-
   public updateRelatedLogsCount(count: number) {
     this.setState({ relatedLogsCount: count });
-    // You can add additional logic here if needed for tab updates
   }
 
   getUrlState() {
@@ -261,32 +141,20 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   }
 
   public setActionView(actionView?: ActionViewType) {
-    const { body, lokiDataSources } = this.state;
+    const { body } = this.state;
     const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
 
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
       // reduce max height for main panel to reduce height flicker
       body.state.topView.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
 
-      let scene;
-      if (actionViewDef.value === 'related_logs') {
-        // When switching to Related Logs tab, initialize a scene
-        // with the current datasources (or empty array if none yet)
-        scene = buildRelatedLogsScene({
-          lokiDataSources: lokiDataSources || [],
-        });
+      // Get the scene from the action view definition
+      const scene = actionViewDef.getScene(this);
 
-        // Initialize datasources if needed
-        if (lokiDataSources === undefined) {
-          this._initializeLokiDatasources();
-        }
-      } else {
-        scene = actionViewDef.getScene();
-      }
-
+      // Update the state
       body.setState({ selectedTab: scene });
       this.setState({ actionView: actionViewDef.value });
-    } else {
+    } else if (this.state.actionView !== undefined) {
       // restore max height
       body.state.topView.state.children[0].setState({ maxHeight: MAIN_PANEL_MAX_HEIGHT });
       body.setState({ selectedTab: undefined });
@@ -298,11 +166,44 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     const { body } = model.useState();
     return <body.Component model={body} />;
   };
+
+  /**
+   * Creates a Related Logs scene with the current state
+   */
+  public createRelatedLogsScene(): SceneObject<SceneObjectState> {
+    const { lokiDataSources, relatedLogsCount } = this.state;
+    const relatedLogsManager = this._relatedLogsManager;
+
+    // Create the scene with the current datasources and loading state
+    const scene = buildRelatedLogsScene({
+      lokiDataSources: lokiDataSources || [],
+      // If we have a logs count but no scene is showing logs,
+      // set isLoading to true to trigger a refresh
+      isLoading: relatedLogsCount && relatedLogsCount > 0 ? true : false,
+    });
+
+    // Initialize datasources if needed
+    if (lokiDataSources === undefined && relatedLogsManager) {
+      relatedLogsManager.initializeLokiDatasources();
+    }
+
+    // Add an activation handler to refresh logs data when the scene is activated
+    // This is the proper @grafana/scenes way to handle initialization after the scene is created
+    scene.addActivationHandler(() => {
+      if (relatedLogsManager) {
+        relatedLogsManager.refreshLogsData();
+      }
+    });
+
+    return scene;
+  }
 }
 
-interface ActionViewDefinition extends BaseActionViewDefinition {
-  getDisplayName?: (scene: MetricScene) => string;
-  getScene: (props?: any) => SceneObject<SceneObjectState>;
+interface ActionViewDefinition {
+  displayName: string;
+  value: ActionViewType;
+  description?: string;
+  getScene: (metricScene: MetricScene) => SceneObject<SceneObjectState>;
 }
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
@@ -320,7 +221,7 @@ if (relatedLogsFeatureEnabled) {
   actionViewsDefinitions.push({
     displayName: 'Related logs',
     value: 'related_logs',
-    getScene: buildRelatedLogsScene,
+    getScene: (metricScene: MetricScene) => metricScene.createRelatedLogsScene(),
     description: 'Relevant logs based on current label filters and time range',
   });
 }
@@ -406,7 +307,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 
         <TabsBar>
           {actionViewsDefinitions.map((tab, index) => {
-            const label = tab.getDisplayName ? tab.getDisplayName(metricScene) : tab.displayName;
+            const label = tab.displayName;
             const counter = tab.value === 'related_logs' ? metricScene.state.relatedLogsCount : undefined;
 
             const tabRender = (

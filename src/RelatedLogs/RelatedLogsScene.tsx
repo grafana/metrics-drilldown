@@ -82,12 +82,20 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       }
     });
 
-    // Show loading state initially
-    this.showLoadingState();
+    // Check if we need to show loading state
+    if (this.state.isLoading) {
+      this.showLoadingState();
+    }
 
     // Subscribe to changes in datasources
     this._subs.add(
       this.subscribeToState((state, prevState) => {
+        // Handle loading state changes
+        if (state.isLoading !== prevState.isLoading && state.isLoading) {
+          this.showLoadingState();
+        }
+
+        // Handle datasource changes
         if (state.lokiDataSources !== prevState.lokiDataSources) {
           // Clean up existing query runner
           if (this._queryRunner) {
@@ -98,7 +106,9 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           // Handle datasource changes
           if (state.lokiDataSources && state.lokiDataSources.length > 0) {
             this.setupLogsPanel();
-          } else {
+          } else if (!state.isLoading) {
+            // Only show NoRelatedLogsScene if we're not in a loading state
+            // This prevents showing the NoRelatedLogsScene prematurely when filters change
             this.showNoLogsScene();
           }
         }
@@ -108,8 +118,9 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     // If datasources already available, set up the panel
     if (this.state.lokiDataSources?.length) {
       this.setupLogsPanel();
-    } else if (this.state.lokiDataSources !== undefined) {
-      // We know there are no datasources
+    } else if (this.state.lokiDataSources !== undefined && !this.state.isLoading) {
+      // Only show NoRelatedLogsScene if we're not in a loading state
+      // This prevents showing the NoRelatedLogsScene prematurely when filters change
       this.showNoLogsScene();
     }
   }
@@ -250,7 +261,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       return;
     }
 
-    // Update queries
+    // Update queries - this will trigger the query runner to fetch new data
+    // The query results will be processed in the subscription handler
     this._queryRunner.setState({ queries });
   }
 
@@ -260,6 +272,11 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     onReferencedVariableValueChanged: (variable: SceneVariable) => {
       // Only update if scene is active
       if (this.isActive) {
+        // If filters changed, show loading state
+        if (variable.state.name === VAR_FILTERS) {
+          this.showLoadingState();
+        }
+
         // Update the query with the new variable values
         this.updateLokiQuery();
       }
