@@ -112,15 +112,26 @@ export class RelatedLogsOrchestrator {
   /**
    * Get the Loki queries for a given datasource.
    */
-  public getLokiQueries(datasourceUid: string): Record<string, string> {
+  public getLokiQueries(
+    datasourceUid: string,
+    maxLines = 100
+  ): Array<{ refId: string; expr: string; maxLines: number }> {
     const { metric } = this._metricScene.state;
-    return this._logsConnectors.reduce<Record<string, string>>((acc, connector, idx) => {
+    const queriesByConnector = this._logsConnectors.reduce<Record<string, string>>((acc, connector, idx) => {
       const lokiExpr = connector.getLokiQueryExpr(metric, datasourceUid);
       if (lokiExpr) {
         acc[connector.name ?? `connector-${idx}`] = lokiExpr;
       }
       return acc;
     }, {});
+
+    const queries = Object.keys(queriesByConnector).map((connectorName) => ({
+      refId: `RelatedLogs-${connectorName}`,
+      expr: queriesByConnector[connectorName],
+      maxLines,
+    }));
+
+    return queries;
   }
 
   /**
@@ -147,16 +158,9 @@ export class RelatedLogsOrchestrator {
         key: `related_logs_check_${datasource.uid}`,
       });
 
-      // Build queries for this datasource
-      const lokiQueries = this.getLokiQueries(datasource.uid);
-
-      // Set queries
+      // Build and set queries
       queryRunner.setState({
-        queries: Object.keys(lokiQueries).map((connectorName) => ({
-          refId: `RelatedLogs-${connectorName}`,
-          expr: lokiQueries[connectorName],
-          maxLines: 100,
-        })),
+        queries: this.getLokiQueries(datasource.uid),
       });
 
       // Subscribe to results

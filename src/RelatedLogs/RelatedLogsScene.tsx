@@ -195,12 +195,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       return;
     }
 
-    const lokiQueries = this.state.orchestrator.getLokiQueries(selectedDatasourceUid);
-    const queries = Object.keys(lokiQueries).map((connectorName) => ({
-      refId: `RelatedLogs-${connectorName}`,
-      expr: lokiQueries[connectorName],
-      maxLines: 100,
-    }));
+    const queries = this.state.orchestrator.getLokiQueries(selectedDatasourceUid);
 
     // If no queries were generated, show the NoRelatedLogsScene
     if (queries.length === 0) {
