@@ -11,19 +11,19 @@ export class NoRelatedLogsScene extends SceneObjectBase<SceneObjectState> {
     return (
       <Stack direction="column" gap={2}>
         <Alert title="No related logs found" severity="info">
-          We couldn't find any logs related to the current metric with your selected filters.
+          We couldn&apos;t find any logs related to the current metric with your selected filters.
         </Alert>
         <Text>
           To find related logs, you can try:
           <ul className={styles.list}>
-            <li>Selecting labels that are shared by the current metric and your logs</li>
+            <li>Adjusting your label filters to include labels that exist in both the current metric and your logs</li>
             <li>
               Selecting a metric created by a{' '}
               <TextLink external href="https://grafana.com/docs/loki/latest/alert/#recording-rules">
                 Loki Recording Rule
               </TextLink>
             </li>
-            <li>Adjusting the time range to include more data</li>
+            <li>Broadening the time range to include more data</li>
           </ul>
         </Text>
         <Text variant="bodySmall" color="secondary">
