@@ -69,7 +69,7 @@ export async function addDataTrailPanelAction(
 
   if (subMenu.length > 0) {
     items.push({
-      text: 'Metrics Drilldown',
+      text: 'Metrics drilldown',
       iconClassName: 'code-branch',
       subMenu: getUnique(subMenu),
     });
