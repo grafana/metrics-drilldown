@@ -22,19 +22,19 @@ import React from 'react';
 import { reportExploreMetrics } from '../interactions';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../shared';
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
-import { type RelatedLogsManager } from './RelatedLogsManager';
+import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { isCustomVariable } from '../utils/utils.variables';
 
 export interface RelatedLogsSceneState extends SceneObjectState {
   controls: SceneObject[];
   body: SceneFlexLayout;
-  manager: RelatedLogsManager;
+  orchestrator: RelatedLogsOrchestrator;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
 const RELATED_LOGS_QUERY_KEY = 'related_logs/logs_query';
 
-type RelatedLogsSceneProps = Pick<RelatedLogsSceneState, 'manager'>;
+type RelatedLogsSceneProps = Pick<RelatedLogsSceneState, 'orchestrator'>;
 
 export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   private _queryRunner?: SceneQueryRunner;
@@ -59,7 +59,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private _onActivate() {
-    this.state.manager.addLokiDataSourcesChangeHandler((dataSources) => {
+    this.state.orchestrator.addLokiDataSourcesChangeHandler((dataSources) => {
       // Handle changes in the list of loki data sources that contain related logs
       if (dataSources.length) {
         this.setupLogsPanel();
@@ -69,12 +69,12 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     });
 
     // Handle initial data loading and datasource setup
-    if (this.state.manager.lokiDataSources === undefined) {
+    if (this.state.orchestrator.lokiDataSources === undefined) {
       // No datasources yet, need to initialize
-      this.state.manager.initializeLokiDatasources();
+      this.state.orchestrator.initializeLokiDatasources();
       // Show loading state while we wait
       this.showLoadingState();
-    } else if (this.state.manager.lokiDataSources.length) {
+    } else if (this.state.orchestrator.lokiDataSources.length) {
       // We already have datasources with logs, set up the panel
       this.setupLogsPanel();
     } else {
@@ -111,7 +111,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     this.setState({
       controls: undefined,
     });
-    this.state.manager.relatedLogsCount = 0;
+    this.state.orchestrator.relatedLogsCount = 0;
   }
 
   private setupLogsPanel(): void {
@@ -131,7 +131,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           : 0;
 
         // Update logs count
-        this.state.manager.relatedLogsCount = totalRows;
+        this.state.orchestrator.relatedLogsCount = totalRows;
 
         // Show NoRelatedLogsScene if no logs found
         if (totalRows === 0 || !state.data.series?.length) {
@@ -153,7 +153,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           new CustomVariable({
             name: VAR_LOGS_DATASOURCE,
             label: 'Logs data source',
-            query: this.state.manager.lokiDataSources.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
+            query: this.state.orchestrator.lokiDataSources.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
           }),
         ],
       }),
@@ -182,7 +182,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       return;
     }
 
-    const lokiQueries = this.state.manager.getLokiQueries(selectedDatasourceUid);
+    const lokiQueries = this.state.orchestrator.getLokiQueries(selectedDatasourceUid);
     const queries = Object.keys(lokiQueries).map((connectorName) => ({
       refId: `RelatedLogs-${connectorName}`,
       expr: lokiQueries[connectorName],
@@ -205,7 +205,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     variableNames: [VAR_LOGS_DATASOURCE, VAR_FILTERS],
     onReferencedVariableValueChanged: (variable: SceneVariable) => {
       if (variable.state.name === VAR_FILTERS) {
-        this.state.manager.handleFiltersChange();
+        this.state.orchestrator.handleFiltersChange();
       } else if (variable.state.name === VAR_LOGS_DATASOURCE) {
         this.updateLokiQuery();
       }

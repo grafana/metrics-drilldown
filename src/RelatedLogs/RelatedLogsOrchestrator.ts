@@ -13,7 +13,7 @@ type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
  * Manager class that handles the orchestration of related logs functionality.
  * This centralizes logs-related logic that was previously spread across multiple components.
  */
-export class RelatedLogsManager {
+export class RelatedLogsOrchestrator {
   private readonly _logsConnectors: MetricsLogsConnector[];
   private readonly _metricScene: MetricScene;
   private readonly _changeHandlers = {

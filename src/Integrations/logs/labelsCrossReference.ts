@@ -3,7 +3,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type SceneObject } from '@grafana/scenes';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsManager';
+import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsOrchestrator';
 import { VAR_FILTERS } from '../../shared';
 import { getTrailFor } from '../../utils';
 import { isAdHocFiltersVariable } from '../../utils/utils.variables';

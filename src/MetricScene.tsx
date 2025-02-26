@@ -30,7 +30,7 @@ import {
   METRIC_AUTOVIZPANEL_KEY,
   MetricGraphScene,
 } from './MetricGraphScene';
-import { RelatedLogsManager } from './RelatedLogs/RelatedLogsManager';
+import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { buildRelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import {
   getVariablesWithMetricConstant,
@@ -68,14 +68,14 @@ export const actionViews = {
 export type ActionViewType = (typeof actionViews)[keyof typeof actionViews];
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
+  public readonly relatedLogsOrchestrator = new RelatedLogsOrchestrator(this);
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
-  public relatedLogsManager = new RelatedLogsManager(this);
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
     onReferencedVariableValueChanged: () => {
       // When filters change, we need to re-check for related logs
       if (relatedLogsFeatureEnabled) {
-        this.relatedLogsManager.handleFiltersChange();
+        this.relatedLogsOrchestrator.handleFiltersChange();
       }
     },
   });
@@ -99,8 +99,8 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
 
     if (relatedLogsFeatureEnabled) {
-      this.relatedLogsManager.initializeLokiDatasources();
-      this.relatedLogsManager.addRelatedLogsCountChangeHandler((count) => {
+      this.relatedLogsOrchestrator.initializeLokiDatasources();
+      this.relatedLogsOrchestrator.addRelatedLogsCountChangeHandler((count) => {
         this.setState({ relatedLogsCount: count });
       });
     }
@@ -166,7 +166,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
     // Create the scene with the current datasources and the manager
     return buildRelatedLogsScene({
-      manager: this.relatedLogsManager,
+      orchestrator: this.relatedLogsOrchestrator,
     });
   }
 }
