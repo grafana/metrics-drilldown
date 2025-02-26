@@ -171,14 +171,11 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
    * Creates a Related Logs scene with the current state
    */
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
-    const { lokiDataSources } = this.state;
+    const lokiDataSources = this.state.lokiDataSources ?? [];
     const relatedLogsManager = this._relatedLogsManager;
 
     // Create the scene with the current datasources
-    const scene = buildRelatedLogsScene({
-      lokiDataSources: lokiDataSources || [],
-      // No need for isLoading flag - we'll use proper scene mechanisms instead
-    });
+    const scene = buildRelatedLogsScene({ lokiDataSources });
 
     // Initialize datasources if needed
     if (lokiDataSources === undefined && relatedLogsManager) {
