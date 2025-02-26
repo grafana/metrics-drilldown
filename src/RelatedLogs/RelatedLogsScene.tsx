@@ -1,4 +1,5 @@
-import { config, getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { LoadingState, type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
+import { config } from '@grafana/runtime';
 import {
   CustomVariable,
   PanelBuilders,
@@ -24,8 +25,6 @@ import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../s
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
 import { type RelatedLogsManager } from './RelatedLogsManager';
 import { isCustomVariable } from '../utils/utils.variables';
-
-import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
 
 export interface RelatedLogsSceneState extends SceneObjectState {
   controls: SceneObject[];
@@ -63,49 +62,29 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private _onActivate() {
-    const { manager } = this.state;
+    this.subscribeToState((state, prevState) => {
+      const currentSignature = state.lokiDataSources.map((ds) => ds.uid).join(',');
+      const previousSignature = prevState.lokiDataSources.map((ds) => ds.uid).join(',');
 
-    if (!manager) {
-      throw new Error('RelatedLogsScene requires a related logs manager');
-    }
+      if (currentSignature === previousSignature) {
+        return;
+      }
 
-    // Set up cleanup
-    this._subs.add(() => {
-      if (this._queryRunner) {
-        this._queryRunner.setState({ queries: [] });
-        this._queryRunner = undefined;
+      // Handle changes in the list of loki data sources that contain related logs
+      if (state.lokiDataSources?.length) {
+        this.setupLogsPanel();
+      } else {
+        this.showNoLogsScene();
       }
     });
-
-    // Subscribe to changes in datasources
-    this._subs.add(
-      this.subscribeToState((state, prevState) => {
-        // Handle datasource changes
-        if (state.lokiDataSources !== prevState.lokiDataSources) {
-          // Clean up existing query runner
-          if (this._queryRunner) {
-            this._queryRunner.setState({ queries: [] });
-            this._queryRunner = undefined;
-          }
-
-          // Handle datasource changes
-          if (state.lokiDataSources && state.lokiDataSources.length > 0) {
-            this.setupLogsPanel();
-          } else {
-            // Show loading or no logs scene based on datasource state
-            this.showNoLogsScene();
-          }
-        }
-      })
-    );
 
     // Handle initial data loading and datasource setup
     if (this.state.lokiDataSources === undefined) {
       // No datasources yet, need to initialize
-      manager.initializeLokiDatasources();
+      this.state.manager.initializeLokiDatasources();
       // Show loading state while we wait
       this.showLoadingState();
-    } else if (this.state.lokiDataSources.length > 0) {
+    } else if (this.state.lokiDataSources.length) {
       // We already have datasources with logs, set up the panel
       this.setupLogsPanel();
     } else {
@@ -148,12 +127,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   private setupLogsPanel(): void {
     const { lokiDataSources } = this.state;
 
-    // If no data sources are available, show the NoRelatedLogsScene
-    if (!lokiDataSources?.length) {
-      this.showNoLogsScene();
-      return;
-    }
-
     // Initialize query runner
     this._queryRunner = new SceneQueryRunner({
       datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
@@ -162,24 +135,22 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     });
 
     // Set up subscription to query results
-    this._subs.add(
-      this._queryRunner.subscribeToState((state) => {
-        // Only process completed query results
-        if (state.data?.state === 'Done') {
-          const totalRows = state.data.series
-            ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
-            : 0;
+    this._queryRunner.subscribeToState((state) => {
+      // Only process completed query results
+      if (state.data?.state === LoadingState.Done) {
+        const totalRows = state.data.series
+          ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
+          : 0;
 
-          // Update logs count
-          this.state.onLogsCountChange(totalRows, this);
+        // Update logs count
+        this.state.onLogsCountChange(totalRows, this);
 
-          // Show NoRelatedLogsScene if no logs found
-          if (totalRows === 0 || !state.data.series || state.data.series.length === 0) {
-            this.showNoLogsScene();
-          }
+        // Show NoRelatedLogsScene if no logs found
+        if (totalRows === 0 || !state.data.series?.length) {
+          this.showNoLogsScene();
         }
-      })
-    );
+      }
+    });
 
     // Set up UI for logs panel
     const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
@@ -245,16 +216,9 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_LOGS_DATASOURCE, VAR_FILTERS],
     onReferencedVariableValueChanged: (variable: SceneVariable) => {
-      if (!this.state.manager) {
-        console.error('RelatedLogsScene: manager is not defined');
-        return;
-      }
-
-      // If filters changed, let the manager handle it
       if (variable.state.name === VAR_FILTERS) {
-        this.state.manager?.handleFiltersChange();
-      } else {
-        // For other variable changes (e.g., datasource selection), just update the query
+        this.state.manager.handleFiltersChange();
+      } else if (variable.state.name === VAR_LOGS_DATASOURCE) {
         this.updateLokiQuery();
       }
     },
@@ -301,38 +265,4 @@ export function buildRelatedLogsScene(props: Omit<RelatedLogsSceneProps, 'onLogs
       }
     },
   });
-}
-
-export async function findHealthyLokiDataSources() {
-  const lokiDataSources = getDataSourceSrv().getList({
-    logs: true,
-    type: 'loki',
-    filter: (ds) => ds.uid !== 'grafana',
-  });
-  const healthyLokiDataSources: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
-  const unhealthyLokiDataSources: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
-
-  await Promise.all(
-    lokiDataSources.map((ds) =>
-      getBackendSrv()
-        .get(`/api/datasources/${ds.id}/health`, undefined, undefined, {
-          showSuccessAlert: false,
-          showErrorAlert: false,
-        })
-        .then((health) =>
-          health?.status === 'OK' ? healthyLokiDataSources.push(ds) : unhealthyLokiDataSources.push(ds)
-        )
-        .catch(() => unhealthyLokiDataSources.push(ds))
-    )
-  );
-
-  if (unhealthyLokiDataSources.length) {
-    console.warn(
-      `Found ${unhealthyLokiDataSources.length} unhealthy Loki data sources: ${unhealthyLokiDataSources
-        .map((ds) => ds.name)
-        .join(', ')}`
-    );
-  }
-
-  return healthyLokiDataSources;
 }

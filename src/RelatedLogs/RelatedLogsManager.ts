@@ -1,11 +1,12 @@
-import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
+import { LoadingState, type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
+import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import { SceneQueryRunner } from '@grafana/scenes';
 
 import { type MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
-import { type MetricScene } from '../MetricScene';
-import { findHealthyLokiDataSources, type RelatedLogsScene } from './RelatedLogsScene';
+import { actionViews, type MetricScene } from '../MetricScene';
+import { type RelatedLogsScene } from './RelatedLogsScene';
 
 /**
  * Manager class that handles the orchestration of related logs functionality.
@@ -19,16 +20,6 @@ export class RelatedLogsManager {
   constructor(metricScene: MetricScene) {
     this._metricScene = metricScene;
     this.logsConnectors = [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(metricScene)];
-  }
-
-  /**
-   * Get the connectors for the scene.
-   * This allows the scene to use the same connector instances as the manager.
-   */
-  public getConnectorsForScene(scene: RelatedLogsScene): MetricsLogsConnector[] {
-    // For the label cross reference connector, we need to create a new instance
-    // since it's tied to a specific scene
-    return [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(scene)];
   }
 
   /**
@@ -106,19 +97,12 @@ export class RelatedLogsManager {
   }
 
   /**
-   * Release resources used by this manager.
-   */
-  public dispose(): void {
-    this.cleanupQueryRunners();
-  }
-
-  /**
    * Get the active RelatedLogsScene if Related Logs tab is selected.
    */
   private get activeRelatedLogsScene(): RelatedLogsScene | undefined {
     const { actionView, body } = this._metricScene.state;
 
-    if (actionView !== 'related_logs' || !body.state.selectedTab) {
+    if (actionView !== actionViews.relatedLogs || !body.state.selectedTab) {
       return undefined;
     }
 
@@ -129,9 +113,6 @@ export class RelatedLogsManager {
    * Check each datasource for logs and update the MetricScene and RelatedLogsScene accordingly.
    */
   private checkLogsInDataSources(datasources: Array<DataSourceInstanceSettings<DataSourceJsonData>>): void {
-    // Clean up existing query runners
-    this.cleanupQueryRunners();
-
     // Check each datasource for logs
     const datasourcesWithLogs: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
     let totalLogsCount = 0;
@@ -148,7 +129,7 @@ export class RelatedLogsManager {
       const queryRunner = new SceneQueryRunner({
         datasource: { uid: datasource.uid },
         queries: [],
-        key: `logs_check_${datasource.uid}`,
+        key: `related_logs_check_${datasource.uid}`,
       });
 
       // Track this query runner for later cleanup
@@ -168,7 +149,7 @@ export class RelatedLogsManager {
 
       // Subscribe to results
       queryRunner.subscribeToState((state) => {
-        if (state.data?.state === 'Done') {
+        if (state.data?.state === LoadingState.Done) {
           totalChecked++;
 
           // Check if we found logs in this datasource
@@ -213,32 +194,38 @@ export class RelatedLogsManager {
       lokiDataSources: datasourcesWithLogs,
     });
   }
+}
 
-  /**
-   * Clean up all active query runners.
-   */
-  private cleanupQueryRunners(): void {
-    this._activeQueryRunners.forEach((runner) => {
-      runner.setState({ queries: [] });
-    });
-    this._activeQueryRunners = [];
+export async function findHealthyLokiDataSources() {
+  const lokiDataSources = getDataSourceSrv().getList({
+    logs: true,
+    type: 'loki',
+    filter: (ds) => ds.uid !== 'grafana',
+  });
+  const healthyLokiDataSources: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
+  const unhealthyLokiDataSources: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
+
+  await Promise.all(
+    lokiDataSources.map((ds) =>
+      getBackendSrv()
+        .get(`/api/datasources/${ds.id}/health`, undefined, undefined, {
+          showSuccessAlert: false,
+          showErrorAlert: false,
+        })
+        .then((health) =>
+          health?.status === 'OK' ? healthyLokiDataSources.push(ds) : unhealthyLokiDataSources.push(ds)
+        )
+        .catch(() => unhealthyLokiDataSources.push(ds))
+    )
+  );
+
+  if (unhealthyLokiDataSources.length) {
+    console.warn(
+      `Found ${unhealthyLokiDataSources.length} unhealthy Loki data sources: ${unhealthyLokiDataSources
+        .map((ds) => ds.name)
+        .join(', ')}`
+    );
   }
 
-  /**
-   * Called when the Related Logs tab is activated to ensure it has the latest data.
-   * This is particularly important when the tab is activated after filters have changed.
-   */
-  public refreshLogsData(): void {
-    const { lokiDataSources, relatedLogsCount } = this._metricScene.state;
-
-    // If we have a logs count but no datasources with logs,
-    // we need to re-check for logs
-    if (relatedLogsCount && relatedLogsCount > 0 && (!lokiDataSources || lokiDataSources.length === 0)) {
-      // Re-initialize datasources
-      this.initializeLokiDatasources();
-    } else if (lokiDataSources && lokiDataSources.length > 0) {
-      // We have datasources with logs, ensure the active scene is updated
-      this.activeRelatedLogsScene?.setState({ lokiDataSources });
-    }
-  }
+  return healthyLokiDataSources;
 }

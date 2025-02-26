@@ -5,7 +5,7 @@ import { type SyntaxNode } from '@lezer/common';
 import { lastValueFrom } from 'rxjs';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsScene';
+import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsManager';
 
 export interface RecordingRuleGroup {
   name: string;

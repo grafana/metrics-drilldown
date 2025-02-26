@@ -51,26 +51,31 @@ const relatedLogsFeatureEnabled = config.featureToggles.exploreMetricsRelatedLog
 export interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
-  nativeHistogram?: boolean;
-  actionView?: string;
-
   autoQuery: AutoQueryInfo;
+  nativeHistogram?: boolean;
+  actionView?: ActionViewType;
   queryDef?: AutoQueryDef;
-  relatedLogsCount?: number;
   lokiDataSources?: Array<DataSourceInstanceSettings<DataSourceJsonData>>;
+  relatedLogsCount?: number;
 }
 
-export type ActionViewType = 'overview' | 'breakdown' | 'related_logs' | 'related';
+export const actionViews = {
+  overview: 'overview',
+  breakdown: 'breakdown',
+  related: 'related',
+  relatedLogs: 'related_logs',
+} as const;
+
+export type ActionViewType = (typeof actionViews)[keyof typeof actionViews];
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
-  protected _relatedLogsManager?: RelatedLogsManager;
-
+  protected _relatedLogsManager = new RelatedLogsManager(this);
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
     onReferencedVariableValueChanged: () => {
       // When filters change, we need to re-check for related logs
-      if (relatedLogsFeatureEnabled && this._relatedLogsManager) {
+      if (relatedLogsFeatureEnabled) {
         this._relatedLogsManager.handleFiltersChange();
       }
     },
@@ -91,21 +96,11 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   private _onActivate() {
     if (this.state.actionView === undefined) {
-      this.setActionView('overview');
+      this.setActionView(actionViews.overview);
     }
 
     if (relatedLogsFeatureEnabled) {
-      // Initialize the RelatedLogsManager
-      this._relatedLogsManager = new RelatedLogsManager(this);
       this._relatedLogsManager.initializeLokiDatasources();
-
-      // Set up cleanup
-      this._subs.add(() => {
-        if (this._relatedLogsManager) {
-          this._relatedLogsManager.dispose();
-          this._relatedLogsManager = undefined;
-        }
-      });
     }
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
@@ -169,12 +164,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
     const lokiDataSources = this.state.lokiDataSources ?? [];
 
-    // Ensure we have a manager
-    if (!this._relatedLogsManager) {
-      // Create a new manager if one doesn't exist
-      this._relatedLogsManager = new RelatedLogsManager(this);
-    }
-
     // Create the scene with the current datasources and the manager
     return buildRelatedLogsScene({
       lokiDataSources,
@@ -191,11 +180,11 @@ interface ActionViewDefinition {
 }
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Overview', value: 'overview', getScene: buildMetricOverviewScene },
-  { displayName: 'Breakdown', value: 'breakdown', getScene: buildLabelBreakdownActionScene },
+  { displayName: 'Overview', value: actionViews.overview, getScene: buildMetricOverviewScene },
+  { displayName: 'Breakdown', value: actionViews.breakdown, getScene: buildLabelBreakdownActionScene },
   {
     displayName: 'Related metrics',
-    value: 'related',
+    value: actionViews.related,
     getScene: buildRelatedMetricsScene,
     description: 'Relevant metrics based on current label filters',
   },
@@ -204,7 +193,7 @@ const actionViewsDefinitions: ActionViewDefinition[] = [
 if (relatedLogsFeatureEnabled) {
   actionViewsDefinitions.push({
     displayName: 'Related logs',
-    value: 'related_logs',
+    value: actionViews.relatedLogs,
     getScene: (metricScene: MetricScene) => metricScene.createRelatedLogsScene(),
     description: 'Relevant logs based on current label filters and time range',
   });
@@ -292,7 +281,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
         <TabsBar>
           {actionViewsDefinitions.map((tab, index) => {
             const label = tab.displayName;
-            const counter = tab.value === 'related_logs' ? metricScene.state.relatedLogsCount : undefined;
+            const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
 
             const tabRender = (
               <Tab
