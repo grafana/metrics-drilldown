@@ -171,15 +171,13 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
    * Creates a Related Logs scene with the current state
    */
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
-    const { lokiDataSources, relatedLogsCount } = this.state;
+    const { lokiDataSources } = this.state;
     const relatedLogsManager = this._relatedLogsManager;
 
-    // Create the scene with the current datasources and loading state
+    // Create the scene with the current datasources
     const scene = buildRelatedLogsScene({
       lokiDataSources: lokiDataSources || [],
-      // If we have a logs count but no scene is showing logs,
-      // set isLoading to true to trigger a refresh
-      isLoading: relatedLogsCount && relatedLogsCount > 0 ? true : false,
+      // No need for isLoading flag - we'll use proper scene mechanisms instead
     });
 
     // Initialize datasources if needed
@@ -188,7 +186,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
 
     // Add an activation handler to refresh logs data when the scene is activated
-    // This is the proper @grafana/scenes way to handle initialization after the scene is created
     scene.addActivationHandler(() => {
       if (relatedLogsManager) {
         relatedLogsManager.refreshLogsData();

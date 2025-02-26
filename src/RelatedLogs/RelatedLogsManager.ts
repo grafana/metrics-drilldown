@@ -60,11 +60,17 @@ export class RelatedLogsManager {
     // Reset logs count immediately to avoid showing stale counts
     this._metricScene.updateRelatedLogsCount(0);
 
-    // Show loading state in the RelatedLogsScene if it's active
+    // Get the active RelatedLogsScene
     const relatedLogsScene = this.getActiveRelatedLogsScene();
+
+    // Instead of directly setting isLoading or calling a private method,
+    // we'll update the scene's state in a way that triggers the loading UI
+    // This is more idiomatic for @grafana/scenes
     if (relatedLogsScene) {
+      // Set lokiDataSources to an empty array to trigger the loading UI
+      // The RelatedLogsScene will handle this appropriately in its state subscription
       relatedLogsScene.setState({
-        isLoading: true,
+        lokiDataSources: [],
       });
     }
 
@@ -154,13 +160,6 @@ export class RelatedLogsManager {
     // Get the active RelatedLogsScene once to avoid repeated lookups
     const relatedLogsScene = this.getActiveRelatedLogsScene();
 
-    // If the RelatedLogsScene is active, ensure it shows a loading state
-    if (relatedLogsScene) {
-      relatedLogsScene.setState({
-        isLoading: true,
-      });
-    }
-
     // Check each datasource for logs
     datasources.forEach((datasource) => {
       const queryRunner = new SceneQueryRunner({
@@ -221,8 +220,6 @@ export class RelatedLogsManager {
             if (relatedLogsScene) {
               relatedLogsScene.setState({
                 lokiDataSources: datasourcesWithLogs.length > 0 ? datasourcesWithLogs : [],
-                // Only set isLoading to false if we found logs, otherwise let the scene handle it
-                isLoading: false,
               });
             }
           }
@@ -262,7 +259,6 @@ export class RelatedLogsManager {
       if (relatedLogsScene) {
         relatedLogsScene.setState({
           lokiDataSources: lokiDataSources,
-          isLoading: false,
         });
       }
     }

@@ -36,7 +36,6 @@ export interface RelatedLogsSceneState extends SceneObjectState {
   connectors: MetricsLogsConnector[];
   lokiDataSources?: Array<DataSourceInstanceSettings<DataSourceJsonData>>;
   onLogsCountChange?: (count: number, scene: SceneObject) => void;
-  isLoading?: boolean;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
@@ -59,7 +58,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
         ],
       }),
       connectors: [],
-      isLoading: true,
       ...state,
     });
 
@@ -82,19 +80,9 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       }
     });
 
-    // Check if we need to show loading state
-    if (this.state.isLoading) {
-      this.showLoadingState();
-    }
-
     // Subscribe to changes in datasources
     this._subs.add(
       this.subscribeToState((state, prevState) => {
-        // Handle loading state changes
-        if (state.isLoading !== prevState.isLoading && state.isLoading) {
-          this.showLoadingState();
-        }
-
         // Handle datasource changes
         if (state.lokiDataSources !== prevState.lokiDataSources) {
           // Clean up existing query runner
@@ -106,9 +94,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           // Handle datasource changes
           if (state.lokiDataSources && state.lokiDataSources.length > 0) {
             this.setupLogsPanel();
-          } else if (!state.isLoading) {
-            // Only show NoRelatedLogsScene if we're not in a loading state
-            // This prevents showing the NoRelatedLogsScene prematurely when filters change
+          } else {
+            // Show loading or no logs scene based on datasource state
             this.showNoLogsScene();
           }
         }
@@ -118,10 +105,12 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     // If datasources already available, set up the panel
     if (this.state.lokiDataSources?.length) {
       this.setupLogsPanel();
-    } else if (this.state.lokiDataSources !== undefined && !this.state.isLoading) {
-      // Only show NoRelatedLogsScene if we're not in a loading state
-      // This prevents showing the NoRelatedLogsScene prematurely when filters change
+    } else if (this.state.lokiDataSources !== undefined) {
+      // Show no logs scene if we know there are no datasources
       this.showNoLogsScene();
+    } else {
+      // Show loading state if datasources are not yet determined
+      this.showLoadingState();
     }
   }
 
@@ -143,7 +132,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
         ],
       }),
     });
-    this.setState({ isLoading: true });
   }
 
   private showNoLogsScene() {
@@ -153,7 +141,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     });
     this.setState({
       controls: undefined,
-      isLoading: false,
     });
     this.state.onLogsCountChange?.(0, this);
   }
@@ -189,9 +176,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           // Show NoRelatedLogsScene if no logs found
           if (totalRows === 0 || !state.data.series || state.data.series.length === 0) {
             this.showNoLogsScene();
-          } else {
-            // We have logs, mark loading as done
-            this.setState({ isLoading: false });
           }
         }
       })
