@@ -119,10 +119,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
   }
 
-  public updateRelatedLogsCount(count: number) {
-    this.setState({ relatedLogsCount: count });
-  }
-
   getUrlState() {
     return { actionView: this.state.actionView };
   }

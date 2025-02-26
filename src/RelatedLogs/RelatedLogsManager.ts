@@ -63,7 +63,7 @@ export class RelatedLogsManager {
     }
 
     // Reset logs count immediately to avoid showing stale counts
-    this._metricScene.updateRelatedLogsCount(0);
+    this._metricScene.setState({ relatedLogsCount: 0 });
 
     // Update the scene to indicate new data is being loaded
     // This approach sets lokiDataSources to an empty array which will
@@ -202,12 +202,10 @@ export class RelatedLogsManager {
     datasourcesWithLogs: Array<DataSourceInstanceSettings<DataSourceJsonData>>,
     totalLogsCount: number
   ): void {
-    // Update logs count
-    this._metricScene.updateRelatedLogsCount(totalLogsCount);
-
-    // Update MetricScene with datasources that have logs
+    // Update MetricScene with logs count & datasources that have logs
     this._metricScene.setState({
       lokiDataSources: datasourcesWithLogs,
+      relatedLogsCount: totalLogsCount,
     });
 
     // Update the RelatedLogsScene if active
