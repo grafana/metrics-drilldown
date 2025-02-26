@@ -18,33 +18,32 @@ import {
 import { LinkButton, Stack } from '@grafana/ui';
 import React from 'react';
 
-import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
-import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
-import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC } from '../shared';
+import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../shared';
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
-import pluginJson from '../plugin.json';
-import { isConstantVariable, isCustomVariable } from '../utils/utils.variables';
+import { type RelatedLogsManager } from './RelatedLogsManager';
+import { isCustomVariable } from '../utils/utils.variables';
 
-import type { MetricsLogsConnector } from '../Integrations/logs/base';
 import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
 
 export interface RelatedLogsSceneState extends SceneObjectState {
   controls: SceneObject[];
   body: SceneFlexLayout;
-  connectors: MetricsLogsConnector[];
-  lokiDataSources?: Array<DataSourceInstanceSettings<DataSourceJsonData>>;
-  onLogsCountChange?: (count: number, scene: SceneObject) => void;
+  lokiDataSources: Array<DataSourceInstanceSettings<DataSourceJsonData>>;
+  manager: RelatedLogsManager;
+  onLogsCountChange: (count: number, scene: SceneObject) => void;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
 const RELATED_LOGS_QUERY_KEY = 'related_logs/logs_query';
 
+type RelatedLogsSceneProps = Pick<RelatedLogsSceneState, 'lokiDataSources' | 'manager' | 'onLogsCountChange'>;
+
 export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   private _queryRunner?: SceneQueryRunner;
 
-  constructor(state: Partial<RelatedLogsSceneState>) {
+  constructor(state: RelatedLogsSceneProps) {
     super({
       controls: [],
       body: new SceneFlexLayout({
@@ -57,7 +56,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           }),
         ],
       }),
-      connectors: [],
       ...state,
     });
 
@@ -65,11 +63,10 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private _onActivate() {
-    // Set up connectors once
-    if (!this.state.connectors.length) {
-      this.setState({
-        connectors: [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(this)],
-      });
+    const { manager } = this.state;
+
+    if (!manager) {
+      throw new Error('RelatedLogsScene requires a related logs manager');
     }
 
     // Set up cleanup
@@ -102,15 +99,18 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       })
     );
 
-    // If datasources already available, set up the panel
-    if (this.state.lokiDataSources?.length) {
-      this.setupLogsPanel();
-    } else if (this.state.lokiDataSources !== undefined) {
-      // Show no logs scene if we know there are no datasources
-      this.showNoLogsScene();
-    } else {
-      // Show loading state if datasources are not yet determined
+    // Handle initial data loading and datasource setup
+    if (this.state.lokiDataSources === undefined) {
+      // No datasources yet, need to initialize
+      manager.initializeLokiDatasources();
+      // Show loading state while we wait
       this.showLoadingState();
+    } else if (this.state.lokiDataSources.length > 0) {
+      // We already have datasources with logs, set up the panel
+      this.setupLogsPanel();
+    } else {
+      // We know there are no datasources with logs
+      this.showNoLogsScene();
     }
   }
 
@@ -142,7 +142,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     this.setState({
       controls: undefined,
     });
-    this.state.onLogsCountChange?.(0, this);
+    this.state.onLogsCountChange(0, this);
   }
 
   private setupLogsPanel(): void {
@@ -171,7 +171,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
             : 0;
 
           // Update logs count
-          this.state.onLogsCountChange?.(totalRows, this);
+          this.state.onLogsCountChange(totalRows, this);
 
           // Show NoRelatedLogsScene if no logs found
           if (totalRows === 0 || !state.data.series || state.data.series.length === 0) {
@@ -212,27 +212,18 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     }
 
     const selectedDatasourceVar = sceneGraph.lookupVariable(VAR_LOGS_DATASOURCE, this);
-    const selectedMetricVar = sceneGraph.lookupVariable(VAR_METRIC, this);
 
-    if (!isCustomVariable(selectedDatasourceVar) || !isConstantVariable(selectedMetricVar)) {
+    if (!isCustomVariable(selectedDatasourceVar)) {
       return;
     }
 
-    const selectedMetric = selectedMetricVar.getValue();
     const selectedDatasourceUid = selectedDatasourceVar.getValue();
 
-    if (typeof selectedMetric !== 'string' || typeof selectedDatasourceUid !== 'string') {
+    if (typeof selectedDatasourceUid !== 'string') {
       return;
     }
 
-    const lokiQueries = this.state.connectors.reduce<Record<string, string>>((acc, connector, idx) => {
-      const lokiExpr = connector.getLokiQueryExpr(selectedMetric, selectedDatasourceUid);
-      if (lokiExpr) {
-        acc[connector.name ?? `connector-${idx}`] = lokiExpr;
-      }
-      return acc;
-    }, {});
-
+    const lokiQueries = this.state.manager.getLokiQueries(selectedDatasourceUid);
     const queries = Object.keys(lokiQueries).map((connectorName) => ({
       refId: `RelatedLogs-${connectorName}`,
       expr: lokiQueries[connectorName],
@@ -254,14 +245,16 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_LOGS_DATASOURCE, VAR_FILTERS],
     onReferencedVariableValueChanged: (variable: SceneVariable) => {
-      // Only update if scene is active
-      if (this.isActive) {
-        // If filters changed, show loading state
-        if (variable.state.name === VAR_FILTERS) {
-          this.showLoadingState();
-        }
+      if (!this.state.manager) {
+        console.error('RelatedLogsScene: manager is not defined');
+        return;
+      }
 
-        // Update the query with the new variable values
+      // If filters changed, let the manager handle it
+      if (variable.state.name === VAR_FILTERS) {
+        this.state.manager?.handleFiltersChange();
+      } else {
+        // For other variable changes (e.g., datasource selection), just update the query
         this.updateLokiQuery();
       }
     },
@@ -298,7 +291,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   };
 }
 
-export function buildRelatedLogsScene(props?: Partial<RelatedLogsSceneState>) {
+export function buildRelatedLogsScene(props: Omit<RelatedLogsSceneProps, 'onLogsCountChange'>) {
   return new RelatedLogsScene({
     ...props,
     onLogsCountChange: (count: number, scene: SceneObject) => {

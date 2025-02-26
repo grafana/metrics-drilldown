@@ -172,24 +172,18 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
    */
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
     const lokiDataSources = this.state.lokiDataSources ?? [];
-    const relatedLogsManager = this._relatedLogsManager;
 
-    // Create the scene with the current datasources
-    const scene = buildRelatedLogsScene({ lokiDataSources });
-
-    // Initialize datasources if needed
-    if (lokiDataSources === undefined && relatedLogsManager) {
-      relatedLogsManager.initializeLokiDatasources();
+    // Ensure we have a manager
+    if (!this._relatedLogsManager) {
+      // Create a new manager if one doesn't exist
+      this._relatedLogsManager = new RelatedLogsManager(this);
     }
 
-    // Add an activation handler to refresh logs data when the scene is activated
-    scene.addActivationHandler(() => {
-      if (relatedLogsManager) {
-        relatedLogsManager.refreshLogsData();
-      }
+    // Create the scene with the current datasources and the manager
+    return buildRelatedLogsScene({
+      lokiDataSources,
+      manager: this._relatedLogsManager,
     });
-
-    return scene;
   }
 }
 
