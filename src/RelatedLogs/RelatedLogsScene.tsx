@@ -25,21 +25,22 @@ import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { isCustomVariable } from '../utils/utils.variables';
 
-export interface RelatedLogsSceneState extends SceneObjectState {
+interface RelatedLogsSceneProps {
+  orchestrator: RelatedLogsOrchestrator;
+}
+
+export interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
   controls: SceneObject[];
   body: SceneFlexLayout;
-  orchestrator: RelatedLogsOrchestrator;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
 const RELATED_LOGS_QUERY_KEY = 'related_logs/logs_query';
 
-type RelatedLogsSceneProps = Pick<RelatedLogsSceneState, 'orchestrator'>;
-
 export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   private _queryRunner?: SceneQueryRunner;
 
-  constructor(state: RelatedLogsSceneProps) {
+  constructor(props: RelatedLogsSceneProps) {
     super({
       controls: [],
       body: new SceneFlexLayout({
@@ -52,13 +53,14 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           }),
         ],
       }),
-      ...state,
+      orchestrator: props.orchestrator,
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
   }
 
   private _onActivate() {
+    // Register handler for future changes to lokiDataSources
     this.state.orchestrator.addLokiDataSourcesChangeHandler((dataSources) => {
       // Handle changes in the list of loki data sources that contain related logs
       if (dataSources.length) {
@@ -68,18 +70,20 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       }
     });
 
-    // Handle initial data loading and datasource setup
-    if (this.state.orchestrator.lokiDataSources === undefined) {
-      // No datasources yet, need to initialize
-      this.state.orchestrator.initializeLokiDatasources();
-      // Show loading state while we wait
-      this.showLoadingState();
-    } else if (this.state.orchestrator.lokiDataSources.length) {
-      // We already have datasources with logs, set up the panel
+    // Let the orchestrator handle initialization
+    this.state.orchestrator.ensureLokiDatasources();
+
+    // Check the current state and set up the panel accordingly
+    // This ensures the panel is set up even when switching tabs after data is already loaded
+    if (this.state.orchestrator.lokiDataSources?.length) {
+      // We have datasources with logs, set up the panel
       this.setupLogsPanel();
-    } else {
-      // We know there are no datasources with logs
+    } else if (this.state.orchestrator.lokiDataSources !== undefined) {
+      // We have an empty array, meaning we checked and found no logs
       this.showNoLogsScene();
+    } else {
+      // lokiDataSources is undefined, meaning we haven't checked yet
+      this.showLoadingState();
     }
   }
 
@@ -115,6 +119,12 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private setupLogsPanel(): void {
+    // Clean up existing query runner if it exists
+    if (this._queryRunner) {
+      this._queryRunner.setState({ queries: [] });
+      this._queryRunner = undefined;
+    }
+
     // Initialize query runner
     this._queryRunner = new SceneQueryRunner({
       datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
@@ -164,7 +174,10 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     this.updateLokiQuery();
   }
 
-  // Update query when necessary
+  /**
+   * Updates the Loki query based on the configured connectors, selected datasource, and current filters.
+   * This function is called when the selected datasource or filters change.
+   */
   private updateLokiQuery() {
     if (!this._queryRunner) {
       return;
@@ -172,13 +185,13 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
     const selectedDatasourceVar = sceneGraph.lookupVariable(VAR_LOGS_DATASOURCE, this);
 
-    if (!isCustomVariable(selectedDatasourceVar)) {
-      return;
+    let selectedDatasourceUid: string | undefined = undefined;
+
+    if (isCustomVariable(selectedDatasourceVar)) {
+      selectedDatasourceUid = selectedDatasourceVar.getValue() as string;
     }
 
-    const selectedDatasourceUid = selectedDatasourceVar.getValue();
-
-    if (typeof selectedDatasourceUid !== 'string') {
+    if (!selectedDatasourceUid) {
       return;
     }
 

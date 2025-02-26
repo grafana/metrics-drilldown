@@ -82,7 +82,10 @@ export class RelatedLogsOrchestrator {
       return;
     }
 
+    // When filters change, we need to reset our state to trigger updates in listeners
+    // Setting to empty array (vs undefined) signals we're actively checking
     this.lokiDataSources = [];
+    this.relatedLogsCount = 0;
 
     // Check all available datasources for logs after filter changes
     this.findAndCheckAllDatasources();
@@ -183,6 +186,17 @@ export class RelatedLogsOrchestrator {
       // Activate query
       queryRunner.activate();
     });
+  }
+
+  /**
+   * Ensures Loki datasources are initialized and appropriate UI state is set.
+   * This handles the complete initialization flow with proper loading states.
+   */
+  public ensureLokiDatasources(): void {
+    if (this.lokiDataSources === undefined) {
+      // No datasources yet, need to initialize
+      this.initializeLokiDatasources();
+    }
   }
 }
 
