@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { type DataSourceInstanceSettings, type DataSourceJsonData, type GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import {
   getExploreURL,
@@ -55,7 +55,6 @@ export interface MetricSceneState extends SceneObjectState {
   nativeHistogram?: boolean;
   actionView?: ActionViewType;
   queryDef?: AutoQueryDef;
-  lokiDataSources?: Array<DataSourceInstanceSettings<DataSourceJsonData>>;
   relatedLogsCount?: number;
 }
 
@@ -70,13 +69,13 @@ export type ActionViewType = (typeof actionViews)[keyof typeof actionViews];
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
-  protected _relatedLogsManager = new RelatedLogsManager(this);
+  public relatedLogsManager = new RelatedLogsManager(this);
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
     onReferencedVariableValueChanged: () => {
       // When filters change, we need to re-check for related logs
       if (relatedLogsFeatureEnabled) {
-        this._relatedLogsManager.handleFiltersChange();
+        this.relatedLogsManager.handleFiltersChange();
       }
     },
   });
@@ -100,7 +99,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
 
     if (relatedLogsFeatureEnabled) {
-      this._relatedLogsManager.initializeLokiDatasources();
+      this.relatedLogsManager.initializeLokiDatasources();
+      this.relatedLogsManager.addRelatedLogsCountChangeHandler((count) => {
+        this.setState({ relatedLogsCount: count });
+      });
     }
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
@@ -162,12 +164,9 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
    * Creates a Related Logs scene with the current state
    */
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
-    const lokiDataSources = this.state.lokiDataSources ?? [];
-
     // Create the scene with the current datasources and the manager
     return buildRelatedLogsScene({
-      lokiDataSources,
-      manager: this._relatedLogsManager,
+      manager: this.relatedLogsManager,
     });
   }
 }
