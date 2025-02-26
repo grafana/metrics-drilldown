@@ -6,7 +6,7 @@ import { type TrailStepType } from './DataTrailsHistory';
 import { type ActionViewType } from './MetricScene';
 
 // prettier-ignore
-type Interactions = {
+export type Interactions = {
   // User selected a label to view its breakdown.
   label_selected: {
     label: string;
@@ -72,7 +72,12 @@ type Interactions = {
     numberOfSteps: number;
   };
   // User clicks on tab to change the action view
-  metric_action_view_changed: { view: ActionViewType };
+  metric_action_view_changed: { 
+    view: ActionViewType 
+
+    // The number of related logs
+    related_logs_count?: number
+  };
   // User clicks on one of the action buttons associated with a selected metric
   selected_metric_action_clicked: {
     action: (

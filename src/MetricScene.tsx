@@ -23,7 +23,7 @@ import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
-import { reportExploreMetrics } from './interactions';
+import { reportExploreMetrics, type Interactions } from './interactions';
 import {
   MAIN_PANEL_MAX_HEIGHT,
   MAIN_PANEL_MIN_HEIGHT,
@@ -301,7 +301,13 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
                 counter={counter}
                 active={actionView === tab.value}
                 onChangeTab={() => {
-                  reportExploreMetrics('metric_action_view_changed', { view: tab.value });
+                  const actionViewChangedPayload: Interactions['metric_action_view_changed'] = { view: tab.value };
+
+                  if (relatedLogsFeatureEnabled) {
+                    actionViewChangedPayload.related_logs_count = counter;
+                  }
+
+                  reportExploreMetrics('metric_action_view_changed', actionViewChangedPayload);
                   metricScene.setActionView(tab.value);
                 }}
               />
