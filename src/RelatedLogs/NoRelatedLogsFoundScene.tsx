@@ -27,8 +27,7 @@ export class NoRelatedLogsScene extends SceneObjectBase<SceneObjectState> {
           </ul>
         </Text>
         <Text variant="bodySmall" color="secondary">
-          Note: Related logs is an experimental feature that attempts to find logs with labels matching your current
-          metric selection.
+          Note: Related logs is an experimental feature.
         </Text>
       </Stack>
     );
