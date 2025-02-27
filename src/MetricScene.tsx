@@ -282,7 +282,10 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
                 onChangeTab={() => {
                   const actionViewChangedPayload: Interactions['metric_action_view_changed'] = { view: tab.value };
 
-                  if (relatedLogsFeatureEnabled) {
+                  if (
+                    relatedLogsFeatureEnabled &&
+                    metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()
+                  ) {
                     actionViewChangedPayload.related_logs_count = counter;
                   }
 

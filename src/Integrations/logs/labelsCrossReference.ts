@@ -77,16 +77,22 @@ async function hasMatchingLabels(datasourceUid: string, filters: AdHocVariableFi
 }
 
 export const createLabelsCrossReferenceConnector = (scene: SceneObject) => {
+  // In this connector, conditions have been met for related logs when label filters have been applied
+  let conditionsMetForRelatedLogs = false;
+
   return createMetricsLogsConnector({
     name: 'labelsCrossReference',
+    conditionsMetForRelatedLogs,
     async getDataSources(): Promise<FoundLokiDataSource[]> {
       const trail = getTrailFor(scene);
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
 
       if (!isAdHocFiltersVariable(filtersVariable) || !filtersVariable.state.filters.length) {
+        conditionsMetForRelatedLogs = false;
         return [];
       }
 
+      conditionsMetForRelatedLogs = true;
       const filters = filtersVariable.state.filters.map(({ key, operator, value }) => ({ key, operator, value }));
 
       // Get current time range if available
