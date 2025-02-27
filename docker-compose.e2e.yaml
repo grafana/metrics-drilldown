@@ -12,6 +12,9 @@ services:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
       # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
       GF_PLUGINS_PREINSTALL_DISABLED: true
+    volumes:
+      - ./dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
+      - ./e2e/provisioning/grafana:/etc/grafana/provisioning
 
   prometheus:
     container_name: 'prometheus-e2e'
