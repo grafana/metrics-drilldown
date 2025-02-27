@@ -214,7 +214,7 @@ export class RelatedLogsOrchestrator {
    * Returns true if any of the connectors have conditions met for related logs to be shown.
    */
   public checkConditionsMetForRelatedLogs(): boolean {
-    return this._logsConnectors.some((connector) => connector.conditionsMetForRelatedLogs);
+    return this._logsConnectors.some((connector) => connector.checkConditionsMetForRelatedLogs());
   }
 }
 

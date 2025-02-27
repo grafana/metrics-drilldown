@@ -183,7 +183,7 @@ const createLokiRecordingRulesConnector = () => {
 
   return createMetricsLogsConnector({
     name: 'lokiRecordingRules',
-    conditionsMetForRelatedLogs,
+    checkConditionsMetForRelatedLogs: () => conditionsMetForRelatedLogs,
     async getDataSources(selectedMetric: string): Promise<FoundLokiDataSource[]> {
       lokiRecordingRules = await fetchAndExtractLokiRecordingRules();
       const lokiDataSources = getDataSourcesWithRecordingRulesContainingMetric(selectedMetric, lokiRecordingRules);

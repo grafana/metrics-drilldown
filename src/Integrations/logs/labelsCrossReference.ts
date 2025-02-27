@@ -82,7 +82,7 @@ export const createLabelsCrossReferenceConnector = (scene: SceneObject) => {
 
   return createMetricsLogsConnector({
     name: 'labelsCrossReference',
-    conditionsMetForRelatedLogs,
+    checkConditionsMetForRelatedLogs: () => conditionsMetForRelatedLogs,
     async getDataSources(): Promise<FoundLokiDataSource[]> {
       const trail = getTrailFor(scene);
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail);

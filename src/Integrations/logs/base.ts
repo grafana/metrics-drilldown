@@ -20,7 +20,7 @@ export interface MetricsLogsConnector {
   /**
    * Whether the conditions are met for related logs to be shown by the connector
    */
-  conditionsMetForRelatedLogs: boolean;
+  checkConditionsMetForRelatedLogs: () => boolean;
 
   /**
    * Retrieves the Loki data sources associated with the specified metric.
