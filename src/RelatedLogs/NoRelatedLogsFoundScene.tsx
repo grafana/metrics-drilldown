@@ -14,16 +14,16 @@ export class NoRelatedLogsScene extends SceneObjectBase<SceneObjectState> {
           We couldn&apos;t find any logs related to the current metric with your selected filters.
         </Alert>
         <Text>
-          To find related logs, you can try:
+          To find related logs, try the following:
           <ul className={styles.list}>
-            <li>Adjusting your label filters to include labels that exist in both the current metric and your logs</li>
+            <li>Adjust your label filters to include labels that exist in both the current metric and your logs</li>
             <li>
-              Selecting a metric created by a{' '}
+              Select a metric created by a{' '}
               <TextLink external href="https://grafana.com/docs/loki/latest/alert/#recording-rules">
                 Loki Recording Rule
               </TextLink>
             </li>
-            <li>Broadening the time range to include more data</li>
+            <li>Broaden the time range to include more data</li>
           </ul>
         </Text>
         <Text variant="bodySmall" color="secondary">
