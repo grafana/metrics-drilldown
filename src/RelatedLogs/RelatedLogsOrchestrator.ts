@@ -38,11 +38,22 @@ export class RelatedLogsOrchestrator {
   }
 
   set lokiDataSources(dataSources: DataSource[]) {
+    const currentDataSourcesSignature = this._internalState.lokiDataSources.map((ds) => ds.uid).join(',');
+    const newDataSourcesSignature = dataSources.map((ds) => ds.uid).join(',');
+
+    if (currentDataSourcesSignature === newDataSourcesSignature) {
+      return;
+    }
+
     this._internalState.lokiDataSources = dataSources;
     this._changeHandlers.lokiDataSources.forEach((handler) => handler(this._internalState.lokiDataSources));
   }
 
   set relatedLogsCount(count: number) {
+    if (this._internalState.relatedLogsCount === count) {
+      return;
+    }
+
     this._internalState.relatedLogsCount = count;
     this._changeHandlers.relatedLogsCount.forEach((handler) => handler(this._internalState.relatedLogsCount));
   }
