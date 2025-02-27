@@ -69,7 +69,7 @@ export async function addDataTrailPanelAction(
 
   if (subMenu.length > 0) {
     items.push({
-      text: 'Explore metrics',
+      text: 'Metrics drilldown',
       iconClassName: 'code-branch',
       subMenu: getUnique(subMenu),
     });
@@ -117,7 +117,7 @@ function createCommonEmbeddedTrailStateProps(item: QueryMetric, dashboard: Dashb
 
   const commonProps = {
     scene: embeddedTrail,
-    title: 'Explore metrics',
+    title: 'Metrics drilldown',
   };
 
   return commonProps;
