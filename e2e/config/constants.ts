@@ -6,6 +6,6 @@ export const DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY = 'grafana.navigation.open';
 export const DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY = 'grafana.navigation.docked';
 
 export const DEFAULT_TIMERANGE = {
-  from: '2025-02-18T13:05:00.000Z',
-  to: '2025-02-18T16:30:00.000Z',
+  from: '2025-02-18T13:30:00.000Z',
+  to: '2025-02-18T16:15:00.000Z',
 };

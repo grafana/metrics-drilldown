@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures';
-import { testIds } from '../src/App/testIds';
-import { ROUTES } from '../src/constants';
-import { UI_TEXT } from '../src/constants/ui';
+import { testIds } from '../../src/App/testIds';
+import { ROUTES } from '../../src/constants';
+import { UI_TEXT } from '../../src/constants/ui';
 
 test.describe('Metrics Drilldown', () => {
   test('home page renders with core elements', async ({ gotoPage, page }) => {

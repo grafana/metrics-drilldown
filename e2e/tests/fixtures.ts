@@ -4,8 +4,8 @@ import {
   DEFAULT_TIMERANGE,
   DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY,
   DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY,
-} from '../e2e/config/constants';
-import pluginJson from '../src/plugin.json';
+} from '../config/constants';
+import pluginJson from '../../src/plugin.json';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
