@@ -2,25 +2,25 @@ name: 'metrics-drilldown-e2e'
 services:
   grafana:
     extends:
-      file: .config/docker-compose-base.yaml
+      file: ../../.config/docker-compose-base.yaml
       service: grafana
     container_name: 'grafana-e2e'
     # Use either the GRAFANA_PORT defined in `.env`, or port 3000 if not defined
     ports: !override
-      - '${GRAFANA_PORT:-3000}:3000'
+      - '${GRAFANA_PORT:-3001}:3000'
     environment:
-      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
       # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
       GF_PLUGINS_PREINSTALL_DISABLED: true
     volumes:
-      - ./dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
-      - ./e2e/provisioning/grafana:/etc/grafana/provisioning
+      - ../../dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
+      - ../provisioning/grafana:/etc/grafana/provisioning
 
   prometheus:
     container_name: 'prometheus-e2e'
     build:
-      dockerfile: ./e2e/provisioning/prometheus/Dockerfile
-      context: .
+      dockerfile: ./docker/Dockerfile.prometheus
+      context: ..
     ports:
       - '9099:9090'
     extra_hosts:
