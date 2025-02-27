@@ -140,9 +140,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
           : 0;
 
-        // Update logs count
-        this.state.orchestrator.relatedLogsCount = totalRows;
-
         // Show NoRelatedLogsScene if no logs found
         if (totalRows === 0 || !state.data.series?.length) {
           this.showNoLogsScene();
