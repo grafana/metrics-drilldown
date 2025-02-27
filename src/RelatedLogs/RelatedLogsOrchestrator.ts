@@ -50,10 +50,6 @@ export class RelatedLogsOrchestrator {
   }
 
   set relatedLogsCount(count: number) {
-    if (this._internalState.relatedLogsCount === count) {
-      return;
-    }
-
     this._internalState.relatedLogsCount = count;
     this._changeHandlers.relatedLogsCount.forEach((handler) => handler(this._internalState.relatedLogsCount));
   }
