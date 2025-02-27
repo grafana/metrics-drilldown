@@ -140,14 +140,9 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
       // reduce max height for main panel to reduce height flicker
       body.state.topView.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
-
-      // Get the scene from the action view definition
-      const scene = actionViewDef.getScene(this);
-
-      // Update the state
-      body.setState({ selectedTab: scene });
+      body.setState({ selectedTab: actionViewDef.getScene(this) });
       this.setState({ actionView: actionViewDef.value });
-    } else if (this.state.actionView !== undefined) {
+    } else {
       // restore max height
       body.state.topView.state.children[0].setState({ maxHeight: MAIN_PANEL_MAX_HEIGHT });
       body.setState({ selectedTab: undefined });
@@ -160,11 +155,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     return <body.Component model={body} />;
   };
 
-  /**
-   * Creates a Related Logs scene with the current state
-   */
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
-    // Create the scene with the current datasources and the manager
     return buildRelatedLogsScene({
       orchestrator: this.relatedLogsOrchestrator,
     });
