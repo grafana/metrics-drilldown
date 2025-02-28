@@ -61,43 +61,16 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
   private _onActivate() {
     // Register handler for future changes to lokiDataSources
-    this.state.orchestrator.addLokiDataSourcesChangeHandler((dataSources) => {
-      // Handle changes in the list of loki data sources that contain related logs
-      if (dataSources.length) {
-        this.setupLogsPanel();
-      } else {
-        this.showNoLogsScene();
-      }
-    });
-
-    // Let the orchestrator handle initialization
-    this.state.orchestrator.ensureLokiDatasources();
-
-    // Check the current state and set up the panel accordingly
-    // This ensures the panel is set up even when switching tabs after data is already loaded
-    if (this.state.orchestrator.lokiDataSources?.length) {
-      // We have datasources with logs, set up the panel
+    this.state.orchestrator.addLokiDataSourcesChangeHandler(() => {
       this.setupLogsPanel();
-    } else if (this.state.orchestrator.lokiDataSources !== undefined) {
-      // We have an empty array, meaning we checked and found no logs
-      this.showNoLogsScene();
-    } else {
-      // lokiDataSources is undefined, meaning we haven't checked yet
-      this.showLoadingState();
-    }
-  }
-
-  private showLoadingState() {
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
-    logsPanelContainer.setState({
-      body: PanelBuilders.text()
-        .setTitle('Searching for related logs...')
-        .setOption(
-          'content',
-          "We're searching for logs related to your current metric and filters. This may take a moment..."
-        )
-        .build(),
     });
+
+    // If data sources have already been loaded, we don't need to fetch them again
+    if (!this.state.orchestrator.lokiDataSources.length) {
+      this.state.orchestrator.findAndCheckAllDatasources();
+    } else {
+      this.setupLogsPanel();
+    }
   }
 
   private showNoLogsScene() {
@@ -112,6 +85,11 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private setupLogsPanel(): void {
+    if (!this.state.orchestrator.lokiDataSources.length) {
+      this.showNoLogsScene();
+      return;
+    }
+
     // Clean up existing query runner if it exists
     if (this._queryRunner) {
       this._queryRunner.setState({ queries: [] });

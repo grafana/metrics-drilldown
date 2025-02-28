@@ -99,7 +99,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
 
     if (relatedLogsFeatureEnabled) {
-      this.relatedLogsOrchestrator.initializeLokiDatasources();
+      this.relatedLogsOrchestrator.findAndCheckAllDatasources();
       this.relatedLogsOrchestrator.addRelatedLogsCountChangeHandler((count) => {
         this.setState({ relatedLogsCount: count });
       });

@@ -69,19 +69,6 @@ export class RelatedLogsOrchestrator {
   }
 
   /**
-   * Initialize Loki datasources by fetching healthy ones and updating the MetricScene state.
-   * If the Related Logs tab is active, it also updates the RelatedLogsScene.
-   */
-  public async initializeLokiDatasources(): Promise<void> {
-    this.lokiDataSources = await findHealthyLokiDataSources();
-
-    // Then check which ones have logs
-    if (this.lokiDataSources.length) {
-      this.checkLogsInDataSources(this.lokiDataSources);
-    }
-  }
-
-  /**
    * Called when filters change to re-check for logs in datasources.
    */
   public handleFiltersChange(): void {
@@ -102,7 +89,7 @@ export class RelatedLogsOrchestrator {
    * Find all available datasources and check them for logs.
    * This is used when filters change to ensure we're checking all possible datasources.
    */
-  private async findAndCheckAllDatasources(): Promise<void> {
+  public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
     const allLokiDatasources = await findHealthyLokiDataSources();
 
@@ -142,7 +129,7 @@ export class RelatedLogsOrchestrator {
   }
 
   /**
-   * Check each datasource for logs and update the MetricScene and RelatedLogsScene accordingly.
+   * Check each datasource for logs, then update the datasources and relatedLogsCount accordingly.
    */
   private checkLogsInDataSources(datasources: DataSource[]): void {
     // Check each datasource for logs
@@ -197,17 +184,6 @@ export class RelatedLogsOrchestrator {
       // Activate query
       queryRunner.activate();
     });
-  }
-
-  /**
-   * Ensures Loki datasources are initialized and appropriate UI state is set.
-   * This handles the complete initialization flow with proper loading states.
-   */
-  public ensureLokiDatasources(): void {
-    if (this.lokiDataSources === undefined) {
-      // No datasources yet, need to initialize
-      this.initializeLokiDatasources();
-    }
   }
 
   /**
