@@ -59,9 +59,11 @@ import {
 } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getTrailFor, limitAdhocProviders } from './utils';
+import { calculateMetricUsageScores, fetchAlertingMetrics, fetchDashboardMetrics } from './utils/metricUsage';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
+
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
@@ -69,6 +71,10 @@ export interface DataTrailState extends SceneObjectState {
   history: DataTrailHistory;
   settings: DataTrailSettings;
   createdAt: number;
+
+  // wingman
+  dashboardMetrics?: Record<string, number>;
+  alertingMetrics?: Record<string, number>;
 
   // just for the starting data source
   initialDS?: string;
@@ -98,6 +104,9 @@ export interface DataTrailState extends SceneObjectState {
   histogramsLoaded: boolean;
   nativeHistograms: string[];
   nativeHistogramMetric: string;
+
+  usageDataFetchStatus?: 'pending' | 'complete' | 'error';
+  metricUsageScores?: Record<string, number>;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -121,6 +130,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       history: state.history ?? new DataTrailHistory({}),
       settings: state.settings ?? new DataTrailSettings({}),
       createdAt: state.createdAt ?? new Date().getTime(),
+      dashboardMetrics: {},
+      alertingMetrics: {},
+      metricUsageScores: {},
       // default to false but update this to true on updateOtelData()
       // or true if the user either turned on the experience
       useOtelExperience: state.useOtelExperience ?? false,
@@ -203,11 +215,51 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     };
     window.addEventListener('unload', saveRecentTrail);
 
+    // Fetch metric usage data
+    this.updateMetricUsageData();
+
     return () => {
       if (!this.state.embedded) {
         saveRecentTrail();
       }
       window.removeEventListener('unload', saveRecentTrail);
+    };
+  }
+
+  /**
+   * Updates metric usage data from dashboards and alerting rules
+   */
+  private async updateMetricUsageData() {
+    try {
+      this.setState({ usageDataFetchStatus: 'pending' });
+
+      // Fetch both metrics sources concurrently
+      const [dashboardMetrics, alertingMetrics] = await Promise.all([fetchDashboardMetrics(), fetchAlertingMetrics()]);
+
+      // Calculate the combined usage scores
+      const metricUsageScores = calculateMetricUsageScores(dashboardMetrics, alertingMetrics);
+
+      this.setState({
+        dashboardMetrics,
+        alertingMetrics,
+        metricUsageScores,
+        usageDataFetchStatus: 'complete',
+      });
+    } catch (error) {
+      console.error('Failed to fetch metric usage data:', error);
+      this.setState({
+        dashboardMetrics: {},
+        alertingMetrics: {},
+        metricUsageScores: {},
+        usageDataFetchStatus: 'error',
+      });
+    }
+  }
+
+  public getUsageStatsFor(metric: string) {
+    return {
+      dashboards: this.state.dashboardMetrics?.[metric] ?? 0,
+      alertingRules: this.state.alertingMetrics?.[metric] ?? 0,
     };
   }
 

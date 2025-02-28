@@ -8,6 +8,7 @@ import { getColorByIndex } from '../utils';
 import { hideEmptyPreviews } from './hideEmptyPreviews';
 import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { SelectMetricAction } from './SelectMetricAction';
+import { WithUsageDataPreviewPanel } from './WithUsageDataPreviewPanel';
 
 export function getPreviewPanelFor(
   metric: string,
@@ -36,7 +37,10 @@ export function getPreviewPanelFor(
     vizPanelBuilder = vizPanelBuilder.setShowMenuAlways(true).setMenu(new PanelMenu({ labelName: metric }));
   }
 
-  const vizPanel = vizPanelBuilder.build();
+  const vizPanel = new WithUsageDataPreviewPanel({
+    vizPanelInGridItem: vizPanelBuilder.build(),
+    metric,
+  });
 
   const queries = autoQuery.preview.queries.map((query) =>
     convertPreviewQueriesToIgnoreUsage(query, currentFilterCount)
