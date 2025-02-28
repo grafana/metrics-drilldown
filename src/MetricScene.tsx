@@ -62,7 +62,7 @@ export const actionViews = {
   overview: 'overview',
   breakdown: 'breakdown',
   related: 'related',
-  relatedLogs: 'related_logs',
+  relatedLogs: 'logs',
 } as const;
 
 export type ActionViewType = (typeof actionViews)[keyof typeof actionViews];
