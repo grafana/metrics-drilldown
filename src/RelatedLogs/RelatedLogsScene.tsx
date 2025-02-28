@@ -3,8 +3,8 @@ import { config } from '@grafana/runtime';
 import {
   CustomVariable,
   PanelBuilders,
-  SceneFlexItem,
-  SceneFlexLayout,
+  SceneCSSGridItem,
+  SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
   SceneQueryRunner,
@@ -31,7 +31,7 @@ interface RelatedLogsSceneProps {
 
 export interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
   controls: SceneObject[];
-  body: SceneFlexLayout;
+  body: SceneCSSGridLayout;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
@@ -43,11 +43,11 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   constructor(props: RelatedLogsSceneProps) {
     super({
       controls: [],
-      body: new SceneFlexLayout({
-        direction: 'column',
-        height: '400px',
+      body: new SceneCSSGridLayout({
+        templateColumns: '1fr',
+        autoRows: 'minmax(300px, 1fr)',
         children: [
-          new SceneFlexItem({
+          new SceneCSSGridItem({
             key: LOGS_PANEL_CONTAINER_KEY,
             body: undefined,
           }),
@@ -88,27 +88,20 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private showLoadingState() {
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
     logsPanelContainer.setState({
-      body: new SceneFlexLayout({
-        direction: 'column',
-        children: [
-          new SceneFlexItem({
-            body: PanelBuilders.text()
-              .setTitle('Searching for related logs...')
-              .setOption(
-                'content',
-                "We're searching for logs related to your current metric and filters. This may take a moment..."
-              )
-              .build(),
-          }),
-        ],
-      }),
+      body: PanelBuilders.text()
+        .setTitle('Searching for related logs...')
+        .setOption(
+          'content',
+          "We're searching for logs related to your current metric and filters. This may take a moment..."
+        )
+        .build(),
     });
   }
 
   private showNoLogsScene() {
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
     logsPanelContainer.setState({
       body: new NoRelatedLogsScene({}),
     });
@@ -148,7 +141,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     });
 
     // Set up UI for logs panel
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
     logsPanelContainer.setState({
       body: PanelBuilders.logs().setTitle('Logs').setData(this._queryRunner).build(),
     });
@@ -221,29 +214,27 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     const { controls, body } = model.useState();
 
     return (
-      <div>
-        <Stack gap={1} direction={'column'} grow={1}>
-          <Stack gap={1} direction={'row'} grow={1} justifyContent={'space-between'} alignItems={'start'}>
-            <Stack gap={1}>
-              {controls?.map((control) => (
-                <control.Component key={control.state.key} model={control} />
-              ))}
-            </Stack>
-
-            <LinkButton
-              href={`${config.appSubUrl}/a/grafana-lokiexplore-app`} // We prefix with the appSubUrl for environments that don't host grafana at the root.
-              target="_blank"
-              tooltip="Navigate to the Explore Logs app"
-              variant="secondary"
-              size="sm"
-              onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_explore_logs' })}
-            >
-              Open Explore Logs
-            </LinkButton>
+      <Stack gap={1} direction={'column'} grow={1}>
+        <Stack gap={1} direction={'row'} justifyContent={'space-between'} alignItems={'start'}>
+          <Stack gap={1}>
+            {controls?.map((control) => (
+              <control.Component key={control.state.key} model={control} />
+            ))}
           </Stack>
-          <body.Component model={body} />
+
+          <LinkButton
+            href={`${config.appSubUrl}/a/grafana-lokiexplore-app`} // We prefix with the appSubUrl for environments that don't host grafana at the root.
+            target="_blank"
+            tooltip="Navigate to the Explore Logs app"
+            variant="secondary"
+            size="sm"
+            onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_explore_logs' })}
+          >
+            Open Explore Logs
+          </LinkButton>
         </Stack>
-      </div>
+        <body.Component model={body} />
+      </Stack>
     );
   };
 }
