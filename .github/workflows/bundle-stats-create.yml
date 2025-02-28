@@ -1,6 +1,7 @@
 name: create bundle stats
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -34,4 +35,5 @@ jobs:
         with:
           name: main-branch-stats
           path: stats.json
+          retention-days: 90
           overwrite: true
