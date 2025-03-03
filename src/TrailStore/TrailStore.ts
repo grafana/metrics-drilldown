@@ -2,7 +2,7 @@ import { urlUtil } from '@grafana/data';
 import { sceneUtils, type SceneObject, type SceneObjectRef, type SceneObjectUrlValues } from '@grafana/scenes';
 import { debounce, isEqual } from 'lodash';
 
-import { type WingmanDataTrail } from 'WingmanDataTrail';
+import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 import { createBookmarkSavedNotification } from './utils';
 import { DataTrail } from '../DataTrail';

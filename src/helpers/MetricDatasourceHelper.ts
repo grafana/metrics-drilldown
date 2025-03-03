@@ -12,7 +12,7 @@ import {
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 
-import { type WingmanDataTrail } from 'WingmanDataTrail';
+import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';

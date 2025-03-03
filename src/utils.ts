@@ -23,7 +23,7 @@ import {
 } from '@grafana/scenes';
 import { lastValueFrom } from 'rxjs';
 
-import { WingmanDataTrail } from 'WingmanDataTrail';
+import { WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 import { ROUTES } from './constants';
 import { DataTrail } from './DataTrail';

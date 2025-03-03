@@ -6,7 +6,7 @@ import React, { createContext, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
 import { getUrlForTrail, newMetricsTrail } from 'utils';
-import { type WingmanDataTrail } from 'WingmanDataTrail';
+import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 import { AppRoutes } from './Routes';
 import { PluginPropsContext } from '../utils/utils.plugin';

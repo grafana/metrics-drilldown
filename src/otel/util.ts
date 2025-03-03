@@ -3,7 +3,7 @@ import { isValidLegacyName } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 
-import { type WingmanDataTrail } from 'WingmanDataTrail';
+import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 import { type DataTrail } from '../DataTrail';
 import { reportChangeInLabelFilters } from '../interactions';
