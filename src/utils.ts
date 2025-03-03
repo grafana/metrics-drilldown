@@ -23,6 +23,8 @@ import {
 } from '@grafana/scenes';
 import { lastValueFrom } from 'rxjs';
 
+import { WingmanDataTrail } from 'WingmanDataTrail';
+
 import { ROUTES } from './constants';
 import { DataTrail } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
@@ -34,16 +36,16 @@ import { getTrailStore } from './TrailStore/TrailStore';
 import { getClosestScopesFacade } from './utils/utils.scopes';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
-export function getTrailFor(model: SceneObject): DataTrail {
-  return sceneGraph.getAncestor(model, DataTrail);
+export function getTrailFor(model: SceneObject): DataTrail | WingmanDataTrail {
+  return sceneGraph.getAncestor(model, WingmanDataTrail);
 }
 
 export function getTrailSettings(model: SceneObject): DataTrailSettings {
   return sceneGraph.getAncestor(model, DataTrail).state.settings;
 }
 
-export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean): DataTrail {
-  return new DataTrail({
+export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean): WingmanDataTrail {
+  return new WingmanDataTrail({
     initialDS,
     $timeRange: new SceneTimeRange({ from: 'now-1h', to: 'now' }),
     embedded: false,
@@ -51,7 +53,7 @@ export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean
   });
 }
 
-export function getUrlForTrail(trail: DataTrail) {
+export function getUrlForTrail(trail: DataTrail | WingmanDataTrail) {
   const params = sceneUtils.getUrlState(trail);
   return getUrlForValues(params);
 }
@@ -145,7 +147,7 @@ const MAX_ADHOC_VARIABLE_OPTIONS = 10000;
  * @param datasourceHelper
  */
 export function limitAdhocProviders(
-  dataTrail: DataTrail,
+  dataTrail: DataTrail | WingmanDataTrail,
   limitedFilterVariable: SceneVariable<SceneVariableState> | null,
   datasourceHelper: MetricDatasourceHelper
 ) {
