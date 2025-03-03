@@ -1,6 +1,8 @@
 import { type AdHocVariableFilter, type UrlQueryMap, type UrlQueryValue } from '@grafana/data';
 import { sceneGraph } from '@grafana/scenes';
 
+import { type WingmanDataTrail } from 'WingmanDataTrail';
+
 import { type DataTrail } from '../DataTrail';
 import { reportExploreMetrics } from '../interactions';
 import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_DEPLOYMENT_ENV } from '../shared';
@@ -19,7 +21,7 @@ import { isAdHocFiltersVariable, isCustomVariable } from '../utils/utils.variabl
  * @param trail
  * @returns
  */
-export function migrateOtelDeploymentEnvironment(trail: DataTrail, urlParams: UrlQueryMap) {
+export function migrateOtelDeploymentEnvironment(trail: DataTrail | WingmanDataTrail, urlParams: UrlQueryMap) {
   const deploymentEnv = urlParams['var-deployment_environment'];
   // does not need to be migrated
   const otelMetricsVar = urlParams['var-otel_and_metric_filters'];

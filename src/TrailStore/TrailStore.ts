@@ -2,6 +2,8 @@ import { urlUtil } from '@grafana/data';
 import { sceneUtils, type SceneObject, type SceneObjectRef, type SceneObjectUrlValues } from '@grafana/scenes';
 import { debounce, isEqual } from 'lodash';
 
+import { type WingmanDataTrail } from 'WingmanDataTrail';
+
 import { createBookmarkSavedNotification } from './utils';
 import { DataTrail } from '../DataTrail';
 import { type TrailStepType } from '../DataTrailsHistory';
@@ -178,7 +180,7 @@ export class TrailStore {
     this._lastModified = Date.now();
   }
 
-  setRecentTrail(recentTrail: DataTrail) {
+  setRecentTrail(recentTrail: DataTrail | WingmanDataTrail) {
     const { steps } = recentTrail.state.history.state;
     if (steps.length === 0 || (steps.length === 1 && steps[0].type === 'start')) {
       // We do not set an uninitialized trail, or a single node "start" trail as recent
@@ -197,7 +199,7 @@ export class TrailStore {
       return !isEqual(recentUrlState, urlState);
     });
 
-    this._recent.unshift(recentTrail.getRef());
+    this._recent.unshift((recentTrail as DataTrail).getRef());
     this._save();
   }
 
@@ -246,7 +248,7 @@ export class TrailStore {
   }
 }
 
-function getUrlStateForComparison(trail: DataTrail) {
+function getUrlStateForComparison(trail: DataTrail | WingmanDataTrail) {
   const urlState = sceneUtils.getUrlState(trail);
   // Make a few corrections
   correctUrlStateForComparison(urlState);
