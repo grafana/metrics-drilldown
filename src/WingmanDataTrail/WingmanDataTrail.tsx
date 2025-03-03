@@ -29,18 +29,18 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { MetricsReducer } from 'MetricSelect/MetricsReducer';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
-import { DataTrailSettings } from './DataTrailSettings';
-import { DataTrailHistory } from './DataTrailsHistory';
-import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { reportChangeInLabelFilters } from './interactions';
-import { MetricScene } from './MetricScene';
-import { MetricsHeader } from './MetricsHeader';
-import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
-import { getTrailStore } from './TrailStore/TrailStore';
-import { isSceneQueryRunner } from './utils/utils.queries';
-import { isAdHocFiltersVariable } from './utils/utils.variables';
+import { DataTrailSettings } from '../DataTrailSettings';
+import { DataTrailHistory } from '../DataTrailsHistory';
+import { MetricDatasourceHelper } from '../helpers/MetricDatasourceHelper';
+import { reportChangeInLabelFilters } from '../interactions';
+import { MetricScene } from '../MetricScene';
+import { MetricsHeader } from '../MetricsHeader';
+import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS, VAR_OTEL_AND_METRIC_FILTERS } from '../shared';
+import { getTrailStore } from '../TrailStore/TrailStore';
+import { isSceneQueryRunner } from '../utils/utils.queries';
+import { isAdHocFiltersVariable } from '../utils/utils.variables';
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;

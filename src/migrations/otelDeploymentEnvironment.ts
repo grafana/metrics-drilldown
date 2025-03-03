@@ -1,7 +1,7 @@
 import { type AdHocVariableFilter, type UrlQueryMap, type UrlQueryValue } from '@grafana/data';
 import { sceneGraph } from '@grafana/scenes';
 
-import { type WingmanDataTrail } from 'WingmanDataTrail';
+import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 import { type DataTrail } from '../DataTrail';
 import { reportExploreMetrics } from '../interactions';

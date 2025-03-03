@@ -2,7 +2,7 @@ import { UrlSyncContextProvider } from '@grafana/scenes';
 import React, { useEffect, useState } from 'react';
 
 import { getTrailStore } from 'TrailStore/TrailStore';
-import { type WingmanDataTrail } from 'WingmanDataTrail';
+import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 export default function Trail({ trail }: { trail: WingmanDataTrail }) {
   const [isInitialized, setIsInitialized] = useState(false);

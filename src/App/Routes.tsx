@@ -2,7 +2,7 @@ import React, { lazy, useContext } from 'react';
 import { Navigate, Route, Routes as ReactRoutes } from 'react-router-dom-v5-compat';
 
 import { type DataTrail } from 'DataTrail';
-import { type WingmanDataTrail } from 'WingmanDataTrail';
+import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 import { ROUTES } from '../constants';
 import { MetricsContext } from './App';
