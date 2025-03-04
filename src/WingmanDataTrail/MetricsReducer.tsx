@@ -78,17 +78,10 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
     setInputValue(searchValue);
   }, [searchValue]);
 
-  // Calculate counts - just use total count for display
-  const totalCount = items.length;
-  const displayCount = totalCount; // Always show total count, regardless of hideEmpty
-
-  // Create full list with "All" option
-  const fullList = [{ label: `All (${displayCount})`, value: 'all' }, ...items];
-
-  // Filter the list - use searchValue instead of inputValue
-  const filteredList = fullList.filter((item) => {
+  // Remove the "All" option - just use the items directly
+  const filteredList = items.filter((item) => {
     const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
-    if (hideEmpty && item.value !== 'all') {
+    if (hideEmpty) {
       const count = parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0', 10);
       return matchesSearch && count > 0;
     }
