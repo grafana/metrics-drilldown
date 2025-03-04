@@ -6,13 +6,12 @@ import React, { createContext, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
 import { getUrlForTrail, newMetricsTrail } from 'utils';
-import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
 
 import { AppRoutes } from './Routes';
 import { PluginPropsContext } from '../utils/utils.plugin';
 
 interface MetricsAppContext {
-  trail: DataTrail | WingmanDataTrail;
+  trail: DataTrail;
   goToUrlForTrail: (trail: DataTrail) => void;
 }
 
@@ -22,9 +21,9 @@ export const MetricsContext = createContext<MetricsAppContext>({
 });
 
 function App(props: AppRootProps) {
-  const [trail, setTrail] = useState<DataTrail | WingmanDataTrail>(newMetricsTrail(undefined, true));
+  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined, true));
   const styles = useStyles2(getStyles);
-  const goToUrlForTrail = (trail: DataTrail | WingmanDataTrail) => {
+  const goToUrlForTrail = (trail: DataTrail) => {
     locationService.push(getUrlForTrail(trail));
     setTrail(trail);
   };

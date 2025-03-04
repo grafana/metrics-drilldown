@@ -3,8 +3,6 @@ import { isValidLegacyName } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 
-import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
-
 import { type DataTrail } from '../DataTrail';
 import { reportChangeInLabelFilters } from '../interactions';
 import {
@@ -236,7 +234,7 @@ export function limitOtelMatchTerms(
  * @param metric
  * @returns
  */
-export async function updateOtelJoinWithGroupLeft(trail: DataTrail | WingmanDataTrail, metric: string) {
+export async function updateOtelJoinWithGroupLeft(trail: DataTrail, metric: string) {
   // When to remove or add the group left
   // REMOVE
   // - selecting a new metric and returning to metric select scene
@@ -352,7 +350,7 @@ export function getProdOrDefaultEnv(envs: string[]): string | null {
  * @param fromDataSourceChanged
  */
 export async function updateOtelData(
-  trail: DataTrail | WingmanDataTrail,
+  trail: DataTrail,
   datasourceUid: string,
   timeRange: RawTimeRange,
   deploymentEnvironments?: string[],

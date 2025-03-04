@@ -356,7 +356,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // must pass this native histogram prometheus knowledge deep into
     // the topscene set on the trail > MetricScene > getAutoQueriesForMetric() > createHistogramMetricQueryDefs();
     stateUpdate.nativeHistogramMetric = nativeHistogramMetric ? '1' : '';
-    stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
+    if (stateUpdate.metric && stateUpdate.nativeHistogramMetric) {
+      stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
+    }
     return stateUpdate;
   }
 

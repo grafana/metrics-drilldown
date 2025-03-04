@@ -2,9 +2,11 @@ import { UrlSyncContextProvider } from '@grafana/scenes';
 import React, { useEffect, useState } from 'react';
 
 import { getTrailStore } from 'TrailStore/TrailStore';
-import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
-export default function Trail({ trail }: { trail: WingmanDataTrail }) {
+import type { DataTrail } from 'DataTrail';
+
+export default function Trail({ trail }: { trail: DataTrail }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -14,6 +16,10 @@ export default function Trail({ trail }: { trail: WingmanDataTrail }) {
       }
       setIsInitialized(true);
     }
+
+    trail.setState({
+      topScene: new MetricsReducer({}),
+    });
   }, [trail, isInitialized]);
 
   if (!isInitialized) {
