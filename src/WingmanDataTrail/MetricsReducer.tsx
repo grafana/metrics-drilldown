@@ -4,8 +4,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Checkbox, Field, FieldSet, Icon, Input, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { HeaderControls } from './HeaderControls/HeaderControls';
-import { MetricsGroupByList } from './MetricsGroupByList';
 import { SimpleMetricsList } from './MetricVizPanel/SimpleMetricsList';
 
 interface MetricsReducerState extends SceneObjectState {
