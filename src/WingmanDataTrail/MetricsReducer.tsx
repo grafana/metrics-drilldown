@@ -78,10 +78,9 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
     setInputValue(searchValue);
   }, [searchValue]);
 
-  // Calculate counts
+  // Calculate counts - just use total count for display
   const totalCount = items.length;
-  const nonEmptyCount = items.filter((item) => parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0', 10) > 0).length;
-  const displayCount = hideEmpty ? nonEmptyCount : totalCount;
+  const displayCount = totalCount; // Always show total count, regardless of hideEmpty
 
   // Create full list with "All" option
   const fullList = [{ label: `All (${displayCount})`, value: 'all' }, ...items];
