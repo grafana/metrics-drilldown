@@ -61,6 +61,9 @@ interface MetricPanel {
   loaded?: boolean;
 }
 
+const sortByOptions = ['alphabetical', 'reverse-alphabetical', 'dashboard-usage', 'alerting-usage'] as const;
+type SortByOption = (typeof sortByOptions)[number];
+
 export interface MetricSelectSceneState extends SceneObjectState {
   body: SceneFlexLayout | SceneCSSGridLayout;
   rootGroup?: Node;
@@ -70,7 +73,7 @@ export interface MetricSelectSceneState extends SceneObjectState {
   metricNamesError?: string;
   metricNamesWarning?: string;
   missingOtelTargets?: boolean;
-  sortBy: 'alphabetical' | 'reverse-alphabetical' | 'usage';
+  sortBy: SortByOption;
 }
 
 const ROW_PREVIEW_HEIGHT = '175px';
@@ -86,7 +89,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   private previewCache: Record<string, MetricPanel> = {};
   private ignoreNextUpdate = false;
   private _debounceRefreshMetricNames = debounce(() => this._refreshMetricNames(), 1000);
-  private _sortChangeInProgress = false;
 
   constructor(state: Partial<MetricSelectSceneState>) {
     super({
@@ -132,7 +134,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     }
     if (typeof values.sortBy === 'string') {
       if (this.state.sortBy !== values.sortBy) {
-        this.setState({ sortBy: values.sortBy as 'alphabetical' | 'usage' });
+        this.setState({
+          sortBy: values.sortBy as 'alphabetical' | 'reverse-alphabetical' | 'dashboard-usage' | 'alerting-usage',
+        });
       }
     }
   }
@@ -303,9 +307,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
         metricNamesWarning = undefined;
       }
 
-      // Sort metrics based on sortBy setting
-      metricNames = this.sortMetrics(metricNames);
-
       let bodyLayout = this.state.body;
 
       // generate groups based on the search metrics input
@@ -358,25 +359,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     });
 
     const trail = getTrailFor(this);
-
-    // Sort metrics based on the current sorting method
-    let sortedMetricNames = metricNames;
-
-    if (trail.state.metric !== undefined) {
-      // If we're in related metrics view, sort by relevance to the current metric
-      sortedMetricNames = sortRelatedMetrics(metricNames, trail.state.metric);
-    } else if (this.state.sortBy === 'usage') {
-      // If sorting by usage, use the usage scores
-      const usageScores = trail.state.metricUsageScores || {};
-      sortedMetricNames = sortMetricsByUsage(metricNames, usageScores);
-    } else if (this.state.sortBy === 'reverse-alphabetical') {
-      // Reverse alphabetical sorting
-      sortedMetricNames = sortMetricsReverseAlphabetically(metricNames);
-    } else {
-      // Default to alphabetical sorting
-      sortedMetricNames = sortMetricsAlphabetically(metricNames);
-    }
-
+    const sortedMetricNames =
+      trail.state.metric !== undefined ? sortRelatedMetrics(metricNames, trail.state.metric) : metricNames;
     const metricsMap: Record<string, MetricPanel> = {};
     const metricsLimit = 120;
 
@@ -416,8 +400,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     const { sortBy } = this.state;
 
     // If sorting by usage, use the usage scores from DataTrail
-    if (sortBy === 'usage') {
-      const usageScores = trail.state.metricUsageScores || {};
+    if (sortBy === 'dashboard-usage') {
+      const usageScores = trail.state.dashboardMetrics || {};
 
       return Object.values(this.previewCache).sort((a, b) => {
         // Always put empty metrics at the end
@@ -540,16 +524,11 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   public updateMetricPanel = (metric: string, isLoaded?: boolean, isEmpty?: boolean) => {
     const metricPanel = this.previewCache[metric];
     if (metricPanel) {
-      // Only update if the values are actually changing
-      if (metricPanel.isEmpty !== isEmpty || metricPanel.loaded !== isLoaded) {
-        metricPanel.isEmpty = isEmpty;
-        metricPanel.loaded = isLoaded;
-        this.previewCache[metric] = metricPanel;
-
-        // Only rebuild layout if we're showing "All" metrics and not in the middle of a sort change
-        if (this.state.metricPrefix === 'All' && !this._sortChangeInProgress) {
-          this.buildLayout();
-        }
+      metricPanel.isEmpty = isEmpty;
+      metricPanel.loaded = isLoaded;
+      this.previewCache[metric] = metricPanel;
+      if (this.state.metricPrefix === 'All') {
+        this.buildLayout();
       }
     }
   };
@@ -594,35 +573,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     }
     setOtelExperienceToggleState(!useOtelExperience);
     trail.setState({ useOtelExperience: !useOtelExperience, resettingOtel, startButtonClicked });
-  };
-
-  public onSortChange = (event: SelectableValue<'alphabetical' | 'reverse-alphabetical' | 'usage'>) => {
-    const value = event.value || 'alphabetical';
-    const previousSortBy = this.state.sortBy;
-
-    // Set flag to prevent interference from behaviors during sort change
-    this._sortChangeInProgress = true;
-
-    this.setState({ sortBy: value });
-
-    // Cancel any pending debounced refreshes
-    this._debounceRefreshMetricNames.cancel();
-
-    // When switching from usage to alphabetical, we need a more thorough refresh
-    if (previousSortBy === 'usage' && (value === 'alphabetical' || value === 'reverse-alphabetical')) {
-      // Clear the cache to force a complete rebuild
-      this.previewCache = {};
-      // Refresh the metric names completely
-      this._refreshMetricNames();
-    } else {
-      // For other sort changes, just rebuild the layout
-      this.onMetricNamesChanged();
-    }
-
-    // Clear the flag after a short delay to allow the layout to stabilize
-    setTimeout(() => {
-      this._sortChangeInProgress = false;
-    }, 500);
   };
 
   public static Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
@@ -670,11 +620,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
         <Icon className={styles.warningIcon} name="exclamation-triangle" />
       </Tooltip>
     ) : undefined;
-
-    const onSortChange = (event: SelectableValue<'alphabetical' | 'reverse-alphabetical' | 'usage'>) => {
-      // Use the class method to handle sort changes
-      model.onSortChange(event);
-    };
 
     return (
       <div className={styles.container}>
@@ -747,18 +692,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
               </div>
             </Field>
           )}
-          <Field label="Sort by" className={styles.displayOption}>
-            <Select
-              value={sortBy}
-              options={[
-                { label: 'Alphabetical (A-Z)', value: 'alphabetical' },
-                { label: 'Alphabetical (Z-A)', value: 'reverse-alphabetical' },
-                { label: 'Usage', value: 'usage', description: 'Sort by frequency in dashboards and alerts' },
-              ]}
-              onChange={onSortChange}
-              width={24}
-            />
-          </Field>
         </div>
         {metricNamesError && (
           <Alert title="Unable to retrieve metric names" severity="error">
@@ -783,27 +716,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       </div>
     );
   };
-
-  private sortMetrics(metrics: string[]): string[] {
-    if (!metrics || metrics.length === 0) {
-      return metrics;
-    }
-
-    const trail = getTrailFor(this);
-    const { sortBy } = this.state;
-
-    if (sortBy === 'usage') {
-      // Get the usage scores from DataTrail, default to empty object if undefined
-      const usageScores = trail.state.metricUsageScores || {};
-      return sortMetricsByUsage(metrics, usageScores);
-    } else if (sortBy === 'reverse-alphabetical') {
-      // Reverse alphabetical sorting
-      return sortMetricsReverseAlphabetically(metrics);
-    }
-
-    // Default to alphabetical sorting
-    return sortMetricsAlphabetically(metrics);
-  }
 }
 
 function getCardPanelFor(metric: string, description?: string) {
