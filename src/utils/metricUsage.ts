@@ -184,33 +184,6 @@ export async function fetchAlertingMetrics(): Promise<Record<string, number>> {
 }
 
 /**
- * Calculates a combined usage score for metrics based on dashboard and alerting usage
- * @param dashboardMetrics Dashboard usage counts
- * @param alertingMetrics Alerting usage counts
- * @returns A record mapping metric names to their combined usage score
- */
-export function calculateMetricUsageScores(
-  dashboardMetrics: Record<string, number> = {},
-  alertingMetrics: Record<string, number> = {}
-): Record<string, number> {
-  const usageScores: Record<string, number> = {};
-
-  // Combine all metric names from both sources
-  const allMetricNames = new Set([...Object.keys(dashboardMetrics), ...Object.keys(alertingMetrics)]);
-
-  // Calculate combined score
-  // Formula: dashboard occurrences + (alerting occurrences * 2)
-  // This gives more weight to metrics used in alerts
-  allMetricNames.forEach((metric) => {
-    const dashboardCount = dashboardMetrics[metric] || 0;
-    const alertCount = alertingMetrics[metric] || 0;
-    usageScores[metric] = dashboardCount + alertCount * 2;
-  });
-
-  return usageScores;
-}
-
-/**
  * Sort metrics by their usage score (descending)
  * @param metrics Array of metric names
  * @param usageScores Usage scores for metrics

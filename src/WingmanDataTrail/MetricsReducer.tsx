@@ -4,6 +4,9 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Checkbox, Field, FieldSet, Icon, Input, Switch, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { getTrailFor } from 'utils';
+import { sortMetricsAlphabetically, sortMetricsByUsage, sortMetricsReverseAlphabetically } from 'utils/metricUsage';
+
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { MetricsGroupByList } from './MetricsGroupByList';
 import { SimpleMetricsList } from './MetricVizPanel/SimpleMetricsList';
@@ -159,6 +162,29 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     };
   }
 
+  private sortMetrics(metrics: string[]): string[] {
+    if (!metrics || metrics.length === 0) {
+      return metrics;
+    }
+
+    const trail = getTrailFor(this);
+    const { sortBy } = this.state;
+
+    switch (sortBy) {
+      case 'dashboard-usage':
+        // Get the usage scores from DataTrail, default to empty object if undefined
+        return sortMetricsByUsage(metrics, trail.state.dashboardMetrics || {});
+      case 'alerting-usage':
+        return sortMetricsByUsage(metrics, trail.state.alertingMetrics || {});
+      case 'reverse-alphabetical':
+        // Reverse alphabetical sorting
+        return sortMetricsReverseAlphabetically(metrics);
+      default:
+        // Default to alphabetical sorting
+        return sortMetricsAlphabetically(metrics);
+    }
+  }
+
   // Update MetricsSidebar to use the new component
   private MetricsSidebar = () => {
     const {
@@ -203,6 +229,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'cpu (9)', value: 'cpu' },
       { label: 'disk (5)', value: 'disk' },
       { label: 'network (7)', value: 'network' },
+    ];
+
+    const sortByOptions: Array<SelectableValue<string>> = [
+      { label: 'Alphabetical', value: 'alphabetical' },
+      { label: 'Reverse Alphabetical', value: 'reverse-alphabetical' },
+      { label: 'Dashboard Usage', value: 'dashboard-usage' },
+      { label: 'Alerting Usage', value: 'alerting-usage' },
     ];
 
     return (
