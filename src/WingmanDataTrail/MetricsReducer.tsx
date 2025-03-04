@@ -289,6 +289,15 @@ function getStyles(theme: GrafanaTheme2) {
       overflowY: 'scroll',
       flexGrow: 1,
       paddingRight: theme.spacing(1),
+      '&::-webkit-scrollbar': {
+        '-webkit-appearance': 'none',
+        width: '7px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        borderRadius: '4px',
+        backgroundColor: theme.colors.secondary.main,
+        '-webkit-box-shadow': `0 0 1px ${theme.colors.secondary.shade}`,
+      },
     }),
   };
 }
