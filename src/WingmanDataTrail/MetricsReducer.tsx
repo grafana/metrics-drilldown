@@ -80,7 +80,7 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
 
   // Calculate counts
   const totalCount = items.length;
-  const nonEmptyCount = items.filter((item) => parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0') > 0).length;
+  const nonEmptyCount = items.filter((item) => parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0', 10) > 0).length;
   const displayCount = hideEmpty ? nonEmptyCount : totalCount;
 
   // Create full list with "All" option
@@ -90,7 +90,7 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
   const filteredList = fullList.filter((item) => {
     const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
     if (hideEmpty && item.value !== 'all') {
-      const count = parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0');
+      const count = parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0', 10);
       return matchesSearch && count > 0;
     }
     return matchesSearch;
