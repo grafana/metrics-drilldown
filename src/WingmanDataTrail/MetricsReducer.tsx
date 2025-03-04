@@ -13,7 +13,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Checkbox, Field, FieldSet, Icon, Input, RadioButtonGroup, Select, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface MetricsReducerState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -24,6 +24,8 @@ interface MetricsReducerState extends SceneObjectState {
   hideEmpty: boolean;
   selectedMetricGroups: string[];
   selectedMetricTypes: string[];
+  metricsGroupSearch: string;
+  metricsTypeSearch: string;
 }
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
@@ -43,6 +45,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       hideEmpty: true,
       selectedMetricGroups: [],
       selectedMetricTypes: [],
+      metricsGroupSearch: '',
+      metricsTypeSearch: '',
       body: new SceneCSSGridLayout({
         templateColumns: '250px 1fr',
         children: [
@@ -112,8 +116,39 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   }
 
   private MetricsSidebar = () => {
-    const { hideEmpty, selectedMetricGroups, selectedMetricTypes } = this.useState();
+    const { hideEmpty, selectedMetricGroups, selectedMetricTypes, metricsGroupSearch, metricsTypeSearch } =
+      this.useState();
     const styles = useStyles2(getStyles);
+
+    // Add local state for immediate input values
+    const [groupSearchInput, setGroupSearchInput] = useState(metricsGroupSearch);
+    const [typeSearchInput, setTypeSearchInput] = useState(metricsTypeSearch);
+
+    // Debounced search updates
+    const debouncedGroupSearch = useCallback((value: string) => {
+      const timeoutId = setTimeout(() => {
+        this.setState({ metricsGroupSearch: value });
+      }, 250);
+      return () => clearTimeout(timeoutId);
+    }, []);
+
+    const debouncedTypeSearch = useCallback((value: string) => {
+      const timeoutId = setTimeout(() => {
+        this.setState({ metricsTypeSearch: value });
+      }, 250);
+      return () => clearTimeout(timeoutId);
+    }, []);
+
+    // Update debounced search when input changes
+    useEffect(() => {
+      const cleanup = debouncedGroupSearch(groupSearchInput);
+      return cleanup;
+    }, [groupSearchInput, debouncedGroupSearch]);
+
+    useEffect(() => {
+      const cleanup = debouncedTypeSearch(typeSearchInput);
+      return cleanup;
+    }, [typeSearchInput, debouncedTypeSearch]);
 
     const metricGroups = [
       { label: 'All', value: 'all' },
@@ -125,6 +160,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'tempo (19)', value: 'tempo' },
       { label: 'mimir (23)', value: 'mimir' },
       { label: 'cortex (15)', value: 'cortex' },
+      { label: 'thanos (41)', value: 'thanos' },
+      { label: 'jaeger (25)', value: 'jaeger' },
+      { label: 'k8s (63)', value: 'k8s' },
     ];
 
     const metricTypes = [
@@ -138,7 +176,18 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'bytes (3)', value: 'bytes' },
       { label: 'connections (6)', value: 'connections' },
       { label: 'memory (4)', value: 'memory' },
+      { label: 'cpu (9)', value: 'cpu' },
+      { label: 'disk (5)', value: 'disk' },
+      { label: 'network (7)', value: 'network' },
     ];
+
+    const filteredMetricGroups = metricGroups.filter((group) =>
+      group.label.toLowerCase().includes(metricsGroupSearch?.toLowerCase() ?? '')
+    );
+
+    const filteredMetricTypes = metricTypes.filter((type) =>
+      type.label.toLowerCase().includes(metricsTypeSearch?.toLowerCase() ?? '')
+    );
 
     return (
       <div className={styles.sidebar}>
@@ -152,10 +201,15 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
               />
             </Field>
             <Field>
-              <Input prefix={<Icon name="search" />} placeholder="Search..." />
+              <Input
+                prefix={<Icon name="search" />}
+                placeholder="Search..."
+                value={groupSearchInput}
+                onChange={(e) => setGroupSearchInput(e.currentTarget.value)}
+              />
             </Field>
             <div className={styles.checkboxList}>
-              {metricGroups.map((group) => (
+              {filteredMetricGroups.map((group) => (
                 <Field key={group.value}>
                   <Checkbox
                     label={group.label}
@@ -179,10 +233,15 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
               <Checkbox label="Hide empty" value={hideEmpty} />
             </Field>
             <Field>
-              <Input prefix={<Icon name="search" />} placeholder="Search..." />
+              <Input
+                prefix={<Icon name="search" />}
+                placeholder="Search..."
+                value={typeSearchInput}
+                onChange={(e) => setTypeSearchInput(e.currentTarget.value)}
+              />
             </Field>
             <div className={styles.checkboxList}>
-              {metricTypes.map((type) => (
+              {filteredMetricTypes.map((type) => (
                 <Field key={type.value}>
                   <Checkbox
                     label={type.label}
@@ -326,7 +385,7 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       gap: theme.spacing(1),
       height: '100%',
-      maxHeight: '280px',
+      maxHeight: '400px',
     }),
     checkboxList: css({
       overflowY: 'scroll',
