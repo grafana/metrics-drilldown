@@ -290,7 +290,7 @@ function getStyles(theme: GrafanaTheme2) {
     fieldSetContent: css({
       display: 'flex',
       flexDirection: 'column',
-      gap: theme.spacing(1),
+      gap: theme.spacing(1.5),
       height: '100%',
       maxHeight: '400px',
       '& .css-1n4u71h-Label': {
@@ -299,6 +299,12 @@ function getStyles(theme: GrafanaTheme2) {
       '& > legend': {
         fontSize: theme.typography.body.fontSize + ' !important',
         fontWeight: theme.typography.body.fontWeight + ' !important',
+      },
+      '& > div': {
+        marginBottom: 0,
+      },
+      '& > div:nth-child(2)': {
+        marginBottom: theme.spacing(1.5),
       },
     }),
     checkboxList: css({
