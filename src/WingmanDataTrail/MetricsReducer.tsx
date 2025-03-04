@@ -9,7 +9,7 @@ import {
 import { Checkbox, Field, FieldSet, Icon, Input, RadioButtonGroup, Select, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { MetricsContent } from './MetricsContent';
+import { MetricsGroupByList } from './MetricsGroupByList';
 
 interface MetricsReducerState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -141,7 +141,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       selectedMetricTypes: [],
       metricsGroupSearch: '',
       metricsTypeSearch: '',
-      body: new MetricsContent({}),
+      body: new MetricsGroupByList({}),
     };
 
     super(initialState);

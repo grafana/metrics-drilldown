@@ -9,7 +9,7 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
-interface MetricsContentState extends SceneObjectState {}
+interface MetricsGroupByListState extends SceneObjectState {}
 
 const groups: any = {
   cluster: [
@@ -34,15 +34,15 @@ const groups: any = {
   ],
 };
 
-export class MetricsContent extends SceneObjectBase<MetricsContentState> {
-  constructor(state: Partial<MetricsContentState>) {
+export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
+  constructor(state: Partial<MetricsGroupByListState>) {
     super({
       ...state,
       key: '',
     });
   }
 
-  private MetricsContent = () => {
+  private MetricsGroupByList = () => {
     // start with the overview
     // extract to a new file - to have a clear separation for responsibility
     // if there are GROUPS, otherwise we just do a normal layout
@@ -122,8 +122,8 @@ export class MetricsContent extends SceneObjectBase<MetricsContentState> {
   };
 
   // this should be rendered to create a static component to render the function above
-  public static Component = ({ model }: SceneComponentProps<MetricsContent>) => {
-    return <model.MetricsContent />;
+  public static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
+    return <model.MetricsGroupByList />;
   };
 }
 
