@@ -172,6 +172,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'thanos (41)', value: 'thanos' },
       { label: 'jaeger (25)', value: 'jaeger' },
       { label: 'k8s (63)', value: 'k8s' },
+      { label: 'elasticsearch (38)', value: 'elasticsearch' },
+      { label: 'redis (29)', value: 'redis' },
+      { label: 'postgres (52)', value: 'postgres' },
+      { label: 'mongodb (31)', value: 'mongodb' },
+      { label: 'kafka (47)', value: 'kafka' },
     ];
 
     const baseMetricTypes = [
