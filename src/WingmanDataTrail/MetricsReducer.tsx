@@ -6,7 +6,7 @@ import {
   type SceneCSSGridLayout,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Checkbox, Field, FieldSet, Icon, Input, useStyles2 } from '@grafana/ui';
+import { Checkbox, Field, FieldSet, Icon, Input, Switch, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { HeaderControls } from './HeaderControls/HeaderControls';
@@ -99,7 +99,10 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
     <FieldSet label={title} className={styles.fieldSetTitle}>
       <div className={styles.fieldSetContent}>
         <Field>
-          <Checkbox label="Hide empty" value={hideEmpty} onChange={(e) => onHideEmptyChange(e.currentTarget.checked)} />
+          <div className={styles.switchContainer}>
+            <span className={styles.switchLabel}>Hide empty</span>
+            <Switch value={hideEmpty} onChange={(e) => onHideEmptyChange(e.currentTarget.checked)} />
+          </div>
         </Field>
         <Field>
           <Input
@@ -314,6 +317,16 @@ function getStyles(theme: GrafanaTheme2) {
         backgroundColor: theme.colors.secondary.main,
         '-webkit-box-shadow': `0 0 1px ${theme.colors.secondary.shade}`,
       },
+    }),
+    switchContainer: css({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%',
+    }),
+    switchLabel: css({
+      fontSize: '14px',
+      color: theme.colors.text.primary,
     }),
   };
 }
