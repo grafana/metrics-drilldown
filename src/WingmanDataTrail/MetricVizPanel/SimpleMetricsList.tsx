@@ -64,9 +64,6 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
   }
 
   private onActivate() {
-    const variable = sceneGraph.lookupVariable(this.state.body.state.variableName, this);
-    console.log('*** variable', variable);
-
     this.subscribeToLayoutChange();
   }
 
