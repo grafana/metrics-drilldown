@@ -290,11 +290,21 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(1),
       height: '100%',
       maxHeight: '400px',
+      '& .css-1n4u71h-Label': {
+        fontSize: '14px !important',
+      },
+      '& > legend': {
+        fontSize: theme.typography.body.fontSize + ' !important',
+        fontWeight: theme.typography.body.fontWeight + ' !important',
+      },
     }),
     checkboxList: css({
       overflowY: 'scroll',
       flexGrow: 1,
       paddingRight: theme.spacing(1),
+      '& .css-1n4u71h-Label': {
+        fontSize: '14px !important',
+      },
       '&::-webkit-scrollbar': {
         '-webkit-appearance': 'none',
         width: '7px',
