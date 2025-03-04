@@ -21,6 +21,7 @@ import React from 'react';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { reportExploreMetrics } from '../interactions';
+import pluginJson from '../plugin.json';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC, VAR_METRIC_EXPR } from '../shared';
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
 import { isConstantVariable, isCustomVariable } from '../utils/utils.variables';
@@ -137,6 +138,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
         refId: `RelatedLogs-${connectorName}`,
         expr: lokiQueries[connectorName],
         maxLines: 100,
+        supportingQueryType: pluginJson.id,
       })),
     });
   }
