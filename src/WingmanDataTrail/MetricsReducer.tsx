@@ -53,6 +53,31 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
 }) => {
   const styles = useStyles2(getStyles);
 
+  // Local state for immediate input value
+  const [inputValue, setInputValue] = useState(searchValue);
+
+  // Add debounced search
+  const debouncedSearch = useCallback(
+    (value: string) => {
+      const timeoutId = setTimeout(() => {
+        onSearchChange(value);
+      }, 250);
+      return () => clearTimeout(timeoutId);
+    },
+    [onSearchChange]
+  );
+
+  // Update debounced search when input changes
+  useEffect(() => {
+    const cleanup = debouncedSearch(inputValue);
+    return cleanup;
+  }, [inputValue, debouncedSearch]);
+
+  // Update local input when searchValue prop changes
+  useEffect(() => {
+    setInputValue(searchValue);
+  }, [searchValue]);
+
   // Calculate counts
   const totalCount = items.length;
   const nonEmptyCount = items.filter((item) => parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0') > 0).length;
@@ -61,7 +86,7 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
   // Create full list with "All" option
   const fullList = [{ label: `All (${displayCount})`, value: 'all' }, ...items];
 
-  // Filter the list
+  // Filter the list - use searchValue instead of inputValue
   const filteredList = fullList.filter((item) => {
     const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
     if (hideEmpty && item.value !== 'all') {
@@ -81,8 +106,8 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
           <Input
             prefix={<Icon name="search" />}
             placeholder="Search..."
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.currentTarget.value)}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.currentTarget.value)}
           />
         </Field>
         <div className={styles.checkboxList}>
@@ -206,36 +231,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     } = this.useState();
     const styles = useStyles2(getStyles);
 
-    // Local state for search inputs
-    const [groupSearchInput, setGroupSearchInput] = useState(metricsGroupSearch);
-    const [typeSearchInput, setTypeSearchInput] = useState(metricsTypeSearch);
-
-    // Debounced search updates
-    const debouncedGroupSearch = useCallback((value: string) => {
-      const timeoutId = setTimeout(() => {
-        this.setState({ metricsGroupSearch: value });
-      }, 250);
-      return () => clearTimeout(timeoutId);
-    }, []);
-
-    const debouncedTypeSearch = useCallback((value: string) => {
-      const timeoutId = setTimeout(() => {
-        this.setState({ metricsTypeSearch: value });
-      }, 250);
-      return () => clearTimeout(timeoutId);
-    }, []);
-
-    // Update debounced search when input changes
-    useEffect(() => {
-      const cleanup = debouncedGroupSearch(groupSearchInput);
-      return cleanup;
-    }, [groupSearchInput, debouncedGroupSearch]);
-
-    useEffect(() => {
-      const cleanup = debouncedTypeSearch(typeSearchInput);
-      return cleanup;
-    }, [typeSearchInput, debouncedTypeSearch]);
-
     const baseMetricGroups = [
       { label: 'alloy (57)', value: 'alloy' },
       { label: 'apollo (0)', value: 'apollo' },
@@ -271,10 +266,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           title="Metrics group"
           items={baseMetricGroups}
           hideEmpty={hideEmptyGroups}
-          searchValue={groupSearchInput}
+          searchValue={metricsGroupSearch}
           selectedValues={selectedMetricGroups}
           onHideEmptyChange={(checked) => this.setState({ hideEmptyGroups: checked })}
-          onSearchChange={setGroupSearchInput}
+          onSearchChange={(value) => this.setState({ metricsGroupSearch: value })}
           onSelectionChange={(values) => this.setState({ selectedMetricGroups: values })}
         />
 
@@ -282,10 +277,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           title="Metrics types"
           items={baseMetricTypes}
           hideEmpty={hideEmptyTypes}
-          searchValue={typeSearchInput}
+          searchValue={metricsTypeSearch}
           selectedValues={selectedMetricTypes}
           onHideEmptyChange={(checked) => this.setState({ hideEmptyTypes: checked })}
-          onSearchChange={setTypeSearchInput}
+          onSearchChange={(value) => this.setState({ metricsTypeSearch: value })}
           onSelectionChange={(values) => this.setState({ selectedMetricTypes: values })}
         />
       </div>
