@@ -46,7 +46,6 @@ import {
 import { StatusWrapper } from '../StatusWrapper';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
-import { sortMetricsAlphabetically, sortMetricsByUsage, sortMetricsReverseAlphabetically } from '../utils/metricUsage';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
 import { getSelectedScopes } from '../utils/utils.scopes';
 import { isSceneTimeRange, isSceneTimeRangeState } from '../utils/utils.timerange';
@@ -61,9 +60,6 @@ interface MetricPanel {
   loaded?: boolean;
 }
 
-const sortByOptions = ['alphabetical', 'reverse-alphabetical', 'dashboard-usage', 'alerting-usage'] as const;
-type SortByOption = (typeof sortByOptions)[number];
-
 export interface MetricSelectSceneState extends SceneObjectState {
   body: SceneFlexLayout | SceneCSSGridLayout;
   rootGroup?: Node;
@@ -73,7 +69,6 @@ export interface MetricSelectSceneState extends SceneObjectState {
   metricNamesError?: string;
   metricNamesWarning?: string;
   missingOtelTargets?: boolean;
-  sortBy: SortByOption;
 }
 
 const ROW_PREVIEW_HEIGHT = '175px';
@@ -94,14 +89,12 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     super({
       $variables: state.$variables,
       metricPrefix: state.metricPrefix ?? METRIC_PREFIX_ALL,
-      sortBy: state.sortBy ?? 'alphabetical',
       body:
         state.body ??
         new SceneCSSGridLayout({
           children: [],
           templateColumns: 'repeat(auto-fill, minmax(450px, 1fr))',
           autoRows: ROW_PREVIEW_HEIGHT,
-          rowGap: 6,
           isLazy: true,
         }),
       ...state,
@@ -110,7 +103,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     this.addActivationHandler(this._onActivate.bind(this));
   }
 
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metricPrefix', 'sortBy'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metricPrefix'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_DATASOURCE, VAR_FILTERS],
     onReferencedVariableValueChanged: () => {
@@ -120,23 +113,13 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   });
 
   getUrlState() {
-    return {
-      metricPrefix: this.state.metricPrefix,
-      sortBy: this.state.sortBy,
-    };
+    return { metricPrefix: this.state.metricPrefix };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
     if (typeof values.metricPrefix === 'string') {
       if (this.state.metricPrefix !== values.metricPrefix) {
         this.setState({ metricPrefix: values.metricPrefix });
-      }
-    }
-    if (typeof values.sortBy === 'string') {
-      if (this.state.sortBy !== values.sortBy) {
-        this.setState({
-          sortBy: values.sortBy as 'alphabetical' | 'reverse-alphabetical' | 'dashboard-usage' | 'alerting-usage',
-        });
       }
     }
   }
@@ -396,63 +379,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   }
 
   private sortedPreviewMetrics() {
-    const trail = getTrailFor(this);
-    const { sortBy } = this.state;
-
-    // If sorting by usage, use the usage scores from DataTrail
-    if (sortBy === 'dashboard-usage') {
-      const usageScores = trail.state.dashboardMetrics || {};
-
-      return Object.values(this.previewCache).sort((a, b) => {
-        // Always put empty metrics at the end
-        if (a.isEmpty && b.isEmpty) {
-          return a.index - b.index;
-        }
-        if (a.isEmpty) {
-          return 1;
-        }
-        if (b.isEmpty) {
-          return -1;
-        }
-
-        // Sort by usage score
-        const scoreA = usageScores[a.name] || 0;
-        const scoreB = usageScores[b.name] || 0;
-
-        // Primary sort by score (descending)
-        if (scoreB !== scoreA) {
-          return scoreB - scoreA;
-        }
-
-        // Secondary sort alphabetically for metrics with the same score
-        return a.name.localeCompare(b.name);
-      });
-    }
-
-    // Reverse alphabetical sorting
-    if (sortBy === 'reverse-alphabetical') {
-      return Object.values(this.previewCache).sort((a, b) => {
-        // Always put empty metrics at the end
-        if (a.isEmpty && b.isEmpty) {
-          return b.name.localeCompare(a.name);
-        }
-        if (a.isEmpty) {
-          return 1;
-        }
-        if (b.isEmpty) {
-          return -1;
-        }
-
-        // Sort reverse alphabetically by name
-        return b.name.localeCompare(a.name);
-      });
-    }
-
-    // Default alphabetical sorting
     return Object.values(this.previewCache).sort((a, b) => {
-      // Always put empty metrics at the end
       if (a.isEmpty && b.isEmpty) {
-        return a.name.localeCompare(b.name);
+        return a.index - b.index;
       }
       if (a.isEmpty) {
         return 1;
@@ -460,9 +389,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       if (b.isEmpty) {
         return -1;
       }
-
-      // Sort alphabetically by name
-      return a.name.localeCompare(b.name);
+      return a.index - b.index;
     });
   }
 
@@ -477,7 +404,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     const children: SceneFlexItem[] = [];
 
-    // Get the sorted metrics list
     const metricsList = this.sortedPreviewMetrics();
 
     // Get the current filters to determine the count of them
@@ -485,7 +411,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     const filters = getFilters(this);
     const currentFilterCount = filters?.length || 0;
 
-    // Create panels for each metric in the sorted order
     for (let index = 0; index < metricsList.length; index++) {
       const metric = metricsList[index];
       const metadata = await trail.getMetricMetadata(metric.name);
@@ -517,7 +442,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     const rowTemplate = showPreviews ? ROW_PREVIEW_HEIGHT : ROW_CARD_HEIGHT;
 
-    // Update the layout with the new children
     this.state.body.setState({ children, autoRows: rowTemplate });
   }
 
@@ -585,7 +509,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       rootGroup,
       metricPrefix,
       missingOtelTargets,
-      sortBy,
     } = model.useState();
     const { children } = body.useState();
     const trail = getTrailFor(model);
