@@ -12,8 +12,6 @@ import {
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 
-import { type WingmanDataTrail } from 'WingmanDataTrail/WingmanDataTrail';
-
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 
@@ -22,7 +20,7 @@ function isPrometheusDatasource(ds: DataSourceApi<any>): ds is PrometheusDatasou
 }
 
 export class MetricDatasourceHelper {
-  constructor(trail: DataTrail | WingmanDataTrail) {
+  constructor(trail: DataTrail) {
     this._trail = trail as DataTrail;
   }
 
