@@ -1,18 +1,21 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import {
   SceneObjectBase,
   type SceneComponentProps,
   type SceneCSSGridLayout,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Checkbox, Field, FieldSet, Icon, Input, RadioButtonGroup, Select, useStyles2 } from '@grafana/ui';
+import { Checkbox, Field, FieldSet, Icon, Input, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { HeaderControls } from './HeaderControls/HeaderControls';
 import { MetricsGroupByList } from './MetricsGroupByList';
 
 interface MetricsReducerState extends SceneObjectState {
+  headerControls: HeaderControls;
   body: SceneCSSGridLayout;
+  hideEmpty: boolean;
   searchQuery: string;
   groupBy: string;
   sortBy: string;
@@ -131,6 +134,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor(state: any) {
     const initialState: MetricsReducerState = {
       ...state,
+      headerControls: new HeaderControls({}),
+      hideEmpty: true,
       searchQuery: '',
       groupBy: 'cluster',
       sortBy: 'name',
@@ -216,53 +221,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   };
 
   public static Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
-    const { body, searchQuery, groupBy, sortBy, viewMode } = model.useState();
     const styles = useStyles2(getStyles);
-
-    const groupByOptions: Array<SelectableValue<string>> = [
-      { label: '(None)', value: 'none' },
-      { label: 'Cluster', value: 'cluster' },
-      { label: 'Namespace', value: 'namespace' },
-      { label: 'Service', value: 'service' },
-    ];
-
-    const sortByOptions: Array<SelectableValue<string>> = [
-      { label: 'Name', value: 'name' },
-      { label: 'Value', value: 'value' },
-    ];
-
-    const viewModeOptions = [
-      { label: 'Grid', value: 'grid' as const },
-      { label: 'Rows', value: 'rows' as const },
-    ];
+    const { body, headerControls } = model.useState();
 
     return (
       <div className={styles.container}>
-        <div className={styles.controls}>
-          <Field className={styles.searchField}>
-            <Input
-              prefix={<Icon name="search" />}
-              placeholder="Search metrics..."
-              value={searchQuery}
-              onChange={(e) => model.setState({ searchQuery: e.currentTarget.value })}
-            />
-          </Field>
-
-          <Field label="Group by">
-            <Select value={groupBy} options={groupByOptions} onChange={(v) => model.setState({ groupBy: v.value! })} />
-          </Field>
-
-          <Field label="Sort">
-            <Select value={sortBy} options={sortByOptions} onChange={(v) => model.setState({ sortBy: v.value! })} />
-          </Field>
-
-          <Field label="View">
-            <RadioButtonGroup
-              options={viewModeOptions}
-              value={viewMode}
-              onChange={(v) => model.setState({ viewMode: v as 'grid' | 'rows' })}
-            />
-          </Field>
+        <div className={styles.headerControls}>
+          <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.content}>
           <model.MetricsSidebar />
@@ -283,20 +248,7 @@ function getStyles(theme: GrafanaTheme2) {
       height: '100%',
       gap: theme.spacing(1),
     }),
-    controls: css({
-      display: 'flex',
-      gap: theme.spacing(2),
-      padding: theme.spacing(1),
-      alignItems: 'flex-end',
-      position: 'sticky',
-      top: 0,
-      backgroundColor: theme.colors.background.primary,
-      zIndex: 1,
-    }),
-    searchField: css({
-      flexGrow: 1,
-      marginBottom: 0,
-    }),
+    headerControls: css({}),
     content: css({
       display: 'flex',
       flexGrow: 1,
