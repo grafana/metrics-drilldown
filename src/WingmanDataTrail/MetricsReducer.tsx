@@ -1,19 +1,15 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import {
-  PanelBuilders,
-  SceneCSSGridItem,
-  SceneCSSGridLayout,
-  SceneFlexItem,
-  SceneFlexLayout,
   SceneObjectBase,
   type SceneComponentProps,
-  type SceneFlexItemLike,
-  type SceneFlexItemState,
+  type SceneCSSGridLayout,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Checkbox, Field, FieldSet, Icon, Input, RadioButtonGroup, Select, useStyles2 } from '@grafana/ui';
 import React from 'react';
+
+import { MetricsContent } from './MetricsContent';
 
 interface MetricsReducerState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -24,18 +20,35 @@ interface MetricsReducerState extends SceneObjectState {
   hideEmpty: boolean;
   selectedMetricGroups: string[];
   selectedMetricTypes: string[];
+  groups: Record<string, Array<{ name: string; metrics: string[] }>>;
 }
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
-  private createMetricPanel(title: string) {
-    return new SceneCSSGridItem({
-      body: PanelBuilders.timeseries().setTitle(title).setOption('legend', { showLegend: false }).build(),
-    });
-  }
-
   public constructor(state: any) {
     const initialState: MetricsReducerState = {
       ...state,
+      groups: {
+        cluster: [
+          {
+            name: 'us-east',
+            metrics: ['alloy_request_duration', 'grafana_total_mem_total', 'grafana_request_duration'],
+          },
+          {
+            name: 'us-west',
+            metrics: ['alloy_request_duration', 'grafana_total_mem_total', 'grafana_request_duration'],
+          },
+        ],
+        namespace: [
+          {
+            name: 'default',
+            metrics: ['alloy_request_duration', 'grafana_total_mem_total', 'grafana_request_duration'],
+          },
+          {
+            name: 'monitoring',
+            metrics: ['alloy_request_duration', 'grafana_total_mem_total', 'grafana_request_duration'],
+          },
+        ],
+      },
       searchQuery: '',
       groupBy: 'cluster',
       sortBy: 'name',
@@ -43,72 +56,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       hideEmpty: true,
       selectedMetricGroups: [],
       selectedMetricTypes: [],
-      body: new SceneCSSGridLayout({
-        templateColumns: '250px 1fr',
-        children: [
-          // Left sidebar
-          new SceneCSSGridItem({
-            body: new SceneFlexLayout({
-              direction: 'column',
-              children: [],
-            }),
-          }),
-          // Main content
-          new SceneCSSGridItem({
-            body: new SceneFlexLayout({
-              direction: 'column',
-              children: [
-                new SceneFlexLayout({
-                  direction: 'column',
-                  children: [
-                    // us-west cluster
-                    new SceneFlexItem({
-                      body: new SceneCSSGridLayout({
-                        templateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                        children: [],
-                      }),
-                    }) as SceneFlexItemLike,
-                    // south-east cluster
-                    new SceneFlexItem({
-                      body: new SceneCSSGridLayout({
-                        templateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                        children: [],
-                      }),
-                    }) as SceneFlexItemLike,
-                  ],
-                }),
-              ],
-            }),
-          }),
-        ],
-      }),
+      body: new MetricsContent({}),
     };
 
     super(initialState);
-
-    // Add metric panels after super() call
-    const mainContent = (initialState.body.state.children[1] as SceneCSSGridItem).state as SceneFlexItemState;
-    const clusterLayout = (mainContent.body as SceneFlexLayout).state.children[0] as SceneFlexLayout;
-
-    const usWestGrid = ((clusterLayout.state.children[0] as SceneFlexItem).state as SceneFlexItemState)
-      .body as SceneCSSGridLayout;
-    usWestGrid.setState({
-      children: [
-        this.createMetricPanel('alloy_request_duration'),
-        this.createMetricPanel('grafana_total_mem_total'),
-        this.createMetricPanel('grafana_request_duration'),
-      ],
-    });
-
-    const southEastGrid = ((clusterLayout.state.children[1] as SceneFlexItem).state as SceneFlexItemState)
-      .body as SceneCSSGridLayout;
-    southEastGrid.setState({
-      children: [
-        this.createMetricPanel('alloy_request_duration'),
-        this.createMetricPanel('grafana_total_mem_total'),
-        this.createMetricPanel('grafana_request_duration'),
-      ],
-    });
   }
 
   private MetricsSidebar = () => {
@@ -237,14 +188,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         <div className={styles.content}>
           <model.MetricsSidebar />
           <div className={styles.mainContent}>
-            <div className={styles.clusterSection}>
-              <h3>us-west cluster</h3>
-              <body.Component model={body} />
-            </div>
-            <div className={styles.clusterSection}>
-              <h3>south-east cluster</h3>
-              <body.Component model={body} />
-            </div>
+            <body.Component model={body} />
           </div>
         </div>
       </div>
