@@ -120,6 +120,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'alloy (57)', value: 'alloy' },
       { label: 'apollo (12)', value: 'apollo' },
       { label: 'grafana (33)', value: 'grafana' },
+      { label: 'prometheus (45)', value: 'prometheus' },
+      { label: 'loki (28)', value: 'loki' },
+      { label: 'tempo (19)', value: 'tempo' },
+      { label: 'mimir (23)', value: 'mimir' },
+      { label: 'cortex (15)', value: 'cortex' },
     ];
 
     const metricTypes = [
@@ -128,58 +133,71 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'response (4)', value: 'response' },
       { label: 'duration (7)', value: 'duration' },
       { label: 'total (2)', value: 'total' },
+      { label: 'latency (8)', value: 'latency' },
+      { label: 'errors (5)', value: 'errors' },
+      { label: 'bytes (3)', value: 'bytes' },
+      { label: 'connections (6)', value: 'connections' },
+      { label: 'memory (4)', value: 'memory' },
     ];
 
     return (
       <div className={styles.sidebar}>
         <FieldSet label="Metrics group">
-          <Field>
-            <Checkbox
-              label="Hide empty"
-              value={hideEmpty}
-              onChange={(e) => this.setState({ hideEmpty: e.currentTarget.checked })}
-            />
-          </Field>
-          <Field>
-            <Input prefix={<Icon name="search" />} placeholder="Search..." />
-          </Field>
-          {metricGroups.map((group) => (
-            <Field key={group.value}>
+          <div className={styles.fieldSetContent}>
+            <Field>
               <Checkbox
-                label={group.label}
-                value={selectedMetricGroups.includes(group.value)}
-                onChange={(e) => {
-                  const newGroups = e.currentTarget.checked
-                    ? [...selectedMetricGroups, group.value]
-                    : selectedMetricGroups.filter((g) => g !== group.value);
-                  this.setState({ selectedMetricGroups: newGroups });
-                }}
+                label="Hide empty"
+                value={hideEmpty}
+                onChange={(e) => this.setState({ hideEmpty: e.currentTarget.checked })}
               />
             </Field>
-          ))}
+            <Field>
+              <Input prefix={<Icon name="search" />} placeholder="Search..." />
+            </Field>
+            <div className={styles.checkboxList}>
+              {metricGroups.map((group) => (
+                <Field key={group.value}>
+                  <Checkbox
+                    label={group.label}
+                    value={selectedMetricGroups.includes(group.value)}
+                    onChange={(e) => {
+                      const newGroups = e.currentTarget.checked
+                        ? [...selectedMetricGroups, group.value]
+                        : selectedMetricGroups.filter((g) => g !== group.value);
+                      this.setState({ selectedMetricGroups: newGroups });
+                    }}
+                  />
+                </Field>
+              ))}
+            </div>
+          </div>
         </FieldSet>
 
         <FieldSet label="Metrics types">
-          <Field>
-            <Checkbox label="Hide empty" value={hideEmpty} />
-          </Field>
-          <Field>
-            <Input prefix={<Icon name="search" />} placeholder="Search..." />
-          </Field>
-          {metricTypes.map((type) => (
-            <Field key={type.value}>
-              <Checkbox
-                label={type.label}
-                value={selectedMetricTypes.includes(type.value)}
-                onChange={(e) => {
-                  const newTypes = e.currentTarget.checked
-                    ? [...selectedMetricTypes, type.value]
-                    : selectedMetricTypes.filter((t) => t !== type.value);
-                  this.setState({ selectedMetricTypes: newTypes });
-                }}
-              />
+          <div className={styles.fieldSetContent}>
+            <Field>
+              <Checkbox label="Hide empty" value={hideEmpty} />
             </Field>
-          ))}
+            <Field>
+              <Input prefix={<Icon name="search" />} placeholder="Search..." />
+            </Field>
+            <div className={styles.checkboxList}>
+              {metricTypes.map((type) => (
+                <Field key={type.value}>
+                  <Checkbox
+                    label={type.label}
+                    value={selectedMetricTypes.includes(type.value)}
+                    onChange={(e) => {
+                      const newTypes = e.currentTarget.checked
+                        ? [...selectedMetricTypes, type.value]
+                        : selectedMetricTypes.filter((t) => t !== type.value);
+                      this.setState({ selectedMetricTypes: newTypes });
+                    }}
+                  />
+                </Field>
+              ))}
+            </div>
+          </div>
         </FieldSet>
       </div>
     );
@@ -288,7 +306,7 @@ function getStyles(theme: GrafanaTheme2) {
       padding: theme.spacing(1),
       width: '250px',
       height: '100%',
-      overflow: 'auto',
+      overflow: 'hidden',
       backgroundColor: theme.colors.background.secondary,
       borderRadius: theme.shape.radius.default,
     }),
@@ -302,6 +320,18 @@ function getStyles(theme: GrafanaTheme2) {
       '& h3': {
         marginBottom: theme.spacing(2),
       },
+    }),
+    fieldSetContent: css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing(1),
+      height: '100%',
+      maxHeight: '280px',
+    }),
+    checkboxList: css({
+      overflowY: 'scroll',
+      flexGrow: 1,
+      paddingRight: theme.spacing(1),
     }),
   };
 }
