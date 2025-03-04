@@ -1,20 +1,16 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
-import {
-  SceneObjectBase,
-  type SceneComponentProps,
-  type SceneCSSGridLayout,
-  type SceneObjectState,
-} from '@grafana/scenes';
+import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Checkbox, Field, FieldSet, Icon, Input, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { MetricsGroupByList } from './MetricsGroupByList';
+import { SimpleMetricsList } from './MetricVizPanel/SimpleMetricsList';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
-  body: SceneCSSGridLayout;
+  body: MetricsGroupByList | SimpleMetricsList;
   hideEmpty: boolean;
   searchQuery: string;
   groupBy: string;
@@ -132,9 +128,16 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor(state: any) {
+    // TEMP: remove this in favour of a groupBy variable dependency instead
+    const headerControlsOptions = {
+      onChange: (option: SelectableValue<string>) => {
+        console.log('groupBy option selected', option);
+      },
+    };
+
     const initialState: MetricsReducerState = {
       ...state,
-      headerControls: new HeaderControls({}),
+      headerControls: new HeaderControls(headerControlsOptions),
       hideEmpty: true,
       searchQuery: '',
       groupBy: 'cluster',
@@ -146,10 +149,18 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       selectedMetricTypes: [],
       metricsGroupSearch: '',
       metricsTypeSearch: '',
-      body: new MetricsGroupByList({}),
+      // body: new MetricsGroupByList({}),
+      body: new SimpleMetricsList(),
     };
 
     super(initialState);
+
+    // TEMP: remove this in favour of a groupBy variable dependency instead
+    headerControlsOptions.onChange = (option: SelectableValue<string>) => {
+      this.setState({
+        body: !option.value || option.value === 'none' ? new SimpleMetricsList() : new MetricsGroupByList({}),
+      });
+    };
   }
 
   // Update MetricsSidebar to use the new component
@@ -231,8 +242,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         </div>
         <div className={styles.content}>
           <model.MetricsSidebar />
+
           <div className={styles.mainContent}>
-            <body.Component model={body} />
+            <body.Component model={body as any} />
           </div>
         </div>
       </div>

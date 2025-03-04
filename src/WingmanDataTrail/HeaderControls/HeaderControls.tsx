@@ -1,3 +1,4 @@
+import { type SelectableValue } from '@grafana/data';
 import {
   EmbeddedScene,
   SceneFlexItem,
@@ -11,7 +12,9 @@ import React from 'react';
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { QuickSearch } from './QuickSearch';
 
-interface HeaderControlsState extends SceneObjectState {}
+interface HeaderControlsState extends SceneObjectState {
+  onChange: (value: SelectableValue<string>) => void;
+}
 
 export class HeaderControls extends EmbeddedScene {
   constructor(state: Partial<HeaderControlsState>) {
@@ -40,7 +43,8 @@ export class HeaderControls extends EmbeddedScene {
                     { label: 'namespace (3)', value: 'namespace' },
                     { label: 'service (11)', value: 'service' },
                   ]}
-                  onChange={() => {}}
+                  // TEMP: add a groupBy variable dependency in MetricsReducer instead
+                  onChange={(value) => state.onChange!(value)}
                 />
               ),
             }),
