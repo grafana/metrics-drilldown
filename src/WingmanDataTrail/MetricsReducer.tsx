@@ -1,7 +1,12 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Checkbox, Field, FieldSet, Icon, Input, useStyles2 } from '@grafana/ui';
+import {
+  SceneObjectBase,
+  type SceneComponentProps,
+  type SceneCSSGridLayout,
+  type SceneObjectState,
+} from '@grafana/scenes';
+import { Checkbox, Field, FieldSet, Icon, Input, Switch, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { HeaderControls } from './HeaderControls/HeaderControls';
@@ -74,17 +79,10 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
     setInputValue(searchValue);
   }, [searchValue]);
 
-  // Calculate counts - just use total count for display
-  const totalCount = items.length;
-  const displayCount = totalCount; // Always show total count, regardless of hideEmpty
-
-  // Create full list with "All" option
-  const fullList = [{ label: `All (${displayCount})`, value: 'all' }, ...items];
-
-  // Filter the list - use searchValue instead of inputValue
-  const filteredList = fullList.filter((item) => {
+  // Remove the "All" option - just use the items directly
+  const filteredList = items.filter((item) => {
     const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
-    if (hideEmpty && item.value !== 'all') {
+    if (hideEmpty) {
       const count = parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0', 10);
       return matchesSearch && count > 0;
     }
@@ -92,10 +90,13 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
   });
 
   return (
-    <FieldSet label={title}>
+    <FieldSet label={title} className={styles.fieldSetTitle}>
       <div className={styles.fieldSetContent}>
         <Field>
-          <Checkbox label="Hide empty" value={hideEmpty} onChange={(e) => onHideEmptyChange(e.currentTarget.checked)} />
+          <div className={styles.switchContainer}>
+            <span className={styles.switchLabel}>Hide empty</span>
+            <Switch value={hideEmpty} onChange={(e) => onHideEmptyChange(e.currentTarget.checked)} />
+          </div>
         </Field>
         <Field>
           <Input
@@ -187,6 +188,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'thanos (41)', value: 'thanos' },
       { label: 'jaeger (25)', value: 'jaeger' },
       { label: 'k8s (63)', value: 'k8s' },
+      { label: 'elasticsearch (38)', value: 'elasticsearch' },
+      { label: 'redis (29)', value: 'redis' },
+      { label: 'postgres (52)', value: 'postgres' },
+      { label: 'mongodb (31)', value: 'mongodb' },
+      { label: 'kafka (47)', value: 'kafka' },
     ];
 
     const baseMetricTypes = [
@@ -276,8 +282,8 @@ function getStyles(theme: GrafanaTheme2) {
       width: '250px',
       height: '100%',
       overflow: 'hidden',
-      backgroundColor: theme.colors.background.secondary,
       borderRadius: theme.shape.radius.default,
+      borderRight: `1px solid ${theme.colors.border.weak}`,
     }),
     mainContent: css({
       flexGrow: 1,
@@ -290,17 +296,58 @@ function getStyles(theme: GrafanaTheme2) {
         marginBottom: theme.spacing(2),
       },
     }),
+    fieldSetTitle: css({
+      '& > legend': {
+        fontSize: theme.typography.h5.fontSize + ' !important',
+        fontWeight: theme.typography.h5.fontWeight + ' !important',
+      },
+    }),
     fieldSetContent: css({
       display: 'flex',
       flexDirection: 'column',
-      gap: theme.spacing(1),
+      gap: theme.spacing(1.5),
       height: '100%',
       maxHeight: '400px',
+      '& .css-1n4u71h-Label': {
+        fontSize: '14px !important',
+      },
+      '& > legend': {
+        fontSize: theme.typography.body.fontSize + ' !important',
+        fontWeight: theme.typography.body.fontWeight + ' !important',
+      },
+      '& > div': {
+        marginBottom: 0,
+      },
+      '& > div:nth-child(2)': {
+        marginBottom: theme.spacing(1.5),
+      },
     }),
     checkboxList: css({
       overflowY: 'scroll',
       flexGrow: 1,
       paddingRight: theme.spacing(1),
+      '& .css-1n4u71h-Label': {
+        fontSize: '14px !important',
+      },
+      '&::-webkit-scrollbar': {
+        '-webkit-appearance': 'none',
+        width: '7px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        borderRadius: '4px',
+        backgroundColor: theme.colors.secondary.main,
+        '-webkit-box-shadow': `0 0 1px ${theme.colors.secondary.shade}`,
+      },
+    }),
+    switchContainer: css({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%',
+    }),
+    switchLabel: css({
+      fontSize: '14px',
+      color: theme.colors.text.primary,
     }),
   };
 }
