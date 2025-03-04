@@ -29,6 +29,83 @@ interface MetricsReducerState extends SceneObjectState {
   metricsTypeSearch: string;
 }
 
+// Move these outside the class, at the top level of the file (after the imports)
+interface MetricsFilterSectionProps {
+  title: string;
+  items: Array<{ label: string; value: string }>;
+  hideEmpty: boolean;
+  searchValue: string;
+  selectedValues: string[];
+  onHideEmptyChange: (checked: boolean) => void;
+  onSearchChange: (value: string) => void;
+  onSelectionChange: (values: string[]) => void;
+}
+
+const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
+  title,
+  items,
+  hideEmpty,
+  searchValue,
+  selectedValues,
+  onHideEmptyChange,
+  onSearchChange,
+  onSelectionChange,
+}) => {
+  const styles = useStyles2(getStyles);
+
+  // Calculate counts
+  const totalCount = items.length;
+  const nonEmptyCount = items.filter((item) => parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0') > 0).length;
+  const displayCount = hideEmpty ? nonEmptyCount : totalCount;
+
+  // Create full list with "All" option
+  const fullList = [{ label: `All (${displayCount})`, value: 'all' }, ...items];
+
+  // Filter the list
+  const filteredList = fullList.filter((item) => {
+    const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
+    if (hideEmpty && item.value !== 'all') {
+      const count = parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0');
+      return matchesSearch && count > 0;
+    }
+    return matchesSearch;
+  });
+
+  return (
+    <FieldSet label={title}>
+      <div className={styles.fieldSetContent}>
+        <Field>
+          <Checkbox label="Hide empty" value={hideEmpty} onChange={(e) => onHideEmptyChange(e.currentTarget.checked)} />
+        </Field>
+        <Field>
+          <Input
+            prefix={<Icon name="search" />}
+            placeholder="Search..."
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.currentTarget.value)}
+          />
+        </Field>
+        <div className={styles.checkboxList}>
+          {filteredList.map((item) => (
+            <Field key={item.value}>
+              <Checkbox
+                label={item.label}
+                value={selectedValues.includes(item.value)}
+                onChange={(e) => {
+                  const newValues = e.currentTarget.checked
+                    ? [...selectedValues, item.value]
+                    : selectedValues.filter((v) => v !== item.value);
+                  onSelectionChange(newValues);
+                }}
+              />
+            </Field>
+          ))}
+        </div>
+      </div>
+    </FieldSet>
+  );
+};
+
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   private createMetricPanel(title: string) {
     return new SceneCSSGridItem({
@@ -117,6 +194,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     });
   }
 
+  // Update MetricsSidebar to use the new component
   private MetricsSidebar = () => {
     const {
       hideEmptyGroups,
@@ -128,7 +206,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     } = this.useState();
     const styles = useStyles2(getStyles);
 
-    // Add local state for immediate input values
+    // Local state for search inputs
     const [groupSearchInput, setGroupSearchInput] = useState(metricsGroupSearch);
     const [typeSearchInput, setTypeSearchInput] = useState(metricsTypeSearch);
 
@@ -187,117 +265,29 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'network (7)', value: 'network' },
     ];
 
-    // Get total counts (including empty)
-    const totalGroupsCount = baseMetricGroups.length;
-    const totalTypesCount = baseMetricTypes.length;
-
-    // Get non-empty counts
-    const nonEmptyGroupsCount = baseMetricGroups.filter(
-      (g) => parseInt(g.label.match(/\((\d+)\)/)?.[1] ?? '0') > 0
-    ).length;
-    const nonEmptyTypesCount = baseMetricTypes.filter(
-      (t) => parseInt(t.label.match(/\((\d+)\)/)?.[1] ?? '0') > 0
-    ).length;
-
-    // Use the appropriate count based on hide empty state
-    const groupsCount = hideEmptyGroups ? nonEmptyGroupsCount : totalGroupsCount;
-    const typesCount = hideEmptyTypes ? nonEmptyTypesCount : totalTypesCount;
-
-    const metricGroups = [{ label: `All (${groupsCount})`, value: 'all' }, ...baseMetricGroups];
-
-    const metricTypes = [{ label: `All (${typesCount})`, value: 'all' }, ...baseMetricTypes];
-
-    const filteredMetricGroups = metricGroups.filter((group) => {
-      const matchesSearch = group.label.toLowerCase().includes(metricsGroupSearch?.toLowerCase() ?? '');
-      if (hideEmptyGroups && group.value !== 'all') {
-        const count = parseInt(group.label.match(/\((\d+)\)/)?.[1] ?? '0');
-        return matchesSearch && count > 0;
-      }
-      return matchesSearch;
-    });
-
-    const filteredMetricTypes = metricTypes.filter((type) => {
-      const matchesSearch = type.label.toLowerCase().includes(metricsTypeSearch?.toLowerCase() ?? '');
-      if (hideEmptyTypes && type.value !== 'all') {
-        const count = parseInt(type.label.match(/\((\d+)\)/)?.[1] ?? '0');
-        return matchesSearch && count > 0;
-      }
-      return matchesSearch;
-    });
-
     return (
       <div className={styles.sidebar}>
-        <FieldSet label="Metrics group">
-          <div className={styles.fieldSetContent}>
-            <Field>
-              <Checkbox
-                label="Hide empty"
-                value={hideEmptyGroups}
-                onChange={(e) => this.setState({ hideEmptyGroups: e.currentTarget.checked })}
-              />
-            </Field>
-            <Field>
-              <Input
-                prefix={<Icon name="search" />}
-                placeholder="Search..."
-                value={groupSearchInput}
-                onChange={(e) => setGroupSearchInput(e.currentTarget.value)}
-              />
-            </Field>
-            <div className={styles.checkboxList}>
-              {filteredMetricGroups.map((group) => (
-                <Field key={group.value}>
-                  <Checkbox
-                    label={group.label}
-                    value={selectedMetricGroups.includes(group.value)}
-                    onChange={(e) => {
-                      const newGroups = e.currentTarget.checked
-                        ? [...selectedMetricGroups, group.value]
-                        : selectedMetricGroups.filter((g) => g !== group.value);
-                      this.setState({ selectedMetricGroups: newGroups });
-                    }}
-                  />
-                </Field>
-              ))}
-            </div>
-          </div>
-        </FieldSet>
+        <MetricsFilterSection
+          title="Metrics group"
+          items={baseMetricGroups}
+          hideEmpty={hideEmptyGroups}
+          searchValue={groupSearchInput}
+          selectedValues={selectedMetricGroups}
+          onHideEmptyChange={(checked) => this.setState({ hideEmptyGroups: checked })}
+          onSearchChange={setGroupSearchInput}
+          onSelectionChange={(values) => this.setState({ selectedMetricGroups: values })}
+        />
 
-        <FieldSet label="Metrics types">
-          <div className={styles.fieldSetContent}>
-            <Field>
-              <Checkbox
-                label="Hide empty"
-                value={hideEmptyTypes}
-                onChange={(e) => this.setState({ hideEmptyTypes: e.currentTarget.checked })}
-              />
-            </Field>
-            <Field>
-              <Input
-                prefix={<Icon name="search" />}
-                placeholder="Search..."
-                value={typeSearchInput}
-                onChange={(e) => setTypeSearchInput(e.currentTarget.value)}
-              />
-            </Field>
-            <div className={styles.checkboxList}>
-              {filteredMetricTypes.map((type) => (
-                <Field key={type.value}>
-                  <Checkbox
-                    label={type.label}
-                    value={selectedMetricTypes.includes(type.value)}
-                    onChange={(e) => {
-                      const newTypes = e.currentTarget.checked
-                        ? [...selectedMetricTypes, type.value]
-                        : selectedMetricTypes.filter((t) => t !== type.value);
-                      this.setState({ selectedMetricTypes: newTypes });
-                    }}
-                  />
-                </Field>
-              ))}
-            </div>
-          </div>
-        </FieldSet>
+        <MetricsFilterSection
+          title="Metrics types"
+          items={baseMetricTypes}
+          hideEmpty={hideEmptyTypes}
+          searchValue={typeSearchInput}
+          selectedValues={selectedMetricTypes}
+          onHideEmptyChange={(checked) => this.setState({ hideEmptyTypes: checked })}
+          onSearchChange={setTypeSearchInput}
+          onSelectionChange={(values) => this.setState({ selectedMetricTypes: values })}
+        />
       </div>
     );
   };
