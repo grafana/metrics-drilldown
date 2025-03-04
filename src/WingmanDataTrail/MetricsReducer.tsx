@@ -264,8 +264,8 @@ function getStyles(theme: GrafanaTheme2) {
       width: '250px',
       height: '100%',
       overflow: 'hidden',
-      backgroundColor: theme.colors.background.secondary,
       borderRadius: theme.shape.radius.default,
+      borderRight: `1px solid ${theme.colors.border.weak}`,
     }),
     mainContent: css({
       flexGrow: 1,
