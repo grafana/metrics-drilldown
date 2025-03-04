@@ -18,7 +18,7 @@ import React from 'react';
 import { HeaderControls } from './HeaderControls/HeaderControls';
 
 interface MetricsReducerState extends SceneObjectState {
-  controls: HeaderControls;
+  headerControls: HeaderControls;
   body: SceneCSSGridLayout;
   hideEmpty: boolean;
   selectedMetricGroups: string[];
@@ -35,7 +35,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor(state: any) {
     const initialState: MetricsReducerState = {
       ...state,
-      controls: new HeaderControls({}),
+      headerControls: new HeaderControls({}),
       hideEmpty: true,
       selectedMetricGroups: [],
       selectedMetricTypes: [],
@@ -182,13 +182,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   };
 
   public static Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
-    const { body, controls } = model.useState();
     const styles = useStyles2(getStyles);
+    const { body, headerControls } = model.useState();
 
     return (
       <div className={styles.container}>
-        <div className={styles.controls}>
-          <controls.Component model={controls} />
+        <div className={styles.headerControls}>
+          <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.content}>
           <model.MetricsSidebar />
@@ -216,7 +216,7 @@ function getStyles(theme: GrafanaTheme2) {
       height: '100%',
       gap: theme.spacing(1),
     }),
-    controls: css({}),
+    headerControls: css({}),
     content: css({
       display: 'flex',
       flexGrow: 1,
