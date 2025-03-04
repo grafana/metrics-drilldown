@@ -21,7 +21,8 @@ interface MetricsReducerState extends SceneObjectState {
   groupBy: string;
   sortBy: string;
   viewMode: 'rows' | 'grid';
-  hideEmpty: boolean;
+  hideEmptyGroups: boolean;
+  hideEmptyTypes: boolean;
   selectedMetricGroups: string[];
   selectedMetricTypes: string[];
   metricsGroupSearch: string;
@@ -42,7 +43,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       groupBy: 'cluster',
       sortBy: 'name',
       viewMode: 'grid' as const,
-      hideEmpty: true,
+      hideEmptyGroups: true,
+      hideEmptyTypes: true,
       selectedMetricGroups: [],
       selectedMetricTypes: [],
       metricsGroupSearch: '',
@@ -116,8 +118,14 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   }
 
   private MetricsSidebar = () => {
-    const { hideEmpty, selectedMetricGroups, selectedMetricTypes, metricsGroupSearch, metricsTypeSearch } =
-      this.useState();
+    const {
+      hideEmptyGroups,
+      hideEmptyTypes,
+      selectedMetricGroups,
+      selectedMetricTypes,
+      metricsGroupSearch,
+      metricsTypeSearch,
+    } = this.useState();
     const styles = useStyles2(getStyles);
 
     // Add local state for immediate input values
@@ -150,30 +158,28 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       return cleanup;
     }, [typeSearchInput, debouncedTypeSearch]);
 
-    const metricGroups = [
-      { label: 'All', value: 'all' },
+    const baseMetricGroups = [
       { label: 'alloy (57)', value: 'alloy' },
-      { label: 'apollo (12)', value: 'apollo' },
+      { label: 'apollo (0)', value: 'apollo' },
       { label: 'grafana (33)', value: 'grafana' },
       { label: 'prometheus (45)', value: 'prometheus' },
-      { label: 'loki (28)', value: 'loki' },
+      { label: 'loki (0)', value: 'loki' },
       { label: 'tempo (19)', value: 'tempo' },
       { label: 'mimir (23)', value: 'mimir' },
-      { label: 'cortex (15)', value: 'cortex' },
+      { label: 'cortex (0)', value: 'cortex' },
       { label: 'thanos (41)', value: 'thanos' },
       { label: 'jaeger (25)', value: 'jaeger' },
       { label: 'k8s (63)', value: 'k8s' },
     ];
 
-    const metricTypes = [
-      { label: 'All', value: 'all' },
+    const baseMetricTypes = [
       { label: 'request (12)', value: 'request' },
-      { label: 'response (4)', value: 'response' },
+      { label: 'response (0)', value: 'response' },
       { label: 'duration (7)', value: 'duration' },
-      { label: 'total (2)', value: 'total' },
+      { label: 'total (0)', value: 'total' },
       { label: 'latency (8)', value: 'latency' },
       { label: 'errors (5)', value: 'errors' },
-      { label: 'bytes (3)', value: 'bytes' },
+      { label: 'bytes (0)', value: 'bytes' },
       { label: 'connections (6)', value: 'connections' },
       { label: 'memory (4)', value: 'memory' },
       { label: 'cpu (9)', value: 'cpu' },
@@ -181,13 +187,43 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'network (7)', value: 'network' },
     ];
 
-    const filteredMetricGroups = metricGroups.filter((group) =>
-      group.label.toLowerCase().includes(metricsGroupSearch?.toLowerCase() ?? '')
-    );
+    // Get total counts (including empty)
+    const totalGroupsCount = baseMetricGroups.length;
+    const totalTypesCount = baseMetricTypes.length;
 
-    const filteredMetricTypes = metricTypes.filter((type) =>
-      type.label.toLowerCase().includes(metricsTypeSearch?.toLowerCase() ?? '')
-    );
+    // Get non-empty counts
+    const nonEmptyGroupsCount = baseMetricGroups.filter(
+      (g) => parseInt(g.label.match(/\((\d+)\)/)?.[1] ?? '0') > 0
+    ).length;
+    const nonEmptyTypesCount = baseMetricTypes.filter(
+      (t) => parseInt(t.label.match(/\((\d+)\)/)?.[1] ?? '0') > 0
+    ).length;
+
+    // Use the appropriate count based on hide empty state
+    const groupsCount = hideEmptyGroups ? nonEmptyGroupsCount : totalGroupsCount;
+    const typesCount = hideEmptyTypes ? nonEmptyTypesCount : totalTypesCount;
+
+    const metricGroups = [{ label: `All (${groupsCount})`, value: 'all' }, ...baseMetricGroups];
+
+    const metricTypes = [{ label: `All (${typesCount})`, value: 'all' }, ...baseMetricTypes];
+
+    const filteredMetricGroups = metricGroups.filter((group) => {
+      const matchesSearch = group.label.toLowerCase().includes(metricsGroupSearch?.toLowerCase() ?? '');
+      if (hideEmptyGroups && group.value !== 'all') {
+        const count = parseInt(group.label.match(/\((\d+)\)/)?.[1] ?? '0');
+        return matchesSearch && count > 0;
+      }
+      return matchesSearch;
+    });
+
+    const filteredMetricTypes = metricTypes.filter((type) => {
+      const matchesSearch = type.label.toLowerCase().includes(metricsTypeSearch?.toLowerCase() ?? '');
+      if (hideEmptyTypes && type.value !== 'all') {
+        const count = parseInt(type.label.match(/\((\d+)\)/)?.[1] ?? '0');
+        return matchesSearch && count > 0;
+      }
+      return matchesSearch;
+    });
 
     return (
       <div className={styles.sidebar}>
@@ -196,8 +232,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             <Field>
               <Checkbox
                 label="Hide empty"
-                value={hideEmpty}
-                onChange={(e) => this.setState({ hideEmpty: e.currentTarget.checked })}
+                value={hideEmptyGroups}
+                onChange={(e) => this.setState({ hideEmptyGroups: e.currentTarget.checked })}
               />
             </Field>
             <Field>
@@ -230,7 +266,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         <FieldSet label="Metrics types">
           <div className={styles.fieldSetContent}>
             <Field>
-              <Checkbox label="Hide empty" value={hideEmpty} />
+              <Checkbox
+                label="Hide empty"
+                value={hideEmptyTypes}
+                onChange={(e) => this.setState({ hideEmptyTypes: e.currentTarget.checked })}
+              />
             </Field>
             <Field>
               <Input
