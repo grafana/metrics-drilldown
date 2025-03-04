@@ -13,7 +13,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Checkbox, Field, FieldSet, Icon, Input, RadioButtonGroup, Select, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface MetricsReducerState extends SceneObjectState {
   body: SceneCSSGridLayout;
@@ -21,10 +21,114 @@ interface MetricsReducerState extends SceneObjectState {
   groupBy: string;
   sortBy: string;
   viewMode: 'rows' | 'grid';
-  hideEmpty: boolean;
+  hideEmptyGroups: boolean;
+  hideEmptyTypes: boolean;
   selectedMetricGroups: string[];
   selectedMetricTypes: string[];
+  metricsGroupSearch: string;
+  metricsTypeSearch: string;
 }
+
+// Move these outside the class, at the top level of the file (after the imports)
+interface MetricsFilterSectionProps {
+  title: string;
+  items: Array<{ label: string; value: string }>;
+  hideEmpty: boolean;
+  searchValue: string;
+  selectedValues: string[];
+  onHideEmptyChange: (checked: boolean) => void;
+  onSearchChange: (value: string) => void;
+  onSelectionChange: (values: string[]) => void;
+}
+
+const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
+  title,
+  items,
+  hideEmpty,
+  searchValue,
+  selectedValues,
+  onHideEmptyChange,
+  onSearchChange,
+  onSelectionChange,
+}) => {
+  const styles = useStyles2(getStyles);
+
+  // Local state for immediate input value
+  const [inputValue, setInputValue] = useState(searchValue);
+
+  // Add debounced search
+  const debouncedSearch = useCallback(
+    (value: string) => {
+      const timeoutId = setTimeout(() => {
+        onSearchChange(value);
+      }, 250);
+      return () => clearTimeout(timeoutId);
+    },
+    [onSearchChange]
+  );
+
+  // Update debounced search when input changes
+  useEffect(() => {
+    const cleanup = debouncedSearch(inputValue);
+    return cleanup;
+  }, [inputValue, debouncedSearch]);
+
+  // Update local input when searchValue prop changes
+  useEffect(() => {
+    setInputValue(searchValue);
+  }, [searchValue]);
+
+  // Calculate counts - just use total count for display
+  const totalCount = items.length;
+  const displayCount = totalCount; // Always show total count, regardless of hideEmpty
+
+  // Create full list with "All" option
+  const fullList = [{ label: `All (${displayCount})`, value: 'all' }, ...items];
+
+  // Filter the list - use searchValue instead of inputValue
+  const filteredList = fullList.filter((item) => {
+    const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
+    if (hideEmpty && item.value !== 'all') {
+      const count = parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0', 10);
+      return matchesSearch && count > 0;
+    }
+    return matchesSearch;
+  });
+
+  return (
+    <FieldSet label={title}>
+      <div className={styles.fieldSetContent}>
+        <Field>
+          <Checkbox label="Hide empty" value={hideEmpty} onChange={(e) => onHideEmptyChange(e.currentTarget.checked)} />
+        </Field>
+        <Field>
+          <Input
+            prefix={<Icon name="search" />}
+            placeholder="Search..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.currentTarget.value)}
+          />
+        </Field>
+        <div className={styles.checkboxList}>
+          {filteredList.map((item) => (
+            <Field key={item.value}>
+              <Checkbox
+                label={item.label}
+                value={selectedValues.includes(item.value)}
+                onChange={(e) => {
+                  const newValues = e.currentTarget.checked
+                    ? [...selectedValues, item.value]
+                    : selectedValues.filter((v) => v !== item.value);
+                  onSelectionChange(newValues);
+                }}
+              />
+            </Field>
+          ))}
+        </div>
+      </div>
+    </FieldSet>
+  );
+};
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   private createMetricPanel(title: string) {
@@ -40,9 +144,12 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       groupBy: 'cluster',
       sortBy: 'name',
       viewMode: 'grid' as const,
-      hideEmpty: true,
+      hideEmptyGroups: true,
+      hideEmptyTypes: true,
       selectedMetricGroups: [],
       selectedMetricTypes: [],
+      metricsGroupSearch: '',
+      metricsTypeSearch: '',
       body: new SceneCSSGridLayout({
         templateColumns: '250px 1fr',
         children: [
@@ -111,76 +218,70 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     });
   }
 
+  // Update MetricsSidebar to use the new component
   private MetricsSidebar = () => {
-    const { hideEmpty, selectedMetricGroups, selectedMetricTypes } = this.useState();
+    const {
+      hideEmptyGroups,
+      hideEmptyTypes,
+      selectedMetricGroups,
+      selectedMetricTypes,
+      metricsGroupSearch,
+      metricsTypeSearch,
+    } = this.useState();
     const styles = useStyles2(getStyles);
 
-    const metricGroups = [
-      { label: 'All', value: 'all' },
+    const baseMetricGroups = [
       { label: 'alloy (57)', value: 'alloy' },
-      { label: 'apollo (12)', value: 'apollo' },
+      { label: 'apollo (0)', value: 'apollo' },
       { label: 'grafana (33)', value: 'grafana' },
+      { label: 'prometheus (45)', value: 'prometheus' },
+      { label: 'loki (0)', value: 'loki' },
+      { label: 'tempo (19)', value: 'tempo' },
+      { label: 'mimir (23)', value: 'mimir' },
+      { label: 'cortex (0)', value: 'cortex' },
+      { label: 'thanos (41)', value: 'thanos' },
+      { label: 'jaeger (25)', value: 'jaeger' },
+      { label: 'k8s (63)', value: 'k8s' },
     ];
 
-    const metricTypes = [
-      { label: 'All', value: 'all' },
+    const baseMetricTypes = [
       { label: 'request (12)', value: 'request' },
-      { label: 'response (4)', value: 'response' },
+      { label: 'response (0)', value: 'response' },
       { label: 'duration (7)', value: 'duration' },
-      { label: 'total (2)', value: 'total' },
+      { label: 'total (0)', value: 'total' },
+      { label: 'latency (8)', value: 'latency' },
+      { label: 'errors (5)', value: 'errors' },
+      { label: 'bytes (0)', value: 'bytes' },
+      { label: 'connections (6)', value: 'connections' },
+      { label: 'memory (4)', value: 'memory' },
+      { label: 'cpu (9)', value: 'cpu' },
+      { label: 'disk (5)', value: 'disk' },
+      { label: 'network (7)', value: 'network' },
     ];
 
     return (
       <div className={styles.sidebar}>
-        <FieldSet label="Metrics group">
-          <Field>
-            <Checkbox
-              label="Hide empty"
-              value={hideEmpty}
-              onChange={(e) => this.setState({ hideEmpty: e.currentTarget.checked })}
-            />
-          </Field>
-          <Field>
-            <Input prefix={<Icon name="search" />} placeholder="Search..." />
-          </Field>
-          {metricGroups.map((group) => (
-            <Field key={group.value}>
-              <Checkbox
-                label={group.label}
-                value={selectedMetricGroups.includes(group.value)}
-                onChange={(e) => {
-                  const newGroups = e.currentTarget.checked
-                    ? [...selectedMetricGroups, group.value]
-                    : selectedMetricGroups.filter((g) => g !== group.value);
-                  this.setState({ selectedMetricGroups: newGroups });
-                }}
-              />
-            </Field>
-          ))}
-        </FieldSet>
+        <MetricsFilterSection
+          title="Metrics group"
+          items={baseMetricGroups}
+          hideEmpty={hideEmptyGroups}
+          searchValue={metricsGroupSearch}
+          selectedValues={selectedMetricGroups}
+          onHideEmptyChange={(checked) => this.setState({ hideEmptyGroups: checked })}
+          onSearchChange={(value) => this.setState({ metricsGroupSearch: value })}
+          onSelectionChange={(values) => this.setState({ selectedMetricGroups: values })}
+        />
 
-        <FieldSet label="Metrics types">
-          <Field>
-            <Checkbox label="Hide empty" value={hideEmpty} />
-          </Field>
-          <Field>
-            <Input prefix={<Icon name="search" />} placeholder="Search..." />
-          </Field>
-          {metricTypes.map((type) => (
-            <Field key={type.value}>
-              <Checkbox
-                label={type.label}
-                value={selectedMetricTypes.includes(type.value)}
-                onChange={(e) => {
-                  const newTypes = e.currentTarget.checked
-                    ? [...selectedMetricTypes, type.value]
-                    : selectedMetricTypes.filter((t) => t !== type.value);
-                  this.setState({ selectedMetricTypes: newTypes });
-                }}
-              />
-            </Field>
-          ))}
-        </FieldSet>
+        <MetricsFilterSection
+          title="Metrics types"
+          items={baseMetricTypes}
+          hideEmpty={hideEmptyTypes}
+          searchValue={metricsTypeSearch}
+          selectedValues={selectedMetricTypes}
+          onHideEmptyChange={(checked) => this.setState({ hideEmptyTypes: checked })}
+          onSearchChange={(value) => this.setState({ metricsTypeSearch: value })}
+          onSelectionChange={(values) => this.setState({ selectedMetricTypes: values })}
+        />
       </div>
     );
   };
@@ -288,7 +389,7 @@ function getStyles(theme: GrafanaTheme2) {
       padding: theme.spacing(1),
       width: '250px',
       height: '100%',
-      overflow: 'auto',
+      overflow: 'hidden',
       backgroundColor: theme.colors.background.secondary,
       borderRadius: theme.shape.radius.default,
     }),
@@ -302,6 +403,18 @@ function getStyles(theme: GrafanaTheme2) {
       '& h3': {
         marginBottom: theme.spacing(2),
       },
+    }),
+    fieldSetContent: css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing(1),
+      height: '100%',
+      maxHeight: '400px',
+    }),
+    checkboxList: css({
+      overflowY: 'scroll',
+      flexGrow: 1,
+      paddingRight: theme.spacing(1),
     }),
   };
 }
