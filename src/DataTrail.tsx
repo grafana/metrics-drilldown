@@ -31,6 +31,8 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
+import { MetricsVariable } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
+
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
 import { DataTrailHistory } from './DataTrailsHistory';
@@ -356,9 +358,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // must pass this native histogram prometheus knowledge deep into
     // the topscene set on the trail > MetricScene > getAutoQueriesForMetric() > createHistogramMetricQueryDefs();
     stateUpdate.nativeHistogramMetric = nativeHistogramMetric ? '1' : '';
-    if (stateUpdate.metric && stateUpdate.nativeHistogramMetric) {
-      stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
-    }
+    stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
+
     return stateUpdate;
   }
 
@@ -705,6 +706,7 @@ function getVariableSet(
         placeholder: 'Select',
         isMulti: true,
       }),
+      new MetricsVariable(),
     ],
   });
 }
