@@ -96,7 +96,7 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
   });
 
   return (
-    <FieldSet label={title}>
+    <FieldSet label={title} className={styles.fieldSetTitle}>
       <div className={styles.fieldSetContent}>
         <Field>
           <Checkbox label="Hide empty" value={hideEmpty} onChange={(e) => onHideEmptyChange(e.currentTarget.checked)} />
@@ -276,6 +276,12 @@ function getStyles(theme: GrafanaTheme2) {
       marginBottom: theme.spacing(3),
       '& h3': {
         marginBottom: theme.spacing(2),
+      },
+    }),
+    fieldSetTitle: css({
+      '& > legend': {
+        fontSize: theme.typography.h5.fontSize + ' !important',
+        fontWeight: theme.typography.h5.fontWeight + ' !important',
       },
     }),
     fieldSetContent: css({
