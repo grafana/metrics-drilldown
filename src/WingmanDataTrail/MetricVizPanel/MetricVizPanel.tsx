@@ -9,7 +9,8 @@ import {
   type VizPanel,
   type VizPanelState,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { ThresholdsMode, VisibilityMode } from '@grafana/schema';
+import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { trailDS } from 'shared';
@@ -81,16 +82,48 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   }
 
   buildVizPanel() {
-    const { title, color, headerActions, hideLegend, highlight } = this.state;
+    const { title, color, headerActions, hideLegend, highlight, metricName } = this.state;
 
-    return PanelBuilders.timeseries()
-      .setTitle(highlight ? `${title} (current)` : title)
-      .setData(this.buildQueryRunner())
-      .setColor({ mode: 'fixed', fixedColor: color })
-      .setCustomFieldConfig('fillOpacity', 9)
-      .setHeaderActions(headerActions)
-      .setOption('legend', { showLegend: !hideLegend })
-      .build();
+    // Check if this is an uptime metric
+    const isUptime = metricName === 'up' || metricName.endsWith('_up');
+
+    let builder;
+
+    if (isUptime) {
+      // For uptime metrics, use a state timeline panel which is better for binary states
+      builder = PanelBuilders.statetimeline()
+        .setTitle(metricName)
+        .setData(this.buildQueryRunner())
+        // Configure the state timeline for uptime metrics
+        .setOption('showValue', VisibilityMode.Auto)
+        .setOption('rowHeight', 0.9)
+        .setOption('alignValue', 'center')
+        // Set color mode to thresholds to enable threshold coloring
+        .setColor({ mode: 'thresholds' })
+        // Set thresholds for coloring
+        .setThresholds({
+          mode: ThresholdsMode.Absolute,
+          steps: [
+            { value: 0, color: 'red' }, // 0 is red (down)
+            { value: 1, color: 'green' }, // 1 is green (up)
+          ],
+        })
+        // Hide the threshold annotations by setting various options
+        .setOption('legend', { showLegend: false })
+        .setOption('mergeValues', false)
+        .setOption('showValue', VisibilityMode.Never);
+    } else {
+      // Default settings for non-uptime metrics - use timeseries
+      builder = PanelBuilders.timeseries()
+        .setTitle(highlight ? `${title} (current)` : title)
+        .setData(this.buildQueryRunner())
+        .setColor({ mode: 'fixed', fixedColor: color })
+        .setCustomFieldConfig('fillOpacity', 9)
+        .setHeaderActions(headerActions)
+        .setOption('legend', { showLegend: !hideLegend });
+    }
+
+    return builder.build();
   }
 
   buildQueryRunner() {
