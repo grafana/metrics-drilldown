@@ -20,7 +20,7 @@ import { MainLabelVariable } from './HeaderControls/MainLabelVariable';
 
 interface MetricsOnboardingState extends SceneObjectState {
   headerControls: SceneFlexLayout;
-  body?: SimpleMetricsList | MetricsGroupByList;
+  body?: SceneObjectBase;
 }
 
 export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
@@ -75,7 +75,9 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
 
   private updateBody(groupBy: string) {
     this.setState({
-      body: !groupBy ? new SimpleMetricsList() : new MetricsGroupByList({}),
+      body: !groupBy
+        ? (new SimpleMetricsList() as unknown as SceneObjectBase)
+        : (new MetricsGroupByList() as unknown as SceneObjectBase),
     });
   }
 
@@ -96,7 +98,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
           </div>
         </div>
         <div className={styles.content}>
-          <div className={styles.mainContent}>{body && <body.Component model={body as any} />}</div>
+          <div className={styles.mainContent}>{body && <body.Component model={body} />}</div>
         </div>
       </div>
     );

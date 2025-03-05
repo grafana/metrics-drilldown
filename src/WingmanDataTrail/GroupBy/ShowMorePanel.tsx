@@ -4,6 +4,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+
 interface ShowMorePanelState extends SceneObjectState {
   onClick?: () => void;
 }
@@ -35,7 +37,7 @@ export class ShowMorePanel extends SceneObjectBase<ShowMorePanelState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     panelContainer: css({
-      height: '100%',
+      height: METRICS_VIZ_PANEL_HEIGHT,
       width: '100%',
       background: theme.colors.background.secondary,
       borderRadius: theme.shape.borderRadius(),

@@ -19,7 +19,7 @@ import { MetricsFilterSection } from './SideBar/MetricsFilterSection';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
-  body: MetricsGroupByList | SimpleMetricsList;
+  body: SceneObjectBase;
   groupBy: string;
   hideEmptyGroups: boolean;
   hideEmptyTypes: boolean;
@@ -40,7 +40,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       selectedMetricTypes: [],
       metricsGroupSearch: '',
       metricsTypeSearch: '',
-      body: new SimpleMetricsList(),
+      body: new SimpleMetricsList() as unknown as SceneObjectBase,
       $variables: new SceneVariableSet({
         variables: [
           new CustomVariable({
@@ -81,7 +81,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   private updateBodyBasedOnGroupBy(groupByValue: string) {
     this.setState({
       groupBy: groupByValue,
-      body: !groupByValue || groupByValue === 'none' ? new SimpleMetricsList() : new MetricsGroupByList({}),
+      body:
+        !groupByValue || groupByValue === 'none'
+          ? (new SimpleMetricsList() as unknown as SceneObjectBase)
+          : (new MetricsGroupByList() as unknown as SceneObjectBase),
     });
   }
 
@@ -168,7 +171,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           <model.MetricsSidebar />
 
           <div className={styles.mainContent}>
-            <body.Component model={body as any} />
+            <body.Component model={body} />
           </div>
         </div>
       </div>

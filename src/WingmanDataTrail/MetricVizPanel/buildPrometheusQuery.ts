@@ -3,13 +3,20 @@ import { type GroupByLabel } from './MetricVizPanel';
 export function buildPrometheusQuery({
   metricName,
   groupByLabel,
+  fn,
 }: {
   metricName: string;
   groupByLabel?: GroupByLabel;
+  fn: string;
 }) {
-  if (!groupByLabel) {
-    return `sum(${metricName})`;
+  // well...
+  if (fn.includes('rate')) {
+    return `sum(${fn}(${metricName}{__ignore_usage__=\"\"}[$__rate_interval]))`;
   }
 
-  return `sum(${metricName}) by (${groupByLabel.name})`;
+  if (!groupByLabel) {
+    return `${fn}(${metricName}{__ignore_usage__=\"\"})`;
+  }
+
+  return `${fn}(${metricName}{__ignore_usage__=\"\"}) by (${groupByLabel.name})`;
 }

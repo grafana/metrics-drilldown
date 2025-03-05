@@ -9,8 +9,13 @@ import {
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { CollapsableSection, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
+
+import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
+import { getColorByIndex } from 'utils';
+import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
+import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { ShowMorePanel } from './ShowMorePanel';
 
@@ -19,18 +24,76 @@ interface MetricsGroupByRowState extends SceneObjectState {
   groupName: string;
   groupType: string;
   metricsList: string[];
-  body: SceneObject;
+  body?: SceneObject;
 }
 
 export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   public constructor(state: Partial<MetricsGroupByRowState>) {
     super({
       ...state,
+      key: `${state.groupName || ''}-${state.groupType || ''}`,
       groupName: state.groupName || '',
       groupType: state.groupType || '',
       metricsList: state.metricsList || [],
-      key: `${state.groupName || ''}-${state.groupType || ''}`,
-      body: state.body || buildMetricsBody(state.groupName || '', state.groupType || '', state.metricsList || [], true),
+      body: undefined,
+    });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    this.setState({
+      body: this.buildMetricsBody(true),
+    });
+  }
+
+  private buildMetricsBody(limit?: boolean): SceneObject {
+    const { groupName, metricsList } = this.state;
+
+    const listLength = limit && metricsList.length >= 5 ? 5 : metricsList.length;
+
+    let colorIndex = 0;
+
+    const panelList = metricsList.slice(0, listLength);
+
+    const panels = panelList.map(
+      (metricName) =>
+        new SceneCSSGridItem({
+          body: new WithUsageDataPreviewPanel({
+            vizPanelInGridItem: new MetricVizPanel({
+              metricName,
+              color: getColorByIndex(colorIndex++),
+              groupByLabel: undefined,
+            }),
+            metric: metricName,
+          }),
+        })
+    );
+
+    if (limit && metricsList.length > 5) {
+      // Create a ShowMorePanel that matches the size of the metric panels
+      const showMorePanel = new SceneCSSGridItem({
+        body: new ShowMorePanel({
+          onClick: () => {
+            // When clicked, toggle to show all metrics
+            this.setState({
+              body: this.buildMetricsBody(false),
+            });
+          },
+        }),
+        // height property is not supported in SceneCSSGridItemState
+        // Using body's properties to control height instead
+      });
+      panels.push(showMorePanel);
+    }
+
+    return new SceneCSSGridLayout({
+      key: groupName + 'metrics',
+      templateColumns: GRID_TEMPLATE_COLUMNS,
+      autoRows: METRICS_VIZ_PANEL_HEIGHT,
+      alignItems: 'start',
+      isLazy: true,
+      children: panels,
     });
   }
 
@@ -44,13 +107,13 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const handleToggleShowMore = () => {
       if (showingMore) {
         // Show less - display only first 3 metrics
-        const newBody = buildMetricsBody(groupName || '', groupType || '', metricsList || [], true);
+        const newBody = model.buildMetricsBody(true);
         model.setState({
           body: newBody,
         });
       } else {
         // Show more - display all metrics
-        const newBody = buildMetricsBody(groupName || '', groupType || '', metricsList || [], false);
+        const newBody = model.buildMetricsBody();
         model.setState({
           body: newBody,
         });
@@ -64,12 +127,17 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         <div className={styles.container}>
           <span className={styles.groupName}>{`${groupName} ${groupType} (${metricsList.length})`}</span>
           <div className={styles.buttons}>
-            <button className="btn btn-sm btn-secondary">Include</button>
-            <button className="btn btn-sm btn-secondary">Exclude</button>
+            <Button variant="secondary" fill="outline" className={styles.button}>
+              Include
+            </Button>
+            <Button variant="secondary" fill="outline" className={styles.button}>
+              Exclude
+            </Button>
           </div>
         </div>
+
         <CollapsableSection onToggle={() => setIsCollapsed(!isCollapsed)} label="" isOpen={!isCollapsed}>
-          <body.Component model={body} />
+          {body && <body.Component model={body} />}
           {/* Show toggle button if there are more than three metrics */}
           {metricsList.length > 3 && (
             <div className={styles.showMoreButton}>
@@ -92,60 +160,6 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   };
 }
 
-function buildMetricsBody(
-  groupName: string,
-  groupType: string,
-  metricsList: string[],
-  firstLoad?: boolean
-): SceneObject {
-  const metricChildren: Array<SceneObject<SceneObjectState> | SceneCSSGridItem> = [];
-  // if the metrics list is less than three, set the list length to the length of the metrics list
-  // if the firstLoad is true, only iterate through the first 3 metrics
-  const listLength = firstLoad && metricsList.length >= 5 ? 5 : metricsList.length;
-
-  for (let i = 0; i < listLength; i++) {
-    const metricPanel = createMetricPanel(metricsList[i]);
-    metricChildren.push(metricPanel);
-  }
-
-  if (firstLoad && metricsList.length > 5) {
-    // Create a ShowMorePanel that matches the size of the metric panels
-    const showMorePanel = new SceneCSSGridItem({
-      body: new ShowMorePanel({
-        onClick: () => {
-          // This click will be handled by the separate button below the grid
-          // It's included here for visual purposes only
-        },
-      }),
-    });
-    metricChildren.push(showMorePanel);
-  }
-
-  const metricsRow = new SceneCSSGridLayout({
-    children: metricChildren,
-    isLazy: true,
-    key: groupName + 'metrics',
-  });
-
-  const container = new SceneCSSGridLayout({
-    children: [metricsRow],
-    templateColumns: '1/-1',
-    autoRows: 'auto',
-    rowGap: 0.5,
-    key: `${groupName}-${groupType}-container`,
-  });
-
-  return container;
-}
-
-function createMetricPanel(title: string) {
-  // Remove the non-existent SceneButton
-  const panel = new SceneCSSGridItem({
-    body: PanelBuilders.timeseries().setTitle(title).setOption('legend', { showLegend: false }).build(),
-  });
-  return panel;
-}
-
 function getStyles(theme: GrafanaTheme2) {
   return {
     rowContainer: css({
@@ -156,23 +170,29 @@ function getStyles(theme: GrafanaTheme2) {
       background: theme.colors.background.primary,
       boxShadow: theme.shadows.z1,
     }),
+    row: css({
+      marginBottom: '32px',
+    }),
     container: css({
       display: 'flex',
       alignItems: 'center',
       gap: '8px',
       width: '98%',
-      marginBottom: '-42px',
+      marginBottom: '-36px',
     }),
     groupName: css({
-      // fontSize: (theme.typography.fontSize = 12),
+      fontSize: '22px',
     }),
     buttons: css({
+      display: 'flex',
+      gap: '8px',
       marginLeft: 'auto',
     }),
     showMoreButton: css({
       display: 'flex',
       justifyContent: 'center',
-      marginTop: '10px',
+      marginTop: '48px',
     }),
+    button: css({}),
   };
 }
