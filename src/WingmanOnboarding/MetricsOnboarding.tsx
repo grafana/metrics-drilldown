@@ -11,9 +11,9 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricsGroupByList } from 'WingmanDataTrail/GroupBy/MetricsGroupByList';
 import { LayoutSwitcher } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch';
-import { MetricsGroupByList } from 'WingmanDataTrail/MetricsGroupByList';
 import { SimpleMetricsList } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 
 import { MainLabelVariable } from './HeaderControls/MainLabelVariable';
@@ -59,6 +59,26 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
+  private onActivate() {
+    const mainLabelVariable = this.state.$variables!.state.variables[0] as MainLabelVariable;
+
+    this.updateBody(mainLabelVariable.state.value as string);
+
+    this._subs.add(
+      mainLabelVariable.subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          this.updateBody(newState.value as string);
+        }
+      })
+    );
+  }
+
+  private updateBody(groupBy: string) {
+    this.setState({
+      body: !groupBy ? new SimpleMetricsList() : new MetricsGroupByList({}),
+    });
+  }
+
   public static Component = ({ model }: SceneComponentProps<MetricsOnboarding>) => {
     const styles = useStyles2(getStyles);
     const { body, headerControls, $variables } = model.useState();
@@ -81,26 +101,6 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       </div>
     );
   };
-
-  private onActivate() {
-    const mainLabelVariable = this.state.$variables!.state.variables[0] as MainLabelVariable;
-
-    this.updateBody(mainLabelVariable.state.value as string);
-
-    this._subs.add(
-      mainLabelVariable.subscribeToState((newState, prevState) => {
-        if (newState.value !== prevState.value) {
-          this.updateBody(newState.value as string);
-        }
-      })
-    );
-  }
-
-  private updateBody(groupBy: string) {
-    this.setState({
-      body: !groupBy ? new SimpleMetricsList() : new MetricsGroupByList({ groupBy }),
-    });
-  }
 }
 
 function getStyles(theme: GrafanaTheme2) {
