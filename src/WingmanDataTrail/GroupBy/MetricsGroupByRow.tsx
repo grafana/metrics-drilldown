@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import {
   PanelBuilders,
   SceneCSSGridItem,
@@ -65,13 +65,10 @@ function buildMetricsBody(groupName: string, groupType: string, metricsList: str
 
   const metricsRow = new SceneCSSGridLayout({
     children: metricChildren,
-    // templateColumns: 'repeat(3, minmax(0, 1fr))',
-    // autoRows: height,
     isLazy: true,
     key: groupName + 'metrics',
   });
 
-  // Create container for both rows
   const container = new SceneCSSGridLayout({
     children: [metricsRow],
     templateColumns: '1/-1',
