@@ -16,21 +16,45 @@ const groups: any = {
   cluster: [
     {
       name: 'us-east',
-      metrics: ['alloy_request_duration_hello', 'grafana_total_mem_total', 'grafana_request_duration'],
+      metrics: [
+        'node_cpu_seconds_total',
+        'node_memory_MemTotal_bytes',
+        'node_memory_MemFree_bytes',
+        'node_memory_Cached_bytes',
+      ],
     },
     {
       name: 'us-west',
-      metrics: ['alloy_request_duration', 'grafana_total_mem_total', 'grafana_request_duration'],
+      metrics: [
+        'node_memory_Buffers_bytes',
+        'node_filesystem_avail_bytes',
+        'node_filesystem_size_bytes',
+        'node_disk_io_time_seconds_total',
+      ],
     },
   ],
   namespace: [
     {
       name: 'default',
-      metrics: ['alloy_request_duration', 'grafana_total_mem_total', 'grafana_request_duration'],
+      metrics: [
+        'node_disk_io_time_seconds_total',
+        'node_disk_reads_completed_total',
+        'node_disk_writes_completed_total',
+        'node_network_receive_bytes_total',
+        'node_network_transmit_bytes_total',
+        'node_load1',
+      ],
     },
     {
       name: 'monitoring',
-      metrics: ['alloy_request_duration', 'grafana_total_mem_total', 'grafana_request_duration'],
+      metrics: [
+        'node_load5',
+        'node_load15',
+        'node_time_seconds',
+        'node_boot_time_seconds',
+        'node_memory_SwapTotal_bytes',
+        'node_memory_SwapFree_bytes',
+      ],
     },
   ],
 };
