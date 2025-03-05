@@ -19,6 +19,7 @@ import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
+import { EventApplyFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventApplyFunction';
 import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigureFunction';
 import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
 import {
@@ -89,6 +90,12 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
         this.openDrawer(event.payload.metricName);
       })
     );
+
+    this._subs.add(
+      this.subscribeToEvent(EventApplyFunction, (event) => {
+        this.state.drawer.close();
+      })
+    );
   }
 
   private subscribeToLayoutChange() {
@@ -137,6 +144,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
                 headerActions: [
                   new ApplyAction({
                     metricName,
+                    prometheusFunction: option.value as string,
                     disabled: colorIndex === 1,
                   }),
                 ],
