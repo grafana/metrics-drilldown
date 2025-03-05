@@ -17,6 +17,7 @@ import React from 'react';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 
+import { VAR_METRICS_VARIABLE } from './MetricsVariable';
 import { MetricVizPanel } from './MetricVizPanel';
 
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
@@ -33,7 +34,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     super({
       key: 'simple-metrics-list',
       body: new SceneByVariableRepeater({
-        variableName: 'metrics-wingman',
+        variableName: VAR_METRICS_VARIABLE,
         body: new SceneCSSGridLayout({
           children: [],
           templateColumns: GRID_TEMPLATE_COLUMNS,
