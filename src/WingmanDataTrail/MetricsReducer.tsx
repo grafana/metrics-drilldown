@@ -11,9 +11,9 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { groupByOptions, VAR_GROUP_BY } from './HeaderControls/GroupByControls';
 import { HeaderControls } from './HeaderControls/HeaderControls';
-import { MetricsGroupByList } from './MetricsGroupByList';
 import { SimpleMetricsList } from './MetricsList/SimpleMetricsList';
 import { MetricsFilterSection } from './SideBar/MetricsFilterSection';
 
