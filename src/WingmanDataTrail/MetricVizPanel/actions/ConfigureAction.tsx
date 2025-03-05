@@ -17,7 +17,7 @@ export class ConfigureAction extends SceneObjectBase<ConfigureActionState> {
     { label: 'Maximum', value: 'max' },
     { label: 'Rate', value: 'rate' },
     { label: 'Instant rate', value: 'irate' },
-  ];
+  ] as const;
 
   constructor({ metricName }: { metricName: ConfigureActionState['metricName'] }) {
     super({
@@ -54,3 +54,5 @@ const getStyles = () => ({
     padding: 0;
   `,
 });
+
+export type PrometheusFn = (typeof ConfigureAction.PROMETHEUS_FN_OPTIONS)[number]['value'];
