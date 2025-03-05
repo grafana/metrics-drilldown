@@ -1,169 +1,93 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Checkbox, Field, FieldSet, Icon, Input, useStyles2 } from '@grafana/ui';
-import React, { useCallback, useEffect, useState } from 'react';
+import { type GrafanaTheme2 } from '@grafana/data';
+import {
+  CustomVariable,
+  sceneGraph,
+  SceneObjectBase,
+  SceneVariableSet,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
+import { useStyles2 } from '@grafana/ui';
+import React from 'react';
 
-import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
+import { groupByOptions, VAR_GROUP_BY } from './HeaderControls/GroupByControls';
 import { HeaderControls } from './HeaderControls/HeaderControls';
-import { SimpleMetricsList } from './MetricVizPanel/SimpleMetricsList';
+import { MetricsGroupByList } from './MetricsGroupByList';
+import { SimpleMetricsList } from './MetricsList/SimpleMetricsList';
+import { MetricsFilterSection } from './SideBar/MetricsFilterSection';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
   body: MetricsGroupByList | SimpleMetricsList;
-  hideEmpty: boolean;
-  searchQuery: string;
   groupBy: string;
-  sortBy: string;
-  viewMode: 'rows' | 'grid';
   hideEmptyGroups: boolean;
   hideEmptyTypes: boolean;
   selectedMetricGroups: string[];
   selectedMetricTypes: string[];
-  groups: Record<string, Array<{ name: string; metrics: string[] }>>;
   metricsGroupSearch: string;
   metricsTypeSearch: string;
 }
 
-// Move these outside the class, at the top level of the file (after the imports)
-interface MetricsFilterSectionProps {
-  title: string;
-  items: Array<{ label: string; value: string }>;
-  hideEmpty: boolean;
-  searchValue: string;
-  selectedValues: string[];
-  onHideEmptyChange: (checked: boolean) => void;
-  onSearchChange: (value: string) => void;
-  onSelectionChange: (values: string[]) => void;
-}
-
-const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
-  title,
-  items,
-  hideEmpty,
-  searchValue,
-  selectedValues,
-  onHideEmptyChange,
-  onSearchChange,
-  onSelectionChange,
-}) => {
-  const styles = useStyles2(getStyles);
-
-  // Local state for immediate input value
-  const [inputValue, setInputValue] = useState(searchValue);
-
-  // Add debounced search
-  const debouncedSearch = useCallback(
-    (value: string) => {
-      const timeoutId = setTimeout(() => {
-        onSearchChange(value);
-      }, 250);
-      return () => clearTimeout(timeoutId);
-    },
-    [onSearchChange]
-  );
-
-  // Update debounced search when input changes
-  useEffect(() => {
-    const cleanup = debouncedSearch(inputValue);
-    return cleanup;
-  }, [inputValue, debouncedSearch]);
-
-  // Update local input when searchValue prop changes
-  useEffect(() => {
-    setInputValue(searchValue);
-  }, [searchValue]);
-
-  // Calculate counts - just use total count for display
-  const totalCount = items.length;
-  const displayCount = totalCount; // Always show total count, regardless of hideEmpty
-
-  // Create full list with "All" option
-  const fullList = [{ label: `All (${displayCount})`, value: 'all' }, ...items];
-
-  // Filter the list - use searchValue instead of inputValue
-  const filteredList = fullList.filter((item) => {
-    const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
-    if (hideEmpty && item.value !== 'all') {
-      const count = parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0', 10);
-      return matchesSearch && count > 0;
-    }
-    return matchesSearch;
-  });
-
-  return (
-    <FieldSet label={title}>
-      <div className={styles.fieldSetContent}>
-        <Field>
-          <Checkbox label="Hide empty" value={hideEmpty} onChange={(e) => onHideEmptyChange(e.currentTarget.checked)} />
-        </Field>
-        <Field>
-          <Input
-            prefix={<Icon name="search" />}
-            placeholder="Search..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.currentTarget.value)}
-          />
-        </Field>
-        <div className={styles.checkboxList}>
-          {filteredList.map((item) => (
-            <Field key={item.value}>
-              <Checkbox
-                label={item.label}
-                value={selectedValues.includes(item.value)}
-                onChange={(e) => {
-                  const newValues = e.currentTarget.checked
-                    ? [...selectedValues, item.value]
-                    : selectedValues.filter((v) => v !== item.value);
-                  onSelectionChange(newValues);
-                }}
-              />
-            </Field>
-          ))}
-        </div>
-      </div>
-    </FieldSet>
-  );
-};
-
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
-  public constructor(state: any) {
-    // TEMP: remove this in favour of a groupBy variable dependency instead
-    const headerControlsOptions = {
-      onChange: (option: SelectableValue<string>) => {
-        console.log('groupBy option selected', option);
-      },
-    };
-
-    const initialState: MetricsReducerState = {
-      ...state,
-      headerControls: new HeaderControls(headerControlsOptions),
-      hideEmpty: true,
-      searchQuery: '',
+  public constructor() {
+    super({
+      headerControls: new HeaderControls({}),
       groupBy: 'cluster',
-      sortBy: 'name',
-      viewMode: 'grid' as const,
       hideEmptyGroups: true,
       hideEmptyTypes: true,
       selectedMetricGroups: [],
       selectedMetricTypes: [],
       metricsGroupSearch: '',
       metricsTypeSearch: '',
-      // body: new MetricsGroupByList({}),
       body: new SimpleMetricsList(),
-    };
+      $variables: new SceneVariableSet({
+        variables: [
+          new CustomVariable({
+            name: VAR_GROUP_BY,
+            label: 'Group By',
+            value: 'cluster', // Default value
+            query: groupByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
+          }),
+        ],
+      }),
+    });
 
-    super(initialState);
-
-    // TEMP: remove this in favour of a groupBy variable dependency instead
-    headerControlsOptions.onChange = (option: SelectableValue<string>) => {
-      this.setState({
-        body: !option.value || option.value === 'none' ? new SimpleMetricsList() : new MetricsGroupByList({}),
-      });
-    };
+    // Add activation handler to listen for groupBy variable changes
+    this.addActivationHandler(() => this.activationHandler());
   }
 
-  // Update MetricsSidebar to use the new component
+  private activationHandler() {
+    const variables = sceneGraph.getVariables(this);
+    const groupByVar = variables.getByName(VAR_GROUP_BY);
+
+    if (groupByVar) {
+      // Set initial state based on the current value
+      const currentValue = groupByVar.getValue() as string;
+      this.updateBodyBasedOnGroupBy(currentValue);
+
+      // Subscribe to VAR_GROUP_BY changes
+      this._subs.add(
+        groupByVar.subscribeToState((state: any) => {
+          const value = state.value || state.getValue?.();
+          if (value) {
+            this.updateBodyBasedOnGroupBy(value as string);
+          }
+        })
+      );
+    }
+  }
+
+  private updateBodyBasedOnGroupBy(groupByValue: string) {
+    this.setState({
+      groupBy: groupByValue,
+      body:
+        !groupByValue || groupByValue === 'none'
+          ? new SimpleMetricsList()
+          : new MetricsGroupByList({ groupBy: groupByValue }),
+    });
+  }
+
   private MetricsSidebar = () => {
     const {
       hideEmptyGroups,
@@ -187,6 +111,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'thanos (41)', value: 'thanos' },
       { label: 'jaeger (25)', value: 'jaeger' },
       { label: 'k8s (63)', value: 'k8s' },
+      { label: 'elasticsearch (38)', value: 'elasticsearch' },
+      { label: 'redis (29)', value: 'redis' },
+      { label: 'postgres (52)', value: 'postgres' },
+      { label: 'mongodb (31)', value: 'mongodb' },
+      { label: 'kafka (47)', value: 'kafka' },
     ];
 
     const baseMetricTypes = [
@@ -212,7 +141,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           hideEmpty={hideEmptyGroups}
           searchValue={metricsGroupSearch}
           selectedValues={selectedMetricGroups}
-          onHideEmptyChange={(checked) => this.setState({ hideEmptyGroups: checked })}
           onSearchChange={(value) => this.setState({ metricsGroupSearch: value })}
           onSelectionChange={(values) => this.setState({ selectedMetricGroups: values })}
         />
@@ -223,7 +151,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           hideEmpty={hideEmptyTypes}
           searchValue={metricsTypeSearch}
           selectedValues={selectedMetricTypes}
-          onHideEmptyChange={(checked) => this.setState({ hideEmptyTypes: checked })}
           onSearchChange={(value) => this.setState({ metricsTypeSearch: value })}
           onSelectionChange={(values) => this.setState({ selectedMetricTypes: values })}
         />
@@ -276,31 +203,13 @@ function getStyles(theme: GrafanaTheme2) {
       width: '250px',
       height: '100%',
       overflow: 'hidden',
-      backgroundColor: theme.colors.background.secondary,
       borderRadius: theme.shape.radius.default,
+      borderRight: `1px solid ${theme.colors.border.weak}`,
     }),
     mainContent: css({
       flexGrow: 1,
       overflow: 'auto',
       padding: theme.spacing(1),
-    }),
-    clusterSection: css({
-      marginBottom: theme.spacing(3),
-      '& h3': {
-        marginBottom: theme.spacing(2),
-      },
-    }),
-    fieldSetContent: css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing(1),
-      height: '100%',
-      maxHeight: '400px',
-    }),
-    checkboxList: css({
-      overflowY: 'scroll',
-      flexGrow: 1,
-      paddingRight: theme.spacing(1),
     }),
   };
 }

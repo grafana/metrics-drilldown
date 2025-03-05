@@ -64,6 +64,8 @@ import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
+import { fetchAlertingMetrics, fetchDashboardMetrics } from './WingmanDataTrail/HeaderControls/MetricsSorter';
+
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
@@ -71,6 +73,10 @@ export interface DataTrailState extends SceneObjectState {
   history: DataTrailHistory;
   settings: DataTrailSettings;
   createdAt: number;
+
+  // wingman
+  dashboardMetrics?: Record<string, number>;
+  alertingMetrics?: Record<string, number>;
 
   // just for the starting data source
   initialDS?: string;
@@ -123,6 +129,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       history: state.history ?? new DataTrailHistory({}),
       settings: state.settings ?? new DataTrailSettings({}),
       createdAt: state.createdAt ?? new Date().getTime(),
+      dashboardMetrics: {},
+      alertingMetrics: {},
       // default to false but update this to true on updateOtelData()
       // or true if the user either turned on the experience
       useOtelExperience: state.useOtelExperience ?? false,
@@ -205,12 +213,33 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     };
     window.addEventListener('unload', saveRecentTrail);
 
+    // Fetch metric usage data
+    this.updateMetricUsageData();
+
     return () => {
       if (!this.state.embedded) {
         saveRecentTrail();
       }
       window.removeEventListener('unload', saveRecentTrail);
     };
+  }
+
+  /**
+   * Updates metric usage data from dashboards and alerting rules
+   */
+  private async updateMetricUsageData() {
+    try {
+      // Fetch both metrics sources concurrently
+      const [dashboardMetrics, alertingMetrics] = await Promise.all([fetchDashboardMetrics(), fetchAlertingMetrics()]);
+
+      this.setState({ dashboardMetrics, alertingMetrics });
+    } catch (error) {
+      console.error('Failed to fetch metric usage data:', error);
+      this.setState({
+        dashboardMetrics: {},
+        alertingMetrics: {},
+      });
+    }
   }
 
   protected _variableDependency = new VariableDependencyConfig(this, {

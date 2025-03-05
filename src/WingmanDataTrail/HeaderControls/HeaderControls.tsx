@@ -3,17 +3,20 @@ import {
   EmbeddedScene,
   SceneFlexItem,
   SceneFlexLayout,
-  SceneReactObject,
   type SceneObjectState,
+  type SceneReactObject,
+  type SceneVariableSet,
 } from '@grafana/scenes';
-import { Select } from '@grafana/ui';
-import React from 'react';
 
+import { GroupByControls } from './GroupByControls';
 import { LayoutSwitcher } from './LayoutSwitcher';
+import { MetricsSorter } from './MetricsSorter';
 import { QuickSearch } from './QuickSearch';
 
 interface HeaderControlsState extends SceneObjectState {
-  onChange: (value: SelectableValue<string>) => void;
+  $variables?: SceneVariableSet;
+  inputControls?: SceneReactObject;
+  onChange?: (value: SelectableValue<string>) => void; // Keeping for backward compatibility
 }
 
 export class HeaderControls extends EmbeddedScene {
@@ -32,37 +35,12 @@ export class HeaderControls extends EmbeddedScene {
             body: quickSearch,
           }),
           new SceneFlexItem({
-            maxWidth: '240px',
-            body: new SceneReactObject({
-              reactNode: (
-                <Select
-                  placeholder="Group by label..."
-                  options={[
-                    { label: '(None)', value: 'none' },
-                    { label: 'cluster (2)', value: 'cluster' },
-                    { label: 'namespace (3)', value: 'namespace' },
-                    { label: 'service (11)', value: 'service' },
-                  ]}
-                  // TEMP: add a groupBy variable dependency in MetricsReducer instead
-                  onChange={(value) => state.onChange!(value)}
-                />
-              ),
-            }),
+            width: 'auto',
+            body: new GroupByControls({}),
           }),
           new SceneFlexItem({
-            maxWidth: '240px',
-            body: new SceneReactObject({
-              reactNode: (
-                <Select
-                  placeholder="Sort..."
-                  options={[
-                    { label: 'A-Z', value: 'a-z' },
-                    { label: 'Z-A', value: 'z-a' },
-                  ]}
-                  onChange={() => {}}
-                />
-              ),
-            }),
+            width: 'auto',
+            body: new MetricsSorter({}),
           }),
           new SceneFlexItem({
             width: 'auto',
