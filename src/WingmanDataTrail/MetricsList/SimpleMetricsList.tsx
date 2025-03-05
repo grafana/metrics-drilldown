@@ -20,8 +20,8 @@ import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDat
 import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
 import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
-const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
-const GRID_TEMPLATE_ROWS = '1fr';
+export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
+export const GRID_TEMPLATE_ROWS = '1fr';
 
 interface SimpleMetricsListState extends SceneObjectState {
   body: SceneByVariableRepeater;

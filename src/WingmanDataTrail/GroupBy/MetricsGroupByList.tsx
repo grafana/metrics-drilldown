@@ -1,16 +1,13 @@
 import {
-  SceneCSSGridLayout,
-  SceneObjectBase,
-  type SceneComponentProps,
+  EmbeddedScene,
+  SceneFlexItem,
+  SceneFlexLayout,
   type SceneCSSGridItem,
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
-import React from 'react';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
-
-interface MetricsGroupByListState extends SceneObjectState {}
 
 const groups: any = {
   cluster: [
@@ -59,30 +56,20 @@ const groups: any = {
   ],
 };
 
-export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
-  constructor(state: Partial<MetricsGroupByListState>) {
+export class MetricsGroupByList extends EmbeddedScene {
+  constructor() {
     super({
-      ...state,
-      key: '',
+      key: 'metrics-group-list',
+      body: new SceneFlexLayout({
+        direction: 'column',
+        children: [],
+      }),
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
   }
 
-  private MetricsGroupByList = () => {
-    // start with the overview
-    // extract to a new file - to have a clear separation for responsibility
-    // if there are GROUPS, otherwise we just do a normal layout
-
-    // separate the complexity and use the variability
-    // see a different thing, make a new component
-
-    // the main content should be the element in the [1] index of the body
-
-    // WHEN ADDDING ELEMENTS TO THE PANEL LIST,
-    // TO GET DIFFERENT GRID OPTIONS FOR BOTH THE
-    // GROUP HEADER AND THE PANELS FOR THE GROUP,
-    // THERE NEEDS TO BE NESTED
-    // iterate through the keys of grouped metrics.
-    // each key currently is a metric prefix
+  private onActivate() {
     const children: Array<SceneObject<SceneObjectState> | SceneCSSGridItem> = [];
     for (const group in groups) {
       const groupFlavors = groups[group];
@@ -92,30 +79,20 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
         const groupName = groupFlavor.name;
         const metricsList = groupFlavor.metrics;
 
-        // Create instance of the new component
-        const metricsGroupByRow = new MetricsGroupByRow({
-          groupName,
-          groupType: group,
-          metricsList,
-        });
-
-        children.push(metricsGroupByRow);
+        children.push(
+          new SceneFlexItem({
+            body: new MetricsGroupByRow({
+              groupName,
+              groupType: group,
+              metricsList,
+            }),
+          })
+        );
       }
     }
 
-    const allGroups = new SceneCSSGridLayout({
+    (this.state.body as SceneFlexLayout).setState({
       children,
-      templateColumns: '1/-1',
-      autoRows: 'auto',
-      rowGap: 0.5,
     });
-
-    // const rowTemplate = showPreviews ? ROW_PREVIEW_HEIGHT : ROW_CARD_HEIGHT;
-    return <allGroups.Component model={allGroups} />;
-  };
-
-  // this should be rendered to create a static component to render the function above
-  public static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
-    return <model.MetricsGroupByList />;
-  };
+  }
 }
