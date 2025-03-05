@@ -1,11 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
-import {
-  SceneObjectBase,
-  type SceneComponentProps,
-  type SceneCSSGridLayout,
-  type SceneObjectState,
-} from '@grafana/scenes';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Checkbox, Field, FieldSet, Icon, Input, Switch, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
