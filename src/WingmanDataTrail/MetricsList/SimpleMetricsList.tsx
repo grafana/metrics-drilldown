@@ -17,9 +17,8 @@ import React from 'react';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
-
-import { VAR_METRICS_VARIABLE } from './MetricsVariable';
-import { MetricVizPanel } from './MetricVizPanel';
+import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
+import { MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 const GRID_TEMPLATE_ROWS = '1fr';
