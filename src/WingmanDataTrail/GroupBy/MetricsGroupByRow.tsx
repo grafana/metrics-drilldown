@@ -60,7 +60,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       <>
         {/* for a custom label with buttons on the right, had to hack this above the collapsable section */}
         <div className={styles.container}>
-          <span className={styles.groupName}>{`${groupName} ${groupType}`}</span>
+          <span className={styles.groupName}>{`${groupName} ${groupType} (${metricsList.length})`}</span>
           <div className={styles.buttons}>
             <button className="btn btn-sm btn-secondary">Include</button>
             <button className="btn btn-sm btn-secondary">Exclude</button>
@@ -141,7 +141,7 @@ function getStyles(theme: GrafanaTheme2) {
       marginBottom: '-42px',
     }),
     groupName: css({
-      fontSize: (theme.typography.fontSize = 26),
+      // fontSize: (theme.typography.fontSize = 12),
     }),
     buttons: css({
       marginLeft: 'auto',
