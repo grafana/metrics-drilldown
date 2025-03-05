@@ -18,7 +18,7 @@ export default function Trail({ trail }: { trail: DataTrail }) {
     }
 
     trail.setState({
-      topScene: new MetricsReducer({}),
+      topScene: new MetricsReducer(),
     });
   }, [trail, isInitialized]);
 

@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Icon, useStyles2 } from '@grafana/ui';
+import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
@@ -42,12 +42,16 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       <div className={styles.panelContainer}>
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
         <div className={styles.usageContainer}>
-          <span className={styles.usageItem}>
-            <Icon name="apps" /> {usageStats.dashboards}
-          </span>
-          <span className={styles.usageItem}>
-            <Icon name="bell" /> {usageStats.alertingRules}
-          </span>
+          <Tooltip content="Dashboards usage">
+            <span className={styles.usageItem}>
+              <Icon name="apps" /> {usageStats.dashboards}
+            </span>
+          </Tooltip>
+          <Tooltip content="Alerting rules usage">
+            <span className={styles.usageItem}>
+              <Icon name="bell" /> {usageStats.alertingRules}
+            </span>
+          </Tooltip>
         </div>
       </div>
     );
