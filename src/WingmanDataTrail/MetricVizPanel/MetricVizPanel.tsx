@@ -14,7 +14,7 @@ import React from 'react';
 
 import { trailDS } from 'shared';
 
-import { ConfigureAction } from './actions/ConfigureAction';
+import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
 import { buildPrometheusQuery } from './buildPrometheusQuery';
 
@@ -26,7 +26,7 @@ export type GroupByLabel = {
 interface MetricVizPanelState extends SceneObjectState {
   metricName: string;
   color: string;
-  prometheusFunction: string;
+  prometheusFunction: PrometheusFn;
   title: string;
   hideLegend: boolean;
   highlight: boolean;
