@@ -17,14 +17,24 @@ import React from 'react';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
+import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
+import { EventApplyFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventApplyFunction';
+import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigureFunction';
 import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
-import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import {
+  METRICS_VIZ_PANEL_HEIGHT,
+  METRICS_VIZ_PANEL_HEIGHT_SMALL,
+  MetricVizPanel,
+} from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 export const GRID_TEMPLATE_ROWS = '1fr';
 
 interface SimpleMetricsListState extends SceneObjectState {
   body: SceneByVariableRepeater;
+  drawer: SceneDrawer;
 }
 
 export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
@@ -63,6 +73,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
           });
         },
       }),
+      drawer: new SceneDrawer({}),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -70,6 +81,21 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
 
   private onActivate() {
     this.subscribeToLayoutChange();
+    this.subscribeToEvents();
+  }
+
+  private subscribeToEvents() {
+    this._subs.add(
+      this.subscribeToEvent(EventConfigureFunction, (event) => {
+        this.openDrawer(event.payload.metricName);
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventApplyFunction, (event) => {
+        this.state.drawer.close();
+      })
+    );
   }
 
   private subscribeToLayoutChange() {
@@ -89,13 +115,54 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
+  private openDrawer(metricName: string) {
+    this.state.drawer.open({
+      title: 'Choose a new Prometheus function',
+      subTitle: metricName,
+      body: new SceneCSSGridLayout({
+        templateColumns: GRID_TEMPLATE_COLUMNS,
+        autoRows: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+        isLazy: true,
+        $behaviors: [
+          new behaviors.CursorSync({
+            key: 'metricCrosshairSync',
+            sync: DashboardCursorSync.Crosshair,
+          }),
+        ],
+        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map(
+          (option, colorIndex) =>
+            new SceneCSSGridItem({
+              body: new MetricVizPanel({
+                title: option.label,
+                metricName,
+                color: getColorByIndex(colorIndex),
+                groupByLabel: undefined,
+                prometheusFunction: option.value as string,
+                height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+                hideLegend: true,
+                highlight: colorIndex === 1,
+                headerActions: [
+                  new ApplyAction({
+                    metricName,
+                    prometheusFunction: option.value as string,
+                    disabled: colorIndex === 1,
+                  }),
+                ],
+              }),
+            })
+        ),
+      }),
+    });
+  }
+
   public static Component = ({ model }: SceneComponentProps<SimpleMetricsList>) => {
     const styles = useStyles2(getStyles);
-    const { body } = model.useState();
+    const { body, drawer } = model.useState();
 
     return (
       <div className={styles.container}>
         <body.Component model={body} />
+        <drawer.Component model={drawer} />
       </div>
     );
   };
