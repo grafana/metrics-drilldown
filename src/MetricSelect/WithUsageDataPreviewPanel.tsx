@@ -33,7 +33,10 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
 
     const styles = useStyles2(getStyles);
     const trail = getTrailFor(model);
-    const usageStats = trail.getUsageStatsFor(metric);
+    const usageStats = {
+      dashboards: trail.state.dashboardMetrics?.[metric] ?? 0,
+      alertingRules: trail.state.alertingMetrics?.[metric] ?? 0,
+    };
 
     return (
       <div className={styles.panelContainer}>

@@ -242,13 +242,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     }
   }
 
-  public getUsageStatsFor(metric: string) {
-    return {
-      dashboards: this.state.dashboardMetrics?.[metric] ?? 0,
-      alertingRules: this.state.alertingMetrics?.[metric] ?? 0,
-    };
-  }
-
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_DATASOURCE, VAR_OTEL_RESOURCES, VAR_OTEL_JOIN_QUERY, VAR_OTEL_AND_METRIC_FILTERS],
     onReferencedVariableValueChanged: async (variable: SceneVariable) => {
