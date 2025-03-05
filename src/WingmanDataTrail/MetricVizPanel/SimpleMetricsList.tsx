@@ -14,6 +14,7 @@ import { DashboardCursorSync } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 
@@ -41,6 +42,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
           autoRows: '240px',
           alignItems: 'start',
           isLazy: true,
+          rowGap: 6,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -51,10 +53,13 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
         getLayoutChild: (option) => {
           // Scenes does not pass an index :man_shrug: :sad_panda:
           return new SceneCSSGridItem({
-            body: new MetricVizPanel({
-              metricName: option.value as string,
-              color: getColorByIndex(colorIndex++),
-              groupByLabel: undefined,
+            body: new WithUsageDataPreviewPanel({
+              vizPanelInGridItem: new MetricVizPanel({
+                metricName: option.value as string,
+                color: getColorByIndex(colorIndex++),
+                groupByLabel: undefined,
+              }),
+              metric: option.value as string,
             }),
           });
         },

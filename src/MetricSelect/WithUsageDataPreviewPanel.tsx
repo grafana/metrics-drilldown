@@ -1,8 +1,10 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState, type VizPanel } from '@grafana/scenes';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
+
+import { type MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { getTrailFor } from '../utils';
 
@@ -12,7 +14,7 @@ export type UsageStats = {
 };
 
 interface WithUsageDataPreviewPanelState extends SceneObjectState {
-  vizPanelInGridItem: VizPanel;
+  vizPanelInGridItem: MetricVizPanel;
   metric: string;
   stats?: UsageStats;
 }
