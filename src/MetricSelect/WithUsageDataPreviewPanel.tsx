@@ -42,12 +42,12 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       <div className={styles.panelContainer}>
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
         <div className={styles.usageContainer}>
-          <Tooltip content="Dashboards usage">
+          <Tooltip content="Dashboards usage" placement="top">
             <span className={styles.usageItem}>
               <Icon name="apps" /> {usageStats.dashboards}
             </span>
           </Tooltip>
-          <Tooltip content="Alerting rules usage">
+          <Tooltip content="Alerting rules usage" placement="top">
             <span className={styles.usageItem}>
               <Icon name="bell" /> {usageStats.alertingRules}
             </span>

@@ -18,7 +18,7 @@ import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPane
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
-import { MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 const GRID_TEMPLATE_ROWS = '1fr';
@@ -38,7 +38,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
         body: new SceneCSSGridLayout({
           children: [],
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: '240px',
+          autoRows: METRICS_VIZ_PANEL_HEIGHT,
           alignItems: 'start',
           isLazy: true,
           rowGap: 6,

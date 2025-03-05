@@ -29,6 +29,8 @@ interface MetricVizPanelState extends SceneObjectState {
   body?: VizPanel;
 }
 
+export const METRICS_VIZ_PANEL_HEIGHT = '200px';
+
 export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   constructor(state: {
     metricName: MetricVizPanelState['metricName'];
@@ -161,6 +163,6 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css({ height: '240px' }),
+    container: css({ height: METRICS_VIZ_PANEL_HEIGHT }),
   };
 }
