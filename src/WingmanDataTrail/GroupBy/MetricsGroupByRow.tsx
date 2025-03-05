@@ -12,6 +12,8 @@ import {
 import { CollapsableSection, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
+import { ShowMorePanel } from './ShowMorePanel';
+
 // Add new component interface
 interface MetricsGroupByRowState extends SceneObjectState {
   groupName: string;
@@ -99,11 +101,24 @@ function buildMetricsBody(
   const metricChildren: Array<SceneObject<SceneObjectState> | SceneCSSGridItem> = [];
   // if the metrics list is less than three, set the list length to the length of the metrics list
   // if the firstLoad is true, only iterate through the first 3 metrics
-  const listLength = firstLoad && metricsList.length >= 3 ? 3 : metricsList.length;
+  const listLength = firstLoad && metricsList.length >= 5 ? 5 : metricsList.length;
 
   for (let i = 0; i < listLength; i++) {
     const metricPanel = createMetricPanel(metricsList[i]);
     metricChildren.push(metricPanel);
+  }
+
+  if (firstLoad && metricsList.length > 5) {
+    // Create a ShowMorePanel that matches the size of the metric panels
+    const showMorePanel = new SceneCSSGridItem({
+      body: new ShowMorePanel({
+        onClick: () => {
+          // This click will be handled by the separate button below the grid
+          // It's included here for visual purposes only
+        },
+      }),
+    });
+    metricChildren.push(showMorePanel);
   }
 
   const metricsRow = new SceneCSSGridLayout({
