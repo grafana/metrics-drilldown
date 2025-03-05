@@ -59,7 +59,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     };
 
     return (
-      <>
+      <div className={styles.rowContainer}>
         {/* for a custom label with buttons on the right, had to hack this above the collapsable section */}
         <div className={styles.container}>
           <span className={styles.groupName}>{`${groupName} ${groupType} (${metricsList.length})`}</span>
@@ -87,7 +87,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             </div>
           )}
         </CollapsableSection>
-      </>
+      </div>
     );
   };
 }
@@ -148,6 +148,14 @@ function createMetricPanel(title: string) {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
+    rowContainer: css({
+      border: `1px solid ${theme.colors.border.medium}`,
+      borderRadius: theme.shape.borderRadius(),
+      padding: theme.spacing(2),
+      marginBottom: theme.spacing(2),
+      background: theme.colors.background.primary,
+      boxShadow: theme.shadows.z1,
+    }),
     container: css({
       display: 'flex',
       alignItems: 'center',
