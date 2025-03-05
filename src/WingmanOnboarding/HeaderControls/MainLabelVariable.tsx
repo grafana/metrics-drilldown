@@ -68,7 +68,7 @@ function getStyles(theme: GrafanaTheme2) {
       border: 1px solid ${theme.colors.border.weak};
       border-radius: 8px;
       padding: ${theme.spacing(2)};
-      transition: all 0.2s ease-in-out;
+      transition: all 0.1s ease-in-out;
 
       &:hover {
         background-color: ${theme.colors.background.secondary};
@@ -76,7 +76,7 @@ function getStyles(theme: GrafanaTheme2) {
       }
     `,
     selected: css`
-      border: 1px solid ${theme.colors.primary.main};
+      border: 2px solid ${theme.colors.primary.main};
       background-color: ${theme.colors.background.primary};
 
       &:hover {
