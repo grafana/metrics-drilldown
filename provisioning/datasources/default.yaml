@@ -33,7 +33,7 @@ datasources:
       manageAlerts: true
       alertmanagerUid: gdev-alertmanager
       prometheusType: Prometheus #Cortex | Mimir | Prometheus | Thanos
-      prometheusVersion: 2.40.0
+      prometheusVersion: 3.2.1
       exemplarTraceIdDestinations:
         - name: traceID
           datasourceUid: gdev-tempo
