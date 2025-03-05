@@ -14,9 +14,11 @@ import { DashboardCursorSync } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 
+import { VAR_METRICS_VARIABLE } from './MetricsVariable';
 import { MetricVizPanel } from './MetricVizPanel';
 
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
@@ -33,13 +35,14 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     super({
       key: 'simple-metrics-list',
       body: new SceneByVariableRepeater({
-        variableName: 'metrics-wingman',
+        variableName: VAR_METRICS_VARIABLE,
         body: new SceneCSSGridLayout({
           children: [],
           templateColumns: GRID_TEMPLATE_COLUMNS,
           autoRows: '240px',
           alignItems: 'start',
           isLazy: true,
+          rowGap: 6,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -50,10 +53,13 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
         getLayoutChild: (option) => {
           // Scenes does not pass an index :man_shrug: :sad_panda:
           return new SceneCSSGridItem({
-            body: new MetricVizPanel({
-              metricName: option.value as string,
-              color: getColorByIndex(colorIndex++),
-              groupByLabel: undefined,
+            body: new WithUsageDataPreviewPanel({
+              vizPanelInGridItem: new MetricVizPanel({
+                metricName: option.value as string,
+                color: getColorByIndex(colorIndex++),
+                groupByLabel: undefined,
+              }),
+              metric: option.value as string,
             }),
           });
         },

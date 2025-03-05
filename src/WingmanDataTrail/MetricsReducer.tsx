@@ -14,7 +14,6 @@ interface MetricsReducerState extends SceneObjectState {
   hideEmpty: boolean;
   searchQuery: string;
   groupBy: string;
-  sortBy: string;
   viewMode: 'rows' | 'grid';
   hideEmptyGroups: boolean;
   hideEmptyTypes: boolean;
@@ -137,7 +136,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       hideEmpty: true,
       searchQuery: '',
       groupBy: 'cluster',
-      sortBy: 'name',
       viewMode: 'grid' as const,
       hideEmptyGroups: true,
       hideEmptyTypes: true,

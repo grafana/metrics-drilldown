@@ -10,6 +10,7 @@ import { Select } from '@grafana/ui';
 import React from 'react';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
+import { MetricsSorter } from './MetricsSorter';
 import { QuickSearch } from './QuickSearch';
 
 interface HeaderControlsState extends SceneObjectState {
@@ -51,18 +52,7 @@ export class HeaderControls extends EmbeddedScene {
           }),
           new SceneFlexItem({
             maxWidth: '240px',
-            body: new SceneReactObject({
-              reactNode: (
-                <Select
-                  placeholder="Sort..."
-                  options={[
-                    { label: 'A-Z', value: 'a-z' },
-                    { label: 'Z-A', value: 'z-a' },
-                  ]}
-                  onChange={() => {}}
-                />
-              ),
-            }),
+            body: new MetricsSorter({}),
           }),
           new SceneFlexItem({
             width: 'auto',
