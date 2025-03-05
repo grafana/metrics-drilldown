@@ -35,7 +35,7 @@ export const sortByOptions: VariableValueOption[] = [
   { label: 'Alerting Usage', value: 'alerting-usage' },
 ];
 
-export const VAR_METRICS_REDUCER_SORT_BY = 'metrics-reducer-sort-by';
+export const VAR_WINGMAN_SORT_BY = 'metrics-reducer-sort-by';
 
 export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   initialized = false;
@@ -47,7 +47,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       $variables: new SceneVariableSet({
         variables: [
           new CustomVariable({
-            name: VAR_METRICS_REDUCER_SORT_BY,
+            name: VAR_WINGMAN_SORT_BY,
             label: 'Sort By',
             value: state.sortBy ?? 'alphabetical',
             query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
@@ -61,7 +61,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   }
 
   private activationHandler() {
-    const sortByVar = sceneGraph.getVariables(this).getByName(VAR_METRICS_REDUCER_SORT_BY);
+    const sortByVar = sceneGraph.getVariables(this).getByName(VAR_WINGMAN_SORT_BY);
     const metricsVar = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this);
 
     // Handle the initial sort when the metrics have loaded
@@ -102,13 +102,13 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
 
     switch (sortBy) {
       case 'dashboard-usage':
-        metricsVar.changeValueTo([...sortMetricsByUsage(metrics, trail.state.dashboardMetrics || {})]);
+        metricsVar.changeValueTo(sortMetricsByCount(metrics, trail.state.dashboardMetrics || {}));
         break;
       case 'alerting-usage':
-        metricsVar.changeValueTo([...sortMetricsByUsage(metrics, trail.state.alertingMetrics || {})]);
+        metricsVar.changeValueTo(sortMetricsByCount(metrics, trail.state.alertingMetrics || {}));
         break;
       case 'reverse-alphabetical':
-        metricsVar.changeValueTo([...sortMetricsReverseAlphabetically(metrics)]);
+        metricsVar.changeValueTo(sortMetricsReverseAlphabetically(metrics));
         break;
       default:
         // Leverage the default (alphabetical, A-Z) sorting of the MetricsVariable
@@ -306,15 +306,15 @@ export async function fetchAlertingMetrics(): Promise<Record<string, number>> {
 }
 
 /**
- * Sort metrics by their usage score (descending)
+ * Sort metrics by an arbitrary count (descending)
  * @param metrics Array of metric names
- * @param usageScores Usage scores for metrics
+ * @param counts A record mapping metric names to an arbitrary count
  * @returns Sorted array of metric names
  */
-export function sortMetricsByUsage(metrics: string[], usageScores: Record<string, number>): string[] {
+export function sortMetricsByCount(metrics: string[], counts: Record<string, number>): string[] {
   return [...metrics].sort((a, b) => {
-    const scoreA = usageScores[a] || 0;
-    const scoreB = usageScores[b] || 0;
+    const scoreA = counts[a] || 0;
+    const scoreB = counts[b] || 0;
 
     // Primary sort by score (descending)
     if (scoreB !== scoreA) {
