@@ -9,7 +9,9 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
-interface MetricsGroupByListState extends SceneObjectState {}
+interface MetricsGroupByListState extends SceneObjectState {
+  groupBy?: string;
+}
 
 const groups: any = {
   cluster: [
@@ -43,6 +45,9 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
   }
 
   private MetricsGroupByList = () => {
+    const { groupBy = 'cluster' } = this.state;
+    const currentGroups = groups[groupBy] || [];
+
     // start with the overview
     // extract to a new file - to have a clear separation for responsibility
     // if there are GROUPS, otherwise we just do a normal layout
@@ -59,55 +64,51 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
     // iterate through the keys of grouped metrics.
     // each key currently is a metric prefix
     const children: Array<SceneObject<SceneObjectState> | SceneCSSGridItem> = [];
-    for (const group in groups) {
-      const groupFlavors = groups[group];
-      // cluster => cluster value => [metrics]
-      // iterate over the groupFlavors
-      for (const groupFlavor of groupFlavors) {
-        const groupName = groupFlavor.name;
-        // us-east
-        const metricsList = groupFlavor.metrics;
-        // for each key make a SceneCSSGridItem and put it in a SceneCSSGridLayout header row
-        // This could be a component instead
-        const header = new SceneCSSGridItem({
-          gridColumn: '1/-1',
-          body: PanelBuilders.text()
-            .setTitle(`${groupName} ${group}`)
-            .setOption('content', '')
-            .setDisplayMode('transparent')
-            .build(),
-        });
 
-        const headerRow = new SceneCSSGridLayout({
-          children: [header],
-          templateColumns: '1/-1',
-          autoRows: '30px',
-          key: groupName,
-        });
+    // Use the currentGroups variable which is filtered by the selected groupBy value
+    for (const groupFlavor of currentGroups) {
+      const groupName = groupFlavor.name;
+      // us-east
+      const metricsList = groupFlavor.metrics;
+      // for each key make a SceneCSSGridItem and put it in a SceneCSSGridLayout header row
+      // This could be a component instead
+      const header = new SceneCSSGridItem({
+        gridColumn: '1/-1',
+        body: PanelBuilders.text()
+          .setTitle(`${groupName} ${groupBy}`)
+          .setOption('content', `${metricsList.length} metrics`)
+          .build(),
+      });
 
-        children.push(headerRow);
+      const headerRow = new SceneCSSGridLayout({
+        children: [header],
+        templateColumns: '1/-1',
+        autoRows: '30px',
+        key: groupName,
+      });
 
-        // then iterate through the metrics to create a SceneCSSGridLayout of metrics childern
-        const metricChildren: Array<SceneObject<SceneObjectState> | SceneCSSGridItem> = [];
+      children.push(headerRow);
 
-        // variable repeater?
-        for (let index = 0; index < metricsList.length; index++) {
-          const metric = metricsList[index];
-          //
-          const metricPanel = createMetricPanel(metric);
-          metricChildren.push(metricPanel);
-        }
+      // then iterate through the metrics to create a SceneCSSGridLayout of metrics childern
+      const metricChildren: Array<SceneObject<SceneObjectState> | SceneCSSGridItem> = [];
 
-        const row = new SceneCSSGridLayout({
-          children: metricChildren,
-          // templateColumns: 'repeat(3, minmax(0, 1fr))',
-          // autoRows: height,
-          isLazy: true,
-          key: groupName + 'metrics',
-        });
-
-        children.push(row);
+      // variable repeater?
+      for (let index = 0; index < metricsList.length; index++) {
+        const metric = metricsList[index];
+        //
+        const metricPanel = createMetricPanel(metric);
+        metricChildren.push(metricPanel);
       }
+
+      const row = new SceneCSSGridLayout({
+        children: metricChildren,
+        // templateColumns: 'repeat(3, minmax(0, 1fr))',
+        // autoRows: height,
+        isLazy: true,
+        key: groupName + 'metrics',
+      });
+
+      children.push(row);
     }
 
     const allGroups = new SceneCSSGridLayout({
