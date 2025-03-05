@@ -61,10 +61,10 @@ import {
 } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getTrailFor, limitAdhocProviders } from './utils';
-import { fetchAlertingMetrics, fetchDashboardMetrics } from './utils/metricUsage';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
+import { fetchAlertingMetrics, fetchDashboardMetrics } from './WingmanDataTrail/HeaderControls/MetricsSorter';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;

@@ -4,9 +4,6 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Checkbox, Field, FieldSet, Icon, Input, Switch, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { getTrailFor } from 'utils';
-import { sortMetricsAlphabetically, sortMetricsByUsage, sortMetricsReverseAlphabetically } from 'utils/metricUsage';
-
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { MetricsGroupByList } from './MetricsGroupByList';
 import { SimpleMetricsList } from './MetricVizPanel/SimpleMetricsList';
@@ -17,7 +14,6 @@ interface MetricsReducerState extends SceneObjectState {
   hideEmpty: boolean;
   searchQuery: string;
   groupBy: string;
-  sortBy: string;
   viewMode: 'rows' | 'grid';
   hideEmptyGroups: boolean;
   hideEmptyTypes: boolean;
@@ -140,7 +136,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       hideEmpty: true,
       searchQuery: '',
       groupBy: 'cluster',
-      sortBy: 'name',
       viewMode: 'grid' as const,
       hideEmptyGroups: true,
       hideEmptyTypes: true,
@@ -160,29 +155,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         body: !option.value || option.value === 'none' ? new SimpleMetricsList() : new MetricsGroupByList({}),
       });
     };
-  }
-
-  private sortMetrics(metrics: string[]): string[] {
-    if (!metrics || metrics.length === 0) {
-      return metrics;
-    }
-
-    const trail = getTrailFor(this);
-    const { sortBy } = this.state;
-
-    switch (sortBy) {
-      case 'dashboard-usage':
-        // Get the usage scores from DataTrail, default to empty object if undefined
-        return sortMetricsByUsage(metrics, trail.state.dashboardMetrics || {});
-      case 'alerting-usage':
-        return sortMetricsByUsage(metrics, trail.state.alertingMetrics || {});
-      case 'reverse-alphabetical':
-        // Reverse alphabetical sorting
-        return sortMetricsReverseAlphabetically(metrics);
-      default:
-        // Default to alphabetical sorting
-        return sortMetricsAlphabetically(metrics);
-    }
   }
 
   // Update MetricsSidebar to use the new component
@@ -229,13 +201,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       { label: 'cpu (9)', value: 'cpu' },
       { label: 'disk (5)', value: 'disk' },
       { label: 'network (7)', value: 'network' },
-    ];
-
-    const sortByOptions: Array<SelectableValue<string>> = [
-      { label: 'Alphabetical', value: 'alphabetical' },
-      { label: 'Reverse Alphabetical', value: 'reverse-alphabetical' },
-      { label: 'Dashboard Usage', value: 'dashboard-usage' },
-      { label: 'Alerting Usage', value: 'alerting-usage' },
     ];
 
     return (

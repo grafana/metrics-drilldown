@@ -1,6 +1,128 @@
 import { getBackendSrv } from '@grafana/runtime';
+import {
+  CustomVariable,
+  sceneGraph,
+  SceneObjectBase,
+  SceneVariableSet,
+  VariableValueSelectors,
+  type SceneComponentProps,
+  type SceneObject,
+  type SceneObjectState,
+  type VariableValueOption,
+} from '@grafana/scenes';
 import { type Dashboard, type DataSourceRef } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
+import React from 'react';
+
+import { getTrailFor } from 'utils';
+import { isCustomVariable } from 'utils/utils.variables';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
+
+export const sortingOptions = ['alphabetical', 'reverse-alphabetical', 'dashboard-usage', 'alerting-usage'] as const;
+export type SortingOption = (typeof sortingOptions)[number];
+
+interface MetricsSorterState extends SceneObjectState {
+  sortBy: SortingOption;
+  onSortByChange?: (sortBy: SortingOption) => void;
+  $variables: SceneVariableSet;
+  inputControls: SceneObject;
+}
+
+export const sortByOptions: VariableValueOption[] = [
+  { label: 'Metric Name (A-Z)', value: 'alphabetical' },
+  { label: 'Metric Name (Z-A)', value: 'reverse-alphabetical' },
+  { label: 'Dashboard Usage', value: 'dashboard-usage' },
+  { label: 'Alerting Usage', value: 'alerting-usage' },
+];
+
+export const VAR_METRICS_REDUCER_SORT_BY = 'metrics-reducer-sort-by';
+
+export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
+  initialized = false;
+
+  constructor(state: Partial<MetricsSorterState>) {
+    super({
+      sortBy: state.sortBy ?? 'alphabetical',
+      onSortByChange: state.onSortByChange,
+      $variables: new SceneVariableSet({
+        variables: [
+          new CustomVariable({
+            name: VAR_METRICS_REDUCER_SORT_BY,
+            label: 'Sort By',
+            value: state.sortBy ?? 'alphabetical',
+            query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
+          }),
+        ],
+      }),
+      inputControls: new VariableValueSelectors({ layout: 'horizontal' }),
+    });
+
+    this.addActivationHandler(() => this.activationHandler());
+  }
+
+  private activationHandler() {
+    const sortByVar = sceneGraph.getVariables(this).getByName(VAR_METRICS_REDUCER_SORT_BY);
+    const metricsVar = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this);
+
+    // Handle the initial sort when the metrics have loaded
+    if (metricsVar instanceof MetricsVariable) {
+      metricsVar.subscribeToState(() => {
+        const sortByValue = sortByVar?.getValue() as SortingOption;
+        if (!this.initialized && sortByValue) {
+          this.initialized = true;
+          this.sortMetrics(sortByValue as SortingOption);
+        }
+      });
+    }
+
+    // Handle the sort when the sortBy variable changes
+    if (isCustomVariable(sortByVar)) {
+      this.sortMetrics(sortByVar.getValue() as SortingOption);
+      this._subs.add(
+        sortByVar.subscribeToState((state) => {
+          if (state.value) {
+            this.sortMetrics(state.value as SortingOption);
+          }
+        })
+      );
+    }
+  }
+
+  private sortMetrics(sortBy: SortingOption): void {
+    const trail = getTrailFor(this);
+
+    const metricsVar = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this);
+    const metricsValue = metricsVar?.getValue();
+    const metrics = (Array.isArray(metricsValue) ? metricsValue : []) as string[];
+    const validMetricsVariable = metricsVar instanceof MetricsVariable;
+
+    if (!validMetricsVariable || !metrics || metrics.length === 0) {
+      return;
+    }
+
+    switch (sortBy) {
+      case 'dashboard-usage':
+        metricsVar.changeValueTo([...sortMetricsByUsage(metrics, trail.state.dashboardMetrics || {})]);
+        break;
+      case 'alerting-usage':
+        metricsVar.changeValueTo([...sortMetricsByUsage(metrics, trail.state.alertingMetrics || {})]);
+        break;
+      case 'reverse-alphabetical':
+        metricsVar.changeValueTo([...sortMetricsReverseAlphabetically(metrics)]);
+        break;
+      default:
+        // Leverage the default (alphabetical, A-Z) sorting of the MetricsVariable
+        metricsVar.changeValueTo('$__all');
+        break;
+    }
+  }
+
+  public static Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
+    const { inputControls } = model.useState();
+
+    return <inputControls.Component model={inputControls} />;
+  };
+}
 
 /**
  * Extracts all metric names from a PromQL expression
@@ -202,15 +324,6 @@ export function sortMetricsByUsage(metrics: string[], usageScores: Record<string
     // Secondary sort alphabetically for metrics with the same score
     return a.localeCompare(b);
   });
-}
-
-/**
- * Sort metrics alphabetically
- * @param metrics Array of metric names
- * @returns Sorted array of metric names
- */
-export function sortMetricsAlphabetically(metrics: string[]): string[] {
-  return [...metrics].sort((a, b) => a.localeCompare(b));
 }
 
 /**
