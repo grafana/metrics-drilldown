@@ -28,15 +28,34 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       groupType: state.groupType || '',
       metricsList: state.metricsList || [],
       key: `${state.groupName || ''}-${state.groupType || ''}`,
-      body: state.body || buildMetricsBody(state.groupName || '', state.groupType || '', state.metricsList || []),
+      body: state.body || buildMetricsBody(state.groupName || '', state.groupType || '', state.metricsList || [], true),
     });
   }
 
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const styles = useStyles2(getStyles);
 
-    const { groupName, groupType, body } = model.state;
+    const { groupName, groupType, body, metricsList } = model.state;
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [showingMore, setShowingMore] = useState(false);
+
+    const handleToggleShowMore = () => {
+      if (showingMore) {
+        // Show less - display only first 3 metrics
+        const newBody = buildMetricsBody(groupName || '', groupType || '', metricsList || [], true);
+        model.setState({
+          body: newBody,
+        });
+      } else {
+        // Show more - display all metrics
+        const newBody = buildMetricsBody(groupName || '', groupType || '', metricsList || [], false);
+        model.setState({
+          body: newBody,
+        });
+      }
+      setShowingMore(!showingMore);
+    };
+
     return (
       <>
         {/* for a custom label with buttons on the right, had to hack this above the collapsable section */}
@@ -49,17 +68,41 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         </div>
         <CollapsableSection onToggle={() => setIsCollapsed(!isCollapsed)} label="" isOpen={!isCollapsed}>
           <body.Component model={body} />
+          {/* Show toggle button if there are more than three metrics */}
+          {metricsList.length > 3 && (
+            <div className={styles.showMoreButton}>
+              <button className="btn btn-sm btn-secondary" onClick={handleToggleShowMore}>
+                {showingMore ? (
+                  <>
+                    Show Less&nbsp;<i className="fa fa-caret-up"></i>
+                  </>
+                ) : (
+                  <>
+                    Show More&nbsp;<i className="fa fa-caret-down"></i>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </CollapsableSection>
       </>
     );
   };
 }
 
-function buildMetricsBody(groupName: string, groupType: string, metricsList: string[]): SceneObject {
+function buildMetricsBody(
+  groupName: string,
+  groupType: string,
+  metricsList: string[],
+  firstLoad?: boolean
+): SceneObject {
   const metricChildren: Array<SceneObject<SceneObjectState> | SceneCSSGridItem> = [];
+  // if the metrics list is less than three, set the list length to the length of the metrics list
+  // if the firstLoad is true, only iterate through the first 3 metrics
+  const listLength = firstLoad && metricsList.length >= 3 ? 3 : metricsList.length;
 
-  for (const metric of metricsList) {
-    const metricPanel = createMetricPanel(metric);
+  for (let i = 0; i < listLength; i++) {
+    const metricPanel = createMetricPanel(metricsList[i]);
     metricChildren.push(metricPanel);
   }
 
@@ -81,9 +124,11 @@ function buildMetricsBody(groupName: string, groupType: string, metricsList: str
 }
 
 function createMetricPanel(title: string) {
-  return new SceneCSSGridItem({
+  // Remove the non-existent SceneButton
+  const panel = new SceneCSSGridItem({
     body: PanelBuilders.timeseries().setTitle(title).setOption('legend', { showLegend: false }).build(),
   });
+  return panel;
 }
 
 function getStyles(theme: GrafanaTheme2) {
@@ -100,6 +145,11 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     buttons: css({
       marginLeft: 'auto',
+    }),
+    showMoreButton: css({
+      display: 'flex',
+      justifyContent: 'center',
+      marginTop: '10px',
     }),
   };
 }
