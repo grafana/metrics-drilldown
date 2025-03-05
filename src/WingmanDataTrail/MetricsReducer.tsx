@@ -1,9 +1,17 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import { type GrafanaTheme2 } from '@grafana/data';
+import {
+  CustomVariable,
+  sceneGraph,
+  SceneObjectBase,
+  SceneVariableSet,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
 import { Checkbox, Field, FieldSet, Icon, Input, Switch, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { groupByOptions, VAR_GROUP_BY } from './HeaderControls/GroupByControls';
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { MetricsGroupByList } from './MetricsGroupByList';
 import { SimpleMetricsList } from './MetricVizPanel/SimpleMetricsList';
@@ -123,16 +131,9 @@ const MetricsFilterSection: React.FC<MetricsFilterSectionProps> = ({
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor(state: any) {
-    // TEMP: remove this in favour of a groupBy variable dependency instead
-    const headerControlsOptions = {
-      onChange: (option: SelectableValue<string>) => {
-        console.log('groupBy option selected', option);
-      },
-    };
-
     const initialState: MetricsReducerState = {
       ...state,
-      headerControls: new HeaderControls(headerControlsOptions),
+      headerControls: new HeaderControls({}),
       hideEmpty: true,
       searchQuery: '',
       groupBy: 'cluster',
@@ -143,18 +144,54 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       selectedMetricTypes: [],
       metricsGroupSearch: '',
       metricsTypeSearch: '',
-      // body: new MetricsGroupByList({}),
       body: new SimpleMetricsList(),
+      $variables: new SceneVariableSet({
+        variables: [
+          new CustomVariable({
+            name: VAR_GROUP_BY,
+            label: 'Group By',
+            value: 'cluster', // Default value
+            query: groupByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
+          }),
+        ],
+      }),
     };
 
     super(initialState);
 
-    // TEMP: remove this in favour of a groupBy variable dependency instead
-    headerControlsOptions.onChange = (option: SelectableValue<string>) => {
-      this.setState({
-        body: !option.value || option.value === 'none' ? new SimpleMetricsList() : new MetricsGroupByList({}),
-      });
-    };
+    // Add activation handler to listen for groupBy variable changes
+    this.addActivationHandler(() => this.activationHandler());
+  }
+
+  private activationHandler() {
+    const variables = sceneGraph.getVariables(this);
+    const groupByVar = variables.getByName(VAR_GROUP_BY);
+
+    if (groupByVar) {
+      // Set initial state based on the current value
+      const currentValue = groupByVar.getValue() as string;
+      this.updateBodyBasedOnGroupBy(currentValue);
+
+      // Subscribe to VAR_GROUP_BY changes
+      this._subs.add(
+        groupByVar.subscribeToState((state: any) => {
+          const value = state.value || state.getValue?.();
+          if (value) {
+            this.updateBodyBasedOnGroupBy(value as string);
+          }
+        })
+      );
+    }
+  }
+
+  private updateBodyBasedOnGroupBy(groupByValue: string) {
+    this.setState({
+      groupBy: groupByValue,
+      body:
+        !groupByValue || groupByValue === 'none'
+          ? new SimpleMetricsList()
+          : new MetricsGroupByList({ groupBy: groupByValue }),
+    });
   }
 
   // Update MetricsSidebar to use the new component
