@@ -81,10 +81,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   private updateBodyBasedOnGroupBy(groupByValue: string) {
     this.setState({
       groupBy: groupByValue,
-      body:
-        !groupByValue || groupByValue === 'none'
-          ? new SimpleMetricsList()
-          : new MetricsGroupByList({ groupBy: groupByValue }),
+      body: !groupByValue || groupByValue === 'none' ? new SimpleMetricsList() : new MetricsGroupByList({}),
     });
   }
 
