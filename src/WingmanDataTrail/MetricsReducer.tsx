@@ -1,10 +1,8 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
-  CustomVariable,
-  sceneGraph,
   SceneObjectBase,
-  SceneVariableSet,
+  VariableDependencyConfig,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
@@ -12,9 +10,11 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
-import { groupByOptions, VAR_GROUP_BY } from './HeaderControls/GroupByControls';
 import { HeaderControls } from './HeaderControls/HeaderControls';
+import { NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
+import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './Labels/LabelsVariable';
 import { SimpleMetricsList } from './MetricsList/SimpleMetricsList';
+import { registerRuntimeDataSources } from './registerRuntimeDataSources';
 import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
@@ -25,54 +25,29 @@ interface MetricsReducerState extends SceneObjectState {
 }
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_WINGMAN_GROUP_BY],
+    onReferencedVariableValueChanged: (variable) => {
+      this.updateBodyBasedOnGroupBy((variable as LabelsVariable).state.value as string);
+    },
+  });
+
   public constructor() {
     super({
       headerControls: new HeaderControls({}),
       groupBy: 'cluster',
       sidebar: new SideBar({}),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
-      $variables: new SceneVariableSet({
-        variables: [
-          new CustomVariable({
-            name: VAR_GROUP_BY,
-            label: 'Group By',
-            value: 'cluster', // Default value
-            query: groupByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
-          }),
-        ],
-      }),
     });
 
-    // Add activation handler to listen for groupBy variable changes
-    this.addActivationHandler(() => this.activationHandler());
-  }
-
-  private activationHandler() {
-    const variables = sceneGraph.getVariables(this);
-    const groupByVar = variables.getByName(VAR_GROUP_BY);
-
-    if (groupByVar) {
-      // Set initial state based on the current value
-      const currentValue = groupByVar.getValue() as string;
-      this.updateBodyBasedOnGroupBy(currentValue);
-
-      // Subscribe to VAR_GROUP_BY changes
-      this._subs.add(
-        groupByVar.subscribeToState((state: any) => {
-          const value = state.value || state.getValue?.();
-          if (value) {
-            this.updateBodyBasedOnGroupBy(value as string);
-          }
-        })
-      );
-    }
+    registerRuntimeDataSources();
   }
 
   private updateBodyBasedOnGroupBy(groupByValue: string) {
     this.setState({
       groupBy: groupByValue,
       body:
-        !groupByValue || groupByValue === 'none'
+        !groupByValue || groupByValue === NULL_GROUP_BY_VALUE
           ? (new SimpleMetricsList() as unknown as SceneObjectBase)
           : (new MetricsGroupByList() as unknown as SceneObjectBase),
     });

@@ -3,12 +3,14 @@ import {
   EmbeddedScene,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
+  SceneReactObject,
   type SceneObjectState,
-  type SceneReactObject,
   type SceneVariableSet,
 } from '@grafana/scenes';
 
-import { GroupByControls } from './GroupByControls';
+import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
+
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsSorter } from './MetricsSorter';
 import { QuickSearch } from './QuickSearch';
@@ -21,9 +23,6 @@ interface HeaderControlsState extends SceneObjectState {
 
 export class HeaderControls extends EmbeddedScene {
   constructor(state: Partial<HeaderControlsState>) {
-    const quickSearch = new QuickSearch();
-    const layoutSwitcher = new LayoutSwitcher();
-
     super({
       ...state,
       key: 'header-controls',
@@ -32,21 +31,36 @@ export class HeaderControls extends EmbeddedScene {
         maxHeight: '32px',
         children: [
           new SceneFlexItem({
-            body: quickSearch,
+            body: new QuickSearch(),
           }),
           new SceneFlexItem({
+            key: 'group-by-label-selector-wingman',
             width: 'auto',
-            body: new GroupByControls({}),
+            body: undefined,
           }),
           new SceneFlexItem({
-            width: 'auto',
+            maxWidth: '240px',
             body: new MetricsSorter({}),
           }),
           new SceneFlexItem({
             width: 'auto',
-            body: layoutSwitcher,
+            body: new LayoutSwitcher(),
           }),
         ],
+      }),
+    });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  onActivate() {
+    const flexItem = sceneGraph.findByKey(this, 'group-by-label-selector-wingman') as SceneFlexItem;
+    const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
+
+    flexItem.setState({
+      body: new SceneReactObject({
+        component: labelsVariable.Component,
+        props: { model: labelsVariable },
       }),
     });
   }
