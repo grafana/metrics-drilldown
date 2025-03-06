@@ -7,6 +7,8 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
+import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
+
 import { MetricsGroupByRow } from './MetricsGroupByRow';
 
 interface MetricsGroupByListState extends SceneObjectState {
@@ -25,17 +27,19 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
       }),
     });
 
-    this.addActivationHandler(this.onActivate.bind(this));
+    this.addActivationHandler(() => {
+      this.onActivate();
+    });
   }
 
-  private onActivate() {
+  private async onActivate() {
     const { labelName } = this.state;
 
-    // TEMP
-    const NAMESPACES = ['flux-system', 'k8s-monitoring', 'oteldemo1', 'oteldemo3', 'oteldemo5'];
+    // TODO: handle loading and errors
+    const labelValues = await this.fetchLabelValues(labelName);
 
     this.state.body.setState({
-      children: NAMESPACES.map(
+      children: labelValues.map(
         (labelValue) =>
           new SceneFlexItem({
             body: new MetricsGroupByRow({
@@ -45,6 +49,17 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
           })
       ),
     });
+  }
+
+  async fetchLabelValues(labelName: string): Promise<string[]> {
+    const ds = await LabelsDataSource.getPrometheusDataSource(this);
+    if (!ds) {
+      return [];
+    }
+
+    const response = await ds.languageProvider.fetchLabelValues(labelName);
+
+    return response;
   }
 
   static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {

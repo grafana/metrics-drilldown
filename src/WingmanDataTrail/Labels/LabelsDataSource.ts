@@ -45,7 +45,7 @@ export class LabelsDataSource extends RuntimeDataSource {
   async metricFindQuery(matcher: string, options: LegacyMetricFindQueryOptions): Promise<MetricFindValue[]> {
     const sceneObject = options.scopedVars?.__sceneObject?.valueOf() as SceneObject;
 
-    const ds = await this.getPrometheusDataSource(sceneObject);
+    const ds = await LabelsDataSource.getPrometheusDataSource(sceneObject);
     if (!ds) {
       return [];
     }
@@ -60,7 +60,7 @@ export class LabelsDataSource extends RuntimeDataSource {
     return [{ value: NULL_GROUP_BY_VALUE, text: '(none)' }, ...labelOptions] as MetricFindValue[];
   }
 
-  async getPrometheusDataSource(sceneObject: SceneObject): Promise<DataSourceApi | undefined> {
+  static async getPrometheusDataSource(sceneObject: SceneObject): Promise<DataSourceApi | undefined> {
     try {
       const dsVariable = sceneGraph.getVariables(sceneObject).getByName('ds') as DataSourceVariable;
       const uid = (dsVariable?.state.value as string) ?? '';
