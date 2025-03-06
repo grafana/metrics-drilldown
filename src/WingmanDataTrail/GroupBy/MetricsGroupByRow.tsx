@@ -28,6 +28,8 @@ interface MetricsGroupByRowState extends SceneObjectState {
   labelValue: string;
   metricsList: string[];
   body?: SceneObject;
+  visibleMetricsCount?: number;
+  paginationCount?: number;
 }
 
 export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
@@ -53,6 +55,8 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       labelValue: state.labelValue || '',
       metricsList: [],
       body: undefined,
+      visibleMetricsCount: state.visibleMetricsCount || 6,
+      paginationCount: state.paginationCount || 9,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -67,7 +71,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const metricsList = filteredMetricsVariable.state.options.map((option) => option.value as string);
 
     this.setState({
-      body: this.buildMetricsBody(metricsList, true),
+      body: this.buildMetricsBody(metricsList, this.state.visibleMetricsCount),
       metricsList,
     });
   }
@@ -91,10 +95,10 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     });
   }
 
-  private buildMetricsBody(metricsList: string[], limit?: boolean): SceneObject {
+  private buildMetricsBody(metricsList: string[], visibleMetricsCount?: number): SceneObject {
     const { labelName, labelValue } = this.state;
 
-    const listLength = limit && metricsList.length >= 5 ? 5 : metricsList.length;
+    const listLength = visibleMetricsCount && metricsList.length >= 6 ? 6 : metricsList.length;
 
     let colorIndex = 0;
 
@@ -103,7 +107,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const panels = panelList.map((metricName) => this.buildPanel(metricName, colorIndex++));
 
     return new SceneCSSGridLayout({
-      key: `${labelName}-${labelValue}-metrics-${limit ? 'limited' : 'all'}`, // Add a different key to force re-render
+      key: `${labelName}-${labelValue}-metrics-${visibleMetricsCount}`, // Add a different key to force re-render
       templateColumns: GRID_TEMPLATE_COLUMNS,
       autoRows: '240px', // will need to fix this at some point
       alignItems: 'start',
