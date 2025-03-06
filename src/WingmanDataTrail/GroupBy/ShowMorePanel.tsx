@@ -4,8 +4,6 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-
 interface ShowMorePanelState extends SceneObjectState {
   onClick?: () => void;
 }
@@ -23,7 +21,7 @@ export class ShowMorePanel extends SceneObjectBase<ShowMorePanelState> {
     const { onClick } = model.state;
 
     return (
-      <div className={styles.panelContainer} onClick={onClick}>
+      <div className={styles.panelContainer} onClick={() => onClick?.()}>
         <div className={styles.content}>
           <div className={styles.showMoreText}>
             Show More&nbsp;<i className="fa fa-caret-down"></i>
@@ -37,7 +35,7 @@ export class ShowMorePanel extends SceneObjectBase<ShowMorePanelState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     panelContainer: css({
-      height: METRICS_VIZ_PANEL_HEIGHT,
+      height: '240px', // fix this in the future
       width: '100%',
       background: theme.colors.background.secondary,
       borderRadius: theme.shape.borderRadius(),

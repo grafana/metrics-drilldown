@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
-import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { ShowMorePanel } from './ShowMorePanel';
 
@@ -75,22 +75,23 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       const showMorePanel = new SceneCSSGridItem({
         body: new ShowMorePanel({
           onClick: () => {
-            // When clicked, toggle to show all metrics
+            console.log('show more panel clicked');
+            // When clicked, show all metrics by creating a new body with limit=false
+            // bug is somewhere here for not re-rendering the body when clicked
+            const newBody = this.buildMetricsBody(false);
             this.setState({
-              body: this.buildMetricsBody(false),
+              body: newBody,
             });
           },
         }),
-        // height property is not supported in SceneCSSGridItemState
-        // Using body's properties to control height instead
       });
       panels.push(showMorePanel);
     }
 
     return new SceneCSSGridLayout({
-      key: groupName + 'metrics',
+      key: `${groupName}-metrics-${limit ? 'limited' : 'all'}`, // Add a different key to force re-render
       templateColumns: GRID_TEMPLATE_COLUMNS,
-      autoRows: METRICS_VIZ_PANEL_HEIGHT,
+      autoRows: '240px', // will need to fix this at some point
       alignItems: 'start',
       isLazy: true,
       children: panels,
@@ -105,20 +106,13 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const [showingMore, setShowingMore] = useState(false);
 
     const handleToggleShowMore = () => {
-      if (showingMore) {
-        // Show less - display only first 3 metrics
-        const newBody = model.buildMetricsBody(true);
-        model.setState({
-          body: newBody,
-        });
-      } else {
-        // Show more - display all metrics
-        const newBody = model.buildMetricsBody();
-        model.setState({
-          body: newBody,
-        });
-      }
       setShowingMore(!showingMore);
+
+      // Create a new body with the appropriate limit based on the new state
+      const newBody = model.buildMetricsBody(showingMore);
+      model.setState({
+        body: newBody,
+      });
     };
 
     return (
@@ -166,9 +160,9 @@ function getStyles(theme: GrafanaTheme2) {
       border: `1px solid ${theme.colors.border.medium}`,
       borderRadius: theme.shape.borderRadius(),
       padding: theme.spacing(2),
-      marginBottom: theme.spacing(2),
       background: theme.colors.background.primary,
       boxShadow: theme.shadows.z1,
+      marginBottom: '32px',
     }),
     row: css({
       marginBottom: '32px',
@@ -191,7 +185,7 @@ function getStyles(theme: GrafanaTheme2) {
     showMoreButton: css({
       display: 'flex',
       justifyContent: 'center',
-      marginTop: '48px',
+      marginTop: '8px',
     }),
     button: css({}),
   };
