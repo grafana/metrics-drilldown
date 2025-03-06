@@ -230,7 +230,7 @@ function getStyles(theme: GrafanaTheme2) {
     buttons: css({
       display: 'flex',
       gap: '8px',
-      marginLeft: 'auto',
+      // marginLeft: 'auto',
     }),
     showMoreButton: css({
       display: 'flex',
