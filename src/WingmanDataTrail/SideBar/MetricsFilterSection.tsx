@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { Checkbox, Field, FieldSet, Icon, Input, Switch, useStyles2 } from '@grafana/ui';
+import { Checkbox, Field, FieldSet, Icon, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
 
 type MetricsFilterSectionProps = {
@@ -11,6 +11,7 @@ type MetricsFilterSectionProps = {
   selectedValues: string[];
   onSearchChange: (value: string) => void;
   onSelectionChange: (values: string[]) => void;
+  loading: boolean;
 };
 
 const CheckboxWithCount = ({
@@ -42,6 +43,7 @@ export function MetricsFilterSection({
   selectedValues,
   onSearchChange,
   onSelectionChange,
+  loading,
 }: MetricsFilterSectionProps) {
   const styles = useStyles2(getStyles);
 
@@ -105,26 +107,48 @@ export function MetricsFilterSection({
             onKeyDown={onKeyDown}
           />
         </Field>
-        <div className={styles.checkboxList}>
-          {filteredList.map((item) => (
-            <Field key={item.value}>
-              <CheckboxWithCount
-                label={item.label}
-                count={item.count}
-                value={item.value}
-                checked={selectedValues.includes(item.value)}
-                onChange={(e) => {
-                  const newValues = e.currentTarget.checked
-                    ? [...selectedValues, item.value]
-                    : selectedValues.filter((v) => v !== item.value);
-                  onSelectionChange(newValues);
-                }}
-              />
-            </Field>
-          ))}
-        </div>
+        {loading && <Spinner inline />}
+        {!loading && (
+          <CheckBoxList
+            filteredList={filteredList}
+            selectedValues={selectedValues}
+            onSelectionChange={onSelectionChange}
+          />
+        )}
       </div>
     </FieldSet>
+  );
+}
+
+function CheckBoxList({
+  filteredList,
+  selectedValues,
+  onSelectionChange,
+}: {
+  filteredList: MetricsFilterSectionProps['items'];
+  selectedValues: MetricsFilterSectionProps['selectedValues'];
+  onSelectionChange: MetricsFilterSectionProps['onSelectionChange'];
+}) {
+  const styles = useStyles2(getStyles);
+  return (
+    <div className={styles.checkboxList}>
+      {filteredList.map((item) => (
+        <Field key={item.value}>
+          <CheckboxWithCount
+            label={item.label}
+            count={item.count}
+            value={item.value}
+            checked={selectedValues.includes(item.value)}
+            onChange={(e) => {
+              const newValues = e.currentTarget.checked
+                ? [...selectedValues, item.value]
+                : selectedValues.filter((v) => v !== item.value);
+              onSelectionChange(newValues);
+            }}
+          />
+        </Field>
+      ))}
+    </div>
   );
 }
 

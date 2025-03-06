@@ -29,6 +29,7 @@ interface SideBarState extends SceneObjectState {
   selectedMetricTypes: string[];
   metricsGroupSearch: string;
   metricsTypeSearch: string;
+  loading: boolean;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -51,7 +52,27 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       selectedMetricTypes: [],
       metricsGroupSearch: '',
       metricsTypeSearch: '',
+      loading: true,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    const filteredMetricsVariable = sceneGraph.lookupVariable(
+      VAR_FILTERED_METRICS_VARIABLE,
+      this
+    ) as FilteredMetricsVariable;
+
+    this._subs.add(
+      filteredMetricsVariable.subscribeToState((newState, prevState) => {
+        if (!prevState.loading && newState.loading) {
+          this.setState({ loading: true });
+        } else if (prevState.loading && !newState.loading) {
+          this.setState({ loading: false });
+        }
+      })
+    );
   }
 
   private updateCounts() {
@@ -75,6 +96,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       metricsTypeSearch,
       prefixGroups,
       categories,
+      loading,
     } = model.useState();
 
     return (
@@ -87,6 +109,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           selectedValues={selectedMetricGroups}
           onSearchChange={(value) => model.setState({ metricsGroupSearch: value })}
           onSelectionChange={(values) => model.setState({ selectedMetricGroups: values })}
+          loading={loading}
         />
 
         <MetricsFilterSection
@@ -97,6 +120,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           selectedValues={selectedMetricTypes}
           onSearchChange={(value) => model.setState({ metricsTypeSearch: value })}
           onSelectionChange={(values) => model.setState({ selectedMetricTypes: values })}
+          loading={loading}
         />
       </div>
     );
