@@ -98,7 +98,8 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   private buildMetricsBody(metricsList: string[], visibleMetricsCount?: number): SceneObject {
     const { labelName, labelValue } = this.state;
 
-    const listLength = visibleMetricsCount && metricsList.length >= 6 ? 6 : metricsList.length;
+    const listLength =
+      visibleMetricsCount && metricsList.length >= visibleMetricsCount ? visibleMetricsCount : metricsList.length;
 
     let colorIndex = 0;
 
@@ -116,21 +117,62 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     });
   }
 
+  /**
+   * Adds more metric panels to the existing body
+   * @param currentCount Current number of visible metrics
+   * @param newCount New number of visible metrics
+   */
+  private addMetricPanels(currentCount: number, newCount: number) {
+    const { metricsList } = this.state;
+
+    // Get the SceneCSSGridLayout body
+    const gridLayout = this.state.body as SceneCSSGridLayout;
+    if (!gridLayout) {
+      return;
+    }
+
+    // Get current children array
+    const currentChildren = [...gridLayout.state.children];
+
+    // Calculate color index to start from (continue from where we left off)
+    let colorIndex = currentCount;
+
+    // Create new panels for the additional metrics
+    const newPanels = metricsList
+      .slice(currentCount, newCount)
+      .map((metricName) => this.buildPanel(metricName, colorIndex++));
+
+    // Add new panels to the existing children
+    const updatedChildren = [...currentChildren, ...newPanels];
+
+    // Update the body's children state
+    gridLayout.setState({
+      children: updatedChildren,
+    });
+  }
+
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const styles = useStyles2(getStyles);
 
-    const { labelName, labelValue, body, metricsList } = model.state;
+    const { labelName, labelValue, body, metricsList, visibleMetricsCount, paginationCount } = model.state;
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [showingMore, setShowingMore] = useState(false);
+    const [currentCount, setCurrentCount] = useState(visibleMetricsCount ?? 6);
+    const [showPagination, setShowPagination] = useState((visibleMetricsCount ?? 6) < metricsList.length);
 
     const handleToggleShowMore = () => {
-      setShowingMore(!showingMore);
+      // Calculate new visible count (current + pagination count, but not exceeding metricsList length)
+      const newCount = Math.min(currentCount + (paginationCount ?? 9), metricsList.length);
 
-      // Create a new body with the appropriate limit based on the new state
-      const newBody = model.buildMetricsBody(metricsList, showingMore);
-      model.setState({
-        body: newBody,
-      });
+      // Add new panels to the existing body
+      model.addMetricPanels(currentCount, newCount);
+
+      // Update current count
+      setCurrentCount(newCount);
+
+      // Hide pagination button if all metrics are now visible
+      if (newCount >= metricsList.length) {
+        setShowPagination(false);
+      }
     };
 
     return (
@@ -150,19 +192,12 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
         <CollapsableSection onToggle={() => setIsCollapsed(!isCollapsed)} label="" isOpen={!isCollapsed}>
           {body && <body.Component model={body} />}
-          {/* Show toggle button if there are more than three metrics */}
-          {metricsList.length > 3 && (
+          {/* Show toggle button if there are more metrics to show */}
+          {showPagination && (
             <div className={styles.showMoreButton}>
               <button className="btn btn-sm btn-secondary" onClick={handleToggleShowMore}>
-                {showingMore ? (
-                  <>
-                    Show Less&nbsp;<i className="fa fa-caret-up"></i>
-                  </>
-                ) : (
-                  <>
-                    Show 9 More (6/{metricsList.length})&nbsp;<i className="fa fa-caret-down"></i>
-                  </>
-                )}
+                Show {Math.min(paginationCount ?? 9, metricsList.length - currentCount)} More ({currentCount}/
+                {metricsList.length})&nbsp;<i className="fa fa-caret-down"></i>
               </button>
             </div>
           )}
