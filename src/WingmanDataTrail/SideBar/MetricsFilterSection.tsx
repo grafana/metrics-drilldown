@@ -5,12 +5,34 @@ import React, { useCallback, useEffect, useState, type KeyboardEvent } from 'rea
 
 type MetricsFilterSectionProps = {
   title: string;
-  items: Array<{ label: string; value: string }>;
+  items: Array<{ label: string; value: string; count: number }>;
   hideEmpty: boolean;
   searchValue: string;
   selectedValues: string[];
   onSearchChange: (value: string) => void;
   onSelectionChange: (values: string[]) => void;
+};
+
+const CheckboxWithCount = ({
+  label,
+  count,
+  value,
+  checked,
+  onChange,
+}: {
+  label: string;
+  count: number;
+  value: string;
+  checked: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
+  const styles = useStyles2(getStyles);
+  return (
+    <div className={styles.checkboxWrapper}>
+      <Checkbox label={label} value={checked} onChange={onChange} />
+      <span className={styles.count}>({count})</span>
+    </div>
+  );
 };
 
 export function MetricsFilterSection({
@@ -53,8 +75,7 @@ export function MetricsFilterSection({
   const filteredList = items.filter((item) => {
     const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
     if (hideEmpty) {
-      const count = parseInt(item.label.match(/\((\d+)\)/)?.[1] ?? '0', 10);
-      return matchesSearch && count > 0;
+      return matchesSearch && item.count > 0;
     }
     return matchesSearch;
   });
@@ -87,9 +108,11 @@ export function MetricsFilterSection({
         <div className={styles.checkboxList}>
           {filteredList.map((item) => (
             <Field key={item.value}>
-              <Checkbox
+              <CheckboxWithCount
                 label={item.label}
-                value={selectedValues.includes(item.value)}
+                count={item.count}
+                value={item.value}
+                checked={selectedValues.includes(item.value)}
                 onChange={(e) => {
                   const newValues = e.currentTarget.checked
                     ? [...selectedValues, item.value]
@@ -159,6 +182,16 @@ function getStyles(theme: GrafanaTheme2) {
     switchLabel: css({
       fontSize: '14px',
       color: theme.colors.text.primary,
+    }),
+    checkboxWrapper: css({
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%',
+    }),
+    count: css({
+      color: theme.colors.text.secondary,
+      marginLeft: theme.spacing(1),
     }),
   };
 }
