@@ -134,11 +134,10 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       gap: theme.spacing(2),
       padding: theme.spacing(1),
-      width: '250px',
+      width: '100%',
       height: '100%',
-      overflow: 'hidden',
-      borderRadius: theme.shape.radius.default,
-      borderRight: `1px solid ${theme.colors.border.weak}`,
+      overflow: 'auto',
+      background: theme.colors.background.primary,
     }),
   };
 }

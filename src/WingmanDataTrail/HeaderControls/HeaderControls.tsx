@@ -29,6 +29,7 @@ export class HeaderControls extends EmbeddedScene {
       body: new SceneFlexLayout({
         direction: 'row',
         maxHeight: '32px',
+        width: '100%',
         children: [
           new SceneFlexItem({
             body: new QuickSearch(),
