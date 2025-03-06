@@ -16,7 +16,10 @@ import React from 'react';
 
 import { getTrailFor } from 'utils';
 import { isCustomVariable } from 'utils/utils.variables';
-import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
+import {
+  FilteredMetricsVariable,
+  VAR_FILTERED_METRICS_VARIABLE,
+} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 
 export const sortingOptions = ['alphabetical', 'reverse-alphabetical', 'dashboard-usage', 'alerting-usage'] as const;
 export type SortingOption = (typeof sortingOptions)[number];
@@ -62,10 +65,10 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
 
   private activationHandler() {
     const sortByVar = sceneGraph.getVariables(this).getByName(VAR_WINGMAN_SORT_BY);
-    const metricsVar = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this);
+    const metricsVar = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this);
 
     // Handle the initial sort when the metrics have loaded
-    if (metricsVar instanceof MetricsVariable) {
+    if (metricsVar instanceof FilteredMetricsVariable) {
       metricsVar.subscribeToState(() => {
         const sortByValue = sortByVar?.getValue() as SortingOption;
         if (!this.initialized && sortByValue) {
@@ -91,10 +94,10 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   private sortMetrics(sortBy: SortingOption): void {
     const trail = getTrailFor(this);
 
-    const metricsVar = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this);
+    const metricsVar = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this);
     const metricsValue = metricsVar?.getValue();
     const metrics = (Array.isArray(metricsValue) ? metricsValue : []) as string[];
-    const validMetricsVariable = metricsVar instanceof MetricsVariable;
+    const validMetricsVariable = metricsVar instanceof FilteredMetricsVariable;
 
     if (!validMetricsVariable || !metrics || metrics.length === 0) {
       return;

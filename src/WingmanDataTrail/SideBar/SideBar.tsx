@@ -1,12 +1,25 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import {
+  sceneGraph,
+  SceneObjectBase,
+  VariableDependencyConfig,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { MetricsFilterSection } from './MetricsFilterSection';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from '../MetricsVariables/FilteredMetricsVariable';
+
+type Options = Array<{ label: string; value: string }>;
 
 interface SideBarState extends SceneObjectState {
+  prefixGroups: Array<{ label: string; value: string; count: number }>;
   hideEmptyGroups: boolean;
   hideEmptyTypes: boolean;
   selectedMetricGroups: string[];
@@ -14,25 +27,6 @@ interface SideBarState extends SceneObjectState {
   metricsGroupSearch: string;
   metricsTypeSearch: string;
 }
-
-const baseMetricGroups = [
-  { label: 'alloy', value: 'alloy', count: 57 },
-  { label: 'apollo', value: 'apollo', count: 0 },
-  { label: 'grafana', value: 'grafana', count: 33 },
-  { label: 'prometheus', value: 'prometheus', count: 45 },
-  { label: 'loki', value: 'loki', count: 0 },
-  { label: 'tempo', value: 'tempo', count: 19 },
-  { label: 'mimir', value: 'mimir', count: 23 },
-  { label: 'cortex', value: 'cortex', count: 0 },
-  { label: 'thanos', value: 'thanos', count: 41 },
-  { label: 'jaeger', value: 'jaeger', count: 25 },
-  { label: 'k8s', value: 'k8s', count: 63 },
-  { label: 'elasticsearch', value: 'elasticsearch', count: 38 },
-  { label: 'redis', value: 'redis', count: 29 },
-  { label: 'postgres', value: 'postgres', count: 52 },
-  { label: 'mongodb', value: 'mongodb', count: 31 },
-  { label: 'kafka', value: 'kafka', count: 47 },
-];
 
 const baseMetricTypes = [
   { label: 'request', value: 'request', count: 12 },
@@ -50,10 +44,20 @@ const baseMetricTypes = [
 ];
 
 export class SideBar extends SceneObjectBase<SideBarState> {
+  private static GROUP_CATCH_ALL = '*';
+
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_FILTERED_METRICS_VARIABLE],
+    onVariableUpdateCompleted: () => {
+      this.updateCounts();
+    },
+  });
+
   constructor(state: Partial<SideBarState>) {
     super({
       ...state,
       key: 'sidebar',
+      prefixGroups: [],
       hideEmptyGroups: true,
       hideEmptyTypes: true,
       selectedMetricGroups: [],
@@ -67,6 +71,47 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   private onActivate() {}
 
+  private updateCounts() {
+    const metricsVariable = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this) as FilteredMetricsVariable;
+
+    const options = metricsVariable.state.options as Options;
+
+    this.setState({ prefixGroups: this.computePrefixGroups(options) });
+  }
+
+  private computePrefixGroups(options: Options) {
+    const rawPrefixesMap = new Map();
+
+    for (const option of options) {
+      const [sep] = option.value.match(/[^a-z0-9]/i) || [];
+
+      if (!sep) {
+        rawPrefixesMap.set(SideBar.GROUP_CATCH_ALL, (rawPrefixesMap.get(SideBar.GROUP_CATCH_ALL) ?? 0) + 1);
+      } else {
+        const [prefix] = option.value.split(sep);
+        rawPrefixesMap.set(prefix, (rawPrefixesMap.get(prefix) ?? 0) + 1);
+      }
+    }
+
+    const prefixesMap = new Map([[SideBar.GROUP_CATCH_ALL, 0]]);
+
+    for (const [prefix, count] of rawPrefixesMap) {
+      if (count === 1) {
+        prefixesMap.set(SideBar.GROUP_CATCH_ALL, (prefixesMap.get(SideBar.GROUP_CATCH_ALL) ?? 0) + 1);
+      } else {
+        prefixesMap.set(prefix, count);
+      }
+    }
+
+    return Array.from(prefixesMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({
+        label,
+        value: label,
+        count,
+      }));
+  }
+
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
     const {
@@ -76,13 +121,14 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       selectedMetricTypes,
       metricsGroupSearch,
       metricsTypeSearch,
+      prefixGroups,
     } = model.useState();
 
     return (
       <div className={styles.sidebar}>
         <MetricsFilterSection
           title="Metrics group"
-          items={baseMetricGroups}
+          items={prefixGroups}
           hideEmpty={hideEmptyGroups}
           searchValue={metricsGroupSearch}
           selectedValues={selectedMetricGroups}

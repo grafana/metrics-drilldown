@@ -17,11 +17,11 @@ import React from 'react';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
 import { EventApplyFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventApplyFunction';
 import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigureFunction';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
 import {
   METRICS_VIZ_PANEL_HEIGHT,
   METRICS_VIZ_PANEL_HEIGHT_SMALL,
@@ -44,7 +44,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     super({
       key: 'simple-metrics-list',
       body: new SceneByVariableRepeater({
-        variableName: VAR_METRICS_VARIABLE,
+        variableName: VAR_FILTERED_METRICS_VARIABLE,
         body: new SceneCSSGridLayout({
           children: [],
           templateColumns: GRID_TEMPLATE_COLUMNS,

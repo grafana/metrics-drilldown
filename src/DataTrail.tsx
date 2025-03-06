@@ -31,7 +31,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
-import { MetricsVariable } from 'WingmanDataTrail/MetricVizPanel/MetricsVariable';
+import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -735,7 +735,7 @@ function getVariableSet(
         placeholder: 'Select',
         isMulti: true,
       }),
-      new MetricsVariable(),
+      new FilteredMetricsVariable(),
     ],
   });
 }

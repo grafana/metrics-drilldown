@@ -157,7 +157,7 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     rowContainer: css({
       border: `1px solid ${theme.colors.border.medium}`,
-      borderRadius: theme.shape.borderRadius(),
+      borderRadius: theme.shape.radius.default,
       padding: theme.spacing(2),
       background: theme.colors.background.primary,
       boxShadow: theme.shadows.z1,
