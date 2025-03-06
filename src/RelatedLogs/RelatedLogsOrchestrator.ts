@@ -41,7 +41,7 @@ export class RelatedLogsOrchestrator {
     const currentDataSourcesSignature = this._internalState.lokiDataSources.map((ds) => ds.uid).join(',');
     const newDataSourcesSignature = dataSources.map((ds) => ds.uid).join(',');
 
-    if (currentDataSourcesSignature === newDataSourcesSignature) {
+    if (currentDataSourcesSignature && currentDataSourcesSignature === newDataSourcesSignature) {
       return;
     }
 
