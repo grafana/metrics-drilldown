@@ -9,14 +9,12 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Button, CollapsableSection, useStyles2 } from '@grafana/ui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import { MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-
-import { ShowMorePanel } from './ShowMorePanel';
 
 // Add new component interface
 interface MetricsGroupByRowState extends SceneObjectState {
@@ -24,6 +22,8 @@ interface MetricsGroupByRowState extends SceneObjectState {
   groupType: string;
   metricsList: string[];
   body?: SceneObject;
+  visibleMetricsCount?: number;
+  paginationCount?: number;
 }
 
 export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
@@ -35,6 +35,8 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       groupType: state.groupType || '',
       metricsList: state.metricsList || [],
       body: undefined,
+      visibleMetricsCount: state.visibleMetricsCount || 6,
+      paginationCount: state.paginationCount || 9,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -42,14 +44,17 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
   private onActivate() {
     this.setState({
-      body: this.buildMetricsBody(true),
+      body: this.buildMetricsBody(this.state.visibleMetricsCount),
     });
   }
 
-  private buildMetricsBody(limit?: boolean): SceneObject {
+  private buildMetricsBody(visibleMetricsCount?: number): SceneObject {
     const { groupName, metricsList } = this.state;
 
-    const listLength = limit && metricsList.length >= 6 ? 6 : metricsList.length;
+    const listLength =
+      visibleMetricsCount && metricsList.length >= (visibleMetricsCount ?? 6)
+        ? visibleMetricsCount ?? 6
+        : metricsList.length;
 
     let colorIndex = 0;
 
@@ -70,7 +75,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     );
 
     return new SceneCSSGridLayout({
-      key: `${groupName}-metrics-${limit ? 'limited' : 'all'}`, // Add a different key to force re-render
+      key: `${groupName}-metrics-${visibleMetricsCount ? 'limited' : 'all'}`, // Add a different key to force re-render
       templateColumns: GRID_TEMPLATE_COLUMNS,
       autoRows: '240px', // will need to fix this at some point
       alignItems: 'start',
@@ -81,24 +86,45 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const styles = useStyles2(getStyles);
+    const { groupName, groupType, body, metricsList, paginationCount } = model.state;
 
-    const { groupName, groupType, body, metricsList } = model.state;
+    // Get visibleMetricsCount directly from model.state each time to ensure fresh value
+    const visibleMetricsCount = model.state.visibleMetricsCount;
+
+    // Use local state to force re-renders
+    const [showCount, setShowCount] = useState(visibleMetricsCount);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [showingMore, setShowingMore] = useState(false);
+
+    // Update local state when model state changes
+    useEffect(() => {
+      setShowCount(model.state.visibleMetricsCount);
+    }, [model.state.visibleMetricsCount]);
+
+    const haveMoreToShow = showCount && showCount < metricsList.length;
 
     const handleToggleShowMore = () => {
-      setShowingMore(!showingMore);
+      console.log('Before: visibleMetricsCount =', model.state.visibleMetricsCount);
 
-      // Create a new body with the appropriate limit based on the new state
-      const newBody = model.buildMetricsBody(showingMore);
+      // Calculate new count
+      const newCount = (model.state.visibleMetricsCount ?? 6) + (paginationCount ?? 9);
+      console.log('Calculated newCount =', newCount);
+
+      const newBody = model.buildMetricsBody(newCount);
+
+      // Update the model state and force local update
       model.setState({
         body: newBody,
+        visibleMetricsCount: newCount,
       });
+
+      // Also update local state to ensure re-render
+      setShowCount(newCount);
+
+      console.log('After setState: visibleMetricsCount =', model.state.visibleMetricsCount);
     };
 
     return (
       <div className={styles.rowContainer}>
-        {/* for a custom label with buttons on the right, had to hack this above the collapsable section */}
         <div className={styles.container}>
           <span className={styles.groupName}>{`${groupName} ${groupType} (${metricsList.length})`}</span>
           <div className={styles.buttons}>
@@ -113,15 +139,10 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
         <CollapsableSection onToggle={() => setIsCollapsed(!isCollapsed)} label="" isOpen={!isCollapsed}>
           {body && <body.Component model={body} />}
-          {/* Show toggle button if there are more than three metrics */}
-          {metricsList.length > 6 && (
+          {metricsList.length > (visibleMetricsCount ?? 6) && (
             <div className={styles.showMoreButton}>
               <button className="btn btn-sm btn-secondary" onClick={handleToggleShowMore}>
-                {showingMore ? (
-                  <>
-                    Show Less&nbsp;<i className="fa fa-caret-up"></i>
-                  </>
-                ) : (
+                {haveMoreToShow && (
                   <>
                     Show More&nbsp;<i className="fa fa-caret-down"></i>
                   </>
