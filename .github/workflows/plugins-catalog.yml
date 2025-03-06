@@ -50,7 +50,6 @@ jobs:
         id: get-secrets
         uses: grafana/shared-workflows/actions/get-vault-secrets@main
         with:
-          vault_instance: ops
           common_secrets: |
             GCOM_PUBLISH_TOKEN=plugins/gcom-publish-token:${{ inputs.environment }}
             GCS_PLUGIN_PUBLISHER_SERVICE_ACCOUNT_JSON=gcs_plugin_publisher_service_account_json:value
