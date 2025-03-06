@@ -6,6 +6,7 @@ import { type MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { type MetricScene } from '../MetricScene';
+import pluginJson from '../plugin.json';
 
 type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
@@ -123,6 +124,7 @@ export class RelatedLogsOrchestrator {
       refId: `RelatedLogs-${connectorName}`,
       expr: queriesByConnector[connectorName],
       maxLines,
+      supportingQueryType: pluginJson.id,
     }));
 
     return queries;
