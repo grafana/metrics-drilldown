@@ -11,10 +11,6 @@ on:
           - ops
           - prod
 
-permissions:
-  contents: 'read'
-  id-token: 'write'
-
 jobs:
   validate-ref:
     name: Validate Git Reference
@@ -43,6 +39,9 @@ jobs:
     if: needs.validate-ref.outputs.is_valid_tag == 'true'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - uses: actions/checkout@v4
 
@@ -52,6 +51,7 @@ jobs:
         with:
           common_secrets: |
             GCOM_PUBLISH_TOKEN=plugins/gcom-publish-token:${{ inputs.environment }}
+          repo_secrets: |
             GCS_PLUGIN_PUBLISHER_SERVICE_ACCOUNT_JSON=gcs_plugin_publisher_service_account_json:value
 
       - name: Login to GCS
