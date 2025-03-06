@@ -70,7 +70,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         className={styles.container}
         style={{
           height: `calc(100vh - ${chromeHeaderHeight}px)`,
-          marginTop: `${chromeHeaderHeight}px`,
         }}
       >
         <div className={styles.headerControls}>
