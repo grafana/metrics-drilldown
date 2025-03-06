@@ -182,9 +182,6 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           <span className={styles.groupName}>{`${labelName}: ${labelValue}`}</span>
           <div className={styles.buttons}>
             <Button variant="secondary" fill="outline" className={styles.button}>
-              Include
-            </Button>
-            <Button variant="secondary" fill="outline" className={styles.button}>
               Exclude
             </Button>
           </div>
