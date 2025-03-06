@@ -6,6 +6,11 @@
 provisioning/datasources/
 !provisioning/datasources/default.yaml
 
+# Local prometheus config files
+config/prometheus.*.yaml
+!config/prometheus.3000.yaml
+!config/prometheus.3001.yaml
+
 # Logs
 logs
 !src/**/logs
