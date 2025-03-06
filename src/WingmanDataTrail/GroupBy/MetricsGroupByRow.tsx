@@ -72,6 +72,25 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     });
   }
 
+  /**
+   * Builds a panel for a metric with usage stats
+   * @param metricName
+   * @param colorIndex
+   * @returns
+   */
+  private buildPanel(metricName: string, colorIndex: number) {
+    return new SceneCSSGridItem({
+      body: new WithUsageDataPreviewPanel({
+        vizPanelInGridItem: new MetricVizPanel({
+          metricName,
+          color: getColorByIndex(colorIndex++),
+          groupByLabel: undefined,
+        }),
+        metric: metricName,
+      }),
+    });
+  }
+
   private buildMetricsBody(metricsList: string[], limit?: boolean): SceneObject {
     const { labelName, labelValue } = this.state;
 
@@ -81,19 +100,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
     const panelList = metricsList.slice(0, listLength);
 
-    const panels = panelList.map(
-      (metricName) =>
-        new SceneCSSGridItem({
-          body: new WithUsageDataPreviewPanel({
-            vizPanelInGridItem: new MetricVizPanel({
-              metricName,
-              color: getColorByIndex(colorIndex++),
-              groupByLabel: undefined,
-            }),
-            metric: metricName,
-          }),
-        })
-    );
+    const panels = panelList.map((metricName) => this.buildPanel(metricName, colorIndex++));
 
     return new SceneCSSGridLayout({
       key: `${labelName}-${labelValue}-metrics-${limit ? 'limited' : 'all'}`, // Add a different key to force re-render
