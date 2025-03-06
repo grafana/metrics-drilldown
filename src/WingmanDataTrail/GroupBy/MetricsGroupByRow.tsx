@@ -225,7 +225,7 @@ function getStyles(theme: GrafanaTheme2) {
       marginBottom: '-36px',
     }),
     groupName: css({
-      fontSize: '22px',
+      fontSize: '18px',
     }),
     buttons: css({
       display: 'flex',
