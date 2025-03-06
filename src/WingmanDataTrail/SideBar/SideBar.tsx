@@ -10,6 +10,9 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
+import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
+
 import { MetricsFilterSection } from './MetricsFilterSection';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
@@ -20,6 +23,7 @@ type Options = Array<{ label: string; value: string }>;
 
 interface SideBarState extends SceneObjectState {
   prefixGroups: Array<{ label: string; value: string; count: number }>;
+  categories: Array<{ label: string; value: string; count: number }>;
   hideEmptyGroups: boolean;
   hideEmptyTypes: boolean;
   selectedMetricGroups: string[];
@@ -28,24 +32,7 @@ interface SideBarState extends SceneObjectState {
   metricsTypeSearch: string;
 }
 
-const baseMetricTypes = [
-  { label: 'request', value: 'request', count: 12 },
-  { label: 'response', value: 'response', count: 0 },
-  { label: 'duration', value: 'duration', count: 7 },
-  { label: 'total', value: 'total', count: 0 },
-  { label: 'latency', value: 'latency', count: 8 },
-  { label: 'errors', value: 'errors', count: 5 },
-  { label: 'bytes', value: 'bytes', count: 0 },
-  { label: 'connections', value: 'connections', count: 6 },
-  { label: 'memory', value: 'memory', count: 4 },
-  { label: 'cpu', value: 'cpu', count: 9 },
-  { label: 'disk', value: 'disk', count: 5 },
-  { label: 'network', value: 'network', count: 7 },
-];
-
 export class SideBar extends SceneObjectBase<SideBarState> {
-  private static GROUP_CATCH_ALL = '*';
-
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERED_METRICS_VARIABLE],
     onVariableUpdateCompleted: () => {
@@ -58,6 +45,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       ...state,
       key: 'sidebar',
       prefixGroups: [],
+      categories: [],
       hideEmptyGroups: true,
       hideEmptyTypes: true,
       selectedMetricGroups: [],
@@ -65,51 +53,17 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       metricsGroupSearch: '',
       metricsTypeSearch: '',
     });
-
-    this.addActivationHandler(this.onActivate.bind(this));
   }
-
-  private onActivate() {}
 
   private updateCounts() {
     const metricsVariable = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this) as FilteredMetricsVariable;
 
     const options = metricsVariable.state.options as Options;
 
-    this.setState({ prefixGroups: this.computePrefixGroups(options) });
-  }
-
-  private computePrefixGroups(options: Options) {
-    const rawPrefixesMap = new Map();
-
-    for (const option of options) {
-      const [sep] = option.value.match(/[^a-z0-9]/i) || [];
-
-      if (!sep) {
-        rawPrefixesMap.set(SideBar.GROUP_CATCH_ALL, (rawPrefixesMap.get(SideBar.GROUP_CATCH_ALL) ?? 0) + 1);
-      } else {
-        const [prefix] = option.value.split(sep);
-        rawPrefixesMap.set(prefix, (rawPrefixesMap.get(prefix) ?? 0) + 1);
-      }
-    }
-
-    const prefixesMap = new Map([[SideBar.GROUP_CATCH_ALL, 0]]);
-
-    for (const [prefix, count] of rawPrefixesMap) {
-      if (count === 1) {
-        prefixesMap.set(SideBar.GROUP_CATCH_ALL, (prefixesMap.get(SideBar.GROUP_CATCH_ALL) ?? 0) + 1);
-      } else {
-        prefixesMap.set(prefix, count);
-      }
-    }
-
-    return Array.from(prefixesMap.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, count]) => ({
-        label,
-        value: label,
-        count,
-      }));
+    this.setState({
+      prefixGroups: computeMetricPrefixGroups(options),
+      categories: computeMetricCategories(options),
+    });
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
@@ -122,12 +76,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       metricsGroupSearch,
       metricsTypeSearch,
       prefixGroups,
+      categories,
     } = model.useState();
 
     return (
       <div className={styles.sidebar}>
         <MetricsFilterSection
-          title="Metrics group"
+          title="Metric groups"
           items={prefixGroups}
           hideEmpty={hideEmptyGroups}
           searchValue={metricsGroupSearch}
@@ -137,8 +92,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         />
 
         <MetricsFilterSection
-          title="Metrics types"
-          items={baseMetricTypes}
+          title="Metric categories"
+          items={categories}
           hideEmpty={hideEmptyTypes}
           searchValue={metricsTypeSearch}
           selectedValues={selectedMetricTypes}
