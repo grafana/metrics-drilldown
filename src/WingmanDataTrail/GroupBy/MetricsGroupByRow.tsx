@@ -3,7 +3,9 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import {
   SceneCSSGridItem,
   SceneCSSGridLayout,
+  sceneGraph,
   SceneObjectBase,
+  VariableDependencyConfig,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
@@ -14,26 +16,43 @@ import React, { useState } from 'react';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-
-import { ShowMorePanel } from './ShowMorePanel';
 
 // Add new component interface
 interface MetricsGroupByRowState extends SceneObjectState {
-  groupName: string;
-  groupType: string;
+  labelName: string;
+  labelValue: string;
   metricsList: string[];
   body?: SceneObject;
 }
 
 export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_FILTERED_METRICS_VARIABLE],
+    onVariableUpdateCompleted: () => {
+      const filteredMetricsVariable = sceneGraph.lookupVariable(
+        VAR_FILTERED_METRICS_VARIABLE,
+        this
+      ) as FilteredMetricsVariable;
+
+      console.log('*** onVariableUpdateCompleted', filteredMetricsVariable.state);
+      this.setState({
+        metricsList: filteredMetricsVariable.state.options.map((option) => option.value as string),
+      });
+    },
+  });
+
   public constructor(state: Partial<MetricsGroupByRowState>) {
     super({
       ...state,
-      key: `${state.groupName || ''}-${state.groupType || ''}`,
-      groupName: state.groupName || '',
-      groupType: state.groupType || '',
-      metricsList: state.metricsList || [],
+      key: `${state.labelName || ''}-${state.labelValue || ''}`,
+      labelName: state.labelName || '',
+      labelValue: state.labelValue || '',
+      metricsList: [],
       body: undefined,
     });
 
@@ -41,13 +60,21 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   }
 
   private onActivate() {
+    const filteredMetricsVariable = sceneGraph.lookupVariable(
+      VAR_FILTERED_METRICS_VARIABLE,
+      this
+    ) as FilteredMetricsVariable;
+
+    const metricsList = filteredMetricsVariable.state.options.map((option) => option.value as string);
+
     this.setState({
-      body: this.buildMetricsBody(true),
+      body: this.buildMetricsBody(metricsList, true),
+      metricsList,
     });
   }
 
-  private buildMetricsBody(limit?: boolean): SceneObject {
-    const { groupName, metricsList } = this.state;
+  private buildMetricsBody(metricsList: string[], limit?: boolean): SceneObject {
+    const { labelName, labelValue } = this.state;
 
     const listLength = limit && metricsList.length >= 5 ? 5 : metricsList.length;
 
@@ -69,26 +96,8 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         })
     );
 
-    if (limit && metricsList.length > 5) {
-      // Create a ShowMorePanel that matches the size of the metric panels
-      const showMorePanel = new SceneCSSGridItem({
-        body: new ShowMorePanel({
-          onClick: () => {
-            console.log('show more panel clicked');
-            // When clicked, show all metrics by creating a new body with limit=false
-            // bug is somewhere here for not re-rendering the body when clicked
-            const newBody = this.buildMetricsBody(false);
-            this.setState({
-              body: newBody,
-            });
-          },
-        }),
-      });
-      panels.push(showMorePanel);
-    }
-
     return new SceneCSSGridLayout({
-      key: `${groupName}-metrics-${limit ? 'limited' : 'all'}`, // Add a different key to force re-render
+      key: `${labelName}-${labelValue}-metrics-${limit ? 'limited' : 'all'}`, // Add a different key to force re-render
       templateColumns: GRID_TEMPLATE_COLUMNS,
       autoRows: '240px', // will need to fix this at some point
       alignItems: 'start',
@@ -100,7 +109,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const styles = useStyles2(getStyles);
 
-    const { groupName, groupType, body, metricsList } = model.state;
+    const { labelName, labelValue, body, metricsList } = model.state;
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [showingMore, setShowingMore] = useState(false);
 
@@ -108,7 +117,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       setShowingMore(!showingMore);
 
       // Create a new body with the appropriate limit based on the new state
-      const newBody = model.buildMetricsBody(showingMore);
+      const newBody = model.buildMetricsBody(metricsList, showingMore);
       model.setState({
         body: newBody,
       });
@@ -118,7 +127,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       <div className={styles.rowContainer}>
         {/* for a custom label with buttons on the right, had to hack this above the collapsable section */}
         <div className={styles.container}>
-          <span className={styles.groupName}>{`${groupName} ${groupType} (${metricsList.length})`}</span>
+          <span className={styles.groupName}>{`${labelName}: ${labelValue}`}</span>
           <div className={styles.buttons}>
             <Button variant="secondary" fill="outline" className={styles.button}>
               Include
@@ -141,7 +150,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                   </>
                 ) : (
                   <>
-                    Show More&nbsp;<i className="fa fa-caret-down"></i>
+                    Show 9 More (6/{metricsList.length})&nbsp;<i className="fa fa-caret-down"></i>
                   </>
                 )}
               </button>
