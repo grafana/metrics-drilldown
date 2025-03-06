@@ -40,7 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
-      # Required for updating the catalog to retrieve the name of the repository
       - uses: actions/checkout@v4
 
       - name: Get secrets from Vault
