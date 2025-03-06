@@ -3,7 +3,7 @@ import { QueryVariable, type SceneObjectState } from '@grafana/scenes';
 
 import { trailDS, VAR_FILTERS } from 'shared';
 
-const VAR_METRICS_VARIABLE = 'metrics-wingman';
+export const VAR_METRICS_VARIABLE = 'metrics-wingman';
 
 interface MetricsVariableState extends SceneObjectState {
   name?: string;

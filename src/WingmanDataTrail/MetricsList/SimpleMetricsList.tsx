@@ -11,13 +11,16 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { DashboardCursorSync } from '@grafana/schema';
-import { useStyles2 } from '@grafana/ui';
+import { Alert, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
-import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
 import { EventApplyFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventApplyFunction';
@@ -158,6 +161,30 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
   public static Component = ({ model }: SceneComponentProps<SimpleMetricsList>) => {
     const styles = useStyles2(getStyles);
     const { body, drawer } = model.useState();
+
+    const variable = sceneGraph.lookupVariable(body.state.variableName, model) as FilteredMetricsVariable;
+    const { loading, error, options } = variable.useState();
+
+    if (loading) {
+      return <Spinner inline />;
+    }
+
+    if (error) {
+      return (
+        <Alert severity="error" title="Error while loading metrics!">
+          <p>&quot;{error.message || error.toString()}&quot;</p>
+          <p>Please try to reload the page. Sorry for the inconvenience.</p>
+        </Alert>
+      );
+    }
+
+    if (!options?.length) {
+      return (
+        <Alert title="" severity="info">
+          No metrics found for the current filters and time range.
+        </Alert>
+      );
+    }
 
     return (
       <div className={styles.container}>
