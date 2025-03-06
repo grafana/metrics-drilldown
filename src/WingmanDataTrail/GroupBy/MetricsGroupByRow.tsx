@@ -192,10 +192,10 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           {/* Show toggle button if there are more metrics to show */}
           {showPagination && (
             <div className={styles.showMoreButton}>
-              <button className="btn btn-sm btn-secondary" onClick={handleToggleShowMore}>
+              <Button variant="secondary" fill="outline" onClick={handleToggleShowMore}>
                 Show {Math.min(paginationCount ?? 9, metricsList.length - currentCount)} More ({currentCount}/
                 {metricsList.length})&nbsp;<i className="fa fa-caret-down"></i>
-              </button>
+              </Button>
             </div>
           )}
         </CollapsableSection>
@@ -212,7 +212,7 @@ function getStyles(theme: GrafanaTheme2) {
       padding: theme.spacing(2),
       background: theme.colors.background.primary,
       boxShadow: theme.shadows.z1,
-      marginBottom: '32px',
+      marginBottom: '16px',
     }),
     row: css({
       marginBottom: '32px',
@@ -230,12 +230,11 @@ function getStyles(theme: GrafanaTheme2) {
     buttons: css({
       display: 'flex',
       gap: '8px',
-      // marginLeft: 'auto',
+      marginLeft: 'auto',
     }),
     showMoreButton: css({
       display: 'flex',
-      justifyContent: 'center',
-      marginTop: '8px',
+      marginTop: '16px',
     }),
     button: css({}),
   };
