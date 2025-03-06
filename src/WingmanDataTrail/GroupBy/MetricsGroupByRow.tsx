@@ -49,7 +49,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   private buildMetricsBody(limit?: boolean): SceneObject {
     const { groupName, metricsList } = this.state;
 
-    const listLength = limit && metricsList.length >= 5 ? 5 : metricsList.length;
+    const listLength = limit && metricsList.length >= 6 ? 6 : metricsList.length;
 
     let colorIndex = 0;
 
@@ -68,24 +68,6 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           }),
         })
     );
-
-    if (limit && metricsList.length > 5) {
-      // Create a ShowMorePanel that matches the size of the metric panels
-      const showMorePanel = new SceneCSSGridItem({
-        body: new ShowMorePanel({
-          onClick: () => {
-            console.log('show more panel clicked');
-            // When clicked, show all metrics by creating a new body with limit=false
-            // bug is somewhere here for not re-rendering the body when clicked
-            const newBody = this.buildMetricsBody(false);
-            this.setState({
-              body: newBody,
-            });
-          },
-        }),
-      });
-      panels.push(showMorePanel);
-    }
 
     return new SceneCSSGridLayout({
       key: `${groupName}-metrics-${limit ? 'limited' : 'all'}`, // Add a different key to force re-render
@@ -132,7 +114,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         <CollapsableSection onToggle={() => setIsCollapsed(!isCollapsed)} label="" isOpen={!isCollapsed}>
           {body && <body.Component model={body} />}
           {/* Show toggle button if there are more than three metrics */}
-          {metricsList.length > 3 && (
+          {metricsList.length > 6 && (
             <div className={styles.showMoreButton}>
               <button className="btn btn-sm btn-secondary" onClick={handleToggleShowMore}>
                 {showingMore ? (
