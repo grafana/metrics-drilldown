@@ -11,10 +11,6 @@ on:
           - ops
           - prod
 
-permissions:
-  contents: 'read'
-  id-token: 'write'
-
 jobs:
   validate-ref:
     name: Validate Git Reference
@@ -22,6 +18,9 @@ jobs:
     outputs:
       is_valid_tag: ${{ steps.check-tag.outputs.is_valid_tag }}
       tag_version: ${{ steps.check-tag.outputs.tag_version }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Check if running on a valid tag
         id: check-tag
@@ -52,6 +51,7 @@ jobs:
         with:
           common_secrets: |
             GCOM_PUBLISH_TOKEN=plugins/gcom-publish-token:${{ inputs.environment }}
+          repo_secrets: |
             GCS_PLUGIN_PUBLISHER_SERVICE_ACCOUNT_JSON=gcs_plugin_publisher_service_account_json:value
 
       - name: Login to GCS
