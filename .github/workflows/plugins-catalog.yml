@@ -11,6 +11,10 @@ on:
           - ops
           - prod
 
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
 jobs:
   validate-ref:
     name: Validate Git Reference
