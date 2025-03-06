@@ -17,9 +17,8 @@ import { MetricsFilterSection } from './MetricsFilterSection';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
+  type MetricOptions,
 } from '../MetricsVariables/FilteredMetricsVariable';
-
-type Options = Array<{ label: string; value: string }>;
 
 interface SideBarState extends SceneObjectState {
   prefixGroups: Array<{ label: string; value: string; count: number }>;
@@ -57,8 +56,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   private updateCounts() {
     const metricsVariable = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this) as FilteredMetricsVariable;
-
-    const options = metricsVariable.state.options as Options;
+    const options = metricsVariable.state.options as MetricOptions;
 
     this.setState({
       prefixGroups: computeMetricPrefixGroups(options),
