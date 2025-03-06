@@ -77,7 +77,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     this.setState({
       body: !groupBy
         ? (new SimpleMetricsList() as unknown as SceneObjectBase)
-        : (new MetricsGroupByList() as unknown as SceneObjectBase),
+        : (new MetricsGroupByList({ labelName: 'namespace' }) as unknown as SceneObjectBase),
     });
   }
 

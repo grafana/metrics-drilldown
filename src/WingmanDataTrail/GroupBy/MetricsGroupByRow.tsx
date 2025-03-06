@@ -39,7 +39,6 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         this
       ) as FilteredMetricsVariable;
 
-      console.log('*** onVariableUpdateCompleted', filteredMetricsVariable.state);
       this.setState({
         metricsList: filteredMetricsVariable.state.options.map((option) => option.value as string),
       });

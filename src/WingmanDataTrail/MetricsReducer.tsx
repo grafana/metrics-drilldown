@@ -1,6 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
+  sceneGraph,
   SceneObjectBase,
   VariableDependencyConfig,
   type SceneComponentProps,
@@ -21,7 +22,6 @@ interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
   sidebar: SideBar;
   body: SceneObjectBase;
-  groupBy: string;
 }
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
@@ -35,21 +35,27 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       headerControls: new HeaderControls({}),
-      groupBy: 'cluster',
       sidebar: new SideBar({}),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
     });
 
     registerRuntimeDataSources();
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
+
+    this.updateBodyBasedOnGroupBy(labelsVariable.state.value as string);
   }
 
   private updateBodyBasedOnGroupBy(groupByValue: string) {
     this.setState({
-      groupBy: groupByValue,
       body:
         !groupByValue || groupByValue === NULL_GROUP_BY_VALUE
           ? (new SimpleMetricsList() as unknown as SceneObjectBase)
-          : (new MetricsGroupByList() as unknown as SceneObjectBase),
+          : (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase),
     });
   }
 

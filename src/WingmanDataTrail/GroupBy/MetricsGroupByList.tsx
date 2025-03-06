@@ -1,20 +1,24 @@
 import {
-  EmbeddedScene,
   SceneFlexItem,
   SceneFlexLayout,
-  type SceneCSSGridItem,
-  type SceneObject,
+  SceneObjectBase,
+  type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
+import React from 'react';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
 
-const NAMESPACES = ['flux-system', 'k8s-monitoring', 'oteldemo1', 'oteldemo3', 'oteldemo5'];
+interface MetricsGroupByListState extends SceneObjectState {
+  body: SceneFlexLayout;
+  labelName: string;
+}
 
-export class MetricsGroupByList extends EmbeddedScene {
-  constructor() {
+export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
+  constructor({ labelName }: { labelName: string }) {
     super({
       key: 'metrics-group-list',
+      labelName,
       body: new SceneFlexLayout({
         direction: 'column',
         children: [],
@@ -25,20 +29,27 @@ export class MetricsGroupByList extends EmbeddedScene {
   }
 
   private onActivate() {
-    const children: Array<SceneObject<SceneObjectState> | SceneCSSGridItem> = [];
-    for (const labelValue of NAMESPACES) {
-      children.push(
-        new SceneFlexItem({
-          body: new MetricsGroupByRow({
-            labelName: 'namespace',
-            labelValue,
-          }),
-        })
-      );
-    }
+    const { labelName } = this.state;
 
-    (this.state.body as SceneFlexLayout).setState({
-      children,
+    // TEMP
+    const NAMESPACES = ['flux-system', 'k8s-monitoring', 'oteldemo1', 'oteldemo3', 'oteldemo5'];
+
+    this.state.body.setState({
+      children: NAMESPACES.map(
+        (labelValue) =>
+          new SceneFlexItem({
+            body: new MetricsGroupByRow({
+              labelName,
+              labelValue,
+            }),
+          })
+      ),
     });
   }
+
+  static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
+    const { body } = model.state;
+
+    return <body.Component model={body} />;
+  };
 }
