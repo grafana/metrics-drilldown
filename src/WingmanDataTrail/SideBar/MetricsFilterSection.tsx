@@ -1,15 +1,13 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { Checkbox, Field, FieldSet, Icon, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
-import React, { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
+import React, { useState, type KeyboardEvent } from 'react';
 
 type MetricsFilterSectionProps = {
   title: string;
   items: Array<{ label: string; value: string; count: number }>;
   hideEmpty: boolean;
-  searchValue: string;
   selectedValues: string[];
-  onSearchChange: (value: string) => void;
   onSelectionChange: (values: string[]) => void;
   loading: boolean;
 };
@@ -42,41 +40,15 @@ const CheckboxWithCount = ({
 export function MetricsFilterSection({
   title,
   items,
-  searchValue,
   selectedValues,
-  onSearchChange,
   onSelectionChange,
   loading,
 }: MetricsFilterSectionProps) {
   const styles = useStyles2(getStyles);
 
-  // Local state for immediate input value
-  const [inputValue, setInputValue] = useState(searchValue);
   const [hideEmpty, setHideEmpty] = useState(true);
+  const [searchValue, setSearchValue] = useState('');
 
-  // Add debounced search
-  const debouncedSearch = useCallback(
-    (value: string) => {
-      const timeoutId = setTimeout(() => {
-        onSearchChange(value);
-      }, 250);
-      return () => clearTimeout(timeoutId);
-    },
-    [onSearchChange]
-  );
-
-  // Update debounced search when input changes
-  useEffect(() => {
-    const cleanup = debouncedSearch(inputValue);
-    return cleanup;
-  }, [inputValue, debouncedSearch]);
-
-  // Update local input when searchValue prop changes
-  useEffect(() => {
-    setInputValue(searchValue);
-  }, [searchValue]);
-
-  // Remove the "All" option - just use the items directly
   const filteredList = items.filter((item) => {
     const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
     if (hideEmpty) {
@@ -88,30 +60,28 @@ export function MetricsFilterSection({
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       e.preventDefault();
-      setInputValue('');
+      setSearchValue('');
     }
   };
 
   return (
     <FieldSet label={title} className={styles.fieldSetTitle}>
       <div className={styles.fieldSetContent}>
-        <div className={styles.controlsRow}>
-          <Field className={styles.field}>
-            <div className={styles.switchContainer}>
-              <span className={styles.switchLabel}>Hide empty</span>
-              <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
-            </div>
-          </Field>
-          <Field className={styles.field}>
-            <Input
-              prefix={<Icon name="search" />}
-              placeholder="Search..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.currentTarget.value)}
-              onKeyDown={onKeyDown}
-            />
-          </Field>
-        </div>
+        <Field>
+          <div className={styles.switchContainer}>
+            <span className={styles.switchLabel}>Hide empty</span>
+            <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
+          </div>
+        </Field>
+        <Field>
+          <Input
+            prefix={<Icon name="search" />}
+            placeholder="Search..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.currentTarget.value)}
+            onKeyDown={onKeyDown}
+          />
+        </Field>
         {loading && <Spinner inline />}
         {!loading && (
           <CheckBoxList
