@@ -25,6 +25,7 @@ interface HeaderControlsState extends SceneObjectState {
   onChange?: (value: SelectableValue<string>) => void; // Keeping for backward compatibility
 }
 
+// @ts-ignore to fix build error. Is there a Scenes friend way of doing this?
 export class HeaderControls extends EmbeddedScene {
   constructor(state: Partial<HeaderControlsState>) {
     super({
