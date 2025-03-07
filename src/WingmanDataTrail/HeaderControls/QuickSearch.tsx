@@ -1,18 +1,21 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
+  sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   VariableDependencyConfig,
-  type MultiValueVariable,
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
 import { IconButton, Input, Tag, useStyles2 } from '@grafana/ui';
 import React, { type KeyboardEvent } from 'react';
 
-import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 interface QuickSearchState extends SceneObjectState {
   value: string;
@@ -21,19 +24,18 @@ interface QuickSearchState extends SceneObjectState {
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_FILTERED_METRICS_VARIABLE],
-    onAnyVariableChanged: (variable) => {
-      const { name, options } = (variable as MultiValueVariable).state;
+    variableNames: [VAR_METRICS_VARIABLE, VAR_FILTERED_METRICS_VARIABLE],
+    onVariableUpdateCompleted: () => {
+      const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
 
-      if (name === VAR_METRICS_VARIABLE) {
-        this.setState({ counts: { ...this.state.counts, total: options.length } });
-        return;
-      }
+      this.setState({ counts: { ...this.state.counts, total: metricsVariable.state.options.length } });
 
-      if (name === VAR_FILTERED_METRICS_VARIABLE) {
-        this.setState({ counts: { ...this.state.counts, current: options.length } });
-        return;
-      }
+      const filteredMetricsVariable = sceneGraph.lookupVariable(
+        VAR_FILTERED_METRICS_VARIABLE,
+        this
+      ) as FilteredMetricsVariable;
+
+      this.setState({ counts: { ...this.state.counts, current: filteredMetricsVariable.state.options.length } });
     },
   });
 
