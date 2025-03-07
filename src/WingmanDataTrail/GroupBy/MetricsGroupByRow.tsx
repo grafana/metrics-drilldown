@@ -111,6 +111,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
     const panelList = metricsList.slice(0, listLength);
 
+    // TODO: remove from list if no data?
     const panels = panelList.map((metricName) => this.buildPanel(metricName, colorIndex++));
 
     return new SceneCSSGridLayout({
