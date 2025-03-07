@@ -85,7 +85,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
 
     const response = await ds.languageProvider.fetchSeriesValuesWithMatch(
       labelName,
-      `{__name__=~".+",\$${VAR_FILTERS}}`
+      `{__name__=~".+",$${VAR_FILTERS}}`
     );
 
     return response;

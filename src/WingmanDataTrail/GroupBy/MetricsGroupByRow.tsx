@@ -5,6 +5,7 @@ import {
   SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
+  SceneReactObject,
   VariableDependencyConfig,
   type SceneComponentProps,
   type SceneObject,
@@ -15,7 +16,8 @@ import React, { useState } from 'react';
 
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
-import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
+import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
@@ -77,6 +79,25 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       metricsList,
       body: this.buildMetricsBody(metricsList),
     });
+
+    this.subscribeToLayoutChange();
+  }
+
+  private subscribeToLayoutChange() {
+    const layoutSwitcher = sceneGraph.findByKeyAndType(this, 'layout-switcher', LayoutSwitcher);
+    const body = this.state.body as SceneCSSGridLayout;
+
+    const onChangeState = (newState: LayoutSwitcherState, prevState?: LayoutSwitcherState) => {
+      if (newState.layout !== prevState?.layout) {
+        body.setState({
+          templateColumns: newState.layout === LayoutType.ROWS ? GRID_TEMPLATE_ROWS : GRID_TEMPLATE_COLUMNS,
+        });
+      }
+    };
+
+    onChangeState(layoutSwitcher.state); // ensure layout when landing on the page
+
+    this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
   /**
@@ -111,13 +132,23 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
     const panelList = metricsList.slice(0, listLength);
 
-    // TODO: remove from list if no data?
     const panels = panelList.map((metricName) => this.buildPanel(metricName, colorIndex++));
+    const autoRows = panels.length ? '240px' : 'auto';
+
+    if (!panels.length) {
+      panels.push(
+        new SceneCSSGridItem({
+          body: new SceneReactObject({
+            reactNode: <em>No results.</em>,
+          }),
+        })
+      );
+    }
 
     return new SceneCSSGridLayout({
       key: `${labelName}-${labelValue}-metrics-${visibleMetricsCount}`, // Add a different key to force re-render
       templateColumns: GRID_TEMPLATE_COLUMNS,
-      autoRows: '240px', // will need to fix this at some point
+      autoRows,
       alignItems: 'start',
       isLazy: true,
       children: panels,

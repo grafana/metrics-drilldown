@@ -34,7 +34,9 @@ export class FilteredMetricsVariable extends MetricsVariable {
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
-  private onActivate() {
+  protected onActivate() {
+    super.onActivate();
+
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
 
     // TODO: subscribe only to the filter sesctions in the side bar, once they are Scene objects (and not React components)
@@ -46,11 +48,18 @@ export class FilteredMetricsVariable extends MetricsVariable {
           this.initOptions = cloneDeep(newState.options);
 
           const quickSearchValue = quickSearch.state.value;
-          // TODO: filters in the side bar, when it's synced to the URL?
+          const { selectedMetricPrefixes, selectedMetricCategories } = sideBar.state;
 
-          this.applyFilters({
-            names: quickSearchValue ? [quickSearchValue] : [],
-          });
+          this.applyFilters(
+            {
+              names: quickSearchValue ? [quickSearchValue] : [],
+              prefixes: selectedMetricPrefixes,
+              categories: selectedMetricCategories,
+            },
+            // force update to ensure the options are filtered
+            // need specifically when selecting a different group by label
+            true
+          );
         }
       })
     );
@@ -64,7 +73,6 @@ export class FilteredMetricsVariable extends MetricsVariable {
         debounce((newState, prevState) => {
           if (newState.value !== prevState.value) {
             this.applyFilters({ names: newState.value ? [newState.value] : [] });
-
             this.notifyUpdate();
           }
         }, 250)
@@ -88,15 +96,16 @@ export class FilteredMetricsVariable extends MetricsVariable {
     );
   }
 
-  private applyFilters(filters: Partial<MetricFilters> = this.filters) {
+  private applyFilters(filters: Partial<MetricFilters> = this.filters, forceUpdate = false) {
     const updatedFilters = {
       ...this.filters,
       ...filters,
     };
 
     if (
-      isEqual(this.filters, updatedFilters) ||
-      (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length)
+      !forceUpdate &&
+      (isEqual(this.filters, updatedFilters) ||
+        (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length))
     ) {
       this.filters = updatedFilters;
 
