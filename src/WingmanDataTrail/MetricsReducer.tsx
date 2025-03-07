@@ -1,7 +1,10 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
+  behaviors,
+  SceneCSSGridItem,
+  SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
   VariableDependencyConfig,
@@ -11,18 +14,27 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { getColorByIndex } from 'utils';
+
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './Labels/LabelsVariable';
-import { SimpleMetricsList } from './MetricsList/SimpleMetricsList';
+import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
+import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
+import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
+import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction';
+import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
+import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { registerRuntimeDataSources } from './registerRuntimeDataSources';
+import { SceneDrawer } from './SceneDrawer';
 import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
   sidebar: SideBar;
   body: SceneObjectBase;
+  drawer: SceneDrawer;
 }
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
@@ -38,6 +50,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       headerControls: new HeaderControls({}),
       sidebar: new SideBar({}),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
+      drawer: new SceneDrawer({}),
     });
 
     registerRuntimeDataSources();
@@ -47,8 +60,23 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
   private onActivate() {
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
-
     this.updateBodyBasedOnGroupBy(labelsVariable.state.value as string);
+
+    this.subscribeToEvents();
+  }
+
+  private subscribeToEvents() {
+    this._subs.add(
+      this.subscribeToEvent(EventConfigureFunction, (event) => {
+        this.openDrawer(event.payload.metricName);
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventApplyFunction, (event) => {
+        this.state.drawer.close();
+      })
+    );
   }
 
   private updateBodyBasedOnGroupBy(groupByValue: string) {
@@ -60,9 +88,49 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     });
   }
 
+  private openDrawer(metricName: string) {
+    this.state.drawer.open({
+      title: 'Choose a new Prometheus function',
+      subTitle: metricName,
+      body: new SceneCSSGridLayout({
+        templateColumns: GRID_TEMPLATE_COLUMNS,
+        autoRows: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+        isLazy: true,
+        $behaviors: [
+          new behaviors.CursorSync({
+            key: 'metricCrosshairSync',
+            sync: DashboardCursorSync.Crosshair,
+          }),
+        ],
+        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map(
+          (option, colorIndex) =>
+            new SceneCSSGridItem({
+              body: new MetricVizPanel({
+                title: option.label,
+                metricName,
+                color: getColorByIndex(colorIndex),
+                groupByLabel: undefined,
+                prometheusFunction: option.value as string,
+                height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+                hideLegend: true,
+                highlight: colorIndex === 1,
+                headerActions: [
+                  new ApplyAction({
+                    metricName,
+                    prometheusFunction: option.value as string,
+                    disabled: colorIndex === 1,
+                  }),
+                ],
+              }),
+            })
+        ),
+      }),
+    });
+  }
+
   public static Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
     const styles = useStyles2(getStyles);
-    const { body, headerControls, sidebar } = model.useState();
+    const { body, headerControls, sidebar, drawer } = model.useState();
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
 
     return (
@@ -81,6 +149,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         <div className={styles.mainContent}>
           <body.Component model={body} />
         </div>
+
+        <drawer.Component model={drawer} />
       </div>
     );
   };

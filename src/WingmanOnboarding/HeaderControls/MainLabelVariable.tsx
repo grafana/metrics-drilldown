@@ -1,24 +1,18 @@
 import { css, cx } from '@emotion/css';
 import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
 import { CustomVariable, type MultiValueVariable, type MultiValueVariableState } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 export const VAR_MAIN_LABEL_VARIABLE = 'mainLabelWingman';
 
 export class MainLabelVariable extends CustomVariable {
-  private static OPTIONS = [
-    { label: 'Cluster', value: 'cluster' },
-    { label: 'Environment', value: 'environment' },
-    { label: 'Job', value: 'job' },
-    { label: 'Namespace', value: 'namespace' },
-    { label: 'Service', value: 'service' },
-  ];
+  private static OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node'];
 
   constructor() {
     super({
       name: VAR_MAIN_LABEL_VARIABLE,
-      query: MainLabelVariable.OPTIONS.map((option) => option.value).join(','),
+      query: MainLabelVariable.OPTIONS.join(','),
       hide: VariableHide.hideLabel,
       value: undefined,
     });
@@ -35,14 +29,14 @@ export class MainLabelVariable extends CustomVariable {
     return (
       <div className={styles.container}>
         {options.map((option) => (
-          <button
+          <Button
             key={String(option.value)}
             className={cx(styles.labelButton, { [styles.selected]: option.value === value })}
             onClick={toggle(option.value)}
             title={`Group metrics by ${option.label}`}
           >
             {option.label}
-          </button>
+          </Button>
         ))}
       </div>
     );
@@ -57,11 +51,12 @@ function getStyles(theme: GrafanaTheme2) {
       gap: ${theme.spacing(2)};
     `,
     labelButton: css`
-      flex: 0 0 200px;
+      width: 200px;
       height: 80px;
       font-size: 16px;
-      text-align: center;
       margin: 0;
+      text-align: center;
+      justify-content: center;
 
       box-sizing: border-box;
       background-color: ${theme.colors.background.primary};
@@ -73,6 +68,11 @@ function getStyles(theme: GrafanaTheme2) {
       &:hover {
         background-color: ${theme.colors.background.secondary};
         border-color: ${theme.colors.border.medium};
+      }
+
+      & span {
+        display: inline-block;
+        height: unset;
       }
     `,
     selected: css`

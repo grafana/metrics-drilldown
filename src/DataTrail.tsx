@@ -668,6 +668,7 @@ function getVariableSet(
   return new SceneVariableSet({
     variables: [
       new DataSourceVariable({
+        key: VAR_DATASOURCE,
         name: VAR_DATASOURCE,
         label: 'Data source',
         description: 'Only prometheus data sources are supported',

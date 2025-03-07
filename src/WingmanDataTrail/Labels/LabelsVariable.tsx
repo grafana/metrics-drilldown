@@ -18,7 +18,6 @@ export class LabelsVariable extends QueryVariable {
       placeholder: 'Group by label...',
       datasource: { uid: LabelsDataSource.uid },
       query: `{__name__=~".+",\$${VAR_FILTERS}}`,
-      value: undefined,
       includeAll: false,
       isMulti: false,
       allowCustomValue: false,
