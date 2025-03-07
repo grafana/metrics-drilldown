@@ -6,6 +6,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
+import { Alert, Spinner } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_FILTERS } from 'shared';
@@ -16,6 +17,8 @@ import { MetricsGroupByRow } from './MetricsGroupByRow';
 interface MetricsGroupByListState extends SceneObjectState {
   body: SceneFlexLayout;
   labelName: string;
+  loading: boolean;
+  error?: Error;
 }
 
 export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
@@ -34,6 +37,8 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
         direction: 'column',
         children: [],
       }),
+      loading: true,
+      error: undefined,
     });
 
     this.addActivationHandler(() => {
@@ -47,9 +52,17 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
 
   async renderBody() {
     const { labelName } = this.state;
+    let labelValues: string[] = [];
 
-    // TODO: handle loading and errors
-    const labelValues = await this.fetchLabelValues(labelName);
+    this.setState({ loading: true });
+
+    try {
+      labelValues = await this.fetchLabelValues(labelName);
+    } catch (error) {
+      this.setState({ error: error as Error });
+    } finally {
+      this.setState({ loading: false });
+    }
 
     this.state.body.setState({
       children: labelValues.map(
@@ -79,7 +92,20 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
   }
 
   static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
-    const { body } = model.state;
+    const { body, loading, error, labelName } = model.useState();
+
+    if (loading) {
+      return <Spinner inline />;
+    }
+
+    if (error) {
+      return (
+        <Alert severity="error" title={`Error while loading "${labelName}" values!`}>
+          <p>&quot;{error.message || error.toString()}&quot;</p>
+          <p>Please try to reload the page. Sorry for the inconvenience.</p>
+        </Alert>
+      );
+    }
 
     return <body.Component model={body} />;
   };
