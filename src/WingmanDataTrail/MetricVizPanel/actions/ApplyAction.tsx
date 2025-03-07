@@ -3,24 +3,17 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { type PrometheusFn } from './ConfigureAction';
 import { EventApplyFunction } from './EventApplyFunction';
 
 interface ApplyActionState extends SceneObjectState {
   metricName: string;
-  prometheusFunction: string;
-  disabled: boolean;
+  prometheusFunction: PrometheusFn;
+  disabled?: boolean;
 }
 
 export class ApplyAction extends SceneObjectBase<ApplyActionState> {
-  constructor({
-    metricName,
-    prometheusFunction,
-    disabled,
-  }: {
-    metricName: ApplyActionState['metricName'];
-    prometheusFunction: ApplyActionState['prometheusFunction'];
-    disabled?: ApplyActionState['disabled'];
-  }) {
+  constructor({ metricName, prometheusFunction, disabled }: ApplyActionState) {
     super({
       metricName,
       prometheusFunction,
