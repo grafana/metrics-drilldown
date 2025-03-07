@@ -2,11 +2,13 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   SceneObjectBase,
+  VariableDependencyConfig,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
 import React from 'react';
 
+import { VAR_FILTERS } from 'shared';
 import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
@@ -17,6 +19,13 @@ interface MetricsGroupByListState extends SceneObjectState {
 }
 
 export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_FILTERS],
+    onVariableUpdateCompleted: () => {
+      this.renderBody();
+    },
+  });
+
   constructor({ labelName }: { labelName: string }) {
     super({
       key: 'metrics-group-list',
@@ -33,6 +42,10 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
   }
 
   private async onActivate() {
+    this.renderBody();
+  }
+
+  async renderBody() {
     const { labelName } = this.state;
 
     // TODO: handle loading and errors
@@ -57,7 +70,10 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
       return [];
     }
 
-    const response = await ds.languageProvider.fetchLabelValues(labelName);
+    const response = await ds.languageProvider.fetchSeriesValuesWithMatch(
+      labelName,
+      `{__name__=~".+",\$${VAR_FILTERS}}`
+    );
 
     return response;
   }
