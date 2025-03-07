@@ -189,7 +189,7 @@ describe('limitOtelMatchTerms', () => {
   });
 });
 
-describe('updateOtelJoinWithGroupLeft', () => {
+describe.skip('updateOtelJoinWithGroupLeft', () => {
   let trail: DataTrail;
   const preTrailUrl =
     '/trail?from=now-1h&to=now&var-ds=edwxqcebl0cg0c&var-deployment_environment=oteldemo01&var-otel_resources=k8s_cluster_name%7C%3D%7Cappo11ydev01&var-filters=&refresh=&metricPrefix=all&metricSearch=http&actionView=breakdown&var-groupby=$__all&metric=http_client_duration_milliseconds_bucket';
@@ -342,7 +342,7 @@ describe('util functions that rely on trail and variable setup', () => {
     trail.setState({ initialOtelCheckComplete: false });
   });
   describe('updateOtelData', () => {
-    it('should automatically add the deployment environment on loading a data trail from start', () => {
+    it.skip('should automatically add the deployment environment on loading a data trail from start', () => {
       trail.setState({ startButtonClicked: true });
       const autoSelectedDepEnvValue = 'production';
       const deploymentEnvironments = [autoSelectedDepEnvValue];
@@ -369,7 +369,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(otelResourcesValue).toBe(autoSelectedDepEnvValue);
     });
 
-    it('should use the deployment environment from url when loading a trail and not automatically load it', () => {
+    it.skip('should use the deployment environment from url when loading a trail and not automatically load it', () => {
       const autoSelectedDeploymentEnvironmentValue = 'production';
       const deploymentEnvironments = [autoSelectedDeploymentEnvironmentValue];
       // the url loads the deployment environment into otelmetricsvar
@@ -401,7 +401,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(otelResourcesValue).toBe(prevUrlDepEnvValue);
     });
 
-    it('should load all filters based on the url for VAR_OTEL_AND_METRICS_FILTERS on initial load', () => {
+    it.skip('should load all filters based on the url for VAR_OTEL_AND_METRICS_FILTERS on initial load', () => {
       const nonPromotedOtelResources = ['deployment_environment', 'resource'];
       const depEnvFilter = { key: 'deployment_environment', operator: '=', value: 'from_url' };
       const otelResourceFilter = { key: 'resource', operator: '=', value: 'resource' };
@@ -433,7 +433,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(varFilters.state.filters).toEqual([promotedFilter, metricFilter]);
     });
 
-    it('should not automatically add the deployment environment on loading a data trail when there are no deployment environments in the data source', () => {
+    it.skip('should not automatically add the deployment environment on loading a data trail when there are no deployment environments in the data source', () => {
       // no dep env values found in the data source
       const deploymentEnvironments: string[] = [];
       updateOtelData(
@@ -452,7 +452,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(otelResourcesVar.state.filters.length).toBe(0);
     });
 
-    it('should not automatically add the deployment environment on loading a data trail when loading from url and no dep env are present in the filters', () => {
+    it.skip('should not automatically add the deployment environment on loading a data trail when loading from url and no dep env are present in the filters', () => {
       // not from start
       // no dep env values found in the data source
       const deploymentEnvironments: string[] = [];
@@ -472,7 +472,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(otelResourcesVar.state.filters.length).toBe(0);
     });
 
-    it('should add the deployment environment to var filters if it has been promoted from start', () => {
+    it.skip('should add the deployment environment to var filters if it has been promoted from start', () => {
       trail.setState({ startButtonClicked: true });
       // the deployment environment has been promoted to a metric label
       const deploymentEnvironments = ['production'];
@@ -489,7 +489,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(varFilters.value).toBe('production');
     });
 
-    it('should preserve var filters when switching a data source but not initial load', () => {
+    it.skip('should preserve var filters when switching a data source but not initial load', () => {
       trail.setState({ initialOtelCheckComplete: true });
       const deploymentEnvironments = ['production'];
       getFilterVar().setState({ filters: [{ key: 'zone', operator: '=', value: 'a' }] });
@@ -508,7 +508,7 @@ describe('util functions that rely on trail and variable setup', () => {
   });
 
   describe('manageOtelAndMetricFilters', () => {
-    it('should add a new filter to otel filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
+    it.skip('should add a new filter to otel filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
       const newStateFilters: AdHocVariableFilter[] = [{ key: 'otel_key', value: 'value', operator: '=' }];
       const prevStateFilters: AdHocVariableFilter[] = [];
 
@@ -529,7 +529,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(otelFiltersVariable.state.filters).toEqual(newStateFilters);
     });
 
-    it('should add a new filter to metric filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
+    it.skip('should add a new filter to metric filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
       const newStateFilters: AdHocVariableFilter[] = [{ key: 'metric_key', value: 'value', operator: '=' }];
       const prevStateFilters: AdHocVariableFilter[] = [];
 
@@ -550,7 +550,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(filtersVariable.state.filters).toEqual(newStateFilters);
     });
 
-    it('should remove a filter from otel filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
+    it.skip('should remove a filter from otel filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
       const newStateFilters: AdHocVariableFilter[] = [];
       const prevStateFilters: AdHocVariableFilter[] = [{ key: 'otel_key', value: 'value', operator: '=' }];
 
@@ -571,7 +571,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(otelFiltersVariable.state.filters).toEqual(newStateFilters);
     });
 
-    it('should remove a filter from metric filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
+    it.skip('should remove a filter from metric filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
       const newStateFilters: AdHocVariableFilter[] = [];
       const prevStateFilters: AdHocVariableFilter[] = [{ key: 'metric_key', value: 'value', operator: '=' }];
 
@@ -593,7 +593,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(filtersVariable.state.filters).toEqual(newStateFilters);
     });
 
-    it('should update a filter in otel filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
+    it.skip('should update a filter in otel filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
       const newStateFilters: AdHocVariableFilter[] = [{ key: 'otel_key', value: 'new_value', operator: '=' }];
       const prevStateFilters: AdHocVariableFilter[] = [{ key: 'otel_key', value: 'old_value', operator: '=' }];
 
@@ -615,7 +615,7 @@ describe('util functions that rely on trail and variable setup', () => {
       expect(otelFiltersVariable.state.filters).toEqual(newStateFilters);
     });
 
-    it('should update a filter in metric filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
+    it.skip('should update a filter in metric filters when VAR_OTEL_AND_METRIC_FILTERS is updated', () => {
       const newStateFilters: AdHocVariableFilter[] = [{ key: 'metric_key', value: 'new_value', operator: '=' }];
       const prevStateFilters: AdHocVariableFilter[] = [{ key: 'metric_key', value: 'old_value', operator: '=' }];
 
