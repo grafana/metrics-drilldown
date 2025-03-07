@@ -1,6 +1,12 @@
 import { css } from '@emotion/css';
 import { VariableHide, VariableRefresh, type GrafanaTheme2 } from '@grafana/data';
-import { QueryVariable, type MultiValueVariable, type SceneComponentProps } from '@grafana/scenes';
+import {
+  AdHocFiltersVariable,
+  QueryVariable,
+  sceneGraph,
+  type MultiValueVariable,
+  type SceneComponentProps,
+} from '@grafana/scenes';
 import { Label, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -32,14 +38,20 @@ export class LabelsVariable extends QueryVariable {
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
         if (newState.query !== prevState.query) {
-          this.setState({ value: NULL_GROUP_BY_VALUE });
+          // preserve the value form URL search params when landing
+          if (prevState.query) {
+            this.setState({ value: NULL_GROUP_BY_VALUE });
+          }
+
           this.refreshOptions();
         }
       })
     );
 
-    this.setState({
-      query: `{__name__=~".+",\$${VAR_FILTERS}}`,
+    // hack to ensure that labels are loaded when landing: sometimes filters are not interpolated and fetching labels give no results
+    const adHocSub = sceneGraph.findByKeyAndType(this, VAR_FILTERS, AdHocFiltersVariable).subscribeToState(() => {
+      this.setState({ query: `{__name__=~".+",$${VAR_FILTERS}}` });
+      adHocSub.unsubscribe();
     });
   }
 

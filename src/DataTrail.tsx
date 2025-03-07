@@ -688,6 +688,7 @@ function getVariableSet(
         allowCustomValue: true,
       }),
       new AdHocFiltersVariable({
+        key: VAR_FILTERS,
         name: VAR_FILTERS,
         addFilterButtonText: 'Add label',
         datasource: trailDS,
