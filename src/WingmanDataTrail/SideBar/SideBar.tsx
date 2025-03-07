@@ -27,8 +27,6 @@ interface SideBarState extends SceneObjectState {
   hideEmptyTypes: boolean;
   selectedMetricGroups: string[];
   selectedMetricTypes: string[];
-  metricsGroupSearch: string;
-  metricsTypeSearch: string;
   loading: boolean;
 }
 
@@ -50,8 +48,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       hideEmptyTypes: true,
       selectedMetricGroups: [],
       selectedMetricTypes: [],
-      metricsGroupSearch: '',
-      metricsTypeSearch: '',
       loading: true,
     });
 
@@ -92,8 +88,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       hideEmptyTypes,
       selectedMetricGroups,
       selectedMetricTypes,
-      metricsGroupSearch,
-      metricsTypeSearch,
       prefixGroups,
       categories,
       loading,
@@ -105,9 +99,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title="Metric groups"
           items={prefixGroups}
           hideEmpty={hideEmptyGroups}
-          searchValue={metricsGroupSearch}
           selectedValues={selectedMetricGroups}
-          onSearchChange={(value) => model.setState({ metricsGroupSearch: value })}
           onSelectionChange={(values) => model.setState({ selectedMetricGroups: values })}
           loading={loading}
         />
@@ -116,9 +108,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title="Metric categories"
           items={categories}
           hideEmpty={hideEmptyTypes}
-          searchValue={metricsTypeSearch}
           selectedValues={selectedMetricTypes}
-          onSearchChange={(value) => model.setState({ metricsTypeSearch: value })}
           onSelectionChange={(values) => model.setState({ selectedMetricTypes: values })}
           loading={loading}
         />
