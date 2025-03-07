@@ -137,7 +137,7 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       height: '100%',
       overflow: 'auto',
-      background: theme.colors.background.primary,
+      background: theme.colors.background.canvas,
     }),
   };
 }

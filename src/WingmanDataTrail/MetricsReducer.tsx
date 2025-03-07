@@ -182,7 +182,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     sidebar: css({
       gridArea: 'sidebar',
-      background: theme.colors.background.primary,
+      background: theme.colors.background.canvas,
       borderRight: `1px solid ${theme.colors.border.weak}`,
       overflow: 'auto',
       height: '100%',
