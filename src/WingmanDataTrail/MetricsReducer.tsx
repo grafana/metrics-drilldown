@@ -104,7 +104,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     headerControls: css({
       gridArea: 'header',
-      background: theme.colors.background.primary,
       borderBottom: `1px solid ${theme.colors.border.weak}`,
       padding: theme.spacing(1, 0),
       zIndex: theme.zIndex.navbarFixed,
