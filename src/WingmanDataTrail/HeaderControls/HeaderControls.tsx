@@ -34,11 +34,10 @@ export class HeaderControls extends EmbeddedScene {
       body: new SceneFlexLayout({
         direction: 'row',
         width: '100%',
+        maxHeight: '32px',
         children: [
           new SceneFlexItem({
             body: new QuickSearch(),
-            minWidth: 700,
-            width: 1,
           }),
           new SceneFlexItem({
             key: 'group-by-label-selector-wingman',
