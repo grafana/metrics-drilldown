@@ -1,0 +1,23 @@
+name: deploy tagged release to prod
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
+
+permissions:
+  contents: 'write'
+  id-token: 'write'
+  attestations: 'write'
+
+jobs:
+  CD:
+    name: Deploy to dev, ops, and prod
+    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
+    with:
+      environment: 'prod'
+      upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
+      attestation: true # this guarantees that the plugin was built from the source code provided in the release
