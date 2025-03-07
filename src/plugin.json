@@ -55,6 +55,7 @@
     "grafanaDependency": ">=11.3.0",
     "plugins": []
   },
+  "preload": true,
   "extensions": {
     "addedLinks": [],
     "extensionPoints": [
