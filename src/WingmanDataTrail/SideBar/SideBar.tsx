@@ -101,27 +101,30 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
     return (
       <div className={styles.sidebar}>
-        <MetricsFilterSection
-          title="Metric groups"
-          items={prefixGroups}
-          hideEmpty={hideEmptyGroups}
-          searchValue={metricsGroupSearch}
-          selectedValues={selectedMetricGroups}
-          onSearchChange={(value) => model.setState({ metricsGroupSearch: value })}
-          onSelectionChange={(values) => model.setState({ selectedMetricGroups: values })}
-          loading={loading}
-        />
-
-        <MetricsFilterSection
-          title="Metric categories"
-          items={categories}
-          hideEmpty={hideEmptyTypes}
-          searchValue={metricsTypeSearch}
-          selectedValues={selectedMetricTypes}
-          onSearchChange={(value) => model.setState({ metricsTypeSearch: value })}
-          onSelectionChange={(values) => model.setState({ selectedMetricTypes: values })}
-          loading={loading}
-        />
+        <div className={styles.sectionContainer}>
+          <MetricsFilterSection
+            title="Metric groups"
+            items={prefixGroups}
+            hideEmpty={hideEmptyGroups}
+            searchValue={metricsGroupSearch}
+            selectedValues={selectedMetricGroups}
+            onSearchChange={(value) => model.setState({ metricsGroupSearch: value })}
+            onSelectionChange={(values) => model.setState({ selectedMetricGroups: values })}
+            loading={loading}
+          />
+        </div>
+        <div className={styles.sectionContainer}>
+          <MetricsFilterSection
+            title="Metric categories"
+            items={categories}
+            hideEmpty={hideEmptyTypes}
+            searchValue={metricsTypeSearch}
+            selectedValues={selectedMetricTypes}
+            onSearchChange={(value) => model.setState({ metricsTypeSearch: value })}
+            onSelectionChange={(values) => model.setState({ selectedMetricTypes: values })}
+            loading={loading}
+          />
+        </div>
       </div>
     );
   };
@@ -132,12 +135,20 @@ function getStyles(theme: GrafanaTheme2) {
     sidebar: css({
       display: 'flex',
       flexDirection: 'column',
+      justifyContent: 'flex-start',
       gap: theme.spacing(2),
       padding: theme.spacing(1),
       width: '100%',
       height: '100%',
       overflow: 'auto',
       background: theme.colors.background.canvas,
+    }),
+    sectionContainer: css({
+      flex: '0 0 auto',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      marginBottom: 0,
     }),
   };
 }

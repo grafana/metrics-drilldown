@@ -92,21 +92,23 @@ export function MetricsFilterSection({
   return (
     <FieldSet label={title} className={styles.fieldSetTitle}>
       <div className={styles.fieldSetContent}>
-        <Field>
-          <div className={styles.switchContainer}>
-            <span className={styles.switchLabel}>Hide empty</span>
-            <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
-          </div>
-        </Field>
-        <Field>
-          <Input
-            prefix={<Icon name="search" />}
-            placeholder="Search..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.currentTarget.value)}
-            onKeyDown={onKeyDown}
-          />
-        </Field>
+        <div className={styles.controlsRow}>
+          <Field className={styles.field}>
+            <div className={styles.switchContainer}>
+              <span className={styles.switchLabel}>Hide empty</span>
+              <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
+            </div>
+          </Field>
+          <Field className={styles.field}>
+            <Input
+              prefix={<Icon name="search" />}
+              placeholder="Search..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.currentTarget.value)}
+              onKeyDown={onKeyDown}
+            />
+          </Field>
+        </div>
         {loading && <Spinner inline />}
         {!loading && (
           <CheckBoxList
@@ -133,7 +135,7 @@ function CheckBoxList({
   return (
     <div className={styles.checkboxList}>
       {filteredList.map((item) => (
-        <Field key={item.value}>
+        <div key={item.value} className={styles.checkboxItem}>
           <CheckboxWithCount
             label={item.label}
             count={item.count}
@@ -146,7 +148,7 @@ function CheckBoxList({
               onSelectionChange(newValues);
             }}
           />
-        </Field>
+        </div>
       ))}
     </div>
   );
@@ -158,14 +160,27 @@ function getStyles(theme: GrafanaTheme2) {
       '& > legend': {
         fontSize: theme.typography.h5.fontSize + ' !important',
         fontWeight: theme.typography.h5.fontWeight + ' !important',
+        marginBottom: '0 !important',
+        paddingBottom: '0 !important',
       },
+      height: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      '& > div': {
+        height: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '250px',
+      },
+      padding: '0 !important',
+      margin: '0 !important',
     }),
     fieldSetContent: css({
       display: 'flex',
       flexDirection: 'column',
-      gap: theme.spacing(1.5),
-      height: '100%',
-      maxHeight: '400px',
+      gap: theme.spacing(0.5),
+      height: 'auto',
+      overflow: 'hidden',
       '& .css-1n4u71h-Label': {
         fontSize: '14px !important',
       },
@@ -177,13 +192,15 @@ function getStyles(theme: GrafanaTheme2) {
         marginBottom: 0,
       },
       '& > div:nth-child(2)': {
-        marginBottom: theme.spacing(1.5),
+        marginBottom: theme.spacing(0.5),
       },
     }),
     checkboxList: css({
-      overflowY: 'scroll',
-      flexGrow: 1,
+      overflowY: 'auto',
+      flexGrow: 0,
       paddingRight: theme.spacing(1),
+      maxHeight: '210px',
+      marginTop: theme.spacing(0.5),
       '& .css-1n4u71h-Label': {
         fontSize: '14px !important',
       },
@@ -212,10 +229,28 @@ function getStyles(theme: GrafanaTheme2) {
       justifyContent: 'space-between',
       alignItems: 'center',
       width: '100%',
+      '& label': {
+        fontSize: '14px !important',
+      },
     }),
     count: css({
       color: theme.colors.text.secondary,
       marginLeft: theme.spacing(1),
+    }),
+    field: css({
+      marginBottom: '0 !important',
+    }),
+    controlsRow: css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing(0.5),
+    }),
+    checkboxItem: css({
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%',
+      padding: `${theme.spacing(0.5)} 0`,
     }),
   };
 }
