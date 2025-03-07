@@ -11,6 +11,8 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
+import { VAR_DATASOURCE } from 'shared';
+
 import { localeCompare } from '../helpers/localCompare';
 
 export const NULL_GROUP_BY_VALUE = '(none)';
@@ -62,7 +64,7 @@ export class LabelsDataSource extends RuntimeDataSource {
 
   static async getPrometheusDataSource(sceneObject: SceneObject): Promise<DataSourceApi | undefined> {
     try {
-      const dsVariable = sceneGraph.getVariables(sceneObject).getByName('ds') as DataSourceVariable;
+      const dsVariable = sceneGraph.findByKey(sceneObject, VAR_DATASOURCE) as DataSourceVariable;
       const uid = (dsVariable?.state.value as string) ?? '';
 
       return await getDataSourceSrv().get({ uid });
