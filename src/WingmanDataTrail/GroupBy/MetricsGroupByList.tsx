@@ -1,6 +1,7 @@
 import {
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObjectBase,
   VariableDependencyConfig,
   type SceneComponentProps,
@@ -9,7 +10,7 @@ import {
 import { Alert, Spinner } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_FILTERS } from 'shared';
+import { VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
 import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
@@ -47,7 +48,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
   }
 
   private async onActivate() {
-    this.renderBody();
+    await this.renderBody();
   }
 
   async renderBody() {
@@ -83,9 +84,12 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
       return [];
     }
 
+    const filterExpression = sceneGraph.interpolate(this, VAR_FILTERS_EXPR, {});
+
     const response = await ds.languageProvider.fetchSeriesValuesWithMatch(
       labelName,
-      `{__name__=~".+",$${VAR_FILTERS}}`
+      // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
+      `{__name__=~".+",${filterExpression}}`
     );
 
     return response;
