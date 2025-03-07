@@ -85,11 +85,10 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
   private subscribeToLayoutChange() {
     const layoutSwitcher = sceneGraph.findByKeyAndType(this, 'layout-switcher', LayoutSwitcher);
-    const body = this.state.body as SceneCSSGridLayout;
 
     const onChangeState = (newState: LayoutSwitcherState, prevState?: LayoutSwitcherState) => {
       if (newState.layout !== prevState?.layout) {
-        body.setState({
+        (this.state.body as SceneCSSGridLayout).setState({
           templateColumns: newState.layout === LayoutType.ROWS ? GRID_TEMPLATE_ROWS : GRID_TEMPLATE_COLUMNS,
         });
       }
@@ -128,11 +127,9 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const listLength =
       visibleMetricsCount && metricsList.length >= visibleMetricsCount ? visibleMetricsCount : metricsList.length;
 
-    let colorIndex = 0;
-
     const panelList = metricsList.slice(0, listLength);
 
-    const panels = panelList.map((metricName) => this.buildPanel(metricName, colorIndex++));
+    const panels = panelList.map((metricName, colorIndex) => this.buildPanel(metricName, colorIndex));
     const autoRows = panels.length ? '240px' : 'auto';
 
     if (!panels.length) {
