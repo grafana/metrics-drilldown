@@ -1,15 +1,6 @@
 import { BusEventBase, BusEventWithPayload } from '@grafana/data';
-import { ConstantVariable, type SceneObject } from '@grafana/scenes';
+import { ConstantVariable } from '@grafana/scenes';
 import { VariableHide } from '@grafana/schema';
-
-export type ActionViewType = 'overview' | 'breakdown' | 'related_logs' | 'related';
-
-export interface ActionViewDefinition {
-  displayName: string;
-  value: ActionViewType;
-  description?: string;
-  getScene: () => SceneObject;
-}
 
 export const TRAILS_ROUTE = '/explore/metrics/trail';
 export const HOME_ROUTE = '/explore/metrics';

@@ -1,9 +1,10 @@
-import { config, getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { LoadingState } from '@grafana/data';
+import { config } from '@grafana/runtime';
 import {
   CustomVariable,
   PanelBuilders,
-  SceneFlexItem,
-  SceneFlexLayout,
+  SceneCSSGridItem,
+  SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
   SceneQueryRunner,
@@ -18,142 +19,171 @@ import {
 import { LinkButton, Stack } from '@grafana/ui';
 import React from 'react';
 
-import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
-import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { reportExploreMetrics } from '../interactions';
-import pluginJson from '../plugin.json';
-import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR, VAR_METRIC, VAR_METRIC_EXPR } from '../shared';
+import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../shared';
 import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
-import { isConstantVariable, isCustomVariable } from '../utils/utils.variables';
+import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
+import { isCustomVariable } from '../utils/utils.variables';
 
-import type { MetricsLogsConnector } from '../Integrations/logs/base';
-import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
+interface RelatedLogsSceneProps {
+  orchestrator: RelatedLogsOrchestrator;
+}
 
-export interface RelatedLogsSceneState extends SceneObjectState {
+export interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
   controls: SceneObject[];
-  body: SceneFlexLayout;
-  connectors: MetricsLogsConnector[];
+  body: SceneCSSGridLayout;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
 const RELATED_LOGS_QUERY_KEY = 'related_logs/logs_query';
 
 export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
-  constructor(state: Partial<RelatedLogsSceneState>) {
+  private _queryRunner?: SceneQueryRunner;
+
+  constructor(props: RelatedLogsSceneProps) {
     super({
       controls: [],
-      body: new SceneFlexLayout({
-        direction: 'column',
-        height: '400px',
+      body: new SceneCSSGridLayout({
+        templateColumns: '1fr',
+        autoRows: 'minmax(300px, 1fr)',
         children: [
-          new SceneFlexItem({
+          new SceneCSSGridItem({
             key: LOGS_PANEL_CONTAINER_KEY,
             body: undefined,
           }),
         ],
       }),
-      connectors: [],
-      ...state,
+      orchestrator: props.orchestrator,
     });
 
-    this.addActivationHandler(this.onActivate.bind(this));
+    this.addActivationHandler(this._onActivate.bind(this));
   }
 
-  private onActivate() {
+  private _onActivate() {
+    // Register handler for future changes to lokiDataSources
+    this.state.orchestrator.addLokiDataSourcesChangeHandler(() => {
+      this.setupLogsPanel();
+    });
+
+    // If data sources have already been loaded, we don't need to fetch them again
+    if (!this.state.orchestrator.lokiDataSources.length) {
+      this.state.orchestrator.findAndCheckAllDatasources();
+    } else {
+      this.setupLogsPanel();
+    }
+  }
+
+  private showNoLogsScene() {
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
+    logsPanelContainer.setState({
+      body: new NoRelatedLogsScene({}),
+    });
     this.setState({
-      connectors: [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(this)],
+      controls: undefined,
     });
-    this.setLogsDataSourceVar();
+    this.state.orchestrator.relatedLogsCount = 0;
   }
 
-  private setLogsDataSourceVar(): Promise<void> {
-    const selectedMetric = sceneGraph.interpolate(this, VAR_METRIC_EXPR);
-    return Promise.all(this.state.connectors.map((connector) => connector.getDataSources(selectedMetric))).then(
-      (results) => {
-        const lokiDataSources = results.flat().slice(0, 10); // limit to the first ten matching Loki data sources
-        const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
+  private setupLogsPanel(): void {
+    if (!this.state.orchestrator.lokiDataSources.length) {
+      this.showNoLogsScene();
+      return;
+    }
 
-        if (!lokiDataSources?.length) {
-          logsPanelContainer.setState({
-            body: new NoRelatedLogsScene({}),
-          });
-          this.setState({ $variables: undefined, controls: undefined });
-        } else {
-          logsPanelContainer.setState({
-            body: PanelBuilders.logs()
-              .setTitle('Logs')
-              .setData(
-                new SceneQueryRunner({
-                  datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
-                  queries: [],
-                  key: RELATED_LOGS_QUERY_KEY,
-                })
-              )
-              .build(),
-          });
-          this.setState({
-            $variables: new SceneVariableSet({
-              variables: [
-                new CustomVariable({
-                  name: VAR_LOGS_DATASOURCE,
-                  label: 'Logs data source',
-                  query: lokiDataSources?.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
-                }),
-              ],
-            }),
-            controls: [new VariableValueSelectors({ layout: 'vertical' })],
-          });
+    // Clean up existing query runner if it exists
+    if (this._queryRunner) {
+      this._queryRunner.setState({ queries: [] });
+      this._queryRunner = undefined;
+    }
+
+    // Initialize query runner
+    this._queryRunner = new SceneQueryRunner({
+      datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
+      queries: [],
+      key: RELATED_LOGS_QUERY_KEY,
+    });
+
+    // Set up subscription to query results
+    this._queryRunner.subscribeToState((state) => {
+      // Only process completed query results
+      if (state.data?.state === LoadingState.Done) {
+        const totalRows = state.data.series
+          ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
+          : 0;
+
+        // Show NoRelatedLogsScene if no logs found
+        if (totalRows === 0 || !state.data.series?.length) {
+          this.showNoLogsScene();
         }
       }
-    );
-  }
-
-  private updateLokiQuery() {
-    const selectedDatasourceVar = sceneGraph.lookupVariable(VAR_LOGS_DATASOURCE, this);
-    const selectedMetricVar = sceneGraph.lookupVariable(VAR_METRIC, this);
-
-    if (!isCustomVariable(selectedDatasourceVar) || !isConstantVariable(selectedMetricVar)) {
-      return;
-    }
-
-    const selectedMetric = selectedMetricVar.getValue();
-    const selectedDatasourceUid = selectedDatasourceVar.getValue();
-
-    if (typeof selectedMetric !== 'string' || typeof selectedDatasourceUid !== 'string') {
-      return;
-    }
-
-    const lokiQueries = this.state.connectors.reduce<Record<string, string>>((acc, connector, idx) => {
-      const lokiExpr = connector.getLokiQueryExpr(selectedMetric, selectedDatasourceUid);
-
-      if (lokiExpr) {
-        acc[connector.name ?? `connector-${idx}`] = lokiExpr;
-      }
-
-      return acc;
-    }, {});
-    const relatedLogsQuery = sceneGraph.findByKeyAndType(this, RELATED_LOGS_QUERY_KEY, SceneQueryRunner);
-    relatedLogsQuery.setState({
-      queries: Object.keys(lokiQueries).map((connectorName) => ({
-        refId: `RelatedLogs-${connectorName}`,
-        expr: lokiQueries[connectorName],
-        maxLines: 100,
-        supportingQueryType: pluginJson.id,
-      })),
     });
+
+    // Set up UI for logs panel
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
+    logsPanelContainer.setState({
+      body: PanelBuilders.logs().setTitle('Logs').setData(this._queryRunner).build(),
+    });
+
+    // Set up variables for datasource selection
+    this.setState({
+      $variables: new SceneVariableSet({
+        variables: [
+          new CustomVariable({
+            name: VAR_LOGS_DATASOURCE,
+            label: 'Logs data source',
+            query: this.state.orchestrator.lokiDataSources.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
+          }),
+        ],
+      }),
+      controls: [new VariableValueSelectors({ layout: 'vertical' })],
+    });
+
+    // Update Loki query
+    this.updateLokiQuery();
   }
 
+  /**
+   * Updates the Loki query based on the configured connectors, selected datasource, and current filters.
+   * This function is called when the selected datasource or filters change.
+   */
+  private updateLokiQuery() {
+    if (!this._queryRunner) {
+      return;
+    }
+
+    const selectedDatasourceVar = sceneGraph.lookupVariable(VAR_LOGS_DATASOURCE, this);
+
+    let selectedDatasourceUid: string | undefined = undefined;
+
+    if (isCustomVariable(selectedDatasourceVar)) {
+      selectedDatasourceUid = selectedDatasourceVar.getValue() as string;
+    }
+
+    if (!selectedDatasourceUid) {
+      return;
+    }
+
+    const queries = this.state.orchestrator.getLokiQueries(selectedDatasourceUid);
+
+    // If no queries were generated, show the NoRelatedLogsScene
+    if (queries.length === 0) {
+      this.showNoLogsScene();
+      return;
+    }
+
+    // Update queries - this will trigger the query runner to fetch new data
+    // The query results will be processed in the subscription handler
+    this._queryRunner.setState({ queries });
+  }
+
+  // Handle variable changes
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_LOGS_DATASOURCE, VAR_FILTERS],
     onReferencedVariableValueChanged: (variable: SceneVariable) => {
-      const { name } = variable.state;
-
-      if (name === VAR_LOGS_DATASOURCE) {
+      if (variable.state.name === VAR_FILTERS) {
+        this.state.orchestrator.handleFiltersChange();
+      } else if (variable.state.name === VAR_LOGS_DATASOURCE) {
         this.updateLokiQuery();
-      }
-
-      if (name === VAR_FILTERS) {
-        this.setLogsDataSourceVar().then(() => this.updateLokiQuery());
       }
     },
   });
@@ -162,67 +192,31 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     const { controls, body } = model.useState();
 
     return (
-      <div>
-        <Stack gap={1} direction={'column'} grow={1}>
-          <Stack gap={1} direction={'row'} grow={1} justifyContent={'space-between'} alignItems={'start'}>
-            <Stack gap={1}>
-              {controls?.map((control) => (
-                <control.Component key={control.state.key} model={control} />
-              ))}
-            </Stack>
-
-            <LinkButton
-              href={`${config.appSubUrl}/a/grafana-lokiexplore-app`} // We prefix with the appSubUrl for environments that don't host grafana at the root.
-              target="_blank"
-              tooltip="Navigate to the Explore Logs app"
-              variant="secondary"
-              size="sm"
-              onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_explore_logs' })}
-            >
-              Open Explore Logs
-            </LinkButton>
+      <Stack gap={1} direction={'column'} grow={1}>
+        <Stack gap={1} direction={'row'} justifyContent={'space-between'} alignItems={'start'}>
+          <Stack gap={1}>
+            {controls?.map((control) => (
+              <control.Component key={control.state.key} model={control} />
+            ))}
           </Stack>
-          <body.Component model={body} />
+
+          <LinkButton
+            href={`${config.appSubUrl}/a/grafana-lokiexplore-app`} // We prefix with the appSubUrl for environments that don't host grafana at the root.
+            target="_blank"
+            tooltip="Navigate to the Explore Logs app"
+            variant="secondary"
+            size="sm"
+            onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_explore_logs' })}
+          >
+            Open Explore Logs
+          </LinkButton>
         </Stack>
-      </div>
+        <body.Component model={body} />
+      </Stack>
     );
   };
 }
 
-export function buildRelatedLogsScene() {
-  return new RelatedLogsScene({});
-}
-
-export async function findHealthyLokiDataSources() {
-  const lokiDataSources = getDataSourceSrv().getList({
-    logs: true,
-    type: 'loki',
-    filter: (ds) => ds.uid !== 'grafana',
-  });
-  const healthyLokiDataSources: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
-  const unhealthyLokiDataSources: Array<DataSourceInstanceSettings<DataSourceJsonData>> = [];
-
-  await Promise.all(
-    lokiDataSources.map((ds) =>
-      getBackendSrv()
-        .get(`/api/datasources/${ds.id}/health`, undefined, undefined, {
-          showSuccessAlert: false,
-          showErrorAlert: false,
-        })
-        .then((health) =>
-          health?.status === 'OK' ? healthyLokiDataSources.push(ds) : unhealthyLokiDataSources.push(ds)
-        )
-        .catch(() => unhealthyLokiDataSources.push(ds))
-    )
-  );
-
-  if (unhealthyLokiDataSources.length) {
-    console.warn(
-      `Found ${unhealthyLokiDataSources.length} unhealthy Loki data sources: ${unhealthyLokiDataSources
-        .map((ds) => ds.name)
-        .join(', ')}`
-    );
-  }
-
-  return healthyLokiDataSources;
+export function buildRelatedLogsScene(props: RelatedLogsSceneProps) {
+  return new RelatedLogsScene(props);
 }
