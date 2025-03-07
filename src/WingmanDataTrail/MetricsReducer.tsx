@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
+import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -130,18 +131,23 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public static Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
     const styles = useStyles2(getStyles);
     const { body, headerControls, sidebar, drawer } = model.useState();
+    const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
 
     return (
-      <div className={styles.container}>
+      <div
+        className={styles.container}
+        style={{
+          height: `calc(100vh - ${chromeHeaderHeight}px)`,
+        }}
+      >
         <div className={styles.headerControls}>
           <headerControls.Component model={headerControls} />
         </div>
-        <div className={styles.content}>
+        <div className={styles.sidebar}>
           <sidebar.Component model={sidebar} />
-
-          <div className={styles.mainContent}>
-            <body.Component model={body} />
-          </div>
+        </div>
+        <div className={styles.mainContent}>
+          <body.Component model={body} />
         </div>
 
         <drawer.Component model={drawer} />
@@ -151,25 +157,41 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 }
 
 function getStyles(theme: GrafanaTheme2) {
+  const headerHeight = 55; // Height of our header controls
+
   return {
     container: css({
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      gap: theme.spacing(1),
-    }),
-    headerControls: css({}),
-    content: css({
-      display: 'flex',
-      flexGrow: 1,
-      gap: theme.spacing(2),
+      display: 'grid',
+      gridTemplateRows: `${headerHeight}px calc(100% - ${headerHeight}px)`,
+      gridTemplateColumns: '250px 1fr',
+      gridTemplateAreas: `
+        'header header'
+        'sidebar content'
+      `,
       height: '100%',
       overflow: 'hidden',
+      position: 'relative',
+    }),
+    headerControls: css({
+      gridArea: 'header',
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
+      padding: theme.spacing(1, 0),
+      zIndex: theme.zIndex.navbarFixed,
+      position: 'sticky',
+      top: 0,
+    }),
+    sidebar: css({
+      gridArea: 'sidebar',
+      background: theme.colors.background.canvas,
+      borderRight: `1px solid ${theme.colors.border.weak}`,
+      overflow: 'auto',
+      height: '100%',
     }),
     mainContent: css({
-      flexGrow: 1,
+      gridArea: 'content',
       overflow: 'auto',
       padding: theme.spacing(1),
+      height: '100%',
     }),
   };
 }
