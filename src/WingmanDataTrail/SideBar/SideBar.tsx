@@ -16,11 +16,7 @@ import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { MetricsFilterSection } from './MetricsFilterSection';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-  type MetricOptions,
-} from '../MetricsVariables/FilteredMetricsVariable';
+import { VAR_FILTERED_METRICS_VARIABLE, type MetricOptions } from '../MetricsVariables/FilteredMetricsVariable';
 
 interface SideBarState extends SceneObjectState {
   prefixGroups: Array<{ label: string; value: string; count: number }>;
@@ -33,8 +29,6 @@ interface SideBarState extends SceneObjectState {
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
-  // TODO: URL sync?
-
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERED_METRICS_VARIABLE],
     onAnyVariableChanged: (variable) => {
@@ -108,27 +102,28 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       loading,
     } = model.useState();
 
-    // TODO: make MetricsFilterSection as Scene object that FilteredMetricsVariable can subscribe to
-    // to prevent FilteredMetricsVariable to listen to the changes of state of the SideBar (inefficient)
     return (
-      <div className={styles.sidebar}>
-        <MetricsFilterSection
-          title="Metric groups"
-          items={prefixGroups}
-          hideEmpty={hideEmptyGroups}
-          selectedValues={selectedMetricPrefixes}
-          onSelectionChange={(values) => model.setState({ selectedMetricPrefixes: values })}
-          loading={loading}
-        />
-
-        <MetricsFilterSection
-          title="Metric categories"
-          items={categories}
-          hideEmpty={hideEmptyTypes}
-          selectedValues={selectedMetricCategories}
-          onSelectionChange={(values) => model.setState({ selectedMetricCategories: values })}
-          loading={loading}
-        />
+      <div className={styles.container}>
+        <div className={styles.topPanel}>
+          <MetricsFilterSection
+            title="Metric groups"
+            items={prefixGroups}
+            hideEmpty={hideEmptyGroups}
+            selectedValues={selectedMetricPrefixes}
+            onSelectionChange={(values) => model.setState({ selectedMetricPrefixes: values })}
+            loading={loading}
+          />
+        </div>
+        <div className={styles.bottomPanel}>
+          <MetricsFilterSection
+            title="Metric categories"
+            items={categories}
+            hideEmpty={hideEmptyTypes}
+            selectedValues={selectedMetricCategories}
+            onSelectionChange={(values) => model.setState({ selectedMetricCategories: values })}
+            loading={loading}
+          />
+        </div>
       </div>
     );
   };
@@ -136,23 +131,29 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    sidebar: css({
+    container: css({
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'flex-start',
-      gap: theme.spacing(2),
-      padding: theme.spacing(1),
-      width: '100%',
       height: '100%',
-      overflow: 'auto',
-      background: theme.colors.background.canvas,
-    }),
-    sectionContainer: css({
-      flex: '0 0 auto',
-      display: 'flex',
-      flexDirection: 'column',
+      background: theme.colors.background.primary,
+      border: `1px solid ${theme.colors.border.weak}`,
+      borderRadius: theme.shape.radius.default,
       overflow: 'hidden',
-      marginBottom: 0,
+    }),
+    topPanel: css({
+      height: '50%',
+      overflow: 'hidden',
+      padding: theme.spacing(2),
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
+      background: theme.colors.background.primary,
+    }),
+    bottomPanel: css({
+      height: '50%',
+      overflow: 'hidden',
+      padding: theme.spacing(2),
+      background: theme.colors.background.primary,
     }),
   };
 }
+
+export default SideBar;

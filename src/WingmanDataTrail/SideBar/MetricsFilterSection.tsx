@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { Checkbox, Field, FieldSet, Icon, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
-import React, { useState, type KeyboardEvent } from 'react';
+import { Checkbox, Icon, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
+import React, { useMemo, useState, type KeyboardEvent } from 'react';
 
 type MetricsFilterSectionProps = {
   title: string;
@@ -49,13 +49,17 @@ export function MetricsFilterSection({
   const [hideEmpty, setHideEmpty] = useState(true);
   const [searchValue, setSearchValue] = useState('');
 
-  const filteredList = items.filter((item) => {
-    const matchesSearch = item.label.toLowerCase().includes(searchValue.toLowerCase());
+  const filteredList = useMemo(() => {
+    const filters: Array<(item: { label: string; value: string; count: number }) => boolean> = [];
+
     if (hideEmpty) {
-      return matchesSearch && item.count > 0;
+      filters.push((item) => item.count > 0);
     }
-    return matchesSearch;
-  });
+
+    filters.push((item) => item.label.toLowerCase().includes(searchValue.toLowerCase()));
+
+    return items.filter((item) => filters.every((filter) => filter(item)));
+  }, [hideEmpty, items, searchValue]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -65,33 +69,34 @@ export function MetricsFilterSection({
   };
 
   return (
-    <FieldSet label={title} className={styles.fieldSetTitle}>
-      <div className={styles.fieldSetContent}>
-        <Field>
-          <div className={styles.switchContainer}>
-            <span className={styles.switchLabel}>Hide empty</span>
-            <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
-          </div>
-        </Field>
-        <Field>
-          <Input
-            prefix={<Icon name="search" />}
-            placeholder="Search..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.currentTarget.value)}
-            onKeyDown={onKeyDown}
-          />
-        </Field>
-        {loading && <Spinner inline />}
-        {!loading && (
-          <CheckBoxList
-            filteredList={filteredList}
-            selectedValues={selectedValues}
-            onSelectionChange={onSelectionChange}
-          />
-        )}
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h5>{title}</h5>
+        <div className={styles.switchContainer} data-testid="switch">
+          <span className={styles.switchLabel}>Hide empty</span>
+          <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
+        </div>
+
+        <Input
+          className={styles.search}
+          prefix={<Icon name="search" />}
+          placeholder="Search..."
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.currentTarget.value)}
+          onKeyDown={onKeyDown}
+        />
       </div>
-    </FieldSet>
+
+      {loading && <Spinner inline />}
+
+      {!loading && (
+        <CheckBoxList
+          filteredList={filteredList}
+          selectedValues={selectedValues}
+          onSelectionChange={onSelectionChange}
+        />
+      )}
+    </div>
   );
 }
 
@@ -134,54 +139,40 @@ function CheckBoxList({
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    noResults: css({
-      fontStyle: 'italic',
-    }),
-    fieldSetTitle: css({
-      '& > legend': {
-        fontSize: theme.typography.h5.fontSize + ' !important',
-        fontWeight: theme.typography.h5.fontWeight + ' !important',
-        marginBottom: '0 !important',
-        paddingBottom: '0 !important',
-      },
-      height: 'auto',
-      display: 'flex',
-      flexDirection: 'column',
-      '& > div': {
-        height: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '250px',
-      },
-      padding: '0 !important',
-      margin: '0 !important',
-    }),
-    fieldSetContent: css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing(0.5),
-      height: 'auto',
+    container: css({
       overflow: 'hidden',
-      '& .css-1n4u71h-Label': {
-        fontSize: '14px !important',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 0,
+      '& h5': {
+        marginBottom: '0',
+        paddingBottom: '0',
       },
-      '& > legend': {
-        fontSize: theme.typography.body.fontSize + ' !important',
-        fontWeight: theme.typography.body.fontWeight + ' !important',
-      },
-      '& > div': {
-        marginBottom: 0,
-      },
-      '& > div:nth-child(2)': {
-        marginBottom: theme.spacing(0.5),
-      },
+    }),
+    header: css({
+      paddingTop: theme.spacing(1),
+      paddingBottom: theme.spacing(1),
+    }),
+    switchContainer: css({
+      marginTop: theme.spacing(2),
+      marginBottom: theme.spacing(1),
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }),
+    switchLabel: css({
+      fontSize: '14px',
+      color: theme.colors.text.primary,
+    }),
+    search: css({
+      marginBottom: 0,
+      padding: '0 4px',
     }),
     checkboxList: css({
+      height: '100%',
+      padding: theme.spacing(1),
       overflowY: 'auto',
-      flexGrow: 0,
-      paddingRight: theme.spacing(1),
-      maxHeight: '210px',
-      marginTop: theme.spacing(0.5),
       '& .css-1n4u71h-Label': {
         fontSize: '14px !important',
       },
@@ -194,16 +185,6 @@ function getStyles(theme: GrafanaTheme2) {
         backgroundColor: theme.colors.secondary.main,
         '-webkit-box-shadow': `0 0 1px ${theme.colors.secondary.shade}`,
       },
-    }),
-    switchContainer: css({
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      width: '100%',
-    }),
-    switchLabel: css({
-      fontSize: '14px',
-      color: theme.colors.text.primary,
     }),
     checkboxWrapper: css({
       display: 'flex',
@@ -218,9 +199,6 @@ function getStyles(theme: GrafanaTheme2) {
       marginLeft: theme.spacing(0.5),
       display: 'inline-block',
     }),
-    field: css({
-      marginBottom: '0 !important',
-    }),
     controlsRow: css({
       display: 'flex',
       flexDirection: 'column',
@@ -231,6 +209,10 @@ function getStyles(theme: GrafanaTheme2) {
       alignItems: 'center',
       width: '100%',
       padding: `${theme.spacing(0.5)} 0`,
+    }),
+    noResults: css({
+      fontStyle: 'italic',
+      marginTop: theme.spacing(2),
     }),
   };
 }

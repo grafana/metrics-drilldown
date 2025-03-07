@@ -137,7 +137,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       <div
         className={styles.container}
         style={{
-          height: `calc(100vh - ${chromeHeaderHeight}px)`,
+          height: `calc(100vh - ${chromeHeaderHeight + 132}px)`,
         }}
       >
         <div className={styles.headerControls}>
@@ -181,17 +181,12 @@ function getStyles(theme: GrafanaTheme2) {
       top: 0,
     }),
     sidebar: css({
-      gridArea: 'sidebar',
-      background: theme.colors.background.canvas,
-      borderRight: `1px solid ${theme.colors.border.weak}`,
-      overflow: 'auto',
-      height: '100%',
+      paddingTop: theme.spacing(1.5),
     }),
     mainContent: css({
-      gridArea: 'content',
-      overflow: 'auto',
-      padding: theme.spacing(1),
+      padding: theme.spacing(1.5),
       height: '100%',
+      overflowY: 'auto',
     }),
   };
 }
