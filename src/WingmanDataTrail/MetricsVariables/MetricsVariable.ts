@@ -1,5 +1,5 @@
 import { VariableHide, VariableRefresh, VariableSort } from '@grafana/data';
-import { AdHocFiltersVariable, QueryVariable, sceneGraph, type SceneObjectState } from '@grafana/scenes';
+import { QueryVariable, sceneGraph, type SceneObjectState } from '@grafana/scenes';
 
 import { trailDS, VAR_FILTERS } from 'shared';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
@@ -20,7 +20,7 @@ export class MetricsVariable extends QueryVariable {
       label: 'Metrics',
       ...state,
       datasource: trailDS,
-      query: '',
+      query: `label_values({$${VAR_FILTERS}}, __name__)`,
       includeAll: true,
       value: '$__all',
       skipUrlSync: true,
@@ -31,27 +31,25 @@ export class MetricsVariable extends QueryVariable {
   }
 
   protected onActivate() {
+    // ensure that the correct metrics are loaded when landing: sometimes filters are not interpolated and fetching metric names gives all the results
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
 
-    // hack to ensure that the correct metrics are loaded when landing: sometimes filters are not interpolated and fetching metric names gives all the results
-    const adHocSub = sceneGraph.findByKeyAndType(this, VAR_FILTERS, AdHocFiltersVariable).subscribeToState(() => {
-      const groupBy = labelsVariable.state.value;
+    const updateQuery = (groupBy: string) => {
       const matcher = groupBy !== NULL_GROUP_BY_VALUE ? `${groupBy}=~".+",$${VAR_FILTERS}` : `$${VAR_FILTERS}`;
+      const query = `label_values({${matcher}}, __name__)`;
 
-      this.setState({ query: `label_values({${matcher}}, __name__)` });
-      this.refreshOptions();
+      if (query !== this.state.query) {
+        this.setState({ query });
+        this.refreshOptions();
+      }
+    };
 
-      adHocSub.unsubscribe();
-    });
+    updateQuery(labelsVariable.state.value as string);
 
     this._subs.add(
       labelsVariable.subscribeToState((newState, prevState) => {
         if (newState.value !== prevState.value) {
-          const matcher =
-            newState.value !== NULL_GROUP_BY_VALUE ? `${newState.value}=~".+",$${VAR_FILTERS}` : `$${VAR_FILTERS}`;
-
-          this.setState({ query: `label_values({${matcher}}, __name__)` });
-          this.refreshOptions();
+          updateQuery(newState.value as string);
         }
       })
     );
