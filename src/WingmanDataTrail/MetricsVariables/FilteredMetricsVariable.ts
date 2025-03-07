@@ -119,8 +119,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
     }
 
     if (updatedFilters.names.length > 0) {
-      const namesRegex = FilteredMetricsVariable.buildRegex(updatedFilters.names.join('|'));
-      filteredOptions = filteredOptions.filter((option) => namesRegex.test(option.value as string));
+      filteredOptions = this.applyNamesFilters(filteredOptions, updatedFilters.names);
     }
 
     this.filters = updatedFilters;
@@ -159,6 +158,25 @@ export class FilteredMetricsVariable extends MetricsVariable {
     }
 
     return filteredOptions;
+  }
+
+  private applyNamesFilters(options: MetricOptions, names: string[]): MetricOptions {
+    const [namePatterns] = names;
+
+    const regexes = namePatterns
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean)
+      .map((r) => {
+        try {
+          return new RegExp(r);
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean) as RegExp[];
+
+    return options.filter((option) => regexes.some((regex) => regex.test(option.value as string)));
   }
 
   private notifyUpdate() {
