@@ -86,11 +86,14 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
    * @returns
    */
   private buildPanel(metricName: string, colorIndex: number) {
+    const { labelName, labelValue } = this.state;
+
     return new SceneCSSGridItem({
       body: new WithUsageDataPreviewPanel({
         vizPanelInGridItem: new MetricVizPanel({
           metricName,
           color: getColorByIndex(colorIndex),
+          matchers: [`${labelName}="${labelValue}"`],
           groupByLabel: undefined,
         }),
         metric: metricName,
