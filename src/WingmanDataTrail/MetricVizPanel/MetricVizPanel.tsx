@@ -4,13 +4,14 @@ import {
   PanelBuilders,
   SceneObjectBase,
   SceneQueryRunner,
+  type QueryRunnerState,
   type SceneComponentProps,
   type SceneObjectState,
   type VizPanel,
   type VizPanelState,
 } from '@grafana/scenes';
-import { ThresholdsMode, VisibilityMode } from '@grafana/schema';
-import { Button, useStyles2 } from '@grafana/ui';
+import { MappingType, ThresholdsMode, VisibilityMode } from '@grafana/schema';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { trailDS } from 'shared';
@@ -90,27 +91,35 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     let builder;
 
     if (isUptime) {
-      // For uptime metrics, use a state timeline panel which is better for binary states
-      builder = PanelBuilders.statetimeline()
+      // For uptime metrics, use a status history panel which is better for binary states
+      builder = PanelBuilders.statushistory()
         .setTitle(metricName)
-        .setData(this.buildQueryRunner())
-        // Configure the state timeline for uptime metrics
-        .setOption('showValue', VisibilityMode.Auto)
-        .setOption('rowHeight', 0.9)
-        .setOption('alignValue', 'center')
-        // Set color mode to thresholds to enable threshold coloring
-        .setColor({ mode: 'thresholds' })
-        // Set thresholds for coloring
+        .setData(this.buildQueryRunner({ maxDataPoints: 100 }))
+        .setColor({ mode: 'thresholds' }) // Set color mode to enable threshold coloring
+        .setMappings([
+          {
+            type: MappingType.ValueToText,
+            options: {
+              '0': {
+                color: 'red',
+                text: 'down',
+              },
+              '1': {
+                color: 'green',
+                text: 'up',
+              },
+            },
+          },
+        ])
         .setThresholds({
           mode: ThresholdsMode.Absolute,
           steps: [
-            { value: 0, color: 'red' }, // 0 is red (down)
-            { value: 1, color: 'green' }, // 1 is green (up)
+            { value: 0, color: 'red' },
+            { value: 1, color: 'green' },
           ],
         })
-        // Hide the threshold annotations by setting various options
+        // Hide the threshold annotations
         .setOption('legend', { showLegend: false })
-        .setOption('mergeValues', false)
         .setOption('showValue', VisibilityMode.Never);
     } else {
       // Default settings for non-uptime metrics - use timeseries
@@ -126,14 +135,19 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     return builder.build();
   }
 
-  buildQueryRunner() {
+  private queryRunnerDefaultState: Partial<QueryRunnerState> = {
+    datasource: trailDS,
+    maxDataPoints: 250,
+  };
+
+  buildQueryRunner(initialState?: Partial<QueryRunnerState>) {
     const { metricName, matchers, groupByLabel, prometheusFunction: fn } = this.state;
 
     const expr = buildPrometheusQuery({ metricName, matchers, groupByLabel, fn });
 
     return new SceneQueryRunner({
-      datasource: trailDS,
-      maxDataPoints: 250,
+      ...this.queryRunnerDefaultState,
+      ...(initialState ?? {}),
       queries: [
         {
           refId: `${metricName}-${groupByLabel?.name}`,
