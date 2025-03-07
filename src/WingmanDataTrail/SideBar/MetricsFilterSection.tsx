@@ -102,6 +102,11 @@ function CheckBoxList({
   onSelectionChange: MetricsFilterSectionProps['onSelectionChange'];
 }) {
   const styles = useStyles2(getStyles);
+
+  if (!filteredList.length) {
+    return <div className={styles.noResults}>No results</div>;
+  }
+
   return (
     <div className={styles.checkboxList}>
       {filteredList.map((item) => (
@@ -126,6 +131,9 @@ function CheckBoxList({
 
 function getStyles(theme: GrafanaTheme2) {
   return {
+    noResults: css({
+      fontStyle: 'italic',
+    }),
     fieldSetTitle: css({
       '& > legend': {
         fontSize: theme.typography.h5.fontSize + ' !important',

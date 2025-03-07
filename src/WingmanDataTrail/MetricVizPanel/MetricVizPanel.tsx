@@ -32,6 +32,7 @@ interface MetricVizPanelState extends SceneObjectState {
   highlight: boolean;
   height: string;
   headerActions: VizPanelState['headerActions'];
+  matchers: string[];
   body?: VizPanel;
   groupByLabel?: GroupByLabel;
 }
@@ -45,6 +46,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     color: MetricVizPanelState['color'];
     prometheusFunction?: MetricVizPanelState['prometheusFunction'];
     groupByLabel: MetricVizPanelState['groupByLabel'];
+    matchers?: MetricVizPanelState['matchers'];
     title?: MetricVizPanelState['title'];
     headerActions?: MetricVizPanelState['headerActions'];
     hideLegend?: MetricVizPanelState['hideLegend'];
@@ -57,6 +59,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       color: state.color,
       prometheusFunction: state.prometheusFunction || 'sum',
       groupByLabel: state.groupByLabel,
+      matchers: state.matchers || [],
       title: state.title || state.metricName,
       height: state.height || METRICS_VIZ_PANEL_HEIGHT,
       hideLegend: Boolean(state.hideLegend),
@@ -91,9 +94,9 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   }
 
   buildQueryRunner() {
-    const { metricName, groupByLabel, prometheusFunction: fn } = this.state;
+    const { metricName, matchers, groupByLabel, prometheusFunction: fn } = this.state;
 
-    const expr = buildPrometheusQuery({ metricName, groupByLabel, fn });
+    const expr = buildPrometheusQuery({ metricName, matchers, groupByLabel, fn });
 
     return new SceneQueryRunner({
       datasource: trailDS,

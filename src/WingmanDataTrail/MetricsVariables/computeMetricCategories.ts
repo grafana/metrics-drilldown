@@ -13,11 +13,15 @@ export function computeMetricCategories(options: Array<{ label: string; value: s
 
   return Array.from(categoriesMap.entries())
     .sort((a, b) => b[1] - a[1])
-    .map(([value, count]) => ({
-      value,
-      label: CATEGORY_MATCHERS.get(value)?.label ?? value,
-      count,
-    }));
+    .map(([value, count]) => {
+      const matcher = CATEGORY_MATCHERS.get(value)!;
+
+      return {
+        value: matcher.regex.toString().replace(/(\/|i$)/g, ''), // See FilteredMetricsVariable
+        label: matcher.label,
+        count,
+      };
+    });
 }
 
 function inferCategoriesFromMetric(metric: string): string[] {

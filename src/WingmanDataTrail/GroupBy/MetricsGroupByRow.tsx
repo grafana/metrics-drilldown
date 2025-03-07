@@ -5,6 +5,7 @@ import {
   SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
+  SceneReactObject,
   VariableDependencyConfig,
   type SceneComponentProps,
   type SceneObject,
@@ -15,7 +16,8 @@ import React, { useState } from 'react';
 
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex } from 'utils';
-import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
+import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
@@ -41,8 +43,11 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         this
       ) as FilteredMetricsVariable;
 
+      const metricsList = filteredMetricsVariable.state.options.map((option) => option.value as string);
+
       this.setState({
-        metricsList: filteredMetricsVariable.state.options.map((option) => option.value as string),
+        metricsList,
+        body: this.buildMetricsBody(metricsList),
       });
     },
   });
@@ -71,9 +76,28 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const metricsList = filteredMetricsVariable.state.options.map((option) => option.value as string);
 
     this.setState({
-      body: this.buildMetricsBody(metricsList, this.state.visibleMetricsCount),
       metricsList,
+      body: this.buildMetricsBody(metricsList),
     });
+
+    this.subscribeToLayoutChange();
+  }
+
+  private subscribeToLayoutChange() {
+    const layoutSwitcher = sceneGraph.findByKeyAndType(this, 'layout-switcher', LayoutSwitcher);
+    const body = this.state.body as SceneCSSGridLayout;
+
+    const onChangeState = (newState: LayoutSwitcherState, prevState?: LayoutSwitcherState) => {
+      if (newState.layout !== prevState?.layout) {
+        body.setState({
+          templateColumns: newState.layout === LayoutType.ROWS ? GRID_TEMPLATE_ROWS : GRID_TEMPLATE_COLUMNS,
+        });
+      }
+    };
+
+    onChangeState(layoutSwitcher.state); // ensure layout when landing on the page
+
+    this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
   /**
@@ -83,11 +107,14 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
    * @returns
    */
   private buildPanel(metricName: string, colorIndex: number) {
+    const { labelName, labelValue } = this.state;
+
     return new SceneCSSGridItem({
       body: new WithUsageDataPreviewPanel({
         vizPanelInGridItem: new MetricVizPanel({
           metricName,
-          color: getColorByIndex(colorIndex++),
+          color: getColorByIndex(colorIndex),
+          matchers: [`${labelName}="${labelValue}"`],
           groupByLabel: undefined,
         }),
         metric: metricName,
@@ -95,8 +122,8 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     });
   }
 
-  private buildMetricsBody(metricsList: string[], visibleMetricsCount?: number): SceneObject {
-    const { labelName, labelValue } = this.state;
+  private buildMetricsBody(metricsList: string[]): SceneObject {
+    const { labelName, labelValue, visibleMetricsCount } = this.state;
 
     const listLength =
       visibleMetricsCount && metricsList.length >= visibleMetricsCount ? visibleMetricsCount : metricsList.length;
@@ -106,11 +133,22 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const panelList = metricsList.slice(0, listLength);
 
     const panels = panelList.map((metricName) => this.buildPanel(metricName, colorIndex++));
+    const autoRows = panels.length ? '240px' : 'auto';
+
+    if (!panels.length) {
+      panels.push(
+        new SceneCSSGridItem({
+          body: new SceneReactObject({
+            reactNode: <em>No results.</em>,
+          }),
+        })
+      );
+    }
 
     return new SceneCSSGridLayout({
       key: `${labelName}-${labelValue}-metrics-${visibleMetricsCount}`, // Add a different key to force re-render
       templateColumns: GRID_TEMPLATE_COLUMNS,
-      autoRows: '240px', // will need to fix this at some point
+      autoRows,
       alignItems: 'start',
       isLazy: true,
       children: panels,
@@ -154,7 +192,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const styles = useStyles2(getStyles);
 
-    const { labelName, labelValue, body, metricsList, visibleMetricsCount, paginationCount } = model.state;
+    const { labelName, labelValue, body, metricsList, visibleMetricsCount, paginationCount } = model.useState();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [currentCount, setCurrentCount] = useState(visibleMetricsCount ?? 6);
     const [showPagination, setShowPagination] = useState((visibleMetricsCount ?? 6) < metricsList.length);
@@ -175,6 +213,8 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       }
     };
 
+    const showMoreCount = Math.min(paginationCount ?? 9, metricsList.length - currentCount);
+
     return (
       <div className={styles.rowContainer}>
         {/* for a custom label with buttons on the right, had to hack this above the collapsable section */}
@@ -189,12 +229,13 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
         <CollapsableSection onToggle={() => setIsCollapsed(!isCollapsed)} label="" isOpen={!isCollapsed}>
           {body && <body.Component model={body} />}
+
           {/* Show toggle button if there are more metrics to show */}
-          {showPagination && (
+          {showPagination && showMoreCount > 0 && (
             <div className={styles.showMoreButton}>
               <Button variant="secondary" fill="outline" onClick={handleToggleShowMore}>
-                Show {Math.min(paginationCount ?? 9, metricsList.length - currentCount)} More ({currentCount}/
-                {metricsList.length})&nbsp;<i className="fa fa-caret-down"></i>
+                Show {showMoreCount} More ({currentCount}/{metricsList.length})&nbsp;
+                <i className="fa fa-caret-down"></i>
               </Button>
             </div>
           )}

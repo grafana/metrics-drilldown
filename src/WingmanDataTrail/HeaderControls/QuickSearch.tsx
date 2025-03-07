@@ -1,21 +1,18 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
-  sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   VariableDependencyConfig,
+  type MultiValueVariable,
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
 import { IconButton, Input, Tag, useStyles2 } from '@grafana/ui';
 import React, { type KeyboardEvent } from 'react';
 
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-  type MetricOptions,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 interface QuickSearchState extends SceneObjectState {
   value: string;
@@ -25,8 +22,18 @@ interface QuickSearchState extends SceneObjectState {
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERED_METRICS_VARIABLE],
-    onVariableUpdateCompleted: () => {
-      this.updateCounts();
+    onAnyVariableChanged: (variable) => {
+      const { name, options } = (variable as MultiValueVariable).state;
+
+      if (name === VAR_METRICS_VARIABLE) {
+        this.setState({ counts: { ...this.state.counts, total: options.length } });
+        return;
+      }
+
+      if (name === VAR_FILTERED_METRICS_VARIABLE) {
+        this.setState({ counts: { ...this.state.counts, current: options.length } });
+        return;
+      }
     },
   });
 
@@ -50,18 +57,11 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     super({
       key: 'quick-search',
       value: '',
-      counts: { current: 0, total: 0 },
+      counts: {
+        current: 0,
+        total: 0,
+      },
     });
-  }
-
-  private updateCounts() {
-    const filteredMetricsVariable = sceneGraph.lookupVariable(
-      VAR_FILTERED_METRICS_VARIABLE,
-      this
-    ) as FilteredMetricsVariable;
-    const options = filteredMetricsVariable.state.options as MetricOptions;
-
-    this.setState({ counts: { current: options.length, total: options.length } });
   }
 
   private onChange = (e: React.FormEvent<HTMLInputElement>) => {

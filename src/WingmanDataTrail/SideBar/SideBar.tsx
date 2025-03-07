@@ -4,6 +4,7 @@ import {
   sceneGraph,
   SceneObjectBase,
   VariableDependencyConfig,
+  type MultiValueVariable,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
@@ -12,6 +13,7 @@ import React from 'react';
 
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
+import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { MetricsFilterSection } from './MetricsFilterSection';
 import {
@@ -25,16 +27,28 @@ interface SideBarState extends SceneObjectState {
   categories: Array<{ label: string; value: string; count: number }>;
   hideEmptyGroups: boolean;
   hideEmptyTypes: boolean;
-  selectedMetricGroups: string[];
-  selectedMetricTypes: string[];
+  selectedMetricPrefixes: string[];
+  selectedMetricCategories: string[];
   loading: boolean;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
+  // TODO: URL sync?
+
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERED_METRICS_VARIABLE],
-    onVariableUpdateCompleted: () => {
-      this.updateCounts();
+    onAnyVariableChanged: (variable) => {
+      const { name, options } = (variable as MultiValueVariable).state;
+
+      if (name === VAR_METRICS_VARIABLE) {
+        this.updateLists(options as MetricOptions);
+        return;
+      }
+
+      if (name === VAR_FILTERED_METRICS_VARIABLE) {
+        this.updateCounts(options as MetricOptions);
+        return;
+      }
     },
   });
 
@@ -46,8 +60,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       categories: [],
       hideEmptyGroups: true,
       hideEmptyTypes: true,
-      selectedMetricGroups: [],
-      selectedMetricTypes: [],
+      selectedMetricPrefixes: [],
+      selectedMetricCategories: [],
       loading: true,
     });
 
@@ -71,14 +85,15 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     );
   }
 
-  private updateCounts() {
-    const metricsVariable = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this) as FilteredMetricsVariable;
-    const options = metricsVariable.state.options as MetricOptions;
-
+  private updateLists(options: MetricOptions) {
     this.setState({
       prefixGroups: computeMetricPrefixGroups(options),
       categories: computeMetricCategories(options),
     });
+  }
+
+  private updateCounts(filteredOptions: MetricOptions) {
+    console.log('[TODO] SideBar.updateCounts', filteredOptions.length);
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
@@ -86,21 +101,23 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const {
       hideEmptyGroups,
       hideEmptyTypes,
-      selectedMetricGroups,
-      selectedMetricTypes,
+      selectedMetricPrefixes,
+      selectedMetricCategories,
       prefixGroups,
       categories,
       loading,
     } = model.useState();
 
+    // TODO: make MetricsFilterSection as Scene object that FilteredMetricsVariable can subscribe to
+    // to prevent FilteredMetricsVariable to listen to the changes of state of the SideBar (inefficient)
     return (
       <div className={styles.sidebar}>
         <MetricsFilterSection
           title="Metric groups"
           items={prefixGroups}
           hideEmpty={hideEmptyGroups}
-          selectedValues={selectedMetricGroups}
-          onSelectionChange={(values) => model.setState({ selectedMetricGroups: values })}
+          selectedValues={selectedMetricPrefixes}
+          onSelectionChange={(values) => model.setState({ selectedMetricPrefixes: values })}
           loading={loading}
         />
 
@@ -108,8 +125,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title="Metric categories"
           items={categories}
           hideEmpty={hideEmptyTypes}
-          selectedValues={selectedMetricTypes}
-          onSelectionChange={(values) => model.setState({ selectedMetricTypes: values })}
+          selectedValues={selectedMetricCategories}
+          onSelectionChange={(values) => model.setState({ selectedMetricCategories: values })}
           loading={loading}
         />
       </div>

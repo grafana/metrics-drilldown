@@ -17,7 +17,7 @@ export class LabelsVariable extends QueryVariable {
       label: 'Group by label',
       placeholder: 'Group by label...',
       datasource: { uid: LabelsDataSource.uid },
-      query: `{__name__=~".+",\$${VAR_FILTERS}}`,
+      query: '',
       includeAll: false,
       isMulti: false,
       allowCustomValue: false,
@@ -37,6 +37,10 @@ export class LabelsVariable extends QueryVariable {
         }
       })
     );
+
+    this.setState({
+      query: `{__name__=~".+",\$${VAR_FILTERS}}`,
+    });
   }
 
   static Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
