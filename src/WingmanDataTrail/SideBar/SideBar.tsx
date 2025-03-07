@@ -16,7 +16,11 @@ import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { MetricsFilterSection } from './MetricsFilterSection';
-import { VAR_FILTERED_METRICS_VARIABLE, type MetricOptions } from '../MetricsVariables/FilteredMetricsVariable';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+  type MetricOptions,
+} from '../MetricsVariables/FilteredMetricsVariable';
 
 interface SideBarState extends SceneObjectState {
   prefixGroups: Array<{ label: string; value: string; count: number }>;
