@@ -28,9 +28,12 @@ const CheckboxWithCount = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const styles = useStyles2(getStyles);
+  // Create a combined label with the count
+  const combinedLabel = `${label} `;
+
   return (
     <div className={styles.checkboxWrapper}>
-      <Checkbox label={label} value={checked} onChange={onChange} />
+      <Checkbox label={combinedLabel} value={checked} onChange={onChange} />
       <span className={styles.count}>({count})</span>
     </div>
   );
@@ -226,7 +229,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     checkboxWrapper: css({
       display: 'flex',
-      justifyContent: 'space-between',
       alignItems: 'center',
       width: '100%',
       '& label': {
@@ -235,7 +237,8 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     count: css({
       color: theme.colors.text.secondary,
-      marginLeft: theme.spacing(1),
+      marginLeft: theme.spacing(0.5),
+      display: 'inline-block',
     }),
     field: css({
       marginBottom: '0 !important',
@@ -247,7 +250,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     checkboxItem: css({
       display: 'flex',
-      justifyContent: 'space-between',
       alignItems: 'center',
       width: '100%',
       padding: `${theme.spacing(0.5)} 0`,
