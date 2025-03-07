@@ -1,11 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "Metrics Drilldown",
+  "name": "Grafana Metrics Drilldown",
   "id": "grafana-metricsdrilldown-app",
   "autoEnabled": true,
   "info": {
-    "keywords": ["app", "mimir", "prometheus", "metrics", "drilldown"],
+    "keywords": ["drilldown", "metrics", "app", "prometheus", "mimir"],
     "description": "Queryless metrics explorer for Prometheus data sources",
     "author": {
       "name": "Grafana"
@@ -44,7 +44,7 @@
   "includes": [
     {
       "type": "page",
-      "name": "Metrics App",
+      "name": "Grafana Metrics Drilldown",
       "path": "/a/%PLUGIN_ID%/",
       "action": "datasources:explore",
       "addToNav": true,
@@ -55,6 +55,7 @@
     "grafanaDependency": ">=11.3.0",
     "plugins": []
   },
+  "preload": true,
   "extensions": {
     "addedLinks": [],
     "extensionPoints": [
