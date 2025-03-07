@@ -38,8 +38,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
     super.onActivate();
 
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
-
-    // TODO: subscribe only to the filter sesctions in the side bar, once they are Scene objects (and not React components)
+    // TODO: subscribe only to the filter sections in the side bar, once they are Scene objects (and not React components)
     const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
 
     this._subs.add(

@@ -1,5 +1,5 @@
 import { VariableHide, VariableRefresh, VariableSort } from '@grafana/data';
-import { QueryVariable, sceneGraph, type SceneObjectState } from '@grafana/scenes';
+import { AdHocFiltersVariable, QueryVariable, sceneGraph, type SceneObjectState } from '@grafana/scenes';
 
 import { trailDS, VAR_FILTERS } from 'shared';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
@@ -20,7 +20,7 @@ export class MetricsVariable extends QueryVariable {
       label: 'Metrics',
       ...state,
       datasource: trailDS,
-      query: `label_values({$${VAR_FILTERS}}, __name__)`,
+      query: '',
       includeAll: true,
       value: '$__all',
       skipUrlSync: true,
@@ -32,6 +32,17 @@ export class MetricsVariable extends QueryVariable {
 
   protected onActivate() {
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
+
+    // hack to ensure that the correct metrics are loaded when landing: sometimes filters are not interpolated and fetching metric names gives all the results
+    const adHocSub = sceneGraph.findByKeyAndType(this, VAR_FILTERS, AdHocFiltersVariable).subscribeToState(() => {
+      const groupBy = labelsVariable.state.value;
+      const matcher = groupBy !== NULL_GROUP_BY_VALUE ? `${groupBy}=~".+",$${VAR_FILTERS}` : `$${VAR_FILTERS}`;
+
+      this.setState({ query: `label_values({${matcher}}, __name__)` });
+      this.refreshOptions();
+
+      adHocSub.unsubscribe();
+    });
 
     this._subs.add(
       labelsVariable.subscribeToState((newState, prevState) => {
