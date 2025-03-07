@@ -1,6 +1,6 @@
-# Metrics-Drilldown
+# Grafana Metrics Drilldown
 
-Metrics Drilldown provides a query-less experience for browsing Prometheus-compatible metrics. Quickly find related metrics without writing PromQL queries.
+Grafana Metrics Drilldown provides a query-less experience for browsing Prometheus-compatible metrics. Quickly find related metrics without writing PromQL queries.
 
 ## Requirements
 
@@ -8,13 +8,13 @@ Requires Grafana 11.3.0 or newer.
 
 ## Getting Started
 
-See the [docs](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/#standalone-experience) for more info using Metrics Drilldown.
+See the [docs](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/#standalone-experience) for more info using Grafana Metrics Drilldown.
 
 ## Documentation
 
-- [DOCS](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/)
+- [DOCS](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics)
 - [CHANGELOG](https://github.com/grafana/metrics-drilldown/releases)
-- [GITHUB](https://github.com/grafana/metrics-drilldown/)
+- [GITHUB](https://github.com/grafana/metrics-drilldown)
 
 ## Contributing
 
@@ -26,5 +26,4 @@ If your issue is a bug, please open one [here](https://github.com/grafana/metric
 
 ### Changes
 
-We do not have a formal proposal process for changes or feature requests. If you have a change you would like to see in
-Metrics Drilldown, please [file an issue](https://github.com/grafana/metrics-drilldown/issues/new) with the necessary details.
+We do not have a formal proposal process for changes or feature requests. If you have a change you would like to see in Grafana Metrics Drilldown, please [file an issue](https://github.com/grafana/metrics-drilldown/issues/new) with the necessary details.
