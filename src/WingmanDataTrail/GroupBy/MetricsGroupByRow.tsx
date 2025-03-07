@@ -231,8 +231,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           {showPagination && showMoreCount > 0 && (
             <div className={styles.showMoreButton}>
               <Button variant="secondary" fill="outline" onClick={handleToggleShowMore}>
-                Show {showMoreCount} More ({currentCount}/{metricsList.length})&nbsp;
-                <i className="fa fa-caret-down"></i>
+                Show {showMoreCount} More ({currentCount}/{metricsList.length})
               </Button>
             </div>
           )}
@@ -273,6 +272,7 @@ function getStyles(theme: GrafanaTheme2) {
     showMoreButton: css({
       display: 'flex',
       marginTop: '16px',
+      justifyContent: 'center',
     }),
     button: css({}),
   };
