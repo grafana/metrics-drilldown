@@ -5,6 +5,7 @@ import {
   SceneFlexLayout,
   SceneObjectBase,
   SceneVariableSet,
+  VariableDependencyConfig,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
@@ -15,8 +16,9 @@ import { MetricsGroupByList } from 'WingmanDataTrail/GroupBy/MetricsGroupByList'
 import { LayoutSwitcher } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch';
 import { SimpleMetricsList } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
+import { registerRuntimeDataSources } from 'WingmanDataTrail/registerRuntimeDataSources';
 
-import { MainLabelVariable } from './HeaderControls/MainLabelVariable';
+import { MainLabelVariable, VAR_MAIN_LABEL_VARIABLE } from './HeaderControls/MainLabelVariable';
 
 interface MetricsOnboardingState extends SceneObjectState {
   headerControls: SceneFlexLayout;
@@ -24,6 +26,13 @@ interface MetricsOnboardingState extends SceneObjectState {
 }
 
 export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_MAIN_LABEL_VARIABLE],
+    onReferencedVariableValueChanged: (variable) => {
+      this.updateBody((variable as MainLabelVariable).state.value as string);
+    },
+  });
+
   constructor() {
     const quickSearch = new QuickSearch();
     const layoutSwitcher = new LayoutSwitcher();
@@ -56,6 +65,8 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       body: undefined,
     });
 
+    registerRuntimeDataSources();
+
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
@@ -73,11 +84,11 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     );
   }
 
-  private updateBody(groupBy: string) {
+  private updateBody(groupByValue: string) {
     this.setState({
-      body: !groupBy
+      body: !groupByValue
         ? (new SimpleMetricsList() as unknown as SceneObjectBase)
-        : (new MetricsGroupByList({ labelName: 'namespace' }) as unknown as SceneObjectBase),
+        : (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase),
     });
   }
 
