@@ -4,17 +4,19 @@ import {
   PanelBuilders,
   SceneObjectBase,
   SceneQueryRunner,
+  type QueryRunnerState,
   type SceneComponentProps,
   type SceneObjectState,
   type VizPanel,
   type VizPanelState,
 } from '@grafana/scenes';
+import { MappingType, ThresholdsMode, VisibilityMode } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { trailDS } from 'shared';
 
-import { ConfigureAction } from './actions/ConfigureAction';
+import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
 import { buildPrometheusQuery } from './buildPrometheusQuery';
 
@@ -26,7 +28,7 @@ export type GroupByLabel = {
 interface MetricVizPanelState extends SceneObjectState {
   metricName: string;
   color: string;
-  prometheusFunction: string;
+  prometheusFunction: PrometheusFn;
   title: string;
   hideLegend: boolean;
   highlight: boolean;
@@ -78,26 +80,71 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   }
 
   buildVizPanel() {
-    const { title, color, headerActions, hideLegend, highlight } = this.state;
+    const { title, color, headerActions, hideLegend, highlight, metricName } = this.state;
 
-    return PanelBuilders.timeseries()
-      .setTitle(highlight ? `${title} (current)` : title)
-      .setData(this.buildQueryRunner())
-      .setColor({ mode: 'fixed', fixedColor: color })
-      .setCustomFieldConfig('fillOpacity', 9)
-      .setHeaderActions(headerActions)
-      .setOption('legend', { showLegend: !hideLegend })
-      .build();
+    // Check if this is an uptime metric
+    const isUptime = metricName === 'up' || metricName.endsWith('_up');
+
+    let builder;
+
+    if (isUptime) {
+      // For uptime metrics, use a status history panel which is better for binary states
+      builder = PanelBuilders.statushistory()
+        .setTitle(metricName)
+        .setData(this.buildQueryRunner({ maxDataPoints: 100 }))
+        .setColor({ mode: 'thresholds' }) // Set color mode to enable threshold coloring
+        .setMappings([
+          {
+            type: MappingType.ValueToText,
+            options: {
+              '0': {
+                color: 'red',
+                text: 'down',
+              },
+              '1': {
+                color: 'green',
+                text: 'up',
+              },
+            },
+          },
+        ])
+        .setThresholds({
+          mode: ThresholdsMode.Absolute,
+          steps: [
+            { value: 0, color: 'red' },
+            { value: 1, color: 'green' },
+          ],
+        })
+        // Hide the threshold annotations
+        .setOption('legend', { showLegend: false })
+        .setOption('showValue', VisibilityMode.Never);
+    } else {
+      // Default settings for non-uptime metrics - use timeseries
+      builder = PanelBuilders.timeseries()
+        .setTitle(highlight ? `${title} (current)` : title)
+        .setData(this.buildQueryRunner())
+        .setColor({ mode: 'fixed', fixedColor: color })
+        .setCustomFieldConfig('fillOpacity', 9)
+        .setHeaderActions(headerActions)
+        .setOption('legend', { showLegend: !hideLegend });
+    }
+
+    return builder.build();
   }
 
-  buildQueryRunner() {
+  private queryRunnerDefaultState: Partial<QueryRunnerState> = {
+    datasource: trailDS,
+    maxDataPoints: 250,
+  };
+
+  buildQueryRunner(initialState?: Partial<QueryRunnerState>) {
     const { metricName, groupByLabel, prometheusFunction: fn } = this.state;
 
     const expr = buildPrometheusQuery({ metricName, groupByLabel, fn });
 
     return new SceneQueryRunner({
-      datasource: trailDS,
-      maxDataPoints: 250,
+      ...this.queryRunnerDefaultState,
+      ...(initialState ?? {}),
       queries: [
         {
           refId: `${metricName}-${groupByLabel?.name}`,
