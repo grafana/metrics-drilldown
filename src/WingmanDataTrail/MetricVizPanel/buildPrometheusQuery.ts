@@ -22,6 +22,7 @@ export function buildPrometheusQuery({ metricName, fn, matchers, groupByLabel }:
   const vectorExpr = promql.vector(metricName);
   vectorExpr.label('__ignore_usage__', '');
 
+  // Add label matchers to the vector expression
   if (matchers) {
     matchers.forEach((matcher) => {
       const [key, value] = matcher.split('=');
