@@ -24,7 +24,10 @@ export function buildPrometheusQuery({ metricName, fn, matchers, groupByLabel }:
 
   if (matchers) {
     matchers.forEach((matcher) => {
-      vectorExpr.label(matcher, '');
+      const [key, value] = matcher.split('=');
+      if (key && value) {
+        vectorExpr.label(key, value);
+      }
     });
   }
 
