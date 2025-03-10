@@ -11,15 +11,22 @@ function isUptimeMetric(metricName: string): boolean {
 interface BuildPrometheusQueryOptions {
   metricName: string;
   fn: PrometheusFn;
+  matchers?: string[];
   groupByLabel?: GroupByLabel;
 }
 
-export function buildPrometheusQuery({ metricName, fn, groupByLabel }: BuildPrometheusQueryOptions): string {
+export function buildPrometheusQuery({ metricName, fn, matchers, groupByLabel }: BuildPrometheusQueryOptions): string {
   let expr: promql.AggregationExprBuilder;
 
   // Create a vector with the metric name and __ignore_usage__ label
   const vectorExpr = promql.vector(metricName);
   vectorExpr.label('__ignore_usage__', '');
+
+  if (matchers) {
+    matchers.forEach((matcher) => {
+      vectorExpr.label(matcher, '');
+    });
+  }
 
   // Special handling for uptime metrics - use `min` to expose downtime in any series
   if (isUptimeMetric(metricName)) {
