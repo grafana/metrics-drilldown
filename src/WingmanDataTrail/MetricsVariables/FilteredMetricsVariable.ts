@@ -1,7 +1,7 @@
 import { sceneGraph, SceneVariableValueChangedEvent, type VariableValueOption } from '@grafana/scenes';
 import { cloneDeep, debounce, isEqual } from 'lodash';
 
-import { VAR_FILTERS } from 'shared';
+import { VAR_FILTERS_EXPR } from 'shared';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
@@ -38,25 +38,27 @@ export class FilteredMetricsVariable extends MetricsVariable {
   }
 
   protected onActivate() {
-    const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
-    // TODO: subscribe only to the filter sections in the side bar, once they are Scene objects (and not React components)
-    const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
+    let quickSearch = new QuickSearch();
+    let sideBar = new SideBar({});
 
     // TEMP: this is just to make the unit tests pass so we can deploy
     // because this variable is added to the ancestor DataTrail Scene object - tried to move it to MetricsReducer, but it does not work
+    // Also it makes the /a/grafana-metricsdrilldown-app/onboard-wingman page work ;)
     try {
-      this.subscribeToStateChange(quickSearch, sideBar);
-      this.subscribeToUiFiltersChange(quickSearch, sideBar);
-      this.subscribeToGroupByChange();
+      quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
+      sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
     } catch (error) {
-      console.error('Error in FilteredMetricsVariable onActivate', error);
+      console.warn('Error in FilteredMetricsVariable onActivate', error);
     }
+
+    this.subscribeToStateChange(quickSearch, sideBar);
+    this.subscribeToUiFiltersChange(quickSearch, sideBar);
+    this.subscribeToGroupByChange();
   }
 
   private subscribeToStateChange(quickSearch: QuickSearch, sideBar: SideBar) {
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
-        console.log('*** newState', newState.options);
         if (newState.loading === false && prevState.loading === true) {
           this.initOptions = cloneDeep(newState.options);
 
@@ -90,6 +92,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
       )
     );
 
+    // TODO: subscribe only to the filter sections in the side bar, once they are Scene objects (and not React components)
     this._subs.add(
       sideBar.subscribeToState((newState, prevState) => {
         if (!isEqual(newState.selectedMetricPrefixes, prevState.selectedMetricPrefixes)) {
@@ -108,14 +111,14 @@ export class FilteredMetricsVariable extends MetricsVariable {
   }
 
   private subscribeToGroupByChange() {
-    // ensure that the correct metrics are loaded when landing: sometimes filters are not interpolated and fetching metric names gives all the results
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
 
     const updateQuery = (groupBy: string) => {
-      const matcher = groupBy !== NULL_GROUP_BY_VALUE ? `${groupBy}=~".+",$${VAR_FILTERS}` : `$${VAR_FILTERS}`;
+      // ensure that the correct metrics are fetched when landing: sometimes filters are not interpolated and fetching metric names gives all the results
+      // (we do the same in MetricsGroupByList.tsx)
+      const filterExpression = sceneGraph.interpolate(this, VAR_FILTERS_EXPR, {});
+      const matcher = groupBy !== NULL_GROUP_BY_VALUE ? `${groupBy}=~".+",${filterExpression}` : filterExpression;
       const query = `label_values({${matcher}}, __name__)`;
-
-      console.log('*** query', query);
 
       if (query !== this.state.query) {
         this.setState({ query });
