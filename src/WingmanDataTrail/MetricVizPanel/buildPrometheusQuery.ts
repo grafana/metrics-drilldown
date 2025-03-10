@@ -26,7 +26,8 @@ export function buildPrometheusQuery({ metricName, fn, matchers, groupByLabel }:
     matchers.forEach((matcher) => {
       const [key, value] = matcher.split('=');
       if (key && value) {
-        vectorExpr.label(key, value);
+        // Remove any single or double quotes from the value
+        vectorExpr.label(key, value.replace(/['"]/g, ''));
       }
     });
   }
