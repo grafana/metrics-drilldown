@@ -1,6 +1,6 @@
 # Grafana Metrics Drilldown
 
-Grafana Metrics Drilldown provides a query-less experience for browsing Prometheus-compatible metrics. Quickly find related metrics without writing PromQL queries.
+The Grafana Metrics Drilldown app provides a queryless experience for browsing Prometheus-compatible metrics. Quickly find related metrics without writing PromQL queries.
 
 ## Requirements
 
