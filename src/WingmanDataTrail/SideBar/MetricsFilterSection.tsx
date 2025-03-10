@@ -1,7 +1,9 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { Checkbox, Icon, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
+import { Button, Icon, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEvent } from 'react';
+
+import { CheckboxWithCount } from './CheckboxWithCount';
 
 type MetricsFilterSectionProps = {
   title: string;
@@ -10,31 +12,6 @@ type MetricsFilterSectionProps = {
   selectedValues: string[];
   onSelectionChange: (values: string[]) => void;
   loading: boolean;
-};
-
-const CheckboxWithCount = ({
-  label,
-  count,
-  value,
-  checked,
-  onChange,
-}: {
-  label: string;
-  count: number;
-  value: string;
-  checked: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) => {
-  const styles = useStyles2(getStyles);
-  // Create a combined label with the count
-  const combinedLabel = `${label} `;
-
-  return (
-    <div className={styles.checkboxWrapper}>
-      <Checkbox label={combinedLabel} value={checked} onChange={onChange} />
-      <span className={styles.count}>({count})</span>
-    </div>
-  );
 };
 
 export function MetricsFilterSection({
@@ -85,6 +62,19 @@ export function MetricsFilterSection({
           onChange={(e) => setSearchValue(e.currentTarget.value)}
           onKeyDown={onKeyDown}
         />
+
+        <div className={styles.checkboxListHeader}>
+          <div>{selectedValues.length} selected</div>
+          <Button
+            className={styles.clearButton}
+            variant="secondary"
+            fill="text"
+            onClick={() => onSelectionChange([])}
+            disabled={!selectedValues.length}
+          >
+            clear
+          </Button>
+        </div>
       </div>
 
       {loading && <Spinner inline />}
@@ -122,7 +112,6 @@ function CheckBoxList({
           <CheckboxWithCount
             label={item.label}
             count={item.count}
-            value={item.value}
             checked={selectedValues.includes(item.value)}
             onChange={(e) => {
               const newValues = e.currentTarget.checked
@@ -152,7 +141,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     header: css({
       paddingTop: theme.spacing(1),
-      paddingBottom: theme.spacing(1),
     }),
     switchContainer: css({
       marginTop: theme.spacing(2),
@@ -171,7 +159,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     checkboxList: css({
       height: '100%',
-      padding: theme.spacing(1),
+      padding: `0 ${theme.spacing(1)} ${theme.spacing(1)} ${theme.spacing(1)}`,
       overflowY: 'auto',
       '& .css-1n4u71h-Label': {
         fontSize: '14px !important',
@@ -186,24 +174,16 @@ function getStyles(theme: GrafanaTheme2) {
         '-webkit-box-shadow': `0 0 1px ${theme.colors.secondary.shade}`,
       },
     }),
-    checkboxWrapper: css({
+    checkboxListHeader: css({
       display: 'flex',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      width: '100%',
-      '& label': {
-        fontSize: '14px !important',
-      },
-    }),
-    count: css({
       color: theme.colors.text.secondary,
-      marginLeft: theme.spacing(0.5),
-      display: 'inline-block',
+      marginTop: theme.spacing(2),
+      marginBottom: theme.spacing(1),
+      padding: `0 ${theme.spacing(1)}`,
     }),
-    controlsRow: css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing(0.5),
-    }),
+    clearButton: css({}),
     checkboxItem: css({
       display: 'flex',
       alignItems: 'center',
