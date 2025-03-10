@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.0-1",
+  "version": "1.0.0-hackathon.0",
   "scripts": {
     "build": "webpack -c ./webpack.config.ts --env production",
     "dev": "webpack -w -c ./webpack.config.ts --env development",
@@ -84,6 +84,7 @@
     "@grafana/data": "^11.5.0",
     "@grafana/lezer-logql": "^0.2.7",
     "@grafana/prometheus": "^11.6.0-223871",
+    "@grafana/promql-builder": "^0.0.4",
     "@grafana/runtime": "^11.5.0",
     "@grafana/scenes": "^5.41.1",
     "@grafana/schema": "^11.5.0",
