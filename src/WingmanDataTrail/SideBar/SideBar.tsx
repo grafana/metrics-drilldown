@@ -34,7 +34,6 @@ interface SideBarState extends SceneObjectState {
 
 export class SideBar extends SceneObjectBase<SideBarState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_FILTERED_METRICS_VARIABLE],
     onAnyVariableChanged: (variable) => {
       const { name, options } = (variable as MultiValueVariable).state;
 

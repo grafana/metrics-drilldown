@@ -7,14 +7,17 @@ import {
   SceneObjectBase,
   SceneReactObject,
   VariableDependencyConfig,
+  type AdHocFiltersVariable,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Button, CollapsableSection, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
+import { VAR_FILTERS } from 'shared';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
@@ -212,15 +215,39 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
     const showMoreCount = Math.min(paginationCount ?? 9, metricsList.length - currentCount);
 
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const isOnboardingView = location.pathname.includes('/onboard');
+
+    const onClickFilterBy = () => {
+      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
+
+      adHocFiltersVariable.setState({
+        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
+      });
+
+      navigate({
+        pathname: location.pathname.replace('/onboard-wingman', '/trail-wingman'),
+      });
+    };
+
     return (
       <div className={styles.rowContainer}>
         {/* for a custom label with buttons on the right, had to hack this above the collapsable section */}
         <div className={styles.container}>
           <span className={styles.groupName}>{`${labelName}: ${labelValue}`}</span>
           <div className={styles.buttons}>
-            <Button variant="secondary" fill="outline" className={styles.button}>
-              Exclude
-            </Button>
+            {!isOnboardingView && (
+              <Button variant="secondary" fill="outline" className={styles.button}>
+                Exclude
+              </Button>
+            )}
+            {isOnboardingView && (
+              <Button variant="secondary" fill="outline" className={styles.button} onClick={onClickFilterBy}>
+                Filter by
+              </Button>
+            )}
           </div>
         </div>
 
@@ -268,6 +295,7 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       gap: '8px',
       marginLeft: 'auto',
+      zIndex: 100,
     }),
     showMoreButton: css({
       display: 'flex',
