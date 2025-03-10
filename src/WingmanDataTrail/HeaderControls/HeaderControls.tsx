@@ -16,6 +16,7 @@ import React from 'react';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
+import { MetricsFilter } from './MetricsFilter/MetricsFilter';
 import { MetricsSorter } from './MetricsSorter';
 import { QuickSearch } from './QuickSearch';
 
@@ -36,6 +37,14 @@ export class HeaderControls extends EmbeddedScene {
         width: '100%',
         maxHeight: '32px',
         children: [
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsFilter({ type: 'prefixes' }),
+          }),
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsFilter({ type: 'categories' }),
+          }),
           new SceneFlexItem({
             body: new QuickSearch(),
           }),

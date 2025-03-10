@@ -137,7 +137,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
     );
   }
 
-  private applyFilters(filters: Partial<MetricFilters> = this.filters, forceUpdate = false) {
+  public applyFilters(filters: Partial<MetricFilters> = this.filters, forceUpdate = false) {
     const updatedFilters = {
       ...this.filters,
       ...filters,
@@ -229,7 +229,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
     return options.filter((option) => regexes.some((regex) => regex.test(option.value as string)));
   }
 
-  private notifyUpdate() {
+  public notifyUpdate() {
     // hack to force SceneByVariableRepeater to re-render
     this.publishEvent(new SceneVariableValueChangedEvent(this), true);
   }

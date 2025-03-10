@@ -18,9 +18,14 @@ import { getColorByIndex } from 'utils';
 
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { HeaderControls } from './HeaderControls/HeaderControls';
+import { EventGroupFiltersChanged } from './HeaderControls/MetricsFilter/EventGroupFiltersChanged';
 import { NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from './MetricsVariables/FilteredMetricsVariable';
 import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
 import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction';
@@ -29,7 +34,6 @@ import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel
 import { registerRuntimeDataSources } from './registerRuntimeDataSources';
 import { SceneDrawer } from './SceneDrawer';
 import { SideBar } from './SideBar/SideBar';
-
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
   sidebar: SideBar;
@@ -75,6 +79,19 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this._subs.add(
       this.subscribeToEvent(EventApplyFunction, (event) => {
         this.state.drawer.close();
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventGroupFiltersChanged, (event) => {
+        const { type, groups } = event.payload;
+        const filteredMetricsVariable = sceneGraph.lookupVariable(
+          VAR_FILTERED_METRICS_VARIABLE,
+          this
+        ) as FilteredMetricsVariable;
+
+        filteredMetricsVariable.applyFilters({ [type]: groups });
+        filteredMetricsVariable.notifyUpdate();
       })
     );
   }

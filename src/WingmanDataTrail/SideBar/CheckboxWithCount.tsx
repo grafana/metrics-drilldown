@@ -30,7 +30,7 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       alignItems: 'center',
       width: '100%',
-      '& label': {
+      '& label *': {
         fontSize: '14px !important',
       },
     }),
