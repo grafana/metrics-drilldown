@@ -1,7 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
-  PanelBuilders,
   SceneObjectBase,
   SceneQueryRunner,
   type SceneComponentProps,
@@ -14,9 +13,11 @@ import React from 'react';
 
 import { trailDS } from 'shared';
 
-import { ConfigureAction } from './actions/ConfigureAction';
+import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
 import { buildPrometheusQuery } from './buildPrometheusQuery';
+import { buildStatusHistoryPanel } from './panels/statushistory';
+import { buildTimeseriesPanel } from './panels/timeseries';
 
 export type GroupByLabel = {
   name: string;
@@ -26,7 +27,7 @@ export type GroupByLabel = {
 interface MetricVizPanelState extends SceneObjectState {
   metricName: string;
   color: string;
-  prometheusFunction: string;
+  prometheusFunction: PrometheusFn;
   title: string;
   hideLegend: boolean;
   highlight: boolean;
@@ -81,21 +82,34 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   }
 
   buildVizPanel() {
-    const { title, color, headerActions, hideLegend, highlight } = this.state;
+    const { title, color, headerActions, hideLegend, highlight, metricName } = this.state;
 
-    return PanelBuilders.timeseries()
-      .setTitle(highlight ? `${title} (current)` : title)
-      .setData(this.buildQueryRunner())
-      .setColor({ mode: 'fixed', fixedColor: color })
-      .setCustomFieldConfig('fillOpacity', 9)
-      .setHeaderActions(headerActions)
-      .setOption('legend', { showLegend: !hideLegend })
-      .build();
+    // Check if this is an uptime metric
+    const isUptime = metricName === 'up' || metricName.endsWith('_up');
+    const panelTitle = highlight ? `${title} (current)` : title;
+    const queryRunner = this.buildQueryRunner();
+
+    let builder;
+
+    if (isUptime) {
+      // For uptime metrics, use a status history panel which is better for binary states
+      builder = buildStatusHistoryPanel({ queryRunner, panelTitle });
+    } else {
+      // Default settings for non-uptime metrics - use timeseries
+      builder = buildTimeseriesPanel({
+        queryRunner,
+        panelTitle,
+        color,
+        headerActions,
+        hideLegend,
+      });
+    }
+
+    return builder.build();
   }
 
   buildQueryRunner() {
     const { metricName, matchers, groupByLabel, prometheusFunction: fn } = this.state;
-
     const expr = buildPrometheusQuery({ metricName, matchers, groupByLabel, fn });
 
     return new SceneQueryRunner({

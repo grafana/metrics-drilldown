@@ -110,14 +110,14 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
                 metricName,
                 color: getColorByIndex(colorIndex),
                 groupByLabel: undefined,
-                prometheusFunction: option.value as string,
+                prometheusFunction: option.value,
                 height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
                 hideLegend: true,
                 highlight: colorIndex === 1,
                 headerActions: [
                   new ApplyAction({
                     metricName,
-                    prometheusFunction: option.value as string,
+                    prometheusFunction: option.value,
                     disabled: colorIndex === 1,
                   }),
                 ],
