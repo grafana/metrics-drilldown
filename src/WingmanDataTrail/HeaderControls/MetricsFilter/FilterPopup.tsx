@@ -90,7 +90,7 @@ export const FilterPopup = ({ items, selectedGroups, onClickOk, onClickCancel }:
       <div className={styles.footer}>
         <Stack direction="row" gap={1}>
           <Button onClick={handleOk} variant="primary" size="sm">
-            Ok
+            Apply
           </Button>
           <Button onClick={handleCancel} variant="secondary" size="sm">
             Cancel
