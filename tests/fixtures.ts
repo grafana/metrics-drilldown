@@ -1,10 +1,13 @@
 import { test as base, type AppConfigPage, type AppPage } from '@grafana/plugin-e2e';
+import { Locator } from 'playwright';
+import { UI_TEXT } from '../src/constants/ui';
 
 import pluginJson from '../src/plugin.json';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
   gotoPage: (path?: string) => Promise<AppPage>;
+  getOtelSwitch: () => Promise<Locator>;
 };
 
 export const test = base.extend<AppTestFixture>({
@@ -21,6 +24,9 @@ export const test = base.extend<AppTestFixture>({
         pluginId: pluginJson.id,
       })
     );
+  },
+  getOtelSwitch: async ({ page }) => {
+    return page.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL);
   },
 });
 
