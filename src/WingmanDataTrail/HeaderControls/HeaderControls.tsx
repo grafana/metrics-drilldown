@@ -18,6 +18,7 @@ import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labe
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
 import { MetricsSorter } from './MetricsSorter';
+import { MetricsTreeFilterToggle } from './MetricsTreeFilter/MetricsTreeFilterToggle';
 import { QuickSearch } from './QuickSearch';
 
 interface HeaderControlsState extends SceneObjectState {
@@ -37,6 +38,10 @@ export class HeaderControls extends EmbeddedScene {
         width: '100%',
         maxHeight: '32px',
         children: [
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsTreeFilterToggle({}),
+          }),
           new SceneFlexItem({
             width: 'auto',
             body: new MetricsFilter({ type: 'prefixes' }),
