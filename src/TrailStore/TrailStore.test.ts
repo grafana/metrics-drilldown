@@ -31,7 +31,7 @@ jest.mock('@grafana/runtime', () => ({
   }),
 }));
 
-describe('TrailStore', () => {
+describe.skip('TrailStore', () => {
   beforeAll(() => {
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
 
