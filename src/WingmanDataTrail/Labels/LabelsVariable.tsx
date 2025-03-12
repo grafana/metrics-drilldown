@@ -79,6 +79,8 @@ const getStyles = (theme: GrafanaTheme2) => ({
     }
   `,
   label: css`
+    height: 32px;
+    white-space: nowrap;
     margin: 0;
     background-color: ${theme.colors.background.primary};
     padding: ${theme.spacing(1)};
