@@ -3,7 +3,7 @@ import { ROUTES } from '../src/constants';
 import { UI_TEXT } from '../src/constants/ui';
 
 test.describe('OTEL Experience', () => {
-  test('otel toggle workflow', async ({ gotoPage, page }) => {
+  test('otel enabled workflow', async ({ gotoPage, page }) => {
     await test.step('navigate to trail', async () => {
       await gotoPage(`/${ROUTES.Trail}`);
     });
@@ -18,11 +18,17 @@ test.describe('OTEL Experience', () => {
       await expect(otelSwitch).toBeVisible();
       await expect(otelSwitch).not.toBeChecked();
       await otelSwitch.check({ force: true });
-      await expect(otelSwitch).toBeChecked();
     });
 
     await test.step('asssert deployment_environment filter is on', async () => {
-      await expect(page.getByText('deployment_environment')).toBeVisible();
+      await expect(otelSwitch).toBeChecked();
+      await expect(page.getByText('deployment_environment = prod')).toBeVisible();
+    });
+
+    await test.step('select utf8 metrics', async () => {
+      const panel = page.getByTestId('data-testid Panel header a.utf8.metric 🤘');
+      await panel.getByRole('button', { name: 'select' }).click();
+      expect(page.url().includes('otel_and_metric_filters')).toBeTruthy();
     });
   });
 });
