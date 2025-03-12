@@ -46,7 +46,7 @@ function getStyles(theme: GrafanaTheme2) {
     appContainer: css({
       display: 'flex',
       flexDirection: 'column',
-      minHeight: '100vh', // Ensure full page height
+      height: '100%',
       backgroundColor: theme.colors.background.primary,
     }),
   };

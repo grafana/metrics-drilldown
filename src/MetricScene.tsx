@@ -8,7 +8,9 @@ import {
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   SceneVariableSet,
+  VariableDependencyConfig,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
@@ -21,23 +23,23 @@ import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
-import { reportExploreMetrics } from './interactions';
+import { reportExploreMetrics, type Interactions } from './interactions';
 import {
   MAIN_PANEL_MAX_HEIGHT,
   MAIN_PANEL_MIN_HEIGHT,
   METRIC_AUTOVIZPANEL_KEY,
   MetricGraphScene,
 } from './MetricGraphScene';
+import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { buildRelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import {
   getVariablesWithMetricConstant,
   MetricSelectedEvent,
   RefreshMetricsEvent,
   trailDS,
+  VAR_FILTERS,
   VAR_GROUP_BY,
   VAR_METRIC_EXPR,
-  type ActionViewDefinition,
-  type ActionViewType,
   type MakeOptional,
 } from './shared';
 import { ShareTrailButton } from './ShareTrailButton';
@@ -49,15 +51,34 @@ const relatedLogsFeatureEnabled = config.featureToggles.exploreMetricsRelatedLog
 export interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
-  nativeHistogram?: boolean;
-  actionView?: string;
-
   autoQuery: AutoQueryInfo;
+  nativeHistogram?: boolean;
+  actionView?: ActionViewType;
   queryDef?: AutoQueryDef;
+  relatedLogsCount?: number;
 }
 
+export const actionViews = {
+  overview: 'overview',
+  breakdown: 'breakdown',
+  related: 'related',
+  relatedLogs: 'logs',
+} as const;
+
+export type ActionViewType = (typeof actionViews)[keyof typeof actionViews];
+
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
+  public readonly relatedLogsOrchestrator = new RelatedLogsOrchestrator(this);
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_FILTERS],
+    onReferencedVariableValueChanged: () => {
+      // When filters change, we need to re-check for related logs
+      if (relatedLogsFeatureEnabled) {
+        this.relatedLogsOrchestrator.handleFiltersChange();
+      }
+    },
+  });
 
   public constructor(state: MakeOptional<MetricSceneState, 'body' | 'autoQuery'>) {
     const autoQuery = state.autoQuery ?? getAutoQueriesForMetric(state.metric, state.nativeHistogram);
@@ -74,7 +95,14 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   private _onActivate() {
     if (this.state.actionView === undefined) {
-      this.setActionView('overview');
+      this.setActionView(actionViews.overview);
+    }
+
+    if (relatedLogsFeatureEnabled) {
+      this.relatedLogsOrchestrator.findAndCheckAllDatasources();
+      this.relatedLogsOrchestrator.addRelatedLogsCountChangeHandler((count) => {
+        this.setState({ relatedLogsCount: count });
+      });
     }
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
@@ -112,7 +140,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
       // reduce max height for main panel to reduce height flicker
       body.state.topView.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
-      body.setState({ selectedTab: actionViewDef.getScene() });
+      body.setState({ selectedTab: actionViewDef.getScene(this) });
       this.setState({ actionView: actionViewDef.value });
     } else {
       // restore max height
@@ -126,14 +154,27 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     const { body } = model.useState();
     return <body.Component model={body} />;
   };
+
+  public createRelatedLogsScene(): SceneObject<SceneObjectState> {
+    return buildRelatedLogsScene({
+      orchestrator: this.relatedLogsOrchestrator,
+    });
+  }
+}
+
+interface ActionViewDefinition {
+  displayName: string;
+  value: ActionViewType;
+  description?: string;
+  getScene: (metricScene: MetricScene) => SceneObject<SceneObjectState>;
 }
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Overview', value: 'overview', getScene: buildMetricOverviewScene },
-  { displayName: 'Breakdown', value: 'breakdown', getScene: buildLabelBreakdownActionScene },
+  { displayName: 'Overview', value: actionViews.overview, getScene: buildMetricOverviewScene },
+  { displayName: 'Breakdown', value: actionViews.breakdown, getScene: buildLabelBreakdownActionScene },
   {
     displayName: 'Related metrics',
-    value: 'related',
+    value: actionViews.related,
     getScene: buildRelatedMetricsScene,
     description: 'Relevant metrics based on current label filters',
   },
@@ -142,8 +183,8 @@ const actionViewsDefinitions: ActionViewDefinition[] = [
 if (relatedLogsFeatureEnabled) {
   actionViewsDefinitions.push({
     displayName: 'Related logs',
-    value: 'related_logs',
-    getScene: buildRelatedLogsScene,
+    value: actionViews.relatedLogs,
+    getScene: (metricScene: MetricScene) => metricScene.createRelatedLogsScene(),
     description: 'Relevant logs based on current label filters and time range',
   });
 }
@@ -229,13 +270,26 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 
         <TabsBar>
           {actionViewsDefinitions.map((tab, index) => {
+            const label = tab.displayName;
+            const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
+
             const tabRender = (
               <Tab
                 key={index}
-                label={tab.displayName}
+                label={label}
+                counter={counter}
                 active={actionView === tab.value}
                 onChangeTab={() => {
-                  reportExploreMetrics('metric_action_view_changed', { view: tab.value });
+                  const actionViewChangedPayload: Interactions['metric_action_view_changed'] = { view: tab.value };
+
+                  if (
+                    relatedLogsFeatureEnabled &&
+                    metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()
+                  ) {
+                    actionViewChangedPayload.related_logs_count = counter;
+                  }
+
+                  reportExploreMetrics('metric_action_view_changed', actionViewChangedPayload);
                   metricScene.setActionView(tab.value);
                 }}
               />
