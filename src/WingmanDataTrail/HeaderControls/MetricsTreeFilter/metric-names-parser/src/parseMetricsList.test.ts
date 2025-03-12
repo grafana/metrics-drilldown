@@ -214,11 +214,6 @@ describe('parseMetricsList', () => {
     const systemNode = result.tree.find((n) => n.prefix === 'system');
     expect(systemNode).toBeDefined();
 
-    // We want to verify that separators are mapped correctly for each child branch
-    const cpuNodes = systemNode?.children.filter(
-      (c) => c.prefix === 'cpu' || c.prefix === 'cpu:usage' || c.prefix === 'cpu_usage'
-    );
-
     // Create a snapshot to inspect the structure
     expect(result.tree).toMatchSnapshot('inconsistent-separator-metrics');
   });

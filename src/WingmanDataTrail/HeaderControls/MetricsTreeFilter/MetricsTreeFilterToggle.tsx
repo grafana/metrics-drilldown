@@ -1,15 +1,15 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import { Button, Icon, useStyles2 } from '@grafana/ui';
+import React, { useState } from 'react';
 
-import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
-
-import { MetricsTreeFilter } from './MetricsTreeFilter';
+import { MetricsTreeFilter, type ExtraMetricsTreeFilterProps } from './MetricsTreeFilter';
+import { Dropdown } from '../MetricsFilter/Dropdown';
+import { EventGroupFiltersChanged } from '../MetricsFilter/EventGroupFiltersChanged';
 
 interface MetricsTreeFilterToggleState extends SceneObjectState {
-  drawer: SceneDrawer;
+  body: MetricsTreeFilter;
 }
 
 export class MetricsTreeFilterToggle extends SceneObjectBase<MetricsTreeFilterToggleState> {
@@ -17,36 +17,49 @@ export class MetricsTreeFilterToggle extends SceneObjectBase<MetricsTreeFilterTo
     super({
       ...state,
       key: 'MetricsTreeFilterToggle',
-      drawer: new SceneDrawer({}),
-    });
-
-    this.addActivationHandler(this.onActivate.bind(this));
-  }
-
-  private onActivate() {}
-
-  private openDrawer() {
-    this.state.drawer.open({
-      title: 'Filter metrics by name (UX only - not functional)',
-      subTitle: 'Select the parts of the metric name you want to filter by',
       body: new MetricsTreeFilter({}),
     });
   }
 
-  private onClickFilter = () => {
-    this.openDrawer();
+  private onApplyFilters = (selectedNodeIds: string[]) => {
+    this.publishEvent(
+      new EventGroupFiltersChanged({
+        type: 'names',
+        groups: selectedNodeIds,
+      }),
+      true
+    );
   };
 
   public static Component = ({ model }: SceneComponentProps<MetricsTreeFilterToggle>) => {
     const styles = useStyles2(getStyles);
-    const { drawer } = model.useState();
+    const { body } = model.useState();
+
+    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+    const icon = isOverlayOpen ? 'angle-up' : 'angle-down';
+
+    const bodyProps: SceneComponentProps<MetricsTreeFilter> & ExtraMetricsTreeFilterProps = {
+      model: body,
+      onClickApply: (selectedNodeIds: string[]) => {
+        model.onApplyFilters(selectedNodeIds);
+        setIsOverlayOpen(false);
+      },
+      onClickCancel() {
+        setIsOverlayOpen(false);
+      },
+    };
 
     return (
       <div className={styles.container}>
-        <Button icon="filter" onClick={model.onClickFilter}>
-          Filter metrics
-        </Button>
-        <drawer.Component model={drawer} />
+        <Dropdown isOpen={isOverlayOpen} overlay={<body.Component {...bodyProps} />} onVisibleChange={setIsOverlayOpen}>
+          <Button variant="secondary" fill="outline">
+            <>
+              <Icon name="filter" />
+              &nbsp;Metrics tree filters&nbsp;
+              <Icon name={icon} />
+            </>
+          </Button>
+        </Dropdown>
       </div>
     );
   };

@@ -1,77 +1,75 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { Checkbox, IconButton, Tag, useStyles2 } from '@grafana/ui';
+import { Checkbox, IconButton, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { type ArrayNode } from './metric-names-parser/src/parseMetricsList';
 
 export const MetricTreeNode = ({
   node,
+  selectedNodeIds,
+  isLastChild,
+  onToggleCheckbox,
   ancestorPrefix = '',
-  isLastChild = false,
   isChild = false,
   level = 0,
 }: {
   node: ArrayNode;
+  selectedNodeIds: string[];
+  isLastChild: boolean;
+  onToggleCheckbox: (node: ArrayNode) => void;
   ancestorPrefix?: string;
-  isLastChild?: boolean;
   isChild?: boolean;
   level?: number;
 }) => {
-  const [expanded, setExpanded] = useState(false);
   const styles = useStyles2(getStyles);
-
-  // Toggle expanded state
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
-
-  // Apply appropriate styling for the tree structure
-  const nodeStyle = {
-    marginLeft: isChild ? '0' : '0',
-    position: 'relative' as const,
-  };
-
-  // For nodes that are children but have their own children, we need to add a special class
-  const nodeContainerClass = isChild ? styles.nodeContainer : '';
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={nodeContainerClass} style={nodeStyle}>
+    <div
+      className={isChild ? styles.nodeContainer : ''}
+      style={{
+        marginLeft: '0',
+        position: 'relative',
+      }}
+    >
       <div className={`${styles.nodeRow} ${isChild ? styles.childNodeRow : ''}`}>
-        <div className={styles.iconContainer}>
-          {node.children && node.children.length > 0 ? (
+        <div className={cx(styles.iconContainer, !node.children.length && 'horiz')}>
+          {node.children.length > 0 ? (
             <IconButton
               className={styles.expandIcon}
               name={expanded ? 'minus-circle' : 'plus-circle'}
-              onClick={toggleExpand}
-              tooltip={expanded ? 'Collapse' : 'Expand'}
+              onClick={() => setExpanded(!expanded)}
+              tooltip=""
             />
           ) : null}
         </div>
         <div className={styles.labelContainer}>
           <div className={styles.checkbox}>
-            <Checkbox label="" />
+            <Checkbox
+              id={node.id}
+              label=""
+              checked={selectedNodeIds.includes(node.id)}
+              onChange={() => onToggleCheckbox(node)}
+            />
           </div>
-          <span className={styles.nodeName}>
-            {isChild && (
-              <span className={styles.separator}>
-                {ancestorPrefix}
-                {node.separator}
-              </span>
-            )}
-            {node.prefix}
-          </span>
+          <Tooltip content={isChild ? `${ancestorPrefix}${node.separator}${node.prefix}` : node.prefix} placement="top">
+            <label className={styles.nodeName} htmlFor={node.id}>
+              {node.prefix}
+            </label>
+          </Tooltip>
           <Tag className={styles.badge} name={node.count.toString()} colorIndex={9} />
         </div>
       </div>
 
-      {/* Render children if expanded */}
       {expanded && node.children && (
         <div className={`${styles.childrenContainer} ${isLastChild ? styles.lastChild : ''}`}>
           {node.children.map((child, index) => (
             <MetricTreeNode
               key={child.prefix}
               node={child}
+              selectedNodeIds={selectedNodeIds}
+              onToggleCheckbox={onToggleCheckbox}
               ancestorPrefix={ancestorPrefix ? `${ancestorPrefix}${node.separator}${node.prefix}` : node.prefix}
               isLastChild={!node.children ? true : index === node.children.length - 1}
               isChild={true}
@@ -146,6 +144,7 @@ function getStyles(theme: GrafanaTheme2) {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      cursor: pointer;
     `,
     separator: css`
       color: ${theme.colors.text.secondary};

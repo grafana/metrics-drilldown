@@ -5,6 +5,7 @@ export function childrenMapToArray(childrenMap: Map<string, MetricNode>): ArrayN
 
   for (const [prefix, metricNode] of childrenMap.entries()) {
     array.push({
+      id: metricNode.id,
       prefix,
       count: metricNode.count,
       separator: metricNode.separator,

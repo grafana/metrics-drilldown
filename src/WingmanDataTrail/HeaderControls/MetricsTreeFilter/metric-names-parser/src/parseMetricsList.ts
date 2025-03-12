@@ -1,6 +1,7 @@
 import { childrenMapToArray } from './helpers/childrenMapToArray';
 
 export type MetricNode = {
+  id: string;
   prefix: string;
   count: number;
   separator: string;
@@ -8,6 +9,7 @@ export type MetricNode = {
 };
 
 export type ArrayNode = {
+  id: string;
   prefix: string;
   count: number;
   separator: string;
@@ -16,6 +18,7 @@ export type ArrayNode = {
 
 export function parseMetricsList(metricsList: string[]): { root: MetricNode; tree: ArrayNode[] } {
   const root: MetricNode = {
+    id: '<root>',
     prefix: '',
     count: metricsList.length,
     separator: '',
@@ -27,13 +30,18 @@ export function parseMetricsList(metricsList: string[]): { root: MetricNode; tre
   for (const metric of metricsList) {
     const [, separator = ''] = metric.match(/^[^_:]+([_:])/) || [];
     const parts = metric.split(/[_:]/);
+
     node = root;
+    let id = '';
 
     for (const part of parts) {
       const child = node.children.get(part);
 
+      id += id ? `${separator}${part}` : part;
+
       if (!child) {
         const newChild = {
+          id,
           prefix: part,
           count: 1,
           separator,
@@ -51,7 +59,8 @@ export function parseMetricsList(metricsList: string[]): { root: MetricNode; tre
   }
 
   const tree = Array.from(root.children.entries())
-    .map(([prefix, { count, children, separator }]) => ({
+    .map(([prefix, { id, count, children, separator }]) => ({
+      id,
       prefix,
       count,
       separator,
