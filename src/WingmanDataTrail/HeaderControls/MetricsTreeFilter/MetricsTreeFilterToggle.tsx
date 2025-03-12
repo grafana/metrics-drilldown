@@ -27,8 +27,8 @@ export class MetricsTreeFilterToggle extends SceneObjectBase<MetricsTreeFilterTo
 
   private openDrawer() {
     this.state.drawer.open({
-      title: 'Filter metrics',
-      subTitle: '',
+      title: 'Filter metrics by name (UX only - not functional)',
+      subTitle: 'Select the parts of the metric name you want to filter by',
       body: new MetricsTreeFilter({}),
     });
   }
