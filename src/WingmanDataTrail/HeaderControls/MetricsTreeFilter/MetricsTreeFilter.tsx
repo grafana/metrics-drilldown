@@ -8,7 +8,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Spinner, useStyles2 } from '@grafana/ui';
+import { IconButton, Input, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import {
@@ -95,17 +95,28 @@ export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
     }
 
     return (
-      <div className={styles.container}>
-        <div className={styles.treeContainer}>
-          {metricTreeRoot?.map((node, index) => (
-            <MetricTreeNode
-              key={node.prefix}
-              node={node}
-              isLastChild={!metricTreeRoot ? true : index === metricTreeRoot.length - 1}
-            />
-          ))}
+      <>
+        <Input
+          placeholder="Quick search..."
+          prefix={<i className="fa fa-search" />}
+          suffix={
+            <>
+              <IconButton name="times" variant="secondary" tooltip="Clear search" />
+            </>
+          }
+        />
+        <div className={styles.container}>
+          <div className={styles.treeContainer}>
+            {metricTreeRoot?.map((node, index) => (
+              <MetricTreeNode
+                key={node.prefix}
+                node={node}
+                isLastChild={!metricTreeRoot ? true : index === metricTreeRoot.length - 1}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      </>
     );
   };
 }
