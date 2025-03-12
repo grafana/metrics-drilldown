@@ -30,5 +30,9 @@ test.describe('OTEL Experience', () => {
       await panel.getByRole('button', { name: 'select' }).click();
       expect(page.url().includes('otel_and_metric_filters')).toBeTruthy();
     });
+
+    await test.step('confirm utf8 attribute is present', async () => {
+      expect(page.getByRole('link', { name: 'resource ę' })).toBeTruthy();
+    });
   });
 });
