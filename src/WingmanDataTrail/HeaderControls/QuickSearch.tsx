@@ -90,7 +90,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         value={value}
         onChange={model.onChange}
         onKeyDown={model.onKeyDown}
-        placeholder="Search metrics..."
+        placeholder="Quick search metrics..."
         prefix={<i className="fa fa-search" />}
         suffix={
           <>
