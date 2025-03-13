@@ -12,10 +12,10 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
-import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
-import { getTrailFor } from '../utils';
-import { getQueryRunnerFor } from '../utils/utils.queries';
 import { MetricScene } from 'MetricScene';
+
+import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
+import { getQueryRunnerFor } from '../utils/utils.queries';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
@@ -51,6 +51,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           delete query.legendFormat;
         });
         // use the metric scene to get the explore url with interpolated variables
+        // need to get not just the metric scene but something deeper so that we can access this in the trail
         const metricScene = sceneGraph.getAncestor(this, MetricScene);
         exploreUrl = getExploreURL(panelData, metricScene, panelData.timeRange);
       } catch (e) {}
