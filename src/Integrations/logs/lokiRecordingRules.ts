@@ -5,7 +5,7 @@ import { type SyntaxNode } from '@lezer/common';
 import { lastValueFrom } from 'rxjs';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsScene';
+import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsOrchestrator';
 
 export interface RecordingRuleGroup {
   name: string;
@@ -176,15 +176,21 @@ export async function fetchAndExtractLokiRecordingRules() {
 const createLokiRecordingRulesConnector = () => {
   let lokiRecordingRules: ExtractedRecordingRules = {};
 
+  // In this connector, conditions have been met for related logs
+  // when we find at least one data source with recording rules
+  // containing the selected metric
+  let conditionsMetForRelatedLogs = false;
+
   return createMetricsLogsConnector({
     name: 'lokiRecordingRules',
+    checkConditionsMetForRelatedLogs: () => conditionsMetForRelatedLogs,
     async getDataSources(selectedMetric: string): Promise<FoundLokiDataSource[]> {
       lokiRecordingRules = await fetchAndExtractLokiRecordingRules();
       const lokiDataSources = getDataSourcesWithRecordingRulesContainingMetric(selectedMetric, lokiRecordingRules);
+      conditionsMetForRelatedLogs = Boolean(lokiDataSources.length);
 
       return lokiDataSources;
     },
-
     getLokiQueryExpr(selectedMetric: string, datasourceUid: string): string {
       return getLokiQueryForRelatedMetric(selectedMetric, datasourceUid, lokiRecordingRules);
     },

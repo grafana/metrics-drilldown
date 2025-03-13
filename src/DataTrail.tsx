@@ -11,6 +11,7 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
+  SceneReactObject,
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
@@ -30,6 +31,8 @@ import {
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
+
+import { PluginInfo } from 'PluginInfo/PluginInfo';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -68,6 +71,7 @@ export interface DataTrailState extends SceneObjectState {
   controls: SceneObject[];
   history: DataTrailHistory;
   settings: DataTrailSettings;
+  pluginInfo: SceneReactObject;
   createdAt: number;
 
   // just for the starting data source
@@ -120,6 +124,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       ],
       history: state.history ?? new DataTrailHistory({}),
       settings: state.settings ?? new DataTrailSettings({}),
+      pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
       // default to false but update this to true on updateOtelData()
       // or true if the user either turned on the experience
@@ -553,6 +558,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       topScene,
       history,
       settings,
+      pluginInfo,
       useOtelExperience,
       hasOtelResources,
       embedded,
@@ -605,7 +611,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             {controls.map((control) => (
               <control.Component key={control.state.key} model={control} />
             ))}
-            <settings.Component model={settings} />
+            <div className={styles.settingsInfo}>
+              <settings.Component model={settings} />
+              <pluginInfo.Component model={pluginInfo} />
+            </div>
           </div>
         )}
         {topScene && (
@@ -732,6 +741,10 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       background: theme.isDark ? theme.colors.background.canvas : theme.colors.background.primary,
       zIndex: theme.zIndex.navbarFixed,
       top: chromeHeaderHeight,
+    }),
+    settingsInfo: css({
+      display: 'flex',
+      gap: theme.spacing(0.5),
     }),
   };
 }
