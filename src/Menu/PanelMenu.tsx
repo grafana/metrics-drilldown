@@ -2,6 +2,7 @@ import { type DataFrame, type PanelMenuItem } from '@grafana/data';
 import { getPluginLinkExtensions } from '@grafana/runtime';
 import {
   getExploreURL,
+  SceneCSSGridItem,
   sceneGraph,
   SceneObjectBase,
   VizPanel,
@@ -16,6 +17,7 @@ import { MetricScene } from 'MetricScene';
 
 import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
+import { MetricSelectScene } from 'MetricSelect/MetricSelectScene';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
@@ -50,10 +52,11 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           // removing legendFormat to get verbose legend in Explore
           delete query.legendFormat;
         });
-        // use the metric scene to get the explore url with interpolated variables
-        // need to get not just the metric scene but something deeper so that we can access this in the trail
-        const metricScene = sceneGraph.getAncestor(this, MetricScene);
-        exploreUrl = getExploreURL(panelData, metricScene, panelData.timeRange);
+        // 'this' scene object contain the variable for the metric name which is correctly interpolated into the explore url
+        // when used in the metric select scene case,
+        // this will get the explore url with interpolated variables and include the labels __ignore_usage__, this is a known issue
+        // in the metric scene we do not get use the __ignore_usage__ labels in the explore url
+        exploreUrl = getExploreURL(panelData, this, panelData.timeRange);
       } catch (e) {}
 
       // Navigation options (all panels)
