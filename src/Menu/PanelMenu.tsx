@@ -2,7 +2,6 @@ import { type DataFrame, type PanelMenuItem } from '@grafana/data';
 import { getPluginLinkExtensions } from '@grafana/runtime';
 import {
   getExploreURL,
-  SceneCSSGridItem,
   sceneGraph,
   SceneObjectBase,
   VizPanel,
@@ -13,11 +12,8 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
-import { MetricScene } from 'MetricScene';
-
 import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
-import { MetricSelectScene } from 'MetricSelect/MetricSelectScene';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
