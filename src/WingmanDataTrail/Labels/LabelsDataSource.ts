@@ -11,9 +11,12 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
-import { VAR_DATASOURCE } from 'shared';
+import { VAR_DATASOURCE, VAR_FILTERS } from 'shared';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 import { localeCompare } from '../helpers/localCompare';
+
+import type { PrometheusDatasource } from '@grafana/prometheus';
 
 export const NULL_GROUP_BY_VALUE = '(none)';
 
@@ -47,19 +50,47 @@ export class LabelsDataSource extends RuntimeDataSource {
   async metricFindQuery(matcher: string, options: LegacyMetricFindQueryOptions): Promise<MetricFindValue[]> {
     const sceneObject = options.scopedVars?.__sceneObject?.valueOf() as SceneObject;
 
-    const ds = await LabelsDataSource.getPrometheusDataSource(sceneObject);
+    const ds = (await LabelsDataSource.getPrometheusDataSource(sceneObject)) as PrometheusDatasource;
     if (!ds) {
       return [];
     }
+    // make an empty array
+    let labelOptions;
 
-    const response = await ds.languageProvider.fetchLabelsWithMatch(matcher);
-
-    const labelOptions = Object.entries(response)
-      .filter(([key]) => !key.startsWith('__'))
-      .map(([key, value]) => ({ value: key, text: value || key }))
-      .sort((a, b) => localeCompare(a.value as string, b.value as string));
+    // there is probably a more graceful way to implement this, but this is what the DS offers us.
+    // if a DS does not support the labels match API, we need getTagKeys to handle the empty matcher
+    if (ds.hasLabelsMatchAPISupport()) {
+      const response = await ds.languageProvider.fetchLabelsWithMatch(matcher);
+      labelOptions = this.processLabelOptions(
+        Object.entries(response).map(([key, value]) => ({
+          value: key,
+          text: Array.isArray(value) ? value[0] : value || key,
+        }))
+      );
+    } else {
+      // the Prometheus series endpoint cannot accept an empty matcher
+      // when there are no filters, we cannot send the matcher passed to this function because
+      // Prometheus evaluates it as empty and returns an error
+      const filters = this.getFiltersFromVariable(sceneObject);
+      const response = await ds.getTagKeys(filters);
+      labelOptions = this.processLabelOptions(response.map(({ value, text }) => ({ value: text, text })));
+    }
 
     return [{ value: NULL_GROUP_BY_VALUE, text: '(none)' }, ...labelOptions] as MetricFindValue[];
+  }
+
+  private processLabelOptions(options: Array<{ value: string; text: string }>): Array<{ value: string; text: string }> {
+    return options.filter(({ value }) => !value.startsWith('__')).sort((a, b) => localeCompare(a.value, b.value));
+  }
+
+  private getFiltersFromVariable(sceneObject: SceneObject): { filters: any[] } {
+    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, sceneObject);
+
+    if (isAdHocFiltersVariable(filtersVariable)) {
+      return { filters: filtersVariable.state.filters };
+    }
+
+    return { filters: [] };
   }
 
   static async getPrometheusDataSource(sceneObject: SceneObject): Promise<DataSourceApi | undefined> {
