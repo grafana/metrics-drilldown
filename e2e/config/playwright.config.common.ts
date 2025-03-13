@@ -5,7 +5,7 @@ import { config as loadDotEnv } from 'dotenv';
 
 import { CHROMIUM_VIEWPORT } from './constants';
 
-import type { PluginOptions } from '@grafana/plugin-e2e';
+import type { PluginOptions, User } from '@grafana/plugin-e2e';
 
 const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
 
@@ -22,6 +22,13 @@ function getGrafanaUrl() {
 
   const grafanaPort = process.env.GRAFANA_PORT || 3001;
   return `http://localhost:${grafanaPort}`;
+}
+
+function getGrafanaUser(): User {
+  return {
+    user: process.env.GRAFANA_USER || 'admin',
+    password: process.env.GRAFANA_PASSWORD || 'admin',
+  };
 }
 
 type CustomEnvConfig = {
@@ -59,6 +66,8 @@ export function config(config: CustomEnvConfig) {
       video: 'on-first-retry',
       /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
       trace: 'on-first-retry',
+      user: getGrafanaUser(),
+      grafanaAPICredentials: getGrafanaUser(),
     },
     /* Configure projects for major browsers */
     projects: [
