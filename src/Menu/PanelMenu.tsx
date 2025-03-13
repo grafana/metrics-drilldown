@@ -15,6 +15,7 @@ import React from 'react';
 import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
 import { getTrailFor } from '../utils';
 import { getQueryRunnerFor } from '../utils/utils.queries';
+import { MetricScene } from 'MetricScene';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
@@ -49,8 +50,9 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           // removing legendFormat to get verbose legend in Explore
           delete query.legendFormat;
         });
-        const trail = getTrailFor(this);
-        exploreUrl = getExploreURL(panelData, trail, panelData.timeRange);
+        // use the metric scene to get the explore url with interpolated variables
+        const metricScene = sceneGraph.getAncestor(this, MetricScene);
+        exploreUrl = getExploreURL(panelData, metricScene, panelData.timeRange);
       } catch (e) {}
 
       // Navigation options (all panels)
