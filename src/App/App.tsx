@@ -29,7 +29,7 @@ function App(props: AppRootProps) {
   };
 
   return (
-    <div className={styles.appContainer}>
+    <div className={styles.appContainer} data-testid="metrics-drilldown-app">
       <PluginPropsContext.Provider value={props}>
         <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
           <AppRoutes />
