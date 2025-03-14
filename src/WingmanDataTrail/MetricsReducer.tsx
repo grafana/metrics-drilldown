@@ -15,7 +15,9 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { getColorByIndex } from 'utils';
+import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
+import { ROUTES } from '../constants';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { EventGroupFiltersChanged } from './HeaderControls/MetricsFilter/EventGroupFiltersChanged';
@@ -34,6 +36,7 @@ import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel
 import { registerRuntimeDataSources } from './registerRuntimeDataSources';
 import { SceneDrawer } from './SceneDrawer';
 import { SideBar } from './SideBar/SideBar';
+
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
   sidebar: SideBar;
@@ -101,7 +104,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       body:
         !groupByValue || groupByValue === NULL_GROUP_BY_VALUE
           ? (new SimpleMetricsList() as unknown as SceneObjectBase)
-          : (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase),
+          : (new MetricsGroupByList({
+              labelName: groupByValue,
+            }) as unknown as SceneObjectBase),
     });
   }
 
@@ -146,64 +151,54 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   }
 
   public static Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
-    const styles = useStyles2(getStyles);
-    const { body, headerControls, sidebar, drawer } = model.useState();
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
+    const styles = useStyles2(getStyles, chromeHeaderHeight);
+
+    const { body, headerControls, drawer, sidebar } = model.useState();
+    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state;
 
     return (
-      <div
-        className={styles.container}
-        style={{
-          height: `calc(100vh - ${chromeHeaderHeight + 132}px)`,
-        }}
-      >
+      <>
         <div className={styles.headerControls}>
           <headerControls.Component model={headerControls} />
         </div>
-        <div className={styles.sidebar}>
-          <sidebar.Component model={sidebar} />
+        <div className={styles.body}>
+          {/* we use ROUTES and not VariantVariable.OPTIONS because when we land on this view, the variable takes the 1st value of OPTIONS :man_shrug: */}
+          {/* we use both routes for the flow from onboarding > this view and for landing on this view directly */}
+          {[ROUTES.TrialWithSidebar, ROUTES.OnboardWithSidebar].includes(variant as string) && (
+            <div className={styles.sidebar}>
+              <sidebar.Component model={sidebar} />
+            </div>
+          )}
+          <div className={styles.list}>
+            <body.Component model={body} />
+          </div>
         </div>
-        <div className={styles.mainContent}>
-          <body.Component model={body} />
-        </div>
-
         <drawer.Component model={drawer} />
-      </div>
+      </>
     );
   };
 }
 
-function getStyles(theme: GrafanaTheme2) {
-  const headerHeight = 55; // Height of our header controls
-
+function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
   return {
-    container: css({
-      display: 'grid',
-      gridTemplateRows: `${headerHeight}px calc(100% - ${headerHeight}px)`,
-      gridTemplateColumns: '250px 1fr',
-      gridTemplateAreas: `
-        'header header'
-        'sidebar content'
-      `,
-      height: '100%',
-      overflow: 'hidden',
-      position: 'relative',
-    }),
     headerControls: css({
-      gridArea: 'header',
+      marginBottom: theme.spacing(1.5),
+      paddingBottom: theme.spacing(1.5),
       borderBottom: `1px solid ${theme.colors.border.weak}`,
-      padding: theme.spacing(1, 0),
-      zIndex: theme.zIndex.navbarFixed,
-      position: 'sticky',
-      top: 0,
+    }),
+    body: css({
+      display: 'flex',
+      flexDirection: 'row',
+      gap: theme.spacing(1),
+      height: `calc(100vh - ${chromeHeaderHeight + 186}px)`,
+    }),
+    list: css({
+      width: '100%',
+      overflowY: 'auto',
     }),
     sidebar: css({
-      paddingTop: theme.spacing(1.5),
-    }),
-    mainContent: css({
-      padding: theme.spacing(1.5),
-      height: '100%',
-      overflowY: 'auto',
+      width: '250px',
     }),
   };
 }

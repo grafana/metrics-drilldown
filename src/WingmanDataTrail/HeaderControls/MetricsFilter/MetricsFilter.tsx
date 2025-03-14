@@ -17,7 +17,7 @@ import {
   type FilteredMetricsVariable,
   type MetricOptions,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { Dropdown } from './Dropdown';
 import { EventGroupFiltersChanged } from './EventGroupFiltersChanged';
@@ -55,17 +55,23 @@ export class MetricsFilter extends SceneObjectBase<MetricsFilterState> {
       placeholder: state.type === 'prefixes' ? 'Metric groups' : 'Metric categories',
       groups: [],
       selectedGroups: [],
-      loading: true,
+      loading: false,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
   private onActivate() {
+    const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
+
+    this.updateLists(metricsVariable.state.options as MetricOptions);
+
     const filteredMetricsVariable = sceneGraph.lookupVariable(
       VAR_FILTERED_METRICS_VARIABLE,
       this
     ) as FilteredMetricsVariable;
+
+    this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
 
     this._subs.add(
       filteredMetricsVariable.subscribeToState((newState, prevState) => {

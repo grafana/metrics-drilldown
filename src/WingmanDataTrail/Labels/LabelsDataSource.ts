@@ -11,7 +11,7 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
-import { VAR_DATASOURCE, VAR_FILTERS } from 'shared';
+import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 import { localeCompare } from '../helpers/localCompare';
@@ -105,6 +105,23 @@ export class LabelsDataSource extends RuntimeDataSource {
 
       return undefined;
     }
+  }
+
+  static async fetchLabelValues(labelName: string, sceneObject: SceneObject): Promise<string[]> {
+    const ds = await LabelsDataSource.getPrometheusDataSource(sceneObject);
+    if (!ds) {
+      return [];
+    }
+
+    const filterExpression = sceneGraph.interpolate(sceneObject, VAR_FILTERS_EXPR, {});
+
+    const response = await ds.languageProvider.fetchLabelValues(
+      labelName,
+      // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
+      `{__name__=~".+",${filterExpression}}`
+    );
+
+    return response;
   }
 
   async testDatasource(): Promise<TestDataSourceResponse> {

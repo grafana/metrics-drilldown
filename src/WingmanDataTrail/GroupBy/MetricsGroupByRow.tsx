@@ -9,10 +9,10 @@ import {
   VariableDependencyConfig,
   type AdHocFiltersVariable,
   type SceneComponentProps,
-  type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Button, CollapsableSection, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
+import { isEqual } from 'lodash';
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 
@@ -20,70 +20,101 @@ import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPane
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 import { MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-
-// Add new component interface
+import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 interface MetricsGroupByRowState extends SceneObjectState {
+  index: number;
   labelName: string;
   labelValue: string;
+  labelCardinality: number;
   metricsList: string[];
-  body?: SceneObject;
-  visibleMetricsCount?: number;
-  paginationCount?: number;
+  body: SceneCSSGridLayout;
+  loading: boolean;
+  visibleMetricsCount: number;
+  paginationCount: number;
 }
+
+const VISIBLE_METRICS_COUNT = 6;
+const PAGINATION_COUNT = 9;
+const GRID_AUTO_ROWS = '240px';
 
 export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERED_METRICS_VARIABLE],
-    onVariableUpdateCompleted: () => {
-      const filteredMetricsVariable = sceneGraph.lookupVariable(
-        VAR_FILTERED_METRICS_VARIABLE,
-        this
-      ) as FilteredMetricsVariable;
+    onVariableUpdateCompleted: async () => {
+      const metricsList = await this.fetchMetricsList();
 
-      const metricsList = filteredMetricsVariable.state.options.map((option) => option.value as string);
-
-      this.setState({
-        metricsList,
-        body: this.buildMetricsBody(metricsList),
-      });
+      if (!isEqual(this.state.metricsList, metricsList)) {
+        this.setState({ metricsList });
+        this.updateBodyChildren();
+      }
     },
   });
 
-  public constructor(state: Partial<MetricsGroupByRowState>) {
+  public constructor(state: {
+    index: MetricsGroupByRowState['index'];
+    labelName: MetricsGroupByRowState['labelName'];
+    labelValue: MetricsGroupByRowState['labelValue'];
+    labelCardinality: MetricsGroupByRowState['labelCardinality'];
+  }) {
     super({
       ...state,
       key: `${state.labelName || ''}-${state.labelValue || ''}`,
       labelName: state.labelName || '',
       labelValue: state.labelValue || '',
       metricsList: [],
-      body: undefined,
-      visibleMetricsCount: state.visibleMetricsCount || 6,
-      paginationCount: state.paginationCount || 9,
+      body: new SceneCSSGridLayout({
+        templateColumns: GRID_TEMPLATE_COLUMNS,
+        autoRows: GRID_AUTO_ROWS,
+        isLazy: true,
+        children: [],
+      }),
+      visibleMetricsCount: VISIBLE_METRICS_COUNT,
+      paginationCount: PAGINATION_COUNT,
+      loading: true,
     });
 
-    this.addActivationHandler(this.onActivate.bind(this));
+    this.addActivationHandler(() => {
+      this.onActivate();
+    });
   }
 
-  private onActivate() {
-    const filteredMetricsVariable = sceneGraph.lookupVariable(
-      VAR_FILTERED_METRICS_VARIABLE,
-      this
-    ) as FilteredMetricsVariable;
+  private async onActivate() {
+    const metricsList = await this.fetchMetricsList();
 
-    const metricsList = filteredMetricsVariable.state.options.map((option) => option.value as string);
-
-    this.setState({
-      metricsList,
-      body: this.buildMetricsBody(metricsList),
-    });
+    this.setState({ metricsList });
+    this.updateBodyChildren();
 
     this.subscribeToLayoutChange();
+  }
+
+  private async fetchMetricsList() {
+    const ds = await LabelsDataSource.getPrometheusDataSource(this);
+    if (!ds) {
+      return [];
+    }
+
+    const { labelName, labelValue } = this.state;
+
+    this.setState({ loading: true });
+
+    try {
+      const metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch(
+        '__name__',
+        `{${labelName}="${labelValue}"}`
+      );
+
+      return metricsList;
+    } catch (error) {
+      console.error('Error while loading metric names for %s="%s"!', labelName, labelValue);
+      console.error(error);
+    } finally {
+      this.setState({ loading: false });
+    }
   }
 
   private subscribeToLayoutChange() {
@@ -102,6 +133,36 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
+  private updateBodyChildren() {
+    const { body, visibleMetricsCount, metricsList } = this.state;
+
+    const listLength =
+      visibleMetricsCount && metricsList.length >= visibleMetricsCount ? visibleMetricsCount : metricsList.length;
+
+    const children = metricsList
+      .slice(0, listLength)
+      .map((metricName, colorIndex) => this.buildPanel(metricName, colorIndex))
+      .filter(Boolean);
+
+    if (!children.length) {
+      body.setState({
+        autoRows: 'auto',
+        children: [
+          new SceneCSSGridItem({
+            body: new SceneReactObject({
+              reactNode: <em>No results.</em>,
+            }),
+          }),
+        ],
+      });
+    }
+
+    body.setState({
+      children,
+      autoRows: GRID_AUTO_ROWS,
+    });
+  }
+
   /**
    * Builds a panel for a metric with usage stats
    * @param metricName
@@ -118,40 +179,10 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           color: getColorByIndex(colorIndex),
           matchers: [`${labelName}="${labelValue}"`],
           groupByLabel: undefined,
+          headerActions: [new SelectAction({ metricName })],
         }),
         metric: metricName,
       }),
-    });
-  }
-
-  private buildMetricsBody(metricsList: string[]): SceneObject {
-    const { labelName, labelValue, visibleMetricsCount } = this.state;
-
-    const listLength =
-      visibleMetricsCount && metricsList.length >= visibleMetricsCount ? visibleMetricsCount : metricsList.length;
-
-    const panelList = metricsList.slice(0, listLength);
-
-    const panels = panelList.map((metricName, colorIndex) => this.buildPanel(metricName, colorIndex));
-    const autoRows = panels.length ? '240px' : 'auto';
-
-    if (!panels.length) {
-      panels.push(
-        new SceneCSSGridItem({
-          body: new SceneReactObject({
-            reactNode: <em>No results.</em>,
-          }),
-        })
-      );
-    }
-
-    return new SceneCSSGridLayout({
-      key: `${labelName}-${labelValue}-metrics-${visibleMetricsCount}`, // Add a different key to force re-render
-      templateColumns: GRID_TEMPLATE_COLUMNS,
-      autoRows,
-      alignItems: 'start',
-      isLazy: true,
-      children: panels,
     });
   }
 
@@ -161,41 +192,52 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
    * @param newCount New number of visible metrics
    */
   private addMetricPanels(currentCount: number, newCount: number) {
-    const { metricsList } = this.state;
+    const { body, metricsList } = this.state;
 
-    // Get the SceneCSSGridLayout body
-    const gridLayout = this.state.body as SceneCSSGridLayout;
-    if (!gridLayout) {
-      return;
-    }
-
-    // Get current children array
-    const currentChildren = [...gridLayout.state.children];
-
-    // Calculate color index to start from (continue from where we left off)
-    let colorIndex = currentCount;
-
-    // Create new panels for the additional metrics
     const newPanels = metricsList
       .slice(currentCount, newCount)
-      .map((metricName) => this.buildPanel(metricName, colorIndex++));
+      .map((metricName, colorIndex) => this.buildPanel(metricName, colorIndex))
+      .filter(Boolean);
 
-    // Add new panels to the existing children
-    const updatedChildren = [...currentChildren, ...newPanels];
-
-    // Update the body's children state
-    gridLayout.setState({
-      children: updatedChildren,
+    body.setState({
+      children: [...body.state.children, ...newPanels],
     });
   }
 
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const styles = useStyles2(getStyles);
+    const {
+      labelName,
+      labelValue,
+      body,
+      metricsList,
+      visibleMetricsCount,
+      paginationCount,
+      index,
+      labelCardinality,
+      loading,
+    } = model.useState();
 
-    const { labelName, labelValue, body, metricsList, visibleMetricsCount, paginationCount } = model.useState();
+    const variant = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state.value as string;
+
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [currentCount, setCurrentCount] = useState(visibleMetricsCount ?? 6);
-    const [showPagination, setShowPagination] = useState((visibleMetricsCount ?? 6) < metricsList.length);
+    const [currentCount, setCurrentCount] = useState(visibleMetricsCount);
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const onClickFilterBy = () => {
+      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
+
+      adHocFiltersVariable.setState({
+        // TOOD: keep unique filters
+        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
+      });
+
+      navigate({
+        pathname: location.pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`),
+      });
+    };
 
     const handleToggleShowMore = () => {
       // Calculate new visible count (current + pagination count, but not exceeding metricsList length)
@@ -206,63 +248,72 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
       // Update current count
       setCurrentCount(newCount);
-
-      // Hide pagination button if all metrics are now visible
-      if (newCount >= metricsList.length) {
-        setShowPagination(false);
-      }
     };
 
-    const showMoreCount = Math.min(paginationCount ?? 9, metricsList.length - currentCount);
-
-    const location = useLocation();
-    const navigate = useNavigate();
-
+    const showMoreCount = Math.min(paginationCount, metricsList.length - currentCount);
+    const showPagination = visibleMetricsCount < metricsList.length;
     const isOnboardingView = location.pathname.includes('/onboard');
-
-    const onClickFilterBy = () => {
-      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
-
-      adHocFiltersVariable.setState({
-        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
-      });
-
-      navigate({
-        pathname: location.pathname.replace('/onboard-wingman', '/trail-wingman'),
-      });
-    };
 
     return (
       <div className={styles.rowContainer}>
-        {/* for a custom label with buttons on the right, had to hack this above the collapsable section */}
-        <div className={styles.container}>
-          <span className={styles.groupName}>{`${labelName}: ${labelValue}`}</span>
+        <div className={styles.top}>
           <div className={styles.buttons}>
             {!isOnboardingView && (
-              <Button variant="secondary" fill="outline" className={styles.button}>
+              <Button variant="secondary" fill="outline" className={styles.excludeButton}>
                 Exclude
               </Button>
             )}
             {isOnboardingView && (
-              <Button variant="secondary" fill="outline" className={styles.button} onClick={onClickFilterBy}>
+              <Button
+                icon="filter"
+                variant="primary"
+                fill="outline"
+                className={styles.filterButton}
+                onClick={onClickFilterBy}
+              >
                 Filter by
               </Button>
             )}
           </div>
         </div>
 
-        <CollapsableSection onToggle={() => setIsCollapsed(!isCollapsed)} label="" isOpen={!isCollapsed}>
-          {body && <body.Component model={body} />}
+        {
+          <CollapsableSection
+            isOpen={!isCollapsed}
+            onToggle={() => setIsCollapsed(!isCollapsed)}
+            label={
+              <div className={styles.groupName}>
+                <Icon name="layer-group" size="lg" />
+                <div className={styles.labelValue}>{labelValue}</div>
+                {labelCardinality > 1 && (
+                  <div className={styles.index}>
+                    ({index + 1}/{labelCardinality})
+                  </div>
+                )}
+              </div>
+            }
+          >
+            {loading && (
+              <div className={styles.loading}>
+                <Spinner inline />
+              </div>
+            )}
+            {!loading && (
+              <>
+                <body.Component model={body} />
 
-          {/* Show toggle button if there are more metrics to show */}
-          {showPagination && showMoreCount > 0 && (
-            <div className={styles.showMoreButton}>
-              <Button variant="secondary" fill="outline" onClick={handleToggleShowMore}>
-                Show {showMoreCount} More ({currentCount}/{metricsList.length})
-              </Button>
-            </div>
-          )}
-        </CollapsableSection>
+                {/* Show toggle button if there are more metrics to show */}
+                {showPagination && showMoreCount > 0 && (
+                  <div className={styles.showMoreButton}>
+                    <Button variant="secondary" fill="outline" onClick={handleToggleShowMore}>
+                      Show {showMoreCount} more ({currentCount}/{metricsList.length})
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </CollapsableSection>
+        }
       </div>
     );
   };
@@ -278,10 +329,7 @@ function getStyles(theme: GrafanaTheme2) {
       boxShadow: theme.shadows.z1,
       marginBottom: '16px',
     }),
-    row: css({
-      marginBottom: '32px',
-    }),
-    container: css({
+    top: css({
       display: 'flex',
       alignItems: 'center',
       gap: '8px',
@@ -289,7 +337,10 @@ function getStyles(theme: GrafanaTheme2) {
       marginBottom: '-36px',
     }),
     groupName: css({
-      fontSize: '18px',
+      display: 'flex',
+      alignItems: 'center',
+      fontSize: '19px',
+      lineHeight: '19px',
     }),
     buttons: css({
       display: 'flex',
@@ -301,7 +352,21 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       marginTop: '16px',
       justifyContent: 'center',
+      '& button': {},
     }),
-    button: css({}),
+    filterButton: css({}),
+    excludeButton: css({}),
+    labelValue: css({
+      fontSize: '17px',
+      marginLeft: '8px',
+    }),
+    index: css({
+      fontSize: '12px',
+      color: theme.colors.text.secondary,
+      marginLeft: '8px',
+    }),
+    loading: css({
+      minHeight: '240px',
+    }),
   };
 }

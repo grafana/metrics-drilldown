@@ -5,12 +5,24 @@ import React from 'react';
 
 interface SelectActionState extends SceneObjectState {
   metricName: string;
+  variant: 'primary' | 'secondary';
+  fill: 'solid' | 'outline' | 'text';
 }
 
 export class SelectAction extends SceneObjectBase<SelectActionState> {
-  constructor({ metricName }: { metricName: SelectActionState['metricName'] }) {
+  constructor({
+    metricName,
+    variant,
+    fill,
+  }: {
+    metricName: SelectActionState['metricName'];
+    variant?: SelectActionState['variant'];
+    fill?: SelectActionState['fill'];
+  }) {
     super({
       metricName,
+      variant: variant || 'primary',
+      fill: fill || 'text',
     });
   }
 
@@ -18,9 +30,10 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
 
   public static Component = ({ model }: SceneComponentProps<SelectAction>) => {
     const styles = useStyles2(getStyles);
+    const { variant, fill } = model.useState();
 
     return (
-      <Button variant="primary" fill="text" size="sm" className={styles.selectButton} onClick={() => {}}>
+      <Button variant={variant} fill={fill} size="sm" className={styles.selectButton} onClick={() => {}}>
         Select
       </Button>
     );

@@ -14,11 +14,13 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
+import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
 import { MetricsSorter } from './MetricsSorter';
 import { QuickSearch } from './QuickSearch';
+import { ROUTES } from '../../constants';
 
 interface HeaderControlsState extends SceneObjectState {
   $variables?: SceneVariableSet;
@@ -36,32 +38,7 @@ export class HeaderControls extends EmbeddedScene {
         direction: 'row',
         width: '100%',
         maxHeight: '32px',
-        children: [
-          new SceneFlexItem({
-            width: 'auto',
-            body: new MetricsFilter({ type: 'prefixes' }),
-          }),
-          new SceneFlexItem({
-            width: 'auto',
-            body: new MetricsFilter({ type: 'categories' }),
-          }),
-          new SceneFlexItem({
-            body: new QuickSearch(),
-          }),
-          new SceneFlexItem({
-            key: 'group-by-label-selector-wingman',
-            width: 'auto',
-            body: undefined,
-          }),
-          new SceneFlexItem({
-            maxWidth: '240px',
-            body: new MetricsSorter({}),
-          }),
-          new SceneFlexItem({
-            width: 'auto',
-            body: new LayoutSwitcher(),
-          }),
-        ],
+        children: [],
       }),
     });
 
@@ -69,14 +46,59 @@ export class HeaderControls extends EmbeddedScene {
   }
 
   onActivate() {
-    const flexItem = sceneGraph.findByKey(this, 'group-by-label-selector-wingman') as SceneFlexItem;
+    const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
 
-    flexItem.setState({
-      body: new SceneReactObject({
-        component: labelsVariable.Component,
-        props: { model: labelsVariable },
-      }),
+    (this.state.body as SceneFlexLayout).setState({
+      // see comment in MetricsReducer
+      children: [ROUTES.TrialWithPills, ROUTES.OnboardWithPills].includes(variant as string)
+        ? [
+            new SceneFlexItem({
+              width: 'auto',
+              body: new MetricsFilter({ type: 'prefixes' }),
+            }),
+            new SceneFlexItem({
+              width: 'auto',
+              body: new MetricsFilter({ type: 'categories' }),
+            }),
+            new SceneFlexItem({
+              body: new QuickSearch(),
+            }),
+            new SceneFlexItem({
+              key: 'group-by-label-selector-wingman',
+              width: 'auto',
+              body: undefined,
+            }),
+            new SceneFlexItem({
+              maxWidth: '240px',
+              body: new MetricsSorter({}),
+            }),
+            new SceneFlexItem({
+              width: 'auto',
+              body: new LayoutSwitcher(),
+            }),
+          ]
+        : [
+            new SceneFlexItem({
+              body: new QuickSearch(),
+            }),
+            new SceneFlexItem({
+              key: 'group-by-label-selector-wingman',
+              width: 'auto',
+              body: new SceneReactObject({
+                component: labelsVariable.Component,
+                props: { model: labelsVariable },
+              }),
+            }),
+            new SceneFlexItem({
+              maxWidth: '240px',
+              body: new MetricsSorter({}),
+            }),
+            new SceneFlexItem({
+              width: 'auto',
+              body: new LayoutSwitcher(),
+            }),
+          ],
     });
   }
 

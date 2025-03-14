@@ -13,7 +13,7 @@ import React from 'react';
 
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { MetricsFilterSection } from './MetricsFilterSection';
 import {
@@ -59,17 +59,23 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       hideEmptyTypes: true,
       selectedMetricPrefixes: [],
       selectedMetricCategories: [],
-      loading: true,
+      loading: false,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
   private onActivate() {
+    const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
+
+    this.updateLists(metricsVariable.state.options as MetricOptions);
+
     const filteredMetricsVariable = sceneGraph.lookupVariable(
       VAR_FILTERED_METRICS_VARIABLE,
       this
     ) as FilteredMetricsVariable;
+
+    this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
 
     this._subs.add(
       filteredMetricsVariable.subscribeToState((newState, prevState) => {

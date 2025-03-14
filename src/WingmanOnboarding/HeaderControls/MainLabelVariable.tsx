@@ -7,13 +7,13 @@ import React from 'react';
 export const VAR_MAIN_LABEL_VARIABLE = 'mainLabelWingman';
 
 export class MainLabelVariable extends CustomVariable {
-  private static OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node'];
+  public static OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node', 'instance'];
 
   constructor() {
     super({
       name: VAR_MAIN_LABEL_VARIABLE,
       query: MainLabelVariable.OPTIONS.join(','),
-      hide: VariableHide.hideLabel,
+      hide: VariableHide.hideVariable,
       value: undefined,
     });
   }
@@ -28,16 +28,23 @@ export class MainLabelVariable extends CustomVariable {
 
     return (
       <div className={styles.container}>
-        {options.map((option) => (
-          <Button
-            key={String(option.value)}
-            className={cx(styles.labelButton, { [styles.selected]: option.value === value })}
-            onClick={toggle(option.value)}
-            title={`Group metrics by ${option.label}`}
-          >
-            {option.label}
-          </Button>
-        ))}
+        {options
+          .sort((a, b) => Number(b.label.replace(/[^0-9]/g, '')) - Number(a.label.replace(/[^0-9]/g, '')))
+          .map((option) => {
+            const [label, labelCardinality] = option.label.split(' ');
+
+            return (
+              <Button
+                key={String(option.value)}
+                className={cx(styles.labelButton, { [styles.selected]: option.value === value })}
+                onClick={toggle(option.value)}
+                title={`Group metrics by ${label}`}
+                disabled={labelCardinality === '(0)'}
+              >
+                {label} {labelCardinality}
+              </Button>
+            );
+          })}
       </div>
     );
   };

@@ -1,7 +1,6 @@
 import {
   SceneFlexItem,
   SceneFlexLayout,
-  sceneGraph,
   SceneObjectBase,
   VariableDependencyConfig,
   type SceneComponentProps,
@@ -10,7 +9,7 @@ import {
 import { Alert, Spinner } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
+import { VAR_FILTERS } from 'shared';
 import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
@@ -18,6 +17,7 @@ import { MetricsGroupByRow } from './MetricsGroupByRow';
 interface MetricsGroupByListState extends SceneObjectState {
   body: SceneFlexLayout;
   labelName: string;
+  labelValues?: string[];
   loading: boolean;
   error?: Error;
 }
@@ -30,10 +30,17 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
     },
   });
 
-  constructor({ labelName }: { labelName: string }) {
+  constructor({
+    labelName,
+    labelValues,
+  }: {
+    labelName: MetricsGroupByListState['labelName'];
+    labelValues?: MetricsGroupByListState['labelValues'];
+  }) {
     super({
       key: 'metrics-group-list',
       labelName,
+      labelValues,
       body: new SceneFlexLayout({
         direction: 'column',
         children: [],
@@ -52,47 +59,44 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
   }
 
   async renderBody() {
-    const { labelName } = this.state;
-    let labelValues: string[] = [];
+    const { labelName, labelValues } = this.state;
+    let values = labelValues;
 
-    this.setState({ loading: true });
-
-    try {
-      labelValues = await this.fetchLabelValues(labelName);
-    } catch (error) {
-      this.setState({ error: error as Error });
-    } finally {
+    if (!values) {
+      values = await this.fetchLabelValues(labelName);
+    } else {
       this.setState({ loading: false });
     }
 
     this.state.body.setState({
-      children: labelValues.map(
-        (labelValue) =>
+      children: values.map(
+        (labelValue, index) =>
           new SceneFlexItem({
             body: new MetricsGroupByRow({
+              index,
               labelName,
               labelValue,
+              labelCardinality: values.length,
             }),
           })
       ),
     });
   }
 
-  async fetchLabelValues(labelName: string): Promise<string[]> {
-    const ds = await LabelsDataSource.getPrometheusDataSource(this);
-    if (!ds) {
-      return [];
+  async fetchLabelValues(labelName: string) {
+    let labelValues: string[] = [];
+
+    this.setState({ loading: true });
+
+    try {
+      labelValues = await LabelsDataSource.fetchLabelValues(labelName, this);
+    } catch (error) {
+      this.setState({ error: error as Error });
+    } finally {
+      this.setState({ loading: false });
     }
 
-    const filterExpression = sceneGraph.interpolate(this, VAR_FILTERS_EXPR, {});
-
-    const response = await ds.languageProvider.fetchSeriesValuesWithMatch(
-      labelName,
-      // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
-      `{__name__=~".+",${filterExpression}}`
-    );
-
-    return response;
+    return labelValues;
   }
 
   static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
