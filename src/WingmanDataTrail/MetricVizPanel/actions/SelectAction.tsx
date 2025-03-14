@@ -4,6 +4,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricSelectedEvent } from 'shared';
+
 interface SelectActionState extends SceneObjectState {
   metricName: string;
   variant: 'primary' | 'secondary';
@@ -27,7 +29,9 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
     });
   }
 
-  public onClick = () => {};
+  public onClick = () => {
+    this.publishEvent(new MetricSelectedEvent(this.state.metricName), true);
+  };
 
   public static Component = ({ model }: SceneComponentProps<SelectAction>) => {
     const styles = useStyles2(getStyles);
@@ -39,7 +43,7 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
         fill={fill}
         size="sm"
         className={cx(styles.selectButton, styles[variant as keyof typeof styles])}
-        onClick={() => {}}
+        onClick={model.onClick}
       >
         Select
       </Button>
