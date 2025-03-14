@@ -11,6 +11,9 @@ on:
           - dev
           - ops
           - prod
+  push:
+    tags:
+      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
 
 permissions:
   contents: 'write'
@@ -19,7 +22,7 @@ permissions:
 
 jobs:
   CD:
-    name: Deploy
+    name: Deploy plugin
     # Don't run on forks, and run only on main or versioned tags
     if: |
       github.repository == 'grafana/metrics-drilldown' && 
