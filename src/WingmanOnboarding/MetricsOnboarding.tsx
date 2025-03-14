@@ -1,7 +1,10 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
+  behaviors,
+  SceneCSSGridItem,
+  SceneCSSGridLayout,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
@@ -15,12 +18,18 @@ import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { VAR_DATASOURCE } from 'shared';
+import { getColorByIndex } from 'utils';
 import { MetricsGroupByList } from 'WingmanDataTrail/GroupBy/MetricsGroupByList';
 import { LayoutSwitcher } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch';
 import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
-import { SimpleMetricsList } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
+import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
+import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
+import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
+import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigureFunction';
+import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { registerRuntimeDataSources } from 'WingmanDataTrail/registerRuntimeDataSources';
+import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { MainLabelVariable, VAR_MAIN_LABEL_VARIABLE } from './HeaderControls/MainLabelVariable';
 import { VAR_VARIANT, type VariantVariable } from './VariantVariable';
@@ -28,6 +37,7 @@ interface MetricsOnboardingState extends SceneObjectState {
   headerControls: SceneFlexLayout;
   allLabelValues: Map<string, string[]>;
   loading: boolean;
+  drawer: SceneDrawer;
   body?: SceneObjectBase;
 }
 
@@ -76,6 +86,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
         ],
       }),
       loading: true,
+      drawer: new SceneDrawer({}),
       body: undefined,
     });
 
@@ -92,6 +103,12 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
         if (newState.value !== prevState.value) {
           this.updateBody(newState.value as string);
         }
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventConfigureFunction, (event) => {
+        this.openDrawer(event.payload.metricName);
       })
     );
 
@@ -143,11 +160,51 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     });
   }
 
+  private openDrawer(metricName: string) {
+    this.state.drawer.open({
+      title: 'Choose a new Prometheus function',
+      subTitle: metricName,
+      body: new SceneCSSGridLayout({
+        templateColumns: GRID_TEMPLATE_COLUMNS,
+        autoRows: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+        isLazy: true,
+        $behaviors: [
+          new behaviors.CursorSync({
+            key: 'metricCrosshairSync',
+            sync: DashboardCursorSync.Crosshair,
+          }),
+        ],
+        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map(
+          (option, colorIndex) =>
+            new SceneCSSGridItem({
+              body: new MetricVizPanel({
+                title: option.label,
+                metricName,
+                color: getColorByIndex(colorIndex),
+                groupByLabel: undefined,
+                prometheusFunction: option.value,
+                height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+                hideLegend: true,
+                highlight: colorIndex === 1,
+                headerActions: [
+                  new ApplyAction({
+                    metricName,
+                    prometheusFunction: option.value,
+                    disabled: colorIndex === 1,
+                  }),
+                ],
+              }),
+            })
+        ),
+      }),
+    });
+  }
+
   public static Component = ({ model }: SceneComponentProps<MetricsOnboarding>) => {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
-    const { body, headerControls, loading } = model.useState();
+    const { body, headerControls, loading, drawer } = model.useState();
 
     const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, model) as MainLabelVariable;
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state.value as string;
@@ -181,6 +238,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
           </div>
         </div>
         <div className={styles.body}>{body && <body.Component model={body} />}</div>
+        <drawer.Component model={drawer} />
       </div>
     );
   };
