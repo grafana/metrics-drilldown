@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.0-3",
+  "version": "1.0.0-4",
   "scripts": {
     "prebuild": "./scripts/update-commit-sha.sh",
     "build": "webpack -c ./webpack.config.ts --env production",
