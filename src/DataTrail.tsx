@@ -31,8 +31,12 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
+import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventQuickSearchChanged';
 import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
-import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import {
+  FilteredMetricsVariable,
+  VAR_FILTERED_METRICS_VARIABLE,
+} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { MainLabelVariable } from 'WingmanOnboarding/HeaderControls/MainLabelVariable';
 import { MetricsOnboarding } from 'WingmanOnboarding/MetricsOnboarding';
@@ -149,6 +153,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
+    this.addActivationHandler(this._onActivateWingman.bind(this));
+  }
+
+  private _onActivateWingman() {
+    this.subscribeToEvent(EventQuickSearchChanged, (event) => {
+      const { searchText } = event.payload;
+      (sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this) as FilteredMetricsVariable).applyFilters({
+        names: searchText ? [searchText] : [],
+      });
+    });
   }
 
   public _onActivate() {

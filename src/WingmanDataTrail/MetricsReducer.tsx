@@ -184,8 +184,6 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
   return {
     headerControls: css({
       marginBottom: theme.spacing(1.5),
-      paddingBottom: theme.spacing(1.5),
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
     body: css({
       display: 'flex',

@@ -21,7 +21,7 @@ import { VAR_DATASOURCE } from 'shared';
 import { getColorByIndex } from 'utils';
 import { MetricsGroupByList } from 'WingmanDataTrail/GroupBy/MetricsGroupByList';
 import { LayoutSwitcher } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
-import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch';
+import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
 import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
@@ -210,10 +210,12 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state.value as string;
 
     const { pathname, search } = useLocation();
-    const href = useMemo(
-      () => pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + search,
-      [pathname, variant, search]
-    );
+    const href = useMemo(() => {
+      const searchParams = new URLSearchParams(search);
+      searchParams.delete(QuickSearch.URL_SEARCH_PARAM_NAME);
+
+      return pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + '?' + searchParams.toString();
+    }, [pathname, variant, search]);
 
     if (loading) {
       return <Spinner inline />;
@@ -256,7 +258,6 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing(2),
-      marginTop: theme.spacing(2),
     }),
     topControls: css({
       display: 'flex',
@@ -271,7 +272,9 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       },
     }),
     mainLabelVariable: css({}),
-    listControls: css({}),
+    listControls: css({
+      marginBottom: theme.spacing(0.5),
+    }),
     body: css({
       width: '100%',
       height: `calc(100vh - ${chromeHeaderHeight + 284}px)`,

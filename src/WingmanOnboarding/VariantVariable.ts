@@ -11,6 +11,7 @@ export class VariantVariable extends CustomVariable {
       name: VAR_VARIANT,
       query: VariantVariable.OPTIONS.join(','),
       hide: VariableHide.hideVariable,
+      includeAll: false,
     });
   }
 }

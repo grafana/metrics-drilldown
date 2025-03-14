@@ -1,8 +1,7 @@
 import { sceneGraph, SceneVariableValueChangedEvent, type VariableValueOption } from '@grafana/scenes';
-import { cloneDeep, debounce, isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 
 import { VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
-import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { SideBar } from 'WingmanDataTrail/SideBar/SideBar';
@@ -39,43 +38,40 @@ export class FilteredMetricsVariable extends MetricsVariable {
   }
 
   protected onActivate() {
-    let quickSearch = new QuickSearch();
     let sideBar = new SideBar({});
 
     // TEMP: this is just to make the unit tests pass so we can deploy
     // because this variable is added to the ancestor DataTrail Scene object - tried to move it to MetricsReducer, but it does not work
     // Also it makes the /a/grafana-metricsdrilldown-app/onboard-wingman page work ;)
     try {
-      quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
       sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
     } catch (error) {
       console.warn('Error in FilteredMetricsVariable onActivate', error);
     }
 
-    this.subscribeToStateChange(quickSearch, sideBar);
-    this.subscribeToUiFiltersChange(quickSearch, sideBar);
+    this.subscribeToStateChange(sideBar);
+    this.subscribeToUiFiltersChange(sideBar);
 
     this.subscribeToGroupByChange(sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable);
     this.subscribeToGroupByChange(sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable);
   }
 
-  private subscribeToStateChange(quickSearch: QuickSearch, sideBar: SideBar) {
+  private subscribeToStateChange(sideBar: SideBar) {
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
         if (newState.loading === false && prevState.loading === true) {
           this.initOptions = cloneDeep(newState.options);
 
-          const quickSearchValue = quickSearch.state.value;
           const { selectedMetricPrefixes, selectedMetricCategories } = sideBar.state;
 
           this.applyFilters(
             {
-              names: quickSearchValue ? [quickSearchValue] : [],
               prefixes: selectedMetricPrefixes,
               categories: selectedMetricCategories,
             },
-            // force update to ensure the options are filtered
-            // need specifically when selecting a different group by label
+            // don't notify
+            false,
+            // force update to ensure the options are filtered (need it specifically when selecting a different group by label)
             true
           );
         }
@@ -83,30 +79,17 @@ export class FilteredMetricsVariable extends MetricsVariable {
     );
   }
 
-  private subscribeToUiFiltersChange(quickSearch: QuickSearch, sideBar: SideBar) {
-    this._subs.add(
-      quickSearch.subscribeToState(
-        debounce((newState, prevState) => {
-          if (newState.value !== prevState.value) {
-            this.applyFilters({ names: newState.value ? [newState.value] : [] });
-            this.notifyUpdate();
-          }
-        }, 250)
-      )
-    );
-
+  private subscribeToUiFiltersChange(sideBar: SideBar) {
     // TODO: subscribe only to the filter sections in the side bar, once they are Scene objects (and not React components)
     this._subs.add(
       sideBar.subscribeToState((newState, prevState) => {
         if (!isEqual(newState.selectedMetricPrefixes, prevState.selectedMetricPrefixes)) {
           this.applyFilters({ prefixes: newState.selectedMetricPrefixes });
-          this.notifyUpdate();
           return;
         }
 
         if (!isEqual(newState.selectedMetricCategories, prevState.selectedMetricCategories)) {
           this.applyFilters({ categories: newState.selectedMetricCategories });
-          this.notifyUpdate();
           return;
         }
       })
@@ -149,7 +132,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
     );
   }
 
-  public applyFilters(filters: Partial<MetricFilters> = this.filters, forceUpdate = false) {
+  public applyFilters(filters: Partial<MetricFilters> = this.filters, notify = true, forceUpdate = false) {
     const updatedFilters = {
       ...this.filters,
       ...filters,
@@ -162,9 +145,11 @@ export class FilteredMetricsVariable extends MetricsVariable {
     ) {
       this.filters = updatedFilters;
 
-      this.setState({
-        options: this.initOptions,
-      });
+      this.setState({ options: this.initOptions });
+
+      if (notify) {
+        this.notifyUpdate();
+      }
 
       return;
     }
@@ -186,9 +171,11 @@ export class FilteredMetricsVariable extends MetricsVariable {
 
     this.filters = updatedFilters;
 
-    this.setState({
-      options: filteredOptions,
-    });
+    this.setState({ options: filteredOptions });
+
+    if (notify) {
+      this.notifyUpdate();
+    }
   }
 
   private applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {

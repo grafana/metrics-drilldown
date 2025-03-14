@@ -19,7 +19,7 @@ import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVari
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
 import { MetricsSorter } from './MetricsSorter';
-import { QuickSearch } from './QuickSearch';
+import { QuickSearch } from './QuickSearch/QuickSearch';
 import { ROUTES } from '../../constants';
 
 interface HeaderControlsState extends SceneObjectState {
@@ -38,7 +38,24 @@ export class HeaderControls extends EmbeddedScene {
         direction: 'row',
         width: '100%',
         maxHeight: '32px',
-        children: [],
+        children: [
+          new SceneFlexItem({
+            body: new QuickSearch(),
+          }),
+          new SceneFlexItem({
+            key: 'group-by-label-selector-wingman',
+            width: 'auto',
+            body: undefined,
+          }),
+          new SceneFlexItem({
+            maxWidth: '240px',
+            body: new MetricsSorter({}),
+          }),
+          new SceneFlexItem({
+            width: 'auto',
+            body: new LayoutSwitcher(),
+          }),
+        ],
       }),
     });
 
@@ -49,57 +66,33 @@ export class HeaderControls extends EmbeddedScene {
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
 
-    (this.state.body as SceneFlexLayout).setState({
-      // see comment in MetricsReducer
-      children: [ROUTES.TrialWithPills, ROUTES.OnboardWithPills].includes(variant as string)
-        ? [
-            new SceneFlexItem({
-              width: 'auto',
-              body: new MetricsFilter({ type: 'prefixes' }),
-            }),
-            new SceneFlexItem({
-              width: 'auto',
-              body: new MetricsFilter({ type: 'categories' }),
-            }),
-            new SceneFlexItem({
-              body: new QuickSearch(),
-            }),
-            new SceneFlexItem({
-              key: 'group-by-label-selector-wingman',
-              width: 'auto',
-              body: undefined,
-            }),
-            new SceneFlexItem({
-              maxWidth: '240px',
-              body: new MetricsSorter({}),
-            }),
-            new SceneFlexItem({
-              width: 'auto',
-              body: new LayoutSwitcher(),
-            }),
-          ]
-        : [
-            new SceneFlexItem({
-              body: new QuickSearch(),
-            }),
-            new SceneFlexItem({
-              key: 'group-by-label-selector-wingman',
-              width: 'auto',
-              body: new SceneReactObject({
-                component: labelsVariable.Component,
-                props: { model: labelsVariable },
-              }),
-            }),
-            new SceneFlexItem({
-              maxWidth: '240px',
-              body: new MetricsSorter({}),
-            }),
-            new SceneFlexItem({
-              width: 'auto',
-              body: new LayoutSwitcher(),
-            }),
-          ],
-    });
+    // see comment in MetricsReducer
+    if ([ROUTES.TrialWithPills, ROUTES.OnboardWithPills].includes(variant as string)) {
+      (this.state.body as SceneFlexLayout).setState({
+        children: [
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsFilter({ type: 'prefixes' }),
+          }),
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsFilter({ type: 'categories' }),
+          }),
+          ...(this.state.body as SceneFlexLayout).state.children,
+        ],
+      });
+    } else {
+      (
+        (this.state.body as SceneFlexLayout).state.children.find(
+          (c) => c.state.key === 'group-by-label-selector-wingman'
+        ) as SceneFlexItem
+      )?.setState({
+        body: new SceneReactObject({
+          component: labelsVariable.Component,
+          props: { model: labelsVariable },
+        }),
+      });
+    }
   }
 
   public static Component = ({ model }: SceneComponentProps<HeaderControls>) => {

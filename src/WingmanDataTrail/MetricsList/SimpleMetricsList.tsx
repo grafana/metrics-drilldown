@@ -1,5 +1,4 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
 import {
   behaviors,
   SceneByVariableRepeater,
@@ -128,7 +127,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2) {
+function getStyles() {
   return {
     container: css({}),
   };
