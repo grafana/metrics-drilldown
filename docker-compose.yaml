@@ -31,3 +31,8 @@ services:
       # To add support for a new port (e.g. 3002), create a new config file:
       # config/prometheus.3002.yaml with the appropriate host.docker.internal:<port> value
       - ./config/prometheus.${GRAFANA_PORT:-3000}.yaml:/etc/prometheus/prometheus.yml
+  # This service is used for e2e tests
+  prometheus-utf8:
+    build: docker/prometheus_utf8
+    ports:
+      - '${PROMETHEUS_UTF8_PORT:-9112}:9112'
