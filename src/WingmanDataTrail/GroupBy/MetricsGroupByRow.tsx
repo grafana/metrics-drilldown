@@ -179,7 +179,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           color: getColorByIndex(colorIndex),
           matchers: [`${labelName}="${labelValue}"`],
           groupByLabel: undefined,
-          headerActions: [new SelectAction({ metricName })],
+          headerActions: [new SelectAction({ metricName, variant: 'secondary' })],
         }),
         metric: metricName,
       }),

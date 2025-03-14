@@ -1,4 +1,5 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -33,13 +34,22 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
     const { variant, fill } = model.useState();
 
     return (
-      <Button variant={variant} fill={fill} size="sm" className={styles.selectButton} onClick={() => {}}>
+      <Button
+        variant={variant}
+        fill={fill}
+        size="sm"
+        className={cx(styles.selectButton, styles[variant as keyof typeof styles])}
+        onClick={() => {}}
+      >
         Select
       </Button>
     );
   };
 }
 
-const getStyles = () => ({
+const getStyles = (theme: GrafanaTheme2) => ({
   selectButton: css``,
+  secondary: css`
+    color: ${theme.colors.text.secondary};
+  `,
 });
