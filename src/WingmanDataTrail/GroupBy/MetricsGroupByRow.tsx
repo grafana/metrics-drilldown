@@ -292,6 +292,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 )}
               </div>
             }
+            className={styles.collapsableSection}
           >
             {loading && (
               <div className={styles.loading}>
@@ -328,6 +329,14 @@ function getStyles(theme: GrafanaTheme2) {
       background: theme.colors.background.primary,
       boxShadow: theme.shadows.z1,
       marginBottom: '16px',
+      '& div:focus-within': {
+        boxShadow: 'none !important',
+      },
+    }),
+    collapsableSection: css({
+      '& button:focus': {
+        boxShadow: 'none !important',
+      },
     }),
     top: css({
       display: 'flex',
