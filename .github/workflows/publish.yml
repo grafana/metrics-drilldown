@@ -29,6 +29,6 @@ jobs:
       (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
     with:
-      environment: ${{ inputs.environment }}
+      environment: ${{ inputs.environment || 'prod' }}
       upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
