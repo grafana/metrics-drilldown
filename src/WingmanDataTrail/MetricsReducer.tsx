@@ -196,7 +196,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       overflowY: 'auto',
     }),
     sidebar: css({
-      width: '250px',
+      width: '320px',
     }),
   };
 }
