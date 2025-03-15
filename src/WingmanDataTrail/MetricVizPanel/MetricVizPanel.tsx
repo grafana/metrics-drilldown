@@ -38,6 +38,7 @@ interface MetricVizPanelState extends SceneObjectState {
   groupByLabel?: GroupByLabel;
 }
 
+export const METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '240px';
 export const METRICS_VIZ_PANEL_HEIGHT = '200px';
 export const METRICS_VIZ_PANEL_HEIGHT_SMALL = '160px';
 

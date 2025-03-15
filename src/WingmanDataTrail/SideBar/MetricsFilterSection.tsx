@@ -181,7 +181,7 @@ function getStyles(theme: GrafanaTheme2) {
       color: theme.colors.text.secondary,
       marginTop: theme.spacing(2),
       marginBottom: theme.spacing(1),
-      padding: `0 ${theme.spacing(1)}`,
+      padding: theme.spacing(0, 0, 0, 1),
     }),
     clearButton: css({}),
     checkboxItem: css({

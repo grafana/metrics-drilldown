@@ -1,11 +1,12 @@
-import { registerRuntimeDataSource } from '@grafana/scenes';
+import { registerRuntimeDataSource, type RuntimeDataSource } from '@grafana/scenes';
 
-import { displayError } from './helpers/displayStatus';
-import { LabelsDataSource } from './Labels/LabelsDataSource';
+import { displayError } from './displayStatus';
 
-export function registerRuntimeDataSources() {
+export function registerRuntimeDataSources(dataSources: RuntimeDataSource[]) {
   try {
-    registerRuntimeDataSource({ dataSource: new LabelsDataSource() });
+    for (const dataSource of dataSources) {
+      registerRuntimeDataSource({ dataSource });
+    }
   } catch (error) {
     const { message } = error as Error;
 

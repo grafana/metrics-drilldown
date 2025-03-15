@@ -1,32 +1,59 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricSelectedEvent } from 'shared';
+
 interface SelectActionState extends SceneObjectState {
   metricName: string;
+  variant: 'primary' | 'secondary';
+  fill: 'solid' | 'outline' | 'text';
 }
 
 export class SelectAction extends SceneObjectBase<SelectActionState> {
-  constructor({ metricName }: { metricName: SelectActionState['metricName'] }) {
+  constructor({
+    metricName,
+    variant,
+    fill,
+  }: {
+    metricName: SelectActionState['metricName'];
+    variant?: SelectActionState['variant'];
+    fill?: SelectActionState['fill'];
+  }) {
     super({
       metricName,
+      variant: variant || 'primary',
+      fill: fill || 'text',
     });
   }
 
-  public onClick = () => {};
+  public onClick = () => {
+    this.publishEvent(new MetricSelectedEvent(this.state.metricName), true);
+  };
 
   public static Component = ({ model }: SceneComponentProps<SelectAction>) => {
     const styles = useStyles2(getStyles);
+    const { variant, fill } = model.useState();
 
     return (
-      <Button variant="primary" fill="text" size="sm" className={styles.selectButton} onClick={() => {}}>
+      <Button
+        variant={variant}
+        fill={fill}
+        size="sm"
+        className={cx(styles.selectButton, styles[variant as keyof typeof styles])}
+        onClick={model.onClick}
+      >
         Select
       </Button>
     );
   };
 }
 
-const getStyles = () => ({
+const getStyles = (theme: GrafanaTheme2) => ({
   selectButton: css``,
+  secondary: css`
+    color: ${theme.colors.text.secondary};
+  `,
 });

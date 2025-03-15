@@ -11,20 +11,21 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
-import { VAR_DATASOURCE, VAR_FILTERS } from 'shared';
+import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 import { localeCompare } from '../helpers/localCompare';
 
 import type { PrometheusDatasource } from '@grafana/prometheus';
 
+// TODO can we get rid of it?
 export const NULL_GROUP_BY_VALUE = '(none)';
 
 export class LabelsDataSource extends RuntimeDataSource {
   static uid = 'grafana-prometheus-labels-datasource';
 
   constructor() {
-    super('grafana-prometheus-labels-datasource', LabelsDataSource.uid);
+    super(LabelsDataSource.uid, LabelsDataSource.uid);
   }
 
   async query(request: DataQueryRequest): Promise<DataQueryResponse> {
@@ -54,6 +55,15 @@ export class LabelsDataSource extends RuntimeDataSource {
     if (!ds) {
       return [];
     }
+
+    const [, labelName] = matcher.match(/valuesOf\((.+)\)/) ?? [];
+
+    if (labelName) {
+      const labelValues = await LabelsDataSource.fetchLabelValues(labelName, sceneObject);
+
+      return labelValues.map((value) => ({ value, text: value }));
+    }
+
     // make an empty array
     let labelOptions;
 
@@ -105,6 +115,23 @@ export class LabelsDataSource extends RuntimeDataSource {
 
       return undefined;
     }
+  }
+
+  static async fetchLabelValues(labelName: string, sceneObject: SceneObject): Promise<string[]> {
+    const ds = await LabelsDataSource.getPrometheusDataSource(sceneObject);
+    if (!ds) {
+      return [];
+    }
+
+    const filterExpression = sceneGraph.interpolate(sceneObject, VAR_FILTERS_EXPR, {});
+
+    const response = await ds.languageProvider.fetchLabelValues(
+      labelName,
+      // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
+      `{__name__=~".+",${filterExpression}}`
+    );
+
+    return response;
   }
 
   async testDatasource(): Promise<TestDataSourceResponse> {
