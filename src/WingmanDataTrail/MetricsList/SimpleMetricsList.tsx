@@ -76,7 +76,6 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
             ),
           }),
         getLayoutChild: (option, colorIndex) => {
-          // Scenes does not pass an index :man_shrug: :sad_panda:
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
               vizPanelInGridItem: new MetricVizPanel({

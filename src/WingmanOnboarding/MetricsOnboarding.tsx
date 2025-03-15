@@ -125,7 +125,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
   private fetchAndLabelValuesAndUpdateBody() {
     const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable;
 
-    this.fetchLabelValues(MainLabelVariable.OPTIONS).then((allLabelValues) => {
+    this.fetchAllLabelValues(MainLabelVariable.OPTIONS).then((allLabelValues) => {
       mainLabelVariable.setState({
         options: allLabelValues.map(([labelName, labelValues]) => ({
           value: labelName,
@@ -142,7 +142,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     });
   }
 
-  private async fetchLabelValues(labelNames: string[]): Promise<Array<[string, string[]]>> {
+  private async fetchAllLabelValues(labelNames: string[]): Promise<Array<[string, string[]]>> {
     return Promise.all(
       labelNames.map((labelName) =>
         LabelsDataSource.fetchLabelValues(labelName, this)
@@ -162,7 +162,6 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
         ? (new SimpleMetricsList() as unknown as SceneObjectBase)
         : (new MetricsGroupByList({
             labelName: groupByValue,
-            labelValues: this.state.allLabelValues.get(groupByValue),
           }) as unknown as SceneObjectBase),
     });
   }

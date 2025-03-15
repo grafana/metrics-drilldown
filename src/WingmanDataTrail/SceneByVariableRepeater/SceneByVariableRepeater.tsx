@@ -26,7 +26,7 @@ import React from 'react';
 interface SceneByVariableRepeaterState extends SceneObjectState {
   variableName: string;
   body: SceneLayout;
-  getLayoutChild(option: VariableValueOption, index: number): SceneObject;
+  getLayoutChild(option: VariableValueOption, index: number, options: VariableValueOption[]): SceneObject;
   getLayoutLoading?: () => SceneObject;
   getLayoutError?: (error: Error) => SceneObject;
   getLayoutEmpty?: () => SceneObject;
@@ -100,7 +100,7 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
 
     const variable = sceneGraph.lookupVariable(this.state.variableName, this);
     if (!(variable instanceof MultiValueVariable)) {
-      console.error('SceneByVariableRepeater: variable is not a MultiValueVariable');
+      console.error('SceneByVariableRepeater: variable is not a MultiValueVariable!', variable);
       return;
     }
 
@@ -135,7 +135,7 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
 
     const newChildren: SceneObject[] = values
       .slice(0, this.state.initialPageSize)
-      .map((option, index) => this.state.getLayoutChild(option, index));
+      .map((option, index) => this.state.getLayoutChild(option, index, values));
 
     this.state.body.setState({
       children: newChildren,
@@ -150,7 +150,7 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
 
     const newChildren: SceneObject[] = values
       .slice(this.state.currentBatchSize, newBatchSize)
-      .map((option, index) => this.state.getLayoutChild(option, index));
+      .map((option, index) => this.state.getLayoutChild(option, index, values));
 
     this.state.body.setState({
       children: [...this.state.body.state.children, ...newChildren],

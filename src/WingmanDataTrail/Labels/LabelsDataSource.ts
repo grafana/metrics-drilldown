@@ -55,6 +55,15 @@ export class LabelsDataSource extends RuntimeDataSource {
     if (!ds) {
       return [];
     }
+
+    const [, labelName] = matcher.match(/valuesOf\((.+)\)/) ?? [];
+
+    if (labelName) {
+      const labelValues = await LabelsDataSource.fetchLabelValues(labelName, sceneObject);
+
+      return labelValues.map((value) => ({ value, text: value }));
+    }
+
     // make an empty array
     let labelOptions;
 

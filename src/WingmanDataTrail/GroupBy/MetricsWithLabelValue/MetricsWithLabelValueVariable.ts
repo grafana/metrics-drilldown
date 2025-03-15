@@ -15,6 +15,7 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
       allowCustomValue: false,
       refresh: VariableRefresh.onTimeRangeChanged,
       hide: VariableHide.hideVariable,
+      skipUrlSync: true,
       // BOTH "value" and "includeAll" below ensure the repetition in SceneByVariableRepeater
       // // (if not set, it'll render only the 1st variable option)
       value: '$__all',
