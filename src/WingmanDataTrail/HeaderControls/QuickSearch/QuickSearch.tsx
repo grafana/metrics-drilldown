@@ -135,7 +135,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     if (disableCurrentCount) {
       return {
         tagName: `${counts.total}`,
-        tooltipContent: counts.total !== 1 ? `${counts.total} metrics displayed` : '1 metric displayed',
+        tooltipContent: counts.total !== 1 ? `${counts.total} metrics in total` : '1 metric in total',
       };
     }
 
@@ -143,8 +143,8 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       tagName: `${counts.current}/${counts.total}`,
       tooltipContent:
         counts.current !== 1
-          ? `${counts.current} out of ${counts.total} metrics displayed`
-          : `1 out of ${counts.total} metrics displayed`,
+          ? `${counts.current} out of ${counts.total} metrics in total`
+          : `1 out of ${counts.total} metrics in total`,
     };
   }
 

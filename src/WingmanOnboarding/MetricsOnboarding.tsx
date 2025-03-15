@@ -217,6 +217,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       // in the future, we'll have to clear QuickSearch (when performing the routing to the target Scene?)
       const searchParams = new URLSearchParams(search);
       searchParams.delete(QuickSearch.URL_SEARCH_PARAM_NAME);
+      searchParams.delete(`var-${VAR_MAIN_LABEL_VARIABLE}`);
 
       return pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + '?' + searchParams.toString();
     }, [pathname, variant, search]);
