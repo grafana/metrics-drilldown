@@ -18,6 +18,7 @@ import { localeCompare } from '../helpers/localCompare';
 
 import type { PrometheusDatasource } from '@grafana/prometheus';
 
+// TODO can we get rid of it?
 export const NULL_GROUP_BY_VALUE = '(none)';
 
 export class LabelsDataSource extends RuntimeDataSource {

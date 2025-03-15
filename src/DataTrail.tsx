@@ -38,7 +38,6 @@ import {
   VAR_FILTERED_METRICS_VARIABLE,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import { MainLabelVariable } from 'WingmanOnboarding/HeaderControls/MainLabelVariable';
 import { MetricsOnboarding } from 'WingmanOnboarding/MetricsOnboarding';
 import { VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
@@ -770,7 +769,6 @@ function getVariableSet(
       new MetricsVariable({}),
       new FilteredMetricsVariable(),
       new LabelsVariable(),
-      new MainLabelVariable(),
     ],
   });
 }

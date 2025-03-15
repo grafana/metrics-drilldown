@@ -1,11 +1,9 @@
 import { sceneGraph, SceneVariableValueChangedEvent, type VariableValueOption } from '@grafana/scenes';
 import { cloneDeep, isEqual } from 'lodash';
 
-import { VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
+import { VAR_FILTERS } from 'shared';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
-import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { SideBar } from 'WingmanDataTrail/SideBar/SideBar';
-import { VAR_MAIN_LABEL_VARIABLE, type MainLabelVariable } from 'WingmanOnboarding/HeaderControls/MainLabelVariable';
 
 import { MetricsVariable } from './MetricsVariable';
 
@@ -50,10 +48,6 @@ export class FilteredMetricsVariable extends MetricsVariable {
     }
 
     this.subscribeToStateChange(sideBar);
-    this.subscribeToUiFiltersChange(sideBar);
-
-    this.subscribeToGroupByChange(sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable);
-    this.subscribeToGroupByChange(sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable);
   }
 
   private subscribeToStateChange(sideBar: SideBar) {
@@ -79,57 +73,16 @@ export class FilteredMetricsVariable extends MetricsVariable {
     );
   }
 
-  private subscribeToUiFiltersChange(sideBar: SideBar) {
-    // TODO: subscribe only to the filter sections in the side bar, once they are Scene objects (and not React components)
-    this._subs.add(
-      sideBar.subscribeToState((newState, prevState) => {
-        if (!isEqual(newState.selectedMetricPrefixes, prevState.selectedMetricPrefixes)) {
-          this.applyFilters({ prefixes: newState.selectedMetricPrefixes });
-          return;
-        }
+  public updateGroupByQuery(groupByValue: string) {
+    const matcher =
+      groupByValue && groupByValue !== NULL_GROUP_BY_VALUE ? `${groupByValue}!="",$${VAR_FILTERS}` : `$${VAR_FILTERS}`;
 
-        if (!isEqual(newState.selectedMetricCategories, prevState.selectedMetricCategories)) {
-          this.applyFilters({ categories: newState.selectedMetricCategories });
-          return;
-        }
-      })
-    );
-  }
+    const query = `label_values({${matcher}}, __name__)`;
 
-  private subscribeToGroupByChange(groupByVariable: LabelsVariable | MainLabelVariable) {
-    const updateQuery = (groupBy: string) => {
-      const matcher = groupBy && groupBy !== NULL_GROUP_BY_VALUE ? `${groupBy}!="",$${VAR_FILTERS}` : `$${VAR_FILTERS}`;
-      const query = `label_values({${matcher}}, __name__)`;
-
-      if (query !== this.state.query) {
-        this.setState({ query });
-        this.refreshOptions();
-      }
-    };
-
-    if (groupByVariable.isActive) {
-      // ensure that the correct metrics are fetched when landing: sometimes filters are not interpolated and fetching metric names gives all the results
-      // (we do the same in MetricsGroupByList.tsx)
-      const filterExpression = sceneGraph.interpolate(this, VAR_FILTERS_EXPR, {});
-      const groupBy = groupByVariable.state.value as string;
-      const matcher =
-        groupBy && groupBy !== NULL_GROUP_BY_VALUE ? `${groupBy}!="",${filterExpression}` : filterExpression;
-      const query = `label_values({${matcher}}, __name__)`;
-
-      if (query !== this.state.query) {
-        this.setState({ query });
-        this.refreshOptions();
-        updateQuery(groupBy); // re-establish the subscription to the ad hoc filters changes
-      }
+    if (query !== this.state.query) {
+      this.setState({ query });
+      this.refreshOptions();
     }
-
-    this._subs.add(
-      groupByVariable.subscribeToState((newState, prevState) => {
-        if (newState.value !== prevState.value) {
-          updateQuery(newState.value as string);
-        }
-      })
-    );
   }
 
   public applyFilters(filters: Partial<MetricFilters> = this.filters, notify = true, forceUpdate = false) {

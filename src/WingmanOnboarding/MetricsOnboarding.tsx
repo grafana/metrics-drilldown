@@ -9,6 +9,7 @@ import {
   SceneFlexLayout,
   sceneGraph,
   SceneObjectBase,
+  SceneVariableSet,
   VariableDependencyConfig,
   type SceneComponentProps,
   type SceneObjectState,
@@ -39,6 +40,7 @@ interface MetricsOnboardingState extends SceneObjectState {
   allLabelValues: Map<string, string[]>;
   loading: boolean;
   drawer: SceneDrawer;
+  $variables: SceneVariableSet;
   body?: SceneObjectBase;
 }
 
@@ -65,6 +67,9 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
 
     super({
       key: 'metrics-onboarding',
+      $variables: new SceneVariableSet({
+        variables: [new MainLabelVariable()],
+      }),
       allLabelValues: new Map(),
       headerControls: new SceneFlexLayout({
         direction: 'column',
@@ -206,21 +211,19 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
-    const { body, headerControls, loading, drawer } = model.useState();
+    const { body, headerControls, loading, drawer, $variables } = model.useState();
 
-    const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, model) as MainLabelVariable;
+    const mainLabelVariable = $variables.state.variables[0] as MainLabelVariable;
+
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state.value as string;
 
     const { pathname, search } = useLocation();
     const href = useMemo(() => {
-      // good enough because we load a new page
-      // in the future, we'll have to clear QuickSearch (when performing the routing to the target Scene?)
-      const searchParams = new URLSearchParams(search);
-      searchParams.delete(QuickSearch.URL_SEARCH_PARAM_NAME);
-      searchParams.delete(`var-${VAR_MAIN_LABEL_VARIABLE}`);
-
-      return pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + '?' + searchParams.toString();
-    }, [pathname, variant, search]);
+      // in the future, maybe we move this to wherethe routing to the target Scene is done?
+      sceneGraph.findByKeyAndType(model, 'quick-search', QuickSearch).clear();
+      return pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + '?' + search;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // it's good enough capture it once when landing
 
     if (loading) {
       return <Spinner inline />;
@@ -244,7 +247,9 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
             <headerControls.Component model={headerControls} />
           </div>
         </div>
+
         <div className={styles.body}>{body && <body.Component model={body} />}</div>
+
         <drawer.Component model={drawer} />
       </div>
     );

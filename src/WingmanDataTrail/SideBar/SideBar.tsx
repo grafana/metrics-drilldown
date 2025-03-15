@@ -9,6 +9,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
+import { isEqual } from 'lodash';
 import React from 'react';
 
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
@@ -83,6 +84,20 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           this.setState({ loading: true });
         } else if (prevState.loading && !newState.loading) {
           this.setState({ loading: false });
+        }
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToState((newState, prevState) => {
+        if (!isEqual(newState.selectedMetricPrefixes, prevState.selectedMetricPrefixes)) {
+          filteredMetricsVariable.applyFilters({ prefixes: newState.selectedMetricPrefixes });
+          return;
+        }
+
+        if (!isEqual(newState.selectedMetricCategories, prevState.selectedMetricCategories)) {
+          filteredMetricsVariable.applyFilters({ categories: newState.selectedMetricCategories });
+          return;
         }
       })
     );

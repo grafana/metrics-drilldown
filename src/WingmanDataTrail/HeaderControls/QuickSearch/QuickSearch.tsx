@@ -27,7 +27,7 @@ import { EventQuickSearchChanged } from './EventQuickSearchChanged';
 interface QuickSearchState extends SceneObjectState {
   value: string;
   counts: { current: number; total: number };
-  disableCurrentCount: boolean;
+  disableRatioDisplay: boolean;
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
@@ -48,13 +48,18 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         return;
       }
 
-      this.setState({
-        disableCurrentCount: Boolean(
-          (sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MultiValueVariable).state.value ||
-            (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as MultiValueVariable).state.value !==
-              NULL_GROUP_BY_VALUE
-        ),
-      });
+      if (variable.state.name === VAR_MAIN_LABEL_VARIABLE) {
+        this.setState({ disableRatioDisplay: Boolean((variable as MultiValueVariable).state.value) });
+        return;
+      }
+
+      if (variable.state.name === VAR_WINGMAN_GROUP_BY) {
+        const value = (variable as MultiValueVariable).state.value;
+        this.setState({ disableRatioDisplay: Boolean(value && value !== NULL_GROUP_BY_VALUE) });
+        return;
+      }
+
+      this.setState({ disableRatioDisplay: false });
     },
   });
 
@@ -82,7 +87,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         current: 0,
         total: 0,
       },
-      disableCurrentCount: false,
+      disableRatioDisplay: false,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -95,14 +100,22 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
           .options.length,
         total: (sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable).state.options.length,
       },
-      disableCurrentCount: Boolean(
-        (sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MultiValueVariable).state.value ||
-          (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as MultiValueVariable).state.value !==
-            NULL_GROUP_BY_VALUE
-      ),
     });
 
+    this.updateDisableRatioDisplay();
+
     this.notifyValueChange(this.state.value);
+  }
+
+  private updateDisableRatioDisplay() {
+    const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MultiValueVariable;
+    const groupByVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as MultiValueVariable;
+    const groupByValue = groupByVariable.state.value;
+
+    this.setState({
+      disableRatioDisplay:
+        Boolean(mainLabelVariable?.state.value) || Boolean(groupByValue && groupByValue !== NULL_GROUP_BY_VALUE),
+    });
   }
 
   private notifyValueChange = debounce((value: string) => {
@@ -118,7 +131,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     this.updateValue(e.currentTarget.value);
   };
 
-  private clear = () => {
+  public clear = () => {
     this.updateValue('');
   };
 
@@ -130,12 +143,14 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   };
 
   private getHumanFriendlyCountsMessage() {
-    const { counts, disableCurrentCount } = this.state;
+    const { counts, disableRatioDisplay } = this.state;
 
-    if (disableCurrentCount) {
+    if (disableRatioDisplay) {
+      // we keep current because it's the count of the active variable (e.g. MetricsWithLabelValueVariable) after selecting a "Group by" value
+      // (total is always the count of options of MetricsVariable)
       return {
-        tagName: `${counts.total}`,
-        tooltipContent: counts.total !== 1 ? `${counts.total} metrics in total` : '1 metric in total',
+        tagName: `${counts.current}`,
+        tooltipContent: counts.current !== 1 ? `${counts.current} metrics in total` : '1 metric in total',
       };
     }
 

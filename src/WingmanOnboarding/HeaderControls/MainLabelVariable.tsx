@@ -1,8 +1,13 @@
 import { css, cx } from '@emotion/css';
 import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
-import { CustomVariable, type MultiValueVariable, type MultiValueVariableState } from '@grafana/scenes';
+import { CustomVariable, sceneGraph, type MultiValueVariable, type MultiValueVariableState } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
+
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 
 export const VAR_MAIN_LABEL_VARIABLE = 'mainLabelWingman';
 
@@ -16,6 +21,26 @@ export class MainLabelVariable extends CustomVariable {
       hide: VariableHide.hideVariable,
       value: undefined,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    const filteredMetricsVariable = sceneGraph.lookupVariable(
+      VAR_FILTERED_METRICS_VARIABLE,
+      this
+    ) as FilteredMetricsVariable;
+
+    // TODO: publish event instead?
+    filteredMetricsVariable.updateGroupByQuery(this.state.value as string);
+
+    this._subs.add(
+      this.subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          filteredMetricsVariable.updateGroupByQuery(this.state.value as string);
+        }
+      })
+    );
   }
 
   static Component = ({ model }: { model: MultiValueVariable<MultiValueVariableState> }) => {
