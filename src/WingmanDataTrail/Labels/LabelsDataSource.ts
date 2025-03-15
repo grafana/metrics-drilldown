@@ -24,7 +24,7 @@ export class LabelsDataSource extends RuntimeDataSource {
   static uid = 'grafana-prometheus-labels-datasource';
 
   constructor() {
-    super('grafana-prometheus-labels-datasource', LabelsDataSource.uid);
+    super(LabelsDataSource.uid, LabelsDataSource.uid);
   }
 
   async query(request: DataQueryRequest): Promise<DataQueryResponse> {

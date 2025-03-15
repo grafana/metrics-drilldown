@@ -20,15 +20,16 @@ import { useLocation } from 'react-router-dom';
 import { VAR_DATASOURCE } from 'shared';
 import { getColorByIndex } from 'utils';
 import { MetricsGroupByList } from 'WingmanDataTrail/GroupBy/MetricsGroupByList';
+import { MetricsWithLabelValueDataSource } from 'WingmanDataTrail/GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { LayoutSwitcher } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
+import { registerRuntimeDataSources } from 'WingmanDataTrail/helpers/registerRuntimeDataSources';
 import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
 import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-import { registerRuntimeDataSources } from 'WingmanDataTrail/registerRuntimeDataSources';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { MainLabelVariable, VAR_MAIN_LABEL_VARIABLE } from './HeaderControls/MainLabelVariable';
@@ -90,7 +91,8 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       body: undefined,
     });
 
-    registerRuntimeDataSources();
+    // TODO: improve - we need to register the LabelsDataSource because LabelsVariable is attached to DataTrail
+    registerRuntimeDataSources([new MetricsWithLabelValueDataSource(), new LabelsDataSource()]);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
@@ -211,6 +213,8 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
 
     const { pathname, search } = useLocation();
     const href = useMemo(() => {
+      // good enough because we load a new page
+      // in the future, we'll have to clear QuickSearch (when performing the routing to the target Scene?)
       const searchParams = new URLSearchParams(search);
       searchParams.delete(QuickSearch.URL_SEARCH_PARAM_NAME);
 

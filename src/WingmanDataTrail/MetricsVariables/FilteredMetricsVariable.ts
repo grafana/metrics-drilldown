@@ -228,7 +228,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
     return options.filter((option) => regexes.some((regex) => regex.test(option.value as string)));
   }
 
-  public notifyUpdate() {
+  private notifyUpdate() {
     // hack to force SceneByVariableRepeater to re-render
     this.publishEvent(new SceneVariableValueChangedEvent(this), true);
   }

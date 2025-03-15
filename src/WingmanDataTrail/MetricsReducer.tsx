@@ -19,9 +19,11 @@ import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVari
 
 import { ROUTES } from '../constants';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
+import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { EventGroupFiltersChanged } from './HeaderControls/MetricsFilter/EventGroupFiltersChanged';
-import { NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
+import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
+import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
 import {
@@ -33,7 +35,6 @@ import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
 import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction';
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
-import { registerRuntimeDataSources } from './registerRuntimeDataSources';
 import { SceneDrawer } from './SceneDrawer';
 import { SideBar } from './SideBar/SideBar';
 
@@ -60,7 +61,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       drawer: new SceneDrawer({}),
     });
 
-    registerRuntimeDataSources();
+    registerRuntimeDataSources([new LabelsDataSource(), new MetricsWithLabelValueDataSource()]);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
@@ -93,8 +94,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           this
         ) as FilteredMetricsVariable;
 
-        filteredMetricsVariable.applyFilters({ [type]: groups });
-        filteredMetricsVariable.notifyUpdate();
+        filteredMetricsVariable.applyFilters({ [type]: groups }, true);
       })
     );
   }

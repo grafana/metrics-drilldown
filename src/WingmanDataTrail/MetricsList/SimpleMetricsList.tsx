@@ -20,7 +20,10 @@ import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import {
+  METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+  MetricVizPanel,
+} from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 export const GRID_TEMPLATE_ROWS = '1fr';
@@ -39,11 +42,9 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
         variableName: VAR_FILTERED_METRICS_VARIABLE,
         body: new SceneCSSGridLayout({
           children: [],
-          templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT,
-          alignItems: 'start',
           isLazy: true,
-          rowGap: 6,
+          templateColumns: GRID_TEMPLATE_COLUMNS,
+          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -95,8 +96,9 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
 
-    const variable = sceneGraph.lookupVariable(body.state.variableName, model) as FilteredMetricsVariable;
-    const { loading, error, options } = variable.useState();
+    const { loading, error, options } = (
+      sceneGraph.lookupVariable(body.state.variableName, model) as FilteredMetricsVariable
+    ).useState();
 
     if (loading) {
       return <Spinner inline />;
