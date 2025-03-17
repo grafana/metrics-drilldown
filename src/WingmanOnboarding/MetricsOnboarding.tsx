@@ -234,8 +234,6 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
           <div className={styles.topControls}>
             <div className={styles.mainLabelVariable}>
               <mainLabelVariable.Component model={mainLabelVariable} />
-            </div>
-            <div>
               <a href={href} className={styles.link}>
                 Go to detailled filtering <Icon name="angle-right" />
               </a>
@@ -274,13 +272,23 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       gap: theme.spacing(2),
       alignItems: 'center',
     }),
+
+    mainLabelVariable: css({
+      display: 'flex',
+      flexDirection: 'row',
+      gap: theme.spacing(2),
+      width: '100%',
+      alignItems: 'center',
+    }),
     link: css({
+      display: 'inline-block',
+      width: '200px',
       color: theme.colors.text.primary,
+
       '&:hover': {
         color: theme.colors.text.link,
       },
     }),
-    mainLabelVariable: css({}),
     listControls: css({
       marginBottom: theme.spacing(0.5),
     }),

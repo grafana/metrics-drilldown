@@ -52,25 +52,40 @@ export class MainLabelVariable extends CustomVariable {
     };
 
     return (
-      <div className={styles.container}>
-        {options
-          .sort((a, b) => Number(b.label.replace(/[^0-9]/g, '')) - Number(a.label.replace(/[^0-9]/g, '')))
-          .map((option) => {
-            const [label, labelCardinality] = option.label.split(' ');
+      <>
+        <>
+          {options
+            .sort((a, b) => Number(b.label.replace(/[^0-9]/g, '')) - Number(a.label.replace(/[^0-9]/g, '')))
+            .map((option) => {
+              const [label, labelCardinality] = option.label.split(' ');
 
-            return (
-              <Button
-                key={String(option.value)}
-                className={cx(styles.labelButton, { [styles.selected]: option.value === value })}
-                onClick={toggle(option.value)}
-                title={`Group metrics by ${label}`}
-                disabled={labelCardinality === '(0)'}
-              >
-                {label} {labelCardinality}
-              </Button>
+              return (
+                <Button
+                  key={String(option.value)}
+                  className={cx(styles.labelButton, { [styles.selected]: option.value === value })}
+                  onClick={toggle(option.value)}
+                  title={`Group metrics by ${label}`}
+                  disabled={labelCardinality === '(0)'}
+                >
+                  {label} {labelCardinality}
+                </Button>
+              );
+            })}
+        </>
+        <Button
+          className={styles.labelButton}
+          style={{ flexBasis: '100px' }}
+          onClick={() => {
+            window.alert(
+              'This feature, which would allow you to add a custom label here, is currently not implemented.'
             );
-          })}
-      </div>
+          }}
+          tooltip="Click to add a custom label"
+          tooltipPlacement="top"
+        >
+          +
+        </Button>
+      </>
     );
   };
 }
@@ -81,9 +96,10 @@ function getStyles(theme: GrafanaTheme2) {
       display: flex;
       flex-direction: row;
       gap: ${theme.spacing(2)};
+      width: 100%;
     `,
     labelButton: css`
-      width: 200px;
+      flex: 0 1 200px;
       height: 80px;
       font-size: 16px;
       margin: 0;
