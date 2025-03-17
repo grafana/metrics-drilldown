@@ -60,7 +60,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       hideEmptyTypes: true,
       selectedMetricPrefixes: [],
       selectedMetricCategories: [],
-      loading: false,
+      loading: true,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -84,6 +84,19 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           this.setState({ loading: true });
         } else if (prevState.loading && !newState.loading) {
           this.setState({ loading: false });
+
+          const { selectedMetricPrefixes, selectedMetricCategories } = this.state;
+
+          filteredMetricsVariable.applyFilters(
+            {
+              prefixes: selectedMetricPrefixes,
+              categories: selectedMetricCategories,
+            },
+            // don't notify
+            false,
+            // force update to ensure the options are filtered (need it specifically when selecting a different group by label)
+            true
+          );
         }
       })
     );

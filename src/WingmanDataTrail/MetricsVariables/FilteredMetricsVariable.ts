@@ -1,9 +1,8 @@
-import { sceneGraph, SceneVariableValueChangedEvent, type VariableValueOption } from '@grafana/scenes';
+import { SceneVariableValueChangedEvent, type VariableValueOption } from '@grafana/scenes';
 import { cloneDeep, isEqual } from 'lodash';
 
 import { VAR_FILTERS } from 'shared';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
-import { SideBar } from 'WingmanDataTrail/SideBar/SideBar';
 
 import { MetricsVariable } from './MetricsVariable';
 
@@ -36,38 +35,14 @@ export class FilteredMetricsVariable extends MetricsVariable {
   }
 
   protected onActivate() {
-    let sideBar = new SideBar({});
-
-    // TEMP: this is just to make the unit tests pass so we can deploy
-    // because this variable is added to the ancestor DataTrail Scene object - tried to move it to MetricsReducer, but it does not work
-    // Also it makes the /a/grafana-metricsdrilldown-app/onboard-wingman page work ;)
-    try {
-      sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
-    } catch (error) {
-      console.warn('Error in FilteredMetricsVariable onActivate', error);
-    }
-
-    this.subscribeToStateChange(sideBar);
+    this.subscribeToStateChange();
   }
 
-  private subscribeToStateChange(sideBar: SideBar) {
+  private subscribeToStateChange() {
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
         if (newState.loading === false && prevState.loading === true) {
           this.initOptions = cloneDeep(newState.options);
-
-          const { selectedMetricPrefixes, selectedMetricCategories } = sideBar.state;
-
-          this.applyFilters(
-            {
-              prefixes: selectedMetricPrefixes,
-              categories: selectedMetricCategories,
-            },
-            // don't notify
-            false,
-            // force update to ensure the options are filtered (need it specifically when selecting a different group by label)
-            true
-          );
         }
       })
     );
