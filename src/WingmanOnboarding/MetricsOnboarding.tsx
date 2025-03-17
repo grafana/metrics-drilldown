@@ -62,9 +62,6 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
   });
 
   constructor() {
-    const quickSearch = new QuickSearch();
-    const layoutSwitcher = new LayoutSwitcher();
-
     super({
       key: 'metrics-onboarding',
       $variables: new SceneVariableSet({
@@ -80,10 +77,10 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
               maxHeight: '32px',
               children: [
                 new SceneFlexItem({
-                  body: quickSearch,
+                  body: new QuickSearch(),
                 }),
                 new SceneFlexItem({
-                  body: layoutSwitcher,
+                  body: new LayoutSwitcher(),
                   width: 'auto',
                 }),
               ],
@@ -217,12 +214,10 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state.value as string;
 
     const { pathname, search } = useLocation();
-    const href = useMemo(() => {
-      // in the future, maybe we move this to wherethe routing to the target Scene is done?
-      sceneGraph.findByKeyAndType(model, 'quick-search', QuickSearch).clear();
-      return pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + '?' + search;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // it's good enough capture it once when landing
+    const href = useMemo(
+      () => pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + '?' + search,
+      [] // eslint-disable-line react-hooks/exhaustive-deps
+    ); // it's good enough capture it once when landing
 
     if (loading) {
       return <Spinner inline />;
@@ -234,7 +229,14 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
           <div className={styles.topControls}>
             <div className={styles.mainLabelVariable}>
               <mainLabelVariable.Component model={mainLabelVariable} />
-              <a href={href} className={styles.link}>
+              <a
+                href={href}
+                className={styles.link}
+                onClick={() => {
+                  // in the future, maybe we move this to wherethe routing to the target Scene is done?
+                  sceneGraph.findByKeyAndType(model, 'quick-search', QuickSearch).clear();
+                }}
+              >
                 Go to detailled filtering <Icon name="angle-right" />
               </a>
             </div>

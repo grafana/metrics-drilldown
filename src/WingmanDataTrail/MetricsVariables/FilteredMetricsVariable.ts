@@ -22,10 +22,6 @@ export class FilteredMetricsVariable extends MetricsVariable {
   }
 
   protected onActivate() {
-    this.subscribeToStateChange();
-  }
-
-  private subscribeToStateChange() {
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
         if (newState.loading === false && prevState.loading === true) {

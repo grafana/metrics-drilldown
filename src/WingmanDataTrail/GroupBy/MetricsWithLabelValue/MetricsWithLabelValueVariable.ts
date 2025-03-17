@@ -1,11 +1,17 @@
 import { VariableHide, VariableRefresh } from '@grafana/data';
-import { QueryVariable } from '@grafana/scenes';
+import { QueryVariable, sceneGraph, type MultiValueVariable } from '@grafana/scenes';
+
+import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventQuickSearchChanged';
+import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
+import { MetricsVariableFilterEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
 import { MetricsWithLabelValueDataSource } from './MetricsWithLabelValueDataSource';
 
 export const VAR_METRIC_WITH_LABEL_VALUE = 'metrics-with-label-value';
 
 export class MetricsWithLabelValueVariable extends QueryVariable {
+  private filterEngine: MetricsVariableFilterEngine;
+
   constructor({ labelName, labelValue }: { labelName: string; labelValue: string }) {
     super({
       name: VAR_METRIC_WITH_LABEL_VALUE,
@@ -21,5 +27,30 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
       value: '$__all',
       includeAll: true,
     });
+
+    this.filterEngine = new MetricsVariableFilterEngine(this as unknown as MultiValueVariable);
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  protected onActivate() {
+    const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
+
+    this._subs.add(
+      this.subscribeToState((newState, prevState) => {
+        if (newState.loading === false && prevState.loading === true) {
+          this.filterEngine.setInitOptions(newState.options);
+
+          // TODO: use events publishing as in FilteredMetricsVariable?
+          this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] });
+        }
+      })
+    );
+
+    this._subs.add(
+      quickSearch.subscribeToEvent(EventQuickSearchChanged, (event) => {
+        this.filterEngine.applyFilters({ names: event.payload.searchText ? [event.payload.searchText] : [] });
+      })
+    );
   }
 }
