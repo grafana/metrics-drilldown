@@ -41,7 +41,7 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
         if (newState.loading === false && prevState.loading === true) {
           this.filterEngine.setInitOptions(newState.options);
 
-          // TODO: use events publishing as in FilteredMetricsVariable?
+          // TODO: use events publishing and subscribe in the main Wingman Scene?
           this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] });
         }
       })
