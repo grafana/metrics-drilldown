@@ -1,116 +1,103 @@
+import { css } from '@emotion/css';
 import {
-  SceneFlexItem,
-  SceneFlexLayout,
-  sceneGraph,
+  SceneCSSGridItem,
+  SceneCSSGridLayout,
   SceneObjectBase,
-  VariableDependencyConfig,
+  SceneReactObject,
+  SceneVariableSet,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Alert, Spinner } from '@grafana/ui';
+import { Alert, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
-import { LabelsDataSource } from 'WingmanDataTrail/Labels/LabelsDataSource';
+import { LabelValuesVariable, VAR_LABEL_VALUES } from 'WingmanDataTrail/Labels/LabelValuesVariable';
+import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
 
 interface MetricsGroupByListState extends SceneObjectState {
-  body: SceneFlexLayout;
   labelName: string;
-  loading: boolean;
-  error?: Error;
+  $variables: SceneVariableSet;
+  body: SceneByVariableRepeater;
 }
 
 export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
-  protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_FILTERS],
-    onVariableUpdateCompleted: () => {
-      this.renderBody();
-    },
-  });
-
-  constructor({ labelName }: { labelName: string }) {
+  constructor({ labelName }: { labelName: MetricsGroupByListState['labelName'] }) {
     super({
       key: 'metrics-group-list',
       labelName,
-      body: new SceneFlexLayout({
-        direction: 'column',
-        children: [],
+      $variables: new SceneVariableSet({
+        variables: [new LabelValuesVariable({ labelName })],
       }),
-      loading: true,
-      error: undefined,
-    });
-
-    this.addActivationHandler(() => {
-      this.onActivate();
-    });
-  }
-
-  private async onActivate() {
-    await this.renderBody();
-  }
-
-  async renderBody() {
-    const { labelName } = this.state;
-    let labelValues: string[] = [];
-
-    this.setState({ loading: true });
-
-    try {
-      labelValues = await this.fetchLabelValues(labelName);
-    } catch (error) {
-      this.setState({ error: error as Error });
-    } finally {
-      this.setState({ loading: false });
-    }
-
-    this.state.body.setState({
-      children: labelValues.map(
-        (labelValue) =>
-          new SceneFlexItem({
+      body: new SceneByVariableRepeater({
+        variableName: VAR_LABEL_VALUES,
+        initialPageSize: Number.POSITIVE_INFINITY,
+        body: new SceneCSSGridLayout({
+          children: [],
+          isLazy: true,
+          templateColumns: '1fr',
+          // using METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW would be more efficient :(
+          // but when the section is collapsed, it does not reduce the height occupied by the grid child
+          autoRows: 'auto',
+        }),
+        getLayoutLoading: () =>
+          new SceneReactObject({
+            reactNode: <Spinner inline />,
+          }),
+        getLayoutEmpty: () =>
+          new SceneReactObject({
+            reactNode: (
+              <Alert title="" severity="info">
+                No label values found for label &quot;{labelName}&quot;.
+              </Alert>
+            ),
+          }),
+        getLayoutError: (error: Error) =>
+          new SceneReactObject({
+            reactNode: (
+              <Alert severity="error" title={`Error while loading label "${labelName}" values!`}>
+                <p>&quot;{error.message || error.toString()}&quot;</p>
+                <p>Please try to reload the page. Sorry for the inconvenience.</p>
+              </Alert>
+            ),
+          }),
+        getLayoutChild: (option, index, options) => {
+          return new SceneCSSGridItem({
             body: new MetricsGroupByRow({
+              index,
               labelName,
-              labelValue,
+              labelValue: option.value as string,
+              labelCardinality: options.length,
             }),
-          })
-      ),
+          });
+        },
+      }),
     });
-  }
-
-  async fetchLabelValues(labelName: string): Promise<string[]> {
-    const ds = await LabelsDataSource.getPrometheusDataSource(this);
-    if (!ds) {
-      return [];
-    }
-
-    const filterExpression = sceneGraph.interpolate(this, VAR_FILTERS_EXPR, {});
-
-    const response = await ds.languageProvider.fetchSeriesValuesWithMatch(
-      labelName,
-      // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
-      `{__name__=~".+",${filterExpression}}`
-    );
-
-    return response;
   }
 
   static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
-    const { body, loading, error, labelName } = model.useState();
+    const styles = useStyles2(getStyles);
+    const { body, $variables } = model.useState();
 
-    if (loading) {
-      return <Spinner inline />;
-    }
+    const variable = $variables.state.variables[0] as LabelValuesVariable;
 
-    if (error) {
-      return (
-        <Alert severity="error" title={`Error while loading "${labelName}" values!`}>
-          <p>&quot;{error.message || error.toString()}&quot;</p>
-          <p>Please try to reload the page. Sorry for the inconvenience.</p>
-        </Alert>
-      );
-    }
+    return (
+      <>
+        <body.Component model={body} />
+        {/* required to trigger its activation handlers */}
+        <div className={styles.variable}>
+          <variable.Component key={variable.state.name} model={variable} />
+        </div>
+      </>
+    );
+  };
+}
 
-    return <body.Component model={body} />;
+function getStyles() {
+  return {
+    variable: css({
+      display: 'none',
+    }),
   };
 }

@@ -1,21 +1,46 @@
 import { css, cx } from '@emotion/css';
 import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
-import { CustomVariable, type MultiValueVariable, type MultiValueVariableState } from '@grafana/scenes';
+import { CustomVariable, sceneGraph, type MultiValueVariable, type MultiValueVariableState } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
+
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 
 export const VAR_MAIN_LABEL_VARIABLE = 'mainLabelWingman';
 
 export class MainLabelVariable extends CustomVariable {
-  private static OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node'];
+  public static OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node', 'instance'];
 
   constructor() {
     super({
       name: VAR_MAIN_LABEL_VARIABLE,
       query: MainLabelVariable.OPTIONS.join(','),
-      hide: VariableHide.hideLabel,
+      hide: VariableHide.hideVariable,
       value: undefined,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    const filteredMetricsVariable = sceneGraph.lookupVariable(
+      VAR_FILTERED_METRICS_VARIABLE,
+      this
+    ) as FilteredMetricsVariable;
+
+    // TODO: publish event instead?
+    filteredMetricsVariable.updateGroupByQuery(this.state.value as string);
+
+    this._subs.add(
+      this.subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          filteredMetricsVariable.updateGroupByQuery(this.state.value as string);
+        }
+      })
+    );
   }
 
   static Component = ({ model }: { model: MultiValueVariable<MultiValueVariableState> }) => {
@@ -27,18 +52,40 @@ export class MainLabelVariable extends CustomVariable {
     };
 
     return (
-      <div className={styles.container}>
-        {options.map((option) => (
-          <Button
-            key={String(option.value)}
-            className={cx(styles.labelButton, { [styles.selected]: option.value === value })}
-            onClick={toggle(option.value)}
-            title={`Group metrics by ${option.label}`}
-          >
-            {option.label}
-          </Button>
-        ))}
-      </div>
+      <>
+        <>
+          {options
+            .sort((a, b) => Number(b.label.replace(/[^0-9]/g, '')) - Number(a.label.replace(/[^0-9]/g, '')))
+            .map((option) => {
+              const [label, labelCardinality] = option.label.split(' ');
+
+              return (
+                <Button
+                  key={String(option.value)}
+                  className={cx(styles.labelButton, { [styles.selected]: option.value === value })}
+                  onClick={toggle(option.value)}
+                  title={`Group metrics by ${label}`}
+                  disabled={labelCardinality === '(0)'}
+                >
+                  {label} {labelCardinality}
+                </Button>
+              );
+            })}
+        </>
+        <Button
+          className={styles.labelButton}
+          style={{ flexBasis: '100px' }}
+          onClick={() => {
+            window.alert(
+              'This feature, which would allow you to add a custom label here, is currently not implemented.'
+            );
+          }}
+          tooltip="Click to add a custom label"
+          tooltipPlacement="top"
+        >
+          +
+        </Button>
+      </>
     );
   };
 }
@@ -49,9 +96,10 @@ function getStyles(theme: GrafanaTheme2) {
       display: flex;
       flex-direction: row;
       gap: ${theme.spacing(2)};
+      width: 100%;
     `,
     labelButton: css`
-      width: 200px;
+      flex: 0 1 200px;
       height: 80px;
       font-size: 16px;
       margin: 0;

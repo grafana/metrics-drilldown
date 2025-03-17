@@ -2,16 +2,16 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
   behaviors,
-  SceneByVariableRepeater,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
+  SceneReactObject,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { DashboardCursorSync } from '@grafana/schema';
-import { Alert, Spinner, useStyles2 } from '@grafana/ui';
+import { Alert, Button, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
@@ -21,7 +21,11 @@ import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import {
+  METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+  MetricVizPanel,
+} from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 export const GRID_TEMPLATE_ROWS = '1fr';
@@ -32,19 +36,17 @@ interface SimpleMetricsListState extends SceneObjectState {
 
 export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
   constructor() {
-    let colorIndex = 0;
-
     super({
       key: 'simple-metrics-list',
       body: new SceneByVariableRepeater({
         variableName: VAR_FILTERED_METRICS_VARIABLE,
+        initialPageSize: 120,
+        pageSizeIncrement: 9,
         body: new SceneCSSGridLayout({
           children: [],
-          templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT,
-          alignItems: 'start',
           isLazy: true,
-          rowGap: 6,
+          templateColumns: GRID_TEMPLATE_COLUMNS,
+          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -52,8 +54,28 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
             }),
           ],
         }),
-        getLayoutChild: (option) => {
-          // Scenes does not pass an index :man_shrug: :sad_panda:
+        getLayoutLoading: () =>
+          new SceneReactObject({
+            reactNode: <Spinner inline />,
+          }),
+        getLayoutEmpty: () =>
+          new SceneReactObject({
+            reactNode: (
+              <Alert title="" severity="info">
+                No metrics found for the current filters and time range.
+              </Alert>
+            ),
+          }),
+        getLayoutError: (error: Error) =>
+          new SceneReactObject({
+            reactNode: (
+              <Alert severity="error" title="Error while loading metrics!">
+                <p>&quot;{error.message || error.toString()}&quot;</p>
+                <p>Please try to reload the page. Sorry for the inconvenience.</p>
+              </Alert>
+            ),
+          }),
+        getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
               vizPanelInGridItem: new MetricVizPanel({
@@ -93,37 +115,33 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
   }
 
   public static Component = ({ model }: SceneComponentProps<SimpleMetricsList>) => {
-    const styles = useStyles2(getStyles);
     const { body } = model.useState();
+    const styles = useStyles2(getStyles);
 
-    const variable = sceneGraph.lookupVariable(body.state.variableName, model) as FilteredMetricsVariable;
-    const { loading, error, options } = variable.useState();
+    const variable = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, model) as FilteredMetricsVariable;
+    const { loading, error } = variable.useState();
 
-    if (loading) {
-      return <Spinner inline />;
-    }
+    const batchSizes = body.useSizes();
+    const shouldDisplayShowMoreButton =
+      !loading && !error && batchSizes.total > 0 && batchSizes.current < batchSizes.total;
 
-    if (error) {
-      return (
-        <Alert severity="error" title="Error while loading metrics!">
-          <p>&quot;{error.message || error.toString()}&quot;</p>
-          <p>Please try to reload the page. Sorry for the inconvenience.</p>
-        </Alert>
-      );
-    }
-
-    if (!options?.length) {
-      return (
-        <Alert title="" severity="info">
-          No metrics found for the current filters and time range.
-        </Alert>
-      );
-    }
+    const onClickShowMore = () => {
+      body.increaseBatchSize();
+    };
 
     return (
-      <div className={styles.container}>
-        <body.Component model={body} />
-      </div>
+      <>
+        <div className={styles.container}>
+          <body.Component model={body} />
+        </div>
+        {shouldDisplayShowMoreButton && (
+          <div className={styles.footer}>
+            <Button variant="secondary" fill="outline" onClick={onClickShowMore}>
+              Show {batchSizes.increment} more ({batchSizes.current}/{batchSizes.total})
+            </Button>
+          </div>
+        )}
+      </>
     );
   };
 }
@@ -131,5 +149,16 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({}),
+    footer: css({
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: theme.spacing(4),
+
+      '& button': {
+        height: '40px',
+        borderRadius: '8px',
+      },
+    }),
   };
 }

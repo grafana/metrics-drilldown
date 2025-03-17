@@ -9,11 +9,12 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
+import { isEqual } from 'lodash';
 import React from 'react';
 
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { MetricsFilterSection } from './MetricsFilterSection';
 import {
@@ -66,10 +67,18 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   }
 
   private onActivate() {
+    const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
+
+    this.updateLists(metricsVariable.state.options as MetricOptions);
+
     const filteredMetricsVariable = sceneGraph.lookupVariable(
       VAR_FILTERED_METRICS_VARIABLE,
       this
     ) as FilteredMetricsVariable;
+
+    this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
+
+    this.setState({ loading: !filteredMetricsVariable.state.options.length });
 
     this._subs.add(
       filteredMetricsVariable.subscribeToState((newState, prevState) => {
@@ -77,6 +86,33 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           this.setState({ loading: true });
         } else if (prevState.loading && !newState.loading) {
           this.setState({ loading: false });
+
+          const { selectedMetricPrefixes, selectedMetricCategories } = this.state;
+
+          filteredMetricsVariable.applyFilters(
+            {
+              prefixes: selectedMetricPrefixes,
+              categories: selectedMetricCategories,
+            },
+            // don't notify
+            false,
+            // force update to ensure the options are filtered (need it specifically when selecting a different group by label)
+            true
+          );
+        }
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToState((newState, prevState) => {
+        if (!isEqual(newState.selectedMetricPrefixes, prevState.selectedMetricPrefixes)) {
+          filteredMetricsVariable.applyFilters({ prefixes: newState.selectedMetricPrefixes });
+          return;
+        }
+
+        if (!isEqual(newState.selectedMetricCategories, prevState.selectedMetricCategories)) {
+          filteredMetricsVariable.applyFilters({ categories: newState.selectedMetricCategories });
+          return;
         }
       })
     );
