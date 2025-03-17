@@ -55,7 +55,7 @@ export class MetricsFilter extends SceneObjectBase<MetricsFilterState> {
     super({
       key: `metrics-${state.type}+filter`,
       type: state.type,
-      placeholder: state.type === 'prefixes' ? 'Metric groups' : 'Metric categories',
+      placeholder: state.type === 'prefixes' ? 'Metric prefixes' : 'Metric categories',
       groups: [],
       selectedGroups: [],
       loading: false,

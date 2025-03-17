@@ -148,7 +148,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       <div className={styles.container}>
         <div className={styles.topPanel}>
           <MetricsFilterSection
-            title="Metric groups"
+            title="Metric prefixes"
             items={prefixGroups}
             hideEmpty={hideEmptyGroups}
             selectedValues={selectedMetricPrefixes}
