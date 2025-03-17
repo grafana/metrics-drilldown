@@ -36,11 +36,12 @@ import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction'
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
+import { LabelsBrowser } from './SideBar/LabelsBrowser';
 import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
-  sidebar: SideBar;
+  sidebar: SideBar | LabelsBrowser;
   body: SceneObjectBase;
   drawer: SceneDrawer;
 }
@@ -56,7 +57,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       headerControls: new HeaderControls({}),
-      sidebar: new SideBar({}),
+      sidebar: new LabelsBrowser({ labelVariableName: VAR_WINGMAN_GROUP_BY }),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
       drawer: new SceneDrawer({}),
     });
@@ -167,7 +168,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           {/* we use both routes for the flow from onboarding > this view and for landing on this view directly */}
           {[ROUTES.TrialWithSidebar, ROUTES.OnboardWithSidebar].includes(variant as string) && (
             <div className={styles.sidebar}>
-              <sidebar.Component model={sidebar} />
+              {sidebar instanceof SideBar ? (
+                <sidebar.Component model={sidebar} />
+              ) : (
+                <sidebar.Component model={sidebar} />
+              )}
             </div>
           )}
           <div className={styles.list}>
