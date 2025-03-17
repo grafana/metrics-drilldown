@@ -124,6 +124,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
+      width: 'inherit',
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing(1),

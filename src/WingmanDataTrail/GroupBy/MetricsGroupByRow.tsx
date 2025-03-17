@@ -20,6 +20,8 @@ import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPane
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
+import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 import {
@@ -190,6 +192,8 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         // TOOD: keep unique filters
         filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
       });
+
+      (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
     };
 
     const onClickExclude = () => {
