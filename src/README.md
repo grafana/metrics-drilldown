@@ -4,7 +4,7 @@ The Grafana Metrics Drilldown app provides a queryless experience for browsing P
 
 ## Requirements
 
-Requires Grafana 11.6.0-82198 or newer.
+Requires Grafana 11.6.0 or newer.
 
 ## Getting Started
 
