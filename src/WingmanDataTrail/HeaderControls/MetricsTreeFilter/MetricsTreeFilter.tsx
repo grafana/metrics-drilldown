@@ -112,50 +112,47 @@ export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
     return (
       <div className={styles.container}>
         <p>Select the parts of the metric name you want to filter by</p>
-        <div className={styles.filtersContainer}>
-          <p>&nbsp;</p>
-          <div className={styles.section}>
-            <div className={styles.tableHeader}>
-              <div>
-                n {selectedMetricsCount === 1 ? 'metric' : 'metrics'} selected&nbsp;
-                <IconButton
-                  name="times"
-                  arial-label="Clear selection"
-                  tooltip="Clear selection"
-                  tooltipPlacement="top"
-                  disabled={!selectedNodeIds.length}
-                  onClick={() => setSelectedNodeIds([])}
-                />
-              </div>
-              <div>
-                <Button variant="primary" size="sm" onClick={() => onClickApply(selectedNodeIds)}>
-                  Apply
-                </Button>
-                &nbsp;
-                <Button variant="secondary" fill="text" size="sm" onClick={() => onClickCancel()}>
-                  Cancel
-                </Button>
-              </div>
+        <div className={styles.section}>
+          <div className={styles.tableHeader}>
+            <div>
+              n {selectedMetricsCount === 1 ? 'metric' : 'metrics'} selected&nbsp;
+              <IconButton
+                name="times"
+                arial-label="Clear selection"
+                tooltip="Clear selection"
+                tooltipPlacement="top"
+                disabled={!selectedNodeIds.length}
+                onClick={() => setSelectedNodeIds([])}
+              />
             </div>
-            <div className={styles.body}>
-              {metricTreeRoot?.map((node, index) => (
-                <MetricTreeNode
-                  key={node.id}
-                  node={node}
-                  selectedNodeIds={selectedNodeIds}
-                  isLastChild={!metricTreeRoot ? true : index === metricTreeRoot.length - 1}
-                  onToggleCheckbox={(node) => {
-                    if (selectedNodeIds.includes(node.id)) {
-                      setSelectedNodeIds(toggleSubTree(node, [...selectedNodeIds], false));
-                      setSelectedMetricsCount(selectedMetricsCount - node.count);
-                    } else {
-                      setSelectedNodeIds(toggleSubTree(node, [...selectedNodeIds], true));
-                      setSelectedMetricsCount(selectedMetricsCount + node.count);
-                    }
-                  }}
-                />
-              ))}
+            <div>
+              <Button variant="primary" size="sm" onClick={() => onClickApply(selectedNodeIds)}>
+                Apply
+              </Button>
+              &nbsp;
+              <Button variant="secondary" fill="text" size="sm" onClick={() => onClickCancel()}>
+                Cancel
+              </Button>
             </div>
+          </div>
+          <div className={styles.body}>
+            {metricTreeRoot?.map((node, index) => (
+              <MetricTreeNode
+                key={node.id}
+                node={node}
+                selectedNodeIds={selectedNodeIds}
+                isLastChild={!metricTreeRoot ? true : index === metricTreeRoot.length - 1}
+                onToggleCheckbox={(node) => {
+                  if (selectedNodeIds.includes(node.id)) {
+                    setSelectedNodeIds(toggleSubTree(node, [...selectedNodeIds], false));
+                    setSelectedMetricsCount(selectedMetricsCount - node.count);
+                  } else {
+                    setSelectedNodeIds(toggleSubTree(node, [...selectedNodeIds], true));
+                    setSelectedMetricsCount(selectedMetricsCount + node.count);
+                  }
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -166,28 +163,19 @@ export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css`
-      width: 460px;
-      min-height: 520px;
       padding: ${theme.spacing(2)};
       background-color: ${theme.colors.background.primary};
-      border: 1px solid ${theme.colors.border.weak};
+      border: 2px solid ${theme.colors.border.weak};
       border-radius: ${theme.shape.radius.default};
-    `,
-    filtersContainer: css`
-      display: flex;
-      flex-direction: column;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 100%;
+      position: relative;
     `,
     section: css`
       display: flex;
       flex-direction: column;
       flex-grow: 1;
-      margin: ${theme.spacing(2)};
       min-height: 0;
+      width: fit-content;
+      min-width: 100%;
     `,
     tableHeader: css({
       display: 'flex',
@@ -199,9 +187,12 @@ function getStyles(theme: GrafanaTheme2) {
       padding: `${theme.spacing(2)}`,
     }),
     body: css`
+      display: inline-block;
       flex-grow: 1;
-      overflow: auto;
+      min-width: 100%;
       min-height: 0;
+      max-height: 360px;
+      overflow-y: auto;
       padding: ${theme.spacing(2)};
       border-top: 1px solid ${theme.colors.border.weak};
     `,

@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { Checkbox, IconButton, Tag, Tooltip, useStyles2 } from '@grafana/ui';
+import { Button, Checkbox, Tag, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { type ArrayNode } from './metric-names-parser/src/parseMetricsList';
@@ -36,11 +36,13 @@ export const MetricTreeNode = ({
       <div className={`${styles.nodeRow} ${isChild ? styles.childNodeRow : ''}`}>
         <div className={cx(styles.iconContainer, !node.children.length && 'horiz')}>
           {node.children.length > 0 ? (
-            <IconButton
-              className={styles.expandIcon}
-              name={expanded ? 'minus-circle' : 'plus-circle'}
+            <Button
+              variant="secondary"
+              size="sm"
+              fill="text"
+              className={styles.expandButton}
+              icon={expanded ? 'minus-circle' : 'plus-circle'}
               onClick={() => setExpanded(!expanded)}
-              tooltip=""
             />
           ) : null}
         </div>
@@ -53,17 +55,15 @@ export const MetricTreeNode = ({
               onChange={() => onToggleCheckbox(node)}
             />
           </div>
-          <Tooltip content={isChild ? `${ancestorPrefix}${node.separator}${node.prefix}` : node.prefix} placement="top">
-            <label className={styles.nodeName} htmlFor={node.id}>
-              {isChild && (
-                <span className={styles.ancestorPrefix}>
-                  {ancestorPrefix}
-                  {node.separator}
-                </span>
-              )}
-              <span>{node.prefix}</span>
-            </label>
-          </Tooltip>
+          <label className={styles.nodeName} htmlFor={node.id}>
+            {isChild && (
+              <span className={styles.ancestorPrefix}>
+                {ancestorPrefix}
+                {node.separator}
+              </span>
+            )}
+            <span>{node.prefix}</span>
+          </label>
           <Tag className={styles.badge} name={node.count.toString()} colorIndex={9} />
         </div>
       </div>
@@ -142,7 +142,7 @@ function getStyles(theme: GrafanaTheme2) {
       min-width: 0; /* Prevents content from overflowing */
       overflow: hidden;
     `,
-    expandIcon: css`
+    expandButton: css`
       flex-shrink: 0;
     `,
     nodeName: css`
