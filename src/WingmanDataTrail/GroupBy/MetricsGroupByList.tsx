@@ -12,6 +12,7 @@ import { Alert, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { LabelValuesVariable, VAR_LABEL_VALUES } from 'WingmanDataTrail/Labels/LabelValuesVariable';
+import { METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
@@ -37,7 +38,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
           children: [],
           isLazy: true,
           templateColumns: '1fr',
-          autoRows: 'auto',
+          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
         }),
         getLayoutLoading: () =>
           new SceneReactObject({
