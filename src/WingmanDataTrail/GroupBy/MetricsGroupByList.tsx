@@ -12,7 +12,6 @@ import { Alert, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { LabelValuesVariable, VAR_LABEL_VALUES } from 'WingmanDataTrail/Labels/LabelValuesVariable';
-import { METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
@@ -38,7 +37,9 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
           children: [],
           isLazy: true,
           templateColumns: '1fr',
-          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+          // using METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW would be more efficient :(
+          // but when the section is collapsed, it does not reduce the height occupied by the grid child
+          autoRows: 'auto',
         }),
         getLayoutLoading: () =>
           new SceneReactObject({
