@@ -1,21 +1,31 @@
-import { sceneGraph, type MultiValueVariable } from '@grafana/scenes';
+import { VariableHide, VariableRefresh } from '@grafana/data';
+import { QueryVariable, sceneGraph, type MultiValueVariable } from '@grafana/scenes';
 
-import { VAR_FILTERS } from 'shared';
 import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
-import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
+import { MetricsVariableFilterEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
-import { MetricsVariable } from './MetricsVariable';
-import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariableFilterEngine';
-export const VAR_FILTERED_METRICS_VARIABLE = 'filtered-metrics-wingman';
+import { MetricsWithLabelValueDataSource } from './MetricsWithLabelValueDataSource';
 
-export class FilteredMetricsVariable extends MetricsVariable {
+export const VAR_METRIC_WITH_LABEL_VALUE = 'metrics-with-label-value';
+
+export class MetricsWithLabelValueVariable extends QueryVariable {
   private filterEngine: MetricsVariableFilterEngine;
 
-  constructor() {
+  constructor({ labelName, labelValue }: { labelName: string; labelValue: string }) {
     super({
-      name: VAR_FILTERED_METRICS_VARIABLE,
-      label: 'Filtered Metrics',
+      name: VAR_METRIC_WITH_LABEL_VALUE,
+      datasource: { uid: MetricsWithLabelValueDataSource.uid },
+      query: `{${labelName}="${labelValue}"}`,
+      isMulti: false,
+      allowCustomValue: false,
+      refresh: VariableRefresh.onTimeRangeChanged,
+      hide: VariableHide.hideVariable,
+      skipUrlSync: true,
+      // BOTH "value" and "includeAll" below ensure the repetition in SceneByVariableRepeater
+      // // (if not set, it'll render only the 1st variable option)
+      value: '$__all',
+      includeAll: true,
     });
 
     this.filterEngine = new MetricsVariableFilterEngine(this as unknown as MultiValueVariable);
@@ -42,21 +52,5 @@ export class FilteredMetricsVariable extends MetricsVariable {
         this.filterEngine.applyFilters({ names: event.payload.searchText ? [event.payload.searchText] : [] });
       })
     );
-  }
-
-  public updateGroupByQuery(groupByValue: string) {
-    const matcher =
-      groupByValue && groupByValue !== NULL_GROUP_BY_VALUE ? `${groupByValue}!="",$${VAR_FILTERS}` : `$${VAR_FILTERS}`;
-
-    const query = `label_values({${matcher}}, __name__)`;
-
-    if (query !== this.state.query) {
-      this.setState({ query });
-      this.refreshOptions();
-    }
-  }
-
-  public applyFilters(filters: Partial<MetricFilters>, notify = true, forceUpdate = false) {
-    this.filterEngine.applyFilters(filters, notify, forceUpdate);
   }
 }

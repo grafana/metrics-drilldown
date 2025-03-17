@@ -1,16 +1,20 @@
 import { css } from '@emotion/css';
 import { VariableHide, VariableRefresh, type GrafanaTheme2 } from '@grafana/data';
 import {
-  AdHocFiltersVariable,
   QueryVariable,
   sceneGraph,
+  type DataSourceVariable,
   type MultiValueVariable,
   type SceneComponentProps,
 } from '@grafana/scenes';
 import { Label, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_FILTERS } from 'shared';
+import { VAR_DATASOURCE, VAR_FILTERS_EXPR } from 'shared';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './LabelsDataSource';
 
@@ -35,10 +39,26 @@ export class LabelsVariable extends QueryVariable {
   }
 
   onActivate() {
+    const filteredMetricsVariable = sceneGraph.lookupVariable(
+      VAR_FILTERED_METRICS_VARIABLE,
+      this
+    ) as FilteredMetricsVariable;
+
+    // TODO: publish event instead?
+    filteredMetricsVariable.updateGroupByQuery(this.state.value as string);
+
+    this._subs.add(
+      this.subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          filteredMetricsVariable.updateGroupByQuery(this.state.value as string);
+        }
+      })
+    );
+
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
         if (newState.query !== prevState.query) {
-          // preserve the value form URL search params when landing
+          // preserve the value from the URL search param when landing
           if (prevState.query) {
             this.setState({ value: NULL_GROUP_BY_VALUE });
           }
@@ -48,11 +68,18 @@ export class LabelsVariable extends QueryVariable {
       })
     );
 
+    this._subs.add(
+      (sceneGraph.findByKey(this, VAR_DATASOURCE) as DataSourceVariable).subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          this.setState({ value: NULL_GROUP_BY_VALUE });
+          this.refreshOptions();
+        }
+      })
+    );
+
     // hack to ensure that labels are loaded when landing: sometimes filters are not interpolated and fetching labels give no results
-    const adHocSub = sceneGraph.findByKeyAndType(this, VAR_FILTERS, AdHocFiltersVariable).subscribeToState(() => {
-      this.setState({ query: `{__name__=~".+",$${VAR_FILTERS}}` });
-      adHocSub.unsubscribe();
-    });
+    const filterExpression = sceneGraph.interpolate(this, VAR_FILTERS_EXPR, {});
+    this.setState({ query: `{__name__=~".+",${filterExpression}}` });
   }
 
   static Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
@@ -79,6 +106,8 @@ const getStyles = (theme: GrafanaTheme2) => ({
     }
   `,
   label: css`
+    height: 32px;
+    white-space: nowrap;
     margin: 0;
     background-color: ${theme.colors.background.primary};
     padding: ${theme.spacing(1)};

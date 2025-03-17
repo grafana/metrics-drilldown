@@ -14,12 +14,14 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
+import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
+import { ROUTES } from '../../constants';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
 import { MetricsSorter } from './MetricsSorter';
 import { MetricsTreeFilterToggle } from './MetricsTreeFilter/MetricsTreeFilterToggle';
-import { QuickSearch } from './QuickSearch';
+import { QuickSearch } from './QuickSearch/QuickSearch';
 
 interface HeaderControlsState extends SceneObjectState {
   $variables?: SceneVariableSet;
@@ -41,14 +43,6 @@ export class HeaderControls extends EmbeddedScene {
           new SceneFlexItem({
             width: 'auto',
             body: new MetricsTreeFilterToggle({}),
-          }),
-          new SceneFlexItem({
-            width: 'auto',
-            body: new MetricsFilter({ type: 'prefixes' }),
-          }),
-          new SceneFlexItem({
-            width: 'auto',
-            body: new MetricsFilter({ type: 'categories' }),
           }),
           new SceneFlexItem({
             body: new QuickSearch(),
@@ -74,15 +68,36 @@ export class HeaderControls extends EmbeddedScene {
   }
 
   onActivate() {
-    const flexItem = sceneGraph.findByKey(this, 'group-by-label-selector-wingman') as SceneFlexItem;
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
+    const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
 
-    flexItem.setState({
+    (
+      (this.state.body as SceneFlexLayout).state.children.find(
+        (c) => c.state.key === 'group-by-label-selector-wingman'
+      ) as SceneFlexItem
+    )?.setState({
       body: new SceneReactObject({
         component: labelsVariable.Component,
         props: { model: labelsVariable },
       }),
     });
+
+    // see comment in MetricsReducer
+    if ([ROUTES.TrialWithPills, ROUTES.OnboardWithPills].includes(variant as string)) {
+      (this.state.body as SceneFlexLayout).setState({
+        children: [
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsFilter({ type: 'prefixes' }),
+          }),
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsFilter({ type: 'categories' }),
+          }),
+          ...(this.state.body as SceneFlexLayout).state.children,
+        ],
+      });
+    }
   }
 
   public static Component = ({ model }: SceneComponentProps<HeaderControls>) => {

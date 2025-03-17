@@ -61,7 +61,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
 export function getStyles(theme: GrafanaTheme2) {
   return {
     panelContainer: css({
-      height: '175px',
+      // height: '175px',
     }),
     usageContainer: css({
       display: 'flex',

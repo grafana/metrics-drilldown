@@ -5,6 +5,8 @@ import { trailDS, VAR_FILTERS } from 'shared';
 
 export const VAR_METRICS_VARIABLE = 'metrics-wingman';
 
+export type MetricOptions = Array<{ label: string; value: string }>;
+
 interface MetricsVariableState extends SceneObjectState {
   name?: string;
   label?: string;
