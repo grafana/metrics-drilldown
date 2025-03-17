@@ -14,13 +14,16 @@ import React from 'react';
 
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
-import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import {
+  VAR_METRICS_VARIABLE,
+  type MetricOptions,
+  type MetricsVariable,
+} from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { MetricsFilterSection } from './MetricsFilterSection';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
-  type MetricOptions,
 } from '../MetricsVariables/FilteredMetricsVariable';
 
 interface SideBarState extends SceneObjectState {

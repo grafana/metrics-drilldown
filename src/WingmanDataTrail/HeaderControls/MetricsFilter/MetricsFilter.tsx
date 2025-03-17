@@ -15,9 +15,12 @@ import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
-  type MetricOptions,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import {
+  VAR_METRICS_VARIABLE,
+  type MetricOptions,
+  type MetricsVariable,
+} from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { Dropdown } from './Dropdown';
 import { EventGroupFiltersChanged } from './EventGroupFiltersChanged';
