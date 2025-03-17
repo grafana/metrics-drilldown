@@ -183,14 +183,37 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       body.increaseBatchSize();
     };
 
+    const onClickInclude = () => {
+      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
+
+      adHocFiltersVariable.setState({
+        // TOOD: keep unique filters
+        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
+      });
+    };
+
+    const onClickExclude = () => {
+      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
+
+      adHocFiltersVariable.setState({
+        // TOOD: keep unique filters
+        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '!=', value: labelValue }],
+      });
+    };
+
     return (
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
             {!isOnboardingView && (
-              <Button variant="secondary" fill="outline" className={styles.excludeButton}>
-                Exclude
-              </Button>
+              <>
+                <Button variant="secondary" fill="outline" className={styles.includeButton} onClick={onClickInclude}>
+                  Include
+                </Button>
+                <Button variant="secondary" fill="outline" className={styles.excludeButton} onClick={onClickExclude}>
+                  Exclude
+                </Button>
+              </>
             )}
             {isOnboardingView && (
               <Button
@@ -278,6 +301,7 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       zIndex: 100,
     }),
     filterButton: css({}),
+    includeButton: css({}),
     excludeButton: css({}),
     collapsableSection: css({
       height: '100%',
