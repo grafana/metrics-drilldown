@@ -78,6 +78,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
     this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
 
+    this.setState({ loading: !filteredMetricsVariable.state.options.length });
+
     this._subs.add(
       filteredMetricsVariable.subscribeToState((newState, prevState) => {
         if (!prevState.loading && newState.loading) {
