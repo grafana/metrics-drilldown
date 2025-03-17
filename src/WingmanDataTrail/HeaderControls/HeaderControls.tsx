@@ -63,8 +63,19 @@ export class HeaderControls extends EmbeddedScene {
   }
 
   onActivate() {
-    const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
+    const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
+
+    (
+      (this.state.body as SceneFlexLayout).state.children.find(
+        (c) => c.state.key === 'group-by-label-selector-wingman'
+      ) as SceneFlexItem
+    )?.setState({
+      body: new SceneReactObject({
+        component: labelsVariable.Component,
+        props: { model: labelsVariable },
+      }),
+    });
 
     // see comment in MetricsReducer
     if ([ROUTES.TrialWithPills, ROUTES.OnboardWithPills].includes(variant as string)) {
@@ -80,17 +91,6 @@ export class HeaderControls extends EmbeddedScene {
           }),
           ...(this.state.body as SceneFlexLayout).state.children,
         ],
-      });
-    } else {
-      (
-        (this.state.body as SceneFlexLayout).state.children.find(
-          (c) => c.state.key === 'group-by-label-selector-wingman'
-        ) as SceneFlexItem
-      )?.setState({
-        body: new SceneReactObject({
-          component: labelsVariable.Component,
-          props: { model: labelsVariable },
-        }),
       });
     }
   }
