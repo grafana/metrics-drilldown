@@ -55,7 +55,13 @@ export const MetricTreeNode = ({
           </div>
           <Tooltip content={isChild ? `${ancestorPrefix}${node.separator}${node.prefix}` : node.prefix} placement="top">
             <label className={styles.nodeName} htmlFor={node.id}>
-              {node.prefix}
+              {isChild && (
+                <span className={styles.ancestorPrefix}>
+                  {ancestorPrefix}
+                  {node.separator}
+                </span>
+              )}
+              <span>{node.prefix}</span>
             </label>
           </Tooltip>
           <Tag className={styles.badge} name={node.count.toString()} colorIndex={9} />
@@ -145,6 +151,9 @@ function getStyles(theme: GrafanaTheme2) {
       text-overflow: ellipsis;
       white-space: nowrap;
       cursor: pointer;
+    `,
+    ancestorPrefix: css`
+      color: ${theme.colors.text.secondary};
     `,
     separator: css`
       color: ${theme.colors.text.secondary};
