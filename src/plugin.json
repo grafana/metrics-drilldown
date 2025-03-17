@@ -52,7 +52,7 @@
     }
   ],
   "dependencies": {
-    "grafanaDependency": ">=11.3.0",
+    "grafanaDependency": ">=11.6.0-82198",
     "plugins": []
   },
   "preload": true,
