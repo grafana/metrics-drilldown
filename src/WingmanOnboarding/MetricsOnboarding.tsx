@@ -214,8 +214,9 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state.value as string;
 
     const { pathname, search } = useLocation();
+    console.log('*** search', search);
     const href = useMemo(
-      () => pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + '?' + search,
+      () => pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + search,
       [] // eslint-disable-line react-hooks/exhaustive-deps
     ); // it's good enough capture it once when landing
 
