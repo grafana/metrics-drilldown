@@ -116,7 +116,7 @@ function getStyles(theme: GrafanaTheme2) {
     labelButton: css`
       flex: 0 1 200px;
       height: 80px;
-      font-size: 16px;
+      font-size: 1.1rem;
       margin: 0;
       text-align: center;
       justify-content: center;

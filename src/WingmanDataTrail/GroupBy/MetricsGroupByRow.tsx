@@ -282,11 +282,11 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
     groupName: css({
       display: 'flex',
       alignItems: 'center',
-      fontSize: '19px',
-      lineHeight: '19px',
+      fontSize: '1.3rem',
+      lineHeight: '1.3rem',
     }),
     labelValue: css({
-      fontSize: '17px',
+      fontSize: '1.2rem',
       marginLeft: '8px',
     }),
     index: css({
