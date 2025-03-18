@@ -13,6 +13,7 @@ import { IconButton, Input, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce } from 'lodash';
 import React, { type KeyboardEvent } from 'react';
 
+import { VAR_DATASOURCE } from 'shared';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import {
@@ -34,7 +35,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   public static readonly URL_SEARCH_PARAM_NAME = 'search_txt';
 
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_METRICS_VARIABLE, VAR_FILTERED_METRICS_VARIABLE, VAR_MAIN_LABEL_VARIABLE, VAR_WINGMAN_GROUP_BY],
+    variableNames: [
+      VAR_DATASOURCE,
+      VAR_METRICS_VARIABLE,
+      VAR_FILTERED_METRICS_VARIABLE,
+      VAR_MAIN_LABEL_VARIABLE,
+      VAR_WINGMAN_GROUP_BY,
+    ],
     onAnyVariableChanged: (variable) => {
       if ([VAR_METRICS_VARIABLE, VAR_FILTERED_METRICS_VARIABLE].includes(variable.state.name)) {
         const { counts } = this.state;
@@ -60,6 +67,10 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       }
 
       this.setState({ disableRatioDisplay: false });
+
+      if (variable.state.name === VAR_DATASOURCE) {
+        this.setState({ value: '' });
+      }
     },
   });
 
