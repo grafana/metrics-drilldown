@@ -42,7 +42,7 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
           this.filterEngine.setInitOptions(newState.options);
 
           // TODO: use events publishing and subscribe in the main Wingman Scene?
-          this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] });
+          this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] }, false);
         }
       })
     );

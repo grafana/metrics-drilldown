@@ -103,8 +103,6 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     });
 
     this.updateDisableRatioDisplay();
-
-    this.notifyValueChange(this.state.value);
   }
 
   private updateDisableRatioDisplay() {
