@@ -140,7 +140,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  useClickFilterBy = () => {
+  private useClickFilterBy = () => {
     const { labelName, labelValue } = this.useState();
     const location = useLocation();
     const navigate = useNavigate();
@@ -228,7 +228,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                   tooltip={`Show more metrics for ${labelName}="${labelValue}"`}
                   tooltipPlacement="top"
                 >
-                  Show {batchSizes.increment} more ({batchSizes.current}/{batchSizes.total})
+                  Show {batchSizes.increment} more metrics ({batchSizes.current}/{batchSizes.total})
                 </Button>
               </div>
             )}
@@ -252,7 +252,6 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       border: `1px solid ${theme.colors.border.medium}`,
       borderRadius: theme.shape.radius.default,
       padding: isCollapsed ? theme.spacing(2) : theme.spacing(2, 2, 0, 2),
-      marginBottom: theme.spacing(2),
 
       '& div:focus-within': {
         boxShadow: 'none !important',
