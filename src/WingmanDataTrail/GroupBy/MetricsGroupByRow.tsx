@@ -107,7 +107,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 color: getColorByIndex(colorIndex++),
                 matchers: [`${labelName}="${labelValue}"`],
                 groupByLabel: undefined,
-                headerActions: [new SelectAction({ metricName: option.value as string, variant: 'secondary' })],
+                headerActions: [new SelectAction({ metricName: option.value as string })],
               }),
               metric: option.value as string,
             }),
@@ -193,13 +193,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
               </Button>
             )}
             {isOnboardingView && (
-              <Button
-                icon="filter"
-                variant="primary"
-                fill="outline"
-                className={styles.filterButton}
-                onClick={onClickFilterBy}
-              >
+              <Button variant="primary" fill="solid" className={styles.filterButton} onClick={onClickFilterBy}>
                 Filter by
               </Button>
             )}
@@ -309,7 +303,6 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
 
       '& button': {
         height: '40px',
-        borderRadius: '8px',
       },
     }),
     variable: css({

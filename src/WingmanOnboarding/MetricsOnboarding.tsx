@@ -37,7 +37,6 @@ import { MainLabelVariable, VAR_MAIN_LABEL_VARIABLE } from './HeaderControls/Mai
 import { VAR_VARIANT, type VariantVariable } from './VariantVariable';
 interface MetricsOnboardingState extends SceneObjectState {
   headerControls: SceneFlexLayout;
-  allLabelValues: Map<string, string[]>;
   loading: boolean;
   drawer: SceneDrawer;
   $variables: SceneVariableSet;
@@ -45,6 +44,8 @@ interface MetricsOnboardingState extends SceneObjectState {
 }
 
 export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
+  public static readonly LABEL_VALUES_API_LIMIT = 100;
+
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_MAIN_LABEL_VARIABLE, VAR_DATASOURCE],
     onReferencedVariableValueChanged: (variable) => {
@@ -67,7 +68,6 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       $variables: new SceneVariableSet({
         variables: [new MainLabelVariable()],
       }),
-      allLabelValues: new Map(),
       headerControls: new SceneFlexLayout({
         direction: 'column',
         children: [
@@ -122,32 +122,33 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
   private fetchAndLabelValuesAndUpdateBody() {
     const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable;
 
-    this.fetchAllLabelValues(MainLabelVariable.OPTIONS).then((allLabelValues) => {
+    this.fetchAllLabelardinalities(MainLabelVariable.OPTIONS).then((allLabelCardinalities) => {
       mainLabelVariable.setState({
-        options: allLabelValues.map(([labelName, labelValues]) => ({
+        options: allLabelCardinalities.map(([labelName, labelCardinality]) => ({
           value: labelName,
-          label: labelValues !== undefined ? `${labelName} (${labelValues.length})` : (labelName as string),
+          label: `${labelName} (${
+            labelCardinality >= MetricsOnboarding.LABEL_VALUES_API_LIMIT
+              ? MetricsOnboarding.LABEL_VALUES_API_LIMIT + '+'
+              : labelCardinality
+          })`,
         })),
       });
 
-      this.setState({
-        loading: false,
-        allLabelValues: new Map(allLabelValues),
-      });
+      this.setState({ loading: false });
 
       this.updateBody(mainLabelVariable.state.value as string);
     });
   }
 
-  private async fetchAllLabelValues(labelNames: string[]): Promise<Array<[string, string[]]>> {
+  private async fetchAllLabelardinalities(labelNames: string[]): Promise<Array<[string, number]>> {
     return Promise.all(
       labelNames.map((labelName) =>
-        LabelsDataSource.fetchLabelValues(labelName, this)
-          .then((labelValues: string[]) => [labelName, labelValues] as [string, string[]])
+        LabelsDataSource.fetchLabelCardinality(labelName, MetricsOnboarding.LABEL_VALUES_API_LIMIT, this)
+          .then((labelCardinality) => [labelName, labelCardinality] as [string, number])
           .catch((error) => {
-            console.error('Error fetching "%s" label values!', labelName);
+            console.error('Error fetching "%s" label cardinality!', labelName);
             console.error(error);
-            return [labelName, []] as [string, string[]];
+            return [labelName, 0] as [string, number];
           })
       )
     );
