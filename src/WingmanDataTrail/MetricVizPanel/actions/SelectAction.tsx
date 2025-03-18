@@ -22,6 +22,7 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
     fill?: SelectActionState['fill'];
   }) {
     super({
+      key: `select-action-${metricName}`,
       metricName,
       variant: variant || 'primary',
       fill: fill || 'text',

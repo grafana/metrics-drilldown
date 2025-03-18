@@ -4,9 +4,9 @@ import {
   SceneObjectBase,
   SceneQueryRunner,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectState,
   type VizPanel,
-  type VizPanelState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -27,9 +27,9 @@ interface MetricVizPanelState extends SceneObjectState {
   hideLegend: boolean;
   highlight: boolean;
   height: string;
-  headerActions: VizPanelState['headerActions'];
   matchers: string[];
   body: VizPanel;
+  headerActions: SceneObject[];
 }
 
 export const METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '240px';
@@ -45,10 +45,10 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     prometheusFunction?: MetricVizPanelState['prometheusFunction'];
     matchers?: MetricVizPanelState['matchers'];
     title?: MetricVizPanelState['title'];
-    headerActions?: MetricVizPanelState['headerActions'];
     hideLegend?: MetricVizPanelState['hideLegend'];
     height?: MetricVizPanelState['height'];
     highlight?: MetricVizPanelState['highlight'];
+    headerActions?: SceneObject[];
   }) {
     const stateWithDefaults = {
       ...state,
@@ -65,7 +65,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     };
 
     super({
-      key: 'MetricVizPanel',
+      key: `metric-viz-panel-${stateWithDefaults.metricName}`,
       ...stateWithDefaults,
       body: MetricVizPanel.buildVizPanel(stateWithDefaults),
     });
@@ -76,21 +76,20 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     title,
     highlight,
     color,
-    headerActions,
     hideLegend,
     prometheusFunction,
     matchers,
+    headerActions,
   }: {
-    metricName: string;
-    title: string;
-    highlight: boolean;
-    color: string;
-    headerActions: VizPanelState['headerActions'];
-    hideLegend: boolean;
-    prometheusFunction: PrometheusFn;
-    matchers: string[];
+    metricName: MetricVizPanelState['metricName'];
+    title: MetricVizPanelState['title'];
+    highlight: MetricVizPanelState['highlight'];
+    color: MetricVizPanelState['color'];
+    hideLegend: MetricVizPanelState['hideLegend'];
+    prometheusFunction: MetricVizPanelState['prometheusFunction'];
+    matchers: MetricVizPanelState['matchers'];
+    headerActions: MetricVizPanelState['headerActions'];
   }) {
-    // console.log('*** buildVizPanel', title);
     const panelTitle = highlight ? `${title} (current)` : title;
 
     const isUptime = metricName === 'up' || metricName.endsWith('_up');
@@ -98,6 +97,8 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       // For uptime metrics, use a status history panel which is better for binary states
       return buildStatusHistoryPanel({
         panelTitle,
+        headerActions,
+        // TODO: custom uptime query runner to prevent if/else in buildPrometheusQuery() (see below)
         queryRunner: MetricVizPanel.buildQueryRunner({
           metricName,
           matchers,
@@ -109,8 +110,8 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     // Default settings for non-uptime metrics - use timeseries
     return buildTimeseriesPanel({
       panelTitle,
-      color,
       headerActions,
+      color,
       hideLegend,
       queryRunner: MetricVizPanel.buildQueryRunner({
         metricName,
