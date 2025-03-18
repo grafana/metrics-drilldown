@@ -81,7 +81,6 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
               vizPanelInGridItem: new MetricVizPanel({
                 metricName: option.value as string,
                 color: getColorByIndex(colorIndex++),
-                groupByLabel: undefined,
               }),
               metric: option.value as string,
             }),

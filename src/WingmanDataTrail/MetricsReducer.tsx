@@ -131,7 +131,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
                 title: option.label,
                 metricName,
                 color: getColorByIndex(colorIndex),
-                groupByLabel: undefined,
                 prometheusFunction: option.value,
                 height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
                 hideLegend: true,

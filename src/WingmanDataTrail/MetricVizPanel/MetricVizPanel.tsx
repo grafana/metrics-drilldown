@@ -19,11 +19,6 @@ import { buildPrometheusQuery } from './buildPrometheusQuery';
 import { buildStatusHistoryPanel } from './panels/statushistory';
 import { buildTimeseriesPanel } from './panels/timeseries';
 
-export type GroupByLabel = {
-  name: string;
-  value: string;
-};
-
 interface MetricVizPanelState extends SceneObjectState {
   metricName: string;
   color: string;
@@ -34,8 +29,7 @@ interface MetricVizPanelState extends SceneObjectState {
   height: string;
   headerActions: VizPanelState['headerActions'];
   matchers: string[];
-  body?: VizPanel;
-  groupByLabel?: GroupByLabel;
+  body: VizPanel;
 }
 
 export const METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '240px';
@@ -43,11 +37,12 @@ export const METRICS_VIZ_PANEL_HEIGHT = '200px';
 export const METRICS_VIZ_PANEL_HEIGHT_SMALL = '160px';
 
 export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
+  private static readonly MAX_DATA_POINTS = 250;
+
   constructor(state: {
     metricName: MetricVizPanelState['metricName'];
     color: MetricVizPanelState['color'];
     prometheusFunction?: MetricVizPanelState['prometheusFunction'];
-    groupByLabel: MetricVizPanelState['groupByLabel'];
     matchers?: MetricVizPanelState['matchers'];
     title?: MetricVizPanelState['title'];
     headerActions?: MetricVizPanelState['headerActions'];
@@ -55,12 +50,9 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     height?: MetricVizPanelState['height'];
     highlight?: MetricVizPanelState['highlight'];
   }) {
-    super({
-      key: 'MetricVizPanel',
-      metricName: state.metricName,
-      color: state.color,
+    const stateWithDefaults = {
+      ...state,
       prometheusFunction: state.prometheusFunction || 'sum',
-      groupByLabel: state.groupByLabel,
       matchers: state.matchers || [],
       title: state.title || state.metricName,
       height: state.height || METRICS_VIZ_PANEL_HEIGHT,
@@ -70,55 +62,81 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         new SelectAction({ metricName: state.metricName }),
         new ConfigureAction({ metricName: state.metricName }),
       ],
-      body: undefined,
-    });
+    };
 
-    this.addActivationHandler(this.onActivate.bind(this));
-  }
-
-  private onActivate() {
-    this.setState({
-      body: this.buildVizPanel(),
+    super({
+      key: 'MetricVizPanel',
+      ...stateWithDefaults,
+      body: MetricVizPanel.buildVizPanel(stateWithDefaults),
     });
   }
 
-  buildVizPanel() {
-    const { title, color, headerActions, hideLegend, highlight, metricName } = this.state;
-
-    // Check if this is an uptime metric
-    const isUptime = metricName === 'up' || metricName.endsWith('_up');
+  private static buildVizPanel({
+    metricName,
+    title,
+    highlight,
+    color,
+    headerActions,
+    hideLegend,
+    prometheusFunction,
+    matchers,
+  }: {
+    metricName: string;
+    title: string;
+    highlight: boolean;
+    color: string;
+    headerActions: VizPanelState['headerActions'];
+    hideLegend: boolean;
+    prometheusFunction: PrometheusFn;
+    matchers: string[];
+  }) {
+    // console.log('*** buildVizPanel', title);
     const panelTitle = highlight ? `${title} (current)` : title;
-    const queryRunner = this.buildQueryRunner();
 
-    let builder;
-
+    const isUptime = metricName === 'up' || metricName.endsWith('_up');
     if (isUptime) {
       // For uptime metrics, use a status history panel which is better for binary states
-      builder = buildStatusHistoryPanel({ queryRunner, panelTitle });
-    } else {
-      // Default settings for non-uptime metrics - use timeseries
-      builder = buildTimeseriesPanel({
-        queryRunner,
+      return buildStatusHistoryPanel({
         panelTitle,
-        color,
-        headerActions,
-        hideLegend,
-      });
+        queryRunner: MetricVizPanel.buildQueryRunner({
+          metricName,
+          matchers,
+          prometheusFunction,
+        }),
+      }).build();
     }
 
-    return builder.build();
+    // Default settings for non-uptime metrics - use timeseries
+    return buildTimeseriesPanel({
+      panelTitle,
+      color,
+      headerActions,
+      hideLegend,
+      queryRunner: MetricVizPanel.buildQueryRunner({
+        metricName,
+        matchers,
+        prometheusFunction,
+      }),
+    }).build();
   }
 
-  buildQueryRunner() {
-    const { metricName, matchers, groupByLabel, prometheusFunction: fn } = this.state;
-    const expr = buildPrometheusQuery({ metricName, matchers, groupByLabel, fn });
+  private static buildQueryRunner({
+    metricName,
+    matchers,
+    prometheusFunction,
+  }: {
+    metricName: string;
+    matchers: string[];
+    prometheusFunction: PrometheusFn;
+  }): SceneQueryRunner {
+    const expr = buildPrometheusQuery({ metricName, matchers, fn: prometheusFunction });
 
     return new SceneQueryRunner({
       datasource: trailDS,
-      maxDataPoints: 250,
+      maxDataPoints: MetricVizPanel.MAX_DATA_POINTS,
       queries: [
         {
-          refId: `${metricName}-${groupByLabel?.name}`,
+          refId: metricName,
           expr,
         },
       ],

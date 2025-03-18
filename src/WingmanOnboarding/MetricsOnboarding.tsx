@@ -154,12 +154,12 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     );
   }
 
-  private updateBody(groupByValue: string) {
+  private updateBody(groupByLabel: string) {
     this.setState({
-      body: !groupByValue
+      body: !groupByLabel
         ? (new SimpleMetricsList() as unknown as SceneObjectBase)
         : (new MetricsGroupByList({
-            labelName: groupByValue,
+            labelName: groupByLabel,
           }) as unknown as SceneObjectBase),
     });
   }
@@ -185,7 +185,6 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
                 title: option.label,
                 metricName,
                 color: getColorByIndex(colorIndex),
-                groupByLabel: undefined,
                 prometheusFunction: option.value,
                 height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
                 hideLegend: true,

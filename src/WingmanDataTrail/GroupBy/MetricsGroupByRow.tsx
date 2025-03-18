@@ -106,7 +106,6 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 metricName: option.value as string,
                 color: getColorByIndex(colorIndex++),
                 matchers: [`${labelName}="${labelValue}"`],
-                groupByLabel: undefined,
                 headerActions: [new SelectAction({ metricName: option.value as string })],
               }),
               metric: option.value as string,
