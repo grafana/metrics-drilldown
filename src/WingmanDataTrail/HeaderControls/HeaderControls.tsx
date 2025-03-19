@@ -5,22 +5,21 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
-  SceneReactObject,
   type SceneComponentProps,
   type SceneObjectState,
+  type SceneReactObject,
   type SceneVariableSet,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
+import { ROUTES } from '../../constants';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
 import { MetricsSorter } from './MetricsSorter';
 import { QuickSearch } from './QuickSearch/QuickSearch';
-import { ROUTES } from '../../constants';
 
 interface HeaderControlsState extends SceneObjectState {
   $variables?: SceneVariableSet;
@@ -43,11 +42,6 @@ export class HeaderControls extends EmbeddedScene {
             body: new QuickSearch(),
           }),
           new SceneFlexItem({
-            key: 'group-by-label-selector-wingman',
-            width: 'auto',
-            body: undefined,
-          }),
-          new SceneFlexItem({
             maxWidth: '240px',
             body: new MetricsSorter({}),
           }),
@@ -63,19 +57,7 @@ export class HeaderControls extends EmbeddedScene {
   }
 
   onActivate() {
-    const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
-
-    (
-      (this.state.body as SceneFlexLayout).state.children.find(
-        (c) => c.state.key === 'group-by-label-selector-wingman'
-      ) as SceneFlexItem
-    )?.setState({
-      body: new SceneReactObject({
-        component: labelsVariable.Component,
-        props: { model: labelsVariable },
-      }),
-    });
 
     // see comment in MetricsReducer
     if ([ROUTES.TrialWithPills, ROUTES.OnboardWithPills].includes(variant as string)) {
