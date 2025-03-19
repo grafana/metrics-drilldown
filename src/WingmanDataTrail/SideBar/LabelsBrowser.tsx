@@ -87,10 +87,7 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(1),
       height: '100%',
       overflowY: 'hidden',
-      padding: theme.spacing(2),
       background: theme.colors.background.primary,
-      border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: theme.shape.radius.default,
     }),
     header: css({
       borderBottom: `1px solid ${theme.colors.border.weak}`,
