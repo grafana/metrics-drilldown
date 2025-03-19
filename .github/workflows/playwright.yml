@@ -154,15 +154,15 @@ jobs:
       - name: Wait for Grafana to start
         uses: grafana/plugin-actions/wait-for-grafana@main
 
+      - name: Run Dockerized  Playwright tests
+        if: ${{ inputs.dockerized-playwright-command }}
+        id: run-tests-in-container
+        run: ${{ inputs.dockerized-playwright-command }}
+
       - name: Run Playwright tests
+        if: ${{ !inputs.dockerized-playwright-command }}
         id: run-tests
-        run: |
-          if [ -n "${{ inputs.dockerized-playwright-command}}" ]; then
-            echo "Running Playwright tests in container"
-            ${{ inputs.dockerized-playwright-command }}
-          else
-            npx playwright test --config ${{ inputs.playwright-config }}
-          fi
+        run: npx playwright test --config ${{ inputs.playwright-config }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.1
