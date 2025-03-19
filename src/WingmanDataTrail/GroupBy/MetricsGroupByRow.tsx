@@ -108,8 +108,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 metricName: option.value as string,
                 color: getColorByIndex(colorIndex++),
                 matchers: [`${labelName}="${labelValue}"`],
-                groupByLabel: undefined,
-                headerActions: [new SelectAction({ metricName: option.value as string, variant: 'secondary' })],
+                headerActions: [new SelectAction({ metricName: option.value as string })],
               }),
               metric: option.value as string,
             }),
@@ -142,7 +141,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  useClickFilterBy = () => {
+  private useClickFilterBy = () => {
     const { labelName, labelValue } = this.useState();
     const location = useLocation();
     const navigate = useNavigate();
@@ -220,13 +219,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
               </>
             )}
             {isOnboardingView && (
-              <Button
-                icon="filter"
-                variant="primary"
-                fill="outline"
-                className={styles.filterButton}
-                onClick={onClickFilterBy}
-              >
+              <Button variant="primary" fill="solid" className={styles.filterButton} onClick={onClickFilterBy}>
                 Filter by
               </Button>
             )}
@@ -261,7 +254,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                   tooltip={`Show more metrics for ${labelName}="${labelValue}"`}
                   tooltipPlacement="top"
                 >
-                  Show {batchSizes.increment} more ({batchSizes.current}/{batchSizes.total})
+                  Show {batchSizes.increment} more metrics ({batchSizes.current}/{batchSizes.total})
                 </Button>
               </div>
             )}
@@ -285,7 +278,6 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       border: `1px solid ${theme.colors.border.medium}`,
       borderRadius: theme.shape.radius.default,
       padding: isCollapsed ? theme.spacing(2) : theme.spacing(2, 2, 0, 2),
-      marginBottom: theme.spacing(2),
 
       '& div:focus-within': {
         boxShadow: 'none !important',
@@ -317,11 +309,11 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
     groupName: css({
       display: 'flex',
       alignItems: 'center',
-      fontSize: '19px',
-      lineHeight: '19px',
+      fontSize: '1.3rem',
+      lineHeight: '1.3rem',
     }),
     labelValue: css({
-      fontSize: '17px',
+      fontSize: '1.2rem',
       marginLeft: '8px',
     }),
     index: css({
@@ -337,7 +329,6 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
 
       '& button': {
         height: '40px',
-        borderRadius: '8px',
       },
     }),
     variable: css({

@@ -81,7 +81,6 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
               vizPanelInGridItem: new MetricVizPanel({
                 metricName: option.value as string,
                 color: getColorByIndex(colorIndex++),
-                groupByLabel: undefined,
               }),
               metric: option.value as string,
             }),
@@ -137,7 +136,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
             <Button variant="secondary" fill="outline" onClick={onClickShowMore}>
-              Show {batchSizes.increment} more ({batchSizes.current}/{batchSizes.total})
+              Show {batchSizes.increment} more metrics ({batchSizes.current}/{batchSizes.total})
             </Button>
           </div>
         )}

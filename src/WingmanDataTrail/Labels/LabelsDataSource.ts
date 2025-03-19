@@ -8,6 +8,7 @@ import {
   type MetricFindValue,
   type TestDataSourceResponse,
 } from '@grafana/data';
+import { getPrometheusTime, type PrometheusDatasource } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
@@ -15,8 +16,6 @@ import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 import { localeCompare } from '../helpers/localCompare';
-
-import type { PrometheusDatasource } from '@grafana/prometheus';
 
 // TODO can we get rid of it?
 export const NULL_GROUP_BY_VALUE = '(none)';
@@ -132,6 +131,32 @@ export class LabelsDataSource extends RuntimeDataSource {
     );
 
     return response;
+  }
+
+  static async fetchLabelCardinality(labelName: string, limit: number, sceneObject: SceneObject): Promise<number> {
+    const ds = await LabelsDataSource.getPrometheusDataSource(sceneObject);
+    if (!ds) {
+      return 0;
+    }
+
+    const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
+
+    const params: Record<string, string | number> = {
+      start: getPrometheusTime(timeRange.from, false),
+      end: getPrometheusTime(timeRange.to, true),
+      limit,
+    };
+
+    const filterExpression = sceneGraph.interpolate(sceneObject, VAR_FILTERS_EXPR, {});
+    if (filterExpression) {
+      params['match[]'] = `{${filterExpression}}`;
+    }
+
+    const response = await ds.languageProvider.request(`/api/v1/label/${labelName}/values`, [], params, {
+      requestId: `metrics-drilldown-${labelName}-values`,
+    });
+
+    return response.length;
   }
 
   async testDatasource(): Promise<TestDataSourceResponse> {

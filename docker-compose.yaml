@@ -7,8 +7,12 @@ services:
     container_name: 'grafana'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
+      GF_FEATURE_TOGGLES_ENABLE: 'exploreMetricsRelatedLogs'
     volumes:
       - ./provisioning/dashboards/dashboardJson:/etc/dashboards
+    extra_hosts:
+      # This allows us to connect to other services running on the host machine.
+      - 'host.docker.internal:host-gateway'
 
   prometheus:
     container_name: 'prometheus'
