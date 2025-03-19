@@ -34,33 +34,38 @@ export class FilteredMetricsVariable extends MetricsVariable {
   }
 
   protected onActivate() {
-    const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
+    // don't break the normal app - this is WingMan's code only
+    try {
+      const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
 
-    this._subs.add(
-      this.subscribeToState((newState, prevState) => {
-        if (newState.loading === false && prevState.loading === true) {
-          this.filterEngine.setInitOptions(newState.options);
+      this._subs.add(
+        this.subscribeToState((newState, prevState) => {
+          if (newState.loading === false && prevState.loading === true) {
+            this.filterEngine.setInitOptions(newState.options);
 
-          // TODO: use events publishing and subscribe in the main Wingman Scene?
-          this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] }, false);
-          // this.sortEngine.sort(sortByVariable.state.value as SortingOption);
-          return;
-        }
+            // TODO: use events publishing and subscribe in the main Wingman Scene?
+            this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] }, false);
+            // this.sortEngine.sort(sortByVariable.state.value as SortingOption);
+            return;
+          }
 
-        // if (!isEqual(newState.options, prevState.options)) {
-        //   this.sortEngine.sort(sortByVariable.state.value as SortingOption);
-        //   return;
-        // }
-      })
-    );
+          // if (!isEqual(newState.options, prevState.options)) {
+          //   this.sortEngine.sort(sortByVariable.state.value as SortingOption);
+          //   return;
+          // }
+        })
+      );
 
-    this._subs.add(
-      quickSearch.subscribeToEvent(EventQuickSearchChanged, (event) => {
-        this.filterEngine.applyFilters({
-          names: event.payload.searchText ? [event.payload.searchText] : [],
-        });
-      })
-    );
+      this._subs.add(
+        quickSearch.subscribeToEvent(EventQuickSearchChanged, (event) => {
+          this.filterEngine.applyFilters({
+            names: event.payload.searchText ? [event.payload.searchText] : [],
+          });
+        })
+      );
+    } catch (error) {
+      console.warn('QuickSearch not found - no worries, gracefully degrading...', error);
+    }
 
     // supports the different variants / prevents runtime errors in the onboard screen
     try {
