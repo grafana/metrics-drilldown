@@ -12,6 +12,7 @@ import { useStyles2 } from '@grafana/ui';
 import { isEqual } from 'lodash';
 import React from 'react';
 
+import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
 import {
@@ -20,6 +21,7 @@ import {
   type MetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
+import { LabelsBrowser } from './LabelsBrowser';
 import { MetricsFilterSection } from './MetricsFilterSection';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
@@ -34,6 +36,7 @@ interface SideBarState extends SceneObjectState {
   selectedMetricPrefixes: string[];
   selectedMetricCategories: string[];
   loading: boolean;
+  labelsBrowswer: LabelsBrowser;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -64,6 +67,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       selectedMetricPrefixes: [],
       selectedMetricCategories: [],
       loading: true,
+      labelsBrowswer: new LabelsBrowser({ labelVariableName: VAR_WINGMAN_GROUP_BY }),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -134,21 +138,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const {
-      hideEmptyGroups,
-      hideEmptyTypes,
-      selectedMetricPrefixes,
-      selectedMetricCategories,
-      prefixGroups,
-      categories,
-      loading,
-    } = model.useState();
+    const { hideEmptyGroups, selectedMetricPrefixes, prefixGroups, loading, labelsBrowswer } = model.useState();
 
     return (
       <div className={styles.container}>
         <div className={styles.topPanel}>
           <MetricsFilterSection
-            title="Metric prefixes"
+            title="Filter by metric prefix"
             items={prefixGroups}
             hideEmpty={hideEmptyGroups}
             selectedValues={selectedMetricPrefixes}
@@ -157,14 +153,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           />
         </div>
         <div className={styles.bottomPanel}>
-          <MetricsFilterSection
-            title="Metric categories"
-            items={categories}
-            hideEmpty={hideEmptyTypes}
-            selectedValues={selectedMetricCategories}
-            onSelectionChange={(values) => model.setState({ selectedMetricCategories: values })}
-            loading={loading}
-          />
+          <labelsBrowswer.Component model={labelsBrowswer} />
         </div>
       </div>
     );

@@ -48,9 +48,10 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
-          <h5>Labels browser ({labels.length})</h5>
-        </div>
+        <h5 className={styles.header}>
+          Group by label
+          <span className={styles.count}>({labels.length})</span>
+        </h5>
 
         <Input
           className={styles.search}
@@ -93,7 +94,14 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     header: css({
       borderBottom: `1px solid ${theme.colors.border.weak}`,
-      marginBottom: theme.spacing(1.5),
+      marginBottom: theme.spacing(1),
+      paddingBottom: theme.spacing(1),
+    }),
+    count: css({
+      display: 'inline-block',
+      color: theme.colors.text.secondary,
+      fontSize: '1rem',
+      marginLeft: theme.spacing(0.5),
     }),
     search: css({
       marginBottom: theme.spacing(1),

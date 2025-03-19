@@ -36,7 +36,7 @@ import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction'
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
-import { LabelsBrowser } from './SideBar/LabelsBrowser';
+import { type LabelsBrowser } from './SideBar/LabelsBrowser';
 import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
@@ -57,7 +57,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       headerControls: new HeaderControls({}),
-      sidebar: new LabelsBrowser({ labelVariableName: VAR_WINGMAN_GROUP_BY }),
+      sidebar: new SideBar({}),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
       drawer: new SceneDrawer({}),
     });
@@ -200,7 +200,8 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       overflowY: 'auto',
     }),
     sidebar: css({
-      width: '320px',
+      flex: '0 0 320px',
+      overflowY: 'hidden',
     }),
   };
 }
