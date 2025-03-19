@@ -35,8 +35,6 @@ export class FilteredMetricsVariable extends MetricsVariable {
 
   protected onActivate() {
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
-    const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
-    const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
 
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
@@ -45,14 +43,14 @@ export class FilteredMetricsVariable extends MetricsVariable {
 
           // TODO: use events publishing and subscribe in the main Wingman Scene?
           this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] }, false);
-          this.sortEngine.sort(sortByVariable.state.value as SortingOption);
+          // this.sortEngine.sort(sortByVariable.state.value as SortingOption);
           return;
         }
 
-        if (!isEqual(newState.options, prevState.options)) {
-          this.sortEngine.sort(sortByVariable.state.value as SortingOption);
-          return;
-        }
+        // if (!isEqual(newState.options, prevState.options)) {
+        //   this.sortEngine.sort(sortByVariable.state.value as SortingOption);
+        //   return;
+        // }
       })
     );
 
@@ -64,11 +62,33 @@ export class FilteredMetricsVariable extends MetricsVariable {
       })
     );
 
-    this._subs.add(
-      metricsSorter.subscribeToEvent(EventSortByChanged, (event) => {
-        this.sortEngine.sort(event.payload.sortBy);
-      })
-    );
+    // supports the different variants / prevents runtime errors in the onboard screen
+    try {
+      const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+      const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
+
+      this._subs.add(
+        metricsSorter.subscribeToEvent(EventSortByChanged, (event) => {
+          this.sortEngine.sort(event.payload.sortBy);
+        })
+      );
+
+      this._subs.add(
+        this.subscribeToState((newState, prevState) => {
+          if (newState.loading === false && prevState.loading === true) {
+            this.sortEngine.sort(sortByVariable.state.value as SortingOption);
+            return;
+          }
+
+          if (!isEqual(newState.options, prevState.options)) {
+            this.sortEngine.sort(sortByVariable.state.value as SortingOption);
+            return;
+          }
+        })
+      );
+    } catch (error) {
+      console.warn('MetricsSorter not found - no worries, gracefully degrading...', error);
+    }
   }
 
   public updateGroupByQuery(groupByValue: string) {
