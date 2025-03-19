@@ -17,10 +17,11 @@ import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labe
 import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
+import { ROUTES } from '../../constants';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
 import { MetricsSorter } from './MetricsSorter';
+import { MetricsTreeFilterToggle } from './MetricsTreeFilter/MetricsTreeFilterToggle';
 import { QuickSearch } from './QuickSearch/QuickSearch';
-import { ROUTES } from '../../constants';
 
 interface HeaderControlsState extends SceneObjectState {
   $variables?: SceneVariableSet;
@@ -39,6 +40,10 @@ export class HeaderControls extends EmbeddedScene {
         width: '100%',
         maxHeight: '32px',
         children: [
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsTreeFilterToggle({}),
+          }),
           new SceneFlexItem({
             body: new QuickSearch(),
           }),
