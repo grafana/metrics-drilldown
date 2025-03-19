@@ -12,6 +12,7 @@ import { useStyles2 } from '@grafana/ui';
 import { isEqual } from 'lodash';
 import React from 'react';
 
+import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
@@ -140,6 +141,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const styles = useStyles2(getStyles);
     const { hideEmptyGroups, selectedMetricPrefixes, prefixGroups, loading, labelsBrowswer } = model.useState();
 
+    const onSelectFilter = (filters: string[]) => {
+      model.setState({ selectedMetricPrefixes: filters });
+      model.publishEvent(new EventFiltersChanged({ type: 'prefixes', filters }));
+    };
+
     return (
       <div className={styles.container}>
         <div className={styles.topPanel}>
@@ -148,7 +154,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             items={prefixGroups}
             hideEmpty={hideEmptyGroups}
             selectedValues={selectedMetricPrefixes}
-            onSelectionChange={(values) => model.setState({ selectedMetricPrefixes: values })}
+            onSelectionChange={onSelectFilter}
             loading={loading}
           />
         </div>
