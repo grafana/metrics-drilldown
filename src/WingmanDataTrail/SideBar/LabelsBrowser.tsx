@@ -1,9 +1,10 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Icon, Input, RadioButtonList, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, Icon, Input, RadioButtonList, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
 
+import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
 interface LabelsBrowserState extends SceneObjectState {
@@ -33,7 +34,11 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     const [searchValue, setSearchValue] = useState('');
 
     const filteredList: Array<SelectableValue<string>> = useMemo(() => {
-      const filters = [(item: string) => item.toLowerCase().includes(searchValue.toLowerCase())];
+      const filters = [
+        (item: string) => item !== NULL_GROUP_BY_VALUE,
+        (item: string) => item.toLowerCase().includes(searchValue.toLowerCase()),
+      ];
+
       return labels.filter((item) => filters.every((filter) => filter(item.value as string))) as Array<
         SelectableValue<string>
       >;
@@ -64,14 +69,29 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
         {loading && <Spinner inline />}
         {!loading && !filteredList.length && <div className={styles.noResults}>No results.</div>}
+
         {!loading && filteredList.length > 0 && (
-          <RadioButtonList
-            name="labels-list"
-            className={styles.list}
-            options={filteredList}
-            onChange={model.onClickLabel}
-            value={value as string}
-          />
+          <>
+            <div className={styles.listHeader}>
+              <div>{value === NULL_GROUP_BY_VALUE ? 'No selection' : `Group by "${value}"`}</div>
+              <Button
+                className={styles.clearButton}
+                variant="secondary"
+                fill="text"
+                onClick={() => labelsVariable.changeValueTo(NULL_GROUP_BY_VALUE)}
+                disabled={value === NULL_GROUP_BY_VALUE}
+              >
+                clear
+              </Button>
+            </div>
+            <RadioButtonList
+              name="labels-list"
+              className={styles.list}
+              options={filteredList}
+              onChange={model.onClickLabel}
+              value={value as string}
+            />
+          </>
         )}
       </div>
     );
@@ -103,6 +123,15 @@ function getStyles(theme: GrafanaTheme2) {
     search: css({
       marginBottom: theme.spacing(1),
     }),
+    listHeader: css({
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      color: theme.colors.text.secondary,
+      margin: theme.spacing(0),
+      padding: theme.spacing(0, 0, 0, 1),
+    }),
+    clearButton: css({}),
     list: css({
       display: 'flex',
       flex: 1,
