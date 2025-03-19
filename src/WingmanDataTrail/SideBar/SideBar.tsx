@@ -9,7 +9,6 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import { isEqual } from 'lodash';
 import React from 'react';
 
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
@@ -82,54 +81,21 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
 
     this.setState({ loading: !filteredMetricsVariable.state.options.length });
-
-    this._subs.add(
-      filteredMetricsVariable.subscribeToState((newState, prevState) => {
-        if (!prevState.loading && newState.loading) {
-          this.setState({ loading: true });
-        } else if (prevState.loading && !newState.loading) {
-          this.setState({ loading: false });
-
-          const { selectedMetricPrefixes, selectedMetricCategories } = this.state;
-
-          filteredMetricsVariable.applyFilters(
-            {
-              prefixes: selectedMetricPrefixes,
-              categories: selectedMetricCategories,
-            },
-            // don't notify
-            false,
-            // force update to ensure the options are filtered (need it specifically when selecting a different group by label)
-            true
-          );
-        }
-      })
-    );
-
-    this._subs.add(
-      this.subscribeToState((newState, prevState) => {
-        if (!isEqual(newState.selectedMetricPrefixes, prevState.selectedMetricPrefixes)) {
-          filteredMetricsVariable.applyFilters({ prefixes: newState.selectedMetricPrefixes });
-          return;
-        }
-
-        if (!isEqual(newState.selectedMetricCategories, prevState.selectedMetricCategories)) {
-          filteredMetricsVariable.applyFilters({ categories: newState.selectedMetricCategories });
-          return;
-        }
-      })
-    );
   }
 
   private updateLists(options: MetricOptions) {
     this.setState({
       prefixGroups: computeMetricPrefixGroups(options),
       categories: computeMetricCategories(options),
+      loading: false,
     });
   }
 
   private updateCounts(filteredOptions: MetricOptions) {
     console.log('[TODO] SideBar.updateCounts', filteredOptions.length);
+    this.setState({
+      loading: false,
+    });
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
@@ -144,6 +110,22 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       loading,
     } = model.useState();
 
+    const onSelectFilter = (type: 'prefixes' | 'categories', filters: string[]) => {
+      const stateKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricCategories';
+      model.setState({ [stateKey]: filters });
+
+      // TODO: use events publishing and subscribe in the main Wingman Scene?
+      // model.publishEvent(new EventFiltersChanged({ type, filters }), true);
+
+      const filteredMetricsVariable = sceneGraph.lookupVariable(
+        VAR_FILTERED_METRICS_VARIABLE,
+        model
+      ) as FilteredMetricsVariable;
+
+      filteredMetricsVariable.applyFilters({ [type]: filters }, false);
+      filteredMetricsVariable.sort();
+    };
+
     return (
       <div className={styles.container}>
         <div className={styles.topPanel}>
@@ -152,7 +134,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             items={prefixGroups}
             hideEmpty={hideEmptyGroups}
             selectedValues={selectedMetricPrefixes}
-            onSelectionChange={(values) => model.setState({ selectedMetricPrefixes: values })}
+            onSelectionChange={(filters) => onSelectFilter('prefixes', filters)}
             loading={loading}
           />
         </div>
@@ -162,7 +144,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             items={categories}
             hideEmpty={hideEmptyTypes}
             selectedValues={selectedMetricCategories}
-            onSelectionChange={(values) => model.setState({ selectedMetricCategories: values })}
+            onSelectionChange={(filters) => onSelectFilter('categories', filters)}
             loading={loading}
           />
         </div>

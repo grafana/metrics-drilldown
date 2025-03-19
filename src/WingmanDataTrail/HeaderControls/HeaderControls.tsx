@@ -18,7 +18,7 @@ import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVari
 
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
-import { MetricsSorter } from './MetricsSorter';
+import { MetricsSorter } from './MetricsSorter/MetricsSorter';
 import { QuickSearch } from './QuickSearch/QuickSearch';
 import { ROUTES } from '../../constants';
 
