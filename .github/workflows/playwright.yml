@@ -157,7 +157,8 @@ jobs:
       - name: Run Playwright tests
         id: run-tests
         run: |
-          if [ -n "${{ inputs.dockerized-playwright-command || '' }}" ]; then
+          if [ -n "${{ inputs.dockerized-playwright-command}}" ]; then
+            echo "Running Playwright tests in container"
             ${{ inputs.dockerized-playwright-command }}
           else
             npx playwright test --config ${{ inputs.playwright-config }}
