@@ -14,7 +14,7 @@ jobs:
   CI:
     # TODO: re-add this when shelldandy's PR gets merged
     # uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
-    uses: shelldandy/plugin-ci-workflows/.github/workflows/ci.yml@feat/dockerized-playwright
+    uses: shelldandy/plugin-ci-workflows/.github/workflows/ci.yml@dockerized-playwright
     with:
       upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
       playwright-docker-compose-file: e2e/docker/docker-compose.e2e.yaml
