@@ -2,6 +2,8 @@ import { SceneVariableValueChangedEvent, type MultiValueVariable } from '@grafan
 
 import { getTrailFor } from 'utils';
 import {
+  fetchAlertingMetrics,
+  fetchDashboardMetrics,
   sortMetricsAlphabetically,
   sortMetricsByCount,
   sortMetricsReverseAlphabetically,
@@ -25,21 +27,11 @@ export class MetricsVariableSortEngine {
 
     switch (sortBy) {
       case 'dashboard-usage':
-        this.variable.setState({
-          options: sortMetricsByCount(metrics, trail.state.dashboardMetrics || {}).map((metricName) => ({
-            label: metricName,
-            value: metricName,
-          })),
-        });
+        this.sortByDashboardUsage(metrics, trail.state.dashboardMetrics);
         break;
 
       case 'alerting-usage':
-        this.variable.setState({
-          options: sortMetricsByCount(metrics, trail.state.alertingMetrics || {}).map((metricName) => ({
-            label: metricName,
-            value: metricName,
-          })),
-        });
+        this.sortByAlertingUsage(metrics, trail.state.alertingMetrics);
         break;
 
       case 'reverse-alphabetical':
@@ -63,6 +55,38 @@ export class MetricsVariableSortEngine {
 
     if (notify) {
       this.notifyUpdate();
+    }
+  }
+
+  private async sortByDashboardUsage(metrics: string[], existingDashboardMetrics?: Record<string, number>) {
+    try {
+      const dashboardMetrics = existingDashboardMetrics ? existingDashboardMetrics : await fetchDashboardMetrics();
+
+      this.variable.setState({
+        options: sortMetricsByCount(metrics, dashboardMetrics).map((metricName) => ({
+          label: metricName,
+          value: metricName,
+        })),
+      });
+    } catch (error) {
+      console.error('Failed to fetch dashboard metrics!');
+      console.error(error);
+    }
+  }
+
+  private async sortByAlertingUsage(metrics: string[], existingAlertingMetrics?: Record<string, number>) {
+    try {
+      const alertingMetrics = existingAlertingMetrics ? existingAlertingMetrics : await fetchAlertingMetrics();
+
+      this.variable.setState({
+        options: sortMetricsByCount(metrics, alertingMetrics).map((metricName) => ({
+          label: metricName,
+          value: metricName,
+        })),
+      });
+    } catch (error) {
+      console.error('Failed to fetch alerting metrics!');
+      console.error(error);
     }
   }
 
