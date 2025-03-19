@@ -154,15 +154,10 @@ jobs:
       - name: Wait for Grafana to start
         uses: grafana/plugin-actions/wait-for-grafana@main
 
-      - name: Debug
-        run: |
-          echo "Config path: ${{ inputs.playwright-config }}"
-          ls -la e2e/config/
-
       - name: Run Playwright tests
         id: run-tests
         run: |
-          if [ -n "${{ inputs.dockerized-playwright-command }}" ]; then
+          if [ -n "${{ inputs.dockerized-playwright-command || '' }}" ]; then
             ${{ inputs.dockerized-playwright-command }}
           else
             npx playwright test --config ${{ inputs.playwright-config }}
