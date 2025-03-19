@@ -1,0 +1,461 @@
+# Description:
+#  CI workflow for building, testing and packaging a plugin.
+#  It does the following steps:
+#  - Runs unit tests and builds the frontend
+#  - Tests and builds the backend (if it exists)
+#  - Signs and packages the plugin into a universal ZIP and OS/arch ZIPs
+#  - Tests the plugin docs (if they exist)
+#  - Runs Playwright E2E tests (if they exist)
+#  - Runs Trufflehog security scanning on all the plugin ZIPs
+#  - Uploads the ZIPs to Google Cloud Storage, for publishing to the Grafana Plugin Catalog
+#  - Uploads the ZIPs as GitHub artifacts, for other workflows to consume
+
+name: Plugins - CI
+
+on:
+  workflow_call:
+    inputs:
+      # Those inputs can be customized depending on the plugin's needs:
+
+      # Custom tooling versions. The default values are in the env section.
+      go-version:
+        description: Go version to use
+        type: string
+        required: false
+      node-version:
+        description: Node.js version to use
+        type: string
+        required: false
+      golangci-lint-version:
+        description: golangci-lint version to use
+        type: string
+        required: false
+      trufflehog-version:
+        description: Trufflehog version to use
+        type: string
+        required: false
+
+      # Playwright
+      run-playwright:
+        description: Whether to run Playwright E2E tests.
+        type: boolean
+        required: false
+        default: true
+      # https://github.com/grafana/plugin-actions/blob/main/e2e-version/action.yml
+      run-playwright-with-grafana-dependency:
+        description: 'Optionally, use this input to pass a semver range of supported Grafana versions to test against. This is only used when version-resolver-type is plugin-grafana-dependency. If not provided, the action will try to read grafanaDependency from the plugin.json file.'
+        type: string
+        required: false
+      run-playwright-with-skip-grafana-dev-image:
+        description: 'Optionally, you can skip the Grafana dev image'
+        type: boolean
+        required: false
+        default: false
+      run-playwright-with-version-resolver-type:
+        description: Define which version resolver type to use for Playwright E2E tests.
+        type: string
+        required: false
+        default: plugin-grafana-dependency
+      upload-playwright-artifacts:
+        description: |
+          If true, the Playwright E2E artifacts will be uploaded to GitHub.
+          Default is false.
+          IMPORTANT: Make sure there are no unmasked secrets in the E2E tests before turning this on.
+        required: false
+        type: boolean
+        default: false
+      playwright-docker-compose-file:
+        required: false
+        type: string
+        description: Path to the docker-compose file to use for testing
+      playwright-config:
+        required: false
+        type: string
+        default: playwright.config.ts
+        description: Path to the Playwright config file to use for testing
+      playwright-docker-prepare-command:
+        required: false
+        type: string
+        description: Custom npm command to prepare Playwright environment in a container. If provided, run-playwright-with-command must also be provided.
+      playwright-docker-run-command:
+        required: false
+        type: string
+        description: Custom command to run Playwright tests in a container. Must be provided if run-playwright-with-prepare is used.
+
+      # Trufflehog
+      run-trufflehog:
+        description: Whether to run Trufflehog secrets scanning.
+        type: boolean
+        required: false
+        default: true
+      trufflehog-include-detectors:
+        description: |
+          Comma-separated list of detector types to include.
+          Protobuf name or IDs may be used, as well as ranges.
+          This value will be passed via the `--include-detectors` option to Trufflehog.
+          If not provided, the flag is not passed.
+        type: string
+        required: false
+      trufflehog-exclude-detectors:
+        description: |
+          Comma-separated list of detector types to exclude.
+          Protobuf name or IDs may be used, as well as ranges.
+          IDs defined here take precedence over the include list.
+          This value will be passed via the `--exclude-detectors` option to Trufflehog.
+          If not provided, the flag is not passed.
+        type: string
+        required: false
+
+      # Options for building PRs. Those values should come from the PR event and should not be set manually.
+      plugin-version-suffix:
+        description: |
+          Suffix to append to plugin version before building it,
+          for example "+abcdef" for PRs.
+          Leave empty for no suffix (use the same version as in package.json).
+        type: string
+        required: false
+        default: ''
+      branch:
+        description: Branch to build from. Can be used to build PRs.
+        type: string
+        required: false
+        default: ${{ github.head_ref || github.ref_name }}
+
+    outputs:
+      plugin:
+        description: |
+          Plugin information in JSON format.
+
+          Contains the following properties:
+          - id: plugin id
+          - version: plugin version
+          - has-backend: true/false, whether the plugin has a backend
+          - executable: plugin backend executable path
+
+          Properties be consumed like this:
+          fromJSON(<...>.outputs.plugin).id
+        value: ${{ jobs.test-and-build.outputs.plugin }}
+
+      has-docs:
+        description: Whether the plugin has docs.
+        value: ${{ jobs.docs.outputs.exist }}
+
+      universal-zip:
+        value: ${{ jobs.test-and-build.outputs.universal-zip }}
+      os-arch-zips:
+        value: ${{ jobs.test-and-build.outputs.os-arch-zips }}
+      zips:
+        value: ${{ jobs.test-and-build.outputs.zips }}
+
+      gcs-zip-urls-latest:
+        value: ${{ jobs.upload-to-gcs.outputs.zip-urls-latest }}
+      gcs-zip-urls-commit:
+        value: ${{ jobs.upload-to-gcs.outputs.zip-urls-commit }}
+
+      gcs-universal-zip-url-latest:
+        value: ${{ jobs.upload-to-gcs.outputs.universal-zip-url-latest }}
+      gcs-universal-zip-url-commit:
+        value: ${{ jobs.upload-to-gcs.outputs.universal-zip-url-commit }}
+
+concurrency:
+  group: ci-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  # Default versions for tooling
+  DEFAULT_GO_VERSION: '1.23'
+  DEFAULT_NODE_VERSION: '20'
+  DEFAULT_GOLANGCI_LINT_VERSION: '1.61.0'
+  DEFAULT_TRUFFLEHOG_VERSION: '3.88.1'
+
+  GCS_ARTIFACTS_BUCKET: integration-artifacts
+  VAULT_INSTANCE: ops
+
+  IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+
+jobs:
+  test-and-build:
+    name: Test and build plugin
+    runs-on: ubuntu-latest-8-cores
+
+    outputs:
+      plugin: ${{ steps.outputs.outputs.plugin }}
+
+      universal-zip: ${{ steps.outputs.outputs.universal-zip }}
+      os-arch-zips: ${{ steps.outputs.outputs.os-arch-zips }}
+      zips: ${{ steps.outputs.outputs.zips }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Setup
+        uses: grafana/plugin-ci-workflows/actions/plugins/setup@main
+        with:
+          go-version: ${{ inputs.go-version || env.DEFAULT_GO_VERSION }}
+          node-version: ${{ inputs.node-version || env.DEFAULT_NODE_VERSION }}
+          golangci-lint-version: ${{ inputs.golangci-lint-version || env.DEFAULT_GOLANGCI_LINT_VERSION }}
+
+      - name: Get secrets from Vault
+        id: get-secrets
+        if: ${{ env.IS_FORK == 'false' }}
+        uses: grafana/shared-workflows/actions/get-vault-secrets@main
+        with:
+          vault_instance: ${{ env.VAULT_INSTANCE }}
+          common_secrets: |
+            SIGN_PLUGIN_ACCESS_POLICY_TOKEN=plugins/sign-plugin-access-policy-token:token
+
+      - name: Spellcheck
+        run: |
+          if [ -f "./cspell.config.json" ]; then
+            npx --yes cspell@6.13.3 -c cspell.config.json "**/*.{ts,tsx,js,go,md,mdx,yml,yaml,json,scss,css}"
+          else
+            echo "❌ Spellcheck is not configured."
+          fi
+        shell: bash
+
+      - name: Replace plugin version
+        if: ${{ inputs.plugin-version-suffix != '' }}
+        run: |
+          version=$(jq -r .version package.json)
+          pr_version="$version+${{ inputs.plugin-version-suffix }}"
+          echo "Replacing plugin version \"$version\" with \"$pr_version\" in package.json"
+          jq --arg pr_version "$pr_version" '.version = $pr_version' package.json > /tmp/package.json
+          mv /tmp/package.json package.json
+        shell: bash
+
+      - name: Check for backend
+        id: check-for-backend
+        run: |
+          r=false
+          [ -f "Magefile.go" ] && r=true
+          echo "has-backend=$r" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Test and build frontend
+        uses: grafana/plugin-ci-workflows/actions/plugins/frontend@main
+
+      - name: Test and build backend
+        if: ${{ steps.check-for-backend.outputs.has-backend == 'true' }}
+        uses: grafana/plugin-ci-workflows/actions/plugins/backend@main
+
+      - name: Package universal ZIP
+        id: universal-zip
+        uses: grafana/plugin-ci-workflows/actions/plugins/package@main
+        with:
+          universal: 'true'
+          dist-folder: dist
+          output-folder: dist-artifacts
+          access-policy-token: ${{ env.SIGN_PLUGIN_ACCESS_POLICY_TOKEN || '' }}
+          allow-unsigned: ${{ env.IS_FORK == 'true' }}
+
+      - name: Package os/arch ZIPs
+        id: os-arch-zips
+        uses: grafana/plugin-ci-workflows/actions/plugins/package@main
+        with:
+          universal: 'false'
+          dist-folder: dist
+          output-folder: dist-artifacts
+          access-policy-token: ${{ env.SIGN_PLUGIN_ACCESS_POLICY_TOKEN || '' }}
+          allow-unsigned: ${{ env.IS_FORK == 'true' }}
+
+      - name: Trufflehog secrets scanning
+        if: ${{ inputs.run-trufflehog == true }}
+        uses: grafana/plugin-ci-workflows/actions/plugins/trufflehog@main
+        with:
+          trufflehog-version: ${{ inputs.trufflehog-version || env.DEFAULT_TRUFFLEHOG_VERSION }}
+          folder: dist-artifacts
+          include-detectors: ${{ inputs.trufflehog-include-detectors }}
+          exclude-detectors: ${{ inputs.trufflehog-exclude-detectors }}
+
+      - name: Define outputs
+        id: outputs
+        run: |
+          {
+            echo plugin="$(jq -n -c \
+                --arg id "$(jq -r .id dist/plugin.json)" \
+                --arg version "$(jq -r .info.version dist/plugin.json)" \
+                --arg has-backend "${{ steps.check-for-backend.outputs.has-backend }}" \
+                --arg executable "$(jq -r .executable dist/plugin.json)" \
+                '$ARGS.named'
+              )"
+
+            echo universal-zip='${{ steps.universal-zip.outputs.zip }}'
+            echo os-arch-zips='${{ steps.os-arch-zips.outputs.zip }}'
+
+            # combine universal zip string with os-arch zips into a single array
+            zips=$(echo -e '["${{ steps.universal-zip.outputs.zip }}"]\n${{ steps.os-arch-zips.outputs.zip }}' | jq -cs 'add')
+            echo zips="$zips"
+          }  >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Upload GitHub artifacts
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: dist-artifacts
+          path: dist-artifacts/
+          retention-days: 7
+
+  docs:
+    name: Test docs
+    runs-on: ubuntu-latest
+    container:
+      image: grafana/docs-base:latest
+      volumes:
+        # This mount is required in order to run the "plugins/docs/test" shared action
+        # into the container. The action gets downloaded into /home/runner/work/_actions,
+        # which is normally outside of the container's filesystem.
+        - /home/runner/work/_actions:/home/runner/work/_actions
+
+    outputs:
+      exist: ${{ steps.exist.outputs.exist }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Check docs exist
+        id: exist
+        run: |
+          r=false
+          [ -d "docs/sources" ] && r=true
+          echo "exist=$r" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: Test docs
+        uses: grafana/plugin-ci-workflows/actions/plugins/docs/test@main
+
+  playwright:
+    name: Playwright E2E tests
+    uses: ./.github/workflows/playwright.yml
+    if: ${{ inputs.run-playwright == true }}
+    needs:
+      - test-and-build
+
+    with:
+      id: ${{ fromJSON(needs.test-and-build.outputs.plugin).id}}
+      version: ${{ fromJSON(needs.test-and-build.outputs.plugin).version}}
+      grafana-dependency: ${{ inputs.run-playwright-with-grafana-dependency }}
+      skip-grafana-dev-image: ${{ inputs.run-playwright-with-skip-grafana-dev-image }}
+      version-resolver-type: ${{ inputs.run-playwright-with-version-resolver-type }}
+      upload-artifacts: ${{ inputs.upload-playwright-artifacts }}
+      docker-compose-file: ${{ inputs.playwright-docker-compose-file }}
+      playwright-config: ${{ inputs.playwright-config }}
+      dockerized-playwright-prepare: ${{ inputs.playwright-docker-prepare-command }}
+      dockerized-playwright-command: ${{ inputs.playwright-docker-run-command }}
+
+  upload-to-gcs:
+    name: Upload to GCS
+    runs-on: ubuntu-latest
+
+    # Skip the GCS upload for PRs from forks (no access to the GCS bucket)
+    # This is equivalent to !env.IS_FORK (we don't have access to the env context at this level)
+    if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    needs:
+      - test-and-build
+
+    outputs:
+      zip-urls-latest: ${{ steps.outputs.outputs.zip_urls_latest }}
+      zip-urls-commit: ${{ steps.outputs.outputs.zip_urls_commit }}
+
+      universal-zip-url-latest: ${{ steps.outputs.outputs.universal_zip_url_latest }}
+      universal-zip-url-commit: ${{ steps.outputs.outputs.universal_zip_url_commit }}
+
+    steps:
+      - name: Download GitHub artifact
+        uses: actions/download-artifact@v4.1.9
+        with:
+          name: dist-artifacts
+          path: /tmp/dist-artifacts
+
+      - name: Login to Google Cloud
+        uses: google-github-actions/auth@v2.1.8
+        with:
+          workload_identity_provider: 'projects/304398677251/locations/global/workloadIdentityPools/github/providers/github-provider'
+          service_account: github-plugin-ci-workflows@grafanalabs-workload-identity.iam.gserviceaccount.com
+
+      - name: Determine GCS artifacts paths
+        run: |
+          plugin_version='${{ fromJSON(needs.test-and-build.outputs.plugin).version }}'
+          # Strip the SHA suffix from the version, if present.
+          plugin_version="${plugin_version%%+*}"
+          gcs_artifacts_base="${{ env.GCS_ARTIFACTS_BUCKET }}/${{ fromJSON(needs.test-and-build.outputs.plugin).id }}/$plugin_version"
+          echo "gcs_artifacts_path_latest=$gcs_artifacts_base/main/latest" >> "$GITHUB_ENV"
+          echo "gcs_artifacts_path_commit=$gcs_artifacts_base/${{ github.event.pull_request.base.ref || 'main' }}/${{ github.event.pull_request.head.sha || github.sha }}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Upload GCS artifacts (latest)
+        id: gcs-upload-latest
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+        uses: google-github-actions/upload-cloud-storage@v2.2.2
+        with:
+          path: /tmp/dist-artifacts
+          destination: ${{ env.gcs_artifacts_path_latest }}
+          parent: false
+          process_gcloudignore: false
+
+      - name: Upload GCS artifacts (commit)
+        id: gcs-upload-commit
+        uses: google-github-actions/upload-cloud-storage@v2.2.2
+        with:
+          path: /tmp/dist-artifacts
+          destination: ${{ env.gcs_artifacts_path_commit }}
+          parent: false
+          process_gcloudignore: false
+
+      - name: Define outputs
+        id: outputs
+        run: |
+          gcs_prefix="https://storage.googleapis.com/${{ env.GCS_ARTIFACTS_BUCKET }}"
+
+          zip_urls_latest=$(jq -n '[]')
+          files='${{ steps.gcs-upload-latest.outputs.uploaded }}'
+          echo files: $files
+
+          IFS=','
+          for file in $files; do
+            if [[ ! $file == *.zip ]]; then
+              continue
+            fi
+            gcs_url="$gcs_prefix/$file"
+            zip_urls_latest=$(echo "$zip_urls_latest" | jq -c --arg x "$gcs_url" '. + [$x]')
+          done
+          unset IFS
+
+          zip_urls_commit=$(jq -n '[]')
+          files='${{ steps.gcs-upload-commit.outputs.uploaded }}'
+          echo files: $files
+
+          IFS=','
+          for file in $files; do
+            if [[ ! $file == *.zip ]]; then
+              continue
+            fi
+            gcs_url="$gcs_prefix/$file"
+            zip_urls_commit=$(echo "$zip_urls_commit" | jq -c --arg x "$gcs_url" '. + [$x]')
+          done
+          unset IFS
+
+          echo zip_urls_latest="$zip_urls_latest" >> "$GITHUB_OUTPUT"
+          echo zip_urls_commit="$zip_urls_commit" >> "$GITHUB_OUTPUT"
+
+          universal_zip_file_name=$(basename "${{ needs.test-and-build.outputs.universal-zip }}")
+          if [ -n "$universal_zip_file_name" ]; then
+            echo universal_zip_url_latest="$gcs_artifacts_path_latest/$universal_zip_file_name" >> "$GITHUB_OUTPUT"
+            echo universal_zip_url_commit="$gcs_artifacts_path_commit/$universal_zip_file_name" >> "$GITHUB_OUTPUT"
+          fi
+        shell: bash

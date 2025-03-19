@@ -1,0 +1,172 @@
+# Description:
+# Run Playwright E2E tests for the plugin.
+# The plugin must be built via the "ci" workflow and available as a GitHub artifact before running this workflow.
+
+name: Plugins - Playwright E2E tests
+
+on:
+  workflow_call:
+    inputs:
+      id:
+        description: Plugin ID
+        type: string
+        required: true
+      version:
+        description: Plugin version
+        type: string
+        required: true
+      # https://github.com/grafana/plugin-actions/blob/main/e2e-version/action.yml
+      skip-grafana-dev-image:
+        default: false
+        required: false
+        type: boolean
+      version-resolver-type:
+        required: false
+        type: string
+        default: plugin-grafana-dependency
+      grafana-dependency:
+        required: false
+        type: string
+      upload-artifacts:
+        required: false
+        type: boolean
+        default: false
+      docker-compose-file:
+        required: false
+        type: string
+        default: docker-compose.yml
+        description: Path to the docker-compose file to use for testing
+      playwright-config:
+        required: false
+        type: string
+        default: playwright.config.ts
+        description: Path to the docker-compose file(s) to use for testing. Can be a single file or comma-separated list of files.
+      dockerized-playwright-prepare:
+        required: false
+        type: string
+        description: Custom npm command to prepare Playwright environment in a container. If provided, dockerized-playwright-command must also be provided.
+      dockerized-playwright-command:
+        required: false
+        type: string
+        description: Custom command to run Playwright tests in a container. Must be provided if dockerized-playwright-prepare is used.
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  resolve-versions:
+    name: Resolve Grafana images
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      matrix: ${{ steps.resolve-versions.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Resolve Grafana E2E versions
+        id: resolve-versions
+        uses: grafana/plugin-actions/e2e-version@main
+        with:
+          skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image }}
+          version-resolver-type: ${{ inputs.version-resolver-type }}
+          grafana-dependency: ${{ inputs.grafana-dependency }}
+
+  playwright-tests:
+    needs: resolve-versions
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        GRAFANA_IMAGE: ${{fromJson(needs.resolve-versions.outputs.matrix)}}
+    name: e2e ${{ matrix.GRAFANA_IMAGE.name }}@${{ matrix.GRAFANA_IMAGE.VERSION }}
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Validate dockerized inputs
+        if: ${{ inputs.dockerized-playwright-prepare || inputs.dockerized-playwright-command }}
+        run: |
+          if [ -n "${{ inputs.dockerized-playwright-prepare }}" ] && [ -z "${{ inputs.dockerized-playwright-command }}" ]; then
+            echo "Error: dockerized-playwright-command must be provided when using dockerized-playwright-prepare"
+            exit 1
+          fi
+          if [ -z "${{ inputs.dockerized-playwright-prepare }}" ] && [ -n "${{ inputs.dockerized-playwright-command }}" ]; then
+            echo "Error: dockerized-playwright-prepare must be provided when using dockerized-playwright-command"
+            exit 1
+          fi
+
+      - name: Setup Node.js environment
+        if: ${{ !inputs.dockerized-playwright-prepare }}
+        uses: actions/setup-node@v4.2.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install npm dependencies
+        if: ${{ !inputs.dockerized-playwright-prepare }}
+        # TODO: find a better way
+        run: |
+          if [ -f yarn.lock ]; then
+            yarn install --frozen-lockfile
+          else
+            npm ci
+          fi
+        shell: bash
+
+      - name: Install Playwright Browsers
+        if: ${{ !inputs.dockerized-playwright-prepare }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Prepare Playwright environment in container
+        if: ${{ inputs.dockerized-playwright-prepare }}
+        run: ${{ inputs.dockerized-playwright-prepare }}
+
+      - name: Download GitHub artifact
+        uses: actions/download-artifact@v4.1.9
+        with:
+          name: dist-artifacts
+          path: /tmp/dist-artifacts
+
+      - name: Move dist artifacts
+        run: |
+          mkdir -p dist
+          src=$(pwd)
+
+          cd /tmp/dist-artifacts
+          # unzip the universal zip
+          unzip ${{ inputs.id }}-${{ inputs.version }}.zip -d out
+          # Folder structure: /tmp/dist-artifacts/out/$PLUGIN_ID/plugin.json
+          cd out
+          cd "$(ls -1)"
+          mv ./* "$src/dist/"
+
+      - name: Start Grafana
+        run: |
+          if [ -n "${{ inputs.docker-compose-file }}" ]; then
+            docker compose -f ${{ inputs.docker-compose-file }} pull
+            GRAFANA_VERSION=${{ matrix.GRAFANA_IMAGE.VERSION }} GRAFANA_IMAGE=${{ matrix.GRAFANA_IMAGE.NAME }} docker compose -f ${{ inputs.docker-compose-file }} up -d
+          else
+            docker compose pull
+            GRAFANA_VERSION=${{ matrix.GRAFANA_IMAGE.VERSION }} GRAFANA_IMAGE=${{ matrix.GRAFANA_IMAGE.NAME }} docker compose up -d
+          fi
+
+      - name: Wait for Grafana to start
+        uses: grafana/plugin-actions/wait-for-grafana@main
+
+      - name: Run Playwright tests
+        id: run-tests
+        run: |
+          if [ -n "${{ inputs.dockerized-playwright-command }}" ]; then
+            ${{ inputs.dockerized-playwright-command }}
+          else
+            npx playwright test --config ${{ inputs.playwright-config }}
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.1
+        if: ${{ (inputs.upload-artifacts == true) && ((always() && steps.run-tests.outcome == 'success') || (failure() && steps.run-tests.outcome == 'failure')) }}
+        with:
+          name: playwright-report-${{ matrix.GRAFANA_IMAGE.NAME }}-v${{ matrix.GRAFANA_IMAGE.VERSION }}-${{github.run_id}}
+          path: playwright-report/
+          retention-days: 30
