@@ -44,7 +44,7 @@ export function MetricsFilterSection({
     <div className={styles.container}>
       <h5 className={styles.header}>
         {title}
-        <span className={styles.count}>({filteredList.length})</span>
+        <span className={styles.count}>({loading ? '0' : filteredList.length})</span>
       </h5>
 
       <Input

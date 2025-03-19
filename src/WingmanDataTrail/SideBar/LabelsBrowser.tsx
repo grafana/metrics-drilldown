@@ -50,7 +50,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       <div className={styles.container}>
         <h5 className={styles.header}>
           Group by label
-          <span className={styles.count}>({labels.length})</span>
+          <span className={styles.count}>({loading ? '0' : labels.length})</span>
         </h5>
 
         <Input
