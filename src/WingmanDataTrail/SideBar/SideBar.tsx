@@ -134,12 +134,25 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   }
 
   private updateCounts(filteredOptions: MetricOptions) {
-    console.log('[TODO] SideBar.updateCounts', filteredOptions.length);
+    const prefixGroups = computeMetricPrefixGroups(filteredOptions);
+    const categories = computeMetricCategories(filteredOptions);
+
+    this.setState({
+      prefixGroups: this.state.prefixGroups.map((group) => ({
+        ...group,
+        count: prefixGroups.find((p) => p.value === group.value)?.count || 0,
+      })),
+      categories: this.state.categories.map((group) => ({
+        ...group,
+        count: categories.find((c) => c.value === group.value)?.count || 0,
+      })),
+      loading: false,
+    });
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const { hideEmptyGroups, selectedMetricPrefixes, prefixGroups, loading, labelsBrowswer } = model.useState();
+    const { selectedMetricPrefixes, prefixGroups, loading, labelsBrowswer } = model.useState();
 
     const onSelectFilter = (filters: string[]) => {
       model.setState({ selectedMetricPrefixes: filters });
@@ -152,7 +165,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           <MetricsFilterSection
             title="Filter by metric prefix"
             items={prefixGroups}
-            hideEmpty={hideEmptyGroups}
             selectedValues={selectedMetricPrefixes}
             onSelectionChange={onSelectFilter}
             loading={loading}
