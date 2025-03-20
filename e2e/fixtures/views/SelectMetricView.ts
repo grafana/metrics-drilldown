@@ -12,6 +12,10 @@ export class SelectMetricView extends DrilldownView {
     return super.goto(new URLSearchParams([...this.urlParams, ...new URLSearchParams(urlSearchParams)]));
   }
 
+  getControls() {
+    return this.getByTestId('controls');
+  }
+
   async assertTopControls() {
     await expect(this.getDataSourceSelector()).toBeVisible();
 
@@ -27,7 +31,7 @@ export class SelectMetricView extends DrilldownView {
   /* Data source */
 
   getDataSourceSelector() {
-    return this.getByLabel('Data source');
+    return this.getControls().getByText('Data source');
   }
 
   async assertSelectedDataSource(expectedDataSource: string) {
@@ -38,13 +42,13 @@ export class SelectMetricView extends DrilldownView {
   /* Ad Hoc filters */
 
   getAdHocFilters() {
-    return this.getByPlaceholder('Filter by label values');
+    return this.getControls().getByPlaceholder('Filter by label values');
   }
 
   /* Time picker/refresh */
 
   getTimePickerButton() {
-    return this.getByTestId('data-testid TimePicker Open Button');
+    return this.getControls().getByTestId('data-testid TimePicker Open Button');
   }
 
   async assertSelectedTimeRange(expectedTimeRange: string) {
@@ -57,7 +61,7 @@ export class SelectMetricView extends DrilldownView {
   }
 
   getRefreshPicker() {
-    return this.getByTestId('data-testid RefreshPicker run button');
+    return this.getControls().getByTestId('data-testid RefreshPicker run button');
   }
 
   clickOnRefresh() {
@@ -67,11 +71,11 @@ export class SelectMetricView extends DrilldownView {
   /* Settings/plugin info */
 
   getSettingsButton() {
-    return this.getByTestId('settings-button');
+    return this.getControls().getByTestId('settings-button');
   }
 
   getPluginInfoButton() {
-    return this.getByTestId('plugin-info-button');
+    return this.getControls().getByTestId('plugin-info-button');
   }
 
   /* Quick filter */
