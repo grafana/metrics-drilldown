@@ -1,6 +1,7 @@
 import { VariableHide, VariableRefresh } from '@grafana/data';
 import { QueryVariable, sceneGraph, type MultiValueVariable } from '@grafana/scenes';
 
+import { VAR_FILTERS } from 'shared';
 import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
 import { MetricsVariableFilterEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
@@ -30,10 +31,17 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
 
     this.filterEngine = new MetricsVariableFilterEngine(this as unknown as MultiValueVariable);
 
-    this.addActivationHandler(this.onActivate.bind(this));
+    this.addActivationHandler(this.onActivate.bind(this, labelName, labelValue));
   }
 
-  protected onActivate() {
+  protected onActivate(labelName: string, labelValue: string) {
+    const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+    if (adHocFiltersVariable?.state.hide !== VariableHide.hideVariable) {
+      this.setState({
+        query: `{${labelName}="${labelValue}",$${VAR_FILTERS}}`,
+      });
+    }
+
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
 
     this._subs.add(
