@@ -54,7 +54,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     return (
       <div className={styles.container}>
         <h5 className={styles.header}>
-          Group by label
+          Breakdown by label
           <span className={styles.count}>({loading ? '0' : labels.length})</span>
         </h5>
 
@@ -73,7 +73,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
         {!loading && filteredList.length > 0 && (
           <>
             <div className={styles.listHeader}>
-              <div>{value === NULL_GROUP_BY_VALUE ? 'No selection' : `Group by "${value}"`}</div>
+              <div>{value === NULL_GROUP_BY_VALUE ? 'No selection' : `Selected: "${value}"`}</div>
               <Button
                 className={styles.clearButton}
                 variant="secondary"

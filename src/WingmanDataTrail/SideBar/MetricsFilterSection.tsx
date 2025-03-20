@@ -50,7 +50,7 @@ export function MetricsFilterSection({
         {title}
         <span className={styles.count}>({loading ? '0' : filteredList.length})</span>
       </h5>
-      <div className={styles.switchContainer} data-testid="switch">
+      <div className={styles.switchContainer}>
         <span className={styles.switchLabel}>Hide empty</span>
         <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
       </div>
@@ -94,7 +94,6 @@ function getStyles(theme: GrafanaTheme2) {
       paddingBottom: theme.spacing(1),
     }),
     switchContainer: css({
-      marginTop: theme.spacing(2),
       marginBottom: theme.spacing(1),
       display: 'flex',
       alignItems: 'center',
