@@ -12,8 +12,8 @@ export const ROUTES = {
   Trail: 'trail',
   OnboardWithSidebar: VARIANT_VARIABLE_OPTIONS[0],
   OnboardWithPills: VARIANT_VARIABLE_OPTIONS[1],
-  TrialWithSidebar: VARIANT_VARIABLE_OPTIONS[0].replace('onboard', 'trail'),
-  TrialWithPills: VARIANT_VARIABLE_OPTIONS[1].replace('onboard', 'trail'),
+  TrailWithSidebar: VARIANT_VARIABLE_OPTIONS[0].replace('onboard', 'trail'),
+  TrailWithPills: VARIANT_VARIABLE_OPTIONS[1].replace('onboard', 'trail'),
 };
 
 export const DATASOURCE_REF = {

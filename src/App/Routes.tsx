@@ -24,8 +24,8 @@ export const AppRoutes = () => {
         path={ROUTES.OnboardWithPills}
         element={<OnboardWingman trail={trail} variant={ROUTES.OnboardWithPills} />}
       />
-      <Route path={ROUTES.TrialWithSidebar} element={<Wingman trail={trail} variant={ROUTES.TrialWithSidebar} />} />
-      <Route path={ROUTES.TrialWithPills} element={<Wingman trail={trail} variant={ROUTES.TrialWithPills} />} />
+      <Route path={ROUTES.TrailWithSidebar} element={<Wingman trail={trail} variant={ROUTES.TrailWithSidebar} />} />
+      <Route path={ROUTES.TrailWithPills} element={<Wingman trail={trail} variant={ROUTES.TrailWithPills} />} />
       <Route path="*" element={<Navigate to={ROUTES.Home} replace />} />
     </ReactRoutes>
   );

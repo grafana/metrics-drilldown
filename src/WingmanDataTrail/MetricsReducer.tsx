@@ -164,7 +164,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         <div className={styles.body}>
           {/* we use ROUTES and not VariantVariable.OPTIONS because when we land on this view, the variable takes the 1st value of OPTIONS :man_shrug: */}
           {/* we use both routes for the flow from onboarding > this view and for landing on this view directly */}
-          {[ROUTES.TrialWithSidebar, ROUTES.OnboardWithSidebar].includes(variant as string) && (
+          {[ROUTES.TrailWithSidebar, ROUTES.OnboardWithSidebar].includes(variant as string) && (
             <div className={styles.sidebar}>
               <sidebar.Component model={sidebar} />
             </div>

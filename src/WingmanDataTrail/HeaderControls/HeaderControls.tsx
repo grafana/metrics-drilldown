@@ -78,7 +78,7 @@ export class HeaderControls extends EmbeddedScene {
     });
 
     // see comment in MetricsReducer
-    if ([ROUTES.TrialWithPills, ROUTES.OnboardWithPills].includes(variant as string)) {
+    if ([ROUTES.TrailWithPills, ROUTES.OnboardWithPills].includes(variant as string)) {
       (this.state.body as SceneFlexLayout).setState({
         children: [
           new SceneFlexItem({
