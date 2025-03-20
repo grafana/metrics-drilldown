@@ -1,6 +1,6 @@
-import { type PromQuery } from '@grafana/prometheus';
 import { SceneCSSGridItem, SceneQueryRunner, SceneVariableSet } from '@grafana/scenes';
 
+import { buildPrometheusQuery } from '../autoQuery/buildPrometheusQuery';
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { PanelMenu } from '../Menu/PanelMenu';
 import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS } from '../shared';
@@ -38,9 +38,22 @@ export function getPreviewPanelFor(
 
   const vizPanel = vizPanelBuilder.build();
 
-  const queries = autoQuery.preview.queries.map((query) =>
-    convertPreviewQueriesToIgnoreUsage(query, currentFilterCount)
-  );
+  const queryExpr = buildPrometheusQuery({
+    metric,
+    filters: '${filters}',
+    isRateQuery: autoQuery.preview.queries[0].expr.includes('rate('),
+    otelJoinQuery: '${otel_join_query}',
+    groupings: autoQuery.preview.queries[0].expr.includes('by(') ? ['le'] : undefined,
+    currentFilterCount,
+  });
+
+  // Override the autoQuery's preview panel query with the one created with `@grafana/promql-builder`
+  const queries = [
+    {
+      ...autoQuery.preview.queries[0],
+      expr: queryExpr,
+    },
+  ];
 
   return new SceneCSSGridItem({
     $variables: new SceneVariableSet({
@@ -54,16 +67,4 @@ export function getPreviewPanelFor(
     }),
     body: vizPanel,
   });
-}
-
-function convertPreviewQueriesToIgnoreUsage(query: PromQuery, currentFilterCount: number) {
-  // If there are filters, we append to the list. Otherwise, we replace the empty list.
-  const replacement = currentFilterCount > 0 ? '__ignore_usage__="",${filters}' : '__ignore_usage__=""';
-
-  const expr = query.expr?.replace('${filters}', replacement);
-
-  return {
-    ...query,
-    expr,
-  };
 }
