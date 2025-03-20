@@ -5,14 +5,15 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
+  SceneReactObject,
   type SceneComponentProps,
   type SceneObjectState,
-  type SceneReactObject,
   type SceneVariableSet,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
@@ -42,6 +43,11 @@ export class HeaderControls extends EmbeddedScene {
             body: new QuickSearch(),
           }),
           new SceneFlexItem({
+            key: 'group-by-label-selector-wingman',
+            width: 'auto',
+            body: undefined,
+          }),
+          new SceneFlexItem({
             maxWidth: '240px',
             body: new MetricsSorter({}),
           }),
@@ -58,6 +64,20 @@ export class HeaderControls extends EmbeddedScene {
 
   onActivate() {
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
+    const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
+
+    if (variant !== ROUTES.OnboardWithLabels) {
+      (
+        (this.state.body as SceneFlexLayout).state.children.find(
+          (c) => c.state.key === 'group-by-label-selector-wingman'
+        ) as SceneFlexItem
+      )?.setState({
+        body: new SceneReactObject({
+          component: labelsVariable.Component,
+          props: { model: labelsVariable },
+        }),
+      });
+    }
 
     if (variant === ROUTES.OnboardWithPills) {
       (this.state.body as SceneFlexLayout).setState({
