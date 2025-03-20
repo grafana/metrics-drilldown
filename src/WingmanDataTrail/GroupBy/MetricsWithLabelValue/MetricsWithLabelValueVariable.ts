@@ -38,7 +38,6 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
 
   protected onActivate() {
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
-    const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
 
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
@@ -49,7 +48,7 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
           this.filterEngine.applyFilters(
             {
               names: quickSearch.state.value ? [quickSearch.state.value] : [],
-              prefixes: sideBar.state.selectedMetricPrefixes,
+              // prefixes: sideBar.state.selectedMetricPrefixes,
             },
             false
           );
@@ -63,11 +62,28 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
       })
     );
 
-    this._subs.add(
+    try {
+      const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
+
+      this._subs.add(
+        this.subscribeToState((newState, prevState) => {
+          if (newState.loading === false && prevState.loading === true) {
+            this.filterEngine.applyFilters(
+              {
+                prefixes: sideBar.state.selectedMetricPrefixes,
+              },
+              false
+            );
+          }
+        })
+      );
+
       sideBar.subscribeToEvent(EventFiltersChanged, (event) => {
         const { filters, type } = event.payload;
         this.filterEngine.applyFilters({ [type]: filters });
-      })
-    );
+      });
+    } catch (error) {
+      console.warn('SideBar not found - no worries, gracefully degrading...', error);
+    }
   }
 }
