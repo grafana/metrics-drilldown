@@ -4,7 +4,9 @@ bear in mind the `TrailStore.ts` file is used for more things than just "data tr
 for now we want to keep recent trails and bookmarks, but we want to decouple them from the concept of trail history steps.
 for example currently we store the history for recent trails like in `current-trails-history.json` but we would like it to look like `expected-trails-history.json` since we don't need the history anymore.
 the `_recent` property of the `TrailStore` should change from an array to an object.
-specify what steps are needed and where in the code will be affected but do NOT make any changes yet. We just want the high level overview plan.
+we don't need a migration strategy nor ensure we handle backward compatibilities.
+
+specify what steps are needed and where in the code will be affected but do NOT make any changes yet.
 
 
 ---
