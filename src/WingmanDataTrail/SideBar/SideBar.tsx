@@ -11,6 +11,8 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
+import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
 import {
@@ -18,7 +20,9 @@ import {
   type MetricOptions,
   type MetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
+import { LabelsBrowser } from './LabelsBrowser';
 import { MetricsFilterSection } from './MetricsFilterSection';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
@@ -33,6 +37,7 @@ interface SideBarState extends SceneObjectState {
   selectedMetricPrefixes: string[];
   selectedMetricCategories: string[];
   loading: boolean;
+  labelsBrowswer?: LabelsBrowser;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -63,12 +68,20 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       selectedMetricPrefixes: [],
       selectedMetricCategories: [],
       loading: true,
+      labelsBrowswer: undefined,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
   private onActivate() {
+    const variantVariable = sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable;
+    if (variantVariable.state.value === 'onboard-filters-labels') {
+      this.setState({
+        labelsBrowswer: new LabelsBrowser({ labelVariableName: VAR_WINGMAN_GROUP_BY }),
+      });
+    }
+
     const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
 
     this.updateLists(metricsVariable.state.options as MetricOptions);
@@ -110,22 +123,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const { selectedMetricPrefixes, selectedMetricCategories, prefixGroups, categories, loading } = model.useState();
+    const { selectedMetricPrefixes, selectedMetricCategories, prefixGroups, categories, loading, labelsBrowswer } =
+      model.useState();
 
     const onSelectFilter = (type: 'prefixes' | 'categories', filters: string[]) => {
-      const stateKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricCategories';
-      model.setState({ [stateKey]: filters });
-
-      // TODO: use events publishing and subscribe in the main Wingman Scene?
-      // model.publishEvent(new EventFiltersChanged({ type, filters }), true);
-
-      const filteredMetricsVariable = sceneGraph.lookupVariable(
-        VAR_FILTERED_METRICS_VARIABLE,
-        model
-      ) as FilteredMetricsVariable;
-
-      filteredMetricsVariable.applyFilters({ [type]: filters }, false);
-      filteredMetricsVariable.sort();
+      model.setState({ [type]: filters });
+      model.publishEvent(new EventFiltersChanged({ type: type, filters }));
     };
 
     return (
@@ -140,13 +143,18 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           />
         </div>
         <div className={styles.bottomPanel}>
-          <MetricsFilterSection
-            title="Categories filters"
-            items={categories}
-            selectedValues={selectedMetricCategories}
-            onSelectionChange={(filters) => onSelectFilter('categories', filters)}
-            loading={loading}
-          />
+          <>
+            {!labelsBrowswer && (
+              <MetricsFilterSection
+                title="Categories filters"
+                items={categories}
+                selectedValues={selectedMetricCategories}
+                onSelectionChange={(filters) => onSelectFilter('categories', filters)}
+                loading={loading}
+              />
+            )}
+            {labelsBrowswer && <labelsBrowswer.Component model={labelsBrowswer} />}
+          </>
         </div>
       </div>
     );

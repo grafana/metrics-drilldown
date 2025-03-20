@@ -11,6 +11,8 @@ import {
 import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
+import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/EventFiltersChanged';
+import { SideBar } from 'WingmanDataTrail/SideBar/SideBar';
 
 import { MetricsVariable } from './MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariableFilterEngine';
@@ -34,7 +36,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
   }
 
   protected onActivate() {
-    // don't break the normal app - this is WingMan's code only
+    // wrapped in a try/catch to prevent breaking the app as this variable is added to the DataTrail Scene object
     try {
       const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
 
@@ -44,15 +46,14 @@ export class FilteredMetricsVariable extends MetricsVariable {
             this.filterEngine.setInitOptions(newState.options);
 
             // TODO: use events publishing and subscribe in the main Wingman Scene?
-            this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] }, false);
-            // this.sortEngine.sort(sortByVariable.state.value as SortingOption);
+            this.filterEngine.applyFilters(
+              {
+                names: quickSearch.state.value ? [quickSearch.state.value] : [],
+              },
+              false
+            );
             return;
           }
-
-          // if (!isEqual(newState.options, prevState.options)) {
-          //   this.sortEngine.sort(sortByVariable.state.value as SortingOption);
-          //   return;
-          // }
         })
       );
 
@@ -67,7 +68,37 @@ export class FilteredMetricsVariable extends MetricsVariable {
       console.warn('QuickSearch not found - no worries, gracefully degrading...', error);
     }
 
-    // supports the different variants / prevents runtime errors in the onboard screen
+    // wrapped in a try/catch to prevent breaking WingMan in the pills variant
+    try {
+      const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
+
+      this._subs.add(
+        this.subscribeToState((newState, prevState) => {
+          if (newState.loading === false && prevState.loading === true) {
+            this.filterEngine.applyFilters(
+              {
+                prefixes: sideBar.state.selectedMetricPrefixes,
+                categories: sideBar.state.selectedMetricCategories,
+              },
+              false
+            );
+            return;
+          }
+        })
+      );
+
+      this._subs.add(
+        sideBar.subscribeToEvent(EventFiltersChanged, (event) => {
+          this.filterEngine.applyFilters({
+            [event.payload.type]: event.payload.filters,
+          });
+        })
+      );
+    } catch (error) {
+      console.warn('SideBar not found - no worries, gracefully degrading...', error);
+    }
+
+    // wrapped in a try/catch to support the different variants / prevents runtime errors in WingMan's onboarding screen
     try {
       const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
       const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;

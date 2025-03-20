@@ -20,6 +20,8 @@ import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPane
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
+import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 import {
@@ -182,14 +184,39 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       body.increaseBatchSize();
     };
 
+    const onClickInclude = () => {
+      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
+
+      adHocFiltersVariable.setState({
+        // TOOD: keep unique filters
+        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
+      });
+
+      (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
+    };
+
+    const onClickExclude = () => {
+      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
+
+      adHocFiltersVariable.setState({
+        // TOOD: keep unique filters
+        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '!=', value: labelValue }],
+      });
+    };
+
     return (
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
             {!isOnboardingView && (
-              <Button variant="secondary" fill="outline" className={styles.excludeButton}>
-                Exclude
-              </Button>
+              <>
+                <Button variant="secondary" fill="outline" className={styles.includeButton} onClick={onClickInclude}>
+                  Include
+                </Button>
+                <Button variant="secondary" fill="outline" className={styles.excludeButton} onClick={onClickExclude}>
+                  Exclude
+                </Button>
+              </>
             )}
             {isOnboardingView && (
               <Button variant="primary" fill="solid" className={styles.filterButton} onClick={onClickFilterBy}>
@@ -246,8 +273,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
   return {
     container: css({
-      background: theme.colors.background.primary,
-      boxShadow: theme.shadows.z1,
+      background: theme.colors.background.canvas,
       border: `1px solid ${theme.colors.border.medium}`,
       borderRadius: theme.shape.radius.default,
       padding: isCollapsed ? theme.spacing(2) : theme.spacing(2, 2, 0, 2),
@@ -270,6 +296,7 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       zIndex: 100,
     }),
     filterButton: css({}),
+    includeButton: css({}),
     excludeButton: css({}),
     collapsableSection: css({
       height: '100%',

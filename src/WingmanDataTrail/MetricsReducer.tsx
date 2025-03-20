@@ -36,11 +36,12 @@ import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction'
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
+import { type LabelsBrowser } from './SideBar/LabelsBrowser';
 import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
-  sidebar: SideBar;
+  sidebar: SideBar | LabelsBrowser;
   body: SceneObjectBase;
   drawer: SceneDrawer;
 }
@@ -154,7 +155,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
     const { body, headerControls, drawer, sidebar } = model.useState();
-    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state;
+    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).useState();
 
     return (
       <>
@@ -162,11 +163,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.body}>
-          {/* we use ROUTES and not VariantVariable.OPTIONS because when we land on this view, the variable takes the 1st value of OPTIONS :man_shrug: */}
-          {/* we use both routes for the flow from onboarding > this view and for landing on this view directly */}
-          {[ROUTES.TrailWithSidebar, ROUTES.OnboardWithSidebar].includes(variant as string) && (
+          {variant !== ROUTES.OnboardWithPills && (
             <div className={styles.sidebar}>
-              <sidebar.Component model={sidebar} />
+              {sidebar instanceof SideBar ? (
+                <sidebar.Component model={sidebar} />
+              ) : (
+                <sidebar.Component model={sidebar} />
+              )}
             </div>
           )}
           <div className={styles.list}>
@@ -195,7 +198,8 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       overflowY: 'auto',
     }),
     sidebar: css({
-      width: '320px',
+      flex: '0 0 320px',
+      overflowY: 'hidden',
     }),
   };
 }

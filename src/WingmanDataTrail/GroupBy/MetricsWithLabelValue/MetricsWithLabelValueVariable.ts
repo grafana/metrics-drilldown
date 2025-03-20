@@ -5,6 +5,8 @@ import { VAR_FILTERS } from 'shared';
 import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
 import { MetricsVariableFilterEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
+import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/EventFiltersChanged';
+import { SideBar } from 'WingmanDataTrail/SideBar/SideBar';
 
 import { MetricsWithLabelValueDataSource } from './MetricsWithLabelValueDataSource';
 
@@ -17,7 +19,7 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
     super({
       name: VAR_METRIC_WITH_LABEL_VALUE,
       datasource: { uid: MetricsWithLabelValueDataSource.uid },
-      query: `{${labelName}="${labelValue}"}`, // TODO: add filters when in MetricsReducer
+      query: `{${labelName}="${labelValue}"}`,
       isMulti: false,
       allowCustomValue: false,
       refresh: VariableRefresh.onTimeRangeChanged,
@@ -50,7 +52,13 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
           this.filterEngine.setInitOptions(newState.options);
 
           // TODO: use events publishing and subscribe in the main Wingman Scene?
-          this.filterEngine.applyFilters({ names: quickSearch.state.value ? [quickSearch.state.value] : [] }, false);
+          this.filterEngine.applyFilters(
+            {
+              names: quickSearch.state.value ? [quickSearch.state.value] : [],
+              // prefixes: sideBar.state.selectedMetricPrefixes,
+            },
+            false
+          );
         }
       })
     );
@@ -60,5 +68,29 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
         this.filterEngine.applyFilters({ names: event.payload.searchText ? [event.payload.searchText] : [] });
       })
     );
+
+    try {
+      const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
+
+      this._subs.add(
+        this.subscribeToState((newState, prevState) => {
+          if (newState.loading === false && prevState.loading === true) {
+            this.filterEngine.applyFilters(
+              {
+                prefixes: sideBar.state.selectedMetricPrefixes,
+              },
+              false
+            );
+          }
+        })
+      );
+
+      sideBar.subscribeToEvent(EventFiltersChanged, (event) => {
+        const { filters, type } = event.payload;
+        this.filterEngine.applyFilters({ [type]: filters });
+      });
+    } catch (error) {
+      console.warn('SideBar not found - no worries, gracefully degrading...', error);
+    }
   }
 }
