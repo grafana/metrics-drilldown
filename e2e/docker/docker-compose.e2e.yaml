@@ -32,7 +32,3 @@ services:
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.path=/prometheus/data
       --storage.tsdb.retention.time=42y
-  prometheus-utf8:
-    build: prometheus_utf8
-    ports:
-      - '${PROMETHEUS_UTF8_PORT:-9112}:9112'
