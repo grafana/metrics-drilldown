@@ -1,9 +1,19 @@
-import { type PromQuery } from '@grafana/prometheus';
-import { SceneCSSGridItem, SceneQueryRunner, SceneVariableSet } from '@grafana/scenes';
+import { type AdHocVariableFilter } from '@grafana/data';
+import { SceneCSSGridItem, sceneGraph, SceneQueryRunner, SceneVariableSet } from '@grafana/scenes';
 
+import { type DataTrail } from 'DataTrail';
+import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
+
+import { buildPrometheusQuery } from '../autoQuery/buildPrometheusQuery';
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { PanelMenu } from '../Menu/PanelMenu';
-import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS } from '../shared';
+import {
+  getVariablesWithMetricConstant,
+  MDP_METRIC_PREVIEW,
+  trailDS,
+  VAR_FILTERS,
+  VAR_OTEL_JOIN_QUERY,
+} from '../shared';
 import { getColorByIndex } from '../utils';
 import { hideEmptyPreviews } from './hideEmptyPreviews';
 import { NativeHistogramBadge } from './NativeHistogramBadge';
@@ -12,7 +22,7 @@ import { SelectMetricAction } from './SelectMetricAction';
 export function getPreviewPanelFor(
   metric: string,
   index: number,
-  currentFilterCount: number,
+  trail: DataTrail,
   description?: string,
   nativeHistogram?: boolean,
   hideMenu?: boolean
@@ -38,9 +48,21 @@ export function getPreviewPanelFor(
 
   const vizPanel = vizPanelBuilder.build();
 
-  const queries = autoQuery.preview.queries.map((query) =>
-    convertPreviewQueriesToIgnoreUsage(query, currentFilterCount)
-  );
+  const queryExpr = buildPrometheusQuery({
+    metric,
+    filters: getVariablesFromTrail(trail),
+    otelJoinQuery: getOtelJoinQueryFromTrail(trail),
+    isRateQuery: autoQuery.preview.queries[0].expr.includes('rate('),
+    groupings: autoQuery.preview.queries[0].expr.includes('by(') ? ['le'] : undefined,
+  });
+
+  // Override the autoQuery's preview panel query with the one created with `@grafana/promql-builder`
+  const queries = [
+    {
+      ...autoQuery.preview.queries[0],
+      expr: queryExpr,
+    },
+  ];
 
   return new SceneCSSGridItem({
     $variables: new SceneVariableSet({
@@ -56,14 +78,20 @@ export function getPreviewPanelFor(
   });
 }
 
-function convertPreviewQueriesToIgnoreUsage(query: PromQuery, currentFilterCount: number) {
-  // If there are filters, we append to the list. Otherwise, we replace the empty list.
-  const replacement = currentFilterCount > 0 ? '__ignore_usage__="",${filters}' : '__ignore_usage__=""';
+function getVariablesFromTrail(trail: DataTrail): AdHocVariableFilter[] {
+  const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, trail);
+  if (!isAdHocFiltersVariable(filtersVar)) {
+    return [];
+  }
 
-  const expr = query.expr?.replace('${filters}', replacement);
+  return filtersVar.state.filters;
+}
 
-  return {
-    ...query,
-    expr,
-  };
+function getOtelJoinQueryFromTrail(trail: DataTrail): string {
+  const otelJoinQueryVar = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, trail);
+  if (!isConstantVariable(otelJoinQueryVar) || typeof otelJoinQueryVar.state.value !== 'string') {
+    return '';
+  }
+
+  return otelJoinQueryVar.state.value;
 }

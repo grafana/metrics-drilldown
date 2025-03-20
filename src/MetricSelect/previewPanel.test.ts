@@ -1,11 +1,14 @@
 import { SceneQueryRunner } from '@grafana/scenes';
 
+import { DataTrail } from 'DataTrail';
+
 import { getPreviewPanelFor } from './previewPanel';
 
 describe('getPreviewPanelFor', () => {
   describe('includes __ignore_usage__ indicator', () => {
     function callAndGetExpr(filterCount: number) {
-      const result = getPreviewPanelFor('METRIC', 0, filterCount);
+      const trail = new DataTrail({});
+      const result = getPreviewPanelFor('METRIC', 0, trail);
       const runner = result.state.$data as SceneQueryRunner;
       expect(runner).toBeInstanceOf(SceneQueryRunner);
       const query = runner.state.queries[0];
