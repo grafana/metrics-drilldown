@@ -1,0 +1,555 @@
+[
+  {
+    "history": [
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"],
+          "metricPrefix": "all"
+        },
+        "type": "start",
+        "description": "Start of history",
+        "parentIndex": -1
+      },
+      {
+        "urlValues": {
+          "metric": "a.utf8.metric 🤘",
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"],
+          "actionView": "overview",
+          "var-groupby": "$__all"
+        },
+        "type": "metric",
+        "description": "Metric selected:",
+        "parentIndex": 0
+      }
+    ],
+    "currentStep": 1,
+    "createdAt": 1741888588216
+  },
+  {
+    "history": [
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "start",
+        "description": "Start of history",
+        "parentIndex": -1
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "metric_page",
+        "description": "Metric select page",
+        "parentIndex": 0
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 1
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "resource",
+        "description": "Resource attribute selected:",
+        "parentIndex": 2
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 3
+      },
+      {
+        "urlValues": {
+          "metric": "a.utf8.metric 🤘",
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"],
+          "var-groupby": ""
+        },
+        "type": "metric",
+        "description": "Metric selected:",
+        "parentIndex": 4
+      }
+    ],
+    "currentStep": 5,
+    "createdAt": 1741815987585
+  },
+  {
+    "history": [
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "start",
+        "description": "Start of history",
+        "parentIndex": -1
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "metric_page",
+        "description": "Metric select page",
+        "parentIndex": 0
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "resource",
+        "description": "Resource attribute selected:",
+        "parentIndex": 1
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 2
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "resource",
+        "description": "Resource attribute selected:",
+        "parentIndex": 3
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 4
+      },
+      {
+        "urlValues": {
+          "metric": "a.utf8.metric 🤘",
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"],
+          "var-groupby": ""
+        },
+        "type": "metric",
+        "description": "Metric selected:",
+        "parentIndex": 5
+      }
+    ],
+    "currentStep": 6,
+    "createdAt": 1741806628100
+  },
+  {
+    "history": [
+      {
+        "urlValues": {
+          "metricSearch": "http",
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"],
+          "metricPrefix": "all"
+        },
+        "type": "start",
+        "description": "Start of history",
+        "parentIndex": -1
+      },
+      {
+        "urlValues": {
+          "metric": "a_utf8_http_requests_total",
+          "metricSearch": "http",
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"],
+          "actionView": "breakdown",
+          "var-groupby": "$__all"
+        },
+        "type": "metric",
+        "description": "Metric selected:",
+        "parentIndex": 0
+      },
+      {
+        "urlValues": {
+          "metric": "a_utf8_http_requests_total",
+          "metricSearch": "http",
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"],
+          "actionView": "breakdown",
+          "var-groupby": "$__all"
+        },
+        "type": "resource",
+        "description": "Resource attribute selected:",
+        "parentIndex": 1
+      }
+    ],
+    "currentStep": 2,
+    "createdAt": 1741649533776
+  },
+  {
+    "history": [
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "start",
+        "description": "Start of history",
+        "parentIndex": -1
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "metric_page",
+        "description": "Metric select page",
+        "parentIndex": 0
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 1
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "resource",
+        "description": "Resource attribute selected:",
+        "parentIndex": 2
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 3
+      },
+      {
+        "urlValues": {
+          "metric": "a_utf8_http_requests_total",
+          "metricSearch": "http",
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"],
+          "var-groupby": ""
+        },
+        "type": "metric",
+        "description": "Metric selected:",
+        "parentIndex": 4
+      }
+    ],
+    "currentStep": 5,
+    "createdAt": 1741637877464
+  },
+  {
+    "history": [
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "start",
+        "description": "Start of history",
+        "parentIndex": -1
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "metric_page",
+        "description": "Metric select page",
+        "parentIndex": 0
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 1
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "resource",
+        "description": "Resource attribute selected:",
+        "parentIndex": 2
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": ["deployment_environment|=|prod"],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 3
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": [""],
+          "var-otel_and_metric_filters": [""],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "resource",
+        "description": "Resource attribute selected:",
+        "parentIndex": 4
+      },
+      {
+        "urlValues": {
+          "nativeHistogramMetric": "",
+          "from": "now-1h",
+          "to": "now",
+          "timezone": "browser",
+          "var-ds": "gdev-prometheus",
+          "var-otel_resources": [""],
+          "var-filters": ["deployment_environment|=|prod"],
+          "var-otel_and_metric_filters": ["deployment_environment|=|prod"],
+          "var-deployment_environment": ["undefined"]
+        },
+        "type": "filters",
+        "description": "Filter applied:",
+        "parentIndex": 5
+      }
+    ],
+    "currentStep": 6,
+    "createdAt": 1741635441869
+  }
+]

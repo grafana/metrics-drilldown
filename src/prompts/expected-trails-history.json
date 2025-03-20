@@ -1,0 +1,16 @@
+{
+  "urlValues": {
+    "metric": "a.utf8.metric 🤘",
+    "nativeHistogramMetric": "",
+    "from": "now-1h",
+    "to": "now",
+    "timezone": "browser",
+    "var-ds": "gdev-prometheus",
+    "var-otel_resources": [""],
+    "var-filters": [""],
+    "var-otel_and_metric_filters": [""],
+    "var-deployment_environment": ["undefined"],
+    "actionView": "overview",
+    "var-groupby": "$__all"
+  }
+}

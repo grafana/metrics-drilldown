@@ -1,0 +1,10 @@
+we are removing the “data trails history” feature which is referred to as history or DataTrailsHistory in the code. what steps are needed and where in the code will be affected.
+bear in mind the `TrailStore.ts` file is used for more things than just "data trails history"
+for now we want to keep recent trails and bookmarks, but we want to decouple them from the concept of trail history steps.
+for example currently we store the history for recent trails like in `current-trails-history.json` but we would like it to look like `expected-trails-history.json` since we don't need the history anymore.
+the `_recent` property of the `TrailStore` should change from an array to an object.
+take extra care to update any associated react hooks or tests.
+After making a series of changes, run `npm run typecheck` to ensure that there are no TS errors. and also run ` lint:fix
+
+---
+When running `npm run test:ci` results in test failures, please trust in the test setup in general, especially with respect to how we are mocking modules. When the tests are failing, let's suspect application code issues first and foremost.
