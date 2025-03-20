@@ -5,7 +5,7 @@ import { buildPrometheusQuery } from './buildPrometheusQuery';
 describe('buildPrometheusQuery', () => {
   const defaultParams = {
     metric: 'test_metric',
-    filters: '{}',
+    filters: [],
     isRateQuery: false,
     isUtf8Metric: false,
     otelJoinQuery: '',
@@ -18,7 +18,7 @@ describe('buildPrometheusQuery', () => {
         metric: 'test_general',
       });
 
-      const expected = promql.avg(promql.vector('test_general')).build().toString();
+      const expected = promql.avg(promql.vector('test_general')).toString();
       expect(result).toBe(expected);
     });
 
@@ -28,7 +28,7 @@ describe('buildPrometheusQuery', () => {
         metric: 'test_bytes',
       });
 
-      const expected = promql.avg(promql.vector('test_bytes')).build().toString();
+      const expected = promql.avg(promql.vector('test_bytes')).toString();
       expect(result).toBe(expected);
     });
 
@@ -38,7 +38,7 @@ describe('buildPrometheusQuery', () => {
         metric: 'test_seconds',
       });
 
-      const expected = promql.avg(promql.vector('test_seconds')).build().toString();
+      const expected = promql.avg(promql.vector('test_seconds')).toString();
       expect(result).toBe(expected);
     });
   });
@@ -53,7 +53,7 @@ describe('buildPrometheusQuery', () => {
 
       const expected = promql
         .sum(promql.rate(promql.vector('test_count').range('$__rate_interval')))
-        .build()
+
         .toString();
       expect(result).toBe(expected);
     });
@@ -67,7 +67,7 @@ describe('buildPrometheusQuery', () => {
 
       const expected = promql
         .sum(promql.rate(promql.vector('test_total').range('$__rate_interval')))
-        .build()
+
         .toString();
       expect(result).toBe(expected);
     });
@@ -85,7 +85,7 @@ describe('buildPrometheusQuery', () => {
       const expected = promql
         .sum(promql.rate(promql.vector('test_bucket').range('$__rate_interval')))
         .by(['le'])
-        .build()
+
         .toString();
       expect(result).toBe(expected);
     });
@@ -101,7 +101,7 @@ describe('buildPrometheusQuery', () => {
       const expected = promql
         .sum(promql.rate(promql.vector('test_histogram').range('$__rate_interval')))
         .by(['le'])
-        .build()
+
         .toString();
       expect(result).toBe(expected);
     });
@@ -114,7 +114,7 @@ describe('buildPrometheusQuery', () => {
         otelJoinQuery: '${otel_join_query}',
       });
 
-      const expected = promql.avg(promql.vector('test_metric')).build().toString() + ' ${otel_join_query}';
+      const expected = promql.avg(promql.vector('test_metric')).toString() + ' ${otel_join_query}';
       expect(result).toBe(expected);
     });
   });
@@ -126,7 +126,7 @@ describe('buildPrometheusQuery', () => {
         metric: 'test_metric',
       });
 
-      const expected = promql.avg(promql.vector('test_metric')).build().toString();
+      const expected = promql.avg(promql.vector('test_metric')).toString();
       expect(result).toBe(expected);
     });
   });
@@ -135,10 +135,16 @@ describe('buildPrometheusQuery', () => {
     it('should include filters in the query', () => {
       const result = buildPrometheusQuery({
         ...defaultParams,
-        filters: '{"job":"test"}',
+        filters: [
+          {
+            key: 'job',
+            value: 'test',
+            operator: '=',
+          },
+        ],
       });
 
-      const expected = promql.avg(promql.vector('test_metric').label('job', 'test')).build().toString();
+      const expected = promql.avg(promql.vector('test_metric').label('job', 'test')).toString();
       expect(result).toBe(expected);
     });
   });
