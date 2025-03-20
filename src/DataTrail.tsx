@@ -33,6 +33,7 @@ import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
 import { PluginInfo } from 'PluginInfo/PluginInfo';
+import { getOtelExperienceToggleState } from 'services/store';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -65,7 +66,6 @@ import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
-import { getOtelExperienceToggleState } from 'services/store';
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
