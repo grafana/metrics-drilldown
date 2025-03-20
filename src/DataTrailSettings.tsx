@@ -67,7 +67,7 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
 
     return (
       <Dropdown overlay={renderPopover} placement="bottom" onVisibleChange={model.onToggleOpen}>
-        <ToolbarButton icon="cog" variant="canvas" isOpen={isOpen} />
+        <ToolbarButton icon="cog" variant="canvas" isOpen={isOpen} data-testid="settings-button" />
       </Dropdown>
     );
   };

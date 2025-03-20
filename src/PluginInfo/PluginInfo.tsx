@@ -77,7 +77,14 @@ function InfoMenu() {
 export function PluginInfo() {
   return (
     <Dropdown overlay={() => <InfoMenu />} placement="bottom-end">
-      <Button icon="info-circle" variant="secondary" tooltip="Plugin info" tooltipPlacement="top" title="Plugin info" />
+      <Button
+        icon="info-circle"
+        variant="secondary"
+        tooltip="Plugin info"
+        tooltipPlacement="top"
+        title="Plugin info"
+        data-testid="plugin-info-button"
+      />
     </Dropdown>
   );
 }
