@@ -155,7 +155,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
     const { body, headerControls, drawer, sidebar } = model.useState();
-    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state;
+    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).useState();
 
     return (
       <>
@@ -163,9 +163,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.body}>
-          {/* we use ROUTES and not VariantVariable.OPTIONS because when we land on this view, the variable takes the 1st value of OPTIONS :man_shrug: */}
-          {/* we use both routes for the flow from onboarding > this view and for landing on this view directly */}
-          {[ROUTES.TrialWithSidebar, ROUTES.OnboardWithSidebar].includes(variant as string) && (
+          {variant !== ROUTES.OnboardWithPills && (
             <div className={styles.sidebar}>
               {sidebar instanceof SideBar ? (
                 <sidebar.Component model={sidebar} />

@@ -94,7 +94,18 @@ export class MetricsFilter extends SceneObjectBase<MetricsFilterState> {
   }
 
   private updateCounts(filteredOptions: MetricOptions) {
-    console.log('[TODO] MetricsFilter.updateCounts', filteredOptions.length);
+    const groups =
+      this.state.type === 'prefixes'
+        ? computeMetricPrefixGroups(filteredOptions)
+        : computeMetricCategories(filteredOptions);
+
+    this.setState({
+      groups: this.state.groups.map((group) => ({
+        ...group,
+        count: groups.find((p) => p.label === group.label)?.count || 0,
+      })),
+      loading: false,
+    });
   }
 
   onChangeUpdateGroups = (groupValues: string[]) => {

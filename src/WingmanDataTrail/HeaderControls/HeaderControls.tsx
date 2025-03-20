@@ -18,7 +18,7 @@ import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVari
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { ROUTES } from '../../constants';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
-import { MetricsSorter } from './MetricsSorter';
+import { MetricsSorter } from './MetricsSorter/MetricsSorter';
 import { QuickSearch } from './QuickSearch/QuickSearch';
 
 interface HeaderControlsState extends SceneObjectState {
@@ -59,8 +59,7 @@ export class HeaderControls extends EmbeddedScene {
   onActivate() {
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
 
-    // see comment in MetricsReducer
-    if ([ROUTES.TrialWithPills, ROUTES.OnboardWithPills].includes(variant as string)) {
+    if (variant === ROUTES.OnboardWithPills) {
       (this.state.body as SceneFlexLayout).setState({
         children: [
           new SceneFlexItem({

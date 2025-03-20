@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { Icon, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
+import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEvent } from 'react';
 
 import { CheckBoxList } from './CheckBoxList';
@@ -62,6 +62,9 @@ export function MetricsFilterSection({
         value={searchValue}
         onChange={(e) => setSearchValue(e.currentTarget.value)}
         onKeyDown={onKeyDown}
+        suffix={
+          <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={(e) => setSearchValue('')} />
+        }
       />
 
       {loading && <Spinner inline />}

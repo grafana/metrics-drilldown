@@ -70,7 +70,10 @@ import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
-import { fetchAlertingMetrics, fetchDashboardMetrics } from './WingmanDataTrail/HeaderControls/MetricsSorter';
+import {
+  fetchAlertingMetrics,
+  fetchDashboardMetrics,
+} from './WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
