@@ -1,17 +1,16 @@
 import { type ArrayNode, type MetricNode } from '../parseMetricsList';
 
-export function childrenMapToArray(childrenMap: Map<string, MetricNode>): ArrayNode[] {
+const sortByCount = (a: ArrayNode, b: ArrayNode) => b.count - a.count;
+
+export function childrenMapToArray(childrenMap: MetricNode['children']): ArrayNode[] {
   const array = [];
 
-  for (const [prefix, metricNode] of childrenMap.entries()) {
+  for (const child of childrenMap.values()) {
     array.push({
-      id: metricNode.id,
-      prefix,
-      count: metricNode.count,
-      separator: metricNode.separator,
-      children: !metricNode.children.size ? [] : childrenMapToArray(metricNode.children),
+      ...child,
+      children: !child.children.size ? [] : childrenMapToArray(child.children),
     });
   }
 
-  return array.sort((a, b) => b.count - a.count);
+  return array.sort(sortByCount);
 }

@@ -7,6 +7,7 @@ import {
   type MultiValueVariable,
   type SceneComponentProps,
   type SceneObjectState,
+  type VariableValueOption,
 } from '@grafana/scenes';
 import { Button, IconButton, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
@@ -17,7 +18,7 @@ import {
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
-import { parseMetricsList, type ArrayNode } from './metric-names-parser/src/parseMetricsList';
+import { isRecordingRule, parseMetricsList, type ArrayNode } from './metric-names-parser/src/parseMetricsList';
 import { MetricTreeNode } from './MetricTreeNode';
 
 // Define the MetricsTreeFilterState interface
@@ -25,12 +26,13 @@ interface MetricsTreeFilterState extends SceneObjectState {
   body?: SceneObjectBase;
   metrics: string[]; // List of all metric names
   loading?: boolean;
+  recordingRulesOnly?: boolean;
 }
 
-export type ExtraMetricsTreeFilterProps = {
+export interface MetricsTreeFilterProps extends SceneComponentProps<MetricsTreeFilter> {
   onClickCancel: () => void;
   onClickApply: (selectedNodeIds: string[]) => void;
-};
+}
 
 export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
@@ -38,7 +40,7 @@ export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
       const { name, options } = (variable as MultiValueVariable).state;
 
       if (name === VAR_METRICS_VARIABLE) {
-        this.setState({ metrics: options.map((o) => o.value as string) });
+        this.updateMetricsFromOptions(options);
         return;
       }
     },
@@ -72,22 +74,26 @@ export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
       })
     );
 
+    this.updateMetricsFromOptions(filteredMetricsVariable.state.options);
+  }
+
+  private updateMetricsFromOptions(options: VariableValueOption[]) {
+    const metrics = options.map((o) => o.value as string);
     this.setState({
-      metrics: filteredMetricsVariable.state.options.map((o) => o.value as string),
+      metrics: this.state.recordingRulesOnly ? metrics.filter(isRecordingRule) : metrics,
     });
   }
 
-  public static Component = ({
-    model,
-    onClickCancel,
-    onClickApply,
-  }: SceneComponentProps<MetricsTreeFilter> & ExtraMetricsTreeFilterProps) => {
+  public static Component = ({ model, onClickCancel, onClickApply }: MetricsTreeFilterProps) => {
     const styles = useStyles2(getStyles);
-    const { metrics, loading } = model.useState();
+    const { metrics, loading, recordingRulesOnly } = model.useState();
     const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
     const [selectedMetricsCount, setSelectedMetricsCount] = useState<number>(0);
 
-    const metricTreeRoot = useMemo(() => parseMetricsList(metrics).tree, [metrics]);
+    const metricTreeArray = useMemo(
+      () => parseMetricsList(metrics, { convertToArray: true }) as ArrayNode[],
+      [metrics]
+    );
 
     if (loading) {
       return <Spinner inline />;
@@ -95,14 +101,14 @@ export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
 
     function toggleSubTree(node: ArrayNode, newIds: string[], select: boolean): string[] {
       if (select) {
-        newIds.push(node.id);
+        newIds.push(node.path);
         for (const child of node.children) {
           toggleSubTree(child, newIds, select);
         }
         return newIds;
       }
 
-      newIds = newIds.filter((id) => id !== node.id);
+      newIds = newIds.filter((id) => id !== node.path);
       for (const child of node.children) {
         newIds = toggleSubTree(child, newIds, select);
       }
@@ -111,7 +117,11 @@ export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
 
     return (
       <div className={styles.container}>
-        <p>Select the parts of the metric name you want to filter by</p>
+        <p>
+          {recordingRulesOnly
+            ? 'Select the parts of the recording rule you want to filter by'
+            : 'Select the parts of the metric you want to filter by'}
+        </p>
         <div className={styles.section}>
           <div className={styles.tableHeader}>
             <div>
@@ -136,14 +146,14 @@ export class MetricsTreeFilter extends SceneObjectBase<MetricsTreeFilterState> {
             </div>
           </div>
           <div className={styles.body}>
-            {metricTreeRoot?.map((node, index) => (
+            {metricTreeArray.map((node, index) => (
               <MetricTreeNode
-                key={node.id}
+                key={node.path}
                 node={node}
                 selectedNodeIds={selectedNodeIds}
-                isLastChild={!metricTreeRoot ? true : index === metricTreeRoot.length - 1}
+                isLastChild={index === metricTreeArray.length - 1}
                 onToggleCheckbox={(node) => {
-                  if (selectedNodeIds.includes(node.id)) {
+                  if (selectedNodeIds.includes(node.path)) {
                     setSelectedNodeIds(toggleSubTree(node, [...selectedNodeIds], false));
                     setSelectedMetricsCount(selectedMetricsCount - node.count);
                   } else {

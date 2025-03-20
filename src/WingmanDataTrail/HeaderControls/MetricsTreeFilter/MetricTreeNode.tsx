@@ -49,20 +49,14 @@ export const MetricTreeNode = ({
         <div className={styles.labelContainer}>
           <div className={styles.checkbox}>
             <Checkbox
-              id={node.id}
-              label=""
-              checked={selectedNodeIds.includes(node.id)}
+              id={node.path}
+              checked={selectedNodeIds.includes(node.path)}
               onChange={() => onToggleCheckbox(node)}
             />
           </div>
-          <label className={styles.nodeName} htmlFor={node.id}>
-            {isChild && (
-              <span className={styles.ancestorPrefix}>
-                {ancestorPrefix}
-                {node.separator}
-              </span>
-            )}
-            <span>{node.prefix}</span>
+          <label className={styles.nodeName} htmlFor={node.path}>
+            {isChild && <span className={styles.ancestorPrefix}>{node.path}</span>}
+            <span>{node.part}</span>
           </label>
           <Tag className={styles.badge} name={node.count.toString()} colorIndex={9} />
         </div>
@@ -72,11 +66,11 @@ export const MetricTreeNode = ({
         <div className={`${styles.childrenContainer} ${isLastChild ? styles.lastChild : ''}`}>
           {node.children.map((child, index) => (
             <MetricTreeNode
-              key={child.prefix}
+              key={child.path}
               node={child}
               selectedNodeIds={selectedNodeIds}
               onToggleCheckbox={onToggleCheckbox}
-              ancestorPrefix={ancestorPrefix ? `${ancestorPrefix}${node.separator}${node.prefix}` : node.prefix}
+              ancestorPrefix={ancestorPrefix ? `${node.path}${node.part}` : node.part}
               isLastChild={!node.children ? true : index === node.children.length - 1}
               isChild={true}
               level={level + 1}

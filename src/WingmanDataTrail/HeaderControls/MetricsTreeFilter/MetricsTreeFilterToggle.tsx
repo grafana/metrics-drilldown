@@ -4,12 +4,13 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
-import { MetricsTreeFilter, type ExtraMetricsTreeFilterProps } from './MetricsTreeFilter';
+import { MetricsTreeFilter, type MetricsTreeFilterProps } from './MetricsTreeFilter';
 import { Dropdown } from '../MetricsFilter/Dropdown';
 import { EventGroupFiltersChanged } from '../MetricsFilter/EventGroupFiltersChanged';
 
 interface MetricsTreeFilterToggleState extends SceneObjectState {
   body: MetricsTreeFilter;
+  recordingRulesBody: MetricsTreeFilter;
 }
 
 export class MetricsTreeFilterToggle extends SceneObjectBase<MetricsTreeFilterToggleState> {
@@ -18,6 +19,7 @@ export class MetricsTreeFilterToggle extends SceneObjectBase<MetricsTreeFilterTo
       ...state,
       key: 'MetricsTreeFilterToggle',
       body: new MetricsTreeFilter({}),
+      recordingRulesBody: new MetricsTreeFilter({ recordingRulesOnly: true }),
     });
   }
 
@@ -33,29 +35,49 @@ export class MetricsTreeFilterToggle extends SceneObjectBase<MetricsTreeFilterTo
 
   public static Component = ({ model }: SceneComponentProps<MetricsTreeFilterToggle>) => {
     const styles = useStyles2(getStyles);
-    const { body } = model.useState();
+    const { body, recordingRulesBody } = model.useState();
 
-    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-    const icon = isOverlayOpen ? 'angle-up' : 'angle-down';
+    const [openOverlay, setOpenOverlay] = useState<'metrics' | 'recordingRules' | null>(null);
 
-    const bodyProps: SceneComponentProps<MetricsTreeFilter> & ExtraMetricsTreeFilterProps = {
-      model: body,
-      onClickApply: (selectedNodeIds: string[]) => {
-        model.onApplyFilters(selectedNodeIds);
-        setIsOverlayOpen(false);
-      },
-      onClickCancel() {
-        setIsOverlayOpen(false);
-      },
+    const icon = openOverlay ? 'angle-up' : 'angle-down';
+
+    const toggleOverlay = (overlay: 'metrics' | 'recordingRules') => () => {
+      setOpenOverlay(overlay === openOverlay ? null : overlay);
+    };
+
+    const renderFilterComponent = (
+      filterModel: MetricsTreeFilter,
+      onApply: (selectedNodeIds: string[]) => void,
+      onCancel: () => void
+    ) => {
+      const Component = filterModel.Component as React.ComponentType<MetricsTreeFilterProps>;
+      return <Component model={filterModel} onClickApply={onApply} onClickCancel={onCancel} />;
     };
 
     return (
       <div className={styles.container}>
-        <Dropdown isOpen={isOverlayOpen} overlay={<body.Component {...bodyProps} />} onVisibleChange={setIsOverlayOpen}>
+        <Dropdown
+          isOpen={openOverlay === 'metrics'}
+          overlay={renderFilterComponent(body, model.onApplyFilters, () => setOpenOverlay(null))}
+          onVisibleChange={toggleOverlay('metrics')}
+        >
           <Button variant="secondary" fill="outline">
             <>
-              <Icon name="filter" />
+              <Icon name="list-ui-alt" />
               &nbsp;Metrics tree filters&nbsp;
+              <Icon name={icon} />
+            </>
+          </Button>
+        </Dropdown>
+        <Dropdown
+          isOpen={openOverlay === 'recordingRules'}
+          overlay={renderFilterComponent(recordingRulesBody, model.onApplyFilters, () => setOpenOverlay(null))}
+          onVisibleChange={toggleOverlay('recordingRules')}
+        >
+          <Button variant="secondary" fill="outline">
+            <>
+              <Icon name="list-ui-alt" />
+              &nbsp;Recording rules tree filters&nbsp;
               <Icon name={icon} />
             </>
           </Button>

@@ -1,72 +1,86 @@
 import { childrenMapToArray } from './helpers/childrenMapToArray';
 
+export type MetricPart = {
+  type: 'sep' | 'part';
+  part: string;
+};
+
 export type MetricNode = {
-  id: string;
-  prefix: string;
+  path: string;
+  part: string;
   count: number;
-  separator: string;
   children: Map<string, MetricNode>;
 };
 
 export type ArrayNode = {
-  id: string;
-  prefix: string;
+  path: string;
+  part: string;
   count: number;
-  separator: string;
   children: ArrayNode[];
 };
 
-export function parseMetricsList(metricsList: string[]): { root: MetricNode; tree: ArrayNode[] } {
-  const root: MetricNode = {
-    id: '<root>',
-    prefix: '',
+export type ParseOptions = {
+  convertToArray?: boolean;
+};
+
+const REGEX_SEP_PART = /([_:]+|[^_:]+)/g;
+
+function extractMetricParts(metric: string): MetricPart[] {
+  const matches = metric.matchAll(REGEX_SEP_PART);
+
+  return Array.from(matches).map(([part]) => ({
+    type: part[0] === '_' || part[0] === ':' ? 'sep' : 'part',
+    part,
+  }));
+}
+
+const REGEX_RECORDING_RULE = /:/;
+
+export function isRecordingRule(metric: string): boolean {
+  return REGEX_RECORDING_RULE.test(metric);
+}
+
+export function parseMetricsList(metricsList: string[], options: ParseOptions = {}): MetricNode | ArrayNode[] {
+  const treeRoot: MetricNode = {
+    part: '',
+    path: '',
     count: metricsList.length,
-    separator: '',
     children: new Map(),
   };
 
   let node: MetricNode;
 
   for (const metric of metricsList) {
-    const [, separator = ''] = metric.match(/^[^_:]+([_:])/) || [];
-    const parts = metric.split(/[_:]/);
+    node = treeRoot;
+    let currentPath = '';
 
-    node = root;
-    let id = '';
+    for (const { type, part } of extractMetricParts(metric)) {
+      if (type === 'sep') {
+        currentPath += part;
+        continue;
+      }
 
-    for (const part of parts) {
       const child = node.children.get(part);
 
-      id += id ? `${separator}${part}` : part;
-
       if (!child) {
-        const newChild = {
-          id,
-          prefix: part,
+        const newChild: MetricNode = {
+          part,
+          path: currentPath,
           count: 1,
-          separator,
           children: new Map(),
         };
 
         node.children.set(part, newChild);
         node = newChild;
+        currentPath += part;
         continue;
       }
 
       child.count += 1;
       node = child;
+      currentPath += part;
     }
   }
 
-  const tree = Array.from(root.children.entries())
-    .map(([prefix, { id, count, children, separator }]) => ({
-      id,
-      prefix,
-      count,
-      separator,
-      children: childrenMapToArray(children),
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  return { root, tree };
+  return options.convertToArray ? childrenMapToArray(treeRoot.children) : treeRoot;
 }
