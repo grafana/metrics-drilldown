@@ -92,23 +92,25 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   }
 
   private updateCounts(filteredOptions: MetricOptions) {
-    console.log('[TODO] SideBar.updateCounts', filteredOptions.length);
+    const prefixGroups = computeMetricPrefixGroups(filteredOptions);
+    const categories = computeMetricCategories(filteredOptions);
+
     this.setState({
+      prefixGroups: this.state.prefixGroups.map((group) => ({
+        ...group,
+        count: prefixGroups.find((p) => p.value === group.value)?.count || 0,
+      })),
+      categories: this.state.categories.map((group) => ({
+        ...group,
+        count: categories.find((c) => c.value === group.value)?.count || 0,
+      })),
       loading: false,
     });
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const {
-      hideEmptyGroups,
-      hideEmptyTypes,
-      selectedMetricPrefixes,
-      selectedMetricCategories,
-      prefixGroups,
-      categories,
-      loading,
-    } = model.useState();
+    const { selectedMetricPrefixes, selectedMetricCategories, prefixGroups, categories, loading } = model.useState();
 
     const onSelectFilter = (type: 'prefixes' | 'categories', filters: string[]) => {
       const stateKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricCategories';
@@ -132,7 +134,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           <MetricsFilterSection
             title="Metric prefixes"
             items={prefixGroups}
-            hideEmpty={hideEmptyGroups}
             selectedValues={selectedMetricPrefixes}
             onSelectionChange={(filters) => onSelectFilter('prefixes', filters)}
             loading={loading}
@@ -142,7 +143,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           <MetricsFilterSection
             title="Metric categories"
             items={categories}
-            hideEmpty={hideEmptyTypes}
             selectedValues={selectedMetricCategories}
             onSelectionChange={(filters) => onSelectFilter('categories', filters)}
             loading={loading}

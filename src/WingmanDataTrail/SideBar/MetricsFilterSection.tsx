@@ -8,7 +8,6 @@ import { CheckboxWithCount } from './CheckboxWithCount';
 type MetricsFilterSectionProps = {
   title: string;
   items: Array<{ label: string; value: string; count: number }>;
-  hideEmpty: boolean;
   selectedValues: string[];
   onSelectionChange: (values: string[]) => void;
   loading: boolean;
