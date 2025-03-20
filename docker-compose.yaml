@@ -7,10 +7,14 @@ services:
     container_name: 'grafana'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
+      GF_FEATURE_TOGGLES_ENABLE: 'exploreMetricsRelatedLogs'
+    extra_hosts:
+      # This allows us to connect to other services running on the host machine.
+      - 'host.docker.internal:host-gateway'
 
   prometheus:
     container_name: 'prometheus'
-    image: prom/prometheus:v3.1.0
+    image: prom/prometheus:v3.2.1
     ports:
       - '9099:9090'
     extra_hosts:
@@ -22,4 +26,8 @@ services:
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.path=/prometheus
     volumes:
-      - ./config/prometheus.yaml:/etc/prometheus/prometheus.yml
+      # This uses Docker Compose's variable substitution to select the correct config file
+      # based on the GRAFANA_PORT environment variable.
+      # To add support for a new port (e.g. 3002), create a new config file:
+      # config/prometheus.3002.yaml with the appropriate host.docker.internal:<port> value
+      - ./config/prometheus.${GRAFANA_PORT:-3000}.yaml:/etc/prometheus/prometheus.yml

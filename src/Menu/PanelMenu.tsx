@@ -13,7 +13,6 @@ import {
 import React from 'react';
 
 import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
-import { getTrailFor } from '../utils';
 import { getQueryRunnerFor } from '../utils/utils.queries';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
@@ -49,8 +48,11 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           // removing legendFormat to get verbose legend in Explore
           delete query.legendFormat;
         });
-        const trail = getTrailFor(this);
-        exploreUrl = getExploreURL(panelData, trail, panelData.timeRange);
+        // 'this' scene object contain the variable for the metric name which is correctly interpolated into the explore url
+        // when used in the metric select scene case,
+        // this will get the explore url with interpolated variables and include the labels __ignore_usage__, this is a known issue
+        // in the metric scene we do not get use the __ignore_usage__ labels in the explore url
+        exploreUrl = getExploreURL(panelData, this, panelData.timeRange);
       } catch (e) {}
 
       // Navigation options (all panels)
