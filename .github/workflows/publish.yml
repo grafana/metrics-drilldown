@@ -8,6 +8,7 @@ description: Upload new plugin artifact to GCS & publish to plugin catalog
 #    - git switch -c bump-version-vX.Y.Z
 #    - npm version <type>  # this creates the commit and tag (see https://docs.npmjs.com/cli/commands/npm-version for <type> options, e.g. patch, minor, major, prerelease, etc.)
 #    - git push origin bump-version-vX.Y.Z --tags
+#    - update CHANGELOG.md with a link to the tag's release notes
 # 4. Get version bump PR approved
 # 5. Merge feature PR first
 # 6. Merge version bump PR
