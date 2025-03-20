@@ -11,9 +11,6 @@ on:
           - dev
           - ops
           - prod
-  push:
-    tags:
-      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
 
 permissions:
   contents: 'write'
@@ -23,11 +20,8 @@ permissions:
 jobs:
   CD:
     name: Deploy plugin
-    # Don't run on forks, and run only when version tag is created on main branch
-    if: |
-      github.repository == 'grafana/metrics-drilldown' && 
-      startsWith(github.ref, 'refs/tags/v') &&
-      github.base_ref == 'main'
+    # Don't run on forks
+    if: github.repository == 'grafana/metrics-drilldown'
     uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
     with:
       environment: ${{ inputs.environment || 'prod' }}
