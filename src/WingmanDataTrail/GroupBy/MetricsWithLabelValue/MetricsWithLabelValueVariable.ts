@@ -1,7 +1,6 @@
 import { VariableHide, VariableRefresh } from '@grafana/data';
 import { QueryVariable, sceneGraph, type MultiValueVariable } from '@grafana/scenes';
 
-import { VAR_FILTERS } from 'shared';
 import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
 import { MetricsVariableFilterEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
@@ -17,7 +16,7 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
     super({
       name: VAR_METRIC_WITH_LABEL_VALUE,
       datasource: { uid: MetricsWithLabelValueDataSource.uid },
-      query: `{${labelName}="${labelValue}",$${VAR_FILTERS}}`,
+      query: `{${labelName}="${labelValue}"}`, // TODO: add filters when in MetricsReducer
       isMulti: false,
       allowCustomValue: false,
       refresh: VariableRefresh.onTimeRangeChanged,
