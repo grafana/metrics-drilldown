@@ -386,95 +386,89 @@ export async function updateOtelData(
   // default to production.
   let defaultDepEnv = getProdOrDefaultEnv(deploymentEnvironments ?? []) ?? '';
 
-  const isEnabledInLocalStorage = getOtelExperienceToggleState();
+  // 1. Cases of how to add filters to the otelmetricsvar
+  //  -- when we set these on instantiation, we need to check that we are not double setting them
+  // 1.0. legacy, check url values for dep env and otel resources and migrate to otelmetricvar
+  //  -- do not duplicate
+  // 1.1. NONE If the otel metrics var has no filters, set the default value
+  // 1.2. VAR_FILTERS If the var filters has filters, add to otemetricsvar
+  //  -- do not duplicate when adding to otelmtricsvar
+  // 1.3. OTEL_FILTERS If the otel resources var has filters, add to otelmetricsvar
+  //  -- do not duplicate when adding to otelmtricsvar
 
-  // We respect that if users have it turned off in local storage we keep it off unless the toggle is switched
-  if (!isEnabledInLocalStorage) {
-    trail.resetOtelExperience(hasOtelResources, nonPromotedOtelResources);
-  } else {
-    // 1. Cases of how to add filters to the otelmetricsvar
-    //  -- when we set these on instantiation, we need to check that we are not double setting them
-    // 1.0. legacy, check url values for dep env and otel resources and migrate to otelmetricvar
-    //  -- do not duplicate
-    // 1.1. NONE If the otel metrics var has no filters, set the default value
-    // 1.2. VAR_FILTERS If the var filters has filters, add to otemetricsvar
-    //  -- do not duplicate when adding to otelmtricsvar
-    // 1.3. OTEL_FILTERS If the otel resources var has filters, add to otelmetricsvar
-    //  -- do not duplicate when adding to otelmtricsvar
+  // 1. switching data source
+  // the previous var filters are not reset so even if they don't apply to the new data source we want to keep them
+  // 2. on load with url values, check isInitial CheckComplete
+  // Set otelmetrics var, distinguish if these are var filters or otel resources, then place in correct filter
+  let prevVarFilters = resettingOtel ? filtersVariable.state.filters : [];
+  // only look at url values for otelmetricsvar if the initial check is NOT YET complete
+  const urlOtelAndMetricsFilters =
+    initialOtelCheckComplete && !resettingOtel ? [] : otelAndMetricsFiltersVariable.state.filters;
+  // url vars should override the deployment environment variable
+  const urlVarsObject = checkLabelPromotion(urlOtelAndMetricsFilters, nonPromotedOtelResources);
+  const urlOtelResources = initialOtelCheckComplete ? [] : urlVarsObject.nonPromoted;
+  const urlVarFilters = initialOtelCheckComplete ? [] : urlVarsObject.promoted;
 
-    // 1. switching data source
-    // the previous var filters are not reset so even if they don't apply to the new data source we want to keep them
-    // 2. on load with url values, check isInitial CheckComplete
-    // Set otelmetrics var, distinguish if these are var filters or otel resources, then place in correct filter
-    let prevVarFilters = resettingOtel ? filtersVariable.state.filters : [];
-    // only look at url values for otelmetricsvar if the initial check is NOT YET complete
-    const urlOtelAndMetricsFilters =
-      initialOtelCheckComplete && !resettingOtel ? [] : otelAndMetricsFiltersVariable.state.filters;
-    // url vars should override the deployment environment variable
-    const urlVarsObject = checkLabelPromotion(urlOtelAndMetricsFilters, nonPromotedOtelResources);
-    const urlOtelResources = initialOtelCheckComplete ? [] : urlVarsObject.nonPromoted;
-    const urlVarFilters = initialOtelCheckComplete ? [] : urlVarsObject.promoted;
+  // set the vars if the following conditions
+  if (!initialOtelCheckComplete || resettingOtel) {
+    // if the default dep env value like 'prod' is missing OR
+    // if we are loading from the url and the default dep env is missing
+    // there are no prev deployment environments from url
+    const hasPreviousDepEnv = urlOtelAndMetricsFilters.filter((f) => f.key === 'deployment_environment').length > 0;
+    const doNotSetDepEvValue = defaultDepEnv === '' || hasPreviousDepEnv;
+    // we do not have to set the dep env value if the default is missing
+    const defaultDepEnvFilter = doNotSetDepEvValue
+      ? []
+      : [
+          {
+            key: 'deployment_environment',
+            value: defaultDepEnv,
+            operator: defaultDepEnv.includes(',') ? '=~' : '=',
+          },
+        ];
 
-    // set the vars if the following conditions
-    if (!initialOtelCheckComplete || resettingOtel) {
-      // if the default dep env value like 'prod' is missing OR
-      // if we are loading from the url and the default dep env is missing
-      // there are no prev deployment environments from url
-      const hasPreviousDepEnv = urlOtelAndMetricsFilters.filter((f) => f.key === 'deployment_environment').length > 0;
-      const doNotSetDepEvValue = defaultDepEnv === '' || hasPreviousDepEnv;
-      // we do not have to set the dep env value if the default is missing
-      const defaultDepEnvFilter = doNotSetDepEvValue
-        ? []
-        : [
-            {
-              key: 'deployment_environment',
-              value: defaultDepEnv,
-              operator: defaultDepEnv.includes(',') ? '=~' : '=',
-            },
-          ];
+    const notPromoted = nonPromotedOtelResources?.includes('deployment_environment');
+    // Next, the previous data source filters may include the default dep env but in the wrong filter
+    // i.e., dep env is not promoted to metrics but in the previous DS, it was, so it will exist in the VAR FILTERS
+    // and we will see a duplication in the OTELMETRICSVAR
+    // remove the duplication
+    prevVarFilters = notPromoted ? prevVarFilters.filter((f) => f.key !== 'deployment_environment') : prevVarFilters;
 
-      const notPromoted = nonPromotedOtelResources?.includes('deployment_environment');
-      // Next, the previous data source filters may include the default dep env but in the wrong filter
-      // i.e., dep env is not promoted to metrics but in the previous DS, it was, so it will exist in the VAR FILTERS
-      // and we will see a duplication in the OTELMETRICSVAR
-      // remove the duplication
-      prevVarFilters = notPromoted ? prevVarFilters.filter((f) => f.key !== 'deployment_environment') : prevVarFilters;
+    // previous var filters are handled but what about previous otel resources filters?
+    // need to add the prev otel resources to the otelmetricsvar filters
+    otelAndMetricsFiltersVariable?.setState({
+      filters: [...defaultDepEnvFilter, ...prevVarFilters, ...urlOtelAndMetricsFilters],
+      hide: VariableHide.hideLabel,
+    });
 
-      // previous var filters are handled but what about previous otel resources filters?
-      // need to add the prev otel resources to the otelmetricsvar filters
-      otelAndMetricsFiltersVariable?.setState({
-        filters: [...defaultDepEnvFilter, ...prevVarFilters, ...urlOtelAndMetricsFilters],
-        hide: VariableHide.hideLabel,
-      });
+    // update the otel resources if the dep env has not been promoted
+    const otelDepEnvFilters = notPromoted ? defaultDepEnvFilter : [];
+    const otelFilters = [...otelDepEnvFilters, ...urlOtelResources];
+    otelResourcesVariable.setState({
+      filters: otelFilters,
+      hide: VariableHide.hideVariable,
+    });
 
-      // update the otel resources if the dep env has not been promoted
-      const otelDepEnvFilters = notPromoted ? defaultDepEnvFilter : [];
-      const otelFilters = [...otelDepEnvFilters, ...urlOtelResources];
-      otelResourcesVariable.setState({
-        filters: otelFilters,
-        hide: VariableHide.hideVariable,
-      });
+    const isPromoted = !notPromoted;
+    // if the dep env IS PROMOTED
+    // we need to ask, does var filters already contain it?
+    // keep previous filters if they are there
+    // add the dep env to var filters if not present and isPromoted
+    const depEnvFromVarFilters = prevVarFilters.filter((f) => f.key === 'deployment_environment');
 
-      const isPromoted = !notPromoted;
-      // if the dep env IS PROMOTED
-      // we need to ask, does var filters already contain it?
-      // keep previous filters if they are there
-      // add the dep env to var filters if not present and isPromoted
-      const depEnvFromVarFilters = prevVarFilters.filter((f) => f.key === 'deployment_environment');
-
-      // if promoted and no dep env has been chosen yet, set the default
-      if (isPromoted && depEnvFromVarFilters.length === 0) {
-        prevVarFilters = [...prevVarFilters, ...defaultDepEnvFilter];
-      }
-
-      prevVarFilters = [...prevVarFilters, ...urlVarFilters];
-
-      filtersVariable.setState({
-        filters: prevVarFilters,
-        hide: VariableHide.hideVariable,
-      });
+    // if promoted and no dep env has been chosen yet, set the default
+    if (isPromoted && depEnvFromVarFilters.length === 0) {
+      prevVarFilters = [...prevVarFilters, ...defaultDepEnvFilter];
     }
+
+    prevVarFilters = [...prevVarFilters, ...urlVarFilters];
+
+    filtersVariable.setState({
+      filters: prevVarFilters,
+      hide: VariableHide.hideVariable,
+    });
   }
+
   // 1. Get the otel join query for state and variable
   // Because we need to define the deployment environment variable
   // we also need to update the otel join query state and variable
@@ -507,7 +501,7 @@ export async function updateOtelData(
       // Previously checking standardization for having deployment environments
       // Now we check that there are target_info labels that are not promoted
       isStandardOtel: (nonPromotedOtelResources ?? []).length > 0,
-      useOtelExperience: isEnabledInLocalStorage,
+      useOtelExperience: true,
       nonPromotedOtelResources,
       initialOtelCheckComplete: true,
       resettingOtel: false,
