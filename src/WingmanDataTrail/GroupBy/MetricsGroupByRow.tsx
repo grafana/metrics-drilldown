@@ -273,8 +273,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
   return {
     container: css({
-      background: theme.colors.background.primary,
-      boxShadow: theme.shadows.z1,
+      background: theme.colors.background.canvas,
       border: `1px solid ${theme.colors.border.medium}`,
       borderRadius: theme.shape.radius.default,
       padding: isCollapsed ? theme.spacing(2) : theme.spacing(2, 2, 0, 2),
