@@ -116,6 +116,7 @@ function getStyles(theme: GrafanaTheme2) {
       flexBasis: '32px',
       flexShrink: 0,
       marginBottom: theme.spacing(1),
+      padding: theme.spacing(0, 0.5),
     }),
   };
 }

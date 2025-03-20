@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, Icon, Input, RadioButtonList, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, Icon, IconButton, Input, RadioButtonList, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
@@ -65,6 +65,9 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
           value={searchValue}
           onChange={(e) => setSearchValue(e.currentTarget.value)}
           onKeyDown={onKeyDown}
+          suffix={
+            <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={(e) => setSearchValue('')} />
+          }
         />
 
         {loading && <Spinner inline />}
@@ -122,6 +125,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     search: css({
       marginBottom: theme.spacing(1),
+      padding: theme.spacing(0, 0.5),
     }),
     listHeader: css({
       display: 'flex',
