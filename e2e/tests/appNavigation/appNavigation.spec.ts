@@ -1,7 +1,7 @@
-import { expect, test } from './fixtures';
-import { testIds } from '../src/App/testIds';
-import { ROUTES } from '../src/constants';
-import { UI_TEXT } from '../src/constants/ui';
+import { testIds } from '../../../src/App/testIds';
+import { ROUTES } from '../../../src/constants';
+import { UI_TEXT } from '../../../src/constants/ui';
+import { expect, test } from '../../fixtures';
 
 test.describe('Metrics Drilldown', () => {
   test('home page renders with core elements', async ({ gotoPage, page }) => {
@@ -54,5 +54,10 @@ test.describe('navigating app', () => {
   test('trail page should render successfully', async ({ gotoPage, page }) => {
     await gotoPage(`/${ROUTES.Trail}`);
     await expect(page.getByText(UI_TEXT.SEARCH.TITLE)).toBeVisible();
+
+    await expect(page.getByTestId('scene-body')).toBeVisible();
+    await expect(page.getByTestId('scene')).toHaveScreenshot({
+      stylePath: './e2e/fixtures/css/hide-app-controls.css',
+    });
   });
 });

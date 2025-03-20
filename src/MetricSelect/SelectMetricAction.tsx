@@ -15,9 +15,9 @@ export class SelectMetricAction extends SceneObjectBase<SelectMetricActionState>
   };
 
   public static Component = ({ model }: SceneComponentProps<SelectMetricAction>) => {
-    const { title } = model.useState();
+    const { title, metric } = model.useState();
     return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
+      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick} data-testid={`select ${metric}`}>
         {title}
       </Button>
     );

@@ -545,8 +545,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     ) : undefined;
 
     return (
-      <div className={styles.container}>
-        <div className={styles.header}>
+      <div className={styles.container} data-testid="scene">
+        <div className={styles.header} data-testid="scene-header">
           <Field label={UI_TEXT.SEARCH.TITLE} className={styles.searchField}>
             <Input
               placeholder={UI_TEXT.SEARCH.TITLE}
@@ -608,7 +608,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 <InlineSwitch
                   disabled={!isStandardOtel}
                   showLabel={true}
-                  label="OTel experience"
+                  label={UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL}
                   value={useOtelExperience}
                   onChange={model.onToggleOtelExperience}
                 />
@@ -633,8 +633,10 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
           </Alert>
         )}
         <StatusWrapper {...{ isLoading, blockingMessage }}>
-          {isSceneFlexLayout(body) && <body.Component model={body} />}
-          {isSceneCSSGridLayout(body) && <body.Component model={body} />}
+          <div data-testid="scene-body">
+            {isSceneFlexLayout(body) && <body.Component model={body} />}
+            {isSceneCSSGridLayout(body) && <body.Component model={body} />}
+          </div>
         </StatusWrapper>
       </div>
     );
