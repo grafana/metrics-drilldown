@@ -1,0 +1,206 @@
+---
+description: 
+globs: *.ts,*.test.ts,*.tsx,*.test.tsx
+alwaysApply: false
+---
+# Prefer using `@grafana/promql-builder` to craft PromQL expressions
+
+When building PromQL expressions, we should use `@grafana/promql-builder` instead of building expressions via string interpolation.
+
+## Overview
+
+`@grafana/promql-builder` is a TypeScript library that provides a type-safe, fluent API for building PromQL (Prometheus Query Language) queries. It allows developers to compose complex PromQL expressions programmatically while maintaining type safety and providing a developer-friendly interface.
+
+## Core Concepts
+
+The library is built around several core expression types that map to PromQL concepts:
+
+### Expression Types
+
+1. **Vector Expressions** - Represent metric selectors with labels
+2. **Binary Expressions** - Operations between two expressions (+, -, \*, /, etc.)
+3. **Aggregation Expressions** - Operations that aggregate data (sum, avg, min, max, etc.)
+4. **Function Call Expressions** - Built-in Prometheus functions (rate, sum, etc.)
+5. **Subquery Expressions** - Nested queries with time ranges
+6. **Literal Expressions** - Number and string literals
+7. **Unary Expressions** - Single-operand operations (+ or -)
+
+## API Reference
+
+### Vector Expressions
+
+```typescript
+// Basic metric selector
+promql.vector("metric_name");
+
+// With label matchers
+promql
+  .vector("metric_name")
+  .label("label_name", "value") // Exact match
+  .labelNeq("label_name", "value") // Not equal
+  .labelMatchRegexp("label_name", "regex") // Regex match
+  .labelNotMatchRegexp("label_name", "regex"); // Negative regex match
+
+// With time modifiers
+promql
+  .vector("metric_name")
+  .range("5m") // Range vector
+  .offset("1h") // Time offset
+  .at("timestamp"); // Evaluation time
+```
+
+### Binary Operations
+
+```typescript
+// Arithmetic operations
+promql.add(left, right); // +
+promql.sub(left, right); // -
+promql.mul(left, right); // *
+promql.div(left, right); // /
+promql.mod(left, right); // %
+promql.pow(left, right); // ^
+
+// Comparison operations
+promql.eq(left, right); // ==
+promql.ne(left, right); // !=
+promql.gt(left, right); // >
+promql.lt(left, right); // <
+promql.ge(left, right); // >=
+promql.le(left, right); // <=
+
+// Logical operations
+promql.and(left, right); // and
+promql.or(left, right); // or
+promql.unless(left, right); // unless
+
+// Vector matching
+promql
+  .vector("metric1")
+  .ignoring(["label1"]) // Ignore specific labels
+  .on(["label1"]); // Match on specific labels
+```
+
+### Aggregations
+
+```typescript
+// Basic aggregations
+promql.sum(expr); // Sum
+promql.min(expr); // Minimum
+promql.max(expr); // Maximum
+promql.avg(expr); // Average
+promql.count(expr); // Count
+promql.group(expr); // Group
+
+// Advanced aggregations
+promql.stddev(expr); // Standard deviation
+promql.stdvar(expr); // Standard variance
+promql.countValues(expr); // Count values
+promql.bottomk(expr, k); // Bottom k elements
+promql.topk(expr, k); // Top k elements
+promql.quantile(expr, q); // Quantile
+promql.limitk(expr, k); // Limit to k elements
+
+// With grouping
+promql.sum(expr).by(["label1", "label2"]); // Group by labels
+promql.sum(expr).without(["label1", "label2"]); // Group without labels
+```
+
+### Functions
+
+```typescript
+// Rate and increase
+promql.rate(expr); // Rate of increase
+promql.increase(expr); // Absolute increase
+
+// Time functions
+promql.time(); // Current timestamp
+promql.absent(expr); // Check for absence
+
+// Aggregation functions
+promql.sumOverTime(expr); // Sum over time
+promql.minOverTime(expr); // Min over time
+promql.maxOverTime(expr); // Max over time
+promql.avgOverTime(expr); // Avg over time
+
+// Histogram functions
+promql.histogramQuantile(quantile, expr); // Histogram quantile
+```
+
+### Subqueries
+
+```typescript
+promql
+  .subquery(expr)
+  .range("30m") // Range of samples
+  .resolution("1m") // Resolution
+  .offset("1h") // Time offset
+  .at("timestamp"); // Evaluation time
+```
+
+## Common Patterns
+
+### Rate Calculation
+
+```typescript
+// rate(http_requests_total[5m])
+promql.rate(promql.vector("http_requests_total").range("5m"));
+```
+
+### Error Rate Calculation
+
+```typescript
+// sum(rate(http_errors_total[5m])) / sum(rate(http_requests_total[5m]))
+promql.div(
+  promql.sum(promql.rate(promql.vector("http_errors_total").range("5m"))),
+  promql.sum(promql.rate(promql.vector("http_requests_total").range("5m")))
+);
+```
+
+### Histogram Quantile
+
+```typescript
+// histogram_quantile(0.9, sum by(le) (rate(http_request_duration_seconds_bucket[5m])))
+promql.histogramQuantile(
+  0.9,
+  promql
+    .sum(
+      promql.rate(
+        promql.vector("http_request_duration_seconds_bucket").range("5m")
+      )
+    )
+    .by(["le"])
+);
+```
+
+## Type Safety
+
+The library provides full TypeScript type safety, ensuring that:
+
+- Expression types are properly checked
+- Function arguments are validated
+- Label matchers are type-safe
+- Time durations are properly formatted
+
+For context on types, see @node_modules/@grafana/promql-builder/dist/index.d.ts.
+
+## Best Practices
+
+1. **Chain Operations**: Use method chaining for cleaner, more readable code
+2. **Type Safety**: Leverage TypeScript's type system to catch errors early
+3. **Modular Queries**: Break complex queries into smaller, reusable functions
+4. **Consistent Naming**: Use descriptive names for metrics and labels
+5. **Documentation**: Add comments for complex queries explaining their purpose
+
+## Error Handling
+
+The library provides type-safe error handling through TypeScript's type system. Invalid operations or incorrect types will be caught at compile time rather than runtime.
+
+## Performance Considerations
+
+- The library generates PromQL strings efficiently
+- Complex queries are built through composition rather than string concatenation
+- Type checking is done at compile time, not runtime
+
+## Version Compatibility
+
+The library is designed to work with modern Prometheus versions and follows the PromQL specification. Always check the package version compatibility with your Prometheus version.
