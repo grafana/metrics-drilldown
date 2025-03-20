@@ -98,11 +98,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     this.setState({
       prefixGroups: this.state.prefixGroups.map((group) => ({
         ...group,
-        count: prefixGroups.find((p) => p.value === group.value)?.count || 0,
+        count: prefixGroups.find((p) => p.label === group.label)?.count || 0,
       })),
       categories: this.state.categories.map((group) => ({
         ...group,
-        count: categories.find((c) => c.value === group.value)?.count || 0,
+        count: categories.find((c) => c.label === group.label)?.count || 0,
       })),
       loading: false,
     });
@@ -132,7 +132,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       <div className={styles.container}>
         <div className={styles.topPanel}>
           <MetricsFilterSection
-            title="Metric prefixes"
+            title="Metric prefix filters"
             items={prefixGroups}
             selectedValues={selectedMetricPrefixes}
             onSelectionChange={(filters) => onSelectFilter('prefixes', filters)}
@@ -141,7 +141,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         </div>
         <div className={styles.bottomPanel}>
           <MetricsFilterSection
-            title="Metric categories"
+            title="Categories filters"
             items={categories}
             selectedValues={selectedMetricCategories}
             onSelectionChange={(filters) => onSelectFilter('categories', filters)}
