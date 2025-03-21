@@ -7,7 +7,6 @@ import { type DataTrail } from '../DataTrail';
 import { reportChangeInLabelFilters } from '../interactions';
 import { getFilteredResourceAttributes, totalOtelResources } from './api';
 import { type OtelResourcesObject } from './types';
-import { getOtelExperienceToggleState } from '../services/store';
 import {
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
