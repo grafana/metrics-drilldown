@@ -17,7 +17,6 @@ import {
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { buildMetricOverviewScene } from './ActionTabs/MetricOverviewScene';
 import { buildRelatedMetricsScene } from './ActionTabs/RelatedMetricsScene';
 import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
@@ -59,7 +58,6 @@ export interface MetricSceneState extends SceneObjectState {
 }
 
 export const actionViews = {
-  overview: 'overview',
   breakdown: 'breakdown',
   related: 'related',
   relatedLogs: 'logs',
@@ -95,7 +93,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   private _onActivate() {
     if (this.state.actionView === undefined) {
-      this.setActionView(actionViews.overview);
+      this.setActionView(actionViews.breakdown);
     }
 
     if (relatedLogsFeatureEnabled) {
@@ -170,7 +168,6 @@ interface ActionViewDefinition {
 }
 
 const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Overview', value: actionViews.overview, getScene: buildMetricOverviewScene },
   { displayName: 'Breakdown', value: actionViews.breakdown, getScene: buildLabelBreakdownActionScene },
   {
     displayName: 'Related metrics',
@@ -242,7 +239,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               icon="compass"
               tooltip="Open in explore"
               onClick={model.openExploreLink}
-            ></ToolbarButton>
+            />
             <ShareTrailButton trail={trail} />
             <ToolbarButton
               variant={'canvas'}
