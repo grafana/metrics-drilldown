@@ -1,14 +1,10 @@
 import { expect, test } from './fixtures';
-import { ROUTES } from '../src/constants';
-import { UI_TEXT } from '../src/constants/ui';
 
 test.describe('OTEL Experience', () => {
-  test('otel enabled workflow', async ({ gotoPage, page }) => {
+  test('otel enabled workflow', async ({ navigateToTrail, otelSwitch, utf8MetricPanel, page }) => {
     await test.step('navigate to trail', async () => {
-      await gotoPage(`/${ROUTES.Trail}`);
+      await navigateToTrail();
     });
-
-    const otelSwitch = page.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL);
 
     await test.step('element is visible', async () => {
       await expect(otelSwitch).toBeVisible();
@@ -20,14 +16,13 @@ test.describe('OTEL Experience', () => {
       await otelSwitch.check({ force: true });
     });
 
-    await test.step('asssert deployment_environment filter is on', async () => {
+    await test.step('assert deployment_environment filter is on', async () => {
       await expect(otelSwitch).toBeChecked();
       await expect(page.getByText('deployment_environment = prod')).toBeVisible();
     });
 
     await test.step('select utf8 metrics', async () => {
-      const panel = page.getByTestId('data-testid Panel header a.utf8.metric 🤘');
-      await panel.getByRole('button', { name: 'select' }).click();
+      await utf8MetricPanel.getByRole('button', { name: 'select' }).click();
       expect(page.url().includes('otel_and_metric_filters')).toBeTruthy();
     });
 
