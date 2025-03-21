@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures';
 
 test.describe('OTEL Experience', () => {
-  test('otel enabled workflow', async ({ navigateToTrail, otelSwitch, utf8MetricPanel, page }) => {
+  test('otel enabled workflow', async ({ navigateToTrail, otelSwitch, getMetricPanel, page }) => {
     await test.step('navigate to trail', async () => {
       await navigateToTrail();
     });
@@ -22,7 +22,8 @@ test.describe('OTEL Experience', () => {
     });
 
     await test.step('select utf8 metrics', async () => {
-      await utf8MetricPanel.getByRole('button', { name: 'select' }).click();
+      const metricPanel = await getMetricPanel('a.utf8.metric 🤘');
+      await metricPanel.getByRole('button', { name: 'select' }).click();
       expect(page.url().includes('otel_and_metric_filters')).toBeTruthy();
     });
 

@@ -10,7 +10,7 @@ type AppTestFixture = {
   gotoPage: (path?: string) => Promise<AppPage>;
   otelSwitch: Locator;
   navigateToTrail: () => Promise<void>;
-  utf8MetricPanel: Locator;
+  getMetricPanel: (title: string) => Promise<Locator>;
 };
 
 export const test = base.extend<AppTestFixture>({
@@ -37,9 +37,10 @@ export const test = base.extend<AppTestFixture>({
       await gotoPage(`/${ROUTES.Trail}`);
     });
   },
-  utf8MetricPanel: async ({ page }, use) => {
-    const panel = page.getByTestId('data-testid Panel header a.utf8.metric 🤘');
-    await use(panel);
+  getMetricPanel: async ({ page }, use) => {
+    await use(async (title: string) => {
+      return page.getByTestId(`data-testid Panel header ${title}`);
+    });
   },
 });
 
