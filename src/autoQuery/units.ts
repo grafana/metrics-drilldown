@@ -1,7 +1,6 @@
 export const DEFAULT_UNIT = 'short';
 export const DEFAULT_RATE_UNIT = 'cps'; // Count per second
 
-// Enhanced unit mappings with more common unit types
 const UNIT_MAP: Record<string, string> = {
   bytes: 'bytes',
   seconds: 's',
@@ -13,15 +12,14 @@ const UNIT_MAP: Record<string, string> = {
 
 const UNIT_LIST = Object.keys(UNIT_MAP);
 
-// Enhanced rate unit mappings
 const RATE_UNIT_MAP: Record<string, string> = {
-  bytes: 'Bps', // bytes per second
-  bits: 'bps', // bits per second
+  bytes: 'Bps',
+  bits: 'bps',
   // seconds per second is unitless
   // this may indicate a count of some resource that is active
   seconds: 'short',
-  count: 'cps', // counts per second
-  percent: 'percent', // percent stays percent even as a rate
+  count: 'cps',
+  percent: 'percent',
 };
 
 // Get unit from metric name (e.g. "go_gc_duration_seconds" -> "seconds")
