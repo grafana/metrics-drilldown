@@ -2,7 +2,6 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 
 import { type BreakdownLayoutType } from './Breakdown/types';
-import { type TrailStepType } from './DataTrailsHistory';
 import { type ActionViewType } from './MetricScene';
 
 // prettier-ignore
@@ -56,25 +55,11 @@ export type Interactions = {
   };
   // User changes metric explore settings
   settings_changed: { stickyMainGraph?: boolean };
-  // User clicks on history nodes to navigate exploration history
-  history_step_clicked: {
-    type: (
-      // One of the standard step types
-      | TrailStepType
-      // The special metric step type that is created when the user de-selects the current metric
-      | 'metric-clear'
-    );
-    // Which step index was clicked on
-    step: number;
-    // The total number of steps currently in the trail
-    numberOfSteps: number;
-  };
   // User clicks on tab to change the action view
-  metric_action_view_changed: { 
-    view: ActionViewType 
-
+  metric_action_view_changed: {
+    view: ActionViewType;
     // The number of related logs
-    related_logs_count?: number
+    related_logs_count?: number;
   };
   // User clicks on one of the action buttons associated with a selected metric
   selected_metric_action_clicked: {
@@ -114,89 +99,78 @@ export type Interactions = {
       | 'metric_list'
       // By clicking "Select" on a metric panel when on the related metrics tab
       | 'related_metrics'
-    )
+    );
     action: (
       // Opens the dropdown
       | 'open'
       // Closes the dropdown
       | 'close'
-    )
+    );
   };
   sorting_changed: {
-      // type of sorting
-      sortBy: string
+    // type of sorting
+    sortBy: string;
   };
-  wasm_not_supported: {},
+  wasm_not_supported: {};
   missing_otel_labels_by_truncating_job_and_instance: {
     metric?: string;
-  },
-  deployment_environment_migrated: {},
-  otel_experience_used: {},
+  };
+  deployment_environment_migrated: {};
+  otel_experience_used: {};
   otel_experience_toggled: {
-    value: ('on'| 'off')
-  },
-  native_histogram_examples_closed: {},
+    value: 'on' | 'off';
+  };
+  native_histogram_examples_closed: {};
   native_histogram_example_clicked: {
     metric: string;
-  },
+  };
 };
 
-const PREFIX = 'grafana_explore_metrics_';
-
-export function reportExploreMetrics<E extends keyof Interactions, P extends Interactions[E]>(event: E, payload: P) {
-  reportInteraction(`${PREFIX}${event}`, payload);
+export function reportExploreMetrics(eventName: string, properties: Record<string, unknown>) {
+  reportInteraction('grafana_explore_metrics_' + eventName, properties);
 }
 
-/** Detect the single change in filters and report the event, assuming it came from manipulating the adhoc filter */
 export function reportChangeInLabelFilters(
   newFilters: AdHocVariableFilter[],
-  oldFilters: AdHocVariableFilter[],
-  otel?: boolean
+  prevFilters: AdHocVariableFilter[],
+  isOtelResource?: boolean
 ) {
-  if (newFilters.length === oldFilters.length) {
-    for (const oldFilter of oldFilters) {
-      for (const newFilter of newFilters) {
-        if (oldFilter.key === newFilter.key) {
-          if (oldFilter.value !== newFilter.value) {
-            reportExploreMetrics('label_filter_changed', {
-              label: oldFilter.key,
-              action: 'changed',
-              cause: 'adhoc_filter',
-              otel_resource_attribute: otel ?? false,
-            });
-          }
-        }
-      }
-    }
-  } else if (newFilters.length < oldFilters.length) {
-    for (const oldFilter of oldFilters) {
-      let foundOldLabel = false;
-      for (const newFilter of newFilters) {
-        if (oldFilter.key === newFilter.key) {
-          foundOldLabel = true;
-          break;
-        }
-      }
-      if (!foundOldLabel) {
-        reportExploreMetrics('label_filter_changed', {
-          label: oldFilter.key,
-          action: 'removed',
-          cause: 'adhoc_filter',
-        });
-      }
-    }
-  } else {
-    for (const newFilter of newFilters) {
-      let foundNewLabel = false;
-      for (const oldFilter of oldFilters) {
-        if (oldFilter.key === newFilter.key) {
-          foundNewLabel = true;
-          break;
-        }
-      }
-      if (!foundNewLabel) {
-        reportExploreMetrics('label_filter_changed', { label: newFilter.key, action: 'added', cause: 'adhoc_filter' });
-      }
-    }
+  const addedFilters = newFilters.filter((f) => !prevFilters.includes(f));
+  const removedFilters = prevFilters.filter((f) => !newFilters.includes(f));
+  const changedFilters = newFilters.filter(
+    (f) => !addedFilters.includes(f) && !removedFilters.includes(f) && !prevFilters.includes(f)
+  );
+
+  if (addedFilters.length > 0) {
+    addedFilters.forEach((filter) => {
+      reportInteraction('label_filter_changed', {
+        label: filter.key,
+        action: 'added',
+        cause: 'adhoc_filter',
+        otel_resource_attribute: isOtelResource,
+      });
+    });
+  }
+
+  if (removedFilters.length > 0) {
+    removedFilters.forEach((filter) => {
+      reportInteraction('label_filter_changed', {
+        label: filter.key,
+        action: 'removed',
+        cause: 'adhoc_filter',
+        otel_resource_attribute: isOtelResource,
+      });
+    });
+  }
+
+  if (changedFilters.length > 0) {
+    changedFilters.forEach((filter) => {
+      reportInteraction('label_filter_changed', {
+        label: filter.key,
+        action: 'changed',
+        cause: 'adhoc_filter',
+        otel_resource_attribute: isOtelResource,
+      });
+    });
   }
 }

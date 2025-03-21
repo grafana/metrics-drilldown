@@ -22,6 +22,7 @@ import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
+import { type DataTrail } from './DataTrail';
 import { reportExploreMetrics, type Interactions } from './interactions';
 import {
   MAIN_PANEL_MAX_HEIGHT,
@@ -29,6 +30,7 @@ import {
   METRIC_AUTOVIZPANEL_KEY,
   MetricGraphScene,
 } from './MetricGraphScene';
+import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { buildRelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import {
@@ -336,4 +338,36 @@ function getVariableSet(metric: string) {
       }),
     ],
   });
+}
+
+export function Component({ trail }: { trail: DataTrail }) {
+  const [isBookmarked, toggleBookmark] = useBookmarkState(trail);
+
+  const metricSelectScene = new MetricSelectScene({
+    $variables: trail.state.$variables,
+  });
+
+  return (
+    <div>
+      <div className="explore-toolbar">
+        <div className="explore-toolbar-item">
+          <ToolbarButton
+            icon={isBookmarked ? 'star' : 'star-outline'}
+            variant="canvas"
+            onClick={toggleBookmark}
+            tooltip={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+          />
+        </div>
+        <div className="explore-toolbar-item">
+          <ShareTrailButton trail={trail} />
+        </div>
+      </div>
+      <TabsBar>
+        <Tab label="Metrics" active={true} />
+      </TabsBar>
+      <div className="explore-container">
+        <metricSelectScene.Component model={metricSelectScene} />
+      </div>
+    </div>
+  );
 }

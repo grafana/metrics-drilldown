@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
 import { type PromQuery } from '@grafana/prometheus';
-import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
+import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
@@ -15,10 +15,8 @@ import {
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
-  sceneUtils,
   SceneVariableSet,
   UrlSyncContextProvider,
-  UrlSyncManager,
   VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
@@ -36,7 +34,6 @@ import { PluginInfo } from 'PluginInfo/PluginInfo';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
-import { DataTrailHistory } from './DataTrailsHistory';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
@@ -65,11 +62,11 @@ import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
+
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
   controls: SceneObject[];
-  history: DataTrailHistory;
   settings: DataTrailSettings;
   pluginInfo: SceneReactObject;
   createdAt: number;
@@ -81,16 +78,16 @@ export interface DataTrailState extends SceneObjectState {
   // this is for otel, if the data source has it, it will be updated here
   hasOtelResources?: boolean;
   useOtelExperience?: boolean;
-  otelTargets?: OtelTargetType; // all the targets with job and instance regex, job=~"<job-v>|<job-v>"", instance=~"<instance-v>|<instance-v>"
+  otelTargets?: OtelTargetType;
   otelJoinQuery?: string;
   isStandardOtel?: boolean;
   nonPromotedOtelResources?: string[];
-  initialOtelCheckComplete?: boolean; // updated after the first otel check
-  startButtonClicked?: boolean; // from original landing page
-  afterFirstOtelCheck?: boolean; // when starting there is always a DS var change from variable dependency
-  resettingOtel?: boolean; // when switching OTel off from the switch
+  initialOtelCheckComplete?: boolean;
+  startButtonClicked?: boolean;
+  afterFirstOtelCheck?: boolean;
+  resettingOtel?: boolean;
   isUpdatingOtel?: boolean;
-  addingLabelFromBreakdown?: boolean; // do not use the otel and metrics var subscription when adding label from the breakdown
+  addingLabelFromBreakdown?: boolean;
 
   // moved into settings
   showPreviews?: boolean;
@@ -112,8 +109,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   public constructor(state: Partial<DataTrailState>) {
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
-      // the initial variables should include a metric for metric scene and the otelJoinQuery.
-      // NOTE: The other OTEL filters should be included too before this work is merged
       $variables:
         state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters, state.otelJoinQuery),
       controls: state.controls ?? [
@@ -122,14 +117,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],
-      history: state.history ?? new DataTrailHistory({}),
       settings: state.settings ?? new DataTrailSettings({}),
       pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
-      // default to false but update this to true on updateOtelData()
-      // or true if the user either turned on the experience
       useOtelExperience: state.useOtelExperience ?? false,
-      // preserve the otel join query
       otelJoinQuery: state.otelJoinQuery ?? '',
       showPreviews: state.showPreviews ?? true,
       nativeHistograms: state.nativeHistograms ?? [],
@@ -243,7 +234,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         const timeRange: RawTimeRange | undefined = this.state.$timeRange?.state;
         const datasourceUid = sceneGraph.interpolate(this, VAR_DATASOURCE_EXPR);
         if (timeRange) {
-          updateOtelData(this, datasourceUid, timeRange);
+          updateOtelData(
+            this,
+            datasourceUid,
+            timeRange,
+            undefined,
+            this.state.hasOtelResources,
+            this.state.nonPromotedOtelResources
+          );
         }
       }
     },
@@ -308,28 +306,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.getMetricMetadata(this.state.metric);
   }
 
-  public restoreFromHistoryStep(state: DataTrailState) {
-    if (!state.topScene && !state.metric) {
-      // If the top scene for an  is missing, correct it.
-      state.topScene = new MetricSelectScene({});
-    }
-
-    this.setState(
-      sceneUtils.cloneSceneObjectState(state, {
-        history: this.state.history,
-        metric: !state.metric ? undefined : state.metric,
-        metricSearch: !state.metricSearch ? undefined : state.metricSearch,
-        // store type because this requires an expensive api call to determine
-        // when loading the metric scene
-        nativeHistogramMetric: !state.nativeHistogramMetric ? undefined : state.nativeHistogramMetric,
-      })
-    );
-
-    const urlState = new UrlSyncManager().getUrlState(this);
-    const fullUrl = urlUtil.renderUrl(locationService.getLocation().pathname, urlState);
-    locationService.replace(fullUrl);
-  }
-
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
     const metric = evt.payload ?? '';
 
@@ -352,6 +328,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         baseFilters: getBaseFiltersForMetric(evt.payload),
       });
     }
+
+    // Add to recent trails
+    const store = getTrailStore();
+    store.setRecentTrail(this);
   }
 
   private getSceneUpdatesForNewMetricValue(metric: string | undefined, nativeHistogramMetric?: boolean) {
@@ -554,9 +534,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   static Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const {
-      controls,
       topScene,
-      history,
+      controls,
       settings,
       pluginInfo,
       useOtelExperience,
@@ -605,7 +584,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       <div className={styles.container}>
         {NativeHistogramBanner({ histogramsLoaded, nativeHistograms, trail: model })}
         {showHeaderForFirstTimeUsers && <MetricsHeader />}
-        <history.Component model={history} />
         {controls && (
           <div className={styles.controls}>
             {controls.map((control) => (
