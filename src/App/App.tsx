@@ -16,12 +16,12 @@ interface MetricsAppContext {
 }
 
 export const MetricsContext = createContext<MetricsAppContext>({
-  trail: newMetricsTrail(undefined, true),
+  trail: newMetricsTrail(undefined),
   goToUrlForTrail: () => {},
 });
 
 function App(props: AppRootProps) {
-  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined, true));
+  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined));
   const styles = useStyles2(getStyles);
   const goToUrlForTrail = (trail: DataTrail) => {
     locationService.push(getUrlForTrail(trail));
