@@ -21,7 +21,7 @@ function isPrometheusDatasource(ds: DataSourceApi<any>): ds is PrometheusDatasou
 
 export class MetricDatasourceHelper {
   constructor(trail: DataTrail) {
-    this._trail = trail;
+    this._trail = trail as DataTrail;
   }
 
   public reset() {
