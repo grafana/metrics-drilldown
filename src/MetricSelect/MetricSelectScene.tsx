@@ -50,6 +50,8 @@ import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
 import { getSelectedScopes } from '../utils/utils.scopes';
 import { isSceneTimeRange, isSceneTimeRangeState } from '../utils/utils.timerange';
 import { isAdHocFiltersVariable } from '../utils/utils.variables';
+import { getOtelResourcesObject } from 'otel/util';
+import { totalOtelResources } from 'otel/api';
 
 interface MetricPanel {
   name: string;
@@ -251,8 +253,14 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     this.setState({ metricNamesLoading: true, metricNamesError: undefined, metricNamesWarning: undefined });
 
     try {
-      const jobsList = trail.state.useOtelExperience ? trail.state.otelTargets?.jobs ?? [] : [];
-      const instancesList = trail.state.useOtelExperience ? trail.state.otelTargets?.instances ?? [] : [];
+      let jobsList: string[] = [];
+      let instancesList: string[] = [];
+      if (trail.state.useOtelExperience) {
+        const otelResourcesObject = getOtelResourcesObject(trail);
+        const otelTargets = await totalOtelResources(datasourceUid, timeRange, otelResourcesObject.filters);
+        jobsList = otelTargets?.jobs ?? [];
+        instancesList = otelTargets?.instances ?? [];
+      }
 
       const response = await getMetricNames(
         datasourceUid,
