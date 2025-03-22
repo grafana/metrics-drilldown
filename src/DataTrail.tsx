@@ -611,7 +611,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       settings,
       pluginInfo,
       useOtelExperience,
-      hasOtelResources,
       embedded,
       histogramsLoaded,
       nativeHistograms,
@@ -622,20 +621,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const showHeaderForFirstTimeUsers = getTrailStore().recent.length < 2;
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
     model.initializeHistograms();
-
-    useEffect(() => {
-      if (model.state.addingLabelFromBreakdown) {
-        return;
-      }
-
-      if (!useOtelExperience && model.state.afterFirstOtelCheck) {
-        // if the experience has been turned off, reset the otel variables
-        model.resetOtelExperience();
-      } else {
-        // if experience is enabled, check standardization and update the otel variables
-        model.checkDataSourceForOTelResources();
-      }
-    }, [model, hasOtelResources, useOtelExperience]);
 
     useEffect(() => {
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
