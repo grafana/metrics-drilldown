@@ -593,7 +593,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.setState({
         otelTargets: { jobs: [], instances: [] },
         otelJoinQuery: '',
-        hasOtelResources: hasOtelResources ?? false,
         useOtelExperience: false,
         afterFirstOtelCheck: true,
         initialOtelCheckComplete: true,
