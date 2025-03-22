@@ -331,7 +331,7 @@ export function setupOtelFilterVariables(
   nonPromotedOtelResources: string[] = [],
   initialOtelCheckComplete: boolean,
   resettingOtel: boolean
-): { resourcesObject: OtelResourcesObject; otelJoinQuery: string } | undefined {
+): OtelResourcesObject | undefined {
   const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
   const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
   const otelAndMetricsFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, trail);
@@ -448,7 +448,7 @@ export function setupOtelFilterVariables(
   // update the otel join query variable too
   otelJoinQueryVariable.setState({ value: otelJoinQuery });
 
-  return { resourcesObject, otelJoinQuery };
+  return resourcesObject;
 }
 
 /**
@@ -509,7 +509,7 @@ export async function updateOtelData(
     return;
   }
 
-  const { resourcesObject, otelJoinQuery } = result;
+  const resourcesObject = result;
 
   // 2. Update state with the following
   // - otel join query
@@ -527,7 +527,6 @@ export async function updateOtelData(
   if (hasOtelResources && deploymentEnvironments && !initialOtelCheckComplete) {
     trail.setState({
       otelTargets,
-      otelJoinQuery,
       hasOtelResources,
       // Previously checking standardization for having deployment environments
       // Now we check that there are target_info labels that are not promoted
@@ -543,7 +542,6 @@ export async function updateOtelData(
     // we are updating on variable changes
     trail.setState({
       otelTargets,
-      otelJoinQuery,
       resettingOtel: false,
       afterFirstOtelCheck: true,
       isUpdatingOtel: false,
