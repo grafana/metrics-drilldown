@@ -170,6 +170,19 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       );
     }
 
+    // INVESTIGATE
+    // Every initiailization of GMD "changes" the datasource and
+    // the variableDependency for VAR_DATASOURCE is called in
+    // protected _variableDependency
+    // This is where we do the OTel check
+    // EXCEPT FOR gdev-prometheus.
+    // Because gdev-prometheus does not activate the variable dependecy,
+    // this is why this special handling exists
+    const datasourceUid = sceneGraph.interpolate(this, VAR_DATASOURCE_EXPR);
+    if (datasourceUid === 'gdev-prometheus') {
+      this.checkDataSourceForOTelResources();
+    }
+
     // This is for OTel consolidation filters
     // whenever the otel and metric filter is updated,
     // we need to add that filter to the correct otel resource var or var filter
