@@ -494,6 +494,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       trail.resetOtelExperience();
     } else {
       reportExploreMetrics('otel_experience_toggled', { value: 'on' });
+      trail.checkDataSourceForOTelResources();
     }
     setOtelExperienceToggleState(!useOtelExperience);
     trail.setState({ useOtelExperience: !useOtelExperience, resettingOtel, startButtonClicked });
