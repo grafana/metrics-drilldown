@@ -33,6 +33,7 @@ import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
 import { PluginInfo } from 'PluginInfo/PluginInfo';
+import { getOtelExperienceToggleState } from 'services/store';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -45,7 +46,13 @@ import { MetricsHeader } from './MetricsHeader';
 import { migrateOtelDeploymentEnvironment } from './migrations/otelDeploymentEnvironment';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
 import { type OtelTargetType } from './otel/types';
-import { manageOtelAndMetricFilters, updateOtelData, updateOtelJoinWithGroupLeft } from './otel/util';
+import {
+  getOtelJoinQuery,
+  getOtelResourcesObject,
+  manageOtelAndMetricFilters,
+  updateOtelData,
+  updateOtelJoinWithGroupLeft,
+} from './otel/util';
 import {
   getVariablesWithOtelJoinQueryConstant,
   MetricSelectedEvent,
@@ -163,16 +170,31 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       );
     }
 
+    // INVESTIGATE
+    // Every initiailization of GMD "changes" the datasource and
+    // the variableDependency for VAR_DATASOURCE is called in
+    // protected _variableDependency
+    // This is where we do the OTel check
+    // EXCEPT FOR gdev-prometheus.
+    // Because gdev-prometheus does not activate the variable dependecy,
+    // this is why this special handling exists
+    const datasourceUid = sceneGraph.interpolate(this, VAR_DATASOURCE_EXPR);
+    if (datasourceUid === 'gdev-prometheus') {
+      this.checkDataSourceForOTelResources();
+    }
+
     // This is for OTel consolidation filters
     // whenever the otel and metric filter is updated,
     // we need to add that filter to the correct otel resource var or var filter
     // so the filter can be interpolated in the query correctly
     const otelAndMetricsFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
     const otelFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, this);
+    const otelJoinQueryVariable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, this);
     if (
       isAdHocFiltersVariable(otelAndMetricsFiltersVariable) &&
       isAdHocFiltersVariable(otelFiltersVariable) &&
-      isAdHocFiltersVariable(filtersVariable)
+      isAdHocFiltersVariable(filtersVariable) &&
+      isConstantVariable(otelJoinQueryVariable)
     ) {
       this._subs.add(
         otelAndMetricsFiltersVariable?.subscribeToState((newState, prevState) => {
@@ -193,6 +215,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               otelFiltersVariable,
               filtersVariable
             );
+            const otelResourcesObject = getOtelResourcesObject(this);
+            this.setState({ otelJoinQuery: getOtelJoinQuery(otelResourcesObject) });
+            otelJoinQueryVariable.setState({ value: getOtelJoinQuery(otelResourcesObject) });
           }
         })
       );
@@ -235,16 +260,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         }
         // fresh check for otel experience
         this.checkDataSourceForOTelResources();
-      }
-
-      // update otel variables when changed
-      if (this.state.useOtelExperience && name === VAR_OTEL_RESOURCES && this.state.initialOtelCheckComplete) {
-        // for state and variables
-        const timeRange: RawTimeRange | undefined = this.state.$timeRange?.state;
-        const datasourceUid = sceneGraph.interpolate(this, VAR_DATASOURCE_EXPR);
-        if (timeRange) {
-          updateOtelData(this, datasourceUid, timeRange);
-        }
       }
     },
   });
@@ -425,50 +440,100 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // get the time range
     const timeRange: RawTimeRange | undefined = trail.state.$timeRange?.state;
 
-    if (timeRange) {
-      const datasourceUid = sceneGraph.interpolate(trail, VAR_DATASOURCE_EXPR);
-      const otelTargets = await totalOtelResources(datasourceUid, timeRange);
-      const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
-      const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
-      // loading from the url with otel resources selected will result in turning on OTel experience
-      const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
-      let previouslyUsedOtelResources = false;
-      if (isAdHocFiltersVariable(otelResourcesVariable)) {
-        previouslyUsedOtelResources = otelResourcesVariable.state.filters.length > 0;
-      }
-
-      // Future refactor: non promoted resources could be the full check
-      //   - remove hasOtelResources
-      //   - remove deployment environments as a check
-      const nonPromotedOtelResources = await getNonPromotedOtelResources(datasourceUid, timeRange);
-
-      // This is the function that will turn on OTel for the entire app.
-      // The conditions to use this function are
-      // 1. must be an otel data source
-      // 2. Do not turn it on if the start button was clicked
-      // 3. Url or bookmark has previous otel filters
-      // 4. We are restting OTel with the toggle switch
-      if (
-        hasOtelResources &&
-        nonPromotedOtelResources && // it is an otel data source
-        !this.state.startButtonClicked && // we are not starting from the start button
-        (previouslyUsedOtelResources || this.state.resettingOtel) // there are otel filters or we are restting
-      ) {
-        // HERE WE START THE OTEL EXPERIENCE ENGINE
-        // 1. Set deployment variable values
-        // 2. update all other variables and state
-        updateOtelData(
-          this,
-          datasourceUid,
-          timeRange,
-          deploymentEnvironments,
-          hasOtelResources,
-          nonPromotedOtelResources
-        );
-      } else {
-        this.resetOtelExperience(hasOtelResources, nonPromotedOtelResources);
-      }
+    if (!timeRange) {
+      return;
     }
+
+    const datasourceUid = sceneGraph.interpolate(trail, VAR_DATASOURCE_EXPR);
+    const otelResources = await this.fetchOtelResources(datasourceUid, timeRange);
+
+    // Check the local storage OTel toggle state
+    const isEnabledInLocalStorage = getOtelExperienceToggleState();
+
+    // This is the function that will turn on OTel for the entire app.
+    // The conditions to use this function are
+    // 1. must be an otel data source
+    // 2. Do not turn it on if the start button was clicked
+    // 3. Url or bookmark has previous otel filters
+    // 4. We are resetting OTel with the toggle switch
+    // 5. The OTel experience is enabled in local storage
+    if (
+      this.shouldEnableOtelExperience(otelResources, isEnabledInLocalStorage)
+      // otelResources.hasOtelResources &&
+      // otelResources.nonPromotedOtelResources && // it is an otel data source
+      // !this.state.startButtonClicked && // we are not starting from the start button
+      // (otelResources.previouslyUsedOtelResources || this.state.resettingOtel) && // there are otel filters or we are restting
+      // isEnabledInLocalStorage // OTel experience is enabled in local storage
+    ) {
+      // HERE WE START THE OTEL EXPERIENCE ENGINE
+      // 1. Set deployment variable values
+      // 2. update all other variables and state
+      updateOtelData(
+        this,
+        datasourceUid,
+        timeRange,
+        otelResources.deploymentEnvironments,
+        otelResources.hasOtelResources,
+        otelResources.nonPromotedOtelResources
+      );
+    } else {
+      // this will update state to show the OTel toggle switch because hasOtelResources is the flag
+      // hasOtelResources is checked in MetricSelectScene to show the OTel toggle switch
+      this.resetOtelExperience(otelResources.hasOtelResources, otelResources.nonPromotedOtelResources);
+    }
+  }
+
+  /**
+   * Fetch OTel resources for a given datasource and time range
+   */
+  private async fetchOtelResources(datasourceUid: string, timeRange: RawTimeRange) {
+    const otelTargets = await totalOtelResources(datasourceUid, timeRange);
+    const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
+    const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
+
+    // loading from the url with otel resources selected will result in turning on OTel experience
+    const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
+    let previouslyUsedOtelResources = false;
+    if (isAdHocFiltersVariable(otelResourcesVariable)) {
+      previouslyUsedOtelResources = otelResourcesVariable.state.filters.length > 0;
+    }
+
+    // Future refactor: non promoted resources could be the full check
+    //   - remove hasOtelResources
+    //   - remove deployment environments as a check
+    const nonPromotedOtelResources = await getNonPromotedOtelResources(datasourceUid, timeRange);
+
+    return {
+      otelTargets,
+      deploymentEnvironments,
+      hasOtelResources,
+      previouslyUsedOtelResources,
+      nonPromotedOtelResources,
+    };
+  }
+
+  /**
+   * Determines if the OTel experience should be enabled based on several conditions
+   *
+   * @param otelResources - The OTel resources information
+   * @param isEnabledInLocalStorage - Whether OTel experience is enabled in local storage
+   * @returns boolean - True if OTel experience should be enabled
+   */
+  private shouldEnableOtelExperience(
+    otelResources: {
+      hasOtelResources: boolean;
+      nonPromotedOtelResources: string[];
+      previouslyUsedOtelResources: boolean;
+    },
+    isEnabledInLocalStorage: boolean
+  ): boolean {
+    return (
+      otelResources.hasOtelResources &&
+      //otelResources.nonPromotedOtelResources.length && // it is an otel data source
+      !this.state.startButtonClicked && // we are not starting from the start button
+      (otelResources.previouslyUsedOtelResources || this.state.resettingOtel || false) && // there are otel filters or we are resetting
+      isEnabledInLocalStorage // OTel experience is enabled in local storage
+    );
   }
 
   resetOtelExperience(hasOtelResources?: boolean, nonPromotedResources?: string[]) {
@@ -560,7 +625,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       settings,
       pluginInfo,
       useOtelExperience,
-      hasOtelResources,
       embedded,
       histogramsLoaded,
       nativeHistograms,
@@ -571,20 +635,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const showHeaderForFirstTimeUsers = getTrailStore().recent.length < 2;
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
     model.initializeHistograms();
-
-    useEffect(() => {
-      if (model.state.addingLabelFromBreakdown) {
-        return;
-      }
-
-      if (!useOtelExperience && model.state.afterFirstOtelCheck) {
-        // if the experience has been turned off, reset the otel variables
-        model.resetOtelExperience();
-      } else {
-        // if experience is enabled, check standardization and update the otel variables
-        model.checkDataSourceForOTelResources();
-      }
-    }, [model, hasOtelResources, useOtelExperience]);
 
     useEffect(() => {
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
