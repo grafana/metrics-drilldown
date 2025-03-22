@@ -46,7 +46,13 @@ import { MetricsHeader } from './MetricsHeader';
 import { migrateOtelDeploymentEnvironment } from './migrations/otelDeploymentEnvironment';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
 import { type OtelTargetType } from './otel/types';
-import { manageOtelAndMetricFilters, updateOtelData, updateOtelJoinWithGroupLeft } from './otel/util';
+import {
+  getOtelJoinQuery,
+  getOtelResourcesObject,
+  manageOtelAndMetricFilters,
+  updateOtelData,
+  updateOtelJoinWithGroupLeft,
+} from './otel/util';
 import {
   getVariablesWithOtelJoinQueryConstant,
   MetricSelectedEvent,
@@ -194,6 +200,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               otelFiltersVariable,
               filtersVariable
             );
+            const otelResourcesObject = getOtelResourcesObject(this);
+            this.setState({ otelJoinQuery: getOtelJoinQuery(otelResourcesObject) });
           }
         })
       );
@@ -236,16 +244,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         }
         // fresh check for otel experience
         this.checkDataSourceForOTelResources();
-      }
-
-      // update otel variables when changed
-      if (this.state.useOtelExperience && name === VAR_OTEL_RESOURCES && this.state.initialOtelCheckComplete) {
-        // for state and variables
-        const timeRange: RawTimeRange | undefined = this.state.$timeRange?.state;
-        const datasourceUid = sceneGraph.interpolate(this, VAR_DATASOURCE_EXPR);
-        if (timeRange) {
-          updateOtelData(this, datasourceUid, timeRange);
-        }
       }
     },
   });
@@ -579,6 +577,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.setState({
         otelTargets: { jobs: [], instances: [] },
         otelJoinQuery: '',
+        hasOtelResources: hasOtelResources ?? false,
         useOtelExperience: false,
         afterFirstOtelCheck: true,
         initialOtelCheckComplete: true,
