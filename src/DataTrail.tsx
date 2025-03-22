@@ -515,9 +515,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   ): boolean {
     return (
       otelResources.hasOtelResources &&
-      otelResources.nonPromotedOtelResources.length > 0 && // it is an otel data source
+      //otelResources.nonPromotedOtelResources.length && // it is an otel data source
       !this.state.startButtonClicked && // we are not starting from the start button
-      (otelResources.previouslyUsedOtelResources || this.state.resettingOtel) && // there are otel filters or we are resetting
+      (otelResources.previouslyUsedOtelResources || this.state.resettingOtel || false) && // there are otel filters or we are resetting
       isEnabledInLocalStorage // OTel experience is enabled in local storage
     );
   }
