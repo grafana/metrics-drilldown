@@ -189,10 +189,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // so the filter can be interpolated in the query correctly
     const otelAndMetricsFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
     const otelFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, this);
+    const otelJoinQueryVariable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, this);
     if (
       isAdHocFiltersVariable(otelAndMetricsFiltersVariable) &&
       isAdHocFiltersVariable(otelFiltersVariable) &&
-      isAdHocFiltersVariable(filtersVariable)
+      isAdHocFiltersVariable(filtersVariable) &&
+      isConstantVariable(otelJoinQueryVariable)
     ) {
       this._subs.add(
         otelAndMetricsFiltersVariable?.subscribeToState((newState, prevState) => {
@@ -215,6 +217,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             );
             const otelResourcesObject = getOtelResourcesObject(this);
             this.setState({ otelJoinQuery: getOtelJoinQuery(otelResourcesObject) });
+            otelJoinQueryVariable.setState({ value: getOtelJoinQuery(otelResourcesObject) });
           }
         })
       );
