@@ -322,52 +322,20 @@ export function getProdOrDefaultEnv(envs: string[]): string | null {
 }
 
 /**
- *  This function is used to update state and otel variables.
- *
- *  1. Set the otelResources adhoc tagKey and tagValues filter functions
- *  2. Get the otel join query for state and variable
- *  3. Update state with the following
- *    - otel join query
- *    - otelTargets used to filter metrics
- *  For initialization we also update the following
- *    - has otel resources flag
- *    - isStandardOtel flag (for enabliing the otel experience toggle)
- *    - and useOtelExperience
- *
- * This function is called on start and when variables change.
- * On start will provide the deploymentEnvironments and hasOtelResources parameters.
- * In the variable change case, we will not provide these parameters. It is assumed that the
- * data source has been checked for otel resources and standardization and the otel variables are enabled at this point.
- * @param datasourceUid
- * @param timeRange
- * @param deploymentEnvironments
- * @param hasOtelResources
- * @param nonPromotedOtelResources
- * @param fromDataSourceChanged
+ * Sets up OTel filter variables during initialization or reset.
+ * Handles deployment environment setup, URL parameters, and variable state management.
  */
-export async function updateOtelData(
+export function setupOtelFilterVariables(
   trail: DataTrail,
-  datasourceUid: string,
-  timeRange: RawTimeRange,
-  deploymentEnvironments?: string[],
-  hasOtelResources?: boolean,
-  nonPromotedOtelResources?: string[]
-) {
-  // currently need isUpdatingOtel check for variable race conditions and state changes
-  // future refactor project
-  //  - checkDataSourceForOTelResources for state changes
-  //  - otel resources var for variable dependency listeners
-  if (trail.state.isUpdatingOtel) {
-    return;
-  }
-  trail.setState({ isUpdatingOtel: true });
-
+  deploymentEnvironments: string[] = [],
+  nonPromotedOtelResources: string[] = [],
+  initialOtelCheckComplete: boolean,
+  resettingOtel: boolean
+): { resourcesObject: OtelResourcesObject; otelJoinQuery: string } | undefined {
   const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
   const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
   const otelAndMetricsFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, trail);
   const otelJoinQueryVariable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, trail);
-  const initialOtelCheckComplete = trail.state.initialOtelCheckComplete;
-  const resettingOtel = trail.state.resettingOtel;
 
   if (
     !(
@@ -377,13 +345,14 @@ export async function updateOtelData(
       isConstantVariable(otelJoinQueryVariable)
     )
   ) {
-    return;
+    return undefined;
   }
+
   // Set deployment environment variable as a new otel & metric filter.
   // We choose one default value at the beginning of the OTel experience.
   // This is because the work flow for OTel begins with users selecting a deployment environment
   // default to production.
-  let defaultDepEnv = getProdOrDefaultEnv(deploymentEnvironments ?? []) ?? '';
+  let defaultDepEnv = getProdOrDefaultEnv(deploymentEnvironments) ?? '';
 
   // 1. Cases of how to add filters to the otelmetricsvar
   //  -- when we set these on instantiation, we need to check that we are not double setting them
@@ -478,6 +447,69 @@ export async function updateOtelData(
 
   // update the otel join query variable too
   otelJoinQueryVariable.setState({ value: otelJoinQuery });
+
+  return { resourcesObject, otelJoinQuery };
+}
+
+/**
+ *  This function is used to update state and otel variables.
+ *
+ *  1. Set the otelResources adhoc tagKey and tagValues filter functions
+ *  2. Get the otel join query for state and variable
+ *  3. Update state with the following
+ *    - otel join query
+ *    - otelTargets used to filter metrics
+ *  For initialization we also update the following
+ *    - has otel resources flag
+ *    - isStandardOtel flag (for enabliing the otel experience toggle)
+ *    - and useOtelExperience
+ *
+ * This function is called on start and when variables change.
+ * On start will provide the deploymentEnvironments and hasOtelResources parameters.
+ * In the variable change case, we will not provide these parameters. It is assumed that the
+ * data source has been checked for otel resources and standardization and the otel variables are enabled at this point.
+ * @param datasourceUid
+ * @param timeRange
+ * @param deploymentEnvironments
+ * @param hasOtelResources
+ * @param nonPromotedOtelResources
+ * @param fromDataSourceChanged
+ */
+export async function updateOtelData(
+  trail: DataTrail,
+  datasourceUid: string,
+  timeRange: RawTimeRange,
+  deploymentEnvironments?: string[],
+  hasOtelResources?: boolean,
+  nonPromotedOtelResources?: string[]
+) {
+  // currently need isUpdatingOtel check for variable race conditions and state changes
+  // future refactor project
+  //  - checkDataSourceForOTelResources for state changes
+  //  - otel resources var for variable dependency listeners
+  if (trail.state.isUpdatingOtel) {
+    return;
+  }
+  trail.setState({ isUpdatingOtel: true });
+
+  const initialOtelCheckComplete = trail.state.initialOtelCheckComplete;
+  const resettingOtel = trail.state.resettingOtel;
+
+  // Setup filter variables and get resources object and join query
+  const result = setupOtelFilterVariables(
+    trail,
+    deploymentEnvironments,
+    nonPromotedOtelResources,
+    initialOtelCheckComplete ?? false,
+    resettingOtel ?? false
+  );
+
+  if (!result) {
+    trail.setState({ isUpdatingOtel: false });
+    return;
+  }
+
+  const { resourcesObject, otelJoinQuery } = result;
 
   // 2. Update state with the following
   // - otel join query
