@@ -89,7 +89,6 @@ export interface DataTrailState extends SceneObjectState {
   hasOtelResources?: boolean;
   useOtelExperience?: boolean;
   otelTargets?: OtelTargetType; // all the targets with job and instance regex, job=~"<job-v>|<job-v>"", instance=~"<instance-v>|<instance-v>"
-  otelJoinQuery?: string;
   isStandardOtel?: boolean;
   nonPromotedOtelResources?: string[];
   initialOtelCheckComplete?: boolean; // updated after the first otel check
@@ -121,8 +120,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       // the initial variables should include a metric for metric scene and the otelJoinQuery.
       // NOTE: The other OTEL filters should be included too before this work is merged
-      $variables:
-        state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters, state.otelJoinQuery),
+      $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
       controls: state.controls ?? [
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
@@ -136,8 +134,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       // default to false but update this to true on updateOtelData()
       // or true if the user either turned on the experience
       useOtelExperience: state.useOtelExperience ?? false,
-      // preserve the otel join query
-      otelJoinQuery: state.otelJoinQuery ?? '',
       showPreviews: state.showPreviews ?? true,
       nativeHistograms: state.nativeHistograms ?? [],
       histogramsLoaded: state.histogramsLoaded ?? false,
@@ -216,7 +212,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               filtersVariable
             );
             const otelResourcesObject = getOtelResourcesObject(this);
-            this.setState({ otelJoinQuery: getOtelJoinQuery(otelResourcesObject) });
             otelJoinQueryVariable.setState({ value: getOtelJoinQuery(otelResourcesObject) });
           }
         })
@@ -583,7 +578,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         isStandardOtel: nonPromotedResources.length > 0,
         useOtelExperience: false,
         otelTargets: { jobs: [], instances: [] },
-        otelJoinQuery: '',
         afterFirstOtelCheck: true,
         initialOtelCheckComplete: true,
         isUpdatingOtel: false,
@@ -592,7 +586,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       // partial reset when a user turns off the otel experience
       this.setState({
         otelTargets: { jobs: [], instances: [] },
-        otelJoinQuery: '',
         useOtelExperience: false,
         afterFirstOtelCheck: true,
         initialOtelCheckComplete: true,
@@ -685,12 +678,7 @@ export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   }
 }
 
-function getVariableSet(
-  initialDS?: string,
-  metric?: string,
-  initialFilters?: AdHocVariableFilter[],
-  otelJoinQuery?: string
-) {
+function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   return new SceneVariableSet({
     variables: [
       new DataSourceVariable({
@@ -728,7 +716,7 @@ function getVariableSet(
             .join(',');
         },
       }),
-      ...getVariablesWithOtelJoinQueryConstant(otelJoinQuery ?? ''),
+      ...getVariablesWithOtelJoinQueryConstant(),
       new ConstantVariable({
         name: VAR_OTEL_GROUP_LEFT,
         value: undefined,
