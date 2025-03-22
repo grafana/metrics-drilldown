@@ -25,16 +25,19 @@ import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
 import { UI_TEXT } from 'constants/ui';
+import { totalOtelResources } from 'otel/api';
+import { getOtelResourcesObject } from 'otel/util';
 
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
-import { getMetricNames } from './api';
-import { setOtelExperienceToggleState } from '../services/store';
 import { getFilters, getTrailFor } from '../utils';
+import { getMetricNames } from './api';
 import { getPreviewPanelFor } from './previewPanel';
+import { sortRelatedMetrics } from './relatedMetrics';
 import { SelectMetricAction } from './SelectMetricAction';
+import { setOtelExperienceToggleState } from '../services/store';
 import {
   getVariablesWithMetricConstant,
   MetricSelectedEvent,
@@ -42,16 +45,14 @@ import {
   VAR_DATASOURCE,
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
+  VAR_OTEL_RESOURCES,
 } from '../shared';
 import { StatusWrapper } from '../StatusWrapper';
-import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
 import { getSelectedScopes } from '../utils/utils.scopes';
 import { isSceneTimeRange, isSceneTimeRangeState } from '../utils/utils.timerange';
 import { isAdHocFiltersVariable } from '../utils/utils.variables';
-import { getOtelResourcesObject } from 'otel/util';
-import { totalOtelResources } from 'otel/api';
 
 interface MetricPanel {
   name: string;
@@ -107,7 +108,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metricPrefix'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE, VAR_FILTERS],
+    variableNames: [VAR_DATASOURCE, VAR_FILTERS, VAR_OTEL_RESOURCES],
     onReferencedVariableValueChanged: () => {
       // In all cases, we want to reload the metric names
       this._debounceRefreshMetricNames();
