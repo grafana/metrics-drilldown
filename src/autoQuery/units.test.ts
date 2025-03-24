@@ -10,11 +10,6 @@ describe('getUnitFromMetric', () => {
     expect(getUnitFromMetric('go_gc_duration_seconds')).toBe('seconds');
   });
 
-  it('should return the second to last part of the metric if it is a valid unit', () => {
-    expect(getUnitFromMetric('go_gc_heap_allocs_by_size_bytes_count')).toBe('bytes');
-    expect(getUnitFromMetric('go_cpu_classes_gc_mark_assist_cpu_seconds_total')).toBe('seconds');
-  });
-
   it('should return null if no valid unit is found', () => {
     expect(getUnitFromMetric('ALERTS')).toBe(null);
     expect(getUnitFromMetric('utf8 metric with.dot')).toBe(null);

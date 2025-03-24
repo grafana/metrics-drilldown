@@ -48,11 +48,6 @@ export function getUnitFromMetric(metric: string) {
     return UNIT_SECONDS;
   }
 
-  // Check for duration or latency metrics
-  if (metricLower.includes('duration') || metricLower.includes('latency')) {
-    return UNIT_SECONDS;
-  }
-
   // Then try the suffix-based approach
   const metricParts = metricLower.split('_');
 
@@ -64,19 +59,12 @@ export function getUnitFromMetric(metric: string) {
     }
   }
 
-  // Check for common units anywhere in the metric name
-  for (const unit of UNIT_LIST) {
-    if (metricLower.includes(unit)) {
-      return unit;
-    }
-  }
-
   // Check for common patterns
   if (metricLower.endsWith('_ms') || metricLower.includes('_ms_')) {
     return UNIT_MILLISECONDS;
   } else if (metricLower.endsWith('_count') || metricLower.includes('_count_')) {
     return UNIT_COUNT;
-  } else if (metricLower.includes('percentage') || metricLower.includes('ratio')) {
+  } else if (metricLower.endsWith('_percentage') || metricLower.endsWith('_ratio')) {
     return UNIT_PERCENT;
   }
 
