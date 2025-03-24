@@ -78,7 +78,7 @@ export function getUnit(metricName: string | undefined) {
   }
 
   const metricPart = getUnitFromMetric(metricName);
-  return (metricPart && UNIT_MAP[metricPart]) || DEFAULT_UNIT;
+  return (metricPart && UNIT_MAP[metricPart.toLowerCase()]) || DEFAULT_UNIT;
 }
 
 export function getPerSecondRateUnit(metricName: string | undefined) {

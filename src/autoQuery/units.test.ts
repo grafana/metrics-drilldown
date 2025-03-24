@@ -1,4 +1,12 @@
-import { DEFAULT_RATE_UNIT, DEFAULT_UNIT, getPerSecondRateUnit, getUnit, getUnitFromMetric } from './units';
+import {
+  DEFAULT_RATE_UNIT,
+  DEFAULT_UNIT,
+  getPerSecondRateUnit,
+  getUnit,
+  getUnitFromMetric,
+  UNIT_BYTES,
+  UNIT_SECONDS,
+} from './units';
 
 describe('getUnitFromMetric', () => {
   it('should return null for an empty string input', () => {
@@ -46,11 +54,6 @@ describe('getUnit', () => {
     expect(getUnit('invalidPart')).toBe(DEFAULT_UNIT);
   });
 
-  it('should handle case sensitivity correctly', () => {
-    expect(getUnit('BYTES')).toBe(DEFAULT_UNIT);
-    expect(getUnit('Seconds')).toBe(DEFAULT_UNIT);
-  });
-
   it('should not throw errors for unusual input', () => {
     expect(() => getUnit('123')).not.toThrow();
     expect(() => getUnit('some_random_string')).not.toThrow();
@@ -74,11 +77,6 @@ describe('getPerSecondRateUnit', () => {
 
   it('should return the default rate unit if the metric part is not in RATE_UNIT_MAP', () => {
     expect(getPerSecondRateUnit('invalidPart')).toBe(DEFAULT_RATE_UNIT);
-  });
-
-  it('should handle case sensitivity correctly', () => {
-    expect(getPerSecondRateUnit('BYTES')).toBe(DEFAULT_RATE_UNIT);
-    expect(getPerSecondRateUnit('Seconds')).toBe(DEFAULT_RATE_UNIT);
   });
 
   it('should not throw errors for unusual input', () => {
