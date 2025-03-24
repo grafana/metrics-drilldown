@@ -68,8 +68,18 @@ export class LabelsDataSource extends RuntimeDataSource {
 
     // there is probably a more graceful way to implement this, but this is what the DS offers us.
     // if a DS does not support the labels match API, we need getTagKeys to handle the empty matcher
+
     if (ds.hasLabelsMatchAPISupport()) {
-      const response = await ds.languageProvider.fetchLabelsWithMatch(matcher);
+      const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
+      let response: Record<string, string[]> = {};
+
+      if (ds.languageProvider.fetchLabelsWithMatch.length === 3) {
+        // @ts-ignore: Ignoring type error due to breaking change in fetchLabelValues signature
+        response = await ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher);
+      } else {
+        response = await ds.languageProvider.fetchLabelsWithMatch(matcher);
+      }
+
       labelOptions = this.processLabelOptions(
         Object.entries(response).map(([key, value]) => ({
           value: key,
