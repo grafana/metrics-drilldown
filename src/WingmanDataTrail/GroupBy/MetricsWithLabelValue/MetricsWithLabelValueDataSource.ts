@@ -52,7 +52,14 @@ export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
       return [];
     }
 
-    const metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch('__name__', matcher);
+    const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
+    let metricsList: string[] = [];
+    if (ds.languageProvider.fetchLabelValues.length === 2) {
+      // @ts-ignore: Ignoring type error due to breaking change in fetchLabelValues signature
+      metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch(timeRange, '__name__', matcher);
+    } else {
+      metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch('__name__', matcher);
+    }
 
     return metricsList.map((metricName) => ({ value: metricName, text: metricName }));
   }
