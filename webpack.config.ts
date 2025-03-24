@@ -23,7 +23,6 @@ const config = async (env): Promise<Configuration> => {
         /@grafana\/plugin-ui/,
         path.resolve(__dirname, 'src/stubs/grafana-plugin-ui.ts')
       ),
-      new NormalModuleReplacementPlugin(/moment-timezone/, path.resolve(__dirname, 'src/stubs/moment-timezone.ts')),
     ],
   });
 };
