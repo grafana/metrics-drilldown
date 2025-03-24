@@ -123,14 +123,19 @@ export class LabelsDataSource extends RuntimeDataSource {
     }
 
     const filterExpression = sceneGraph.interpolate(sceneObject, VAR_FILTERS_EXPR, {});
-
-    const response = await ds.languageProvider.fetchLabelValues(
-      labelName,
-      // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
-      `{__name__=~".+",${filterExpression}}`
-    );
-
-    return response;
+    const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
+    // new signature for fetchLabelValues includes time range
+    // handle old signature for backwards compatibility
+    if (ds.languageProvider.fetchLabelValues.length === 2) {
+      return await ds.languageProvider.fetchLabelValues(
+        timeRange,
+        labelName,
+        // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
+        `{__name__=~".+",${filterExpression}}`
+      );
+    } else {
+      return await ds.languageProvider.fetchLabelValues(labelName, `{__name__=~".+",${filterExpression}}`);
+    }
   }
 
   static async fetchLabelCardinality(labelName: string, limit: number, sceneObject: SceneObject): Promise<number> {
