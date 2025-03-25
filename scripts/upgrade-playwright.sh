@@ -7,7 +7,7 @@ if [ -z "$OLD_VERSION" ] || [ -z "$NEW_VERSION" ]; then
     exit 1
 fi
 
-yarn up @playwright/test@^$NEW_VERSION 
+npm up @playwright/test
 
 find ./e2e/docker/Dockerfile.plugin -type f -exec sed -i "" "s/$OLD_VERSION/$NEW_VERSION/g" {} \;
 
