@@ -22,10 +22,6 @@ cards:
       href: ./about-metrics/
       description: Learn about metrics and the role they serve in analyzing telemetry data.
       height: 24
-    - title: Set up
-      href: ./set-up/
-      description: Set up the Grafana Metrics Drilldown app in Grafana Cloud or in your own stack.
-      height: 24
     - title: Get started
       href: ./get-started/
       description: Get started analyzing your metrics with Grafana Metrics Drilldown

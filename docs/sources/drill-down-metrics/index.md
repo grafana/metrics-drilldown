@@ -5,7 +5,7 @@ labels:
     - enterprise
     - oss
 title: Drill down your metrics
-weight: 40
+weight: 30
 ---
 
 # Drill down your metrics
