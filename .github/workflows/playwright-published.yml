@@ -41,7 +41,7 @@ jobs:
           mkdir -p dist-artifacts
           echo "Checking plugin.json contents:"
           cat dist/plugin.json
-          version=$(jq -r .version dist/plugin.json)
+          version=$(jq -r .info.version dist/plugin.json)
           plugin_id=$(jq -r .id dist/plugin.json)
           echo "Extracted version: $version"
           echo "Extracted plugin_id: $plugin_id"
