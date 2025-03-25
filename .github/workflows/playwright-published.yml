@@ -47,8 +47,8 @@ jobs:
           echo "Extracted plugin_id: $plugin_id"
           echo "plugin-version=$version" >> "$GITHUB_OUTPUT"
 
-          # Create the zip file with the correct structure directly
-          (cd dist && zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip . && cd ..)
+          # Create the zip file with the correct structure in one go
+          (cd dist && find . -type f -exec zip -j ../dist-artifacts/${{ github.event.repository.name }}-$version.zip {} \;)
           (cd dist-artifacts && zip -r ${{ github.event.repository.name }}-$version.zip $plugin_id/* && zip -d ${{ github.event.repository.name }}-$version.zip $plugin_id/)
 
       - name: Upload artifacts
