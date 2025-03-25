@@ -55,6 +55,11 @@ describe('getUnit', () => {
     expect(getUnit('invalidPart')).toBe(DEFAULT_UNIT);
   });
 
+  it('should handle case sensitivity correctly', () => {
+    expect(getUnit('BYTES')).toBe(UNIT_BYTES);
+    expect(getUnit('SECONDS')).toBe('s');
+  });
+
   it('should not throw errors for unusual input', () => {
     expect(() => getUnit('123')).not.toThrow();
     expect(() => getUnit('some_random_string')).not.toThrow();
@@ -78,6 +83,10 @@ describe('getPerSecondRateUnit', () => {
 
   it('should return the default rate unit if the metric part is not in RATE_UNIT_MAP', () => {
     expect(getPerSecondRateUnit('invalidPart')).toBe(DEFAULT_RATE_UNIT);
+  });
+
+  it('should handle case sensitivity correctly', () => {
+    expect(getPerSecondRateUnit('BYTES')).toBe(RATE_BYTES_PER_SECOND);
   });
 
   it('should not throw errors for unusual input', () => {
