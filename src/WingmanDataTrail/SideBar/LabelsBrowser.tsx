@@ -8,13 +8,22 @@ import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
 interface LabelsBrowserState extends SceneObjectState {
+  key: string;
+  title: string;
   labelVariableName: string;
 }
 
 export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
-  constructor({ labelVariableName }: { labelVariableName: LabelsBrowserState['labelVariableName'] }) {
+  constructor({
+    title,
+    labelVariableName,
+  }: {
+    title: LabelsBrowserState['title'];
+    labelVariableName: LabelsBrowserState['labelVariableName'];
+  }) {
     super({
       key: 'labels-browser',
+      title,
       labelVariableName,
     });
   }
@@ -26,7 +35,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
   public static Component = ({ model }: SceneComponentProps<LabelsBrowser>) => {
     const styles = useStyles2(getStyles);
-    const { labelVariableName } = model.useState();
+    const { labelVariableName, title } = model.useState();
 
     const labelsVariable = sceneGraph.lookupVariable(labelVariableName, model) as LabelsVariable;
     const { loading, options: labels, value } = labelsVariable.useState();
@@ -54,7 +63,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     return (
       <div className={styles.container}>
         <h5 className={styles.header}>
-          Breakdown by label
+          {title}
           <span className={styles.count}>({loading ? '0' : labels.length})</span>
         </h5>
 
@@ -110,12 +119,10 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(1),
       height: '100%',
       overflowY: 'hidden',
-      background: theme.colors.background.primary,
     }),
     header: css({
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
+      fontSize: '1.1rem',
       marginBottom: theme.spacing(1),
-      paddingBottom: theme.spacing(1),
     }),
     count: css({
       display: 'inline-block',
@@ -124,6 +131,8 @@ function getStyles(theme: GrafanaTheme2) {
       marginLeft: theme.spacing(0.5),
     }),
     search: css({
+      flexBasis: '32px',
+      flexShrink: 0,
       marginBottom: theme.spacing(1),
       padding: theme.spacing(0, 0.5),
     }),

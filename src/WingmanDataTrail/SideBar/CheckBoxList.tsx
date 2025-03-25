@@ -17,10 +17,6 @@ export function CheckBoxList({
 }) {
   const styles = useStyles2(getStyles);
 
-  if (!filteredList.length) {
-    return <div className={styles.noResults}>No results</div>;
-  }
-
   return (
     <>
       <div className={styles.checkboxListHeader}>
@@ -35,23 +31,26 @@ export function CheckBoxList({
           clear
         </Button>
       </div>
-      <div className={styles.checkboxList}>
-        {filteredList.map((item) => (
-          <div key={item.value} className={styles.checkboxItem}>
-            <CheckboxWithCount
-              label={item.label}
-              count={item.count}
-              checked={selectedValues.includes(item.value)}
-              onChange={(e) => {
-                const newValues = e.currentTarget.checked
-                  ? [...selectedValues, item.value]
-                  : selectedValues.filter((v) => v !== item.value);
-                onSelectionChange(newValues);
-              }}
-            />
-          </div>
-        ))}
-      </div>
+      {!filteredList.length && <div className={styles.noResults}>No results</div>}
+      {filteredList.length > 0 && (
+        <div className={styles.checkboxList}>
+          {filteredList.map((item) => (
+            <div key={item.value} className={styles.checkboxItem}>
+              <CheckboxWithCount
+                label={item.label}
+                count={item.count}
+                checked={selectedValues.includes(item.value)}
+                onChange={(e) => {
+                  const newValues = e.currentTarget.checked
+                    ? [...selectedValues, item.value]
+                    : selectedValues.filter((v) => v !== item.value);
+                  onSelectionChange(newValues);
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
@@ -92,7 +91,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     noResults: css({
       fontStyle: 'italic',
-      marginTop: theme.spacing(2),
+      margin: theme.spacing(0, 0, 0.5, 1),
     }),
   };
 }

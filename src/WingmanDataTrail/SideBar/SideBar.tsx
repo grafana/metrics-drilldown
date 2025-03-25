@@ -78,7 +78,10 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const variantVariable = sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable;
     if (variantVariable.state.value === 'onboard-filters-labels') {
       this.setState({
-        labelsBrowswer: new LabelsBrowser({ labelVariableName: VAR_WINGMAN_GROUP_BY }),
+        labelsBrowswer: new LabelsBrowser({
+          title: 'Breakdown by label',
+          labelVariableName: VAR_WINGMAN_GROUP_BY,
+        }),
       });
     }
 

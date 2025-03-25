@@ -36,12 +36,13 @@ import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction'
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
-import { type LabelsBrowser } from './SideBar/LabelsBrowser';
+import { CollapsibleSideBar } from './SideBar/CollapsibleSideBar';
+import { LabelsBrowser } from './SideBar/LabelsBrowser';
 import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
-  sidebar: SideBar | LabelsBrowser;
+  sidebar: SideBar | LabelsBrowser | CollapsibleSideBar;
   body: SceneObjectBase;
   drawer: SceneDrawer;
 }
@@ -57,7 +58,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       headerControls: new HeaderControls({}),
-      sidebar: new SideBar({}),
+      sidebar: new CollapsibleSideBar({}),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
       drawer: new SceneDrawer({}),
     });
@@ -165,11 +166,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         <div className={styles.body}>
           {variant !== ROUTES.OnboardWithPills && (
             <div className={styles.sidebar}>
-              {sidebar instanceof SideBar ? (
-                <sidebar.Component model={sidebar} />
-              ) : (
-                <sidebar.Component model={sidebar} />
-              )}
+              {sidebar instanceof SideBar && <sidebar.Component model={sidebar} />}
+              {sidebar instanceof LabelsBrowser && <sidebar.Component model={sidebar} />}
+              {sidebar instanceof CollapsibleSideBar && <sidebar.Component model={sidebar} />}
             </div>
           )}
           <div className={styles.list}>
@@ -198,8 +197,12 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       overflowY: 'auto',
     }),
     sidebar: css({
-      flex: '0 0 320px',
-      overflowY: 'hidden',
+      flex: '0 0 auto',
+      overflowY: 'auto',
+      boxSizing: 'border-box',
+      border: `1px solid ${theme.colors.border.weak}`,
+      borderRadius: theme.shape.radius.default,
+      backgroundColor: theme.colors.background.canvas,
     }),
   };
 }
