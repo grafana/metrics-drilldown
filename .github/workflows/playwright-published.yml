@@ -11,8 +11,46 @@ permissions:
   id-token: 'write'
 
 jobs:
-  CI:
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
+  build:
+    name: Build plugin
+    runs-on: ubuntu-latest
+    outputs:
+      plugin-version: ${{ steps.package.outputs.plugin-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build -- --profile --json stats.json
+
+      - name: Package plugin
+        id: package
+        run: |
+          mkdir -p dist-artifacts
+          version=$(jq -r .version dist/plugin.json)
+          echo "plugin-version=$version" >> "$GITHUB_OUTPUT"
+          cd dist
+          zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: dist-artifacts
+          path: dist-artifacts/
+          retention-days: 7
+
+  playwright:
+    needs: build
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright.yml
     with:
-      upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
-      branch: main
+      id: ${{ github.event.repository.name }}
+      version: ${{ needs.build.outputs.plugin-version }}
