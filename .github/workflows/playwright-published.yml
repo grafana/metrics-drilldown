@@ -54,3 +54,4 @@ jobs:
     with:
       id: ${{ github.event.repository.name }}
       version: ${{ needs.build.outputs.plugin-version }}
+      upload-artifacts: true
