@@ -41,8 +41,7 @@ jobs:
           mkdir -p dist-artifacts
           version=$(jq -r .version dist/plugin.json)
           echo "plugin-version=$version" >> "$GITHUB_OUTPUT"
-          cd dist
-          zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
+          (cd dist && zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .)
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.1
