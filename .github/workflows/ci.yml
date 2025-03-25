@@ -11,7 +11,13 @@ permissions:
   id-token: 'write'
 
 jobs:
-  CI:
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
-    with:
-      upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: echo "Hello, world!"
+
+  # CI:
+  #   uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
+  #   with:
+  #     upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
