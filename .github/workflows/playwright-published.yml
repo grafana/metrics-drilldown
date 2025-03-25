@@ -50,7 +50,7 @@ jobs:
 
   playwright:
     needs: build
-    uses: grafana/plugin-ci-workflows/.github/workflows/playwright.yml
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright.yml@main
     with:
       id: ${{ github.event.repository.name }}
       version: ${{ needs.build.outputs.plugin-version }}
