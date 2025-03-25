@@ -42,9 +42,12 @@ jobs:
           version=$(jq -r .info.version dist/plugin.json)
           plugin_id=$(jq -r .id dist/plugin.json)
 
+          # Set the version as an output
+          echo "plugin-version=${version}" >> $GITHUB_OUTPUT
+
           # Step 1: Create initial zip with all files
           cd dist
-          zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
+          zip -r ../dist-artifacts/${{ github.event.repository.name }}-${version}.zip .
           cd ..
 
           # Step 2: Create plugin ID directory and copy files into it
@@ -54,7 +57,7 @@ jobs:
 
           # Step 3: Add files to zip with correct structure
           cd $plugin_id
-          zip -r ../${{ github.event.repository.name }}-$version.zip .
+          zip -r ../${{ github.event.repository.name }}-${version}.zip .
 
           # Step 4: Clean up
           cd ..
