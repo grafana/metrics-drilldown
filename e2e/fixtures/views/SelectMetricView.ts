@@ -2,6 +2,7 @@ import { expect, type Page } from '@playwright/test';
 
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
+import { UI_TEXT } from '../../../src/constants/ui';
 
 export class SelectMetricView extends DrilldownView {
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
@@ -37,6 +38,10 @@ export class SelectMetricView extends DrilldownView {
   async assertSelectedDataSource(expectedDataSource: string) {
     const name = await this.getDataSourceSelector().textContent();
     await expect(name?.trim()).toBe(expectedDataSource);
+  }
+
+  selectExplorationType(dataSource: string) {
+    return this.getDataSourceSelector().getByLabel(dataSource).click();
   }
 
   /* Ad Hoc filters */
@@ -99,13 +104,35 @@ export class SelectMetricView extends DrilldownView {
     await expect(this.getByTestId('quick-filter-results-count')).toHaveText(String(expectedCount));
   }
 
+  /* Otel */
+
+  async toggleOtelExperience(switchOn: boolean) {
+    const otelSwitch = this.page.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL);
+
+    if (switchOn) {
+      await expect(otelSwitch).not.toBeChecked();
+      await otelSwitch.check();
+    } else {
+      await expect(otelSwitch).toBeChecked();
+      await otelSwitch.uncheck();
+    }
+  }
+
   /* Scene body */
 
   getSceneBody() {
     return this.getByTestId('scene-body');
   }
 
+  /* Viz panels */
+
   getPanelByTitle(panelTitle: string) {
-    return this.locator('[data-viz-panel-key]').getByTestId('header-container').getByTitle(panelTitle);
+    return this.getByTestId(`data-testid Panel header ${panelTitle}`);
+  }
+
+  selectMetricPanel(panelTitle: string) {
+    return this.getPanelByTitle(panelTitle)
+      .getByRole('button', { name: /select/i })
+      .click();
   }
 }

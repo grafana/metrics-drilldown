@@ -31,23 +31,8 @@ export const test = base.extend<AppTestFixture>({
       })
     );
   },
-  otelSwitch: async ({ page }, use) => {
-    const switchElement = page.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL);
-    await use(switchElement);
-  },
-  navigateToTrail: async ({ gotoPage }, use) => {
-    await use(async () => {
-      await gotoPage(`/${ROUTES.Trail}`);
-    });
-  },
-  getMetricPanel: async ({ page }, use) => {
-    await use(async (title: string) => {
-      return page.getByTestId(`data-testid Panel header ${title}`);
-    });
-  },
   selectMetricView: async ({ page }, use) => {
     const selectMetricView = new SelectMetricView(page, new URLSearchParams({ ...DEFAULT_TIMERANGE }));
-
     await use(selectMetricView);
   },
 });
