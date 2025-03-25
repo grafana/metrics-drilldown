@@ -1,17 +1,20 @@
 import { test as base, type AppConfigPage, type AppPage } from '@grafana/plugin-e2e';
+import { type Locator } from '@playwright/test';
 
+import { ROUTES } from '../../src/constants';
 import pluginJson from '../../src/plugin.json';
 import {
   DEFAULT_TIMERANGE,
   DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY,
   DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY,
 } from '../config/constants';
-import { TrailView } from './views/TrailView';
+import { SelectMetricView } from './views/SelectMetricView';
+import { UI_TEXT } from '../../src/constants/ui';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
   gotoPage: (path?: string) => Promise<AppPage>;
-  trailView: TrailView;
+  selectMetricView: SelectMetricView;
 };
 
 export const test = base.extend<AppTestFixture>({
@@ -43,11 +46,9 @@ export const test = base.extend<AppTestFixture>({
       return appPage;
     });
   },
-  trailView: async ({ page }, use) => {
-    const urlParams = new URLSearchParams({ ...DEFAULT_TIMERANGE });
-    const trailView = new TrailView(page, urlParams);
-
-    await use(trailView);
+  selectMetricView: async ({ page }, use) => {
+    const selectMetricView = new SelectMetricView(page, new URLSearchParams({ ...DEFAULT_TIMERANGE }));
+    await use(selectMetricView);
   },
 });
 

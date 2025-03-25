@@ -150,7 +150,11 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   static Component = ({ model }: SceneComponentProps<MetricScene>) => {
     const { body } = model.useState();
-    return <body.Component model={body} />;
+    return (
+      <div data-testid="metric-scene">
+        <body.Component model={body} />
+      </div>
+    );
   };
 
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
@@ -221,7 +225,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     const { actionView } = metricScene.useState();
 
     return (
-      <Box paddingY={1}>
+      <Box paddingY={1} data-testid="metric-scene-details">
         <div className={styles.actions}>
           <Stack gap={1}>
             <ToolbarButton

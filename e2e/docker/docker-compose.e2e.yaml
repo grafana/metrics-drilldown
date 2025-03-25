@@ -7,9 +7,9 @@ services:
     container_name: 'grafana-e2e'
     # Use either the GRAFANA_PORT defined in `.env`, or port 3001 if not defined
     ports: !override
-      - '${GRAFANA_PORT:-3000}:3000'
+      - '${GRAFANA_PORT:-3001}:3000'
     environment:
-      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
       # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
       GF_PLUGINS_PREINSTALL_DISABLED: true
     volumes:
@@ -32,3 +32,8 @@ services:
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.path=/prometheus/data
       --storage.tsdb.retention.time=42y
+
+  prometheus-utf8:
+    build: ./prometheus_utf8
+    ports:
+      - '${PROMETHEUS_UTF8_PORT:-9112}:9112'
