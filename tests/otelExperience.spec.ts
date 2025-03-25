@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { expect, test } from '../e2e/fixtures';
 
 test.describe('OTEL Experience', () => {
   test('otel enabled workflow', async ({ navigateToTrail, otelSwitch, getMetricPanel, page }) => {
