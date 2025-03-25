@@ -1,29 +1,21 @@
-import { expect, test } from './fixtures';
+import { expect, test } from '../e2e/fixtures';
 
 test.describe('OTEL Experience', () => {
-  test('otel enabled workflow', async ({ navigateToTrail, otelSwitch, getMetricPanel, page }) => {
-    await test.step('navigate to trail', async () => {
-      await navigateToTrail();
-    });
+  test.beforeEach(async ({ selectMetricView }) => {
+    await selectMetricView.goto(new URLSearchParams({ 'var-ds': 'gdev-prometheus' }));
+  });
 
-    await test.step('element is visible', async () => {
-      await expect(otelSwitch).toBeVisible();
-    });
-
+  test('otel enabled workflow', async ({ selectMetricView, page }) => {
     await test.step('turning otel experience on', async () => {
-      await expect(otelSwitch).toBeVisible();
-      await expect(otelSwitch).not.toBeChecked();
-      await otelSwitch.check({ force: true });
+      await selectMetricView.toggleOtelExperience(true);
     });
 
     await test.step('assert deployment_environment filter is on', async () => {
-      await expect(otelSwitch).toBeChecked();
       await expect(page.getByText('deployment_environment = prod')).toBeVisible();
     });
 
     await test.step('select utf8 metrics', async () => {
-      const metricPanel = await getMetricPanel('a.utf8.metric 🤘');
-      await metricPanel.getByRole('button', { name: 'select' }).click();
+      await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
       expect(page.url().includes('otel_and_metric_filters')).toBeTruthy();
     });
 
