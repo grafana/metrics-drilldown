@@ -53,4 +53,13 @@ test.describe('Select metric view', () => {
     await expect(metricSceneDetails.getByLabel('Copy url')).toBeVisible();
     await expect(metricSceneDetails.getByLabel('Bookmark')).toBeVisible();
   });
+
+  test('Screenshot example', async ({ selectMetricView }) => {
+    await selectMetricView.goto();
+
+    await expect(selectMetricView.getByTestId('scene-body')).toBeVisible();
+    await expect(selectMetricView.getByTestId('scene')).toHaveScreenshot({
+      stylePath: './e2e/fixtures/css/hide-app-controls.css',
+    });
+  });
 });
