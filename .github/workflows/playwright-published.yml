@@ -45,23 +45,17 @@ jobs:
           # Set the version as an output
           echo "plugin-version=$version" >> $GITHUB_OUTPUT
 
-          # Step 1: Create initial zip with all files
-          cd dist
+          # Create a temporary directory with the correct structure
+          mkdir -p temp/$plugin_id
+          cp -r dist/* temp/$plugin_id/
+
+          # Create the zip with the correct structure
+          cd temp
           zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
           cd ..
 
-          # Step 2: Create plugin ID directory and copy files into it
-          cd dist-artifacts
-          mkdir -p $plugin_id
-          cp -r ../dist/* $plugin_id/
-
-          # Step 3: Add files to zip with correct structure
-          cd $plugin_id
-          zip -r ../${{ github.event.repository.name }}-$version.zip .
-
-          # Step 4: Clean up
-          cd ..
-          rm -rf $plugin_id
+          # Clean up
+          rm -rf temp
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.1
