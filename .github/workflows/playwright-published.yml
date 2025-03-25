@@ -39,9 +39,17 @@ jobs:
         id: package
         run: |
           mkdir -p dist-artifacts
+          echo "Checking plugin.json contents:"
+          cat dist/plugin.json
           version=$(jq -r .version dist/plugin.json)
+          plugin_id=$(jq -r .id dist/plugin.json)
+          echo "Extracted version: $version"
+          echo "Extracted plugin_id: $plugin_id"
           echo "plugin-version=$version" >> "$GITHUB_OUTPUT"
-          (cd dist && zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .)
+
+          # Create the zip file with the correct structure directly
+          (cd dist && zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip . && cd ..)
+          (cd dist-artifacts && zip -r ${{ github.event.repository.name }}-$version.zip $plugin_id/* && zip -d ${{ github.event.repository.name }}-$version.zip $plugin_id/)
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.1
