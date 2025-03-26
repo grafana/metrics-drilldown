@@ -1,5 +1,21 @@
-name: 'metrics-drilldown-e2e'
+# include:
+#   - ./docker-compose.e2e.yaml
+name: 'metrics-drilldown-playwright-e2e'
 services:
+  playwright:
+    network_mode: host
+    container_name: playwright
+    build:
+      dockerfile: ./docker/Dockerfile.plugin
+      context: ..
+    volumes:
+      - ../../e2e:/app/e2e
+      - ../../src:/app/src
+    depends_on:
+      - grafana
+    healthcheck:
+      test: ./wait-for-grafana.sh http://localhost:${GRAFANA_PORT:-3001}/ 200 60 3
+
   grafana:
     extends:
       file: ../../.config/docker-compose-base.yaml
