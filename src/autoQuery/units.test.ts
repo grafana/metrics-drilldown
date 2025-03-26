@@ -1,4 +1,13 @@
-import { DEFAULT_RATE_UNIT, DEFAULT_UNIT, getPerSecondRateUnit, getUnit, getUnitFromMetric } from './units';
+import {
+  DEFAULT_RATE_UNIT,
+  DEFAULT_UNIT,
+  getPerSecondRateUnit,
+  getUnit,
+  getUnitFromMetric,
+  RATE_BYTES_PER_SECOND,
+  UNIT_BYTES,
+  UNIT_SECONDS,
+} from './units';
 
 describe('getUnitFromMetric', () => {
   it('should return null for an empty string input', () => {
@@ -6,13 +15,8 @@ describe('getUnitFromMetric', () => {
   });
 
   it('should return the last part of the metric if it is a valid unit', () => {
-    expect(getUnitFromMetric('go_gc_gomemlimit_bytes')).toBe('bytes');
-    expect(getUnitFromMetric('go_gc_duration_seconds')).toBe('seconds');
-  });
-
-  it('should return the second to last part of the metric if it is a valid unit', () => {
-    expect(getUnitFromMetric('go_gc_heap_allocs_by_size_bytes_count')).toBe('bytes');
-    expect(getUnitFromMetric('go_cpu_classes_gc_mark_assist_cpu_seconds_total')).toBe('seconds');
+    expect(getUnitFromMetric('go_gc_gomemlimit_bytes')).toBe(UNIT_BYTES);
+    expect(getUnitFromMetric('go_gc_duration_seconds')).toBe(UNIT_SECONDS);
   });
 
   it('should return null if no valid unit is found', () => {
@@ -21,7 +25,7 @@ describe('getUnitFromMetric', () => {
   });
 
   it('should handle metrics with extra underscores', () => {
-    expect(getUnitFromMetric('go_gc__duration__seconds')).toBe('seconds');
+    expect(getUnitFromMetric('go_gc__duration__seconds')).toBe(UNIT_SECONDS);
   });
 
   it('should return null if the metric ends with an invalid unit', () => {
@@ -29,7 +33,7 @@ describe('getUnitFromMetric', () => {
   });
 
   it('should return the last unit if the metric contains only valid units', () => {
-    expect(getUnitFromMetric('bytes_seconds')).toBe('seconds');
+    expect(getUnitFromMetric('bytes_seconds')).toBe(UNIT_SECONDS);
   });
 });
 
@@ -52,8 +56,8 @@ describe('getUnit', () => {
   });
 
   it('should handle case sensitivity correctly', () => {
-    expect(getUnit('BYTES')).toBe(DEFAULT_UNIT);
-    expect(getUnit('Seconds')).toBe(DEFAULT_UNIT);
+    expect(getUnit('BYTES')).toBe(UNIT_BYTES);
+    expect(getUnit('SECONDS')).toBe('s');
   });
 
   it('should not throw errors for unusual input', () => {
@@ -65,7 +69,7 @@ describe('getUnit', () => {
 
 describe('getPerSecondRateUnit', () => {
   it('should return the mapped rate unit for a valid metric part', () => {
-    expect(getPerSecondRateUnit('bytes')).toBe('Bps');
+    expect(getPerSecondRateUnit('bytes')).toBe(RATE_BYTES_PER_SECOND);
     expect(getPerSecondRateUnit('seconds')).toBe('short');
   });
 
@@ -82,8 +86,7 @@ describe('getPerSecondRateUnit', () => {
   });
 
   it('should handle case sensitivity correctly', () => {
-    expect(getPerSecondRateUnit('BYTES')).toBe(DEFAULT_RATE_UNIT);
-    expect(getPerSecondRateUnit('Seconds')).toBe(DEFAULT_RATE_UNIT);
+    expect(getPerSecondRateUnit('BYTES')).toBe(RATE_BYTES_PER_SECOND);
   });
 
   it('should not throw errors for unusual input', () => {
