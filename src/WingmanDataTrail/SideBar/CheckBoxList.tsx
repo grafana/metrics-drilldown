@@ -35,9 +35,9 @@ export function CheckBoxList({
           clear
         </Button>
       </div>
-      <div className={styles.checkboxList}>
+      <ul className={styles.checkboxList} data-testid="checkbox-filters-list">
         {filteredList.map((item) => (
-          <div key={item.value} className={styles.checkboxItem}>
+          <li key={item.value} className={styles.checkboxItem}>
             <CheckboxWithCount
               label={item.label}
               count={item.count}
@@ -49,9 +49,9 @@ export function CheckBoxList({
                 onSelectionChange(newValues);
               }}
             />
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </>
   );
 }
@@ -69,6 +69,7 @@ function getStyles(theme: GrafanaTheme2) {
     clearButton: css({}),
     checkboxList: css({
       height: '100%',
+      margin: 0,
       padding: `0 ${theme.spacing(1)} ${theme.spacing(1)} ${theme.spacing(1)}`,
       overflowY: 'auto',
       '& .css-1n4u71h-Label': {

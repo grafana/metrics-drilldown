@@ -141,6 +141,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             selectedValues={selectedMetricPrefixes}
             onSelectionChange={(filters) => onSelectFilter('prefixes', filters)}
             loading={loading}
+            dataTestId="metric-prefix-filters"
           />
         </div>
         <div className={styles.bottomPanel}>
@@ -152,6 +153,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                 selectedValues={selectedMetricCategories}
                 onSelectionChange={(filters) => onSelectFilter('categories', filters)}
                 loading={loading}
+                dataTestId="categories-filters"
               />
             )}
             {labelsBrowswer && <labelsBrowswer.Component model={labelsBrowswer} />}

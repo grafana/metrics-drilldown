@@ -159,12 +159,12 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
     return (
       <>
-        <div className={styles.headerControls}>
+        <div className={styles.headerControls} data-testid="header-controls">
           <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.body}>
           {variant !== ROUTES.OnboardWithPills && (
-            <div className={styles.sidebar}>
+            <div className={styles.sidebar} data-testid="sidebar">
               {sidebar instanceof SideBar ? (
                 <sidebar.Component model={sidebar} />
               ) : (
@@ -172,7 +172,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
               )}
             </div>
           )}
-          <div className={styles.list}>
+          <div className={styles.list} data-testid="metrics-list">
             <body.Component model={body} />
           </div>
         </div>
