@@ -47,4 +47,10 @@ test.describe('Select metric view', () => {
     await expect(metricSceneDetails.getByLabel('Copy url')).toBeVisible();
     await expect(metricSceneDetails.getByLabel('Bookmark')).toBeVisible();
   });
+
+  test('Filtering by Label', async ({ selectMetricView }) => {
+    await expect(selectMetricView.getSceneBody()).toBeVisible();
+    const filters = selectMetricView.getAdHocFilters();
+    await expect(filters).toBeVisible();
+  });
 });
