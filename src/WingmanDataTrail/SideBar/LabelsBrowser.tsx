@@ -54,7 +54,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     return (
       <div className={styles.container}>
         <h5 className={styles.header}>
-          Breakdown by label
+          Group by label
           <span className={styles.count}>({loading ? '0' : labels.length})</span>
         </h5>
 
