@@ -37,7 +37,7 @@ export class SelectMetricView extends DrilldownView {
 
   async assertSelectedDataSource(expectedDataSource: string) {
     const name = await this.getDataSourceSelector().textContent();
-    await expect(name?.trim()).toBe(expectedDataSource);
+    expect(name?.trim()).toBe(expectedDataSource);
   }
 
   selectExplorationType(dataSource: string) {
@@ -90,7 +90,7 @@ export class SelectMetricView extends DrilldownView {
   }
 
   async assertQuickFilter(explectedPlaceholder: string, expectedValue: string, expectedResultsCount: number) {
-    await expect(await this.getQuickFilterInput().getAttribute('placeholder')).toBe(explectedPlaceholder);
+    expect(await this.getQuickFilterInput().getAttribute('placeholder')).toBe(explectedPlaceholder);
     await expect(this.getQuickFilterInput()).toHaveValue(expectedValue);
     await this.assertQuickFilterResultsCount(expectedResultsCount);
   }
