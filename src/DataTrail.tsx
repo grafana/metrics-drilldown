@@ -45,7 +45,6 @@ import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { MetricsHeader } from './MetricsHeader';
 import { migrateOtelDeploymentEnvironment } from './migrations/otelDeploymentEnvironment';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
-import { type OtelTargetType } from './otel/types';
 import {
   getOtelJoinQuery,
   getOtelResourcesObject,
@@ -88,7 +87,6 @@ export interface DataTrailState extends SceneObjectState {
   // this is for otel, if the data source has it, it will be updated here
   hasOtelResources?: boolean;
   useOtelExperience?: boolean;
-  otelTargets?: OtelTargetType; // all the targets with job and instance regex, job=~"<job-v>|<job-v>"", instance=~"<instance-v>|<instance-v>"
   isStandardOtel?: boolean;
   nonPromotedOtelResources?: string[];
   initialOtelCheckComplete?: boolean; // updated after the first otel check
@@ -577,7 +575,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         hasOtelResources,
         isStandardOtel: nonPromotedResources.length > 0,
         useOtelExperience: false,
-        otelTargets: { jobs: [], instances: [] },
         afterFirstOtelCheck: true,
         initialOtelCheckComplete: true,
         isUpdatingOtel: false,
@@ -585,7 +582,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     } else {
       // partial reset when a user turns off the otel experience
       this.setState({
-        otelTargets: { jobs: [], instances: [] },
         useOtelExperience: false,
         afterFirstOtelCheck: true,
         initialOtelCheckComplete: true,

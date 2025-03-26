@@ -5,7 +5,7 @@ import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafan
 
 import { type DataTrail } from '../DataTrail';
 import { reportChangeInLabelFilters } from '../interactions';
-import { getFilteredResourceAttributes, totalOtelResources } from './api';
+import { getFilteredResourceAttributes } from './api';
 import { type OtelResourcesObject } from './types';
 import {
   VAR_DATASOURCE_EXPR,
@@ -509,24 +509,16 @@ export async function updateOtelData(
     return;
   }
 
-  const resourcesObject = result;
-
   // 2. Update state with the following
   // - otel join query
-  // - otelTargets used to filter metrics
-  // now we can filter target_info targets by deployment_environment="somevalue"
-  // and use these new targets to reduce the metrics
-  // for initialization we also update the following
   // - has otel resources flag
   // - and default to useOtelExperience
-  const otelTargets = await totalOtelResources(datasourceUid, timeRange, resourcesObject.filters);
 
   // we pass in deploymentEnvironments and hasOtelResources on start
   // RETHINK We may be able to get rid of this check
   // a non standard data source is more missing job and instance matchers
   if (hasOtelResources && deploymentEnvironments && !initialOtelCheckComplete) {
     trail.setState({
-      otelTargets,
       hasOtelResources,
       // Previously checking standardization for having deployment environments
       // Now we check that there are target_info labels that are not promoted
@@ -541,7 +533,6 @@ export async function updateOtelData(
   } else {
     // we are updating on variable changes
     trail.setState({
-      otelTargets,
       resettingOtel: false,
       afterFirstOtelCheck: true,
       isUpdatingOtel: false,

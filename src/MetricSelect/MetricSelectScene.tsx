@@ -186,17 +186,17 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       }
     });
 
-    this._subs.add(
-      trail.subscribeToState(({ otelTargets }, oldState) => {
-        // if the otel targets have changed, get the new list of metrics
-        if (
-          otelTargets?.instances !== oldState.otelTargets?.instances &&
-          otelTargets?.jobs !== oldState.otelTargets?.jobs
-        ) {
-          this._debounceRefreshMetricNames();
-        }
-      })
-    );
+    const otelResourcesVar = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
+    if (isAdHocFiltersVariable(otelResourcesVar)) {
+      this._subs.add(
+        otelResourcesVar.subscribeToState((newState, oldState) => {
+          // Only refresh if the filters have changed
+          if (!isEqual(newState.filters, oldState.filters)) {
+            this._debounceRefreshMetricNames();
+          }
+        })
+      );
+    }
 
     this._subs.add(
       trail.subscribeToState(() => {
