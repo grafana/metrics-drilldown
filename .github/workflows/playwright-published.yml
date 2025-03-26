@@ -36,10 +36,23 @@ jobs:
         id: package
         run: |
           mkdir -p dist-artifacts
-          version=$(jq -r .version dist/plugin.json)
-          echo "plugin-version=$version" >> "$GITHUB_OUTPUT"
-          cd dist
+          version=$(jq -r .info.version dist/plugin.json)
+          plugin_id=$(jq -r .id dist/plugin.json)
+
+          # Set the version as an output
+          echo "plugin-version=$version" >> $GITHUB_OUTPUT
+
+          # Create a temporary directory with the correct structure
+          mkdir -p temp/$plugin_id
+          cp -r dist/* temp/$plugin_id/
+
+          # Create the zip with the correct structure
+          cd temp
           zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
+          cd ..
+
+          # Clean up
+          rm -rf temp
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.1
