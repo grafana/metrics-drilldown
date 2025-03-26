@@ -528,6 +528,7 @@ export async function updateOtelData(
       initialOtelCheckComplete: true,
       resettingOtel: false,
       isUpdatingOtel: false,
+      afterFirstOtelCheck: true,
     });
   } else {
     // we are updating on variable changes
@@ -535,6 +536,7 @@ export async function updateOtelData(
       resettingOtel: false,
       isUpdatingOtel: false,
       nonPromotedOtelResources,
+      afterFirstOtelCheck: true,
     });
   }
 }

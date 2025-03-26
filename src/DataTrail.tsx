@@ -94,6 +94,7 @@ export interface DataTrailState extends SceneObjectState {
   resettingOtel?: boolean; // when switching OTel off from the switch
   isUpdatingOtel?: boolean;
   addingLabelFromBreakdown?: boolean; // do not use the otel and metrics var subscription when adding label from the breakdown
+  afterFirstOtelCheck?: boolean; // don't reset because of the migration on the first otel check from the data source updating
 
   // moved into settings
   showPreviews?: boolean;
@@ -244,10 +245,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         // reset native histograms
         this.resetNativeHistograms();
 
-        // we need a new check for OTel
-        this.setState({ initialOtelCheckComplete: false });
-        // clear out the OTel filters, do not clear out var filters
-        this.resetOtelExperience();
+        if (this.state.afterFirstOtelCheck) {
+          // we need a new check for OTel
+          this.setState({ initialOtelCheckComplete: false });
+          // clear out the OTel filters, do not clear out var filters
+          this.resetOtelExperience();
+        }
         // fresh check for otel experience
         this.checkDataSourceForOTelResources();
       }
@@ -573,6 +576,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         isStandardOtel: nonPromotedResources.length > 0,
         useOtelExperience: false,
         initialOtelCheckComplete: true,
+        afterFirstOtelCheck: true,
       });
     } else {
       // partial reset when a user turns off the otel experience
@@ -580,6 +584,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         useOtelExperience: false,
         initialOtelCheckComplete: true,
         isUpdatingOtel: false,
+        afterFirstOtelCheck: true,
       });
     }
   }
