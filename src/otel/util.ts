@@ -527,14 +527,12 @@ export async function updateOtelData(
       nonPromotedOtelResources,
       initialOtelCheckComplete: true,
       resettingOtel: false,
-      afterFirstOtelCheck: true,
       isUpdatingOtel: false,
     });
   } else {
     // we are updating on variable changes
     trail.setState({
       resettingOtel: false,
-      afterFirstOtelCheck: true,
       isUpdatingOtel: false,
       nonPromotedOtelResources,
     });
