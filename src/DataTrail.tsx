@@ -92,7 +92,6 @@ export interface DataTrailState extends SceneObjectState {
   initialOtelCheckComplete?: boolean; // updated after the first otel check
   startButtonClicked?: boolean; // from original landing page
   resettingOtel?: boolean; // when switching OTel off from the switch
-  isUpdatingOtel?: boolean;
   addingLabelFromBreakdown?: boolean; // do not use the otel and metrics var subscription when adding label from the breakdown
   afterFirstOtelCheck?: boolean; // don't reset because of the migration on the first otel check from the data source updating
 
@@ -583,7 +582,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.setState({
         useOtelExperience: false,
         initialOtelCheckComplete: true,
-        isUpdatingOtel: false,
         afterFirstOtelCheck: true,
       });
     }

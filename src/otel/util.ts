@@ -483,15 +483,6 @@ export async function updateOtelData(
   hasOtelResources?: boolean,
   nonPromotedOtelResources?: string[]
 ) {
-  // currently need isUpdatingOtel check for variable race conditions and state changes
-  // future refactor project
-  //  - checkDataSourceForOTelResources for state changes
-  //  - otel resources var for variable dependency listeners
-  if (trail.state.isUpdatingOtel) {
-    return;
-  }
-  trail.setState({ isUpdatingOtel: true });
-
   const initialOtelCheckComplete = trail.state.initialOtelCheckComplete;
   const resettingOtel = trail.state.resettingOtel;
 
@@ -505,7 +496,6 @@ export async function updateOtelData(
   );
 
   if (!result) {
-    trail.setState({ isUpdatingOtel: false });
     return;
   }
 
@@ -527,14 +517,12 @@ export async function updateOtelData(
       nonPromotedOtelResources,
       initialOtelCheckComplete: true,
       resettingOtel: false,
-      isUpdatingOtel: false,
       afterFirstOtelCheck: true,
     });
   } else {
     // we are updating on variable changes
     trail.setState({
       resettingOtel: false,
-      isUpdatingOtel: false,
       nonPromotedOtelResources,
       afterFirstOtelCheck: true,
     });
