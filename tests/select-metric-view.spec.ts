@@ -48,9 +48,11 @@ test.describe('Select metric view', () => {
     await expect(metricSceneDetails.getByLabel('Bookmark')).toBeVisible();
   });
 
-  test('Filtering by Label', async ({ selectMetricView }) => {
-    await expect(selectMetricView.getSceneBody()).toBeVisible();
-    const filters = selectMetricView.getAdHocFilters();
-    await expect(filters).toBeVisible();
+  test('Filtering by Label', async ({ selectMetricView, selectors }) => {
+    await selectMetricView.filterLabelEquals('label with 📈', 'metrics', selectors.components.Select.option);
+
+    await expect(selectMetricView.getByText('label with 📈 = metrics')).toBeVisible();
+    await expect(selectMetricView.getPanelByTitle('a.utf8.metric 🤘')).toBeVisible();
+    await expect(selectMetricView.getPanelByTitle('a_utf8_http_requests_total')).toBeVisible();
   });
 });
