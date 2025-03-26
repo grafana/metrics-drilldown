@@ -1,0 +1,70 @@
+name: Playwright Published
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: 'read'
+  id-token: 'write'
+
+jobs:
+  build:
+    name: Build plugin
+    runs-on: ubuntu-latest
+    outputs:
+      plugin-version: ${{ steps.package.outputs.plugin-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build -- --profile --json stats.json
+
+      - name: Package plugin
+        id: package
+        run: |
+          mkdir -p dist-artifacts
+          version=$(jq -r .info.version dist/plugin.json)
+          plugin_id=$(jq -r .id dist/plugin.json)
+
+          # Set the version as an output
+          echo "plugin-version=$version" >> $GITHUB_OUTPUT
+
+          # Create a temporary directory with the correct structure
+          mkdir -p temp/$plugin_id
+          cp -r dist/* temp/$plugin_id/
+
+          # Create the zip with the correct structure
+          cd temp
+          zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
+          cd ..
+
+          # Clean up
+          rm -rf temp
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: dist-artifacts
+          path: dist-artifacts/
+          retention-days: 7
+
+  playwright:
+    needs: build
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright.yml@main
+    with:
+      id: ${{ github.event.repository.name }}
+      version: ${{ needs.build.outputs.plugin-version }}
+      upload-artifacts: true
