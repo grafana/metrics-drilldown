@@ -122,6 +122,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],
+      // HISTORY refactor different shape
       history: state.history ?? new DataTrailHistory({}),
       settings: state.settings ?? new DataTrailSettings({}),
       pluginInfo: new SceneReactObject({ component: PluginInfo }),
@@ -309,6 +310,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   public restoreFromHistoryStep(state: DataTrailState) {
+    // HISTORY refactor fordifferent shape
     if (!state.topScene && !state.metric) {
       // If the top scene for an  is missing, correct it.
       state.topScene = new MetricSelectScene({});
@@ -605,6 +607,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       <div className={styles.container}>
         {NativeHistogramBanner({ histogramsLoaded, nativeHistograms, trail: model })}
         {showHeaderForFirstTimeUsers && <MetricsHeader />}
+        {/* HISTORY remove component */}
         <history.Component model={history} />
         {controls && (
           <div className={styles.controls} data-testid="controls">
