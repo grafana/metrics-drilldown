@@ -91,6 +91,8 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
 
     if (this.state.steps.length === 0) {
       // We always want to ensure in initial 'start' step
+      // HISTORY: Initial history step creation
+      console.log('[DataTrailsHistory] Initializing with start step');
       this.addTrailStep(trail, 'start');
 
       if (trail.state.metric) {
@@ -104,22 +106,36 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
 
         // But must add a secondary step to represent the selection of the metric
         // for this restored trail state
+        // HISTORY: Adding metric step for restored trail state
+        console.log('[DataTrailsHistory] Adding metric step for restored trail state:', { metric: trail.state.metric });
         this.addTrailStep(trail, 'metric', trail.state.metric);
       } else {
+        // HISTORY: Adding metric page step for new trail
+        console.log('[DataTrailsHistory] Adding metric page step');
         this.addTrailStep(trail, 'metric_page');
       }
     }
 
     trail.subscribeToState((newState, oldState) => {
       if (newState.metric !== oldState.metric) {
+        // HISTORY: Metric selection change detected
+        console.log('[DataTrailsHistory] Metric changed:', {
+          oldMetric: oldState.metric,
+          newMetric: newState.metric,
+        });
+
         if (this.state.steps.length === 1) {
           // For the first step we want to update the starting state so that it contains data
           this.state.steps[0].trailState = sceneUtils.cloneSceneObjectState(oldState, { history: this });
         }
 
         if (!newState.metric) {
+          // HISTORY: Metric cleared, adding metric page step
+          console.log('[DataTrailsHistory] Adding metric page step after metric cleared');
           this.addTrailStep(trail, 'metric_page');
         } else {
+          // HISTORY: New metric selected, adding metric step
+          console.log('[DataTrailsHistory] Adding metric step:', { metric: newState.metric });
           this.addTrailStep(trail, 'metric', newState.metric);
         }
       }
@@ -129,14 +145,23 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
       if (evt.payload.state.name === VAR_FILTERS) {
         const filtersApplied = this.state.filtersApplied;
         const urlState = sceneUtils.getUrlState(trail);
+        // HISTORY: Filter changes detected
+        console.log('[DataTrailsHistory] Filters changed:', {
+          filtersApplied,
+          urlState: urlState[VAR_FILTERS],
+        });
         this.addTrailStep(trail, 'filters', parseFilterTooltip(urlState, filtersApplied));
         this.setState({ filtersApplied });
       }
 
-      // TEST THE MIGRATION OF REMOVING THE VAR_OTEL_DEPLOYMENT_ENV
       if (evt.payload.state.name === VAR_OTEL_DEPLOYMENT_ENV) {
         const otelDepEnvs = this.state.otelDepEnvs;
         const urlState = sceneUtils.getUrlState(trail);
+        // HISTORY: Deployment environment changes detected
+        console.log('[DataTrailsHistory] Deployment environment changed:', {
+          otelDepEnvs,
+          urlState: urlState[VAR_OTEL_DEPLOYMENT_ENV],
+        });
         this.addTrailStep(trail, 'dep_env', parseDepEnvTooltip(urlState, otelDepEnvs));
         this.setState({ otelDepEnvs });
       }
@@ -144,6 +169,11 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
       if (evt.payload.state.name === VAR_OTEL_RESOURCES) {
         const otelResources = this.state.otelResources;
         const urlState = sceneUtils.getUrlState(trail);
+        // HISTORY: Resource attributes changes detected
+        console.log('[DataTrailsHistory] Resource attributes changed:', {
+          otelResources,
+          urlState: urlState[VAR_OTEL_RESOURCES],
+        });
         this.addTrailStep(trail, 'resource', parseOtelResourcesTooltip(urlState, otelResources));
         this.setState({ otelResources });
       }
@@ -157,6 +187,13 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
           if (prevState.from === newState.from && prevState.to === newState.to) {
             return;
           }
+
+          // HISTORY: Time range changes detected
+          console.log('[DataTrailsHistory] Time range changed:', {
+            from: { old: prevState.from, new: newState.from },
+            to: { old: prevState.to, new: newState.to },
+            timeZone: newState.timeZone,
+          });
 
           const tooltip = parseTimeTooltip({
             from: newState.from,
@@ -190,6 +227,15 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
     const stepIndex = this.state.steps.length;
     const parentIndex = type === 'start' ? -1 : this.state.currentStep;
 
+    // HISTORY: Adding new trail step
+    console.log(`[DataTrailsHistory] Adding trail step:`, {
+      type,
+      detail,
+      stepIndex,
+      parentIndex,
+      description: stepDescriptionMap[type],
+    });
+
     this.setState({
       currentStep: stepIndex,
       steps: [
@@ -218,6 +264,14 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
     const otelResources = this.state.otelResources;
     const otelDepEnvs = this.state.otelDepEnvs;
     let detail = '';
+
+    // HISTORY: Adding trail step from storage
+    console.log(`[DataTrailsHistory] Adding trail step from storage:`, {
+      type,
+      stepIndex,
+      parentIndex,
+      description: stepDescriptionMap[type],
+    });
 
     switch (step.type) {
       case 'metric':
@@ -260,6 +314,14 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
 
     const step = this.state.steps[stepIndex];
     const type = step.type === 'metric' && step.trailState.metric === undefined ? 'metric-clear' : step.type;
+
+    // HISTORY: Navigating back to previous step
+    console.log(`[DataTrailsHistory] Going back to step:`, {
+      stepIndex,
+      type,
+      description: step.description,
+      detail: step.detail,
+    });
 
     reportExploreMetrics('history_step_clicked', { type, step: stepIndex, numberOfSteps: this.state.steps.length });
 

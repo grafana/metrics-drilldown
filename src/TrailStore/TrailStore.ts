@@ -41,8 +41,12 @@ export class TrailStore {
       const serializedRecent = this._recent
         .slice(0, MAX_RECENT_TRAILS)
         .map((trail) => this._serializeTrail(trail.resolve()));
+      // HISTORY: Log when trails are saved to localStorage
+      console.log('[TrailStore] Saving to localStorage:', {
+        recentTrails: serializedRecent.length,
+        bookmarks: this._bookmarks.length,
+      });
       localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify(serializedRecent));
-
       localStorage.setItem(TRAIL_BOOKMARKS_KEY, JSON.stringify(this._bookmarks));
       this._lastModified = Date.now();
     };
@@ -62,6 +66,10 @@ export class TrailStore {
 
     if (storageItem) {
       const serializedTrails: SerializedTrail[] = JSON.parse(storageItem);
+      // HISTORY: Log when recent trails are loaded from storage
+      console.log('[TrailStore] Loading recent trails from storage:', {
+        count: serializedTrails.length,
+      });
       for (const t of serializedTrails) {
         const trail = this._deserializeTrail(t);
         list.push(trail.getRef());
@@ -74,6 +82,11 @@ export class TrailStore {
     const storageItem = localStorage.getItem(TRAIL_BOOKMARKS_KEY);
 
     const list: Array<DataTrailBookmark | SerializedTrail> = storageItem ? JSON.parse(storageItem) : [];
+
+    // HISTORY: Log when bookmarks are loaded from storage
+    console.log('[TrailStore] Loading bookmarks from storage:', {
+      count: list.length,
+    });
 
     return list.map((item) => {
       if (isSerializedTrail(item)) {
@@ -182,6 +195,8 @@ export class TrailStore {
     const { steps } = recentTrail.state.history.state;
     if (steps.length === 0 || (steps.length === 1 && steps[0].type === 'start')) {
       // We do not set an uninitialized trail, or a single node "start" trail as recent
+      // HISTORY: Log when a trail is skipped due to being uninitialized
+      console.log('[TrailStore] Skipping uninitialized trail or single node start trail');
       return;
     }
 
@@ -189,12 +204,19 @@ export class TrailStore {
     this._recent = this._recent.filter((t) => t !== recentTrail.getRef());
 
     // Check if any existing "recent" entries have equivalent urlState to the new recentTrail
-    const recentUrlState = getUrlStateForComparison(recentTrail); //
+    const recentUrlState = getUrlStateForComparison(recentTrail);
     this._recent = this._recent.filter((t) => {
       // Use the current step urlValues to filter out equivalent states
       const urlState = getUrlStateForComparison(t.resolve());
       // Only keep trails with sufficiently unique urlValues on their current step
       return !isEqual(recentUrlState, urlState);
+    });
+
+    // HISTORY: Log when a new trail is added to recent trails
+    console.log('[TrailStore] Adding recent trail:', {
+      metric: recentTrail.state.metric,
+      steps: steps.length,
+      currentStep: recentTrail.state.history.state.currentStep,
     });
 
     this._recent.unshift(recentTrail.getRef());
@@ -213,6 +235,12 @@ export class TrailStore {
       urlValues: urlState,
       createdAt: Date.now(),
     };
+
+    // HISTORY: Log when a new bookmark is added
+    console.log('[TrailStore] Adding bookmark:', {
+      metric: trail.state.metric,
+      urlState,
+    });
 
     this._bookmarks.unshift(bookmarkState);
     this._refreshBookmarkIndexMap();
