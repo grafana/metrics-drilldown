@@ -23,8 +23,6 @@ import {
   VAR_METRIC_WITH_LABEL_VALUE,
 } from 'WingmanDataTrail/GroupBy/MetricsWithLabelValue/MetricsWithLabelValueVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
-import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
-import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
@@ -158,66 +156,28 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const styles = useStyles2(getStyles, isCollapsed);
+    const styles = useStyles2(getStyles);
 
     const { index, labelName, labelValue, labelCardinality, $variables, body } = model.useState();
-
     const variable = $variables.state.variables[0] as MetricsWithLabelValueVariable;
-
     const batchSizes = body.useSizes();
-
-    const location = useLocation();
-    const isOnboardingView = location.pathname.includes('/onboard');
-
     const onClickShowAllMetrics = model.useClickShowAllMetrics();
-
-    const onClickInclude = () => {
-      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
-
-      adHocFiltersVariable.setState({
-        // TOOD: keep unique filters
-        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
-      });
-
-      (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
-    };
-
-    const onClickExclude = () => {
-      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
-
-      adHocFiltersVariable.setState({
-        // TOOD: keep unique filters
-        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '!=', value: labelValue }],
-      });
-    };
 
     return (
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
-            {!isOnboardingView && (
-              <>
-                <Button variant="secondary" fill="outline" className={styles.includeButton} onClick={onClickInclude}>
-                  Include
-                </Button>
-                <Button variant="secondary" fill="outline" className={styles.excludeButton} onClick={onClickExclude}>
-                  Exclude
-                </Button>
-              </>
-            )}
-            {isOnboardingView && (
-              <Button
-                className={styles.filterButton}
-                variant="primary"
-                fill="solid"
-                size="md"
-                onClick={onClickShowAllMetrics}
-                tooltip={`Show all metrics for ${labelName}="${labelValue}"`}
-                tooltipPlacement="top"
-              >
-                Show all metrics ({batchSizes.total})
-              </Button>
-            )}
+            <Button
+              className={styles.filterButton}
+              variant="primary"
+              fill="solid"
+              size="md"
+              onClick={onClickShowAllMetrics}
+              tooltip={`Show all metrics for ${labelName}="${labelValue}"`}
+              tooltipPlacement="top"
+            >
+              Show all metrics ({batchSizes.total})
+            </Button>
           </div>
         </div>
 
@@ -252,7 +212,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
+function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       background: theme.colors.background.canvas,
@@ -280,13 +240,6 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
     filterButton: css({}),
     includeButton: css({}),
     excludeButton: css({}),
-    collapsableSectionHeader: css({
-      height: '100%',
-
-      '& button:focus': {
-        boxShadow: 'none !important',
-      },
-    }),
     collapsableSectionBody: css({
       display: 'flex',
       flexDirection: 'column',
