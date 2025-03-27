@@ -24,11 +24,19 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
   private filterEngine: MetricsVariableFilterEngine;
   private sortEngine: MetricsVariableSortEngine;
 
-  constructor({ labelName, labelValue }: { labelName: string; labelValue: string }) {
+  constructor({
+    labelName,
+    labelValue,
+    removeRules,
+  }: {
+    labelName: string;
+    labelValue: string;
+    removeRules?: boolean;
+  }) {
     super({
       name: VAR_METRIC_WITH_LABEL_VALUE,
       datasource: { uid: MetricsWithLabelValueDataSource.uid },
-      query: `{${labelName}="${labelValue}"}`,
+      query: MetricsWithLabelValueVariable.buildQuery(labelName, labelValue, removeRules),
       isMulti: false,
       allowCustomValue: false,
       refresh: VariableRefresh.onTimeRangeChanged,
@@ -43,14 +51,18 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
     this.filterEngine = new MetricsVariableFilterEngine(this as unknown as MultiValueVariable);
     this.sortEngine = new MetricsVariableSortEngine(this as unknown as MultiValueVariable);
 
-    this.addActivationHandler(this.onActivate.bind(this, labelName, labelValue));
+    this.addActivationHandler(this.onActivate.bind(this, labelName, labelValue, removeRules));
   }
 
-  protected onActivate(labelName: string, labelValue: string) {
+  private static buildQuery(labelName: string, labelValue: string, removeRules?: boolean) {
+    return removeRules ? `removeRules{${labelName}="${labelValue}"}` : `{${labelName}="${labelValue}"}`;
+  }
+
+  protected onActivate(labelName: string, labelValue: string, removeRules?: boolean) {
     const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (adHocFiltersVariable?.state.hide !== VariableHide.hideVariable) {
       this.setState({
-        query: `{${labelName}="${labelValue}",$${VAR_FILTERS}}`,
+        query: MetricsWithLabelValueVariable.buildQuery(labelName, labelValue, removeRules),
       });
     }
 

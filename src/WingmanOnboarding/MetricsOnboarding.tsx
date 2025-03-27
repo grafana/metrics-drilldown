@@ -33,6 +33,7 @@ import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
+import { MetricsGroupByRow } from './GroupBy/MetricsGroupByRow';
 import { MainLabelVariable, VAR_MAIN_LABEL_VARIABLE } from './HeaderControls/MainLabelVariable';
 import { VAR_VARIANT, type VariantVariable } from './VariantVariable';
 interface MetricsOnboardingState extends SceneObjectState {
@@ -160,6 +161,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
         ? (new SimpleMetricsList() as unknown as SceneObjectBase)
         : (new MetricsGroupByList({
             labelName: groupByLabel,
+            GroupByRow: MetricsGroupByRow,
           }) as unknown as SceneObjectBase),
     });
   }

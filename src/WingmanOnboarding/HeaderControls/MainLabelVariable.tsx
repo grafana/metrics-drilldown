@@ -98,7 +98,7 @@ export class MainLabelVariable extends CustomVariable {
           tooltip="Click to add a custom label"
           tooltipPlacement="top"
         >
-          +
+          + Add
         </Button>
       </>
     );
@@ -114,7 +114,7 @@ function getStyles(theme: GrafanaTheme2) {
       width: 100%;
     `,
     labelButton: css`
-      flex: 0 1 200px;
+      flex: 0 1 180px;
       height: 80px;
       font-size: 1.1rem;
       margin: 0;

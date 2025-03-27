@@ -15,7 +15,8 @@ import React from 'react';
 import { LabelValuesVariable, VAR_LABEL_VALUES } from 'WingmanDataTrail/Labels/LabelValuesVariable';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
-import { MetricsGroupByRow } from './MetricsGroupByRow';
+import { type MetricsGroupByRow, type MetricsGroupByRowState } from './MetricsGroupByRow';
+import { type MetricsGroupByRow as OnboardingMetricsGroupByRow } from '../../WingmanOnboarding/GroupBy/MetricsGroupByRow';
 
 interface MetricsGroupByListState extends SceneObjectState {
   labelName: string;
@@ -24,7 +25,23 @@ interface MetricsGroupByListState extends SceneObjectState {
 }
 
 export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
-  constructor({ labelName }: { labelName: MetricsGroupByListState['labelName'] }) {
+  constructor({
+    labelName,
+    GroupByRow,
+  }: {
+    labelName: MetricsGroupByListState['labelName'];
+    GroupByRow: new ({
+      index,
+      labelName,
+      labelValue,
+      labelCardinality,
+    }: {
+      index: MetricsGroupByRowState['index'];
+      labelName: MetricsGroupByRowState['labelName'];
+      labelValue: MetricsGroupByRowState['labelValue'];
+      labelCardinality: MetricsGroupByRowState['labelCardinality'];
+    }) => MetricsGroupByRow | OnboardingMetricsGroupByRow;
+  }) {
     super({
       key: 'metrics-group-list',
       labelName,
@@ -65,7 +82,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
           }),
         getLayoutChild: (option, index, options) => {
           return new SceneCSSGridItem({
-            body: new MetricsGroupByRow({
+            body: new GroupByRow({
               index,
               labelName,
               labelValue: option.value as string,

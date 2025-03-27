@@ -16,27 +16,21 @@ import { Alert, Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@g
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 
-import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex } from 'utils';
+import {
+  MetricsWithLabelValueVariable,
+  VAR_METRIC_WITH_LABEL_VALUE,
+} from 'WingmanDataTrail/GroupBy/MetricsWithLabelValue/MetricsWithLabelValueVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
-import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
-import {
-  METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
-  MetricVizPanel,
-} from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
-import {
-  MetricsWithLabelValueVariable,
-  VAR_METRIC_WITH_LABEL_VALUE,
-} from './MetricsWithLabelValue/MetricsWithLabelValueVariable';
-
-export interface MetricsGroupByRowState extends SceneObjectState {
+interface MetricsGroupByRowState extends SceneObjectState {
   index: number;
   labelName: string;
   labelValue: string;
@@ -64,15 +58,16 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       labelCardinality,
       key: `${labelName || ''}-${labelValue || ''}`,
       $variables: new SceneVariableSet({
-        variables: [new MetricsWithLabelValueVariable({ labelName, labelValue })],
+        variables: [new MetricsWithLabelValueVariable({ labelName, labelValue, removeRules: true })],
       }),
       body: new SceneByVariableRepeater({
         variableName: VAR_METRIC_WITH_LABEL_VALUE,
+        initialPageSize: 4,
         body: new SceneCSSGridLayout({
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+          autoRows: METRICS_VIZ_PANEL_HEIGHT_SMALL,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -103,14 +98,13 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           }),
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
-            body: new WithUsageDataPreviewPanel({
-              vizPanelInGridItem: new MetricVizPanel({
-                metricName: option.value as string,
-                color: getColorByIndex(colorIndex++),
-                matchers: [`${labelName}="${labelValue}"`],
-                headerActions: [new SelectAction({ metricName: option.value as string })],
-              }),
-              metric: option.value as string,
+            body: new MetricVizPanel({
+              height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+              metricName: option.value as string,
+              color: getColorByIndex(colorIndex++),
+              matchers: [`${labelName}="${labelValue}"`],
+              headerActions: [],
+              hideLegend: true,
             }),
           });
         },
@@ -141,7 +135,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  private useClickFilterBy = () => {
+  private useClickShowAllMetrics = () => {
     const { labelName, labelValue } = this.useState();
     const location = useLocation();
     const navigate = useNavigate();
@@ -169,20 +163,13 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const { index, labelName, labelValue, labelCardinality, $variables, body } = model.useState();
 
     const variable = $variables.state.variables[0] as MetricsWithLabelValueVariable;
-    const { loading, error } = variable.useState();
 
     const batchSizes = body.useSizes();
-    const shouldDisplayShowMoreButton =
-      !loading && !error && batchSizes.total > 0 && batchSizes.current < batchSizes.total;
 
     const location = useLocation();
     const isOnboardingView = location.pathname.includes('/onboard');
 
-    const onClickFilterBy = model.useClickFilterBy();
-
-    const onClickShowMore = () => {
-      body.increaseBatchSize();
-    };
+    const onClickShowAllMetrics = model.useClickShowAllMetrics();
 
     const onClickInclude = () => {
       const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
@@ -219,8 +206,16 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
               </>
             )}
             {isOnboardingView && (
-              <Button variant="primary" fill="solid" className={styles.filterButton} onClick={onClickFilterBy}>
-                Filter by
+              <Button
+                className={styles.filterButton}
+                variant="primary"
+                fill="solid"
+                size="md"
+                onClick={onClickShowAllMetrics}
+                tooltip={`Show all metrics for ${labelName}="${labelValue}"`}
+                tooltipPlacement="top"
+              >
+                Show all metrics ({batchSizes.total})
               </Button>
             )}
           </div>
@@ -241,23 +236,10 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 )}
               </div>
             }
-            className={styles.collapsableSection}
           >
-            <body.Component model={body} />
-
-            {shouldDisplayShowMoreButton && (
-              <div className={styles.footer}>
-                <Button
-                  variant="secondary"
-                  fill="outline"
-                  onClick={onClickShowMore}
-                  tooltip={`Show more metrics for ${labelName}="${labelValue}"`}
-                  tooltipPlacement="top"
-                >
-                  Show {batchSizes.increment} more metrics ({batchSizes.current}/{batchSizes.total})
-                </Button>
-              </div>
-            )}
+            <div className={styles.collapsableSectionBody}>
+              <body.Component model={body} />
+            </div>
           </CollapsableSection>
         }
 
@@ -274,9 +256,7 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
   return {
     container: css({
       background: theme.colors.background.canvas,
-      border: `1px solid ${theme.colors.border.medium}`,
-      borderRadius: theme.shape.radius.default,
-      padding: isCollapsed ? theme.spacing(2) : theme.spacing(2, 2, 0, 2),
+      margin: theme.spacing(2, 1, 0, 1),
 
       '& div:focus-within': {
         boxShadow: 'none !important',
@@ -287,6 +267,8 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       alignItems: 'center',
       gap: '8px',
       marginBottom: '-36px',
+      paddingBottom: theme.spacing(1.5),
+      borderBottom: `1px solid ${theme.colors.border.medium}`,
     }),
     headerButtons: css({
       display: 'flex',
@@ -298,12 +280,18 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
     filterButton: css({}),
     includeButton: css({}),
     excludeButton: css({}),
-    collapsableSection: css({
+    collapsableSectionHeader: css({
       height: '100%',
 
       '& button:focus': {
         boxShadow: 'none !important',
       },
+    }),
+    collapsableSectionBody: css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '24px',
+      padding: theme.spacing(1),
     }),
     groupName: css({
       display: 'flex',
@@ -319,16 +307,6 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       fontSize: '12px',
       color: theme.colors.text.secondary,
       marginLeft: '8px',
-    }),
-    footer: css({
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: theme.spacing(4),
-
-      '& button': {
-        height: '40px',
-      },
     }),
     variable: css({
       display: 'none',
