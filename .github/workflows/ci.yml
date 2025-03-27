@@ -2,6 +2,11 @@ name: CI
 
 on:
   workflow_dispatch:
+    inputs:
+      skip-grafana-dev-image:
+        required: false
+        type: boolean
+        default: false
   pull_request:
     branches:
       - main
@@ -15,3 +20,4 @@ jobs:
     uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
     with:
       upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
+      run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
