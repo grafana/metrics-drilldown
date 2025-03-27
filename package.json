@@ -2,7 +2,7 @@
   "name": "grafana-metricsdrilldown-app",
   "version": "1.0.0-4",
   "author": "Grafana",
-  "license": "Apache-2.0",
+  "license": "AGPL-3.0",
   "scripts": {
     "prebuild": "./scripts/update-commit-sha.sh",
     "build": "webpack -c ./webpack.config.ts --env production",
