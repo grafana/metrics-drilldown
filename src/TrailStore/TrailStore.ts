@@ -178,7 +178,7 @@ export class TrailStore {
     this._lastModified = Date.now();
   }
 
-  setRecentTrail<T extends DataTrail>(recentTrail: T) {
+  setRecentTrail(recentTrail: DataTrail) {
     const { steps } = recentTrail.state.history.state;
     if (steps.length === 0 || (steps.length === 1 && steps[0].type === 'start')) {
       // We do not set an uninitialized trail, or a single node "start" trail as recent
@@ -197,7 +197,7 @@ export class TrailStore {
       return !isEqual(recentUrlState, urlState);
     });
 
-    this._recent.unshift((recentTrail as DataTrail).getRef());
+    this._recent.unshift(recentTrail.getRef());
     this._save();
   }
 
