@@ -1,6 +1,8 @@
 {
   "name": "grafana-metricsdrilldown-app",
   "version": "1.0.0-4",
+  "author": "Grafana",
+  "license": "AGPL-3.0",
   "scripts": {
     "prebuild": "./scripts/update-commit-sha.sh",
     "build": "webpack -c ./webpack.config.ts --env production",
@@ -20,8 +22,27 @@
     "server:down": "docker compose down",
     "sign": "npx --yes @grafana/sign-plugin@latest"
   },
-  "author": "Grafana",
-  "license": "Apache-2.0",
+  "packageManager": "npm@10.5.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@bsull/augurs": "^0.9.0",
+    "@emotion/css": "11.10.6",
+    "@grafana/data": "^11.6.0",
+    "@grafana/lezer-logql": "^0.2.7",
+    "@grafana/prometheus": "^11.6.0-223871",
+    "@grafana/runtime": "^11.6.0",
+    "@grafana/scenes": "^5.41.1",
+    "@grafana/schema": "^11.6.0",
+    "@grafana/ui": "^11.6.0",
+    "@lezer/common": "^1.2.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-router-dom": "^5.2.0",
+    "react-router-dom-v5-compat": "^6.29.0",
+    "rxjs": "7.8.1"
+  },
   "devDependencies": {
     "@grafana/eslint-config": "^8.0.0",
     "@grafana/plugin-e2e": "^1.17.0",
@@ -74,28 +95,7 @@
     "webpack-subresource-integrity": "^5.1.0",
     "webpack-virtual-modules": "^0.6.2"
   },
-  "engines": {
-    "node": ">=22"
-  },
   "overrides": {
     "dompurify": "^3.2.4"
-  },
-  "dependencies": {
-    "@bsull/augurs": "^0.9.0",
-    "@emotion/css": "11.10.6",
-    "@grafana/data": "^11.5.0",
-    "@grafana/lezer-logql": "^0.2.7",
-    "@grafana/prometheus": "^11.6.0-223871",
-    "@grafana/runtime": "^11.5.0",
-    "@grafana/scenes": "^5.41.1",
-    "@grafana/schema": "^11.5.0",
-    "@grafana/ui": "^11.5.0",
-    "@lezer/common": "^1.2.3",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-router-dom": "^5.2.0",
-    "react-router-dom-v5-compat": "^6.29.0",
-    "rxjs": "7.8.1"
-  },
-  "packageManager": "npm@10.5.0"
+  }
 }

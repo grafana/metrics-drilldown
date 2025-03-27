@@ -1,10 +1,15 @@
 name: 'metrics-drilldown'
 services:
   grafana:
+    container_name: 'grafana-gmd'
     extends:
       file: .config/docker-compose-base.yaml
       service: grafana
-    container_name: 'grafana'
+    build:
+      args:
+        grafana_version: ${GRAFANA_VERSION:-11.6.0}
+    ports: !override
+      - '${GRAFANA_PORT:-3000}:3000'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,exploreMetricsRelatedLogs
@@ -13,6 +18,7 @@ services:
       - 'host.docker.internal:host-gateway'
 
   prometheus:
+    container_name: 'prometheus-gmd'
     image: prom/prometheus:v3.2.1
     ports:
       - '9099:9090'
@@ -32,6 +38,7 @@ services:
       - ./config/prometheus.${GRAFANA_PORT:-3000}.yaml:/etc/prometheus/prometheus.yml
   # This service is used for e2e tests
   prometheus-utf8:
+    container_name: 'prometheus-utf8-gmd'
     build: docker/prometheus_utf8
     ports:
       - '${PROMETHEUS_UTF8_PORT:-9112}:9112'
