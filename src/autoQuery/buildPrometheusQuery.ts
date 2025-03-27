@@ -1,5 +1,8 @@
 import { type AdHocVariableFilter } from '@grafana/data';
+import { utf8Support } from '@grafana/prometheus';
 import * as promql from '@grafana/promql-builder';
+
+import { Utf8MetricExprBuilder } from './buildUtf8Query';
 
 interface BuildPrometheusQueryParams {
   metric: string;
@@ -19,21 +22,49 @@ export function buildPrometheusQuery({
   ignoreUsage = false,
 }: BuildPrometheusQueryParams): string {
   let expr: promql.AggregationExprBuilder;
-  // Start building the query with the base vector
-  const vectorExpr = promql.vector(metric);
 
-  // Add filters if present and not a template variable
-  filters?.forEach((filter) => addLabel(vectorExpr, filter));
+  // Check if metric name contains special characters
+  const isUtf8Metric = /[^a-zA-Z0-9_:]/.test(metric);
 
+  // Convert filters to label selectors
+  const labels: promql.LabelSelector[] = [];
   if (ignoreUsage) {
-    vectorExpr.label('__ignore_usage__', '');
+    labels.push({ name: '__ignore_usage__', value: '', operator: '=' });
   }
+  filters?.forEach((filter) => {
+    labels.push({
+      name: filter.key,
+      value: filter.value,
+      operator: filter.operator as promql.LabelMatchingOperator,
+    });
+  });
 
-  // Apply aggregation based on query type
-  if (isRateQuery) {
-    expr = promql.sum(promql.rate(vectorExpr.range('$__rate_interval')));
+  // Use Utf8MetricExprBuilder for UTF-8 metric names
+  if (isUtf8Metric) {
+    const vectorExpr = new Utf8MetricExprBuilder(metric, labels, isRateQuery ? '$__rate_interval' : undefined);
+    expr = isRateQuery ? promql.sum(promql.rate(vectorExpr)) : promql.avg(vectorExpr);
   } else {
-    expr = promql.avg(vectorExpr);
+    // For regular metrics, use the normal label handling
+    const vectorExpr = promql.vector(metric);
+    labels.forEach((label) => {
+      const labelName = utf8Support(label.name);
+
+      switch (label.operator) {
+        case '=':
+          vectorExpr.label(labelName, label.value);
+          break;
+        case '!=':
+          vectorExpr.labelNeq(labelName, label.value);
+          break;
+        case '=~':
+          vectorExpr.labelMatchRegexp(labelName, label.value);
+          break;
+        case '!~':
+          vectorExpr.labelNotMatchRegexp(labelName, label.value);
+          break;
+      }
+    });
+    expr = isRateQuery ? promql.sum(promql.rate(vectorExpr.range('$__rate_interval'))) : promql.avg(vectorExpr);
   }
 
   // Apply grouping if specified
@@ -50,23 +81,4 @@ export function buildPrometheusQuery({
   }
 
   return result;
-}
-
-function addLabel(expressionBuilder: promql.VectorExprBuilder, filter: AdHocVariableFilter) {
-  switch (filter.operator) {
-    case '=':
-      expressionBuilder.label(filter.key, filter.value);
-      break;
-    case '!=':
-      expressionBuilder.labelNeq(filter.key, filter.value);
-      break;
-    case '=~':
-      expressionBuilder.labelMatchRegexp(filter.key, filter.value);
-      break;
-    case '!~':
-      expressionBuilder.labelNotMatchRegexp(filter.key, filter.value);
-      break;
-    default:
-      throw new Error(`Unsupported filter operator: ${filter.operator}`);
-  }
 }
