@@ -55,4 +55,12 @@ test.describe('Select metric view', () => {
     await expect(selectMetricView.getPanelByTitle('a.utf8.metric 🤘')).toBeVisible();
     await expect(selectMetricView.getPanelByTitle('a_utf8_http_requests_total')).toBeVisible();
   });
+
+  test('Open in Explore', async ({ selectMetricView }) => {
+    await selectMetricView.setAdHocFilter('label with 📈', 'metrics');
+
+    await expect(selectMetricView.getByText('label with 📈 = metrics')).toBeVisible();
+    await expect(selectMetricView.getPanelByTitle('a.utf8.metric 🤘')).toBeVisible();
+    await expect(selectMetricView.getPanelByTitle('a_utf8_http_requests_total')).toBeVisible();
+  });
 });
