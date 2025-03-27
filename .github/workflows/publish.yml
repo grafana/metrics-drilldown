@@ -24,6 +24,10 @@ on:
           - dev
           - ops
           - prod
+      skip-grafana-dev-image:
+        required: false
+        type: boolean
+        default: false
   push:
     tags:
       - 'v*' # Run workflow on version tags, e.g. v1.0.0.
@@ -48,3 +52,4 @@ jobs:
       environment: ${{ inputs.environment || 'prod' }}
       upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
+      run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
