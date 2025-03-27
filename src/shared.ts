@@ -58,11 +58,11 @@ export function getVariablesWithMetricConstant(metric: string) {
   ];
 }
 
-export function getVariablesWithOtelJoinQueryConstant(otelJoinQuery: string) {
+export function getVariablesWithOtelJoinQueryConstant() {
   return [
     new ConstantVariable({
       name: VAR_OTEL_JOIN_QUERY,
-      value: otelJoinQuery,
+      value: '',
       hide: VariableHide.hideVariable,
     }),
   ];
