@@ -48,8 +48,8 @@ test.describe('Select metric view', () => {
     await expect(metricSceneDetails.getByLabel('Bookmark')).toBeVisible();
   });
 
-  test('Filtering by Label', async ({ selectMetricView, selectors }) => {
-    await selectMetricView.filterLabelEquals('label with 📈', 'metrics', selectors.components.Select.option);
+  test('Filtering by Label', async ({ selectMetricView }) => {
+    await selectMetricView.setAdHocFilter('label with 📈', 'metrics');
 
     await expect(selectMetricView.getByText('label with 📈 = metrics')).toBeVisible();
     await expect(selectMetricView.getPanelByTitle('a.utf8.metric 🤘')).toBeVisible();

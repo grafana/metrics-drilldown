@@ -50,6 +50,18 @@ export class SelectMetricView extends DrilldownView {
     return this.getControls().getByPlaceholder('Filter by label values');
   }
 
+  // TODO: This can probably be better by having getByGrafanaSelector
+  // https://grafana.com/developers/plugin-tools/e2e-test-a-plugin/selecting-elements#select-field
+  async setAdHocFilter(label: string, value: string) {
+    await this.getAdHocFilters().click();
+    await this.page.keyboard.type(label);
+    await this.page.keyboard.press('Enter');
+    await this.page.keyboard.type('=');
+    await this.page.keyboard.press('Enter');
+    await this.page.keyboard.type(value);
+    await this.page.keyboard.press('Enter');
+  }
+
   /* Time picker/refresh */
 
   getTimePickerButton() {
