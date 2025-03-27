@@ -22,7 +22,7 @@ jest.mock('./otel/api', () => ({
   isOtelStandardization: jest.fn(() => true),
 }));
 
-describe.skip('DataTrail', () => {
+describe('DataTrail', () => {
   beforeAll(() => {
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
     setDataSourceSrv(
