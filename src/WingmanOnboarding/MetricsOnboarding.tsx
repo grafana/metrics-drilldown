@@ -53,7 +53,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       if (variable.state.name === VAR_DATASOURCE) {
         (sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable).setState({ value: undefined });
 
-        this.fetchAndLabelValuesAndUpdateBody();
+        this.fetchLabelValuesAndUpdateBody();
         return;
       }
 
@@ -117,13 +117,13 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       })
     );
 
-    this.fetchAndLabelValuesAndUpdateBody();
+    this.fetchLabelValuesAndUpdateBody();
   }
 
-  private fetchAndLabelValuesAndUpdateBody() {
+  private fetchLabelValuesAndUpdateBody() {
     const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable;
 
-    this.fetchAllLabelardinalities(MainLabelVariable.OPTIONS).then((allLabelCardinalities) => {
+    this.fetchAllLabelCardinalities(MainLabelVariable.OPTIONS).then((allLabelCardinalities) => {
       mainLabelVariable.setState({
         options: allLabelCardinalities.map(([labelName, labelCardinality]) => ({
           value: labelName,
@@ -141,7 +141,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     });
   }
 
-  private async fetchAllLabelardinalities(labelNames: string[]): Promise<Array<[string, number]>> {
+  private async fetchAllLabelCardinalities(labelNames: string[]): Promise<Array<[string, number]>> {
     return Promise.all(
       labelNames.map((labelName) =>
         LabelsDataSource.fetchLabelCardinality(labelName, MetricsOnboarding.LABEL_VALUES_API_LIMIT, this)
