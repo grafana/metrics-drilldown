@@ -227,8 +227,8 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
 
     return (
       <div className={styles.container}>
-        <div className={styles.headerControls}>
-          <div className={styles.topControls}>
+        <div className={styles.allControls}>
+          <div className={styles.topControls} data-testid="top-controls">
             <div className={styles.mainLabelVariable}>
               <mainLabelVariable.Component model={mainLabelVariable} />
               <a
@@ -244,7 +244,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
             </div>
           </div>
 
-          <div className={styles.listControls}>
+          <div className={styles.headerControls} data-testid="header-controls">
             <headerControls.Component model={headerControls} />
           </div>
         </div>
@@ -265,7 +265,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       height: '100%',
       gap: theme.spacing(1),
     }),
-    headerControls: css({
+    allControls: css({
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing(2),
@@ -293,7 +293,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
         color: theme.colors.text.link,
       },
     }),
-    listControls: css({
+    headerControls: css({
       marginBottom: theme.spacing(0.5),
     }),
     body: css({
