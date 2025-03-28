@@ -5,10 +5,13 @@ import { useStyles2 } from '@grafana/ui';
 import React, { createContext, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
+import { initFaro } from 'tracking/faro/faro';
 import { getUrlForTrail, newMetricsTrail } from 'utils';
 
 import { AppRoutes } from './Routes';
 import { PluginPropsContext } from '../utils/utils.plugin';
+
+initFaro();
 
 interface MetricsAppContext {
   trail: DataTrail;
