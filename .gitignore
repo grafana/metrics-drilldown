@@ -50,6 +50,8 @@ ci/
 
 
 # Editor
+.cursor
+.vscode
 .idea
 
 .eslintcache

@@ -1,3 +1,4 @@
+import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { expect, test } from '../fixtures';
 
 test.describe('Select metric view', () => {
@@ -55,7 +56,7 @@ test.describe('Select metric view', () => {
   });
 
   test('Screenshot example', async ({ selectMetricView }) => {
-    await selectMetricView.goto();
+    await selectMetricView.goto(DEFAULT_STATIC_URL_SEARCH_PARAMS);
 
     await expect(selectMetricView.getByTestId('scene-body')).toBeVisible();
     await expect(selectMetricView.getByTestId('scene')).toHaveScreenshot({
