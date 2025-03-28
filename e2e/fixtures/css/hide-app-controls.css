@@ -1,0 +1,7 @@
+.main-view > header {
+  display: none;
+}
+
+[data-testid='app-controls'] {
+  display: none;
+}

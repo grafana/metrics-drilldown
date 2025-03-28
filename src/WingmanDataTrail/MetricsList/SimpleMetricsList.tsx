@@ -125,7 +125,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     };
 
     return (
-      <>
+      <div data-testid="metrics-list">
         <div className={styles.container}>
           <body.Component model={body} />
         </div>
@@ -136,7 +136,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
             </Button>
           </div>
         )}
-      </>
+      </div>
     );
   };
 }

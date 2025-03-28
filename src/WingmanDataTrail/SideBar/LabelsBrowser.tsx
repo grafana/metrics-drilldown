@@ -52,7 +52,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     };
 
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid="labels-browser">
         <h5 className={styles.header}>
           Group by label
           <span className={styles.count}>({loading ? '0' : labels.length})</span>
@@ -87,13 +87,14 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
                 clear
               </Button>
             </div>
-            <RadioButtonList
-              name="labels-list"
-              className={styles.list}
-              options={filteredList}
-              onChange={model.onClickLabel}
-              value={value as string}
-            />
+            <div className={styles.list} data-testid="labels-list">
+              <RadioButtonList
+                name="labels-list"
+                options={filteredList}
+                onChange={model.onClickLabel}
+                value={value as string}
+              />
+            </div>
           </>
         )}
       </div>
@@ -143,9 +144,13 @@ function getStyles(theme: GrafanaTheme2) {
       gap: 0,
       overflowY: 'auto',
 
+      '& [role="radiogroup"]': {
+        gap: 0,
+      },
+
       '& label': {
         cursor: 'pointer',
-        padding: theme.spacing(0.75, 1),
+        padding: theme.spacing(0.5, 1),
         '&:hover': {
           background: theme.colors.background.secondary,
         },
