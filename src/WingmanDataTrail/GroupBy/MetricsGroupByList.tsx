@@ -9,9 +9,10 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Alert, Button, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { InlineBanner } from 'App/InlineBanner';
 import { LabelValuesVariable, VAR_LABEL_VALUES } from 'WingmanDataTrail/Labels/LabelValuesVariable';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
@@ -66,18 +67,15 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
         getLayoutEmpty: () =>
           new SceneReactObject({
             reactNode: (
-              <Alert title="" severity="info">
+              <InlineBanner title="" severity="info">
                 No label values found for label &quot;{labelName}&quot;.
-              </Alert>
+              </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
             reactNode: (
-              <Alert severity="error" title={`Error while loading label "${labelName}" values!`}>
-                <p>&quot;{error.message || error.toString()}&quot;</p>
-                <p>Please try to reload the page. Sorry for the inconvenience.</p>
-              </Alert>
+              <InlineBanner severity="error" title={`Error while loading label "${labelName}" values!`} error={error} />
             ),
           }),
         getLayoutChild: (option, index, options) => {

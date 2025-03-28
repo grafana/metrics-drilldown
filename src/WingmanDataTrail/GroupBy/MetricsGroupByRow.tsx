@@ -12,9 +12,10 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Alert, Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
+import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -85,19 +86,14 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         getLayoutEmpty: () =>
           new SceneReactObject({
             reactNode: (
-              <Alert title="" severity="info">
+              <InlineBanner title="" severity="info">
                 No metrics found for the current filters and time range.
-              </Alert>
+              </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
-            reactNode: (
-              <Alert severity="error" title="Error while loading metrics!">
-                <p>&quot;{error.message || error.toString()}&quot;</p>
-                <p>Please try to reload the page. Sorry for the inconvenience.</p>
-              </Alert>
-            ),
+            reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({

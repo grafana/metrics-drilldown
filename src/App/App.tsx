@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { ErrorBoundary, useStyles2 } from '@grafana/ui';
-import React, { createContext, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
 import { initFaro } from 'tracking/faro/faro';
@@ -11,7 +11,6 @@ import { getUrlForTrail, newMetricsTrail } from 'utils';
 import { ErrorView } from './ErrorView';
 import { AppRoutes } from './Routes';
 import { PluginPropsContext } from '../utils/utils.plugin';
-
 initFaro();
 
 interface MetricsAppContext {
@@ -33,6 +32,25 @@ function App(props: AppRootProps) {
   };
 
   const [error, setError] = useState<Error>();
+
+  useEffect(() => {
+    // even though we wrap the app in an ErrorBoundary, some errors are not caught,
+    // so we have to set a global onerror handler to catch these (e.g. error thrown from some click handlers)
+    const onError = (errorEvent: ErrorEvent) => {
+      setError(errorEvent.error);
+    };
+    const onUnHandledRejection = (event: PromiseRejectionEvent) => {
+      setError(new Error(event.reason, { cause: { type: event.type } }));
+    };
+
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onUnHandledRejection);
+    return () => {
+      window.removeEventListener('unhandledrejection', onUnHandledRejection);
+      window.removeEventListener('error', onError);
+    };
+  }, []);
+
   if (error) {
     return (
       <div className={styles.appContainer} data-testid="metrics-drilldown-app">
