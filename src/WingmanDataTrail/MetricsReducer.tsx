@@ -174,7 +174,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
               )}
             </div>
           )}
-          <div className={styles.list} data-testid="metrics-list">
+          <div className={styles.list}>
             <body.Component model={body} />
           </div>
         </div>

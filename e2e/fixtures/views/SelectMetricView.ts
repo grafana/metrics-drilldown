@@ -10,11 +10,12 @@ export class SelectMetricView extends DrilldownView {
   }
 
   goto(urlSearchParams = new URLSearchParams()) {
-    return super.goto(new URLSearchParams([...this.urlParams, ...new URLSearchParams(urlSearchParams)]));
+    // the spread order is important to override the default params (e.g. overriding "from" and "to")
+    return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
 
   getControls() {
-    return this.getByTestId('controls');
+    return this.getByTestId('app-controls');
   }
 
   async assertTopControls() {

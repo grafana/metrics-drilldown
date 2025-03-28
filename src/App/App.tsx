@@ -10,8 +10,8 @@ import { getUrlForTrail, newMetricsTrail } from 'utils';
 
 import { ErrorView } from './ErrorView';
 import { AppRoutes } from './Routes';
+import { useCatchExceptions } from './useCatchExceptions';
 import { PluginPropsContext } from '../utils/utils.plugin';
-
 initFaro();
 
 interface MetricsAppContext {
@@ -32,7 +32,8 @@ function App(props: AppRootProps) {
     setTrail(trail);
   };
 
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useCatchExceptions();
+
   if (error) {
     return (
       <div className={styles.appContainer} data-testid="metrics-drilldown-app">

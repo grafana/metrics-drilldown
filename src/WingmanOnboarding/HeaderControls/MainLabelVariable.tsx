@@ -13,14 +13,16 @@ import { MetricsOnboarding } from '../MetricsOnboarding';
 export const VAR_MAIN_LABEL_VARIABLE = 'mainLabelWingman';
 
 export class MainLabelVariable extends CustomVariable {
-  public static OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node', 'instance'];
+  public static readonly OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node', 'instance'];
 
   constructor() {
     super({
       name: VAR_MAIN_LABEL_VARIABLE,
-      query: MainLabelVariable.OPTIONS.join(','),
+      query: [' ', ...MainLabelVariable.OPTIONS].join(','),
       hide: VariableHide.hideVariable,
-      value: undefined,
+      value: ' ',
+      includeAll: false,
+      allowCustomValue: true,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
