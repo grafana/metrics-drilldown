@@ -16,7 +16,7 @@ export function InlineBanner({ severity, title, message, error, errorContext, ch
   let errorObject;
 
   if (error) {
-    errorObject = error instanceof Error ? error : new Error(error);
+    errorObject = typeof error === 'string' ? new Error(error) : error;
 
     logger.error(errorObject, {
       ...(errorObject.cause || {}),
@@ -29,7 +29,7 @@ export function InlineBanner({ severity, title, message, error, errorContext, ch
     <Alert title={title} severity={severity}>
       {errorObject && (
         <>
-          {errorObject.message}
+          {errorObject.message || errorObject.toString()}
           <br />
         </>
       )}
