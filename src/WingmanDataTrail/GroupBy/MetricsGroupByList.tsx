@@ -110,7 +110,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
     };
 
     return (
-      <>
+      <div data-testid="metrics-groupby-list">
         <body.Component model={body} />
 
         {shouldDisplayShowMoreButton && (
@@ -125,7 +125,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
         <div className={styles.variable}>
           <variable.Component key={variable.state.name} model={variable} />
         </div>
-      </>
+      </div>
     );
   };
 }

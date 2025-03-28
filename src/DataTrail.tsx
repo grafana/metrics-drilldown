@@ -655,7 +655,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         {showHeaderForFirstTimeUsers && <MetricsHeader />}
         <history.Component model={history} />
         {controls && (
-          <div className={styles.controls} data-testid="controls">
+          <div className={styles.controls} data-testid="app-controls">
             {controls.map((control) => (
               <control.Component key={control.state.key} model={control} />
             ))}
