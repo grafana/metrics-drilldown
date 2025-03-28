@@ -125,7 +125,6 @@ describe('initFaro()', () => {
         release: 'v1-test',
         version: GIT_COMMIT,
         environment: 'prod',
-        namespace: 'v11.6.0 (Enterprise)',
       });
 
       expect(user).toStrictEqual({ email: 'sixty.four@grafana.com' });
