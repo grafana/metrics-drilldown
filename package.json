@@ -32,6 +32,7 @@
     "@grafana/data": "^11.6.0",
     "@grafana/lezer-logql": "^0.2.7",
     "@grafana/prometheus": "^11.6.0-223871",
+    "@grafana/promql-builder": "^0.0.4",
     "@grafana/runtime": "^11.6.0",
     "@grafana/scenes": "^5.41.1",
     "@grafana/schema": "^11.6.0",

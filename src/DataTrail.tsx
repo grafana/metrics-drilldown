@@ -33,6 +33,11 @@ import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
 import { PluginInfo } from 'PluginInfo/PluginInfo';
+import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
+import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { MetricsOnboarding } from 'WingmanOnboarding/MetricsOnboarding';
+import { VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -65,6 +70,11 @@ import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
+import {
+  fetchAlertingMetrics,
+  fetchDashboardMetrics,
+} from './WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
+
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
@@ -73,6 +83,10 @@ export interface DataTrailState extends SceneObjectState {
   settings: DataTrailSettings;
   pluginInfo: SceneReactObject;
   createdAt: number;
+
+  // wingman
+  dashboardMetrics?: Record<string, number>;
+  alertingMetrics?: Record<string, number>;
 
   // just for the starting data source
   initialDS?: string;
@@ -126,6 +140,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       settings: state.settings ?? new DataTrailSettings({}),
       pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
+      dashboardMetrics: {},
+      alertingMetrics: {},
       // default to false but update this to true on updateOtelData()
       // or true if the user either turned on the experience
       useOtelExperience: state.useOtelExperience ?? false,
@@ -208,12 +224,33 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     };
     window.addEventListener('unload', saveRecentTrail);
 
+    // Fetch metric usage data
+    this.updateMetricUsageData();
+
     return () => {
       if (!this.state.embedded) {
         saveRecentTrail();
       }
       window.removeEventListener('unload', saveRecentTrail);
     };
+  }
+
+  /**
+   * Updates metric usage data from dashboards and alerting rules
+   */
+  private async updateMetricUsageData() {
+    try {
+      // Fetch both metrics sources concurrently
+      const [dashboardMetrics, alertingMetrics] = await Promise.all([fetchDashboardMetrics(), fetchAlertingMetrics()]);
+
+      this.setState({ dashboardMetrics, alertingMetrics });
+    } catch (error) {
+      console.error('Failed to fetch metric usage data:', error);
+      this.setState({
+        dashboardMetrics: {},
+        alertingMetrics: {},
+      });
+    }
   }
 
   protected _variableDependency = new VariableDependencyConfig(this, {
@@ -362,6 +399,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // the topscene set on the trail > MetricScene > getAutoQueriesForMetric() > createHistogramMetricQueryDefs();
     stateUpdate.nativeHistogramMetric = nativeHistogramMetric ? '1' : '';
     stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
+
     return stateUpdate;
   }
 
@@ -488,12 +526,22 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       return;
     }
 
-    // show the var filters normally
-    filtersVariable.setState({
-      addFilterButtonText: 'Add label',
-      label: 'Select label',
-      hide: VariableHide.hideLabel,
-    });
+    // Wingman - we are forced to do this here and not in MetricsOnboarding because resetOtelExperience()
+    // is called after the child is rendered, so we can't hide it from there
+    if (this.state.topScene instanceof MetricsOnboarding) {
+      filtersVariable.setState({
+        hide: VariableHide.hideVariable,
+        filters: [],
+      });
+    } else {
+      // show the var filters normally
+      filtersVariable.setState({
+        addFilterButtonText: 'Add label',
+        label: 'Select label',
+        hide: VariableHide.hideLabel,
+      });
+    }
+
     // Resetting the otel experience filters means clearing both the otel resources var and the otelMetricsVar
     // hide the super otel and metric filter and reset it
     otelAndMetricsFiltersVariable.setState({
@@ -644,6 +692,7 @@ function getVariableSet(
   return new SceneVariableSet({
     variables: [
       new DataSourceVariable({
+        key: VAR_DATASOURCE,
         name: VAR_DATASOURCE,
         label: 'Data source',
         description: 'Only prometheus data sources are supported',
@@ -662,6 +711,7 @@ function getVariableSet(
         allowCustomValue: true,
       }),
       new AdHocFiltersVariable({
+        key: VAR_FILTERS,
         name: VAR_FILTERS,
         addFilterButtonText: 'Add label',
         datasource: trailDS,
@@ -712,6 +762,10 @@ function getVariableSet(
         placeholder: 'Select',
         isMulti: true,
       }),
+      new VariantVariable(),
+      new MetricsVariable({}),
+      new FilteredMetricsVariable(),
+      new LabelsVariable(),
     ],
   });
 }
