@@ -16,7 +16,7 @@ import { getTrailStore } from './TrailStore/TrailStore';
 import { getDatasourceForNewTrail, newMetricsTrail } from './utils';
 
 export interface DataTrailsHomeState extends SceneObjectState {
-  onTrailSelected<T extends DataTrail>(trail: T): void;
+  onTrailSelected: (trail: DataTrail) => void;
 }
 
 export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
