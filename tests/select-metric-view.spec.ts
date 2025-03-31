@@ -72,4 +72,15 @@ test.describe('Select metric view', () => {
     const expectedContent = `${getGrafanaUrl()}/a/grafana-metricsdrilldown-app/trail?metric=a.utf8.metric%20%F0%9F%A4%98&nativeHistogramMetric=&from=now-15m&to=now&timezone=browser&var-ds=gdev-prometheus&var-otel_resources=&var-filters=&var-otel_and_metric_filters=&var-deployment_environment=undefined&var-variant=onboard-filters-sidebar&var-labelsWingman=&actionView=breakdown&var-groupby=$__all&breakdownLayout=grid`;
     expect(clipboardContent).toBe(expectedContent);
   });
+
+  test('Bookmark', async ({ selectMetricView }) => {
+    await selectMetricView.selectMetricPanel('a_utf8_http_requests_total');
+    await selectMetricView.getByLabel('Bookmark').click();
+    await expect(selectMetricView.getByText('Bookmark created')).toBeVisible();
+    await selectMetricView.getByRole('link', { name: 'View bookmarks' }).click();
+    await selectMetricView.getByText('Or view bookmarks').click();
+    await selectMetricView.getByLabel('bookmarkCarrot').click();
+    // One for recent exploration and one for bookmark
+    await expect(selectMetricView.getByRole('button', { name: 'a_utf8_http_requests_total' })).toHaveCount(2);
+  });
 });
