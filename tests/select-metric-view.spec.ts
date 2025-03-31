@@ -47,7 +47,7 @@ test.describe('Select metric view', () => {
     await expect(metricSceneDetails.getByLabel('Remove existing metric and choose a new metric')).toBeVisible();
     await expect(metricSceneDetails.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL)).toBeVisible();
     await expect(metricSceneDetails.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL)).toBeVisible();
-    await expect(metricSceneDetails.getByLabel('Bookmark')).toBeVisible();
+    await expect(metricSceneDetails.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL)).toBeVisible();
   });
 
   test('Filtering by Label', async ({ selectMetricView }) => {
@@ -74,13 +74,12 @@ test.describe('Select metric view', () => {
   });
 
   test('Bookmark', async ({ selectMetricView }) => {
-    await selectMetricView.selectMetricPanel('a_utf8_http_requests_total');
-    await selectMetricView.getByLabel('Bookmark').click();
+    const panelTitle = 'a.utf8.metric 🤘';
+    await selectMetricView.selectMetricPanel(panelTitle);
+    await selectMetricView.createBookmark();
     await expect(selectMetricView.getByText('Bookmark created')).toBeVisible();
-    await selectMetricView.getByRole('link', { name: 'View bookmarks' }).click();
-    await selectMetricView.getByText('Or view bookmarks').click();
-    await selectMetricView.getByLabel('bookmarkCarrot').click();
+    await selectMetricView.seeAllBookmarksFromAlert();
     // One for recent exploration and one for bookmark
-    await expect(selectMetricView.getByRole('button', { name: 'a_utf8_http_requests_total' })).toHaveCount(2);
+    await expect(selectMetricView.getByRole('button', { name: panelTitle })).toHaveCount(2);
   });
 });

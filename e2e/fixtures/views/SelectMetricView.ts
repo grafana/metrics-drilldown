@@ -159,4 +159,13 @@ export class SelectMetricView extends DrilldownView {
   async clickCopyPanelUrl() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL).click();
   }
+
+  async createBookmark() {
+    await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL).click();
+  }
+
+  async seeAllBookmarksFromAlert() {
+    await this.getByRole('link', { name: 'View bookmarks' }).click();
+    await this.getByLabel('bookmarkCarrot').click();
+  }
 }
