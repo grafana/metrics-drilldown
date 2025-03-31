@@ -22,6 +22,7 @@ import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
+import { UI_TEXT } from './constants/ui';
 import { reportExploreMetrics, type Interactions } from './interactions';
 import {
   MAIN_PANEL_MAX_HEIGHT,
@@ -241,7 +242,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
             <ToolbarButton
               variant={'canvas'}
               icon="compass"
-              tooltip="Open in explore"
+              tooltip={UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL}
               onClick={model.openExploreLink}
             />
             <ShareTrailButton trail={trail} />

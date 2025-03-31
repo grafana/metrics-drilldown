@@ -11,5 +11,6 @@ export const UI_TEXT = {
   },
   METRIC_SELECT_SCENE: {
     OTEL_LABEL: 'OTel experience',
+    OPEN_EXPLORE_LABEL: 'Open in explore',
   },
 };

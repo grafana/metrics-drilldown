@@ -148,4 +148,12 @@ export class SelectMetricView extends DrilldownView {
       .getByRole('button', { name: /select/i })
       .click();
   }
+
+  async openPanelInExplore(panelTitle: string) {
+    await this.selectMetricPanel(panelTitle);
+    const explorePromise = this.page.waitForEvent('popup');
+    await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL).click();
+    const explorePage = await explorePromise;
+    return explorePage;
+  }
 }

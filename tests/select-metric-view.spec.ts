@@ -1,4 +1,5 @@
 import { expect, test } from '../e2e/fixtures';
+import { UI_TEXT } from '../src/constants/ui';
 
 test.describe('Select metric view', () => {
   test.beforeEach(async ({ selectMetricView }) => {
@@ -43,7 +44,7 @@ test.describe('Select metric view', () => {
 
     // buttons
     await expect(metricSceneDetails.getByLabel('Remove existing metric and choose a new metric')).toBeVisible();
-    await expect(metricSceneDetails.getByLabel('Open in explore')).toBeVisible();
+    await expect(metricSceneDetails.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL)).toBeVisible();
     await expect(metricSceneDetails.getByLabel('Copy url')).toBeVisible();
     await expect(metricSceneDetails.getByLabel('Bookmark')).toBeVisible();
   });
@@ -57,10 +58,7 @@ test.describe('Select metric view', () => {
   });
 
   test('Open in Explore', async ({ selectMetricView }) => {
-    await selectMetricView.setAdHocFilter('label with 📈', 'metrics');
-
-    await expect(selectMetricView.getByText('label with 📈 = metrics')).toBeVisible();
-    await expect(selectMetricView.getPanelByTitle('a.utf8.metric 🤘')).toBeVisible();
-    await expect(selectMetricView.getPanelByTitle('a_utf8_http_requests_total')).toBeVisible();
+    const explorePage = await selectMetricView.openPanelInExplore('a.utf8.metric 🤘');
+    await expect(explorePage.getByRole('code').getByText('"a.utf8.metric 🤘"')).toBeVisible();
   });
 });
