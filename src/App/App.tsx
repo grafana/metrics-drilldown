@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import { ErrorBoundary, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import React, { createContext, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
@@ -32,8 +32,7 @@ function App(props: AppRootProps) {
     setTrail(trail);
   };
 
-  const [error, setError] = useCatchExceptions();
-
+  const [error] = useCatchExceptions();
   if (error) {
     return (
       <div className={styles.appContainer} data-testid="metrics-drilldown-app">
@@ -44,15 +43,11 @@ function App(props: AppRootProps) {
 
   return (
     <div className={styles.appContainer} data-testid="metrics-drilldown-app">
-      <ErrorBoundary onError={setError}>
-        {() => (
-          <PluginPropsContext.Provider value={props}>
-            <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
-              <AppRoutes />
-            </MetricsContext.Provider>
-          </PluginPropsContext.Provider>
-        )}
-      </ErrorBoundary>
+      <PluginPropsContext.Provider value={props}>
+        <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
+          <AppRoutes />
+        </MetricsContext.Provider>
+      </PluginPropsContext.Provider>
     </div>
   );
 }
