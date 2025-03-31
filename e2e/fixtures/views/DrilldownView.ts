@@ -1,4 +1,4 @@
-import { expect, type Mouse, type Page, type Request, type Route, type Locator } from '@playwright/test';
+import { expect, type Locator, type Mouse, type Page, type Request, type Route } from '@playwright/test';
 import { getByGrafanaSelectorOptions } from '@grafana/plugin-e2e';
 
 import { DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY, DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY } from '../../config/constants';
