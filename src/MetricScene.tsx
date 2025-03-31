@@ -231,7 +231,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
           <Stack gap={1}>
             <ToolbarButton
               variant={'canvas'}
-              tooltip="Remove existing metric and choose a new metric"
+              tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
               onClick={() => {
                 reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
                 trail.publishEvent(new MetricSelectedEvent(undefined));
@@ -255,7 +255,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
                   <Icon name={'star'} type={'default'} size={'lg'} />
                 )
               }
-              tooltip={'Bookmark'}
+              tooltip={UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL}
               onClick={toggleBookmark}
             />
             {trail.state.embedded && (

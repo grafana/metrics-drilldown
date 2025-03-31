@@ -82,4 +82,10 @@ test.describe('Select metric view', () => {
     // One for recent exploration and one for bookmark
     await expect(selectMetricView.getByRole('button', { name: panelTitle })).toHaveCount(2);
   });
+
+  test('Select New Metric', async ({ selectMetricView }) => {
+    await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
+    await selectMetricView.selectNewMetric();
+    await selectMetricView.assertTopControls();
+  });
 });
