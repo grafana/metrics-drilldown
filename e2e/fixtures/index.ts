@@ -14,6 +14,7 @@ type AppTestFixture = {
   otelSwitch: Locator;
   navigateToTrail: () => Promise<void>;
   getMetricPanel: (title: string) => Promise<Locator>;
+  forEachTest: void;
 };
 
 export const test = base.extend<AppTestFixture>({
@@ -23,6 +24,16 @@ export const test = base.extend<AppTestFixture>({
     });
     await use(configPage);
   },
+  forEachTest: [
+    async ({ page }, use) => {
+      // This code runs before every test.
+      await page.goto('http://localhost:8000');
+      await use();
+      // This code runs after every test.
+      console.log('Last URL:', page.url());
+    },
+    { auto: true },
+  ],
   gotoPage: async ({ gotoAppPage }, use) => {
     await use((path) =>
       gotoAppPage({
