@@ -121,11 +121,13 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 }
 
 const getInvestigationLink = async (addToExplorations: AddToExplorationButton) => {
+  const context = addToExplorations.state.context;
+
   // `getPluginLinkExtensions` is removed in Grafana v12
   if (getPluginLinkExtensions !== undefined) {
     const links = getPluginLinkExtensions({
-      extensionPointId: extensionPointId,
-      context: addToExplorations.state.context,
+      extensionPointId,
+      context,
     });
 
     return links.extensions[0];
@@ -135,8 +137,8 @@ const getInvestigationLink = async (addToExplorations: AddToExplorationButton) =
   if (getObservablePluginLinks !== undefined) {
     const links: PluginExtensionLink[] = await lastValueFrom(
       getObservablePluginLinks({
-        extensionPointId: extensionPointId,
-        context: addToExplorations.state.context,
+        extensionPointId,
+        context,
       })
     );
 
