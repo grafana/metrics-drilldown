@@ -1,6 +1,6 @@
 import { expect, test } from '../e2e/fixtures';
-import { UI_TEXT } from '../src/constants/ui';
 import { getGrafanaUrl } from '../playwright.config';
+import { UI_TEXT } from '../src/constants/ui';
 
 test.describe('Select metric view', () => {
   test.beforeEach(async ({ selectMetricView }) => {
