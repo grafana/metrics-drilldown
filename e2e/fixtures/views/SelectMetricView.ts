@@ -149,11 +149,14 @@ export class SelectMetricView extends DrilldownView {
       .click();
   }
 
-  async openPanelInExplore(panelTitle: string) {
-    await this.selectMetricPanel(panelTitle);
+  async openPanelInExplore() {
     const explorePromise = this.page.waitForEvent('popup');
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL).click();
     const explorePage = await explorePromise;
     return explorePage;
+  }
+
+  async clickCopyPanelUrl() {
+    await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL).click();
   }
 }
