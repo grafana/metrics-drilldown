@@ -105,9 +105,12 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metricPrefix'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE, VAR_FILTERS],
-    onReferencedVariableValueChanged: () => {
-      // In all cases, we want to reload the metric names
+    variableNames: [VAR_DATASOURCE],
+    onReferencedVariableValueChanged: (filter) => {
+      // In all cases of major variable changes, we want to reload the metric names
+      // But previously, we listened for changes in the filters variable
+      // Since we are handling __name__ filters specially,
+      // This variableDependency does not pick that label change up
       this._debounceRefreshMetricNames();
     },
   });
@@ -215,6 +218,19 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       this._subs.add(
         trail.subscribeToEvent(RefreshMetricsEvent, () => {
           this._debounceRefreshMetricNames();
+        })
+      );
+    }
+
+    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+    if (isAdHocFiltersVariable(filtersVariable)) {
+      this._subs.add(
+        filtersVariable?.subscribeToState((newState, prevState) => {
+          // if oldState is not equal to newstate, then we need to refresh the metric names
+          // this handles changes in __name__ labels which are filtered out of the expression in DataTrail.tsx
+          if (!isEqual(prevState, newState)) {
+            this._debounceRefreshMetricNames();
+          }
         })
       );
     }
