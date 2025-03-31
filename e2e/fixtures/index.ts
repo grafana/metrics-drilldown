@@ -1,17 +1,15 @@
 import { test as base, type AppConfigPage, type AppPage } from '@grafana/plugin-e2e';
-import { type Locator } from '@playwright/test';
 
 import pluginJson from '../../src/plugin.json';
-import { DEFAULT_TIMERANGE } from '../config/constants';
+import { DEFAULT_URL_SEARCH_PARAMS } from '../config/constants';
+import { MetricsReducerView } from './views/MetricsReducerView';
 import { SelectMetricView } from './views/SelectMetricView';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
   gotoPage: (path?: string) => Promise<AppPage>;
   selectMetricView: SelectMetricView;
-  otelSwitch: Locator;
-  navigateToTrail: () => Promise<void>;
-  getMetricPanel: (title: string) => Promise<Locator>;
+  metricsReducerView: MetricsReducerView;
 };
 
 export const test = base.extend<AppTestFixture>({
@@ -30,8 +28,12 @@ export const test = base.extend<AppTestFixture>({
     );
   },
   selectMetricView: async ({ page }, use) => {
-    const selectMetricView = new SelectMetricView(page, new URLSearchParams({ ...DEFAULT_TIMERANGE }));
+    const selectMetricView = new SelectMetricView(page, DEFAULT_URL_SEARCH_PARAMS);
     await use(selectMetricView);
+  },
+  metricsReducerView: async ({ page }, use) => {
+    const metricsReducerView = new MetricsReducerView(page, DEFAULT_URL_SEARCH_PARAMS);
+    await use(metricsReducerView);
   },
 });
 

@@ -17,6 +17,10 @@ export class DrilldownView {
     this.urlParams = urlParams;
   }
 
+  setPathName(pathname: string) {
+    this.pathname = pathname;
+  }
+
   async goto(urlParams: URLSearchParams | undefined = undefined) {
     await this.page.addInitScript(
       (keys) => {

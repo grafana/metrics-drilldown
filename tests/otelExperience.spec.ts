@@ -2,7 +2,7 @@ import { expect, test } from '../e2e/fixtures';
 
 test.describe('OTEL Experience', () => {
   test.beforeEach(async ({ selectMetricView }) => {
-    await selectMetricView.goto(new URLSearchParams({ 'var-ds': 'gdev-prometheus' }));
+    await selectMetricView.goto();
   });
 
   test('otel enabled workflow', async ({ selectMetricView, page }) => {
