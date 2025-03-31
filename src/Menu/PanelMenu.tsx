@@ -1,5 +1,6 @@
-import { type DataFrame, type PanelMenuItem } from '@grafana/data';
-import { getPluginLinkExtensions } from '@grafana/runtime';
+import { type DataFrame, type PanelMenuItem, type PluginExtensionLink } from '@grafana/data';
+// @ts-ignore Certain imports are not available in the dependant package, but can be if the plugin is running in a different Grafana version
+import { getObservablePluginLinks, getPluginLinkExtensions } from '@grafana/runtime';
 import {
   getExploreURL,
   sceneGraph,
@@ -11,6 +12,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import React from 'react';
+import { lastValueFrom } from 'rxjs';
 
 import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
@@ -81,8 +83,8 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
         frame: this.state.frame,
       });
       this._subs.add(
-        addToExplorationsButton?.subscribeToState(() => {
-          subscribeToAddToExploration(this);
+        addToExplorationsButton?.subscribeToState(async () => {
+          await subscribeToAddToExploration(this);
         })
       );
       this.setState({
@@ -118,26 +120,36 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
   };
 }
 
-const getInvestigationLink = (addToExplorations: AddToExplorationButton) => {
-  const links = getPluginLinkExtensions({
-    extensionPointId: extensionPointId,
-    context: addToExplorations.state.context,
-  });
+const getInvestigationLink = async (addToExplorations: AddToExplorationButton) => {
+  // `getPluginLinkExtensions` is removed in Grafana v12
+  if (getPluginLinkExtensions !== undefined) {
+    const links = getPluginLinkExtensions({
+      extensionPointId: extensionPointId,
+      context: addToExplorations.state.context,
+    });
 
-  return links.extensions[0];
-};
-
-const onAddToInvestigationClick = (event: React.MouseEvent, addToExplorations: AddToExplorationButton) => {
-  const link = getInvestigationLink(addToExplorations);
-  if (link && link.onClick) {
-    link.onClick(event);
+    return links.extensions[0];
   }
+
+  // `getObservablePluginLinks` is introduced in Grafana v12
+  if (getObservablePluginLinks !== undefined) {
+    const links: PluginExtensionLink[] = await lastValueFrom(
+      getObservablePluginLinks({
+        extensionPointId: extensionPointId,
+        context: addToExplorations.state.context,
+      })
+    );
+
+    return links[0];
+  }
+
+  return undefined;
 };
 
-function subscribeToAddToExploration(menu: PanelMenu) {
+async function subscribeToAddToExploration(menu: PanelMenu) {
   const addToExplorationButton = menu.state.explorationsButton;
   if (addToExplorationButton) {
-    const link = getInvestigationLink(addToExplorationButton);
+    const link = await getInvestigationLink(addToExplorationButton);
 
     const existingMenuItems = menu.state.body?.state.items ?? [];
 
@@ -156,7 +168,7 @@ function subscribeToAddToExploration(menu: PanelMenu) {
         menu.state.body?.addItem({
           text: ADD_TO_INVESTIGATION_MENU_TEXT,
           iconClassName: 'plus-square',
-          onClick: (e) => onAddToInvestigationClick(e, addToExplorationButton),
+          onClick: (e) => link.onClick && link.onClick(e),
         });
       } else {
         if (existingAddToExplorationLink) {
