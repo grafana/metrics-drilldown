@@ -9,5 +9,3 @@ services:
     volumes:
       - ../../e2e:/app/e2e
       - ../../src:/app/src
-    healthcheck:
-      test: ./wait-for-grafana.sh http://localhost:${GRAFANA_PORT:-3001}/ 200 60 3
