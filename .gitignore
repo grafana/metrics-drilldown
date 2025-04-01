@@ -55,6 +55,8 @@ ci/
 /playwright/.auth/
 
 # Editor
+.cursor
+.vscode
 .idea
 
 .eslintcache

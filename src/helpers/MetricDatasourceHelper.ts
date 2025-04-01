@@ -1,5 +1,4 @@
 import {
-  type DataSourceApi,
   type DataSourceGetTagKeysOptions,
   type DataSourceGetTagValuesOptions,
   type MetricFindValue,
@@ -15,7 +14,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 
-function isPrometheusDatasource(ds: DataSourceApi<any>): ds is PrometheusDatasource {
+function isPrometheusDatasource(ds: any): ds is PrometheusDatasource {
   return ds.type === 'prometheus';
 }
 
