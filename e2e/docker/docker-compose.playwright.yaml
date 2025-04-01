@@ -1,0 +1,13 @@
+name: 'metrics-drilldown-playwright-e2e'
+services:
+  playwright:
+    network_mode: host
+    container_name: 'playwright-e2e'
+    build:
+      dockerfile: ./docker/Dockerfile.plugin
+      context: ..
+    volumes:
+      - ../../e2e:/app/e2e
+      - ../../src:/app/src
+    healthcheck:
+      test: ./wait-for-grafana.sh http://localhost:${GRAFANA_PORT:-3001}/ 200 60 3
