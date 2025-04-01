@@ -723,7 +723,10 @@ function getVariableSet(
         applyMode: 'manual',
         allowCustomValue: true,
         expressionBuilder: (filters: AdHocVariableFilter[]) => {
-          return [...getBaseFiltersForMetric(metric), ...filters]
+          // remove any filters that include __name__ key in the expression
+          // to prevent the metric name from being set twice in the query and causing an error.
+          const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
+          return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
             .map((filter) => `${filter.key}${filter.operator}"${filter.value}"`)
             .join(',');
         },
