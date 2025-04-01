@@ -18,7 +18,7 @@ export type Props = {
 };
 
 // Helper function to truncate the value for a single key:value pair
-const truncateValue = (key: string, value: string, maxLength: number) => {
+export const truncateValue = (key: string, value: string, maxLength: number) => {
   const combinedLength = key.length + 2 + value.length; // 2 for ": "
   if (combinedLength > maxLength) {
     return value.substring(0, maxLength - key.length - 5) + '...'; // 5 for ": " and "..."
@@ -57,11 +57,12 @@ export function DataTrailCard(props: Props) {
 
   const { filters, metric, createdAt } = values;
 
+  const heading = truncateValue('', getMetricName(metric), 39);
   return (
-    <article>
+    <article data-testid={`data-trail-card ${heading}`}>
       <Card onClick={onSelect} className={styles.card}>
         <Card.Heading>
-          <div className={styles.metricValue}>{truncateValue('', getMetricName(metric), 39)}</div>
+          <div className={styles.metricValue}>{heading}</div>
         </Card.Heading>
         <Card.Meta className={styles.meta}>
           {filters.map((f) => (
