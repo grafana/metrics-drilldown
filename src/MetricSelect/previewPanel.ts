@@ -54,6 +54,7 @@ export function getPreviewPanelFor(
     otelJoinQuery: getOtelJoinQueryFromTrail(trail),
     isRateQuery: autoQuery.preview.queries[0].expr.includes('rate('),
     groupings: autoQuery.preview.queries[0].expr.includes('by(') ? ['le'] : undefined,
+    ignoreUsage: true,
   });
 
   // Override the autoQuery's preview panel query with the one created with `@grafana/promql-builder`
