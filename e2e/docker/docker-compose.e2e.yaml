@@ -36,5 +36,5 @@ services:
   prometheus-utf8:
     build: ./prometheus_utf8
     container_name: 'prometheus-utf8-e2e'
-    ports:
+    ports: !override
       - '${PROMETHEUS_UTF8_PORT:-9112}:9112'
