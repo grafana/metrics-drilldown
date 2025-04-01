@@ -17,6 +17,7 @@ import { trailDS } from 'shared';
 import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
 import { buildPrometheusQuery } from './buildPrometheusQuery';
+import { buildHeatmapPanel } from './panels/heatmap';
 import { buildStatusHistoryPanel } from './panels/statushistory';
 import { buildTimeseriesPanel } from './panels/timeseries';
 
@@ -108,6 +109,24 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         }),
       })
         .setUnit(unit) // Set the appropriate unit for status history panel as well
+        .build();
+    }
+
+    // check if metric is histogram, if yes build heatmap panel
+    const isHistogram = metricName.endsWith('_bucket');
+    if (isHistogram) {
+      return buildHeatmapPanel({
+        panelTitle,
+        headerActions,
+        color,
+        hideLegend,
+        queryRunner: MetricVizPanel.buildQueryRunner({
+          metricName,
+          matchers,
+          prometheusFunction,
+        }),
+      })
+        .setUnit(unit)
         .build();
     }
 
