@@ -52,10 +52,10 @@ test.describe('Select metric view', () => {
 
   test('Filtering by Label', async ({ selectMetricView }) => {
     await selectMetricView.setAdHocFilter('label with 📈', 'metrics');
-
-    await expect(selectMetricView.getByText('label with 📈 = metrics')).toBeVisible();
-    await expect(selectMetricView.getPanelByTitle('a.utf8.metric 🤘')).toBeVisible();
-    await expect(selectMetricView.getPanelByTitle('a_utf8_http_requests_total')).toBeVisible();
+    await selectMetricView.assertAdHocFilter('label with 📈 = metrics', [
+      'a.utf8.metric 🤘',
+      'a_utf8_http_requests_total',
+    ]);
   });
 
   test('Open in Explore', async ({ selectMetricView }) => {
