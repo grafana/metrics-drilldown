@@ -5,7 +5,8 @@ export const CHROMIUM_VIEWPORT = { width: 1920, height: 1080 };
 export const DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY = 'grafana.navigation.open';
 export const DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY = 'grafana.navigation.docked';
 
-export const DEFAULT_TIMERANGE = {
+export const DEFAULT_URL_SEARCH_PARAMS = new URLSearchParams({
   from: 'now-15m',
   to: 'now',
-};
+  'var-ds': 'gdev-prometheus',
+});
