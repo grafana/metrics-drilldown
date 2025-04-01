@@ -8,9 +8,9 @@ import { type DataTrail } from 'DataTrail';
 import { initFaro } from 'tracking/faro/faro';
 import { getUrlForTrail, newMetricsTrail } from 'utils';
 
-import { ErrorView } from './ErrorView';
+// import { ErrorView } from './ErrorView';
 import { AppRoutes } from './Routes';
-import { useCatchExceptions } from './useCatchExceptions';
+// import { useCatchExceptions } from './useCatchExceptions';
 import { PluginPropsContext } from '../utils/utils.plugin';
 initFaro();
 
@@ -32,14 +32,14 @@ function App(props: AppRootProps) {
     setTrail(trail);
   };
 
-  const [error] = useCatchExceptions();
-  if (error) {
-    return (
-      <div className={styles.appContainer} data-testid="metrics-drilldown-app">
-        <ErrorView error={error} />
-      </div>
-    );
-  }
+  // const [error] = useCatchExceptions();
+  // if (error) {
+  //   return (
+  //     <div className={styles.appContainer} data-testid="metrics-drilldown-app">
+  //       <ErrorView error={error} />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className={styles.appContainer} data-testid="metrics-drilldown-app">
