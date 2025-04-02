@@ -25,16 +25,19 @@ import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
 import { UI_TEXT } from 'constants/ui';
+import { totalOtelResources } from 'otel/api';
+import { getOtelResourcesObject } from 'otel/util';
 
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
-import { getMetricNames } from './api';
-import { setOtelExperienceToggleState } from '../services/store';
 import { getFilters, getTrailFor } from '../utils';
+import { getMetricNames } from './api';
 import { getPreviewPanelFor } from './previewPanel';
+import { sortRelatedMetrics } from './relatedMetrics';
 import { SelectMetricAction } from './SelectMetricAction';
+import { setOtelExperienceToggleState } from '../services/store';
 import {
   getVariablesWithMetricConstant,
   MetricSelectedEvent,
@@ -42,9 +45,9 @@ import {
   VAR_DATASOURCE,
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
+  VAR_OTEL_RESOURCES,
 } from '../shared';
 import { StatusWrapper } from '../StatusWrapper';
-import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
 import { getSelectedScopes } from '../utils/utils.scopes';
@@ -105,12 +108,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metricPrefix'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE],
-    onReferencedVariableValueChanged: (filter) => {
-      // In all cases of major variable changes, we want to reload the metric names
-      // But previously, we listened for changes in the filters variable
-      // Since we are handling __name__ filters specially,
-      // This variableDependency does not pick that label change up
+    variableNames: [VAR_DATASOURCE, VAR_OTEL_RESOURCES],
+    onReferencedVariableValueChanged: () => {
+      // In all cases, we want to reload the metric names
       this._debounceRefreshMetricNames();
     },
   });
@@ -186,17 +186,17 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       }
     });
 
-    this._subs.add(
-      trail.subscribeToState(({ otelTargets }, oldState) => {
-        // if the otel targets have changed, get the new list of metrics
-        if (
-          otelTargets?.instances !== oldState.otelTargets?.instances &&
-          otelTargets?.jobs !== oldState.otelTargets?.jobs
-        ) {
-          this._debounceRefreshMetricNames();
-        }
-      })
-    );
+    const otelResourcesVar = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
+    if (isAdHocFiltersVariable(otelResourcesVar)) {
+      this._subs.add(
+        otelResourcesVar.subscribeToState((newState, oldState) => {
+          // Only refresh if the filters have changed
+          if (!isEqual(newState.filters, oldState.filters)) {
+            this._debounceRefreshMetricNames();
+          }
+        })
+      );
+    }
 
     this._subs.add(
       trail.subscribeToState(() => {
@@ -267,8 +267,14 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     this.setState({ metricNamesLoading: true, metricNamesError: undefined, metricNamesWarning: undefined });
 
     try {
-      const jobsList = trail.state.useOtelExperience ? trail.state.otelTargets?.jobs ?? [] : [];
-      const instancesList = trail.state.useOtelExperience ? trail.state.otelTargets?.instances ?? [] : [];
+      let jobsList: string[] = [];
+      let instancesList: string[] = [];
+      if (trail.state.useOtelExperience) {
+        const otelResourcesObject = getOtelResourcesObject(trail);
+        const otelTargets = await totalOtelResources(datasourceUid, timeRange, otelResourcesObject.filters);
+        jobsList = otelTargets?.jobs ?? [];
+        instancesList = otelTargets?.instances ?? [];
+      }
 
       const response = await getMetricNames(
         datasourceUid,
@@ -510,6 +516,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       trail.resetOtelExperience();
     } else {
       reportExploreMetrics('otel_experience_toggled', { value: 'on' });
+      trail.checkDataSourceForOTelResources();
     }
     setOtelExperienceToggleState(!useOtelExperience);
     trail.setState({ useOtelExperience: !useOtelExperience, resettingOtel, startButtonClicked });
