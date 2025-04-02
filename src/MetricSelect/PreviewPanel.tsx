@@ -12,7 +12,7 @@ import {
 import React from 'react';
 
 import { type AutoQueryDef } from 'autoQuery/types';
-import { isAdHocFiltersVariable, isConstantVariable } from 'utils/utils.variables';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 import { buildPrometheusQuery } from '../autoQuery/buildPrometheusQuery';
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
@@ -57,10 +57,8 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
     const filters = isAdHocFiltersVariable(filtersVar) ? filtersVar.state.filters : [];
 
     const otelJoinQueryVar = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, this);
-    const otelJoinQuery =
-      isConstantVariable(otelJoinQueryVar) && typeof otelJoinQueryVar.state.value === 'string'
-        ? otelJoinQueryVar.state.value
-        : '';
+    const otelJoinQueryValue = otelJoinQueryVar?.getValue();
+    const otelJoinQuery = typeof otelJoinQueryValue === 'string' ? otelJoinQueryValue : '';
 
     // TODO: remove dependency on `autoQuery`
     const autoQuery = this.state.autoQueryDef.queries[0];
