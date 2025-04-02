@@ -691,8 +691,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       <div className={styles.container}>
         {NativeHistogramBanner({ histogramsLoaded, nativeHistograms, trail: model })}
         {showHeaderForFirstTimeUsers && <MetricsHeader />}
-        {/* HISTORY remove component */}
-        <history.Component model={history} />
         {controls && (
           <div className={styles.controls} data-testid="app-controls">
             {controls.map((control) => (
