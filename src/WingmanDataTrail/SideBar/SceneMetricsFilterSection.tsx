@@ -63,7 +63,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     computeGroups: MetricsFilterSectionState['computeGroups'];
   }) {
     super({
-      key: `metrics-filter-section-${type}`,
+      key: `metrics-filter-section-${title}`,
       title,
       type,
       groups: [],
@@ -138,7 +138,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
     const onSelectionChange = (filters: string[]) => {
       model.setState({ selectedFilters: filters });
-      model.publishEvent(new EventFiltersChanged({ type, filters }));
+      model.publishEvent(new EventFiltersChanged({ type, filters }), true);
     };
 
     return (

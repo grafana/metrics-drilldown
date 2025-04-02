@@ -113,7 +113,9 @@ export class MetricsVariableFilterEngine {
       .map((r) => {
         try {
           return new RegExp(r);
-        } catch {
+        } catch (error) {
+          console.warn(`Error while building RegExp "${r}"! Ignoring...`);
+          console.warn(error);
           return null;
         }
       })
@@ -130,7 +132,9 @@ export class MetricsVariableFilterEngine {
   private static buildRegex(pattern: string, flags?: string) {
     try {
       return new RegExp(pattern, flags);
-    } catch {
+    } catch (error) {
+      console.warn(`Error while building RegExp "${pattern}"! Use default ".*" instead.`);
+      console.warn(error);
       return new RegExp('.*');
     }
   }

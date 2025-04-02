@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2, type IconName } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button, CollapsableSection, Icon, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
@@ -8,6 +8,7 @@ import { PluginLogo } from 'PluginInfo/PluginLogo';
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
+import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 import { LabelsBrowser } from 'WingmanDataTrail/SideBar/LabelsBrowser';
 
 import { MetricsFilterSection } from './SceneMetricsFilterSection';
@@ -25,6 +26,11 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
       key: 'collapsible-sidebar',
       isCollapsed: true,
       groupFilters: [
+        new MetricsFilterSection({
+          title: 'Rules filters',
+          type: 'categories',
+          computeGroups: computeRulesGroups,
+        }),
         new MetricsFilterSection({
           title: 'Prefix filters',
           type: 'prefixes',
@@ -82,38 +88,47 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
           />
         </div>
         <ul className={styles.featuresList}>
-          {groupFilters.map((filter, index) => (
-            <li key={filter.state.key} className={cx(styles.featureItem, 'featureItem')}>
-              {isCollapsed && (
-                <Button
-                  className={styles.iconButton}
-                  size="md"
-                  variant="secondary"
-                  fill="text"
-                  icon={!index ? 'font' : 'filter'}
-                  tooltip={isCollapsed ? filter.state.title : ''}
-                  tooltipPlacement="right"
-                  onClick={() => toggleSidebar(filter.state.key)}
-                />
-              )}
-              {!isCollapsed && (
-                <CollapsableSection
-                  key={filter.state.key}
-                  className={styles.collapsable}
-                  label={
-                    <div className={styles.featureLabel}>
-                      <Icon name={!index ? 'font' : 'filter'} size="md" className={styles.icon} />
-                      <span>{filter.state.title}</span>
-                    </div>
-                  }
-                  isOpen={openSections[filter.state.key] || openSections['metric-filters']}
-                  onToggle={() => toggleSection(filter.state.key)}
-                >
-                  <filter.Component model={filter} />
-                </CollapsableSection>
-              )}
-            </li>
-          ))}
+          {groupFilters.map((filter) => {
+            let icon: IconName = 'filter';
+            if (filter.state.type === 'prefixes') {
+              icon = 'font';
+            } else if (filter.state.title === 'Rules filters') {
+              icon = 'record-audio';
+            }
+
+            return (
+              <li key={filter.state.key} className={cx(styles.featureItem, 'featureItem')}>
+                {isCollapsed && (
+                  <Button
+                    className={styles.iconButton}
+                    size="md"
+                    variant="secondary"
+                    fill="text"
+                    icon={icon}
+                    tooltip={isCollapsed ? filter.state.title : ''}
+                    tooltipPlacement="right"
+                    onClick={() => toggleSidebar(filter.state.key)}
+                  />
+                )}
+                {!isCollapsed && (
+                  <CollapsableSection
+                    key={filter.state.key}
+                    className={styles.collapsable}
+                    label={
+                      <div className={styles.featureLabel}>
+                        <Icon name={icon} size="md" className={styles.icon} />
+                        <span>{filter.state.title}</span>
+                      </div>
+                    }
+                    isOpen={openSections[filter.state.key]}
+                    onToggle={() => toggleSection(filter.state.key)}
+                  >
+                    <filter.Component model={filter} />
+                  </CollapsableSection>
+                )}
+              </li>
+            );
+          })}
           <li className={cx(styles.featureItem, 'featureItem')}>
             {isCollapsed && (
               <Button
@@ -275,6 +290,7 @@ function getStyles(theme: GrafanaTheme2) {
     `,
     collapsed: css`
       width: 42px;
+
       .title,
       .featureLabel {
         display: none;
@@ -347,18 +363,23 @@ function getStyles(theme: GrafanaTheme2) {
       &:not(:last-child) {
         border-bottom: 1px solid ${theme.colors.border.weak};
       }
+      & [id^='collapse-content'] {
+        padding: 0 !important;
+      }
     `,
     featureLabel: css`
       display: flex;
       align-items: center;
-      gap: ${theme.spacing(1.5)};
+      gap: ${theme.spacing(1)};
+      height: 32px;
     `,
     icon: css`
       color: ${theme.colors.text.secondary};
     `,
     collapsable: css`
-      font-size: 15px;
-      padding: ${theme.spacing(0, 0, 1.25, 0)};
+      font-size: 14px;
+      padding: 0;
+      margin: 0;
       &:focus-within {
         box-shadow: none !important;
       }

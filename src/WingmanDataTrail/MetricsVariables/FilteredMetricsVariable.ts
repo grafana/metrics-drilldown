@@ -11,6 +11,7 @@ import {
 import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
+import { CollapsibleSideBar } from 'WingmanDataTrail/SideBar/CollapsibleSideBar';
 import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/EventFiltersChanged';
 import { SideBar } from 'WingmanDataTrail/SideBar/SideBar';
 
@@ -96,6 +97,36 @@ export class FilteredMetricsVariable extends MetricsVariable {
       );
     } catch (error) {
       console.warn('SideBar not found - no worries, gracefully degrading...', error);
+    }
+
+    // wrapped in a try/catch to prevent breaking WingMan in the pills variant
+    try {
+      const collapsibleSideBar = sceneGraph.findByKeyAndType(this, 'collapsible-sidebar', CollapsibleSideBar);
+
+      this._subs.add(
+        this.subscribeToState((newState, prevState) => {
+          if (newState.loading === false && prevState.loading === true) {
+            this.filterEngine.applyFilters(
+              {
+                prefixes: collapsibleSideBar.state.groupFilters[0].state.selectedFilters,
+                categories: collapsibleSideBar.state.groupFilters[1].state.selectedFilters,
+              },
+              false
+            );
+            return;
+          }
+        })
+      );
+
+      this._subs.add(
+        collapsibleSideBar.subscribeToEvent(EventFiltersChanged, (event) => {
+          this.filterEngine.applyFilters({
+            [event.payload.type]: event.payload.filters,
+          });
+        })
+      );
+    } catch (error) {
+      console.warn('Collapsible SideBar not found - no worries, gracefully degrading...', error);
     }
 
     // wrapped in a try/catch to support the different variants / prevents runtime errors in WingMan's onboarding screen
