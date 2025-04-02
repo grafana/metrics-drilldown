@@ -3,18 +3,16 @@ import { reportInteraction } from '@grafana/runtime';
 
 import { type BreakdownLayoutType } from './Breakdown/types';
 import { type TrailStepType } from './DataTrailsHistory';
-import { type ActionViewType } from './shared';
+import { type ActionViewType } from './MetricScene';
 
 // prettier-ignore
-type Interactions = {
+export type Interactions = {
   // User selected a label to view its breakdown.
   label_selected: {
     label: string;
     cause: (
       // By clicking the "select" button on that label's breakdown panel
       | 'breakdown_panel'
-      // By clicking the label link on the overview
-      | 'overview_link'
       // By clicking on the label selector at the top of the breakdown
       | 'selector'
     );
@@ -72,7 +70,12 @@ type Interactions = {
     numberOfSteps: number;
   };
   // User clicks on tab to change the action view
-  metric_action_view_changed: { view: ActionViewType };
+  metric_action_view_changed: { 
+    view: ActionViewType 
+
+    // The number of related logs
+    related_logs_count?: number
+  };
   // User clicks on one of the action buttons associated with a selected metric
   selected_metric_action_clicked: {
     action: (

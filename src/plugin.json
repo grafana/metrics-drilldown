@@ -6,7 +6,7 @@
   "autoEnabled": true,
   "info": {
     "keywords": ["drilldown", "metrics", "app", "prometheus", "mimir"],
-    "description": "Queryless metrics explorer for Prometheus data sources",
+    "description": "Quickly find related metrics with a few clicks, without needing to write PromQL queries to retrieve metrics.",
     "author": {
       "name": "Grafana"
     },
@@ -52,7 +52,7 @@
     }
   ],
   "dependencies": {
-    "grafanaDependency": ">=11.3.0",
+    "grafanaDependency": ">=11.6.0",
     "plugins": []
   },
   "preload": true,

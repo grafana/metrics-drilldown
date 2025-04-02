@@ -2,7 +2,6 @@ apiVersion: 1
 
 datasources:
   - name: gdev-testdata
-    isDefault: true
     type: testdata
   - name: gdev-loki
     type: loki
@@ -25,6 +24,7 @@ datasources:
   - name: gdev-prometheus
     uid: gdev-prometheus
     type: prometheus
+    isDefault: true
     access: proxy
     url: http://host.docker.internal:9099
     basicAuth: true #username: admin, password: admin

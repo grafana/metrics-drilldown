@@ -19,6 +19,7 @@ import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVari
 
 import { ROUTES } from '../constants';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
+import { MetricsGroupByRow } from './GroupBy/MetricsGroupByRow';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { EventGroupFiltersChanged } from './HeaderControls/MetricsFilter/EventGroupFiltersChanged';
@@ -36,11 +37,12 @@ import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction'
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
+import { type LabelsBrowser } from './SideBar/LabelsBrowser';
 import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
-  sidebar: SideBar;
+  sidebar: SideBar | LabelsBrowser;
   body: SceneObjectBase;
   drawer: SceneDrawer;
 }
@@ -106,6 +108,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           ? (new SimpleMetricsList() as unknown as SceneObjectBase)
           : (new MetricsGroupByList({
               labelName: groupByValue,
+              GroupByRow: MetricsGroupByRow,
             }) as unknown as SceneObjectBase),
     });
   }
@@ -131,7 +134,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
                 title: option.label,
                 metricName,
                 color: getColorByIndex(colorIndex),
-                groupByLabel: undefined,
                 prometheusFunction: option.value,
                 height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
                 hideLegend: true,
@@ -155,19 +157,21 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
     const { body, headerControls, drawer, sidebar } = model.useState();
-    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).state;
+    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).useState();
 
     return (
       <>
-        <div className={styles.headerControls}>
+        <div className={styles.headerControls} data-testid="header-controls">
           <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.body}>
-          {/* we use ROUTES and not VariantVariable.OPTIONS because when we land on this view, the variable takes the 1st value of OPTIONS :man_shrug: */}
-          {/* we use both routes for the flow from onboarding > this view and for landing on this view directly */}
-          {[ROUTES.TrialWithSidebar, ROUTES.OnboardWithSidebar].includes(variant as string) && (
-            <div className={styles.sidebar}>
-              <sidebar.Component model={sidebar} />
+          {variant !== ROUTES.OnboardWithPills && (
+            <div className={styles.sidebar} data-testid="sidebar">
+              {sidebar instanceof SideBar ? (
+                <sidebar.Component model={sidebar} />
+              ) : (
+                <sidebar.Component model={sidebar} />
+              )}
             </div>
           )}
           <div className={styles.list}>
@@ -196,7 +200,8 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       overflowY: 'auto',
     }),
     sidebar: css({
-      width: '320px',
+      flex: '0 0 320px',
+      overflowY: 'hidden',
     }),
   };
 }

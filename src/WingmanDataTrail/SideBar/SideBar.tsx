@@ -9,9 +9,10 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import { isEqual } from 'lodash';
 import React from 'react';
 
+import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
+import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
 import {
@@ -19,7 +20,9 @@ import {
   type MetricOptions,
   type MetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
+import { LabelsBrowser } from './LabelsBrowser';
 import { MetricsFilterSection } from './MetricsFilterSection';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
@@ -34,6 +37,7 @@ interface SideBarState extends SceneObjectState {
   selectedMetricPrefixes: string[];
   selectedMetricCategories: string[];
   loading: boolean;
+  labelsBrowswer?: LabelsBrowser;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -64,12 +68,20 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       selectedMetricPrefixes: [],
       selectedMetricCategories: [],
       loading: true,
+      labelsBrowswer: undefined,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
   private onActivate() {
+    const variantVariable = sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable;
+    if (variantVariable.state.value === 'onboard-filters-labels') {
+      this.setState({
+        labelsBrowswer: new LabelsBrowser({ labelVariableName: VAR_WINGMAN_GROUP_BY }),
+      });
+    }
+
     const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
 
     this.updateLists(metricsVariable.state.options as MetricOptions);
@@ -82,89 +94,70 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
 
     this.setState({ loading: !filteredMetricsVariable.state.options.length });
-
-    this._subs.add(
-      filteredMetricsVariable.subscribeToState((newState, prevState) => {
-        if (!prevState.loading && newState.loading) {
-          this.setState({ loading: true });
-        } else if (prevState.loading && !newState.loading) {
-          this.setState({ loading: false });
-
-          const { selectedMetricPrefixes, selectedMetricCategories } = this.state;
-
-          filteredMetricsVariable.applyFilters(
-            {
-              prefixes: selectedMetricPrefixes,
-              categories: selectedMetricCategories,
-            },
-            // don't notify
-            false,
-            // force update to ensure the options are filtered (need it specifically when selecting a different group by label)
-            true
-          );
-        }
-      })
-    );
-
-    this._subs.add(
-      this.subscribeToState((newState, prevState) => {
-        if (!isEqual(newState.selectedMetricPrefixes, prevState.selectedMetricPrefixes)) {
-          filteredMetricsVariable.applyFilters({ prefixes: newState.selectedMetricPrefixes });
-          return;
-        }
-
-        if (!isEqual(newState.selectedMetricCategories, prevState.selectedMetricCategories)) {
-          filteredMetricsVariable.applyFilters({ categories: newState.selectedMetricCategories });
-          return;
-        }
-      })
-    );
   }
 
   private updateLists(options: MetricOptions) {
     this.setState({
       prefixGroups: computeMetricPrefixGroups(options),
       categories: computeMetricCategories(options),
+      loading: false,
     });
   }
 
   private updateCounts(filteredOptions: MetricOptions) {
-    console.log('[TODO] SideBar.updateCounts', filteredOptions.length);
+    const prefixGroups = computeMetricPrefixGroups(filteredOptions);
+    const categories = computeMetricCategories(filteredOptions);
+
+    this.setState({
+      prefixGroups: this.state.prefixGroups.map((group) => ({
+        ...group,
+        count: prefixGroups.find((p) => p.label === group.label)?.count || 0,
+      })),
+      categories: this.state.categories.map((group) => ({
+        ...group,
+        count: categories.find((c) => c.label === group.label)?.count || 0,
+      })),
+      loading: false,
+    });
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const {
-      hideEmptyGroups,
-      hideEmptyTypes,
-      selectedMetricPrefixes,
-      selectedMetricCategories,
-      prefixGroups,
-      categories,
-      loading,
-    } = model.useState();
+    const { selectedMetricPrefixes, selectedMetricCategories, prefixGroups, categories, loading, labelsBrowswer } =
+      model.useState();
+
+    const onSelectFilter = (type: 'prefixes' | 'categories', filters: string[]) => {
+      const selectedKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricCategories';
+      model.setState({ [selectedKey]: filters });
+      model.publishEvent(new EventFiltersChanged({ type: type, filters }));
+    };
 
     return (
       <div className={styles.container}>
         <div className={styles.topPanel}>
           <MetricsFilterSection
-            title="Metric prefixes"
+            title="Metric prefix filters"
             items={prefixGroups}
-            hideEmpty={hideEmptyGroups}
             selectedValues={selectedMetricPrefixes}
-            onSelectionChange={(values) => model.setState({ selectedMetricPrefixes: values })}
+            onSelectionChange={(filters) => onSelectFilter('prefixes', filters)}
             loading={loading}
+            dataTestId="metric-prefix-filters"
           />
         </div>
         <div className={styles.bottomPanel}>
-          <MetricsFilterSection
-            title="Metric categories"
-            items={categories}
-            hideEmpty={hideEmptyTypes}
-            selectedValues={selectedMetricCategories}
-            onSelectionChange={(values) => model.setState({ selectedMetricCategories: values })}
-            loading={loading}
-          />
+          <>
+            {!labelsBrowswer && (
+              <MetricsFilterSection
+                title="Categories filters"
+                items={categories}
+                selectedValues={selectedMetricCategories}
+                onSelectionChange={(filters) => onSelectFilter('categories', filters)}
+                loading={loading}
+                dataTestId="categories-filters"
+              />
+            )}
+            {labelsBrowswer && <labelsBrowswer.Component model={labelsBrowswer} />}
+          </>
         </div>
       </div>
     );

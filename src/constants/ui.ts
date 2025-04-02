@@ -9,4 +9,7 @@ export const UI_TEXT = {
   SEARCH: {
     TITLE: 'Search metrics',
   },
+  METRIC_SELECT_SCENE: {
+    OTEL_LABEL: 'OTel experience',
+  },
 };

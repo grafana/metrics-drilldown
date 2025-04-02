@@ -1,7 +1,7 @@
 import { css, cx } from '@emotion/css';
 import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
 import { CustomVariable, sceneGraph, type MultiValueVariable, type MultiValueVariableState } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { Button, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import {
@@ -9,17 +9,20 @@ import {
   type FilteredMetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 
+import { MetricsOnboarding } from '../MetricsOnboarding';
 export const VAR_MAIN_LABEL_VARIABLE = 'mainLabelWingman';
 
 export class MainLabelVariable extends CustomVariable {
-  public static OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node', 'instance'];
+  public static readonly OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node', 'instance'];
 
   constructor() {
     super({
       name: VAR_MAIN_LABEL_VARIABLE,
-      query: MainLabelVariable.OPTIONS.join(','),
+      query: [' ', ...MainLabelVariable.OPTIONS].join(','),
       hide: VariableHide.hideVariable,
-      value: undefined,
+      value: ' ',
+      includeAll: false,
+      allowCustomValue: true,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -59,7 +62,7 @@ export class MainLabelVariable extends CustomVariable {
             .map((option) => {
               const [label, labelCardinality] = option.label.split(' ');
 
-              return (
+              const LabelCard = (
                 <Button
                   key={String(option.value)}
                   className={cx(styles.labelButton, { [styles.selected]: option.value === value })}
@@ -70,6 +73,20 @@ export class MainLabelVariable extends CustomVariable {
                   {label} {labelCardinality}
                 </Button>
               );
+
+              if (labelCardinality.includes(`(${String(MetricsOnboarding.LABEL_VALUES_API_LIMIT)}+)`)) {
+                return (
+                  <Tooltip
+                    key={String(option.value)}
+                    content={`This label has a high cardinality, with more than ${MetricsOnboarding.LABEL_VALUES_API_LIMIT} values. For performance reasons, the application does not display the exact number.`}
+                    placement="top"
+                  >
+                    {LabelCard}
+                  </Tooltip>
+                );
+              }
+
+              return LabelCard;
             })}
         </>
         <Button
@@ -77,13 +94,13 @@ export class MainLabelVariable extends CustomVariable {
           style={{ flexBasis: '100px' }}
           onClick={() => {
             window.alert(
-              'This feature, which would allow you to add a custom label here, is currently not implemented.'
+              'Thank you for your interest in this feature to add a custom label. While it is not currently implemented, we would love to learn about your interest in it.'
             );
           }}
           tooltip="Click to add a custom label"
           tooltipPlacement="top"
         >
-          +
+          + Add
         </Button>
       </>
     );
@@ -99,9 +116,9 @@ function getStyles(theme: GrafanaTheme2) {
       width: 100%;
     `,
     labelButton: css`
-      flex: 0 1 200px;
+      flex: 0 1 180px;
       height: 80px;
-      font-size: 16px;
+      font-size: 1.1rem;
       margin: 0;
       text-align: center;
       justify-content: center;

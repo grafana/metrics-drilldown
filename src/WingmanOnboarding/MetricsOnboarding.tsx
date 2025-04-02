@@ -16,7 +16,7 @@ import {
 } from '@grafana/scenes';
 import { Icon, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 
 import { VAR_DATASOURCE } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -33,11 +33,11 @@ import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
+import { MetricsGroupByRow } from './GroupBy/MetricsGroupByRow';
 import { MainLabelVariable, VAR_MAIN_LABEL_VARIABLE } from './HeaderControls/MainLabelVariable';
 import { VAR_VARIANT, type VariantVariable } from './VariantVariable';
 interface MetricsOnboardingState extends SceneObjectState {
   headerControls: SceneFlexLayout;
-  allLabelValues: Map<string, string[]>;
   loading: boolean;
   drawer: SceneDrawer;
   $variables: SceneVariableSet;
@@ -45,13 +45,15 @@ interface MetricsOnboardingState extends SceneObjectState {
 }
 
 export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
+  public static readonly LABEL_VALUES_API_LIMIT = 100;
+
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_MAIN_LABEL_VARIABLE, VAR_DATASOURCE],
     onReferencedVariableValueChanged: (variable) => {
       if (variable.state.name === VAR_DATASOURCE) {
         (sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable).setState({ value: undefined });
 
-        this.fetchAndLabelValuesAndUpdateBody();
+        this.fetchLabelValuesAndUpdateBody();
         return;
       }
 
@@ -67,7 +69,6 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       $variables: new SceneVariableSet({
         variables: [new MainLabelVariable()],
       }),
-      allLabelValues: new Map(),
       headerControls: new SceneFlexLayout({
         direction: 'column',
         children: [
@@ -116,49 +117,51 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       })
     );
 
-    this.fetchAndLabelValuesAndUpdateBody();
+    this.fetchLabelValuesAndUpdateBody();
   }
 
-  private fetchAndLabelValuesAndUpdateBody() {
+  private fetchLabelValuesAndUpdateBody() {
     const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable;
 
-    this.fetchAllLabelValues(MainLabelVariable.OPTIONS).then((allLabelValues) => {
+    this.fetchAllLabelCardinalities(MainLabelVariable.OPTIONS).then((allLabelCardinalities) => {
       mainLabelVariable.setState({
-        options: allLabelValues.map(([labelName, labelValues]) => ({
+        options: allLabelCardinalities.map(([labelName, labelCardinality]) => ({
           value: labelName,
-          label: labelValues !== undefined ? `${labelName} (${labelValues.length})` : (labelName as string),
+          label: `${labelName} (${
+            labelCardinality >= MetricsOnboarding.LABEL_VALUES_API_LIMIT
+              ? MetricsOnboarding.LABEL_VALUES_API_LIMIT + '+'
+              : labelCardinality
+          })`,
         })),
       });
 
-      this.setState({
-        loading: false,
-        allLabelValues: new Map(allLabelValues),
-      });
+      this.setState({ loading: false });
 
       this.updateBody(mainLabelVariable.state.value as string);
     });
   }
 
-  private async fetchAllLabelValues(labelNames: string[]): Promise<Array<[string, string[]]>> {
+  private async fetchAllLabelCardinalities(labelNames: string[]): Promise<Array<[string, number]>> {
     return Promise.all(
       labelNames.map((labelName) =>
-        LabelsDataSource.fetchLabelValues(labelName, this)
-          .then((labelValues: string[]) => [labelName, labelValues] as [string, string[]])
+        LabelsDataSource.fetchLabelCardinality(labelName, MetricsOnboarding.LABEL_VALUES_API_LIMIT, this)
+          .then((labelCardinality) => [labelName, labelCardinality] as [string, number])
           .catch((error) => {
-            console.error('Error fetching "%s" label values!', labelName);
+            console.error('Error fetching "%s" label cardinality!', labelName);
             console.error(error);
-            return [labelName, []] as [string, string[]];
+            return [labelName, 0] as [string, number];
           })
       )
     );
   }
 
-  private updateBody(groupByValue: string) {
+  private updateBody(groupByLabel: string) {
     this.setState({
-      body: !groupByValue
+      body: !groupByLabel
         ? (new SimpleMetricsList() as unknown as SceneObjectBase)
         : (new MetricsGroupByList({
-            labelName: groupByValue,
+            labelName: groupByLabel,
+            GroupByRow: MetricsGroupByRow,
           }) as unknown as SceneObjectBase),
     });
   }
@@ -184,7 +187,6 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
                 title: option.label,
                 metricName,
                 color: getColorByIndex(colorIndex),
-                groupByLabel: undefined,
                 prometheusFunction: option.value,
                 height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
                 hideLegend: true,
@@ -215,7 +217,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
 
     const { pathname, search } = useLocation();
     const href = useMemo(
-      () => pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + '?' + search,
+      () => pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`) + search,
       [] // eslint-disable-line react-hooks/exhaustive-deps
     ); // it's good enough capture it once when landing
 
@@ -225,8 +227,8 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
 
     return (
       <div className={styles.container}>
-        <div className={styles.headerControls}>
-          <div className={styles.topControls}>
+        <div className={styles.allControls}>
+          <div className={styles.topControls} data-testid="top-controls">
             <div className={styles.mainLabelVariable}>
               <mainLabelVariable.Component model={mainLabelVariable} />
               <a
@@ -242,7 +244,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
             </div>
           </div>
 
-          <div className={styles.listControls}>
+          <div className={styles.headerControls} data-testid="header-controls">
             <headerControls.Component model={headerControls} />
           </div>
         </div>
@@ -263,7 +265,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       height: '100%',
       gap: theme.spacing(1),
     }),
-    headerControls: css({
+    allControls: css({
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing(2),
@@ -291,7 +293,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
         color: theme.colors.text.link,
       },
     }),
-    listControls: css({
+    headerControls: css({
       marginBottom: theme.spacing(0.5),
     }),
     body: css({

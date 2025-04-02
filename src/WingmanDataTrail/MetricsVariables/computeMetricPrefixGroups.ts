@@ -31,7 +31,7 @@ export function computeMetricPrefixGroups(options: Array<{ label: string; value:
         return {
           value: catchAllValues.join('|'), // see FilteredMetricsVariable
           count,
-          label: '*',
+          label: '<none>',
         };
       }
 

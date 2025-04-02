@@ -21,6 +21,7 @@ export class ConfigureAction extends SceneObjectBase<ConfigureActionState> {
 
   constructor({ metricName }: { metricName: ConfigureActionState['metricName'] }) {
     super({
+      key: `configure-action-${metricName}`,
       metricName,
     });
   }

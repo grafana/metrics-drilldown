@@ -1,4 +1,5 @@
 import { css } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
 import {
   SceneCSSGridItem,
   SceneCSSGridLayout,
@@ -8,13 +9,15 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Alert, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { InlineBanner } from 'App/InlineBanner';
 import { LabelValuesVariable, VAR_LABEL_VALUES } from 'WingmanDataTrail/Labels/LabelValuesVariable';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
-import { MetricsGroupByRow } from './MetricsGroupByRow';
+import { type MetricsGroupByRow, type MetricsGroupByRowState } from './MetricsGroupByRow';
+import { type MetricsGroupByRow as OnboardingMetricsGroupByRow } from '../../WingmanOnboarding/GroupBy/MetricsGroupByRow';
 
 interface MetricsGroupByListState extends SceneObjectState {
   labelName: string;
@@ -23,7 +26,23 @@ interface MetricsGroupByListState extends SceneObjectState {
 }
 
 export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
-  constructor({ labelName }: { labelName: MetricsGroupByListState['labelName'] }) {
+  constructor({
+    labelName,
+    GroupByRow,
+  }: {
+    labelName: MetricsGroupByListState['labelName'];
+    GroupByRow: new ({
+      index,
+      labelName,
+      labelValue,
+      labelCardinality,
+    }: {
+      index: MetricsGroupByRowState['index'];
+      labelName: MetricsGroupByRowState['labelName'];
+      labelValue: MetricsGroupByRowState['labelValue'];
+      labelCardinality: MetricsGroupByRowState['labelCardinality'];
+    }) => MetricsGroupByRow | OnboardingMetricsGroupByRow;
+  }) {
     super({
       key: 'metrics-group-list',
       labelName,
@@ -32,14 +51,14 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
       }),
       body: new SceneByVariableRepeater({
         variableName: VAR_LABEL_VALUES,
-        initialPageSize: Number.POSITIVE_INFINITY,
+        initialPageSize: 20,
+        pageSizeIncrement: 10,
         body: new SceneCSSGridLayout({
           children: [],
           isLazy: true,
           templateColumns: '1fr',
-          // using METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW would be more efficient :(
-          // but when the section is collapsed, it does not reduce the height occupied by the grid child
           autoRows: 'auto',
+          rowGap: 1,
         }),
         getLayoutLoading: () =>
           new SceneReactObject({
@@ -48,23 +67,20 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
         getLayoutEmpty: () =>
           new SceneReactObject({
             reactNode: (
-              <Alert title="" severity="info">
+              <InlineBanner title="" severity="info">
                 No label values found for label &quot;{labelName}&quot;.
-              </Alert>
+              </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
             reactNode: (
-              <Alert severity="error" title={`Error while loading label "${labelName}" values!`}>
-                <p>&quot;{error.message || error.toString()}&quot;</p>
-                <p>Please try to reload the page. Sorry for the inconvenience.</p>
-              </Alert>
+              <InlineBanner severity="error" title={`Error while loading label "${labelName}" values!`} error={error} />
             ),
           }),
         getLayoutChild: (option, index, options) => {
           return new SceneCSSGridItem({
-            body: new MetricsGroupByRow({
+            body: new GroupByRow({
               index,
               labelName,
               labelValue: option.value as string,
@@ -78,24 +94,52 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
 
   static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
     const styles = useStyles2(getStyles);
-    const { body, $variables } = model.useState();
+    const { body, $variables, labelName } = model.useState();
 
     const variable = $variables.state.variables[0] as LabelValuesVariable;
+    const { loading, error } = variable.useState();
+
+    const batchSizes = body.useSizes();
+    const shouldDisplayShowMoreButton =
+      !loading && !error && batchSizes.total > 0 && batchSizes.current < batchSizes.total;
+
+    const onClickShowMore = () => {
+      body.increaseBatchSize();
+    };
 
     return (
-      <>
+      <div data-testid="metrics-groupby-list">
         <body.Component model={body} />
+
+        {shouldDisplayShowMoreButton && (
+          <div className={styles.footer}>
+            <Button variant="secondary" fill="outline" onClick={onClickShowMore}>
+              Show {batchSizes.increment} more &quot;{labelName}&quot; values ({batchSizes.current}/{batchSizes.total})
+            </Button>
+          </div>
+        )}
+
         {/* required to trigger its activation handlers */}
         <div className={styles.variable}>
           <variable.Component key={variable.state.name} model={variable} />
         </div>
-      </>
+      </div>
     );
   };
 }
 
-function getStyles() {
+function getStyles(theme: GrafanaTheme2) {
   return {
+    footer: css({
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      margin: theme.spacing(3, 0, 1, 0),
+
+      '& button': {
+        height: '40px',
+      },
+    }),
     variable: css({
       display: 'none',
     }),

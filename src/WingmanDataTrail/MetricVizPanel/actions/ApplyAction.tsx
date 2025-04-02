@@ -15,6 +15,7 @@ interface ApplyActionState extends SceneObjectState {
 export class ApplyAction extends SceneObjectBase<ApplyActionState> {
   constructor({ metricName, prometheusFunction, disabled }: ApplyActionState) {
     super({
+      key: `apply-action-${metricName}`,
       metricName,
       prometheusFunction,
       disabled: Boolean(disabled),

@@ -8,6 +8,7 @@ import {
   type MetricFindValue,
   type TestDataSourceResponse,
 } from '@grafana/data';
+import { getPrometheusTime, type PrometheusDatasource } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
@@ -15,8 +16,6 @@ import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 import { localeCompare } from '../helpers/localCompare';
-
-import type { PrometheusDatasource } from '@grafana/prometheus';
 
 // TODO can we get rid of it?
 export const NULL_GROUP_BY_VALUE = '(none)';
@@ -69,8 +68,18 @@ export class LabelsDataSource extends RuntimeDataSource {
 
     // there is probably a more graceful way to implement this, but this is what the DS offers us.
     // if a DS does not support the labels match API, we need getTagKeys to handle the empty matcher
+
     if (ds.hasLabelsMatchAPISupport()) {
-      const response = await ds.languageProvider.fetchLabelsWithMatch(matcher);
+      const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
+      let response: Record<string, string[]> = {};
+
+      if (ds.languageProvider.fetchLabelsWithMatch.length === 3) {
+        // @ts-ignore: Ignoring type error due to breaking change in fetchLabelValues signature
+        response = await ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher);
+      } else {
+        response = await ds.languageProvider.fetchLabelsWithMatch(matcher);
+      }
+
       labelOptions = this.processLabelOptions(
         Object.entries(response).map(([key, value]) => ({
           value: key,
@@ -124,14 +133,45 @@ export class LabelsDataSource extends RuntimeDataSource {
     }
 
     const filterExpression = sceneGraph.interpolate(sceneObject, VAR_FILTERS_EXPR, {});
+    const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
+    // new signature for fetchLabelValues includes time range
+    // handle old signature for backwards compatibility
+    if (ds.languageProvider.fetchLabelValues.length === 2) {
+      return await ds.languageProvider.fetchLabelValues(
+        timeRange,
+        labelName,
+        // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
+        `{__name__=~".+",${filterExpression}}`
+      );
+    } else {
+      return await ds.languageProvider.fetchLabelValues(labelName, `{__name__=~".+",${filterExpression}}`);
+    }
+  }
 
-    const response = await ds.languageProvider.fetchLabelValues(
-      labelName,
-      // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
-      `{__name__=~".+",${filterExpression}}`
-    );
+  static async fetchLabelCardinality(labelName: string, limit: number, sceneObject: SceneObject): Promise<number> {
+    const ds = await LabelsDataSource.getPrometheusDataSource(sceneObject);
+    if (!ds) {
+      return 0;
+    }
 
-    return response;
+    const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
+
+    const params: Record<string, string | number> = {
+      start: getPrometheusTime(timeRange.from, false),
+      end: getPrometheusTime(timeRange.to, true),
+      limit,
+    };
+
+    const filterExpression = sceneGraph.interpolate(sceneObject, VAR_FILTERS_EXPR, {});
+    if (filterExpression) {
+      params['match[]'] = `{${filterExpression}}`;
+    }
+
+    const response = await ds.languageProvider.request(`/api/v1/label/${labelName}/values`, [], params, {
+      requestId: `metrics-drilldown-${labelName}-values`,
+    });
+
+    return response.length;
   }
 
   async testDatasource(): Promise<TestDataSourceResponse> {

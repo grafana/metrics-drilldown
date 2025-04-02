@@ -12,14 +12,16 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Alert, Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 
+import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
+import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 import {
@@ -27,14 +29,13 @@ import {
   MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
-import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import {
   MetricsWithLabelValueVariable,
   VAR_METRIC_WITH_LABEL_VALUE,
 } from './MetricsWithLabelValue/MetricsWithLabelValueVariable';
 
-interface MetricsGroupByRowState extends SceneObjectState {
+export interface MetricsGroupByRowState extends SceneObjectState {
   index: number;
   labelName: string;
   labelValue: string;
@@ -85,19 +86,14 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         getLayoutEmpty: () =>
           new SceneReactObject({
             reactNode: (
-              <Alert title="" severity="info">
+              <InlineBanner title="" severity="info">
                 No metrics found for the current filters and time range.
-              </Alert>
+              </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
-            reactNode: (
-              <Alert severity="error" title="Error while loading metrics!">
-                <p>&quot;{error.message || error.toString()}&quot;</p>
-                <p>Please try to reload the page. Sorry for the inconvenience.</p>
-              </Alert>
-            ),
+            reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
@@ -106,8 +102,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 metricName: option.value as string,
                 color: getColorByIndex(colorIndex++),
                 matchers: [`${labelName}="${labelValue}"`],
-                groupByLabel: undefined,
-                headerActions: [new SelectAction({ metricName: option.value as string, variant: 'secondary' })],
+                headerActions: [new SelectAction({ metricName: option.value as string })],
               }),
               metric: option.value as string,
             }),
@@ -140,30 +135,9 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  useClickFilterBy = () => {
-    const { labelName, labelValue } = this.useState();
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
-
-    return () => {
-      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this) as AdHocFiltersVariable;
-
-      adHocFiltersVariable.setState({
-        // TOOD: keep unique filters
-        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
-      });
-
-      navigate({
-        pathname: location.pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`),
-      });
-    };
-  };
-
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const styles = useStyles2(getStyles, isCollapsed);
+    const styles = useStyles2(getStyles);
 
     const { index, labelName, labelValue, labelCardinality, $variables, body } = model.useState();
 
@@ -174,35 +148,40 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const shouldDisplayShowMoreButton =
       !loading && !error && batchSizes.total > 0 && batchSizes.current < batchSizes.total;
 
-    const location = useLocation();
-    const isOnboardingView = location.pathname.includes('/onboard');
-
-    const onClickFilterBy = model.useClickFilterBy();
-
     const onClickShowMore = () => {
       body.increaseBatchSize();
+    };
+
+    const onClickInclude = () => {
+      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
+
+      adHocFiltersVariable.setState({
+        // TOOD: keep unique filters
+        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
+      });
+
+      (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
+    };
+
+    const onClickExclude = () => {
+      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
+
+      adHocFiltersVariable.setState({
+        // TOOD: keep unique filters
+        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '!=', value: labelValue }],
+      });
     };
 
     return (
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
-            {!isOnboardingView && (
-              <Button variant="secondary" fill="outline" className={styles.excludeButton}>
-                Exclude
-              </Button>
-            )}
-            {isOnboardingView && (
-              <Button
-                icon="filter"
-                variant="primary"
-                fill="outline"
-                className={styles.filterButton}
-                onClick={onClickFilterBy}
-              >
-                Filter by
-              </Button>
-            )}
+            <Button variant="secondary" fill="outline" className={styles.includeButton} onClick={onClickInclude}>
+              Include
+            </Button>
+            <Button variant="secondary" fill="outline" className={styles.excludeButton} onClick={onClickExclude}>
+              Exclude
+            </Button>
           </div>
         </div>
 
@@ -221,9 +200,10 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 )}
               </div>
             }
-            className={styles.collapsableSection}
           >
-            <body.Component model={body} />
+            <div className={styles.collapsableSectionBody}>
+              <body.Component model={body} />
+            </div>
 
             {shouldDisplayShowMoreButton && (
               <div className={styles.footer}>
@@ -234,7 +214,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                   tooltip={`Show more metrics for ${labelName}="${labelValue}"`}
                   tooltipPlacement="top"
                 >
-                  Show {batchSizes.increment} more ({batchSizes.current}/{batchSizes.total})
+                  Show {batchSizes.increment} more metrics ({batchSizes.current}/{batchSizes.total})
                 </Button>
               </div>
             )}
@@ -250,15 +230,11 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
+function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
-      background: theme.colors.background.primary,
-      boxShadow: theme.shadows.z1,
-      border: `1px solid ${theme.colors.border.medium}`,
-      borderRadius: theme.shape.radius.default,
-      padding: isCollapsed ? theme.spacing(2) : theme.spacing(2, 2, 0, 2),
-      marginBottom: theme.spacing(2),
+      background: theme.colors.background.canvas,
+      margin: theme.spacing(1, 1, 0, 1),
 
       '& div:focus-within': {
         boxShadow: 'none !important',
@@ -269,6 +245,8 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       alignItems: 'center',
       gap: '8px',
       marginBottom: '-36px',
+      paddingBottom: theme.spacing(1.5),
+      borderBottom: `1px solid ${theme.colors.border.medium}`,
     }),
     headerButtons: css({
       display: 'flex',
@@ -278,22 +256,22 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       zIndex: 100,
     }),
     filterButton: css({}),
+    includeButton: css({}),
     excludeButton: css({}),
-    collapsableSection: css({
-      height: '100%',
-
-      '& button:focus': {
-        boxShadow: 'none !important',
-      },
+    collapsableSectionBody: css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '24px',
+      padding: theme.spacing(1),
     }),
     groupName: css({
       display: 'flex',
       alignItems: 'center',
-      fontSize: '19px',
-      lineHeight: '19px',
+      fontSize: '1.3rem',
+      lineHeight: '1.3rem',
     }),
     labelValue: css({
-      fontSize: '17px',
+      fontSize: '1.2rem',
       marginLeft: '8px',
     }),
     index: css({
@@ -305,11 +283,10 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: theme.spacing(4),
+      marginTop: theme.spacing(1),
 
       '& button': {
         height: '40px',
-        borderRadius: '8px',
       },
     }),
     variable: css({

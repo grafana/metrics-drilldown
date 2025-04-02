@@ -11,6 +11,7 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
+  SceneReactObject,
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
@@ -31,6 +32,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
+import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
@@ -68,7 +70,10 @@ import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
-import { fetchAlertingMetrics, fetchDashboardMetrics } from './WingmanDataTrail/HeaderControls/MetricsSorter';
+import {
+  fetchAlertingMetrics,
+  fetchDashboardMetrics,
+} from './WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -76,6 +81,7 @@ export interface DataTrailState extends SceneObjectState {
   controls: SceneObject[];
   history: DataTrailHistory;
   settings: DataTrailSettings;
+  pluginInfo: SceneReactObject;
   createdAt: number;
 
   // wingman
@@ -132,6 +138,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       ],
       history: state.history ?? new DataTrailHistory({}),
       settings: state.settings ?? new DataTrailSettings({}),
+      pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
       alertingMetrics: {},
@@ -599,6 +606,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       topScene,
       history,
       settings,
+      pluginInfo,
       useOtelExperience,
       hasOtelResources,
       embedded,
@@ -647,11 +655,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         {showHeaderForFirstTimeUsers && <MetricsHeader />}
         <history.Component model={history} />
         {controls && (
-          <div className={styles.controls}>
+          <div className={styles.controls} data-testid="app-controls">
             {controls.map((control) => (
               <control.Component key={control.state.key} model={control} />
             ))}
-            <settings.Component model={settings} />
+            <div className={styles.settingsInfo}>
+              <settings.Component model={settings} />
+              <pluginInfo.Component model={pluginInfo} />
+            </div>
           </div>
         )}
         {topScene && (
@@ -712,7 +723,10 @@ function getVariableSet(
         applyMode: 'manual',
         allowCustomValue: true,
         expressionBuilder: (filters: AdHocVariableFilter[]) => {
-          return [...getBaseFiltersForMetric(metric), ...filters]
+          // remove any filters that include __name__ key in the expression
+          // to prevent the metric name from being set twice in the query and causing an error.
+          const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
+          return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
             .map((filter) => `${filter.key}${filter.operator}"${filter.value}"`)
             .join(',');
         },
@@ -784,6 +798,10 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       background: theme.isDark ? theme.colors.background.canvas : theme.colors.background.primary,
       zIndex: theme.zIndex.navbarFixed,
       top: chromeHeaderHeight,
+    }),
+    settingsInfo: css({
+      display: 'flex',
+      gap: theme.spacing(0.5),
     }),
   };
 }
