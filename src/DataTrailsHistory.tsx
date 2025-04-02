@@ -52,7 +52,7 @@ export interface DataTrailHistoryStep {
   detail: string;
   type: TrailStepType;
   trailState: DataTrailState;
-  parentIndex: number;
+  // parentIndex: number;
 }
 
 export type TrailStepType = 'filters' | 'time' | 'metric' | 'start' | 'metric_page' | 'dep_env' | 'resource';
@@ -87,6 +87,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
   private stepTransitionInProgress = false;
 
   public _onActivate() {
+    // debugger;
     const trail = getTrailFor(this);
 
     if (this.state.steps.length === 0) {
@@ -225,14 +226,14 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
     }
 
     const stepIndex = this.state.steps.length;
-    const parentIndex = type === 'start' ? -1 : this.state.currentStep;
+    // const parentIndex = type === 'start' ? -1 : this.state.currentStep;
 
     // HISTORY: Adding new trail step
     console.log(`[DataTrailsHistory] Adding trail step:`, {
       type,
       detail,
       stepIndex,
-      parentIndex,
+      // parentIndex,
       description: stepDescriptionMap[type],
     });
 
@@ -245,7 +246,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
           detail,
           description: stepDescriptionMap[type],
           trailState: sceneUtils.cloneSceneObjectState(trail.state, { history: this }),
-          parentIndex,
+          // parentIndex,
         },
       ],
     });
@@ -259,7 +260,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
 
     const type = step.type;
     const stepIndex = this.state.steps.length;
-    const parentIndex = type === 'start' ? -1 : this.state.currentStep;
+    // const parentIndex = type === 'start' ? -1 : this.state.currentStep;
     const filtersApplied = this.state.filtersApplied;
     const otelResources = this.state.otelResources;
     const otelDepEnvs = this.state.otelDepEnvs;
@@ -269,7 +270,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
     console.log(`[DataTrailsHistory] Adding trail step from storage:`, {
       type,
       stepIndex,
-      parentIndex,
+      // parentIndex,
       description: stepDescriptionMap[type],
     });
 
@@ -288,20 +289,20 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
       case 'resource':
         detail = parseOtelResourcesTooltip(step.urlValues, otelResources);
     }
-
+    // debugger;
     this.setState({
       filtersApplied,
       otelDepEnvs,
       otelResources,
       currentStep: stepIndex,
       steps: [
-        ...this.state.steps,
+        // ...this.state.steps,
         {
           type,
           detail,
           description: stepDescriptionMap[type],
           trailState: sceneUtils.cloneSceneObjectState(trail.state, { history: this }),
-          parentIndex,
+          // parentIndex,
         },
       ],
     });
@@ -357,16 +358,16 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
           break;
         }
         ancestry.add(cursor);
-        cursor = step.parentIndex;
+        // cursor = step.parentIndex;
       }
 
       const alternatePredecessorStyle = new Map<number, string>();
 
       ancestry.forEach((index) => {
-        const parent = steps[index].parentIndex;
-        if (parent + 1 !== index) {
-          alternatePredecessorStyle.set(index, createAlternatePredecessorStyle(index, parent));
-        }
+        // const parent = steps[index].parentIndex;
+        // if (parent + 1 !== index) {
+        // alternatePredecessorStyle.set(index, createAlternatePredecessorStyle(index, parent));
+        // }
       });
 
       return { ancestry, alternatePredecessorStyle };
@@ -397,7 +398,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
                   // To alter the look of steps with distant non-directly preceding parent
                   alternatePredecessorStyle.get(index) ?? '',
                   // To remove direct link for steps that don't have a direct parent
-                  index !== step.parentIndex + 1 ? styles.stepOmitsDirectLeftLink : '',
+                  // index !== step.parentIndex + 1 ? styles.stepOmitsDirectLeftLink : '',
                   // To remove the direct parent link on the start node as well
                   index === 0 ? styles.stepOmitsDirectLeftLink : '',
                   // To darken steps that aren't the current step's ancesters
