@@ -18,7 +18,7 @@ export type Props = {
 };
 
 // Helper function to truncate the value for a single key:value pair
-export const truncateValue = (key: string, value: string, maxLength: number) => {
+const truncateValue = (key: string, value: string, maxLength: number) => {
   const combinedLength = key.length + 2 + value.length; // 2 for ": "
   if (combinedLength > maxLength) {
     return value.substring(0, maxLength - key.length - 5) + '...'; // 5 for ": " and "..."
