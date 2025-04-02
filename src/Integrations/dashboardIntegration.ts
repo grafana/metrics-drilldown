@@ -38,7 +38,11 @@ export async function addDataTrailPanelAction(
     return;
   }
 
-  if (datasource.type !== 'prometheus') {
+  if (
+    datasource.type !== 'prometheus' &&
+    datasource.type !== 'grafana-amazonprometheus-datasource' &&
+    datasource.type !== 'grafana-azureprometheus-datasource'
+  ) {
     return;
   }
 

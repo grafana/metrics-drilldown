@@ -15,7 +15,11 @@ import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 
 function isPrometheusDatasource(ds: any): ds is PrometheusDatasource {
-  return ds.type === 'prometheus';
+  return (
+    ds.type === 'prometheus' ||
+    ds.type === 'grafana-amazonprometheus-datasource' ||
+    ds.type === 'grafana-azureprometheus-datasource'
+  );
 }
 
 export class MetricDatasourceHelper {

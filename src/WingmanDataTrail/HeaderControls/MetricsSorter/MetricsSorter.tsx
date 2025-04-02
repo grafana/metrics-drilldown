@@ -115,7 +115,9 @@ export function isPrometheusDataSource(input: unknown): input is Required<Pick<D
     typeof input === 'object' &&
     input !== null &&
     'type' in input &&
-    input.type === 'prometheus' &&
+    (input.type === 'prometheus' ||
+      input.type === 'grafana-amazonprometheus-datasource' ||
+      input.type === 'grafana-azureprometheus-datasource') &&
     'uid' in input &&
     typeof input.uid === 'string'
   );
