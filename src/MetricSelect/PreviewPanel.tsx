@@ -30,31 +30,16 @@ import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { SelectMetricAction } from './SelectMetricAction';
 
 interface PreviewPanelState extends SceneObjectState {
-  metric: string;
   autoQueryDef: AutoQueryDef;
-  nativeHistogram?: boolean;
   body: SceneObject;
+  metric: string;
 }
 
 export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
   protected _variableDependency: VariableDependencyConfig<PreviewPanelState>;
 
-  constructor(options: {
-    metric: string;
-    nativeHistogram?: boolean;
-    $variables?: SceneVariableSet;
-    $behaviors?: any[];
-    body: SceneObject;
-    autoQueryDef: AutoQueryDef;
-  }) {
-    super({
-      body: options.body,
-      $variables: options.$variables,
-      $behaviors: options.$behaviors,
-      metric: options.metric,
-      nativeHistogram: options.nativeHistogram,
-      autoQueryDef: options.autoQueryDef,
-    });
+  constructor(params: PreviewPanelState) {
+    super(params);
 
     this._variableDependency = new VariableDependencyConfig<PreviewPanelState>(this, {
       variableNames: [VAR_FILTERS, VAR_OTEL_JOIN_QUERY],
@@ -68,8 +53,6 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
   }
 
   private updateQuery() {
-    const { metric } = this.state;
-
     const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
     const filters = isAdHocFiltersVariable(filtersVar) ? filtersVar.state.filters : [];
 
@@ -79,10 +62,11 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
         ? otelJoinQueryVar.state.value
         : '';
 
+    // TODO: remove dependency on `autoQuery`
     const autoQuery = this.state.autoQueryDef.queries[0];
 
     const queryExpr = buildPrometheusQuery({
-      metric,
+      metric: this.state.metric,
       filters,
       otelJoinQuery,
       isRateQuery: autoQuery.expr.includes('rate('),
@@ -141,14 +125,13 @@ export function getPreviewPanelFor(
 
   return new SceneCSSGridItem({
     body: new PreviewPanel({
-      metric,
-      autoQueryDef: autoQuery.preview,
-      nativeHistogram,
+      $behaviors: [hideEmptyPreviews(metric)],
       $variables: new SceneVariableSet({
         variables: getVariablesWithMetricConstant(metric),
       }),
-      $behaviors: [hideEmptyPreviews(metric)],
+      autoQueryDef: autoQuery.preview,
       body: vizPanel,
+      metric,
     }),
   });
 }
