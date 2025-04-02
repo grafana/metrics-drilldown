@@ -32,11 +32,8 @@ import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
-import { getTrailFor } from '../utils';
-import { getMetricNames } from './api';
-import { getPreviewPanelFor } from './previewPanel';
-import { sortRelatedMetrics } from './relatedMetrics';
-import { SelectMetricAction } from './SelectMetricAction';
+import { getPreviewPanelFor } from './PreviewPanel';
+import { setOtelExperienceToggleState } from '../services/store';
 import {
   getVariablesWithMetricConstant,
   MetricSelectedEvent,
@@ -46,9 +43,12 @@ import {
   VAR_FILTERS,
   VAR_OTEL_RESOURCES,
 } from '../shared';
+import { getTrailFor } from '../utils';
+import { getMetricNames } from './api';
+import { sortRelatedMetrics } from './relatedMetrics';
+import { SelectMetricAction } from './SelectMetricAction';
 import { StatusWrapper } from '../StatusWrapper';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
-import { setOtelExperienceToggleState } from '../services/store';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
 import { getSelectedScopes } from '../utils/utils.scopes';
 import { isSceneTimeRange, isSceneTimeRangeState } from '../utils/utils.timerange';
@@ -440,7 +440,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
         }
         // refactor this into the query generator in future
         const isNative = trail.isNativeHistogram(metric.name);
-        const panel = getPreviewPanelFor(metric.name, index, trail, description, isNative, true);
+        const panel = getPreviewPanelFor(metric.name, index, description, isNative, true);
         metric.itemRef = panel.getRef();
         metric.isPanel = true;
         children.push(panel);
