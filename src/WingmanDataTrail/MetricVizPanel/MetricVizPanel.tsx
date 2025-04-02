@@ -4,6 +4,7 @@ import {
   SceneObjectBase,
   SceneQueryRunner,
   type SceneComponentProps,
+  type SceneDataQuery,
   type SceneObject,
   type SceneObjectState,
   type VizPanel,
@@ -123,7 +124,11 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         queryRunner: MetricVizPanel.buildQueryRunner({
           metricName,
           matchers,
-          prometheusFunction,
+          prometheusFunction: 'rate',
+          groupByLabel: 'le',
+          queryOptions: {
+            format: 'heatmap',
+          },
         }),
       })
         .setUnit(unit)
@@ -150,12 +155,16 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     metricName,
     matchers,
     prometheusFunction,
+    groupByLabel,
+    queryOptions = {},
   }: {
     metricName: string;
     matchers: string[];
     prometheusFunction: PrometheusFn;
+    groupByLabel?: string;
+    queryOptions?: Partial<SceneDataQuery>;
   }): SceneQueryRunner {
-    const expr = buildPrometheusQuery({ metricName, matchers, fn: prometheusFunction });
+    let expr = buildPrometheusQuery({ metricName, matchers, fn: prometheusFunction, groupByLabel });
 
     return new SceneQueryRunner({
       datasource: trailDS,
@@ -164,6 +173,8 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         {
           refId: metricName,
           expr,
+          fromExploreMetrics: true,
+          ...queryOptions,
         },
       ],
     });
