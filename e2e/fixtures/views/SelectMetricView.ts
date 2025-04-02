@@ -53,11 +53,11 @@ export class SelectMetricView extends DrilldownView {
 
   // TODO: This can probably be better by having getByGrafanaSelector
   // https://grafana.com/developers/plugin-tools/e2e-test-a-plugin/selecting-elements#select-field
-  async setAdHocFilter(label: string, value: string) {
+  async setAdHocFilter(label: string, operator: string, value: string) {
     await this.getAdHocFilters().click();
     await this.page.keyboard.type(label);
     await this.page.keyboard.press('Enter');
-    await this.page.keyboard.type('=');
+    await this.page.keyboard.type(operator);
     await this.page.keyboard.press('Enter');
     await this.page.keyboard.type(value);
     await this.page.keyboard.press('Enter');

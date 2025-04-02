@@ -51,7 +51,7 @@ test.describe('Select metric view', () => {
   });
 
   test('Filtering by Label', async ({ selectMetricView }) => {
-    await selectMetricView.setAdHocFilter('label with 📈', 'metrics');
+    await selectMetricView.setAdHocFilter('label with 📈', '=', 'metrics');
     await selectMetricView.assertAdHocFilters(['label with 📈 = metrics']);
 
     for (const panelTitle of ['a.utf8.metric 🤘', 'a_utf8_http_requests_total']) {
