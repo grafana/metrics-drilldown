@@ -1,9 +1,8 @@
 import { type DataFrame, type PanelMenuItem, type PluginExtensionLink } from '@grafana/data';
-import { getPluginLinkExtensions } from '@grafana/runtime';
 // Certain imports are not available in the dependant package, but can be if the plugin is running in a different Grafana version.
 // We need both imports to support Grafana v11 and v12.
-// @ts-expect-error
-import { getObservablePluginLinks } from '@grafana/runtime/unstable'; // eslint-disable-line
+// @ts-expect-error 
+import { getObservablePluginLinks, getPluginLinkExtensions } from '@grafana/runtime';
 import {
   getExploreURL,
   sceneGraph,
