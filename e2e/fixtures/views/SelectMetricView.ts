@@ -155,6 +155,11 @@ export class SelectMetricView extends DrilldownView {
     await expect(this.getPanelByTitle(panelTitle)).toBeVisible();
   }
 
+  async assertPanelIsNativeHistogram(panelTitle: string) {
+    const panel = this.getPanelByTitle(panelTitle);
+    await expect(panel.getByTestId('header-container').getByText('Native Histogram')).toBeVisible();
+  }
+
   selectMetricPanel(panelTitle: string) {
     return this.getPanelByTitle(panelTitle)
       .getByRole('button', { name: /select/i })
@@ -196,6 +201,11 @@ export class SelectMetricView extends DrilldownView {
     const alert = this.getByTestId('data-testid Alert info');
     await expect(alert).toBeVisible();
     await expect(alert.getByText('Native Histogram Support')).toBeVisible();
+  }
+
+  async assertNativeHistogramBannerIsNotVisible() {
+    const alert = this.getByTestId('data-testid Alert info');
+    await expect(alert).not.toBeVisible();
   }
 
   async expandNativeHistogramBanner() {
