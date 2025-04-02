@@ -14,8 +14,16 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 
-function isPrometheusDatasource(ds: any): ds is PrometheusDatasource {
-  return ds.type === 'prometheus';
+const PROMETHEUS_DATA_SOURCE_REGEX = /^grafana-[0-9a-z]+prometheus-datasource$/;
+
+export function isPrometheusDatasource(ds: unknown): ds is PrometheusDatasource {
+  return (
+    typeof ds === 'object' &&
+    ds !== null &&
+    'type' in ds &&
+    typeof ds.type === 'string' &&
+    (ds.type === 'prometheus' || PROMETHEUS_DATA_SOURCE_REGEX.test(ds.type))
+  );
 }
 
 export class MetricDatasourceHelper {

@@ -1,5 +1,5 @@
 import { DataTrail } from '../DataTrail';
-import { MetricDatasourceHelper } from './MetricDatasourceHelper';
+import { isPrometheusDatasource, MetricDatasourceHelper } from './MetricDatasourceHelper';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
@@ -56,5 +56,27 @@ describe('MetricDatasourceHelper', () => {
       const result = await metricDatasourceHelper.isNativeHistogram('solo_native_histogram');
       expect(result).toBe(true);
     });
+  });
+});
+
+describe('isPrometheusDatasource', () => {
+  it('should return true for a core Prometheus datasource', () => {
+    const ds = { type: 'prometheus' };
+    expect(isPrometheusDatasource(ds)).toBe(true);
+  });
+
+  it('should return true for a Grafana developed Prometheus datasource', () => {
+    const ds = { type: 'grafana-amazonprometheus-datasource' };
+    expect(isPrometheusDatasource(ds)).toBe(true);
+  });
+
+  it('should return false for non-Prometheus datasource', () => {
+    const ds = { type: 'grafana-test-datasource' };
+    expect(isPrometheusDatasource(ds)).toBe(false);
+  });
+
+  it('should return false for object without type property', () => {
+    const ds = { name: 'prometheus' };
+    expect(isPrometheusDatasource(ds)).toBe(false);
   });
 });
