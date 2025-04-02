@@ -171,10 +171,10 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       maxDataPoints: MetricVizPanel.MAX_DATA_POINTS,
       queries: [
         {
+          ...queryOptions,
           refId: metricName,
           expr,
           fromExploreMetrics: true,
-          ...queryOptions,
         },
       ],
     });
