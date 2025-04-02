@@ -25,6 +25,7 @@ import React, { useReducer, type SyntheticEvent } from 'react';
 import { UI_TEXT } from 'constants/ui';
 import { totalOtelResources } from 'otel/api';
 import { getOtelResourcesObject } from 'otel/util';
+import { setOtelExperienceToggleState } from 'services/store';
 
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
@@ -41,10 +42,9 @@ import {
 import { StatusWrapper } from '../StatusWrapper';
 import { getTrailFor } from '../utils';
 import { getMetricNames } from './api';
-import { getPreviewPanelFor } from './previewPanel';
+import { getPreviewPanelFor } from './PreviewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
-import { setOtelExperienceToggleState } from '../services/store';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
 import { getSelectedScopes } from '../utils/utils.scopes';
 import { isSceneTimeRange, isSceneTimeRangeState } from '../utils/utils.timerange';
@@ -432,7 +432,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       }
       // refactor this into the query generator in future
       const isNative = trail.isNativeHistogram(metric.name);
-      const panel = getPreviewPanelFor(metric.name, index, trail, description, isNative, true);
+      const panel = getPreviewPanelFor(metric.name, index, description, isNative, true);
       metric.itemRef = panel.getRef();
       metric.isPanel = true;
       children.push(panel);
