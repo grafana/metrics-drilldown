@@ -1,5 +1,5 @@
 import { type AdHocVariableFilter } from '@grafana/data';
-import { utf8Support } from '@grafana/prometheus';
+import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import * as promql from '@grafana/promql-builder';
 
 import { Utf8MetricExprBuilder } from './buildUtf8Query';
@@ -23,8 +23,8 @@ export function buildPrometheusQuery({
 }: BuildPrometheusQueryParams): string {
   let expr: promql.AggregationExprBuilder;
 
-  // Check if metric name contains special characters
-  const isUtf8Metric = /[^a-zA-Z0-9_:]/.test(metric);
+  // Check if metric name contains UTF-8 characters
+  const isUtf8Metric = !isValidLegacyName(metric);
 
   // Convert filters to label selectors
   const labels: promql.LabelSelector[] = [];
