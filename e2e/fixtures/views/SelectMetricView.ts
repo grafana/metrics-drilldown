@@ -63,9 +63,12 @@ export class SelectMetricView extends DrilldownView {
     await this.page.keyboard.press('Enter');
   }
 
-  async assertAdHocFilter(label: string) {
+  async assertAdHocFilters(expectedFilters: string[]) {
     const appControls = this.getByTestId('app-controls');
-    await expect(appControls.getByText(label)).toBeVisible();
+
+    for (const expectedFilter of expectedFilters) {
+      await expect(appControls.getByText(expectedFilter)).toBeVisible();
+    }
   }
 
   /* Time picker/refresh */
