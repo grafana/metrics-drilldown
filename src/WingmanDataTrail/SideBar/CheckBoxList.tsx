@@ -17,6 +17,10 @@ export function CheckBoxList({
 }) {
   const styles = useStyles2(getStyles);
 
+  if (!filteredList.length) {
+    return <div className={styles.noResults}>No results</div>;
+  }
+
   return (
     <>
       <div className={styles.checkboxListHeader}>
@@ -31,26 +35,23 @@ export function CheckBoxList({
           clear
         </Button>
       </div>
-      {!filteredList.length && <div className={styles.noResults}>No results</div>}
-      {filteredList.length > 0 && (
-        <div className={styles.checkboxList}>
-          {filteredList.map((item) => (
-            <div key={item.value} className={styles.checkboxItem}>
-              <CheckboxWithCount
-                label={item.label}
-                count={item.count}
-                checked={selectedValues.includes(item.value)}
-                onChange={(e) => {
-                  const newValues = e.currentTarget.checked
-                    ? [...selectedValues, item.value]
-                    : selectedValues.filter((v) => v !== item.value);
-                  onSelectionChange(newValues);
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      <ul className={styles.checkboxList} data-testid="checkbox-filters-list">
+        {filteredList.map((item) => (
+          <li key={item.value} className={styles.checkboxItem}>
+            <CheckboxWithCount
+              label={item.label}
+              count={item.count}
+              checked={selectedValues.includes(item.value)}
+              onChange={(e) => {
+                const newValues = e.currentTarget.checked
+                  ? [...selectedValues, item.value]
+                  : selectedValues.filter((v) => v !== item.value);
+                onSelectionChange(newValues);
+              }}
+            />
+          </li>
+        ))}
+      </ul>
     </>
   );
 }
@@ -68,6 +69,7 @@ function getStyles(theme: GrafanaTheme2) {
     clearButton: css({}),
     checkboxList: css({
       height: '100%',
+      margin: 0,
       padding: `0 ${theme.spacing(1)} ${theme.spacing(1)} ${theme.spacing(1)}`,
       overflowY: 'auto',
       '& .css-1n4u71h-Label': {
@@ -91,7 +93,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     noResults: css({
       fontStyle: 'italic',
-      margin: theme.spacing(0, 0, 0.5, 1),
+      marginTop: theme.spacing(2),
     }),
   };
 }

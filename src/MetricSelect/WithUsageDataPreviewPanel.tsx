@@ -73,7 +73,6 @@ export function getStyles(theme: GrafanaTheme2) {
       borderTopWidth: 0,
       backgroundColor: theme.colors.background.primary,
       alignItems: 'center',
-      boxSizing: 'border-box',
     }),
     usageItem: css({
       display: 'flex',

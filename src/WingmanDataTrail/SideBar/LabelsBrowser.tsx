@@ -9,21 +9,13 @@ import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
 interface LabelsBrowserState extends SceneObjectState {
   key: string;
-  title: string;
   labelVariableName: string;
 }
 
 export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
-  constructor({
-    title,
-    labelVariableName,
-  }: {
-    title: LabelsBrowserState['title'];
-    labelVariableName: LabelsBrowserState['labelVariableName'];
-  }) {
+  constructor({ labelVariableName }: { labelVariableName: LabelsBrowserState['labelVariableName'] }) {
     super({
       key: 'labels-browser',
-      title,
       labelVariableName,
     });
   }
@@ -35,7 +27,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
   public static Component = ({ model }: SceneComponentProps<LabelsBrowser>) => {
     const styles = useStyles2(getStyles);
-    const { labelVariableName, title } = model.useState();
+    const { labelVariableName } = model.useState();
 
     const labelsVariable = sceneGraph.lookupVariable(labelVariableName, model) as LabelsVariable;
     const { loading, options: labels, value } = labelsVariable.useState();
@@ -61,12 +53,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     };
 
     return (
-      <div className={styles.container}>
-        <h5 className={styles.header}>
-          {title}
-          <span className={styles.count}>({loading ? '0' : labels.length})</span>
-        </h5>
-
+      <div className={styles.container} data-testid="labels-browser">
         <Input
           className={styles.search}
           prefix={<Icon name="search" />}
@@ -85,7 +72,9 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
         {!loading && filteredList.length > 0 && (
           <>
             <div className={styles.listHeader}>
-              <div>{value === NULL_GROUP_BY_VALUE ? 'No selection' : `Selected: "${value}"`}</div>
+              <div className={styles.selected}>
+                {value === NULL_GROUP_BY_VALUE ? 'No selection' : `Selected: "${value}"`}
+              </div>
               <Button
                 className={styles.clearButton}
                 variant="secondary"
@@ -96,13 +85,14 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
                 clear
               </Button>
             </div>
-            <RadioButtonList
-              name="labels-list"
-              className={styles.list}
-              options={filteredList}
-              onChange={model.onClickLabel}
-              value={value as string}
-            />
+            <div className={styles.list} data-testid="labels-list">
+              <RadioButtonList
+                name="labels-list"
+                options={filteredList}
+                onChange={model.onClickLabel}
+                value={value as string}
+              />
+            </div>
           </>
         )}
       </div>
@@ -121,8 +111,9 @@ function getStyles(theme: GrafanaTheme2) {
       overflowY: 'hidden',
     }),
     header: css({
-      fontSize: '1.1rem',
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
       marginBottom: theme.spacing(1),
+      paddingBottom: theme.spacing(1),
     }),
     count: css({
       display: 'inline-block',
@@ -131,8 +122,6 @@ function getStyles(theme: GrafanaTheme2) {
       marginLeft: theme.spacing(0.5),
     }),
     search: css({
-      flexBasis: '32px',
-      flexShrink: 0,
       marginBottom: theme.spacing(1),
       padding: theme.spacing(0, 0.5),
     }),
@@ -144,6 +133,11 @@ function getStyles(theme: GrafanaTheme2) {
       margin: theme.spacing(0),
       padding: theme.spacing(0, 0, 0, 1),
     }),
+    selected: css({
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+    }),
     clearButton: css({}),
     list: css({
       display: 'flex',
@@ -152,9 +146,13 @@ function getStyles(theme: GrafanaTheme2) {
       gap: 0,
       overflowY: 'auto',
 
+      '& [role="radiogroup"]': {
+        gap: 0,
+      },
+
       '& label': {
         cursor: 'pointer',
-        padding: theme.spacing(0.75, 1),
+        padding: theme.spacing(0.5, 1),
         '&:hover': {
           background: theme.colors.background.secondary,
         },

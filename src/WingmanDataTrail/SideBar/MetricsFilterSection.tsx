@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
+import { Icon, IconButton, InlineSwitch, Input, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEvent } from 'react';
 
 import { CheckBoxList } from './CheckBoxList';
@@ -11,6 +11,7 @@ export type MetricsFilterSectionProps = {
   selectedValues: string[];
   onSelectionChange: (values: string[]) => void;
   loading: boolean;
+  dataTestId?: string;
 };
 
 export function MetricsFilterSection({
@@ -19,6 +20,7 @@ export function MetricsFilterSection({
   selectedValues,
   onSelectionChange,
   loading,
+  dataTestId,
 }: MetricsFilterSectionProps) {
   const styles = useStyles2(getStyles);
 
@@ -45,15 +47,19 @@ export function MetricsFilterSection({
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-testid={dataTestId || 'metrics-filter-section'}>
       <h5 className={styles.header}>
         {title}
         <span className={styles.count}>({loading ? '0' : filteredList.length})</span>
       </h5>
-      <div className={styles.switchContainer}>
-        <span className={styles.switchLabel}>Hide empty</span>
-        <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
-      </div>
+
+      <InlineSwitch
+        className={styles.switchContainer}
+        showLabel
+        label="Hide empty"
+        value={hideEmpty}
+        onChange={(e) => setHideEmpty(e.currentTarget.checked)}
+      />
 
       <Input
         className={styles.search}
@@ -97,14 +103,18 @@ function getStyles(theme: GrafanaTheme2) {
       paddingBottom: theme.spacing(1),
     }),
     switchContainer: css({
-      marginBottom: theme.spacing(1),
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-    }),
-    switchLabel: css({
       fontSize: '14px',
       color: theme.colors.text.primary,
+      marginBottom: theme.spacing(1),
+      background: 'none',
+      border: 'none',
+
+      '&:hover': {
+        border: 'none',
+      },
     }),
     count: css({
       display: 'inline-block',

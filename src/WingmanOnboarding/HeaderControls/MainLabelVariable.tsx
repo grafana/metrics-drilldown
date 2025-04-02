@@ -13,14 +13,16 @@ import { MetricsOnboarding } from '../MetricsOnboarding';
 export const VAR_MAIN_LABEL_VARIABLE = 'mainLabelWingman';
 
 export class MainLabelVariable extends CustomVariable {
-  public static OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node', 'instance'];
+  public static readonly OPTIONS = ['cluster', 'job', 'namespace', 'service', 'node', 'instance'];
 
   constructor() {
     super({
       name: VAR_MAIN_LABEL_VARIABLE,
-      query: MainLabelVariable.OPTIONS.join(','),
+      query: [' ', ...MainLabelVariable.OPTIONS].join(','),
       hide: VariableHide.hideVariable,
-      value: undefined,
+      value: ' ',
+      includeAll: false,
+      allowCustomValue: true,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -98,7 +100,7 @@ export class MainLabelVariable extends CustomVariable {
           tooltip="Click to add a custom label"
           tooltipPlacement="top"
         >
-          +
+          + Add
         </Button>
       </>
     );
@@ -114,7 +116,7 @@ function getStyles(theme: GrafanaTheme2) {
       width: 100%;
     `,
     labelButton: css`
-      flex: 0 1 200px;
+      flex: 0 1 180px;
       height: 80px;
       font-size: 1.1rem;
       margin: 0;

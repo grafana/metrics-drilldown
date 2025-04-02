@@ -19,6 +19,7 @@ import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVari
 
 import { ROUTES } from '../constants';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
+import { MetricsGroupByRow } from './GroupBy/MetricsGroupByRow';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { HeaderControls } from './HeaderControls/HeaderControls';
 import { EventGroupFiltersChanged } from './HeaderControls/MetricsFilter/EventGroupFiltersChanged';
@@ -108,6 +109,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           ? (new SimpleMetricsList() as unknown as SceneObjectBase)
           : (new MetricsGroupByList({
               labelName: groupByValue,
+              GroupByRow: MetricsGroupByRow,
             }) as unknown as SceneObjectBase),
     });
   }
@@ -160,7 +162,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
     return (
       <>
-        <div className={styles.headerControls}>
+        <div className={styles.headerControls} data-testid="header-controls">
           <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.body}>

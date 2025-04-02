@@ -12,7 +12,7 @@ import { EventQuickSearchChanged } from 'WingmanDataTrail/HeaderControls/QuickSe
 import { QuickSearch } from 'WingmanDataTrail/HeaderControls/QuickSearch/QuickSearch';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/EventFiltersChanged';
-import { MetricsFilterSection } from 'WingmanDataTrail/SideBar/SceneMetricsFilterSection';
+import { SideBar } from 'WingmanDataTrail/SideBar/SideBar';
 
 import { MetricsVariable } from './MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariableFilterEngine';
@@ -70,24 +70,15 @@ export class FilteredMetricsVariable extends MetricsVariable {
 
     // wrapped in a try/catch to prevent breaking WingMan in the pills variant
     try {
-      const prefixFilterSection = sceneGraph.findByKeyAndType(
-        this,
-        `metrics-filter-section-prefixes`,
-        MetricsFilterSection
-      );
-      const categoryFilterSection = sceneGraph.findByKeyAndType(
-        this,
-        `metrics-filter-section-categories`,
-        MetricsFilterSection
-      );
+      const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
 
       this._subs.add(
         this.subscribeToState((newState, prevState) => {
           if (newState.loading === false && prevState.loading === true) {
             this.filterEngine.applyFilters(
               {
-                prefixes: prefixFilterSection.state.selectedFilters,
-                categories: categoryFilterSection.state.selectedFilters,
+                prefixes: sideBar.state.selectedMetricPrefixes,
+                categories: sideBar.state.selectedMetricCategories,
               },
               false
             );
@@ -97,22 +88,14 @@ export class FilteredMetricsVariable extends MetricsVariable {
       );
 
       this._subs.add(
-        prefixFilterSection.subscribeToEvent(EventFiltersChanged, (event) => {
-          this.filterEngine.applyFilters({
-            [event.payload.type]: event.payload.filters,
-          });
-        })
-      );
-
-      this._subs.add(
-        categoryFilterSection.subscribeToEvent(EventFiltersChanged, (event) => {
+        sideBar.subscribeToEvent(EventFiltersChanged, (event) => {
           this.filterEngine.applyFilters({
             [event.payload.type]: event.payload.filters,
           });
         })
       );
     } catch (error) {
-      console.warn('MetricsFilterSection not found - no worries, gracefully degrading...', error);
+      console.warn('SideBar not found - no worries, gracefully degrading...', error);
     }
 
     // wrapped in a try/catch to support the different variants / prevents runtime errors in WingMan's onboarding screen

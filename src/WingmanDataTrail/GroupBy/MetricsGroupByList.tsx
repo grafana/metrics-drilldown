@@ -9,13 +9,15 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Alert, Button, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { InlineBanner } from 'App/InlineBanner';
 import { LabelValuesVariable, VAR_LABEL_VALUES } from 'WingmanDataTrail/Labels/LabelValuesVariable';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
-import { MetricsGroupByRow } from './MetricsGroupByRow';
+import { type MetricsGroupByRow, type MetricsGroupByRowState } from './MetricsGroupByRow';
+import { type MetricsGroupByRow as OnboardingMetricsGroupByRow } from '../../WingmanOnboarding/GroupBy/MetricsGroupByRow';
 
 interface MetricsGroupByListState extends SceneObjectState {
   labelName: string;
@@ -24,7 +26,23 @@ interface MetricsGroupByListState extends SceneObjectState {
 }
 
 export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState> {
-  constructor({ labelName }: { labelName: MetricsGroupByListState['labelName'] }) {
+  constructor({
+    labelName,
+    GroupByRow,
+  }: {
+    labelName: MetricsGroupByListState['labelName'];
+    GroupByRow: new ({
+      index,
+      labelName,
+      labelValue,
+      labelCardinality,
+    }: {
+      index: MetricsGroupByRowState['index'];
+      labelName: MetricsGroupByRowState['labelName'];
+      labelValue: MetricsGroupByRowState['labelValue'];
+      labelCardinality: MetricsGroupByRowState['labelCardinality'];
+    }) => MetricsGroupByRow | OnboardingMetricsGroupByRow;
+  }) {
     super({
       key: 'metrics-group-list',
       labelName,
@@ -49,23 +67,20 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
         getLayoutEmpty: () =>
           new SceneReactObject({
             reactNode: (
-              <Alert title="" severity="info">
+              <InlineBanner title="" severity="info">
                 No label values found for label &quot;{labelName}&quot;.
-              </Alert>
+              </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
             reactNode: (
-              <Alert severity="error" title={`Error while loading label "${labelName}" values!`}>
-                <p>&quot;{error.message || error.toString()}&quot;</p>
-                <p>Please try to reload the page. Sorry for the inconvenience.</p>
-              </Alert>
+              <InlineBanner severity="error" title={`Error while loading label "${labelName}" values!`} error={error} />
             ),
           }),
         getLayoutChild: (option, index, options) => {
           return new SceneCSSGridItem({
-            body: new MetricsGroupByRow({
+            body: new GroupByRow({
               index,
               labelName,
               labelValue: option.value as string,
@@ -93,7 +108,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
     };
 
     return (
-      <>
+      <div data-testid="metrics-groupby-list">
         <body.Component model={body} />
 
         {shouldDisplayShowMoreButton && (
@@ -108,7 +123,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
         <div className={styles.variable}>
           <variable.Component key={variable.state.name} model={variable} />
         </div>
-      </>
+      </div>
     );
   };
 }

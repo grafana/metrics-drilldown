@@ -5,10 +5,14 @@ import { useStyles2 } from '@grafana/ui';
 import React, { createContext, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
+import { initFaro } from 'tracking/faro/faro';
 import { getUrlForTrail, newMetricsTrail } from 'utils';
 
+import { ErrorView } from './ErrorView';
 import { AppRoutes } from './Routes';
+import { useCatchExceptions } from './useCatchExceptions';
 import { PluginPropsContext } from '../utils/utils.plugin';
+initFaro();
 
 interface MetricsAppContext {
   trail: DataTrail;
@@ -28,8 +32,17 @@ function App(props: AppRootProps) {
     setTrail(trail);
   };
 
+  const [error] = useCatchExceptions();
+  if (error) {
+    return (
+      <div className={styles.appContainer} data-testid="metrics-drilldown-app">
+        <ErrorView error={error} />
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.appContainer}>
+    <div className={styles.appContainer} data-testid="metrics-drilldown-app">
       <PluginPropsContext.Provider value={props}>
         <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
           <AppRoutes />

@@ -37,7 +37,6 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
         }),
       ],
       labelBrowser: new LabelsBrowser({
-        title: 'Breakdown by label',
         labelVariableName: VAR_WINGMAN_GROUP_BY,
       }),
     });
@@ -72,12 +71,12 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
             <span>Drilldown options</span>
           </div>
           <Button
-            className={styles.iconButton}
+            className={cx(styles.iconButton, 'expand-collapse')}
             size="md"
             variant="secondary"
             fill="text"
-            icon={isCollapsed ? 'arrow-from-right' : 'arrow-left'}
-            tooltip={isCollapsed ? 'Expand' : ''}
+            icon={isCollapsed ? 'arrow-right' : 'arrow-left'}
+            tooltip={isCollapsed ? 'Expand' : 'Collapse'}
             tooltipPlacement="right"
             onClick={() => toggleSidebar('toggle')}
           />
@@ -110,9 +109,7 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                   isOpen={openSections[filter.state.key] || openSections['metric-filters']}
                   onToggle={() => toggleSection(filter.state.key)}
                 >
-                  <div className={styles.section}>
-                    <filter.Component model={filter} />
-                  </div>
+                  <filter.Component model={filter} />
                 </CollapsableSection>
               )}
             </li>
@@ -125,7 +122,7 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 variant="secondary"
                 fill="text"
                 icon="gf-prometheus"
-                tooltip={isCollapsed ? 'Prometheus labels' : ''}
+                tooltip={isCollapsed ? 'Group by labels' : ''}
                 tooltipPlacement="right"
                 onClick={() => toggleSidebar(labelBrowser.state.key)}
               />
@@ -136,15 +133,13 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 label={
                   <div className={styles.featureLabel}>
                     <Icon name="gf-prometheus" size="md" className={styles.icon} />
-                    <span>Prometheus labels</span>
+                    <span>Group by labels</span>
                   </div>
                 }
                 isOpen={openSections[labelBrowser.state.key]}
                 onToggle={() => toggleSection(labelBrowser.state.key)}
               >
-                <div className={styles.section}>
-                  <labelBrowser.Component model={labelBrowser} />
-                </div>
+                <labelBrowser.Component model={labelBrowser} />
               </CollapsableSection>
             )}
           </li>
@@ -173,7 +168,7 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 isOpen={openSections['favorites']}
                 onToggle={() => toggleSection('favorites')}
               >
-                <div className={styles.section}></div>
+                <></>
               </CollapsableSection>
             )}
           </li>
@@ -184,10 +179,10 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 size="md"
                 variant="secondary"
                 fill="text"
-                icon="bolt"
-                tooltip={isCollapsed ? 'Most viewed' : ''}
+                icon="clock-nine"
+                tooltip={isCollapsed ? 'Recents' : ''}
                 tooltipPlacement="right"
-                onClick={() => toggleSidebar('most-viewed')}
+                onClick={() => toggleSidebar('recents')}
               />
             )}
             {!isCollapsed && (
@@ -195,14 +190,14 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 className={styles.collapsable}
                 label={
                   <div className={styles.featureLabel}>
-                    <Icon name="eye" size="md" className={styles.icon} />
-                    <span>Most viewed</span>
+                    <Icon name="clock-nine" size="md" className={styles.icon} />
+                    <span>Recents</span>
                   </div>
                 }
-                isOpen={openSections['most-viewed']}
-                onToggle={() => toggleSection('most-viewed')}
+                isOpen={openSections['recents']}
+                onToggle={() => toggleSection('recents')}
               >
-                <div className={styles.section}></div>
+                <></>
               </CollapsableSection>
             )}
           </li>
@@ -231,7 +226,7 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 isOpen={openSections['saved-filters']}
                 onToggle={() => toggleSection('saved-filters')}
               >
-                <div className={styles.section}></div>
+                <></>
               </CollapsableSection>
             )}
           </li>
@@ -260,7 +255,7 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 isOpen={openSections['settings']}
                 onToggle={() => toggleSection('settings')}
               >
-                <div className={styles.section}></div>
+                <></>
               </CollapsableSection>
             )}
           </li>
@@ -280,7 +275,6 @@ function getStyles(theme: GrafanaTheme2) {
     `,
     collapsed: css`
       width: 42px;
-
       .title,
       .featureLabel {
         display: none;
@@ -291,6 +285,8 @@ function getStyles(theme: GrafanaTheme2) {
       .featureItem {
         justify-content: center;
         width: auto;
+
+        border-bottom: none;
       }
       .featureItem:hover {
         & button::before {
@@ -321,6 +317,9 @@ function getStyles(theme: GrafanaTheme2) {
         color: ${theme.colors.text.maxContrast};
         background: transparent;
       }
+      &.expand-collapse {
+        padding: ${theme.spacing(1)};
+      }
     `,
     featuresList: css`
       display: flex;
@@ -345,6 +344,9 @@ function getStyles(theme: GrafanaTheme2) {
         opacity: 0;
         visibility: hidden;
       }
+      &:not(:last-child) {
+        border-bottom: 1px solid ${theme.colors.border.weak};
+      }
     `,
     featureLabel: css`
       display: flex;
@@ -356,14 +358,9 @@ function getStyles(theme: GrafanaTheme2) {
     `,
     collapsable: css`
       font-size: 15px;
-    `,
-    section: css`
-      display: flex;
-      flex-direction: column;
-      margin: ${theme.spacing(1, 0)};
-      padding-bottom: ${theme.spacing(1)};
-      &:not(:last-child) {
-        border-bottom: 1px solid ${theme.colors.border.weak};
+      padding: ${theme.spacing(0, 0, 1.25, 0)};
+      &:focus-within {
+        box-shadow: none !important;
       }
     `,
   };

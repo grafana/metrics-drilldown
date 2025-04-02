@@ -1,11 +1,18 @@
-import { type DataFrame, type TimeRange } from '@grafana/data';
+import { type DataFrame, type FieldConfig, type FieldConfigSource, type TimeRange } from '@grafana/data';
 import { usePluginLinks } from '@grafana/runtime';
-import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import {
+  sceneGraph,
+  SceneObjectBase,
+  VizPanel,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
 import { type DataQuery, type DataSourceRef } from '@grafana/schema';
 import { IconButton } from '@grafana/ui';
 import React from 'react';
 
 import MimirLogo from 'img/logo.svg';
+import { findObjectOfType } from 'utils';
 
 import pluginJson from '../plugin.json';
 import { VAR_DATASOURCE_EXPR } from '../shared';
@@ -23,6 +30,7 @@ export interface AddToExplorationButtonState extends SceneObjectState {
   context?: ExtensionContext;
 
   queries: DataQuery[];
+  fieldConfig?: FieldConfigSource;
 }
 
 interface ExtensionContext {
@@ -76,7 +84,48 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
     }
   };
 
+  private readonly getFieldConfig = () => {
+    const panel = findObjectOfType(this, (o) => o instanceof VizPanel, VizPanel);
+    const data = sceneGraph.getData(this);
+    const frames = data?.state.data?.series;
+    let fieldConfig = panel?.state.fieldConfig;
+    if (fieldConfig && frames?.length) {
+      for (const frame of frames) {
+        for (const field of frame.fields) {
+          const configKeys = Object.keys(field.config);
+          const properties = configKeys.map((key) => ({
+            id: key,
+            value: field.config[key as keyof FieldConfig],
+          }));
+
+          // check if the override already exists
+          const existingOverride = fieldConfig.overrides.find(
+            (o) =>
+              o.matcher.options === (field.config.displayNameFromDS ?? field.config.displayName ?? field.name) &&
+              o.matcher.id === 'byName'
+          );
+          if (!existingOverride) {
+            // add as first override
+            fieldConfig.overrides.unshift({
+              matcher: {
+                id: 'byName',
+                options: field.config.displayNameFromDS ?? field.config.displayName ?? field.name,
+              },
+              properties,
+            });
+          }
+
+          if (existingOverride && JSON.stringify(existingOverride.properties) !== JSON.stringify(properties)) {
+            existingOverride.properties = properties;
+          }
+        }
+      }
+    }
+    return fieldConfig;
+  };
+
   private readonly getContext = () => {
+    const fieldConfig = this.getFieldConfig();
     const { queries, dsUid, labelName, fieldName } = this.state;
     const timeRange = sceneGraph.getTimeRange(this);
 
@@ -94,6 +143,7 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
       title: `${labelName}${fieldName ? ` > ${fieldName}` : ''}`,
       logoPath: MimirLogo,
       drillDownLabel: fieldName,
+      fieldConfig,
     };
     if (JSON.stringify(ctx) !== JSON.stringify(this.state.context)) {
       this.setState({ context: ctx });

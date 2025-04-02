@@ -112,7 +112,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
   public static Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {
     const styles = useStyles2(getStyles);
-    const { type, title, groups, selectedFilters, loading } = model.useState();
+    const { type, groups, selectedFilters, loading } = model.useState();
 
     const [hideEmpty, setHideEmpty] = useState(true);
     const [searchValue, setSearchValue] = useState('');
@@ -144,10 +144,6 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     return (
       <div className={styles.container}>
         <h5 className={styles.header}>
-          <div>
-            {title}
-            <span className={styles.count}>({loading ? '0' : filteredList.length})</span>
-          </div>
           <div className={styles.switchContainer}>
             <span className={styles.switchLabel}>Hide empty</span>
             <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
@@ -192,7 +188,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     header: css({
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       alignItems: 'center',
       gap: theme.spacing(1),
       fontSize: '14px',

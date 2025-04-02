@@ -11,6 +11,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
 import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
@@ -91,6 +92,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     headerActions: MetricVizPanelState['headerActions'];
   }) {
     const panelTitle = highlight ? `${title} (current)` : title;
+    const unit = getUnit(metricName);
 
     const isUptime = metricName === 'up' || metricName.endsWith('_up');
     if (isUptime) {
@@ -104,7 +106,9 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
           matchers,
           prometheusFunction,
         }),
-      }).build();
+      })
+        .setUnit(unit) // Set the appropriate unit for status history panel as well
+        .build();
     }
 
     // Default settings for non-uptime metrics - use timeseries
@@ -118,7 +122,9 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         matchers,
         prometheusFunction,
       }),
-    }).build();
+    })
+      .setUnit(unit) // Set the appropriate unit
+      .build();
   }
 
   private static buildQueryRunner({

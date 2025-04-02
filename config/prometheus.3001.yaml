@@ -7,3 +7,6 @@ scrape_configs:
     static_configs:
       - targets:
           - host.docker.internal:3001
+  - job_name: 'prometheus-utf8'
+    static_configs:
+      - targets: ['prometheus-utf8:9112']

@@ -46,7 +46,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
         variables: [
           new CustomVariable({
             name: VAR_WINGMAN_SORT_BY,
-            label: 'Sort By',
+            label: 'Sort by',
             value: 'alphabetical',
             query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
           }),

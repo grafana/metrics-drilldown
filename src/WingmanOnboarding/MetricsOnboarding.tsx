@@ -16,7 +16,7 @@ import {
 } from '@grafana/scenes';
 import { Icon, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 
 import { VAR_DATASOURCE } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -33,6 +33,7 @@ import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
+import { MetricsGroupByRow } from './GroupBy/MetricsGroupByRow';
 import { MainLabelVariable, VAR_MAIN_LABEL_VARIABLE } from './HeaderControls/MainLabelVariable';
 import { VAR_VARIANT, type VariantVariable } from './VariantVariable';
 interface MetricsOnboardingState extends SceneObjectState {
@@ -52,7 +53,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       if (variable.state.name === VAR_DATASOURCE) {
         (sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable).setState({ value: undefined });
 
-        this.fetchAndLabelValuesAndUpdateBody();
+        this.fetchLabelValuesAndUpdateBody();
         return;
       }
 
@@ -116,13 +117,13 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
       })
     );
 
-    this.fetchAndLabelValuesAndUpdateBody();
+    this.fetchLabelValuesAndUpdateBody();
   }
 
-  private fetchAndLabelValuesAndUpdateBody() {
+  private fetchLabelValuesAndUpdateBody() {
     const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MainLabelVariable;
 
-    this.fetchAllLabelardinalities(MainLabelVariable.OPTIONS).then((allLabelCardinalities) => {
+    this.fetchAllLabelCardinalities(MainLabelVariable.OPTIONS).then((allLabelCardinalities) => {
       mainLabelVariable.setState({
         options: allLabelCardinalities.map(([labelName, labelCardinality]) => ({
           value: labelName,
@@ -140,7 +141,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
     });
   }
 
-  private async fetchAllLabelardinalities(labelNames: string[]): Promise<Array<[string, number]>> {
+  private async fetchAllLabelCardinalities(labelNames: string[]): Promise<Array<[string, number]>> {
     return Promise.all(
       labelNames.map((labelName) =>
         LabelsDataSource.fetchLabelCardinality(labelName, MetricsOnboarding.LABEL_VALUES_API_LIMIT, this)
@@ -160,6 +161,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
         ? (new SimpleMetricsList() as unknown as SceneObjectBase)
         : (new MetricsGroupByList({
             labelName: groupByLabel,
+            GroupByRow: MetricsGroupByRow,
           }) as unknown as SceneObjectBase),
     });
   }
@@ -225,8 +227,8 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
 
     return (
       <div className={styles.container}>
-        <div className={styles.headerControls}>
-          <div className={styles.topControls}>
+        <div className={styles.allControls}>
+          <div className={styles.topControls} data-testid="top-controls">
             <div className={styles.mainLabelVariable}>
               <mainLabelVariable.Component model={mainLabelVariable} />
               <a
@@ -242,7 +244,7 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
             </div>
           </div>
 
-          <div className={styles.listControls}>
+          <div className={styles.headerControls} data-testid="header-controls">
             <headerControls.Component model={headerControls} />
           </div>
         </div>
@@ -263,7 +265,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       height: '100%',
       gap: theme.spacing(1),
     }),
-    headerControls: css({
+    allControls: css({
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing(2),
@@ -291,7 +293,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
         color: theme.colors.text.link,
       },
     }),
-    listControls: css({
+    headerControls: css({
       marginBottom: theme.spacing(0.5),
     }),
     body: css({

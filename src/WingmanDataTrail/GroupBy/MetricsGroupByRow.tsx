@@ -12,10 +12,10 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Alert, Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 
+import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -29,14 +29,13 @@ import {
   MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
-import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import {
   MetricsWithLabelValueVariable,
   VAR_METRIC_WITH_LABEL_VALUE,
 } from './MetricsWithLabelValue/MetricsWithLabelValueVariable';
 
-interface MetricsGroupByRowState extends SceneObjectState {
+export interface MetricsGroupByRowState extends SceneObjectState {
   index: number;
   labelName: string;
   labelValue: string;
@@ -87,19 +86,14 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         getLayoutEmpty: () =>
           new SceneReactObject({
             reactNode: (
-              <Alert title="" severity="info">
+              <InlineBanner title="" severity="info">
                 No metrics found for the current filters and time range.
-              </Alert>
+              </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
-            reactNode: (
-              <Alert severity="error" title="Error while loading metrics!">
-                <p>&quot;{error.message || error.toString()}&quot;</p>
-                <p>Please try to reload the page. Sorry for the inconvenience.</p>
-              </Alert>
-            ),
+            reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
@@ -141,30 +135,9 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  private useClickFilterBy = () => {
-    const { labelName, labelValue } = this.useState();
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
-
-    return () => {
-      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this) as AdHocFiltersVariable;
-
-      adHocFiltersVariable.setState({
-        // TOOD: keep unique filters
-        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
-      });
-
-      navigate({
-        pathname: location.pathname.replace(`/${variant}`, `/${variant.replace('onboard', 'trail')}`),
-      });
-    };
-  };
-
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const styles = useStyles2(getStyles, isCollapsed);
+    const styles = useStyles2(getStyles);
 
     const { index, labelName, labelValue, labelCardinality, $variables, body } = model.useState();
 
@@ -174,11 +147,6 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     const batchSizes = body.useSizes();
     const shouldDisplayShowMoreButton =
       !loading && !error && batchSizes.total > 0 && batchSizes.current < batchSizes.total;
-
-    const location = useLocation();
-    const isOnboardingView = location.pathname.includes('/onboard');
-
-    const onClickFilterBy = model.useClickFilterBy();
 
     const onClickShowMore = () => {
       body.increaseBatchSize();
@@ -208,21 +176,12 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
-            {!isOnboardingView && (
-              <>
-                <Button variant="secondary" fill="outline" className={styles.includeButton} onClick={onClickInclude}>
-                  Include
-                </Button>
-                <Button variant="secondary" fill="outline" className={styles.excludeButton} onClick={onClickExclude}>
-                  Exclude
-                </Button>
-              </>
-            )}
-            {isOnboardingView && (
-              <Button variant="primary" fill="solid" className={styles.filterButton} onClick={onClickFilterBy}>
-                Filter by
-              </Button>
-            )}
+            <Button variant="secondary" fill="outline" className={styles.includeButton} onClick={onClickInclude}>
+              Include
+            </Button>
+            <Button variant="secondary" fill="outline" className={styles.excludeButton} onClick={onClickExclude}>
+              Exclude
+            </Button>
           </div>
         </div>
 
@@ -241,9 +200,10 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 )}
               </div>
             }
-            className={styles.collapsableSection}
           >
-            <body.Component model={body} />
+            <div className={styles.collapsableSectionBody}>
+              <body.Component model={body} />
+            </div>
 
             {shouldDisplayShowMoreButton && (
               <div className={styles.footer}>
@@ -270,13 +230,11 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
+function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       background: theme.colors.background.canvas,
-      border: `1px solid ${theme.colors.border.medium}`,
-      borderRadius: theme.shape.radius.default,
-      padding: isCollapsed ? theme.spacing(2) : theme.spacing(2, 2, 0, 2),
+      margin: theme.spacing(1, 1, 0, 1),
 
       '& div:focus-within': {
         boxShadow: 'none !important',
@@ -287,6 +245,8 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       alignItems: 'center',
       gap: '8px',
       marginBottom: '-36px',
+      paddingBottom: theme.spacing(1.5),
+      borderBottom: `1px solid ${theme.colors.border.medium}`,
     }),
     headerButtons: css({
       display: 'flex',
@@ -298,12 +258,11 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
     filterButton: css({}),
     includeButton: css({}),
     excludeButton: css({}),
-    collapsableSection: css({
-      height: '100%',
-
-      '& button:focus': {
-        boxShadow: 'none !important',
-      },
+    collapsableSectionBody: css({
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '24px',
+      padding: theme.spacing(1),
     }),
     groupName: css({
       display: 'flex',
@@ -324,7 +283,7 @@ function getStyles(theme: GrafanaTheme2, isCollapsed: boolean) {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: theme.spacing(4),
+      marginTop: theme.spacing(1),
 
       '& button': {
         height: '40px',
