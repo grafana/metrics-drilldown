@@ -1,10 +1,11 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2, type IconName } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, CollapsableSection, Icon, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Icon, Switch, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { PluginLogo } from 'PluginInfo/PluginLogo';
+import { getTrailFor } from 'utils';
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
@@ -67,6 +68,13 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
 
     const toggleSection = (section: string) => {
       setOpenSections({ ...openSections, [section]: !openSections[section] });
+    };
+
+    const trail = getTrailFor(model);
+    const { showPreviews } = trail.useState();
+
+    const onTogglePreviews = () => {
+      trail.setState({ showPreviews: !trail.state.showPreviews });
     };
 
     return (
@@ -270,7 +278,10 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 isOpen={openSections['settings']}
                 onToggle={() => toggleSection('settings')}
               >
-                <></>
+                <div className={styles.showPreview}>
+                  <div>Show previews of metric graphs</div>
+                  <Switch value={showPreviews} onChange={onTogglePreviews} />
+                </div>
               </CollapsableSection>
             )}
           </li>
@@ -365,6 +376,7 @@ function getStyles(theme: GrafanaTheme2) {
       }
       & [id^='collapse-content'] {
         padding: 0 !important;
+        margin-top: ${theme.spacing(1)};
       }
     `,
     featureLabel: css`
@@ -383,6 +395,12 @@ function getStyles(theme: GrafanaTheme2) {
       &:focus-within {
         box-shadow: none !important;
       }
+    `,
+    showPreview: css`
+      display: flex;
+      align-items: center;
+      gap: ${theme.spacing(1)};
+      justify-content: space-between;
     `,
   };
 }

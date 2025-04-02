@@ -4,6 +4,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Dropdown, Switch, ToolbarButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+
 import { reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
@@ -44,6 +46,10 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
     const trail = getTrailFor(model);
 
     const { showPreviews, topScene } = trail.useState();
+
+    if (topScene instanceof MetricsReducer) {
+      return null;
+    }
 
     const renderPopover = () => {
       return (

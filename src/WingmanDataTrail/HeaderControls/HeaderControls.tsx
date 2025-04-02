@@ -66,7 +66,7 @@ export class HeaderControls extends EmbeddedScene {
     const variant = (sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable).state.value as string;
     const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
 
-    if (variant !== ROUTES.OnboardWithLabels) {
+    if (variant === ROUTES.OnboardWithLabels) {
       (
         (this.state.body as SceneFlexLayout).state.children.find(
           (c) => c.state.key === 'group-by-label-selector-wingman'
