@@ -78,10 +78,9 @@ test.describe('Select metric view', () => {
     const panelTitle = 'a.utf8.metric 🤘';
     await selectMetricView.selectMetricPanel(panelTitle);
     await selectMetricView.createBookmark();
-    await expect(selectMetricView.getByText('Bookmark created')).toBeVisible();
+    await selectMetricView.assertBookmarkAlert();
     await selectMetricView.seeAllBookmarksFromAlert();
-    // One for recent exploration and one for bookmark
-    await expect(selectMetricView.getByRole('button', { name: panelTitle })).toHaveCount(2);
+    await selectMetricView.assertBookmarkCreated(panelTitle);
   });
 
   test('Select New Metric', async ({ selectMetricView }) => {
