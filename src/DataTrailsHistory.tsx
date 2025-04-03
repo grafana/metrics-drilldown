@@ -331,7 +331,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
     this.stepTransitionInProgress = true;
     this.setState({ currentStep: stepIndex });
 
-    getTrailFor(this).restoreFromHistoryStep(step.trailState);
+    // getTrailFor(this).restoreFromHistoryStep(step.trailState);
 
     // The URL will update
     this.stepTransitionInProgress = false;
