@@ -14,7 +14,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import React from 'react';
-import { lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
@@ -137,7 +137,7 @@ const getInvestigationLink = async (addToExplorations: AddToExplorationButton) =
 
   // `getObservablePluginLinks` is introduced in Grafana v12
   if (getObservablePluginLinks !== undefined) {
-    const links: PluginExtensionLink[] = await lastValueFrom(
+    const links: PluginExtensionLink[] = await firstValueFrom(
       getObservablePluginLinks({
         extensionPointId,
         context,
