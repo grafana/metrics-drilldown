@@ -24,13 +24,6 @@ function getGrafanaUrl() {
   return `http://localhost:${grafanaPort}`;
 }
 
-function getGrafanaUser(): User {
-  return {
-    user: process.env.GRAFANA_USER || 'admin',
-    password: process.env.GRAFANA_PASSWORD || 'admin',
-  };
-}
-
 type CustomEnvConfig = {
   reporter: PlaywrightTestConfig['reporter'];
   timeout?: number;
@@ -66,8 +59,6 @@ export function config(config: CustomEnvConfig) {
       video: 'on-first-retry',
       /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
       trace: 'on-first-retry',
-      user: getGrafanaUser(),
-      grafanaAPICredentials: getGrafanaUser(),
     },
     /* Configure projects for major browsers */
     projects: [
