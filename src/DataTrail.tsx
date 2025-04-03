@@ -234,7 +234,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const saveRecentTrail = () => {
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
       const hasFilters = isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.filters.length > 0;
-      // debugger;
       if (this.state.metric || hasFilters) {
         getTrailStore().setRecentTrail(this);
       }
