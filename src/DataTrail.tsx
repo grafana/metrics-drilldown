@@ -40,7 +40,6 @@ import { VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
-// import { DataTrailHistory } from './DataTrailsHistory';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
@@ -83,7 +82,6 @@ export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
   controls: SceneObject[];
-  // history: DataTrailHistory;
   settings: DataTrailSettings;
   pluginInfo: SceneReactObject;
   createdAt: number;
@@ -635,7 +633,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const {
       controls,
       topScene,
-      // history,
       settings,
       pluginInfo,
       useOtelExperience,
