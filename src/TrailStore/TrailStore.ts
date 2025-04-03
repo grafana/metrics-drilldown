@@ -122,12 +122,13 @@ export class TrailStore {
     const urlSerializedTrail = 'urlValues' in t;
     if (isSerializedTrail) {
       t.history.map((step) => {
+        // will go through all steps until the last one and load the most recent one
         this._loadFromUrl(trail, step.urlValues);
         // debugger;
         // const parentIndex = step.parentIndex ?? trail.state.history.state.steps.length - 1;
         // Set the parent of the next trail step by setting the current step in history.
-        trail.state.history.setState({ currentStep: 0 });
-        trail.state.history.addTrailStepFromStorage(trail, step);
+        // trail.state.history.setState({ currentStep: 0 });
+        // trail.state.history.addTrailStepFromStorage(trail, step);
       });
     } else if (urlSerializedTrail) {
       this._loadFromUrl(trail, t.urlValues);
@@ -140,11 +141,7 @@ export class TrailStore {
 
     // trail.state.history.setState({ currentStep });
     // do not clone history but clone something else like most recent event
-    trail.setState(
-      sceneUtils.cloneSceneObjectState(trail.state, {
-        trailActivated: false, // load from recent trails will fire off setRecentTrail when clicking recent trails
-      })
-    );
+    trail.setState(sceneUtils.cloneSceneObjectState(trail.state, {}));
 
     return trail;
   }
@@ -220,7 +217,7 @@ export class TrailStore {
     this._lastModified = Date.now();
   }
 
-  setRecentTrail(recentTrail: DataTrail) {
+  setRecentTrail(recentTrail: DataTrail, fromHome?: boolean) {
     // HISTORY: do not use history anymore
     // there is no more history so we need to create a new state object that saves the current action
     // this will be equivalient to a single step.
@@ -235,7 +232,7 @@ export class TrailStore {
     // debugger;
 
     // if (steps.length === 0 || (steps.length === 1 && steps[0].type === 'start')) {
-    if (notActivated) {
+    if (notActivated || fromHome) {
       // We do not set an uninitialized trail, or a single node "start" trail as recent
       // HISTORY: Log when a trail is skipped due to being uninitialized
       console.log('[TrailStore] Skipping uninitialized trail or single node start trail');
@@ -260,7 +257,7 @@ export class TrailStore {
     console.log('[TrailStore] Adding recent trail:', {
       metric: recentTrail.state.metric,
       // steps: steps.length,
-      currentStep: recentTrail.state.history.state.currentStep,
+      // currentStep: recentTrail.state.history.state.currentStep,
     });
 
     this._recent.unshift(recentTrail.getRef());
