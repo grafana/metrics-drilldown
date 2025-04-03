@@ -139,11 +139,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToEvent(MetricSelectedEvent, (event) => {
-        // const { steps, currentStep } = trail.state.history.state;
-        // const prevStep = steps[currentStep].parentIndex;
-        // const previousMetric = steps[prevStep].trailState.metric;
-        // const isRelatedMetricSelector = previousMetric !== undefined;
-
         if (event.payload !== undefined) {
           const metricSearch = getMetricSearch(trail);
           const searchTermCount = deriveSearchTermsFromInput(metricSearch).length;
