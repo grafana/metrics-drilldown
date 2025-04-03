@@ -489,13 +489,10 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   };
 
   public reportPrefixFilterInteraction = (isMenuOpen: boolean) => {
-    const trail = getTrailFor(this);
-    const { steps, currentStep } = trail.state.history.state;
-    const previousMetric = steps[currentStep]?.trailState.metric;
-    const isRelatedMetricSelector = previousMetric !== undefined;
-
     reportExploreMetrics('prefix_filter_clicked', {
-      from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+      // HISTORY: need way to identify selected metrics from related metrics
+      // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+      from: 'metric_list',
       action: isMenuOpen ? 'open' : 'close',
     });
   };
