@@ -42,7 +42,7 @@ import { VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
-import { DataTrailHistory } from './DataTrailsHistory';
+// import { DataTrailHistory } from './DataTrailsHistory';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
@@ -85,7 +85,7 @@ export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
   controls: SceneObject[];
-  history: DataTrailHistory;
+  // history: DataTrailHistory;
   settings: DataTrailSettings;
   pluginInfo: SceneReactObject;
   createdAt: number;
@@ -141,7 +141,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneRefreshPicker({}),
       ],
       // HISTORY refactor different shape
-      history: state.history ?? new DataTrailHistory({}),
+      // history: state.history ?? new DataTrailHistory({}),
       settings: state.settings ?? new DataTrailSettings({}),
       pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
@@ -357,29 +357,29 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   public getCurrentMetricMetadata() {
     return this.getMetricMetadata(this.state.metric);
   }
+  // HISTORY: no longer needed once we remove history
+  // public restoreFromHistoryStep(state: DataTrailState) {
+  //   // HISTORY refactor fordifferent shape
+  //   if (!state.topScene && !state.metric) {
+  //     // If the top scene for an  is missing, correct it.
+  //     state.topScene = new MetricSelectScene({});
+  //   }
 
-  public restoreFromHistoryStep(state: DataTrailState) {
-    // HISTORY refactor fordifferent shape
-    if (!state.topScene && !state.metric) {
-      // If the top scene for an  is missing, correct it.
-      state.topScene = new MetricSelectScene({});
-    }
+  //   this.setState(
+  //     sceneUtils.cloneSceneObjectState(state, {
+  //       history: this.state.history,
+  //       metric: !state.metric ? undefined : state.metric,
+  //       metricSearch: !state.metricSearch ? undefined : state.metricSearch,
+  //       // store type because this requires an expensive api call to determine
+  //       // when loading the metric scene
+  //       nativeHistogramMetric: !state.nativeHistogramMetric ? undefined : state.nativeHistogramMetric,
+  //     })
+  //   );
 
-    this.setState(
-      sceneUtils.cloneSceneObjectState(state, {
-        history: this.state.history,
-        metric: !state.metric ? undefined : state.metric,
-        metricSearch: !state.metricSearch ? undefined : state.metricSearch,
-        // store type because this requires an expensive api call to determine
-        // when loading the metric scene
-        nativeHistogramMetric: !state.nativeHistogramMetric ? undefined : state.nativeHistogramMetric,
-      })
-    );
-
-    const urlState = new UrlSyncManager().getUrlState(this);
-    const fullUrl = urlUtil.renderUrl(locationService.getLocation().pathname, urlState);
-    locationService.replace(fullUrl);
-  }
+  //   const urlState = new UrlSyncManager().getUrlState(this);
+  //   const fullUrl = urlUtil.renderUrl(locationService.getLocation().pathname, urlState);
+  //   locationService.replace(fullUrl);
+  // }
 
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
     const metric = evt.payload ?? '';
@@ -662,7 +662,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const {
       controls,
       topScene,
-      history,
+      // history,
       settings,
       pluginInfo,
       useOtelExperience,
