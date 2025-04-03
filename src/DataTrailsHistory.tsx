@@ -220,6 +220,7 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
   }
 
   public addTrailStep(trail: DataTrail, type: TrailStepType, detail = '') {
+    // debugger;
     if (this.stepTransitionInProgress) {
       // Do not add trail steps when step transition is in progress
       return;
@@ -240,7 +241,8 @@ export class DataTrailHistory extends SceneObjectBase<DataTrailsHistoryState> {
     this.setState({
       currentStep: stepIndex,
       steps: [
-        ...this.state.steps,
+        // only add the last step
+        // ...this.state.steps,
         {
           type,
           detail,
