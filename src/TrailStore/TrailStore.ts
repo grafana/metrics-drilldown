@@ -46,11 +46,6 @@ export class TrailStore {
       const serializedRecent = this._recent
         .slice(0, MAX_RECENT_TRAILS)
         .map((trail) => this._serializeTrail(trail.resolve()));
-      // HISTORY: Log when trails are saved to localStorage
-      console.log('[TrailStore] Saving to localStorage:', {
-        recentTrails: serializedRecent.length,
-        bookmarks: this._bookmarks.length,
-      });
       localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify(serializedRecent));
       localStorage.setItem(TRAIL_BOOKMARKS_KEY, JSON.stringify(this._bookmarks));
       this._lastModified = Date.now();
@@ -68,15 +63,8 @@ export class TrailStore {
   private _loadRecentTrailsFromStorage() {
     const list: Array<SceneObjectRef<DataTrail>> = [];
     const storageItem = localStorage.getItem(RECENT_TRAILS_KEY);
-    // HISTORY: add migration here for old history format
-    // debugger;
     if (storageItem) {
-      // HISTORY: add migration here for old history format
       const serializedTrails: SerializedTrail[] = JSON.parse(storageItem);
-      // HISTORY: Log when recent trails are loaded from storage
-      console.log('[TrailStore] Loading recent trails from storage:', {
-        count: serializedTrails.length,
-      });
       for (const t of serializedTrails) {
         const trail = this._deserializeTrail(t);
         list.push(trail.getRef());
@@ -89,11 +77,6 @@ export class TrailStore {
     const storageItem = localStorage.getItem(TRAIL_BOOKMARKS_KEY);
 
     const list: Array<DataTrailBookmark | SerializedTrail> = storageItem ? JSON.parse(storageItem) : [];
-
-    // HISTORY: Log when bookmarks are loaded from storage
-    console.log('[TrailStore] Loading bookmarks from storage:', {
-      count: list.length,
-    });
 
     return list.map((item) => {
       if (isSerializedTrail(item)) {
@@ -112,22 +95,13 @@ export class TrailStore {
   private _deserializeTrail(t: SerializedTrail | UrlSerializedTrail): DataTrail {
     // reconstruct the trail based on the serialized history
     const trail = new DataTrail({});
-    // HISTORY: migration from old history format
-    // only take the last step from the history
 
-    // HISTORY: save for migration!!!
-    // check if is is a serialized trail type
     const isSerializedTrail = 'history' in t;
     const urlSerializedTrail = 'urlValues' in t;
     if (isSerializedTrail) {
       t.history.map((step) => {
         // will go through all steps until the last one and load the most recent one
         this._loadFromUrl(trail, step.urlValues);
-        // debugger;
-        // const parentIndex = step.parentIndex ?? trail.state.history.state.steps.length - 1;
-        // Set the parent of the next trail step by setting the current step in history.
-        // trail.state.history.setState({ currentStep: 0 });
-        // trail.state.history.addTrailStepFromStorage(trail, step);
       });
     } else if (urlSerializedTrail) {
       this._loadFromUrl(trail, t.urlValues);
@@ -192,8 +166,7 @@ export class TrailStore {
     const notActivated = !recentTrail.state.trailActivated;
 
     if (notActivated || fromHome) {
-      // We do not set an uninitialized trail, or a single node "start" trail as recent
-      console.log('[TrailStore] Skipping uninitialized trail or single node start trail');
+      // We do not set an uninitialized trail, or a RECENT single node "start" trail
       return;
     }
 
@@ -208,13 +181,6 @@ export class TrailStore {
       const urlState = getUrlStateForComparison(t.resolve());
       // Only keep trails with sufficiently unique urlValues on their current step
       return !isEqual(recentUrlState, urlState);
-    });
-
-    // HISTORY: Log when a new trail is added to recent trails
-    console.log('[TrailStore] Adding recent trail:', {
-      metric: recentTrail.state.metric,
-      // steps: steps.length,
-      // currentStep: recentTrail.state.history.state.currentStep,
     });
 
     this._recent.unshift(recentTrail.getRef());
@@ -233,12 +199,6 @@ export class TrailStore {
       urlValues: urlState,
       createdAt: Date.now(),
     };
-
-    // HISTORY: Log when a new bookmark is added
-    console.log('[TrailStore] Adding bookmark:', {
-      metric: trail.state.metric,
-      urlState,
-    });
 
     this._bookmarks.unshift(bookmarkState);
     this._refreshBookmarkIndexMap();
