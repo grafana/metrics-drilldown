@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   CI:
-    uses: shelldandy/plugin-ci-workflows/.github/workflows/ci.yml@412f5481f0c8e47fa92a8ff7e49c9c0d9840889b
+    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
     with:
       upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
       run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
