@@ -206,6 +206,7 @@ describe('TrailStore', () => {
     });
   });
 
+  // Legacy bookmark trails use history similar to legacy recent trails
   describe('Initialize store with one legacy bookmark trail', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
