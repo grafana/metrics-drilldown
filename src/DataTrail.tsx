@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
 import { type PromQuery } from '@grafana/prometheus';
-import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
+import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
@@ -15,10 +15,8 @@ import {
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
-  sceneUtils,
   SceneVariableSet,
   UrlSyncContextProvider,
-  UrlSyncManager,
   VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
