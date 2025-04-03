@@ -70,7 +70,7 @@ export class TrailStore {
     const list: Array<SceneObjectRef<DataTrail>> = [];
     const storageItem = localStorage.getItem(RECENT_TRAILS_KEY);
     // HISTORY: add migration here for old history format
-    debugger;
+    // debugger;
     if (storageItem) {
       // HISTORY: add migration here for old history format
       const serializedTrails: SerializedTrail[] = JSON.parse(storageItem);
@@ -244,7 +244,7 @@ export class TrailStore {
 
     // Remove the `recentTrail` from the list if it already exists there
     this._recent = this._recent.filter((t) => t !== recentTrail.getRef());
-    debugger;
+    // debugger;
 
     // Check if any existing "recent" entries have equivalent urlState to the new recentTrail
     const recentUrlState = getUrlStateForComparison(recentTrail);
