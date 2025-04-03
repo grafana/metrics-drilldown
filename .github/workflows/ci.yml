@@ -17,9 +17,11 @@ permissions:
 
 jobs:
   CI:
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
+    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@412f5481f0c8e47fa92a8ff7e49c9c0d9840889b
     with:
       upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
       run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
       playwright-docker-compose-file: e2e/docker/docker-compose.e2e.yaml
-      playwright-config: e2e/config/playwright.config.ci.ts
+      run-playwright-docker: true
+      e2e-compose-file: e2e/docker/docker-compose.playwright.yaml
+      playwright-report-path: e2e/test-reports/
