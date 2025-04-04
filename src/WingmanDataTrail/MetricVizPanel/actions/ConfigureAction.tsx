@@ -16,7 +16,6 @@ export class ConfigureAction extends SceneObjectBase<ConfigureActionState> {
     { label: 'Minimum', value: 'min' },
     { label: 'Maximum', value: 'max' },
     { label: 'Rate', value: 'rate' },
-    { label: 'Instant rate', value: 'irate' },
   ] as const;
 
   constructor({ metricName }: { metricName: ConfigureActionState['metricName'] }) {
