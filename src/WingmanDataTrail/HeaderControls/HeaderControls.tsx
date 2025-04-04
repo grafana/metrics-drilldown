@@ -19,7 +19,8 @@ import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVari
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { ROUTES } from '../../constants';
 import { MetricsFilter } from './MetricsFilter/MetricsFilter';
-import { MetricsSorter } from './MetricsSorter/MetricsSorter';
+import { MetricsSorter } from './MetricsSorter';
+import { MetricsTreeFilterToggle } from './MetricsTreeFilter/MetricsTreeFilterToggle';
 import { QuickSearch } from './QuickSearch/QuickSearch';
 
 interface HeaderControlsState extends SceneObjectState {
@@ -39,6 +40,10 @@ export class HeaderControls extends EmbeddedScene {
         width: '100%',
         maxHeight: '32px',
         children: [
+          new SceneFlexItem({
+            width: 'auto',
+            body: new MetricsTreeFilterToggle({}),
+          }),
           new SceneFlexItem({
             body: new QuickSearch(),
           }),
