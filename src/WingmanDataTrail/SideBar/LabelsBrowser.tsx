@@ -8,6 +8,7 @@ import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
 interface LabelsBrowserState extends SceneObjectState {
+  key: string;
   labelVariableName: string;
 }
 
@@ -53,11 +54,6 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
     return (
       <div className={styles.container} data-testid="labels-browser">
-        <h5 className={styles.header}>
-          Group by label
-          <span className={styles.count}>({loading ? '0' : labels.length})</span>
-        </h5>
-
         <Input
           className={styles.search}
           prefix={<Icon name="search" />}
@@ -76,7 +72,9 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
         {!loading && filteredList.length > 0 && (
           <>
             <div className={styles.listHeader}>
-              <div>{value === NULL_GROUP_BY_VALUE ? 'No selection' : `Selected: "${value}"`}</div>
+              <div className={styles.selected}>
+                {value === NULL_GROUP_BY_VALUE ? 'No selection' : `Selected: "${value}"`}
+              </div>
               <Button
                 className={styles.clearButton}
                 variant="secondary"
@@ -111,7 +109,6 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(1),
       height: '100%',
       overflowY: 'hidden',
-      background: theme.colors.background.primary,
     }),
     header: css({
       borderBottom: `1px solid ${theme.colors.border.weak}`,
@@ -135,6 +132,11 @@ function getStyles(theme: GrafanaTheme2) {
       color: theme.colors.text.secondary,
       margin: theme.spacing(0),
       padding: theme.spacing(0, 0, 0, 1),
+    }),
+    selected: css({
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
     }),
     clearButton: css({}),
     list: css({
