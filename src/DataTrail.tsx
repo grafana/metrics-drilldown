@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
-import { type PromQuery } from '@grafana/prometheus';
+import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
@@ -738,7 +738,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           // to prevent the metric name from being set twice in the query and causing an error.
           const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
           return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
-            .map((filter) => `${filter.key}${filter.operator}"${filter.value}"`)
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
       }),
