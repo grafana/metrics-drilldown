@@ -29,7 +29,7 @@ describe('getPreviewPanelFor', () => {
     const metricName = 'METRIC';
 
     function callAndGetExpr() {
-      const gridItem = getPreviewPanelFor(metricName, 0);
+      const gridItem = getPreviewPanelFor(metricName, 0, false);
       expect(gridItem).toBeInstanceOf(SceneCSSGridItem);
       const previewPanel = gridItem.state.body as PreviewPanel;
       expect(previewPanel).toBeInstanceOf(PreviewPanel);

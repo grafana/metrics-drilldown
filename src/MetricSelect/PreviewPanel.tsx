@@ -27,6 +27,7 @@ interface PreviewPanelState extends SceneObjectState {
   autoQueryDef: AutoQueryDef;
   body: SceneObject;
   metric: string;
+  hasOtelResources: boolean;
 }
 
 export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
@@ -59,6 +60,7 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
       isRateQuery: autoQuery.expr.includes('rate('),
       groupings: autoQuery.expr.includes('by(') ? ['le'] : undefined,
       ignoreUsage: true,
+      useOtelJoin: this.state.hasOtelResources,
     });
 
     this.setState({
@@ -85,6 +87,7 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
 export function getPreviewPanelFor(
   metric: string,
   index: number,
+  hasOtelResources: boolean,
   description?: string,
   nativeHistogram?: boolean,
   hideMenu?: boolean
@@ -119,6 +122,7 @@ export function getPreviewPanelFor(
       autoQueryDef: autoQuery.preview,
       body: vizPanel,
       metric,
+      hasOtelResources,
     }),
   });
 }

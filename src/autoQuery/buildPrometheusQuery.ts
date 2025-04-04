@@ -10,20 +10,20 @@ export interface BuildPrometheusQueryParams {
   metric: string;
   filters: AdHocVariableFilter[];
   isRateQuery: boolean;
+  useOtelJoin: boolean;
   groupings?: string[];
   ignoreUsage?: boolean;
-  appendToQuery?: string;
 }
 
 export function buildPrometheusQuery({
   metric,
   filters,
   isRateQuery,
+  useOtelJoin,
   groupings,
   ignoreUsage = false,
-  appendToQuery = VAR_OTEL_JOIN_QUERY_EXPR,
 }: BuildPrometheusQueryParams): string {
-  let expr: promql.AggregationExprBuilder;
+  let metricPartExpr: promql.VectorExprBuilder | promql.FuncCallExprBuilder | Utf8MetricExprBuilder;
 
   // Check if metric name contains UTF-8 characters
   const isUtf8Metric = !isValidLegacyName(metric);
@@ -41,16 +41,18 @@ export function buildPrometheusQuery({
     });
   });
 
-  // Use Utf8MetricExprBuilder for UTF-8 metric names
+  // Build metric part using promql-builder
   if (isUtf8Metric) {
-    const vectorExpr = new Utf8MetricExprBuilder(metric, labels, isRateQuery ? '$__rate_interval' : undefined);
-    expr = isRateQuery ? promql.sum(promql.rate(vectorExpr)) : promql.avg(vectorExpr);
+    // For UTF-8 metrics, Utf8MetricExprBuilder handles the optional range internally for rate
+    // Pass the range directly to the constructor if it's a rate query
+    const baseUtf8Expr = new Utf8MetricExprBuilder(metric, labels, isRateQuery ? '$__rate_interval' : undefined);
+    // Apply rate separately if needed, ensuring range is handled by Utf8MetricExprBuilder
+    metricPartExpr = isRateQuery ? promql.rate(baseUtf8Expr) : baseUtf8Expr;
   } else {
-    // For regular metrics, use the normal label handling
+    // For regular metrics, build vector and apply labels
     const vectorExpr = promql.vector(metric);
     labels.forEach((label) => {
       const labelName = utf8Support(label.name);
-
       switch (label.operator) {
         case '=':
           vectorExpr.label(labelName, label.value);
@@ -66,20 +68,27 @@ export function buildPrometheusQuery({
           break;
       }
     });
-    expr = isRateQuery ? promql.sum(promql.rate(vectorExpr.range('$__rate_interval'))) : promql.avg(vectorExpr);
+
+    // Apply rate function if needed, adding the range selector
+    metricPartExpr = isRateQuery ? promql.rate(vectorExpr.range('$__rate_interval')) : vectorExpr;
   }
 
-  // Apply grouping if specified
+  // Convert the builder expression to string
+  const metricPartString = metricPartExpr.toString();
+
+  // Combine with OTel join string if requested
+  const innerQueryString = useOtelJoin ? `${metricPartString} ${VAR_OTEL_JOIN_QUERY_EXPR}` : metricPartString;
+
+  // Determine aggregation function
+  const aggregator = isRateQuery ? 'sum' : 'avg';
+
+  // Build final query using string templates
+  let finalQuery: string;
   if (groupings?.length) {
-    expr = expr.by(groupings);
+    finalQuery = `${aggregator}(${innerQueryString}) by (${groupings.join(', ')})`;
+  } else {
+    finalQuery = `${aggregator}(${innerQueryString})`;
   }
 
-  // Convert expression to string
-  let result = expr.toString();
-
-  if (appendToQuery) {
-    result += ` ${appendToQuery}`;
-  }
-
-  return result;
+  return finalQuery;
 }
