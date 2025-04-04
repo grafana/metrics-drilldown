@@ -15,7 +15,7 @@ export function ErrorView({ error }: { error: Error }) {
         title="Fatal error!"
         message="Please try reloading the page or, if the problem persists, contact your organization admin. Sorry for the inconvenience."
         error={error}
-        errorContext={{ handheldBy: 'React error boundary' }}
+        errorContext={{ handheldBy: 'App error view' }}
       />
     </div>
   );
