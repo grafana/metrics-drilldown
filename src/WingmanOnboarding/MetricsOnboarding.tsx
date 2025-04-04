@@ -19,7 +19,7 @@ import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom-v5-compat';
 
 import { VAR_DATASOURCE } from 'shared';
-import { getColorByIndex } from 'utils';
+import { getColorByIndex, getTrailFor } from 'utils';
 import { MetricsGroupByList } from 'WingmanDataTrail/GroupBy/MetricsGroupByList';
 import { MetricsWithLabelValueDataSource } from 'WingmanDataTrail/GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { LayoutSwitcher } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
@@ -36,6 +36,7 @@ import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 import { MetricsGroupByRow } from './GroupBy/MetricsGroupByRow';
 import { MainLabelVariable, VAR_MAIN_LABEL_VARIABLE } from './HeaderControls/MainLabelVariable';
 import { VAR_VARIANT, type VariantVariable } from './VariantVariable';
+
 interface MetricsOnboardingState extends SceneObjectState {
   headerControls: SceneFlexLayout;
   loading: boolean;
@@ -180,27 +181,30 @@ export class MetricsOnboarding extends SceneObjectBase<MetricsOnboardingState> {
             sync: DashboardCursorSync.Crosshair,
           }),
         ],
-        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map(
-          (option, colorIndex) =>
-            new SceneCSSGridItem({
-              body: new MetricVizPanel({
-                title: option.label,
-                metricName,
-                color: getColorByIndex(colorIndex),
-                prometheusFunction: option.value,
-                height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
-                hideLegend: true,
-                highlight: colorIndex === 1,
-                headerActions: [
-                  new ApplyAction({
-                    metricName,
-                    prometheusFunction: option.value,
-                    disabled: colorIndex === 1,
-                  }),
-                ],
-              }),
-            })
-        ),
+        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map((option, colorIndex) => {
+          const trail = getTrailFor(this);
+          const isNativeHistogram = trail.isNativeHistogram(metricName);
+
+          return new SceneCSSGridItem({
+            body: new MetricVizPanel({
+              title: option.label,
+              metricName,
+              color: getColorByIndex(colorIndex),
+              prometheusFunction: option.value,
+              height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+              hideLegend: true,
+              highlight: colorIndex === 1,
+              isNativeHistogram,
+              headerActions: [
+                new ApplyAction({
+                  metricName,
+                  prometheusFunction: option.value,
+                  disabled: colorIndex === 1,
+                }),
+              ],
+            }),
+          });
+        }),
       }),
     });
   }

@@ -14,7 +14,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { getColorByIndex } from 'utils';
+import { getColorByIndex, getTrailFor } from 'utils';
 import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { ROUTES } from '../constants';
@@ -127,27 +127,30 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             sync: DashboardCursorSync.Crosshair,
           }),
         ],
-        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map(
-          (option, colorIndex) =>
-            new SceneCSSGridItem({
-              body: new MetricVizPanel({
-                title: option.label,
-                metricName,
-                color: getColorByIndex(colorIndex),
-                prometheusFunction: option.value,
-                height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
-                hideLegend: true,
-                highlight: colorIndex === 1,
-                headerActions: [
-                  new ApplyAction({
-                    metricName,
-                    prometheusFunction: option.value,
-                    disabled: colorIndex === 1,
-                  }),
-                ],
-              }),
-            })
-        ),
+        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map((option, colorIndex) => {
+          const trail = getTrailFor(this);
+          const isNativeHistogram = trail.isNativeHistogram(metricName);
+
+          return new SceneCSSGridItem({
+            body: new MetricVizPanel({
+              title: option.label,
+              metricName,
+              color: getColorByIndex(colorIndex),
+              prometheusFunction: option.value,
+              height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+              hideLegend: true,
+              highlight: colorIndex === 1,
+              isNativeHistogram,
+              headerActions: [
+                new ApplyAction({
+                  metricName,
+                  prometheusFunction: option.value,
+                  disabled: colorIndex === 1,
+                }),
+              ],
+            }),
+          });
+        }),
       }),
     });
   }
