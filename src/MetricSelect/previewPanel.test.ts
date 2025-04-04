@@ -53,7 +53,7 @@ describe('getPreviewPanelFor', () => {
         { key: 'filter1', value: 'value1', operator: '=' },
         { key: 'filter2', value: 'value2', operator: '=' },
       ]);
-      const expected = `avg(${metricName}{__ignore_usage__="",filter1="value1",filter2="value2"})`;
+      const expected = `avg(${metricName}{__ignore_usage__="", filter1="value1", filter2="value2"})`;
       const expr = callAndGetExpr();
       expect(expr).toBe(expected);
     });

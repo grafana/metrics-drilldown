@@ -1,206 +1,210 @@
 ---
 description: 
-globs: *.ts,*.test.ts,*.tsx,*.test.tsx
+globs: *.tsx,*.test.tsx,*.ts,*.test.ts
 alwaysApply: false
 ---
-# Prefer using `@grafana/promql-builder` to craft PromQL expressions
+# Prefer using `tsqtsq` to craft PromQL expressions
 
-When building PromQL expressions, we should use `@grafana/promql-builder` instead of building expressions via string interpolation.
+When building PromQL expressions, we should use `tsqtsq` instead of building expressions via string interpolation.
 
-## Overview
+## `tsqtsq` Overview
 
-`@grafana/promql-builder` is a TypeScript library that provides a type-safe, fluent API for building PromQL (Prometheus Query Language) queries. It allows developers to compose complex PromQL expressions programmatically while maintaining type safety and providing a developer-friendly interface.
+`tsqtsq` is a TypeScript library designed to make working with PromQL (Prometheus Query Language) more maintainable and type-safe. It provides a structured way to build PromQL queries programmatically, avoiding string interpolation and making queries more readable and maintainable.
 
 ## Core Concepts
 
-The library is built around several core expression types that map to PromQL concepts:
+### 1. Expression Class
 
-### Expression Types
+The `Expression` class is the foundation for building metric queries. It allows you to:
 
-1. **Vector Expressions** - Represent metric selectors with labels
-2. **Binary Expressions** - Operations between two expressions (+, -, \*, /, etc.)
-3. **Aggregation Expressions** - Operations that aggregate data (sum, avg, min, max, etc.)
-4. **Function Call Expressions** - Built-in Prometheus functions (rate, sum, etc.)
-5. **Subquery Expressions** - Nested queries with time ranges
-6. **Literal Expressions** - Number and string literals
-7. **Unary Expressions** - Single-operand operations (+ or -)
-
-## API Reference
-
-### Vector Expressions
+- Define metric names
+- Add label selectors with specific operators
+- Set default operators and selectors
+- Compose complex metric expressions
 
 ```typescript
-// Basic metric selector
-promql.vector("metric_name");
-
-// With label matchers
-promql
-  .vector("metric_name")
-  .label("label_name", "value") // Exact match
-  .labelNeq("label_name", "value") // Not equal
-  .labelMatchRegexp("label_name", "regex") // Regex match
-  .labelNotMatchRegexp("label_name", "regex"); // Negative regex match
-
-// With time modifiers
-promql
-  .vector("metric_name")
-  .range("5m") // Range vector
-  .offset("1h") // Time offset
-  .at("timestamp"); // Evaluation time
+new Expression({
+  metric: 'test_metric',
+  values: {
+    arg1: 'foo',
+    arg2: 'bar',
+  },
+  defaultOperator: MatchingOperator.regexMatch,
+  defaultSelectors: [{ label: 'baz', operator: MatchingOperator.notEqual, value: '' }],
+});
 ```
 
-### Binary Operations
+### 2. Label Selectors
+
+The library supports four types of label matching operators:
+
+- `=` (equal)
+- `!=` (not equal)
+- `=~` (regex match)
+- `!~` (not regex match)
+
+### 3. PromQL Functions
+
+The library provides a comprehensive set of PromQL functions through the `promql` object:
+
+#### Aggregation Functions
+
+- `sum`, `min`, `max`, `avg`, `group`, `count`, `stddev`, `stdvar`
+- `count_values`, `bottomk`, `topk`, `quantile`
+
+#### Time-based Functions
+
+- `rate`, `increase`
+- `*_over_time` functions (avg, count, last, max, min, present, stddev, stdvar, sum)
+
+#### Label Manipulation
+
+- `label_replace`
+- `label_join`
+
+#### Logical Operations
+
+- `and`, `or`, `unless`
+
+#### Time Offsets
+
+- Complex time offset support with units (years, weeks, days, hours, minutes, seconds, milliseconds)
+
+## Usage Examples
+
+### Basic Metric Query
 
 ```typescript
-// Arithmetic operations
-promql.add(left, right); // +
-promql.sub(left, right); // -
-promql.mul(left, right); // *
-promql.div(left, right); // /
-promql.mod(left, right); // %
-promql.pow(left, right); // ^
+import { promql, Expression, MatchingOperator } from 'tsqtsq';
 
-// Comparison operations
-promql.eq(left, right); // ==
-promql.ne(left, right); // !=
-promql.gt(left, right); // >
-promql.lt(left, right); // <
-promql.ge(left, right); // >=
-promql.le(left, right); // <=
+// Create a metric expression
+const expr = new Expression({
+  metric: 'http_requests_total',
+  values: {
+    status: '200',
+    method: 'GET',
+  },
+  defaultOperator: MatchingOperator.equal,
+}).toString();
 
-// Logical operations
-promql.and(left, right); // and
-promql.or(left, right); // or
-promql.unless(left, right); // unless
-
-// Vector matching
-promql
-  .vector("metric1")
-  .ignoring(["label1"]) // Ignore specific labels
-  .on(["label1"]); // Match on specific labels
+// Use with aggregation
+const query = promql.sum({
+  expr,
+  by: ['method', 'status'],
+});
 ```
 
-### Aggregations
+### Time-based Queries
 
 ```typescript
-// Basic aggregations
-promql.sum(expr); // Sum
-promql.min(expr); // Minimum
-promql.max(expr); // Maximum
-promql.avg(expr); // Average
-promql.count(expr); // Count
-promql.group(expr); // Group
+// Rate calculation
+const rateQuery = promql.rate({
+  expr: 'http_requests_total{status="200"}',
+  interval: '5m',
+});
 
-// Advanced aggregations
-promql.stddev(expr); // Standard deviation
-promql.stdvar(expr); // Standard variance
-promql.countValues(expr); // Count values
-promql.bottomk(expr, k); // Bottom k elements
-promql.topk(expr, k); // Top k elements
-promql.quantile(expr, q); // Quantile
-promql.limitk(expr, k); // Limit to k elements
-
-// With grouping
-promql.sum(expr).by(["label1", "label2"]); // Group by labels
-promql.sum(expr).without(["label1", "label2"]); // Group without labels
+// Aggregation over time
+const sumOverTime = promql.sum_over_time({
+  expr: 'http_requests_total',
+  range: '1h',
+});
 ```
 
-### Functions
+### Label Manipulation
 
 ```typescript
-// Rate and increase
-promql.rate(expr); // Rate of increase
-promql.increase(expr); // Absolute increase
+// Label replacement
+const replaced = promql.label_replace({
+  expr: 'http_requests_total',
+  newLabel: 'service',
+  existingLabel: 'instance',
+  replacement: '$1',
+  regex: '(.*)',
+});
 
-// Time functions
-promql.time(); // Current timestamp
-promql.absent(expr); // Check for absence
-
-// Aggregation functions
-promql.sumOverTime(expr); // Sum over time
-promql.minOverTime(expr); // Min over time
-promql.maxOverTime(expr); // Max over time
-promql.avgOverTime(expr); // Avg over time
-
-// Histogram functions
-promql.histogramQuantile(quantile, expr); // Histogram quantile
+// Label joining
+const joined = promql.label_join({
+  expr: 'http_requests_total',
+  newLabel: 'full_path',
+  labels: ['path', 'method'],
+  separator: '_',
+});
 ```
-
-### Subqueries
-
-```typescript
-promql
-  .subquery(expr)
-  .range("30m") // Range of samples
-  .resolution("1m") // Resolution
-  .offset("1h") // Time offset
-  .at("timestamp"); // Evaluation time
-```
-
-## Common Patterns
-
-### Rate Calculation
-
-```typescript
-// rate(http_requests_total[5m])
-promql.rate(promql.vector("http_requests_total").range("5m"));
-```
-
-### Error Rate Calculation
-
-```typescript
-// sum(rate(http_errors_total[5m])) / sum(rate(http_requests_total[5m]))
-promql.div(
-  promql.sum(promql.rate(promql.vector("http_errors_total").range("5m"))),
-  promql.sum(promql.rate(promql.vector("http_requests_total").range("5m")))
-);
-```
-
-### Histogram Quantile
-
-```typescript
-// histogram_quantile(0.9, sum by(le) (rate(http_request_duration_seconds_bucket[5m])))
-promql.histogramQuantile(
-  0.9,
-  promql
-    .sum(
-      promql.rate(
-        promql.vector("http_request_duration_seconds_bucket").range("5m")
-      )
-    )
-    .by(["le"])
-);
-```
-
-## Type Safety
-
-The library provides full TypeScript type safety, ensuring that:
-
-- Expression types are properly checked
-- Function arguments are validated
-- Label matchers are type-safe
-- Time durations are properly formatted
-
-For context on types, see @node_modules/@grafana/promql-builder/dist/index.d.ts.
 
 ## Best Practices
 
-1. **Chain Operations**: Use method chaining for cleaner, more readable code
-2. **Type Safety**: Leverage TypeScript's type system to catch errors early
-3. **Modular Queries**: Break complex queries into smaller, reusable functions
-4. **Consistent Naming**: Use descriptive names for metrics and labels
-5. **Documentation**: Add comments for complex queries explaining their purpose
+1. **Use Expression Class for Metric Selection**
 
-## Error Handling
+   - Prefer using the `Expression` class over string literals for metric selection
+   - This provides type safety and better IDE support
 
-The library provides type-safe error handling through TypeScript's type system. Invalid operations or incorrect types will be caught at compile time rather than runtime.
+2. **Leverage Default Operators**
 
-## Performance Considerations
+   - Set appropriate default operators for your use case
+   - This reduces repetition and makes queries more consistent
 
-- The library generates PromQL strings efficiently
-- Complex queries are built through composition rather than string concatenation
-- Type checking is done at compile time, not runtime
+3. **Compose Queries**
 
-## Version Compatibility
+   - Build complex queries by combining multiple `promql` functions
+   - Use the result of one operation as input to another
 
-The library is designed to work with modern Prometheus versions and follows the PromQL specification. Always check the package version compatibility with your Prometheus version.
+4. **Use Named Parameters**
+   - Always use named parameters for clarity
+   - This makes the code more maintainable and self-documenting
+
+## Type Safety
+
+The library provides strong TypeScript support with:
+
+- Enums for operators
+- Interfaces for all function parameters
+- Type checking for label selectors
+- Validation for time units
+
+## Common Use Cases
+
+1. **Building Dashboard Queries**
+
+   - Compose complex queries for Grafana dashboards
+   - Ensure consistency across multiple panels
+
+2. **Alert Rule Creation**
+
+   - Build type-safe alert conditions
+   - Maintain consistent query patterns
+
+3. **Query Refactoring**
+   - Easily update query patterns across multiple places
+   - Maintain consistency when changing metric names or labels
+
+## Limitations
+
+1. **Dynamic Query Building**
+
+   - While the library supports complex queries, extremely dynamic queries might still require some string manipulation
+
+2. **PromQL Version Support**
+
+   - The library supports standard PromQL features
+   - Some newer or experimental PromQL features might not be directly supported
+
+3. **Performance**
+   - The library adds a small overhead compared to direct string manipulation
+   - This is generally negligible for most use cases
+
+## Integration Tips
+
+1. **With Grafana**
+
+   - Use the library to generate queries for Grafana dashboards
+   - Ensure consistent query patterns across panels
+
+2. **With Alerting Systems**
+
+   - Generate alert conditions programmatically
+   - Maintain type safety in alert definitions
+
+3. **With Custom Applications**
+   - Use the library to build queries for custom monitoring applications
+   - Ensure consistent query patterns across the application
+
