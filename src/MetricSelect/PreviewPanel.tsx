@@ -11,11 +11,11 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
-import { type AutoQueryDef } from 'autoQuery/types';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 import { buildPrometheusQuery } from '../autoQuery/buildPrometheusQuery';
-import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
+import { heatmapGraphBuilder, simpleGraphBuilder } from '../autoQuery/graphBuilders';
+import { getUnit } from '../autoQuery/units';
 import { PanelMenu } from '../Menu/PanelMenu';
 import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS, VAR_FILTERS } from '../shared';
 import { getColorByIndex } from '../utils';
@@ -24,10 +24,10 @@ import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { SelectMetricAction } from './SelectMetricAction';
 
 interface PreviewPanelState extends SceneObjectState {
-  autoQueryDef: AutoQueryDef;
   body: SceneObject;
   metric: string;
   hasOtelResources: boolean;
+  nativeHistogram?: boolean;
 }
 
 export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
@@ -51,14 +51,14 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
     const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
     const filters = isAdHocFiltersVariable(filtersVar) ? filtersVar.state.filters : [];
 
-    // TODO: remove dependency on `autoQuery`
-    const autoQuery = this.state.autoQueryDef.queries[0];
+    // Determine if this is a rate query and what groupings to use based on metric name
+    const { isRateQuery, groupings } = this.determineQueryProperties();
 
     const queryExpr = buildPrometheusQuery({
       metric: this.state.metric,
       filters,
-      isRateQuery: autoQuery.expr.includes('rate('),
-      groupings: autoQuery.expr.includes('by(') ? ['le'] : undefined,
+      isRateQuery,
+      groupings,
       ignoreUsage: true,
       useOtelJoin: this.state.hasOtelResources,
     });
@@ -69,12 +69,31 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
         maxDataPoints: MDP_METRIC_PREVIEW,
         queries: [
           {
-            ...autoQuery,
+            refId: 'A',
             expr: queryExpr,
+            legendFormat: this.state.metric,
           },
         ],
       }),
     });
+  }
+
+  private determineQueryProperties() {
+    const metric = this.state.metric;
+    const parts = metric.split('_');
+    const suffix = parts.at(-1);
+
+    // Determine if this is a rate query based on metric suffix
+    const isRateForSuffix = new Set(['count', 'total', 'sum', 'bucket']);
+    const isRateQuery = isRateForSuffix.has(suffix || '');
+
+    // Determine groupings based on metric suffix and native histogram status
+    let groupings: string[] | undefined;
+    if (suffix === 'bucket' || this.state.nativeHistogram) {
+      groupings = ['le'];
+    }
+
+    return { isRateQuery, groupings };
   }
 
   static Component = ({ model }: SceneComponentProps<PreviewPanel>) => {
@@ -92,23 +111,32 @@ export function getPreviewPanelFor(
   nativeHistogram?: boolean,
   hideMenu?: boolean
 ) {
-  const autoQuery = getAutoQueriesForMetric(metric, nativeHistogram);
+  const parts = metric.split('_');
+  const suffix = parts.at(-1);
+  const unitSuffix = parts.at(-2);
+  const unit = getUnit(unitSuffix);
+
   let actions: Array<SelectMetricAction | NativeHistogramBadge> = [new SelectMetricAction({ metric, title: 'Select' })];
 
   if (nativeHistogram) {
     actions.unshift(new NativeHistogramBadge({}));
   }
 
-  let vizPanelBuilder = autoQuery.preview
-    .vizBuilder()
+  // Choose the appropriate visualization based on the metric's suffix
+  const isHistogram = suffix === 'bucket' || nativeHistogram;
+
+  let vizPanelBuilder = isHistogram
+    ? heatmapGraphBuilder({ title: metric, unit })
+    : simpleGraphBuilder({ title: metric, unit });
+
+  vizPanelBuilder = vizPanelBuilder
     .setColor({ mode: 'fixed', fixedColor: getColorByIndex(index) })
     .setDescription(description)
     .setHeaderActions(actions)
-    .setShowMenuAlways(true)
-    .setMenu(new PanelMenu({ labelName: metric }));
+    .setShowMenuAlways(true);
 
   if (!hideMenu) {
-    vizPanelBuilder = vizPanelBuilder.setShowMenuAlways(true).setMenu(new PanelMenu({ labelName: metric }));
+    vizPanelBuilder = vizPanelBuilder.setMenu(new PanelMenu({ labelName: metric }));
   }
 
   const vizPanel = vizPanelBuilder.build();
@@ -119,10 +147,10 @@ export function getPreviewPanelFor(
       $variables: new SceneVariableSet({
         variables: getVariablesWithMetricConstant(metric),
       }),
-      autoQueryDef: autoQuery.preview,
       body: vizPanel,
       metric,
       hasOtelResources,
+      nativeHistogram,
     }),
   });
 }
