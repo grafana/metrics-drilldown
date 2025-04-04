@@ -8,7 +8,7 @@ describe('buildPrometheusQuery', () => {
     filters: [],
     isRateQuery: false,
     ignoreUsage: false,
-    appendToQuery: '',
+    useOtelJoin: false,
   };
 
   describe('basic metrics (no rate)', () => {
@@ -94,12 +94,13 @@ describe('buildPrometheusQuery', () => {
   });
 
   describe('OTel resource queries', () => {
-    const { appendToQuery, ...params } = defaultParams;
+    it('should append the OTel join query variable name to the inner query by default', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        useOtelJoin: true,
+      });
 
-    it('should append the OTel join query variable name by default', () => {
-      const result = buildPrometheusQuery(params);
-
-      const expected = `avg(test_metric) ${VAR_OTEL_JOIN_QUERY_EXPR}`;
+      const expected = `avg(test_metric ${VAR_OTEL_JOIN_QUERY_EXPR})`;
       expect(result).toBe(expected);
     });
   });
