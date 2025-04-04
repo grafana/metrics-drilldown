@@ -3,7 +3,11 @@ import { setPluginLinksHook } from '@grafana/runtime';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { AddToExplorationButton, addToExplorationsButtonLabel, investigationsPluginId } from './AddToExplorationsButton';
+import {
+  AddToExplorationButton,
+  addToExplorationsButtonLabel,
+  investigationsPluginId,
+} from './AddToExplorationsButton';
 import { mockPluginLinkExtension } from '../mocks/plugin';
 
 jest.mock('@grafana/runtime', () => ({
