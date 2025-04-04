@@ -14,7 +14,6 @@ import React from 'react';
 
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
-import { getTrailFor } from 'utils';
 
 import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
