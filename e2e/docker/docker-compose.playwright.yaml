@@ -4,7 +4,7 @@ services:
     network_mode: host
     container_name: 'playwright-e2e'
     build:
-      dockerfile: ./docker/Dockerfile.plugin
+      dockerfile: ./docker/Dockerfile.playwright
       context: ..
     volumes:
       - ../../e2e:/app/e2e
