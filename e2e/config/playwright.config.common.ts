@@ -24,6 +24,13 @@ function getGrafanaUrl() {
   return `http://localhost:${grafanaPort}`;
 }
 
+function getGrafanaUser(): User {
+  return {
+    user: process.env.GRAFANA_USER || 'admin',
+    password: process.env.GRAFANA_PASSWORD || 'admin',
+  };
+}
+
 type CustomEnvConfig = {
   reporter: PlaywrightTestConfig['reporter'];
   timeout?: number;
@@ -51,6 +58,8 @@ export function config(config: CustomEnvConfig) {
     fullyParallel: true,
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
+      user: getGrafanaUser(),
+      grafanaAPICredentials: getGrafanaUser(),
       /* Base URL to use in actions like `await page.goto('/')`. */
       baseURL: getGrafanaUrl(),
       // Record trace only when retrying a test for the first time.
