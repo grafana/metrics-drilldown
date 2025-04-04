@@ -18,7 +18,7 @@ import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { VAR_FILTERS } from 'shared';
-import { getColorByIndex } from 'utils';
+import { getColorByIndex, getTrailFor } from 'utils';
 import {
   MetricsWithLabelValueVariable,
   VAR_METRIC_WITH_LABEL_VALUE,
@@ -91,6 +91,9 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
+          const trail = getTrailFor(this);
+          const isNativeHistogram = trail.isNativeHistogram(option.value as string);
+
           return new SceneCSSGridItem({
             body: new MetricVizPanel({
               height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
@@ -99,6 +102,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
               matchers: [`${labelName}="${labelValue}"`],
               headerActions: [],
               hideLegend: true,
+              isNativeHistogram,
             }),
           });
         },

@@ -14,6 +14,7 @@ import React from 'react';
 
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
+import { getTrailFor } from 'utils';
 
 import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
@@ -33,6 +34,7 @@ interface MetricVizPanelState extends SceneObjectState {
   matchers: string[];
   body: VizPanel;
   headerActions: SceneObject[];
+  isNativeHistogram?: boolean;
 }
 
 export const METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '240px';
@@ -52,6 +54,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     height?: MetricVizPanelState['height'];
     highlight?: MetricVizPanelState['highlight'];
     headerActions?: SceneObject[];
+    isNativeHistogram?: boolean;
   }) {
     const stateWithDefaults = {
       ...state,
@@ -70,7 +73,10 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     super({
       key: `metric-viz-panel-${stateWithDefaults.metricName}`,
       ...stateWithDefaults,
-      body: MetricVizPanel.buildVizPanel(stateWithDefaults),
+      body: MetricVizPanel.buildVizPanel({
+        ...stateWithDefaults,
+        isNativeHistogram: state.isNativeHistogram,
+      }),
     });
   }
 
@@ -83,6 +89,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     prometheusFunction,
     matchers,
     headerActions,
+    isNativeHistogram = false,
   }: {
     metricName: MetricVizPanelState['metricName'];
     title: MetricVizPanelState['title'];
@@ -92,6 +99,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     prometheusFunction: MetricVizPanelState['prometheusFunction'];
     matchers: MetricVizPanelState['matchers'];
     headerActions: MetricVizPanelState['headerActions'];
+    isNativeHistogram?: boolean;
   }) {
     const panelTitle = highlight ? `${title} (current)` : title;
     const unit = getUnit(metricName);
@@ -113,8 +121,8 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         .build();
     }
 
-    // check if metric is histogram, if yes build heatmap panel
-    const isHistogram = metricName.endsWith('_bucket');
+    // check if metric is a histogram (either classic or native)
+    const isHistogram = metricName.endsWith('_bucket') || isNativeHistogram;
     if (isHistogram) {
       return buildHeatmapPanel({
         panelTitle,
