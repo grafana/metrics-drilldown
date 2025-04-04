@@ -1,4 +1,4 @@
-import { expect, test } from '../e2e/fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe('OTEL Experience', () => {
   test.beforeEach(async ({ selectMetricView }) => {
