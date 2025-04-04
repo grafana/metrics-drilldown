@@ -18,6 +18,7 @@ import { trailDS } from 'shared';
 import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
 import { buildPrometheusQuery } from './buildPrometheusQuery';
+import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { buildHeatmapPanel } from './panels/heatmap';
 import { buildStatusHistoryPanel } from './panels/statushistory';
 import { buildTimeseriesPanel } from './panels/timeseries';
@@ -64,6 +65,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       hideLegend: Boolean(state.hideLegend),
       highlight: Boolean(state.highlight),
       headerActions: state.headerActions || [
+        ...(state.isNativeHistogram ? [new NativeHistogramBadge({})] : []),
         new SelectAction({ metricName: state.metricName }),
         new ConfigureAction({ metricName: state.metricName }),
       ],
