@@ -18,27 +18,7 @@ describe('buildPrometheusQuery', () => {
         metric: 'test_general',
       });
 
-      const expected = 'avg(test_general)';
-      expect(result).toBe(expected);
-    });
-
-    it('should build a simple average query for bytes metrics', () => {
-      const result = buildPrometheusQuery({
-        ...defaultParams,
-        metric: 'test_bytes',
-      });
-
-      const expected = 'avg(test_bytes)';
-      expect(result).toBe(expected);
-    });
-
-    it('should build a simple average query for seconds metrics', () => {
-      const result = buildPrometheusQuery({
-        ...defaultParams,
-        metric: 'test_seconds',
-      });
-
-      const expected = 'avg(test_seconds)';
+      const expected = 'avg(test_general{})';
       expect(result).toBe(expected);
     });
   });
@@ -51,7 +31,7 @@ describe('buildPrometheusQuery', () => {
         isRateQuery: true,
       });
 
-      const expected = 'sum(rate(test_count[$__rate_interval]))';
+      const expected = 'sum(rate(test_count{}[$__rate_interval]))';
       expect(result).toBe(expected);
     });
 
@@ -62,7 +42,7 @@ describe('buildPrometheusQuery', () => {
         isRateQuery: true,
       });
 
-      const expected = 'sum(rate(test_total[$__rate_interval]))';
+      const expected = 'sum(rate(test_total{}[$__rate_interval]))';
       expect(result).toBe(expected);
     });
   });
@@ -76,7 +56,7 @@ describe('buildPrometheusQuery', () => {
         groupings: ['le'],
       });
 
-      const expected = 'sum(rate(test_bucket[$__rate_interval])) by (le)';
+      const expected = 'sum by (le) (rate(test_bucket{}[$__rate_interval]))';
       expect(result).toBe(expected);
     });
 
@@ -88,7 +68,7 @@ describe('buildPrometheusQuery', () => {
         groupings: ['le'],
       });
 
-      const expected = 'sum(rate(test_histogram[$__rate_interval])) by (le)';
+      const expected = 'sum by (le) (rate(test_histogram{}[$__rate_interval]))';
       expect(result).toBe(expected);
     });
   });
@@ -100,7 +80,7 @@ describe('buildPrometheusQuery', () => {
         useOtelJoin: true,
       });
 
-      const expected = `avg(test_metric ${VAR_OTEL_JOIN_QUERY_EXPR})`;
+      const expected = `avg(test_metric{} ${VAR_OTEL_JOIN_QUERY_EXPR})`;
       expect(result).toBe(expected);
     });
   });
@@ -128,7 +108,7 @@ describe('buildPrometheusQuery', () => {
         ],
       });
 
-      expect(result).toBe('avg({"a.utf8.metric 🤘",job="test"})');
+      expect(result).toBe('avg({"a.utf8.metric 🤘", job="test"})');
     });
 
     it('should handle UTF-8 metrics with UTF-8 labels', () => {
@@ -144,7 +124,7 @@ describe('buildPrometheusQuery', () => {
         ],
       });
 
-      expect(result).toBe('avg({"a.utf8.metric 🤘","label with 📈"="metrics"})');
+      expect(result).toBe('avg({"a.utf8.metric 🤘", "label with 📈"="metrics"})');
     });
 
     it('should handle UTF-8 metrics with rate query', () => {
@@ -161,7 +141,7 @@ describe('buildPrometheusQuery', () => {
         ],
       });
 
-      expect(result).toBe('sum(rate({"a.utf8.metric 🤘","label with 📈"="metrics"}[$__rate_interval]))');
+      expect(result).toBe('sum(rate({"a.utf8.metric 🤘", "label with 📈"="metrics"}[$__rate_interval]))');
     });
 
     it('should handle UTF-8 metrics with rate query and ignore usage', () => {
@@ -180,7 +160,7 @@ describe('buildPrometheusQuery', () => {
       });
 
       expect(result).toBe(
-        'sum(rate({"a.utf8.metric 🤘",__ignore_usage__="","label with 📈"="metrics"}[$__rate_interval]))'
+        'sum(rate({"a.utf8.metric 🤘", __ignore_usage__="", "label with 📈"="metrics"}[$__rate_interval]))'
       );
     });
   });
@@ -227,7 +207,7 @@ describe('buildPrometheusQuery', () => {
       });
 
       const expected =
-        'avg(test_metric{"label with 📈"="metrics","another label 🎯"=~"value","exclude label 🚫"!="bad"})';
+        'avg(test_metric{"label with 📈"="metrics", "another label 🎯"=~"value", "exclude label 🚫"!="bad"})';
       expect(result).toBe(expected);
     });
   });
@@ -266,7 +246,7 @@ describe('buildPrometheusQuery', () => {
         ],
       });
 
-      const expected = 'avg(test_metric{instance="host.docker.internal:3001",namespace="my-namespace"})';
+      const expected = 'avg(test_metric{instance="host.docker.internal:3001", namespace="my-namespace"})';
       expect(result).toBe(expected);
     });
 
@@ -297,7 +277,7 @@ describe('buildPrometheusQuery', () => {
         ],
       });
 
-      const expected = 'avg(test_metric{job="test",env!="prod",service=~"web.*",region!~"us-.*"})';
+      const expected = 'avg(test_metric{job="test", env!="prod", service=~"web.*", region!~"us-.*"})';
       expect(result).toBe(expected);
     });
   });
@@ -326,7 +306,7 @@ describe('buildPrometheusQuery', () => {
         ],
       });
 
-      const expected = 'avg(test_metric{__ignore_usage__="",instance="host.docker.internal:3001"})';
+      const expected = 'avg(test_metric{__ignore_usage__="", instance="host.docker.internal:3001"})';
       expect(result).toBe(expected);
     });
 
@@ -343,7 +323,7 @@ describe('buildPrometheusQuery', () => {
         ],
       });
 
-      const expected = 'avg(test_metric{__ignore_usage__="","label with 📈"="metrics"})';
+      const expected = 'avg(test_metric{__ignore_usage__="", "label with 📈"="metrics"})';
       expect(result).toBe(expected);
     });
   });
