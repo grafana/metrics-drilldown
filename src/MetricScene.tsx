@@ -22,6 +22,7 @@ import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
+import { UI_TEXT } from './constants/ui';
 import { reportExploreMetrics, type Interactions } from './interactions';
 import {
   MAIN_PANEL_MAX_HEIGHT,
@@ -230,7 +231,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
           <Stack gap={1}>
             <ToolbarButton
               variant={'canvas'}
-              tooltip="Remove existing metric and choose a new metric"
+              tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
               onClick={() => {
                 reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
                 trail.publishEvent(new MetricSelectedEvent(undefined));
@@ -241,7 +242,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
             <ToolbarButton
               variant={'canvas'}
               icon="compass"
-              tooltip="Open in explore"
+              tooltip={UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL}
               onClick={model.openExploreLink}
             />
             <ShareTrailButton trail={trail} />
@@ -254,7 +255,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
                   <Icon name={'star'} type={'default'} size={'lg'} />
                 )
               }
-              tooltip={'Bookmark'}
+              tooltip={UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL}
               onClick={toggleBookmark}
             />
             {trail.state.embedded && (

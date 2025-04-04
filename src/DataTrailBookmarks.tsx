@@ -42,7 +42,7 @@ export function DataTrailsBookmarks({ onSelect, onDelete }: Props) {
         />
       </div>
       {toggleBookmark && (
-        <div className={styles.trailList}>
+        <div className={styles.trailList} data-testid="hp-bookmarks">
           {getTrailStore().bookmarks.map((bookmark, index) => {
             return (
               <DataTrailCard

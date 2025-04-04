@@ -48,13 +48,18 @@ export default defineConfig<PluginOptions>({
     // 2. Run tests in Google Chrome. Every test will start authenticated as admin user.
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/admin.json' },
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/admin.json',
+        // Used by the Copy URL test
+        permissions: ['clipboard-read', 'clipboard-write'],
+      },
       dependencies: ['auth'],
     },
   ],
 });
 
-function getGrafanaUrl() {
+export function getGrafanaUrl() {
   if (process.env.GRAFANA_URL) {
     return process.env.GRAFANA_URL;
   }
