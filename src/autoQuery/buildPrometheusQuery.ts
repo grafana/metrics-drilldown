@@ -2,24 +2,26 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import * as promql from '@grafana/promql-builder';
 
+import { VAR_OTEL_JOIN_QUERY_EXPR } from 'shared';
+
 import { Utf8MetricExprBuilder } from './buildUtf8Query';
 
-interface BuildPrometheusQueryParams {
+export interface BuildPrometheusQueryParams {
   metric: string;
   filters: AdHocVariableFilter[];
   isRateQuery: boolean;
-  otelJoinQuery: string;
   groupings?: string[];
   ignoreUsage?: boolean;
+  appendToQuery?: string;
 }
 
 export function buildPrometheusQuery({
   metric,
   filters,
   isRateQuery,
-  otelJoinQuery,
   groupings,
   ignoreUsage = false,
+  appendToQuery = VAR_OTEL_JOIN_QUERY_EXPR,
 }: BuildPrometheusQueryParams): string {
   let expr: promql.AggregationExprBuilder;
 
@@ -75,9 +77,8 @@ export function buildPrometheusQuery({
   // Convert expression to string
   let result = expr.toString();
 
-  // Append OTel join query if present
-  if (otelJoinQuery) {
-    result += ` ${otelJoinQuery}`;
+  if (appendToQuery) {
+    result += ` ${appendToQuery}`;
   }
 
   return result;

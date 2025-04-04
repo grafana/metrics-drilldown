@@ -1,15 +1,14 @@
-import * as promql from '@grafana/promql-builder';
+import { VAR_OTEL_JOIN_QUERY_EXPR } from 'shared';
 
-import { buildPrometheusQuery } from './buildPrometheusQuery';
+import { buildPrometheusQuery, type BuildPrometheusQueryParams } from './buildPrometheusQuery';
 
 describe('buildPrometheusQuery', () => {
-  const defaultParams = {
+  const defaultParams: BuildPrometheusQueryParams = {
     metric: 'test_metric',
     filters: [],
     isRateQuery: false,
-    isUtf8Metric: false,
-    otelJoinQuery: '',
     ignoreUsage: false,
+    appendToQuery: '',
   };
 
   describe('basic metrics (no rate)', () => {
@@ -19,7 +18,7 @@ describe('buildPrometheusQuery', () => {
         metric: 'test_general',
       });
 
-      const expected = promql.avg(promql.vector('test_general')).toString();
+      const expected = 'avg(test_general)';
       expect(result).toBe(expected);
     });
 
@@ -29,7 +28,7 @@ describe('buildPrometheusQuery', () => {
         metric: 'test_bytes',
       });
 
-      const expected = promql.avg(promql.vector('test_bytes')).toString();
+      const expected = 'avg(test_bytes)';
       expect(result).toBe(expected);
     });
 
@@ -39,7 +38,7 @@ describe('buildPrometheusQuery', () => {
         metric: 'test_seconds',
       });
 
-      const expected = promql.avg(promql.vector('test_seconds')).toString();
+      const expected = 'avg(test_seconds)';
       expect(result).toBe(expected);
     });
   });
@@ -52,7 +51,7 @@ describe('buildPrometheusQuery', () => {
         isRateQuery: true,
       });
 
-      const expected = promql.sum(promql.rate(promql.vector('test_count').range('$__rate_interval'))).toString();
+      const expected = 'sum(rate(test_count[$__rate_interval]))';
       expect(result).toBe(expected);
     });
 
@@ -63,7 +62,7 @@ describe('buildPrometheusQuery', () => {
         isRateQuery: true,
       });
 
-      const expected = promql.sum(promql.rate(promql.vector('test_total').range('$__rate_interval'))).toString();
+      const expected = 'sum(rate(test_total[$__rate_interval]))';
       expect(result).toBe(expected);
     });
   });
@@ -77,10 +76,7 @@ describe('buildPrometheusQuery', () => {
         groupings: ['le'],
       });
 
-      const expected = promql
-        .sum(promql.rate(promql.vector('test_bucket').range('$__rate_interval')))
-        .by(['le'])
-        .toString();
+      const expected = 'sum(rate(test_bucket[$__rate_interval])) by (le)';
       expect(result).toBe(expected);
     });
 
@@ -92,22 +88,18 @@ describe('buildPrometheusQuery', () => {
         groupings: ['le'],
       });
 
-      const expected = promql
-        .sum(promql.rate(promql.vector('test_histogram').range('$__rate_interval')))
-        .by(['le'])
-        .toString();
+      const expected = 'sum(rate(test_histogram[$__rate_interval])) by (le)';
       expect(result).toBe(expected);
     });
   });
 
   describe('OTel resource queries', () => {
-    it('should include OTel join query when provided', () => {
-      const result = buildPrometheusQuery({
-        ...defaultParams,
-        otelJoinQuery: '${otel_join_query}',
-      });
+    const { appendToQuery, ...params } = defaultParams;
 
-      const expected = promql.avg(promql.vector('test_metric')).toString() + ' ${otel_join_query}';
+    it('should append the OTel join query variable name by default', () => {
+      const result = buildPrometheusQuery(params);
+
+      const expected = `avg(test_metric) ${VAR_OTEL_JOIN_QUERY_EXPR}`;
       expect(result).toBe(expected);
     });
   });
