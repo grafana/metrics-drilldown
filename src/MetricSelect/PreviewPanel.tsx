@@ -17,13 +17,7 @@ import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { buildPrometheusQuery } from '../autoQuery/buildPrometheusQuery';
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { PanelMenu } from '../Menu/PanelMenu';
-import {
-  getVariablesWithMetricConstant,
-  MDP_METRIC_PREVIEW,
-  trailDS,
-  VAR_FILTERS,
-  VAR_OTEL_JOIN_QUERY,
-} from '../shared';
+import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS, VAR_FILTERS } from '../shared';
 import { getColorByIndex } from '../utils';
 import { hideEmptyPreviews } from './hideEmptyPreviews';
 import { NativeHistogramBadge } from './NativeHistogramBadge';
@@ -42,7 +36,7 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
     super(params);
 
     this._variableDependency = new VariableDependencyConfig<PreviewPanelState>(this, {
-      variableNames: [VAR_FILTERS, VAR_OTEL_JOIN_QUERY],
+      variableNames: [VAR_FILTERS],
       onReferencedVariableValueChanged: () => {
         this.updateQuery();
       },
@@ -56,17 +50,12 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
     const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
     const filters = isAdHocFiltersVariable(filtersVar) ? filtersVar.state.filters : [];
 
-    const otelJoinQueryVar = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, this);
-    const otelJoinQueryValue = otelJoinQueryVar?.getValue();
-    const otelJoinQuery = typeof otelJoinQueryValue === 'string' ? otelJoinQueryValue : '';
-
     // TODO: remove dependency on `autoQuery`
     const autoQuery = this.state.autoQueryDef.queries[0];
 
     const queryExpr = buildPrometheusQuery({
       metric: this.state.metric,
       filters,
-      otelJoinQuery,
       isRateQuery: autoQuery.expr.includes('rate('),
       groupings: autoQuery.expr.includes('by(') ? ['le'] : undefined,
       ignoreUsage: true,
