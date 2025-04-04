@@ -33,7 +33,7 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
 
   public onSelectRecentTrail = (trail: DataTrail) => {
     reportExploreMetrics('exploration_started', { cause: 'recent_clicked' });
-    getTrailStore().setRecentTrail(trail);
+    getTrailStore().setRecentTrail(trail, true);
     this.state.onTrailSelected(trail);
   };
 

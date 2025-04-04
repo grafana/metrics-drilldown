@@ -2,7 +2,6 @@ import { SceneObjectStateChangedEvent } from '@grafana/scenes';
 import { useEffect, useState } from 'react';
 
 import { type DataTrail } from '../DataTrail';
-import { isDataTrailsHistoryState } from '../DataTrailsHistory';
 import { reportExploreMetrics } from '../interactions';
 import { getTrailStore } from './TrailStore';
 
@@ -17,12 +16,7 @@ export function useBookmarkState(trail: DataTrail) {
 
   useEffect(() => {
     const sub = trail.subscribeToEvent(SceneObjectStateChangedEvent, ({ payload: { prevState, newState } }) => {
-      if (isDataTrailsHistoryState(prevState) && isDataTrailsHistoryState(newState)) {
-        if (newState.steps.length > prevState.steps.length) {
-          // When we add new steps, we need to re-evaluate whether or not it is still a bookmark
-          setBookmarkIndex(getTrailStore().getBookmarkIndex(trail));
-        }
-      }
+      setBookmarkIndex(getTrailStore().getBookmarkIndex(trail));
     });
     return () => sub.unsubscribe();
   }, [trail]);
