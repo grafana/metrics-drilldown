@@ -35,10 +35,9 @@ import React, { useEffect, useRef } from 'react';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
 import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import { MetricsOnboarding } from 'WingmanOnboarding/MetricsOnboarding';
-import { VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -585,7 +584,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     // Wingman - we are forced to do this here and not in MetricsOnboarding because resetOtelExperience()
     // is called after the child is rendered, so we can't hide it from there
-    if (this.state.topScene instanceof MetricsOnboarding) {
+    if (this.state.topScene instanceof MetricsReducer) {
       filtersVariable.setState({
         hide: VariableHide.hideVariable,
         filters: [],
@@ -796,7 +795,6 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         placeholder: 'Select',
         isMulti: true,
       }),
-      new VariantVariable(),
       new MetricsVariable({}),
       new FilteredMetricsVariable(),
       new LabelsVariable(),
