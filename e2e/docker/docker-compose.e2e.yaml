@@ -1,16 +1,20 @@
 name: 'metrics-drilldown-e2e'
 services:
   grafana:
+    container_name: 'grafana-e2e'
     extends:
       file: ../../.config/docker-compose-base.yaml
       service: grafana
-    container_name: 'grafana-e2e'
+    build:
+      args:
+        grafana_version: ${GRAFANA_VERSION:-11.6.0}
     ports: !override
       - '${GRAFANA_PORT:-3001}:3000'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
       # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
       GF_PLUGINS_PREINSTALL_DISABLED: true
+      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,exploreMetricsRelatedLogs
     volumes:
       - ../../dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
       - ../provisioning/grafana:/etc/grafana/provisioning
@@ -33,5 +37,5 @@ services:
       --storage.tsdb.retention.time=42y
 
   prometheus-utf8:
-    build: ./prometheus_utf8
     container_name: 'prometheus-utf8-e2e'
+    build: ./prometheus_utf8
