@@ -1,0 +1,43 @@
+name: 'metrics-drilldown-e2e'
+services:
+  grafana:
+    container_name: 'grafana-e2e'
+    extends:
+      file: ../../.config/docker-compose-base.yaml
+      service: grafana
+    build:
+      args:
+        grafana_version: ${GRAFANA_VERSION:-11.6.0}
+    ports: !override
+      - '${GRAFANA_PORT:-3001}:3000'
+    environment:
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
+      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,exploreMetricsRelatedLogs
+      # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
+      GF_PLUGINS_PREINSTALL_DISABLED: true
+    volumes:
+      - ../../dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
+      - ../provisioning/grafana:/etc/grafana/provisioning
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  prometheus:
+    container_name: 'prometheus-e2e'
+    build:
+      dockerfile: ./docker/Dockerfile.prometheus-static-data
+      context: ..
+    ports:
+      - '9099:9090'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    command: >
+      --enable-feature=remote-write-receiver
+      --enable-feature=exemplar-storage
+      --enable-feature=native-histograms
+      --config.file=/etc/prometheus/prometheus.yml
+      --storage.tsdb.path=/prometheus/data
+      --storage.tsdb.retention.time=42y
+
+  prometheus-utf8:
+    container_name: 'prometheus-utf8-e2e'
+    build: ./prometheus_utf8

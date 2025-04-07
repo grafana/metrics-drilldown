@@ -1,4 +1,4 @@
-import { test } from '../e2e/fixtures';
+import { test } from '../fixtures';
 
 test.describe('Metrics reducer view', () => {
   test.describe('Variant #1: Side bar with prefixes and categories filters', () => {
