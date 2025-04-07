@@ -27,7 +27,7 @@ interface PreviewPanelState extends SceneObjectState {
   body: SceneObject;
   metric: string;
   hasOtelResources: boolean;
-  nativeHistogram?: boolean;
+  isHistogram: boolean;
 }
 
 export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
@@ -72,6 +72,8 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
             refId: 'A',
             expr: queryExpr,
             legendFormat: this.state.metric,
+            fromExploreMetrics: true,
+            ...(this.state.isHistogram ? { format: 'heatmap' } : {}),
           },
         ],
       }),
@@ -89,7 +91,8 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
 
     // Determine groupings based on metric suffix and native histogram status
     let groupings: string[] | undefined;
-    if (suffix === 'bucket' || this.state.nativeHistogram) {
+
+    if (this.state.isHistogram) {
       groupings = ['le'];
     }
 
@@ -123,7 +126,7 @@ export function getPreviewPanelFor(
   }
 
   // Choose the appropriate visualization based on the metric's suffix
-  const isHistogram = suffix === 'bucket' || nativeHistogram;
+  const isHistogram = Boolean(suffix === 'bucket' || nativeHistogram);
 
   let vizPanelBuilder = isHistogram
     ? heatmapGraphBuilder({ title: metric, unit })
@@ -150,7 +153,7 @@ export function getPreviewPanelFor(
       body: vizPanel,
       metric,
       hasOtelResources,
-      nativeHistogram,
+      isHistogram,
     }),
   });
 }

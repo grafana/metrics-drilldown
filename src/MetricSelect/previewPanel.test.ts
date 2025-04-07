@@ -25,6 +25,7 @@ describe('getPreviewPanelFor', () => {
   beforeEach(() => {
     sceneGraphSpy.mockClear();
   });
+
   describe('includes __ignore_usage__ indicator', () => {
     const metricName = 'METRIC';
 
@@ -56,6 +57,32 @@ describe('getPreviewPanelFor', () => {
       const expected = `avg(${metricName}{__ignore_usage__="", filter1="value1", filter2="value2"})`;
       const expr = callAndGetExpr();
       expect(expr).toBe(expected);
+    });
+  });
+
+  describe('heatmap panels', () => {
+    test('When the metric name ends with _bucket, the query is formatted for a heatmap', () => {
+      const metricName = 'METRIC_bucket';
+      const gridItem = getPreviewPanelFor(metricName, 0, false);
+      expect(gridItem).toBeInstanceOf(SceneCSSGridItem);
+      const previewPanel = gridItem.state.body as PreviewPanel;
+      expect(previewPanel).toBeInstanceOf(PreviewPanel);
+      const runner = previewPanel.state.$data as SceneQueryRunner;
+      expect(runner).toBeInstanceOf(SceneQueryRunner);
+      const query = runner.state.queries[0];
+      expect(query.format).toBe('heatmap');
+    });
+
+    test('When the metric is a native histogram, the query is formatted for a heatmap', () => {
+      const metricName = 'METRIC';
+      const gridItem = getPreviewPanelFor(metricName, 0, false, undefined, true);
+      expect(gridItem).toBeInstanceOf(SceneCSSGridItem);
+      const previewPanel = gridItem.state.body as PreviewPanel;
+      expect(previewPanel).toBeInstanceOf(PreviewPanel);
+      const runner = previewPanel.state.$data as SceneQueryRunner;
+      expect(runner).toBeInstanceOf(SceneQueryRunner);
+      const query = runner.state.queries[0];
+      expect(query.format).toBe('heatmap');
     });
   });
 });
