@@ -1,4 +1,4 @@
-import { expect, test } from '../e2e/fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe('Onboarding reducer view', () => {
   test.describe('Variant #1: Side bar with prefixes and categories filters', () => {
