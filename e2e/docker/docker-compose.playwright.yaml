@@ -1,0 +1,11 @@
+name: 'metrics-drilldown-playwright-e2e'
+services:
+  playwright:
+    network_mode: host
+    container_name: 'playwright-e2e'
+    build:
+      dockerfile: ./docker/Dockerfile.playwright
+      context: ..
+    volumes:
+      - ../../e2e:/app/e2e
+      - ../../src:/app/src
