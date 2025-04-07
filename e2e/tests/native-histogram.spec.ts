@@ -1,4 +1,4 @@
-import { test } from '../e2e/fixtures';
+import { test } from '../fixtures';
 
 const NATIVE_HISTOGRAM_LABEL = `grafana_database_all_migrations_duration_seconds`;
 

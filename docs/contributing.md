@@ -47,6 +47,8 @@ When opening a Pull Request (PR), please make sure that the title is properly pr
 
 We encourage you to write tests, whether they are unit tests or end-to-end tests. They will give us the confidence that the plugin behaves as intended and help us capture any regression early.
 
+For end-to-end testing (E2E), please have a look at our [E2E testing documentation](./end-to-end-testing.md).
+
 ## Common problems & solutions
 
 ...

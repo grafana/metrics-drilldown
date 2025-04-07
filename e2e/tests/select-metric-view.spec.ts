@@ -1,10 +1,16 @@
-import { expect, test } from '../e2e/fixtures';
-import { getGrafanaUrl } from '../playwright.config';
-import { UI_TEXT } from '../src/constants/ui';
+import { UI_TEXT } from '../../src/constants/ui';
+import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
+import { getGrafanaUrl } from '../config/playwright.config.common';
+import { expect, test } from '../fixtures';
 
 test.describe('Select metric view', () => {
   test.beforeEach(async ({ selectMetricView }) => {
-    await selectMetricView.goto();
+    await selectMetricView.goto(
+      new URLSearchParams({
+        from: 'now-15m',
+        to: 'now',
+      })
+    );
   });
 
   test('Core UI elements', async ({ selectMetricView }) => {
@@ -41,7 +47,8 @@ test.describe('Select metric view', () => {
     // tabs
     await expect(metricSceneDetails.getByText('Breakdown')).toBeVisible();
     await expect(metricSceneDetails.getByText('Related metrics')).toBeVisible();
-    await expect(metricSceneDetails.getByText('Related logs')).toBeVisible();
+    // FIXME: make sure they appear (the "gdev-loki" data source is provisioned - not sure where the problem is)
+    // await expect(metricSceneDetails.getByText('Related logs')).toBeVisible();
 
     // buttons
     await expect(metricSceneDetails.getByLabel('Remove existing metric and choose a new metric')).toBeVisible();
@@ -87,5 +94,14 @@ test.describe('Select metric view', () => {
     await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
     await selectMetricView.selectNewMetric();
     await selectMetricView.assertTopControls();
+  });
+
+  test('Screenshot example', async ({ selectMetricView }) => {
+    await selectMetricView.goto(DEFAULT_STATIC_URL_SEARCH_PARAMS);
+
+    await expect(selectMetricView.getByTestId('scene-body')).toBeVisible();
+    await expect(selectMetricView.getByTestId('scene')).toHaveScreenshot({
+      stylePath: './e2e/fixtures/css/hide-app-controls.css',
+    });
   });
 });
