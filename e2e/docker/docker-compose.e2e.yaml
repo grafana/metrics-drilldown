@@ -12,9 +12,9 @@ services:
       - '${GRAFANA_PORT:-3001}:3000'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
+      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,exploreMetricsRelatedLogs
       # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
       GF_PLUGINS_PREINSTALL_DISABLED: true
-      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,exploreMetricsRelatedLogs
     volumes:
       - ../../dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
       - ../provisioning/grafana:/etc/grafana/provisioning
