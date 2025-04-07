@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   CI:
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
+    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@66de69feb58f1396501be4a1459f5a93de35174b
     with:
       run-playwright-docker: true
       run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
