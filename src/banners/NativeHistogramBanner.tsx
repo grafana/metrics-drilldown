@@ -249,9 +249,15 @@ function getStyles(theme: GrafanaTheme2, _chromeHeaderHeight: number) {
 }
 
 export function setBannerHasBeenShown() {
+  if (!localStorage) {
+    return;
+  }
   localStorage.setItem('nativeHistogramBanner', 'true');
 }
 
 export function bannerHasBeenShown() {
+  if (!localStorage) {
+    return false;
+  }
   return localStorage.getItem('nativeHistogramBanner') ?? false;
 }
