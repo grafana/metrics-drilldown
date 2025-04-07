@@ -17,12 +17,12 @@ permissions:
 
 jobs:
   CI:
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@66de69feb58f1396501be4a1459f5a93de35174b
+    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@main
     with:
       run-playwright-docker: true
       run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
       upload-playwright-artifacts: true
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: e2e/docker/docker-compose.e2e.yaml
-      playwright-e2e-compose-file: e2e/docker/docker-compose.playwright.yaml
+      playwright-e2e-docker-compose-file: e2e/docker/docker-compose.playwright.yaml
       playwright-grafana-url: http://localhost:3001
