@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/playwright:v1.51.0
 WORKDIR /app
 
 # required by the e2e test code
-RUN yarn add "@playwright/test@^1.51.0" "dotenv@^16.3.1" "@grafana/plugin-e2e"
+RUN npm install "@playwright/test@^1.51.0" "dotenv@^16.3.1" "@grafana/plugin-e2e"
 
 ENV TZ=Europe/Madrid
 
