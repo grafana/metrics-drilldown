@@ -98,7 +98,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             body: new MetricVizPanel({
               height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
               metricName: option.value as string,
-              color: getColorByIndex(colorIndex++),
+              color: getColorByIndex(colorIndex),
               matchers: [`${labelName}="${labelValue}"`],
               headerActions: [],
               hideLegend: true,

@@ -103,7 +103,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             body: new WithUsageDataPreviewPanel({
               vizPanelInGridItem: new MetricVizPanel({
                 metricName: option.value as string,
-                color: getColorByIndex(colorIndex++),
+                color: getColorByIndex(colorIndex),
                 matchers: [`${labelName}="${labelValue}"`],
                 headerActions: [new SelectAction({ metricName: option.value as string })],
                 isNativeHistogram,
