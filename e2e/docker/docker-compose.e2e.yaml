@@ -18,6 +18,8 @@ services:
     volumes:
       - ../../dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
       - ../provisioning/grafana:/etc/grafana/provisioning
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
 
   prometheus:
     container_name: 'prometheus-e2e'
