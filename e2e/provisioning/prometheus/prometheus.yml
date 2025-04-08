@@ -3,9 +3,9 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: 'grafana'
     static_configs:
-      - targets: ['prometheus:9090']
+      - targets: ['grafana:3000']
 
   - job_name: 'fake-server-utf8'
     static_configs:

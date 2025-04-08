@@ -1,6 +1,6 @@
 import { test } from '../fixtures';
 
-const NATIVE_HISTOGRAM_LABEL = `prometheus_tsdb_compaction_duration_seconds`;
+const NATIVE_HISTOGRAM_LABEL = `grafana_database_all_migrations_duration_seconds`;
 
 test.describe('Native Histogram', () => {
   test.beforeEach(async ({ selectMetricView }) => {
