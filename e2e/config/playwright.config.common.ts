@@ -83,6 +83,9 @@ export function config(config: CustomEnvConfig) {
         use: {
           ...devices['Desktop Chrome'],
           viewport: CHROMIUM_VIEWPORT,
+          storageState: 'playwright/.auth/admin.json',
+          // Used by the Copy URL test
+          permissions: ['clipboard-read', 'clipboard-write'],
         },
         dependencies: ['auth'],
       },
