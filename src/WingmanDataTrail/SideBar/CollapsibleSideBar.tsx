@@ -1,11 +1,10 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2, type IconName } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, CollapsableSection, Icon, Switch, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Icon, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { PluginLogo } from 'PluginInfo/PluginLogo';
-import { getTrailFor } from 'utils';
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
@@ -38,9 +37,9 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
           computeGroups: computeMetricPrefixGroups,
         }),
         new MetricsFilterSection({
-          title: 'Categories filters',
+          title: 'Suffix filters',
           type: 'categories',
-          computeGroups: computeMetricCategories,
+          computeGroups: computeMetricCategories, // TODO
         }),
       ],
       labelBrowser: new LabelsBrowser({
@@ -70,13 +69,6 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
       setOpenSections({ ...openSections, [section]: !openSections[section] });
     };
 
-    const trail = getTrailFor(model);
-    const { showPreviews } = trail.useState();
-
-    const onTogglePreviews = () => {
-      trail.setState({ showPreviews: !trail.state.showPreviews });
-    };
-
     return (
       <div className={cx(styles.container, isCollapsed && styles.collapsed)} data-testid={key}>
         <div className={cx(styles.header, 'header')}>
@@ -97,12 +89,7 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
         </div>
         <ul className={styles.featuresList}>
           {groupFilters.map((filter) => {
-            let icon: IconName = 'filter';
-            if (filter.state.type === 'prefixes') {
-              icon = 'font';
-            } else if (filter.state.title === 'Rules filters') {
-              icon = 'record-audio';
-            }
+            const icon: IconName = filter.state.title === 'Rules filters' ? 'record-audio' : 'filter';
 
             return (
               <li key={filter.state.key} className={cx(styles.featureItem, 'featureItem')}>
@@ -173,10 +160,10 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 size="md"
                 variant="secondary"
                 fill="text"
-                icon="favorite"
-                tooltip={isCollapsed ? 'Favorites' : ''}
+                icon="bookmark"
+                tooltip={isCollapsed ? 'Bookmarks' : ''}
                 tooltipPlacement="right"
-                onClick={() => toggleSidebar('favorites')}
+                onClick={() => toggleSidebar('bookmarks')}
               />
             )}
             {!isCollapsed && (
@@ -184,104 +171,14 @@ export class CollapsibleSideBar extends SceneObjectBase<CollapsibleSideBarState>
                 className={styles.collapsable}
                 label={
                   <div className={styles.featureLabel}>
-                    <Icon name="favorite" size="md" className={styles.icon} />
-                    <span>Favorites</span>
+                    <Icon name="bookmark" size="md" className={styles.icon} />
+                    <span>Bookmarks</span>
                   </div>
                 }
-                isOpen={openSections['favorites']}
-                onToggle={() => toggleSection('favorites')}
+                isOpen={openSections['bookmarks']}
+                onToggle={() => toggleSection('bookmarks')}
               >
                 <></>
-              </CollapsableSection>
-            )}
-          </li>
-          <li className={cx(styles.featureItem, 'featureItem')}>
-            {isCollapsed && (
-              <Button
-                className={styles.iconButton}
-                size="md"
-                variant="secondary"
-                fill="text"
-                icon="clock-nine"
-                tooltip={isCollapsed ? 'Recents' : ''}
-                tooltipPlacement="right"
-                onClick={() => toggleSidebar('recents')}
-              />
-            )}
-            {!isCollapsed && (
-              <CollapsableSection
-                className={styles.collapsable}
-                label={
-                  <div className={styles.featureLabel}>
-                    <Icon name="clock-nine" size="md" className={styles.icon} />
-                    <span>Recents</span>
-                  </div>
-                }
-                isOpen={openSections['recents']}
-                onToggle={() => toggleSection('recents')}
-              >
-                <></>
-              </CollapsableSection>
-            )}
-          </li>
-          <li className={cx(styles.featureItem, 'featureItem')}>
-            {isCollapsed && (
-              <Button
-                className={styles.iconButton}
-                size="md"
-                variant="secondary"
-                fill="text"
-                icon="save"
-                tooltip={isCollapsed ? 'Saved filters' : ''}
-                tooltipPlacement="right"
-                onClick={() => toggleSidebar('saved-filters')}
-              />
-            )}
-            {!isCollapsed && (
-              <CollapsableSection
-                className={styles.collapsable}
-                label={
-                  <div className={styles.featureLabel}>
-                    <Icon name="save" size="md" className={styles.icon} />
-                    <span>Saved filters</span>
-                  </div>
-                }
-                isOpen={openSections['saved-filters']}
-                onToggle={() => toggleSection('saved-filters')}
-              >
-                <></>
-              </CollapsableSection>
-            )}
-          </li>
-          <li className={cx(styles.featureItem, 'featureItem')}>
-            {isCollapsed && (
-              <Button
-                className={styles.iconButton}
-                size="md"
-                variant="secondary"
-                fill="text"
-                icon="cog"
-                tooltip={isCollapsed ? 'Settings' : ''}
-                tooltipPlacement="right"
-                onClick={() => toggleSidebar('settings')}
-              />
-            )}
-            {!isCollapsed && (
-              <CollapsableSection
-                className={styles.collapsable}
-                label={
-                  <div className={styles.featureLabel}>
-                    <Icon name="cog" size="md" className={styles.icon} />
-                    <span>Settings</span>
-                  </div>
-                }
-                isOpen={openSections['settings']}
-                onToggle={() => toggleSection('settings')}
-              >
-                <div className={styles.showPreview}>
-                  <div>Show previews of metric graphs</div>
-                  <Switch value={showPreviews} onChange={onTogglePreviews} />
-                </div>
               </CollapsableSection>
             )}
           </li>
