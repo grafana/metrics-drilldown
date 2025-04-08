@@ -50,8 +50,11 @@ test.describe('Home page', () => {
     await gotoPage(`/${ROUTES.Home}`);
     const startButton = page.getByTestId(testIds.pageHome.startButton);
     await startButton.click();
+    await selectMetricView.assertTopControls();
+    await selectMetricView.assertOtelExperienceSwitchIsVisible();
     await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
     await page.goBack();
     await selectMetricView.assertTopControls();
+    await selectMetricView.assertOtelExperienceSwitchIsVisible();
   });
 });
