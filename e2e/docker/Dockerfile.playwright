@@ -7,4 +7,4 @@ RUN npm install "@playwright/test@^1.51.0" "dotenv@^16.3.1" "@grafana/plugin-e2e
 
 ENV TZ=Europe/Madrid
 
-CMD ["npx", "playwright", "test", "-c", "e2e/config/playwright.config.ci.ts"]
+ENTRYPOINT ["npx", "playwright", "test", "-c", "e2e/config/playwright.config.ci.ts"]
