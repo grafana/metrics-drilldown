@@ -9,3 +9,4 @@ services:
     volumes:
       - ../../e2e:/app/e2e
       - ../../src:/app/src
+    command: ${PLAYWRIGHT_ARGS:-}

@@ -18,7 +18,7 @@ import React, { useState } from 'react';
 import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
-import { getColorByIndex } from 'utils';
+import { getColorByIndex, getTrailFor } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
@@ -96,6 +96,9 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
+          const trail = getTrailFor(this);
+          const isNativeHistogram = trail.isNativeHistogram(option.value as string);
+
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
               vizPanelInGridItem: new MetricVizPanel({
@@ -103,6 +106,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 color: getColorByIndex(colorIndex),
                 matchers: [`${labelName}="${labelValue}"`],
                 headerActions: [new SelectAction({ metricName: option.value as string })],
+                isNativeHistogram,
               }),
               metric: option.value as string,
             }),
