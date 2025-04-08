@@ -702,7 +702,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           </div>
         )}
         {topScene && (
-          <UrlSyncContextProvider scene={topScene}>
+          <UrlSyncContextProvider scene={topScene} createBrowserHistorySteps={true}>
             <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
           </UrlSyncContextProvider>
         )}

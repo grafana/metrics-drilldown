@@ -45,4 +45,10 @@ test.describe('Home page', () => {
       }
     });
   });
+
+  test('Browser History', async ({ gotoPage, page }) => {
+    await gotoPage(`/${ROUTES.Home}`);
+    const startButton = page.getByTestId(testIds.pageHome.startButton);
+    await startButton.click();
+  });
 });

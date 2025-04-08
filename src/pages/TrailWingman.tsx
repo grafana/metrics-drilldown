@@ -32,7 +32,7 @@ export default function Trail({ trail, variant }: { trail: DataTrail; variant: s
   }
 
   return (
-    <UrlSyncContextProvider scene={trail}>
+    <UrlSyncContextProvider scene={trail} createBrowserHistorySteps={true}>
       <trail.Component model={trail} />
     </UrlSyncContextProvider>
   );
