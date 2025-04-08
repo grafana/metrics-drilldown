@@ -41,3 +41,5 @@ services:
   prometheus-utf8:
     container_name: 'prometheus-utf8-e2e'
     build: ./prometheus_utf8
+    command: >
+      --enable-feature=native-histograms
