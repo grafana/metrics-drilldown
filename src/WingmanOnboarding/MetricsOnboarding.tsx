@@ -16,7 +16,7 @@ import {
 } from '@grafana/scenes';
 import { Icon, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom-v5-compat';
+import { useLocation } from 'react-router-dom';
 
 import { VAR_DATASOURCE } from 'shared';
 import { getColorByIndex } from 'utils';

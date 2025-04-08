@@ -14,7 +14,7 @@ import {
 } from '@grafana/scenes';
 import { Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { VAR_FILTERS } from 'shared';
