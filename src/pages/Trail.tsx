@@ -4,11 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { type DataTrail } from 'DataTrail';
 import { getTrailStore } from 'TrailStore/TrailStore';
 
-export default function Trail({ trail }: { trail?: DataTrail }) {
+export default function Trail({ trail }: { trail: DataTrail }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (!isInitialized && trail) {
+    if (!isInitialized) {
       if (trail.state.metric) {
         getTrailStore().setRecentTrail(trail);
       }
@@ -16,7 +16,7 @@ export default function Trail({ trail }: { trail?: DataTrail }) {
     }
   }, [trail, isInitialized]);
 
-  if (!isInitialized || !trail) {
+  if (!isInitialized) {
     return null;
   }
 
