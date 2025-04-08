@@ -10,16 +10,10 @@ weight: 30
 
 # Drill down your metrics
 
-You can access Metrics Drilldown either as a standalone experience or as part of Grafana dashboards.
+Drill down into your metrics to gain insight into your data without writing a query.
 
-## Standalone experience
-
-To access Metrics Drilldown as a standalone experience:
-
-1. Click the arrow next to **Drilldown** in the Grafana left-side menu and click **Metrics**. You are taken to an overview page that shows recent metrics, bookmarks, and the option to select a new metric exploration.
-1. To get started with a new exploration, click **Let's start!**.
 1. Select **Prometheus** or any Prometheus-compatible data source available in the drop-down menu under **Data source**.
-1. Click **+ Add label** to select a label-value pair from the drop-down menu. You can add multiple label-value pairs. A label type appears above the selected label with a drop-down list of options from which to choose. For example, if you select the label `container` a drop-down list of available containers appears.
+1. TODO: Click **+ Add label** to select a label-value pair from the drop-down menu. You can add multiple label-value pairs. A label type appears above the selected label with a drop-down list of options from which to choose. For example, if you select the label `container` a drop-down list of available containers appears.
 1. You can also search for metrics using keywords under **Search metrics** in the search bar.
 1. Use the time picker to select a date and time range from the drop-down menu or use an absolute time range.
 1. Click the down arrow next to the **Refresh** icon to set a refresh rate from the drop-down menu. The default is `Off`.
@@ -44,11 +38,3 @@ After you have gathered your metrics exploration data you can:
 - Click the **Copy URL** icon on the right side to copy the metric drill down URL to the clipboard so it can be shared.
 - Click the **Star** icon on the right side to bookmark and save the metrics exploration.
 
-## Dashboard experience
-
-To access Metrics Drilldown via a dashboard:
-
-1. Navigate to your dashboard.
-1. Select a time series panel.
-1. Click the panel menu in the upper right and select **Metrics Drilldown**. If there are multiple metrics, click on the one you want to explore.
-1. You see a slide out drawer with the Metrics Experience, starting with the drill down. You can access the standalone experience by clicking **Open** in the upper right.
