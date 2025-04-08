@@ -33,7 +33,8 @@ function getGrafanaUser(): User {
 
 type CustomEnvConfig = {
   reporter: PlaywrightTestConfig['reporter'];
-  timeout?: number;
+  expectTimeout?: number;
+  actionTimeout?: number;
   retries?: number;
   forbidOnly?: boolean;
   workers?: number;
@@ -44,7 +45,7 @@ export function config(config: CustomEnvConfig) {
     // Custom config
     reporter: config.reporter,
     expect: {
-      timeout: Number(config.timeout) > 0 ? config.timeout : 5000,
+      timeout: Number(config.expectTimeout) > 0 ? config.expectTimeout : 5000,
       toHaveScreenshot: { maxDiffPixelRatio: 0.01 }, // tweak me with experience
     },
     retries: config.retries && config.retries > 0 ? config.retries : 0,
@@ -58,6 +59,9 @@ export function config(config: CustomEnvConfig) {
     fullyParallel: true,
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
+      /* timeouts for each action, like clicks */
+      actionTimeout: Number(config.actionTimeout) > 0 ? config.actionTimeout : 5000,
+      /* user and credentials */
       user: getGrafanaUser(),
       grafanaAPICredentials: getGrafanaUser(),
       /* Base URL to use in actions like `await page.goto('/')`. */
