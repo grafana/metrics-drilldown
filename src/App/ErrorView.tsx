@@ -2,14 +2,14 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { TextLink, useStyles2 } from '@grafana/ui';
 import React, { useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { InlineBanner } from './InlineBanner';
 
 export function ErrorView({ error }: { error: Error }) {
   const styles = useStyles2(getStyles);
 
-  const navigate = useNavigate();
+  const history = useHistory();
   const { pathname, search } = useLocation();
 
   const onClickReload = useCallback(() => {
@@ -21,9 +21,9 @@ export function ErrorView({ error }: { error: Error }) {
       .filter((key) => searchParams.has(key))
       .forEach((key) => newSearchParams.set(key, searchParams.get(key)!));
 
-    navigate({ pathname, search: newSearchParams.toString() });
+    history.push({ pathname, search: newSearchParams.toString() });
     window.location.reload();
-  }, [navigate, pathname, search]);
+  }, [history, pathname, search]);
 
   return (
     <div className={styles.container}>

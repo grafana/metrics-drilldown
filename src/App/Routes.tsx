@@ -1,5 +1,5 @@
 import React, { lazy, useContext } from 'react';
-import { Navigate, Route, Routes as ReactRoutes } from 'react-router-dom';
+import { Navigate, Route, Routes as ReactRoutes } from 'react-router-dom-v5-compat';
 
 import { ROUTES } from '../constants';
 import { MetricsContext } from './App';
