@@ -15,7 +15,7 @@ const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
  */
 loadDotEnv({ path: resolve(process.cwd(), '.env') });
 
-function getGrafanaUrl() {
+export function getGrafanaUrl() {
   if (process.env.GRAFANA_URL) {
     return process.env.GRAFANA_URL;
   }
@@ -83,6 +83,8 @@ export function config(config: CustomEnvConfig) {
         use: {
           ...devices['Desktop Chrome'],
           viewport: CHROMIUM_VIEWPORT,
+          // Used by the Copy URL test
+          permissions: ['clipboard-read', 'clipboard-write'],
         },
         dependencies: ['auth'],
       },

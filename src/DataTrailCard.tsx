@@ -57,11 +57,12 @@ export function DataTrailCard(props: Props) {
 
   const { filters, metric, createdAt } = values;
 
+  const heading = truncateValue('', getMetricName(metric), 39);
   return (
-    <article>
+    <article data-testid={`data-trail-card ${heading}`}>
       <Card onClick={onSelect} className={styles.card}>
         <Card.Heading>
-          <div className={styles.metricValue}>{truncateValue('', getMetricName(metric), 39)}</div>
+          <div className={styles.metricValue}>{heading}</div>
         </Card.Heading>
         <Card.Meta className={styles.meta}>
           {filters.map((f) => (
