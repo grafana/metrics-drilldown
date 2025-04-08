@@ -64,10 +64,12 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       height: state.height || METRICS_VIZ_PANEL_HEIGHT,
       hideLegend: Boolean(state.hideLegend),
       highlight: Boolean(state.highlight),
-      headerActions: state.headerActions || [
+      headerActions: [
         ...(state.isNativeHistogram ? [new NativeHistogramBadge({})] : []),
-        new SelectAction({ metricName: state.metricName }),
-        new ConfigureAction({ metricName: state.metricName }),
+        ...(state.headerActions || [
+          new SelectAction({ metricName: state.metricName }),
+          new ConfigureAction({ metricName: state.metricName }),
+        ]),
       ],
     };
 
