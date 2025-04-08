@@ -5,10 +5,14 @@ import { useStyles2 } from '@grafana/ui';
 import React, { createContext, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
+import { initFaro } from 'tracking/faro/faro';
 import { getUrlForTrail, newMetricsTrail } from 'utils';
 
+import { ErrorView } from './ErrorView';
 import { AppRoutes } from './Routes';
+import { useCatchExceptions } from './useCatchExceptions';
 import { PluginPropsContext } from '../utils/utils.plugin';
+initFaro();
 
 interface MetricsAppContext {
   trail: DataTrail;
@@ -16,17 +20,26 @@ interface MetricsAppContext {
 }
 
 export const MetricsContext = createContext<MetricsAppContext>({
-  trail: newMetricsTrail(undefined, true),
+  trail: newMetricsTrail(undefined),
   goToUrlForTrail: () => {},
 });
 
 function App(props: AppRootProps) {
-  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined, true));
+  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined));
   const styles = useStyles2(getStyles);
   const goToUrlForTrail = (trail: DataTrail) => {
     locationService.push(getUrlForTrail(trail));
     setTrail(trail);
   };
+
+  const [error] = useCatchExceptions();
+  if (error) {
+    return (
+      <div className={styles.appContainer} data-testid="metrics-drilldown-app">
+        <ErrorView error={error} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.appContainer} data-testid="metrics-drilldown-app">

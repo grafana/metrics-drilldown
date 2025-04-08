@@ -6,9 +6,9 @@ description: Upload new plugin artifact to GCS & publish to plugin catalog
 # 2. Get your feature PR approved
 # 3. Create a separate version bump PR:
 #    - git switch -c bump-version-vX.Y.Z
+#    - update CHANGELOG.md with a link to the forthcoming tag's release notes
 #    - npm version <type>  # this creates the commit and tag (see https://docs.npmjs.com/cli/commands/npm-version for <type> options, e.g. patch, minor, major, prerelease, etc.)
-#    - git push origin bump-version-vX.Y.Z --tags
-#    - update CHANGELOG.md with a link to the tag's release notes
+#    - git push origin bump-version-vX.Y.Z --follow-tags
 # 4. Get version bump PR approved
 # 5. Merge feature PR first
 # 6. Merge version bump PR
@@ -24,9 +24,13 @@ on:
           - dev
           - ops
           - prod
+      skip-grafana-dev-image:
+        required: false
+        type: boolean
+        default: false
   push:
-    tags:
-      - 'v*' # Run workflow on version tags, e.g. v1.0.0.
+    branches:
+      - main
 
 permissions:
   contents: 'write'
@@ -40,11 +44,18 @@ jobs:
     if: |
       github.repository == 'grafana/metrics-drilldown' &&
       (
-        (github.event_name == 'push' && contains(github.ref, 'refs/tags/v')) ||
-        (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || contains(github.ref, 'refs/tags/v')))
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'npm version')) ||
+        (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')))
       )
     uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
     with:
       environment: ${{ inputs.environment || 'prod' }}
-      upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
+      run-playwright: false
+      run-playwright-docker: true
+      upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
+      run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
+      playwright-report-path: e2e/test-reports/
+      playwright-docker-compose-file: e2e/docker/docker-compose.e2e.yaml
+      playwright-e2e-docker-compose-file: e2e/docker/docker-compose.playwright.yaml
+      playwright-grafana-url: http://localhost:3001

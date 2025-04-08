@@ -1,5 +1,4 @@
 import {
-  type DataSourceApi,
   type DataSourceGetTagKeysOptions,
   type DataSourceGetTagValuesOptions,
   type MetricFindValue,
@@ -15,7 +14,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
 
-function isPrometheusDatasource(ds: DataSourceApi<any>): ds is PrometheusDatasource {
+function isPrometheusDatasource(ds: any): ds is PrometheusDatasource {
   return ds.type === 'prometheus';
 }
 
@@ -106,8 +105,10 @@ export class MetricDatasourceHelper {
         this._classicHistograms[m.text] = 1;
       });
 
-      if (!this._metricsMetadata && !ds.languageProvider.metricsMetadata) {
-        await ds.languageProvider.loadMetricsMetadata();
+      if (!this._metricsMetadata) {
+        if (!ds.languageProvider.metricsMetadata) {
+          await ds.languageProvider.loadMetricsMetadata();
+        }
         this._metricsMetadata = ds.languageProvider.metricsMetadata;
       }
 

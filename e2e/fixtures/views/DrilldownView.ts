@@ -1,4 +1,5 @@
-import { expect, type Mouse, type Page, type Request, type Route } from '@playwright/test';
+import { type getByGrafanaSelectorOptions } from '@grafana/plugin-e2e';
+import { expect, type Locator, type Mouse, type Page, type Request, type Route } from '@playwright/test';
 
 import { DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY, DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY } from '../../config/constants';
 
@@ -14,6 +15,10 @@ export class DrilldownView {
     this.mouse = page.mouse;
     this.pathname = pathname;
     this.urlParams = urlParams;
+  }
+
+  setPathName(pathname: string) {
+    this.pathname = pathname;
   }
 
   async goto(urlParams: URLSearchParams | undefined = undefined) {
@@ -81,4 +86,16 @@ export class DrilldownView {
   pause() {
     return this.page.pause();
   }
+
+  getByGrafanaSelector(selector: string, options?: getByGrafanaSelectorOptions): Locator {
+    return (options?.root ?? this.page).locator(resolveGrafanaSelector(selector, options));
+  }
+}
+
+export function resolveGrafanaSelector(selector: string, options?: Omit<getByGrafanaSelectorOptions, 'root'>): string {
+  const startsWith = options?.startsWith ? '^' : '';
+  if (selector.startsWith('data-testid')) {
+    return `[data-testid${startsWith}="${selector}"]`;
+  }
+  return `[aria-label${startsWith}="${selector}"]`;
 }
