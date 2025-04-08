@@ -45,4 +45,13 @@ test.describe('Home page', () => {
       }
     });
   });
+
+  test('Browser History', async ({ gotoPage, page, selectMetricView }) => {
+    await gotoPage(`/${ROUTES.Home}`);
+    const startButton = page.getByTestId(testIds.pageHome.startButton);
+    await startButton.click();
+    await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
+    await page.goBack();
+    await selectMetricView.assertTopControls();
+  });
 });

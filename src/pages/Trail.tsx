@@ -4,11 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { type DataTrail } from 'DataTrail';
 import { getTrailStore } from 'TrailStore/TrailStore';
 
-export default function Trail({ trail }: { trail: DataTrail }) {
+export default function Trail({ trail }: { trail?: DataTrail }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (!isInitialized) {
+    if (!isInitialized && trail) {
       if (trail.state.metric) {
         getTrailStore().setRecentTrail(trail);
       }
@@ -16,12 +16,12 @@ export default function Trail({ trail }: { trail: DataTrail }) {
     }
   }, [trail, isInitialized]);
 
-  if (!isInitialized) {
+  if (!isInitialized || !trail) {
     return null;
   }
 
   return (
-    <UrlSyncContextProvider scene={trail}>
+    <UrlSyncContextProvider scene={trail} createBrowserHistorySteps={true} updateUrlOnInit={true}>
       <trail.Component model={trail} />
     </UrlSyncContextProvider>
   );
