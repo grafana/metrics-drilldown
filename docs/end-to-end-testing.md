@@ -70,10 +70,10 @@ The screenshots are generated in subfolders within the [e2e/tests](../e2e/tests)
 
 ### Regenerating screenshots
 
-Just pass extra arguments to `npm run e2e:ci`, e.g.:
+Just pass the extra arguments in a `PLAYWRIGHT_ARGS` environment variable when executing `npm run e2e:ci`, e.g. to regenerate the screenshots of the `select-metric-view.spec.ts` test file:
 
 ```shell
-npm run e2e:ci metrics-list.spec.ts --update-snapshots
+PLAYWRIGHT_ARGS="select-metric-view.spec.ts -u" npm run e2e:ci
 ```
 
 ### CI build
