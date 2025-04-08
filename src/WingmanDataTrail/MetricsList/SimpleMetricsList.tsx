@@ -16,7 +16,7 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
-import { getColorByIndex } from 'utils';
+import { getColorByIndex, getTrailFor } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
@@ -72,11 +72,15 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
+          const trail = getTrailFor(this);
+          const isNativeHistogram = trail.isNativeHistogram(option.value as string);
+
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
               vizPanelInGridItem: new MetricVizPanel({
                 metricName: option.value as string,
                 color: getColorByIndex(colorIndex),
+                isNativeHistogram,
               }),
               metric: option.value as string,
             }),
