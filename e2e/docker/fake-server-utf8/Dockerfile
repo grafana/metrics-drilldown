@@ -1,3 +1,4 @@
+# Grabbed from: https://github.com/grafana/grafana/tree/main/devenv/docker/blocks/prometheus_utf8
 FROM golang:latest AS builder
 
 ADD main.go /
