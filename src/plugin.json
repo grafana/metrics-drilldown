@@ -44,19 +44,11 @@
   "includes": [
     {
       "type": "page",
-      "name": "Metric Select",
-      "path": "/a/%PLUGIN_ID%/onboard-filters-sidebar",
+      "name": "Grafana Metrics Drilldown",
+      "path": "/a/%PLUGIN_ID%/trail-filters-sidebar",
       "action": "datasources:explore",
       "addToNav": true,
       "defaultNav": true
-    },
-    {
-      "type": "page",
-      "name": "Home",
-      "path": "/a/%PLUGIN_ID%/",
-      "action": "datasources:explore",
-      "addToNav": true,
-      "defaultNav": false
     }
   ],
   "dependencies": {
