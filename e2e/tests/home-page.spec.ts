@@ -53,6 +53,11 @@ test.describe('Home page', () => {
     await selectMetricView.assertTopControls();
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
     await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
+    await expect(
+      selectMetricView
+        .getByTestId('data-testid Panel header a.utf8.metric 🤘 (average)')
+        .getByTestId('data-testid Panel status error')
+    ).not.toBeVisible();
     await page.goBack();
     await selectMetricView.assertTopControls();
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
