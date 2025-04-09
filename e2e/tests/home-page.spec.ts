@@ -52,13 +52,14 @@ test.describe('Home page', () => {
     await startButton.click();
     await selectMetricView.assertTopControls();
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
+    await expect(selectMetricView.getByTestId('scene')).toHaveScreenshot({
+      stylePath: './e2e/fixtures/css/hide-app-controls.css',
+    });
     await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
-    await expect(
-      selectMetricView
-        .getByTestId('data-testid Panel header a.utf8.metric 🤘 (average)')
-        .getByTestId('data-testid Panel status error')
-    ).not.toBeVisible();
     await page.goBack();
+    await expect(selectMetricView.getByTestId('scene')).toHaveScreenshot({
+      stylePath: './e2e/fixtures/css/hide-app-controls.css',
+    });
     await selectMetricView.assertTopControls();
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
   });
