@@ -59,6 +59,11 @@ test.describe('Home page', () => {
 
     await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
     await page.goBack();
+
+    // We should not return to the homepage but to the metric selection page
+    await expect(page.getByText(testIds.pageHome.container)).not.toBeVisible();
+
+    // Compare screenshots to assert UI didn't change
     await expect(selectMetricView.getByTestId('scene-body')).toHaveScreenshot({
       stylePath: './e2e/fixtures/css/hide-app-controls.css',
     });
