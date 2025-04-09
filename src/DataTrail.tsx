@@ -121,7 +121,7 @@ export interface DataTrailState extends SceneObjectState {
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'metricSearch', 'showPreviews', 'nativeHistogramMetric', 'useOtelExperience', 'trailActivated'],
+    keys: ['metric', 'metricSearch', 'showPreviews', 'nativeHistogramMetric'],
   });
 
   public constructor(state: Partial<DataTrailState>) {
@@ -388,15 +388,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   getUrlState(): SceneObjectUrlValues {
-    const { metric, metricSearch, showPreviews, nativeHistogramMetric, useOtelExperience, trailActivated } = this.state;
+    const { metric, metricSearch, showPreviews, nativeHistogramMetric } = this.state;
     return {
       metric,
       metricSearch,
       ...{ showPreviews: showPreviews === false ? 'false' : null },
       // store the native histogram knowledge in url for the metric scene
       nativeHistogramMetric,
-      useOtelExperience: useOtelExperience ? '1' : undefined,
-      trailActivated: trailActivated ? '1' : undefined,
     };
   }
 
@@ -427,16 +425,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     if (typeof values.showPreviews === 'string') {
       stateUpdate.showPreviews = values.showPreviews !== 'false';
-    }
-
-    // Preserve OTel experience state
-    if (values.useOtelExperience === '1') {
-      stateUpdate.useOtelExperience = true;
-    }
-
-    // Preserve trail activation state
-    if (values.trailActivated === '1') {
-      stateUpdate.trailActivated = true;
     }
 
     this.setState(stateUpdate);
