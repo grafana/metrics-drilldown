@@ -45,4 +45,20 @@ test.describe('Home page', () => {
       }
     });
   });
+
+  test('Browser History', async ({ gotoPage, page, selectMetricView }) => {
+    await gotoPage(`/${ROUTES.Home}`);
+    const startButton = page.getByTestId(testIds.pageHome.startButton);
+    await startButton.click();
+    await selectMetricView.assertTopControls();
+    await selectMetricView.assertOtelExperienceSwitchIsVisible();
+
+    await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
+    await page.goBack();
+
+    // We should not return to the homepage but to the metric selection page
+    await expect(page.getByText(testIds.pageHome.container)).not.toBeVisible();
+    await selectMetricView.assertTopControls();
+    await selectMetricView.assertOtelExperienceSwitchIsVisible();
+  });
 });
