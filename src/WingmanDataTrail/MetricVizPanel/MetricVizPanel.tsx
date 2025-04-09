@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { FieldMatcherID, LoadingState, type GrafanaTheme2 } from '@grafana/data';
 import {
   SceneObjectBase,
   SceneQueryRunner,
@@ -19,9 +19,9 @@ import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
 import { buildPrometheusQuery } from './buildPrometheusQuery';
 import { NativeHistogramBadge } from './NativeHistogramBadge';
-import { buildHeatmapPanel } from './panels/heatmap';
-import { buildStatusHistoryPanel } from './panels/statushistory';
-import { buildTimeseriesPanel } from './panels/timeseries';
+import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
+import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
+import { buildTimeseriesPanel } from './panels/buildTimeseriesPanel';
 
 interface MetricVizPanelState extends SceneObjectState {
   metricName: string;
@@ -81,6 +81,41 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         isNativeHistogram: state.isNativeHistogram,
       }),
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    const { body, prometheusFunction } = this.state;
+
+    this._subs.add(
+      (body.state.$data as SceneQueryRunner).subscribeToState((newState) => {
+        if (newState.data?.state !== LoadingState.Done) {
+          return;
+        }
+
+        const { series } = newState.data;
+
+        if (series?.length) {
+          body.setState({
+            fieldConfig: {
+              defaults: body.state.fieldConfig.defaults,
+              overrides: [
+                {
+                  matcher: { id: FieldMatcherID.byFrameRefID, options: series[0].refId },
+                  properties: [
+                    {
+                      id: 'displayName',
+                      value: prometheusFunction,
+                    },
+                  ],
+                },
+              ],
+            },
+          });
+        }
+      })
+    );
   }
 
   private static buildVizPanel({
