@@ -5,7 +5,6 @@ import { type MetricOptions } from './MetricsVariable';
 
 export type MetricFilters = {
   prefixes: string[];
-  categories: string[];
   suffixes: string[];
   names: string[];
 };
@@ -15,7 +14,6 @@ export class MetricsVariableFilterEngine {
   private initOptions: VariableValueOption[] = [];
   private filters: MetricFilters = {
     prefixes: [],
-    categories: [],
     suffixes: [],
     names: [],
   };
@@ -37,10 +35,7 @@ export class MetricsVariableFilterEngine {
     if (
       !forceUpdate &&
       (isEqual(this.filters, updatedFilters) ||
-        (!updatedFilters.names.length &&
-          !updatedFilters.prefixes.length &&
-          !updatedFilters.suffixes.length &&
-          !updatedFilters.categories.length))
+        (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.suffixes.length))
     ) {
       this.filters = updatedFilters;
 
@@ -58,10 +53,6 @@ export class MetricsVariableFilterEngine {
 
     if (updatedFilters.prefixes.length > 0) {
       filteredOptions = this.applyPrefixFilters(filteredOptions, updatedFilters.prefixes);
-    }
-
-    if (updatedFilters.categories.length > 0) {
-      filteredOptions = this.applyCategoriesFilters(filteredOptions, updatedFilters.categories);
     }
 
     if (updatedFilters.suffixes.length > 0) {
@@ -119,17 +110,6 @@ export class MetricsVariableFilterEngine {
     const suffixesRegex = MetricsVariableFilterEngine.buildRegex(`(${pattern})`);
 
     return options.filter((option) => suffixesRegex.test(option.value as string));
-  }
-
-  private applyCategoriesFilters(options: MetricOptions, categories: string[]): MetricOptions {
-    let filteredOptions: MetricOptions = [];
-
-    for (const category of categories) {
-      const categoryRegex = MetricsVariableFilterEngine.buildRegex(category, 'i'); // see computeMetricCategories
-      filteredOptions = filteredOptions.concat(options.filter((option) => categoryRegex.test(option.value)));
-    }
-
-    return filteredOptions;
   }
 
   private applyNamesFilters(options: MetricOptions, names: string[]): MetricOptions {
