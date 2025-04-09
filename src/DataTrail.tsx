@@ -34,9 +34,6 @@ import React, { useEffect, useRef } from 'react';
 
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
-import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
-import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -785,9 +782,6 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         placeholder: 'Select',
         isMulti: true,
       }),
-      new MetricsVariable({}),
-      new FilteredMetricsVariable(),
-      new LabelsVariable(),
     ],
   });
 }
