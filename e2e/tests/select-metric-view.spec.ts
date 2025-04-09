@@ -77,7 +77,7 @@ test.describe('Select metric view', () => {
     await selectMetricView.clickCopyPanelUrl();
 
     const clipboardContent = await page.evaluate(() => navigator.clipboard.readText());
-    const expectedContent = `${getGrafanaUrl()}/a/grafana-metricsdrilldown-app/trail?metric=a.utf8.metric%20%F0%9F%A4%98&nativeHistogramMetric=&from=now-15m&to=now&timezone=browser&var-ds=gdev-prometheus&var-otel_resources=&var-filters=&var-otel_and_metric_filters=&var-deployment_environment=undefined&var-labelsWingman=&actionView=breakdown&var-groupby=$__all&breakdownLayout=grid`;
+    const expectedContent = `${getGrafanaUrl()}/a/grafana-metricsdrilldown-app/trail?metric=a.utf8.metric%20%F0%9F%A4%98&nativeHistogramMetric=&from=now-15m&to=now&timezone=browser&var-ds=gdev-prometheus&var-otel_resources=&var-filters=&var-otel_and_metric_filters=&var-deployment_environment=undefined&var-variant=onboard-filters-sidebar&var-labelsWingman=&actionView=breakdown&var-groupby=$__all&breakdownLayout=grid`;
     expect(clipboardContent).toBe(expectedContent);
   });
 

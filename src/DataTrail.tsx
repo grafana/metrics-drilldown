@@ -35,6 +35,8 @@ import { getOtelExperienceToggleState } from 'services/store';
 import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { MetricsOnboarding } from 'WingmanOnboarding/MetricsOnboarding';
+import { VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -558,12 +560,21 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       return;
     }
 
-    // show the var filters normally
-    filtersVariable.setState({
-      addFilterButtonText: 'Add label',
-      label: 'Select label',
-      hide: VariableHide.hideLabel,
-    });
+    // Wingman - we are forced to do this here and not in MetricsOnboarding because resetOtelExperience()
+    // is called after the child is rendered, so we can't hide it from there
+    if (this.state.topScene instanceof MetricsOnboarding) {
+      filtersVariable.setState({
+        hide: VariableHide.hideVariable,
+        filters: [],
+      });
+    } else {
+      // show the var filters normally
+      filtersVariable.setState({
+        addFilterButtonText: 'Add label',
+        label: 'Select label',
+        hide: VariableHide.hideLabel,
+      });
+    }
 
     // Resetting the otel experience filters means clearing both the otel resources var and the otelMetricsVar
     // hide the super otel and metric filter and reset it
@@ -760,6 +771,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         placeholder: 'Select',
         isMulti: true,
       }),
+      new VariantVariable(),
       new MetricsVariable({}),
       new FilteredMetricsVariable(),
       new LabelsVariable(),

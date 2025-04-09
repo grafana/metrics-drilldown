@@ -21,6 +21,7 @@ import {
   type FilteredMetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { VAR_MAIN_LABEL_VARIABLE } from 'WingmanOnboarding/HeaderControls/MainLabelVariable';
 
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
 
@@ -34,7 +35,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   public static readonly URL_SEARCH_PARAM_NAME = 'search_txt';
 
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE, VAR_METRICS_VARIABLE, VAR_FILTERED_METRICS_VARIABLE, VAR_WINGMAN_GROUP_BY],
+    variableNames: [
+      VAR_DATASOURCE,
+      VAR_METRICS_VARIABLE,
+      VAR_FILTERED_METRICS_VARIABLE,
+      VAR_MAIN_LABEL_VARIABLE,
+      VAR_WINGMAN_GROUP_BY,
+    ],
     onAnyVariableChanged: (variable) => {
       if ([VAR_METRICS_VARIABLE, VAR_FILTERED_METRICS_VARIABLE].includes(variable.state.name)) {
         const { counts } = this.state;
@@ -45,6 +52,11 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         if (newCount !== counts[key]) {
           this.setState({ counts: { ...counts, [key]: newCount } });
         }
+        return;
+      }
+
+      if (variable.state.name === VAR_MAIN_LABEL_VARIABLE) {
+        this.setState({ disableRatioDisplay: Boolean((variable as MultiValueVariable).state.value) });
         return;
       }
 
@@ -105,11 +117,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   }
 
   private updateDisableRatioDisplay() {
+    const mainLabelVariable = sceneGraph.lookupVariable(VAR_MAIN_LABEL_VARIABLE, this) as MultiValueVariable;
     const groupByVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as MultiValueVariable;
     const groupByValue = groupByVariable.state.value;
 
     this.setState({
-      disableRatioDisplay: Boolean(groupByValue && groupByValue !== NULL_GROUP_BY_VALUE),
+      disableRatioDisplay:
+        Boolean(mainLabelVariable?.state.value) || Boolean(groupByValue && groupByValue !== NULL_GROUP_BY_VALUE),
     });
   }
 

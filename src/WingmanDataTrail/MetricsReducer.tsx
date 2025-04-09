@@ -15,25 +15,34 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { getColorByIndex, getTrailFor } from 'utils';
+import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
+import { ROUTES } from '../constants';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
+import { MetricsGroupByRow } from './GroupBy/MetricsGroupByRow';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { HeaderControls } from './HeaderControls/HeaderControls';
+import { EventGroupFiltersChanged } from './HeaderControls/MetricsFilter/EventGroupFiltersChanged';
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from './MetricsVariables/FilteredMetricsVariable';
 import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
 import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction';
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
+import { type LabelsBrowser } from './SideBar/LabelsBrowser';
 import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
-  sidebar: SideBar;
+  sidebar: SideBar | LabelsBrowser;
   body: SceneObjectBase;
   drawer: SceneDrawer;
 }
@@ -78,6 +87,18 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         this.state.drawer.close();
       })
     );
+
+    this._subs.add(
+      this.subscribeToEvent(EventGroupFiltersChanged, (event) => {
+        const { type, groups } = event.payload;
+        const filteredMetricsVariable = sceneGraph.lookupVariable(
+          VAR_FILTERED_METRICS_VARIABLE,
+          this
+        ) as FilteredMetricsVariable;
+
+        filteredMetricsVariable.applyFilters({ [type]: groups }, true);
+      })
+    );
   }
 
   private updateBodyBasedOnGroupBy(groupByValue: string) {
@@ -85,7 +106,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       body:
         !groupByValue || groupByValue === NULL_GROUP_BY_VALUE
           ? (new SimpleMetricsList() as unknown as SceneObjectBase)
-          : (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase),
+          : (new MetricsGroupByList({
+              labelName: groupByValue,
+              GroupByRow: MetricsGroupByRow,
+            }) as unknown as SceneObjectBase),
     });
   }
 
@@ -136,6 +160,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
     const { body, headerControls, drawer, sidebar } = model.useState();
+    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).useState();
 
     return (
       <>
@@ -143,9 +168,15 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.body}>
-          <div className={styles.sidebar} data-testid="sidebar">
-            <sidebar.Component model={sidebar} />
-          </div>
+          {variant !== ROUTES.OnboardWithPills && (
+            <div className={styles.sidebar} data-testid="sidebar">
+              {sidebar instanceof SideBar ? (
+                <sidebar.Component model={sidebar} />
+              ) : (
+                <sidebar.Component model={sidebar} />
+              )}
+            </div>
+          )}
           <div className={styles.list}>
             <body.Component model={body} />
           </div>
