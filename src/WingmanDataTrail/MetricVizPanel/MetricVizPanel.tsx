@@ -18,10 +18,10 @@ import { trailDS } from 'shared';
 
 import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
-import { buildStatusHistoryPanel } from './panels/statushistory';
-import { buildTimeseriesPanel } from './panels/timeseries';
 import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { buildHeatmapPanel } from './panels/heatmap';
+import { buildStatusHistoryPanel } from './panels/statushistory';
+import { buildTimeseriesPanel } from './panels/timeseries';
 
 interface MetricVizPanelState extends SceneObjectState {
   metricName: string;
