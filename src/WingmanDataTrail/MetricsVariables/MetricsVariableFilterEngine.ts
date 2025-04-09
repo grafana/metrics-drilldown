@@ -6,6 +6,7 @@ import { type MetricOptions } from './MetricsVariable';
 export type MetricFilters = {
   prefixes: string[];
   categories: string[];
+  suffixes: string[];
   names: string[];
 };
 
@@ -15,6 +16,7 @@ export class MetricsVariableFilterEngine {
   private filters: MetricFilters = {
     prefixes: [],
     categories: [],
+    suffixes: [],
     names: [],
   };
 
@@ -35,7 +37,10 @@ export class MetricsVariableFilterEngine {
     if (
       !forceUpdate &&
       (isEqual(this.filters, updatedFilters) ||
-        (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length))
+        (!updatedFilters.names.length &&
+          !updatedFilters.prefixes.length &&
+          !updatedFilters.suffixes.length &&
+          !updatedFilters.categories.length))
     ) {
       this.filters = updatedFilters;
 
@@ -57,6 +62,10 @@ export class MetricsVariableFilterEngine {
 
     if (updatedFilters.categories.length > 0) {
       filteredOptions = this.applyCategoriesFilters(filteredOptions, updatedFilters.categories);
+    }
+
+    if (updatedFilters.suffixes.length > 0) {
+      filteredOptions = this.applySuffixFilters(filteredOptions, updatedFilters.suffixes);
     }
 
     if (updatedFilters.names.length > 0) {
@@ -90,6 +99,26 @@ export class MetricsVariableFilterEngine {
     const prefixesRegex = MetricsVariableFilterEngine.buildRegex(`(${pattern})`);
 
     return options.filter((option) => prefixesRegex.test(option.value as string));
+  }
+
+  private applySuffixFilters(options: MetricOptions, suffixes: string[]): MetricOptions {
+    const pattern = suffixes
+      .map((suffix) => {
+        // catch-all (see computeMetricSuffixGroups)
+        if (suffix.includes('|')) {
+          return `${suffix
+            .split('|')
+            .map((s) => `^${s}$`)
+            .join('|')}`;
+        }
+
+        return `.+${suffix}$`;
+      })
+      .join('|');
+
+    const suffixesRegex = MetricsVariableFilterEngine.buildRegex(`(${pattern})`);
+
+    return options.filter((option) => suffixesRegex.test(option.value as string));
   }
 
   private applyCategoriesFilters(options: MetricOptions, categories: string[]): MetricOptions {

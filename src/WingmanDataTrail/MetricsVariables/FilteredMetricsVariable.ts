@@ -78,6 +78,7 @@ export class FilteredMetricsVariable extends MetricsVariable {
             this.filterEngine.applyFilters(
               {
                 prefixes: sideBar.state.selectedMetricPrefixes,
+                suffixes: sideBar.state.selectedMetricSuffixes,
                 categories: sideBar.state.selectedMetricCategories,
               },
               false
