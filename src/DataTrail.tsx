@@ -35,8 +35,6 @@ import { getOtelExperienceToggleState } from 'services/store';
 import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import { MetricsOnboarding } from 'WingmanOnboarding/MetricsOnboarding';
-import { VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { DataTrailSettings } from './DataTrailSettings';
@@ -105,9 +103,6 @@ export interface DataTrailState extends SceneObjectState {
   addingLabelFromBreakdown?: boolean; // do not use the otel and metrics var subscription when adding label from the breakdown
   afterFirstOtelCheck?: boolean; // don't reset because of the migration on the first otel check from the data source updating
 
-  // moved into settings
-  showPreviews?: boolean;
-
   // Synced with url
   metric?: string;
   metricSearch?: string;
@@ -121,7 +116,7 @@ export interface DataTrailState extends SceneObjectState {
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'metricSearch', 'showPreviews', 'nativeHistogramMetric'],
+    keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
   });
 
   public constructor(state: Partial<DataTrailState>) {
@@ -144,7 +139,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       // default to false but update this to true on updateOtelData()
       // or true if the user either turned on the experience
       useOtelExperience: state.useOtelExperience ?? false,
-      showPreviews: state.showPreviews ?? true,
       nativeHistograms: state.nativeHistograms ?? [],
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
@@ -388,11 +382,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   getUrlState(): SceneObjectUrlValues {
-    const { metric, metricSearch, showPreviews, nativeHistogramMetric } = this.state;
+    const { metric, metricSearch, nativeHistogramMetric } = this.state;
     return {
       metric,
       metricSearch,
-      ...{ showPreviews: showPreviews === false ? 'false' : null },
       // store the native histogram knowledge in url for the metric scene
       nativeHistogramMetric,
     };
@@ -421,10 +414,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       stateUpdate.metricSearch = values.metricSearch;
     } else if (values.metric == null) {
       stateUpdate.metricSearch = undefined;
-    }
-
-    if (typeof values.showPreviews === 'string') {
-      stateUpdate.showPreviews = values.showPreviews !== 'false';
     }
 
     this.setState(stateUpdate);
@@ -560,21 +549,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       return;
     }
 
-    // Wingman - we are forced to do this here and not in MetricsOnboarding because resetOtelExperience()
-    // is called after the child is rendered, so we can't hide it from there
-    if (this.state.topScene instanceof MetricsOnboarding) {
-      filtersVariable.setState({
-        hide: VariableHide.hideVariable,
-        filters: [],
-      });
-    } else {
-      // show the var filters normally
-      filtersVariable.setState({
-        addFilterButtonText: 'Add label',
-        label: 'Select label',
-        hide: VariableHide.hideLabel,
-      });
-    }
+    // show the var filters normally
+    filtersVariable.setState({
+      addFilterButtonText: 'Add label',
+      label: 'Select label',
+      hide: VariableHide.hideLabel,
+    });
 
     // Resetting the otel experience filters means clearing both the otel resources var and the otelMetricsVar
     // hide the super otel and metric filter and reset it
@@ -771,7 +751,6 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         placeholder: 'Select',
         isMulti: true,
       }),
-      new VariantVariable(),
       new MetricsVariable({}),
       new FilteredMetricsVariable(),
       new LabelsVariable(),
