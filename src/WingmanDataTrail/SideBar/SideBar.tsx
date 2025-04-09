@@ -28,6 +28,8 @@ import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from '../MetricsVariables/FilteredMetricsVariable';
+import { getTrailStore, getBookmarkKey } from '../../TrailStore/TrailStore';
+import { DataTrailCard } from '../../DataTrailCard';
 
 interface SideBarState extends SceneObjectState {
   prefixGroups: Array<{ label: string; value: string; count: number }>;
@@ -132,6 +134,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       model.publishEvent(new EventFiltersChanged({ type: type, filters }));
     };
 
+    const { bookmarks } = getTrailStore();
+
     return (
       <div className={styles.container}>
         <div className={styles.topPanel}>
@@ -159,6 +163,21 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             {labelsBrowswer && <labelsBrowswer.Component model={labelsBrowswer} />}
           </>
         </div>
+        {bookmarks.length > 0 && (
+          <div className={styles.bookmarksPanel}>
+            <h5 className={styles.header}>Bookmarks {bookmarks.length}</h5>
+            {bookmarks.map((bookmark, index) => {
+              return (
+                <DataTrailCard
+                  key={getBookmarkKey(bookmark)}
+                  bookmark={bookmark}
+                  onSelect={() => onSelect(index)}
+                  onDelete={() => onDelete(index)}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   };
@@ -187,6 +206,16 @@ function getStyles(theme: GrafanaTheme2) {
       overflow: 'hidden',
       padding: theme.spacing(2),
       background: theme.colors.background.primary,
+    }),
+    bookmarksPanel: css({
+      padding: theme.spacing(2),
+      borderTop: `1px solid ${theme.colors.border.weak}`,
+      background: theme.colors.background.primary,
+    }),
+    header: css({
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
+      marginBottom: theme.spacing(1),
+      paddingBottom: theme.spacing(1),
     }),
   };
 }
