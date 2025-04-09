@@ -52,12 +52,14 @@ test.describe('Home page', () => {
     await startButton.click();
     await selectMetricView.assertTopControls();
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
-    await expect(selectMetricView.getByTestId('scene')).toHaveScreenshot({
+
+    await expect(selectMetricView.getByTestId('scene-body')).toHaveScreenshot({
       stylePath: './e2e/fixtures/css/hide-app-controls.css',
     });
+
     await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
     await page.goBack();
-    await expect(selectMetricView.getByTestId('scene')).toHaveScreenshot({
+    await expect(selectMetricView.getByTestId('scene-body')).toHaveScreenshot({
       stylePath: './e2e/fixtures/css/hide-app-controls.css',
     });
     await selectMetricView.assertTopControls();
