@@ -10,11 +10,9 @@ import {
 } from 'WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 
-import { EventMetricsVariableActivated } from './EventMetricsVariableActivated';
-import { EventMetricsVariableDeactivated } from './EventMetricsVariableDeactivated';
-import { EventMetricsVariableUpdated } from './EventMetricsVariableUpdated';
 import { MetricsVariable } from './MetricsVariable';
 import { MetricsVariableSortEngine } from './MetricsVariableSortEngine';
+import { withLifecycleEvents } from './withLifecycleEvents';
 
 export const VAR_FILTERED_METRICS_VARIABLE = 'filtered-metrics-wingman';
 
@@ -31,20 +29,12 @@ export class FilteredMetricsVariable extends MetricsVariable {
     this.sortEngine = new MetricsVariableSortEngine(this as unknown as MultiValueVariable);
 
     this.addActivationHandler(this.onActivate.bind(this));
+
+    // required for filtering and sorting
+    return withLifecycleEvents<FilteredMetricsVariable>(this);
   }
 
   protected onActivate() {
-    this.publishEvent(new EventMetricsVariableActivated({ key: this.state.key as string }), true);
-
-    this.subscribeToState((newState, prevState) => {
-      if (!newState.loading && prevState.loading) {
-        this.publishEvent(
-          new EventMetricsVariableUpdated({ key: this.state.key as string, options: newState.options }),
-          true
-        );
-      }
-    });
-
     // wrapped in a try/catch to support the different variants / prevents runtime errors in WingMan's onboarding screen
     try {
       const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
@@ -72,10 +62,6 @@ export class FilteredMetricsVariable extends MetricsVariable {
     } catch (error) {
       console.warn('MetricsSorter not found - no worries, gracefully degrading...', error);
     }
-
-    return () => {
-      this.publishEvent(new EventMetricsVariableDeactivated({ key: this.state.key as string }), true);
-    };
   }
 
   public updateGroupByQuery(groupByValue: string) {

@@ -96,6 +96,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     );
   }
 
+  /**
+   * The centralized filtering and sorting mechanism implemented here is decoupled via the usage of events.
+   * In order to work, the variables to be filtered/sorted must emit lifecycle events.
+   * This is done via the `withLifecycleEvents` decorator function.
+   *
+   * See `FilteredMetricsVariable` class as an example.
+   */
   private subscribeToFiltersEvents() {
     const filterEnginesMap = new Map<string, MetricsVariableFilterEngine>();
 

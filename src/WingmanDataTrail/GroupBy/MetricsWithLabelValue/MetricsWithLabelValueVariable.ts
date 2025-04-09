@@ -9,10 +9,8 @@ import {
   VAR_WINGMAN_SORT_BY,
   type SortingOption,
 } from 'WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
-import { EventMetricsVariableActivated } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableActivated';
-import { EventMetricsVariableDeactivated } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableDeactivated';
-import { EventMetricsVariableUpdated } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableUpdated';
 import { MetricsVariableSortEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableSortEngine';
+import { withLifecycleEvents } from 'WingmanDataTrail/MetricsVariables/withLifecycleEvents';
 
 import { MetricsWithLabelValueDataSource } from './MetricsWithLabelValueDataSource';
 
@@ -49,6 +47,9 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
     this.sortEngine = new MetricsVariableSortEngine(this as unknown as MultiValueVariable);
 
     this.addActivationHandler(this.onActivate.bind(this, labelName, labelValue, removeRules));
+
+    // required for filtering and sorting
+    return withLifecycleEvents<MetricsWithLabelValueVariable>(this);
   }
 
   private static buildQuery(labelName: string, labelValue: string, removeRules?: boolean) {
@@ -62,17 +63,6 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
         query: MetricsWithLabelValueVariable.buildQuery(labelName, labelValue, removeRules),
       });
     }
-
-    this.publishEvent(new EventMetricsVariableActivated({ key: this.state.key as string }), true);
-
-    this.subscribeToState((newState, prevState) => {
-      if (!newState.loading && prevState.loading) {
-        this.publishEvent(
-          new EventMetricsVariableUpdated({ key: this.state.key as string, options: newState.options }),
-          true
-        );
-      }
-    });
 
     // wrapped in a try/catch to support the different variants / prevents runtime errors in WingMan's onboarding screen
     try {
@@ -101,9 +91,5 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
     } catch (error) {
       console.warn('MetricsSorter not found - no worries, gracefully degrading...', error);
     }
-
-    return () => {
-      this.publishEvent(new EventMetricsVariableDeactivated({ key: this.state.key as string }), true);
-    };
   }
 }
