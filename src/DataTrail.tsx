@@ -812,7 +812,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       gap: theme.spacing(1),
       flexDirection: 'column',
       background: theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas,
-      padding: theme.spacing(2, 3, 2, 3),
+      padding: theme.spacing(1, 2),
     }),
     body: css({
       flexGrow: 1,
