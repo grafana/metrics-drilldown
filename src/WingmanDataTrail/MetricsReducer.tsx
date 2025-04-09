@@ -14,20 +14,15 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { getColorByIndex } from 'utils';
+import { getColorByIndex, getTrailFor } from 'utils';
 
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { HeaderControls } from './HeaderControls/HeaderControls';
-import { EventGroupFiltersChanged } from './HeaderControls/MetricsFilter/EventGroupFiltersChanged';
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from './MetricsVariables/FilteredMetricsVariable';
 import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
 import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction';
@@ -83,18 +78,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         this.state.drawer.close();
       })
     );
-
-    this._subs.add(
-      this.subscribeToEvent(EventGroupFiltersChanged, (event) => {
-        const { type, groups } = event.payload;
-        const filteredMetricsVariable = sceneGraph.lookupVariable(
-          VAR_FILTERED_METRICS_VARIABLE,
-          this
-        ) as FilteredMetricsVariable;
-
-        filteredMetricsVariable.applyFilters({ [type]: groups }, true);
-      })
-    );
   }
 
   private updateBodyBasedOnGroupBy(groupByValue: string) {
@@ -120,27 +103,30 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             sync: DashboardCursorSync.Crosshair,
           }),
         ],
-        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map(
-          (option, colorIndex) =>
-            new SceneCSSGridItem({
-              body: new MetricVizPanel({
-                title: option.label,
-                metricName,
-                color: getColorByIndex(colorIndex),
-                prometheusFunction: option.value,
-                height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
-                hideLegend: true,
-                highlight: colorIndex === 1,
-                headerActions: [
-                  new ApplyAction({
-                    metricName,
-                    prometheusFunction: option.value,
-                    disabled: colorIndex === 1,
-                  }),
-                ],
-              }),
-            })
-        ),
+        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map((option, colorIndex) => {
+          const trail = getTrailFor(this);
+          const isNativeHistogram = trail.isNativeHistogram(metricName);
+
+          return new SceneCSSGridItem({
+            body: new MetricVizPanel({
+              title: option.label,
+              metricName,
+              color: getColorByIndex(colorIndex),
+              prometheusFunction: option.value,
+              height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+              hideLegend: true,
+              highlight: colorIndex === 1,
+              isNativeHistogram,
+              headerActions: [
+                new ApplyAction({
+                  metricName,
+                  prometheusFunction: option.value,
+                  disabled: colorIndex === 1,
+                }),
+              ],
+            }),
+          });
+        }),
       }),
     });
   }

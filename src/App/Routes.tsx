@@ -1,5 +1,5 @@
 import React, { lazy, useContext } from 'react';
-import { Navigate, Route, Routes as ReactRoutes } from 'react-router-dom-v5-compat';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { ROUTES } from '../constants';
 import { MetricsContext } from './App';
@@ -12,12 +12,12 @@ export const AppRoutes = () => {
   const { trail } = useContext(MetricsContext);
 
   return (
-    <ReactRoutes>
+    <Routes>
       <Route path={ROUTES.Home} element={<HomePage />} />
       <Route path={ROUTES.Trail} element={<TrailPage trail={trail} />} />
       <Route path={ROUTES.TrailWithSidebar} element={<Wingman trail={trail} />} />
       {/* catch-all route */}
       <Route path="*" element={<Navigate to={ROUTES.Home} replace />} />
-    </ReactRoutes>
+    </Routes>
   );
 };
