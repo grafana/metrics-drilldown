@@ -6,7 +6,6 @@ import {
   AdHocFiltersVariable,
   ConstantVariable,
   CustomVariable,
-  DataSourceVariable,
   SceneControlsSpacer,
   sceneGraph,
   SceneObjectBase,
@@ -32,6 +31,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
+import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
 import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
@@ -722,14 +722,7 @@ export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   return new SceneVariableSet({
     variables: [
-      new DataSourceVariable({
-        key: VAR_DATASOURCE,
-        name: VAR_DATASOURCE,
-        label: 'Data source',
-        description: 'Only prometheus data sources are supported',
-        value: initialDS,
-        pluginId: 'prometheus',
-      }),
+      new MetricsDrilldownDataSourceVariable({ initialDS }),
       new AdHocFiltersVariable({
         name: VAR_OTEL_RESOURCES,
         label: 'Select resource attributes',
