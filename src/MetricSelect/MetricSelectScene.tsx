@@ -137,6 +137,11 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     const trail = getTrailFor(this);
 
+    // Ensure we have the correct state when going back
+    if (trail.state.trailActivated) {
+      this._debounceRefreshMetricNames();
+    }
+
     this._subs.add(
       trail.subscribeToEvent(MetricSelectedEvent, (event) => {
         if (event.payload !== undefined) {
