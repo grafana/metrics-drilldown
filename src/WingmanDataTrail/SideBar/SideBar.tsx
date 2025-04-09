@@ -24,12 +24,12 @@ import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVari
 
 import { LabelsBrowser } from './LabelsBrowser';
 import { MetricsFilterSection } from './MetricsFilterSection';
+import { DataTrailCard } from '../../DataTrailCard';
+import { getBookmarkKey, getTrailStore } from '../../TrailStore/TrailStore';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from '../MetricsVariables/FilteredMetricsVariable';
-import { getTrailStore, getBookmarkKey } from '../../TrailStore/TrailStore';
-import { DataTrailCard } from '../../DataTrailCard';
 
 interface SideBarState extends SceneObjectState {
   prefixGroups: Array<{ label: string; value: string; count: number }>;
