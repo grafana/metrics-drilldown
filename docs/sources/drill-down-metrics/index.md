@@ -15,6 +15,8 @@ Drill down into your metrics to gain insight into your data without writing a qu
 1. Navigate to the **Metrics Drilldown** page in Grafana.
 1. From the **Data source** menu, select a data source to view associated metrics. Supported data sources include Prometheus and Prometheus-compatible data sources.
 
+     A dashboard of metrics for your selected data source appears.
+1. To filter metrics in the dashboard, use the 
 1. TODO: Click **+ Add label** to select a label-value pair from the drop-down menu. You can add multiple label-value pairs. A label type appears above the selected label with a drop-down list of options from which to choose. For example, if you select the label `container` a drop-down list of available containers appears.
 1. You can also search for metrics using keywords under **Search metrics** in the search bar.
 1. Use the time picker to select a date and time range from the drop-down menu or use an absolute time range.
