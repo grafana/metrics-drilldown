@@ -37,7 +37,6 @@
     "@grafana/faro-web-sdk": "^1.14.1",
     "@grafana/lezer-logql": "^0.2.7",
     "@grafana/prometheus": "^11.6.0-223871",
-    "@grafana/promql-builder": "^0.0.4",
     "@grafana/runtime": "^11.6.0",
     "@grafana/scenes": "^6.6.3",
     "@grafana/schema": "^11.6.0",
@@ -46,7 +45,8 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "^6.30.0",
-    "rxjs": "7.8.1"
+    "rxjs": "7.8.1",
+    "tsqtsq": "^1.0.10"
   },
   "devDependencies": {
     "@grafana/eslint-config": "^8.0.0",
