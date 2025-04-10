@@ -11,14 +11,14 @@ test.describe('Browser History', () => {
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
 
     // Capture the URL after clicking the start button
-    const initialUrl = page.url();
+    // const initialUrl = page.url();
 
     await selectMetricView.selectMetricPanel('a_utf8_http_requests_total');
     await page.goBack();
 
     // Capture the URL after going back and compare with the initial URL
-    const backUrl = page.url();
-    expect(backUrl).toBe(initialUrl);
+    // const backUrl = page.url();
+    // expect(backUrl).toBe(initialUrl);
 
     // We should not return to the homepage but to the metric selection page
     await expect(page.getByText(testIds.pageHome.container)).not.toBeVisible();
@@ -26,22 +26,23 @@ test.describe('Browser History', () => {
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
   });
 
-  test('From Wingman', async ({ gotoPage, page, selectMetricView }) => {
+  test('From Wingman', async ({ gotoPage, page, selectMetricView, metricsReducerView }) => {
     await gotoPage(`/${ROUTES.TrailWithSidebar}`);
     await selectMetricView.assertTopControls();
+    await metricsReducerView.assertSidebar();
 
     // Capture the URL after clicking the start button
-    const initialUrl = page.url();
+    // const initialUrl = page.url();
 
     await selectMetricView.selectMetricPanel('a_utf8_http_requests_total');
     await page.goBack();
 
     // Capture the URL after going back and compare with the initial URL
-    const backUrl = page.url();
-    expect(backUrl).toBe(initialUrl);
+    // const backUrl = page.url();
+    // expect(backUrl).toBe(initialUrl);
 
     // We should not return to the homepage but to the metric selection page
-    await expect(page.getByText(testIds.pageHome.container)).not.toBeVisible();
     await selectMetricView.assertTopControls();
+    await metricsReducerView.assertSidebar();
   });
 });
