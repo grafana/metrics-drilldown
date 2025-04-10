@@ -172,7 +172,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
-            <Button variant="secondary" onClick={onClickSelect}>
+            <Button className={styles.selectButton} variant="secondary" onClick={onClickSelect}>
               Select
             </Button>
           </div>
@@ -242,11 +242,14 @@ function getStyles(theme: GrafanaTheme2) {
       borderBottom: `1px solid ${theme.colors.border.medium}`,
     }),
     headerButtons: css({
-      display: 'flex',
-      gap: '8px',
+      position: 'relative',
+      top: '2px',
       marginLeft: 'auto',
       marginRight: '30px',
       zIndex: 100,
+    }),
+    selectButton: css({
+      height: '28px',
     }),
     collapsableSectionBody: css({
       display: 'flex',
