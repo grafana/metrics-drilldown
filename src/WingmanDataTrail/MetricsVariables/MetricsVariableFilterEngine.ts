@@ -55,7 +55,7 @@ export class MetricsVariableFilterEngine {
     }
 
     if (updatedFilters.suffixes.length > 0) {
-      filteredOptions = this.applySuffixFilters(filteredOptions, updatedFilters.suffixes);
+      filteredOptions = MetricsVariableFilterEngine.applySuffixFilters(filteredOptions, updatedFilters.suffixes);
     }
 
     if (updatedFilters.names.length > 0) {
@@ -74,7 +74,7 @@ export class MetricsVariableFilterEngine {
   private static applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
     const pattern = prefixes
       .map((prefix) => {
-        // catch-all (see computeMetricPrefixGroups)
+        // Multi-value support (see computeMetricPrefixGroups)
         if (prefix.includes('|')) {
           return `${prefix
             .split('|')
@@ -91,10 +91,10 @@ export class MetricsVariableFilterEngine {
     return options.filter((option) => prefixesRegex.test(option.value as string));
   }
 
-  private applySuffixFilters(options: MetricOptions, suffixes: string[]): MetricOptions {
+  private static applySuffixFilters(options: MetricOptions, suffixes: string[]): MetricOptions {
     const pattern = suffixes
       .map((suffix) => {
-        // catch-all (see computeMetricSuffixGroups)
+        // Multi-value support (see computeMetricSuffixGroups)
         if (suffix.includes('|')) {
           return `${suffix
             .split('|')
