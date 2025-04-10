@@ -57,7 +57,13 @@
   },
   "preload": true,
   "extensions": {
-    "addedLinks": [],
+    "addedLinks": [
+      {
+        "targets": ["grafana/dashboard/panel/menu"],
+        "title": "Open in Grafana Metrics Drilldown",
+        "description": "Open current query in the Grafana Metrics Drilldown view"
+      }
+    ],
     "extensionPoints": [
       {
         "id": "grafana-exploremetrics-app/investigation/v1"
