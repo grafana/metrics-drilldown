@@ -52,16 +52,21 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
           ? (context.timeRange as { from: string; to: string })
           : undefined;
 
-      const params = setUrlParameters({
-        [UrlParameters.Metric]: queryMetrics[0].metric,
-        [UrlParameters.Filters]: queryMetrics[0].labelFilters.map((f) => f.toString()).join(','),
-        [UrlParameters.TimeRangeFrom]: timeRange?.from,
-        [UrlParameters.TimeRangeTo]: timeRange?.to,
-        [UrlParameters.DatasourceId]: datasource.uid,
-      });
+      const params = appendUrlParameters([
+        [UrlParameters.Metric, queryMetrics[0].metric],
+        [UrlParameters.TimeRangeFrom, timeRange?.from],
+        [UrlParameters.TimeRangeTo, timeRange?.to],
+        [UrlParameters.DatasourceId, datasource.uid],
+        ...queryMetrics[0].labelFilters.map(
+          (f) =>
+            [UrlParameters.Filters, encodeURIComponent(`${f.label}${f.op}"${f.value}"`)] as [UrlParameterType, string]
+        ),
+      ]);
+
+      const pathToMetricView = createAppUrl(ROUTES.Trail, params);
 
       return {
-        path: createAppUrl(ROUTES.Trail, params),
+        path: pathToMetricView,
       };
     },
   },
@@ -81,15 +86,15 @@ export const UrlParameters = {
 
 export type UrlParameterType = (typeof UrlParameters)[keyof typeof UrlParameters];
 
-export function setUrlParameters(
-  params: Partial<Record<UrlParameterType, string>>,
+export function appendUrlParameters(
+  params: Array<[UrlParameterType, string | undefined]>,
   initialParams?: URLSearchParams
 ): URLSearchParams {
-  const searchParams = new URLSearchParams(initialParams?.toString() ?? location.search);
+  const searchParams = new URLSearchParams(initialParams?.toString());
 
-  Object.entries(params).forEach(([key, value]) => {
+  params.forEach(([key, value]) => {
     if (value) {
-      searchParams.set(key, value);
+      searchParams.append(key, value);
     }
   });
 
