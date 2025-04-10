@@ -101,6 +101,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     this.addActivationHandler(this._onActivate.bind(this));
   }
 
+  // TODO: URL Sync - Configures URL synchronization for metricPrefix
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metricPrefix'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_DATASOURCE, VAR_OTEL_RESOURCES],

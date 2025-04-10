@@ -115,6 +115,7 @@ export interface DataTrailState extends SceneObjectState {
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
+  // TODO: URL Sync - Configures URL synchronization for metric, metricSearch, and nativeHistogramMetric
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
   });
@@ -383,6 +384,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   getUrlState(): SceneObjectUrlValues {
+    // TODO: URL Sync - Returns the current state values that should be reflected in the URL
     const { metric, metricSearch, nativeHistogramMetric } = this.state;
     return {
       metric,
