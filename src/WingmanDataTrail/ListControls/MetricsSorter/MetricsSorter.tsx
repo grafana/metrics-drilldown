@@ -1,4 +1,4 @@
-import { getBackendSrv } from '@grafana/runtime';
+import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import {
   CustomVariable,
   sceneGraph,
@@ -132,53 +132,75 @@ interface DashboardSearchItem {
   isStarred: boolean;
 }
 
+const requestOptions: Partial<BackendSrvRequest> = {
+  showSuccessAlert: false,
+  showErrorAlert: false,
+};
+
 /**
  * Fetches metric usage data from dashboards
  * @returns A record mapping metric names to their occurrence count in dashboards
  */
 export async function fetchDashboardMetrics(): Promise<Record<string, number>> {
-  const dashboards = await getBackendSrv().get<DashboardSearchItem[]>('/api/search', {
-    type: 'dash-db',
-    limit: 1000,
-  });
+  try {
+    const dashboards = await getBackendSrv().get<DashboardSearchItem[]>(
+      '/api/search',
+      {
+        type: 'dash-db',
+        limit: 500,
+      },
+      'grafana-metricsdrilldown-app-dashboard-search',
+      requestOptions
+    );
 
-  const metricCounts = await Promise.all(
-    dashboards.map(({ uid }) => getBackendSrv().get<{ dashboard: Dashboard }>(`/api/dashboards/uid/${uid}`))
-  ).then((dashboards) => {
-    // Create a map to count metric occurrences
-    const counts: Record<string, number> = {};
+    const metricCounts = await Promise.all(
+      dashboards.map(({ uid }) =>
+        getBackendSrv().get<{ dashboard: Dashboard }>(
+          `/api/dashboards/uid/${uid}`,
+          undefined,
+          'grafana-metricsdrilldown-app-dashboard-metric-usage',
+          requestOptions
+        )
+      )
+    ).then((dashboards) => {
+      // Create a map to count metric occurrences
+      const counts: Record<string, number> = {};
 
-    for (const { dashboard } of dashboards) {
-      if (!dashboard.panels?.length || !dashboard.uid) {
-        continue;
-      }
-
-      for (const panel of dashboard.panels) {
-        const { datasource } = panel;
-        if (!isPrometheusDataSource(datasource) || !('targets' in panel) || !panel.targets?.length) {
+      for (const { dashboard } of dashboards) {
+        if (!dashboard.panels?.length || !dashboard.uid) {
           continue;
         }
 
-        for (const target of panel.targets) {
-          const expr = typeof target.expr === 'string' ? target.expr : '';
-          const metrics = extractMetricNames(expr);
+        for (const panel of dashboard.panels) {
+          const { datasource } = panel;
+          if (!isPrometheusDataSource(datasource) || !('targets' in panel) || !panel.targets?.length) {
+            continue;
+          }
 
-          // Count each metric occurrence
-          for (const metric of metrics) {
-            if (!metric) {
-              continue;
+          for (const target of panel.targets) {
+            const expr = typeof target.expr === 'string' ? target.expr : '';
+            const metrics = extractMetricNames(expr);
+
+            // Count each metric occurrence
+            for (const metric of metrics) {
+              if (!metric) {
+                continue;
+              }
+
+              counts[metric] = (counts[metric] || 0) + 1;
             }
-
-            counts[metric] = (counts[metric] || 0) + 1;
           }
         }
       }
-    }
 
-    return counts;
-  });
+      return counts;
+    });
 
-  return metricCounts;
+    return metricCounts;
+  } catch (error) {
+    console.error('Failed to fetch dashboard metrics:', error);
+    return {};
+  }
 }
 
 interface AlertingRule {
@@ -207,7 +229,12 @@ interface AlertingRule {
  */
 export async function fetchAlertingMetrics(): Promise<Record<string, number>> {
   try {
-    const alertingRules = await getBackendSrv().get<AlertingRule[]>('/api/v1/provisioning/alert-rules');
+    const alertingRules = await getBackendSrv().get<AlertingRule[]>(
+      '/api/v1/provisioning/alert-rules',
+      undefined,
+      'grafana-metricsdrilldown-app-alert-rule-metric-usage',
+      requestOptions
+    );
 
     // Create a map to count metric occurrences
     const metricCounts: Record<string, number> = {};
