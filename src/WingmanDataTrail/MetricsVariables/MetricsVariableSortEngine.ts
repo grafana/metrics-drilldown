@@ -1,4 +1,5 @@
-import { SceneVariableValueChangedEvent, type MultiValueVariable } from '@grafana/scenes';
+import { SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
+import { isEqual } from 'lodash';
 
 import { getTrailFor } from 'utils';
 import {
@@ -11,82 +12,75 @@ import {
 } from 'WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
 
 export class MetricsVariableSortEngine {
-  private variable: MultiValueVariable;
+  private variable: QueryVariable;
+  private lastMetrics: string[];
   private sortBy?: SortingOption;
 
-  constructor(variable: MultiValueVariable) {
+  constructor(variable: QueryVariable) {
     this.variable = variable;
     this.sortBy = undefined;
+    this.lastMetrics = [];
   }
 
-  public sort(sortBy = this.sortBy, notify = true) {
-    this.sortBy = sortBy;
+  public async sort(sortBy = this.sortBy) {
+    const metrics = this.variable.state.options.map((option) => option.value as string);
 
-    const trail = getTrailFor(this.variable);
-    const metrics = (this.variable as MultiValueVariable).state.options.map((option) => option.value as string);
+    if (sortBy === this.sortBy && metrics.length === this.lastMetrics.length && isEqual(metrics, this.lastMetrics)) {
+      return;
+    }
+
+    let sortedMetrics: string[];
 
     switch (sortBy) {
       case 'dashboard-usage':
-        this.sortByDashboardUsage(metrics, trail.state.dashboardMetrics);
+        sortedMetrics = await this.sortByDashboardUsage(metrics, getTrailFor(this.variable).state.dashboardMetrics);
         break;
 
       case 'alerting-usage':
-        this.sortByAlertingUsage(metrics, trail.state.alertingMetrics);
+        sortedMetrics = await this.sortByAlertingUsage(metrics, getTrailFor(this.variable).state.alertingMetrics);
         break;
 
       case 'reverse-alphabetical':
-        this.variable.setState({
-          options: sortMetricsReverseAlphabetically(metrics).map((metricName) => ({
-            label: metricName,
-            value: metricName,
-          })),
-        });
+        sortedMetrics = sortMetricsReverseAlphabetically(metrics);
         break;
 
       default:
-        this.variable.setState({
-          options: sortMetricsAlphabetically(metrics).map((metricName) => ({
-            label: metricName,
-            value: metricName,
-          })),
-        });
+        sortedMetrics = sortMetricsAlphabetically(metrics);
         break;
     }
 
-    if (notify) {
-      this.notifyUpdate();
-    }
+    this.sortBy = sortBy;
+    this.lastMetrics = sortedMetrics;
+
+    this.variable.setState({
+      options: sortedMetrics.map((metricName) => ({
+        label: metricName,
+        value: metricName,
+      })),
+    });
+
+    this.notifyUpdate();
   }
 
   private async sortByDashboardUsage(metrics: string[], existingDashboardMetrics?: Record<string, number>) {
     try {
       const dashboardMetrics = existingDashboardMetrics ? existingDashboardMetrics : await fetchDashboardMetrics();
-
-      this.variable.setState({
-        options: sortMetricsByCount(metrics, dashboardMetrics).map((metricName) => ({
-          label: metricName,
-          value: metricName,
-        })),
-      });
+      return sortMetricsByCount(metrics, dashboardMetrics);
     } catch (error) {
       console.error('Failed to fetch dashboard metrics!');
       console.error(error);
+      return metrics;
     }
   }
 
   private async sortByAlertingUsage(metrics: string[], existingAlertingMetrics?: Record<string, number>) {
     try {
       const alertingMetrics = existingAlertingMetrics ? existingAlertingMetrics : await fetchAlertingMetrics();
-
-      this.variable.setState({
-        options: sortMetricsByCount(metrics, alertingMetrics).map((metricName) => ({
-          label: metricName,
-          value: metricName,
-        })),
-      });
+      return sortMetricsByCount(metrics, alertingMetrics);
     } catch (error) {
       console.error('Failed to fetch alerting metrics!');
       console.error(error);
+      return metrics;
     }
   }
 

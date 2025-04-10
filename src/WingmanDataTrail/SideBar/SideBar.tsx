@@ -12,7 +12,6 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
-import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
 import {
@@ -20,9 +19,7 @@ import {
   type MetricOptions,
   type MetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
-import { LabelsBrowser } from './LabelsBrowser';
 import { MetricsFilterSection } from './MetricsFilterSection';
 import { DataTrailCard } from '../../DataTrailCard';
 import { getBookmarkKey, getTrailStore } from '../../TrailStore/TrailStore';
@@ -39,7 +36,6 @@ interface SideBarState extends SceneObjectState {
   selectedMetricPrefixes: string[];
   selectedMetricCategories: string[];
   loading: boolean;
-  labelsBrowswer?: LabelsBrowser;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -70,20 +66,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       selectedMetricPrefixes: [],
       selectedMetricCategories: [],
       loading: true,
-      labelsBrowswer: undefined,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
   private onActivate() {
-    const variantVariable = sceneGraph.lookupVariable(VAR_VARIANT, this) as VariantVariable;
-    if (variantVariable.state.value === 'onboard-filters-labels') {
-      this.setState({
-        labelsBrowswer: new LabelsBrowser({ labelVariableName: VAR_WINGMAN_GROUP_BY }),
-      });
-    }
-
     const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
 
     this.updateLists(metricsVariable.state.options as MetricOptions);
@@ -125,13 +113,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const { selectedMetricPrefixes, selectedMetricCategories, prefixGroups, categories, loading, labelsBrowswer } =
-      model.useState();
+    const { selectedMetricPrefixes, selectedMetricCategories, prefixGroups, categories, loading } = model.useState();
 
     const onSelectFilter = (type: 'prefixes' | 'categories', filters: string[]) => {
       const selectedKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricCategories';
       model.setState({ [selectedKey]: filters });
-      model.publishEvent(new EventFiltersChanged({ type: type, filters }));
+      model.publishEvent(new EventFiltersChanged({ type: type, filters }), true);
     };
 
     const { bookmarks } = getTrailStore();
@@ -149,19 +136,14 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           />
         </div>
         <div className={styles.bottomPanel}>
-          <>
-            {!labelsBrowswer && (
-              <MetricsFilterSection
-                title="Categories filters"
-                items={categories}
-                selectedValues={selectedMetricCategories}
-                onSelectionChange={(filters) => onSelectFilter('categories', filters)}
-                loading={loading}
-                dataTestId="categories-filters"
-              />
-            )}
-            {labelsBrowswer && <labelsBrowswer.Component model={labelsBrowswer} />}
-          </>
+          <MetricsFilterSection
+            title="Categories filters"
+            items={categories}
+            selectedValues={selectedMetricCategories}
+            onSelectionChange={(filters) => onSelectFilter('categories', filters)}
+            loading={loading}
+            dataTestId="categories-filters"
+          />
         </div>
         {bookmarks.length > 0 && (
           <div className={styles.bookmarksPanel}>

@@ -7,7 +7,10 @@ import {
   SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
+  SceneVariableSet,
   VariableDependencyConfig,
+  type CustomVariable,
+  type QueryVariable,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
@@ -15,34 +18,37 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { getColorByIndex, getTrailFor } from 'utils';
-import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
-import { ROUTES } from '../constants';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
-import { MetricsGroupByRow } from './GroupBy/MetricsGroupByRow';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { HeaderControls } from './HeaderControls/HeaderControls';
-import { EventGroupFiltersChanged } from './HeaderControls/MetricsFilter/EventGroupFiltersChanged';
+import { EventSortByChanged } from './HeaderControls/MetricsSorter/EventSortByChanged';
+import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './HeaderControls/MetricsSorter/MetricsSorter';
+import { EventQuickSearchChanged } from './HeaderControls/QuickSearch/EventQuickSearchChanged';
+import { QuickSearch } from './HeaderControls/QuickSearch/QuickSearch';
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
-import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './Labels/LabelsVariable';
+import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from './MetricsVariables/FilteredMetricsVariable';
+import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
+import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
+import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
+import { EventMetricsVariableUpdated } from './MetricsVariables/EventMetricsVariableUpdated';
+import { FilteredMetricsVariable } from './MetricsVariables/FilteredMetricsVariable';
+import { MetricsVariable } from './MetricsVariables/MetricsVariable';
+import { MetricsVariableFilterEngine } from './MetricsVariables/MetricsVariableFilterEngine';
+import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
 import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
 import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction';
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
-import { type LabelsBrowser } from './SideBar/LabelsBrowser';
+import { EventFiltersChanged } from './SideBar/EventFiltersChanged';
 import { SideBar } from './SideBar/SideBar';
-
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
-  sidebar: SideBar | LabelsBrowser;
+  sidebar: SideBar;
   body: SceneObjectBase;
   drawer: SceneDrawer;
 }
@@ -57,6 +63,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
   public constructor() {
     super({
+      $variables: new SceneVariableSet({
+        variables: [new MetricsVariable(), new FilteredMetricsVariable(), new LabelsVariable()],
+      }),
       headerControls: new HeaderControls({}),
       sidebar: new SideBar({}),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
@@ -69,13 +78,16 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   }
 
   private onActivate() {
-    const labelsVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable;
-    this.updateBodyBasedOnGroupBy(labelsVariable.state.value as string);
+    this.updateBodyBasedOnGroupBy(
+      (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable).state.value as string
+    );
 
     this.subscribeToEvents();
   }
 
   private subscribeToEvents() {
+    this.initVariablesFilteringAndSorting();
+
     this._subs.add(
       this.subscribeToEvent(EventConfigureFunction, (event) => {
         this.openDrawer(event.payload.metricName);
@@ -87,16 +99,108 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         this.state.drawer.close();
       })
     );
+  }
+
+  /**
+   * The centralized filtering and sorting mechanism implemented here is decoupled via the usage of events.
+   * In order to work, the variables to be filtered/sorted must emit lifecycle events.
+   * This is done via the `withLifecycleEvents` decorator function.
+   *
+   * For example, check the `FilteredMetricsVariable` class.
+   */
+  private initVariablesFilteringAndSorting() {
+    const filterEnginesMap = new Map<string, MetricsVariableFilterEngine>();
+    const sortEnginesMap = new Map<string, MetricsVariableSortEngine>();
 
     this._subs.add(
-      this.subscribeToEvent(EventGroupFiltersChanged, (event) => {
-        const { type, groups } = event.payload;
-        const filteredMetricsVariable = sceneGraph.lookupVariable(
-          VAR_FILTERED_METRICS_VARIABLE,
-          this
-        ) as FilteredMetricsVariable;
+      this.subscribeToEvent(EventMetricsVariableActivated, (event) => {
+        // register engines
+        const { key } = event.payload;
+        const filteredMetricsVariable = sceneGraph.findByKey(this, key) as QueryVariable;
 
-        filteredMetricsVariable.applyFilters({ [type]: groups }, true);
+        filterEnginesMap.set(key, new MetricsVariableFilterEngine(filteredMetricsVariable));
+        sortEnginesMap.set(key, new MetricsVariableSortEngine(filteredMetricsVariable));
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventMetricsVariableDeactivated, (event) => {
+        // unregister engines
+        sortEnginesMap.delete(event.payload.key);
+        filterEnginesMap.delete(event.payload.key);
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
+        // filter and sort on initial load
+        const { key, options } = event.payload;
+        const filterEngine = filterEnginesMap.get(key)!;
+        const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
+        const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
+
+        filterEngine.setInitOptions(options);
+
+        filterEngine.applyFilters(
+          {
+            names: quickSearch.state.value ? [quickSearch.state.value] : [],
+            prefixes: sideBar.state.selectedMetricPrefixes,
+            categories: sideBar.state.selectedMetricCategories,
+          },
+          { notify: false }
+        );
+
+        const sortEngine = sortEnginesMap.get(event.payload.key)!;
+        const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+        const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
+
+        sortEngine.sort(sortByVariable.state.value as SortingOption);
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventMetricsVariableUpdated, (event) => {
+        // sort whenever the variable options change
+        const { key } = event.payload;
+        const sortEngine = sortEnginesMap.get(key)!;
+        const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+        const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
+
+        sortEngine.sort(sortByVariable.state.value as SortingOption);
+      })
+    );
+
+    /* Filters */
+
+    this._subs.add(
+      this.subscribeToEvent(EventQuickSearchChanged, (event) => {
+        const { searchText } = event.payload;
+
+        for (const [, filterEngine] of filterEnginesMap) {
+          filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
+        }
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventFiltersChanged, (event) => {
+        const { type, filters } = event.payload;
+
+        for (const [, filterEngine] of filterEnginesMap) {
+          filterEngine.applyFilters({ [type]: filters });
+        }
+      })
+    );
+
+    /* Sorting */
+
+    this._subs.add(
+      this.subscribeToEvent(EventSortByChanged, (event) => {
+        const { sortBy } = event.payload;
+
+        for (const [, sortEngine] of sortEnginesMap) {
+          sortEngine.sort(sortBy);
+        }
       })
     );
   }
@@ -106,10 +210,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       body:
         !groupByValue || groupByValue === NULL_GROUP_BY_VALUE
           ? (new SimpleMetricsList() as unknown as SceneObjectBase)
-          : (new MetricsGroupByList({
-              labelName: groupByValue,
-              GroupByRow: MetricsGroupByRow,
-            }) as unknown as SceneObjectBase),
+          : (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase),
     });
   }
 
@@ -159,8 +260,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
-    const { body, headerControls, drawer, sidebar } = model.useState();
-    const { value: variant } = (sceneGraph.lookupVariable(VAR_VARIANT, model) as VariantVariable).useState();
+    const { $variables, body, headerControls, drawer, sidebar } = model.useState();
 
     return (
       <>
@@ -168,18 +268,17 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           <headerControls.Component model={headerControls} />
         </div>
         <div className={styles.body}>
-          {variant !== ROUTES.OnboardWithPills && (
-            <div className={styles.sidebar} data-testid="sidebar">
-              {sidebar instanceof SideBar ? (
-                <sidebar.Component model={sidebar} />
-              ) : (
-                <sidebar.Component model={sidebar} />
-              )}
-            </div>
-          )}
+          <div className={styles.sidebar} data-testid="sidebar">
+            <sidebar.Component model={sidebar} />
+          </div>
           <div className={styles.list}>
             <body.Component model={body} />
           </div>
+        </div>
+        <div className={styles.variables}>
+          {$variables?.state.variables.map((variable) => (
+            <variable.Component key={variable.state.name} model={variable} />
+          ))}
         </div>
         <drawer.Component model={drawer} />
       </>
@@ -205,6 +304,9 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
     sidebar: css({
       flex: '0 0 320px',
       overflowY: 'hidden',
+    }),
+    variables: css({
+      display: 'none',
     }),
   };
 }

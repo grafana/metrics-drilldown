@@ -1,4 +1,4 @@
-import { SceneVariableValueChangedEvent, type MultiValueVariable, type VariableValueOption } from '@grafana/scenes';
+import { SceneVariableValueChangedEvent, type QueryVariable, type VariableValueOption } from '@grafana/scenes';
 import { cloneDeep, isEqual } from 'lodash';
 
 import { type MetricOptions } from './MetricsVariable';
@@ -10,7 +10,7 @@ export type MetricFilters = {
 };
 
 export class MetricsVariableFilterEngine {
-  private variable: MultiValueVariable;
+  private variable: QueryVariable;
   private initOptions: VariableValueOption[] = [];
   private filters: MetricFilters = {
     prefixes: [],
@@ -18,7 +18,7 @@ export class MetricsVariableFilterEngine {
     names: [],
   };
 
-  constructor(variable: MultiValueVariable) {
+  constructor(variable: QueryVariable) {
     this.variable = variable;
   }
 
@@ -26,22 +26,21 @@ export class MetricsVariableFilterEngine {
     this.initOptions = cloneDeep(options);
   }
 
-  public applyFilters(filters: Partial<MetricFilters> = this.filters, notify = true, forceUpdate = false) {
+  public applyFilters(filters: Partial<MetricFilters> = this.filters, settings = { notify: true }) {
     const updatedFilters = {
       ...this.filters,
       ...filters,
     };
 
     if (
-      !forceUpdate &&
-      (isEqual(this.filters, updatedFilters) ||
-        (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length))
+      isEqual(this.filters, updatedFilters) ||
+      (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length)
     ) {
       this.filters = updatedFilters;
 
       this.variable.setState({ options: this.initOptions });
 
-      if (notify) {
+      if (settings.notify) {
         this.notifyUpdate();
       }
 
@@ -52,27 +51,27 @@ export class MetricsVariableFilterEngine {
     let filteredOptions = allOptions as MetricOptions;
 
     if (updatedFilters.prefixes.length > 0) {
-      filteredOptions = this.applyPrefixFilters(filteredOptions, updatedFilters.prefixes);
+      filteredOptions = MetricsVariableFilterEngine.applyPrefixFilters(filteredOptions, updatedFilters.prefixes);
     }
 
     if (updatedFilters.categories.length > 0) {
-      filteredOptions = this.applyCategoriesFilters(filteredOptions, updatedFilters.categories);
+      filteredOptions = MetricsVariableFilterEngine.applyCategoriesFilters(filteredOptions, updatedFilters.categories);
     }
 
     if (updatedFilters.names.length > 0) {
-      filteredOptions = this.applyNamesFilters(filteredOptions, updatedFilters.names);
+      filteredOptions = MetricsVariableFilterEngine.applyNamesFilters(filteredOptions, updatedFilters.names);
     }
 
     this.filters = updatedFilters;
 
     this.variable.setState({ options: filteredOptions });
 
-    if (notify) {
+    if (settings.notify) {
       this.notifyUpdate();
     }
   }
 
-  private applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
+  private static applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
     const pattern = prefixes
       .map((prefix) => {
         // catch-all (see computeMetricPrefixGroups)
@@ -92,7 +91,7 @@ export class MetricsVariableFilterEngine {
     return options.filter((option) => prefixesRegex.test(option.value as string));
   }
 
-  private applyCategoriesFilters(options: MetricOptions, categories: string[]): MetricOptions {
+  private static applyCategoriesFilters(options: MetricOptions, categories: string[]): MetricOptions {
     let filteredOptions: MetricOptions = [];
 
     for (const category of categories) {
@@ -103,7 +102,7 @@ export class MetricsVariableFilterEngine {
     return filteredOptions;
   }
 
-  private applyNamesFilters(options: MetricOptions, names: string[]): MetricOptions {
+  private static applyNamesFilters(options: MetricOptions, names: string[]): MetricOptions {
     const [namePatterns] = names;
 
     const regexes = namePatterns
@@ -122,16 +121,16 @@ export class MetricsVariableFilterEngine {
     return options.filter((option) => regexes.some((regex) => regex.test(option.value as string)));
   }
 
-  private notifyUpdate() {
-    // hack to force SceneByVariableRepeater to re-render
-    this.variable.publishEvent(new SceneVariableValueChangedEvent(this.variable), true);
-  }
-
   private static buildRegex(pattern: string, flags?: string) {
     try {
       return new RegExp(pattern, flags);
     } catch {
       return new RegExp('.*');
     }
+  }
+
+  private notifyUpdate() {
+    // hack to force SceneByVariableRepeater to re-render
+    this.variable.publishEvent(new SceneVariableValueChangedEvent(this.variable), true);
   }
 }

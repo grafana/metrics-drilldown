@@ -1,0 +1,210 @@
+---
+description: 
+globs: *.tsx,*.test.tsx,*.ts,*.test.ts
+alwaysApply: false
+---
+# Prefer using `tsqtsq` to craft PromQL expressions
+
+When building PromQL expressions, we should use `tsqtsq` instead of building expressions via string interpolation.
+
+## `tsqtsq` Overview
+
+`tsqtsq` is a TypeScript library designed to make working with PromQL (Prometheus Query Language) more maintainable and type-safe. It provides a structured way to build PromQL queries programmatically, avoiding string interpolation and making queries more readable and maintainable.
+
+## Core Concepts
+
+### 1. Expression Class
+
+The `Expression` class is the foundation for building metric queries. It allows you to:
+
+- Define metric names
+- Add label selectors with specific operators
+- Set default operators and selectors
+- Compose complex metric expressions
+
+```typescript
+new Expression({
+  metric: 'test_metric',
+  values: {
+    arg1: 'foo',
+    arg2: 'bar',
+  },
+  defaultOperator: MatchingOperator.regexMatch,
+  defaultSelectors: [{ label: 'baz', operator: MatchingOperator.notEqual, value: '' }],
+});
+```
+
+### 2. Label Selectors
+
+The library supports four types of label matching operators:
+
+- `=` (equal)
+- `!=` (not equal)
+- `=~` (regex match)
+- `!~` (not regex match)
+
+### 3. PromQL Functions
+
+The library provides a comprehensive set of PromQL functions through the `promql` object:
+
+#### Aggregation Functions
+
+- `sum`, `min`, `max`, `avg`, `group`, `count`, `stddev`, `stdvar`
+- `count_values`, `bottomk`, `topk`, `quantile`
+
+#### Time-based Functions
+
+- `rate`, `increase`
+- `*_over_time` functions (avg, count, last, max, min, present, stddev, stdvar, sum)
+
+#### Label Manipulation
+
+- `label_replace`
+- `label_join`
+
+#### Logical Operations
+
+- `and`, `or`, `unless`
+
+#### Time Offsets
+
+- Complex time offset support with units (years, weeks, days, hours, minutes, seconds, milliseconds)
+
+## Usage Examples
+
+### Basic Metric Query
+
+```typescript
+import { promql, Expression, MatchingOperator } from 'tsqtsq';
+
+// Create a metric expression
+const expr = new Expression({
+  metric: 'http_requests_total',
+  values: {
+    status: '200',
+    method: 'GET',
+  },
+  defaultOperator: MatchingOperator.equal,
+}).toString();
+
+// Use with aggregation
+const query = promql.sum({
+  expr,
+  by: ['method', 'status'],
+});
+```
+
+### Time-based Queries
+
+```typescript
+// Rate calculation
+const rateQuery = promql.rate({
+  expr: 'http_requests_total{status="200"}',
+  interval: '5m',
+});
+
+// Aggregation over time
+const sumOverTime = promql.sum_over_time({
+  expr: 'http_requests_total',
+  range: '1h',
+});
+```
+
+### Label Manipulation
+
+```typescript
+// Label replacement
+const replaced = promql.label_replace({
+  expr: 'http_requests_total',
+  newLabel: 'service',
+  existingLabel: 'instance',
+  replacement: '$1',
+  regex: '(.*)',
+});
+
+// Label joining
+const joined = promql.label_join({
+  expr: 'http_requests_total',
+  newLabel: 'full_path',
+  labels: ['path', 'method'],
+  separator: '_',
+});
+```
+
+## Best Practices
+
+1. **Use Expression Class for Metric Selection**
+
+   - Prefer using the `Expression` class over string literals for metric selection
+   - This provides type safety and better IDE support
+
+2. **Leverage Default Operators**
+
+   - Set appropriate default operators for your use case
+   - This reduces repetition and makes queries more consistent
+
+3. **Compose Queries**
+
+   - Build complex queries by combining multiple `promql` functions
+   - Use the result of one operation as input to another
+
+4. **Use Named Parameters**
+   - Always use named parameters for clarity
+   - This makes the code more maintainable and self-documenting
+
+## Type Safety
+
+The library provides strong TypeScript support with:
+
+- Enums for operators
+- Interfaces for all function parameters
+- Type checking for label selectors
+- Validation for time units
+
+## Common Use Cases
+
+1. **Building Dashboard Queries**
+
+   - Compose complex queries for Grafana dashboards
+   - Ensure consistency across multiple panels
+
+2. **Alert Rule Creation**
+
+   - Build type-safe alert conditions
+   - Maintain consistent query patterns
+
+3. **Query Refactoring**
+   - Easily update query patterns across multiple places
+   - Maintain consistency when changing metric names or labels
+
+## Limitations
+
+1. **Dynamic Query Building**
+
+   - While the library supports complex queries, extremely dynamic queries might still require some string manipulation
+
+2. **PromQL Version Support**
+
+   - The library supports standard PromQL features
+   - Some newer or experimental PromQL features might not be directly supported
+
+3. **Performance**
+   - The library adds a small overhead compared to direct string manipulation
+   - This is generally negligible for most use cases
+
+## Integration Tips
+
+1. **With Grafana**
+
+   - Use the library to generate queries for Grafana dashboards
+   - Ensure consistent query patterns across panels
+
+2. **With Alerting Systems**
+
+   - Generate alert conditions programmatically
+   - Maintain type safety in alert definitions
+
+3. **With Custom Applications**
+   - Use the library to build queries for custom monitoring applications
+   - Ensure consistent query patterns across the application
+

@@ -6,7 +6,6 @@ import React from 'react';
 
 import { reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
-import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { getTrailFor } from './utils';
 
 export interface DataTrailSettingsState extends SceneObjectState {
@@ -32,18 +31,14 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
     this.setState({ isOpen });
   };
 
-  public onTogglePreviews = () => {
-    const trail = getTrailFor(this);
-    trail.setState({ showPreviews: !trail.state.showPreviews });
-  };
-
   static Component = ({ model }: SceneComponentProps<DataTrailSettings>) => {
     const { stickyMainGraph, isOpen } = model.useState();
     const styles = useStyles2(getStyles);
 
     const trail = getTrailFor(model);
+    const { topScene } = trail.useState();
 
-    const { showPreviews, topScene } = trail.useState();
+    const isButtonEnabled = topScene instanceof MetricScene;
 
     const renderPopover = () => {
       return (
@@ -55,19 +50,19 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
               <Switch value={stickyMainGraph} onChange={model.onToggleStickyMainGraph} />
             </div>
           )}
-          {topScene instanceof MetricSelectScene && (
-            <div className={styles.options}>
-              <div>Show previews of metric graphs</div>
-              <Switch value={showPreviews} onChange={model.onTogglePreviews} />
-            </div>
-          )}
         </div>
       );
     };
 
     return (
       <Dropdown overlay={renderPopover} placement="bottom" onVisibleChange={model.onToggleOpen}>
-        <ToolbarButton icon="cog" variant="canvas" isOpen={isOpen} data-testid="settings-button" />
+        <ToolbarButton
+          icon="cog"
+          variant="canvas"
+          isOpen={isOpen}
+          data-testid="settings-button"
+          disabled={!isButtonEnabled}
+        />
       </Dropdown>
     );
   };
