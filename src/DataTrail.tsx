@@ -412,6 +412,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
     } else if (values.metric == null) {
       stateUpdate.metric = undefined;
+      // TODO: Handle reducer and metric scene
       stateUpdate.topScene = new MetricSelectScene({});
     }
 
