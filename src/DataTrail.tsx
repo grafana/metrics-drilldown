@@ -1,12 +1,11 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
-import { type PromQuery } from '@grafana/prometheus';
+import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
   CustomVariable,
-  DataSourceVariable,
   SceneControlsSpacer,
   sceneGraph,
   SceneObjectBase,
@@ -32,6 +31,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
+import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
 
@@ -699,14 +699,7 @@ export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   return new SceneVariableSet({
     variables: [
-      new DataSourceVariable({
-        key: VAR_DATASOURCE,
-        name: VAR_DATASOURCE,
-        label: 'Data source',
-        description: 'Only prometheus data sources are supported',
-        value: initialDS,
-        pluginId: 'prometheus',
-      }),
+      new MetricsDrilldownDataSourceVariable({ initialDS }),
       new AdHocFiltersVariable({
         name: VAR_OTEL_RESOURCES,
         label: 'Select resource attributes',
@@ -735,7 +728,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           // to prevent the metric name from being set twice in the query and causing an error.
           const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
           return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
-            .map((filter) => `${filter.key}${filter.operator}"${filter.value}"`)
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
       }),
@@ -785,7 +778,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       gap: theme.spacing(1),
       flexDirection: 'column',
       background: theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas,
-      padding: theme.spacing(2, 3, 2, 3),
+      padding: theme.spacing(1, 2),
     }),
     body: css({
       flexGrow: 1,
