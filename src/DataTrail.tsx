@@ -504,6 +504,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
    */
   private async fetchOtelResources(datasourceUid: string, timeRange: RawTimeRange) {
     const otelTargets = await totalOtelResources(datasourceUid, timeRange);
+    // if there are no otel targets, return early
+    // the following call for deployment environments will throw an error for a vendor data source that does not handle errors
+    // similar to the other Prometheus flavors.
+    if (otelTargets.jobs.length === 0 && otelTargets.instances.length === 0) {
+      return {
+        hasOtelResources: false,
+        nonPromotedOtelResources: [],
+        previouslyUsedOtelResources: false,
+      };
+    }
     const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
     const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
 
