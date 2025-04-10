@@ -360,7 +360,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       nativeHistogramMetric = true;
     }
 
-    this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    });
 
     // Add metric to adhoc filters baseFilter
     const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
