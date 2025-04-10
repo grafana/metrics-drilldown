@@ -9,6 +9,7 @@ import {
   SceneObjectBase,
   SceneVariableSet,
   VariableDependencyConfig,
+  type CustomVariable,
   type QueryVariable,
   type SceneComponentProps,
   type SceneObjectState,
@@ -21,6 +22,8 @@ import { getColorByIndex, getTrailFor } from 'utils';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { HeaderControls } from './HeaderControls/HeaderControls';
+import { EventSortByChanged } from './HeaderControls/MetricsSorter/EventSortByChanged';
+import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './HeaderControls/MetricsSorter/MetricsSorter';
 import { EventQuickSearchChanged } from './HeaderControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './HeaderControls/QuickSearch/QuickSearch';
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
@@ -29,10 +32,12 @@ import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
 import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
+import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
 import { EventMetricsVariableUpdated } from './MetricsVariables/EventMetricsVariableUpdated';
 import { FilteredMetricsVariable } from './MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine } from './MetricsVariables/MetricsVariableFilterEngine';
+import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
 import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
 import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction';
@@ -81,7 +86,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   }
 
   private subscribeToEvents() {
-    this.subscribeToFiltersEvents();
+    this.initVariablesFilteringAndSorting();
 
     this._subs.add(
       this.subscribeToEvent(EventConfigureFunction, (event) => {
@@ -101,34 +106,40 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
    * In order to work, the variables to be filtered/sorted must emit lifecycle events.
    * This is done via the `withLifecycleEvents` decorator function.
    *
-   * See `FilteredMetricsVariable` class as an example.
+   * For example, check the `FilteredMetricsVariable` class.
    */
-  private subscribeToFiltersEvents() {
+  private initVariablesFilteringAndSorting() {
     const filterEnginesMap = new Map<string, MetricsVariableFilterEngine>();
+    const sortEnginesMap = new Map<string, MetricsVariableSortEngine>();
 
     this._subs.add(
       this.subscribeToEvent(EventMetricsVariableActivated, (event) => {
+        // register engines
         const { key } = event.payload;
         const filteredMetricsVariable = sceneGraph.findByKey(this, key) as QueryVariable;
+
         filterEnginesMap.set(key, new MetricsVariableFilterEngine(filteredMetricsVariable));
+        sortEnginesMap.set(key, new MetricsVariableSortEngine(filteredMetricsVariable));
       })
     );
 
     this._subs.add(
       this.subscribeToEvent(EventMetricsVariableDeactivated, (event) => {
+        // unregister engines
+        sortEnginesMap.delete(event.payload.key);
         filterEnginesMap.delete(event.payload.key);
       })
     );
 
     this._subs.add(
-      this.subscribeToEvent(EventMetricsVariableUpdated, (event) => {
+      this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
+        // filter and sort on initial load
         const { key, options } = event.payload;
         const filterEngine = filterEnginesMap.get(key)!;
-
-        filterEngine.setInitOptions(options);
-
         const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
         const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
+
+        filterEngine.setInitOptions(options);
 
         filterEngine.applyFilters(
           {
@@ -136,10 +147,30 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             prefixes: sideBar.state.selectedMetricPrefixes,
             categories: sideBar.state.selectedMetricCategories,
           },
-          true
+          { notify: false }
         );
+
+        const sortEngine = sortEnginesMap.get(event.payload.key)!;
+        const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+        const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
+
+        sortEngine.sort(sortByVariable.state.value as SortingOption);
       })
     );
+
+    this._subs.add(
+      this.subscribeToEvent(EventMetricsVariableUpdated, (event) => {
+        // sort whenever the variable options change
+        const { key } = event.payload;
+        const sortEngine = sortEnginesMap.get(key)!;
+        const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+        const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
+
+        sortEngine.sort(sortByVariable.state.value as SortingOption);
+      })
+    );
+
+    /* Filters */
 
     this._subs.add(
       this.subscribeToEvent(EventQuickSearchChanged, (event) => {
@@ -157,6 +188,18 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
         for (const [, filterEngine] of filterEnginesMap) {
           filterEngine.applyFilters({ [type]: filters });
+        }
+      })
+    );
+
+    /* Sorting */
+
+    this._subs.add(
+      this.subscribeToEvent(EventSortByChanged, (event) => {
+        const { sortBy } = event.payload;
+
+        for (const [, sortEngine] of sortEnginesMap) {
+          sortEngine.sort(sortBy);
         }
       })
     );
