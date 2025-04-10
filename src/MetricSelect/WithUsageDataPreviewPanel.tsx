@@ -39,16 +39,16 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     };
 
     return (
-      <div className={styles.panelContainer}>
+      <div className={styles.panelContainer} data-testid="metric-item">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
-        <div className={styles.usageContainer}>
+        <div className={styles.usageContainer} data-testid="usage-data-panel">
           <Tooltip content="Dashboards usage" placement="top">
-            <span className={styles.usageItem}>
+            <span className={styles.usageItem} data-testid="dashboard-usage">
               <Icon name="apps" /> {usageStats.dashboards}
             </span>
           </Tooltip>
           <Tooltip content="Alerting rules usage" placement="top">
-            <span className={styles.usageItem}>
+            <span className={styles.usageItem} data-testid="alerting-usage">
               <Icon name="bell" /> {usageStats.alertingRules}
             </span>
           </Tooltip>

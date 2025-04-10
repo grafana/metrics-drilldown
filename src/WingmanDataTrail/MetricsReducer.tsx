@@ -19,6 +19,7 @@ import React from 'react';
 
 import { getColorByIndex, getTrailFor } from 'utils';
 
+import { MetricSelectedEvent } from '../shared';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
@@ -26,7 +27,12 @@ import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
 import { ListControls } from './ListControls/ListControls';
 import { EventSortByChanged } from './ListControls/MetricsSorter/EventSortByChanged';
-import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './ListControls/MetricsSorter/MetricsSorter';
+import {
+  addRecentMetric,
+  MetricsSorter,
+  VAR_WINGMAN_SORT_BY,
+  type SortingOption,
+} from './ListControls/MetricsSorter/MetricsSorter';
 import { EventQuickSearchChanged } from './ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './ListControls/QuickSearch/QuickSearch';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
@@ -46,6 +52,7 @@ import { SceneDrawer } from './SceneDrawer';
 import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { MetricsFilterSection } from './SideBar/sections/MetricsFilterSection/MetricsFilterSection';
 import { SideBar } from './SideBar/SideBar';
+
 interface MetricsReducerState extends SceneObjectState {
   listControls: ListControls;
   sidebar: SideBar;
@@ -97,6 +104,14 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this._subs.add(
       this.subscribeToEvent(EventApplyFunction, (event) => {
         this.state.drawer.close();
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(MetricSelectedEvent, (event) => {
+        if (event.payload !== undefined) {
+          addRecentMetric(event.payload);
+        }
       })
     );
   }

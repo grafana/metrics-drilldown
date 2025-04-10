@@ -21,6 +21,66 @@ import { EventSortByChanged } from './EventSortByChanged';
 export const sortingOptions = ['default', 'dashboard-usage', 'alerting-usage'] as const;
 export type SortingOption = (typeof sortingOptions)[number];
 
+const RECENT_METRICS_STORAGE_KEY = 'metrics-drilldown-recent-metrics';
+const MAX_RECENT_METRICS = 6;
+const RECENT_METRICS_EXPIRY_DAYS = 30;
+
+interface RecentMetric {
+  name: string;
+  timestamp: number;
+}
+
+/**
+ * Adds a metric to the recent metrics list in localStorage
+ * @param metricName The name of the metric to add
+ */
+export function addRecentMetric(metricName: string): void {
+  try {
+    const recentMetrics = getRecentMetrics();
+    const now = Date.now();
+
+    // Remove the metric if it already exists and add it with new timestamp
+    const filteredMetrics = recentMetrics.filter((m) => m.name !== metricName);
+    filteredMetrics.unshift({ name: metricName, timestamp: now });
+
+    // Keep only the most recent metrics
+    const updatedMetrics = filteredMetrics.slice(0, MAX_RECENT_METRICS);
+    localStorage.setItem(RECENT_METRICS_STORAGE_KEY, JSON.stringify(updatedMetrics));
+  } catch (error) {
+    console.error('Failed to update recent metrics:', error);
+  }
+}
+
+/**
+ * Gets the list of recent metrics from localStorage, removing expired ones
+ * @returns Array of recent metric names
+ */
+export function getRecentMetrics(): RecentMetric[] {
+  try {
+    const stored = localStorage.getItem(RECENT_METRICS_STORAGE_KEY);
+    if (!stored) {
+      return [];
+    }
+
+    const recentMetrics: RecentMetric[] = JSON.parse(stored);
+    const now = Date.now();
+    const thirtyDaysAgo = now - RECENT_METRICS_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+
+    // Filter out expired metrics
+    const validMetrics = recentMetrics.filter((metric) => metric.timestamp > thirtyDaysAgo);
+
+    // If any metrics were removed, update storage
+    if (validMetrics.length !== recentMetrics.length) {
+      localStorage.setItem(RECENT_METRICS_STORAGE_KEY, JSON.stringify(validMetrics));
+    }
+
+    return validMetrics;
+  } catch (error) {
+    console.error('Failed to get recent metrics:', error);
+    return [];
+  }
+}
+
 interface MetricsSorterState extends SceneObjectState {
   $variables: SceneVariableSet;
   inputControls: SceneObject;
@@ -48,6 +108,8 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
             label: 'Sort by',
             value: 'default',
             query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
+            description:
+              'Sort metrics by default (alphabetically, with recently-selected metrics first), by prevalence in dashboard panel queries, or by prevalence in alerting rules',
           }),
         ],
       }),
@@ -72,7 +134,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   public static Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
     const { inputControls } = model.useState();
 
-    return <inputControls.Component model={inputControls} />;
+    return <inputControls.Component model={inputControls} data-testid="sort-by-select" />;
   };
 }
 
@@ -312,4 +374,30 @@ export function sortMetricsByCount(metrics: string[], counts: Record<string, num
  */
 export function sortMetricsAlphabetically(metrics: string[]): string[] {
   return [...metrics].sort((a, b) => localeCompare(a, b));
+}
+
+/**
+ * Sort metrics with recent metrics first (by recency), then alphabetically
+ * @param metrics Array of metric names
+ * @returns Sorted array of metric names
+ */
+export function sortMetricsWithRecentFirst(metrics: string[]): string[] {
+  const allRecentMetrics = getRecentMetrics().map((m) => m.name);
+  const allRecentMetricsSet = new Set(allRecentMetrics);
+  const [recent, nonRecent] = metrics.reduce<[string[], string[]]>(
+    ([recent, nonRecent], metric) => {
+      if (allRecentMetricsSet.has(metric)) {
+        recent.push(metric);
+      } else {
+        nonRecent.push(metric);
+      }
+      return [recent, nonRecent];
+    },
+    [[], []]
+  );
+  const sortedNonRecent = sortMetricsAlphabetically(nonRecent);
+  // `recentMetrics` are already sorted by recency, so we just need to filter them
+  const sortedRecent = allRecentMetrics.filter((m) => recent.includes(m));
+
+  return [...sortedRecent, ...sortedNonRecent];
 }

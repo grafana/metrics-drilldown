@@ -4,8 +4,8 @@ import { getTrailFor } from 'utils';
 import {
   fetchAlertingMetrics,
   fetchDashboardMetrics,
-  sortMetricsAlphabetically,
   sortMetricsByCount,
+  sortMetricsWithRecentFirst,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
@@ -41,7 +41,7 @@ export class MetricsVariableSortEngine {
         break;
 
       default:
-        sortedMetrics = sortMetricsAlphabetically(metrics);
+        sortedMetrics = sortMetricsWithRecentFirst(metrics);
         break;
     }
 
