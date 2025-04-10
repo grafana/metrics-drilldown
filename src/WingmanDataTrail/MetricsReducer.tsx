@@ -145,7 +145,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           {
             names: quickSearch.state.value ? [quickSearch.state.value] : [],
             prefixes: sideBar.state.selectedMetricPrefixes,
-            categories: sideBar.state.selectedMetricCategories,
+            suffixes: sideBar.state.selectedMetricSuffixes,
           },
           { notify: false }
         );
