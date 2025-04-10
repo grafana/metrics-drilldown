@@ -141,6 +141,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
           reportExploreMetrics('metric_selected', {
             from: 'metric_list',
+            // HISTORY: need way to identify selected metrics from related metrics
+            // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
             searchTermCount,
           });
         }
