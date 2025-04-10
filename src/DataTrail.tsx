@@ -346,6 +346,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
+    // TODO: 02 SelectMetricAction - Main event handler that processes metric selection
     const metric = evt.payload ?? '';
 
     if (this.state.useOtelExperience) {

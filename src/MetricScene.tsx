@@ -233,6 +233,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               variant={'canvas'}
               tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
               onClick={() => {
+                // TODO: 04 SelectMetricAction - UI component that allows deselecting the current metric
                 reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
                 trail.publishEvent(new MetricSelectedEvent(undefined));
               }}

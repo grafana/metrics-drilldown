@@ -134,14 +134,13 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToEvent(MetricSelectedEvent, (event) => {
+        // TODO: 03 SelectMetricAction - Event subscription that handles analytics and metric selection tracking
         if (event.payload !== undefined) {
           const metricSearch = getMetricSearch(trail);
           const searchTermCount = deriveSearchTermsFromInput(metricSearch).length;
 
           reportExploreMetrics('metric_selected', {
             from: 'metric_list',
-            // HISTORY: need way to identify selected metrics from related metrics
-            // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
             searchTermCount,
           });
         }
