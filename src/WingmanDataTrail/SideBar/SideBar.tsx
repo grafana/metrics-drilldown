@@ -6,6 +6,7 @@ import React from 'react';
 
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
+import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
 import { BookmarksList } from './sections/BookmarksList';
@@ -47,11 +48,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         // TEMP
         new MetricsFilterSection({
           key: 'suffix-filters',
-          type: 'prefixes',
+          type: 'suffixes',
           title: 'Suffix filters',
           description: 'Filter metrics based on their name suffix',
           iconName: 'filter',
-          computeGroups: computeMetricPrefixGroups,
+          computeGroups: computeMetricSuffixGroups,
         }),
         new LabelsBrowser({
           key: 'groupby-labels',
