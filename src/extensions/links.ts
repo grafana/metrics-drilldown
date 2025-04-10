@@ -58,8 +58,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
         [UrlParameters.TimeRangeTo, timeRange?.to],
         [UrlParameters.DatasourceId, datasource.uid],
         ...queryMetrics[0].labelFilters.map(
-          (f) =>
-            [UrlParameters.Filters, encodeURIComponent(`${f.label}${f.op}"${f.value}"`)] as [UrlParameterType, string]
+          (f) => [UrlParameters.Filters, `${f.label}${f.op}${f.value}`] as [UrlParameterType, string]
         ),
       ]);
 
