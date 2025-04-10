@@ -13,7 +13,7 @@ test.describe('Browser History', () => {
     // Capture the URL after clicking the start button
     const initialUrl = page.url();
 
-    await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
+    await selectMetricView.selectMetricPanel('a_utf8_http_requests_total');
     await page.goBack();
 
     // Capture the URL after going back and compare with the initial URL
@@ -33,7 +33,7 @@ test.describe('Browser History', () => {
     // Capture the URL after clicking the start button
     const initialUrl = page.url();
 
-    await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
+    await selectMetricView.selectMetricPanel('a_utf8_http_requests_total');
     await page.goBack();
 
     // Capture the URL after going back and compare with the initial URL
