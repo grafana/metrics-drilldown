@@ -140,7 +140,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   private getHumanFriendlyCountsMessage() {
     const { counts, disableRatioDisplay } = this.state;
 
-    if (disableRatioDisplay) {
+    if (disableRatioDisplay || counts.current === counts.total) {
       // we keep current because it's the count of the active variable (e.g. MetricsWithLabelValueVariable) after selecting a "Group by" value
       // (total is always the count of options of MetricsVariable)
       return {
