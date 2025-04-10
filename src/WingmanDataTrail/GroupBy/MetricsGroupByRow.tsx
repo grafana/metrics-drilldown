@@ -172,7 +172,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
-            <Button variant="secondary" fill="outline" onClick={onClickSelect}>
+            <Button variant="secondary" onClick={onClickSelect}>
               Select
             </Button>
           </div>
