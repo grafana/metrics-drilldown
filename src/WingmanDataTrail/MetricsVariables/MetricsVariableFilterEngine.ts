@@ -1,4 +1,4 @@
-import { type QueryVariable, type VariableValueOption } from '@grafana/scenes';
+import { SceneVariableValueChangedEvent, type QueryVariable, type VariableValueOption } from '@grafana/scenes';
 import { cloneDeep, isEqual } from 'lodash';
 
 import { type MetricOptions } from './MetricsVariable';
@@ -26,20 +26,23 @@ export class MetricsVariableFilterEngine {
     this.initOptions = cloneDeep(options);
   }
 
-  public applyFilters(filters: Partial<MetricFilters> = this.filters, forceUpdate = false) {
+  public applyFilters(filters: Partial<MetricFilters> = this.filters, settings = { notify: true }) {
     const updatedFilters = {
       ...this.filters,
       ...filters,
     };
 
     if (
-      !forceUpdate &&
-      (isEqual(this.filters, updatedFilters) ||
-        (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length))
+      isEqual(this.filters, updatedFilters) ||
+      (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length)
     ) {
       this.filters = updatedFilters;
 
       this.variable.setState({ options: this.initOptions });
+
+      if (settings.notify) {
+        this.notifyUpdate();
+      }
 
       return;
     }
@@ -62,6 +65,10 @@ export class MetricsVariableFilterEngine {
     this.filters = updatedFilters;
 
     this.variable.setState({ options: filteredOptions });
+
+    if (settings.notify) {
+      this.notifyUpdate();
+    }
   }
 
   private static applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
@@ -120,5 +127,10 @@ export class MetricsVariableFilterEngine {
     } catch {
       return new RegExp('.*');
     }
+  }
+
+  private notifyUpdate() {
+    // hack to force SceneByVariableRepeater to re-render
+    this.variable.publishEvent(new SceneVariableValueChangedEvent(this.variable), true);
   }
 }
