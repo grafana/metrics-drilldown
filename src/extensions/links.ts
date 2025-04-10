@@ -119,106 +119,47 @@ type ParsedPromQuery = { metric: string | undefined; labelFilters: PromLabelFilt
  * Note: This parser is simplified and may not cover all complex PromQL syntaxes,
  * especially nested functions or advanced selectors. It prioritizes common cases.
  */
-function parsePromQueryRegex(query: string): ParsedPromQuery {
+export function parsePromQueryRegex(query: string): ParsedPromQuery {
   let metric: string | undefined = undefined;
   const labelFilters: PromLabelFilter[] = [];
   const trimmedQuery = query.trim();
 
-  // Regex to find metric name optionally followed by labels
-  // Tries to capture the first identifier and an optional subsequent label block {}
+  // First, try to find the metric name and labels in the most common format
   const queryMatch = trimmedQuery.match(/^([a-zA-Z_:][a-zA-Z0-9_:]*)\s*(?:\{([^}]*)\})?/);
 
   if (queryMatch) {
     const potentialMetric = queryMatch[1];
-    const labelsContent = queryMatch[2]; // Undefined if no {}
+    const labelsContent = queryMatch[2];
 
-    // Avoid matching known function names like 'rate', 'sum' if they are followed by '('
-    // indicating a function call rather than a metric identifier.
+    // Check if this is a function call
     const nextCharIndex = queryMatch[0].length;
     const nextChar = trimmedQuery[nextCharIndex];
     const isLikelyFunctionCall = nextChar === '(';
 
-    // Set of known PromQL functions/keywords that are unlikely to be metrics when followed by '('
-    const knownKeywords = new Set([
-      'rate',
-      'increase',
-      'sum',
-      'avg',
-      'count',
-      'max',
-      'min',
-      'stddev',
-      'stdvar',
-      'topk',
-      'bottomk',
-      'quantile',
-      'histogram_quantile',
-      'label_replace',
-      'label_join',
-      'vector',
-      'scalar',
-      'time',
-      'timestamp',
-      'month',
-      'year',
-      'day_of_month',
-      'day_of_week',
-      'days_in_month',
-      'hour',
-      'minute',
-      // Aggregation clauses etc.
-      'by',
-      'without',
-      'on',
-      'ignoring',
-      'group_left',
-      'group_right',
-    ]);
-
     if (!(isLikelyFunctionCall && knownKeywords.has(potentialMetric))) {
       metric = potentialMetric;
     }
-    // If it is a likely function call, we don't assign the metric here.
-    // More sophisticated parsing would be needed to find the metric *inside* the function.
 
     // Parse labels if content exists
     if (labelsContent !== undefined) {
-      const labelParts = labelsContent.split(',');
-      // Regex for a single label key-op-value pair
-      const labelRegex = /^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*([=!~]+)\s*"((?:[^"\\]|\\.)*)"\s*$/;
-      // Note: The value regex `((?:[^"\\]|\\.)*)` handles escaped quotes (\") inside the value.
-      labelParts.forEach((part) => {
-        if (part.trim() === '') {
-          return;
-        } // Skip empty parts (e.g., from trailing commas)
-        const match = part.match(labelRegex);
-        if (match) {
-          // Unescape values (e.g., \\ -> \, \" -> ")
-          const unescapedValue = match[3].replace(/\\(.)/g, '$1');
-          labelFilters.push({ label: match[1], op: match[2], value: unescapedValue });
-        } else {
-          console.warn(`[Metrics Drilldown] Could not parse label part: "${part}" in query: "${query}"`);
-        }
-      });
+      parseLabels(labelsContent, labelFilters);
     }
-  } else {
-    // The initial regex didn't match (e.g., query doesn't start with an identifier).
-    // This might happen with binary operations at the very start, or complex cases.
-    console.warn(`[Metrics Drilldown] Could not extract metric/labels from start of query: "${query}"`);
   }
 
-  // If no metric was found initially (e.g. function call), try a simpler scan
-  // for the first identifier that isn't a known keyword. This is less reliable.
+  // If we didn't find a metric or it was a function call, try to find the metric inside the query
   if (!metric) {
-    const identifiers = trimmedQuery.match(/[a-zA-Z_:][a-zA-Z0-9_:]*/g) || [];
-    const knownKeywords = new Set(['rate', 'increase', 'sum', 'avg', /* ... add others ... */ 'by', 'without']);
-    for (const id of identifiers) {
-      if (!knownKeywords.has(id) && isNaN(Number(id))) {
-        // Check if it's not a keyword and not a number
-        metric = id;
-        // Attempt to find associated labels *near* this identifier
-        // This part is heuristic and less reliable. For now, we just take the metric.
-        // A more robust solution would require actual parsing.
+    // Look for the first occurrence of a metric pattern that's not a known keyword
+    const metricPattern = /([a-zA-Z_:][a-zA-Z0-9_:]*)\s*(?:\{([^}]*)\})?/g;
+    let match;
+    while ((match = metricPattern.exec(trimmedQuery)) !== null) {
+      const potentialMetric = match[1];
+      const labelsContent = match[2];
+
+      if (!knownKeywords.has(potentialMetric)) {
+        metric = potentialMetric;
+        if (labelsContent) {
+          parseLabels(labelsContent, labelFilters);
+        }
         break;
       }
     }
@@ -226,3 +167,56 @@ function parsePromQueryRegex(query: string): ParsedPromQuery {
 
   return { metric, labelFilters, query };
 }
+
+function parseLabels(labelsContent: string, labelFilters: PromLabelFilter[]): void {
+  const labelParts = labelsContent.split(',');
+  const labelRegex = /^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*([=!~]+)\s*"((?:[^"\\]|\\.)*)"\s*$/;
+
+  labelParts.forEach((part) => {
+    if (part.trim() === '') {
+      return;
+    }
+    const match = part.match(labelRegex);
+    if (match) {
+      const unescapedValue = match[3].replace(/\\(.)/g, '$1');
+      labelFilters.push({ label: match[1], op: match[2], value: unescapedValue });
+    } else {
+      console.warn(`[Metrics Drilldown] Could not parse label part: "${part}"`);
+    }
+  });
+}
+
+const knownKeywords = new Set([
+  'rate',
+  'increase',
+  'sum',
+  'avg',
+  'count',
+  'max',
+  'min',
+  'stddev',
+  'stdvar',
+  'topk',
+  'bottomk',
+  'quantile',
+  'histogram_quantile',
+  'label_replace',
+  'label_join',
+  'vector',
+  'scalar',
+  'time',
+  'timestamp',
+  'month',
+  'year',
+  'day_of_month',
+  'day_of_week',
+  'days_in_month',
+  'hour',
+  'minute',
+  'by',
+  'without',
+  'on',
+  'ignoring',
+  'group_left',
+  'group_right',
+]);
