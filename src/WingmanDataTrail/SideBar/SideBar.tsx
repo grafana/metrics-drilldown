@@ -12,8 +12,8 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
-import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
+import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricSuffixGroups';
 import {
   VAR_METRICS_VARIABLE,
   type MetricOptions,
@@ -28,11 +28,11 @@ import {
 
 interface SideBarState extends SceneObjectState {
   prefixGroups: Array<{ label: string; value: string; count: number }>;
-  categories: Array<{ label: string; value: string; count: number }>;
+  suffixGroups: Array<{ label: string; value: string; count: number }>;
   hideEmptyGroups: boolean;
   hideEmptyTypes: boolean;
   selectedMetricPrefixes: string[];
-  selectedMetricCategories: string[];
+  selectedMetricSuffixes: string[];
   loading: boolean;
 }
 
@@ -58,11 +58,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       ...state,
       key: 'sidebar',
       prefixGroups: [],
-      categories: [],
+      suffixGroups: [],
       hideEmptyGroups: true,
       hideEmptyTypes: true,
       selectedMetricPrefixes: [],
-      selectedMetricCategories: [],
+      selectedMetricSuffixes: [],
       loading: true,
     });
 
@@ -87,23 +87,23 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   private updateLists(options: MetricOptions) {
     this.setState({
       prefixGroups: computeMetricPrefixGroups(options),
-      categories: computeMetricCategories(options),
+      suffixGroups: computeMetricSuffixGroups(options),
       loading: false,
     });
   }
 
   private updateCounts(filteredOptions: MetricOptions) {
     const prefixGroups = computeMetricPrefixGroups(filteredOptions);
-    const categories = computeMetricCategories(filteredOptions);
+    const suffixGroups = computeMetricSuffixGroups(filteredOptions);
 
     this.setState({
       prefixGroups: this.state.prefixGroups.map((group) => ({
         ...group,
         count: prefixGroups.find((p) => p.label === group.label)?.count || 0,
       })),
-      categories: this.state.categories.map((group) => ({
+      suffixGroups: this.state.suffixGroups.map((group) => ({
         ...group,
-        count: categories.find((c) => c.label === group.label)?.count || 0,
+        count: suffixGroups.find((s) => s.label === group.label)?.count || 0,
       })),
       loading: false,
     });
@@ -111,10 +111,10 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const { selectedMetricPrefixes, selectedMetricCategories, prefixGroups, categories, loading } = model.useState();
+    const { selectedMetricPrefixes, selectedMetricSuffixes, prefixGroups, suffixGroups, loading } = model.useState();
 
-    const onSelectFilter = (type: 'prefixes' | 'categories', filters: string[]) => {
-      const selectedKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricCategories';
+    const onSelectFilter = (type: 'prefixes' | 'suffixes', filters: string[]) => {
+      const selectedKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricSuffixes';
       model.setState({ [selectedKey]: filters });
       model.publishEvent(new EventFiltersChanged({ type: type, filters }), true);
     };
@@ -133,12 +133,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         </div>
         <div className={styles.bottomPanel}>
           <MetricsFilterSection
-            title="Categories filters"
-            items={categories}
-            selectedValues={selectedMetricCategories}
-            onSelectionChange={(filters) => onSelectFilter('categories', filters)}
+            title="Metric suffix filters"
+            items={suffixGroups}
+            selectedValues={selectedMetricSuffixes}
+            onSelectionChange={(filters) => onSelectFilter('suffixes', filters)}
             loading={loading}
-            dataTestId="categories-filters"
+            dataTestId="metric-suffix-filters"
           />
         </div>
       </div>
