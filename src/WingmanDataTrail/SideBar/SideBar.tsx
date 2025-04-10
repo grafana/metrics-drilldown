@@ -116,7 +116,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const onSelectFilter = (type: 'prefixes' | 'suffixes', filters: string[]) => {
       const selectedKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricSuffixes';
       model.setState({ [selectedKey]: filters });
-      model.publishEvent(new EventFiltersChanged({ type: type, filters }));
+      model.publishEvent(new EventFiltersChanged({ type: type, filters }), true);
     };
 
     return (
