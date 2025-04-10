@@ -6,7 +6,6 @@ import {
   fetchDashboardMetrics,
   sortMetricsAlphabetically,
   sortMetricsByCount,
-  sortMetricsReverseAlphabetically,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
@@ -39,10 +38,6 @@ export class MetricsVariableSortEngine {
 
       case 'alerting-usage':
         sortedMetrics = await this.sortByAlertingUsage(metrics, getTrailFor(this.variable).state.alertingMetrics);
-        break;
-
-      case 'reverse-alphabetical':
-        sortedMetrics = sortMetricsReverseAlphabetically(metrics);
         break;
 
       default:

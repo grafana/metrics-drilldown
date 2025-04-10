@@ -18,7 +18,7 @@ import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 import { EventSortByChanged } from './EventSortByChanged';
 
-export const sortingOptions = ['alphabetical', 'reverse-alphabetical', 'dashboard-usage', 'alerting-usage'] as const;
+export const sortingOptions = ['default', 'dashboard-usage', 'alerting-usage'] as const;
 export type SortingOption = (typeof sortingOptions)[number];
 
 interface MetricsSorterState extends SceneObjectState {
@@ -27,8 +27,7 @@ interface MetricsSorterState extends SceneObjectState {
 }
 
 export const sortByOptions: VariableValueOption[] = [
-  { label: 'Metric Name (A-Z)', value: 'alphabetical' },
-  { label: 'Metric Name (Z-A)', value: 'reverse-alphabetical' },
+  { label: 'Default', value: 'default' },
   { label: 'Dashboard Usage', value: 'dashboard-usage' },
   { label: 'Alerting Usage', value: 'alerting-usage' },
 ];
@@ -47,7 +46,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
           new CustomVariable({
             name: VAR_WINGMAN_SORT_BY,
             label: 'Sort by',
-            value: 'alphabetical',
+            value: 'default',
             query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
           }),
         ],
@@ -307,14 +306,10 @@ export function sortMetricsByCount(metrics: string[], counts: Record<string, num
 }
 
 /**
- * Sort metrics in reverse alphabetical order
+ * Sort metrics in alphabetical order
  * @param metrics Array of metric names
- * @returns Sorted array of metric names in reverse alphabetical order
+ * @returns Sorted array of metric names in alphabetical order
  */
-export function sortMetricsReverseAlphabetically(metrics: string[]): string[] {
-  return [...metrics].sort((a, b) => localeCompare(b, a));
-}
-
 export function sortMetricsAlphabetically(metrics: string[]): string[] {
   return [...metrics].sort((a, b) => localeCompare(a, b));
 }
