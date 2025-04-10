@@ -1,7 +1,7 @@
 import { BusEventWithPayload } from '@grafana/data';
 
 export interface EventFiltersChangedPayload {
-  type: 'prefixes' | 'categories';
+  type: 'prefixes' | 'suffixes';
   filters: string[];
 }
 
