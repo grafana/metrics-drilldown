@@ -19,6 +19,12 @@ import { EventMetricsVariableUpdated } from './EventMetricsVariableUpdated';
 export function withLifecycleEvents<T extends MultiValueVariable>(variable: T): T {
   const key = variable.state.key as string;
 
+  if (!key) {
+    throw new TypeError(
+      `Variable "${variable.state.name}" has no key. Please provide a key in order to publish its lifecycle events.`
+    );
+  }
+
   variable.addActivationHandler(() => {
     variable.publishEvent(new EventMetricsVariableActivated({ key }), true);
 
