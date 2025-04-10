@@ -1,11 +1,11 @@
 import { type MultiValueVariable, type MultiValueVariableState } from '@grafana/scenes';
-import { isEqual } from 'lodash';
 import { type Unsubscribable } from 'rxjs';
 
 import { EventMetricsVariableActivated } from './EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './EventMetricsVariableLoaded';
 import { EventMetricsVariableUpdated } from './EventMetricsVariableUpdated';
+import { areArraysEqual } from './helpers/areArraysEqual';
 
 /**
  * Adds the publication of lifecycle events to a metrics variable:
@@ -45,7 +45,7 @@ export function withLifecycleEvents<T extends MultiValueVariable>(variable: T): 
         }
 
         updateSub = variable.subscribeToState((newState, prevState) => {
-          if (newState.options.length !== prevState.options.length || !isEqual(newState.options, prevState.options)) {
+          if (!areArraysEqual(newState.options, prevState.options)) {
             variable.publishEvent(new EventMetricsVariableUpdated({ key }), true);
           }
         });

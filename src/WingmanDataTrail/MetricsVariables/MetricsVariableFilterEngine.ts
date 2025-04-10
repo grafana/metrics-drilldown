@@ -32,10 +32,11 @@ export class MetricsVariableFilterEngine {
       ...filters,
     };
 
-    if (
-      isEqual(this.filters, updatedFilters) ||
-      (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length)
-    ) {
+    if (isEqual(this.filters, updatedFilters)) {
+      return;
+    }
+
+    if (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length) {
       this.filters = updatedFilters;
 
       this.variable.setState({ options: this.initOptions });

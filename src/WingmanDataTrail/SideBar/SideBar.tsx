@@ -1,146 +1,141 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import {
-  sceneGraph,
-  SceneObjectBase,
-  VariableDependencyConfig,
-  type MultiValueVariable,
-  type SceneComponentProps,
-  type SceneObjectState,
-} from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import { Button, IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
-import { computeMetricCategories } from 'WingmanDataTrail/MetricsVariables/computeMetricCategories';
+import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
-import {
-  VAR_METRICS_VARIABLE,
-  type MetricOptions,
-  type MetricsVariable,
-} from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
-import { MetricsFilterSection } from './MetricsFilterSection';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from '../MetricsVariables/FilteredMetricsVariable';
+import { BookmarksList } from './sections/BookmarksList';
+import { LabelsBrowser } from './sections/LabelsBrowser';
+import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
+import { Settings } from './sections/Settings';
+
+type Section = MetricsFilterSection | LabelsBrowser | BookmarksList | Settings;
 
 interface SideBarState extends SceneObjectState {
-  prefixGroups: Array<{ label: string; value: string; count: number }>;
-  categories: Array<{ label: string; value: string; count: number }>;
-  hideEmptyGroups: boolean;
-  hideEmptyTypes: boolean;
-  selectedMetricPrefixes: string[];
-  selectedMetricCategories: string[];
-  loading: boolean;
+  sections: Section[];
+  activeSection: Section | null;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
-  protected _variableDependency = new VariableDependencyConfig(this, {
-    onAnyVariableChanged: (variable) => {
-      const { name, options } = (variable as MultiValueVariable).state;
-
-      if (name === VAR_METRICS_VARIABLE) {
-        this.updateLists(options as MetricOptions);
-        return;
-      }
-
-      if (name === VAR_FILTERED_METRICS_VARIABLE) {
-        this.updateCounts(options as MetricOptions);
-        return;
-      }
-    },
-  });
-
   constructor(state: Partial<SideBarState>) {
     super({
-      ...state,
       key: 'sidebar',
-      prefixGroups: [],
-      categories: [],
-      hideEmptyGroups: true,
-      hideEmptyTypes: true,
-      selectedMetricPrefixes: [],
-      selectedMetricCategories: [],
-      loading: true,
+      activeSection: null,
+      sections: [
+        new MetricsFilterSection({
+          key: 'rule-filters',
+          type: 'categories',
+          title: 'Rules filters',
+          description: 'Filter metrics, recording rules and alerting rules',
+          iconName: 'record-audio',
+          computeGroups: computeRulesGroups,
+          showHideEmpty: false,
+          showSearch: false,
+        }),
+        new MetricsFilterSection({
+          key: 'prefix-filters',
+          type: 'prefixes',
+          title: 'Prefix filters',
+          description: 'Filter metrics based on their name prefix',
+          iconName: 'filter',
+          computeGroups: computeMetricPrefixGroups,
+        }),
+        // TEMP
+        new MetricsFilterSection({
+          key: 'suffix-filters',
+          type: 'prefixes',
+          title: 'Suffix filters',
+          description: 'Filter metrics based on their name suffix',
+          iconName: 'filter',
+          computeGroups: computeMetricPrefixGroups,
+        }),
+        new LabelsBrowser({
+          key: 'groupby-labels',
+          variableName: VAR_WINGMAN_GROUP_BY,
+          title: 'Group by labels',
+          description: 'Group metrics by their label values',
+          iconName: 'gf-prometheus',
+        }),
+        new BookmarksList({
+          key: 'bookmarks',
+          title: 'Bookmarks',
+          description: 'Bookmarks',
+          iconName: 'bookmark',
+          disabled: true,
+        }),
+        new Settings({
+          key: 'settings',
+          title: 'Settings',
+          description: 'Settings',
+          iconName: 'cog',
+          disabled: true,
+        }),
+      ],
+      ...state,
     });
-
-    this.addActivationHandler(this.onActivate.bind(this));
   }
 
-  private onActivate() {
-    const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
+  public setActiveSection(sectionKey: string) {
+    const { activeSection, sections } = this.state;
 
-    this.updateLists(metricsVariable.state.options as MetricOptions);
-
-    const filteredMetricsVariable = sceneGraph.lookupVariable(
-      VAR_FILTERED_METRICS_VARIABLE,
-      this
-    ) as FilteredMetricsVariable;
-
-    this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
-
-    this.setState({ loading: !filteredMetricsVariable.state.options.length });
-  }
-
-  private updateLists(options: MetricOptions) {
-    this.setState({
-      prefixGroups: computeMetricPrefixGroups(options),
-      categories: computeMetricCategories(options),
-      loading: false,
-    });
-  }
-
-  private updateCounts(filteredOptions: MetricOptions) {
-    const prefixGroups = computeMetricPrefixGroups(filteredOptions);
-    const categories = computeMetricCategories(filteredOptions);
+    if (!sectionKey || sectionKey === activeSection?.state.key) {
+      this.setState({ activeSection: null });
+      return;
+    }
 
     this.setState({
-      prefixGroups: this.state.prefixGroups.map((group) => ({
-        ...group,
-        count: prefixGroups.find((p) => p.label === group.label)?.count || 0,
-      })),
-      categories: this.state.categories.map((group) => ({
-        ...group,
-        count: categories.find((c) => c.label === group.label)?.count || 0,
-      })),
-      loading: false,
+      activeSection: sections.find((section) => section.state.key === sectionKey) ?? null,
     });
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const { selectedMetricPrefixes, selectedMetricCategories, prefixGroups, categories, loading } = model.useState();
-
-    const onSelectFilter = (type: 'prefixes' | 'categories', filters: string[]) => {
-      const selectedKey = type === 'prefixes' ? 'selectedMetricPrefixes' : 'selectedMetricCategories';
-      model.setState({ [selectedKey]: filters });
-      model.publishEvent(new EventFiltersChanged({ type: type, filters }), true);
-    };
+    const { sections, activeSection } = model.useState();
 
     return (
       <div className={styles.container}>
-        <div className={styles.topPanel}>
-          <MetricsFilterSection
-            title="Metric prefix filters"
-            items={prefixGroups}
-            selectedValues={selectedMetricPrefixes}
-            onSelectionChange={(filters) => onSelectFilter('prefixes', filters)}
-            loading={loading}
-            dataTestId="metric-prefix-filters"
-          />
+        <div className={styles.buttonsBar}>
+          {sections.map((section) => (
+            <div
+              key={section.state.key}
+              className={cx(
+                styles.buttonContainer,
+                activeSection?.state.key === section.state.key && 'active',
+                section.state.disabled && 'disabled'
+              )}
+            >
+              <Button
+                className={cx(styles.button, section.state.disabled && 'disabled')}
+                size="md"
+                variant="secondary"
+                fill="text"
+                icon={section.state.iconName}
+                aria-label={section.state.title}
+                tooltip={section.state.title}
+                tooltipPlacement="right"
+                onClick={() => model.setActiveSection(section.state.key)}
+                disabled={section.state.disabled}
+              />
+            </div>
+          ))}
         </div>
-        <div className={styles.bottomPanel}>
-          <MetricsFilterSection
-            title="Categories filters"
-            items={categories}
-            selectedValues={selectedMetricCategories}
-            onSelectionChange={(filters) => onSelectFilter('categories', filters)}
-            loading={loading}
-            dataTestId="categories-filters"
-          />
-        </div>
+        {activeSection && (
+          <div className={styles.content}>
+            <IconButton
+              className={styles.closeButton}
+              name="times"
+              aria-label="Close"
+              tooltip="Close"
+              tooltipPlacement="top"
+              onClick={() => model.setActiveSection('')}
+            />
+            {activeSection && <activeSection.Component model={activeSection as any} />}
+          </div>
+        )}
       </div>
     );
   };
@@ -149,26 +144,77 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'row',
+      height: '100%',
+      overflow: 'hidden',
+    }),
+    buttonsBar: css({
       display: 'flex',
       flexDirection: 'column',
-      height: '100%',
-      background: theme.colors.background.primary,
+      alignItems: 'center',
+      gap: 0,
+      width: '42px',
+      padding: 0,
+      margin: 0,
+      boxSizing: 'border-box',
       border: `1px solid ${theme.colors.border.weak}`,
       borderRadius: theme.shape.radius.default,
-      overflow: 'hidden',
+      backgroundColor: theme.colors.background.primary,
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
     }),
-    topPanel: css({
-      height: '50%',
-      overflow: 'hidden',
-      padding: theme.spacing(2),
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
-      background: theme.colors.background.primary,
+    buttonContainer: css({
+      marginTop: theme.spacing(1),
+      '&::before': {
+        transition: '0.5s ease',
+        content: '""',
+        position: 'absolute',
+        left: 0,
+        height: '32px',
+        borderLeft: `2px solid ${theme.colors.action.selectedBorder}`,
+        boxSizing: 'border-box',
+        opacity: 0,
+        visibility: 'hidden',
+      },
+      '&:hover::before': {
+        opacity: 1,
+        visibility: 'visible',
+      },
+      '&.active::before': {
+        opacity: 1,
+        visibility: 'visible',
+      },
+      '&.disabled::before': {
+        opacity: 0,
+        visibility: 'hidden',
+      },
     }),
-    bottomPanel: css({
-      height: '50%',
-      overflow: 'hidden',
-      padding: theme.spacing(2),
-      background: theme.colors.background.primary,
+    button: css({
+      margin: 0,
+      '&:hover': {
+        color: theme.colors.text.maxContrast,
+        background: 'transparent',
+      },
+      '&.disabled:hover': {
+        color: theme.colors.text.secondary,
+      },
+    }),
+    content: css({
+      width: 'calc(300px - 42px)', // we want 300px in total
+      boxSizing: 'border-box',
+      border: `1px solid ${theme.colors.border.weak}`,
+      borderLeft: 'none',
+      borderRadius: theme.shape.radius.default,
+      backgroundColor: theme.colors.background.canvas,
+      padding: theme.spacing(1.5),
+    }),
+    closeButton: css({
+      position: 'absolute',
+      top: theme.spacing(1.5),
+      right: theme.spacing(1),
+      margin: 0,
     }),
   };
 }

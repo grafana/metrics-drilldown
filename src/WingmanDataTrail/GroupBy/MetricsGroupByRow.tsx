@@ -238,7 +238,7 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       background: theme.colors.background.canvas,
-      margin: theme.spacing(1, 1, 0, 1),
+      margin: theme.spacing(1, 0, 0, 0),
 
       '& div:focus-within': {
         boxShadow: 'none !important',

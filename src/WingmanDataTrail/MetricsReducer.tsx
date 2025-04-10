@@ -36,7 +36,7 @@ import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVaria
 import { EventMetricsVariableUpdated } from './MetricsVariables/EventMetricsVariableUpdated';
 import { FilteredMetricsVariable } from './MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from './MetricsVariables/MetricsVariable';
-import { MetricsVariableFilterEngine } from './MetricsVariables/MetricsVariableFilterEngine';
+import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
 import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
@@ -44,7 +44,8 @@ import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction'
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
-import { EventFiltersChanged } from './SideBar/EventFiltersChanged';
+import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
+import { MetricsFilterSection } from './SideBar/sections/MetricsFilterSection/MetricsFilterSection';
 import { SideBar } from './SideBar/SideBar';
 interface MetricsReducerState extends SceneObjectState {
   headerControls: HeaderControls;
@@ -136,19 +137,25 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         // filter and sort on initial load
         const { key, options } = event.payload;
         const filterEngine = filterEnginesMap.get(key)!;
-        const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
-        const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
 
         filterEngine.setInitOptions(options);
 
-        filterEngine.applyFilters(
-          {
-            names: quickSearch.state.value ? [quickSearch.state.value] : [],
-            prefixes: sideBar.state.selectedMetricPrefixes,
-            categories: sideBar.state.selectedMetricCategories,
-          },
-          { notify: false }
-        );
+        const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
+        const filterSections = sceneGraph.findAllObjects(
+          this,
+          (o) => o instanceof MetricsFilterSection
+        ) as MetricsFilterSection[];
+
+        const filters: Partial<MetricFilters> = {
+          names: quickSearch.state.value ? [quickSearch.state.value] : [],
+        };
+
+        // TODO: verify it works when landing on the page
+        for (const filterSection of filterSections) {
+          filters[filterSection.state.type] = filterSection.state.selectedFilters;
+        }
+
+        filterEngine.applyFilters(filters, { notify: false });
 
         const sortEngine = sortEnginesMap.get(event.payload.key)!;
         const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
@@ -302,8 +309,8 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       overflowY: 'auto',
     }),
     sidebar: css({
-      flex: '0 0 320px',
-      overflowY: 'hidden',
+      flex: '0 0 auto',
+      overflowY: 'auto',
     }),
     variables: css({
       display: 'none',

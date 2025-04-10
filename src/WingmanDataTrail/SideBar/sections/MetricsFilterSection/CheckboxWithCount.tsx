@@ -33,6 +33,10 @@ function getStyles(theme: GrafanaTheme2) {
       '& label *': {
         fontSize: '14px !important',
       },
+      // TODO: check me
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     }),
     count: css({
       color: theme.colors.text.secondary,

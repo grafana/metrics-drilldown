@@ -4,20 +4,20 @@ import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { CheckboxWithCount } from './CheckboxWithCount';
-import { type MetricsFilterSectionProps } from './MetricsFilterSection';
+import { type MetricsFilterSectionState } from './MetricsFilterSection';
 
 export function CheckBoxList({
-  filteredList,
+  items,
   selectedValues,
   onSelectionChange,
 }: {
-  filteredList: MetricsFilterSectionProps['items'];
-  selectedValues: MetricsFilterSectionProps['selectedValues'];
-  onSelectionChange: MetricsFilterSectionProps['onSelectionChange'];
+  items: MetricsFilterSectionState['groups'];
+  selectedValues: MetricsFilterSectionState['selectedFilters'];
+  onSelectionChange: (filters: string[]) => void;
 }) {
   const styles = useStyles2(getStyles);
 
-  if (!filteredList.length) {
+  if (!items.length) {
     return <div className={styles.noResults}>No results</div>;
   }
 
@@ -25,18 +25,12 @@ export function CheckBoxList({
     <>
       <div className={styles.checkboxListHeader}>
         <div>{selectedValues.length} selected</div>
-        <Button
-          className={styles.clearButton}
-          variant="secondary"
-          fill="text"
-          onClick={() => onSelectionChange([])}
-          disabled={!selectedValues.length}
-        >
+        <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedValues.length}>
           clear
         </Button>
       </div>
       <ul className={styles.checkboxList} data-testid="checkbox-filters-list">
-        {filteredList.map((item) => (
+        {items.map((item) => (
           <li key={item.value} className={styles.checkboxItem}>
             <CheckboxWithCount
               label={item.label}
@@ -66,7 +60,6 @@ function getStyles(theme: GrafanaTheme2) {
       margin: theme.spacing(0),
       padding: theme.spacing(0, 0, 0, 1),
     }),
-    clearButton: css({}),
     checkboxList: css({
       height: '100%',
       margin: 0,
