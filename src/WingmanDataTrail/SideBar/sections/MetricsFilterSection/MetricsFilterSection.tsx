@@ -8,7 +8,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Icon, IconButton, Input, Spinner, Switch, Tooltip, useStyles2 } from '@grafana/ui';
+import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
 import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
@@ -23,6 +23,7 @@ import {
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
+import { SectionTitle } from '../SectionTitle';
 import { CheckBoxList } from './CheckBoxList';
 
 export interface MetricsFilterSectionState extends SceneObjectState {
@@ -164,12 +165,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
     return (
       <div className={styles.container}>
-        <h6 className={styles.title}>
-          <span>{title}</span>
-          <Tooltip content={description} placement="top">
-            <Icon name="info-circle" size="sm" className={styles.infoIcon} />
-          </Tooltip>
-        </h6>
+        <SectionTitle title={title} description={description} />
 
         {showHideEmpty && (
           <div className={styles.switchContainer}>
@@ -210,19 +206,6 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(1),
       height: '100%',
       overflowY: 'hidden',
-    }),
-    title: css({
-      fontSize: '16px',
-      fontWeight: theme.typography.fontWeightLight,
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
-      paddingBottom: theme.spacing(0.5),
-    }),
-    infoIcon: css({
-      marginLeft: theme.spacing(1),
-      cursor: 'pointer',
-      color: theme.colors.text.secondary,
-      position: 'relative',
-      top: '-4px',
     }),
     switchContainer: css({
       display: 'flex',

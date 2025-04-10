@@ -1,11 +1,13 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type IconName, type SelectableValue } from '@grafana/data';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, Icon, IconButton, Input, RadioButtonList, Spinner, Tooltip, useStyles2 } from '@grafana/ui';
+import { Button, Icon, IconButton, Input, RadioButtonList, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
+
+import { SectionTitle } from './SectionTitle';
 
 interface LabelsBrowserState extends SceneObjectState {
   key: string;
@@ -76,12 +78,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
     return (
       <div className={styles.container} data-testid="labels-browser">
-        <h6 className={styles.title}>
-          <span>{title}</span>
-          <Tooltip content={description} placement="top">
-            <Icon name="info-circle" size="sm" className={styles.infoIcon} />
-          </Tooltip>
-        </h6>
+        <SectionTitle title={title} description={description} />
 
         <Input
           className={styles.search}
@@ -138,19 +135,6 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(1),
       height: '100%',
       overflowY: 'hidden',
-    }),
-    title: css({
-      fontSize: '16px',
-      fontWeight: theme.typography.fontWeightLight,
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
-      paddingBottom: theme.spacing(0.5),
-    }),
-    infoIcon: css({
-      marginLeft: theme.spacing(1),
-      cursor: 'pointer',
-      color: theme.colors.text.secondary,
-      position: 'relative',
-      top: '-4px',
     }),
     search: css({
       marginBottom: theme.spacing(1),
