@@ -56,7 +56,17 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
         // when used in the metric select scene case,
         // this will get the explore url with interpolated variables and include the labels __ignore_usage__, this is a known issue
         // in the metric scene we do not get use the __ignore_usage__ labels in the explore url
-        exploreUrl = getExploreURL(panelData, this, panelData.timeRange);
+        exploreUrl = getExploreURL(panelData, this, panelData.timeRange, (query) => {
+          // remove __ignore_usage__="" from the query
+          if ('expr' in query && typeof query.expr === 'string' && query.expr.includes('__ignore_usage__')) {
+            return {
+              ...query,
+              expr: query.expr.replace(/,?__ignore_usage__=""/, ''), // also remove leading comma if present
+            };
+          }
+
+          return query;
+        });
       } catch (e) {}
 
       // Navigation options (all panels)

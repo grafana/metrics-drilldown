@@ -12,12 +12,12 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { buildPrometheusQuery } from 'autoQuery/buildPrometheusQuery';
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
 import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
-import { buildPrometheusQuery } from './buildPrometheusQuery';
 import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
 import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
@@ -152,7 +152,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         queryRunner: MetricVizPanel.buildQueryRunner({
           metricName,
           matchers,
-          prometheusFunction,
+          prometheusFunction: 'min',
         }),
       })
         .setUnit(unit) // Set the appropriate unit for status history panel as well
@@ -210,7 +210,23 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     groupByLabel?: string;
     queryOptions?: Partial<SceneDataQuery>;
   }): SceneQueryRunner {
-    let expr = buildPrometheusQuery({ metricName, matchers, fn: prometheusFunction, groupByLabel });
+    const filters = matchers.map((matcher) => {
+      const [key, value] = matcher.split('=');
+      return {
+        key,
+        value: value.replace(/['"]/g, ''),
+        operator: '=',
+      };
+    });
+    const expr = buildPrometheusQuery({
+      metric: metricName,
+      filters,
+      isRateQuery: false,
+      useOtelJoin: false,
+      ignoreUsage: true,
+      groupings: [],
+      nonRateQueryFunction: prometheusFunction as 'avg' | 'min' | 'max',
+    });
 
     return new SceneQueryRunner({
       datasource: trailDS,

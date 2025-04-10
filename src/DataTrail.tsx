@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
-import { type PromQuery } from '@grafana/prometheus';
+import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
@@ -107,9 +107,6 @@ export interface DataTrailState extends SceneObjectState {
   addingLabelFromBreakdown?: boolean; // do not use the otel and metrics var subscription when adding label from the breakdown
   afterFirstOtelCheck?: boolean; // don't reset because of the migration on the first otel check from the data source updating
 
-  // moved into settings
-  showPreviews?: boolean;
-
   // Synced with url
   metric?: string;
   metricSearch?: string;
@@ -121,7 +118,7 @@ export interface DataTrailState extends SceneObjectState {
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'metricSearch', 'showPreviews', 'nativeHistogramMetric'],
+    keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
   });
 
   public constructor(state: Partial<DataTrailState>) {
@@ -145,7 +142,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       // default to false but update this to true on updateOtelData()
       // or true if the user either turned on the experience
       useOtelExperience: state.useOtelExperience ?? false,
-      showPreviews: state.showPreviews ?? true,
       nativeHistograms: state.nativeHistograms ?? [],
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
@@ -409,11 +405,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   getUrlState(): SceneObjectUrlValues {
-    const { metric, metricSearch, showPreviews, nativeHistogramMetric } = this.state;
+    const { metric, metricSearch, nativeHistogramMetric } = this.state;
     return {
       metric,
       metricSearch,
-      ...{ showPreviews: showPreviews === false ? 'false' : null },
       // store the native histogram knowledge in url for the metric scene
       nativeHistogramMetric,
     };
@@ -442,10 +437,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       stateUpdate.metricSearch = values.metricSearch;
     } else if (values.metric == null) {
       stateUpdate.metricSearch = undefined;
-    }
-
-    if (typeof values.showPreviews === 'string') {
-      stateUpdate.showPreviews = values.showPreviews !== 'false';
     }
 
     this.setState(stateUpdate);
@@ -740,7 +731,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           // to prevent the metric name from being set twice in the query and causing an error.
           const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
           return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
-            .map((filter) => `${filter.key}${filter.operator}"${filter.value}"`)
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
       }),

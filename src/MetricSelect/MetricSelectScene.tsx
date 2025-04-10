@@ -2,16 +2,14 @@ import { css } from '@emotion/css';
 import { type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange, type SelectableValue } from '@grafana/data';
 import { config, isFetchError } from '@grafana/runtime';
 import {
-  PanelBuilders,
-  SceneCSSGridItem,
   SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
   SceneObjectStateChangedEvent,
   SceneObjectUrlSyncConfig,
-  SceneVariableSet,
   VariableDependencyConfig,
   type SceneComponentProps,
+  type SceneCSSGridItem,
   type SceneFlexItem,
   type SceneFlexLayout,
   type SceneObject,
@@ -27,19 +25,13 @@ import React, { useReducer, type SyntheticEvent } from 'react';
 import { UI_TEXT } from 'constants/ui';
 import { totalOtelResources } from 'otel/api';
 import { getOtelResourcesObject } from 'otel/util';
+import { setOtelExperienceToggleState } from 'services/store';
 
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
-import { getFilters, getTrailFor } from '../utils';
-import { getMetricNames } from './api';
-import { getPreviewPanelFor } from './previewPanel';
-import { sortRelatedMetrics } from './relatedMetrics';
-import { SelectMetricAction } from './SelectMetricAction';
-import { setOtelExperienceToggleState } from '../services/store';
 import {
-  getVariablesWithMetricConstant,
   MetricSelectedEvent,
   RefreshMetricsEvent,
   VAR_DATASOURCE,
@@ -48,6 +40,10 @@ import {
   VAR_OTEL_RESOURCES,
 } from '../shared';
 import { StatusWrapper } from '../StatusWrapper';
+import { getTrailFor } from '../utils';
+import { getMetricNames } from './api';
+import { getPreviewPanelFor } from './PreviewPanel';
+import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
 import { getSelectedScopes } from '../utils/utils.scopes';
@@ -75,7 +71,6 @@ export interface MetricSelectSceneState extends SceneObjectState {
 }
 
 const ROW_PREVIEW_HEIGHT = '175px';
-const ROW_CARD_HEIGHT = '64px';
 const METRIC_PREFIX_ALL = 'all';
 
 const MAX_METRIC_NAMES = 20000;
@@ -208,7 +203,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToState(() => {
-        // move showPreviews into the settings
         // build layout when toggled
         this.buildLayout();
       })
@@ -417,7 +411,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
   private async buildLayout() {
     const trail = getTrailFor(this);
-    const showPreviews = trail.state.showPreviews;
     // Temp hack when going back to select metric scene and variable updates
     if (this.ignoreNextUpdate) {
       this.ignoreNextUpdate = false;
@@ -428,43 +421,25 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     const metricsList = this.sortedPreviewMetrics();
 
-    // Get the current filters to determine the count of them
-    // Which is required for `getPreviewPanelFor`
-    const filters = getFilters(this);
-    const currentFilterCount = filters?.length || 0;
-
     for (let index = 0; index < metricsList.length; index++) {
       const metric = metricsList[index];
       const metadata = await trail.getMetricMetadata(metric.name);
       const description = getMetricDescription(metadata);
 
-      if (showPreviews) {
-        if (metric.itemRef && metric.isPanel) {
-          children.push(metric.itemRef.resolve());
-          continue;
-        }
-        // refactor this into the query generator in future
-        const isNative = trail.isNativeHistogram(metric.name);
-        const panel = getPreviewPanelFor(metric.name, index, currentFilterCount, description, isNative, true);
-        metric.itemRef = panel.getRef();
-        metric.isPanel = true;
-        children.push(panel);
-      } else {
-        const panel = new SceneCSSGridItem({
-          $variables: new SceneVariableSet({
-            variables: getVariablesWithMetricConstant(metric.name),
-          }),
-          body: getCardPanelFor(metric.name, description),
-        });
-        metric.itemRef = panel.getRef();
-        metric.isPanel = false;
-        children.push(panel);
+      if (metric.itemRef && metric.isPanel) {
+        children.push(metric.itemRef.resolve());
+        continue;
       }
+      // refactor this into the query generator in future
+      const isNative = trail.isNativeHistogram(metric.name);
+      const hasOtelResources = Boolean(trail.state.hasOtelResources);
+      const panel = getPreviewPanelFor(metric.name, index, hasOtelResources, description, isNative, true);
+      metric.itemRef = panel.getRef();
+      metric.isPanel = true;
+      children.push(panel);
     }
 
-    const rowTemplate = showPreviews ? ROW_PREVIEW_HEIGHT : ROW_CARD_HEIGHT;
-
-    this.state.body.setState({ children, autoRows: rowTemplate });
+    this.state.body.setState({ children, autoRows: ROW_PREVIEW_HEIGHT });
   }
 
   public updateMetricPanel = (metric: string, isLoaded?: boolean, isEmpty?: boolean) => {
@@ -664,15 +639,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       </div>
     );
   };
-}
-
-function getCardPanelFor(metric: string, description?: string) {
-  return PanelBuilders.text()
-    .setTitle(metric)
-    .setDescription(description)
-    .setHeaderActions([new SelectMetricAction({ metric, title: 'Select' })])
-    .setOption('content', '')
-    .build();
 }
 
 function getStyles(theme: GrafanaTheme2) {
