@@ -7,6 +7,12 @@ labels:
 title: Get started with Grafana Metrics Drilldown
 menuTitle: Get started
 weight: 20
+refs:
+  drilldown:
+    - pattern: /docs/grafana/
+      destination: https://grafana.com/docs/grafana/<GRAFANA_VERSION>/explore/simplified-exploration/metrics/drill-down-metrics/
+    - pattern: /docs/grafana-cloud/
+      destination: https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/drill-down-metrics/
 ---
 
 # Get started with Grafana Metrics Drilldown
@@ -55,4 +61,4 @@ A drawer appears showing your selected metric in the Metrics Drilldown app. To g
 
 ## Next steps
 
-Now you're ready to drill down into your metric data. For more information, refer to [Drill down your metrics](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/drill-down-metrics).
+Now you're ready to drill down into your metric data. For more information, refer to [Drill down your metrics](ref:drilldown).
