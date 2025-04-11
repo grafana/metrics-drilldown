@@ -40,7 +40,6 @@ const URL_VALUES_BOOKMARK = {
   'var-filters': [],
   'var-otel_and_metric_filters': [''],
   'var-deployment_environment': ['undefined'],
-  'var-variant': 'onboard-filters-sidebar',
   'var-labelsWingman': '',
   'var-groupby': '$__all',
 };
