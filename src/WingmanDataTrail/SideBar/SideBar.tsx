@@ -175,6 +175,7 @@ function getStyles(theme: GrafanaTheme2) {
       backgroundColor: theme.colors.background.primary,
       borderTopLeftRadius: 0,
       borderBottomLeftRadius: 0,
+      position: 'relative',
     }),
     buttonContainer: css({
       marginTop: theme.spacing(1),
@@ -200,6 +201,16 @@ function getStyles(theme: GrafanaTheme2) {
       '&.disabled::before': {
         opacity: 0,
         visibility: 'hidden',
+      },
+      '&.active::after': {
+        content: '""',
+        position: 'absolute',
+        right: 0,
+        width: '8px',
+        height: '8px',
+        backgroundColor: theme.colors.action.selectedBorder,
+        borderRadius: '50%',
+        margin: '2px 5px 0 0',
       },
     }),
     button: css({
