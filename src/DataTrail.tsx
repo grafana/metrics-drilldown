@@ -33,10 +33,12 @@ import React, { useEffect, useRef } from 'react';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
 import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
+import { ROUTES } from './constants';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
@@ -413,7 +415,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     } else if (values.metric == null) {
       stateUpdate.metric = undefined;
       // TODO: Handle reducer and metric scene
-      stateUpdate.topScene = new MetricSelectScene({});
+      // Check if we're in the Wingman route
+      const currentPath = window.location.pathname;
+      if (currentPath.includes(ROUTES.TrailWithSidebar)) {
+        stateUpdate.topScene = new MetricsReducer();
+      } else {
+        stateUpdate.topScene = new MetricSelectScene({});
+      }
     }
 
     if (typeof values.metricSearch === 'string') {
