@@ -210,7 +210,7 @@ function getStyles(theme: GrafanaTheme2) {
         height: '8px',
         backgroundColor: theme.colors.action.selectedBorder,
         borderRadius: '50%',
-        margin: '2px 5px 0 0',
+        margin: '2px 4px 0 0',
       },
     }),
     button: css({
