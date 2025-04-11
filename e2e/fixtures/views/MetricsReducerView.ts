@@ -82,17 +82,17 @@ export class MetricsReducerView extends DrilldownView {
     const prefixesListItemsCount = await metricPrefixFilters.getByTestId('checkbox-filters-list').locator('li').count();
     expect(prefixesListItemsCount).toBeGreaterThan(0);
 
-    // Categories filters
-    const categoriesFilters = sidebar.getByTestId('categories-filters');
+    // Metric suffix filters
+    const suffixFilters = sidebar.getByTestId('metric-suffix-filters');
 
-    await expect(categoriesFilters.getByRole('heading', { name: /categories filters/i, level: 5 })).toBeVisible();
-    await expect(categoriesFilters.getByRole('switch', { name: /hide empty/i })).toBeChecked();
+    await expect(suffixFilters.getByRole('heading', { name: /metric suffix filters/i, level: 5 })).toBeVisible();
+    await expect(suffixFilters.getByRole('switch', { name: /hide empty/i })).toBeChecked();
 
-    await expect(categoriesFilters.getByText('0 selected')).toBeVisible();
-    await expect(categoriesFilters.getByRole('button', { name: 'clear', exact: true })).toBeVisible();
+    await expect(suffixFilters.getByText('0 selected')).toBeVisible();
+    await expect(suffixFilters.getByRole('button', { name: 'clear', exact: true })).toBeVisible();
 
-    const categoriesListItemsCount = await categoriesFilters.getByTestId('checkbox-filters-list').locator('li').count();
-    expect(categoriesListItemsCount).toBeGreaterThan(0);
+    const suffixesListItemsCount = await suffixFilters.getByTestId('checkbox-filters-list').locator('li').count();
+    expect(suffixesListItemsCount).toBeGreaterThan(0);
   }
 
   /* Metrics list */

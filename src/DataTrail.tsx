@@ -1,12 +1,11 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
-import { type PromQuery } from '@grafana/prometheus';
 import { useChromeHeaderHeight } from '@grafana/runtime';
+import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
   CustomVariable,
-  DataSourceVariable,
   SceneControlsSpacer,
   sceneGraph,
   SceneObjectBase,
@@ -30,12 +29,10 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
+import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
-import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { ROUTES } from './constants';
@@ -488,6 +485,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
    */
   private async fetchOtelResources(datasourceUid: string, timeRange: RawTimeRange) {
     const otelTargets = await totalOtelResources(datasourceUid, timeRange);
+    // if there are no otel targets, return early
+    // the following call for deployment environments will throw an error for a vendor data source that does not handle errors
+    // similar to the other Prometheus flavors.
+    if (otelTargets.jobs.length === 0 && otelTargets.instances.length === 0) {
+      return {
+        hasOtelResources: false,
+        nonPromotedOtelResources: [],
+        previouslyUsedOtelResources: false,
+      };
+    }
     const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
     const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
 
@@ -690,14 +697,7 @@ export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   return new SceneVariableSet({
     variables: [
-      new DataSourceVariable({
-        key: VAR_DATASOURCE,
-        name: VAR_DATASOURCE,
-        label: 'Data source',
-        description: 'Only prometheus data sources are supported',
-        value: initialDS,
-        pluginId: 'prometheus',
-      }),
+      new MetricsDrilldownDataSourceVariable({ initialDS }),
       new AdHocFiltersVariable({
         name: VAR_OTEL_RESOURCES,
         label: 'Select resource attributes',
@@ -726,7 +726,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           // to prevent the metric name from being set twice in the query and causing an error.
           const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
           return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
-            .map((filter) => `${filter.key}${filter.operator}"${filter.value}"`)
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
       }),
@@ -764,9 +764,6 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         placeholder: 'Select',
         isMulti: true,
       }),
-      new MetricsVariable({}),
-      new FilteredMetricsVariable(),
-      new LabelsVariable(),
     ],
   });
 }
@@ -779,7 +776,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       gap: theme.spacing(1),
       flexDirection: 'column',
       background: theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas,
-      padding: theme.spacing(2, 3, 2, 3),
+      padding: theme.spacing(1, 2),
     }),
     body: css({
       flexGrow: 1,

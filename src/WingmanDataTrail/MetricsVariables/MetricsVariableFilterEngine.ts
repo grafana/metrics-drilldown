@@ -1,24 +1,24 @@
-import { SceneVariableValueChangedEvent, type MultiValueVariable, type VariableValueOption } from '@grafana/scenes';
+import { SceneVariableValueChangedEvent, type QueryVariable, type VariableValueOption } from '@grafana/scenes';
 import { cloneDeep, isEqual } from 'lodash';
 
 import { type MetricOptions } from './MetricsVariable';
 
 export type MetricFilters = {
   prefixes: string[];
-  categories: string[];
+  suffixes: string[];
   names: string[];
 };
 
 export class MetricsVariableFilterEngine {
-  private variable: MultiValueVariable;
+  private variable: QueryVariable;
   private initOptions: VariableValueOption[] = [];
   private filters: MetricFilters = {
     prefixes: [],
-    categories: [],
+    suffixes: [],
     names: [],
   };
 
-  constructor(variable: MultiValueVariable) {
+  constructor(variable: QueryVariable) {
     this.variable = variable;
   }
 
@@ -26,22 +26,21 @@ export class MetricsVariableFilterEngine {
     this.initOptions = cloneDeep(options);
   }
 
-  public applyFilters(filters: Partial<MetricFilters> = this.filters, notify = true, forceUpdate = false) {
-    const updatedFilters = {
+  public applyFilters(filters: Partial<MetricFilters> = this.filters, settings = { notify: true }) {
+    const updatedFilters: MetricFilters = {
       ...this.filters,
       ...filters,
     };
 
     if (
-      !forceUpdate &&
-      (isEqual(this.filters, updatedFilters) ||
-        (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.categories.length))
+      isEqual(this.filters, updatedFilters) ||
+      (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.suffixes.length)
     ) {
       this.filters = updatedFilters;
 
       this.variable.setState({ options: this.initOptions });
 
-      if (notify) {
+      if (settings.notify) {
         this.notifyUpdate();
       }
 
@@ -52,30 +51,30 @@ export class MetricsVariableFilterEngine {
     let filteredOptions = allOptions as MetricOptions;
 
     if (updatedFilters.prefixes.length > 0) {
-      filteredOptions = this.applyPrefixFilters(filteredOptions, updatedFilters.prefixes);
+      filteredOptions = MetricsVariableFilterEngine.applyPrefixFilters(filteredOptions, updatedFilters.prefixes);
     }
 
-    if (updatedFilters.categories.length > 0) {
-      filteredOptions = this.applyCategoriesFilters(filteredOptions, updatedFilters.categories);
+    if (updatedFilters.suffixes.length > 0) {
+      filteredOptions = MetricsVariableFilterEngine.applySuffixFilters(filteredOptions, updatedFilters.suffixes);
     }
 
     if (updatedFilters.names.length > 0) {
-      filteredOptions = this.applyNamesFilters(filteredOptions, updatedFilters.names);
+      filteredOptions = MetricsVariableFilterEngine.applyNamesFilters(filteredOptions, updatedFilters.names);
     }
 
     this.filters = updatedFilters;
 
     this.variable.setState({ options: filteredOptions });
 
-    if (notify) {
+    if (settings.notify) {
       this.notifyUpdate();
     }
   }
 
-  private applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
+  private static applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
     const pattern = prefixes
       .map((prefix) => {
-        // catch-all (see computeMetricPrefixGroups)
+        // Multi-value support (see computeMetricPrefixGroups)
         if (prefix.includes('|')) {
           return `${prefix
             .split('|')
@@ -92,18 +91,27 @@ export class MetricsVariableFilterEngine {
     return options.filter((option) => prefixesRegex.test(option.value as string));
   }
 
-  private applyCategoriesFilters(options: MetricOptions, categories: string[]): MetricOptions {
-    let filteredOptions: MetricOptions = [];
+  private static applySuffixFilters(options: MetricOptions, suffixes: string[]): MetricOptions {
+    const pattern = suffixes
+      .map((suffix) => {
+        // Multi-value support (see computeMetricSuffixGroups)
+        if (suffix.includes('|')) {
+          return `${suffix
+            .split('|')
+            .map((s) => `^${s}$`)
+            .join('|')}`;
+        }
 
-    for (const category of categories) {
-      const categoryRegex = MetricsVariableFilterEngine.buildRegex(category, 'i'); // see computeMetricCategories
-      filteredOptions = filteredOptions.concat(options.filter((option) => categoryRegex.test(option.value)));
-    }
+        return `.+${suffix}$`;
+      })
+      .join('|');
 
-    return filteredOptions;
+    const suffixesRegex = MetricsVariableFilterEngine.buildRegex(`(${pattern})`);
+
+    return options.filter((option) => suffixesRegex.test(option.value as string));
   }
 
-  private applyNamesFilters(options: MetricOptions, names: string[]): MetricOptions {
+  private static applyNamesFilters(options: MetricOptions, names: string[]): MetricOptions {
     const [namePatterns] = names;
 
     const regexes = namePatterns
@@ -122,16 +130,16 @@ export class MetricsVariableFilterEngine {
     return options.filter((option) => regexes.some((regex) => regex.test(option.value as string)));
   }
 
-  private notifyUpdate() {
-    // hack to force SceneByVariableRepeater to re-render
-    this.variable.publishEvent(new SceneVariableValueChangedEvent(this.variable), true);
-  }
-
   private static buildRegex(pattern: string, flags?: string) {
     try {
       return new RegExp(pattern, flags);
     } catch {
       return new RegExp('.*');
     }
+  }
+
+  private notifyUpdate() {
+    // hack to force SceneByVariableRepeater to re-render
+    this.variable.publishEvent(new SceneVariableValueChangedEvent(this.variable), true);
   }
 }

@@ -25,12 +25,12 @@ import React, { useReducer, type SyntheticEvent } from 'react';
 import { UI_TEXT } from 'constants/ui';
 import { totalOtelResources } from 'otel/api';
 import { getOtelResourcesObject } from 'otel/util';
+import { setOtelExperienceToggleState } from 'services/store';
 
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
-import { setOtelExperienceToggleState } from '../services/store';
 import {
   MetricSelectedEvent,
   RefreshMetricsEvent,
@@ -40,9 +40,9 @@ import {
   VAR_OTEL_RESOURCES,
 } from '../shared';
 import { StatusWrapper } from '../StatusWrapper';
-import { getFilters, getTrailFor } from '../utils';
+import { getTrailFor } from '../utils';
 import { getMetricNames } from './api';
-import { getPreviewPanelFor } from './previewPanel';
+import { getPreviewPanelFor } from './PreviewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
@@ -418,11 +418,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     const metricsList = this.sortedPreviewMetrics();
 
-    // Get the current filters to determine the count of them
-    // Which is required for `getPreviewPanelFor`
-    const filters = getFilters(this);
-    const currentFilterCount = filters?.length || 0;
-
     for (let index = 0; index < metricsList.length; index++) {
       const metric = metricsList[index];
       const metadata = await trail.getMetricMetadata(metric.name);
@@ -434,7 +429,8 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       }
       // refactor this into the query generator in future
       const isNative = trail.isNativeHistogram(metric.name);
-      const panel = getPreviewPanelFor(metric.name, index, currentFilterCount, description, isNative, true);
+      const hasOtelResources = Boolean(trail.state.hasOtelResources);
+      const panel = getPreviewPanelFor(metric.name, index, hasOtelResources, description, isNative, true);
       metric.itemRef = panel.getRef();
       metric.isPanel = true;
       children.push(panel);

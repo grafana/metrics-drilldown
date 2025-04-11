@@ -1,44 +1,34 @@
-const GROUP_CATCH_ALL = '*';
+import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 export function computeMetricPrefixGroups(options: Array<{ label: string; value: string }>) {
   const rawPrefixesMap = new Map<string, string[]>();
 
   for (const option of options) {
     const [sep] = option.value.match(/[^a-z0-9]/i) || [];
-    const key = !sep ? GROUP_CATCH_ALL : option.value.split(sep)[0];
+    const key = sep ? option.value.split(sep)[0] : option.value;
     const values = rawPrefixesMap.get(key) ?? [];
 
     values.push(option.value);
     rawPrefixesMap.set(key, values);
   }
 
-  const catchAllValues = rawPrefixesMap.get(GROUP_CATCH_ALL) ?? [];
-  const prefixesMap = new Map([[GROUP_CATCH_ALL, catchAllValues.length]]);
+  const prefixesMap = new Map<string, number>();
 
   for (const [prefix, values] of rawPrefixesMap) {
-    if (values.length === 1) {
-      prefixesMap.set(GROUP_CATCH_ALL, prefixesMap.get(GROUP_CATCH_ALL)! + 1);
-      catchAllValues.push(values[0]);
-    } else {
-      prefixesMap.set(prefix, values.length);
-    }
+    prefixesMap.set(prefix, values.length);
   }
 
   return Array.from(prefixesMap.entries())
-    .sort((a, b) => b[1] - a[1])
-    .map(([value, count]) => {
-      if (value === GROUP_CATCH_ALL) {
-        return {
-          value: catchAllValues.join('|'), // see FilteredMetricsVariable
-          count,
-          label: '<none>',
-        };
+    .sort((a, b) => {
+      if (a[1] !== b[1]) {
+        return b[1] - a[1];
       }
 
-      return {
-        value,
-        count,
-        label: value,
-      };
-    });
+      return localeCompare(a[0], b[0]);
+    })
+    .map(([value, count]) => ({
+      value,
+      count,
+      label: value,
+    }));
 }
