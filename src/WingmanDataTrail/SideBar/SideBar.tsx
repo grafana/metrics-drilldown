@@ -96,7 +96,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     );
   }
 
-  public setActiveSection(sectionKey: string) {
+  private setActiveSection(sectionKey: string) {
     const { visibleSection, sections } = this.state;
 
     if (!sectionKey || sectionKey === visibleSection?.state.key) {
