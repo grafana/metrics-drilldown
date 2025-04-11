@@ -8,7 +8,7 @@ import {
   sortMetricsByCount,
   sortMetricsReverseAlphabetically,
   type SortingOption,
-} from 'WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
+} from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 import { areArraysEqual } from './helpers/areArraysEqual';
 

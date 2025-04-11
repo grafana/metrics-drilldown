@@ -74,7 +74,7 @@ import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variab
 import {
   fetchAlertingMetrics,
   fetchDashboardMetrics,
-} from './WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
+} from './WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;

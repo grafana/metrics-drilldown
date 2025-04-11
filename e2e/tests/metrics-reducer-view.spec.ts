@@ -7,7 +7,7 @@ test.describe('Metrics reducer view', () => {
   });
 
   test('Core UI elements', async ({ metricsReducerView }) => {
-    await metricsReducerView.assertHeaderControls();
+    await metricsReducerView.assertListControls();
     await metricsReducerView.assertSidebar();
     await metricsReducerView.assertMetricsList();
   });

@@ -10,7 +10,7 @@ import {
 import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
-import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
+import { EventFiltersChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventFiltersChanged';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,

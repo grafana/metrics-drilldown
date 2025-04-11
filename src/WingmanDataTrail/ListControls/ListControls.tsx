@@ -16,18 +16,18 @@ import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsSorter } from './MetricsSorter/MetricsSorter';
 import { QuickSearch } from './QuickSearch/QuickSearch';
 
-interface HeaderControlsState extends SceneObjectState {
+interface ListControlsState extends SceneObjectState {
   $variables?: SceneVariableSet;
   inputControls?: SceneReactObject;
   onChange?: (value: SelectableValue<string>) => void; // Keeping for backward compatibility
 }
 
 // @ts-ignore to fix build error. Is there a Scenes friend way of doing this?
-export class HeaderControls extends EmbeddedScene {
-  constructor(state: Partial<HeaderControlsState>) {
+export class ListControls extends EmbeddedScene {
+  constructor(state: Partial<ListControlsState>) {
     super({
       ...state,
-      key: 'header-controls',
+      key: 'list-controls',
       body: new SceneFlexLayout({
         direction: 'row',
         width: '100%',
@@ -49,7 +49,7 @@ export class HeaderControls extends EmbeddedScene {
     });
   }
 
-  public static Component = ({ model }: SceneComponentProps<HeaderControls>) => {
+  public static Component = ({ model }: SceneComponentProps<ListControls>) => {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
 
