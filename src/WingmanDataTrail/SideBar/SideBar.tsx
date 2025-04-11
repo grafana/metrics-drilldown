@@ -4,6 +4,7 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricSuffixGroups';
@@ -26,6 +27,9 @@ interface SideBarState extends SceneObjectState {
 
 export class SideBar extends SceneObjectBase<SideBarState> {
   constructor(state: Partial<SideBarState>) {
+    const labelValue = new URLSearchParams(window.location.search).get(`var-${VAR_WINGMAN_GROUP_BY}`);
+    const isLabelsBrowserActive = Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE);
+
     super({
       key: 'sidebar',
       visibleSection: null,
@@ -65,7 +69,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title: 'Group by labels',
           description: 'Group metrics by their label values',
           icon: 'layer-group',
-          active: new URLSearchParams(window.location.search).has(`var-${VAR_WINGMAN_GROUP_BY}`),
+          active: isLabelsBrowserActive,
         }),
         new BookmarksList({
           key: 'bookmarks',
@@ -82,7 +86,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           disabled: true,
         }),
       ],
-      sectionValues: new Map(),
+      sectionValues: new Map(isLabelsBrowserActive ? [['groupby-labels', [labelValue!]]] : []),
       ...state,
     });
 
