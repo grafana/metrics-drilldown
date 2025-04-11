@@ -41,7 +41,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           key: 'prefix-filters',
           type: 'prefixes',
           title: 'Prefix filters',
-          description: 'Filter metrics based on their name prefix',
+          description: 'Filter metrics based on their name prefix (Prometheus namespace)',
           iconName: 'filter',
           computeGroups: computeMetricPrefixGroups,
         }),
