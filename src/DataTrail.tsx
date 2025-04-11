@@ -117,7 +117,6 @@ export interface DataTrailState extends SceneObjectState {
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
-  // TODO: URL Sync - Configures URL synchronization for metric, metricSearch, and nativeHistogramMetric
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
   });
@@ -349,7 +348,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
-    // TODO: 02 SelectMetricAction - Main event handler that processes metric selection
     const metric = evt.payload ?? '';
 
     if (this.state.useOtelExperience) {
@@ -388,7 +386,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   getUrlState(): SceneObjectUrlValues {
-    // TODO: URL Sync - Returns the current state values that should be reflected in the URL
     const { metric, metricSearch, nativeHistogramMetric } = this.state;
     return {
       metric,
@@ -414,8 +411,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
     } else if (values.metric == null) {
       stateUpdate.metric = undefined;
-      // TODO: Handle reducer and metric scene
-      // Check if we're in the Wingman route
       const currentPath = window.location.pathname;
       if (currentPath.includes(ROUTES.TrailWithSidebar)) {
         stateUpdate.topScene = new MetricsReducer();
@@ -680,7 +675,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
-// TODO: Handle reducer and metric scene
 export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   if (metric) {
     return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });

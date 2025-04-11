@@ -11,7 +11,6 @@ export interface SelectMetricActionState extends SceneObjectState {
 
 export class SelectMetricAction extends SceneObjectBase<SelectMetricActionState> {
   public onClick = () => {
-    // TODO: 01 SelectMetricAction - Initial click handler that publishes MetricSelectedEvent
     this.publishEvent(new MetricSelectedEvent(this.state.metric), true);
   };
 
