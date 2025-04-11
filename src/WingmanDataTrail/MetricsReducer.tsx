@@ -33,7 +33,6 @@ import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMe
 import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
-import { EventMetricsVariableUpdated } from './MetricsVariables/EventMetricsVariableUpdated';
 import { FilteredMetricsVariable } from './MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine } from './MetricsVariables/MetricsVariableFilterEngine';
@@ -131,6 +130,14 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       })
     );
 
+    function applySort(sceneObject: MetricsReducer, key: string) {
+      const sortEngine = sortEnginesMap.get(key)!;
+      const metricsSorter = sceneGraph.findByKeyAndType(sceneObject, 'metrics-sorter', MetricsSorter);
+      const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
+
+      sortEngine.sort(sortByVariable.state.value as SortingOption);
+    }
+
     this._subs.add(
       this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
         // filter and sort on initial load
@@ -147,26 +154,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             prefixes: sideBar.state.selectedMetricPrefixes,
             suffixes: sideBar.state.selectedMetricSuffixes,
           },
-          { notify: false }
+          { forceUpdate: true, notify: false }
         );
 
-        const sortEngine = sortEnginesMap.get(event.payload.key)!;
-        const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
-        const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
-
-        sortEngine.sort(sortByVariable.state.value as SortingOption);
-      })
-    );
-
-    this._subs.add(
-      this.subscribeToEvent(EventMetricsVariableUpdated, (event) => {
-        // sort whenever the variable options change
-        const { key } = event.payload;
-        const sortEngine = sortEnginesMap.get(key)!;
-        const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
-        const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
-
-        sortEngine.sort(sortByVariable.state.value as SortingOption);
+        applySort(this, key);
       })
     );
 
@@ -176,8 +167,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventQuickSearchChanged, (event) => {
         const { searchText } = event.payload;
 
-        for (const [, filterEngine] of filterEnginesMap) {
+        for (const [key, filterEngine] of filterEnginesMap) {
           filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
+          applySort(this, key);
         }
       })
     );
@@ -186,8 +178,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventFiltersChanged, (event) => {
         const { type, filters } = event.payload;
 
-        for (const [, filterEngine] of filterEnginesMap) {
+        for (const [key, filterEngine] of filterEnginesMap) {
           filterEngine.applyFilters({ [type]: filters });
+          applySort(this, key);
         }
       })
     );

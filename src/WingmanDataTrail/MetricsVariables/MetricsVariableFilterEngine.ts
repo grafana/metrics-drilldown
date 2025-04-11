@@ -26,15 +26,16 @@ export class MetricsVariableFilterEngine {
     this.initOptions = cloneDeep(options);
   }
 
-  public applyFilters(filters: Partial<MetricFilters> = this.filters, settings = { notify: true }) {
+  public applyFilters(filters: Partial<MetricFilters> = this.filters, settings = { forceUpdate: false, notify: true }) {
     const updatedFilters: MetricFilters = {
       ...this.filters,
       ...filters,
     };
 
     if (
-      isEqual(this.filters, updatedFilters) ||
-      (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.suffixes.length)
+      !settings.forceUpdate &&
+      (isEqual(this.filters, updatedFilters) ||
+        (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.suffixes.length))
     ) {
       this.filters = updatedFilters;
 
