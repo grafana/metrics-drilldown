@@ -36,7 +36,6 @@ import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
-import { DataTrailSettings } from './DataTrailSettings';
 import { DataTrailHistory } from './DataTrailsHistory';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
@@ -81,7 +80,6 @@ export interface DataTrailState extends SceneObjectState {
   embedded?: boolean;
   controls: SceneObject[];
   history: DataTrailHistory;
-  settings: DataTrailSettings;
   pluginInfo: SceneReactObject;
   createdAt: number;
 
@@ -131,7 +129,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneRefreshPicker({}),
       ],
       history: state.history ?? new DataTrailHistory({}),
-      settings: state.settings ?? new DataTrailSettings({}),
       pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
@@ -639,17 +636,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   static Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const {
-      controls,
-      topScene,
-      history,
-      settings,
-      pluginInfo,
-      useOtelExperience,
-      embedded,
-      histogramsLoaded,
-      nativeHistograms,
-    } = model.useState();
+    const { controls, topScene, history, pluginInfo, useOtelExperience, embedded, histogramsLoaded, nativeHistograms } =
+      model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight();
     const styles = useStyles2(getStyles, embedded ? 0 : chromeHeaderHeight ?? 0);
@@ -683,7 +671,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               <control.Component key={control.state.key} model={control} />
             ))}
             <div className={styles.settingsInfo}>
-              <settings.Component model={settings} />
               <pluginInfo.Component model={pluginInfo} />
             </div>
           </div>
