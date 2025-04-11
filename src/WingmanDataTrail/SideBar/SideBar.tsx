@@ -1,7 +1,7 @@
 import { css, cx } from '@emotion/css';
 import { availableIconsIndex, type GrafanaTheme2, type IconName } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, IconButton, useStyles2 } from '@grafana/ui';
+import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
@@ -14,6 +14,8 @@ import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { Settings } from './sections/Settings';
+import { SideBarButton } from './SideBarButton';
+
 type Section = MetricsFilterSection | LabelsBrowser | BookmarksList | Settings;
 
 interface SideBarState extends SceneObjectState {
@@ -116,7 +118,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         <div className={styles.buttonsBar} data-testid="sidebar-buttons">
           {sections.map((section) => {
             const { key, title, icon: iconOrText, disabled, active } = section.state;
-            const isVisible = visibleSection?.state.key === key;
+            const visible = visibleSection?.state.key === key;
 
             let buttonText;
             let buttonIcon;
@@ -127,32 +129,23 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               buttonText = iconOrText;
             }
 
-            let tooltip = sectionValues.has(key) ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
+            let tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
 
             return (
               <div
                 key={key}
-                className={cx(
-                  styles.buttonContainer,
-                  isVisible && 'visible',
-                  active && 'active',
-                  disabled && 'disabled'
-                )}
+                className={cx(styles.buttonContainer, visible && 'visible', active && 'active', disabled && 'disabled')}
               >
-                <Button
-                  className={cx(styles.button, disabled && 'disabled', isVisible && 'visible', active && 'active')}
-                  size="md"
-                  variant="secondary"
-                  fill="text"
-                  icon={buttonIcon}
-                  aria-label={title}
-                  tooltip={tooltip}
-                  tooltipPlacement="right"
-                  onClick={() => model.setActiveSection(key)}
+                <SideBarButton
+                  ariaLabel={title}
                   disabled={disabled}
-                >
-                  {buttonText}
-                </Button>
+                  visible={visible}
+                  active={active}
+                  tooltip={tooltip}
+                  onClick={() => model.setActiveSection(key)}
+                  icon={buttonIcon}
+                  text={buttonText}
+                />
               </div>
             );
           })}
@@ -240,23 +233,6 @@ function getStyles(theme: GrafanaTheme2) {
         margin: '2px 4px 0 0',
       },
     }),
-    button: css({
-      margin: 0,
-      color: theme.colors.text.secondary,
-      '&:hover': {
-        color: theme.colors.text.maxContrast,
-        background: 'transparent',
-      },
-      '&.disabled:hover': {
-        color: theme.colors.text.secondary,
-      },
-      '&.visible': {
-        color: theme.colors.text.maxContrast,
-      },
-      '&.active': {
-        color: theme.colors.text.maxContrast,
-      },
-    }),
     content: css({
       width: 'calc(300px - 42px)', // we want 300px in total
       boxSizing: 'border-box',
@@ -274,5 +250,3 @@ function getStyles(theme: GrafanaTheme2) {
     }),
   };
 }
-
-export default SideBar;
