@@ -66,6 +66,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     showHideEmpty,
     showSearch,
     disabled,
+    active,
   }: {
     key: MetricsFilterSectionState['key'];
     type: MetricsFilterSectionState['type'];
@@ -76,6 +77,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     showHideEmpty?: MetricsFilterSectionState['showHideEmpty'];
     showSearch?: MetricsFilterSectionState['showSearch'];
     disabled?: MetricsFilterSectionState['disabled'];
+    active?: MetricsFilterSectionState['active'];
   }) {
     super({
       key,
@@ -90,7 +92,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       showHideEmpty: showHideEmpty ?? true,
       showSearch: showSearch ?? true,
       disabled: disabled ?? false,
-      active: false,
+      active: active ?? false,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));

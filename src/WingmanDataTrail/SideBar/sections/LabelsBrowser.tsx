@@ -23,6 +23,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     description,
     icon,
     disabled,
+    active,
   }: {
     key: LabelsBrowserState['key'];
     variableName: LabelsBrowserState['variableName'];
@@ -30,6 +31,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     description: LabelsBrowserState['description'];
     icon: LabelsBrowserState['icon'];
     disabled?: LabelsBrowserState['disabled'];
+    active?: LabelsBrowserState['active'];
   }) {
     super({
       key,
@@ -38,7 +40,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       description,
       icon,
       disabled: disabled ?? false,
-      active: false,
+      active: active ?? false,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));

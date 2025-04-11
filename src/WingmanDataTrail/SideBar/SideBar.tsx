@@ -39,6 +39,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           computeGroups: computeRulesGroups,
           showHideEmpty: false,
           showSearch: false,
+          active: false, // TODO
         }),
         new MetricsFilterSection({
           key: 'prefix-filters',
@@ -47,6 +48,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           description: 'Filter metrics based on their name prefix (Prometheus namespace)',
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
+          active: false, // TODO
         }),
         new MetricsFilterSection({
           key: 'suffix-filters',
@@ -55,6 +57,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           description: 'Filter metrics based on their name suffix',
           icon: '_Z',
           computeGroups: computeMetricSuffixGroups,
+          active: false, // TODO
         }),
         new LabelsBrowser({
           key: 'groupby-labels',
@@ -62,6 +65,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title: 'Group by labels',
           description: 'Group metrics by their label values',
           icon: 'layer-group',
+          active: new URLSearchParams(window.location.search).has(`var-${VAR_WINGMAN_GROUP_BY}`),
         }),
         new BookmarksList({
           key: 'bookmarks',
