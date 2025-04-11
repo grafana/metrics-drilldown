@@ -5,7 +5,7 @@ export interface SideBarSectionState extends SceneObjectState {
   key: string;
   title: string;
   description: string;
-  iconName: IconName;
+  icon: IconName | string;
   disabled: boolean;
   active: boolean;
 }

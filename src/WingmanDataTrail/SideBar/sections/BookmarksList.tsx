@@ -14,20 +14,20 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
     key,
     title,
     description,
-    iconName,
+    icon,
     disabled,
   }: {
     key: BookmarksListState['key'];
     title: BookmarksListState['title'];
     description: BookmarksListState['description'];
-    iconName: BookmarksListState['iconName'];
+    icon: BookmarksListState['icon'];
     disabled?: BookmarksListState['disabled'];
   }) {
     super({
       key,
       title,
       description,
-      iconName,
+      icon,
       disabled: disabled ?? false,
       active: false,
     });

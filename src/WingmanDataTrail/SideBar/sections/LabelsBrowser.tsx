@@ -20,14 +20,14 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     variableName,
     title,
     description,
-    iconName,
+    icon,
     disabled,
   }: {
     key: LabelsBrowserState['key'];
     variableName: LabelsBrowserState['variableName'];
     title: LabelsBrowserState['title'];
     description: LabelsBrowserState['description'];
-    iconName: LabelsBrowserState['iconName'];
+    icon: LabelsBrowserState['icon'];
     disabled?: LabelsBrowserState['disabled'];
   }) {
     super({
@@ -35,7 +35,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       variableName,
       title,
       description,
-      iconName,
+      icon,
       disabled: disabled ?? false,
       active: false,
     });

@@ -60,7 +60,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     type,
     title,
     description,
-    iconName,
+    icon,
     computeGroups,
     showHideEmpty,
     showSearch,
@@ -70,7 +70,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     type: MetricsFilterSectionState['type'];
     title: MetricsFilterSectionState['title'];
     description: MetricsFilterSectionState['description'];
-    iconName: MetricsFilterSectionState['iconName'];
+    icon: MetricsFilterSectionState['icon'];
     computeGroups: MetricsFilterSectionState['computeGroups'];
     showHideEmpty?: MetricsFilterSectionState['showHideEmpty'];
     showSearch?: MetricsFilterSectionState['showSearch'];
@@ -81,7 +81,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       type,
       title,
       description,
-      iconName,
+      icon,
       groups: [],
       computeGroups,
       selectedGroups: [],

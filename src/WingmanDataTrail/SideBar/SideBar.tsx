@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { availableIconsIndex, type GrafanaTheme2, type IconName } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button, IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -32,7 +32,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           type: 'categories',
           title: 'Rules filters',
           description: 'Filter metrics, recording rules and alerting rules',
-          iconName: 'record-audio',
+          icon: 'gf-prometheus',
           computeGroups: computeRulesGroups,
           showHideEmpty: false,
           showSearch: false,
@@ -42,16 +42,15 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           type: 'prefixes',
           title: 'Prefix filters',
           description: 'Filter metrics based on their name prefix (Prometheus namespace)',
-          iconName: 'filter',
+          icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
         }),
-        // TEMP
         new MetricsFilterSection({
           key: 'suffix-filters',
           type: 'suffixes',
           title: 'Suffix filters',
           description: 'Filter metrics based on their name suffix',
-          iconName: 'filter',
+          icon: '_Z',
           computeGroups: computeMetricSuffixGroups,
         }),
         new LabelsBrowser({
@@ -59,20 +58,20 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           variableName: VAR_WINGMAN_GROUP_BY,
           title: 'Group by labels',
           description: 'Group metrics by their label values',
-          iconName: 'gf-prometheus',
+          icon: 'layer-group',
         }),
         new BookmarksList({
           key: 'bookmarks',
           title: 'Bookmarks',
           description: 'Bookmarks',
-          iconName: 'bookmark',
+          icon: 'bookmark',
           disabled: true,
         }),
         new Settings({
           key: 'settings',
           title: 'Settings',
           description: 'Settings',
-          iconName: 'cog',
+          icon: 'cog',
           disabled: true,
         }),
       ],
@@ -101,8 +100,17 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       <div className={styles.container}>
         <div className={styles.buttonsBar}>
           {sections.map((section) => {
-            const { key, title, iconName, disabled, active } = section.state;
+            const { key, title, icon: iconOrText, disabled, active } = section.state;
             const isVisible = visibleSection?.state.key === key;
+
+            let buttonText;
+            let buttonIcon;
+
+            if (iconOrText in availableIconsIndex) {
+              buttonIcon = iconOrText as IconName;
+            } else {
+              buttonText = iconOrText;
+            }
 
             return (
               <div
@@ -119,13 +127,15 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                   size="md"
                   variant="secondary"
                   fill="text"
-                  icon={iconName}
+                  icon={buttonIcon}
                   aria-label={title}
                   tooltip={title}
                   tooltipPlacement="right"
                   onClick={() => model.setActiveSection(key)}
                   disabled={disabled}
-                />
+                >
+                  {buttonText}
+                </Button>
               </div>
             );
           })}

@@ -23,7 +23,7 @@ export function computeRulesGroups(options: Array<{ label: string; value: string
   }
 
   return [
-    { value: '^(?!alert)(?!.*:.*)', label: 'Metrics', count: rulesMap.get('metrics')!.length },
+    { value: '^(?!alert)(?!.*:.*)', label: 'Non-rules metrics', count: rulesMap.get('metrics')!.length },
     { value: ':', label: 'Recording rules', count: rulesMap.get('rules')!.length },
     { value: '^alert', label: 'Alerting rules', count: rulesMap.get('alerts')!.length },
   ];

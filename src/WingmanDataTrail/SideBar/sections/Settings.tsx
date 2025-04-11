@@ -14,20 +14,20 @@ export class Settings extends SceneObjectBase<SettingsState> {
     key,
     title,
     description,
-    iconName,
+    icon,
     disabled,
   }: {
     key: SettingsState['key'];
     title: SettingsState['title'];
     description: SettingsState['description'];
-    iconName: SettingsState['iconName'];
+    icon: SettingsState['icon'];
     disabled?: SettingsState['disabled'];
   }) {
     super({
       key,
       title,
       description,
-      iconName,
+      icon,
       disabled: disabled ?? false,
       active: false,
     });
