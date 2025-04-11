@@ -101,9 +101,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       <div className={styles.container}>
         <div className={styles.buttonsBar}>
           {sections.map((section) => {
-            const { state } = section;
-            const key = state.key;
-            const { title, iconName, disabled, active } = state;
+            const { key, title, iconName, disabled, active } = section.state;
             const isVisible = visibleSection?.state.key === key;
 
             return (
