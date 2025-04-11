@@ -67,6 +67,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       }),
       body: new SceneByVariableRepeater({
         variableName: VAR_METRIC_WITH_LABEL_VALUE,
+        initialPageSize: 3,
         body: new SceneCSSGridLayout({
           children: [],
           isLazy: true,
@@ -156,7 +157,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       body.increaseBatchSize();
     };
 
-    const onClickInclude = () => {
+    const onClickSelect = () => {
       const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
 
       adHocFiltersVariable.setState({
@@ -167,24 +168,12 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
     };
 
-    const onClickExclude = () => {
-      const adHocFiltersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model) as AdHocFiltersVariable;
-
-      adHocFiltersVariable.setState({
-        // TOOD: keep unique filters
-        filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '!=', value: labelValue }],
-      });
-    };
-
     return (
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
-            <Button variant="secondary" fill="outline" className={styles.includeButton} onClick={onClickInclude}>
-              Include
-            </Button>
-            <Button variant="secondary" fill="outline" className={styles.excludeButton} onClick={onClickExclude}>
-              Exclude
+            <Button className={styles.selectButton} variant="secondary" onClick={onClickSelect}>
+              Select
             </Button>
           </div>
         </div>
@@ -253,15 +242,15 @@ function getStyles(theme: GrafanaTheme2) {
       borderBottom: `1px solid ${theme.colors.border.medium}`,
     }),
     headerButtons: css({
-      display: 'flex',
-      gap: '8px',
+      position: 'relative',
+      top: '2px',
       marginLeft: 'auto',
       marginRight: '30px',
       zIndex: 100,
     }),
-    filterButton: css({}),
-    includeButton: css({}),
-    excludeButton: css({}),
+    selectButton: css({
+      height: '28px',
+    }),
     collapsableSectionBody: css({
       display: 'flex',
       flexDirection: 'column',
