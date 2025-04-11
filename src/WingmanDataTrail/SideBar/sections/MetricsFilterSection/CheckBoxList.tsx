@@ -7,39 +7,39 @@ import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
 
 export function CheckBoxList({
-  items,
-  selectedValues,
+  groups,
+  selectedGroups,
   onSelectionChange,
 }: {
-  items: MetricsFilterSectionState['groups'];
-  selectedValues: MetricsFilterSectionState['selectedFilters'];
+  groups: MetricsFilterSectionState['groups'];
+  selectedGroups: MetricsFilterSectionState['selectedGroups'];
   onSelectionChange: (filters: string[]) => void;
 }) {
   const styles = useStyles2(getStyles);
 
-  if (!items.length) {
+  if (!groups.length) {
     return <div className={styles.noResults}>No results</div>;
   }
 
   return (
     <>
       <div className={styles.checkboxListHeader}>
-        <div>{selectedValues.length} selected</div>
-        <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedValues.length}>
+        <div>{selectedGroups.length} selected</div>
+        <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
           clear
         </Button>
       </div>
       <ul className={styles.checkboxList} data-testid="checkbox-filters-list">
-        {items.map((item) => (
-          <li key={item.value} className={styles.checkboxItem}>
+        {groups.map((group) => (
+          <li key={group.value} className={styles.checkboxItem}>
             <CheckboxWithCount
-              label={item.label}
-              count={item.count}
-              checked={selectedValues.includes(item.value)}
+              label={group.label}
+              count={group.count}
+              checked={selectedGroups.includes(group.value)}
               onChange={(e) => {
                 const newValues = e.currentTarget.checked
-                  ? [...selectedValues, item.value]
-                  : selectedValues.filter((v) => v !== item.value);
+                  ? [...selectedGroups, group.value]
+                  : selectedGroups.filter((v) => v !== group.value);
                 onSelectionChange(newValues);
               }}
             />

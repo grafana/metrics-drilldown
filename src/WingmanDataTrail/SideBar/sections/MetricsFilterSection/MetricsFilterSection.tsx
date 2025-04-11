@@ -1,12 +1,11 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type IconName } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import {
   sceneGraph,
   SceneObjectBase,
   VariableDependencyConfig,
   type MultiValueVariable,
   type SceneComponentProps,
-  type SceneObjectState,
 } from '@grafana/scenes';
 import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
@@ -24,22 +23,18 @@ import {
 import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
 import { SectionTitle } from '../SectionTitle';
+import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
 
-export interface MetricsFilterSectionState extends SceneObjectState {
-  key: string;
+export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
-  title: string;
-  description: string;
-  iconName: IconName;
   computeGroups: (
     options: Array<{ label: string; value: string }>
   ) => Array<{ label: string; value: string; count: number }>;
   showHideEmpty: boolean;
   showSearch: boolean;
-  disabled: boolean;
   groups: Array<{ label: string; value: string; count: number }>;
-  selectedFilters: string[];
+  selectedGroups: string[];
   loading: boolean;
 }
 
@@ -89,11 +84,12 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       iconName,
       groups: [],
       computeGroups,
-      selectedFilters: [],
+      selectedGroups: [],
       loading: true,
       showHideEmpty: showHideEmpty ?? true,
       showSearch: showSearch ?? true,
       disabled: disabled ?? false,
+      active: false,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -109,7 +105,10 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.updateLists(metricsVariable.state.options as MetricOptions);
     this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
 
-    this.setState({ loading: filteredMetricsVariable.state.loading });
+    this.setState({
+      loading: filteredMetricsVariable.state.loading,
+      active: this.state.selectedGroups.length > 0,
+    });
   }
 
   private updateLists(options: MetricOptions) {
@@ -132,9 +131,15 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     });
   }
 
+  onSelectionChange = (selectedGroups: string[]) => {
+    this.setState({ selectedGroups, active: selectedGroups.length > 0 });
+
+    this.publishEvent(new EventFiltersChanged({ type: this.state.type, filters: selectedGroups }), true);
+  };
+
   public static Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {
     const styles = useStyles2(getStyles);
-    const { type, groups, selectedFilters, loading, title, description, showHideEmpty, showSearch } = model.useState();
+    const { groups, selectedGroups, loading, title, description, showHideEmpty, showSearch } = model.useState();
 
     const [hideEmpty, setHideEmpty] = useState(false);
     const [searchValue, setSearchValue] = useState('');
@@ -156,11 +161,6 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
         e.preventDefault();
         setSearchValue('');
       }
-    };
-
-    const onSelectionChange = (filters: string[]) => {
-      model.setState({ selectedFilters: filters });
-      model.publishEvent(new EventFiltersChanged({ type, filters }), true);
     };
 
     return (
@@ -191,7 +191,11 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
         {loading && <Spinner inline />}
 
         {!loading && (
-          <CheckBoxList items={filteredGroups} selectedValues={selectedFilters} onSelectionChange={onSelectionChange} />
+          <CheckBoxList
+            groups={filteredGroups}
+            selectedGroups={selectedGroups}
+            onSelectionChange={model.onSelectionChange}
+          />
         )}
       </div>
     );

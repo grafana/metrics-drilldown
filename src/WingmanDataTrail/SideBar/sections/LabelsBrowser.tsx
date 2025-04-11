@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type IconName, type SelectableValue } from '@grafana/data';
-import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { sceneGraph, SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { Button, Icon, IconButton, Input, RadioButtonList, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
 
@@ -8,14 +8,10 @@ import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
 import { SectionTitle } from './SectionTitle';
+import { type SideBarSectionState } from './types';
 
-interface LabelsBrowserState extends SceneObjectState {
-  key: string;
+interface LabelsBrowserState extends SideBarSectionState {
   variableName: string;
-  title: string;
-  description: string;
-  iconName: IconName;
-  disabled: boolean;
 }
 
 export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
@@ -41,12 +37,31 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       description,
       iconName,
       disabled: disabled ?? false,
+      active: false,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
+    const labelValue = labelsVariable.state.value;
+
+    this.setState({ active: Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE) });
   }
 
   onClickLabel = (value: string) => {
     const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
     labelsVariable.changeValueTo(value);
+
+    this.setState({ active: true });
+  };
+
+  onClickClearSelection = () => {
+    const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
+    labelsVariable.changeValueTo(NULL_GROUP_BY_VALUE);
+
+    this.setState({ active: false });
   };
 
   public static Component = ({ model }: SceneComponentProps<LabelsBrowser>) => {
@@ -104,7 +119,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
               <Button
                 variant="secondary"
                 fill="text"
-                onClick={() => labelsVariable.changeValueTo(NULL_GROUP_BY_VALUE)}
+                onClick={model.onClickClearSelection}
                 disabled={value === NULL_GROUP_BY_VALUE}
               >
                 clear

@@ -18,14 +18,14 @@ type Section = MetricsFilterSection | LabelsBrowser | BookmarksList | Settings;
 
 interface SideBarState extends SceneObjectState {
   sections: Section[];
-  activeSection: Section | null;
+  visibleSection: Section | null;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
   constructor(state: Partial<SideBarState>) {
     super({
       key: 'sidebar',
-      activeSection: null,
+      visibleSection: null,
       sections: [
         new MetricsFilterSection({
           key: 'rule-filters',
@@ -81,50 +81,58 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   }
 
   public setActiveSection(sectionKey: string) {
-    const { activeSection, sections } = this.state;
+    const { visibleSection, sections } = this.state;
 
-    if (!sectionKey || sectionKey === activeSection?.state.key) {
-      this.setState({ activeSection: null });
+    if (!sectionKey || sectionKey === visibleSection?.state.key) {
+      this.setState({ visibleSection: null });
       return;
     }
 
     this.setState({
-      activeSection: sections.find((section) => section.state.key === sectionKey) ?? null,
+      visibleSection: sections.find((section) => section.state.key === sectionKey) ?? null,
     });
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const { sections, activeSection } = model.useState();
+    const { sections, visibleSection } = model.useState();
 
     return (
       <div className={styles.container}>
         <div className={styles.buttonsBar}>
-          {sections.map((section) => (
-            <div
-              key={section.state.key}
-              className={cx(
-                styles.buttonContainer,
-                activeSection?.state.key === section.state.key && 'active',
-                section.state.disabled && 'disabled'
-              )}
-            >
-              <Button
-                className={cx(styles.button, section.state.disabled && 'disabled')}
-                size="md"
-                variant="secondary"
-                fill="text"
-                icon={section.state.iconName}
-                aria-label={section.state.title}
-                tooltip={section.state.title}
-                tooltipPlacement="right"
-                onClick={() => model.setActiveSection(section.state.key)}
-                disabled={section.state.disabled}
-              />
-            </div>
-          ))}
+          {sections.map((section) => {
+            const { state } = section;
+            const key = state.key;
+            const { title, iconName, disabled, active } = state;
+            const isVisible = visibleSection?.state.key === key;
+
+            return (
+              <div
+                key={key}
+                className={cx(
+                  styles.buttonContainer,
+                  isVisible && 'visible',
+                  active && 'active',
+                  disabled && 'disabled'
+                )}
+              >
+                <Button
+                  className={cx(styles.button, disabled && 'disabled', isVisible && 'visible', active && 'active')}
+                  size="md"
+                  variant="secondary"
+                  fill="text"
+                  icon={iconName}
+                  aria-label={title}
+                  tooltip={title}
+                  tooltipPlacement="right"
+                  onClick={() => model.setActiveSection(key)}
+                  disabled={disabled}
+                />
+              </div>
+            );
+          })}
         </div>
-        {activeSection && (
+        {visibleSection && (
           <div className={styles.content}>
             <IconButton
               className={styles.closeButton}
@@ -134,7 +142,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               tooltipPlacement="top"
               onClick={() => model.setActiveSection('')}
             />
-            {activeSection && <activeSection.Component model={activeSection as any} />}
+            {/* :man_shrug: */}
+            {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
+            {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
+            {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}
+            {visibleSection instanceof Settings && <visibleSection.Component model={visibleSection} />}
           </div>
         )}
       </div>
@@ -183,7 +195,7 @@ function getStyles(theme: GrafanaTheme2) {
         opacity: 1,
         visibility: 'visible',
       },
-      '&.active::before': {
+      '&.visible::before': {
         opacity: 1,
         visibility: 'visible',
       },
@@ -194,12 +206,19 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     button: css({
       margin: 0,
+      color: theme.colors.text.secondary,
       '&:hover': {
         color: theme.colors.text.maxContrast,
         background: 'transparent',
       },
       '&.disabled:hover': {
         color: theme.colors.text.secondary,
+      },
+      '&.visible': {
+        color: theme.colors.text.maxContrast,
+      },
+      '&.active': {
+        color: theme.colors.text.maxContrast,
       },
     }),
     content: css({

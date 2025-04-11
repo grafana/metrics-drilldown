@@ -1,18 +1,13 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type IconName } from '@grafana/data';
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import { type GrafanaTheme2 } from '@grafana/data';
+import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { SectionTitle } from './SectionTitle';
+import { type SideBarSectionState } from './types';
 
-export interface BookmarksListState extends SceneObjectState {
-  key: string;
-  title: string;
-  description: string;
-  iconName: IconName;
-  disabled: boolean;
-}
+export interface BookmarksListState extends SideBarSectionState {}
 
 export class BookmarksList extends SceneObjectBase<BookmarksListState> {
   constructor({
@@ -34,8 +29,13 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
       description,
       iconName,
       disabled: disabled ?? false,
+      active: false,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
   }
+
+  private onActivate() {}
 
   public static Component = ({ model }: SceneComponentProps<BookmarksList>) => {
     const styles = useStyles2(getStyles);
