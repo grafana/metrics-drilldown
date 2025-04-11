@@ -109,7 +109,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.updateLists(metricsVariable.state.options as MetricOptions);
     this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
 
-    this.setState({ loading: !filteredMetricsVariable.state.options.length });
+    this.setState({ loading: filteredMetricsVariable.state.loading });
   }
 
   private updateLists(options: MetricOptions) {
