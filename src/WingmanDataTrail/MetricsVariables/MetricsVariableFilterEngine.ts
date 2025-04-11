@@ -97,7 +97,7 @@ export class MetricsVariableFilterEngine {
   private static applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
     const pattern = prefixes
       .map((prefix) => {
-        // catch-all (see computeMetricPrefixGroups)
+        // Multi-value support (see computeMetricPrefixGroups)
         if (prefix.includes('|')) {
           return `${prefix
             .split('|')
