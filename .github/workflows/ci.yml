@@ -4,12 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       skip-grafana-dev-image:
+        description: Skip the grafana dev image e2e test
         required: false
         type: boolean
         default: false
   pull_request:
     branches:
       - main
+      # temporary to get e2e going
+      - shelldandy-bohandley/remove-history
 
 permissions:
   contents: 'read'
