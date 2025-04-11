@@ -121,10 +121,14 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
 
   private activationHandler() {
     const sortByVar = sceneGraph.getVariables(this).getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
+    const deprecatedSortByOptions = new Set(['alphabetical', 'reverse-alphabetical']);
 
     this._subs.add(
       sortByVar.subscribeToState((newState, prevState) => {
-        if (newState.value !== prevState.value) {
+        if (deprecatedSortByOptions.has(newState.value as string)) {
+          // Migration for the old sortBy values
+          this.publishEvent(new EventSortByChanged({ sortBy: 'default' }), true);
+        } else if (newState.value !== prevState.value) {
           this.publishEvent(new EventSortByChanged({ sortBy: newState.value as SortingOption }), true);
         }
       })
