@@ -11,8 +11,6 @@ on:
   pull_request:
     branches:
       - main
-      # temporary to get e2e going
-      - shelldandy-bohandley/remove-history
 
 permissions:
   contents: 'read'
