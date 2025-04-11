@@ -13,7 +13,7 @@ export function CheckBoxList({
 }: {
   groups: MetricsFilterSectionState['groups'];
   selectedGroups: MetricsFilterSectionState['selectedGroups'];
-  onSelectionChange: (filters: string[]) => void;
+  onSelectionChange: (newGroups: MetricsFilterSectionState['selectedGroups']) => void;
 }) {
   const styles = useStyles2(getStyles);
 
@@ -35,12 +35,13 @@ export function CheckBoxList({
             <CheckboxWithCount
               label={group.label}
               count={group.count}
-              checked={selectedGroups.includes(group.value)}
+              checked={selectedGroups.some((g) => g.value === group.value)}
               onChange={(e) => {
-                const newValues = e.currentTarget.checked
-                  ? [...selectedGroups, group.value]
-                  : selectedGroups.filter((v) => v !== group.value);
-                onSelectionChange(newValues);
+                const newGroups = e.currentTarget.checked
+                  ? [...selectedGroups, { label: group.label, value: group.value }]
+                  : selectedGroups.filter((v) => v.value !== group.value);
+
+                onSelectionChange(newGroups);
               }}
             />
           </li>

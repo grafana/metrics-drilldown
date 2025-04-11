@@ -152,7 +152,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
         // TODO: verify it works when landing on the page
         for (const filterSection of filterSections) {
-          filters[filterSection.state.type] = filterSection.state.selectedGroups;
+          filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
         }
 
         filterEngine.applyFilters(filters, { notify: false });

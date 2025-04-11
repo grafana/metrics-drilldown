@@ -25,6 +25,7 @@ import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVar
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
+import { EventSectionValueChanged } from '../EventSectionValueChanged';
 
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
@@ -34,7 +35,7 @@ export interface MetricsFilterSectionState extends SideBarSectionState {
   showHideEmpty: boolean;
   showSearch: boolean;
   groups: Array<{ label: string; value: string; count: number }>;
-  selectedGroups: string[];
+  selectedGroups: Array<{ label: string; value: string }>; // we need labels for displaying tooltips in `SideBar.tsx`
   loading: boolean;
 }
 
@@ -131,10 +132,18 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     });
   }
 
-  onSelectionChange = (selectedGroups: string[]) => {
+  onSelectionChange = (selectedGroups: MetricsFilterSectionState['selectedGroups']) => {
     this.setState({ selectedGroups, active: selectedGroups.length > 0 });
 
-    this.publishEvent(new EventFiltersChanged({ type: this.state.type, filters: selectedGroups }), true);
+    this.publishEvent(
+      new EventFiltersChanged({ type: this.state.type, filters: selectedGroups.map((g) => g.value) }),
+      true
+    );
+
+    this.publishEvent(
+      new EventSectionValueChanged({ key: this.state.key, values: selectedGroups.map((g) => g.label) }),
+      true
+    );
   };
 
   public static Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {

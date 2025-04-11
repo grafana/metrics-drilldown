@@ -7,6 +7,7 @@ import React, { useMemo, useState } from 'react';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
+import { EventSectionValueChanged } from './EventSectionValueChanged';
 import { SectionTitle } from './SectionTitle';
 import { type SideBarSectionState } from './types';
 
@@ -50,18 +51,23 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     this.setState({ active: Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE) });
   }
 
-  onClickLabel = (value: string) => {
+  selectValue(value: string) {
     const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
     labelsVariable.changeValueTo(value);
 
-    this.setState({ active: true });
+    const active = Boolean(value && value !== NULL_GROUP_BY_VALUE);
+
+    this.setState({ active });
+
+    this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [value] : [] }), true);
+  }
+
+  onClickLabel = (value: string) => {
+    this.selectValue(value);
   };
 
   onClickClearSelection = () => {
-    const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
-    labelsVariable.changeValueTo(NULL_GROUP_BY_VALUE);
-
-    this.setState({ active: false });
+    this.selectValue(NULL_GROUP_BY_VALUE);
   };
 
   useLabelsBrowser = () => {

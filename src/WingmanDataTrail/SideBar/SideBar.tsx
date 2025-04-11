@@ -10,15 +10,16 @@ import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
 import { BookmarksList } from './sections/BookmarksList';
+import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { Settings } from './sections/Settings';
-
 type Section = MetricsFilterSection | LabelsBrowser | BookmarksList | Settings;
 
 interface SideBarState extends SceneObjectState {
   sections: Section[];
   visibleSection: Section | null;
+  sectionValues: Map<string, string[]>;
 }
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -75,8 +76,22 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           disabled: true,
         }),
       ],
+      sectionValues: new Map(),
       ...state,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    this._subs.add(
+      this.subscribeToEvent(EventSectionValueChanged, (event) => {
+        const { key, values } = event.payload;
+        const { sectionValues } = this.state;
+
+        this.setState({ sectionValues: new Map(sectionValues).set(key, values) });
+      })
+    );
   }
 
   public setActiveSection(sectionKey: string) {
@@ -94,7 +109,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const { sections, visibleSection } = model.useState();
+    const { sections, visibleSection, sectionValues } = model.useState();
 
     return (
       <div className={styles.container}>
@@ -111,6 +126,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             } else {
               buttonText = iconOrText;
             }
+
+            let tooltip = sectionValues.has(key) ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
 
             return (
               <div
@@ -129,7 +146,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                   fill="text"
                   icon={buttonIcon}
                   aria-label={title}
-                  tooltip={title}
+                  tooltip={tooltip}
                   tooltipPlacement="right"
                   onClick={() => model.setActiveSection(key)}
                   disabled={disabled}
