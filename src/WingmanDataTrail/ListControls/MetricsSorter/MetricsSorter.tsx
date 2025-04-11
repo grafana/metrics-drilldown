@@ -127,7 +127,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       sortByVar.subscribeToState((newState, prevState) => {
         if (deprecatedSortByOptions.has(newState.value as string)) {
           // Migration for the old sortBy values
-          this.publishEvent(new EventSortByChanged({ sortBy: 'default' }), true);
+          sortByVar.changeValueTo('default');
         } else if (newState.value !== prevState.value) {
           this.publishEvent(new EventSortByChanged({ sortBy: newState.value as SortingOption }), true);
         }
