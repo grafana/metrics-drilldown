@@ -243,7 +243,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     headerButtons: css({
       position: 'relative',
-      top: '2px',
+      top: '3px',
       marginLeft: 'auto',
       marginRight: '30px',
       zIndex: 100,
@@ -264,7 +264,7 @@ function getStyles(theme: GrafanaTheme2) {
       lineHeight: '1.3rem',
     }),
     labelValue: css({
-      fontSize: '1.2rem',
+      fontSize: '16px',
       marginLeft: '8px',
     }),
     index: css({
