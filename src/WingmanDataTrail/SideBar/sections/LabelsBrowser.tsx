@@ -64,11 +64,10 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     this.setState({ active: false });
   };
 
-  public static Component = ({ model }: SceneComponentProps<LabelsBrowser>) => {
-    const styles = useStyles2(getStyles);
-    const { variableName, title, description } = model.useState();
+  useLabelsBrowser = () => {
+    const { variableName, title, description } = this.useState();
 
-    const labelsVariable = sceneGraph.lookupVariable(variableName, model) as LabelsVariable;
+    const labelsVariable = sceneGraph.lookupVariable(variableName, this) as LabelsVariable;
     const { loading, options: labels, value } = labelsVariable.useState();
 
     const [searchValue, setSearchValue] = useState('');
@@ -84,12 +83,48 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       >;
     }, [labels, searchValue]);
 
-    const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchValue(e.currentTarget.value);
+    };
+
+    const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         setSearchValue('');
       }
     };
+
+    const onInputClear = () => {
+      setSearchValue('');
+    };
+
+    return {
+      title,
+      description,
+      loading,
+      value,
+      filteredList,
+      searchValue,
+      onInputChange,
+      onInputKeyDown,
+      onInputClear,
+    };
+  };
+
+  public static Component = ({ model }: SceneComponentProps<LabelsBrowser>) => {
+    const styles = useStyles2(getStyles);
+
+    const {
+      title,
+      description,
+      loading,
+      value,
+      filteredList,
+      searchValue,
+      onInputChange,
+      onInputKeyDown,
+      onInputClear,
+    } = model.useLabelsBrowser();
 
     return (
       <div className={styles.container} data-testid="labels-browser">
@@ -100,11 +135,9 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
           prefix={<Icon name="search" />}
           placeholder="Search..."
           value={searchValue}
-          onChange={(e) => setSearchValue(e.currentTarget.value)}
-          onKeyDown={onKeyDown}
-          suffix={
-            <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={(e) => setSearchValue('')} />
-          }
+          onChange={onInputChange}
+          onKeyDown={onInputKeyDown}
+          suffix={<IconButton name="times" variant="secondary" tooltip="Clear search" onClick={onInputClear} />}
         />
 
         {loading && <Spinner inline />}
