@@ -411,12 +411,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
     } else if (values.metric == null) {
       stateUpdate.metric = undefined;
-      const currentPath = window.location.pathname;
-      if (currentPath.includes(ROUTES.TrailWithSidebar)) {
-        stateUpdate.topScene = new MetricsReducer();
-      } else {
-        stateUpdate.topScene = new MetricSelectScene({});
-      }
+      stateUpdate.topScene = getFreshTopScene();
     }
 
     if (typeof values.metricSearch === 'string') {
@@ -675,11 +670,20 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
+export function getFreshTopScene() {
+  const currentPath = window.location.pathname;
+  if (currentPath.includes(ROUTES.TrailWithSidebar)) {
+    return new MetricsReducer();
+  } else {
+    return new MetricSelectScene({});
+  }
+}
+
 export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   if (metric) {
     return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
   } else {
-    return new MetricSelectScene({});
+    return getFreshTopScene();
   }
 }
 
