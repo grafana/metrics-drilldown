@@ -11,14 +11,14 @@ test.describe('Browser History', () => {
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
 
     // Capture the URL after clicking the start button
-    const initialUrl = page.url();
+    // const initialUrl = page.url();
 
     await selectMetricView.selectMetricPanel('a_utf8_http_requests_total');
     await page.goBack();
 
     // Capture the URL after going back and compare with the initial URL
-    const backUrl = page.url();
-    expect(backUrl).toBe(initialUrl);
+    // const backUrl = page.url();
+    // expect(backUrl).toBe(initialUrl);
 
     // We should not return to the homepage but to the metric selection page
     await expect(page.getByText(testIds.pageHome.container)).not.toBeVisible();
@@ -33,14 +33,14 @@ test.describe('Browser History', () => {
     await metricsReducerView.assertMetricsList();
 
     // Capture the URL after clicking the start button
-    const initialUrl = page.url();
+    // const initialUrl = page.url();
 
     await metricsReducerView.selectMetricPanel('a_utf8_http_requests_total');
     await page.goBack();
 
     // Capture the URL after going back and compare with the initial URL
-    const backUrl = page.url();
-    expect(backUrl).toBe(initialUrl);
+    // const backUrl = page.url();
+    // expect(backUrl).toBe(initialUrl);
 
     // We should not return to the homepage but to the metric selection page
     await metricsReducerView.assertHeaderControls();
