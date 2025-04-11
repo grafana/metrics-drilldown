@@ -33,10 +33,12 @@ import React, { useEffect, useRef } from 'react';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
 import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
+import { ROUTES } from './constants';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
@@ -358,7 +360,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       nativeHistogramMetric = true;
     }
 
-    this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    });
 
     // Add metric to adhoc filters baseFilter
     const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
@@ -407,7 +411,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
     } else if (values.metric == null) {
       stateUpdate.metric = undefined;
-      stateUpdate.topScene = new MetricSelectScene({});
+      stateUpdate.topScene = getFreshTopScene();
     }
 
     if (typeof values.metricSearch === 'string') {
@@ -657,7 +661,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           </div>
         )}
         {topScene && (
-          <UrlSyncContextProvider scene={topScene}>
+          <UrlSyncContextProvider scene={topScene} createBrowserHistorySteps={true} updateUrlOnInit={true}>
             <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
           </UrlSyncContextProvider>
         )}
@@ -666,11 +670,20 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
+export function getFreshTopScene() {
+  const currentPath = window.location.pathname;
+  if (currentPath.includes(ROUTES.TrailWithSidebar)) {
+    return new MetricsReducer();
+  } else {
+    return new MetricSelectScene({});
+  }
+}
+
 export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   if (metric) {
     return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
   } else {
-    return new MetricSelectScene({});
+    return getFreshTopScene();
   }
 }
 
