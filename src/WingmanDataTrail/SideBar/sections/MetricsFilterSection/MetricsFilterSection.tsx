@@ -3,9 +3,11 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import {
   sceneGraph,
   SceneObjectBase,
+  SceneObjectUrlSyncConfig,
   VariableDependencyConfig,
   type MultiValueVariable,
   type SceneComponentProps,
+  type SceneObjectUrlValues,
 } from '@grafana/scenes';
 import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
@@ -22,10 +24,10 @@ import {
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
+import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
-import { EventSectionValueChanged } from '../EventSectionValueChanged';
 
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
@@ -55,6 +57,29 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       }
     },
   });
+
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: [this.state.key] });
+
+  getUrlState() {
+    return {
+      [this.state.key]: this.state.selectedGroups.map((g) => g.value).join(','),
+    };
+  }
+
+  updateFromUrl(values: SceneObjectUrlValues) {
+    const stateUpdate: Partial<MetricsFilterSectionState> = {};
+
+    if (
+      typeof values[this.state.key] === 'string' &&
+      values[this.state.key] !== this.state.selectedGroups.map((g) => g.value).join(',')
+    ) {
+      stateUpdate.selectedGroups = (values[this.state.key] as string)
+        .split(',')
+        .map((v) => ({ label: v, value: v })) as Array<{ label: string; value: string }>;
+    }
+
+    this.setState(stateUpdate);
+  }
 
   constructor({
     key,
@@ -108,9 +133,11 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.updateLists(metricsVariable.state.options as MetricOptions);
     this.updateCounts(filteredMetricsVariable.state.options as MetricOptions);
 
+    const { selectedGroups } = this.state;
+
     this.setState({
       loading: filteredMetricsVariable.state.loading,
-      active: this.state.selectedGroups.length > 0,
+      active: selectedGroups.length > 0,
     });
   }
 

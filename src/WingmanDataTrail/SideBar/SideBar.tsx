@@ -27,15 +27,33 @@ interface SideBarState extends SceneObjectState {
 
 export class SideBar extends SceneObjectBase<SideBarState> {
   constructor(state: Partial<SideBarState>) {
-    const labelValue = new URLSearchParams(window.location.search).get(`var-${VAR_WINGMAN_GROUP_BY}`);
+    const urlSearchParams = new URLSearchParams(window.location.search);
+
+    const filterKeys = ['filters-rule', 'filters-prefix', 'filters-suffix'];
+    const sectionValues = new Map(
+      filterKeys.map((key) => [
+        key,
+        urlSearchParams.get(key)
+          ? urlSearchParams
+              .get(key)!
+              .split(',')
+              .map((v) => v.trim())
+          : [],
+      ])
+    );
+
+    const labelValue = urlSearchParams.get(`var-${VAR_WINGMAN_GROUP_BY}`);
     const isLabelsBrowserActive = Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE);
+    if (isLabelsBrowserActive) {
+      sectionValues.set('groupby-labels', [labelValue!]);
+    }
 
     super({
       key: 'sidebar',
       visibleSection: null,
       sections: [
         new MetricsFilterSection({
-          key: 'rule-filters',
+          key: 'filters-rule',
           type: 'categories',
           title: 'Rules filters',
           description: 'Filter metrics, recording rules and alerting rules',
@@ -43,25 +61,25 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           computeGroups: computeRulesGroups,
           showHideEmpty: false,
           showSearch: false,
-          active: false, // TODO
+          active: Boolean(sectionValues.get('filters-rule')?.length),
         }),
         new MetricsFilterSection({
-          key: 'prefix-filters',
+          key: 'filters-prefix',
           type: 'prefixes',
           title: 'Prefix filters',
           description: 'Filter metrics based on their name prefix (Prometheus namespace)',
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
-          active: false, // TODO
+          active: Boolean(sectionValues.get('filters-prefix')?.length),
         }),
         new MetricsFilterSection({
-          key: 'suffix-filters',
+          key: 'filters-suffix',
           type: 'suffixes',
           title: 'Suffix filters',
           description: 'Filter metrics based on their name suffix',
           icon: '_Z',
           computeGroups: computeMetricSuffixGroups,
-          active: false, // TODO
+          active: Boolean(sectionValues.get('filters-suffix')?.length),
         }),
         new LabelsBrowser({
           key: 'groupby-labels',
@@ -86,9 +104,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           disabled: true,
         }),
       ],
-      sectionValues: new Map(isLabelsBrowserActive ? [['groupby-labels', [labelValue!]]] : []),
+      sectionValues,
       ...state,
     });
+
+    // TODO: FIXME
+    // rule values are regex, so we do this to disable adding the values to the button tooltip
+    sectionValues.set('filters-rule', []);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
