@@ -35,12 +35,13 @@ const URL_VALUES_BOOKMARK = {
   from: 'now-1h',
   to: 'now',
   timezone: 'browser',
-  'var-ds': 'edwxqcebl0cg0c',
+  // 'var-ds': 'edwxqcebl0cg0c',
   'var-otel_resources': [''],
   'var-filters': [],
   'var-otel_and_metric_filters': [''],
   'var-deployment_environment': ['undefined'],
-  'var-labelsWingman': '',
+  // 'var-variant': 'onboard-filters-sidebar',
+  // 'var-labelsWingman': '',
   'var-groupby': '$__all',
 };
 
@@ -205,7 +206,6 @@ describe('TrailStore', () => {
     });
   });
 
-  // Legacy bookmark trails use history similar to legacy recent trails
   describe('Initialize store with one legacy bookmark trail', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
