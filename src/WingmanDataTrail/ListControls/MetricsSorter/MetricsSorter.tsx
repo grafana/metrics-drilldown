@@ -17,6 +17,7 @@ import React from 'react';
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 import { EventSortByChanged } from './EventSortByChanged';
+import { logger } from '../../../tracking/logger/logger';
 
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
 
@@ -46,7 +47,12 @@ export function addRecentMetric(metricName: string): void {
     const updatedMetrics = filteredMetrics.slice(0, MAX_RECENT_METRICS);
     localStorage.setItem(RECENT_METRICS_STORAGE_KEY, JSON.stringify(updatedMetrics));
   } catch (error) {
-    console.error('Failed to update recent metrics:', error);
+    const errorObject = error instanceof Error ? error : new Error(String(error));
+
+    logger.error(errorObject, {
+      ...(errorObject.cause || {}),
+      metricName,
+    });
   }
 }
 
