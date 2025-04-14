@@ -1,10 +1,10 @@
 import { css, cx } from '@emotion/css';
-import { type GrafanaTheme2, type IconName } from '@grafana/data';
-import { Button, Spinner, useStyles2, useTheme2 } from '@grafana/ui';
+import { availableIconsIndex, type GrafanaTheme2, type IconName } from '@grafana/data';
+import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
-import SVG from 'react-inlinesvg';
 
-import pluginJson from '../../plugin.json';
+import { GroupsIcon } from './custom-icons/GroupsIcon';
+import { RulesIcon } from './custom-icons/RulesIcon';
 
 type SideBarButtonProps = {
   ariaLabel: string;
@@ -13,8 +13,7 @@ type SideBarButtonProps = {
   active: boolean;
   tooltip: string;
   onClick: () => void;
-  icon?: IconName;
-  text?: string;
+  iconOrText: string | IconName;
 };
 
 export function SideBarButton({
@@ -22,37 +21,28 @@ export function SideBarButton({
   disabled,
   visible,
   active,
-  icon,
   tooltip,
-  text,
+  iconOrText,
   onClick,
 }: SideBarButtonProps) {
   const styles = useStyles2(getStyles);
-  const { isDark } = useTheme2();
 
-  if (text && ['rules', 'groups'].includes(text)) {
-    return (
-      <Button
-        className={cx(styles.button, disabled && 'disabled', visible && 'visible', active && 'active')}
-        size="md"
-        variant="secondary"
-        fill="text"
-        aria-label={ariaLabel}
-        tooltip={tooltip}
-        tooltipPlacement="right"
-        onClick={onClick}
-        disabled={disabled}
-      >
-        <SVG
-          src={
-            isDark
-              ? `public/plugins/${pluginJson.id}//img/icons/icon-${text}-dark.svg`
-              : `public/plugins/${pluginJson.id}//img/icons/icon-${text}-light.svg`
-          }
-          loader={<Spinner />}
-        />
-      </Button>
-    );
+  let buttonIcon;
+  let ButtonChild;
+
+  if (iconOrText in availableIconsIndex) {
+    buttonIcon = iconOrText as IconName;
+  } else {
+    // some icons are not available in the Saga Design System and have been added as SVG files to the code base
+    if (iconOrText === 'rules') {
+      ButtonChild = RulesIcon;
+    } else if (iconOrText === 'groups') {
+      ButtonChild = GroupsIcon;
+    } else {
+      ButtonChild = function ButtonChildText() {
+        return <>{iconOrText}</>;
+      };
+    }
   }
 
   return (
@@ -61,14 +51,14 @@ export function SideBarButton({
       size="md"
       variant="secondary"
       fill="text"
-      icon={icon}
+      icon={buttonIcon}
       aria-label={ariaLabel}
       tooltip={tooltip}
       tooltipPlacement="right"
       onClick={onClick}
       disabled={disabled}
     >
-      {text}
+      {ButtonChild && <ButtonChild />}
     </Button>
   );
 }

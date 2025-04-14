@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { availableIconsIndex, type GrafanaTheme2, type IconName } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -149,17 +149,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           {sections.map((section) => {
             const { key, title, icon: iconOrText, disabled, active } = section.state;
             const visible = visibleSection?.state.key === key;
-
-            let buttonText;
-            let buttonIcon;
-
-            if (iconOrText in availableIconsIndex) {
-              buttonIcon = iconOrText as IconName;
-            } else {
-              buttonText = iconOrText;
-            }
-
-            let tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
+            const tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
 
             return (
               <div
@@ -173,8 +163,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                   active={active}
                   tooltip={tooltip}
                   onClick={() => model.setActiveSection(key)}
-                  icon={buttonIcon}
-                  text={buttonText}
+                  iconOrText={iconOrText}
                 />
               </div>
             );
