@@ -138,7 +138,6 @@ export class MetricsReducerView extends DrilldownView {
       .locator('div span')
       .first();
 
-    await targetPrefix.scrollIntoViewIfNeeded();
     await targetPrefix.click();
   }
 
@@ -156,7 +155,7 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async changeSortOption(sortBy: 'Default' | 'Dashboard Usage' | 'Alerting Usage') {
-    await this.page.getByTestId('header-controls').getByTestId('data-testid template variable').click();
+    await this.page.getByTestId('list-controls').getByTestId('data-testid template variable').click();
     await this.page.getByRole('option', { name: sortBy }).locator('span').click();
   }
 
