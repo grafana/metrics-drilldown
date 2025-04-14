@@ -57,7 +57,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           type: 'categories',
           title: 'Rules filters',
           description: 'Filter metrics, recording rules and alerting rules',
-          icon: 'gf-prometheus',
+          icon: 'rules',
           computeGroups: computeRulesGroups,
           showHideEmpty: false,
           showSearch: false,
@@ -86,7 +86,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           variableName: VAR_WINGMAN_GROUP_BY,
           title: 'Group by labels',
           description: 'Group metrics by their label values',
-          icon: 'layer-group',
+          icon: 'groups',
           active: isLabelsBrowserActive,
         }),
         new BookmarksList({

@@ -1,7 +1,10 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2, type IconName } from '@grafana/data';
-import { Button, useStyles2 } from '@grafana/ui';
+import { Button, useStyles2, useTheme2 } from '@grafana/ui';
 import React from 'react';
+import SVG from 'react-inlinesvg';
+
+import pluginJson from '../../plugin.json';
 
 type SideBarButtonProps = {
   ariaLabel: string;
@@ -25,6 +28,31 @@ export function SideBarButton({
   onClick,
 }: SideBarButtonProps) {
   const styles = useStyles2(getStyles);
+  const { isDark } = useTheme2();
+
+  if (text && ['rules', 'groups'].includes(text)) {
+    return (
+      <Button
+        className={cx(styles.button, disabled && 'disabled', visible && 'visible', active && 'active')}
+        size="md"
+        variant="secondary"
+        fill="text"
+        aria-label={ariaLabel}
+        tooltip={tooltip}
+        tooltipPlacement="right"
+        onClick={onClick}
+        disabled={disabled}
+      >
+        <SVG
+          src={
+            isDark
+              ? `public/plugins/${pluginJson.id}//img/icons/icon-${text}-dark.svg`
+              : `public/plugins/${pluginJson.id}//img/icons/icon-${text}-light.svg`
+          }
+        />
+      </Button>
+    );
+  }
 
   return (
     <Button

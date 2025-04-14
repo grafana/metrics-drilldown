@@ -44,6 +44,7 @@
     "@lezer/common": "^1.2.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-inlinesvg": "^4.2.0",
     "react-router-dom": "^6.30.0",
     "rxjs": "7.8.1",
     "tsqtsq": "^1.0.10"
