@@ -13,14 +13,14 @@ export class MetricsReducerView extends DrilldownView {
     return super.goto(new URLSearchParams([...this.urlParams, ...new URLSearchParams(urlSearchParams)]));
   }
 
-  /* Header controls */
+  /* List controls */
 
-  getHeaderControls() {
-    return this.getByTestId('header-controls');
+  getListControls() {
+    return this.getByTestId('list-controls');
   }
 
-  async assertHeaderControls() {
-    const headerControls = this.getHeaderControls();
+  async assertListControls() {
+    const headerControls = this.getListControls();
 
     await expect(headerControls.getByText('Group by label')).toBeVisible();
     await expect(headerControls.getByText('Sort by')).toBeVisible();
@@ -34,7 +34,7 @@ export class MetricsReducerView extends DrilldownView {
   /* Quick filter */
 
   getQuickFilterInput() {
-    return this.getHeaderControls().getByPlaceholder('Search metrics');
+    return this.getListControls().getByPlaceholder('Search metrics');
   }
 
   async assertQuickFilter(expectedValue: string, expectedResultsCount: number) {

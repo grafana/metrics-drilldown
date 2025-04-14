@@ -21,14 +21,14 @@ import { getColorByIndex, getTrailFor } from 'utils';
 
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
-import { HeaderControls } from './HeaderControls/HeaderControls';
-import { EventSortByChanged } from './HeaderControls/MetricsSorter/EventSortByChanged';
-import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './HeaderControls/MetricsSorter/MetricsSorter';
-import { EventQuickSearchChanged } from './HeaderControls/QuickSearch/EventQuickSearchChanged';
-import { QuickSearch } from './HeaderControls/QuickSearch/QuickSearch';
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
+import { ListControls } from './ListControls/ListControls';
+import { EventSortByChanged } from './ListControls/MetricsSorter/EventSortByChanged';
+import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './ListControls/MetricsSorter/MetricsSorter';
+import { EventQuickSearchChanged } from './ListControls/QuickSearch/EventQuickSearchChanged';
+import { QuickSearch } from './ListControls/QuickSearch/QuickSearch';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
 import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
@@ -47,7 +47,7 @@ import { SceneDrawer } from './SceneDrawer';
 import { EventFiltersChanged } from './SideBar/EventFiltersChanged';
 import { SideBar } from './SideBar/SideBar';
 interface MetricsReducerState extends SceneObjectState {
-  headerControls: HeaderControls;
+  listControls: ListControls;
   sidebar: SideBar;
   body: SceneObjectBase;
   drawer: SceneDrawer;
@@ -66,7 +66,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       $variables: new SceneVariableSet({
         variables: [new MetricsVariable(), new FilteredMetricsVariable(), new LabelsVariable()],
       }),
-      headerControls: new HeaderControls({}),
+      listControls: new ListControls({}),
       sidebar: new SideBar({}),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
       drawer: new SceneDrawer({}),
@@ -260,12 +260,12 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
-    const { $variables, body, headerControls, drawer, sidebar } = model.useState();
+    const { $variables, body, listControls, drawer, sidebar } = model.useState();
 
     return (
       <>
-        <div className={styles.headerControls} data-testid="header-controls">
-          <headerControls.Component model={headerControls} />
+        <div className={styles.listControls} data-testid="list-controls">
+          <listControls.Component model={listControls} />
         </div>
         <div className={styles.body}>
           <div className={styles.sidebar} data-testid="sidebar">
@@ -288,7 +288,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
 function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
   return {
-    headerControls: css({
+    listControls: css({
       marginBottom: theme.spacing(1.5),
     }),
     body: css({
