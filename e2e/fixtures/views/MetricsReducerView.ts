@@ -101,6 +101,16 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
+  getPanelByTitle(panelTitle: string) {
+    return this.getByTestId(`data-testid Panel header ${panelTitle}`);
+  }
+
+  selectMetricPanel(panelTitle: string) {
+    return this.getPanelByTitle(panelTitle)
+      .getByRole('button', { name: /select/i })
+      .click();
+  }
+
   getMetricsGroupByList() {
     return this.getByTestId('metrics-groupby-list');
   }

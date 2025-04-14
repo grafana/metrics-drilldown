@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
+import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
@@ -14,10 +14,8 @@ import {
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
-  sceneUtils,
   SceneVariableSet,
   UrlSyncContextProvider,
-  UrlSyncManager,
   VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
@@ -34,9 +32,10 @@ import React, { useEffect, useRef } from 'react';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
-import { DataTrailHistory } from './DataTrailsHistory';
+import { ROUTES } from './constants';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
@@ -79,7 +78,6 @@ export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
   controls: SceneObject[];
-  history: DataTrailHistory;
   pluginInfo: SceneReactObject;
   createdAt: number;
 
@@ -109,6 +107,8 @@ export interface DataTrailState extends SceneObjectState {
   histogramsLoaded: boolean;
   nativeHistograms: string[];
   nativeHistogramMetric: string;
+
+  trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -128,7 +128,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],
-      history: state.history ?? new DataTrailHistory({}),
       pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
@@ -139,6 +138,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       nativeHistograms: state.nativeHistograms ?? [],
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
+      trailActivated: state.trailActivated ?? false,
       ...state,
     });
 
@@ -146,6 +146,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   public _onActivate() {
+    this.setState({ trailActivated: true });
     const urlParams = urlUtil.getUrlSearchParams();
     migrateOtelDeploymentEnvironment(this, urlParams);
 
@@ -340,28 +341,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.getMetricMetadata(this.state.metric);
   }
 
-  public restoreFromHistoryStep(state: DataTrailState) {
-    if (!state.topScene && !state.metric) {
-      // If the top scene for an  is missing, correct it.
-      state.topScene = new MetricSelectScene({});
-    }
-
-    this.setState(
-      sceneUtils.cloneSceneObjectState(state, {
-        history: this.state.history,
-        metric: !state.metric ? undefined : state.metric,
-        metricSearch: !state.metricSearch ? undefined : state.metricSearch,
-        // store type because this requires an expensive api call to determine
-        // when loading the metric scene
-        nativeHistogramMetric: !state.nativeHistogramMetric ? undefined : state.nativeHistogramMetric,
-      })
-    );
-
-    const urlState = new UrlSyncManager().getUrlState(this);
-    const fullUrl = urlUtil.renderUrl(locationService.getLocation().pathname, urlState);
-    locationService.replace(fullUrl);
-  }
-
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
     const metric = evt.payload ?? '';
 
@@ -375,7 +354,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       nativeHistogramMetric = true;
     }
 
-    this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    });
 
     // Add metric to adhoc filters baseFilter
     const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
@@ -424,7 +405,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
     } else if (values.metric == null) {
       stateUpdate.metric = undefined;
-      stateUpdate.topScene = new MetricSelectScene({});
+      stateUpdate.topScene = getFreshTopScene();
     }
 
     if (typeof values.metricSearch === 'string') {
@@ -636,7 +617,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   static Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, history, pluginInfo, useOtelExperience, embedded, histogramsLoaded, nativeHistograms } =
+    const { controls, topScene, pluginInfo, useOtelExperience, embedded, histogramsLoaded, nativeHistograms } =
       model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight();
@@ -664,7 +645,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       <div className={styles.container}>
         {NativeHistogramBanner({ histogramsLoaded, nativeHistograms, trail: model })}
         {showHeaderForFirstTimeUsers && <MetricsHeader />}
-        <history.Component model={history} />
         {controls && (
           <div className={styles.controls} data-testid="app-controls">
             {controls.map((control) => (
@@ -676,7 +656,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           </div>
         )}
         {topScene && (
-          <UrlSyncContextProvider scene={topScene}>
+          <UrlSyncContextProvider scene={topScene} createBrowserHistorySteps={true} updateUrlOnInit={true}>
             <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
           </UrlSyncContextProvider>
         )}
@@ -685,11 +665,20 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
+export function getFreshTopScene() {
+  const currentPath = window.location.pathname;
+  if (currentPath.includes(ROUTES.TrailWithSidebar)) {
+    return new MetricsReducer();
+  } else {
+    return new MetricSelectScene({});
+  }
+}
+
 export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   if (metric) {
     return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
   } else {
-    return new MetricSelectScene({});
+    return getFreshTopScene();
   }
 }
 
