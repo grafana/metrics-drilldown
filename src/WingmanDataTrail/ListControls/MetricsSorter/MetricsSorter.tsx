@@ -18,8 +18,7 @@ import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 import { EventSortByChanged } from './EventSortByChanged';
 
-export const sortingOptions = ['default', 'dashboard-usage', 'alerting-usage'] as const;
-export type SortingOption = (typeof sortingOptions)[number];
+export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
 
 const RECENT_METRICS_STORAGE_KEY = 'metrics-drilldown-recent-metrics';
 const MAX_RECENT_METRICS = 6;
@@ -96,6 +95,7 @@ export const VAR_WINGMAN_SORT_BY = 'metrics-reducer-sort-by';
 
 export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   initialized = false;
+  supportedSortByOptions = new Set<SortingOption>(['default', 'dashboard-usage', 'alerting-usage']);
 
   constructor(state: Partial<MetricsSorterState>) {
     super({
@@ -121,11 +121,10 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
 
   private activationHandler() {
     const sortByVar = sceneGraph.getVariables(this).getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
-    const deprecatedSortByOptions = new Set(['alphabetical', 'reverse-alphabetical']);
 
     this._subs.add(
       sortByVar.subscribeToState((newState, prevState) => {
-        if (deprecatedSortByOptions.has(newState.value as string)) {
+        if (!this.supportedSortByOptions.has(newState.value as SortingOption)) {
           // Migration for the old sortBy values
           sortByVar.changeValueTo('default');
         } else if (newState.value !== prevState.value) {
