@@ -21,7 +21,7 @@ import { logger } from '../../../tracking/logger/logger';
 
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
 
-const RECENT_METRICS_STORAGE_KEY = 'metrics-drilldown-recent-metrics';
+const RECENT_METRICS_STORAGE_KEY = 'metrics-drilldown-recent-metrics/v1';
 const MAX_RECENT_METRICS = 6;
 const RECENT_METRICS_EXPIRY_DAYS = 30;
 
