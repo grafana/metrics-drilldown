@@ -12,8 +12,9 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Spinner, useStyles2, useTheme2 } from '@grafana/ui';
 import React, { useState } from 'react';
+import SVG from 'react-inlinesvg';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
@@ -30,6 +31,7 @@ import {
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 
+import pluginJson from '../../plugin.json';
 import {
   MetricsWithLabelValueVariable,
   VAR_METRIC_WITH_LABEL_VALUE,
@@ -143,6 +145,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
   public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const styles = useStyles2(getStyles);
+    const { isDark } = useTheme2();
 
     const { index, labelName, labelValue, labelCardinality, $variables, body } = model.useState();
 
@@ -184,7 +187,13 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             onToggle={() => setIsCollapsed(!isCollapsed)}
             label={
               <div className={styles.groupName}>
-                <Icon name="layer-group" size="lg" />
+                <SVG
+                  src={
+                    isDark
+                      ? `public/plugins/${pluginJson.id}//img/icons/icon-groups-dark.svg`
+                      : `public/plugins/${pluginJson.id}//img/icons/icon-groups-light.svg`
+                  }
+                />
                 <div className={styles.labelValue}>{labelValue}</div>
                 {labelCardinality > 1 && (
                   <div className={styles.index}>
