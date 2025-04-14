@@ -39,7 +39,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     };
 
     return (
-      <div className={styles.panelContainer} data-testid="metric-item">
+      <div className={styles.panelContainer} data-testid="metric-viz-panel">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
         <div className={styles.usageContainer} data-testid="usage-data-panel">
           <Tooltip content="Dashboards usage" placement="top">

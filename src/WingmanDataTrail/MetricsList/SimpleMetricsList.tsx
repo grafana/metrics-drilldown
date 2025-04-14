@@ -57,7 +57,11 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
         }),
         getLayoutLoading: () =>
           new SceneReactObject({
-            reactNode: <Spinner inline />,
+            reactNode: (
+              <div data-testid="metrics-loading">
+                <Spinner inline />
+              </div>
+            ),
           }),
         getLayoutEmpty: () =>
           new SceneReactObject({

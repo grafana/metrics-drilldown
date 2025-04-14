@@ -127,4 +127,73 @@ export class MetricsReducerView extends DrilldownView {
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
   }
+
+  async selectPrefixFilter(prefix: string) {
+    const prefixFilters = this.page.getByTestId('metric-prefix-filters');
+
+    // It'd be great to be able to use `.getByRole('checkbox', { name: prefix })`, but it doesn't work
+    const targetPrefix = await prefixFilters
+      .getByRole('listitem')
+      .filter({ hasText: prefix })
+      .locator('div span')
+      .first();
+
+    await targetPrefix.scrollIntoViewIfNeeded();
+    await targetPrefix.click();
+  }
+
+  async selectMetric(metricName: string) {
+    const element = await this.page.getByTestId(`select-action-${metricName}`);
+    await element.scrollIntoViewIfNeeded();
+    await element.click();
+  }
+
+  async getVisibleMetrics(): Promise<string[]> {
+    const metricElements = await this.page.getByTestId('metric-viz-panel').all();
+    return Promise.all(
+      metricElements.map((el) => el.getByTestId('header-container').getByRole('heading').textContent())
+    ) as Promise<string[]>;
+  }
+
+  async changeSortOption(sortBy: 'Default' | 'Dashboard Usage' | 'Alerting Usage') {
+    await this.page.getByTestId('header-controls').getByTestId('data-testid template variable').click();
+    await this.page.getByRole('option', { name: sortBy }).locator('span').click();
+  }
+
+  async waitForMetricsUpdate() {
+    await this.page.waitForFunction(() => {
+      const loadingIndicator = document.querySelector('[data-testid="metrics-loading"]');
+      return !loadingIndicator;
+    });
+  }
+
+  async getMetricUsageCounts(): Promise<Record<string, number>> {
+    const usageCounts: Record<string, number> = {};
+
+    // Get all metric items
+    const metricItems = await this.page.getByTestId('metric-viz-panel').all();
+
+    // For each metric item, extract its usage counts
+    for (const item of metricItems) {
+      const metricName = await item.textContent();
+      if (!metricName) {
+        continue;
+      }
+
+      // Get the usage data panel for this metric
+      const usagePanel = await item.locator('[data-testid="usage-data-panel"]');
+      if (!usagePanel) {
+        continue;
+      }
+
+      // Extract dashboard and alerting usage counts
+      const dashboardCount = await usagePanel.locator('[data-testid="dashboard-usage"]').textContent();
+      const alertingCount = await usagePanel.locator('[data-testid="alerting-usage"]').textContent();
+
+      // Store the total usage count
+      usageCounts[metricName] = parseInt(dashboardCount || '0', 10) + parseInt(alertingCount || '0', 10);
+    }
+
+    return usageCounts;
+  }
 }
