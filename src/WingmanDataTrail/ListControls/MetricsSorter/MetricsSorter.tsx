@@ -206,6 +206,7 @@ const requestOptions: Partial<BackendSrvRequest> = {
   showSuccessAlert: false,
   showErrorAlert: false,
 };
+const dashboardRequestMap = new Map<string, Promise<{ dashboard: Dashboard } | null>>();
 
 /**
  * Fetches metric usage data from dashboards
@@ -223,21 +224,46 @@ export async function fetchDashboardMetrics(): Promise<Record<string, number>> {
       requestOptions
     );
 
+    let dashboardRequestsFailedCount = 0;
+
     const metricCounts = await Promise.all(
-      dashboards.map(({ uid }) =>
-        getBackendSrv().get<{ dashboard: Dashboard }>(
-          `/api/dashboards/uid/${uid}`,
-          undefined,
-          'grafana-metricsdrilldown-app-dashboard-metric-usage',
-          requestOptions
-        )
-      )
-    ).then((dashboards) => {
+      dashboards.map(({ uid: dashboardUid }) => {
+        let promise = dashboardRequestMap.get(dashboardUid);
+
+        if (!promise) {
+          promise = getBackendSrv()
+            .get<{ dashboard: Dashboard }>(
+              `/api/dashboards/uid/${dashboardUid}`,
+              undefined,
+              `grafana-metricsdrilldown-app-dashboard-metric-usage-${dashboardUid}`,
+              requestOptions
+            )
+            .catch((error) => {
+              // Prevent excessive noise
+              if (dashboardRequestsFailedCount <= 5) {
+                logger.error(error, {
+                  dashboardUid,
+                });
+              }
+
+              dashboardRequestsFailedCount++;
+              return Promise.resolve(null);
+            })
+            .finally(() => {
+              dashboardRequestMap.delete(dashboardUid);
+            });
+          dashboardRequestMap.set(dashboardUid, promise);
+        }
+
+        return promise;
+      })
+    ).then((dashboardSearchResponse) => {
       // Create a map to count metric occurrences
       const counts: Record<string, number> = {};
+      const dashboards = dashboardSearchResponse.filter((d): d is { dashboard: Dashboard } => d !== null);
 
       for (const { dashboard } of dashboards) {
-        if (!dashboard.panels?.length || !dashboard.uid) {
+        if (!dashboard.panels?.length) {
           continue;
         }
 
