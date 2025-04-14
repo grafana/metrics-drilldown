@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2, type IconName } from '@grafana/data';
-import { Button, useStyles2, useTheme2 } from '@grafana/ui';
+import { Button, Spinner, useStyles2, useTheme2 } from '@grafana/ui';
 import React from 'react';
 import SVG from 'react-inlinesvg';
 
@@ -49,6 +49,7 @@ export function SideBarButton({
               ? `public/plugins/${pluginJson.id}//img/icons/icon-${text}-dark.svg`
               : `public/plugins/${pluginJson.id}//img/icons/icon-${text}-light.svg`
           }
+          loader={<Spinner />}
         />
       </Button>
     );
