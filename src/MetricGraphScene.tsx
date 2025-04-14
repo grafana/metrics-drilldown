@@ -15,7 +15,7 @@ import React from 'react';
 
 import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { MetricActionBar } from './MetricScene';
-import { getTrailFor, getTrailSettings } from './utils';
+import { getTrailFor } from './utils';
 
 export const MAIN_PANEL_MIN_HEIGHT = 280;
 export const MAIN_PANEL_MAX_HEIGHT = '40%';
@@ -36,14 +36,13 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
   public static Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {
     const { topView, selectedTab } = model.useState();
-    const { stickyMainGraph } = getTrailSettings(model).useState();
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0);
 
     return (
       <div className={styles.container}>
-        <div className={stickyMainGraph ? styles.sticky : styles.nonSticky}>
+        <div className={styles.nonSticky}>
           <topView.Component model={topView} />
         </div>
         {selectedTab && <selectedTab.Component model={selectedTab} />}

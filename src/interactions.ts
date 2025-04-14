@@ -53,8 +53,6 @@ export type Interactions = {
       | 'deleted'
     );
   };
-  // User changes metric explore settings
-  settings_changed: { stickyMainGraph?: boolean };
   // User clicks on tab to change the action view
   metric_action_view_changed: { 
     view: ActionViewType 
