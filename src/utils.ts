@@ -25,6 +25,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { ROUTES } from './constants';
 import { DataTrail } from './DataTrail';
+import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { MetricScene } from './MetricScene';
 import { sortResources } from './otel/util';
@@ -35,6 +36,10 @@ import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 export function getTrailFor(model: SceneObject): DataTrail {
   return sceneGraph.getAncestor(model, DataTrail);
+}
+
+export function getTrailSettings(model: SceneObject): DataTrailSettings {
+  return sceneGraph.getAncestor(model, DataTrail).state.settings;
 }
 
 export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean): DataTrail {
