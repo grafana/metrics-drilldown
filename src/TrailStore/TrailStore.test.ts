@@ -1,12 +1,10 @@
-import { locationService, setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
-import { sceneGraph, sceneUtils } from '@grafana/scenes';
+import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 import { type DataSourceRef } from '@grafana/schema';
 
 import { DataTrail } from '../DataTrail';
 import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
-import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY, VAR_FILTERS } from '../shared';
-import { getTrailStore, type SerializedTrail } from './TrailStore';
-import { isAdHocFiltersVariable } from '../utils/utils.variables';
+import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY } from '../shared';
+import { getTrailStore, type UrlSerializedTrail } from './TrailStore';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
@@ -31,7 +29,23 @@ jest.mock('@grafana/runtime', () => ({
   }),
 }));
 
-describe.skip('TrailStore', () => {
+const URL_VALUES_BOOKMARK = {
+  metric: 'bookmarked_metric',
+  nativeHistogramMetric: '',
+  from: 'now-1h',
+  to: 'now',
+  timezone: 'browser',
+  // 'var-ds': 'edwxqcebl0cg0c',
+  'var-otel_resources': [''],
+  'var-filters': [],
+  'var-otel_and_metric_filters': [''],
+  'var-deployment_environment': ['undefined'],
+  // 'var-variant': 'onboard-filters-sidebar',
+  // 'var-labelsWingman': '',
+  'var-groupby': '$__all',
+};
+
+describe('TrailStore', () => {
   beforeAll(() => {
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
 
@@ -73,8 +87,9 @@ describe.skip('TrailStore', () => {
   describe('Initialize store with one recent trail with final current step', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    const history: SerializedTrail['history'] = [
+    const urlSerializedTrails: UrlSerializedTrail[] = [
       {
+        // this has no metric nor labels so it will be ignored
         urlValues: {
           from: 'now-1h',
           to: 'now',
@@ -84,9 +99,6 @@ describe.skip('TrailStore', () => {
           refresh: '',
           nativeHistogramMetric: '',
         },
-        type: 'start',
-        description: 'Test',
-        parentIndex: -1,
       },
       {
         urlValues: {
@@ -99,446 +111,34 @@ describe.skip('TrailStore', () => {
           refresh: '',
           nativeHistogramMetric: '',
         },
-        type: 'metric',
-        description: 'Test',
-        parentIndex: 0,
       },
     ];
 
     beforeEach(() => {
       localStorage.clear();
-      localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify([{ history }]));
+      localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify([{ urlSerializedTrails }]));
       getTrailStore().load();
     });
 
     it('should accurately load recent trails', () => {
       const store = getTrailStore();
       expect(store.recent.length).toBe(1);
-      const trail = store.recent[0].resolve();
-      expect(trail.state.history.state.steps.length).toBe(2);
-      expect(trail.state.history.state.steps[0].type).toBe('start');
-      expect(trail.state.history.state.steps[1].type).toBe('metric');
     });
 
     it('should have no bookmarked trails', () => {
       const store = getTrailStore();
       expect(store.bookmarks.length).toBe(0);
-    });
-
-    describe('Add a new recent trail with equivalent current step state', () => {
-      const store = getTrailStore();
-
-      const duplicateTrailSerialized: SerializedTrail = {
-        history: [
-          history[0],
-          history[1],
-          {
-            ...history[1],
-            urlValues: {
-              ...history[1].urlValues,
-              metric: 'different_metric_in_the_middle',
-            },
-          },
-          {
-            ...history[1],
-          },
-        ],
-        currentStep: 3,
-      };
-
-      beforeEach(() => {
-        // We expect the initialized trail to be there
-        expect(store.recent.length).toBe(1);
-        expect(store.recent[0].resolve().state.history.state.steps.length).toBe(2);
-
-        // @ts-ignore #2341 -- deliberately access private method to construct trail object for testing purposes
-        const duplicateTrail = store._deserializeTrail(duplicateTrailSerialized);
-        store.setRecentTrail(duplicateTrail);
-      });
-
-      it('should still be only one recent trail', () => {
-        expect(store.recent.length).toBe(1);
-      });
-
-      it('it should only contain the new trail', () => {
-        const newRecentTrail = store.recent[0].resolve();
-        expect(newRecentTrail.state.history.state.steps.length).toBe(duplicateTrailSerialized.history.length);
-
-        // @ts-ignore #2341 -- deliberately access private method to construct trail object for testing purposes
-        const newRecent = store._serializeTrail(newRecentTrail);
-        expect(newRecent.currentStep).toBe(duplicateTrailSerialized.currentStep);
-        expect(newRecent.history.length).toBe(duplicateTrailSerialized.history.length);
-      });
-    });
-
-    it.each([
-      ['metric', 'different_metric'],
-      ['from', 'now-1y'],
-      ['to', 'now-30m'],
-      ['timezone', 'utc'],
-      ['var-ds', 'ds'],
-      ['var-groupby', 'job'],
-      ['var-filters', 'cluster|=|dev-eu-west-2'],
-    ])(`new recent trails with a different '%p' value should insert new entry`, (key, differentValue) => {
-      const store = getTrailStore();
-      // We expect the initialized trail to be there
-      expect(store.recent.length).toBe(1);
-
-      const differentTrailSerialized: SerializedTrail = {
-        history: [
-          history[0],
-          history[1],
-          {
-            ...history[1],
-            urlValues: {
-              ...history[1].urlValues,
-              [key]: differentValue,
-            },
-            parentIndex: 1,
-          },
-        ],
-        currentStep: 2,
-      };
-
-      // @ts-ignore #2341 -- deliberately access private method to construct trail object for testing purposes
-      const differentTrail = store._deserializeTrail(differentTrailSerialized);
-      store.setRecentTrail(differentTrail);
-
-      // There should now be two trails
-      expect(store.recent.length).toBe(2);
-    });
-
-    test('deserializeTrail must show state of current step when not last step', () => {
-      const trailSerialized: SerializedTrail = {
-        history: [
-          history[0],
-          history[1],
-          {
-            ...history[1],
-            urlValues: {
-              ...history[1].urlValues,
-              metric: 'something_else',
-            },
-            parentIndex: 1,
-          },
-        ],
-        currentStep: 1,
-      };
-
-      // @ts-ignore #2341 -- deliberately access private method to construct trail object for testing purposes
-      const trail = getTrailStore()._deserializeTrail(trailSerialized);
-
-      //
-      expect(trail.state.metric).not.toEqual('something_else');
-      expect(trail.state.metric).toEqual(history[1].urlValues.metric);
-    });
-  });
-
-  describe('Initialize store with one recent trail with non final current step', () => {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    const history: SerializedTrail['history'] = [
-      {
-        urlValues: {
-          from: 'now-1h',
-          to: 'now',
-          timezone,
-          'var-ds': 'ds',
-          'var-filters': [],
-          refresh: '',
-          nativeHistogramMetric: '',
-        },
-        type: 'start',
-        description: 'Test',
-        parentIndex: -1,
-      },
-      {
-        urlValues: {
-          metric: 'current_metric',
-          from: 'now-1h',
-          to: 'now',
-          timezone,
-          'var-ds': 'ds',
-          'var-filters': [],
-          refresh: '',
-          nativeHistogramMetric: '',
-        },
-        type: 'metric',
-        description: 'Test',
-        parentIndex: 0,
-      },
-      {
-        urlValues: {
-          metric: 'final_metric',
-          from: 'now-1h',
-          to: 'now',
-          timezone,
-          'var-ds': 'ds',
-          'var-filters': [],
-          refresh: '',
-          nativeHistogramMetric: '',
-        },
-        type: 'metric',
-        description: 'Test',
-        parentIndex: 1,
-      },
-    ];
-
-    beforeEach(() => {
-      localStorage.clear();
-      localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify([{ history, currentStep: 1 }]));
-      getTrailStore().load();
-    });
-
-    it('should accurately load recent trails', () => {
-      const store = getTrailStore();
-      expect(store.recent.length).toBe(1);
-      const trail = store.recent[0].resolve();
-      expect(trail.state.history.state.steps.length).toBe(3);
-      expect(trail.state.history.state.steps[0].type).toBe('start');
-      expect(trail.state.history.state.steps[1].type).toBe('metric');
-      expect(trail.state.history.state.steps[1].trailState.metric).toBe('current_metric');
-      expect(trail.state.history.state.steps[2].type).toBe('metric');
-      expect(trail.state.history.state.steps[2].trailState.metric).toBe('final_metric');
-      expect(trail.state.history.state.currentStep).toBe(1);
-    });
-
-    function getFilterVar(trail: DataTrail) {
-      const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
-      if (isAdHocFiltersVariable(variable)) {
-        return variable;
-      }
-      throw new Error('getFilterVar failed');
-    }
-
-    function getStepFilterVar(trail: DataTrail, step: number) {
-      const variable = trail.state.history.state.steps[step].trailState.$variables?.getByName(VAR_FILTERS);
-      if (isAdHocFiltersVariable(variable)) {
-        return variable;
-      }
-      throw new Error(`getStepFilterVar failed for step ${step}`);
-    }
-
-    it('Recent trail filter should be empty at current step 1', () => {
-      const store = getTrailStore();
-      const trail = store.recent[0].resolve();
-
-      expect(getStepFilterVar(trail, 1).state.filters.length).toBe(0);
-      expect(trail.state.history.state.currentStep).toBe(1);
-      expect(trail.state.history.state.steps.length).toBe(3);
-    });
-
-    describe('And filter is added zone=a', () => {
-      let trail: DataTrail;
-      beforeEach(() => {
-        localStorage.clear();
-        localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify([{ history, currentStep: 1 }]));
-        getTrailStore().load();
-        const store = getTrailStore();
-        trail = store.recent[0].resolve();
-        const urlState = sceneUtils.getUrlState(trail);
-        locationService.partial(urlState);
-        trail.activate();
-        trail.state.history.activate();
-        getFilterVar(trail).setState({ filters: [{ key: 'zone', operator: '=', value: 'a' }] });
-      });
-
-      it('This should create step 3', () => {
-        expect(trail.state.history.state.steps.length).toBe(4);
-        expect(trail.state.history.state.currentStep).toBe(3);
-      });
-
-      it('Filter of trail should be zone=a', () => {
-        expect(getFilterVar(trail).state.filters[0].key).toBe('zone');
-        expect(getFilterVar(trail).state.filters[0].value).toBe('a');
-      });
-
-      it('Filter of step 3 should be zone=a', () => {
-        expect(getStepFilterVar(trail, 3).state.filters[0].key).toBe('zone');
-        expect(getStepFilterVar(trail, 3).state.filters[0].value).toBe('a');
-      });
-
-      it('Filter of step 1 should be empty', () => {
-        expect(getStepFilterVar(trail, 1).state.filters.length).toBe(0);
-      });
-
-      describe('When returning to step 1', () => {
-        beforeEach(() => {
-          trail.state.history.goBackToStep(1);
-        });
-
-        it('Filter of trail should be empty', () => {
-          expect(getFilterVar(trail).state.filters.length).toBe(0);
-        });
-      });
-    });
-
-    it('Time range `from` should be now-1h', () => {
-      const store = getTrailStore();
-      const trail = store.recent[0].resolve();
-
-      expect(trail.state.$timeRange?.state.from).toBe('now-1h');
-    });
-
-    describe('And time range is changed to now-15m to now', () => {
-      let trail: DataTrail;
-
-      beforeEach(() => {
-        localStorage.clear();
-        localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify([{ history, currentStep: 1 }]));
-        getTrailStore().load();
-        const store = getTrailStore();
-        trail = store.recent[0].resolve();
-        const urlState = sceneUtils.getUrlState(trail);
-        locationService.partial(urlState);
-
-        trail.activate();
-        trail.state.history.activate();
-        trail.state.$timeRange?.setState({ from: 'now-15m' });
-      });
-
-      it('This should create step 3', () => {
-        expect(trail.state.history.state.steps.length).toBe(4);
-        expect(trail.state.history.state.currentStep).toBe(3);
-      });
-
-      it('Time range `from` should be now-15m', () => {
-        expect(trail.state.$timeRange?.state.from).toBe('now-15m');
-      });
-
-      it('Time range `from` of step 2 should be now-15m', () => {
-        expect(trail.state.history.state.steps[3].trailState.$timeRange?.state.from).toBe('now-15m');
-      });
-
-      it('Time range `from` of step 1 should be now-1h', () => {
-        expect(trail.state.history.state.steps[1].trailState.$timeRange?.state.from).toBe('now-1h');
-      });
-
-      describe('When returning to step 1', () => {
-        beforeEach(() => {
-          trail.state.history.goBackToStep(1);
-        });
-
-        it('Time range `from` should be now-1h', () => {
-          expect(trail.state.$timeRange?.state.from).toBe('now-1h');
-        });
-      });
-    });
-
-    it('should have no bookmarked trails', () => {
-      const store = getTrailStore();
-      expect(store.bookmarks.length).toBe(0);
-    });
-
-    describe('Add a new recent trail with equivalent current step state', () => {
-      const store = getTrailStore();
-
-      const duplicateTrailSerialized: SerializedTrail = {
-        history: [
-          history[0],
-          history[1],
-          history[2],
-          {
-            ...history[2],
-            urlValues: {
-              ...history[1].urlValues,
-              metric: 'different_metric_in_the_middle',
-            },
-          },
-          {
-            ...history[1],
-          },
-        ],
-        currentStep: 4,
-      };
-
-      beforeEach(() => {
-        // We expect the initialized trail to be there
-        expect(store.recent.length).toBe(1);
-        expect(store.recent[0].resolve().state.history.state.steps.length).toBe(3);
-
-        // @ts-ignore #2341 -- deliberately access private method to construct trail object for testing purposes
-        const duplicateTrail = store._deserializeTrail(duplicateTrailSerialized);
-        store.setRecentTrail(duplicateTrail);
-      });
-
-      it('should still be only one recent trail', () => {
-        expect(store.recent.length).toBe(1);
-      });
-
-      it('it should only contain the new trail', () => {
-        const newRecentTrail = store.recent[0].resolve();
-        expect(newRecentTrail.state.history.state.steps.length).toBe(duplicateTrailSerialized.history.length);
-
-        // @ts-ignore #2341 -- deliberately access private method to construct trail object for testing purposes
-        const newRecent = store._serializeTrail(newRecentTrail);
-        expect(newRecent.currentStep).toBe(duplicateTrailSerialized.currentStep);
-        expect(newRecent.history.length).toBe(duplicateTrailSerialized.history.length);
-      });
-    });
-
-    it.each([
-      ['metric', 'different_metric'],
-      ['from', 'now-1y'],
-      ['to', 'now-30m'],
-      ['timezone', 'utc'],
-      ['var-ds', 'different'],
-      ['var-groupby', 'job'],
-      ['var-filters', 'cluster|=|dev-eu-west-2'],
-    ])(`new recent trails with a different '%p' value should insert new entry`, (key, differentValue) => {
-      const store = getTrailStore();
-      // We expect the initialized trail to be there
-      expect(store.recent.length).toBe(1);
-
-      const differentTrailSerialized: SerializedTrail = {
-        history: [
-          history[0],
-          history[1],
-          history[2],
-          {
-            ...history[2],
-            urlValues: {
-              ...history[1].urlValues,
-              [key]: differentValue,
-            },
-            parentIndex: 1,
-          },
-        ],
-        currentStep: 3,
-      };
-
-      // @ts-ignore #2341 -- deliberately access private method to construct trail object for testing purposes
-      const differentTrail = store._deserializeTrail(differentTrailSerialized);
-      store.setRecentTrail(differentTrail);
-
-      // There should now be two trails
-      expect(store.recent.length).toBe(2);
     });
   });
 
   describe('Initialize store with one bookmark trail but no recent trails', () => {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
     beforeEach(() => {
       localStorage.clear();
       localStorage.setItem(
         TRAIL_BOOKMARKS_KEY,
         JSON.stringify([
           {
-            urlValues: {
-              metric: 'bookmarked_metric',
-              nativeHistogramMetric: '',
-              from: 'now-1h',
-              to: 'now',
-              timezone,
-              'var-ds': 'prom-mock',
-              'var-otel_resources': [''],
-              'var-filters': [],
-              'var-otel_and_metric_filters': [''],
-              'var-deployment_environment': [''],
-              refresh: '',
-            },
-            type: 'time',
+            urlValues: URL_VALUES_BOOKMARK,
           },
         ])
       );
@@ -560,9 +160,8 @@ describe.skip('TrailStore', () => {
     it('should save a new recent trail based on the bookmark', () => {
       expect(store.recent.length).toBe(0);
       const trail = store.getTrailForBookmarkIndex(0);
-      // Trail and history must be activated first
+      // Trail must be activated first
       trail.activate();
-      trail.state.history.activate();
       store.setRecentTrail(trail);
       expect(store.recent.length).toBe(1);
     });
@@ -737,65 +336,8 @@ describe.skip('TrailStore', () => {
         RECENT_TRAILS_KEY,
         JSON.stringify([
           {
-            history: [
-              {
-                urlValues: {
-                  nativeHistogramMetric: '',
-                  from: 'now-1h',
-                  to: 'now',
-                  timezone,
-                  'var-ds': 'prom-mock',
-                  'var-otel_resources': [''],
-                  'var-filters': [],
-                  'var-otel_and_metric_filters': [''],
-                  'var-deployment_environment': [''],
-                  refresh: '',
-                },
-                type: 'start',
-              },
-              {
-                urlValues: {
-                  metric: 'bookmarked_metric',
-                  nativeHistogramMetric: '',
-                  from: 'now-1h',
-                  to: 'now',
-                  timezone,
-                  'var-ds': 'prom-mock',
-                  'var-otel_resources': [''],
-                  'var-filters': [],
-                  'var-otel_and_metric_filters': [''],
-                  'var-deployment_environment': [''],
-                  refresh: '',
-                },
-                type: 'time',
-              },
-              {
-                urlValues: {
-                  metric: 'some_other_metric',
-                  nativeHistogramMetric: '',
-                  from: 'now-1h',
-                  to: 'now',
-                  timezone,
-                  'var-ds': 'prom-mock',
-                  'var-otel_resources': [''],
-                  'var-filters': [],
-                  'var-otel_and_metric_filters': [''],
-                  'var-deployment_environment': [''],
-                  refresh: '',
-                },
-                type: 'metric',
-              },
-            ],
-            currentStep: 1,
-          },
-        ])
-      );
-      localStorage.setItem(
-        TRAIL_BOOKMARKS_KEY,
-        JSON.stringify([
-          {
             urlValues: {
-              metric: 'bookmarked_metric',
+              metric: 'other_metric',
               nativeHistogramMetric: '',
               from: 'now-1h',
               to: 'now',
@@ -807,7 +349,14 @@ describe.skip('TrailStore', () => {
               'var-deployment_environment': [''],
               refresh: '',
             },
-            type: 'time',
+          },
+        ])
+      );
+      localStorage.setItem(
+        TRAIL_BOOKMARKS_KEY,
+        JSON.stringify([
+          {
+            urlValues: URL_VALUES_BOOKMARK,
           },
         ])
       );
@@ -823,11 +372,6 @@ describe.skip('TrailStore', () => {
     it('should accurately load bookmarked trail from matching recent', () => {
       expect(store.bookmarks.length).toBe(1);
       expect(store.recent.length).toBe(1);
-      const trail = store.getTrailForBookmarkIndex(0);
-      expect(trail.state.history.state.steps.length).toBe(3);
-      expect(trail.state.history.state.steps[0].type).toBe('start');
-      expect(trail.state.history.state.steps[1].type).toBe('time');
-      expect(trail.state.history.state.steps[2].type).toBe('metric');
     });
 
     it('should save a new recent trail based on the bookmark', () => {
