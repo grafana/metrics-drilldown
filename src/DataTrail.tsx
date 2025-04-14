@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
+import { config, locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
@@ -12,6 +12,7 @@ import {
   SceneObjectUrlSyncConfig,
   SceneReactObject,
   SceneRefreshPicker,
+  SceneScopesBridge,
   SceneTimePicker,
   SceneTimeRange,
   sceneUtils,
@@ -55,6 +56,7 @@ import {
 import {
   getVariablesWithOtelJoinQueryConstant,
   MetricSelectedEvent,
+  RefreshMetricsEvent,
   trailDS,
   VAR_DATASOURCE,
   VAR_DATASOURCE_EXPR,
@@ -69,7 +71,6 @@ import {
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
-import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
 import {
   fetchAlertingMetrics,
@@ -111,19 +112,43 @@ export interface DataTrailState extends SceneObjectState {
   histogramsLoaded: boolean;
   nativeHistograms: string[];
   nativeHistogramMetric: string;
+
+  // Scopes support
+  scopesBridge: SceneScopesBridge | undefined;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
+  protected _renderBeforeActivation = true;
+
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
   });
 
   public constructor(state: Partial<DataTrailState>) {
+    const scopesBridge =
+      config.featureToggles.scopeFilters && config.featureToggles.enableScopesInMetricsExplore
+        ? new SceneScopesBridge({})
+        : undefined;
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       // the initial variables should include a metric for metric scene and the otelJoinQuery.
       // NOTE: The other OTEL filters should be included too before this work is merged
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
+      $behaviors: [
+        () => {
+          scopesBridge?.setEnabled(true);
+
+          const sub = scopesBridge?.subscribeToValue(() => {
+            this.publishEvent(new RefreshMetricsEvent());
+            this.checkDataSourceForOTelResources();
+          });
+
+          return () => {
+            scopesBridge?.setEnabled(false);
+            sub?.unsubscribe();
+          };
+        },
+      ],
       controls: state.controls ?? [
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
@@ -142,6 +167,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       nativeHistograms: state.nativeHistograms ?? [],
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
+      scopesBridge,
       ...state,
     });
 
@@ -514,7 +540,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         previouslyUsedOtelResources: false,
       };
     }
-    const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
+    const deploymentEnvironments = await getDeploymentEnvironments(
+      datasourceUid,
+      timeRange,
+      sceneGraph.getScopesBridge(this)?.getValue() ?? []
+    );
     const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
 
     // loading from the url with otel resources selected will result in turning on OTel experience

@@ -1,6 +1,7 @@
 import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
-import { locationService } from '@grafana/runtime';
+import { config, locationService } from '@grafana/runtime';
+import { SceneScopesBridge } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React, { createContext, useState } from 'react';
 
@@ -27,6 +28,7 @@ export const MetricsContext = createContext<MetricsAppContext>({
 function App(props: AppRootProps) {
   const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined));
   const styles = useStyles2(getStyles);
+
   const goToUrlForTrail = (trail: DataTrail) => {
     locationService.push(getUrlForTrail(trail));
     setTrail(trail);
@@ -41,13 +43,22 @@ function App(props: AppRootProps) {
     );
   }
 
+  const scopesBridge = trail.state.scopesBridge;
+  console.log('scopesBridge', scopesBridge);
+  scopesBridge?.setEnabled(
+    (config.featureToggles.scopeFilters && config.featureToggles.enableScopesInMetricsExplore) || false
+  );
+
   return (
     <div className={styles.appContainer} data-testid="metrics-drilldown-app">
-      <PluginPropsContext.Provider value={props}>
-        <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
-          <AppRoutes />
-        </MetricsContext.Provider>
-      </PluginPropsContext.Provider>
+      <>
+        {scopesBridge && <SceneScopesBridge.Component model={scopesBridge} />}
+        <PluginPropsContext.Provider value={props}>
+          <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
+            <AppRoutes />
+          </MetricsContext.Provider>
+        </PluginPropsContext.Provider>
+      </>
     </div>
   );
 }

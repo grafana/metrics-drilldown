@@ -46,7 +46,6 @@ import { getPreviewPanelFor } from './PreviewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
-import { getSelectedScopes } from '../utils/utils.scopes';
 import { isSceneTimeRange, isSceneTimeRangeState } from '../utils/utils.timerange';
 import { isAdHocFiltersVariable } from '../utils/utils.variables';
 
@@ -273,7 +272,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       const response = await getMetricNames(
         datasourceUid,
         timeRange,
-        getSelectedScopes(),
+        sceneGraph.getScopesBridge(this)?.getValue() ?? [],
         filters,
         jobsList,
         instancesList,
