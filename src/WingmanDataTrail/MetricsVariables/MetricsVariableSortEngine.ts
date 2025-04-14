@@ -1,5 +1,4 @@
 import { SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
-import { isEqual } from 'lodash';
 
 import { getTrailFor } from 'utils';
 import {
@@ -10,6 +9,8 @@ import {
   sortMetricsReverseAlphabetically,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+
+import { areArraysEqual } from './helpers/areArraysEqual';
 
 export class MetricsVariableSortEngine {
   private variable: QueryVariable;
@@ -25,7 +26,7 @@ export class MetricsVariableSortEngine {
   public async sort(sortBy = this.sortBy) {
     const metrics = this.variable.state.options.map((option) => option.value as string);
 
-    if (sortBy === this.sortBy && metrics.length === this.lastMetrics.length && isEqual(metrics, this.lastMetrics)) {
+    if (sortBy === this.sortBy && areArraysEqual(metrics, this.lastMetrics)) {
       return;
     }
 
