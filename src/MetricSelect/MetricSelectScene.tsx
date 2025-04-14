@@ -18,7 +18,7 @@ import {
   type SceneObjectUrlValues,
   type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
-import { Alert, Badge, Field, Icon, IconButton, InlineSwitch, Input, Select, Tooltip, useStyles2 } from '@grafana/ui';
+import { Alert, Badge, Combobox, Field, Icon, IconButton, InlineSwitch, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
@@ -557,11 +557,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
             }
             className={styles.displayOption}
           >
-            <Select
+            <Combobox
               value={metricPrefix}
-              onChange={model.onPrefixFilterChange}
-              onOpenMenu={() => model.reportPrefixFilterInteraction(true)}
-              onCloseMenu={() => model.reportPrefixFilterInteraction(false)}
+              onChange={(selected) => model.onPrefixFilterChange(selected)}
               options={[
                 {
                   label: 'All metric names',
@@ -569,7 +567,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 },
                 ...Array.from(rootGroup?.groups.keys() ?? []).map((g) => ({ label: `${g}_`, value: g })),
               ]}
-              className="metrics-drilldown-metric-prefix-select"
+              width={16}
             />
           </Field>
           {!metric && hasOtelResources && (
