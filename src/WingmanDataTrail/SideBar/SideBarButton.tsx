@@ -6,6 +6,11 @@ import React from 'react';
 import { GroupsIcon } from './custom-icons/GroupsIcon';
 import { RulesIcon } from './custom-icons/RulesIcon';
 
+const CustomIcons = new Map<string, React.FC>([
+  ['rules', RulesIcon],
+  ['groups', GroupsIcon],
+]);
+
 type SideBarButtonProps = {
   ariaLabel: string;
   disabled: boolean;
@@ -32,17 +37,13 @@ export function SideBarButton({
 
   if (iconOrText in availableIconsIndex) {
     buttonIcon = iconOrText as IconName;
-  } else {
+  } else if (CustomIcons.has(iconOrText)) {
     // some icons are not available in the Saga Design System and have been added as SVG files to the code base
-    if (iconOrText === 'rules') {
-      ButtonChild = RulesIcon;
-    } else if (iconOrText === 'groups') {
-      ButtonChild = GroupsIcon;
-    } else {
-      ButtonChild = function ButtonChildText() {
-        return <>{iconOrText}</>;
-      };
-    }
+    ButtonChild = CustomIcons.get(iconOrText);
+  } else {
+    ButtonChild = function ButtonChildText() {
+      return <>{iconOrText}</>;
+    };
   }
 
   return (
