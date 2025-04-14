@@ -272,7 +272,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       const response = await getMetricNames(
         datasourceUid,
         timeRange,
-        sceneGraph.getScopesBridge(this)?.getValue() ?? [],
+        trail.state.scopesBridge?.getValue() ?? [],
         filters,
         jobsList,
         instancesList,

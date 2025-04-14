@@ -127,28 +127,42 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   public constructor(state: Partial<DataTrailState>) {
     const scopesBridge =
       config.featureToggles.scopeFilters && config.featureToggles.enableScopesInMetricsExplore
-        ? new SceneScopesBridge({})
+        ? new SceneScopesBridge({
+            $behaviors: [
+              () => {
+                if (!scopesBridge) {
+                  return;
+                }
+                const sub = scopesBridge.subscribeToValue(() => {
+                  this.publishEvent(new RefreshMetricsEvent());
+                  this.checkDataSourceForOTelResources();
+                });
+
+                return () => {
+                  sub.unsubscribe();
+                };
+              },
+            ],
+          })
         : undefined;
+
+    scopesBridge?.addActivationHandler(() => {
+      if (!scopesBridge) {
+        return;
+      }
+      scopesBridge.setEnabled(true);
+
+      return () => {
+        scopesBridge.setEnabled(false);
+      };
+    });
+
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       // the initial variables should include a metric for metric scene and the otelJoinQuery.
       // NOTE: The other OTEL filters should be included too before this work is merged
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
-      $behaviors: [
-        () => {
-          scopesBridge?.setEnabled(true);
 
-          const sub = scopesBridge?.subscribeToValue(() => {
-            this.publishEvent(new RefreshMetricsEvent());
-            this.checkDataSourceForOTelResources();
-          });
-
-          return () => {
-            scopesBridge?.setEnabled(false);
-            sub?.unsubscribe();
-          };
-        },
-      ],
       controls: state.controls ?? [
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
@@ -540,6 +554,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         previouslyUsedOtelResources: false,
       };
     }
+
     const deploymentEnvironments = await getDeploymentEnvironments(
       datasourceUid,
       timeRange,
