@@ -27,26 +27,7 @@ interface SideBarState extends SceneObjectState {
 
 export class SideBar extends SceneObjectBase<SideBarState> {
   constructor(state: Partial<SideBarState>) {
-    const urlSearchParams = new URLSearchParams(window.location.search);
-
-    const filterKeys = ['filters-rule', 'filters-prefix', 'filters-suffix'];
-    const sectionValues = new Map(
-      filterKeys.map((key) => [
-        key,
-        urlSearchParams.get(key)
-          ? urlSearchParams
-              .get(key)!
-              .split(',')
-              .map((v) => v.trim())
-          : [],
-      ])
-    );
-
-    const labelValue = urlSearchParams.get(`var-${VAR_WINGMAN_GROUP_BY}`);
-    const isLabelsBrowserActive = Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE);
-    if (isLabelsBrowserActive) {
-      sectionValues.set('groupby-labels', [labelValue!]);
-    }
+    const sectionValues = SideBar.getSectionValuesFromUrl();
 
     super({
       key: 'sidebar',
@@ -87,7 +68,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title: 'Group by labels',
           description: 'Group metrics by their label values',
           icon: 'groups',
-          active: isLabelsBrowserActive,
+          active: sectionValues.has('groupby-labels'),
         }),
         new BookmarksList({
           key: 'bookmarks',
@@ -109,7 +90,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     });
 
     // TODO: FIXME
-    // rule values are regex, so we do this to disable adding the values to the button tooltip
+    // rule values are regexes, we do this only to disable adding the values to the button tooltip
     sectionValues.set('filters-rule', []);
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -124,6 +105,31 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         this.setState({ sectionValues: new Map(sectionValues).set(key, values) });
       })
     );
+  }
+
+  private static getSectionValuesFromUrl() {
+    const urlSearchParams = new URLSearchParams(window.location.search);
+
+    const filterKeys = ['filters-rule', 'filters-prefix', 'filters-suffix'];
+    const sectionValues = new Map(
+      filterKeys.map((key) => [
+        key,
+        urlSearchParams.get(key)
+          ? urlSearchParams
+              .get(key)!
+              .split(',')
+              .map((v) => v.trim())
+          : [],
+      ])
+    );
+
+    const labelValue = urlSearchParams.get(`var-${VAR_WINGMAN_GROUP_BY}`);
+    const isLabelsBrowserActive = Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE);
+    if (isLabelsBrowserActive) {
+      sectionValues.set('groupby-labels', [labelValue!]);
+    }
+
+    return sectionValues;
   }
 
   private setActiveSection(sectionKey: string) {
