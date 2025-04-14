@@ -1,6 +1,7 @@
 import { expect, test } from '../fixtures';
 
 // Keep this in sync with MAX_RECENT_METRICS in MetricsSorter.tsx
+// If updating MAX_RECENT_METRICS, also update the tests below.
 const MAX_RECENT_METRICS = 6;
 
 test.describe('Metrics reducer view', () => {
@@ -74,6 +75,9 @@ test.describe('Metrics reducer view', () => {
       for (let i = 0; i < metrics.length - 1; i++) {
         const currentUsage = usageCounts[metrics[i]] || 0;
         const nextUsage = usageCounts[metrics[i + 1]] || 0;
+        if (i === 0) {
+          expect(currentUsage).toBeGreaterThan(0);
+        }
         expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
       }
     });
@@ -90,6 +94,9 @@ test.describe('Metrics reducer view', () => {
       for (let i = 0; i < metrics.length - 1; i++) {
         const currentUsage = usageCounts[metrics[i]] || 0;
         const nextUsage = usageCounts[metrics[i + 1]] || 0;
+        if (i === 0) {
+          expect(currentUsage).toBeGreaterThan(0);
+        }
         expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
       }
     });
