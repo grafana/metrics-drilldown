@@ -150,7 +150,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           names: quickSearch.state.value ? [quickSearch.state.value] : [],
         };
 
-        // TODO: verify it works when landing on the page
         for (const filterSection of filterSections) {
           filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
         }
