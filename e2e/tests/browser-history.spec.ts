@@ -21,7 +21,7 @@ test.describe('Browser History', () => {
 
   test('From Wingman', async ({ gotoPage, page, metricsReducerView }) => {
     await gotoPage(`/${ROUTES.TrailWithSidebar}`);
-    await metricsReducerView.assertHeaderControls();
+    await metricsReducerView.assertListControls();
     await metricsReducerView.assertSidebar();
     await metricsReducerView.assertMetricsList();
 
@@ -29,7 +29,7 @@ test.describe('Browser History', () => {
     await page.goBack();
 
     // We should not return to the homepage but to the metric selection page
-    await metricsReducerView.assertHeaderControls();
+    await metricsReducerView.assertListControls();
     await metricsReducerView.assertSidebar();
     await metricsReducerView.assertMetricsList();
   });

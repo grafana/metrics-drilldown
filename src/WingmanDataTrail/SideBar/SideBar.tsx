@@ -11,7 +11,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { EventFiltersChanged } from 'WingmanDataTrail/HeaderControls/QuickSearch/EventFiltersChanged';
+import { EventFiltersChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventFiltersChanged';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricSuffixGroups';
 import {
