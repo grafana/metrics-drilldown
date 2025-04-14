@@ -18,6 +18,7 @@ services:
     volumes:
       - ../../dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
       - ../provisioning/grafana:/etc/grafana/provisioning
+      - ../provisioning/grafana/dashboards/dashboardJson:/etc/dashboards
     extra_hosts:
       - 'host.docker.internal:host-gateway'
 
