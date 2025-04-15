@@ -13,16 +13,22 @@ const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
 const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
+const icon = 'gf-prometheus';
 
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
-    targets: [PluginExtensionPoints.DashboardPanelMenu],
+    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
     title,
     description,
+    icon,
     category,
     path: createAppUrl(ROUTES.Trail),
     configure: (context) => {
-      if (typeof context === 'undefined' || !('pluginId' in context) || context.pluginId !== 'timeseries') {
+      if (typeof context === 'undefined') {
+        return;
+      }
+
+      if ('pluginId' in context && context.pluginId !== 'timeseries') {
         return;
       }
 
