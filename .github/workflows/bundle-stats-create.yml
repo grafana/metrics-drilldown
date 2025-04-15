@@ -2,6 +2,8 @@ name: create bundle stats
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Run once per day at midnight UTC
   push:
     branches:
       - main
