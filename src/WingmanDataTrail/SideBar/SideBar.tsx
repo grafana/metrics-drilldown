@@ -109,19 +109,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   private static getSectionValuesFromUrl() {
     const urlSearchParams = new URLSearchParams(window.location.search);
+    const sectionValues = new Map();
 
-    const filterKeys = ['filters-rule', 'filters-prefix', 'filters-suffix'];
-    const sectionValues = new Map(
-      filterKeys.map((key) => [
-        key,
-        urlSearchParams.get(key)
-          ? urlSearchParams
-              .get(key)!
-              .split(',')
-              .map((v) => v.trim())
-          : [],
-      ])
-    );
+    for (const filterKey of ['filters-rule', 'filters-prefix', 'filters-suffix']) {
+      const filterValueFromUrl = urlSearchParams.get(filterKey);
+      sectionValues.set(filterKey, filterValueFromUrl ? filterValueFromUrl.split(',').map((v) => v.trim()) : []);
+    }
 
     const labelValue = urlSearchParams.get(`var-${VAR_WINGMAN_GROUP_BY}`);
     const isLabelsBrowserActive = Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE);
@@ -185,7 +178,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               tooltipPlacement="top"
               onClick={() => model.setActiveSection('')}
             />
-            {/* :man_shrug: */}
+            {/* TODO: find a better way */}
             {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
             {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
             {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}
