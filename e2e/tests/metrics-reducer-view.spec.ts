@@ -22,7 +22,7 @@ test.describe('Metrics reducer view', () => {
       // recent metrics are shown above the alphabetical list.
       const metricsToSelect = [
         'go_cgo_go_to_c_calls_calls_total',
-        'grafana_access_permissions_duration_sum',
+        'grafana_access_evaluation_duration_bucket',
         'process_virtual_memory_max_bytes',
         'net_conntrack_dialer_conn_established_total',
         'go_cpu_classes_idle_cpu_seconds_total',
@@ -38,6 +38,7 @@ test.describe('Metrics reducer view', () => {
       }
 
       // Verify the order in the metrics list
+      await metricsReducerView.clearPrefixFilters();
       const metrics = await metricsReducerView.getVisibleMetrics();
       expect(metrics.length).toBeGreaterThan(MAX_RECENT_METRICS);
 

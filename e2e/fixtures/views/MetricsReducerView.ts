@@ -4,6 +4,15 @@ import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL } from '../../../src/constants';
 
 export class MetricsReducerView extends DrilldownView {
+  buttonNames = [
+    'Rules filters',
+    'Prefix filters',
+    'Suffix filters',
+    'Group by labels',
+    'Bookmarks',
+    'Settings',
+  ] as const;
+
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
   }
@@ -70,14 +79,7 @@ export class MetricsReducerView extends DrilldownView {
   async assertSidebar() {
     const sidebar = this.getByTestId('sidebar-buttons');
 
-    for (const buttonName of [
-      'Rules filters',
-      'Prefix filters',
-      'Suffix filters',
-      'Group by labels',
-      'Bookmarks',
-      'Settings',
-    ]) {
+    for (const buttonName of this.buttonNames) {
       await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
     }
   }
@@ -115,6 +117,16 @@ export class MetricsReducerView extends DrilldownView {
     return this.getByTestId('metrics-groupby-list');
   }
 
+  getSidebarContent() {
+    return this.page.getByTestId('sidebar-content');
+  }
+
+  async closeSidebar() {
+    const closeButton = this.getSidebarContent().getByRole('button', { name: 'Close' });
+    await expect(closeButton).toBeVisible();
+    await closeButton.click();
+  }
+
   async assertMetricsGroupByList() {
     const metricsList = this.getMetricsGroupByList();
 
@@ -128,24 +140,63 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
+  async openSidebarItem(category: (typeof this.buttonNames)[number]) {
+    const button = this.page
+      .getByTestId('sidebar-buttons')
+      .getByRole('button', { name: new RegExp(category as string, 'i') });
+    await button.click();
+    await expect(this.getSidebarContent()).toBeVisible();
+  }
+
+  async clearPrefixFilters() {
+    if (await this.getSidebarContent().isVisible()) {
+      await this.closeSidebar();
+    }
+
+    await this.openSidebarItem('Prefix filters');
+
+    // Clear any previous prefix filters
+    const clearButton = this.getSidebarContent().getByRole('button', { name: 'clear', exact: true });
+    await expect(clearButton).toBeVisible();
+    await clearButton.click({ force: true });
+  }
+
   async selectPrefixFilter(prefix: string) {
-    await this.assertSidebar();
-    const prefixFiltersSection = await this.page.getByTestId('metric-prefix-filters');
+    await this.openSidebarItem('Prefix filters');
+
+    // Clear any previous prefix filters
+    await this.clearPrefixFilters();
 
     // Start by searching for the prefix filter
-    const searchInput = await prefixFiltersSection.getByPlaceholder('Search...');
+    const sidebarContent = this.getSidebarContent();
+    const searchInput = sidebarContent.getByPlaceholder('Search...');
     await searchInput.fill(prefix);
 
     // Then select the prefix filter
-    const prefixes = await prefixFiltersSection.getByTestId('checkbox-filters-list').getByRole('listitem');
-    const targetPrefix = await prefixes.filter({ hasText: prefix }).first();
+    const prefixes = sidebarContent.getByTestId('checkbox-filters-list').getByRole('listitem');
+    const targetPrefix = prefixes.filter({ hasText: prefix }).first();
     expect(targetPrefix).toBeVisible();
-    await targetPrefix.getByTestId('checkbox').check({ force: true });
+    await targetPrefix.locator('div span').first().click();
+    // await targetPrefix.locator('input[data-testid="checkbox"] + span').click();
+
+    // Wait for the metrics list to update
+    await expect(async () => {
+      const metrics = await this.getVisibleMetrics();
+      expect(metrics.some((metric) => metric.startsWith(prefix))).toBe(true);
+    }).toPass();
   }
 
   async selectMetric(metricName: string) {
-    const element = await this.page.getByTestId(`select-action-${metricName}`);
-    await element.scrollIntoViewIfNeeded();
+    // Scroll the metric list to get the target panel into view
+    await this.getMetricsList().evaluate(async (el, childSelector) => {
+      const child = el.querySelector(childSelector);
+      if (child) {
+        child.scrollIntoView();
+      }
+    }, `[data-testid="select-action-${metricName}"]`);
+
+    const element = this.page.getByTestId(`select-action-${metricName}`);
+    await expect(element).toBeVisible();
     await element.click();
   }
 
