@@ -147,8 +147,14 @@ export class MetricsReducerView extends DrilldownView {
     await element.click();
   }
 
+  async selectMetricAndReturnToMetricsReducer(metricName: string) {
+    await this.selectMetric(metricName);
+    await this.page.goBack();
+    await this.waitForMetricsUpdate();
+  }
+
   async getVisibleMetrics(): Promise<string[]> {
-    const metricElements = await this.page.getByTestId('metric-viz-panel').all();
+    const metricElements = await this.page.getByTestId('with-usage-data-preview-panel').all();
     return Promise.all(
       metricElements.map((el) => el.getByTestId('header-container').getByRole('heading').textContent())
     ) as Promise<string[]>;
@@ -167,10 +173,11 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async getMetricUsageCounts(usageType: 'dashboard' | 'alerting'): Promise<Record<string, number>> {
+    await this.waitForMetricsUpdate();
     const usageCounts: Record<string, number> = {};
 
     // Get all metric items
-    const metricItems = await this.page.getByTestId('metric-viz-panel').all();
+    const metricItems = await this.page.getByTestId('with-usage-data-preview-panel').all();
 
     // For each metric item, extract its usage counts
     for (const item of metricItems) {
@@ -194,5 +201,23 @@ export class MetricsReducerView extends DrilldownView {
     }
 
     return usageCounts;
+  }
+
+  async waitForMetricsWithUsage(usageType: 'dashboard' | 'alerting'): Promise<void> {
+    // Wait for at least one metric with non-zero usage count to appear
+    await expect(async () => {
+      const panels = await this.page.getByTestId('with-usage-data-preview-panel').all();
+      let panelsWithUsage = 0;
+      for (const panel of panels) {
+        const usageElement = panel.locator(`[data-testid="${usageType}-usage"]`);
+        const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
+
+        if (usageCount > 0) {
+          panelsWithUsage++;
+        }
+      }
+
+      expect(panelsWithUsage).toBeGreaterThan(0);
+    }).toPass();
   }
 }

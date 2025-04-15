@@ -34,9 +34,7 @@ test.describe('Metrics reducer view', () => {
       for (const metric of metricsToSelect) {
         const metricPrefix = metric.split('_')[0];
         await metricsReducerView.selectPrefixFilter(metricPrefix);
-        await metricsReducerView.selectMetric(metric);
-        await page.goBack();
-        await metricsReducerView.waitForMetricsUpdate();
+        await metricsReducerView.selectMetricAndReturnToMetricsReducer(metric);
       }
 
       // Verify the order in the metrics list
@@ -61,7 +59,7 @@ test.describe('Metrics reducer view', () => {
 
     test('Dashboard usage sorting shows most used metrics first', async ({ metricsReducerView }) => {
       await metricsReducerView.changeSortOption('Dashboard Usage');
-      await metricsReducerView.waitForMetricsUpdate();
+      await metricsReducerView.waitForMetricsWithUsage('dashboard');
 
       // Verify metrics are sorted by dashboard usage count
       const metrics = await metricsReducerView.getVisibleMetrics();
@@ -80,7 +78,7 @@ test.describe('Metrics reducer view', () => {
 
     test('Alerting usage sorting shows most used metrics first', async ({ metricsReducerView }) => {
       await metricsReducerView.changeSortOption('Alerting Usage');
-      await metricsReducerView.waitForMetricsUpdate();
+      await metricsReducerView.waitForMetricsWithUsage('alerting');
 
       // Verify metrics are sorted by alerting usage count
       const metrics = await metricsReducerView.getVisibleMetrics();
