@@ -290,7 +290,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       display: 'flex',
       flexDirection: 'row',
       gap: theme.spacing(1),
-      height: `calc(100vh - ${chromeHeaderHeight + 186}px)`,
+      height: `calc(100vh - ${chromeHeaderHeight + 144}px)`,
     }),
     list: css({
       width: '100%',
