@@ -12,7 +12,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Button, CollapsableSection, Icon, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
@@ -29,6 +29,7 @@ import {
   MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
+import { GroupsIcon } from 'WingmanDataTrail/SideBar/custom-icons/GroupsIcon';
 
 import {
   MetricsWithLabelValueVariable,
@@ -184,7 +185,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             onToggle={() => setIsCollapsed(!isCollapsed)}
             label={
               <div className={styles.groupName}>
-                <Icon name="layer-group" size="lg" />
+                <GroupsIcon />
                 <div className={styles.labelValue}>{labelValue}</div>
                 {labelCardinality > 1 && (
                   <div className={styles.index}>
@@ -227,7 +228,7 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       background: theme.colors.background.canvas,
-      margin: theme.spacing(1, 1, 0, 1),
+      margin: theme.spacing(1, 0, 0, 0),
 
       '& div:focus-within': {
         boxShadow: 'none !important',
@@ -243,7 +244,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     headerButtons: css({
       position: 'relative',
-      top: '2px',
+      top: '3px',
       marginLeft: 'auto',
       marginRight: '30px',
       zIndex: 100,
@@ -264,7 +265,7 @@ function getStyles(theme: GrafanaTheme2) {
       lineHeight: '1.3rem',
     }),
     labelValue: css({
-      fontSize: '1.2rem',
+      fontSize: '16px',
       marginLeft: '8px',
     }),
     index: css({

@@ -4,6 +4,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { type MetricOptions } from './MetricsVariable';
 
 export type MetricFilters = {
+  categories: string[];
   prefixes: string[];
   suffixes: string[];
   names: string[];
@@ -13,6 +14,7 @@ export class MetricsVariableFilterEngine {
   private variable: QueryVariable;
   private initOptions: VariableValueOption[] = [];
   private filters: MetricFilters = {
+    categories: [],
     prefixes: [],
     suffixes: [],
     names: [],
@@ -36,7 +38,12 @@ export class MetricsVariableFilterEngine {
       return;
     }
 
-    if (!updatedFilters.names.length && !updatedFilters.prefixes.length && !updatedFilters.suffixes.length) {
+    if (
+      !updatedFilters.categories.length &&
+      !updatedFilters.prefixes.length &&
+      !updatedFilters.suffixes.length &&
+      !updatedFilters.names.length
+    ) {
       this.filters = updatedFilters;
 
       this.variable.setState({ options: this.initOptions });
@@ -51,6 +58,10 @@ export class MetricsVariableFilterEngine {
     const allOptions = this.initOptions;
     let filteredOptions = allOptions as MetricOptions;
 
+    if (updatedFilters.categories.length > 0) {
+      filteredOptions = MetricsVariableFilterEngine.applyCategoryFilters(filteredOptions, updatedFilters.categories);
+    }
+
     if (updatedFilters.prefixes.length > 0) {
       filteredOptions = MetricsVariableFilterEngine.applyPrefixFilters(filteredOptions, updatedFilters.prefixes);
     }
@@ -60,7 +71,7 @@ export class MetricsVariableFilterEngine {
     }
 
     if (updatedFilters.names.length > 0) {
-      filteredOptions = MetricsVariableFilterEngine.applyNamesFilters(filteredOptions, updatedFilters.names);
+      filteredOptions = MetricsVariableFilterEngine.applyNameFilters(filteredOptions, updatedFilters.names);
     }
 
     this.filters = updatedFilters;
@@ -70,6 +81,17 @@ export class MetricsVariableFilterEngine {
     if (settings.notify) {
       this.notifyUpdate();
     }
+  }
+
+  private static applyCategoryFilters(options: MetricOptions, categories: string[]): MetricOptions {
+    let filteredOptions: MetricOptions = [];
+
+    for (const category of categories) {
+      const categoryRegex = MetricsVariableFilterEngine.buildRegex(category, 'i'); // see e.g. computeRulesGroups (could apply to other categories in the future)
+      filteredOptions = filteredOptions.concat(options.filter((option) => categoryRegex.test(option.value)));
+    }
+
+    return filteredOptions;
   }
 
   private static applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
@@ -112,7 +134,7 @@ export class MetricsVariableFilterEngine {
     return options.filter((option) => suffixesRegex.test(option.value as string));
   }
 
-  private static applyNamesFilters(options: MetricOptions, names: string[]): MetricOptions {
+  private static applyNameFilters(options: MetricOptions, names: string[]): MetricOptions {
     const [namePatterns] = names;
 
     const regexes = namePatterns

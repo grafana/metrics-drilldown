@@ -4,8 +4,8 @@ export function computeMetricPrefixGroups(options: Array<{ label: string; value:
   const rawPrefixesMap = new Map<string, string[]>();
 
   for (const option of options) {
-    const [sep] = option.value.match(/[^a-z0-9]/i) || [];
-    const key = sep ? option.value.split(sep)[0] : option.value;
+    const parts = option.value.split(/[^a-z0-9]/i);
+    const key = parts.length <= 1 ? option.value : parts[0];
     const values = rawPrefixesMap.get(key) ?? [];
 
     values.push(option.value);
