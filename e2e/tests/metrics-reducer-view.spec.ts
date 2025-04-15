@@ -18,44 +18,49 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Metrics sorting', () => {
     test('Default sorting shows recent metrics first, then alphabetical', async ({ metricsReducerView, page }) => {
-      // We'll select seven metrics to test that only the six most
-      // recent metrics are shown above the alphabetical list.
+      // We'll select seven metrics, but only the six most recent
+      // metrics shoul shown above the alphabetical list.
       const metricsToSelect = [
-        'go_cgo_go_to_c_calls_calls_total',
+        'go_cgo_go_to_c_calls_calls_total', // This one should not appear in the screenshot
         'grafana_access_evaluation_duration_bucket',
         'process_virtual_memory_max_bytes',
-        'net_conntrack_dialer_conn_established_total',
         'go_cpu_classes_idle_cpu_seconds_total',
+        'net_conntrack_dialer_conn_established_total',
         'scrape_duration_seconds',
         'openfga_cachecontroller_cache_hit_count',
       ];
-      const sixMostRecentMetrics = metricsToSelect.slice(metricsToSelect.length - MAX_RECENT_METRICS).reverse();
+      const searchInput = page.getByRole('textbox', { name: 'Quick search metrics...' });
 
       for (const metric of metricsToSelect) {
-        const metricPrefix = metric.split('_')[0];
-        await metricsReducerView.selectPrefixFilter(metricPrefix);
+        await searchInput.fill(metric);
         await metricsReducerView.selectMetricAndReturnToMetricsReducer(metric);
       }
 
       // Verify the order in the metrics list
-      await metricsReducerView.clearPrefixFilters();
-      const metrics = await metricsReducerView.getVisibleMetrics();
-      expect(metrics.length).toBeGreaterThan(MAX_RECENT_METRICS);
+      await searchInput.clear();
+      const metricsList = metricsReducerView.getMetricsList();
 
-      // Recent metrics should appear first
-      for (let i = 0; i < MAX_RECENT_METRICS; i++) {
-        expect(metrics[i]).toBe(sixMostRecentMetrics[i]);
+      // Wait for the metrics list to update after clearing the search input
+      await expect(async () => {
+        const visibleMetrics = await metricsReducerView.getVisibleMetrics();
+        expect(visibleMetrics.length).toBeGreaterThan(MAX_RECENT_METRICS);
+      }).toPass();
+      const box = await metricsList.boundingBox();
+
+      if (!box) {
+        throw new Error('Could not get element bounding box');
       }
 
-      // Remaining metrics should be in alphabetical order
-      const remainingMetrics = metrics.slice(MAX_RECENT_METRICS);
-      const sortedRemaining = [...remainingMetrics].sort((a, b) => {
-        if (!a || !b) {
-          return 0;
-        }
-        return a.localeCompare(b);
+      await page.setViewportSize({
+        width: Math.ceil(box.x + box.width),
+        height: Math.ceil(box.y + box.height),
       });
-      expect(remainingMetrics).toEqual(sortedRemaining);
+      await expect(metricsList).toHaveScreenshot('metrics-list-default-sort.png', {
+        maxDiffPixelRatio: 0.0095, // This value is the result of much tuning.
+        // Without this tuned value, the screenshot test either fails erroneously
+        // or passes when it should fail, such as when the order of similar metrics
+        // in the `metricsToSelect` array is changed.
+      });
     });
 
     test('Dashboard usage sorting shows most used metrics first', async ({ metricsReducerView }) => {
