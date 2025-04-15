@@ -38,13 +38,13 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
         return;
       }
 
-      const datasource = queries[0].datasource;
+      const { datasource, expr } = queries[0];
 
-      if (!(datasource?.type === 'prometheus')) {
+      if (!expr || !(datasource?.type === 'prometheus')) {
         return;
       }
 
-      const query = parsePromQueryRegex(queries[0].expr);
+      const query = parsePromQueryRegex(expr);
 
       const timeRange =
         'timeRange' in context &&
