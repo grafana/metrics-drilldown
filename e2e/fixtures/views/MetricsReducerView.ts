@@ -129,16 +129,13 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async selectPrefixFilter(prefix: string) {
-    const prefixFilters = this.page.getByTestId('metric-prefix-filters');
+    await this.assertSidebar();
+    const prefixes = await this.page
+      .getByTestId('metric-prefix-filters')
+      .getByTestId('checkbox-filters-list')
+      .getByRole('listitem');
 
-    // It'd be great to be able to use `.getByRole('checkbox', { name: prefix })`, but it doesn't work
-    const targetPrefix = await prefixFilters
-      .getByRole('listitem')
-      .filter({ hasText: prefix })
-      .locator('div span')
-      .first();
-
-    await targetPrefix.click();
+    await prefixes.filter({ hasText: prefix }).getByTestId('checkbox').check({ force: true });
   }
 
   async selectMetric(metricName: string) {
