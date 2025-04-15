@@ -7,6 +7,7 @@ import {
 import { type DataQuery } from '@grafana/schema';
 
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
+import { logger } from '../tracking/logger/logger';
 
 const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
@@ -181,7 +182,7 @@ function parseLabels(labelsContent: string, labelFilters: PromLabelFilter[]): vo
       const unescapedValue = match[3].replace(/\\(.)/g, '$1');
       labelFilters.push({ label: match[1], op: match[2], value: unescapedValue });
     } else {
-      console.warn(`[Metrics Drilldown] Could not parse label part: "${part}"`);
+      logger.warn(`[Metrics Drilldown] Could not parse label part: "${part}" for labels: ${labelsContent}`);
     }
   });
 }
