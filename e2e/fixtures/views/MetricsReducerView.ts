@@ -154,7 +154,14 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async getVisibleMetrics(): Promise<string[]> {
+    await this.waitForMetricsUpdate();
     const metricElements = await this.page.getByTestId('with-usage-data-preview-panel').all();
+    await expect(async () => {
+      const metricNames = await metricElements.map((el) =>
+        el.getByTestId('header-container').getByRole('heading').textContent()
+      );
+      expect(metricNames.some((name) => name !== null)).toBe(true);
+    }).toPass();
     return Promise.all(
       metricElements.map((el) => el.getByTestId('header-container').getByRole('heading').textContent())
     ) as Promise<string[]>;
@@ -170,6 +177,8 @@ export class MetricsReducerView extends DrilldownView {
       const loadingIndicator = document.querySelector('[data-testid="metrics-loading"]');
       return !loadingIndicator;
     });
+
+    await this.assertMetricsList();
   }
 
   async getMetricUsageCounts(usageType: 'dashboard' | 'alerting'): Promise<Record<string, number>> {
