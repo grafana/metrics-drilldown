@@ -121,11 +121,11 @@ export class MetricsVariableFilterEngine {
         if (suffix.includes('|')) {
           return `${suffix
             .split('|')
-            .map((s) => `${s}$`)
+            .map((s) => `(^|[^a-z0-9])${s}$`)
             .join('|')}`;
         }
 
-        return `${suffix}$`;
+        return `(^|[^a-z0-9])${suffix}$`;
       })
       .join('|');
 
