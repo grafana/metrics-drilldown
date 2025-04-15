@@ -21,7 +21,7 @@ test.describe('Metrics reducer view', () => {
       // We'll select seven metrics to test that only the six most
       // recent metrics are shown above the alphabetical list.
       const metricsToSelect = [
-        'go_gc_stack_starting_size_bytes',
+        'go_cgo_go_to_c_calls_calls_total',
         'grafana_access_permissions_duration_sum',
         'process_virtual_memory_max_bytes',
         'net_conntrack_dialer_conn_established_total',
