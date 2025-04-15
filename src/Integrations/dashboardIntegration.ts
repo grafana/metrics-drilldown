@@ -4,6 +4,8 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { type SceneObject, type SceneObjectState, type SceneTimeRangeState, type VizPanel } from '@grafana/scenes';
 import { type DataQuery, type DataSourceRef } from '@grafana/schema';
 
+import { isPrometheusDatasource } from 'helpers/MetricDatasourceHelper';
+
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
 import { DataTrailEmbedded, type DataTrailEmbeddedState } from './DataTrailEmbedded';
@@ -38,7 +40,7 @@ export async function addDataTrailPanelAction(
     return;
   }
 
-  if (datasource.type !== 'prometheus') {
+  if (!isPrometheusDatasource(datasource)) {
     return;
   }
 

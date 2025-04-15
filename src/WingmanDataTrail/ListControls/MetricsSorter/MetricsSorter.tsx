@@ -14,6 +14,7 @@ import { type Dashboard, type DataSourceRef } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
 import React from 'react';
 
+import { isPrometheusDatasource } from 'helpers/MetricDatasourceHelper';
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 import { EventSortByChanged } from './EventSortByChanged';
@@ -115,7 +116,7 @@ export function isPrometheusDataSource(input: unknown): input is Required<Pick<D
     typeof input === 'object' &&
     input !== null &&
     'type' in input &&
-    input.type === 'prometheus' &&
+    isPrometheusDatasource(input) &&
     'uid' in input &&
     typeof input.uid === 'string'
   );
