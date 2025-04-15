@@ -130,12 +130,17 @@ export class MetricsReducerView extends DrilldownView {
 
   async selectPrefixFilter(prefix: string) {
     await this.assertSidebar();
-    const prefixes = await this.page
-      .getByTestId('metric-prefix-filters')
-      .getByTestId('checkbox-filters-list')
-      .getByRole('listitem');
+    const prefixFiltersSection = await this.page.getByTestId('metric-prefix-filters');
 
-    await prefixes.filter({ hasText: prefix }).getByTestId('checkbox').check({ force: true });
+    // Start by searching for the prefix filter
+    const searchInput = await prefixFiltersSection.getByPlaceholder('Search...');
+    await searchInput.fill(prefix);
+
+    // Then select the prefix filter
+    const prefixes = await prefixFiltersSection.getByTestId('checkbox-filters-list').getByRole('listitem');
+    const targetPrefix = await prefixes.filter({ hasText: prefix }).first();
+    expect(targetPrefix).toBeVisible();
+    await targetPrefix.getByTestId('checkbox').check({ force: true });
   }
 
   async selectMetric(metricName: string) {
