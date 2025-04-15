@@ -1,15 +1,10 @@
 import { type QueryBuilderLabelFilter } from '@grafana/prometheus';
 
-import { type DashboardSceneInterface } from './dashboardIntegration';
 import { type QueryMetric } from './getQueryMetrics'; // We only support label filters with the '=' operator
 
 // We only support label filters with the '=' operator
 export function isEquals(labelFilter: QueryBuilderLabelFilter) {
   return labelFilter.op === '=';
-}
-
-export function getTimeRangeStateFromDashboard(dashboard: DashboardSceneInterface) {
-  return dashboard.state.$timeRange!.state;
 }
 
 export function getQueryMetricLabel({ metric, labelFilters }: QueryMetric) {
