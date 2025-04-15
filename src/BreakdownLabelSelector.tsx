@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
-import { Select, useStyles2 } from '@grafana/ui';
+import { Combobox, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 type Props = {
@@ -12,7 +12,16 @@ type Props = {
 export function BreakdownLabelSelector({ options, value, onChange }: Props) {
   const styles = useStyles2(getStyles);
 
-  return <Select {...{ options, value }} onChange={(selected) => onChange(selected.value)} className={styles.select} />;
+  return (
+    <div className={styles.select}>
+      <Combobox
+        options={options.map((opt) => ({ label: opt.label || '', value: opt.value || '' }))}
+        value={value || ''}
+        onChange={(selected) => onChange(selected?.value)}
+        width={16}
+      />
+    </div>
+  );
 }
 
 function getStyles(theme: GrafanaTheme2) {
