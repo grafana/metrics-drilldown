@@ -35,7 +35,7 @@ import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetrics
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
 import { FilteredMetricsVariable } from './MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from './MetricsVariables/MetricsVariable';
-import { MetricsVariableFilterEngine } from './MetricsVariables/MetricsVariableFilterEngine';
+import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
 import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
 import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
@@ -43,7 +43,8 @@ import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction'
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
-import { EventFiltersChanged } from './SideBar/EventFiltersChanged';
+import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
+import { MetricsFilterSection } from './SideBar/sections/MetricsFilterSection/MetricsFilterSection';
 import { SideBar } from './SideBar/SideBar';
 interface MetricsReducerState extends SceneObjectState {
   listControls: ListControls;
@@ -134,7 +135,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     );
 
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
-    const sideBar = sceneGraph.findByKeyAndType(this, 'sidebar', SideBar);
+    const filterSections = sceneGraph.findAllObjects(
+      this,
+      (o) => o instanceof MetricsFilterSection
+    ) as MetricsFilterSection[];
     const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
     const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
 
@@ -146,15 +150,15 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
         filterEngine.setInitOptions(options);
 
-        filterEngine.applyFilters(
-          {
-            names: quickSearch.state.value ? [quickSearch.state.value] : [],
-            prefixes: sideBar.state.selectedMetricPrefixes,
-            suffixes: sideBar.state.selectedMetricSuffixes,
-          },
-          { forceUpdate: true, notify: false }
-        );
+        const filters: Partial<MetricFilters> = {
+          names: quickSearch.state.value ? [quickSearch.state.value] : [],
+        };
 
+        for (const filterSection of filterSections) {
+          filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
+        }
+
+        filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
         sortEngine.sort(sortByVariable.state.value as SortingOption);
       })
     );
@@ -293,8 +297,8 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       overflowY: 'auto',
     }),
     sidebar: css({
-      flex: '0 0 320px',
-      overflowY: 'hidden',
+      flex: '0 0 auto',
+      overflowY: 'auto',
     }),
     variables: css({
       display: 'none',

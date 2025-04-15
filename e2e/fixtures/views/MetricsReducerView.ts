@@ -20,10 +20,9 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async assertListControls() {
-    const headerControls = this.getListControls();
+    const listControls = this.getListControls();
 
-    await expect(headerControls.getByText('Group by label')).toBeVisible();
-    await expect(headerControls.getByText('Sort by')).toBeVisible();
+    await expect(listControls.getByText('Sort by')).toBeVisible();
 
     await expect(this.getQuickFilterInput()).toBeVisible();
     await expect(this.getLayoutSwitcher()).toBeVisible();
@@ -69,30 +68,18 @@ export class MetricsReducerView extends DrilldownView {
   /* Side bar */
 
   async assertSidebar() {
-    const sidebar = this.getByTestId('sidebar');
+    const sidebar = this.getByTestId('sidebar-buttons');
 
-    const metricPrefixFilters = sidebar.getByTestId('metric-prefix-filters');
-
-    await expect(metricPrefixFilters.getByRole('heading', { name: /metric prefix filters/i, level: 5 })).toBeVisible();
-    await expect(metricPrefixFilters.getByRole('switch', { name: /hide empty/i })).toBeChecked();
-
-    await expect(metricPrefixFilters.getByText('0 selected')).toBeVisible();
-    await expect(metricPrefixFilters.getByRole('button', { name: 'clear', exact: true })).toBeVisible();
-
-    const prefixesListItemsCount = await metricPrefixFilters.getByTestId('checkbox-filters-list').locator('li').count();
-    expect(prefixesListItemsCount).toBeGreaterThan(0);
-
-    // Metric suffix filters
-    const suffixFilters = sidebar.getByTestId('metric-suffix-filters');
-
-    await expect(suffixFilters.getByRole('heading', { name: /metric suffix filters/i, level: 5 })).toBeVisible();
-    await expect(suffixFilters.getByRole('switch', { name: /hide empty/i })).toBeChecked();
-
-    await expect(suffixFilters.getByText('0 selected')).toBeVisible();
-    await expect(suffixFilters.getByRole('button', { name: 'clear', exact: true })).toBeVisible();
-
-    const suffixesListItemsCount = await suffixFilters.getByTestId('checkbox-filters-list').locator('li').count();
-    expect(suffixesListItemsCount).toBeGreaterThan(0);
+    for (const buttonName of [
+      'Rules filters',
+      'Prefix filters',
+      'Suffix filters',
+      'Group by labels',
+      'Bookmarks',
+      'Settings',
+    ]) {
+      await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
+    }
   }
 
   /* Metrics list */
