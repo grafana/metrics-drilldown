@@ -166,7 +166,7 @@ export class MetricsReducerView extends DrilldownView {
     });
   }
 
-  async getMetricUsageCounts(): Promise<Record<string, number>> {
+  async getMetricUsageCounts(usageType: 'dashboard' | 'alerting'): Promise<Record<string, number>> {
     const usageCounts: Record<string, number> = {};
 
     // Get all metric items
@@ -174,7 +174,8 @@ export class MetricsReducerView extends DrilldownView {
 
     // For each metric item, extract its usage counts
     for (const item of metricItems) {
-      const metricName = await item.textContent();
+      const metricName = await item.locator(':is(h1, h2, h3, h4, h5, h6)').textContent();
+
       if (!metricName) {
         continue;
       }
@@ -186,11 +187,10 @@ export class MetricsReducerView extends DrilldownView {
       }
 
       // Extract dashboard and alerting usage counts
-      const dashboardCount = await usagePanel.locator('[data-testid="dashboard-usage"]').textContent();
-      const alertingCount = await usagePanel.locator('[data-testid="alerting-usage"]').textContent();
+      const usageCount = await usagePanel.locator(`[data-testid="${usageType}-usage"]`).textContent();
 
       // Store the total usage count
-      usageCounts[metricName] = parseInt(dashboardCount || '0', 10) + parseInt(alertingCount || '0', 10);
+      usageCounts[metricName] = parseInt(usageCount || '0', 10);
     }
 
     return usageCounts;

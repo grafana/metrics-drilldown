@@ -35,11 +35,7 @@ test.describe('Metrics reducer view', () => {
         const metricPrefix = metric.split('_')[0];
         await metricsReducerView.selectPrefixFilter(metricPrefix);
         await metricsReducerView.selectMetric(metric);
-
-        // Temporary hack to get back to the Metrics Reducer view,
-        // instead of relying on browser navigation or the "Select new metric" button.
-        await metricsReducerView.gotoVariant('/trail-filters-sidebar');
-
+        await page.goBack();
         await metricsReducerView.waitForMetricsUpdate();
       }
 
@@ -69,12 +65,12 @@ test.describe('Metrics reducer view', () => {
 
       // Verify metrics are sorted by dashboard usage count
       const metrics = await metricsReducerView.getVisibleMetrics();
-      const usageCounts = await metricsReducerView.getMetricUsageCounts();
+      const usageCounts = await metricsReducerView.getMetricUsageCounts('dashboard');
 
       // Check that metrics are in descending order of usage
       for (let i = 0; i < metrics.length - 1; i++) {
-        const currentUsage = usageCounts[metrics[i]] || 0;
-        const nextUsage = usageCounts[metrics[i + 1]] || 0;
+        const currentUsage = usageCounts[metrics[i]];
+        const nextUsage = usageCounts[metrics[i + 1]];
         if (i === 0) {
           expect(currentUsage).toBeGreaterThan(0);
         }
@@ -88,12 +84,12 @@ test.describe('Metrics reducer view', () => {
 
       // Verify metrics are sorted by alerting usage count
       const metrics = await metricsReducerView.getVisibleMetrics();
-      const usageCounts = await metricsReducerView.getMetricUsageCounts();
+      const usageCounts = await metricsReducerView.getMetricUsageCounts('alerting');
 
       // Check that metrics are in descending order of usage
       for (let i = 0; i < metrics.length - 1; i++) {
-        const currentUsage = usageCounts[metrics[i]] || 0;
-        const nextUsage = usageCounts[metrics[i + 1]] || 0;
+        const currentUsage = usageCounts[metrics[i]];
+        const nextUsage = usageCounts[metrics[i + 1]];
         if (i === 0) {
           expect(currentUsage).toBeGreaterThan(0);
         }
