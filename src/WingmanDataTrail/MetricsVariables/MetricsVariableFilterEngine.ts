@@ -101,11 +101,11 @@ export class MetricsVariableFilterEngine {
         if (prefix.includes('|')) {
           return `${prefix
             .split('|')
-            .map((p) => `^${p}$`)
+            .map((p) => `^${p}([^a-z0-9]|$)`)
             .join('|')}`;
         }
 
-        return `^${prefix}.+`;
+        return `^${prefix}([^a-z0-9]|$)`;
       })
       .join('|');
 
@@ -121,11 +121,11 @@ export class MetricsVariableFilterEngine {
         if (suffix.includes('|')) {
           return `${suffix
             .split('|')
-            .map((s) => `^${s}$`)
+            .map((s) => `${s}$`)
             .join('|')}`;
         }
 
-        return `.+${suffix}$`;
+        return `${suffix}$`;
       })
       .join('|');
 
