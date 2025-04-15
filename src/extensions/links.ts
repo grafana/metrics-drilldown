@@ -13,16 +13,22 @@ const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
 const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
+const icon = 'gf-prometheus';
 
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
-    targets: [PluginExtensionPoints.DashboardPanelMenu],
+    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
     title,
     description,
+    icon,
     category,
     path: createAppUrl(ROUTES.Trail),
     configure: (context) => {
-      if (typeof context === 'undefined' || !('pluginId' in context) || context.pluginId !== 'timeseries') {
+      if (typeof context === 'undefined') {
+        return;
+      }
+
+      if ('pluginId' in context && context.pluginId !== 'timeseries') {
         return;
       }
 
@@ -32,13 +38,13 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
         return;
       }
 
-      const datasource = queries[0].datasource;
+      const { datasource, expr } = queries[0];
 
-      if (!(datasource?.type === 'prometheus')) {
+      if (!expr || !(datasource?.type === 'prometheus')) {
         return;
       }
 
-      const query = parsePromQueryRegex(queries[0].expr);
+      const query = parsePromQueryRegex(expr);
 
       const timeRange =
         'timeRange' in context &&
