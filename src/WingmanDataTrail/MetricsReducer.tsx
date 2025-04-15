@@ -58,6 +58,7 @@ interface MetricsReducerState extends SceneObjectState {
   sidebar: SideBar;
   body: SceneObjectBase;
   drawer: SceneDrawer;
+  enginesMap: Map<string, { filterEngine: MetricsVariableFilterEngine; sortEngine: MetricsVariableSortEngine }>;
 }
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
@@ -77,6 +78,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       sidebar: new SideBar({}),
       body: new SimpleMetricsList() as unknown as SceneObjectBase,
       drawer: new SceneDrawer({}),
+      enginesMap: new Map(),
     });
 
     registerRuntimeDataSources([new LabelsDataSource(), new MetricsWithLabelValueDataSource()]);
@@ -124,18 +126,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
    * For example, check the `FilteredMetricsVariable` class.
    */
   private initVariablesFilteringAndSorting() {
-    const enginesMap = new Map<
-      string,
-      { filterEngine: MetricsVariableFilterEngine; sortEngine: MetricsVariableSortEngine }
-    >();
-
     this._subs.add(
       this.subscribeToEvent(EventMetricsVariableActivated, (event) => {
         // register engines
         const { key } = event.payload;
         const filteredMetricsVariable = sceneGraph.findByKey(this, key) as QueryVariable;
 
-        enginesMap.set(key, {
+        this.state.enginesMap.set(key, {
           filterEngine: new MetricsVariableFilterEngine(filteredMetricsVariable),
           sortEngine: new MetricsVariableSortEngine(filteredMetricsVariable),
         });
@@ -145,7 +142,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this._subs.add(
       this.subscribeToEvent(EventMetricsVariableDeactivated, (event) => {
         // unregister engines
-        enginesMap.delete(event.payload.key);
+        this.state.enginesMap.delete(event.payload.key);
       })
     );
 
@@ -161,7 +158,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
         // filter and sort on initial load
         const { key, options } = event.payload;
-        const { filterEngine, sortEngine } = enginesMap.get(key)!;
+        const { filterEngine, sortEngine } = this.state.enginesMap.get(key)!;
 
         filterEngine.setInitOptions(options);
 
@@ -184,7 +181,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventQuickSearchChanged, (event) => {
         const { searchText } = event.payload;
 
-        for (const [, { filterEngine, sortEngine }] of enginesMap) {
+        for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
           filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
           sortEngine.sort(sortByVariable.state.value as SortingOption);
         }
@@ -195,7 +192,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventFiltersChanged, (event) => {
         const { type, filters } = event.payload;
 
-        for (const [, { filterEngine, sortEngine }] of enginesMap) {
+        for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
           filterEngine.applyFilters({ [type]: filters });
           sortEngine.sort(sortByVariable.state.value as SortingOption);
         }
@@ -208,7 +205,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventSortByChanged, (event) => {
         const { sortBy } = event.payload;
 
-        for (const [, { sortEngine }] of enginesMap) {
+        for (const [, { sortEngine }] of this.state.enginesMap) {
           sortEngine.sort(sortBy);
         }
       })
