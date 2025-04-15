@@ -4,49 +4,44 @@ import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { CheckboxWithCount } from './CheckboxWithCount';
-import { type MetricsFilterSectionProps } from './MetricsFilterSection';
+import { type MetricsFilterSectionState } from './MetricsFilterSection';
 
 export function CheckBoxList({
-  filteredList,
-  selectedValues,
+  groups,
+  selectedGroups,
   onSelectionChange,
 }: {
-  filteredList: MetricsFilterSectionProps['items'];
-  selectedValues: MetricsFilterSectionProps['selectedValues'];
-  onSelectionChange: MetricsFilterSectionProps['onSelectionChange'];
+  groups: MetricsFilterSectionState['groups'];
+  selectedGroups: MetricsFilterSectionState['selectedGroups'];
+  onSelectionChange: (newGroups: MetricsFilterSectionState['selectedGroups']) => void;
 }) {
   const styles = useStyles2(getStyles);
 
-  if (!filteredList.length) {
+  if (!groups.length) {
     return <div className={styles.noResults}>No results</div>;
   }
 
   return (
     <>
       <div className={styles.checkboxListHeader}>
-        <div>{selectedValues.length} selected</div>
-        <Button
-          className={styles.clearButton}
-          variant="secondary"
-          fill="text"
-          onClick={() => onSelectionChange([])}
-          disabled={!selectedValues.length}
-        >
+        <div>{selectedGroups.length} selected</div>
+        <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
           clear
         </Button>
       </div>
       <ul className={styles.checkboxList} data-testid="checkbox-filters-list">
-        {filteredList.map((item) => (
-          <li key={item.value} className={styles.checkboxItem}>
+        {groups.map((group) => (
+          <li key={group.value} className={styles.checkboxItem}>
             <CheckboxWithCount
-              label={item.label}
-              count={item.count}
-              checked={selectedValues.includes(item.value)}
+              label={group.label}
+              count={group.count}
+              checked={selectedGroups.some((g) => g.value === group.value)}
               onChange={(e) => {
-                const newValues = e.currentTarget.checked
-                  ? [...selectedValues, item.value]
-                  : selectedValues.filter((v) => v !== item.value);
-                onSelectionChange(newValues);
+                const newGroups = e.currentTarget.checked
+                  ? [...selectedGroups, { label: group.label, value: group.value }]
+                  : selectedGroups.filter((v) => v.value !== group.value);
+
+                onSelectionChange(newGroups);
               }}
             />
           </li>
@@ -66,7 +61,6 @@ function getStyles(theme: GrafanaTheme2) {
       margin: theme.spacing(0),
       padding: theme.spacing(0, 0, 0, 1),
     }),
-    clearButton: css({}),
     checkboxList: css({
       height: '100%',
       margin: 0,

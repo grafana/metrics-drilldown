@@ -13,17 +13,16 @@ export class MetricsReducerView extends DrilldownView {
     return super.goto(new URLSearchParams([...this.urlParams, ...new URLSearchParams(urlSearchParams)]));
   }
 
-  /* Header controls */
+  /* List controls */
 
-  getHeaderControls() {
-    return this.getByTestId('header-controls');
+  getListControls() {
+    return this.getByTestId('list-controls');
   }
 
-  async assertHeaderControls() {
-    const headerControls = this.getHeaderControls();
+  async assertListControls() {
+    const listControls = this.getListControls();
 
-    await expect(headerControls.getByText('Group by label')).toBeVisible();
-    await expect(headerControls.getByText('Sort by')).toBeVisible();
+    await expect(listControls.getByText('Sort by')).toBeVisible();
 
     await expect(this.getQuickFilterInput()).toBeVisible();
     await expect(this.getLayoutSwitcher()).toBeVisible();
@@ -34,7 +33,7 @@ export class MetricsReducerView extends DrilldownView {
   /* Quick filter */
 
   getQuickFilterInput() {
-    return this.getHeaderControls().getByPlaceholder('Search metrics');
+    return this.getListControls().getByPlaceholder('Search metrics');
   }
 
   async assertQuickFilter(expectedValue: string, expectedResultsCount: number) {
@@ -69,30 +68,18 @@ export class MetricsReducerView extends DrilldownView {
   /* Side bar */
 
   async assertSidebar() {
-    const sidebar = this.getByTestId('sidebar');
+    const sidebar = this.getByTestId('sidebar-buttons');
 
-    const metricPrefixFilters = sidebar.getByTestId('metric-prefix-filters');
-
-    await expect(metricPrefixFilters.getByRole('heading', { name: /metric prefix filters/i, level: 5 })).toBeVisible();
-    await expect(metricPrefixFilters.getByRole('switch', { name: /hide empty/i })).toBeChecked();
-
-    await expect(metricPrefixFilters.getByText('0 selected')).toBeVisible();
-    await expect(metricPrefixFilters.getByRole('button', { name: 'clear', exact: true })).toBeVisible();
-
-    const prefixesListItemsCount = await metricPrefixFilters.getByTestId('checkbox-filters-list').locator('li').count();
-    expect(prefixesListItemsCount).toBeGreaterThan(0);
-
-    // Categories filters
-    const categoriesFilters = sidebar.getByTestId('categories-filters');
-
-    await expect(categoriesFilters.getByRole('heading', { name: /categories filters/i, level: 5 })).toBeVisible();
-    await expect(categoriesFilters.getByRole('switch', { name: /hide empty/i })).toBeChecked();
-
-    await expect(categoriesFilters.getByText('0 selected')).toBeVisible();
-    await expect(categoriesFilters.getByRole('button', { name: 'clear', exact: true })).toBeVisible();
-
-    const categoriesListItemsCount = await categoriesFilters.getByTestId('checkbox-filters-list').locator('li').count();
-    expect(categoriesListItemsCount).toBeGreaterThan(0);
+    for (const buttonName of [
+      'Rules filters',
+      'Prefix filters',
+      'Suffix filters',
+      'Group by labels',
+      'Bookmarks',
+      'Settings',
+    ]) {
+      await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
+    }
   }
 
   /* Metrics list */
@@ -112,6 +99,16 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+  }
+
+  getPanelByTitle(panelTitle: string) {
+    return this.getByTestId(`data-testid Panel header ${panelTitle}`);
+  }
+
+  selectMetricPanel(panelTitle: string) {
+    return this.getPanelByTitle(panelTitle)
+      .getByRole('button', { name: /select/i })
+      .click();
   }
 
   getMetricsGroupByList() {
