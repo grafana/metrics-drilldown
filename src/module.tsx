@@ -2,6 +2,8 @@ import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
 
+import { linkConfigs } from 'extensions/links';
+
 const LazyApp = lazy(async () => {
   const { wasmSupported } = await import('./services/sorting');
   const { default: initOutlier } = await import('@bsull/augurs/outlier');
@@ -21,3 +23,7 @@ const App = (props: AppRootProps) => (
 );
 
 export const plugin = new AppPlugin<{}>().setRootPage(App);
+
+for (const linkConfig of linkConfigs) {
+  plugin.addLink(linkConfig);
+}

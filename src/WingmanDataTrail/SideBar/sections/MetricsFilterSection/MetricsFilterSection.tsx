@@ -161,7 +161,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     });
   }
 
-  onSelectionChange = (selectedGroups: MetricsFilterSectionState['selectedGroups']) => {
+  private onSelectionChange = (selectedGroups: MetricsFilterSectionState['selectedGroups']) => {
     this.setState({ selectedGroups, active: selectedGroups.length > 0 });
 
     this.publishEvent(

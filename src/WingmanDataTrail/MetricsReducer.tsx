@@ -281,6 +281,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   };
 }
 
+// the height of header between Grafana's chrome header and the metrics list container.
+const APP_HEADER_HEIGHT = 144;
+
 function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
   return {
     listControls: css({
@@ -290,7 +293,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       display: 'flex',
       flexDirection: 'row',
       gap: theme.spacing(1),
-      height: `calc(100vh - ${chromeHeaderHeight + 186}px)`,
+      height: `calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT}px)`,
     }),
     list: css({
       width: '100%',
