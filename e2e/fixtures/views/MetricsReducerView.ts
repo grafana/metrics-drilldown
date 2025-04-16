@@ -10,7 +10,8 @@ export class MetricsReducerView extends DrilldownView {
 
   gotoVariant(variantPath: string, urlSearchParams = new URLSearchParams()) {
     super.setPathName(`${PLUGIN_BASE_URL}${variantPath}`);
-    return super.goto(new URLSearchParams([...this.urlParams, ...new URLSearchParams(urlSearchParams)]));
+    // the spread order is important to override the default params (e.g. overriding "from" and "to")
+    return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
 
   /* List controls */
