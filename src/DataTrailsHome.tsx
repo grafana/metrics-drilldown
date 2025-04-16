@@ -2,14 +2,13 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Box, Button, Icon, Stack, Text, TextLink, useStyles2, useTheme2 } from '@grafana/ui';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { testIds } from 'App/testIds';
 import { UI_TEXT } from 'constants/ui';
 
 import { DarkModeRocket, LightModeRocket } from './assets/rockets';
 import { type DataTrail } from './DataTrail';
-import { DataTrailsBookmarks } from './DataTrailBookmarks';
 import { DataTrailsRecentMetrics } from './DataTrailsRecentMetrics';
 import { reportExploreMetrics } from './interactions';
 import { getTrailStore } from './TrailStore/TrailStore';
@@ -37,23 +36,9 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
     this.state.onTrailSelected(trail);
   };
 
-  public onSelectBookmark = (bookmarkIndex: number) => {
-    reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
-    const trail = getTrailStore().getTrailForBookmarkIndex(bookmarkIndex);
-    getTrailStore().setRecentTrail(trail);
-    this.state.onTrailSelected(trail);
-  };
-
   static Component = ({ model }: SceneComponentProps<DataTrailsHome>) => {
-    const [_, setLastDelete] = useState(Date.now());
     const styles = useStyles2(getStyles);
     const theme = useTheme2();
-
-    const onDelete = (index: number) => {
-      getTrailStore().removeBookmark(index);
-      reportExploreMetrics('bookmark_changed', { action: 'deleted' });
-      setLastDelete(Date.now()); // trigger re-render
-    };
 
     return (
       <article className={styles.container} data-testid={testIds.pageHome.container}>
@@ -89,7 +74,6 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
           </Stack>
         </section>
         <DataTrailsRecentMetrics onSelect={model.onSelectRecentTrail} />
-        <DataTrailsBookmarks onSelect={model.onSelectBookmark} onDelete={onDelete} />
       </article>
     );
   };
