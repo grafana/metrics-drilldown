@@ -10,11 +10,10 @@ import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
-import { DataTrailCard } from '../../DataTrailCard';
-import { getBookmarkKey, getTrailStore } from '../../TrailStore/TrailStore';
 import { BookmarksList } from './sections/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser';
+import { getTrailStore } from '../../TrailStore/TrailStore';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';
@@ -77,7 +76,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title: 'Bookmarks',
           description: 'Bookmarks',
           icon: 'bookmark',
-          disabled: true,
         }),
         new Settings({
           key: 'settings',
@@ -144,11 +142,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const styles = useStyles2(getStyles);
     const { sections, visibleSection, sectionValues } = model.useState();
 
-    const { bookmarks } = getTrailStore();
-
-    const onSelect = (index: number) => index;
-    const onDelete = (index: number) => index;
-
     return (
       <div className={styles.container}>
         <div className={styles.buttonsBar} data-testid="sidebar-buttons">
@@ -175,21 +168,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             );
           })}
         </div>
-        {bookmarks.length > 0 && (
-          <div className={styles.bookmarksPanel}>
-            <h5 className={styles.header}>Bookmarks {bookmarks.length}</h5>
-            {bookmarks.map((bookmark, index) => {
-              return (
-                <DataTrailCard
-                  key={getBookmarkKey(bookmark)}
-                  bookmark={bookmark}
-                  onSelect={() => onSelect(index)}
-                  onDelete={() => onDelete(index)}
-                />
-              );
-            })}
-          </div>
-        )}
         {visibleSection && (
           <div className={styles.content} data-testid="sidebar-content">
             <IconButton
@@ -287,16 +265,6 @@ function getStyles(theme: GrafanaTheme2) {
       top: theme.spacing(1.5),
       right: theme.spacing(1),
       margin: 0,
-    }),
-    bookmarksPanel: css({
-      padding: theme.spacing(2),
-      borderTop: `1px solid ${theme.colors.border.weak}`,
-      background: theme.colors.background.primary,
-    }),
-    header: css({
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
-      marginBottom: theme.spacing(1),
-      paddingBottom: theme.spacing(1),
     }),
   };
 }
