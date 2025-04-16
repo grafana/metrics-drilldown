@@ -117,16 +117,6 @@ export class MetricsReducerView extends DrilldownView {
     return this.getByTestId('metrics-groupby-list');
   }
 
-  getSidebarContent() {
-    return this.page.getByTestId('sidebar-content');
-  }
-
-  async closeSidebar() {
-    const closeButton = this.getSidebarContent().getByRole('button', { name: 'Close' });
-    await expect(closeButton).toBeVisible();
-    await closeButton.click();
-  }
-
   async assertMetricsGroupByList() {
     const metricsList = this.getMetricsGroupByList();
 
