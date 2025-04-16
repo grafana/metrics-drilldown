@@ -36,7 +36,7 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.selectMetricAndReturnToMetricsReducer(metric);
       }
 
-      // Verify the order in the metrics list
+      // Begin the process of verifying the order in the metrics list
       await searchInput.clear();
       const metricsList = metricsReducerView.getMetricsList();
 
@@ -45,6 +45,8 @@ test.describe('Metrics reducer view', () => {
         const visibleMetrics = await metricsReducerView.getVisibleMetrics();
         expect(visibleMetrics.length).toBeGreaterThan(MAX_RECENT_METRICS);
       }).toPass();
+
+      // Set the viewport size to the width and height of the metrics list
       const box = await metricsList.boundingBox();
 
       if (!box) {
