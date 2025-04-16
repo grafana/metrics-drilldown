@@ -17,7 +17,7 @@ export type Interactions = {
     );
     otel_resource_attribute?: boolean;
   };
-  // User changed a label filter.
+  // User changed a label filter
   label_filter_changed: {
     label: string;
     action: 'added' | 'removed' | 'changed';
