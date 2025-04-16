@@ -125,6 +125,16 @@ export type Interactions = {
   native_histogram_example_clicked: {
     metric: string;
   },
+  // User toggles the Wingman sidebar
+  wingman_sidebar_toggled: {
+    action: (
+      // Opens the sidebar section
+      | 'opened'
+      // Closes the sidebar section
+      | 'closed'
+    ),
+    section?: string
+  },
 };
 
 const PREFIX = 'grafana_explore_metrics_';
