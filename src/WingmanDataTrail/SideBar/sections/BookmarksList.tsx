@@ -70,6 +70,7 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
                 onSelect={() => onSelect(index)}
                 onDelete={() => onDelete(index)}
                 wide={true}
+                compactHeight={true}
               />
             ))}
           </div>

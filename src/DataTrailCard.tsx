@@ -16,6 +16,7 @@ export type Props = {
   onSelect: () => void;
   onDelete?: () => void;
   wide?: boolean;
+  compactHeight?: boolean;
 };
 
 // Helper function to truncate the value for a single key:value pair
@@ -59,7 +60,8 @@ export function DataTrailCard(props: Props) {
   const { filters, metric, createdAt } = values;
 
   const heading = truncateValue('', getMetricName(metric), 39);
-  const cardClassName = `${styles.card} ${props.wide ? styles.cardWide : ''}`;
+  const cardHeightClassName = `${props.compactHeight && filters.length > 0 ? styles.cardTall : ''}`;
+  const cardClassName = `${styles.card} ${props.wide ? styles.cardWide : ''} ${cardHeightClassName}`;
   return (
     <article data-testid={`data-trail-card ${heading}`}>
       <Card onClick={onSelect} className={cardClassName}>
@@ -109,7 +111,6 @@ export function getStyles(theme: GrafanaTheme2) {
       position: 'relative',
       width: '318px',
       padding: `12px ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2)}`,
-      height: '110px',
       alignItems: 'start',
       marginBottom: 0,
       borderTop: `1px solid ${theme.colors.border.weak}`,
@@ -120,6 +121,9 @@ export function getStyles(theme: GrafanaTheme2) {
     }),
     cardWide: css({
       width: '100%',
+    }),
+    cardTall: css({
+      height: '110px',
     }),
     secondary: css({
       color: theme.colors.text.secondary,
