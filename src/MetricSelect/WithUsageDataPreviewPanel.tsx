@@ -4,6 +4,7 @@ import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObject
 import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricsSorter } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { type MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
@@ -33,14 +34,14 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     if (!filteredMetricsEngine) {
       return;
     }
-    filteredMetricsEngine.sortEngine.getDashboardUsageForMetric(metric).then((value) => {
+    const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+    Promise.all([
+      metricsSorter?.getUsageForMetric(metric, 'dashboards'),
+      metricsSorter?.getUsageForMetric(metric, 'alerting'),
+    ]).then(([dashboardUsage, alertingUsage]) => {
       this.setState({
-        metricsUsedInDashboardsCount: value,
-      });
-    });
-    filteredMetricsEngine.sortEngine.getAlertingUsageForMetric(metric).then((value) => {
-      this.setState({
-        metricsUsedInAlertingRulesCount: value,
+        metricsUsedInDashboardsCount: dashboardUsage,
+        metricsUsedInAlertingRulesCount: alertingUsage,
       });
     });
   }
