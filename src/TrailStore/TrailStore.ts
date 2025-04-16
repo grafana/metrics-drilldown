@@ -53,7 +53,7 @@ export class TrailStore {
 
     this._save = debounce(doSave, 1000);
 
-    window.addEventListener('beforeunload', (ev) => {
+    window.addEventListener('beforeunload', () => {
       // Before closing or reloading the page, we want to remove the debounce from `_save` so that
       // any calls to is on event `unload` are actualized. Debouncing would cause a delay until after the page has been unloaded.
       this._save = doSave;
