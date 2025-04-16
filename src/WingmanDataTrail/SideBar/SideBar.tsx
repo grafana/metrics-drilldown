@@ -189,13 +189,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               aria-label="Close"
               tooltip="Close"
               tooltipPlacement="top"
-              onClick={() => {
-                reportExploreMetrics('metrics_sidebar_toggled', {
-                  action: 'closed',
-                  section: visibleSection.state.key,
-                });
-                model.setActiveSection('');
-              }}
+              onClick={() => model.setActiveSection('')}
             />
             {/* TODO: find a better way */}
             {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
