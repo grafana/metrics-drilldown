@@ -12,7 +12,7 @@ import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRul
 
 import { BookmarksList } from './sections/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
-import { LabelsBrowser } from './sections/LabelsBrowser';
+import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';

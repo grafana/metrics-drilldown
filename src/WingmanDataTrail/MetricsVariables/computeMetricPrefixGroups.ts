@@ -1,5 +1,7 @@
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
+const NONE_PREFIX = '<none>';
+
 export function computeMetricPrefixGroups(options: Array<{ label: string; value: string }>) {
   const rawPrefixesMap = new Map<string, string[]>();
 
@@ -9,7 +11,7 @@ export function computeMetricPrefixGroups(options: Array<{ label: string; value:
     const values = rawPrefixesMap.get(key) ?? [];
 
     values.push(option.value);
-    rawPrefixesMap.set(key, values);
+    rawPrefixesMap.set(key || NONE_PREFIX, values);
   }
 
   const prefixesMap = new Map<string, number>();
