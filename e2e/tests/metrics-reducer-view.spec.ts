@@ -1,3 +1,4 @@
+import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { expect, test } from '../fixtures';
 
 // Keep this in sync with MAX_RECENT_METRICS in MetricsSorter.tsx
@@ -18,16 +19,18 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Metrics sorting', () => {
     test('Default sorting shows recent metrics first, then alphabetical', async ({ metricsReducerView, page }) => {
+      await metricsReducerView.goto(DEFAULT_STATIC_URL_SEARCH_PARAMS);
+
       // We'll select seven metrics, but only the six most recent
       // metrics shoul shown above the alphabetical list.
       const metricsToSelect = [
         'go_cgo_go_to_c_calls_calls_total', // This one should not appear in the screenshot
         'grafana_access_evaluation_duration_bucket',
-        'process_virtual_memory_max_bytes',
-        'go_cpu_classes_idle_cpu_seconds_total',
+        'process_network_transmit_bytes_total',
+        'memberlist_client_cas_success_total',
         'net_conntrack_dialer_conn_established_total',
-        'scrape_duration_seconds',
-        'openfga_cachecontroller_cache_hit_count',
+        'handler_duration_seconds_count',
+        'jaeger_tracer_finished_spans_total',
       ];
       const searchInput = page.getByRole('textbox', { name: 'Quick search metrics...' });
 
@@ -58,18 +61,7 @@ test.describe('Metrics reducer view', () => {
         height: Math.ceil(box.y + box.height),
       });
 
-      // Find all panel content elements inside usage data preview panels to mask
-      const panelContentLocators = page
-        .getByTestId('with-usage-data-preview-panel')
-        .locator('[data-testid="data-testid panel content"]');
-
-      await expect(metricsList).toHaveScreenshot('metrics-list-default-sort.png', {
-        // Without this tuned `maxDiffPixels value, the screenshot test either
-        // fails erroneously or passes when it should fail, such as when the order
-        // of similar metrics in the `metricsToSelect` array is changed.
-        maxDiffPixels: 500,
-        mask: [panelContentLocators],
-      });
+      await expect(metricsList).toHaveScreenshot('metrics-list-default-sort.png');
     });
 
     test('Dashboard usage sorting shows most used metrics first', async ({ metricsReducerView }) => {
