@@ -1,5 +1,7 @@
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
+const NONE_SUFFIX = '<none>';
+
 export function computeMetricSuffixGroups(options: Array<{ label: string; value: string }>) {
   const rawSuffixesMap = new Map<string, string[]>();
 
@@ -9,7 +11,7 @@ export function computeMetricSuffixGroups(options: Array<{ label: string; value:
     const values = rawSuffixesMap.get(key) ?? [];
 
     values.push(option.value);
-    rawSuffixesMap.set(key, values);
+    rawSuffixesMap.set(key || NONE_SUFFIX, values);
   }
 
   const suffixesMap = new Map<string, number>();

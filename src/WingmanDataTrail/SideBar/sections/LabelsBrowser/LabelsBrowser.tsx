@@ -1,15 +1,16 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
-import { Button, Icon, IconButton, Input, RadioButtonList, Spinner, useStyles2 } from '@grafana/ui';
+import { Icon, IconButton, Input, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
-import { EventSectionValueChanged } from './EventSectionValueChanged';
-import { SectionTitle } from './SectionTitle';
-import { type SideBarSectionState } from './types';
+import { EventSectionValueChanged } from '../EventSectionValueChanged';
+import { SectionTitle } from '../SectionTitle';
+import { type SideBarSectionState } from '../types';
+import { LabelsList } from './LabelsList';
 
 interface LabelsBrowserState extends SideBarSectionState {
   variableName: string;
@@ -53,34 +54,34 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     this.setState({ active: Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE) });
   }
 
-  selectValue(value: string) {
+  private selectLabel(label: string) {
     const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
-    labelsVariable.changeValueTo(value);
+    labelsVariable.changeValueTo(label);
 
-    const active = Boolean(value && value !== NULL_GROUP_BY_VALUE);
+    const active = Boolean(label && label !== NULL_GROUP_BY_VALUE);
 
     this.setState({ active });
 
-    this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [value] : [] }), true);
+    this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [label] : [] }), true);
   }
 
-  onClickLabel = (value: string) => {
-    this.selectValue(value);
+  private onClickLabel = (label: string) => {
+    this.selectLabel(label);
   };
 
-  onClickClearSelection = () => {
-    this.selectValue(NULL_GROUP_BY_VALUE);
+  private onClickClearSelection = () => {
+    this.selectLabel(NULL_GROUP_BY_VALUE);
   };
 
-  useLabelsBrowser = () => {
+  private useLabelsBrowser = () => {
     const { variableName, title, description } = this.useState();
 
     const labelsVariable = sceneGraph.lookupVariable(variableName, this) as LabelsVariable;
-    const { loading, options: labels, value } = labelsVariable.useState();
+    const { loading, options: labels, value: labelValue } = labelsVariable.useState();
 
     const [searchValue, setSearchValue] = useState('');
 
-    const filteredList: Array<SelectableValue<string>> = useMemo(() => {
+    const labelsList: Array<SelectableValue<string>> = useMemo(() => {
       const filters = [
         (item: string) => item !== NULL_GROUP_BY_VALUE,
         (item: string) => item.toLowerCase().includes(searchValue.toLowerCase()),
@@ -110,8 +111,8 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       title,
       description,
       loading,
-      value,
-      filteredList,
+      selectedLabel: labelValue as string,
+      labelsList,
       searchValue,
       onInputChange,
       onInputKeyDown,
@@ -126,8 +127,8 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       title,
       description,
       loading,
-      value,
-      filteredList,
+      labelsList,
+      selectedLabel,
       searchValue,
       onInputChange,
       onInputKeyDown,
@@ -149,34 +150,14 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
         />
 
         {loading && <Spinner inline />}
-        {!loading && !filteredList.length && <div className={styles.noResults}>No results.</div>}
 
-        {!loading && filteredList.length > 0 && (
-          <>
-            <div className={styles.listHeader}>
-              <div className={styles.selected}>
-                {value === NULL_GROUP_BY_VALUE ? 'No selection' : `Selected: "${value}"`}
-              </div>
-              <Button
-                variant="secondary"
-                fill="text"
-                onClick={model.onClickClearSelection}
-                disabled={value === NULL_GROUP_BY_VALUE}
-              >
-                clear
-              </Button>
-            </div>
-            <div className={styles.list} data-testid="labels-list">
-              {/* TODO: use a custom one to have option labels with ellipsis and title/tooltip when hovering
-              now we're customizing too much the component CSS */}
-              <RadioButtonList
-                name="labels-list"
-                options={filteredList}
-                onChange={model.onClickLabel}
-                value={value as string}
-              />
-            </div>
-          </>
+        {!loading && (
+          <LabelsList
+            labels={labelsList}
+            selectedLabel={selectedLabel}
+            onClickLabel={model.onClickLabel}
+            onClickClearSelection={model.onClickClearSelection}
+          />
         )}
       </div>
     );
@@ -196,49 +177,5 @@ function getStyles(theme: GrafanaTheme2) {
       marginBottom: theme.spacing(1),
       padding: theme.spacing(0, 0.5),
     }),
-    listHeader: css({
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      color: theme.colors.text.secondary,
-      margin: theme.spacing(0),
-      padding: theme.spacing(0, 0, 0, 1),
-    }),
-    selected: css({
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis',
-    }),
-    list: css({
-      display: 'flex',
-      flex: 1,
-      flexDirection: 'column',
-      gap: 0,
-      overflowY: 'auto',
-
-      '& [role="radiogroup"]': {
-        gap: 0,
-      },
-
-      '& label': {
-        cursor: 'pointer',
-        padding: theme.spacing(0.5, 1),
-        '&:hover': {
-          background: theme.colors.background.secondary,
-        },
-      },
-
-      '& label div': {
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      },
-    }),
-    noResults: css({
-      fontStyle: 'italic',
-      marginTop: theme.spacing(2),
-    }),
   };
 }
-
-export default LabelsBrowser;
