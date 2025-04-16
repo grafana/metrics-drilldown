@@ -126,7 +126,7 @@ export type Interactions = {
     metric: string;
   },
   // User toggles the Wingman sidebar
-  wingman_sidebar_toggled: {
+  metrics_sidebar_toggled: {
     action: (
       // Opens the sidebar section
       | 'opened'

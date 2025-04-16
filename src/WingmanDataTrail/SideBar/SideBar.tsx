@@ -131,7 +131,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
     if (!sectionKey || sectionKey === visibleSection?.state.key) {
       // Report closing the sidebar
-      reportExploreMetrics('wingman_sidebar_toggled', {
+      reportExploreMetrics('metrics_sidebar_toggled', {
         action: 'closed',
         section: visibleSection?.state.key,
       });
@@ -141,7 +141,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     }
 
     // Report opening the sidebar with the selected section
-    reportExploreMetrics('wingman_sidebar_toggled', {
+    reportExploreMetrics('metrics_sidebar_toggled', {
       action: 'opened',
       section: sectionKey,
     });
@@ -190,7 +190,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               tooltip="Close"
               tooltipPlacement="top"
               onClick={() => {
-                reportExploreMetrics('wingman_sidebar_toggled', {
+                reportExploreMetrics('metrics_sidebar_toggled', {
                   action: 'closed',
                   section: visibleSection.state.key,
                 });
