@@ -17,7 +17,7 @@ export type Interactions = {
     );
     otel_resource_attribute?: boolean;
   };
-  // User changed a label filter.
+  // User changed a label filter
   label_filter_changed: {
     label: string;
     action: 'added' | 'removed' | 'changed';
@@ -124,6 +124,16 @@ export type Interactions = {
   native_histogram_examples_closed: {},
   native_histogram_example_clicked: {
     metric: string;
+  },
+  // User toggles the Wingman sidebar
+  metrics_sidebar_toggled: {
+    action: (
+      // Opens the sidebar section
+      | 'opened'
+      // Closes the sidebar section
+      | 'closed'
+    ),
+    section?: string
   },
 };
 
