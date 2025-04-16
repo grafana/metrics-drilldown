@@ -10,6 +10,7 @@ import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
+import { reportExploreMetrics } from '../../interactions';
 import { BookmarksList } from './sections/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
@@ -129,9 +130,21 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const { visibleSection, sections } = this.state;
 
     if (!sectionKey || sectionKey === visibleSection?.state.key) {
+      // Report closing the sidebar
+      reportExploreMetrics('metrics_sidebar_toggled', {
+        action: 'closed',
+        section: visibleSection?.state.key,
+      });
+
       this.setState({ visibleSection: null });
       return;
     }
+
+    // Report opening the sidebar with the selected section
+    reportExploreMetrics('metrics_sidebar_toggled', {
+      action: 'opened',
+      section: sectionKey,
+    });
 
     this.setState({
       visibleSection: sections.find((section) => section.state.key === sectionKey) ?? null,
