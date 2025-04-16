@@ -140,52 +140,6 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
-  async openSidebarItem(category: (typeof this.buttonNames)[number]) {
-    const button = this.page
-      .getByTestId('sidebar-buttons')
-      .getByRole('button', { name: new RegExp(category as string, 'i') });
-    await button.click();
-    await expect(this.getSidebarContent()).toBeVisible();
-  }
-
-  async clearPrefixFilters() {
-    if (await this.getSidebarContent().isVisible()) {
-      await this.closeSidebar();
-    }
-
-    await this.openSidebarItem('Prefix filters');
-
-    // Clear any previous prefix filters
-    const clearButton = this.getSidebarContent().getByRole('button', { name: 'clear', exact: true });
-    await expect(clearButton).toBeVisible();
-    await clearButton.click({ force: true });
-  }
-
-  async selectPrefixFilter(prefix: string) {
-    await this.openSidebarItem('Prefix filters');
-
-    // Clear any previous prefix filters
-    await this.clearPrefixFilters();
-
-    // Start by searching for the prefix filter
-    const sidebarContent = this.getSidebarContent();
-    const searchInput = sidebarContent.getByPlaceholder('Search...');
-    await searchInput.fill(prefix);
-
-    // Then select the prefix filter
-    const prefixes = sidebarContent.getByTestId('checkbox-filters-list').getByRole('listitem');
-    const targetPrefix = prefixes.filter({ hasText: prefix }).first();
-    expect(targetPrefix).toBeVisible();
-    await targetPrefix.locator('div span').first().click();
-    // await targetPrefix.locator('input[data-testid="checkbox"] + span').click();
-
-    // Wait for the metrics list to update
-    await expect(async () => {
-      const metrics = await this.getVisibleMetrics();
-      expect(metrics.some((metric) => metric.startsWith(prefix))).toBe(true);
-    }).toPass();
-  }
-
   async selectMetric(metricName: string) {
     // Scroll the metric list to get the target panel into view
     await this.getMetricsList().evaluate(async (el, childSelector) => {
