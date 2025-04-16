@@ -55,11 +55,18 @@ test.describe('Metrics reducer view', () => {
         width: Math.ceil(box.x + box.width),
         height: Math.ceil(box.y + box.height),
       });
+
+      // Find all panel content elements inside usage data preview panels to mask
+      const panelContentLocators = page
+        .getByTestId('with-usage-data-preview-panel')
+        .locator('[data-testid="data-testid panel content"]');
+
       await expect(metricsList).toHaveScreenshot('metrics-list-default-sort.png', {
-        maxDiffPixelRatio: 0.0095, // This value is the result of much tuning.
-        // Without this tuned value, the screenshot test either fails erroneously
-        // or passes when it should fail, such as when the order of similar metrics
-        // in the `metricsToSelect` array is changed.
+        // Without this tuned `maxDiffPixels value, the screenshot test either
+        // fails erroneously or passes when it should fail, such as when the order
+        // of similar metrics in the `metricsToSelect` array is changed.
+        maxDiffPixels: 10,
+        mask: [panelContentLocators],
       });
     });
 
