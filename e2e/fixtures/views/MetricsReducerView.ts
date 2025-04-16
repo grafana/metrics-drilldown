@@ -3,6 +3,7 @@ import { expect, type Page } from '@playwright/test';
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL } from '../../../src/constants';
 
+export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
 export class MetricsReducerView extends DrilldownView {
   buttonNames = [
     'Rules filters',
@@ -19,7 +20,8 @@ export class MetricsReducerView extends DrilldownView {
 
   gotoVariant(variantPath: string, urlSearchParams = new URLSearchParams()) {
     super.setPathName(`${PLUGIN_BASE_URL}${variantPath}`);
-    return super.goto(new URLSearchParams([...this.urlParams, ...new URLSearchParams(urlSearchParams)]));
+    // the spread order is important to override the default params (e.g. overriding "from" and "to")
+    return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
 
   /* List controls */
@@ -130,100 +132,8 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
-  async selectMetric(metricName: string) {
-    // Scroll the metric list to get the target panel into view
-    await this.getMetricsList().evaluate(async (el, childSelector) => {
-      const child = el.querySelector(childSelector);
-      if (child) {
-        child.scrollIntoView();
-      }
-    }, `[data-testid="select-action-${metricName}"]`);
-
-    const element = this.page.getByTestId(`select-action-${metricName}`);
-    await expect(element).toBeVisible();
-    await element.click();
-  }
-
-  async selectMetricAndReturnToMetricsReducer(metricName: string) {
-    await this.selectMetric(metricName);
-    await this.page.goBack();
-    await this.waitForMetricsUpdate();
-  }
-
-  async getVisibleMetrics(): Promise<string[]> {
-    await this.waitForMetricsUpdate();
-    const metricElements = await this.page.getByTestId('with-usage-data-preview-panel').all();
-    await expect(async () => {
-      const metricNames = await metricElements.map((el) =>
-        el.getByTestId('header-container').getByRole('heading').textContent()
-      );
-      expect(metricNames.some((name) => name !== null)).toBe(true);
-    }).toPass();
-    return Promise.all(
-      metricElements.map((el) => el.getByTestId('header-container').getByRole('heading').textContent())
-    ) as Promise<string[]>;
-  }
-
-  async changeSortOption(sortBy: 'Default' | 'Dashboard Usage' | 'Alerting Usage') {
+  async changeSortOption(sortBy: SortOption) {
     await this.page.getByTestId('list-controls').getByTestId('data-testid template variable').click();
     await this.page.getByRole('option', { name: sortBy }).locator('span').click();
-  }
-
-  async waitForMetricsUpdate() {
-    await this.page.waitForFunction(() => {
-      const loadingIndicator = document.querySelector('[data-testid="metrics-loading"]');
-      return !loadingIndicator;
-    });
-
-    await this.assertMetricsList();
-  }
-
-  async getMetricUsageCounts(usageType: 'dashboard' | 'alerting'): Promise<Record<string, number>> {
-    await this.waitForMetricsUpdate();
-    const usageCounts: Record<string, number> = {};
-
-    // Get all metric items
-    const metricItems = await this.page.getByTestId('with-usage-data-preview-panel').all();
-
-    // For each metric item, extract its usage counts
-    for (const item of metricItems) {
-      const metricName = await item.locator(':is(h1, h2, h3, h4, h5, h6)').textContent();
-
-      if (!metricName) {
-        continue;
-      }
-
-      // Get the usage data panel for this metric
-      const usagePanel = await item.locator('[data-testid="usage-data-panel"]');
-      if (!usagePanel) {
-        continue;
-      }
-
-      // Extract dashboard and alerting usage counts
-      const usageCount = await usagePanel.locator(`[data-testid="${usageType}-usage"]`).textContent();
-
-      // Store the total usage count
-      usageCounts[metricName] = parseInt(usageCount || '0', 10);
-    }
-
-    return usageCounts;
-  }
-
-  async waitForMetricsWithUsage(usageType: 'dashboard' | 'alerting'): Promise<void> {
-    // Wait for at least one metric with non-zero usage count to appear
-    await expect(async () => {
-      const panels = await this.page.getByTestId('with-usage-data-preview-panel').all();
-      let panelsWithUsage = 0;
-      for (const panel of panels) {
-        const usageElement = panel.locator(`[data-testid="${usageType}-usage"]`);
-        const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
-
-        if (usageCount > 0) {
-          panelsWithUsage++;
-        }
-      }
-
-      expect(panelsWithUsage).toBeGreaterThan(0);
-    }).toPass();
   }
 }

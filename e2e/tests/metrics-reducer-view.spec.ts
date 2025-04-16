@@ -1,26 +1,25 @@
 import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { expect, test } from '../fixtures';
+import { type SortOption } from '../fixtures/views/MetricsReducerView';
 
 // Keep this in sync with MAX_RECENT_METRICS in MetricsSorter.tsx
 // If updating MAX_RECENT_METRICS, also update the tests below.
 const MAX_RECENT_METRICS = 6;
 
 test.describe('Metrics reducer view', () => {
-  test.beforeEach(async ({ metricsReducerView }) => {
-    // TEMP
-    await metricsReducerView.gotoVariant('/trail-filters-sidebar');
-  });
-
   test('Core UI elements', async ({ metricsReducerView }) => {
+    await metricsReducerView.gotoVariant('/trail-filters-sidebar');
     await metricsReducerView.assertListControls();
     await metricsReducerView.assertSidebar();
     await metricsReducerView.assertMetricsList();
   });
 
   test.describe('Metrics sorting', () => {
-    test('Default sorting shows recent metrics first, then alphabetical', async ({ metricsReducerView, page }) => {
-      await metricsReducerView.goto(DEFAULT_STATIC_URL_SEARCH_PARAMS);
+    test.beforeEach(async ({ metricsReducerView }) => {
+      await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
+    });
 
+    test('Default sorting shows recent metrics first, then alphabetical', async ({ metricsReducerView, page }) => {
       // We'll select seven metrics, but only the six most recent
       // metrics shoul shown above the alphabetical list.
       const metricsToSelect = [
@@ -35,71 +34,58 @@ test.describe('Metrics reducer view', () => {
       const searchInput = page.getByRole('textbox', { name: 'Quick search metrics...' });
 
       for (const metric of metricsToSelect) {
-        await searchInput.fill(metric);
-        await metricsReducerView.selectMetricAndReturnToMetricsReducer(metric);
+        await searchInput.fill(metric); // search for the metric
+        await page.getByTestId(`select-action-${metric}`).click(); // select the metric
+        await page.goBack(); // return to the metrics reducer view
       }
 
-      // Begin the process of verifying the order in the metrics list
       await searchInput.clear();
-      const metricsList = metricsReducerView.getMetricsList();
-
-      // Wait for the metrics list to update after clearing the search input
-      await expect(async () => {
-        const visibleMetrics = await metricsReducerView.getVisibleMetrics();
-        expect(visibleMetrics.length).toBeGreaterThan(MAX_RECENT_METRICS);
-      }).toPass();
-
-      // Set the viewport size to the width and height of the metrics list
-      const box = await metricsList.boundingBox();
-
-      if (!box) {
-        throw new Error('Could not get element bounding box');
-      }
-
-      await page.setViewportSize({
-        width: Math.ceil(box.x + box.width),
-        height: Math.ceil(box.y + box.height),
+      await expect(page).toHaveScreenshot({
+        stylePath: './e2e/fixtures/css/hide-app-controls.css',
       });
-
-      await expect(metricsList).toHaveScreenshot('metrics-list-default-sort.png');
     });
 
-    test('Dashboard usage sorting shows most used metrics first', async ({ metricsReducerView }) => {
-      await metricsReducerView.changeSortOption('Dashboard Usage');
-      await metricsReducerView.waitForMetricsWithUsage('dashboard');
+    const usageTypeSortOptions: Array<{ usageType: 'dashboard' | 'alerting'; sortOption: SortOption }> = [
+      { usageType: 'dashboard', sortOption: 'Dashboard Usage' },
+      { usageType: 'alerting', sortOption: 'Alerting Usage' },
+    ];
 
-      // Verify metrics are sorted by dashboard usage count
-      const metrics = await metricsReducerView.getVisibleMetrics();
-      const usageCounts = await metricsReducerView.getMetricUsageCounts('dashboard');
+    usageTypeSortOptions.forEach(({ usageType, sortOption }) => {
+      test(`Usage sorting for ${usageType} shows most used metrics first`, async ({ metricsReducerView }) => {
+        await metricsReducerView.changeSortOption(sortOption);
 
-      // Check that metrics are in descending order of usage
-      for (let i = 0; i < metrics.length - 1; i++) {
-        const currentUsage = usageCounts[metrics[i]];
-        const nextUsage = usageCounts[metrics[i + 1]];
-        if (i === 0) {
-          expect(currentUsage).toBeGreaterThan(0);
+        // Wait for the usage count to load
+        await expect(async () => {
+          const firstPanel = await metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
+          const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
+          const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
+          expect(usageCount).toBeGreaterThan(0);
+        }).toPass();
+
+        // Verify metrics are sorted by alerting usage count
+        const usageCounts: Record<string, number> = {};
+        const metricPanels = await metricsReducerView.getByTestId('with-usage-data-preview-panel').all();
+
+        // For each metric item, extract its usage counts
+        for (const item of metricPanels) {
+          const metricName = await item.getByRole('heading').textContent();
+          expect(metricName).not.toBeNull();
+          const usagePanel = item.locator('[data-testid="usage-data-panel"]');
+          const usageCount = await usagePanel.locator(`[data-testid="${usageType}-usage"]`).textContent();
+          usageCounts[metricName as string] = parseInt(usageCount || '0', 10);
         }
-        expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
-      }
-    });
+        const metricNames = Object.keys(usageCounts);
 
-    test('Alerting usage sorting shows most used metrics first', async ({ metricsReducerView }) => {
-      await metricsReducerView.changeSortOption('Alerting Usage');
-      await metricsReducerView.waitForMetricsWithUsage('alerting');
-
-      // Verify metrics are sorted by alerting usage count
-      const metrics = await metricsReducerView.getVisibleMetrics();
-      const usageCounts = await metricsReducerView.getMetricUsageCounts('alerting');
-
-      // Check that metrics are in descending order of usage
-      for (let i = 0; i < metrics.length - 1; i++) {
-        const currentUsage = usageCounts[metrics[i]];
-        const nextUsage = usageCounts[metrics[i + 1]];
-        if (i === 0) {
-          expect(currentUsage).toBeGreaterThan(0);
+        // Check that metrics are in descending order of usage
+        for (let i = 0; i < metricNames.length - 1; i++) {
+          const currentUsage = usageCounts[metricNames[i]];
+          const nextUsage = usageCounts[metricNames[i + 1]];
+          if (i === 0) {
+            expect(currentUsage).toBeGreaterThan(0);
+          }
+          expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
         }
-        expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
-      }
+      });
     });
   });
 });
