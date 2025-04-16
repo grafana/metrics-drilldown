@@ -1,6 +1,7 @@
 import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import { type Dashboard, type DataSourceRef } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
+import { limitFunction } from 'p-limit';
 
 import { logger } from '../../../tracking/logger/logger';
 
@@ -64,6 +65,39 @@ const usageRequestOptions: Partial<BackendSrvRequest> = {
   showErrorAlert: false,
 };
 const dashboardRequestMap = new Map<string, Promise<{ dashboard: Dashboard } | null>>();
+const limitedFunction = limitFunction(
+  async (dashboardUid: string, dashboardRequestsFailedCount: number) => {
+    let promise = dashboardRequestMap.get(dashboardUid);
+
+    if (!promise) {
+      promise = getBackendSrv()
+        .get<{ dashboard: Dashboard }>(
+          `/api/dashboards/uid/${dashboardUid}`,
+          undefined,
+          `grafana-metricsdrilldown-app-dashboard-metric-usage-${dashboardUid}`,
+          usageRequestOptions
+        )
+        .catch((error) => {
+          // Prevent excessive noise
+          if (dashboardRequestsFailedCount <= 5) {
+            logger.error(error, {
+              dashboardUid,
+            });
+          }
+
+          dashboardRequestsFailedCount++;
+          return Promise.resolve(null);
+        })
+        .finally(() => {
+          dashboardRequestMap.delete(dashboardUid);
+        });
+      dashboardRequestMap.set(dashboardUid, promise);
+    }
+
+    return promise;
+  },
+  { concurrency: 50 }
+);
 
 /**
  * Fetches metric usage data from dashboards
@@ -84,36 +118,7 @@ export async function fetchDashboardMetrics(): Promise<Record<string, number>> {
     let dashboardRequestsFailedCount = 0;
 
     const metricCounts = await Promise.all(
-      dashboards.map(({ uid: dashboardUid }) => {
-        let promise = dashboardRequestMap.get(dashboardUid);
-
-        if (!promise) {
-          promise = getBackendSrv()
-            .get<{ dashboard: Dashboard }>(
-              `/api/dashboards/uid/${dashboardUid}`,
-              undefined,
-              `grafana-metricsdrilldown-app-dashboard-metric-usage-${dashboardUid}`,
-              usageRequestOptions
-            )
-            .catch((error) => {
-              // Prevent excessive noise
-              if (dashboardRequestsFailedCount <= 5) {
-                logger.error(error, {
-                  dashboardUid,
-                });
-              }
-
-              dashboardRequestsFailedCount++;
-              return Promise.resolve(null);
-            })
-            .finally(() => {
-              dashboardRequestMap.delete(dashboardUid);
-            });
-          dashboardRequestMap.set(dashboardUid, promise);
-        }
-
-        return promise;
-      })
+      dashboards.map(({ uid: dashboardUid }) => limitedFunction(dashboardUid, dashboardRequestsFailedCount))
     ).then((dashboardSearchResponse) => {
       // Create a map to count metric occurrences
       const counts: Record<string, number> = {};
