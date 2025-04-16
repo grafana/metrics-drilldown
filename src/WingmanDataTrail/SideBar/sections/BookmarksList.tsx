@@ -2,11 +2,12 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { SectionTitle } from './SectionTitle';
 import { type SideBarSectionState } from './types';
 import { DataTrailCard } from '../../../DataTrailCard';
+import { reportExploreMetrics } from '../../../interactions';
 import { getBookmarkKey, getTrailStore } from '../../../TrailStore/TrailStore';
 
 export interface BookmarksListState extends SideBarSectionState {}
@@ -43,30 +44,18 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
     const styles = useStyles2(getStyles);
     const { title, description } = model.useState();
     const { bookmarks } = getTrailStore();
+    const [_, setLastDelete] = useState(Date.now());
 
     const onSelect = (index: number) => {
-      const bookmark = bookmarks[index];
-      if (bookmark) {
-        const trail = getTrailStore().getTrailForBookmark(bookmark);
-        if (trail) {
-          // Navigate to the trail
-          const urlState = trail.getUrlState();
-          const params = new URLSearchParams();
-
-          // Convert SceneObjectUrlValues to URLSearchParams
-          Object.entries(urlState).forEach(([key, value]) => {
-            if (value !== undefined) {
-              params.append(key, String(value));
-            }
-          });
-
-          window.location.href = window.location.pathname + '?' + params.toString();
-        }
-      }
+      reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
+      const trail = getTrailStore().getTrailForBookmarkIndex(index);
+      getTrailStore().setRecentTrail(trail);
     };
 
     const onDelete = (index: number) => {
       getTrailStore().removeBookmark(index);
+      reportExploreMetrics('bookmark_changed', { action: 'deleted' });
+      setLastDelete(Date.now()); // trigger re-render
     };
 
     return (
