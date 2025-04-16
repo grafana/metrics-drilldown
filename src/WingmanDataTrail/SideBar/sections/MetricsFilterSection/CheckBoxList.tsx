@@ -17,10 +17,6 @@ export function CheckBoxList({
 }) {
   const styles = useStyles2(getStyles);
 
-  if (!groups.length) {
-    return <div className={styles.noResults}>No results</div>;
-  }
-
   return (
     <>
       <div className={styles.checkboxListHeader}>
@@ -29,24 +25,29 @@ export function CheckBoxList({
           clear
         </Button>
       </div>
-      <ul className={styles.checkboxList} data-testid="checkbox-filters-list">
-        {groups.map((group) => (
-          <li key={group.value} className={styles.checkboxItem}>
-            <CheckboxWithCount
-              label={group.label}
-              count={group.count}
-              checked={selectedGroups.some((g) => g.value === group.value)}
-              onChange={(e) => {
-                const newGroups = e.currentTarget.checked
-                  ? [...selectedGroups, { label: group.label, value: group.value }]
-                  : selectedGroups.filter((v) => v.value !== group.value);
 
-                onSelectionChange(newGroups);
-              }}
-            />
-          </li>
-        ))}
-      </ul>
+      {!groups.length && <div className={styles.noResults}>No results.</div>}
+
+      {groups.length > 0 && (
+        <ul className={styles.checkboxList} data-testid="checkbox-filters-list">
+          {groups.map((group) => (
+            <li key={group.value} className={styles.checkboxItem}>
+              <CheckboxWithCount
+                label={group.label}
+                count={group.count}
+                checked={selectedGroups.some((g) => g.value === group.value)}
+                onChange={(e) => {
+                  const newGroups = e.currentTarget.checked
+                    ? [...selectedGroups, { label: group.label, value: group.value }]
+                    : selectedGroups.filter((v) => v.value !== group.value);
+
+                  onSelectionChange(newGroups);
+                }}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
     </>
   );
 }
@@ -64,7 +65,7 @@ function getStyles(theme: GrafanaTheme2) {
     checkboxList: css({
       height: '100%',
       margin: 0,
-      padding: `0 ${theme.spacing(1)} ${theme.spacing(1)} ${theme.spacing(1)}`,
+      padding: theme.spacing(0, 1, 1, 1),
       overflowY: 'auto',
       '& .css-1n4u71h-Label': {
         fontSize: '14px !important',
@@ -83,11 +84,11 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       alignItems: 'center',
       width: '100%',
-      padding: `${theme.spacing(0.5)} 0`,
+      padding: theme.spacing(0.5, 0),
     }),
     noResults: css({
       fontStyle: 'italic',
-      marginTop: theme.spacing(2),
+      padding: theme.spacing(0, 1, 1, 1),
     }),
   };
 }
