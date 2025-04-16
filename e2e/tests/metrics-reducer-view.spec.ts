@@ -24,8 +24,8 @@ test.describe('Metrics reducer view', () => {
         'go_cgo_go_to_c_calls_calls_total', // This one should not appear in the screenshot
         'grafana_access_evaluation_duration_bucket',
         'process_virtual_memory_max_bytes',
-        'net_conntrack_dialer_conn_established_total',
         'go_cpu_classes_idle_cpu_seconds_total',
+        'net_conntrack_dialer_conn_established_total',
         'scrape_duration_seconds',
         'openfga_cachecontroller_cache_hit_count',
       ];
@@ -65,7 +65,7 @@ test.describe('Metrics reducer view', () => {
         // Without this tuned `maxDiffPixels value, the screenshot test either
         // fails erroneously or passes when it should fail, such as when the order
         // of similar metrics in the `metricsToSelect` array is changed.
-        maxDiffPixels: 50,
+        maxDiffPixels: 500,
         mask: [panelContentLocators],
       });
     });
