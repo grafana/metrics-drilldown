@@ -29,6 +29,9 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
 
   public onToggleOpen = (isOpen: boolean) => {
     this.setState({ isOpen });
+    if (isOpen) {
+      reportExploreMetrics('settings_opened', {});
+    }
   };
 
   static Component = ({ model }: SceneComponentProps<DataTrailSettings>) => {

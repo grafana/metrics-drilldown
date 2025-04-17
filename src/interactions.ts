@@ -55,6 +55,7 @@ export type Interactions = {
   };
   // User changes metric explore settings
   settings_changed: { stickyMainGraph?: boolean };
+  settings_opened: {},
   // User clicks on tab to change the action view
   metric_action_view_changed: { 
     view: ActionViewType 
