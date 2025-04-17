@@ -24,4 +24,5 @@ export type AutoQueryContext = {
   unit: string;
   suffix: string;
   unitSuffix?: string;
+  nativeHistogram?: boolean;
 };

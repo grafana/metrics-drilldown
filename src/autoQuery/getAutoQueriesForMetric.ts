@@ -24,6 +24,7 @@ export function getAutoQueriesForMetric(metric: string, nativeHistogram?: boolea
     suffix,
     unitSuffix,
     unit,
+    nativeHistogram,
   };
 
   if (suffix === 'sum') {
