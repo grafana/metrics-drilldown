@@ -3,14 +3,25 @@ import { expect, type Page } from '@playwright/test';
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL } from '../../../src/constants';
 
+export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
 export class MetricsReducerView extends DrilldownView {
+  buttonNames = [
+    'Rules filters',
+    'Prefix filters',
+    'Suffix filters',
+    'Group by labels',
+    'Bookmarks',
+    'Settings',
+  ] as const;
+
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
   }
 
   gotoVariant(variantPath: string, urlSearchParams = new URLSearchParams()) {
     super.setPathName(`${PLUGIN_BASE_URL}${variantPath}`);
-    return super.goto(new URLSearchParams([...this.urlParams, ...new URLSearchParams(urlSearchParams)]));
+    // the spread order is important to override the default params (e.g. overriding "from" and "to")
+    return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
 
   /* List controls */
@@ -70,14 +81,7 @@ export class MetricsReducerView extends DrilldownView {
   async assertSidebar() {
     const sidebar = this.getByTestId('sidebar-buttons');
 
-    for (const buttonName of [
-      'Rules filters',
-      'Prefix filters',
-      'Suffix filters',
-      'Group by labels',
-      'Bookmarks',
-      'Settings',
-    ]) {
+    for (const buttonName of this.buttonNames) {
       await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
     }
   }
@@ -126,5 +130,10 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+  }
+
+  async changeSortOption(sortBy: SortOption) {
+    await this.page.getByTestId('list-controls').getByTestId('data-testid template variable').click();
+    await this.page.getByRole('option', { name: sortBy }).locator('span').click();
   }
 }
