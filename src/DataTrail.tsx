@@ -70,10 +70,6 @@ import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
-import {
-  fetchAlertingMetrics,
-  fetchDashboardMetrics,
-} from './WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -233,33 +229,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     };
     window.addEventListener('unload', saveRecentTrail);
 
-    // Fetch metric usage data
-    this.updateMetricUsageData();
-
     return () => {
       if (!this.state.embedded) {
         saveRecentTrail();
       }
       window.removeEventListener('unload', saveRecentTrail);
     };
-  }
-
-  /**
-   * Updates metric usage data from dashboards and alerting rules
-   */
-  private async updateMetricUsageData() {
-    try {
-      // Fetch both metrics sources concurrently
-      const [dashboardMetrics, alertingMetrics] = await Promise.all([fetchDashboardMetrics(), fetchAlertingMetrics()]);
-
-      this.setState({ dashboardMetrics, alertingMetrics });
-    } catch (error) {
-      console.error('Failed to fetch metric usage data:', error);
-      this.setState({
-        dashboardMetrics: {},
-        alertingMetrics: {},
-      });
-    }
   }
 
   protected _variableDependency = new VariableDependencyConfig(this, {
