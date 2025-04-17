@@ -59,12 +59,22 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       <div className={styles.panelContainer} data-testid="with-usage-data-preview-panel">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
         <div className={styles.usageContainer} data-testid="usage-data-panel">
-          <Tooltip content="Dashboards usage" placement="top">
+          <Tooltip
+            content={`Metric is used in ${metricsUsedInDashboardsCount} dashboard panel ${
+              metricsUsedInDashboardsCount === 1 ? 'query' : 'queries'
+            }`}
+            placement="top"
+          >
             <span className={styles.usageItem} data-testid="dashboard-usage">
               <Icon name="apps" /> {metricsUsedInDashboardsCount}
             </span>
           </Tooltip>
-          <Tooltip content="Alerting rules usage" placement="top">
+          <Tooltip
+            content={`Metric is used in ${metricsUsedInAlertingRulesCount} alert rule${
+              metricsUsedInAlertingRulesCount === 1 ? '' : 's'
+            }`}
+            placement="top"
+          >
             <span className={styles.usageItem} data-testid="alerting-usage">
               <Icon name="bell" /> {metricsUsedInAlertingRulesCount}
             </span>
