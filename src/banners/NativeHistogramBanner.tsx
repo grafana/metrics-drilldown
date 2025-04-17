@@ -125,7 +125,7 @@ const NativeHistogramExamples = ({ trail, nativeHistograms, setHistogramMessage 
       : 'public/img/native-histograms/LightModeHeatmapClassicHistogram.png',
     nativeHistogram: isDark
       ? 'public/img/native-histograms/DarkModeHistogramNativehistogram.png'
-      : 'public/img/native-histograms/LightModeHistogramClassicHistogram.png',
+      : 'public/img/native-histograms/LightModeHistogramNativeHistogram.png',
     classicHistogram: isDark
       ? 'public/img/native-histograms/DarkModeHistogramClassicHistogram.png'
       : 'public/img/native-histograms/LightModeHistogramClassicHistogram.png',
