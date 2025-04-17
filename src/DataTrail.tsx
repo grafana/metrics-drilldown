@@ -64,6 +64,7 @@ import {
   VAR_OTEL_GROUP_LEFT,
   VAR_OTEL_JOIN_QUERY,
   VAR_OTEL_RESOURCES,
+  VAR_OTHER_METRIC_FILTERS,
 } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getTrailFor, limitAdhocProviders } from './utils';
@@ -704,6 +705,16 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
             .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
+      }),
+      new AdHocFiltersVariable({
+        name: VAR_OTHER_METRIC_FILTERS,
+        readOnly: true,
+        skipUrlSync: true,
+        datasource: null,
+        hide: VariableHide.hideLabel,
+        layout: 'combobox',
+        applyMode: 'manual',
+        allowCustomValue: true,
       }),
       ...getVariablesWithOtelJoinQueryConstant(),
       new ConstantVariable({
