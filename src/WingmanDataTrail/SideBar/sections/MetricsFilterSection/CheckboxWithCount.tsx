@@ -18,7 +18,7 @@ export const CheckboxWithCount = ({
 
   return (
     <div className={styles.checkboxWrapper} title={label}>
-      <Checkbox label={label} value={checked} onChange={onChange} data-testid="checkbox" />
+      <Checkbox label={label} value={checked} onChange={onChange} />
       <span className={styles.count}>({count})</span>
     </div>
   );
