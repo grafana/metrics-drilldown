@@ -171,7 +171,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
           metricName,
           matchers,
           prometheusFunction: 'rate',
-          groupByLabel: 'le',
+          groupByLabel: isNativeHistogram ? '' : 'le', // Group by is not needed for `rate` function but keeping this logic because we will use it in the future for the metric scene with the prom query builder.
           queryOptions: {
             format: 'heatmap',
           },
