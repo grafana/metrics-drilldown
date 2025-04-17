@@ -26,7 +26,6 @@ export class SelectMetricView extends DrilldownView {
     await expect(this.getTimePickerButton()).toBeVisible();
     await expect(this.getRefreshPicker()).toBeVisible();
 
-    await expect(this.getSettingsButton()).toBeVisible();
     await expect(this.getPluginInfoButton()).toBeVisible();
   }
 
@@ -94,11 +93,7 @@ export class SelectMetricView extends DrilldownView {
     return this.getRefreshPicker().click();
   }
 
-  /* Settings/plugin info */
-
-  getSettingsButton() {
-    return this.getControls().getByTestId('settings-button');
-  }
+  /* Plugin info */
 
   getPluginInfoButton() {
     return this.getControls().getByTestId('plugin-info-button');
