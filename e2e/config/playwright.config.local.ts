@@ -6,4 +6,5 @@ export default config({
     ['html', { outputFolder: '../test-reports', open: 'never' }],
   ],
   workers: 4,
+  forbidOnly: false,
 });

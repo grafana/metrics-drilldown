@@ -38,7 +38,14 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
     const { variant, fill } = model.useState();
 
     return (
-      <Button variant={variant} fill={fill} size="sm" className={styles.selectButton} onClick={model.onClick}>
+      <Button
+        variant={variant}
+        fill={fill}
+        size="sm"
+        className={styles.selectButton}
+        onClick={model.onClick}
+        data-testid={`select-action-${model.state.metricName}`}
+      >
         Select
       </Button>
     );

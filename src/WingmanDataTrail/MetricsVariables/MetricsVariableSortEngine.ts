@@ -1,12 +1,9 @@
-import { SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
+import { sceneGraph, SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
 
-import { getTrailFor } from 'utils';
 import {
-  fetchAlertingMetrics,
-  fetchDashboardMetrics,
-  sortMetricsAlphabetically,
+  MetricsSorter,
   sortMetricsByCount,
-  sortMetricsReverseAlphabetically,
+  sortMetricsWithRecentFirst,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
@@ -34,19 +31,15 @@ export class MetricsVariableSortEngine {
 
     switch (sortBy) {
       case 'dashboard-usage':
-        sortedMetrics = await this.sortByDashboardUsage(metrics, getTrailFor(this.variable).state.dashboardMetrics);
+        sortedMetrics = await this.sortByDashboardUsage(metrics);
         break;
 
       case 'alerting-usage':
-        sortedMetrics = await this.sortByAlertingUsage(metrics, getTrailFor(this.variable).state.alertingMetrics);
-        break;
-
-      case 'reverse-alphabetical':
-        sortedMetrics = sortMetricsReverseAlphabetically(metrics);
+        sortedMetrics = await this.sortByAlertingUsage(metrics);
         break;
 
       default:
-        sortedMetrics = sortMetricsAlphabetically(metrics);
+        sortedMetrics = sortMetricsWithRecentFirst(metrics);
         break;
     }
 
@@ -63,9 +56,10 @@ export class MetricsVariableSortEngine {
     this.notifyUpdate();
   }
 
-  private async sortByDashboardUsage(metrics: string[], existingDashboardMetrics?: Record<string, number>) {
+  private async sortByDashboardUsage(metrics: string[]) {
     try {
-      const dashboardMetrics = existingDashboardMetrics ? existingDashboardMetrics : await fetchDashboardMetrics();
+      const metricsSorter = sceneGraph.findByKeyAndType(this.variable, 'metrics-sorter', MetricsSorter);
+      const dashboardMetrics = await metricsSorter?.getUsageMetrics('dashboards');
       return sortMetricsByCount(metrics, dashboardMetrics);
     } catch (error) {
       console.error('Failed to fetch dashboard metrics!');
@@ -74,9 +68,10 @@ export class MetricsVariableSortEngine {
     }
   }
 
-  private async sortByAlertingUsage(metrics: string[], existingAlertingMetrics?: Record<string, number>) {
+  private async sortByAlertingUsage(metrics: string[]) {
     try {
-      const alertingMetrics = existingAlertingMetrics ? existingAlertingMetrics : await fetchAlertingMetrics();
+      const metricsSorter = sceneGraph.findByKeyAndType(this.variable, 'metrics-sorter', MetricsSorter);
+      const alertingMetrics = await metricsSorter?.getUsageMetrics('alerting');
       return sortMetricsByCount(metrics, alertingMetrics);
     } catch (error) {
       console.error('Failed to fetch alerting metrics!');
