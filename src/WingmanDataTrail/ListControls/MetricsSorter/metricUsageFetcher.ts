@@ -155,8 +155,11 @@ export async function fetchDashboardMetrics(): Promise<Record<string, number>> {
     });
 
     return metricCounts;
-  } catch (error) {
-    console.error('Failed to fetch dashboard metrics:', error);
+  } catch (err) {
+    const error = typeof err === 'string' ? new Error(err) : (err as Error);
+    logger.error(error, {
+      message: 'Failed to fetch dashboard metrics',
+    });
     return {};
   }
 }
@@ -230,14 +233,19 @@ export async function fetchAlertingMetrics(): Promise<Record<string, number>> {
           }
         } catch (error) {
           // Log parsing errors but continue processing other expressions
-          console.warn(`Failed to parse PromQL expression in alert rule ${rule.title}:`, error);
+          logger.warn(error, {
+            message: `Failed to parse PromQL expression in alert rule ${rule.title}`,
+          });
         }
       }
     }
 
     return metricCounts;
-  } catch (error) {
-    console.error('Failed to fetch alerting rules:', error);
+  } catch (err) {
+    const error = typeof err === 'string' ? new Error(err) : (err as Error);
+    logger.error(error, {
+      message: 'Failed to fetch alerting rules',
+    });
     // Return empty object when fetch fails
     return {};
   }
