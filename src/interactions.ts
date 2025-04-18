@@ -2,7 +2,6 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 
 import { type BreakdownLayoutType } from './Breakdown/types';
-import { type TrailStepType } from './DataTrailsHistory';
 import { type ActionViewType } from './MetricScene';
 
 // prettier-ignore
@@ -18,7 +17,7 @@ export type Interactions = {
     );
     otel_resource_attribute?: boolean;
   };
-  // User changed a label filter.
+  // User changed a label filter
   label_filter_changed: {
     label: string;
     action: 'added' | 'removed' | 'changed';
@@ -56,19 +55,6 @@ export type Interactions = {
   };
   // User changes metric explore settings
   settings_changed: { stickyMainGraph?: boolean };
-  // User clicks on history nodes to navigate exploration history
-  history_step_clicked: {
-    type: (
-      // One of the standard step types
-      | TrailStepType
-      // The special metric step type that is created when the user de-selects the current metric
-      | 'metric-clear'
-    );
-    // Which step index was clicked on
-    step: number;
-    // The total number of steps currently in the trail
-    numberOfSteps: number;
-  };
   // User clicks on tab to change the action view
   metric_action_view_changed: { 
     view: ActionViewType 
@@ -138,6 +124,16 @@ export type Interactions = {
   native_histogram_examples_closed: {},
   native_histogram_example_clicked: {
     metric: string;
+  },
+  // User toggles the Wingman sidebar
+  metrics_sidebar_toggled: {
+    action: (
+      // Opens the sidebar section
+      | 'opened'
+      // Closes the sidebar section
+      | 'closed'
+    ),
+    section?: string
   },
 };
 

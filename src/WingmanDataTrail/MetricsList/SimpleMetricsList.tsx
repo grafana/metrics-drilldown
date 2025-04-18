@@ -17,7 +17,7 @@ import React from 'react';
 import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { getColorByIndex, getTrailFor } from 'utils';
-import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/HeaderControls/LayoutSwitcher';
+import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,

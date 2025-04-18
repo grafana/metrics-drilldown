@@ -1,15 +1,17 @@
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
+const NONE_PREFIX = '<none>';
+
 export function computeMetricPrefixGroups(options: Array<{ label: string; value: string }>) {
   const rawPrefixesMap = new Map<string, string[]>();
 
   for (const option of options) {
-    const [sep] = option.value.match(/[^a-z0-9]/i) || [];
-    const key = sep ? option.value.split(sep)[0] : option.value;
+    const parts = option.value.split(/[^a-z0-9]/i);
+    const key = parts.length <= 1 ? option.value : parts[0];
     const values = rawPrefixesMap.get(key) ?? [];
 
     values.push(option.value);
-    rawPrefixesMap.set(key, values);
+    rawPrefixesMap.set(key || NONE_PREFIX, values);
   }
 
   const prefixesMap = new Map<string, number>();

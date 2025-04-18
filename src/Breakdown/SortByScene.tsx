@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { BusEventBase, type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Field, IconButton, Select, useStyles2 } from '@grafana/ui';
+import { Combobox, Field, IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { getSortByPreference, setSortByPreference } from '../services/store';
@@ -22,24 +22,19 @@ export class SortCriteriaChanged extends BusEventBase {
 export class SortByScene extends SceneObjectBase<SortBySceneState> {
   public sortingOptions = [
     {
-      label: '',
-      options: [
-        {
-          value: 'outliers',
-          label: 'Outlying series',
-          description: 'Prioritizes values that show distinct behavior from others within the same label',
-        },
-        {
-          value: 'alphabetical',
-          label: 'Name [A-Z]',
-          description: 'Alphabetical order',
-        },
-        {
-          value: 'alphabetical-reversed',
-          label: 'Name [Z-A]',
-          description: 'Reversed alphabetical order',
-        },
-      ],
+      value: 'outliers',
+      label: 'Outlying series',
+      description: 'Prioritizes values that show distinct behavior from others within the same label',
+    },
+    {
+      value: 'alphabetical',
+      label: 'Name [A-Z]',
+      description: 'Alphabetical order',
+    },
+    {
+      value: 'alphabetical-reversed',
+      label: 'Name [Z-A]',
+      description: 'Reversed alphabetical order',
     },
   ];
 
@@ -51,8 +46,8 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
     });
   }
 
-  public onCriteriaChange = (criteria: SelectableValue<string>) => {
-    if (!criteria.value) {
+  public onCriteriaChange = (criteria: SelectableValue<string> | null) => {
+    if (!criteria?.value) {
       return;
     }
     this.setState({ sortBy: criteria.value });
@@ -63,8 +58,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
   public static Component = ({ model }: SceneComponentProps<SortByScene>) => {
     const styles = useStyles2(getStyles);
     const { sortBy } = model.useState();
-    const group = model.sortingOptions.find((group) => group.options.find((option) => option.value === sortBy));
-    const value = group?.options.find((option) => option.value === sortBy);
+    const value = model.sortingOptions.find((option) => option.value === sortBy);
     return (
       <Field
         htmlFor="sort-by-criteria"
@@ -80,14 +74,14 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
           </div>
         }
       >
-        <Select
+        <Combobox
+          id="sort-by-criteria"
           value={value}
           width={20}
-          isSearchable={true}
           options={model.sortingOptions}
           placeholder={'Choose criteria'}
           onChange={model.onCriteriaChange}
-          inputId="sort-by-criteria"
+          isClearable={false}
         />
       </Field>
     );

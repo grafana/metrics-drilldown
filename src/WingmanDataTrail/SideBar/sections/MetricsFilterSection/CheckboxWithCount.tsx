@@ -17,7 +17,7 @@ export const CheckboxWithCount = ({
   const styles = useStyles2(getStyles);
 
   return (
-    <div className={styles.checkboxWrapper}>
+    <div className={styles.checkboxWrapper} title={label}>
       <Checkbox label={label} value={checked} onChange={onChange} />
       <span className={styles.count}>({count})</span>
     </div>
@@ -32,6 +32,9 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       '& label *': {
         fontSize: '14px !important',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
       },
     }),
     count: css({

@@ -18,7 +18,7 @@ import {
   type SceneObjectUrlValues,
   type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
-import { Alert, Badge, Field, Icon, IconButton, InlineSwitch, Input, Select, Tooltip, useStyles2 } from '@grafana/ui';
+import { Alert, Badge, Combobox, Field, Icon, IconButton, InlineSwitch, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
@@ -134,17 +134,14 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToEvent(MetricSelectedEvent, (event) => {
-        const { steps, currentStep } = trail.state.history.state;
-        const prevStep = steps[currentStep].parentIndex;
-        const previousMetric = steps[prevStep].trailState.metric;
-        const isRelatedMetricSelector = previousMetric !== undefined;
-
         if (event.payload !== undefined) {
           const metricSearch = getMetricSearch(trail);
           const searchTermCount = deriveSearchTermsFromInput(metricSearch).length;
 
           reportExploreMetrics('metric_selected', {
-            from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+            from: 'metric_list',
+            // HISTORY: need way to identify selected metrics from related metrics
+            // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
             searchTermCount,
           });
         }
@@ -467,13 +464,10 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   };
 
   public reportPrefixFilterInteraction = (isMenuOpen: boolean) => {
-    const trail = getTrailFor(this);
-    const { steps, currentStep } = trail.state.history.state;
-    const previousMetric = steps[currentStep]?.trailState.metric;
-    const isRelatedMetricSelector = previousMetric !== undefined;
-
     reportExploreMetrics('prefix_filter_clicked', {
-      from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+      // HISTORY: need way to identify selected metrics from related metrics
+      // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+      from: 'metric_list',
       action: isMenuOpen ? 'open' : 'close',
     });
   };
@@ -563,11 +557,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
             }
             className={styles.displayOption}
           >
-            <Select
+            <Combobox
               value={metricPrefix}
-              onChange={model.onPrefixFilterChange}
-              onOpenMenu={() => model.reportPrefixFilterInteraction(true)}
-              onCloseMenu={() => model.reportPrefixFilterInteraction(false)}
+              onChange={(selected) => model.onPrefixFilterChange(selected)}
               options={[
                 {
                   label: 'All metric names',
@@ -575,7 +567,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 },
                 ...Array.from(rootGroup?.groups.keys() ?? []).map((g) => ({ label: `${g}_`, value: g })),
               ]}
-              className="metrics-drilldown-metric-prefix-select"
+              width={16}
             />
           </Field>
           {!metric && hasOtelResources && (

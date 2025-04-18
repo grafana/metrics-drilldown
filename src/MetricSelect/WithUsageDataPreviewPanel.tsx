@@ -1,55 +1,82 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricsSorter } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { type MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-
-import { getTrailFor } from '../utils';
-
-export type UsageStats = {
-  alertRules: Record<string, number>;
-  dashboards: Record<string, number>;
-};
 
 interface WithUsageDataPreviewPanelState extends SceneObjectState {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
-  stats?: UsageStats;
+  metricsUsedInDashboardsCount: number;
+  metricsUsedInAlertingRulesCount: number;
 }
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
-  constructor(state: WithUsageDataPreviewPanelState) {
-    super({ ...state });
+  constructor(state: Pick<WithUsageDataPreviewPanelState, 'vizPanelInGridItem' | 'metric'>) {
+    super({
+      ...state,
+      metricsUsedInDashboardsCount: 0,
+      metricsUsedInAlertingRulesCount: 0,
+    });
+
+    this.addActivationHandler(this._onActivate.bind(this));
+  }
+
+  private _onActivate() {
+    const { metric } = this.state;
+    const metricsReducer = sceneGraph.getAncestor(this, MetricsReducer);
+    const filteredMetricsEngine = metricsReducer.state.enginesMap.get(VAR_FILTERED_METRICS_VARIABLE);
+    if (!filteredMetricsEngine) {
+      return;
+    }
+    const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+    Promise.all([
+      metricsSorter?.getUsageForMetric(metric, 'dashboards'),
+      metricsSorter?.getUsageForMetric(metric, 'alerting'),
+    ]).then(([dashboardUsage, alertingUsage]) => {
+      this.setState({
+        metricsUsedInDashboardsCount: dashboardUsage,
+        metricsUsedInAlertingRulesCount: alertingUsage,
+      });
+    });
   }
 
   public static Component = ({ model }: SceneComponentProps<WithUsageDataPreviewPanel>) => {
-    const { vizPanelInGridItem, metric } = model.useState();
+    const { vizPanelInGridItem, metricsUsedInAlertingRulesCount, metricsUsedInDashboardsCount } = model.useState();
     if (!vizPanelInGridItem) {
       console.log('no viz panel');
       return;
     }
 
     const styles = useStyles2(getStyles);
-    const trail = getTrailFor(model);
-    const usageStats = {
-      dashboards: trail.state.dashboardMetrics?.[metric] ?? 0,
-      alertingRules: trail.state.alertingMetrics?.[metric] ?? 0,
-    };
 
     return (
-      <div className={styles.panelContainer}>
+      <div className={styles.panelContainer} data-testid="with-usage-data-preview-panel">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
-        <div className={styles.usageContainer}>
-          <Tooltip content="Dashboards usage" placement="top">
-            <span className={styles.usageItem}>
-              <Icon name="apps" /> {usageStats.dashboards}
+        <div className={styles.usageContainer} data-testid="usage-data-panel">
+          <Tooltip
+            content={`Metric is used in ${metricsUsedInDashboardsCount} dashboard panel ${
+              metricsUsedInDashboardsCount === 1 ? 'query' : 'queries'
+            }`}
+            placement="top"
+          >
+            <span className={styles.usageItem} data-testid="dashboard-usage">
+              <Icon name="apps" /> {metricsUsedInDashboardsCount}
             </span>
           </Tooltip>
-          <Tooltip content="Alerting rules usage" placement="top">
-            <span className={styles.usageItem}>
-              <Icon name="bell" /> {usageStats.alertingRules}
+          <Tooltip
+            content={`Metric is used in ${metricsUsedInAlertingRulesCount} alert rule${
+              metricsUsedInAlertingRulesCount === 1 ? '' : 's'
+            }`}
+            placement="top"
+          >
+            <span className={styles.usageItem} data-testid="alerting-usage">
+              <Icon name="bell" /> {metricsUsedInAlertingRulesCount}
             </span>
           </Tooltip>
         </div>
