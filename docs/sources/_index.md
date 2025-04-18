@@ -45,7 +45,6 @@ With Metrics Drilldown, you can:
 - Automatically display the optimal visualization for each metric type (gauge vs. counter, for example) without manual setup.
 - Uncover related metrics relevant to the one you're viewing.
 - “Explore in a drawer” - overlay additional content on your dashboard without losing your current view.
-- View a history of user steps when navigating through metrics and their filters.
 - Seamlessly pivot to related telemetry, including log data.
 
 {{< docs/play title="Metrics Drilldown" url="https://play.grafana.org/explore/metrics/trail?from=now-1h&to=now&var-ds=grafanacloud-demoinfra-prom&var-filters=&refresh=&metricPrefix=all" >}}
