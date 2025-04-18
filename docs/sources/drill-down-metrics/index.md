@@ -41,7 +41,7 @@ The **Metrics Drilldown** dashboard adjusts to reflect your selected filters. To
 
 ## Analyze selected metrics
 
-After filtering the metrics in the **Metrics Drilldown** dashboard, you can further drill down into selected metrics.
+After filtering the metrics in **Metrics Drilldown**, you can further drill down into selected metrics.
 
 1. From the **Metrics Drilldown** dashboard, locate the metric you want to drill down.
 1. From the upper-right corner of the metric's dashboard panel, click **Select**, as shown in the following screenshot.
