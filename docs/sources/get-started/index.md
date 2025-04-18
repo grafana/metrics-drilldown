@@ -55,7 +55,7 @@ Follow these steps to access the app through an existing metrics dashboard in Gr
 
 1. Navigate to your dashboard in Grafana.
 1. Select a time series panel.
-1. Select the panel menu, and then select **Metrics drilldown**. If there are multiple available metrics, select the one you want to explore.
+1. Select the panel menu, and then select **Metrics drilldown**.
 
 A drawer appears showing your selected metric in the Metrics Drilldown app. To go to the app's main page, select **Open**.
 
