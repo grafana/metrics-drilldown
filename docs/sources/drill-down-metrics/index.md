@@ -16,7 +16,7 @@ refs:
 
 # Drill down your metrics
 
-Drill down into your metrics to gain insight into your data without writing a query. First, filter metrics to appear in the **Metrics Drilldown** dashboard. Then, perform an in-depth analysis of selected metrics.
+Drill down into your metrics to gain insight into your data without writing a query. First, filter the metrics surfaced by **Metrics Drilldown**. Then, select a metric to perform in-depth analysis.
 
 ## Filter the Metrics Drilldown dashboard
 
