@@ -47,7 +47,7 @@ With Metrics Drilldown, you can:
 - “Explore in a drawer” - overlay additional content on your dashboard without losing your current view.
 - Seamlessly pivot to related telemetry, including log data.
 
-{{< docs/play title="Metrics Drilldown" url="https://play.grafana.org/explore/metrics/trail?from=now-1h&to=now&var-ds=grafanacloud-demoinfra-prom&var-filters=&refresh=&metricPrefix=all" >}}
+{{< docs/play title="Metrics Drilldown" url="https://play.grafana.org/a/grafana-metricsdrilldown-app/trail?from=now-1h&to=now&var-ds=grafanacloud-demoinfra-prom&var-filters=&refresh=&metricPrefix=all" >}}
 
 ## Explore
 
