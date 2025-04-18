@@ -20,7 +20,7 @@ Drill down into your metrics to gain insight into your data without writing a qu
 
 ## Filter the Metrics Drilldown dashboard
 
-To begin drilling down your data, filter the metrics that appear in the **Metrics Drilldown** dashboard.
+To begin drilling down your data, filter the metrics that appear in **Metrics Drilldown**.
 
 1. Navigate to the **Metrics Drilldown** page in Grafana. Refer to [Get started with Grafana Metrics Drilldown](ref:get-started).
 1. From the **Data source** dropdown, select a data source to view related metrics. Supported data sources include Prometheus and Prometheus-compatible data sources.
