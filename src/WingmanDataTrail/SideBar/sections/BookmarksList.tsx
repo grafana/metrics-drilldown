@@ -89,7 +89,6 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       gap: theme.spacing(1),
       height: '100%',
-      overflowY: 'hidden',
     }),
     bookmarksList: css({
       display: 'flex',
