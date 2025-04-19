@@ -35,13 +35,13 @@ weight: 200
 
 # Grafana Metrics Drilldown
 
-Grafana Metrics Drilldown is a queryless experience for browsing Prometheus-compatible metrics. Quickly find related metrics with just a few simple clicks, without needing to write PromQL queries to retrieve metrics.
+Grafana Metrics Drilldown is a queryless experience for browsing Prometheus-compatible metrics. Quickly find related metrics with just a few simple clicks, without needing to write a PromQL query.
 
 {{< docs/shared source="grafana" lookup="plugins/rename-note.md" version="<GRAFANA_VERSION>" >}}
 
 With Metrics Drilldown, you can:
 
-- Easily segment metrics based on their labels, so you can immediately spot anomalies and identify issues.
+- Segment metrics based on their labels, so you can immediately spot anomalies and identify issues.
 - Automatically display the optimal visualization for each metric type (gauge vs. counter, for example) without manual setup.
 - Uncover related metrics relevant to the one you're viewing.
 - Seamlessly pivot to related telemetry, including log data.
