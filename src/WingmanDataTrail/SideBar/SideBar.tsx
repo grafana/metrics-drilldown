@@ -74,9 +74,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new BookmarksList({
           key: 'bookmarks',
           title: 'Bookmarks',
-          description: 'Bookmarks',
+          description: 'Access your saved metrics for quick reference',
           icon: 'bookmark',
-          disabled: true,
         }),
         new Settings({
           key: 'settings',

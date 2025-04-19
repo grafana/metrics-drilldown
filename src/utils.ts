@@ -60,6 +60,14 @@ export function getUrlForValues(values: SceneObjectUrlValues) {
   return urlUtil.renderUrl(ROUTES.Trail, values);
 }
 
+export function getCurrentPath(): Location['pathname'] {
+  return window.location.pathname;
+}
+
+export function currentPathIncludes(path: string) {
+  return getCurrentPath().includes(path);
+}
+
 export function getMetricSceneFor(model: SceneObject): MetricScene {
   if (model instanceof MetricScene) {
     return model;

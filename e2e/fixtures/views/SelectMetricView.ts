@@ -201,6 +201,7 @@ export class SelectMetricView extends DrilldownView {
   }
 
   async assertBookmarkCreated(title: string) {
+    await this.goto();
     await expect(this.getByTestId('hp-bookmarks').getByText(title)).toBeVisible();
   }
 
