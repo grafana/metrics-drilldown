@@ -60,7 +60,7 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
 
     return (
       <div className={styles.container}>
-        <SectionTitle title={title} description={description} />
+        <SectionTitle title={title} description={description} data-testid="bookmarks-list-sidebar" />
         {bookmarks.length > 0 ? (
           <div className={styles.bookmarksList}>
             {bookmarks.map((bookmark, index) => (
