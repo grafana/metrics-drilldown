@@ -11,7 +11,7 @@ export function createBookmarkSavedNotification() {
   const appEvents = getAppEvents();
   const isSidebarView = currentPathIncludes(ROUTES.TrailWithSidebar);
 
-  const infoText = isSidebarView ? <i>Explore &gt; Metrics</i> : <i>The sidebar</i>;
+  const infoText = !isSidebarView ? <i>Explore &gt; Metrics</i> : <i>the Metrics Reducer sidebar</i>;
 
   appEvents.publish({
     type: AppEvents.alertSuccess.name,
