@@ -57,7 +57,7 @@ Follow these steps to access the app through an existing metrics dashboard in Gr
 1. Select a time series panel.
 1. Select the panel menu, and then select **Metrics drilldown** > **Open in Grafana Metrics Drilldown**.
 
-Tge selected metric opens in the Metrics Drilldown app.
+The selected metric opens in the Metrics Drilldown app.
 
 ## Next steps
 
