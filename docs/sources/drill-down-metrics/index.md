@@ -18,7 +18,7 @@ refs:
 
 Drill down into your metrics to gain insight into your data without writing a query. First, filter the metrics surfaced by **Metrics Drilldown**. Then, select a metric to perform in-depth analysis.
 
-## Filter the Metrics Drilldown dashboard
+## Filter metrics in Metrics Drilldown
 
 To begin drilling down your data, filter the metrics that appear in **Metrics Drilldown**.
 
@@ -35,7 +35,7 @@ To begin drilling down your data, filter the metrics that appear in **Metrics Dr
 1. Use the time picker to select a date and time range from the dropdown menu, or use an absolute time range.
 1. Click the down arrow next to the **Refresh** icon to set a refresh rate from the drop-down menu. The default refresh status is **Off**.
 
-The **Metrics Drilldown** dashboard adjusts to reflect your selected filters. To review the steps in your journey, use the **History** breadcrumbs at the top of the dashboard, as shown in the following screenshot.
+The **Metrics Drilldown** dashboard adjusts to reflect your selected filters.
 
 ![show metrics explore overview](/media/metrics-explore/metrics-drilldown-overview.png)
 
