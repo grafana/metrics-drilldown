@@ -21,7 +21,7 @@ export function CheckBoxList({
     <>
       <div className={styles.checkboxListHeader}>
         <div>{selectedGroups.length} selected</div>
-        <Button variant="secondary" fill="text" disabled={!selectedGroups.length}>
+        <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
           clear
         </Button>
       </div>
