@@ -94,6 +94,6 @@ In build time (PR and main branch), we run the same [dockerized Prometheus with 
 
 - Identify the current Playwright version, e.g. `1.50.0`
 - Identify the new Playwright version, e.g. `1.51.0`
-- In a terminal, execute: `./scripts/upgrade-playwright 1.50.0 1.51.0`
+- In a terminal, execute: `./scripts/upgrade-playwright.sh 1.50.0 1.51.0`
 - Launch the E2E tests locally with Docker to verify that the new version works: `npm run e2e:ci:server:up && npm run e2e:ci`
 - Push the modified files to the PR
