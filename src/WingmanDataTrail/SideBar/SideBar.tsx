@@ -126,7 +126,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   private setOtherMetricFilters(sectionValues: Map<string, string[]>) {
     const otherMetricFiltersVar = sceneGraph.lookupVariable(VAR_OTHER_METRIC_FILTERS, this);
     if (!isAdHocFiltersVariable(otherMetricFiltersVar)) {
-      console.log('otherMetricFiltersVar is not an AdHocFiltersVariable');
       return;
     }
 
@@ -157,6 +156,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     });
   }
 
+  /**
+   * Initialize the other metrics variable and set the filters from the current sidebar selections.
+   * This powers the read-only, "other metric filters" UI next to the label filters.
+   * The purpose of this is to provide users with at-a-glance feedback about the current sidebar
+   * selections, without needing to interact with the sidebar.
+   */
   private initOtherMetricsVar() {
     const otherMetricFiltersVar = new AdHocFiltersVariable({
       name: VAR_OTHER_METRIC_FILTERS,
