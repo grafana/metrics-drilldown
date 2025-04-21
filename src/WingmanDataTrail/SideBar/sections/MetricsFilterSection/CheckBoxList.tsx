@@ -5,6 +5,7 @@ import React from 'react';
 
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
+import { reportSidebarRulesFilterSelected } from '../../../../interactions';
 
 export function CheckBoxList({
   groups,
@@ -17,11 +18,44 @@ export function CheckBoxList({
 }) {
   const styles = useStyles2(getStyles);
 
+  const isRulesFilter = groups.some(
+    (g) => g.label === 'Non-rules metrics' || g.label === 'Recording rules' || g.label === 'Alerting rules'
+  );
+
+  const handleClearFilters = () => {
+    // If this is a rules filter component and we're clearing the selection
+    if (isRulesFilter && selectedGroups.length > 0) {
+      // Determine which rule types were previously selected
+      selectedGroups.forEach((group) => {
+        let filterType: 'non_rules_metrics' | 'recording_rules' | 'alerting_rules';
+
+        switch (group.label) {
+          case 'Non-rules metrics':
+            filterType = 'non_rules_metrics';
+            break;
+          case 'Recording rules':
+            filterType = 'recording_rules';
+            break;
+          case 'Alerting rules':
+            filterType = 'alerting_rules';
+            break;
+          default:
+            return; // Skip if it's not a recognized rules filter
+        }
+
+        // Report that the filter was unselected
+        reportSidebarRulesFilterSelected(filterType);
+      });
+    }
+
+    onSelectionChange([]);
+  };
+
   return (
     <>
       <div className={styles.checkboxListHeader}>
         <div>{selectedGroups.length} selected</div>
-        <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
+        <Button variant="secondary" fill="text" onClick={handleClearFilters} disabled={!selectedGroups.length}>
           clear
         </Button>
       </div>

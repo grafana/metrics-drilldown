@@ -24,6 +24,7 @@ import {
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
+import { reportSidebarRulesFilterSelected } from '../../../../interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
@@ -173,6 +174,30 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       new EventSectionValueChanged({ key: this.state.key, values: selectedGroups.map((g) => g.label) }),
       true
     );
+
+    // Track rule filter selection events
+    if (this.state.key === 'filters-rule' && selectedGroups.length > 0) {
+      // Map the label to the appropriate filter_type for the event
+      selectedGroups.forEach((group) => {
+        let filterType: 'non_rules_metrics' | 'recording_rules' | 'alerting_rules';
+
+        switch (group.label) {
+          case 'Non-rules metrics':
+            filterType = 'non_rules_metrics';
+            break;
+          case 'Recording rules':
+            filterType = 'recording_rules';
+            break;
+          case 'Alerting rules':
+            filterType = 'alerting_rules';
+            break;
+          default:
+            return; // Skip if it's not a recognized rules filter
+        }
+
+        reportSidebarRulesFilterSelected(filterType);
+      });
+    }
   };
 
   public static Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {

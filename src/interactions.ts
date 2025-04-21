@@ -135,6 +135,17 @@ export type Interactions = {
     ),
     section?: string
   },
+  // User selects a rules filter from the Wingman sidebar
+  sidebar_rules_filter_selected: {
+    filter_type: (
+      // Standard metrics that are not rules
+      | 'non_rules_metrics'
+      // Recording rules
+      | 'recording_rules'
+      // Alerting rules 
+      | 'alerting_rules'
+    )
+  }
 };
 
 const PREFIX = 'grafana_explore_metrics_';
@@ -195,4 +206,13 @@ export function reportChangeInLabelFilters(
       }
     }
   }
+}
+
+/** Report when a user selects a rules filter from the Wingman sidebar */
+export function reportSidebarRulesFilterSelected(
+  filterType: Interactions['sidebar_rules_filter_selected']['filter_type']
+) {
+  reportExploreMetrics('sidebar_rules_filter_selected', {
+    filter_type: filterType,
+  });
 }
