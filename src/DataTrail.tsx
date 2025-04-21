@@ -146,8 +146,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   public _onActivate() {
     this.setState({ trailActivated: true });
-    const urlParams = urlUtil.getUrlSearchParams();
-    migrateOtelDeploymentEnvironment(this, urlParams);
 
     if (!this.state.topScene) {
       this.setState({ topScene: getTopSceneFor(this.state.metric) });
