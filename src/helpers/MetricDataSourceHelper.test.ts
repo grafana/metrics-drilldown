@@ -1,4 +1,5 @@
-import { MetricDatasourceHelper, type DataTrailInterface } from './MetricDatasourceHelper';
+import { DataTrail } from '../DataTrail';
+import { MetricDatasourceHelper } from './MetricDatasourceHelper';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
@@ -11,19 +12,10 @@ jest.mock('@grafana/runtime', () => ({
 const NATIVE_HISTOGRAM = 'test_metric';
 describe('MetricDatasourceHelper', () => {
   let metricDatasourceHelper: MetricDatasourceHelper;
-  let mockTrail: DataTrailInterface;
 
   beforeEach(() => {
-    // Create a mock trail that implements the DataTrailInterface
-    mockTrail = {
-      state: {
-        metric: '',
-        nativeHistograms: [],
-        nativeHistogramMetric: '',
-      },
-    };
-
-    metricDatasourceHelper = new MetricDatasourceHelper(mockTrail);
+    const trail = new DataTrail({});
+    metricDatasourceHelper = new MetricDatasourceHelper(trail);
     metricDatasourceHelper['_classicHistograms'] = {
       test_metric_bucket: 1,
     };

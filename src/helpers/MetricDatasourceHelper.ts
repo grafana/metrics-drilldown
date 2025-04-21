@@ -11,23 +11,15 @@ import {
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 
+import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
-
-// Define an interface for the DataTrail methods we need
-export interface DataTrailInterface {
-  state: {
-    metric?: string;
-    nativeHistograms: string[];
-    nativeHistogramMetric: string;
-  };
-}
 
 function isPrometheusDatasource(ds: any): ds is PrometheusDatasource {
   return ds.type === 'prometheus';
 }
 
 export class MetricDatasourceHelper {
-  constructor(trail: DataTrailInterface) {
+  constructor(trail: DataTrail) {
     this._trail = trail;
   }
 
@@ -38,7 +30,7 @@ export class MetricDatasourceHelper {
     this._nativeHistograms = [];
   }
 
-  private _trail: DataTrailInterface;
+  private _trail: DataTrail;
 
   private _datasource?: PrometheusDatasource;
 
