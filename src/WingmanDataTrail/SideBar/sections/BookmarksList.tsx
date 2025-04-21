@@ -2,10 +2,11 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import { SectionTitle } from './SectionTitle';
 import { type SideBarSectionState } from './types';
+import { MetricsContext } from '../../../App/App';
 import { DataTrailCard } from '../../../DataTrailCard';
 import { reportExploreMetrics } from '../../../interactions';
 import { getBookmarkKey, getTrailStore } from '../../../TrailStore/TrailStore';
