@@ -42,7 +42,6 @@ import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { MetricsHeader } from './MetricsHeader';
-import { migrateOtelDeploymentEnvironment } from './migrations/otelDeploymentEnvironment';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
 import {
   getOtelJoinQuery,
