@@ -58,10 +58,10 @@ export function getUrlForTrail(trail: DataTrail) {
 
 // TODO: We can simplify this when we remove the Homepage and/or the Trail experience
 export function getUrlForValues(values: SceneObjectUrlValues) {
-  const currentPath = getCurrentPath();
-  const inDataTrail = currentPath.includes(ROUTES.Trail || ROUTES.TrailWithSidebar);
-  const pathToUse = inDataTrail ? currentPath : ROUTES.Trail;
-  return urlUtil.renderUrl(pathToUse, values);
+  return urlUtil.renderUrl(
+    getCurrentPath().includes(ROUTES.TrailWithSidebar) ? ROUTES.TrailWithSidebar : ROUTES.Trail,
+    values
+  );
 }
 
 export function getCurrentPath(): Location['pathname'] {
