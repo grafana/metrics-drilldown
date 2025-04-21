@@ -23,6 +23,7 @@ import {
 } from '@grafana/scenes';
 import { lastValueFrom } from 'rxjs';
 
+import { ROUTES } from './constants';
 import { DataTrail } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
@@ -56,7 +57,10 @@ export function getUrlForTrail(trail: DataTrail) {
 }
 
 export function getUrlForValues(values: SceneObjectUrlValues) {
-  return urlUtil.renderUrl(getCurrentPath(), values);
+  const currentPath = getCurrentPath();
+  const inDataTrail = currentPath.includes(ROUTES.Trail || ROUTES.TrailWithSidebar);
+  const pathToUse = inDataTrail ? currentPath : ROUTES.Trail;
+  return urlUtil.renderUrl(pathToUse, values);
 }
 
 export function getCurrentPath(): Location['pathname'] {
