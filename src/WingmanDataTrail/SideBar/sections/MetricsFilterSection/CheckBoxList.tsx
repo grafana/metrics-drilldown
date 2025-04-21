@@ -17,16 +17,11 @@ export function CheckBoxList({
 }) {
   const styles = useStyles2(getStyles);
 
-  const handleClearFilters = () => {
-    // We don't need to track when filters are cleared
-    onSelectionChange([]);
-  };
-
   return (
     <>
       <div className={styles.checkboxListHeader}>
         <div>{selectedGroups.length} selected</div>
-        <Button variant="secondary" fill="text" onClick={handleClearFilters} disabled={!selectedGroups.length}>
+        <Button variant="secondary" fill="text" disabled={!selectedGroups.length}>
           clear
         </Button>
       </div>
