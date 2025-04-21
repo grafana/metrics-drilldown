@@ -6,6 +6,7 @@ import {
   type AdHocFilterWithLabels,
   type SceneComponentProps,
   type SceneObjectState,
+  type SceneVariable,
 } from '@grafana/scenes';
 import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -109,50 +110,47 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   }
 
   private onActivate() {
+    const otherMetricFiltersVar = sceneGraph.lookupVariable(VAR_OTHER_METRIC_FILTERS, this);
     this._subs.add(
       this.subscribeToEvent(EventSectionValueChanged, (event) => {
         const { key, values } = event.payload;
         const { sectionValues } = this.state;
+        const newSectionValues = new Map(sectionValues).set(key, values);
 
-        this.setState({ sectionValues: new Map(sectionValues).set(key, values) });
+        this.setOtherMetricFilters(newSectionValues, otherMetricFiltersVar);
+        this.setState({ sectionValues: newSectionValues });
       })
     );
+  }
 
-    const otherMetricFiltersVar = sceneGraph.lookupVariable(VAR_OTHER_METRIC_FILTERS, this);
+  private setOtherMetricFilters(sectionValues: Map<string, string[]>, otherMetricFiltersVar: SceneVariable | null) {
+    if (isAdHocFiltersVariable(otherMetricFiltersVar)) {
+      const varToTextMap: Record<MetricFiltersVariable, string> = {
+        'filters-rule': 'rule group',
+        'filters-prefix': 'prefix',
+        'filters-suffix': 'suffix',
+      };
+      const newFilters = Array.from(sectionValues.entries()).reduce<Array<AdHocFilterWithLabels<{}>>>(
+        (acc, [key, value]) => {
+          if (value.length && metricFiltersVariables.includes(key as MetricFiltersVariable)) {
+            acc.push({
+              key,
+              operator: '=',
+              value: value.join(', '),
+              keyLabel: varToTextMap[key as MetricFiltersVariable],
+            });
+          }
 
-    const varToTextMap: Record<MetricFiltersVariable, string> = {
-      'filters-rule': 'rule group',
-      'filters-prefix': 'prefix',
-      'filters-suffix': 'suffix',
-    };
-    this._subs.add(
-      this.subscribeToState(({ sectionValues }) => {
-        if (isAdHocFiltersVariable(otherMetricFiltersVar)) {
-          const newFilters = Array.from(sectionValues.entries()).reduce<Array<AdHocFilterWithLabels<{}>>>(
-            (acc, [key, value]) => {
-              if (!value.length || !metricFiltersVariables.includes(key as MetricFiltersVariable)) {
-                return acc;
-              }
+          return acc;
+        },
+        []
+      );
 
-              acc.push({
-                key,
-                operator: '=',
-                value: value.join(', '),
-                keyLabel: varToTextMap[key as MetricFiltersVariable],
-              });
-
-              return acc;
-            },
-            []
-          );
-
-          otherMetricFiltersVar.setState({
-            filters: newFilters,
-            hide: newFilters.length ? VariableHide.hideLabel : VariableHide.hideVariable,
-          });
-        }
-      })
-    );
+      otherMetricFiltersVar.setState({
+        filters: newFilters,
+        hide: newFilters.length ? VariableHide.hideLabel : VariableHide.hideVariable,
+      });
+    }
   }
 
   private static getSectionValuesFromUrl() {
