@@ -45,11 +45,13 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
     const { title, description } = model.useState();
     const { bookmarks } = getTrailStore();
     const [_, setLastDelete] = useState(Date.now());
+    const { goToUrlForTrail } = useContext(MetricsContext);
 
     const onSelect = (index: number) => {
       reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
       const trail = getTrailStore().getTrailForBookmarkIndex(index);
       getTrailStore().setRecentTrail(trail);
+      goToUrlForTrail(trail);
     };
 
     const onDelete = (index: number) => {
