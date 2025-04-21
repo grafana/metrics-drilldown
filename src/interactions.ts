@@ -135,6 +135,13 @@ export type Interactions = {
     ),
     section?: string
   },
+  // User clicks into the prefix filter section of the sidebar
+  sidebar_prefix_filter_section_clicked: {},
+  // User applies any prefix filter from the sidebar
+  sidebar_prefix_filter_applied: {
+    // Number of prefix filters applied (optional)
+    filter_count?: number;
+  },
 };
 
 const PREFIX = 'grafana_explore_metrics_';
@@ -195,4 +202,21 @@ export function reportChangeInLabelFilters(
       }
     }
   }
+}
+
+/**
+ * Report when a user clicks into the prefix filter section of the sidebar
+ */
+export function reportSidebarPrefixFilterSectionClicked() {
+  reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
+}
+
+/**
+ * Report when a user applies any prefix filter from the sidebar
+ * @param filterCount Optional - the number of filters applied
+ */
+export function reportSidebarPrefixFilterApplied(filterCount?: number) {
+  reportExploreMetrics('sidebar_prefix_filter_applied', {
+    filter_count: filterCount,
+  });
 }

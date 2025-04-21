@@ -24,6 +24,7 @@ import {
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
+import { reportSidebarPrefixFilterApplied } from '../../../../interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
@@ -173,6 +174,10 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       new EventSectionValueChanged({ key: this.state.key, values: selectedGroups.map((g) => g.label) }),
       true
     );
+
+    if (this.state.type === 'prefixes') {
+      reportSidebarPrefixFilterApplied(selectedGroups.length);
+    }
   };
 
   public static Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {
