@@ -18,17 +18,7 @@ import {
   type SceneObjectUrlValues,
   type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
-import {
-  Alert,
-  Badge,
-  Combobox,
-  Field,
-  Icon,
-  IconButton,
-  InlineSwitch,
-  Input,
-  Tooltip,
-  useStyles2,
+import { Alert, Badge, Combobox, Field, Icon, IconButton, InlineSwitch, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
