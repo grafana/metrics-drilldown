@@ -25,11 +25,6 @@ export const navigationEvents = {
   },
 };
 
-// Export this function to be used in App.tsx
-export const navigateToTrail = (trail: any) => {
-  navigationEvents.emit(trail);
-};
-
 // Simple function to navigate to a trail without using MetricsContext
 function goToUrlForTrail(trail: any) {
   navigationEvents.emit(trail);
