@@ -470,13 +470,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
     const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
 
-    // loading from the url with otel resources selected will result in turning on OTel experience
-    const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
-    let previouslyUsedOtelResources = false;
-    if (isAdHocFiltersVariable(otelResourcesVariable)) {
-      previouslyUsedOtelResources = otelResourcesVariable.state.filters.length > 0;
-    }
-
     // Future refactor: non promoted resources could be the full check
     //   - remove hasOtelResources
     //   - remove deployment environments as a check
@@ -486,7 +479,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       otelTargets,
       deploymentEnvironments,
       hasOtelResources,
-      previouslyUsedOtelResources,
+      // all previous uses of OTel resources should start with it off
+      previouslyUsedOtelResources: false,
       nonPromotedOtelResources,
     };
   }
