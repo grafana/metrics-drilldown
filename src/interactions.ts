@@ -138,11 +138,8 @@ export type Interactions = {
   // User selects a rules filter from the Wingman sidebar
   sidebar_rules_filter_selected: {
     filter_type: (
-      // Standard metrics that are not rules
       | 'non_rules_metrics'
-      // Recording rules
       | 'recording_rules'
-      // Alerting rules 
       | 'alerting_rules'
     )
   }
