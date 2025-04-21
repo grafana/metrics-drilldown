@@ -59,7 +59,7 @@ export function DataTrailCard(props: Props) {
 
   const { filters, metric, createdAt } = values;
 
-  const heading = truncateValue('', getMetricName(metric), 39);
+  const heading = truncateValue('', getMetricName(metric), 27);
   const cardHeightClassName = `${props.compactHeight && filters.length > 0 ? styles.cardTall : ''}`;
   const cardClassName = `${styles.card} ${props.wide ? styles.cardWide : ''} ${cardHeightClassName}`;
   return (
