@@ -29,7 +29,6 @@ import {
   Input,
   Tooltip,
   useStyles2,
-} from '@grafana/ui';
 import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
