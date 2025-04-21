@@ -2,14 +2,38 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 
 import { SectionTitle } from './SectionTitle';
 import { type SideBarSectionState } from './types';
-import { MetricsContext } from '../../../App/App';
 import { DataTrailCard } from '../../../DataTrailCard';
 import { reportExploreMetrics } from '../../../interactions';
 import { getBookmarkKey, getTrailStore } from '../../../TrailStore/TrailStore';
+
+// Create a simple event-based system to avoid circular dependencies
+export const navigationEvents = {
+  listeners: new Set<(trail: any) => void>(),
+  emit: function (trail: any) {
+    this.listeners.forEach((listener) => listener(trail));
+  },
+  subscribe: function (listener: (trail: any) => void) {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+      return undefined; // Explicitly return void
+    };
+  },
+};
+
+// Export this function to be used in App.tsx
+export const navigateToTrail = (trail: any) => {
+  navigationEvents.emit(trail);
+};
+
+// Simple function to navigate to a trail without using MetricsContext
+function goToUrlForTrail(trail: any) {
+  navigationEvents.emit(trail);
+}
 
 export interface BookmarksListState extends SideBarSectionState {}
 
@@ -46,7 +70,6 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
     const { title, description } = model.useState();
     const { bookmarks } = getTrailStore();
     const [_, setLastDelete] = useState(Date.now());
-    const { goToUrlForTrail } = useContext(MetricsContext);
 
     const onSelect = (index: number) => {
       reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
