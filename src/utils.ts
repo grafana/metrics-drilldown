@@ -42,12 +42,14 @@ export function getTrailSettings(model: SceneObject): DataTrailSettings {
   return sceneGraph.getAncestor(model, DataTrail).state.settings;
 }
 
-export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean): DataTrail {
-  return new DataTrail({
-    initialDS,
-    $timeRange: new SceneTimeRange({ from: 'now-1h', to: 'now' }),
-    embedded: false,
-    startButtonClicked,
+export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean): any {
+  return import('./DataTrail').then(({ DataTrail }) => {
+    return new DataTrail({
+      initialDS,
+      $timeRange: new SceneTimeRange({ from: 'now-1h', to: 'now' }),
+      embedded: false,
+      startButtonClicked,
+    });
   });
 }
 
