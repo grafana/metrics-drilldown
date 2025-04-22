@@ -13,11 +13,11 @@ import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/u
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
 import { EventFiltersChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventFiltersChanged';
-import { ruleGroupLabels, type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { ruleGroupLabels, type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/metricLabels';
 import {
   VAR_METRICS_VARIABLE,
   type MetricOptions,
@@ -30,11 +30,6 @@ import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
-
-// Constants for metric rule type labels
-export const LABEL_METRICS = 'Non-rules metrics';
-export const LABEL_RULES = 'Recording rules';
-export const LABEL_ALERTS = 'Alerting rules';
 
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;

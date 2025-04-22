@@ -3,7 +3,7 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
+import { type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/metricLabels';
 
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';

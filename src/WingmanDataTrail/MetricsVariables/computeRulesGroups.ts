@@ -1,9 +1,8 @@
-export const ruleGroupLabels = {
-  metrics: 'Non-rules metrics',
-  rules: 'Recording rules',
-  alerts: 'Alerting rules',
-} as const;
-export type RuleGroupLabel = (typeof ruleGroupLabels)[keyof typeof ruleGroupLabels];
+import { ruleGroupLabels, type RuleGroupLabel } from './metricLabels';
+
+export type { RuleGroupLabel };
+export { ruleGroupLabels };
+
 type MetricType = 'metrics' | 'rules' | 'alerts';
 
 export function computeRulesGroups(options: Array<{ label: string; value: string }>) {
