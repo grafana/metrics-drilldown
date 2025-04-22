@@ -1,9 +1,19 @@
 import { css, cx } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
+import {
+  AdHocFiltersVariable,
+  sceneGraph,
+  SceneObjectBase,
+  type AdHocFilterWithLabels,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
 import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { VAR_OTHER_METRIC_FILTERS } from 'shared';
+import { getTrailFor } from 'utils';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
@@ -25,6 +35,9 @@ interface SideBarState extends SceneObjectState {
   visibleSection: Section | null;
   sectionValues: Map<string, string[]>;
 }
+
+export const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix'] as const;
+type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 
 export class SideBar extends SceneObjectBase<SideBarState> {
   constructor(state: Partial<SideBarState>) {
@@ -97,21 +110,84 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   }
 
   private onActivate() {
+    this.initOtherMetricsVar();
     this._subs.add(
       this.subscribeToEvent(EventSectionValueChanged, (event) => {
         const { key, values } = event.payload;
         const { sectionValues } = this.state;
-
-        this.setState({ sectionValues: new Map(sectionValues).set(key, values) });
+        const newSectionValues = new Map(sectionValues).set(key, values);
+        this.setOtherMetricFilters(newSectionValues);
+        this.setState({ sectionValues: newSectionValues });
       })
     );
+  }
+
+  private setOtherMetricFilters(sectionValues: Map<string, string[]>) {
+    const otherMetricFiltersVar = sceneGraph.lookupVariable(VAR_OTHER_METRIC_FILTERS, this);
+    if (!isAdHocFiltersVariable(otherMetricFiltersVar)) {
+      return;
+    }
+
+    const varToTextMap: Record<MetricFiltersVariable, string> = {
+      'filters-rule': 'rule group',
+      'filters-prefix': 'prefix',
+      'filters-suffix': 'suffix',
+    };
+    const newFilters = Array.from(sectionValues.entries()).reduce<Array<AdHocFilterWithLabels<{}>>>(
+      (acc, [key, value]) => {
+        if (value.length && metricFiltersVariables.includes(key as MetricFiltersVariable)) {
+          acc.push({
+            key,
+            operator: '=',
+            value: value.join(', '),
+            keyLabel: varToTextMap[key as MetricFiltersVariable],
+          });
+        }
+
+        return acc;
+      },
+      []
+    );
+
+    otherMetricFiltersVar.setState({
+      filters: newFilters,
+      hide: newFilters.length ? VariableHide.hideLabel : VariableHide.hideVariable,
+    });
+  }
+
+  /**
+   * Initialize the other metrics variable and set the filters from the current sidebar selections.
+   * This powers the read-only, "other metric filters" UI next to the label filters.
+   * The purpose of this is to provide users with at-a-glance feedback about the current sidebar
+   * selections, without needing to interact with the sidebar.
+   */
+  private initOtherMetricsVar() {
+    const otherMetricFiltersVar = new AdHocFiltersVariable({
+      name: VAR_OTHER_METRIC_FILTERS,
+      readOnly: true,
+      skipUrlSync: true,
+      datasource: null,
+      hide: VariableHide.hideLabel,
+      layout: 'combobox',
+      applyMode: 'manual',
+      allowCustomValue: true,
+    });
+    const trail = getTrailFor(this);
+    const currentVariableSet = trail.state.$variables;
+    if (!currentVariableSet) {
+      return;
+    }
+    currentVariableSet.setState({
+      variables: [...currentVariableSet.state.variables, otherMetricFiltersVar],
+    });
+    this.setOtherMetricFilters(this.state.sectionValues);
   }
 
   private static getSectionValuesFromUrl() {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const sectionValues = new Map();
 
-    for (const filterKey of ['filters-rule', 'filters-prefix', 'filters-suffix']) {
+    for (const filterKey of metricFiltersVariables) {
       const filterValueFromUrl = urlSearchParams.get(filterKey);
       sectionValues.set(filterKey, filterValueFromUrl ? filterValueFromUrl.split(',').map((v) => v.trim()) : []);
     }
