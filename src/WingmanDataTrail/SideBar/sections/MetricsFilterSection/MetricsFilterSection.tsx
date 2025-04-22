@@ -30,6 +30,11 @@ import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
 
+// Constants for metric rule type labels
+export const LABEL_METRICS = 'Non-rules metrics';
+export const LABEL_RULES = 'Recording rules';
+export const LABEL_ALERTS = 'Alerting rules';
+
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
   computeGroups: (
@@ -182,13 +187,13 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
         let filterType: 'non_rules_metrics' | 'recording_rules' | 'alerting_rules';
 
         switch (group.label) {
-          case 'Non-rules metrics':
+          case LABEL_METRICS:
             filterType = 'non_rules_metrics';
             break;
-          case 'Recording rules':
+          case LABEL_RULES:
             filterType = 'recording_rules';
             break;
-          case 'Alerting rules':
+          case LABEL_ALERTS:
             filterType = 'alerting_rules';
             break;
           default:
