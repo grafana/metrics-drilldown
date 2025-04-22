@@ -3,6 +3,8 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
+
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
 
@@ -38,7 +40,7 @@ export function CheckBoxList({
                 checked={selectedGroups.some((g) => g.value === group.value)}
                 onChange={(e) => {
                   const newGroups = e.currentTarget.checked
-                    ? [...selectedGroups, { label: group.label, value: group.value }]
+                    ? [...selectedGroups, { label: group.label as RuleGroupLabel, value: group.value }]
                     : selectedGroups.filter((v) => v.value !== group.value);
 
                   onSelectionChange(newGroups);
