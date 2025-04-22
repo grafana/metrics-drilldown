@@ -16,6 +16,7 @@ import {
   VAR_WINGMAN_SORT_BY,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/metricUsageFetcher';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import {
@@ -24,21 +25,21 @@ import {
   type MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
-interface WithUsageDataPreviewPanelState extends SceneObjectState {
+type WithUsageDataPreviewPanelState = SceneObjectState & {
+  [key in MetricUsageType]: number;
+} & {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
-  metricsUsedInDashboardsCount: number;
-  metricsUsedInAlertingRulesCount: number;
   sortBy: SortingOption;
-}
+};
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
   constructor(state: Pick<WithUsageDataPreviewPanelState, 'vizPanelInGridItem' | 'metric'>) {
     super({
       ...state,
-      metricsUsedInDashboardsCount: 0,
-      metricsUsedInAlertingRulesCount: 0,
       sortBy: 'default',
+      'alerting-usage': 0,
+      'dashboard-usage': 0,
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
@@ -69,36 +70,31 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
 
     switch (sortBy) {
       case 'dashboard-usage':
-        metricsSorter?.getUsageForMetric(this.state.metric, 'dashboards').then((usage) => {
-          this.setState({
-            metricsUsedInDashboardsCount: usage,
-          });
-        });
-        if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW) {
-          gridLayout?.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW });
-        }
-        break;
       case 'alerting-usage':
-        metricsSorter?.getUsageForMetric(this.state.metric, 'alerting').then((usage) => {
+        metricsSorter.getUsageForMetric(this.state.metric, sortBy).then((usage) => {
           this.setState({
-            metricsUsedInAlertingRulesCount: usage,
+            [sortBy]: usage,
           });
         });
         if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW) {
-          gridLayout?.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW });
+          gridLayout.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW });
         }
         break;
       default:
         if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT) {
-          gridLayout?.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT });
+          gridLayout.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT });
         }
         break;
     }
   }
 
   public static Component = ({ model }: SceneComponentProps<WithUsageDataPreviewPanel>) => {
-    const { vizPanelInGridItem, metricsUsedInAlertingRulesCount, metricsUsedInDashboardsCount, sortBy } =
-      model.useState();
+    const {
+      vizPanelInGridItem,
+      sortBy,
+      'alerting-usage': metricUsedInAlertingRulesCount,
+      'dashboard-usage': metricUsedInDashboardsCount,
+    } = model.useState();
     if (!vizPanelInGridItem) {
       console.log('no viz panel');
       return;
@@ -120,13 +116,13 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
         {sortBy === 'dashboard-usage' && (
           <div className={styles.usageContainer} data-testid="usage-data-panel">
             <Tooltip
-              content={`Metric is used in ${metricsUsedInDashboardsCount} dashboard panel ${
-                metricsUsedInDashboardsCount === 1 ? 'query' : 'queries'
+              content={`Metric is used in ${metricUsedInDashboardsCount} dashboard panel ${
+                metricUsedInDashboardsCount === 1 ? 'query' : 'queries'
               }`}
               placement="top"
             >
               <span className={styles.usageItem} data-testid="dashboard-usage">
-                <Icon name="apps" /> {metricsUsedInDashboardsCount}
+                <Icon name="apps" /> {metricUsedInDashboardsCount}
               </span>
             </Tooltip>
           </div>
@@ -134,13 +130,13 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
         {sortBy === 'alerting-usage' && (
           <div className={styles.usageContainer} data-testid="usage-data-panel">
             <Tooltip
-              content={`Metric is used in ${metricsUsedInAlertingRulesCount} alert rule${
-                metricsUsedInAlertingRulesCount === 1 ? '' : 's'
+              content={`Metric is used in ${metricUsedInAlertingRulesCount} alert rule${
+                metricUsedInAlertingRulesCount === 1 ? '' : 's'
               }`}
               placement="top"
             >
               <span className={styles.usageItem} data-testid="alerting-usage">
-                <Icon name="bell" /> {metricsUsedInAlertingRulesCount}
+                <Icon name="bell" /> {metricUsedInAlertingRulesCount}
               </span>
             </Tooltip>
           </div>

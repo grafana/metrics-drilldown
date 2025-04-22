@@ -1,11 +1,13 @@
 import { sceneGraph, SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
 
+import { logger } from 'tracking/logger/logger';
 import {
   MetricsSorter,
   sortMetricsByCount,
   sortMetricsWithRecentFirst,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/metricUsageFetcher';
 
 import { areArraysEqual } from './helpers/areArraysEqual';
 
@@ -31,11 +33,11 @@ export class MetricsVariableSortEngine {
 
     switch (sortBy) {
       case 'dashboard-usage':
-        sortedMetrics = await this.sortByDashboardUsage(metrics);
+        sortedMetrics = await this.sortByUsage(metrics, 'dashboard-usage');
         break;
 
       case 'alerting-usage':
-        sortedMetrics = await this.sortByAlertingUsage(metrics);
+        sortedMetrics = await this.sortByUsage(metrics, 'alerting-usage');
         break;
 
       default:
@@ -56,26 +58,16 @@ export class MetricsVariableSortEngine {
     this.notifyUpdate();
   }
 
-  private async sortByDashboardUsage(metrics: string[]) {
+  private async sortByUsage(metrics: string[], usageType: MetricUsageType) {
     try {
       const metricsSorter = sceneGraph.findByKeyAndType(this.variable, 'metrics-sorter', MetricsSorter);
-      const dashboardMetrics = await metricsSorter?.getUsageMetrics('dashboards');
-      return sortMetricsByCount(metrics, dashboardMetrics);
-    } catch (error) {
-      console.error('Failed to fetch dashboard metrics!');
-      console.error(error);
-      return metrics;
-    }
-  }
-
-  private async sortByAlertingUsage(metrics: string[]) {
-    try {
-      const metricsSorter = sceneGraph.findByKeyAndType(this.variable, 'metrics-sorter', MetricsSorter);
-      const alertingMetrics = await metricsSorter?.getUsageMetrics('alerting');
-      return sortMetricsByCount(metrics, alertingMetrics);
-    } catch (error) {
-      console.error('Failed to fetch alerting metrics!');
-      console.error(error);
+      const usageMetrics = await metricsSorter?.getUsageMetrics(usageType);
+      return sortMetricsByCount(metrics, usageMetrics);
+    } catch (err) {
+      const error = typeof err === 'string' ? new Error(err) : (err as Error);
+      logger.error(error, {
+        usageType,
+      });
       return metrics;
     }
   }
