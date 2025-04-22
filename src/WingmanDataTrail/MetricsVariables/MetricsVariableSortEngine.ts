@@ -57,7 +57,11 @@ export class MetricsVariableSortEngine {
   private async sortByUsage(metrics: string[], usageType: MetricUsageType) {
     try {
       const metricsSorter = sceneGraph.findByKeyAndType(this.variable, 'metrics-sorter', MetricsSorter);
-      const usageMetrics = await metricsSorter?.getUsageMetrics(usageType);
+      if (!metricsSorter) {
+        logger.warn('Metrics sorter not found. Returning unsorted metrics.', { usageType });
+        return metrics;
+      }
+      const usageMetrics = await metricsSorter.getUsageMetrics(usageType);
       return sortMetricsByCount(metrics, usageMetrics);
     } catch (err) {
       const error = typeof err === 'string' ? new Error(err) : (err as Error);
