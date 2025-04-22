@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
+import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
