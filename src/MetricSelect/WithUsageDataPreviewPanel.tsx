@@ -7,7 +7,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
+import { Icon, Tooltip, useStyles2, type IconName } from '@grafana/ui';
 import React from 'react';
 
 import { isCustomVariable } from 'utils/utils.variables';
@@ -109,43 +109,60 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
         </div>
       );
     }
+    const usageDetails: Record<MetricUsageType, Omit<UsageSectionProps, 'usageType'>> = {
+      'dashboard-usage': {
+        usageCount: metricUsedInDashboardsCount,
+        singularUsageType: 'dashboard panel query',
+        pluralUsageType: 'dashboard panel queries',
+        icon: 'apps',
+      },
+      'alerting-usage': {
+        usageCount: metricUsedInAlertingRulesCount,
+        singularUsageType: 'alert rule',
+        pluralUsageType: 'alert rules',
+        icon: 'bell',
+      },
+    };
 
     return (
       <div className={styles.panelContainer} data-testid="with-usage-data-preview-panel">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
-        {sortBy === 'dashboard-usage' && (
-          <div className={styles.usageContainer} data-testid="usage-data-panel">
-            <Tooltip
-              content={`Metric is used in ${metricUsedInDashboardsCount} dashboard panel ${
-                metricUsedInDashboardsCount === 1 ? 'query' : 'queries'
-              }`}
-              placement="top"
-            >
-              <span className={styles.usageItem} data-testid="dashboard-usage">
-                <Icon name="apps" /> {metricUsedInDashboardsCount}
-              </span>
-            </Tooltip>
-          </div>
-        )}
-        {sortBy === 'alerting-usage' && (
-          <div className={styles.usageContainer} data-testid="usage-data-panel">
-            <Tooltip
-              content={`Metric is used in ${metricUsedInAlertingRulesCount} alert rule${
-                metricUsedInAlertingRulesCount === 1 ? '' : 's'
-              }`}
-              placement="top"
-            >
-              <span className={styles.usageItem} data-testid="alerting-usage">
-                <Icon name="bell" /> {metricUsedInAlertingRulesCount}
-              </span>
-            </Tooltip>
-          </div>
-        )}
+        <UsageData
+          usageType={sortBy}
+          usageCount={usageDetails[sortBy].usageCount}
+          singularUsageType={usageDetails[sortBy].singularUsageType}
+          pluralUsageType={usageDetails[sortBy].pluralUsageType}
+          icon={usageDetails[sortBy].icon as IconName}
+        />
       </div>
     );
   };
 }
 
+interface UsageSectionProps {
+  usageType: MetricUsageType;
+  usageCount: number;
+  singularUsageType: string;
+  pluralUsageType: string;
+  icon: IconName;
+}
+
+function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: UsageSectionProps) {
+  const styles = useStyles2(getStyles);
+
+  return (
+    <div className={styles.usageContainer} data-testid="usage-data-panel">
+      <Tooltip
+        content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
+        placement="top"
+      >
+        <span className={styles.usageItem} data-testid={usageType}>
+          <Icon name={icon} /> {usageCount}
+        </span>
+      </Tooltip>
+    </div>
+  );
+}
 export function getStyles(theme: GrafanaTheme2) {
   return {
     panelContainer: css({
