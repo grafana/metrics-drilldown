@@ -40,6 +40,7 @@ test.describe('Metrics reducer view', () => {
       }
 
       await searchInput.clear();
+      await metricsReducerView.assertMetricsList();
       await expect(page).toHaveScreenshot({
         stylePath: './e2e/fixtures/css/hide-app-controls.css',
       });
