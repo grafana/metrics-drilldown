@@ -581,7 +581,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                         <div>
                           <p>The OTel experience is deprecated in Grafana Metrics Drilldown.</p>
                           <p>
-                            Please use the following docs to promote your OTel resource attributes to metrics with{' '}
+                            Please use the following docs to promote your OTel resource attributes as metric labels with{' '}
                             <a
                               href="https://grafana.com/docs/mimir/latest/configure/configure-otel-collector/#work-with-default-opentelemetry-labels"
                               target="_blank"
