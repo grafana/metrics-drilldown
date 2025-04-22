@@ -33,13 +33,9 @@ export class MetricsVariableSortEngine {
 
     switch (sortBy) {
       case 'dashboard-usage':
-        sortedMetrics = await this.sortByUsage(metrics, 'dashboard-usage');
-        break;
-
       case 'alerting-usage':
-        sortedMetrics = await this.sortByUsage(metrics, 'alerting-usage');
+        sortedMetrics = await this.sortByUsage(metrics, sortBy);
         break;
-
       default:
         sortedMetrics = sortMetricsWithRecentFirst(metrics);
         break;
