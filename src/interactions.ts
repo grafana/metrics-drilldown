@@ -204,12 +204,3 @@ export function reportChangeInLabelFilters(
     }
   }
 }
-
-/** Report when a user selects a rules filter from the Wingman sidebar */
-export function reportSidebarRulesFilterSelected(
-  filterType: Interactions['sidebar_rules_filter_selected']['filter_type']
-) {
-  reportExploreMetrics('sidebar_rules_filter_selected', {
-    filter_type: filterType,
-  });
-}

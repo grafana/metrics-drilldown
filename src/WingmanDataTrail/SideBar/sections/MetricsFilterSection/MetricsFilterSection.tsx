@@ -24,7 +24,7 @@ import {
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
-import { reportSidebarRulesFilterSelected } from '../../../../interactions';
+import { reportExploreMetrics } from '../../../../interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
@@ -195,7 +195,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
             return; // Skip if it's not a recognized rules filter
         }
 
-        reportSidebarRulesFilterSelected(filterType);
+        reportExploreMetrics('sidebar_rules_filter_selected', { filter_type: filterType });
       });
     }
   };
