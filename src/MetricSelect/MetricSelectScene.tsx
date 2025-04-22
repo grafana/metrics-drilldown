@@ -576,14 +576,46 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 <>
                   <div className={styles.displayOptionTooltip}>
                     Filter by
-                    <IconButton
-                      name={'info-circle'}
-                      size="sm"
-                      variant={'secondary'}
-                      tooltip="This switch enables filtering by OTel resources for OTel native data sources."
-                    />
+                    <Tooltip
+                      content={
+                        <div>
+                          <p>The OTel experience is deprecated in Grafana Metrics Drilldown.</p>
+                          <p>
+                            Please use the following docs to promote your OTel resource attributes to metrics with{' '}
+                            <a
+                              href="https://grafana.com/docs/mimir/latest/configure/configure-otel-collector/#work-with-default-opentelemetry-labels"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'underline' }}
+                            >
+                              Mimir
+                            </a>{' '}
+                            and{' '}
+                            <a
+                              href="https://prometheus.io/docs/guides/opentelemetry/#promoting-resource-attributes"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'underline' }}
+                            >
+                              Prometheus
+                            </a>
+                            .
+                          </p>
+                        </div>
+                      }
+                      placement="bottom"
+                      interactive={true}
+                    >
+                      <IconButton
+                        name={'info-circle'}
+                        size="sm"
+                        variant={'secondary'}
+                        aria-label="Information about OTel experience"
+                      />
+                    </Tooltip>
                     <div>
-                      <Badge text="New" color={'blue'} className={styles.badgeStyle}></Badge>
+                      {/* badge color does not align with theme warning color so we explicitly set it here */}
+                      <Badge text="Deprecated" color={'orange'} className={styles.badgeStyle}></Badge>
                     </div>
                   </div>
                 </>
@@ -674,7 +706,9 @@ function getStyles(theme: GrafanaTheme2) {
       padding: '0rem 0.25rem 0 0.30rem',
       alignItems: 'center',
       borderRadius: theme.shape.radius.pill,
-      border: `1px solid ${theme.colors.info.text}`,
+      border: `1px solid ${theme.colors.warning.text}`,
+      // badge color does not align with theme warning color so we explicitly set it here
+      color: `${theme.colors.warning.text}`,
       background: theme.colors.info.transparent,
       marginTop: '4px',
       marginLeft: '-3px',
