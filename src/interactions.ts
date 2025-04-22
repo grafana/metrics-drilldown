@@ -142,6 +142,13 @@ export type Interactions = {
     // Number of prefix filters applied (optional)
     filter_count?: number;
   },
+  // User clicks into the suffix filter section of the sidebar
+  sidebar_suffix_filter_section_clicked: {},
+  // User applies any suffix filter from the sidebar
+  sidebar_suffix_filter_applied: {
+    // Number of suffix filters applied (optional)
+    filter_count?: number;
+  },
 };
 
 const PREFIX = 'grafana_explore_metrics_';
@@ -217,6 +224,23 @@ export function reportSidebarPrefixFilterSectionClicked() {
  */
 export function reportSidebarPrefixFilterApplied(filterCount?: number) {
   reportExploreMetrics('sidebar_prefix_filter_applied', {
+    filter_count: filterCount,
+  });
+}
+
+/**
+ * Report when a user clicks into the suffix filter section of the sidebar
+ */
+export function reportSidebarSuffixFilterSectionClicked() {
+  reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
+}
+
+/**
+ * Report when a user applies any suffix filter from the sidebar
+ * @param filterCount Optional - the number of filters applied
+ */
+export function reportSidebarSuffixFilterApplied(filterCount?: number) {
+  reportExploreMetrics('sidebar_suffix_filter_applied', {
     filter_count: filterCount,
   });
 }

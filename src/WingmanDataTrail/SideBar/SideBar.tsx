@@ -10,7 +10,11 @@ import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
-import { reportExploreMetrics, reportSidebarPrefixFilterSectionClicked } from '../../interactions';
+import {
+  reportExploreMetrics,
+  reportSidebarPrefixFilterSectionClicked,
+  reportSidebarSuffixFilterSectionClicked,
+} from '../../interactions';
 import { BookmarksList } from './sections/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
@@ -152,6 +156,10 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
     if (sectionKey === 'filters-prefix') {
       reportSidebarPrefixFilterSectionClicked();
+    }
+
+    if (sectionKey === 'filters-suffix') {
+      reportSidebarSuffixFilterSectionClicked();
     }
   }
 
