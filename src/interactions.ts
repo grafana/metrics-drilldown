@@ -135,6 +135,28 @@ export type Interactions = {
     ),
     section?: string
   },
+  // User clicks into the prefix filter section of the sidebar
+  sidebar_prefix_filter_section_clicked: {},
+  // User applies any prefix filter from the sidebar
+  sidebar_prefix_filter_applied: {
+    // Number of prefix filters applied (optional)
+    filter_count?: number;
+  },
+  // User clicks into the suffix filter section of the sidebar
+  sidebar_suffix_filter_section_clicked: {},
+  // User applies any suffix filter from the sidebar
+  sidebar_suffix_filter_applied: {
+    // Number of suffix filters applied (optional)
+    filter_count?: number;
+  },
+  // User selects a rules filter from the Wingman sidebar
+  sidebar_rules_filter_selected: {
+    filter_type: (
+      | 'non_rules_metrics'
+      | 'recording_rules'
+      | 'alerting_rules'
+    )
+  }
 };
 
 const PREFIX = 'grafana_explore_metrics_';
