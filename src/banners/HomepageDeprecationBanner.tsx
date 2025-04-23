@@ -1,5 +1,5 @@
 import { Alert } from '@grafana/ui';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const HP_BANNER_KEY = 'homepageDeprecationBanner';
 
