@@ -114,7 +114,7 @@ function getStyles(theme: GrafanaTheme2) {
     bookmarksList: css({
       display: 'flex',
       flexDirection: 'column',
-      gap: theme.spacing(1),
+      gap: theme.spacing(1.5),
       overflowY: 'auto',
       paddingRight: theme.spacing(1),
     }),
