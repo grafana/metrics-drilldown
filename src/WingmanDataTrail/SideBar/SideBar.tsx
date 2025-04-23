@@ -88,7 +88,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           key: 'bookmarks',
           title: 'Bookmarks',
           description: 'Access your saved metrics for quick reference',
-          icon: 'bookmark',
+          icon: 'star',
         }),
         new Settings({
           key: 'settings',
