@@ -2,10 +2,6 @@ import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { expect, test } from '../fixtures';
 import { type SortOption } from '../fixtures/views/MetricsReducerView';
 
-// Keep this in sync with MAX_RECENT_METRICS in MetricsSorter.tsx
-// If updating MAX_RECENT_METRICS, also update the tests below.
-// const MAX_RECENT_METRICS = 6;
-
 test.describe('Metrics reducer view', () => {
   test('Core UI elements', async ({ metricsReducerView }) => {
     await metricsReducerView.gotoVariant('/trail-filters-sidebar');
