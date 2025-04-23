@@ -2,20 +2,17 @@ import { expect, type Page } from '@playwright/test';
 
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL } from '../../../src/constants';
+import { QuickSearch } from '../components/QuickSearchInput';
 
 export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
+
 export class MetricsReducerView extends DrilldownView {
-  buttonNames = [
-    'Rules filters',
-    'Prefix filters',
-    'Suffix filters',
-    'Group by labels',
-    'Bookmarks',
-    'Settings',
-  ] as const;
+  public quickSearch: QuickSearch;
 
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
+
+    this.quickSearch = new QuickSearch(page);
   }
 
   gotoVariant(variantPath: string, urlSearchParams = new URLSearchParams()) {
@@ -35,30 +32,10 @@ export class MetricsReducerView extends DrilldownView {
 
     await expect(listControls.getByText('Sort by')).toBeVisible();
 
-    await expect(this.getQuickFilterInput()).toBeVisible();
+    await expect(this.quickSearch.getInput()).toBeVisible();
+
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
-    return;
-  }
-
-  /* Quick filter */
-
-  getQuickFilterInput() {
-    return this.getListControls().getByPlaceholder('Search metrics');
-  }
-
-  async assertQuickFilter(expectedValue: string, expectedResultsCount: number) {
-    await expect(this.getQuickFilterInput()).toHaveValue(expectedValue);
-    await this.assertQuickFilterResultsCount(expectedResultsCount);
-  }
-
-  async enterQuickFilterText(searchText: string) {
-    await this.getQuickFilterInput().fill(searchText);
-    await this.waitForTimeout(250); // see SceneQuickFilter.DEBOUNCE_DELAY
-  }
-
-  async assertQuickFilterResultsCount(expectedCount: number) {
-    await expect(this.getByTestId('quick-filter-results-count')).toHaveText(String(expectedCount));
   }
 
   /* Layout switcher */
@@ -81,7 +58,14 @@ export class MetricsReducerView extends DrilldownView {
   async assertSidebar() {
     const sidebar = this.getByTestId('sidebar-buttons');
 
-    for (const buttonName of this.buttonNames) {
+    for (const buttonName of [
+      'Rules filters',
+      'Prefix filters',
+      'Suffix filters',
+      'Group by labels',
+      'Bookmarks',
+      'Settings',
+    ]) {
       await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
     }
   }
