@@ -31,15 +31,15 @@ test.describe('Metrics reducer view', () => {
         'handler_duration_seconds_count',
         'jaeger_tracer_finished_spans_total',
       ];
-      const searchInput = page.getByRole('textbox', { name: 'Quick search metrics...' });
 
       for (const metric of metricsToSelect) {
-        await searchInput.fill(metric); // search for the metric
+        await metricsReducerView.quickSearch.enterText(metric); // search for the metric
         await page.getByTestId(`select-action-${metric}`).click(); // select the metric
         await page.goBack(); // return to the metrics reducer view
       }
 
-      await searchInput.clear();
+      await metricsReducerView.quickSearch.clear();
+      await metricsReducerView.assertMetricsList();
       await expect(page).toHaveScreenshot({
         stylePath: './e2e/fixtures/css/hide-app-controls.css',
       });

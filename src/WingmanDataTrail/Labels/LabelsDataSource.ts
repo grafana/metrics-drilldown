@@ -73,11 +73,11 @@ export class LabelsDataSource extends RuntimeDataSource {
       const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
       let response: Record<string, string[]> = {};
 
-      if (ds.languageProvider.fetchLabelsWithMatch.length === 3) {
+      if (ds.languageProvider.fetchLabelsWithMatch.length === 2) {
+        response = await ds.languageProvider.fetchLabelsWithMatch(matcher);
+      } else {
         // @ts-ignore: Ignoring type error due to breaking change in fetchLabelValues signature
         response = await ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher);
-      } else {
-        response = await ds.languageProvider.fetchLabelsWithMatch(matcher);
       }
 
       labelOptions = this.processLabelOptions(
