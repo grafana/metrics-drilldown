@@ -7,7 +7,7 @@ import { QuickSearch } from '../components/QuickSearchInput';
 export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
 
 export class MetricsReducerView extends DrilldownView {
-  private quickSearch: QuickSearch;
+  public quickSearch: QuickSearch;
 
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
