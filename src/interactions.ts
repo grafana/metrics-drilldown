@@ -135,6 +135,13 @@ export type Interactions = {
     ),
     section?: string
   },
+  // User selects a rules filter from the Wingman sidebar
+  sidebar_rules_filter_selected: {
+    filter_type: (
+      | 'non_rules_metrics'
+      | 'recording_rules'
+    )
+  }
 };
 
 const PREFIX = 'grafana_explore_metrics_';
