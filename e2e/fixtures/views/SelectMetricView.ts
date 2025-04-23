@@ -3,10 +3,15 @@ import { expect, type Page } from '@playwright/test';
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
 import { UI_TEXT } from '../../../src/constants/ui';
+import { QuickSearch } from '../components/QuickSearchInput';
 
 export class SelectMetricView extends DrilldownView {
+  public quickSearch: QuickSearch;
+
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
     super(page, `${PLUGIN_BASE_URL}/${ROUTES.Trail}`, new URLSearchParams(defaultUrlSearchParams));
+
+    this.quickSearch = new QuickSearch(page);
   }
 
   goto(urlSearchParams = new URLSearchParams()) {
@@ -102,27 +107,6 @@ export class SelectMetricView extends DrilldownView {
 
   getPluginInfoButton() {
     return this.getControls().getByTestId('plugin-info-button');
-  }
-
-  /* Quick filter */
-
-  getQuickFilterInput() {
-    return this.getByPlaceholder('Search metrics');
-  }
-
-  async assertQuickFilter(explectedPlaceholder: string, expectedValue: string, expectedResultsCount: number) {
-    expect(await this.getQuickFilterInput().getAttribute('placeholder')).toBe(explectedPlaceholder);
-    await expect(this.getQuickFilterInput()).toHaveValue(expectedValue);
-    await this.assertQuickFilterResultsCount(expectedResultsCount);
-  }
-
-  async enterQuickFilterText(searchText: string) {
-    await this.getQuickFilterInput().fill(searchText);
-    await this.waitForTimeout(250); // see SceneQuickFilter.DEBOUNCE_DELAY
-  }
-
-  async assertQuickFilterResultsCount(expectedCount: number) {
-    await expect(this.getByTestId('quick-filter-results-count')).toHaveText(String(expectedCount));
   }
 
   /* Otel */

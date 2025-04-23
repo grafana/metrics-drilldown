@@ -16,7 +16,7 @@ test.describe('Select metric view', () => {
   test('Core UI elements', async ({ selectMetricView }) => {
     await selectMetricView.assertTopControls();
 
-    await expect(selectMetricView.getQuickFilterInput()).toBeVisible();
+    await expect(selectMetricView.getByRole('textbox', { name: 'Search metrics' })).toBeVisible();
 
     await expect(selectMetricView.getByText('View by')).toBeVisible();
 
