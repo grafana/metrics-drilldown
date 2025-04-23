@@ -172,7 +172,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       readOnly: true,
       skipUrlSync: true,
       datasource: null,
-      hide: VariableHide.hideLabel,
+      hide: VariableHide.hideVariable,
       layout: 'combobox',
       applyMode: 'manual',
       allowCustomValue: true,

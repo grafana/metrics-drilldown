@@ -18,7 +18,7 @@ test.describe('Native Histogram', () => {
   });
 
   test('From select metrics', async ({ selectMetricView }) => {
-    await selectMetricView.enterQuickFilterText(NATIVE_HISTOGRAM_LABEL);
+    await selectMetricView.quickSearch.enterText(NATIVE_HISTOGRAM_LABEL);
     await selectMetricView.assertPanel(NATIVE_HISTOGRAM_LABEL);
     await selectMetricView.assertPanelIsNativeHistogram(NATIVE_HISTOGRAM_LABEL);
   });
