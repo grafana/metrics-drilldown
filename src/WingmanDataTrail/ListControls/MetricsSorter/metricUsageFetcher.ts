@@ -3,6 +3,7 @@ import { type Dashboard, type DataSourceRef } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
 import { limitFunction } from 'p-limit';
 
+import { type SortingOption } from './MetricsSorter';
 import { logger } from '../../../tracking/logger/logger';
 
 interface MetricsUsageState {
@@ -10,22 +11,23 @@ interface MetricsUsageState {
   metricsPromise: Promise<Record<string, number>> | undefined;
   fetcher: () => Promise<Record<string, number>>;
 }
+export type MetricUsageType = Exclude<SortingOption, 'default'>;
 
 export class MetricUsageFetcher {
-  private _usageState: Record<string, MetricsUsageState> = {
-    dashboards: {
+  private _usageState: Record<MetricUsageType, MetricsUsageState> = {
+    'dashboard-usage': {
       metrics: {},
       metricsPromise: undefined,
       fetcher: fetchDashboardMetrics,
     },
-    alerting: {
+    'alerting-usage': {
       metrics: {},
       metricsPromise: undefined,
       fetcher: fetchAlertingMetrics,
     },
   };
 
-  public getUsageMetrics(usageType: 'dashboards' | 'alerting'): Promise<Record<string, number>> {
+  public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
     const hasExistingMetrics =
       this._usageState[usageType].metrics && Object.keys(this._usageState[usageType].metrics).length > 0;
 
@@ -44,7 +46,7 @@ export class MetricUsageFetcher {
     return this._usageState[usageType].metricsPromise;
   }
 
-  public getUsageForMetric(metricName: string, usageType: 'dashboards' | 'alerting'): Promise<number> {
+  public getUsageForMetric(metricName: string, usageType: MetricUsageType): Promise<number> {
     return this.getUsageMetrics(usageType).then((metrics) => metrics[metricName] ?? 0);
   }
 }

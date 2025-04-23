@@ -224,6 +224,14 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     this.setState({
       visibleSection: sections.find((section) => section.state.key === sectionKey) ?? null,
     });
+
+    if (sectionKey === 'filters-prefix') {
+      reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
+    }
+
+    if (sectionKey === 'filters-suffix') {
+      reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
+    }
   }
 
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
