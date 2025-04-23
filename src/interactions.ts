@@ -149,6 +149,14 @@ export type Interactions = {
     // Number of suffix filters applied (optional)
     filter_count?: number;
   },
+  // User selects a rules filter from the Wingman sidebar
+  sidebar_rules_filter_selected: {
+    filter_type: (
+      | 'non_rules_metrics'
+      | 'recording_rules'
+      | 'alerting_rules'
+    )
+  }
 };
 
 const PREFIX = 'grafana_explore_metrics_';

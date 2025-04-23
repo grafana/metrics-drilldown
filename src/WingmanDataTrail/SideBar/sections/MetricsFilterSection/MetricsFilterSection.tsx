@@ -17,6 +17,7 @@ import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { ruleGroupLabels, type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/metricLabels';
 import {
   VAR_METRICS_VARIABLE,
   type MetricOptions,
@@ -38,7 +39,7 @@ export interface MetricsFilterSectionState extends SideBarSectionState {
   showHideEmpty: boolean;
   showSearch: boolean;
   groups: Array<{ label: string; value: string; count: number }>;
-  selectedGroups: Array<{ label: string; value: string }>; // we need labels for displaying tooltips in `SideBar.tsx`
+  selectedGroups: Array<{ label: RuleGroupLabel; value: string }>; // we need labels for displaying tooltips in `SideBar.tsx`
   loading: boolean;
 }
 
@@ -76,7 +77,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     ) {
       stateUpdate.selectedGroups = (values[this.state.key] as string)
         .split(',')
-        .map((v) => ({ label: v, value: v })) as Array<{ label: string; value: string }>;
+        .map((v) => ({ label: v as RuleGroupLabel, value: v })) as Array<{ label: RuleGroupLabel; value: string }>;
     }
 
     this.setState(stateUpdate);
@@ -184,6 +185,30 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     if (this.state.type === 'suffixes') {
       reportExploreMetrics('sidebar_suffix_filter_applied', {
         filter_count: selectedGroups.length,
+      });
+    }
+
+    // Track rule filter selection events
+    if (this.state.key === 'filters-rule' && selectedGroups.length > 0) {
+      // Map the label to the appropriate filter_type for the event
+      selectedGroups.forEach((group) => {
+        let filterType: 'non_rules_metrics' | 'recording_rules' | 'alerting_rules';
+
+        switch (group.label) {
+          case ruleGroupLabels.metrics:
+            filterType = 'non_rules_metrics';
+            break;
+          case ruleGroupLabels.rules:
+            filterType = 'recording_rules';
+            break;
+          case ruleGroupLabels.alerts:
+            filterType = 'alerting_rules';
+            break;
+          default:
+            return; // Skip if it's not a recognized rules filter
+        }
+
+        reportExploreMetrics('sidebar_rules_filter_selected', { filter_type: filterType });
       });
     }
   };
