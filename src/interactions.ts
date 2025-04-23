@@ -210,37 +210,3 @@ export function reportChangeInLabelFilters(
     }
   }
 }
-
-/**
- * Report when a user clicks into the prefix filter section of the sidebar
- */
-export function reportSidebarPrefixFilterSectionClicked() {
-  reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
-}
-
-/**
- * Report when a user applies any prefix filter from the sidebar
- * @param filterCount Optional - the number of filters applied
- */
-export function reportSidebarPrefixFilterApplied(filterCount?: number) {
-  reportExploreMetrics('sidebar_prefix_filter_applied', {
-    filter_count: filterCount,
-  });
-}
-
-/**
- * Report when a user clicks into the suffix filter section of the sidebar
- */
-export function reportSidebarSuffixFilterSectionClicked() {
-  reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
-}
-
-/**
- * Report when a user applies any suffix filter from the sidebar
- * @param filterCount Optional - the number of filters applied
- */
-export function reportSidebarSuffixFilterApplied(filterCount?: number) {
-  reportExploreMetrics('sidebar_suffix_filter_applied', {
-    filter_count: filterCount,
-  });
-}

@@ -24,7 +24,7 @@ import {
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
-import { reportSidebarPrefixFilterApplied, reportSidebarSuffixFilterApplied } from '../../../../interactions';
+import { reportExploreMetrics } from '../../../../interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
@@ -176,11 +176,15 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     );
 
     if (this.state.type === 'prefixes') {
-      reportSidebarPrefixFilterApplied(selectedGroups.length);
+      reportExploreMetrics('sidebar_prefix_filter_applied', {
+        filter_count: selectedGroups.length,
+      });
     }
 
     if (this.state.type === 'suffixes') {
-      reportSidebarSuffixFilterApplied(selectedGroups.length);
+      reportExploreMetrics('sidebar_suffix_filter_applied', {
+        filter_count: selectedGroups.length,
+      });
     }
   };
 
