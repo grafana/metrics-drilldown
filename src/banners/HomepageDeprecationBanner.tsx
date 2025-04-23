@@ -1,28 +1,39 @@
 import { Alert } from '@grafana/ui';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const HP_BANNER_KEY = 'homepageDeprecationBanner';
 
 export const HomepageDeprecationBanner = () => {
-  if (bannerHasBeenShown()) {
+  const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    setShowBanner(!bannerHasBeenShown());
+  }, []);
+
+  if (!showBanner || bannerHasBeenShown()) {
     return null;
   }
 
   const onBannerRemove = () => {
-    bannerHasBeenShown();
+    setBannerHasBeenShown();
+    setShowBanner(false);
   };
 
   return (
-    <Alert title="Homepage deprecation warning" severity="warning" elevated onRemove={onBannerRemove}>
-      This page will be removed soon. Bookmarks will move alongside your list of metrics.
-    </Alert>
+    <div>
+      <Alert title="Homepage deprecation" severity="warning" elevated onRemove={onBannerRemove}>
+        This page will be removed soon.
+        <br />
+        Bookmarks will move alongside your list of metrics.
+      </Alert>
+    </div>
   );
 };
 
-export function setBannerHasBeenShown() {
+function setBannerHasBeenShown() {
   localStorage.setItem(HP_BANNER_KEY, 'true');
 }
 
-export function bannerHasBeenShown() {
+function bannerHasBeenShown() {
   return localStorage.getItem(HP_BANNER_KEY) ?? false;
 }
