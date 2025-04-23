@@ -1,7 +1,4 @@
-import { ruleGroupLabels, type RuleGroupLabel } from './metricLabels';
-
-export type { RuleGroupLabel };
-export { ruleGroupLabels };
+import { ruleGroupLabels } from './metricLabels';
 
 type MetricType = 'metrics' | 'rules' | 'alerts';
 
