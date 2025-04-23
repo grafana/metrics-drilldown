@@ -2,6 +2,7 @@ import { expect, type Page } from '@playwright/test';
 
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL } from '../../../src/constants';
+import { UI_TEXT } from '../../../src/constants/ui';
 import { QuickSearch } from '../components/QuickSearchInput';
 
 export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
@@ -55,8 +56,17 @@ export class MetricsReducerView extends DrilldownView {
 
   /* Side bar */
 
+  async getSideBar() {
+    return this.getByTestId('sidebar-buttons');
+  }
+
+  async toggleSideBarButton(buttonName: string) {
+    const sidebar = await this.getSideBar();
+    await sidebar.getByRole('button', { name: buttonName }).click();
+  }
+
   async assertSidebar() {
-    const sidebar = this.getByTestId('sidebar-buttons');
+    const sidebar = await this.getSideBar();
 
     for (const buttonName of [
       'Rules filters',
@@ -68,6 +78,19 @@ export class MetricsReducerView extends DrilldownView {
     ]) {
       await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
     }
+  }
+
+  /* Bookmarks */
+  async createBookmark() {
+    await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL).click();
+  }
+
+  async assertBookmarkAlert() {
+    await expect(this.getByText('Bookmark created')).toBeVisible();
+  }
+
+  async assertBookmarkCreated(title: string) {
+    await expect(this.getByRole('button', { name: title })).toBeVisible();
   }
 
   /* Metrics list */

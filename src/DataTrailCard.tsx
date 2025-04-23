@@ -15,6 +15,8 @@ export type Props = {
   bookmark?: DataTrailBookmark;
   onSelect: () => void;
   onDelete?: () => void;
+  wide?: boolean;
+  compactHeight?: boolean;
 };
 
 // Helper function to truncate the value for a single key:value pair
@@ -57,10 +59,12 @@ export function DataTrailCard(props: Props) {
 
   const { filters, metric, createdAt } = values;
 
-  const heading = truncateValue('', getMetricName(metric), 39);
+  const heading = truncateValue('', getMetricName(metric), 27);
+  const cardHeightClassName = `${props.compactHeight && filters.length > 0 ? styles.cardTall : ''}`;
+  const cardClassName = `${styles.card} ${props.wide ? styles.cardWide : ''} ${cardHeightClassName}`;
   return (
     <article data-testid={`data-trail-card ${heading}`}>
-      <Card onClick={onSelect} className={styles.card}>
+      <Card onClick={onSelect} className={cardClassName}>
         <Card.Heading>
           <div className={styles.metricValue}>{heading}</div>
         </Card.Heading>
@@ -107,7 +111,6 @@ export function getStyles(theme: GrafanaTheme2) {
       position: 'relative',
       width: '318px',
       padding: `12px ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2)}`,
-      height: '110px',
       alignItems: 'start',
       marginBottom: 0,
       borderTop: `1px solid ${theme.colors.border.weak}`,
@@ -115,6 +118,12 @@ export function getStyles(theme: GrafanaTheme2) {
       borderLeft: `1px solid ${theme.colors.border.weak}`,
       borderBottom: 'none', // Remove the bottom border
       borderRadius: '2px 2px 0 0', // Top-left and top-right corners are 2px, bottom-left and bottom-right are 0; cannot use theme.shape.radius.default because need bottom corners to be 0
+    }),
+    cardWide: css({
+      width: '100%',
+    }),
+    cardTall: css({
+      height: '110px',
     }),
     secondary: css({
       color: theme.colors.text.secondary,

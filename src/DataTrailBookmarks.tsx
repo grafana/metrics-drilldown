@@ -18,11 +18,13 @@ export function DataTrailsBookmarks({ onSelect, onDelete }: Props) {
   });
   const styles = useStyles2(getStyles);
 
+  const { bookmarks } = getTrailStore();
+
   useEffect(() => {
     localStorage.setItem('toggleBookmark', JSON.stringify(toggleBookmark));
   }, [toggleBookmark]);
 
-  if (getTrailStore().bookmarks.length === 0) {
+  if (bookmarks.length === 0) {
     return null;
   }
 
@@ -43,7 +45,7 @@ export function DataTrailsBookmarks({ onSelect, onDelete }: Props) {
       </div>
       {toggleBookmark && (
         <div className={styles.trailList} data-testid="hp-bookmarks">
-          {getTrailStore().bookmarks.map((bookmark, index) => {
+          {bookmarks.map((bookmark, index) => {
             return (
               <DataTrailCard
                 key={getBookmarkKey(bookmark)}

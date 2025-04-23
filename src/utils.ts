@@ -56,8 +56,20 @@ export function getUrlForTrail(trail: DataTrail) {
   return getUrlForValues(params);
 }
 
+// TODO: We can simplify this when we remove the Homepage and/or the Trail experience
 export function getUrlForValues(values: SceneObjectUrlValues) {
-  return urlUtil.renderUrl(ROUTES.Trail, values);
+  return urlUtil.renderUrl(
+    getCurrentPath().includes(ROUTES.TrailWithSidebar) ? ROUTES.TrailWithSidebar : ROUTES.Trail,
+    values
+  );
+}
+
+export function getCurrentPath(): Location['pathname'] {
+  return window.location.pathname;
+}
+
+export function currentPathIncludes(path: string) {
+  return getCurrentPath().includes(path);
 }
 
 export function getMetricSceneFor(model: SceneObject): MetricScene {
