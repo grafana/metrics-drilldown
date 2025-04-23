@@ -176,6 +176,18 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       true
     );
 
+    if (this.state.type === 'prefixes') {
+      reportExploreMetrics('sidebar_prefix_filter_applied', {
+        filter_count: selectedGroups.length,
+      });
+    }
+
+    if (this.state.type === 'suffixes') {
+      reportExploreMetrics('sidebar_suffix_filter_applied', {
+        filter_count: selectedGroups.length,
+      });
+    }
+
     // Track rule filter selection events
     if (this.state.key === 'filters-rule' && selectedGroups.length > 0) {
       // Map the label to the appropriate filter_type for the event
