@@ -47,7 +47,7 @@ export class MetricsReducerView extends DrilldownView {
 
   async assertSelectedLayout(expectedLayoutName: 'Grid' | 'Row') {
     const layoutName = await this.getLayoutSwitcher().locator('input[checked]~label').textContent();
-    await expect(layoutName?.trim()).toBe(expectedLayoutName);
+    expect(layoutName?.trim()).toBe(expectedLayoutName);
   }
 
   selectLayout(layoutName: string) {

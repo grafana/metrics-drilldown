@@ -4,7 +4,7 @@ import { type SortOption } from '../fixtures/views/MetricsReducerView';
 
 // Keep this in sync with MAX_RECENT_METRICS in MetricsSorter.tsx
 // If updating MAX_RECENT_METRICS, also update the tests below.
-const MAX_RECENT_METRICS = 6;
+// const MAX_RECENT_METRICS = 6;
 
 test.describe('Metrics reducer view', () => {
   test('Core UI elements', async ({ metricsReducerView }) => {
@@ -56,7 +56,7 @@ test.describe('Metrics reducer view', () => {
 
         // Wait for the usage count to load
         await expect(async () => {
-          const firstPanel = await metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
+          const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
           const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
           const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
           expect(usageCount).toBeGreaterThan(0);

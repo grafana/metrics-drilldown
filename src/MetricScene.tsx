@@ -22,6 +22,7 @@ import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
+import { ROUTES } from './constants';
 import { UI_TEXT } from './constants/ui';
 import { reportExploreMetrics, type Interactions } from './interactions';
 import {
@@ -44,7 +45,7 @@ import {
 } from './shared';
 import { ShareTrailButton } from './ShareTrailButton';
 import { useBookmarkState } from './TrailStore/useBookmarkState';
-import { getTrailFor, getUrlForTrail } from './utils';
+import { currentPathIncludes, getTrailFor, getUrlForTrail } from './utils';
 
 const relatedLogsFeatureEnabled = config.featureToggles.exploreMetricsRelatedLogs;
 
@@ -224,6 +225,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     const trail = getTrailFor(model);
     const [isBookmarked, toggleBookmark] = useBookmarkState(trail);
     const { actionView } = metricScene.useState();
+    const showBookmark = currentPathIncludes(ROUTES.TrailWithSidebar);
 
     return (
       <Box paddingY={1} data-testid="metric-scene-details">
@@ -246,18 +248,20 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               onClick={model.openExploreLink}
             />
             <ShareTrailButton trail={trail} />
-            <ToolbarButton
-              variant={'canvas'}
-              icon={
-                isBookmarked ? (
-                  <Icon name={'favorite'} type={'mono'} size={'lg'} />
-                ) : (
-                  <Icon name={'star'} type={'default'} size={'lg'} />
-                )
-              }
-              tooltip={UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL}
-              onClick={toggleBookmark}
-            />
+            {showBookmark && (
+              <ToolbarButton
+                variant={'canvas'}
+                icon={
+                  isBookmarked ? (
+                    <Icon name={'favorite'} type={'mono'} size={'lg'} />
+                  ) : (
+                    <Icon name={'star'} type={'default'} size={'lg'} />
+                  )
+                }
+                tooltip={UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL}
+                onClick={toggleBookmark}
+              />
+            )}
             {trail.state.embedded && (
               <LinkButton
                 href={getUrlForTrail(trail)}

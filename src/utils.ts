@@ -168,7 +168,7 @@ export function limitAdhocProviders(
   limitedFilterVariable.setState({
     getTagKeysProvider: async (
       variable: AdHocFiltersVariable,
-      currentKey: string | null
+      _: string | null // currentKey
     ): Promise<{
       replace?: boolean;
       values: GetTagResponse | MetricFindValue[];
