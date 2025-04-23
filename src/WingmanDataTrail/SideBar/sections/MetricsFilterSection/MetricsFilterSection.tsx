@@ -45,16 +45,12 @@ export interface MetricsFilterSectionState extends SideBarSectionState {
 
 export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    onAnyVariableChanged: (variable) => {
+    variableNames: [VAR_METRICS_VARIABLE],
+    onReferencedVariableValueChanged: (variable) => {
       const { name, options } = (variable as MultiValueVariable).state;
 
       if (name === VAR_METRICS_VARIABLE) {
         this.updateLists(options as MetricOptions);
-        return;
-      }
-
-      if (name === VAR_FILTERED_METRICS_VARIABLE) {
-        this.updateCounts(options as MetricOptions);
         return;
       }
     },
@@ -153,12 +149,13 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
   private updateCounts(filteredOptions: MetricOptions) {
     const { groups, computeGroups } = this.state;
     const newGroups = computeGroups(filteredOptions);
+    const newGroupsWithCount = groups.map((group) => ({
+      ...group,
+      count: newGroups.find((p) => p.label === group.label)?.count || group.count,
+    }));
 
     this.setState({
-      groups: groups.map((group) => ({
-        ...group,
-        count: newGroups.find((p) => p.label === group.label)?.count || 0,
-      })),
+      groups: newGroupsWithCount,
       loading: false,
     });
   }
