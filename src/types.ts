@@ -1,4 +1,4 @@
-import { type AdHocVariableFilter, type RawTimeRange } from '@grafana/data';
+import { type AdHocVariableFilter } from '@grafana/data';
 import { type SceneObject, type SceneObjectState, type SceneReactObject } from '@grafana/scenes';
 
 import { type DataTrailSettings } from './DataTrailSettings';
