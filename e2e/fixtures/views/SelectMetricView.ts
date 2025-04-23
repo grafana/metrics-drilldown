@@ -165,27 +165,8 @@ export class SelectMetricView extends DrilldownView {
     return explorePage;
   }
 
-  /* Bookmarks */
-
   async clickCopyPanelUrl() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL).click();
-  }
-
-  async createBookmark() {
-    await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL).click();
-  }
-
-  async assertBookmarkAlert() {
-    await expect(this.getByText('Bookmark created')).toBeVisible();
-  }
-
-  async seeAllBookmarksFromAlert() {
-    await this.getByRole('link', { name: 'View bookmarks' }).click();
-    await this.getByLabel('bookmarkCarrot').click();
-  }
-
-  async assertBookmarkCreated(title: string) {
-    await expect(this.getByTestId('hp-bookmarks').getByText(title)).toBeVisible();
   }
 
   async selectNewMetric() {

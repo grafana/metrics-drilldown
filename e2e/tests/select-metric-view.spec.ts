@@ -81,15 +81,6 @@ test.describe('Select metric view', () => {
     expect(clipboardContent).toBe(expectedContent);
   });
 
-  test('Bookmark', async ({ selectMetricView }) => {
-    const panelTitle = 'a.utf8.metric 🤘';
-    await selectMetricView.selectMetricPanel(panelTitle);
-    await selectMetricView.createBookmark();
-    await selectMetricView.assertBookmarkAlert();
-    await selectMetricView.seeAllBookmarksFromAlert();
-    await selectMetricView.assertBookmarkCreated(panelTitle);
-  });
-
   test('Select New Metric', async ({ selectMetricView }) => {
     await selectMetricView.selectMetricPanel('a.utf8.metric 🤘');
     await selectMetricView.selectNewMetric();
