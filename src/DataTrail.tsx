@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
+import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
@@ -42,7 +42,6 @@ import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { MetricsHeader } from './MetricsHeader';
-import { migrateOtelDeploymentEnvironment } from './migrations/otelDeploymentEnvironment';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
 import {
   getOtelJoinQuery,
@@ -70,10 +69,6 @@ import { getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
-import {
-  fetchAlertingMetrics,
-  fetchDashboardMetrics,
-} from './WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -150,8 +145,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   public _onActivate() {
     this.setState({ trailActivated: true });
-    const urlParams = urlUtil.getUrlSearchParams();
-    migrateOtelDeploymentEnvironment(this, urlParams);
 
     if (!this.state.topScene) {
       this.setState({ topScene: getTopSceneFor(this.state.metric) });
@@ -233,33 +226,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     };
     window.addEventListener('unload', saveRecentTrail);
 
-    // Fetch metric usage data
-    this.updateMetricUsageData();
-
     return () => {
       if (!this.state.embedded) {
         saveRecentTrail();
       }
       window.removeEventListener('unload', saveRecentTrail);
     };
-  }
-
-  /**
-   * Updates metric usage data from dashboards and alerting rules
-   */
-  private async updateMetricUsageData() {
-    try {
-      // Fetch both metrics sources concurrently
-      const [dashboardMetrics, alertingMetrics] = await Promise.all([fetchDashboardMetrics(), fetchAlertingMetrics()]);
-
-      this.setState({ dashboardMetrics, alertingMetrics });
-    } catch (error) {
-      console.error('Failed to fetch metric usage data:', error);
-      this.setState({
-        dashboardMetrics: {},
-        alertingMetrics: {},
-      });
-    }
   }
 
   protected _variableDependency = new VariableDependencyConfig(this, {
@@ -498,13 +470,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
     const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
 
-    // loading from the url with otel resources selected will result in turning on OTel experience
-    const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
-    let previouslyUsedOtelResources = false;
-    if (isAdHocFiltersVariable(otelResourcesVariable)) {
-      previouslyUsedOtelResources = otelResourcesVariable.state.filters.length > 0;
-    }
-
     // Future refactor: non promoted resources could be the full check
     //   - remove hasOtelResources
     //   - remove deployment environments as a check
@@ -514,7 +479,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       otelTargets,
       deploymentEnvironments,
       hasOtelResources,
-      previouslyUsedOtelResources,
+      // all previous uses of OTel resources should start with it off
+      previouslyUsedOtelResources: false,
       nonPromotedOtelResources,
     };
   }

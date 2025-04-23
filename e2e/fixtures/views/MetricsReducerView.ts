@@ -4,6 +4,8 @@ import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL } from '../../../src/constants';
 import { QuickSearch } from '../components/QuickSearchInput';
 
+export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
+
 export class MetricsReducerView extends DrilldownView {
   private quickSearch: QuickSearch;
 
@@ -112,5 +114,10 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+  }
+
+  async changeSortOption(sortBy: SortOption) {
+    await this.page.getByTestId('list-controls').getByTestId('data-testid template variable').click();
+    await this.page.getByRole('option', { name: sortBy }).locator('span').click();
   }
 }

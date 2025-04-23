@@ -107,7 +107,7 @@ export class SelectMetricView extends DrilldownView {
   /* Otel */
 
   getOtelExperienceSwitch() {
-    return this.page.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL);
+    return this.page.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL, { exact: true });
   }
 
   async assertOtelExperienceSwitchIsVisible() {
