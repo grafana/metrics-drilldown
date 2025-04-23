@@ -1,3 +1,5 @@
+import { ruleGroupLabels } from './metricLabels';
+
 type MetricType = 'metrics' | 'rules' | 'alerts';
 
 export function computeRulesGroups(options: Array<{ label: string; value: string }>) {
@@ -23,8 +25,8 @@ export function computeRulesGroups(options: Array<{ label: string; value: string
   }
 
   return [
-    { value: '^(?!alert)(?!.*:.*)', label: 'Non-rules metrics', count: rulesMap.get('metrics')!.length },
-    { value: ':', label: 'Recording rules', count: rulesMap.get('rules')!.length },
-    { value: '^alert', label: 'Alerting rules', count: rulesMap.get('alerts')!.length },
+    { value: '^(?!alert)(?!.*:.*)', label: ruleGroupLabels.metrics, count: rulesMap.get('metrics')!.length },
+    { value: ':', label: ruleGroupLabels.rules, count: rulesMap.get('rules')!.length },
+    { value: '^alert', label: ruleGroupLabels.alerts, count: rulesMap.get('alerts')!.length },
   ];
 }
