@@ -54,7 +54,7 @@ test.describe('Select metric view', () => {
     await expect(metricSceneDetails.getByLabel('Remove existing metric and choose a new metric')).toBeVisible();
     await expect(metricSceneDetails.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL)).toBeVisible();
     await expect(metricSceneDetails.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL)).toBeVisible();
-    await expect(metricSceneDetails.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL)).toBeVisible();
+    await expect(metricSceneDetails.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL)).not.toBeVisible();
   });
 
   test('Filtering by Label', async ({ selectMetricView }) => {
