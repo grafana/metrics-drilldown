@@ -45,11 +45,6 @@ function getStyles() {
       maxWidth: '904px',
       width: '100%',
       margin: '0 auto',
-      textAlign: 'center',
-    }),
-    banner: css({
-      maxWidth: '500px',
-      margin: '0 auto',
     }),
   };
 }
