@@ -3,10 +3,8 @@ import { ROUTES } from '../../src/constants';
 import { expect, test } from '../fixtures';
 
 test.describe('Browser History', () => {
-  test('From Homepage', async ({ gotoPage, page, selectMetricView }) => {
-    await gotoPage(`/${ROUTES.Home}`);
-    const startButton = page.getByTestId(testIds.pageHome.startButton);
-    await startButton.click();
+  test('From Trail', async ({ gotoPage, page, selectMetricView }) => {
+    await gotoPage(`/${ROUTES.Trail}`);
     await selectMetricView.assertTopControls();
     await selectMetricView.assertOtelExperienceSwitchIsVisible();
 
