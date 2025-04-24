@@ -31,13 +31,26 @@ To begin drilling down your data, filter the metrics that appear in Metrics Dril
      {{< admonition type="note" >}}
       You can apply multiple filters to your metrics.
      {{< /admonition >}}
-1. (Optional) To search for metrics, type keywords in the search bar under **Search metrics**.
+1. (Optional) To search for metrics, type keywords in the search bar under **Quick search metrics**.
 1. Use the time picker to select a date and time range from the dropdown menu, or use an absolute time range.
 1. Click the down arrow next to the **Refresh** icon to set a refresh rate from the drop-down menu. The default refresh status is **Off**.
 
 The visualizations in the Metrics Drilldown app adjust to reflect your filters.
 
 ![show metrics explore overview](/media/metrics-explore/metrics-drilldown-overview.png)
+
+## Apply advanced filters
+
+Apply advanced filters to further refine the metrics that appear in Metrics Drilldown. Access the following advanced filters from the left-side menu of the Metrics Drilldown app.
+
+| Filter type     | Description                                                                                                       |
+|-----------------|-------------------------------------------------------------------------------------------------------------------|
+| Rules filters   | Filter metrics based on whether they use recording or alerting rules.                                             |
+| Prefix fiters   | Filter metrics based on their name prefix in the Prometheus namespace. Multiple selected prefixes use "OR" logic. |
+| Suffix filters  | Filter metrics based on their name suffix. Multiple selected suffixes use "OR" logic.                             |
+| Group by labels | Group metrics by their label values.                                                                              |
+
+logic example.
 
 ## Analyze selected metrics
 
