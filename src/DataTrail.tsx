@@ -65,7 +65,7 @@ import {
   VAR_OTEL_RESOURCES,
 } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
-import { getTrailFor, limitAdhocProviders } from './utils';
+import { currentPathIncludes, getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
@@ -644,8 +644,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 }
 
 export function getFreshTopScene() {
-  const currentPath = window.location.pathname;
-  if (currentPath.includes(ROUTES.TrailWithSidebar)) {
+  if (currentPathIncludes(ROUTES.TrailWithSidebar)) {
     return new MetricsReducer();
   } else {
     return new MetricSelectScene({});

@@ -88,4 +88,20 @@ test.describe('Metrics reducer view', () => {
       });
     });
   });
+
+  test.describe('Sidebar buttons', () => {
+    test.beforeEach(async ({ metricsReducerView }) => {
+      await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+    });
+
+    test('Bookmarks', async ({ metricsReducerView }) => {
+      const panelTitle = 'a.utf8.metric 🤘';
+      await metricsReducerView.selectMetricPanel(panelTitle);
+      await metricsReducerView.createBookmark();
+      await metricsReducerView.assertBookmarkAlert();
+      await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+      await metricsReducerView.toggleSideBarButton('Bookmarks');
+      await metricsReducerView.assertBookmarkCreated(panelTitle);
+    });
+  });
 });
