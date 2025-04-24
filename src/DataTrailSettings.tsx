@@ -4,6 +4,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Dropdown, Switch, ToolbarButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricSelectScene } from 'MetricSelect/MetricSelectScene';
+
 import { reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { getTrailFor } from './utils';
@@ -38,7 +40,11 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
     const trail = getTrailFor(model);
     const { topScene } = trail.useState();
 
-    const isButtonEnabled = topScene instanceof MetricScene;
+    const isButtonVisible = topScene instanceof MetricSelectScene || topScene instanceof MetricScene;
+
+    if (!isButtonVisible) {
+      return null;
+    }
 
     const renderPopover = () => {
       return (
@@ -56,13 +62,7 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
 
     return (
       <Dropdown overlay={renderPopover} placement="bottom" onVisibleChange={model.onToggleOpen}>
-        <ToolbarButton
-          icon="cog"
-          variant="canvas"
-          isOpen={isOpen}
-          data-testid="settings-button"
-          disabled={!isButtonEnabled}
-        />
+        <ToolbarButton icon="cog" variant="canvas" isOpen={isOpen} data-testid="settings-button" />
       </Dropdown>
     );
   };

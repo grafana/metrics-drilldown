@@ -56,7 +56,7 @@ export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
     const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
     let metricsList: string[] = [];
 
-    let removeRules = query.startsWith('removeRules');
+    const removeRules = query.startsWith('removeRules');
     const matcher = removeRules ? query.replace('removeRules', '') : query;
 
     if (ds.languageProvider.fetchLabelValues.length === 2) {

@@ -37,7 +37,7 @@ export class ListControls extends EmbeddedScene {
             body: new QuickSearch(),
           }),
           new SceneFlexItem({
-            maxWidth: '240px',
+            width: 'auto',
             body: new MetricsSorter({}),
           }),
           new SceneFlexItem({

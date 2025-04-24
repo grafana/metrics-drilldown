@@ -1,7 +1,7 @@
 import { VariableHide, VariableRefresh } from '@grafana/data';
 import { QueryVariable, sceneGraph } from '@grafana/scenes';
 
-import { VAR_FILTERS } from 'shared';
+import { VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
 import { withLifecycleEvents } from 'WingmanDataTrail/MetricsVariables/withLifecycleEvents';
 
 import { MetricsWithLabelValueDataSource } from './MetricsWithLabelValueDataSource';
@@ -51,6 +51,8 @@ export class MetricsWithLabelValueVariable extends QueryVariable {
   }
 
   private static buildQuery(labelName: string, labelValue: string, removeRules?: boolean) {
-    return removeRules ? `removeRules{${labelName}="${labelValue}"}` : `{${labelName}="${labelValue}"}`;
+    return removeRules
+      ? `removeRules{${labelName}="${labelValue}",${VAR_FILTERS_EXPR}}`
+      : `{${labelName}="${labelValue}",${VAR_FILTERS_EXPR}}`;
   }
 }
