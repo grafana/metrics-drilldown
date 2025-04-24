@@ -45,7 +45,7 @@
     {
       "type": "page",
       "name": "Grafana Metrics Drilldown",
-      "path": "/a/%PLUGIN_ID%/",
+      "path": "/a/%PLUGIN_ID%/trail-filters-sidebar",
       "action": "datasources:explore",
       "addToNav": true,
       "defaultNav": true
