@@ -102,7 +102,6 @@
     "webpack-virtual-modules": "^0.6.2"
   },
   "overrides": {
-    "dompurify": "^3.2.5",
-    "semver": "^7.5.4"
+    "dompurify": "^3.2.5"
   }
 }
