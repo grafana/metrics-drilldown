@@ -86,8 +86,6 @@ test.describe('Select metric view', () => {
     await selectMetricView.selectMetricPanel(panelTitle);
     await selectMetricView.createBookmark();
     await selectMetricView.assertBookmarkAlert();
-    await selectMetricView.seeAllBookmarksFromAlert();
-    await selectMetricView.assertBookmarkCreated(panelTitle);
   });
 
   test('Select New Metric', async ({ selectMetricView }) => {

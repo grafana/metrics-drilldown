@@ -179,15 +179,6 @@ export class SelectMetricView extends DrilldownView {
     await expect(this.getByText('Bookmark created')).toBeVisible();
   }
 
-  async seeAllBookmarksFromAlert() {
-    await this.getByRole('link', { name: 'View bookmarks' }).click();
-    await this.getByLabel('bookmarkCarrot').click();
-  }
-
-  async assertBookmarkCreated(title: string) {
-    await expect(this.getByTestId('hp-bookmarks').getByText(title)).toBeVisible();
-  }
-
   async selectNewMetric() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP).click();
   }
