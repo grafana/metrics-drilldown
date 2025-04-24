@@ -51,7 +51,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           key: 'filters-rule',
           type: 'categories',
           title: 'Rules filters',
-          description: 'Filter metrics, recording rules and alerting rules',
+          description: 'Filter metrics and recording rules',
           icon: 'rules',
           computeGroups: computeRulesGroups,
           showHideEmpty: false,
