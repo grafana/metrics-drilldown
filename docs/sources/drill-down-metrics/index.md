@@ -37,7 +37,7 @@ To begin drilling down your data, filter the metrics that appear in Metrics Dril
 
 The visualizations in the Metrics Drilldown app adjust to reflect your filters.
 
-![show metrics explore overview](/media/metrics-explore/metrics-drilldown-overview.png)
+![show metrics drilldown main page with filters highlighted](/media/metrics-explore/metrics-drilldown-filters.png)
 
 ## Apply advanced filters
 
@@ -60,7 +60,7 @@ After filtering the metrics in Metrics Drilldown, you can further drill down int
 1. From the **Metrics Drilldown** main page, locate the metric you want to drill down.
 1. From the upper-right corner of the metric's dashboard panel, click **Select**, as shown in the following screenshot.
 
-    ![show select box](/media/metrics-explore/select-metric.png)
+    ![show select box](/media/metrics-explore/select-metric-drilldown.png)
 
 A detailed view of the metric opens that shows the following details:
 
