@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { Alert, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useState } from 'react';
 
-const HP_BANNER_KEY = 'homepageDeprecationBanner';
+const HP_BANNER_KEY = 'metricsDrilldownHomepageDeprecationBanner';
 
 export const HomepageDeprecationBanner = () => {
   const [showBanner, setShowBanner] = useState(false);
