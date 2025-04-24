@@ -16,7 +16,7 @@ import { buildPrometheusQuery } from 'autoQuery/buildPrometheusQuery';
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
-import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
+import { type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
 import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
@@ -66,10 +66,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       highlight: Boolean(state.highlight),
       headerActions: [
         ...(state.isNativeHistogram ? [new NativeHistogramBadge({})] : []),
-        ...(state.headerActions || [
-          new SelectAction({ metricName: state.metricName }),
-          new ConfigureAction({ metricName: state.metricName }),
-        ]),
+        ...(state.headerActions || [new SelectAction({ metricName: state.metricName })]),
       ],
     };
 
@@ -201,7 +198,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     metricName,
     matchers,
     prometheusFunction,
-    groupByLabel,
+    //groupByLabel,
     queryOptions = {},
   }: {
     metricName: string;
