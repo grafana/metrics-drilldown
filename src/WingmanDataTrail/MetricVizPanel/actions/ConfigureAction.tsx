@@ -32,9 +32,6 @@ export class ConfigureAction extends SceneObjectBase<ConfigureActionState> {
   public static Component = ({ model }: SceneComponentProps<ConfigureAction>) => {
     const styles = useStyles2(getStyles);
 
-    // TODO: Do we want to keep this hidden?
-    return null;
-
     return (
       <Button
         className={styles.selectButton}
