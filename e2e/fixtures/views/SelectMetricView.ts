@@ -191,28 +191,4 @@ export class SelectMetricView extends DrilldownView {
   async selectNewMetric() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP).click();
   }
-
-  /* Native Histogram */
-  async assertNativeHistogramBanner() {
-    const alert = this.getByTestId('data-testid Alert info');
-    await expect(alert).toBeVisible();
-    await expect(alert.getByText('Native Histogram Support')).toBeVisible();
-  }
-
-  async assertNativeHistogramBannerIsNotVisible() {
-    const alert = this.getByTestId('data-testid Alert info');
-    await expect(alert).not.toBeVisible();
-  }
-
-  async expandNativeHistogramBanner() {
-    await this.getByRole('button', { name: '> See examples' }).click();
-  }
-
-  async selectNativeHistogramExample(name: string) {
-    await this.getByRole('button', { name }).click();
-  }
-
-  async assertHeatmapLabel(panelTitle: string) {
-    await expect(this.getPanelByTitle(panelTitle).getByLabel('heatmap')).toBeVisible();
-  }
 }
