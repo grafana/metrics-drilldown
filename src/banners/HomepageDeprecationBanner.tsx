@@ -23,12 +23,9 @@ export const HomepageDeprecationBanner = () => {
 
   return (
     <div className={styles.container}>
-      <Alert title="Homepage deprecation" severity="warning" elevated onRemove={onBannerRemove}>
-        <div className={styles.banner}>
-          This page will be removed soon.
-          <br />
-          Bookmarks will move alongside your list of metrics.
-        </div>
+      <Alert title="Homepage deprecation" severity="info" elevated onRemove={onBannerRemove}>
+        This page will be removed in Grafana Metrics Drilldown v1.0.0. Bookmarks will move alongside your list of
+        metrics.
       </Alert>
     </div>
   );
