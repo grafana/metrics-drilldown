@@ -34,7 +34,7 @@ Profiles help you understand how your applications utilize compute resources suc
 
 ## Why use metrics?
 
-Metrics tell you how much of something exists, such as how much memory a computer system has available or how many centimeters long a desktop is. In the case of Grafana, metrics are most useful when they are recorded repeatedly over time. This permits us to compare things like how running a program affects the availability of system resources, as shown in the following daashboard.
+Metrics tell you how much of something exists, such as how much memory a computer system has available or how many centimeters long a desktop is. In the case of Grafana, metrics are most useful when they are recorded repeatedly over time. This permits us to compare things like how running a program affects the availability of system resources, as shown in the following dashboard.
 
 ![Sample visualization dashboard](../images/visualization_sample.png)
 
