@@ -176,7 +176,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
             <Tooltip content={tooltipContent} placement="top">
               <Tag className={styles.counts} name={tagName} colorIndex={9} />
             </Tooltip>
-            <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={model.clear} />
+            <IconButton
+              name="times"
+              variant="secondary"
+              tooltip="Clear search"
+              onClick={model.clear}
+              disabled={!value}
+            />
           </>
         }
       />
