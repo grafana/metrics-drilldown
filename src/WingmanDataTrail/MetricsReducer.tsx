@@ -104,7 +104,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     );
 
     this._subs.add(
-      this.subscribeToEvent(EventApplyFunction, (_) => {
+      this.subscribeToEvent(EventApplyFunction, () => {
         this.state.drawer.close();
       })
     );
