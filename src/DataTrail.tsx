@@ -34,7 +34,6 @@ import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
-import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
 import { ROUTES } from './constants';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
@@ -586,16 +585,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   static Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const {
-      controls,
-      topScene,
-      settings,
-      pluginInfo,
-      useOtelExperience,
-      embedded,
-      histogramsLoaded,
-      nativeHistograms,
-    } = model.useState();
+    const { controls, topScene, settings, pluginInfo, useOtelExperience, embedded } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight();
     const styles = useStyles2(getStyles, embedded ? 0 : chromeHeaderHeight ?? 0);
@@ -620,7 +610,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     return (
       <div className={styles.container}>
-        {NativeHistogramBanner({ histogramsLoaded, nativeHistograms, trail: model })}
         {showHeaderForFirstTimeUsers && <MetricsHeader />}
         {controls && (
           <div className={styles.controls} data-testid="app-controls">
