@@ -32,6 +32,7 @@ import React, { useEffect, useRef } from 'react';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
+import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
 import { ROUTES } from './constants';
@@ -291,7 +292,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   // use this to initialize histograms in all scenes
   public async initializeHistograms() {
     if (!this.state.histogramsLoaded) {
-      await this.datasourceHelper.initializeHistograms();
+      try {
+        await this.datasourceHelper.initializeHistograms();
+      } catch (error) {
+        displayWarning(['Error while initializing histograms!']);
+      }
 
       this.setState({
         nativeHistograms: this.listNativeHistograms(),
