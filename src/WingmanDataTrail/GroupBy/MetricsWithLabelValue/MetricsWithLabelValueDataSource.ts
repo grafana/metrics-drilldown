@@ -60,10 +60,10 @@ export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
     const matcher = removeRules ? query.replace('removeRules', '') : query;
 
     if (ds.languageProvider.fetchLabelValues.length === 2) {
+      metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch('__name__', matcher);
+    } else {
       // @ts-ignore: Ignoring type error due to breaking change in fetchLabelValues signature
       metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch(timeRange, '__name__', matcher);
-    } else {
-      metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch('__name__', matcher);
     }
 
     if (removeRules) {
