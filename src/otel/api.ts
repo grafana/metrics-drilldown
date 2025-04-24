@@ -57,11 +57,15 @@ export async function totalOtelResources(
   const responseTotal = await getBackendSrv()
     .get<OtelResponse>(url, paramsTotalTargets, `metrics-drilldown-otel-check-total-${query}`)
     .catch((error) => {
-      const { statusText, status } = error;
-      displayWarning([
-        'Error while fetching OTel resources! Defaulting to an empty array.',
-        `${statusText} (${status})`,
-      ]);
+      const { type, statusText, status } = error;
+
+      if (type !== 'cancelled') {
+        displayWarning([
+          'Error while fetching OTel resources! Defaulting to an empty array.',
+          `${statusText} (${status})`,
+        ]);
+      }
+
       return { data: { result: [] } };
     });
 
