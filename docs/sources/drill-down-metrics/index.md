@@ -51,7 +51,7 @@ Apply advanced filters to further refine the metrics that appear in Metrics Dril
 | Group by labels | Group metrics by their label values.                                                                              |
 
 {{< admonition type="note" >}}
-Multiple selections for filter apply "OR" logic, but selections between filters apply "AND" logic. For example, if you apply two prefix filters and one suffix filter, metrics that contain either prefix and the suffix appear. {{< /admonition >}}
+Multiple selections for a filter apply "OR" logic, but selections between filters apply "AND" logic. For example, if you apply two prefix filters and one suffix filter, metrics that contain either prefix and the suffix appear. {{< /admonition >}}
 
 ## Analyze selected metrics
 
