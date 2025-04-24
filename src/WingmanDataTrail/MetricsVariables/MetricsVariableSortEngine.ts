@@ -1,92 +1,74 @@
-import { SceneVariableValueChangedEvent, type MultiValueVariable } from '@grafana/scenes';
+import { sceneGraph, SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
 
-import { getTrailFor } from 'utils';
+import { logger } from 'tracking/logger/logger';
 import {
-  fetchAlertingMetrics,
-  fetchDashboardMetrics,
-  sortMetricsAlphabetically,
+  MetricsSorter,
   sortMetricsByCount,
-  sortMetricsReverseAlphabetically,
+  sortMetricsWithRecentFirst,
   type SortingOption,
-} from 'WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
+} from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/metricUsageFetcher';
+
+import { areArraysEqual } from './helpers/areArraysEqual';
 
 export class MetricsVariableSortEngine {
-  private variable: MultiValueVariable;
+  private variable: QueryVariable;
+  private lastMetrics: string[];
   private sortBy?: SortingOption;
 
-  constructor(variable: MultiValueVariable) {
+  constructor(variable: QueryVariable) {
     this.variable = variable;
     this.sortBy = undefined;
+    this.lastMetrics = [];
   }
 
-  public sort(sortBy = this.sortBy, notify = true) {
-    this.sortBy = sortBy;
+  public async sort(sortBy = this.sortBy) {
+    const metrics = this.variable.state.options.map((option) => option.value as string);
 
-    const trail = getTrailFor(this.variable);
-    const metrics = (this.variable as MultiValueVariable).state.options.map((option) => option.value as string);
+    if (sortBy === this.sortBy && areArraysEqual(metrics, this.lastMetrics)) {
+      return;
+    }
+
+    let sortedMetrics: string[];
 
     switch (sortBy) {
       case 'dashboard-usage':
-        this.sortByDashboardUsage(metrics, trail.state.dashboardMetrics);
-        break;
-
       case 'alerting-usage':
-        this.sortByAlertingUsage(metrics, trail.state.alertingMetrics);
+        sortedMetrics = await this.sortByUsage(metrics, sortBy);
         break;
-
-      case 'reverse-alphabetical':
-        this.variable.setState({
-          options: sortMetricsReverseAlphabetically(metrics).map((metricName) => ({
-            label: metricName,
-            value: metricName,
-          })),
-        });
-        break;
-
       default:
-        this.variable.setState({
-          options: sortMetricsAlphabetically(metrics).map((metricName) => ({
-            label: metricName,
-            value: metricName,
-          })),
-        });
+        sortedMetrics = sortMetricsWithRecentFirst(metrics);
         break;
     }
 
-    if (notify) {
-      this.notifyUpdate();
-    }
+    this.sortBy = sortBy;
+    this.lastMetrics = sortedMetrics;
+
+    this.variable.setState({
+      options: sortedMetrics.map((metricName) => ({
+        label: metricName,
+        value: metricName,
+      })),
+    });
+
+    this.notifyUpdate();
   }
 
-  private async sortByDashboardUsage(metrics: string[], existingDashboardMetrics?: Record<string, number>) {
+  private async sortByUsage(metrics: string[], usageType: MetricUsageType) {
     try {
-      const dashboardMetrics = existingDashboardMetrics ? existingDashboardMetrics : await fetchDashboardMetrics();
-
-      this.variable.setState({
-        options: sortMetricsByCount(metrics, dashboardMetrics).map((metricName) => ({
-          label: metricName,
-          value: metricName,
-        })),
+      const metricsSorter = sceneGraph.findByKeyAndType(this.variable, 'metrics-sorter', MetricsSorter);
+      if (!metricsSorter) {
+        logger.warn('Metrics sorter not found. Returning unsorted metrics.', { usageType });
+        return metrics;
+      }
+      const usageMetrics = await metricsSorter.getUsageMetrics(usageType);
+      return sortMetricsByCount(metrics, usageMetrics);
+    } catch (err) {
+      const error = typeof err === 'string' ? new Error(err) : (err as Error);
+      logger.error(error, {
+        usageType,
       });
-    } catch (error) {
-      console.error('Failed to fetch dashboard metrics!');
-      console.error(error);
-    }
-  }
-
-  private async sortByAlertingUsage(metrics: string[], existingAlertingMetrics?: Record<string, number>) {
-    try {
-      const alertingMetrics = existingAlertingMetrics ? existingAlertingMetrics : await fetchAlertingMetrics();
-
-      this.variable.setState({
-        options: sortMetricsByCount(metrics, alertingMetrics).map((metricName) => ({
-          label: metricName,
-          value: metricName,
-        })),
-      });
-    } catch (error) {
-      console.error('Failed to fetch alerting metrics!');
-      console.error(error);
+      return metrics;
     }
   }
 

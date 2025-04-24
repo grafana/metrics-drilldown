@@ -1,9 +1,10 @@
 import { css, cx } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { FieldMatcherID, LoadingState, type GrafanaTheme2 } from '@grafana/data';
 import {
   SceneObjectBase,
   SceneQueryRunner,
   type SceneComponentProps,
+  type SceneDataQuery,
   type SceneObject,
   type SceneObjectState,
   type VizPanel,
@@ -11,14 +12,16 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { buildPrometheusQuery } from 'autoQuery/buildPrometheusQuery';
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
 import { ConfigureAction, type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
-import { buildPrometheusQuery } from './buildPrometheusQuery';
-import { buildStatusHistoryPanel } from './panels/statushistory';
-import { buildTimeseriesPanel } from './panels/timeseries';
+import { NativeHistogramBadge } from './NativeHistogramBadge';
+import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
+import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
+import { buildTimeseriesPanel } from './panels/buildTimeseriesPanel';
 
 interface MetricVizPanelState extends SceneObjectState {
   metricName: string;
@@ -31,6 +34,7 @@ interface MetricVizPanelState extends SceneObjectState {
   matchers: string[];
   body: VizPanel;
   headerActions: SceneObject[];
+  isNativeHistogram?: boolean;
 }
 
 export const METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '240px';
@@ -50,6 +54,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     height?: MetricVizPanelState['height'];
     highlight?: MetricVizPanelState['highlight'];
     headerActions?: SceneObject[];
+    isNativeHistogram?: boolean;
   }) {
     const stateWithDefaults = {
       ...state,
@@ -59,17 +64,58 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       height: state.height || METRICS_VIZ_PANEL_HEIGHT,
       hideLegend: Boolean(state.hideLegend),
       highlight: Boolean(state.highlight),
-      headerActions: state.headerActions || [
-        new SelectAction({ metricName: state.metricName }),
-        new ConfigureAction({ metricName: state.metricName }),
+      headerActions: [
+        ...(state.isNativeHistogram ? [new NativeHistogramBadge({})] : []),
+        ...(state.headerActions || [
+          new SelectAction({ metricName: state.metricName }),
+          new ConfigureAction({ metricName: state.metricName }),
+        ]),
       ],
     };
 
     super({
       key: `metric-viz-panel-${stateWithDefaults.metricName}`,
       ...stateWithDefaults,
-      body: MetricVizPanel.buildVizPanel(stateWithDefaults),
+      body: MetricVizPanel.buildVizPanel({
+        ...stateWithDefaults,
+        isNativeHistogram: state.isNativeHistogram,
+      }),
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    const { body, prometheusFunction } = this.state;
+
+    this._subs.add(
+      (body.state.$data as SceneQueryRunner).subscribeToState((newState) => {
+        if (newState.data?.state !== LoadingState.Done) {
+          return;
+        }
+
+        const { series } = newState.data;
+
+        if (series?.length) {
+          body.setState({
+            fieldConfig: {
+              defaults: body.state.fieldConfig.defaults,
+              overrides: [
+                {
+                  matcher: { id: FieldMatcherID.byFrameRefID, options: series[0].refId },
+                  properties: [
+                    {
+                      id: 'displayName',
+                      value: prometheusFunction,
+                    },
+                  ],
+                },
+              ],
+            },
+          });
+        }
+      })
+    );
   }
 
   private static buildVizPanel({
@@ -81,6 +127,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     prometheusFunction,
     matchers,
     headerActions,
+    isNativeHistogram = false,
   }: {
     metricName: MetricVizPanelState['metricName'];
     title: MetricVizPanelState['title'];
@@ -90,6 +137,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     prometheusFunction: MetricVizPanelState['prometheusFunction'];
     matchers: MetricVizPanelState['matchers'];
     headerActions: MetricVizPanelState['headerActions'];
+    isNativeHistogram?: boolean;
   }) {
     const panelTitle = highlight ? `${title} (current)` : title;
     const unit = getUnit(metricName);
@@ -104,10 +152,32 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         queryRunner: MetricVizPanel.buildQueryRunner({
           metricName,
           matchers,
-          prometheusFunction,
+          prometheusFunction: 'min',
         }),
       })
         .setUnit(unit) // Set the appropriate unit for status history panel as well
+        .build();
+    }
+
+    // check if metric is a histogram (either classic or native)
+    const isHistogram = metricName.endsWith('_bucket') || isNativeHistogram;
+    if (isHistogram) {
+      return buildHeatmapPanel({
+        panelTitle,
+        headerActions,
+        color,
+        hideLegend,
+        queryRunner: MetricVizPanel.buildQueryRunner({
+          metricName,
+          matchers,
+          prometheusFunction: 'rate',
+          groupByLabel: isNativeHistogram ? '' : 'le', // Group by is not needed for `rate` function but keeping this logic because we will use it in the future for the metric scene with the prom query builder.
+          queryOptions: {
+            format: 'heatmap',
+          },
+        }),
+      })
+        .setUnit(unit)
         .build();
     }
 
@@ -131,20 +201,42 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     metricName,
     matchers,
     prometheusFunction,
+    groupByLabel,
+    queryOptions = {},
   }: {
     metricName: string;
     matchers: string[];
     prometheusFunction: PrometheusFn;
+    groupByLabel?: string;
+    queryOptions?: Partial<SceneDataQuery>;
   }): SceneQueryRunner {
-    const expr = buildPrometheusQuery({ metricName, matchers, fn: prometheusFunction });
+    const filters = matchers.map((matcher) => {
+      const [key, value] = matcher.split('=');
+      return {
+        key,
+        value: value.replace(/['"]/g, ''),
+        operator: '=',
+      };
+    });
+    const expr = buildPrometheusQuery({
+      metric: metricName,
+      filters,
+      isRateQuery: false,
+      useOtelJoin: false,
+      ignoreUsage: true,
+      groupings: [],
+      nonRateQueryFunction: prometheusFunction as 'avg' | 'min' | 'max',
+    });
 
     return new SceneQueryRunner({
       datasource: trailDS,
       maxDataPoints: MetricVizPanel.MAX_DATA_POINTS,
       queries: [
         {
+          ...queryOptions,
           refId: metricName,
           expr,
+          fromExploreMetrics: true,
         },
       ],
     });

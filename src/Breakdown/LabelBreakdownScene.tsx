@@ -668,8 +668,8 @@ function fixLegendForUnspecifiedLabelValueBehavior(vizPanel: VizPanel) {
       const label = legendFormat.slice(2, -2);
 
       newState.data?.series.forEach((series) => {
-        if (!series.fields[1].labels?.[label]) {
-          const labels = series.fields[1].labels;
+        if (!series.fields[1]?.labels?.[label]) {
+          const labels = series.fields[1]?.labels;
           if (labels) {
             labels[label] = `<unspecified ${label}>`;
           }

@@ -1,12 +1,11 @@
 import { css } from '@emotion/css';
-import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
-import { type PromQuery } from '@grafana/prometheus';
-import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
+import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
+import { utf8Support, type PromQuery } from '@grafana/prometheus';
+import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
   CustomVariable,
-  DataSourceVariable,
   SceneControlsSpacer,
   sceneGraph,
   SceneObjectBase,
@@ -15,10 +14,8 @@ import {
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
-  sceneUtils,
   SceneVariableSet,
   UrlSyncContextProvider,
-  UrlSyncManager,
   VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
@@ -32,23 +29,19 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
+import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
-import { LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
-import { FilteredMetricsVariable } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import { MetricsOnboarding } from 'WingmanOnboarding/MetricsOnboarding';
-import { VariantVariable } from 'WingmanOnboarding/VariantVariable';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
 import { NativeHistogramBanner } from './banners/NativeHistogramBanner';
+import { ROUTES } from './constants';
 import { DataTrailSettings } from './DataTrailSettings';
-import { DataTrailHistory } from './DataTrailsHistory';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { MetricsHeader } from './MetricsHeader';
-import { migrateOtelDeploymentEnvironment } from './migrations/otelDeploymentEnvironment';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
 import {
   getOtelJoinQuery,
@@ -72,20 +65,15 @@ import {
   VAR_OTEL_RESOURCES,
 } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
-import { getTrailFor, limitAdhocProviders } from './utils';
+import { currentPathIncludes, getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
-import {
-  fetchAlertingMetrics,
-  fetchDashboardMetrics,
-} from './WingmanDataTrail/HeaderControls/MetricsSorter/MetricsSorter';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
   controls: SceneObject[];
-  history: DataTrailHistory;
   settings: DataTrailSettings;
   pluginInfo: SceneReactObject;
   createdAt: number;
@@ -109,9 +97,6 @@ export interface DataTrailState extends SceneObjectState {
   addingLabelFromBreakdown?: boolean; // do not use the otel and metrics var subscription when adding label from the breakdown
   afterFirstOtelCheck?: boolean; // don't reset because of the migration on the first otel check from the data source updating
 
-  // moved into settings
-  showPreviews?: boolean;
-
   // Synced with url
   metric?: string;
   metricSearch?: string;
@@ -119,11 +104,13 @@ export interface DataTrailState extends SceneObjectState {
   histogramsLoaded: boolean;
   nativeHistograms: string[];
   nativeHistogramMetric: string;
+
+  trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'metricSearch', 'showPreviews', 'nativeHistogramMetric'],
+    keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
   });
 
   public constructor(state: Partial<DataTrailState>) {
@@ -138,7 +125,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],
-      history: state.history ?? new DataTrailHistory({}),
       settings: state.settings ?? new DataTrailSettings({}),
       pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
@@ -147,10 +133,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       // default to false but update this to true on updateOtelData()
       // or true if the user either turned on the experience
       useOtelExperience: state.useOtelExperience ?? false,
-      showPreviews: state.showPreviews ?? true,
       nativeHistograms: state.nativeHistograms ?? [],
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
+      trailActivated: state.trailActivated ?? false,
       ...state,
     });
 
@@ -158,8 +144,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   public _onActivate() {
-    const urlParams = urlUtil.getUrlSearchParams();
-    migrateOtelDeploymentEnvironment(this, urlParams);
+    this.setState({ trailActivated: true });
 
     if (!this.state.topScene) {
       this.setState({ topScene: getTopSceneFor(this.state.metric) });
@@ -241,33 +226,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     };
     window.addEventListener('unload', saveRecentTrail);
 
-    // Fetch metric usage data
-    this.updateMetricUsageData();
-
     return () => {
       if (!this.state.embedded) {
         saveRecentTrail();
       }
       window.removeEventListener('unload', saveRecentTrail);
     };
-  }
-
-  /**
-   * Updates metric usage data from dashboards and alerting rules
-   */
-  private async updateMetricUsageData() {
-    try {
-      // Fetch both metrics sources concurrently
-      const [dashboardMetrics, alertingMetrics] = await Promise.all([fetchDashboardMetrics(), fetchAlertingMetrics()]);
-
-      this.setState({ dashboardMetrics, alertingMetrics });
-    } catch (error) {
-      console.error('Failed to fetch metric usage data:', error);
-      this.setState({
-        dashboardMetrics: {},
-        alertingMetrics: {},
-      });
-    }
   }
 
   protected _variableDependency = new VariableDependencyConfig(this, {
@@ -352,28 +316,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.getMetricMetadata(this.state.metric);
   }
 
-  public restoreFromHistoryStep(state: DataTrailState) {
-    if (!state.topScene && !state.metric) {
-      // If the top scene for an  is missing, correct it.
-      state.topScene = new MetricSelectScene({});
-    }
-
-    this.setState(
-      sceneUtils.cloneSceneObjectState(state, {
-        history: this.state.history,
-        metric: !state.metric ? undefined : state.metric,
-        metricSearch: !state.metricSearch ? undefined : state.metricSearch,
-        // store type because this requires an expensive api call to determine
-        // when loading the metric scene
-        nativeHistogramMetric: !state.nativeHistogramMetric ? undefined : state.nativeHistogramMetric,
-      })
-    );
-
-    const urlState = new UrlSyncManager().getUrlState(this);
-    const fullUrl = urlUtil.renderUrl(locationService.getLocation().pathname, urlState);
-    locationService.replace(fullUrl);
-  }
-
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
     const metric = evt.payload ?? '';
 
@@ -387,7 +329,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       nativeHistogramMetric = true;
     }
 
-    this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    });
 
     // Add metric to adhoc filters baseFilter
     const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
@@ -411,11 +355,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   getUrlState(): SceneObjectUrlValues {
-    const { metric, metricSearch, showPreviews, nativeHistogramMetric } = this.state;
+    const { metric, metricSearch, nativeHistogramMetric } = this.state;
     return {
       metric,
       metricSearch,
-      ...{ showPreviews: showPreviews === false ? 'false' : null },
       // store the native histogram knowledge in url for the metric scene
       nativeHistogramMetric,
     };
@@ -437,17 +380,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
     } else if (values.metric == null) {
       stateUpdate.metric = undefined;
-      stateUpdate.topScene = new MetricSelectScene({});
+      stateUpdate.topScene = getFreshTopScene();
     }
 
     if (typeof values.metricSearch === 'string') {
       stateUpdate.metricSearch = values.metricSearch;
     } else if (values.metric == null) {
       stateUpdate.metricSearch = undefined;
-    }
-
-    if (typeof values.showPreviews === 'string') {
-      stateUpdate.showPreviews = values.showPreviews !== 'false';
     }
 
     this.setState(stateUpdate);
@@ -518,15 +457,18 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
    */
   private async fetchOtelResources(datasourceUid: string, timeRange: RawTimeRange) {
     const otelTargets = await totalOtelResources(datasourceUid, timeRange);
+    // if there are no otel targets, return early
+    // the following call for deployment environments will throw an error for a vendor data source that does not handle errors
+    // similar to the other Prometheus flavors.
+    if (otelTargets.jobs.length === 0 && otelTargets.instances.length === 0) {
+      return {
+        hasOtelResources: false,
+        nonPromotedOtelResources: [],
+        previouslyUsedOtelResources: false,
+      };
+    }
     const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
     const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
-
-    // loading from the url with otel resources selected will result in turning on OTel experience
-    const otelResourcesVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
-    let previouslyUsedOtelResources = false;
-    if (isAdHocFiltersVariable(otelResourcesVariable)) {
-      previouslyUsedOtelResources = otelResourcesVariable.state.filters.length > 0;
-    }
 
     // Future refactor: non promoted resources could be the full check
     //   - remove hasOtelResources
@@ -537,7 +479,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       otelTargets,
       deploymentEnvironments,
       hasOtelResources,
-      previouslyUsedOtelResources,
+      // all previous uses of OTel resources should start with it off
+      previouslyUsedOtelResources: false,
       nonPromotedOtelResources,
     };
   }
@@ -583,21 +526,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       return;
     }
 
-    // Wingman - we are forced to do this here and not in MetricsOnboarding because resetOtelExperience()
-    // is called after the child is rendered, so we can't hide it from there
-    if (this.state.topScene instanceof MetricsOnboarding) {
-      filtersVariable.setState({
-        hide: VariableHide.hideVariable,
-        filters: [],
-      });
-    } else {
-      // show the var filters normally
-      filtersVariable.setState({
-        addFilterButtonText: 'Add label',
-        label: 'Select label',
-        hide: VariableHide.hideLabel,
-      });
-    }
+    // show the var filters normally
+    filtersVariable.setState({
+      addFilterButtonText: 'Add label',
+      label: 'Select label',
+      hide: VariableHide.hideLabel,
+    });
 
     // Resetting the otel experience filters means clearing both the otel resources var and the otelMetricsVar
     // hide the super otel and metric filter and reset it
@@ -655,7 +589,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const {
       controls,
       topScene,
-      history,
       settings,
       pluginInfo,
       useOtelExperience,
@@ -689,7 +622,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       <div className={styles.container}>
         {NativeHistogramBanner({ histogramsLoaded, nativeHistograms, trail: model })}
         {showHeaderForFirstTimeUsers && <MetricsHeader />}
-        <history.Component model={history} />
         {controls && (
           <div className={styles.controls} data-testid="app-controls">
             {controls.map((control) => (
@@ -702,7 +634,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           </div>
         )}
         {topScene && (
-          <UrlSyncContextProvider scene={topScene}>
+          <UrlSyncContextProvider scene={topScene} createBrowserHistorySteps={true} updateUrlOnInit={true}>
             <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
           </UrlSyncContextProvider>
         )}
@@ -711,25 +643,26 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
+export function getFreshTopScene() {
+  if (currentPathIncludes(ROUTES.TrailWithSidebar)) {
+    return new MetricsReducer();
+  } else {
+    return new MetricSelectScene({});
+  }
+}
+
 export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   if (metric) {
     return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
   } else {
-    return new MetricSelectScene({});
+    return getFreshTopScene();
   }
 }
 
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   return new SceneVariableSet({
     variables: [
-      new DataSourceVariable({
-        key: VAR_DATASOURCE,
-        name: VAR_DATASOURCE,
-        label: 'Data source',
-        description: 'Only prometheus data sources are supported',
-        value: initialDS,
-        pluginId: 'prometheus',
-      }),
+      new MetricsDrilldownDataSourceVariable({ initialDS }),
       new AdHocFiltersVariable({
         name: VAR_OTEL_RESOURCES,
         label: 'Select resource attributes',
@@ -758,7 +691,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           // to prevent the metric name from being set twice in the query and causing an error.
           const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
           return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
-            .map((filter) => `${filter.key}${filter.operator}"${filter.value}"`)
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
       }),
@@ -796,10 +729,6 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         placeholder: 'Select',
         isMulti: true,
       }),
-      new VariantVariable(),
-      new MetricsVariable({}),
-      new FilteredMetricsVariable(),
-      new LabelsVariable(),
     ],
   });
 }
@@ -812,7 +741,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       gap: theme.spacing(1),
       flexDirection: 'column',
       background: theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas,
-      padding: theme.spacing(2, 3, 2, 3),
+      padding: theme.spacing(1, 2),
     }),
     body: css({
       flexGrow: 1,

@@ -18,6 +18,7 @@ services:
     volumes:
       - ../../dist:/var/lib/grafana/plugins/grafana-metricsdrilldown-app
       - ../provisioning/grafana:/etc/grafana/provisioning
+      - ../provisioning/grafana/dashboards/dashboardJson:/etc/dashboards
     extra_hosts:
       - 'host.docker.internal:host-gateway'
 
@@ -38,6 +39,11 @@ services:
       --storage.tsdb.path=/prometheus/data
       --storage.tsdb.retention.time=42y
 
-  prometheus-utf8:
-    container_name: 'prometheus-utf8-e2e'
-    build: ./prometheus_utf8
+  fake-server-utf8:
+    # Grabbed from: https://github.com/grafana/grafana/tree/main/devenv/docker/blocks/prometheus_utf8
+    container_name: 'fake-server-utf8-e2e'
+    build: ./fake-server-utf8
+    ports:
+      - '9112:9112'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'

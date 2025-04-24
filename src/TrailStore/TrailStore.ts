@@ -4,23 +4,28 @@ import { debounce, isEqual } from 'lodash';
 
 import { createBookmarkSavedNotification } from './utils';
 import { DataTrail } from '../DataTrail';
-import { type TrailStepType } from '../DataTrailsHistory';
+// import { type TrailStepType } from '../DataTrailsHistory';
 import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY } from '../shared';
 import { newMetricsTrail } from '../utils';
 
 const MAX_RECENT_TRAILS = 20;
 
-export interface SerializedTrailHistory {
+// Added when removing history to replace serialized trail history with only URL values
+export interface UrlSerializedTrail {
   urlValues: SceneObjectUrlValues;
-  type: TrailStepType;
-  description: string;
-  parentIndex: number;
 }
 
+// used in the migration for old history format
 export interface SerializedTrail {
   history: SerializedTrailHistory[];
   currentStep?: number; // Assume last step in history if not specified
   createdAt?: number;
+}
+
+// used in the migration for old history format
+export interface SerializedTrailHistory {
+  urlValues: SceneObjectUrlValues;
+  description: string;
 }
 
 export interface DataTrailBookmark {
@@ -42,14 +47,13 @@ export class TrailStore {
         .slice(0, MAX_RECENT_TRAILS)
         .map((trail) => this._serializeTrail(trail.resolve()));
       localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify(serializedRecent));
-
       localStorage.setItem(TRAIL_BOOKMARKS_KEY, JSON.stringify(this._bookmarks));
       this._lastModified = Date.now();
     };
 
     this._save = debounce(doSave, 1000);
 
-    window.addEventListener('beforeunload', (ev) => {
+    window.addEventListener('beforeunload', () => {
       // Before closing or reloading the page, we want to remove the debounce from `_save` so that
       // any calls to is on event `unload` are actualized. Debouncing would cause a delay until after the page has been unloaded.
       this._save = doSave;
@@ -59,7 +63,6 @@ export class TrailStore {
   private _loadRecentTrailsFromStorage() {
     const list: Array<SceneObjectRef<DataTrail>> = [];
     const storageItem = localStorage.getItem(RECENT_TRAILS_KEY);
-
     if (storageItem) {
       const serializedTrails: SerializedTrail[] = JSON.parse(storageItem);
       for (const t of serializedTrails) {
@@ -89,46 +92,28 @@ export class TrailStore {
     });
   }
 
-  private _deserializeTrail(t: SerializedTrail): DataTrail {
+  private _deserializeTrail(t: SerializedTrail | UrlSerializedTrail): DataTrail {
     // reconstruct the trail based on the serialized history
-    const trail = new DataTrail({ createdAt: t.createdAt });
+    const trail = new DataTrail({});
 
-    t.history.map((step) => {
-      this._loadFromUrl(trail, step.urlValues);
-      const parentIndex = step.parentIndex ?? trail.state.history.state.steps.length - 1;
-      // Set the parent of the next trail step by setting the current step in history.
-      trail.state.history.setState({ currentStep: parentIndex });
-      trail.state.history.addTrailStepFromStorage(trail, step);
-    });
-
-    const currentStep = t.currentStep ?? trail.state.history.state.steps.length - 1;
-
-    trail.state.history.setState({ currentStep });
-
-    trail.setState(
-      sceneUtils.cloneSceneObjectState(trail.state.history.state.steps[currentStep].trailState, {
-        history: trail.state.history,
-      })
-    );
+    const isSerializedTrail = 'history' in t;
+    const urlSerializedTrail = 'urlValues' in t;
+    if (isSerializedTrail) {
+      t.history.map((step) => {
+        // will go through all steps until the last one and load the most recent one
+        this._loadFromUrl(trail, step.urlValues);
+      });
+    } else if (urlSerializedTrail) {
+      this._loadFromUrl(trail, t.urlValues);
+    }
+    trail.setState(sceneUtils.cloneSceneObjectState(trail.state, {}));
 
     return trail;
   }
 
-  private _serializeTrail(trail: DataTrail): SerializedTrail {
-    const history = trail.state.history.state.steps.map((step) => {
-      const stepTrail = new DataTrail(sceneUtils.cloneSceneObjectState(step.trailState));
-      return {
-        urlValues: sceneUtils.getUrlState(stepTrail),
-        type: step.type,
-        description: step.description,
-        parentIndex: step.parentIndex,
-      };
-    });
-    return {
-      history,
-      currentStep: trail.state.history.state.currentStep,
-      createdAt: trail.state.createdAt,
-    };
+  private _serializeTrail(trail: DataTrail): UrlSerializedTrail {
+    const urlValues = sceneUtils.getUrlState(trail);
+    return { urlValues };
   }
 
   public getTrailForBookmarkIndex(index: number) {
@@ -150,7 +135,6 @@ export class TrailStore {
       }
     }
     // Just create a new trail with that state
-
     const trail = new DataTrail({});
     this._loadFromUrl(trail, bookmark.urlValues);
     return trail;
@@ -178,10 +162,11 @@ export class TrailStore {
     this._lastModified = Date.now();
   }
 
-  setRecentTrail<T extends DataTrail>(recentTrail: T) {
-    const { steps } = recentTrail.state.history.state;
-    if (steps.length === 0 || (steps.length === 1 && steps[0].type === 'start')) {
-      // We do not set an uninitialized trail, or a single node "start" trail as recent
+  setRecentTrail(recentTrail: DataTrail, fromHome?: boolean) {
+    const notActivated = !recentTrail.state.trailActivated;
+
+    if (notActivated || fromHome) {
+      // We do not set an uninitialized trail, or a RECENT single node "start" trail
       return;
     }
 
@@ -189,7 +174,8 @@ export class TrailStore {
     this._recent = this._recent.filter((t) => t !== recentTrail.getRef());
 
     // Check if any existing "recent" entries have equivalent urlState to the new recentTrail
-    const recentUrlState = getUrlStateForComparison(recentTrail); //
+    const recentUrlState = getUrlStateForComparison(recentTrail);
+
     this._recent = this._recent.filter((t) => {
       // Use the current step urlValues to filter out equivalent states
       const urlState = getUrlStateForComparison(t.resolve());
