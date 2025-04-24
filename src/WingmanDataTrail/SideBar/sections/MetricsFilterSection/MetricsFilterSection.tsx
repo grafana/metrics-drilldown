@@ -201,9 +201,6 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
           case ruleGroupLabels.rules:
             filterType = 'recording_rules';
             break;
-          case ruleGroupLabels.alerts:
-            filterType = 'alerting_rules';
-            break;
           default:
             return; // Skip if it's not a recognized rules filter
         }
