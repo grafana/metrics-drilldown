@@ -2,6 +2,8 @@ import { type RawTimeRange, type Scope } from '@grafana/data';
 import { getPrometheusTime, isValidLegacyName } from '@grafana/prometheus';
 import { config, getBackendSrv } from '@grafana/runtime';
 
+import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
+
 import { callSuggestionsApi } from '../utils';
 import { type LabelResponse, type OtelResponse, type OtelTargetType } from './types';
 import { limitOtelMatchTerms, sortResources } from './util';
@@ -52,11 +54,16 @@ export async function totalOtelResources(
     query,
   };
 
-  const responseTotal = await getBackendSrv().get<OtelResponse>(
-    url,
-    paramsTotalTargets,
-    `metrics-drilldown-otel-check-total-${query}`
-  );
+  const responseTotal = await getBackendSrv()
+    .get<OtelResponse>(url, paramsTotalTargets, `metrics-drilldown-otel-check-total-${query}`)
+    .catch((error) => {
+      const { statusText, status } = error;
+      displayWarning([
+        'Error while fetching OTel resources! Defaulting to an empty array.',
+        `${statusText} (${status})`,
+      ]);
+      return { data: { result: [] } };
+    });
 
   let jobs: string[] = [];
   let instances: string[] = [];
