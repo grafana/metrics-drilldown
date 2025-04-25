@@ -638,10 +638,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 }
 
 export function getFreshTopScene() {
-  if (currentPathIncludes(ROUTES.TrailWithSidebar)) {
-    return new MetricsReducer();
-  } else {
+  if (currentPathIncludes(ROUTES.Trail)) {
     return new MetricSelectScene({});
+  } else {
+    return new MetricsReducer();
   }
 }
 

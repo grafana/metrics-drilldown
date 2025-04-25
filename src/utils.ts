@@ -58,10 +58,7 @@ export function getUrlForTrail(trail: DataTrail) {
 
 // TODO: We can simplify this when we remove the Homepage and/or the Trail experience
 export function getUrlForValues(values: SceneObjectUrlValues) {
-  return urlUtil.renderUrl(
-    getCurrentPath().includes(ROUTES.TrailWithSidebar) ? ROUTES.TrailWithSidebar : ROUTES.Trail,
-    values
-  );
+  return urlUtil.renderUrl(currentPathIncludes(ROUTES.Trail) ? ROUTES.Trail : ROUTES.TrailWithSidebar, values);
 }
 
 export function getCurrentPath(): Location['pathname'] {

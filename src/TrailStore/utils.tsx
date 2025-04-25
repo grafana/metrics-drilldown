@@ -9,9 +9,9 @@ import { currentPathIncludes } from '../utils';
 
 export function createBookmarkSavedNotification() {
   const appEvents = getAppEvents();
-  const isSidebarView = currentPathIncludes(ROUTES.TrailWithSidebar);
+  const isTrailView = currentPathIncludes(ROUTES.Trail);
 
-  const infoText = !isSidebarView ? <i>Drilldown &gt; Metrics</i> : <i>the Metrics Reducer sidebar</i>;
+  const infoText = isTrailView ? <i>Drilldown &gt; Metrics</i> : <i>the Metrics Reducer sidebar</i>;
 
   appEvents.publish({
     type: AppEvents.alertSuccess.name,
@@ -19,7 +19,7 @@ export function createBookmarkSavedNotification() {
       'Bookmark created',
       <Stack gap={2} direction="row" key="bookmark-notification">
         <div>You can view bookmarks under {infoText}</div>
-        {!isSidebarView && (
+        {isTrailView && (
           <LinkButton fill="solid" variant="secondary" href={HOME_ROUTE}>
             View bookmarks
           </LinkButton>
