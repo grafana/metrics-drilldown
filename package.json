@@ -5,8 +5,8 @@
   "license": "AGPL-3.0",
   "scripts": {
     "prebuild": "./scripts/update-commit-sha.sh",
-    "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
-    "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
+    "build": "webpack -c ./webpack.config.ts --env production",
+    "dev": "webpack -w -c ./webpack.config.ts --env development",
     "analyze": "webpack -c ./webpack-analyze.config.ts --env production",
     "test": "jest --watch --onlyChanged",
     "test:ci": "jest --passWithNoTests --maxWorkers 4",
