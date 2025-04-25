@@ -4,7 +4,7 @@ import { sceneGraph } from '@grafana/scenes';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene';
-import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { DataSourceType, MockDataSourceSrv } from './mocks/datasource';
 import {
   MetricSelectedEvent,
@@ -51,7 +51,7 @@ describe('DataTrail', () => {
     });
 
     it('Should default to metric select scene', () => {
-      expect(trail.state.topScene).toBeInstanceOf(MetricSelectScene);
+      expect(trail.state.topScene).toBeInstanceOf(MetricsReducer);
     });
 
     describe('And metric is selected', () => {
