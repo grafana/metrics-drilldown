@@ -12,7 +12,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { buildPrometheusQuery } from 'autoQuery/buildPrometheusQuery';
+import { buildPrometheusQuery, getPromqlFunction, type NonRateQueryFunction } from 'autoQuery/buildPrometheusQuery';
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
@@ -23,52 +23,49 @@ import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
 import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
 import { buildTimeseriesPanel } from './panels/buildTimeseriesPanel';
 
-interface MetricVizPanelState extends SceneObjectState {
+interface MetricVizPanelProps {
   metricName: string;
   color: string;
-  prometheusFunction: PrometheusFn;
-  title: string;
-  hideLegend: boolean;
-  highlight: boolean;
-  height: string;
-  matchers: string[];
+  headerActions?: SceneObject[];
+  height?: string;
+  hideLegend?: boolean;
+  highlight?: boolean;
+  isNativeHistogram: boolean;
+  matchers?: string[];
+  prometheusFunction?: PrometheusFn;
+  title?: string;
+}
+
+interface MetricVizPanelState
+  extends SceneObjectState,
+    Pick<Required<MetricVizPanelProps>, 'height' | 'highlight' | 'prometheusFunction'> {
   body: VizPanel;
-  headerActions: SceneObject[];
-  isNativeHistogram?: boolean;
 }
 
 export const METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '240px';
 export const METRICS_VIZ_PANEL_HEIGHT = '200px';
 export const METRICS_VIZ_PANEL_HEIGHT_SMALL = '160px';
+const rateQueryMetricSuffixes = new Set(['count', 'total', 'sum', 'bucket']);
 
 export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   private static readonly MAX_DATA_POINTS = 250;
 
-  constructor(state: {
-    metricName: MetricVizPanelState['metricName'];
-    color: MetricVizPanelState['color'];
-    prometheusFunction?: MetricVizPanelState['prometheusFunction'];
-    matchers?: MetricVizPanelState['matchers'];
-    title?: MetricVizPanelState['title'];
-    hideLegend?: MetricVizPanelState['hideLegend'];
-    height?: MetricVizPanelState['height'];
-    highlight?: MetricVizPanelState['highlight'];
-    headerActions?: SceneObject[];
-    isNativeHistogram?: boolean;
-  }) {
+  constructor(props: MetricVizPanelProps) {
+    const { isRateQuery } = MetricVizPanel.determineQueryProperties(props.metricName, props.isNativeHistogram);
     const stateWithDefaults = {
-      ...state,
-      prometheusFunction: state.prometheusFunction || 'sum',
-      matchers: state.matchers || [],
-      title: state.title || state.metricName,
-      height: state.height || METRICS_VIZ_PANEL_HEIGHT,
-      hideLegend: Boolean(state.hideLegend),
-      highlight: Boolean(state.highlight),
+      ...props,
+      prometheusFunction: props.prometheusFunction ?? (getPromqlFunction(isRateQuery) as PrometheusFn),
+      isNativeHistogram: props.isNativeHistogram,
+      matchers: props.matchers || [],
+      title: props.title || props.metricName,
+      height: props.height || METRICS_VIZ_PANEL_HEIGHT,
+      hideLegend: Boolean(props.hideLegend),
+      highlight: Boolean(props.highlight),
       headerActions: [
-        ...(state.isNativeHistogram ? [new NativeHistogramBadge({})] : []),
-        ...(state.headerActions || [
-          new SelectAction({ metricName: state.metricName }),
-          new ConfigureAction({ metricName: state.metricName }),
+        ...(props.isNativeHistogram ? [new NativeHistogramBadge({})] : []),
+        ...(props.headerActions || [
+          new SelectAction({ metricName: props.metricName }),
+          new ConfigureAction({ metricName: props.metricName }),
         ]),
       ],
     };
@@ -78,7 +75,6 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       ...stateWithDefaults,
       body: MetricVizPanel.buildVizPanel({
         ...stateWithDefaults,
-        isNativeHistogram: state.isNativeHistogram,
       }),
     });
 
@@ -128,19 +124,14 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     matchers,
     headerActions,
     isNativeHistogram = false,
-  }: {
-    metricName: MetricVizPanelState['metricName'];
-    title: MetricVizPanelState['title'];
-    highlight: MetricVizPanelState['highlight'];
-    color: MetricVizPanelState['color'];
-    hideLegend: MetricVizPanelState['hideLegend'];
-    prometheusFunction: MetricVizPanelState['prometheusFunction'];
-    matchers: MetricVizPanelState['matchers'];
-    headerActions: MetricVizPanelState['headerActions'];
-    isNativeHistogram?: boolean;
+  }: Required<Omit<MetricVizPanelProps, 'prometheusFunction'>> & {
+    prometheusFunction?: MetricVizPanelProps['prometheusFunction'];
   }) {
     const panelTitle = highlight ? `${title} (current)` : title;
     const unit = getUnit(metricName);
+
+    // check if metric is a histogram (either classic or native)
+    const isHistogram = metricName.endsWith('_bucket') || isNativeHistogram;
 
     const isUptime = metricName === 'up' || metricName.endsWith('_up');
     if (isUptime) {
@@ -153,25 +144,24 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
           metricName,
           matchers,
           prometheusFunction: 'min',
+          isHistogram,
         }),
       })
         .setUnit(unit) // Set the appropriate unit for status history panel as well
         .build();
     }
 
-    // check if metric is a histogram (either classic or native)
-    const isHistogram = metricName.endsWith('_bucket') || isNativeHistogram;
     if (isHistogram) {
       return buildHeatmapPanel({
         panelTitle,
-        headerActions,
         color,
+        headerActions,
         hideLegend,
         queryRunner: MetricVizPanel.buildQueryRunner({
           metricName,
           matchers,
           prometheusFunction: 'rate',
-          groupByLabel: isNativeHistogram ? '' : 'le', // Group by is not needed for `rate` function but keeping this logic because we will use it in the future for the metric scene with the prom query builder.
+          isHistogram,
           queryOptions: {
             format: 'heatmap',
           },
@@ -191,6 +181,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         metricName,
         matchers,
         prometheusFunction,
+        isHistogram,
       }),
     })
       .setUnit(unit) // Set the appropriate unit
@@ -200,14 +191,14 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   private static buildQueryRunner({
     metricName,
     matchers,
+    isHistogram,
     prometheusFunction,
-    groupByLabel,
     queryOptions = {},
   }: {
     metricName: string;
     matchers: string[];
-    prometheusFunction: PrometheusFn;
-    groupByLabel?: string;
+    isHistogram: boolean;
+    prometheusFunction?: PrometheusFn;
     queryOptions?: Partial<SceneDataQuery>;
   }): SceneQueryRunner {
     const filters = matchers.map((matcher) => {
@@ -218,14 +209,15 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         operator: '=',
       };
     });
+    const { isRateQuery, groupings } = MetricVizPanel.determineQueryProperties(metricName, isHistogram);
     const expr = buildPrometheusQuery({
       metric: metricName,
       filters,
-      isRateQuery: false,
+      isRateQuery,
       useOtelJoin: false,
       ignoreUsage: true,
-      groupings: [],
-      nonRateQueryFunction: prometheusFunction as 'avg' | 'min' | 'max',
+      groupings,
+      ...(prometheusFunction ? { nonRateQueryFunction: prometheusFunction as NonRateQueryFunction } : {}),
     });
 
     return new SceneQueryRunner({
@@ -240,6 +232,23 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         },
       ],
     });
+  }
+
+  static determineQueryProperties(metricName: string, isHistogram: boolean) {
+    const parts = metricName.split('_');
+    const suffix = parts.at(-1);
+
+    // Determine if this is a rate query based on metric suffix
+    const isRateQuery = rateQueryMetricSuffixes.has(suffix || '');
+
+    // Determine groupings based on metric suffix and native histogram status
+    let groupings: string[] | undefined;
+
+    if (isHistogram) {
+      groupings = ['le'];
+    }
+
+    return { isRateQuery, groupings };
   }
 
   public static Component = ({ model }: SceneComponentProps<MetricVizPanel>) => {
