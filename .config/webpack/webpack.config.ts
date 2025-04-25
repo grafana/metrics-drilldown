@@ -34,11 +34,7 @@ __webpack_public_path__ =
 `,
 });
 
-export type Env = {
-  [key: string]: true | string | Env;
-};
-
-const config = async (env: Env): Promise<Configuration> => {
+const config = async (env): Promise<Configuration> => {
   const baseConfig: Configuration = {
     cache: {
       type: 'filesystem',
@@ -81,10 +77,10 @@ const config = async (env: Env): Promise<Configuration> => {
       // Mark legacy SDK imports as external if their name starts with the "grafana/" prefix
       ({ request }, callback) => {
         const prefix = 'grafana/';
-        const hasPrefix = (request: string) => request.indexOf(prefix) === 0;
-        const stripPrefix = (request: string) => request.substr(prefix.length);
+        const hasPrefix = (request) => request.indexOf(prefix) === 0;
+        const stripPrefix = (request) => request.substr(prefix.length);
 
-        if (request && hasPrefix(request)) {
+        if (hasPrefix(request)) {
           return callback(undefined, stripPrefix(request));
         }
 
