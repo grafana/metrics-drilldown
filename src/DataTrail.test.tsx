@@ -2,9 +2,10 @@ import { VariableHide } from '@grafana/data';
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene';
-import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { DataSourceType, MockDataSourceSrv } from './mocks/datasource';
 import {
   MetricSelectedEvent,
