@@ -1,13 +1,11 @@
-import { sceneGraph, UrlSyncContextProvider } from '@grafana/scenes';
+import { UrlSyncContextProvider } from '@grafana/scenes';
 import React, { useEffect, useState } from 'react';
 
 import { getTrailStore } from 'TrailStore/TrailStore';
-import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import { VAR_VARIANT, type VariantVariable } from 'WingmanOnboarding/VariantVariable';
 
 import type { DataTrail } from 'DataTrail';
 
-export default function Trail({ trail, variant }: { trail: DataTrail; variant: string }) {
+export default function Trail({ trail }: { trail: DataTrail }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -17,22 +15,14 @@ export default function Trail({ trail, variant }: { trail: DataTrail; variant: s
       }
       setIsInitialized(true);
     }
-
-    (sceneGraph.getVariables(trail).getByName(VAR_VARIANT) as VariantVariable)!.setState({
-      value: variant,
-    });
-
-    trail.setState({
-      topScene: new MetricsReducer(),
-    });
-  }, [trail, isInitialized, variant]);
+  }, [trail, isInitialized]);
 
   if (!isInitialized) {
     return null;
   }
 
   return (
-    <UrlSyncContextProvider scene={trail}>
+    <UrlSyncContextProvider scene={trail} createBrowserHistorySteps={true} updateUrlOnInit={true}>
       <trail.Component model={trail} />
     </UrlSyncContextProvider>
   );

@@ -4,7 +4,7 @@ process.env.TZ = 'UTC';
 
 const baseConfig = require('./.config/jest.config'); // Jest configuration provided by Grafana scaffolding
 const { nodeModulesToTransform, grafanaESModules } = require('./.config/jest/utils');
-const esModules = [...grafanaESModules, '@bsull/augurs', 'monaco-promql'];
+const esModules = [...grafanaESModules, '@bsull/augurs', 'monaco-promql', 'tsqtsq', 'p-limit', 'yocto-queue'];
 
 module.exports = {
   ...baseConfig,

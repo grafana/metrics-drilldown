@@ -8,13 +8,15 @@ export const VAR_METRICS_VARIABLE = 'metrics-wingman';
 export type MetricOptions = Array<{ label: string; value: string }>;
 
 interface MetricsVariableState extends SceneObjectState {
+  key: string;
   name?: string;
   label?: string;
 }
 
 export class MetricsVariable extends QueryVariable {
-  constructor(state: Partial<MetricsVariableState>) {
+  constructor(state?: MetricsVariableState) {
     super({
+      key: VAR_METRICS_VARIABLE,
       name: VAR_METRICS_VARIABLE,
       label: 'Metrics',
       ...state,

@@ -3,6 +3,7 @@ import { ToolbarButton } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { PLUGIN_BASE_URL } from './constants';
+import { UI_TEXT } from './constants/ui';
 import { type DataTrail } from './DataTrail';
 import { reportExploreMetrics } from './interactions';
 import { getUrlForTrail } from './utils';
@@ -11,8 +12,10 @@ interface ShareTrailButtonState {
   trail: DataTrail;
 }
 
+const COPY_LABEL = UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL;
+
 export const ShareTrailButton = ({ trail }: ShareTrailButtonState) => {
-  const [tooltip, setTooltip] = useState('Copy url');
+  const [tooltip, setTooltip] = useState(COPY_LABEL);
 
   const onShare = () => {
     if (navigator.clipboard) {
@@ -22,7 +25,7 @@ export const ShareTrailButton = ({ trail }: ShareTrailButtonState) => {
       navigator.clipboard.writeText(url);
       setTooltip('Copied!');
       setTimeout(() => {
-        setTooltip('Copy url');
+        setTooltip(COPY_LABEL);
       }, 2000);
     }
   };

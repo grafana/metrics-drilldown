@@ -30,6 +30,7 @@ export const VAR_MISSING_OTEL_TARGETS_EXPR = '${missing_otel_targets}';
 // for consolidating otel and metric filters into one adhoc filter set
 export const VAR_OTEL_AND_METRIC_FILTERS = 'otel_and_metric_filters';
 export const VAR_OTEL_AND_METRIC_FILTERS_EXPR = '${otel_and_metric_filters}';
+export const VAR_OTHER_METRIC_FILTERS = 'other_metric_filters';
 
 export const LOGS_METRIC = '$__logs__';
 export const KEY_SQR_METRIC_VIZ_QUERY = 'sqr-metric-viz-query';
@@ -58,11 +59,11 @@ export function getVariablesWithMetricConstant(metric: string) {
   ];
 }
 
-export function getVariablesWithOtelJoinQueryConstant(otelJoinQuery: string) {
+export function getVariablesWithOtelJoinQueryConstant() {
   return [
     new ConstantVariable({
       name: VAR_OTEL_JOIN_QUERY,
-      value: otelJoinQuery,
+      value: '',
       hide: VariableHide.hideVariable,
     }),
   ];

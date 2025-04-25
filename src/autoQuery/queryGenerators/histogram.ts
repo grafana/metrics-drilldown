@@ -4,7 +4,7 @@ import { type AutoQueryContext, type AutoQueryDef } from '../types';
 import { generateBaseQuery } from './baseQuery';
 
 export function createHistogramMetricQueryDefs(context: AutoQueryContext) {
-  const { unit } = context;
+  const { unit, nativeHistogram } = context;
 
   const common = {
     title: VAR_METRIC_EXPR,
@@ -41,7 +41,7 @@ export function createHistogramMetricQueryDefs(context: AutoQueryContext) {
         expr: generateBaseQuery({
           isRateQuery: true,
           isUtf8Metric: context.isUtf8Metric,
-          groupings: ['le'],
+          groupings: nativeHistogram ? [] : ['le'],
         }),
         fromExploreMetrics: true,
         format: 'heatmap',
@@ -66,7 +66,7 @@ function percentileQuery(context: AutoQueryContext, percentile: number, grouping
   const query = generateBaseQuery({
     isRateQuery: true,
     isUtf8Metric: context.isUtf8Metric,
-    groupings: ['le', ...groupings],
+    groupings: context.nativeHistogram ? [...groupings] : ['le', ...groupings],
   });
 
   return {

@@ -2,16 +2,14 @@ import { css } from '@emotion/css';
 import { type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange, type SelectableValue } from '@grafana/data';
 import { config, isFetchError } from '@grafana/runtime';
 import {
-  PanelBuilders,
-  SceneCSSGridItem,
   SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
   SceneObjectStateChangedEvent,
   SceneObjectUrlSyncConfig,
-  SceneVariableSet,
   VariableDependencyConfig,
   type SceneComponentProps,
+  type SceneCSSGridItem,
   type SceneFlexItem,
   type SceneFlexLayout,
   type SceneObject,
@@ -20,30 +18,31 @@ import {
   type SceneObjectUrlValues,
   type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
-import { Alert, Badge, Field, Icon, IconButton, InlineSwitch, Input, Select, Tooltip, useStyles2 } from '@grafana/ui';
+import { Alert, Badge, Combobox, Field, Icon, IconButton, InlineSwitch, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
 import { UI_TEXT } from 'constants/ui';
+import { totalOtelResources } from 'otel/api';
+import { getOtelResourcesObject } from 'otel/util';
+import { setOtelExperienceToggleState } from 'services/store';
 
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
-import { getMetricNames } from './api';
-import { setOtelExperienceToggleState } from '../services/store';
-import { getFilters, getTrailFor } from '../utils';
-import { getPreviewPanelFor } from './previewPanel';
-import { SelectMetricAction } from './SelectMetricAction';
 import {
-  getVariablesWithMetricConstant,
   MetricSelectedEvent,
   RefreshMetricsEvent,
   VAR_DATASOURCE,
   VAR_DATASOURCE_EXPR,
   VAR_FILTERS,
+  VAR_OTEL_RESOURCES,
 } from '../shared';
 import { StatusWrapper } from '../StatusWrapper';
+import { getTrailFor } from '../utils';
+import { getMetricNames } from './api';
+import { getPreviewPanelFor } from './PreviewPanel';
 import { sortRelatedMetrics } from './relatedMetrics';
 import { createJSRegExpFromSearchTerms, createPromRegExp, deriveSearchTermsFromInput } from './util';
 import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
@@ -72,7 +71,6 @@ export interface MetricSelectSceneState extends SceneObjectState {
 }
 
 const ROW_PREVIEW_HEIGHT = '175px';
-const ROW_CARD_HEIGHT = '64px';
 const METRIC_PREFIX_ALL = 'all';
 
 const MAX_METRIC_NAMES = 20000;
@@ -105,12 +103,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metricPrefix'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE],
-    onReferencedVariableValueChanged: (filter) => {
-      // In all cases of major variable changes, we want to reload the metric names
-      // But previously, we listened for changes in the filters variable
-      // Since we are handling __name__ filters specially,
-      // This variableDependency does not pick that label change up
+    variableNames: [VAR_DATASOURCE, VAR_OTEL_RESOURCES],
+    onReferencedVariableValueChanged: () => {
+      // In all cases, we want to reload the metric names
       this._debounceRefreshMetricNames();
     },
   });
@@ -139,17 +134,14 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToEvent(MetricSelectedEvent, (event) => {
-        const { steps, currentStep } = trail.state.history.state;
-        const prevStep = steps[currentStep].parentIndex;
-        const previousMetric = steps[prevStep].trailState.metric;
-        const isRelatedMetricSelector = previousMetric !== undefined;
-
         if (event.payload !== undefined) {
           const metricSearch = getMetricSearch(trail);
           const searchTermCount = deriveSearchTermsFromInput(metricSearch).length;
 
           reportExploreMetrics('metric_selected', {
-            from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+            from: 'metric_list',
+            // HISTORY: need way to identify selected metrics from related metrics
+            // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
             searchTermCount,
           });
         }
@@ -186,17 +178,17 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       }
     });
 
-    this._subs.add(
-      trail.subscribeToState(({ otelTargets }, oldState) => {
-        // if the otel targets have changed, get the new list of metrics
-        if (
-          otelTargets?.instances !== oldState.otelTargets?.instances &&
-          otelTargets?.jobs !== oldState.otelTargets?.jobs
-        ) {
-          this._debounceRefreshMetricNames();
-        }
-      })
-    );
+    const otelResourcesVar = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
+    if (isAdHocFiltersVariable(otelResourcesVar)) {
+      this._subs.add(
+        otelResourcesVar.subscribeToState((newState, oldState) => {
+          // Only refresh if the filters have changed
+          if (!isEqual(newState.filters, oldState.filters)) {
+            this._debounceRefreshMetricNames();
+          }
+        })
+      );
+    }
 
     this._subs.add(
       trail.subscribeToState(() => {
@@ -208,7 +200,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToState(() => {
-        // move showPreviews into the settings
         // build layout when toggled
         this.buildLayout();
       })
@@ -267,8 +258,14 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     this.setState({ metricNamesLoading: true, metricNamesError: undefined, metricNamesWarning: undefined });
 
     try {
-      const jobsList = trail.state.useOtelExperience ? trail.state.otelTargets?.jobs ?? [] : [];
-      const instancesList = trail.state.useOtelExperience ? trail.state.otelTargets?.instances ?? [] : [];
+      let jobsList: string[] = [];
+      let instancesList: string[] = [];
+      if (trail.state.useOtelExperience) {
+        const otelResourcesObject = getOtelResourcesObject(trail);
+        const otelTargets = await totalOtelResources(datasourceUid, timeRange, otelResourcesObject.filters);
+        jobsList = otelTargets?.jobs ?? [];
+        instancesList = otelTargets?.instances ?? [];
+      }
 
       const response = await getMetricNames(
         datasourceUid,
@@ -411,7 +408,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
   private async buildLayout() {
     const trail = getTrailFor(this);
-    const showPreviews = trail.state.showPreviews;
     // Temp hack when going back to select metric scene and variable updates
     if (this.ignoreNextUpdate) {
       this.ignoreNextUpdate = false;
@@ -422,43 +418,25 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     const metricsList = this.sortedPreviewMetrics();
 
-    // Get the current filters to determine the count of them
-    // Which is required for `getPreviewPanelFor`
-    const filters = getFilters(this);
-    const currentFilterCount = filters?.length || 0;
-
     for (let index = 0; index < metricsList.length; index++) {
       const metric = metricsList[index];
       const metadata = await trail.getMetricMetadata(metric.name);
       const description = getMetricDescription(metadata);
 
-      if (showPreviews) {
-        if (metric.itemRef && metric.isPanel) {
-          children.push(metric.itemRef.resolve());
-          continue;
-        }
-        // refactor this into the query generator in future
-        const isNative = trail.isNativeHistogram(metric.name);
-        const panel = getPreviewPanelFor(metric.name, index, currentFilterCount, description, isNative, true);
-        metric.itemRef = panel.getRef();
-        metric.isPanel = true;
-        children.push(panel);
-      } else {
-        const panel = new SceneCSSGridItem({
-          $variables: new SceneVariableSet({
-            variables: getVariablesWithMetricConstant(metric.name),
-          }),
-          body: getCardPanelFor(metric.name, description),
-        });
-        metric.itemRef = panel.getRef();
-        metric.isPanel = false;
-        children.push(panel);
+      if (metric.itemRef && metric.isPanel) {
+        children.push(metric.itemRef.resolve());
+        continue;
       }
+      // refactor this into the query generator in future
+      const isNative = trail.isNativeHistogram(metric.name);
+      const hasOtelResources = Boolean(trail.state.hasOtelResources);
+      const panel = getPreviewPanelFor(metric.name, index, hasOtelResources, description, isNative, true);
+      metric.itemRef = panel.getRef();
+      metric.isPanel = true;
+      children.push(panel);
     }
 
-    const rowTemplate = showPreviews ? ROW_PREVIEW_HEIGHT : ROW_CARD_HEIGHT;
-
-    this.state.body.setState({ children, autoRows: rowTemplate });
+    this.state.body.setState({ children, autoRows: ROW_PREVIEW_HEIGHT });
   }
 
   public updateMetricPanel = (metric: string, isLoaded?: boolean, isEmpty?: boolean) => {
@@ -486,13 +464,10 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   };
 
   public reportPrefixFilterInteraction = (isMenuOpen: boolean) => {
-    const trail = getTrailFor(this);
-    const { steps, currentStep } = trail.state.history.state;
-    const previousMetric = steps[currentStep]?.trailState.metric;
-    const isRelatedMetricSelector = previousMetric !== undefined;
-
     reportExploreMetrics('prefix_filter_clicked', {
-      from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+      // HISTORY: need way to identify selected metrics from related metrics
+      // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+      from: 'metric_list',
       action: isMenuOpen ? 'open' : 'close',
     });
   };
@@ -510,6 +485,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       trail.resetOtelExperience();
     } else {
       reportExploreMetrics('otel_experience_toggled', { value: 'on' });
+      trail.checkDataSourceForOTelResources();
     }
     setOtelExperienceToggleState(!useOtelExperience);
     trail.setState({ useOtelExperience: !useOtelExperience, resettingOtel, startButtonClicked });
@@ -581,11 +557,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
             }
             className={styles.displayOption}
           >
-            <Select
+            <Combobox
               value={metricPrefix}
-              onChange={model.onPrefixFilterChange}
-              onOpenMenu={() => model.reportPrefixFilterInteraction(true)}
-              onCloseMenu={() => model.reportPrefixFilterInteraction(false)}
+              onChange={(selected) => model.onPrefixFilterChange(selected)}
               options={[
                 {
                   label: 'All metric names',
@@ -593,7 +567,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 },
                 ...Array.from(rootGroup?.groups.keys() ?? []).map((g) => ({ label: `${g}_`, value: g })),
               ]}
-              className="metrics-drilldown-metric-prefix-select"
+              width={16}
             />
           </Field>
           {!metric && hasOtelResources && (
@@ -602,14 +576,46 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 <>
                   <div className={styles.displayOptionTooltip}>
                     Filter by
-                    <IconButton
-                      name={'info-circle'}
-                      size="sm"
-                      variant={'secondary'}
-                      tooltip="This switch enables filtering by OTel resources for OTel native data sources."
-                    />
+                    <Tooltip
+                      content={
+                        <div>
+                          <p>The OTel experience is deprecated in Grafana Metrics Drilldown.</p>
+                          <p>
+                            Please use the following docs to promote your OTel resource attributes as metric labels with{' '}
+                            <a
+                              href="https://grafana.com/docs/mimir/latest/configure/configure-otel-collector/#work-with-default-opentelemetry-labels"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'underline' }}
+                            >
+                              Mimir
+                            </a>{' '}
+                            and{' '}
+                            <a
+                              href="https://prometheus.io/docs/guides/opentelemetry/#promoting-resource-attributes"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'underline' }}
+                            >
+                              Prometheus
+                            </a>
+                            .
+                          </p>
+                        </div>
+                      }
+                      placement="bottom"
+                      interactive={true}
+                    >
+                      <IconButton
+                        name={'info-circle'}
+                        size="sm"
+                        variant={'secondary'}
+                        aria-label="Information about OTel experience"
+                      />
+                    </Tooltip>
                     <div>
-                      <Badge text="New" color={'blue'} className={styles.badgeStyle}></Badge>
+                      {/* badge color does not align with theme warning color so we explicitly set it here */}
+                      <Badge text="Deprecated" color={'orange'} className={styles.badgeStyle}></Badge>
                     </div>
                   </div>
                 </>
@@ -659,15 +665,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   };
 }
 
-function getCardPanelFor(metric: string, description?: string) {
-  return PanelBuilders.text()
-    .setTitle(metric)
-    .setDescription(description)
-    .setHeaderActions([new SelectMetricAction({ metric, title: 'Select' })])
-    .setOption('content', '')
-    .build();
-}
-
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
@@ -709,7 +706,9 @@ function getStyles(theme: GrafanaTheme2) {
       padding: '0rem 0.25rem 0 0.30rem',
       alignItems: 'center',
       borderRadius: theme.shape.radius.pill,
-      border: `1px solid ${theme.colors.info.text}`,
+      border: `1px solid ${theme.colors.warning.text}`,
+      // badge color does not align with theme warning color so we explicitly set it here
+      color: `${theme.colors.warning.text}`,
       background: theme.colors.info.transparent,
       marginTop: '4px',
       marginLeft: '-3px',

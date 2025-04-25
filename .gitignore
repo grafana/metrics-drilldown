@@ -47,12 +47,7 @@ artifacts/
 work/
 ci/
 
-# e2e test directories
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
+
 
 # Editor
 .cursor
@@ -63,3 +58,12 @@ ci/
 
 # MacOS
 .DS_Store
+
+# e2e test directories
+e2e/test-results/
+e2e/test-reports/
+playwright
+
+e2e/tests/**/*darwin.png
+e2e/provisioning/prometheus/data*
+!e2e/provisioning/prometheus/data.zip

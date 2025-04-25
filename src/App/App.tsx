@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import { useStyles2 } from '@grafana/ui';
-import React, { createContext, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
 import { initFaro } from 'tracking/faro/faro';
@@ -12,6 +12,8 @@ import { ErrorView } from './ErrorView';
 import { AppRoutes } from './Routes';
 import { useCatchExceptions } from './useCatchExceptions';
 import { PluginPropsContext } from '../utils/utils.plugin';
+import { navigationEvents } from '../WingmanDataTrail/SideBar/sections/BookmarksList';
+
 initFaro();
 
 interface MetricsAppContext {
@@ -20,17 +22,31 @@ interface MetricsAppContext {
 }
 
 export const MetricsContext = createContext<MetricsAppContext>({
-  trail: newMetricsTrail(undefined, true),
+  trail: newMetricsTrail(undefined),
   goToUrlForTrail: () => {},
 });
 
 function App(props: AppRootProps) {
-  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined, true));
+  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined));
   const styles = useStyles2(getStyles);
+
   const goToUrlForTrail = (trail: DataTrail) => {
     locationService.push(getUrlForTrail(trail));
     setTrail(trail);
   };
+
+  // Subscribe to navigation events from BookmarksList
+  useEffect(() => {
+    const handleNavigation = (trail: DataTrail) => {
+      goToUrlForTrail(trail);
+    };
+
+    // Subscribe to navigation events
+    const unsubscribe = navigationEvents.subscribe(handleNavigation);
+
+    // Clean up subscription
+    return () => unsubscribe();
+  }, []);
 
   const [error] = useCatchExceptions();
   if (error) {
