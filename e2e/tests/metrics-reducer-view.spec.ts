@@ -1,14 +1,11 @@
+import { ROUTES } from '../../src/constants';
 import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { expect, test } from '../fixtures';
 import { type SortOption } from '../fixtures/views/MetricsReducerView';
 
-// Keep this in sync with MAX_RECENT_METRICS in MetricsSorter.tsx
-// If updating MAX_RECENT_METRICS, also update the tests below.
-const MAX_RECENT_METRICS = 6;
-
 test.describe('Metrics reducer view', () => {
   test('Core UI elements', async ({ metricsReducerView }) => {
-    await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+    await metricsReducerView.gotoVariant(ROUTES.TrailWithSidebar);
     await metricsReducerView.assertListControls();
     await metricsReducerView.assertSidebar();
     await metricsReducerView.assertMetricsList();
@@ -16,7 +13,7 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Metrics sorting', () => {
     test.beforeEach(async ({ metricsReducerView }) => {
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
+      await metricsReducerView.gotoVariant(ROUTES.TrailWithSidebar, DEFAULT_STATIC_URL_SEARCH_PARAMS);
     });
 
     test('Default sorting shows recent metrics first, then alphabetical', async ({ metricsReducerView, page }) => {
@@ -56,7 +53,7 @@ test.describe('Metrics reducer view', () => {
 
         // Wait for the usage count to load
         await expect(async () => {
-          const firstPanel = await metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
+          const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
           const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
           const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
           expect(usageCount).toBeGreaterThan(0);
@@ -91,7 +88,7 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Sidebar buttons', () => {
     test.beforeEach(async ({ metricsReducerView }) => {
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+      await metricsReducerView.gotoVariant(ROUTES.TrailWithSidebar);
     });
 
     test('Bookmarks', async ({ metricsReducerView }) => {
@@ -99,7 +96,7 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.selectMetricPanel(panelTitle);
       await metricsReducerView.createBookmark();
       await metricsReducerView.assertBookmarkAlert();
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+      await metricsReducerView.gotoVariant(ROUTES.TrailWithSidebar);
       await metricsReducerView.toggleSideBarButton('Bookmarks');
       await metricsReducerView.assertBookmarkCreated(panelTitle);
     });
