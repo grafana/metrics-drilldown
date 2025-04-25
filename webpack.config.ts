@@ -17,12 +17,12 @@ const config = async (env): Promise<Configuration> => {
     output: {
       asyncChunks: true,
     },
-    resolve: {
-      alias: {
-        // helps working with @grafana/prometheus
-        'semver/preload': path.resolve(__dirname, 'node_modules/semver/preload.js'),
-      },
-    },
+    // resolve: {
+    //   alias: {
+    //     // helps working with @grafana/prometheus
+    //     'semver/preload': path.resolve(__dirname, 'node_modules/semver/preload.js'),
+    //   },
+    // },
     plugins: [
       new NormalModuleReplacementPlugin(/monaco-editor/, path.resolve(__dirname, 'src/stubs/monaco-editor.ts')),
       new NormalModuleReplacementPlugin(
