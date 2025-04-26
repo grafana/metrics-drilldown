@@ -110,30 +110,47 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
     });
 
-    test('Shows the correct number of metrics', async ({ metricsReducerView, page }) => {
-      // The goal of this test is to validate the `AND` + `OR` nature of the filters, whereby:
-      // - Within a given set of metric filters (for example, prefixes), selecting `prefix.one` and `prefix.two` amounts to `prefix.one OR prefix.two`
-      // - Between the various metric filters, it should work like `(prefix.one OR prefix.two) AND (suffix.one OR suffix.two)`
-
-      await metricsReducerView.assertMetricsList();
-
-      // Select prefixes
-      const prefixesToSelect = ['prometheus', 'pyroscope'];
-      await metricsReducerView.getByRole('button', { name: 'Prefix filters' }).click();
-      for (const prefix of prefixesToSelect) {
-        await page.getByTitle(prefix, { exact: true }).locator('div span').click();
+    test.describe('Filter logic behavior', () => {
+      async function selectPrefixFilters({ metricsReducerView, page }) {
+        const prefixesToSelect = ['prometheus', 'pyroscope'];
+        await metricsReducerView.getByRole('button', { name: 'Prefix filters' }).click();
+        for (const prefix of prefixesToSelect) {
+          await page.getByTitle(prefix, { exact: true }).locator('div span').click();
+        }
       }
-      // This screenshot verifies that the metric counts for unselected prefixes are non-zero
-      await expect(page).toHaveScreenshot('prefixes-selected-metric-counts.png');
 
-      // Select suffixes
-      const suffixesToSelect = ['bytes', 'count'];
-      await metricsReducerView.getByRole('button', { name: 'Suffix filters' }).click();
-      for (const suffix of suffixesToSelect) {
-        await page.getByTitle(suffix, { exact: true }).locator('div span').click();
-      }
-      // This screenshot verifies that the metric counts for another metric filter group are non-zero and additive
-      await expect(page).toHaveScreenshot('prefixes-and-suffixes-selected-metric-counts.png');
+      test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
+        metricsReducerView,
+        page,
+      }) => {
+        await metricsReducerView.assertMetricsList();
+
+        // Select multiple prefixes to demonstrate OR behavior within a group
+        await selectPrefixFilters({ metricsReducerView, page });
+
+        // Verify OR behavior by checking that metrics with either prefix are shown
+        await expect(page).toHaveScreenshot('prefixes-selected-metric-counts.png');
+      });
+
+      test('Between filter groups, selections use AND logic ((prefix.one OR prefix.two) AND (suffix.one OR suffix.two))', async ({
+        metricsReducerView,
+        page,
+      }) => {
+        await metricsReducerView.assertMetricsList();
+
+        // First select prefixes
+        await selectPrefixFilters({ metricsReducerView, page });
+
+        // Then select suffixes to demonstrate AND behavior between groups
+        const suffixesToSelect = ['bytes', 'count'];
+        await metricsReducerView.getByRole('button', { name: 'Suffix filters' }).click();
+        for (const suffix of suffixesToSelect) {
+          await page.getByTitle(suffix, { exact: true }).locator('div span').click();
+        }
+
+        // Verify AND behavior between filter groups
+        await expect(page).toHaveScreenshot('prefixes-and-suffixes-selected-metric-counts.png');
+      });
     });
   });
 });
