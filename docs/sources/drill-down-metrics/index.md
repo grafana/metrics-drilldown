@@ -32,6 +32,7 @@ To begin drilling down your data, filter the metrics that appear in Metrics Dril
       You can apply multiple filters to your metrics.
      {{< /admonition >}}
 1. (Optional) To search for metrics, type keywords in the search bar under **Quick search metrics**.
+1. (Optional) Select how you want to sort metrics in the app. You can sort metrics alphabetically, with recently selected metrics first (default), by prevalence in dashboard panel queries, or by prevalence in alerting rules.
 1. Use the time picker to select a date and time range from the dropdown menu, or use an absolute time range.
 1. Click the down arrow next to the **Refresh** icon to set a refresh rate from the drop-down menu. The default refresh status is **Off**.
 
@@ -51,7 +52,7 @@ Apply advanced filters to further refine the metrics that appear in Metrics Dril
 | Group by labels | Group metrics by their label values.                                                                              |
 
 {{< admonition type="note" >}}
-Multiple selections for a filter apply "OR" logic, but selections between filters apply "AND" logic. For example, if you apply two prefix filters and one suffix filter, metrics that contain either prefix and the suffix appear. {{< /admonition >}}
+Multiple selections for a filter apply "OR" logic, but selections between filters apply "AND" logic. For example, if you select both `envoy` and `kafka` as prefix filters, the app shows all metrics with a prefix of either `envoy` or `kafka`. Then, if you select `count` as a suffix filter, the app updates to only show metrics with the `count` suffix. {{< /admonition >}}
 
 ## Analyze selected metrics
 
