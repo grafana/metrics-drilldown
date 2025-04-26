@@ -154,7 +154,6 @@ export type Interactions = {
     filter_type: (
       | 'non_rules_metrics'
       | 'recording_rules'
-      | 'alerting_rules'
     )
   }
 };
