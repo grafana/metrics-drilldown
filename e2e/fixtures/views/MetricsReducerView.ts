@@ -143,4 +143,18 @@ export class MetricsReducerView extends DrilldownView {
     await this.page.getByTestId('list-controls').getByTestId('data-testid template variable').click();
     await this.page.getByRole('option', { name: sortBy }).locator('span').click();
   }
+
+  async selectPrefixFilters(prefixes: string[]) {
+    await this.getByRole('button', { name: 'Prefix filters' }).click();
+    for (const prefix of prefixes) {
+      await this.page.getByTitle(prefix, { exact: true }).locator('div span').click();
+    }
+  }
+
+  async selectSuffixFilters(suffixes: string[]) {
+    await this.getByRole('button', { name: 'Suffix filters' }).click();
+    for (const suffix of suffixes) {
+      await this.page.getByTitle(suffix, { exact: true }).locator('div span').click();
+    }
+  }
 }

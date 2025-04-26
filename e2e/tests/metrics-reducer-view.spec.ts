@@ -111,14 +111,6 @@ test.describe('Metrics reducer view', () => {
     });
 
     test.describe('Filter logic behavior', () => {
-      async function selectPrefixFilters({ metricsReducerView, page }) {
-        const prefixesToSelect = ['prometheus', 'pyroscope'];
-        await metricsReducerView.getByRole('button', { name: 'Prefix filters' }).click();
-        for (const prefix of prefixesToSelect) {
-          await page.getByTitle(prefix, { exact: true }).locator('div span').click();
-        }
-      }
-
       test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
         metricsReducerView,
         page,
@@ -126,7 +118,7 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.assertMetricsList();
 
         // Select multiple prefixes to demonstrate OR behavior within a group
-        await selectPrefixFilters({ metricsReducerView, page });
+        await metricsReducerView.selectPrefixFilters(['prometheus', 'pyroscope']);
 
         // Verify OR behavior by checking that metrics with either prefix are shown
         await expect(page).toHaveScreenshot('prefixes-selected-metric-counts.png');
@@ -139,14 +131,10 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.assertMetricsList();
 
         // First select prefixes
-        await selectPrefixFilters({ metricsReducerView, page });
+        await metricsReducerView.selectPrefixFilters(['prometheus', 'pyroscope']);
 
         // Then select suffixes to demonstrate AND behavior between groups
-        const suffixesToSelect = ['bytes', 'count'];
-        await metricsReducerView.getByRole('button', { name: 'Suffix filters' }).click();
-        for (const suffix of suffixesToSelect) {
-          await page.getByTitle(suffix, { exact: true }).locator('div span').click();
-        }
+        await metricsReducerView.selectSuffixFilters(['bytes', 'count']);
 
         // Verify AND behavior between filter groups
         await expect(page).toHaveScreenshot('prefixes-and-suffixes-selected-metric-counts.png');
