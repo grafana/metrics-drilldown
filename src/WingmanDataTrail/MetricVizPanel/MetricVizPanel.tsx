@@ -198,7 +198,6 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     metricName,
     matchers,
     prometheusFunction,
-    //groupByLabel,
     queryOptions = {},
   }: {
     metricName: string;
