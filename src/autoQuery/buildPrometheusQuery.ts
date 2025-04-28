@@ -67,6 +67,7 @@ export function buildPrometheusQuery({
   const innerQueryString = useOtelJoin ? `${metricPartString} ${VAR_OTEL_JOIN_QUERY_EXPR}` : metricPartString;
 
   // Build final query using tsqtsq
+  // native histograms will not get `sum by (le)` here because they are not identified as rate queries in `determineProperties` function because they don't have the suffix bucket. The `rate` function is defined much earlier for them in `MetricVizPanel.buildQueryRunner` and is passed here as the `nonRateQueryFunction`.
   return promql[getPromqlFunction(isRateQuery, nonRateQueryFunction)]({
     expr: innerQueryString,
     ...(groupings?.length ? { by: groupings } : {}),
