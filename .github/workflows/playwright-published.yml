@@ -57,7 +57,7 @@ jobs:
           rm -rf temp
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8.6.1
+        uses: actions/upload-artifact@ea165f8
         with:
           name: dist-artifacts
           path: dist-artifacts/
