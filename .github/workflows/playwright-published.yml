@@ -18,12 +18,12 @@ jobs:
       plugin-version: ${{ steps.package.outputs.plugin-version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd719
         with:
           persist-credentials: false
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea
         with:
           node-version: '22'
           cache: 'npm'
@@ -57,7 +57,7 @@ jobs:
           rm -rf temp
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@ea165f8.6.1
         with:
           name: dist-artifacts
           path: dist-artifacts/
@@ -65,7 +65,7 @@ jobs:
 
   playwright:
     needs: build
-    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@main
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@f73e5dd
     with:
       id: ${{ github.event.repository.name }}
       version: ${{ needs.build.outputs.plugin-version }}
