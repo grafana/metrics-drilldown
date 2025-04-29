@@ -16,7 +16,9 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
+import { VAR_FILTERS } from 'shared';
 import { getColorByIndex, getTrailFor } from 'utils';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
@@ -75,12 +77,20 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
           const trail = getTrailFor(this);
           const isNativeHistogram = trail.isNativeHistogram(option.value as string);
 
+          // get the VAR_FILTERS variable to pass in the correct matchers for the functions
+          const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+
+          const matchers = isAdHocFiltersVariable(filtersVariable)
+            ? filtersVariable.state.filters.map((filter) => `${filter.key}${filter.operator}${filter.value}`)
+            : [];
+
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
               vizPanelInGridItem: new MetricVizPanel({
                 metricName: option.value as string,
                 color: getColorByIndex(colorIndex),
                 isNativeHistogram,
+                matchers,
               }),
               metric: option.value as string,
             }),

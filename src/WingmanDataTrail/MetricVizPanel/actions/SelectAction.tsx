@@ -1,6 +1,5 @@
-import { css } from '@emotion/css';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { Button } from '@grafana/ui';
 import React from 'react';
 
 import { MetricSelectedEvent } from 'shared';
@@ -25,7 +24,7 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
       key: `select-action-${metricName}`,
       metricName,
       variant: variant || 'primary',
-      fill: fill || 'text',
+      fill: fill || 'outline',
     });
   }
 
@@ -34,7 +33,6 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
   };
 
   public static Component = ({ model }: SceneComponentProps<SelectAction>) => {
-    const styles = useStyles2(getStyles);
     const { variant, fill } = model.useState();
 
     return (
@@ -42,7 +40,6 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
         variant={variant}
         fill={fill}
         size="sm"
-        className={styles.selectButton}
         onClick={model.onClick}
         data-testid={`select-action-${model.state.metricName}`}
       >
@@ -51,7 +48,3 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
     );
   };
 }
-
-const getStyles = () => ({
-  selectButton: css``,
-});
