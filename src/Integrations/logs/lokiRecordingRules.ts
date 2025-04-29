@@ -37,11 +37,9 @@ export interface ExtractedRecordingRules {
 async function fetchRecordingRuleGroups(datasourceSettings: DataSourceInstanceSettings<DataSourceJsonData>) {
   const recordingRuleUrl = `api/prometheus/${datasourceSettings.uid}/api/v1/rules`;
   const recordingRules: BackendSrvRequest = { url: recordingRuleUrl, showErrorAlert: false, showSuccessAlert: false };
-  const res = await lastValueFrom<
-    FetchResponse<{
-      data: { groups: RecordingRuleGroup[] };
-    }>
-  >(getBackendSrv().fetch(recordingRules));
+  const res = (await lastValueFrom(getBackendSrv().fetch(recordingRules) as any)) as FetchResponse<{
+    data: { groups: RecordingRuleGroup[] };
+  }>;
 
   if (!res.ok) {
     console.warn(`Failed to fetch recording rules from Loki data source: ${datasourceSettings.name}`);
