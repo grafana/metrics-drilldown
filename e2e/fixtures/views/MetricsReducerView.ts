@@ -57,7 +57,7 @@ export class MetricsReducerView extends DrilldownView {
   /* Side bar */
 
   async getSideBar() {
-    return this.getByTestId('sidebar-buttons');
+    return this.getByTestId('sidebar');
   }
 
   async toggleSideBarButton(buttonName: string) {
@@ -145,16 +145,18 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async selectPrefixFilters(prefixes: string[]) {
-    await this.getByRole('button', { name: 'Prefix filters' }).click();
+    const sidebar = await this.getSideBar();
+    await sidebar.getByRole('button', { name: 'Prefix filters' }).click();
     for (const prefix of prefixes) {
-      await this.page.getByTitle(prefix, { exact: true }).locator('div span').click();
+      await sidebar.getByTitle(prefix, { exact: true }).locator('div span').click();
     }
   }
 
   async selectSuffixFilters(suffixes: string[]) {
-    await this.getByRole('button', { name: 'Suffix filters' }).click();
+    const sidebar = await this.getSideBar();
+    await sidebar.getByRole('button', { name: 'Suffix filters' }).click();
     for (const suffix of suffixes) {
-      await this.page.getByTitle(suffix, { exact: true }).locator('div span').click();
+      await sidebar.getByTitle(suffix, { exact: true }).locator('div span').click();
     }
   }
 }
