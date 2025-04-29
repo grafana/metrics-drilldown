@@ -5,6 +5,15 @@ import { PLUGIN_BASE_URL } from '../../../src/constants';
 import { UI_TEXT } from '../../../src/constants/ui';
 import { QuickSearch } from '../components/QuickSearchInput';
 
+const sidebarButtonNames = [
+  'Rules filters',
+  'Prefix filters',
+  'Suffix filters',
+  'Group by labels',
+  'Bookmarks',
+  'Settings',
+] as const;
+type ButtonName = (typeof sidebarButtonNames)[number];
 export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
 
 export class MetricsReducerView extends DrilldownView {
@@ -60,7 +69,7 @@ export class MetricsReducerView extends DrilldownView {
     return this.getByTestId('sidebar');
   }
 
-  async toggleSideBarButton(buttonName: string) {
+  async toggleSideBarButton(buttonName: ButtonName) {
     const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: buttonName }).click();
   }
@@ -68,14 +77,7 @@ export class MetricsReducerView extends DrilldownView {
   async assertSidebar() {
     const sidebar = this.getSideBar();
 
-    for (const buttonName of [
-      'Rules filters',
-      'Prefix filters',
-      'Suffix filters',
-      'Group by labels',
-      'Bookmarks',
-      'Settings',
-    ]) {
+    for (const buttonName of sidebarButtonNames) {
       await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
     }
   }
@@ -158,5 +160,11 @@ export class MetricsReducerView extends DrilldownView {
     for (const suffix of suffixes) {
       await sidebar.getByTitle(suffix, { exact: true }).locator('label').click();
     }
+  }
+
+  async selectGroupByLabel(labelName: string) {
+    await this.toggleSideBarButton('Group by labels');
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('radio', { name: labelName }).check();
   }
 }
