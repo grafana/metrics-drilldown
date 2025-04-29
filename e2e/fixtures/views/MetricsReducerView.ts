@@ -148,7 +148,7 @@ export class MetricsReducerView extends DrilldownView {
     const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: 'Prefix filters' }).click();
     for (const prefix of prefixes) {
-      await sidebar.getByTitle(prefix, { exact: true }).locator('div span').click();
+      await sidebar.getByTitle(prefix, { exact: true }).locator('label').click();
     }
   }
 
@@ -156,7 +156,7 @@ export class MetricsReducerView extends DrilldownView {
     const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: 'Suffix filters' }).click();
     for (const suffix of suffixes) {
-      await sidebar.getByTitle(suffix, { exact: true }).locator('div span').click();
+      await sidebar.getByTitle(suffix, { exact: true }).locator('label').click();
     }
   }
 }
