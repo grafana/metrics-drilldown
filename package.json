@@ -37,7 +37,7 @@
     "@grafana/data": "^11.6.0",
     "@grafana/faro-web-sdk": "^1.14.1",
     "@grafana/lezer-logql": "^0.2.7",
-    "@grafana/prometheus": "^11.6.0-223871",
+    "@grafana/prometheus": "^11.6.1",
     "@grafana/runtime": "^11.6.0",
     "@grafana/scenes": "^6.6.3",
     "@grafana/schema": "^11.6.0",
