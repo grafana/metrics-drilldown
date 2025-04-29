@@ -110,7 +110,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   }
 
   private onActivate() {
-    this.initOtherMetricsVar();
+    const cleanupOtherMetricsVar = this.initOtherMetricsVar();
+
     this._subs.add(
       this.subscribeToEvent(EventSectionValueChanged, (event) => {
         const { key, values } = event.payload;
@@ -120,6 +121,10 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         this.setState({ sectionValues: newSectionValues });
       })
     );
+
+    return () => {
+      cleanupOtherMetricsVar();
+    };
   }
 
   private setOtherMetricFilters(sectionValues: Map<string, string[]>) {
@@ -133,6 +138,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       'filters-prefix': 'prefix',
       'filters-suffix': 'suffix',
     };
+
     const newFilters = Array.from(sectionValues.entries()).reduce<Array<AdHocFilterWithLabels<{}>>>(
       (acc, [key, value]) => {
         if (value.length && metricFiltersVariables.includes(key as MetricFiltersVariable)) {
@@ -162,6 +168,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
    * selections, without needing to interact with the sidebar.
    */
   private initOtherMetricsVar() {
+    const currentVariableSet = getTrailFor(this).state.$variables;
+    if (!currentVariableSet) {
+      return () => {};
+    }
+
     const otherMetricFiltersVar = new AdHocFiltersVariable({
       name: VAR_OTHER_METRIC_FILTERS,
       readOnly: true,
@@ -172,15 +183,18 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       applyMode: 'manual',
       allowCustomValue: true,
     });
-    const trail = getTrailFor(this);
-    const currentVariableSet = trail.state.$variables;
-    if (!currentVariableSet) {
-      return;
-    }
+
     currentVariableSet.setState({
       variables: [...currentVariableSet.state.variables, otherMetricFiltersVar],
     });
+
     this.setOtherMetricFilters(this.state.sectionValues);
+
+    return () => {
+      currentVariableSet.setState({
+        variables: [...currentVariableSet.state.variables.filter((v) => v !== otherMetricFiltersVar)],
+      });
+    };
   }
 
   private static getSectionValuesFromUrl() {
