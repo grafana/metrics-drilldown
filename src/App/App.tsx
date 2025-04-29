@@ -7,7 +7,6 @@ import React, { createContext, useEffect, useState } from 'react';
 import { type DataTrail } from 'DataTrail';
 import { initFaro } from 'tracking/faro/faro';
 import { getUrlForTrail, newMetricsTrail } from 'utils';
-// Import our custom CSS for panel menu overrides
 import '../showMenuInBreakdown.css';
 
 import { ErrorView } from './ErrorView';
