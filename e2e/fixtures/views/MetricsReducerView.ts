@@ -56,17 +56,17 @@ export class MetricsReducerView extends DrilldownView {
 
   /* Side bar */
 
-  async getSideBar() {
+  getSideBar() {
     return this.getByTestId('sidebar');
   }
 
   async toggleSideBarButton(buttonName: string) {
-    const sidebar = await this.getSideBar();
+    const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: buttonName }).click();
   }
 
   async assertSidebar() {
-    const sidebar = await this.getSideBar();
+    const sidebar = this.getSideBar();
 
     for (const buttonName of [
       'Rules filters',
@@ -145,7 +145,7 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async selectPrefixFilters(prefixes: string[]) {
-    const sidebar = await this.getSideBar();
+    const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: 'Prefix filters' }).click();
     for (const prefix of prefixes) {
       await sidebar.getByTitle(prefix, { exact: true }).locator('div span').click();
@@ -153,7 +153,7 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async selectSuffixFilters(suffixes: string[]) {
-    const sidebar = await this.getSideBar();
+    const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: 'Suffix filters' }).click();
     for (const suffix of suffixes) {
       await sidebar.getByTitle(suffix, { exact: true }).locator('div span').click();
