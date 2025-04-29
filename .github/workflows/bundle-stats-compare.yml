@@ -16,7 +16,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd719
+        with:
+          persist-credentials: false
 
       - name: Get Node.js version from package.json
         id: node-version
@@ -25,6 +27,6 @@ jobs:
           echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
 
       - name: Compare bundle stats
-        uses: grafana/plugin-actions/bundle-size@main
+        uses: grafana/plugin-actions/bundle-size@c233e9f
         with:
           node-version: ${{ steps.node-version.outputs.version }}
