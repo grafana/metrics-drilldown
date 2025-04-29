@@ -194,6 +194,22 @@ export class MetricDatasourceHelper {
     const keys = await ds.getTagValues(options);
     return keys;
   }
+
+  /**
+   * Check if the datasource uses time range in language provider methods.
+   * @param ds
+   * @returns boolean
+   * @remarks
+   * This is a temporary hack to check if the datasource uses time range in language provider methods.
+   * It will be removed when a better way of handling recent breaking changes in `@grafana/prometheus`
+   * is provided to us in that package.
+   */
+  public static datasourceUsesTimeRangeInLanguageProviderMethods(ds: PrometheusDatasource): boolean {
+    // This works because the `fetchLabelValues` method happens to have changed in a way that
+    // can be used as a heuristic to check if the runtime datasource uses the G12-style
+    // language provider methods introduced in https://github.com/grafana/grafana/pull/101889.
+    return ds.languageProvider.fetchLabelValues.length > 2;
+  }
 }
 
 export function getMetricDescription(metadata?: PromMetricsMetadataItem) {

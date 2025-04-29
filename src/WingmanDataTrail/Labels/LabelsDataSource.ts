@@ -3,7 +3,6 @@ import {
   LoadingState,
   type DataQueryRequest,
   type DataQueryResponse,
-  type DataSourceApi,
   type LegacyMetricFindQueryOptions,
   type MetricFindValue,
   type TestDataSourceResponse,
@@ -12,9 +11,11 @@ import { type PrometheusDatasource } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
+import { MetricDatasourceHelper } from 'helpers/MetricDatasourceHelper';
 import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
+import { isPrometheusDataSource } from 'WingmanDataTrail/ListControls/MetricsSorter/metricUsageFetcher';
 
 import { localeCompare } from '../helpers/localCompare';
 
@@ -73,11 +74,17 @@ export class LabelsDataSource extends RuntimeDataSource {
     return [{ value: NULL_GROUP_BY_VALUE, text: '(none)' }, ...labelOptions] as MetricFindValue[];
   }
 
-  private static async getPrometheusDataSource(sceneObject: SceneObject): Promise<DataSourceApi | undefined> {
+  private static async getPrometheusDataSource(sceneObject: SceneObject): Promise<PrometheusDatasource | undefined> {
     try {
       const dsVariable = sceneGraph.findByKey(sceneObject, VAR_DATASOURCE) as DataSourceVariable;
       const uid = (dsVariable?.state.value as string) ?? '';
-      return await getDataSourceSrv().get({ uid });
+      const ds = await getDataSourceSrv().get({ uid });
+
+      if (isPrometheusDataSource(ds)) {
+        return ds as PrometheusDatasource;
+      }
+
+      throw new Error('Data source is not a valid Prometheus data source');
     } catch (error) {
       displayError(error as Error, ['Error while getting the Prometheus data source!']);
       return undefined;
@@ -101,12 +108,11 @@ export class LabelsDataSource extends RuntimeDataSource {
       );
     }
 
-    const args =
-      ds.languageProvider.fetchLabelsWithMatch.length === 2
-        ? [matcher]
-        : [sceneGraph.getTimeRange(sceneObject).state.value, matcher];
+    const args = MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)
+      ? [sceneGraph.getTimeRange(sceneObject).state.value, matcher]
+      : [matcher];
 
-    // @ts-ignore: Ignoring type error due to breaking change in fetchLabelValues signature
+    // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelsWithMatch signature
     const response = await ds.languageProvider.fetchLabelsWithMatch(...args);
 
     return this.processLabelOptions(
