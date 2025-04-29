@@ -16,7 +16,9 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
+import { VAR_FILTERS } from 'shared';
 import { getColorByIndex, getTrailFor } from 'utils';
+import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
@@ -27,8 +29,6 @@ import {
   MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
-import { VAR_FILTERS } from 'shared';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 export const GRID_TEMPLATE_ROWS = '1fr';
