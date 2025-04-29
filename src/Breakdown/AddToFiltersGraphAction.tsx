@@ -78,7 +78,7 @@ export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphAc
     }
 
     return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
+      <Button variant="secondary" size="sm" fill="outline" onClick={model.onClick}>
         Add to filters
       </Button>
     );
