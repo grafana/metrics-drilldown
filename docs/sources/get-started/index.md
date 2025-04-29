@@ -46,8 +46,7 @@ Follow these steps to access the app through the Grafana main page.
    The **Drilldown** page opens.
 1. From the list of Drilldown apps, select **Metrics**.
 
-   The Metrics Drilldown overview page opens showing recent metrics, bookmarks, and the option to start a new metric exploration.
-1. Select **Let's start**.
+The Grafana Metrics Drilldown app opens.
 
 ### Access the app through a dashboard
 
