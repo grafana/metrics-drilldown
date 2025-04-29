@@ -1,0 +1,28 @@
+/* Override for panel menu buttons to always show */
+.panel-menu-toggle.show-on-hover,
+.panel-menu-toggle,
+div[data-testid='panel-menu-button'],
+button[data-testid='panel-menu-button'],
+button.show-on-hover,
+[class*='css-'][class*='toolbar-button-panel-menu'] {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+/* Fix for panel header hover states */
+.panel-header:hover,
+.panel-header {
+  background-color: transparent;
+}
+
+.panel-title-container,
+.panel-title-text {
+  cursor: auto;
+}
+
+/* Remove any transitions that might affect visibility */
+[class*='panel-menu'],
+[class*='toolbar-button'] {
+  transition: none !important;
+}
