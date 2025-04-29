@@ -12,7 +12,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
 import { MetricDatasourceHelper } from 'helpers/MetricDatasourceHelper';
-import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
+import { VAR_DATASOURCE, VAR_FILTERS } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { isPrometheusDataSource } from 'WingmanDataTrail/ListControls/MetricsSorter/metricUsageFetcher';
@@ -155,21 +155,12 @@ export class LabelsDataSource extends RuntimeDataSource {
       return [];
     }
 
-    const filterExpression = sceneGraph.interpolate(sceneObject, VAR_FILTERS_EXPR, {});
-
-    const args =
-      ds.languageProvider.fetchLabelValues.length === 2
-        ? // new signature for fetchLabelValues includes time range
-          [
-            sceneGraph.getTimeRange(sceneObject).state.value,
-            labelName,
-            // `{__name__=~".+",$${VAR_FILTERS}}` // FIXME: the filters var is not interpolated, why?!
-            `{__name__=~".+",${filterExpression}}`,
-          ]
-        : // handle old signature for backwards compatibility
-          [labelName, `{__name__=~".+",${filterExpression}}`];
+    const args = MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)
+      ? [sceneGraph.getTimeRange(sceneObject).state.value, labelName]
+      : [labelName];
 
     try {
+      // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelValues signature
       return await ds.languageProvider.fetchLabelValues(...args);
     } catch (error) {
       displayWarning([
