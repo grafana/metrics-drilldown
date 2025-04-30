@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  id-token: none
+
 jobs:
   build:
     name: Build plugin
@@ -34,7 +38,7 @@ jobs:
         run: npm run build -- --profile --json stats.json
 
       - name: Sign and package
-        uses: grafana/plugin-ci-workflows/actions/plugins/package@main
+        uses: grafana/plugin-ci-workflows/actions/plugins/package@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
         with:
           output-folder: dist-artifacts
 
@@ -47,7 +51,7 @@ jobs:
 
   playwright:
     needs: build
-    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@main
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
     with:
       id: ${{ github.event.repository.name }}
       version: ${{ needs.build.outputs.plugin-version }}
