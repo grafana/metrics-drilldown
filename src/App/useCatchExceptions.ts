@@ -20,13 +20,6 @@ export function useCatchExceptions(): [Error | undefined, React.Dispatch<React.S
   // so we have to set global handlers to catch these (e.g. error thrown from some click handlers)
   useEffect(() => {
     const onError = (errorEvent: ErrorEvent) => {
-      // TODO: remove me when move all the variables from the DataTrail Scene object to the WingMan Scene objects
-      // this happens because we add the variables to DataTrail without register WingMan's runtime data sources
-      if (['Datasource grafana-prometheus-labels-datasource was not found'].includes(errorEvent.error.message)) {
-        setError(undefined);
-        return;
-      }
-
       setError(ensureErrorObject(errorEvent.error, 'Uncaught exception!'));
     };
 
