@@ -80,11 +80,7 @@ export class LabelsDataSource extends RuntimeDataSource {
       const uid = (dsVariable?.state.value as string) ?? '';
       const ds = await getDataSourceSrv().get({ uid });
 
-      if (isPrometheusDataSource(ds)) {
-        return ds as PrometheusDatasource;
-      }
-
-      throw new Error('Data source is not a valid Prometheus data source');
+      return ds as PrometheusDatasource;
     } catch (error) {
       displayError(error as Error, ['Error while getting the Prometheus data source!']);
       return undefined;
