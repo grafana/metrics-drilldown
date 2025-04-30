@@ -104,10 +104,11 @@ test.describe('Metrics reducer view', () => {
 
     test.describe('Group by label', () => {
       test('A list of metrics is shown when metrics are grouped by label', async ({ page, metricsReducerView }) => {
-        await metricsReducerView.selectGroupByLabel('active');
+        await metricsReducerView.selectGroupByLabel('action');
         await metricsReducerView.assertMetricsGroupByList();
         await expect(page).toHaveScreenshot({
           stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          maxDiffPixelRatio: 0.005, // the default 0.01 isn't sensitive enough to detect important differences
         });
       });
     });
