@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - main
+  # TODO: Revert after confirming
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: 'read'
