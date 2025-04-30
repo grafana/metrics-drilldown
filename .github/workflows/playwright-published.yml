@@ -2,12 +2,6 @@ name: Playwright Published
 
 on:
   workflow_dispatch:
-    inputs:
-      skip-grafana-dev-image:
-        description: Skip the grafana dev image e2e test
-        required: false
-        type: boolean
-        default: false
   push:
     branches:
       - main
@@ -17,14 +11,66 @@ permissions:
   id-token: 'write'
 
 jobs:
-  CI:
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
+  build:
+    name: Build plugin
+    runs-on: ubuntu-latest
+    outputs:
+      plugin-version: ${{ steps.package.outputs.plugin-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build -- --profile --json stats.json
+
+      - name: Package plugin
+        id: package
+        run: |
+          mkdir -p dist-artifacts
+          version=$(jq -r .info.version dist/plugin.json)
+          plugin_id=$(jq -r .id dist/plugin.json)
+
+          # Set the version as an output
+          echo "plugin-version=$version" >> $GITHUB_OUTPUT
+
+          # Create a temporary directory with the correct structure
+          mkdir -p temp/$plugin_id
+          cp -r dist/* temp/$plugin_id/
+
+          # Create the zip with the correct structure
+          cd temp
+          zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
+          cd ..
+
+          # Clean up
+          rm -rf temp
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dist-artifacts
+          path: dist-artifacts/
+          retention-days: 7
+
+  playwright:
+    needs: build
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@main
     with:
-      run-playwright: false
-      run-playwright-docker: true
-      run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
-      upload-playwright-artifacts: true
-      playwright-report-path: e2e/test-reports/
-      playwright-docker-compose-file: e2e/docker/docker-compose.e2e.yaml
-      playwright-e2e-docker-compose-file: e2e/docker/docker-compose.playwright.yaml
-      playwright-grafana-url: http://localhost:3001
+      id: ${{ github.event.repository.name }}
+      version: ${{ needs.build.outputs.plugin-version }}
+      upload-artifacts: true
+      report-path: e2e/test-reports/
+      grafana-compose-file: e2e/docker/docker-compose.e2e.yaml
+      playwright-compose-file: e2e/docker/docker-compose.playwright.yaml
+      grafana-url: http://localhost:3001
