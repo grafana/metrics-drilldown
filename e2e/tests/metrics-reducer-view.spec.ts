@@ -108,7 +108,6 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.assertMetricsGroupByList();
         await expect(page).toHaveScreenshot({
           stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          maxDiffPixelRatio: 0.005, // the default 0.01 isn't sensitive enough to detect important differences
         });
       });
     });
