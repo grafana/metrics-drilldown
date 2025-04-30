@@ -2,10 +2,6 @@ import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { expect, test } from '../fixtures';
 import { type SortOption } from '../fixtures/views/MetricsReducerView';
 
-// Keep this in sync with MAX_RECENT_METRICS in MetricsSorter.tsx
-// If updating MAX_RECENT_METRICS, also update the tests below.
-const MAX_RECENT_METRICS = 6;
-
 test.describe('Metrics reducer view', () => {
   test('Core UI elements', async ({ metricsReducerView }) => {
     await metricsReducerView.gotoVariant('/trail-filters-sidebar');
@@ -91,17 +87,29 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Sidebar buttons', () => {
     test.beforeEach(async ({ metricsReducerView }) => {
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+      await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
     });
 
-    test('Bookmarks', async ({ metricsReducerView }) => {
-      const panelTitle = 'a.utf8.metric 🤘';
-      await metricsReducerView.selectMetricPanel(panelTitle);
-      await metricsReducerView.createBookmark();
-      await metricsReducerView.assertBookmarkAlert();
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar');
-      await metricsReducerView.toggleSideBarButton('Bookmarks');
-      await metricsReducerView.assertBookmarkCreated(panelTitle);
+    test.describe('Bookmarks', () => {
+      test('New bookmarks appear in the sidebar', async ({ metricsReducerView, page }) => {
+        const panelTitle = 'deprecated_flags_inuse_total';
+        await metricsReducerView.selectMetricPanel(panelTitle);
+        await metricsReducerView.createBookmark();
+        await metricsReducerView.assertBookmarkAlert();
+        await page.goBack();
+        await metricsReducerView.toggleSideBarButton('Bookmarks');
+        await metricsReducerView.assertBookmarkCreated(panelTitle);
+      });
+    });
+
+    test.describe('Group by label', () => {
+      test('A list of metrics is shown when metrics are grouped by label', async ({ page, metricsReducerView }) => {
+        await metricsReducerView.selectGroupByLabel('action');
+        await metricsReducerView.assertMetricsGroupByList();
+        await expect(page).toHaveScreenshot({
+          stylePath: './e2e/fixtures/css/hide-app-controls.css',
+        });
+      });
     });
   });
 
