@@ -167,6 +167,6 @@ export class MetricsReducerView extends DrilldownView {
   async selectGroupByLabel(labelName: string) {
     await this.toggleSideBarButton('Group by labels');
     const sidebar = this.getSideBar();
-    await sidebar.getByRole('radio', { name: labelName }).check();
+    await sidebar.getByRole('radio', { name: labelName, exact: true }).check();
   }
 }
