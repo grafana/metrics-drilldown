@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: 'read'
+  id-token: 'write'
 
 jobs:
   build:
@@ -37,27 +38,10 @@ jobs:
       - name: Build frontend
         run: npm run build -- --profile --json stats.json
 
-      - name: Package plugin
-        id: package
-        run: |
-          mkdir -p dist-artifacts
-          version=$(jq -r .info.version dist/plugin.json)
-          plugin_id=$(jq -r .id dist/plugin.json)
-
-          # Set the version as an output
-          echo "plugin-version=$version" >> $GITHUB_OUTPUT
-
-          # Create a temporary directory with the correct structure
-          mkdir -p temp/$plugin_id
-          cp -r dist/* temp/$plugin_id/
-
-          # Create the zip with the correct structure
-          cd temp
-          zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
-          cd ..
-
-          # Clean up
-          rm -rf temp
+      - name: Sign and package
+        uses: grafana/plugin-ci-workflows/actions/plugins/package/action.yml@main
+        with:
+          output-folder: dist-artifacts
 
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
