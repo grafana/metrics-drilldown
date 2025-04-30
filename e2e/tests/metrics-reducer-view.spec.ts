@@ -95,16 +95,16 @@ test.describe('Metrics reducer view', () => {
         const panelTitle = 'deprecated_flags_inuse_total';
         await metricsReducerView.selectMetricPanel(panelTitle);
         await metricsReducerView.createBookmark();
-        metricsReducerView.assertBookmarkAlert();
+        await metricsReducerView.assertBookmarkAlert();
         await page.goBack();
         await metricsReducerView.toggleSideBarButton('Bookmarks');
-        metricsReducerView.assertBookmarkCreated(panelTitle);
+        await metricsReducerView.assertBookmarkCreated(panelTitle);
       });
     });
 
     test.describe('Group by label', () => {
       test('A list of metrics is shown when metrics are grouped by label', async ({ page, metricsReducerView }) => {
-        await metricsReducerView.selectGroupByLabel('backend');
+        await metricsReducerView.selectGroupByLabel('code');
         await expect(page).toHaveScreenshot({
           stylePath: './e2e/fixtures/css/hide-app-controls.css',
         });

@@ -87,14 +87,14 @@ export class MetricsReducerView extends DrilldownView {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL).click();
   }
 
-  assertBookmarkAlert() {
-    expect(this.getByText('Bookmark created')).toBeVisible();
+  async assertBookmarkAlert() {
+    await expect(this.getByText('Bookmark created')).toBeVisible();
   }
 
-  assertBookmarkCreated(metricName: string) {
+  async assertBookmarkCreated(metricName: string) {
     // Only consider the first 20 characters, to account for truncation of long meric names
     const possiblyTruncatedMetricName = new RegExp(`^${metricName.substring(0, 20)}`);
-    expect(this.getByRole('button', { name: possiblyTruncatedMetricName })).toBeVisible();
+    await expect(this.getByRole('button', { name: possiblyTruncatedMetricName })).toBeVisible();
   }
 
   /* Metrics list */
