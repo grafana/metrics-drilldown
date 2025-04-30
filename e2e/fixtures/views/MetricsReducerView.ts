@@ -56,17 +56,17 @@ export class MetricsReducerView extends DrilldownView {
 
   /* Side bar */
 
-  async getSideBar() {
-    return this.getByTestId('sidebar-buttons');
+  getSideBar() {
+    return this.getByTestId('sidebar');
   }
 
   async toggleSideBarButton(buttonName: string) {
-    const sidebar = await this.getSideBar();
+    const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: buttonName }).click();
   }
 
   async assertSidebar() {
-    const sidebar = await this.getSideBar();
+    const sidebar = this.getSideBar();
 
     for (const buttonName of [
       'Rules filters',
@@ -142,5 +142,21 @@ export class MetricsReducerView extends DrilldownView {
   async changeSortOption(sortBy: SortOption) {
     await this.page.getByTestId('list-controls').getByTestId('data-testid template variable').click();
     await this.page.getByRole('option', { name: sortBy }).locator('span').click();
+  }
+
+  async selectPrefixFilters(prefixes: string[]) {
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('button', { name: 'Prefix filters' }).click();
+    for (const prefix of prefixes) {
+      await sidebar.getByTitle(prefix, { exact: true }).locator('label').click();
+    }
+  }
+
+  async selectSuffixFilters(suffixes: string[]) {
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('button', { name: 'Suffix filters' }).click();
+    for (const suffix of suffixes) {
+      await sidebar.getByTitle(suffix, { exact: true }).locator('label').click();
+    }
   }
 }

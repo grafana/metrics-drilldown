@@ -104,4 +104,41 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.assertBookmarkCreated(panelTitle);
     });
   });
+
+  test.describe('Metrics counts', () => {
+    test.beforeEach(async ({ metricsReducerView }) => {
+      await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
+    });
+
+    test.describe('Filter logic behavior', () => {
+      test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
+        metricsReducerView,
+        page,
+      }) => {
+        await metricsReducerView.assertMetricsList();
+
+        // Select multiple prefixes to demonstrate OR behavior within a group
+        await metricsReducerView.selectPrefixFilters(['prometheus', 'pyroscope']);
+
+        // Verify OR behavior by checking that metrics with either prefix are shown
+        await expect(page).toHaveScreenshot('prefixes-selected-metric-counts.png');
+      });
+
+      test('Between filter groups, selections use AND logic ((prefix.one OR prefix.two) AND (suffix.one OR suffix.two))', async ({
+        metricsReducerView,
+        page,
+      }) => {
+        await metricsReducerView.assertMetricsList();
+
+        // First select prefixes
+        await metricsReducerView.selectPrefixFilters(['prometheus', 'pyroscope']);
+
+        // Then select suffixes to demonstrate AND behavior between groups
+        await metricsReducerView.selectSuffixFilters(['bytes', 'count']);
+
+        // Verify AND behavior between filter groups
+        await expect(page).toHaveScreenshot('prefixes-and-suffixes-selected-metric-counts.png');
+      });
+    });
+  });
 });
