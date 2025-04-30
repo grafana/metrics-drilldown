@@ -10,9 +10,7 @@ on:
         default: false
   pull_request:
     branches:
-      - dev
-      # TODO: Revert after confirming
-      # - main
+      - main
 
 permissions:
   contents: 'read'
