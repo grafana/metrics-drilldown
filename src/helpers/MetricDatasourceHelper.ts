@@ -202,7 +202,7 @@ export class MetricDatasourceHelper {
    * @remarks
    * This is a temporary hack to check if the datasource uses time range in language provider methods.
    * It will be removed when a better way of handling recent breaking changes in `@grafana/prometheus`
-   * is provided to us in that package.
+   * is provided to us in that package. For more details, see https://github.com/grafana/metrics-drilldown/issues/370.
    */
   public static datasourceUsesTimeRangeInLanguageProviderMethods(ds: PrometheusDatasource): boolean {
     // This works because the `fetchLabelValues` method happens to have changed in a way that
