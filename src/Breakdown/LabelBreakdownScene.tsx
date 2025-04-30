@@ -234,7 +234,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
         }
       });
     }
-    reportExploreMetrics('sorting_changed', { sortBy: event.sortBy });
+    reportExploreMetrics('sorting_changed', { from: 'label-breakdown', sortBy: event.sortBy });
   };
 
   private onReferencedVariableValueChanged() {
