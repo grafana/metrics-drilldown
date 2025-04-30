@@ -8,9 +8,10 @@ on:
         required: false
         type: boolean
         default: false
-  pull_request:
-    branches:
-      - main
+  # TODO: Revert after confirming
+  # pull_request:
+  #   branches:
+  #     - main
 
 permissions:
   contents: 'read'
