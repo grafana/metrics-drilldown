@@ -1,10 +1,11 @@
 import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
-import { type Dashboard, type DataSourceRef } from '@grafana/schema';
+import { type Dashboard } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
 import { limitFunction } from 'p-limit';
 
 import { type SortingOption } from './MetricsSorter';
 import { logger } from '../../../tracking/logger/logger';
+import { isPrometheusDataSource } from '../../../utils/utils.datasource';
 
 interface MetricsUsageState {
   metrics: Record<string, number>;
@@ -280,18 +281,4 @@ export function extractMetricNames(promqlExpression: string): string[] {
   } while (cursor.next());
 
   return Array.from(metricNames);
-}
-
-/**
- * Helper function to determine if a datasource is a Prometheus datasource
- */
-export function isPrometheusDataSource(input: unknown): input is Required<Pick<DataSourceRef, 'type' | 'uid'>> {
-  return (
-    typeof input === 'object' &&
-    input !== null &&
-    'type' in input &&
-    input.type === 'prometheus' &&
-    'uid' in input &&
-    typeof input.uid === 'string'
-  );
 }
