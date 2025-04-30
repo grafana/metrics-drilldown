@@ -104,7 +104,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     );
 
     this._subs.add(
-      this.subscribeToEvent(EventApplyFunction, (event) => {
+      this.subscribeToEvent(EventApplyFunction, () => {
         this.state.drawer.close();
       })
     );
@@ -222,6 +222,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   }
 
   private openDrawer(metricName: string) {
+    const trail = getTrailFor(this);
     this.state.drawer.open({
       title: 'Choose a new Prometheus function',
       subTitle: metricName,
@@ -236,9 +237,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           }),
         ],
         children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map((option, colorIndex) => {
-          const trail = getTrailFor(this);
-          const isNativeHistogram = trail.isNativeHistogram(metricName);
-
           return new SceneCSSGridItem({
             body: new MetricVizPanel({
               title: option.label,
@@ -248,7 +246,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
               height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
               hideLegend: true,
               highlight: colorIndex === 1,
-              isNativeHistogram,
+              isNativeHistogram: trail.isNativeHistogram(metricName),
               headerActions: [
                 new ApplyAction({
                   metricName,
