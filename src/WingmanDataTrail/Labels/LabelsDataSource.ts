@@ -15,7 +15,6 @@ import { MetricDatasourceHelper } from 'helpers/MetricDatasourceHelper';
 import { VAR_DATASOURCE, VAR_FILTERS } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
-import { isPrometheusDataSource } from 'WingmanDataTrail/ListControls/MetricsSorter/metricUsageFetcher';
 
 import { localeCompare } from '../helpers/localCompare';
 

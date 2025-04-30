@@ -13,10 +13,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
-
-function isPrometheusDatasource(ds: any): ds is PrometheusDatasource {
-  return ds.type === 'prometheus';
-}
+import { isPrometheusDataSource } from '../utils/utils.datasource';
 
 export class MetricDatasourceHelper {
   constructor(trail: DataTrail) {
@@ -41,7 +38,7 @@ export class MetricDatasourceHelper {
 
     const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this._trail } });
 
-    if (isPrometheusDatasource(ds)) {
+    if (isPrometheusDataSource(ds)) {
       this._datasource = ds;
     }
 
