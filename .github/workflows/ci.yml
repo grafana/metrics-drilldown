@@ -8,9 +8,9 @@ on:
         required: false
         type: boolean
         default: false
-  # pull_request:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: 'read'
