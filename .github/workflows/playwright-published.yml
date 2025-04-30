@@ -40,6 +40,9 @@ jobs:
         uses: grafana/plugin-ci-workflows/actions/plugins/package@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
         with:
           output-folder: dist-artifacts
+          universal: 'true'
+          dist-folder: dist
+          access-policy-token: ${{ env.SIGN_PLUGIN_ACCESS_POLICY_TOKEN || '' }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
