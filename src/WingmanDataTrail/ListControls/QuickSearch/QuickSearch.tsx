@@ -23,6 +23,7 @@ import {
 import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
+import { reportExploreMetrics } from '../../../interactions';
 
 interface QuickSearchState extends SceneObjectState {
   value: string;
@@ -115,6 +116,11 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   private notifyValueChange = debounce((value: string) => {
     this.publishEvent(new EventQuickSearchChanged({ searchText: value }), true);
+
+    // Track when a user types in the search bar (simplified)
+    if (value) {
+      reportExploreMetrics('quick_search_used', {});
+    }
   }, 250);
 
   private updateValue(value: string) {

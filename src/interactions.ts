@@ -111,6 +111,9 @@ export type Interactions = {
       | 'close'
     )
   };
+  // User types in the quick search bar
+  quick_search_used: {
+  };
   sorting_changed: {
     // By clicking on the sort by variable in the metrics reducer
     from: 'metrics-reducer',
