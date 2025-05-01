@@ -37,7 +37,8 @@
       {
         "fixStyle": "inline-type-imports"
       }
-    ]
+    ],
+    "sonarjs/todo-tag": ["warn"]
   },
   "overrides": [
     {
