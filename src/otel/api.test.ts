@@ -58,7 +58,7 @@ jest.mock('@grafana/runtime', () => ({
           // part of getFilteredResourceAttributes to get instance labels
           return Promise.resolve({ data: ['promotedResourceAttribute', 'resourceAttribute'] });
         }
-        return [];
+        return Promise.resolve([]);
       },
     };
   },

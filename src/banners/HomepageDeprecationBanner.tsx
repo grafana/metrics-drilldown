@@ -36,7 +36,7 @@ function setBannerHasBeenShown() {
 }
 
 function bannerHasBeenShown() {
-  return localStorage.getItem(HP_BANNER_KEY) ?? false;
+  return Boolean(localStorage.getItem(HP_BANNER_KEY));
 }
 
 function getStyles() {

@@ -21,7 +21,7 @@ export function StatusWrapper({ blockingMessage, isLoading, children }: Readonly
   }
 
   if (!blockingMessage) {
-    return children;
+    return <>{children}</>;
   }
 
   return <div className={styles.statusMessage}>{blockingMessage}</div>;
