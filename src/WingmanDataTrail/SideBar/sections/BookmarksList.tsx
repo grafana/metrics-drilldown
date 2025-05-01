@@ -64,7 +64,7 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
     const styles = useStyles2(getStyles);
     const { title, description } = model.useState();
     const { bookmarks } = getTrailStore();
-    const [_, setLastDelete] = useState(Date.now());
+    const [, setLastDelete] = useState(Date.now());
 
     const onSelect = (index: number) => {
       reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
