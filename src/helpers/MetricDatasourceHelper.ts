@@ -146,11 +146,7 @@ export class MetricDatasourceHelper {
     }
 
     // check for comparison when there is overlap between native and classic histograms
-    if (this._classicHistograms[`${metric}_bucket`]) {
-      return true;
-    }
-
-    return false;
+    return this._classicHistograms[`${metric}_bucket`] > 0;
   }
 
   private addNativeHistogram(metric: string) {
