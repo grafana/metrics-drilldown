@@ -38,7 +38,8 @@
         "fixStyle": "inline-type-imports"
       }
     ],
-    "sonarjs/todo-tag": ["warn"]
+    "sonarjs/todo-tag": ["warn"],
+    "sonarjs/fixme-tag": ["warn"]
   },
   "overrides": [
     {

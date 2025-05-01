@@ -47,8 +47,7 @@ test.describe('Select metric view', () => {
     // tabs
     await expect(metricSceneDetails.getByText('Breakdown')).toBeVisible();
     await expect(metricSceneDetails.getByText('Related metrics')).toBeVisible();
-    // FIXME: make sure they appear (the "gdev-loki" data source is provisioned - not sure where the problem is)
-    // await expect(metricSceneDetails.getByText('Related logs')).toBeVisible();
+    await expect(metricSceneDetails.getByText('Related logs')).toBeVisible();
 
     // buttons
     await expect(metricSceneDetails.getByLabel('Remove existing metric and choose a new metric')).toBeVisible();
