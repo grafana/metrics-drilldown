@@ -1,6 +1,9 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 
+import { type LabelBreakdownSortingOption as BreakdownSortByOption } from 'Breakdown/SortByScene';
+import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+
 import { type BreakdownLayoutType } from './Breakdown/types';
 import { type ActionViewType } from './MetricScene';
 
@@ -109,8 +112,15 @@ export type Interactions = {
     )
   };
   sorting_changed: {
-      // type of sorting
-      sortBy: string
+    // By clicking on the sort by variable in the metrics reducer
+    from: 'metrics-reducer',
+    // The sort by option selected
+    sortBy: MetricsReducerSortByOption
+  } | {
+    // By clicking on the sort by component in the label breakdown
+    from: 'label-breakdown',
+    // The sort by option selected
+    sortBy: BreakdownSortByOption
   };
   wasm_not_supported: {},
   missing_otel_labels_by_truncating_job_and_instance: {
