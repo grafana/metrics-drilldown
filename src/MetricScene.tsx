@@ -128,13 +128,13 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         }
       }
     } else if (values.actionView === null) {
-      this.setActionView(undefined);
+      this.setActionView(null);
     }
   }
 
-  public setActionView(actionView?: ActionViewType) {
+  public setActionView(actionViewType: ActionViewType | null) {
     const { body } = this.state;
-    const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
+    const actionViewDef = actionViewType ? actionViewsDefinitions.find((v) => v.value === actionViewType) : null;
 
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
       // reduce max height for main panel to reduce height flicker

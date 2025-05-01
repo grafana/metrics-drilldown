@@ -22,13 +22,13 @@ interface MetricsAppContext {
 }
 
 export const MetricsContext = createContext<MetricsAppContext>({
-  trail: newMetricsTrail(undefined),
+  trail: newMetricsTrail(),
   goToUrlForTrail: () => {},
 });
 
 function App(props: AppRootProps) {
   const [error] = useCatchExceptions();
-  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined));
+  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail());
   const styles = useStyles2(getStyles);
 
   const goToUrlForTrail = (trail: DataTrail) => {
