@@ -23,8 +23,6 @@ import {
 import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
-import { reportExploreMetrics } from '../../../interactions';
-
 interface QuickSearchState extends SceneObjectState {
   value: string;
   counts: { current: number; total: number };
