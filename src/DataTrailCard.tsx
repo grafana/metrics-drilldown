@@ -93,7 +93,7 @@ export function DataTrailCard(props: Readonly<Props>) {
       </Card>
       <div className={styles.date}>
         <div className={styles.secondaryFont}>Date created: </div>
-        <div className={styles.primaryFont}>{createdAt && dateTimeFormat(createdAt, { format: 'YYYY-MM-DD' })}</div>
+        <div className={styles.primaryFont}>{createdAt > 0 && dateTimeFormat(createdAt, { format: 'YYYY-MM-DD' })}</div>
       </div>
     </article>
   );

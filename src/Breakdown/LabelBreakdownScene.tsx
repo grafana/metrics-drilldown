@@ -363,7 +363,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       <div className={styles.container}>
         <StatusWrapper {...{ isLoading: loading, blockingMessage }}>
           <div className={styles.controls}>
-            {!loading && labels.length && (
+            {!loading && labels.length > 0 && (
               <Field label={useOtelExperience ? 'By attribute' : 'By label'}>
                 <BreakdownLabelSelector options={allLabelOptions} value={value} onChange={model.onChange} />
               </Field>
