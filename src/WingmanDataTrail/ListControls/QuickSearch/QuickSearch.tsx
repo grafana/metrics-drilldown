@@ -117,11 +117,11 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   private notifyValueChange = debounce((value: string) => {
     this.publishEvent(new EventQuickSearchChanged({ searchText: value }), true);
 
-    // Track when a user types in the search bar (simplified)
+    // Report when a user completes typing (after 1 second)
     if (value) {
       reportExploreMetrics('quick_search_used', {});
     }
-  }, 250);
+  }, 1000);
 
   private updateValue(value: string) {
     this.setState({ value });
