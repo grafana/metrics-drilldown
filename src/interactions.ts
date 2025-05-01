@@ -165,6 +165,11 @@ export type Interactions = {
       | 'non_rules_metrics'
       | 'recording_rules'
     )
+  },
+  // User applies a label filter from the sidebar
+  sidebar_group_by_label_filter_applied: {
+    // The label that was applied (optional)
+    label?: string;
   }
 };
 
