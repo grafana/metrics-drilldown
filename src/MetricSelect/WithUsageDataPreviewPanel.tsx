@@ -147,7 +147,7 @@ interface UsageSectionProps {
   icon: IconName;
 }
 
-function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: UsageSectionProps) {
+function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: Readonly<UsageSectionProps>) {
   const styles = useStyles2(getStyles);
 
   return (

@@ -26,7 +26,7 @@ export const MetricsContext = createContext<MetricsAppContext>({
   goToUrlForTrail: () => {},
 });
 
-function App(props: AppRootProps) {
+function App(props: Readonly<AppRootProps>) {
   const [error] = useCatchExceptions();
   const [trail, setTrail] = useState<DataTrail>(newMetricsTrail());
   const styles = useStyles2(getStyles);

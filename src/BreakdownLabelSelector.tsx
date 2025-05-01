@@ -9,7 +9,7 @@ type Props = {
   onChange: (label: string | undefined) => void;
 };
 
-export function BreakdownLabelSelector({ options, value, onChange }: Props) {
+export function BreakdownLabelSelector({ options, value, onChange }: Readonly<Props>) {
   const styles = useStyles2(getStyles);
 
   return (

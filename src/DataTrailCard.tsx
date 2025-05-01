@@ -28,7 +28,7 @@ const truncateValue = (key: string, value: string, maxLength: number) => {
   return value;
 };
 
-export function DataTrailCard(props: Props) {
+export function DataTrailCard(props: Readonly<Props>) {
   const { onSelect, onDelete, bookmark } = props;
   const styles = useStyles2(getStyles);
 
