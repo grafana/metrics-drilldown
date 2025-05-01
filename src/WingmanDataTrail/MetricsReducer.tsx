@@ -17,6 +17,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { reportExploreMetrics } from 'interactions';
 import { getColorByIndex, getTrailFor } from 'utils';
 
 import { MetricSelectedEvent } from '../shared';
@@ -208,6 +209,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         for (const [, { sortEngine }] of this.state.enginesMap) {
           sortEngine.sort(sortBy);
         }
+
+        reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
       })
     );
   }
