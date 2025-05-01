@@ -1,6 +1,11 @@
 {
-  "extends": ["./.config/.eslintrc", "plugin:import/recommended", "plugin:import/typescript"],
-  "plugins": ["import"],
+  "plugins": ["import", "sonarjs"],
+  "extends": [
+    "./.config/.eslintrc",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:sonarjs/recommended-legacy"
+  ],
   "settings": {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"]
