@@ -270,7 +270,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
           </Stack>
         </div>
 
-        <TabsBar>
+        <TabsBar className={styles.customTabsBar}>
           {actionViewsDefinitions.map((tab, index) => {
             const label = tab.displayName;
             const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
@@ -321,6 +321,9 @@ function getStyles(theme: GrafanaTheme2) {
         top: 16,
         zIndex: 2,
       },
+    }),
+    customTabsBar: css({
+      paddingBottom: theme.spacing(1),
     }),
   };
 }
