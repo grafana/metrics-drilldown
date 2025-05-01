@@ -15,6 +15,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
+import { debounce } from 'lodash';
 import React from 'react';
 
 import { reportExploreMetrics } from 'interactions';
@@ -69,6 +70,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.updateBodyBasedOnGroupBy((variable as LabelsVariable).state.value as string);
     },
   });
+
+  // Report when a user completes typing (after 1 second)
+  private readonly _debounceReportQuickSearchChange = debounce((searchText: string) => {
+    if (searchText) {
+      reportExploreMetrics('quick_search_used', {});
+    }
+  }, 1000);
 
   public constructor() {
     super({
@@ -186,6 +194,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
           sortEngine.sort(sortByVariable.state.value as SortingOption);
         }
+
+        this._debounceReportQuickSearchChange(searchText);
       })
     );
 
