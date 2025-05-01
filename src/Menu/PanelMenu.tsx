@@ -136,7 +136,7 @@ const getInvestigationLink = async (addToExplorations: AddToExplorationButton) =
   const context = addToExplorations.state.context;
 
   // `getPluginLinkExtensions` is removed in Grafana v12
-  if (getPluginLinkExtensions !== undefined) {
+  if (typeof getPluginLinkExtensions === 'function') {
     const links = getPluginLinkExtensions({
       extensionPointId,
       context,

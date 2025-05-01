@@ -149,7 +149,7 @@ export function parsePromQueryRegex(query: string): ParsedPromQuery {
     }
 
     // Parse labels if content exists
-    if (labelsContent !== undefined) {
+    if (labelsContent) {
       parseLabels(labelsContent, labelFilters);
     }
   }
