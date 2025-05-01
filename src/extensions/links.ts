@@ -40,7 +40,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
 
       const { datasource, expr } = queries[0];
 
-      if (!expr || !(datasource?.type === 'prometheus')) {
+      if (!expr || datasource?.type !== 'prometheus') {
         return;
       }
 
