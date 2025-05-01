@@ -67,7 +67,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 
           return query;
         });
-      } catch (e) {}
+      } catch {}
 
       // Navigation options (all panels)
       const items: PanelMenuItem[] = [

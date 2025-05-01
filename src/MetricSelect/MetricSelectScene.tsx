@@ -383,7 +383,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       // If there is a current metric, do not present it
       const currentMetric = sceneGraph.getAncestor(this, MetricScene).state.metric;
       delete metricsMap[currentMetric];
-    } catch (err) {
+    } catch {
       // There is no current metric
     }
 
