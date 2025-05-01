@@ -22,7 +22,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     description,
     icon,
     category,
-    path: createAppUrl(ROUTES.Trail),
+    path: createAppUrl(ROUTES.Drilldown),
     configure: (context) => {
       if (typeof context === 'undefined') {
         return;
@@ -65,7 +65,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
         ),
       ]);
 
-      const pathToMetricView = createAppUrl(ROUTES.Trail, params);
+      const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
 
       return {
         path: pathToMetricView,

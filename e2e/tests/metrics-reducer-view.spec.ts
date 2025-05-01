@@ -4,7 +4,7 @@ import { type SortOption } from '../fixtures/views/MetricsReducerView';
 
 test.describe('Metrics reducer view', () => {
   test('Core UI elements', async ({ metricsReducerView }) => {
-    await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+    await metricsReducerView.gotoVariant('/drilldown');
     await metricsReducerView.assertListControls();
     await metricsReducerView.assertSidebar();
     await metricsReducerView.assertMetricsList();
@@ -12,7 +12,7 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Metrics sorting', () => {
     test.beforeEach(async ({ metricsReducerView }) => {
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
+      await metricsReducerView.gotoVariant('/drilldown', DEFAULT_STATIC_URL_SEARCH_PARAMS);
     });
 
     test('Default sorting shows recent metrics first, then alphabetical', async ({ metricsReducerView, page }) => {
@@ -87,7 +87,7 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Sidebar buttons', () => {
     test.beforeEach(async ({ metricsReducerView }) => {
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
+      await metricsReducerView.gotoVariant('/drilldown', DEFAULT_STATIC_URL_SEARCH_PARAMS);
     });
 
     test.describe('Bookmarks', () => {
@@ -115,7 +115,7 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Metrics counts', () => {
     test.beforeEach(async ({ metricsReducerView }) => {
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
+      await metricsReducerView.gotoVariant('/drilldown', DEFAULT_STATIC_URL_SEARCH_PARAMS);
     });
 
     test.describe('Filter logic behavior', () => {
