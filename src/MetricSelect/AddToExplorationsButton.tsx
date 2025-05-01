@@ -140,7 +140,7 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
       datasource: { uid: dsUid },
       url: window.location.href,
       id: `${JSON.stringify(queries)}${labelName}${fieldName}`,
-      title: `${labelName}${fieldName ? ` > ${fieldName}` : ''}`,
+      title: labelName + (fieldName ? ` > ${fieldName}` : ''),
       logoPath: MimirLogo,
       drillDownLabel: fieldName,
       fieldConfig,

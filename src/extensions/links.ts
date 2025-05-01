@@ -75,7 +75,8 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
 ];
 
 export function createAppUrl(route: string, urlParams?: URLSearchParams): string {
-  return `${PLUGIN_BASE_URL}/${route}${urlParams ? `?${urlParams.toString()}` : ''}`;
+  const urlParamsAsString = urlParams ? `?${urlParams.toString()}` : '';
+  return `${PLUGIN_BASE_URL}/${route}${urlParamsAsString}`;
 }
 
 // We can't use `src/shared.ts` vars here because of the impacts of its imports on the module.tsx bundle size

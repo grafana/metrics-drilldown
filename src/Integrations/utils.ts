@@ -13,8 +13,8 @@ export function getQueryMetricLabel({ metric, labelFilters }: QueryMetric) {
     return metric;
   }
 
-  const filter = `{${labelFilters.map(({ label, op, value }) => `${label}${op}"${value}"`)}}`;
-  return `${metric}${filter}`;
+  const filterExpression = labelFilters.map(({ label, op, value }) => `${label}${op}"${value}"`);
+  return `${metric}{${filterExpression}}`;
 }
 
 export function createAdHocFilters(labels: QueryBuilderLabelFilter[]) {
