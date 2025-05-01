@@ -248,7 +248,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     }
   }
 
-  public static Component = ({ model }: SceneComponentProps<SideBar>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
     const { sections, visibleSection, sectionValues } = model.useState();
 

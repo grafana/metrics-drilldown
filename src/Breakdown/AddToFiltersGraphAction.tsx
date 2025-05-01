@@ -67,7 +67,7 @@ export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphAc
     }
   };
 
-  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     const state = model.useState();
     const labels = state.frame.fields[1]?.labels || {};
 

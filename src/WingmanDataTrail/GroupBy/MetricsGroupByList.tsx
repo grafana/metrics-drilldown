@@ -75,7 +75,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
     });
   }
 
-  static Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
+  static readonly Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
     const styles = useStyles2(getStyles);
     const { body, $variables, labelName } = model.useState();
 

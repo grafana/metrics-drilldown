@@ -491,7 +491,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     trail.setState({ useOtelExperience: !useOtelExperience, resettingOtel, startButtonClicked });
   };
 
-  public static Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
     const {
       body,
       metricNames,

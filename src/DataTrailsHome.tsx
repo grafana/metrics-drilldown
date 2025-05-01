@@ -45,7 +45,7 @@ export class DataTrailsHome extends SceneObjectBase<DataTrailsHomeState> {
     this.state.onTrailSelected(trail);
   };
 
-  static Component = ({ model }: SceneComponentProps<DataTrailsHome>) => {
+  static readonly Component = ({ model }: SceneComponentProps<DataTrailsHome>) => {
     const [_, setLastDelete] = useState(Date.now());
     const styles = useStyles2(getStyles);
     const theme = useTheme2();

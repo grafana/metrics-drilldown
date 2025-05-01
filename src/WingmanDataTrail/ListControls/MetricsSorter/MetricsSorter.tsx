@@ -148,7 +148,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     return this.usageFetcher.getUsageMetrics(usageType);
   }
 
-  public static Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
     const { inputControls } = model.useState();
 
     return <inputControls.Component model={inputControls} data-testid="sort-by-select" />;

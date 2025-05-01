@@ -5,5 +5,5 @@ export interface EventMetricsVariableDeactivatedPayload {
 }
 
 export class EventMetricsVariableDeactivated extends BusEventWithPayload<EventMetricsVariableDeactivatedPayload> {
-  public static type = 'metrics-variable-deactivated';
+  public static readonly type = 'metrics-variable-deactivated';
 }

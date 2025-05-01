@@ -7,5 +7,5 @@ export interface EventSortByChangedPayload {
 }
 
 export class EventSortByChanged extends BusEventWithPayload<EventSortByChangedPayload> {
-  public static type = 'sort-by-changed';
+  public static readonly type = 'sort-by-changed';
 }

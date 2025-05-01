@@ -49,7 +49,7 @@ export class ListControls extends EmbeddedScene {
     });
   }
 
-  public static Component = ({ model }: SceneComponentProps<ListControls>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<ListControls>) => {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
 

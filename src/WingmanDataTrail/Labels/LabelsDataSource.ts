@@ -22,7 +22,7 @@ import { localeCompare } from '../helpers/localCompare';
 export const NULL_GROUP_BY_VALUE = '(none)';
 
 export class LabelsDataSource extends RuntimeDataSource {
-  static uid = 'grafana-prometheus-labels-datasource';
+  static readonly uid = 'grafana-prometheus-labels-datasource';
 
   constructor() {
     super(LabelsDataSource.uid, LabelsDataSource.uid);

@@ -261,7 +261,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     });
   }
 
-  public static Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 

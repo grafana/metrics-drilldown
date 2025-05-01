@@ -330,7 +330,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return allLabelOptions;
   }
 
-  public static Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
     const { labels, body, search, sortBy, loading, value, blockingMessage } = model.useState();
     const styles = useStyles2(getStyles);
 
@@ -638,7 +638,7 @@ export class SelectLabelAction extends SceneObjectBase<SelectLabelActionState> {
     getBreakdownSceneFor(this).onChange(label);
   };
 
-  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     return (
       <Button variant="secondary" size="sm" fill="outline" onClick={model.onClick}>
         Select

@@ -16,7 +16,7 @@ export class SortCriteriaChanged extends BusEventBase {
     super();
   }
 
-  public static type = 'sort-criteria-changed';
+  public static readonly type = 'sort-criteria-changed';
 }
 
 export class SortByScene extends SceneObjectBase<SortBySceneState> {
@@ -55,7 +55,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
     this.publishEvent(new SortCriteriaChanged(this.state.target, criteria.value), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<SortByScene>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<SortByScene>) => {
     const styles = useStyles2(getStyles);
     const { sortBy } = model.useState();
     const value = model.sortingOptions.find((option) => option.value === sortBy);

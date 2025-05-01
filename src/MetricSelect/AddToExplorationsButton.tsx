@@ -150,7 +150,7 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
     }
   };
 
-  public static Component = ({ model }: SceneComponentProps<AddToExplorationButton>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<AddToExplorationButton>) => {
     const { context } = model.useState();
     const { links } = usePluginLinks({ extensionPointId, context, limitPerPlugin: 1 });
     const link = links.find((link) => link.pluginId === investigationsPluginId);

@@ -88,7 +88,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     }
   }
 
-  public static Component = ({ model }: SceneComponentProps<WithUsageDataPreviewPanel>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<WithUsageDataPreviewPanel>) => {
     const {
       vizPanelInGridItem,
       sortBy,

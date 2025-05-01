@@ -149,7 +149,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
   }
 
-  static Component = ({ model }: SceneComponentProps<MetricScene>) => {
+  static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
     const { body } = model.useState();
     return (
       <div data-testid="metric-scene">
@@ -218,7 +218,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     });
   };
 
-  public static Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
     const trail = getTrailFor(model);

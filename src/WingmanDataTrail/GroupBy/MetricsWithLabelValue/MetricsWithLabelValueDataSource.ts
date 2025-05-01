@@ -20,7 +20,7 @@ import type { PrometheusDatasource } from '@grafana/prometheus';
 export const NULL_GROUP_BY_VALUE = '(none)';
 
 export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
-  static uid = 'grafana-prometheus-metrics-with-label-values-datasource';
+  static readonly uid = 'grafana-prometheus-metrics-with-label-values-datasource';
 
   constructor() {
     super(MetricsWithLabelValueDataSource.uid, MetricsWithLabelValueDataSource.uid);

@@ -121,7 +121,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
     }
   }
 
-  public static Component = ({ model }: SceneComponentProps<PanelMenu>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<PanelMenu>) => {
     const { body } = model.useState();
 
     if (body) {

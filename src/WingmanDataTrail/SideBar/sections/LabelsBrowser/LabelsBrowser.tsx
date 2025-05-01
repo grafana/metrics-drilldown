@@ -120,7 +120,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     };
   };
 
-  public static Component = ({ model }: SceneComponentProps<LabelsBrowser>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<LabelsBrowser>) => {
     const styles = useStyles2(getStyles);
 
     const {

@@ -24,7 +24,7 @@ export class LabelValuesVariable extends QueryVariable {
     });
   }
 
-  public static Component = () => {
+  public static readonly Component = () => {
     return <></>;
   };
 }
