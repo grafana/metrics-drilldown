@@ -635,7 +635,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 }
 
 export function getFreshTopScene() {
-  if (currentPathIncludes(ROUTES.TrailWithSidebar)) {
+  if (currentPathIncludes(ROUTES.Drilldown)) {
     return new MetricsReducer();
   } else {
     return new MetricSelectScene({});
