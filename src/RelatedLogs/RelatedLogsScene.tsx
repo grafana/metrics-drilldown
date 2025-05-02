@@ -8,6 +8,7 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneQueryRunner,
+  SceneReactObject,
   SceneVariableSet,
   VariableDependencyConfig,
   VariableValueSelectors,
@@ -21,7 +22,7 @@ import React from 'react';
 
 import { reportExploreMetrics } from '../interactions';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../shared';
-import { NoRelatedLogsScene } from './NoRelatedLogsFoundScene';
+import { NoRelatedLogs } from './NoRelatedLogsFound';
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { isCustomVariable } from '../utils/utils.variables';
 
@@ -61,9 +62,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
   private _onActivate() {
     // Register handler for future changes to lokiDataSources
-    this.state.orchestrator.addLokiDataSourcesChangeHandler(() => {
-      this.setupLogsPanel();
-    });
+    this.state.orchestrator.addLokiDataSourcesChangeHandler(() => this.setupLogsPanel());
 
     // If data sources have already been loaded, we don't need to fetch them again
     if (!this.state.orchestrator.lokiDataSources.length) {
@@ -76,7 +75,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   private showNoLogsScene() {
     const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
     logsPanelContainer.setState({
-      body: new NoRelatedLogsScene({}),
+      body: new SceneReactObject({ component: NoRelatedLogs }),
     });
     this.setState({
       controls: undefined,
@@ -104,19 +103,21 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     });
 
     // Set up subscription to query results
-    this._queryRunner.subscribeToState((state) => {
-      // Only process completed query results
-      if (state.data?.state === LoadingState.Done) {
-        const totalRows = state.data.series
-          ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
-          : 0;
+    this._subs.add(
+      this._queryRunner.subscribeToState((state) => {
+        // Only process completed query results
+        if (state.data?.state === LoadingState.Done) {
+          const totalRows = state.data.series
+            ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
+            : 0;
 
-        // Show NoRelatedLogsScene if no logs found
-        if (totalRows === 0 || !state.data.series?.length) {
-          this.showNoLogsScene();
+          // Show NoRelatedLogsScene if no logs found
+          if (totalRows === 0 || !state.data.series?.length) {
+            this.showNoLogsScene();
+          }
         }
-      }
-    });
+      })
+    );
 
     // Set up UI for logs panel
     const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
@@ -125,18 +126,22 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     });
 
     // Set up variables for datasource selection
+    const logsDataSourceVariable = new CustomVariable({
+      name: VAR_LOGS_DATASOURCE,
+      label: 'Logs data source',
+      query: this.state.orchestrator.lokiDataSources.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
+    });
     this.setState({
-      $variables: new SceneVariableSet({
-        variables: [
-          new CustomVariable({
-            name: VAR_LOGS_DATASOURCE,
-            label: 'Logs data source',
-            query: this.state.orchestrator.lokiDataSources.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
-          }),
-        ],
-      }),
+      $variables: new SceneVariableSet({ variables: [logsDataSourceVariable] }),
       controls: [new VariableValueSelectors({ layout: 'vertical' })],
     });
+    this._subs.add(
+      logsDataSourceVariable.subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          reportExploreMetrics('related_logs_action_clicked', { action: 'logs_data_source_changed' });
+        }
+      })
+    );
 
     // Update Loki query
     this.updateLokiQuery();
@@ -203,12 +208,12 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           <LinkButton
             href={`${config.appSubUrl}/a/grafana-lokiexplore-app`} // We prefix with the appSubUrl for environments that don't host grafana at the root.
             target="_blank"
-            tooltip="Navigate to the Explore Logs app"
+            tooltip="Navigate to the Logs Drilldown app"
             variant="secondary"
             size="sm"
-            onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_explore_logs' })}
+            onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_logs_drilldown' })}
           >
-            Open Explore Logs
+            Open Logs Drilldown
           </LinkButton>
         </Stack>
         <body.Component model={body} />
