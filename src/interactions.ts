@@ -81,8 +81,10 @@ export type Interactions = {
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: (
-      // Opens Explore Logs
-      | 'open_explore_logs'
+      // Opens Logs Drilldown
+      | 'open_logs_drilldown'
+      // Logs data source changed
+      | 'logs_data_source_changed'
     );
   };
   // User selects a metric
@@ -167,6 +169,11 @@ export type Interactions = {
       | 'non_rules_metrics'
       | 'recording_rules'
     )
+  },
+  // User applies a label filter from the sidebar
+  sidebar_group_by_label_filter_applied: {
+    // The label that was applied (optional)
+    label?: string;
   }
 };
 
