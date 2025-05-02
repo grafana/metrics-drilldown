@@ -81,8 +81,10 @@ export type Interactions = {
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: (
-      // Opens Explore Logs
-      | 'open_explore_logs'
+      // Opens Logs Drilldown
+      | 'open_logs_drilldown'
+      // Logs data source changed
+      | 'logs_data_source_changed'
     );
   };
   // User selects a metric
@@ -111,6 +113,8 @@ export type Interactions = {
       | 'close'
     )
   };
+  // User types in the quick search bar
+  quick_search_used: {};
   sorting_changed: {
     // By clicking on the sort by variable in the metrics reducer
     from: 'metrics-reducer',
