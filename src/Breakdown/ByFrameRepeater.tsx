@@ -16,6 +16,7 @@ import { Alert, Button } from '@grafana/ui';
 import React from 'react';
 
 import { BreakdownSearchReset } from './BreakdownSearchScene';
+import { type LabelBreakdownSortingOption } from './SortByScene';
 import { findSceneObjectsByType } from './utils';
 import { getLabelValueFromDataFrame } from '../services/levels';
 import { fuzzySearch } from '../services/search';
@@ -32,7 +33,7 @@ type FrameIterateCallback = (frames: DataFrame[], seriesIndex: number) => void;
 
 export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
   private unfilteredChildren: SceneFlexItem[] = [];
-  private sortBy: string;
+  private sortBy: LabelBreakdownSortingOption;
   private sortedSeries: DataFrame[] = [];
   private getFilter: () => string;
 
@@ -40,7 +41,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     sortBy,
     getFilter,
     ...state
-  }: ByFrameRepeaterState & { sortBy: string; getFilter: () => string }) {
+  }: ByFrameRepeaterState & { sortBy: LabelBreakdownSortingOption; getFilter: () => string }) {
     super(state);
 
     this.sortBy = sortBy;
@@ -74,7 +75,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     });
   }
 
-  public sort = (sortBy: string) => {
+  public sort = (sortBy: LabelBreakdownSortingOption) => {
     const data = sceneGraph.getData(this);
     this.sortBy = sortBy;
     if (data.state.data) {
