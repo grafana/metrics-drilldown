@@ -5,7 +5,7 @@ import { type SyntaxNode } from '@lezer/common';
 import { lastValueFrom } from 'rxjs';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsOrchestrator';
+import { findHealthyDataSources } from '../../utils/utils.datasource';
 
 export interface RecordingRuleGroup {
   name: string;
@@ -156,7 +156,7 @@ export function getLokiQueryForRelatedMetric(
  * @throws Will log an error to the console if fetching or extracting rules fails for any data source.
  */
 export async function fetchAndExtractLokiRecordingRules() {
-  const lokiDataSources = await findHealthyLokiDataSources();
+  const lokiDataSources = await findHealthyDataSources('loki');
   const extractedRecordingRules: ExtractedRecordingRules = {};
   await Promise.all(
     lokiDataSources.map(async (dataSource) => {

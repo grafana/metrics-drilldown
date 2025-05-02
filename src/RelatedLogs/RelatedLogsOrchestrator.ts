@@ -1,5 +1,4 @@
-import { LoadingState, type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
-import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { LoadingState } from '@grafana/data';
 import { SceneQueryRunner } from '@grafana/scenes';
 
 import { type MetricsLogsConnector } from '../Integrations/logs/base';
@@ -7,8 +6,7 @@ import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labels
 import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { type MetricScene } from '../MetricScene';
 import pluginJson from '../plugin.json';
-
-type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
+import { findHealthyDataSources, type DataSource } from '../utils/utils.datasource';
 
 /**
  * Manager class that handles the orchestration of related logs functionality.
@@ -92,7 +90,7 @@ export class RelatedLogsOrchestrator {
    */
   public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
-    const allLokiDatasources = await findHealthyLokiDataSources();
+    const allLokiDatasources = await findHealthyDataSources('loki', true);
 
     // Check all datasources for logs
     if (allLokiDatasources.length > 0) {
@@ -194,38 +192,4 @@ export class RelatedLogsOrchestrator {
   public checkConditionsMetForRelatedLogs(): boolean {
     return this._logsConnectors.some((connector) => connector.checkConditionsMetForRelatedLogs());
   }
-}
-
-export async function findHealthyLokiDataSources() {
-  const lokiDataSources = getDataSourceSrv().getList({
-    logs: true,
-    type: 'loki',
-    filter: (ds) => ds.uid !== 'grafana',
-  });
-  const healthyLokiDataSources: DataSource[] = [];
-  const unhealthyLokiDataSources: DataSource[] = [];
-
-  await Promise.all(
-    lokiDataSources.map((ds) =>
-      getBackendSrv()
-        .get(`/api/datasources/${ds.id}/health`, undefined, undefined, {
-          showSuccessAlert: false,
-          showErrorAlert: false,
-        })
-        .then((health) =>
-          health?.status === 'OK' ? healthyLokiDataSources.push(ds) : unhealthyLokiDataSources.push(ds)
-        )
-        .catch(() => unhealthyLokiDataSources.push(ds))
-    )
-  );
-
-  if (unhealthyLokiDataSources.length) {
-    console.warn(
-      `Found ${unhealthyLokiDataSources.length} unhealthy Loki data sources: ${unhealthyLokiDataSources
-        .map((ds) => ds.name)
-        .join(', ')}`
-    );
-  }
-
-  return healthyLokiDataSources;
 }
