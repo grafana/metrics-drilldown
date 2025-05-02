@@ -72,7 +72,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     }
   }
 
-  private showNoLogsScene() {
+  private showNoLogsFound() {
     const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
     logsPanelContainer.setState({
       body: new SceneReactObject({ component: NoRelatedLogs }),
@@ -85,7 +85,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
   private setupLogsPanel(): void {
     if (!this.state.orchestrator.lokiDataSources.length) {
-      this.showNoLogsScene();
+      this.showNoLogsFound();
       return;
     }
 
@@ -111,9 +111,9 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
             ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
             : 0;
 
-          // Show NoRelatedLogsScene if no logs found
+          // Show NoRelatedLogs if no logs found
           if (totalRows === 0 || !state.data.series?.length) {
-            this.showNoLogsScene();
+            this.showNoLogsFound();
           }
         }
       })
@@ -172,7 +172,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
     // If no queries were generated, show the NoRelatedLogsScene
     if (queries.length === 0) {
-      this.showNoLogsScene();
+      this.showNoLogsFound();
       return;
     }
 
