@@ -2,7 +2,7 @@ import { type DataFrame, type PanelMenuItem, type PluginExtensionLink } from '@g
 // Certain imports are not available in the dependant package, but can be if the plugin is running in a different Grafana version.
 // We need both imports to support Grafana v11 and v12.
 // @ts-expect-error
-import { getObservablePluginLinks, getPluginLinkExtensions } from '@grafana/runtime';
+import { config, getObservablePluginLinks } from '@grafana/runtime';
 import {
   getExploreURL,
   sceneGraph,
@@ -135,14 +135,22 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 const getInvestigationLink = async (addToExplorations: AddToExplorationButton) => {
   const context = addToExplorations.state.context;
 
-  // `getPluginLinkExtensions` is removed in Grafana v12
-  if (getPluginLinkExtensions !== undefined) {
-    const links = getPluginLinkExtensions({
-      extensionPointId,
-      context,
-    });
+  // Check if we're running on Grafana v11
+  if (config.buildInfo.version.startsWith('11.')) {
+    try {
+      const { getPluginLinkExtensions } = await import('@grafana/runtime');
+      if (getPluginLinkExtensions !== undefined) {
+        const links = getPluginLinkExtensions({
+          extensionPointId,
+          context,
+        });
 
-    return links.extensions[0];
+        return links.extensions[0];
+      }
+    } catch (e) {
+      // Ignore import error and fall through to v12 implementation
+      console.error('Error importing getPluginLinkExtensions', e);
+    }
   }
 
   // `getObservablePluginLinks` is introduced in Grafana v12
