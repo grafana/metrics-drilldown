@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "docs/sources/**"
+      - 'docs/sources/**'
   workflow_dispatch:
 jobs:
   sync:
@@ -19,3 +19,4 @@ jobs:
       - uses: grafana/writers-toolkit/publish-technical-documentation@publish-technical-documentation/v1
         with:
           website_directory: content/docs/explore-metrics/next
+          persist-credentials: false
