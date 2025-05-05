@@ -9,7 +9,7 @@ import { currentPathIncludes } from '../utils';
 
 export function createBookmarkSavedNotification() {
   const appEvents = getAppEvents();
-  const isTrailView = currentPathIncludes(ROUTES.Trail);
+  const isSidebarView = currentPathIncludes(ROUTES.Drilldown);
 
   const infoText = isTrailView ? <i>Drilldown &gt; Metrics</i> : <i>the Metrics Reducer sidebar</i>;
 

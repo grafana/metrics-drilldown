@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.0-8",
+  "version": "1.0.0",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
@@ -39,7 +39,7 @@
     "@grafana/lezer-logql": "^0.2.7",
     "@grafana/prometheus": "^11.6.0-223871",
     "@grafana/runtime": "^11.6.0",
-    "@grafana/scenes": "^6.6.3",
+    "@grafana/scenes": "^6.10.2",
     "@grafana/schema": "^11.6.0",
     "@grafana/ui": "^11.6.0",
     "@lezer/common": "^1.2.3",

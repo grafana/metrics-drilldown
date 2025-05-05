@@ -13,10 +13,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE_EXPR } from '../shared';
-
-function isPrometheusDatasource(ds: any): ds is PrometheusDatasource {
-  return ds.type === 'prometheus';
-}
+import { isPrometheusDataSource } from '../utils/utils.datasource';
 
 export class MetricDatasourceHelper {
   constructor(trail: DataTrail) {
@@ -41,7 +38,7 @@ export class MetricDatasourceHelper {
 
     const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this._trail } });
 
-    if (isPrometheusDatasource(ds)) {
+    if (isPrometheusDataSource(ds)) {
       this._datasource = ds;
     }
 
@@ -193,6 +190,22 @@ export class MetricDatasourceHelper {
     options.key = unwrapQuotes(options.key);
     const keys = await ds.getTagValues(options);
     return keys;
+  }
+
+  /**
+   * Check if the datasource uses time range in language provider methods.
+   * @param ds
+   * @returns boolean
+   * @remarks
+   * This is a temporary hack to check if the datasource uses time range in language provider methods.
+   * It will be removed when a better way of handling recent breaking changes in `@grafana/prometheus`
+   * is provided to us in that package. For more details, see https://github.com/grafana/metrics-drilldown/issues/370.
+   */
+  public static datasourceUsesTimeRangeInLanguageProviderMethods(ds: PrometheusDatasource): boolean {
+    // This works because the `fetchLabelValues` method happens to have changed in a way that
+    // can be used as a heuristic to check if the runtime datasource uses the G12-style
+    // language provider methods introduced in https://github.com/grafana/grafana/pull/101889.
+    return ds.languageProvider.fetchLabelValues.length > 2;
   }
 }
 

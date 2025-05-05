@@ -5,7 +5,7 @@ export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 
 export const ROUTES = {
   Trail: 'trail',
-  TrailWithSidebar: '',
+  Drilldown: 'drilldown',
 };
 
 export const DATASOURCE_REF = {

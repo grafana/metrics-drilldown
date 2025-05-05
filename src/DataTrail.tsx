@@ -41,7 +41,6 @@ import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
-import { MetricsHeader } from './MetricsHeader';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
 import {
   getOtelJoinQuery,
@@ -594,7 +593,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     const chromeHeaderHeight = useChromeHeaderHeight();
     const styles = useStyles2(getStyles, embedded ? 0 : chromeHeaderHeight ?? 0);
-    const showHeaderForFirstTimeUsers = getTrailStore().recent.length < 2;
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
     model.initializeHistograms();
 
@@ -615,7 +613,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     return (
       <div className={styles.container}>
-        {showHeaderForFirstTimeUsers && <MetricsHeader />}
         {controls && (
           <div className={styles.controls} data-testid="app-controls">
             {controls.map((control) => (
@@ -638,7 +635,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 }
 
 export function getFreshTopScene() {
-  if (currentPathIncludes(ROUTES.Trail)) {
+  if (currentPathIncludes(ROUTES.Drilldown)) {
+    return new MetricsReducer();
+  } else {
     return new MetricSelectScene({});
   } else {
     return new MetricsReducer();
