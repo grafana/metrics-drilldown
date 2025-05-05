@@ -72,6 +72,7 @@ export class MetricsReducerView extends DrilldownView {
   async toggleSideBarButton(buttonName: ButtonName) {
     const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: buttonName }).click();
+    await this.mouse.move(0, 0); // prevents the tooltip to cover controls within the side bar
   }
 
   async assertSidebar() {

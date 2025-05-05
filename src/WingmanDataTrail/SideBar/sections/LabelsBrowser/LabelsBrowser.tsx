@@ -7,6 +7,7 @@ import React, { useMemo, useState } from 'react';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
+import { reportExploreMetrics } from '../../../../interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
@@ -67,6 +68,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
   private onClickLabel = (label: string) => {
     this.selectLabel(label);
+    reportExploreMetrics('sidebar_group_by_label_filter_applied', { label });
   };
 
   private onClickClearSelection = () => {

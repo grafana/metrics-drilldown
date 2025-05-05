@@ -1,6 +1,9 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 
+import { type LabelBreakdownSortingOption as BreakdownSortByOption } from 'Breakdown/SortByScene';
+import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+
 import { type BreakdownLayoutType } from './Breakdown/types';
 import { type ActionViewType } from './MetricScene';
 
@@ -78,8 +81,10 @@ export type Interactions = {
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: (
-      // Opens Explore Logs
-      | 'open_explore_logs'
+      // Opens Logs Drilldown
+      | 'open_logs_drilldown'
+      // Logs data source changed
+      | 'logs_data_source_changed'
     );
   };
   // User selects a metric
@@ -108,9 +113,18 @@ export type Interactions = {
       | 'close'
     )
   };
+  // User types in the quick search bar
+  quick_search_used: {};
   sorting_changed: {
-      // type of sorting
-      sortBy: string
+    // By clicking on the sort by variable in the metrics reducer
+    from: 'metrics-reducer',
+    // The sort by option selected
+    sortBy: MetricsReducerSortByOption
+  } | {
+    // By clicking on the sort by component in the label breakdown
+    from: 'label-breakdown',
+    // The sort by option selected
+    sortBy: BreakdownSortByOption
   };
   wasm_not_supported: {},
   missing_otel_labels_by_truncating_job_and_instance: {
@@ -155,6 +169,11 @@ export type Interactions = {
       | 'non_rules_metrics'
       | 'recording_rules'
     )
+  },
+  // User applies a label filter from the sidebar
+  sidebar_group_by_label_filter_applied: {
+    // The label that was applied (optional)
+    label?: string;
   }
 };
 
