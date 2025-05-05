@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { FieldMatcherID, LoadingState, type DataFrame, type GrafanaTheme2 } from '@grafana/data';
+import { FieldMatcherID, LoadingState, type GrafanaTheme2 } from '@grafana/data';
 import {
   SceneObjectBase,
   SceneQueryRunner,
@@ -10,7 +10,6 @@ import {
   type VizPanel,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import { merge } from 'lodash';
 import React from 'react';
 
 import { buildPrometheusQuery, getPromqlFunction, type NonRateQueryFunction } from 'autoQuery/buildPrometheusQuery';
@@ -50,7 +49,6 @@ const rateQueryMetricSuffixes = new Set(['count', 'total', 'sum', 'bucket']);
 
 export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   private static readonly MAX_DATA_POINTS = 250;
-  private static readonly MAX_Y_AXIS_SHORT_VALUE = 100_000;
 
   constructor(props: MetricVizPanelProps) {
     const { isRateQuery } = MetricVizPanel.determineQueryProperties(props.metricName, props.isNativeHistogram);
@@ -94,7 +92,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         if (series?.length) {
           body.setState({
             fieldConfig: {
-              defaults: merge({}, body.state.fieldConfig.defaults, { unit: MetricVizPanel.getUnit(series) }),
+              defaults: body.state.fieldConfig.defaults,
               overrides: [
                 {
                   matcher: { id: FieldMatcherID.byFrameRefID, options: series[0].refId },
@@ -111,23 +109,6 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
         }
       })
     );
-  }
-
-  // This method determines the unit for the y-axis values
-  // Without calling this method, the current default unit would be "short": a short number abbreviated with the SI prefix, e.g. "71K" for 71000
-  // This methods checks if the max value received in the 1st data frame is lower than MetricVizPanel.MAX_Y_AXIS_SHORT_VALUE, and if it's the case,
-  // it uses the full number, e.g. 71K becomes 71255
-  private static getUnit(series: DataFrame[]) {
-    if (series.length > 1) {
-      return undefined;
-    }
-
-    const field = series[0].fields.find((f) => f.name === 'Value');
-    if (!field) {
-      return undefined;
-    }
-
-    return Math.max(...field.values) < MetricVizPanel.MAX_Y_AXIS_SHORT_VALUE ? 'none' : undefined;
   }
 
   private static buildVizPanel({
@@ -267,7 +248,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     return { isRateQuery, groupings };
   }
 
-  public static Component = ({ model }: SceneComponentProps<MetricVizPanel>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricVizPanel>) => {
     const { body, height, highlight } = model.useState();
     const styles = useStyles2(getStyles, height);
 
