@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: 'read'
-  id-token: 'write'
 
 jobs:
   build:
@@ -50,11 +49,14 @@ jobs:
 
           # Create the zip with the correct structure
           cd temp
-          zip -r ../dist-artifacts/${{ github.event.repository.name }}-$version.zip .
+          zip -r ../dist-artifacts/${REPOSITORY_NAME}-$version.zip .
           cd ..
 
           # Clean up
           rm -rf temp
+
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -74,3 +76,6 @@ jobs:
       grafana-compose-file: e2e/docker/docker-compose.e2e.yaml
       playwright-compose-file: e2e/docker/docker-compose.playwright.yaml
       grafana-url: http://localhost:3001
+    permissions:
+      contents: read
+      id-token: write
