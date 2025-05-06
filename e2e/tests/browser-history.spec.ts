@@ -12,7 +12,6 @@ test.describe('Browser History', () => {
     await metricsReducerView.selectMetricPanel('a_utf8_http_requests_total');
     await page.goBack();
 
-    // We should not return to the homepage but to the metric selection page
     await metricsReducerView.assertListControls();
     await metricsReducerView.assertSidebar();
     await metricsReducerView.assertMetricsList();
