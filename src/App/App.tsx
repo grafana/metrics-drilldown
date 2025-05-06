@@ -27,6 +27,7 @@ export const MetricsContext = createContext<MetricsAppContext>({
 });
 
 function App(props: AppRootProps) {
+  const [error] = useCatchExceptions();
   const [trail, setTrail] = useState<DataTrail>(newMetricsTrail(undefined));
   const styles = useStyles2(getStyles);
 
@@ -48,7 +49,6 @@ function App(props: AppRootProps) {
     return () => unsubscribe();
   }, []);
 
-  const [error] = useCatchExceptions();
   if (error) {
     return (
       <div className={styles.appContainer} data-testid="metrics-drilldown-app">

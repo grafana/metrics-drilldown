@@ -16,10 +16,6 @@
     },
     "screenshots": [
       {
-        "name": "homepage",
-        "path": "img/homepage.png"
-      },
-      {
         "name": "metricselect",
         "path": "img/metricselect.png"
       },
@@ -45,7 +41,7 @@
     {
       "type": "page",
       "name": "Grafana Metrics Drilldown",
-      "path": "/a/%PLUGIN_ID%/",
+      "path": "/a/%PLUGIN_ID%/drilldown",
       "action": "datasources:explore",
       "addToNav": true,
       "defaultNav": true

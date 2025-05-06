@@ -1,6 +1,9 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 
+import { type LabelBreakdownSortingOption as BreakdownSortByOption } from 'Breakdown/SortByScene';
+import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+
 import { type BreakdownLayoutType } from './Breakdown/types';
 import { type ActionViewType } from './MetricScene';
 
@@ -29,18 +32,7 @@ export type Interactions = {
   // A metric exploration has started due to one of the following causes
   exploration_started: {
     cause: (
-      // a bookmark was clicked from the home page
       | 'bookmark_clicked'
-      // a recent exploration was clicked from the home page
-      | 'recent_clicked'
-      // "new exploration" was clicked from the home page
-      | 'new_clicked'
-      // the page was loaded (or reloaded) from a URL which matches one of the recent explorations
-      | 'loaded_local_recent_url'
-      // the page was loaded from a URL which did not match one of the recent explorations, and is assumed shared
-      | 'loaded_shared_url'
-      // the exploration was opened from the dashboard panel menu and is embedded in a drawer
-      | 'dashboard_panel'
     );
   };
   // A user has changed a bookmark
@@ -49,15 +41,15 @@ export type Interactions = {
       // Toggled on or off from the bookmark icon
       | 'toggled_on'
       | 'toggled_off'
-      // Deleted from the homepage bookmarks list
+      // Deleted from the sidebar bookmarks list
       | 'deleted'
     );
   };
   // User changes metric explore settings
   settings_changed: { stickyMainGraph?: boolean };
   // User clicks on tab to change the action view
-  metric_action_view_changed: { 
-    view: ActionViewType 
+  metric_action_view_changed: {
+    view: ActionViewType
 
     // The number of related logs
     related_logs_count?: number
@@ -78,8 +70,10 @@ export type Interactions = {
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: (
-      // Opens Explore Logs
-      | 'open_explore_logs'
+      // Opens Logs Drilldown
+      | 'open_logs_drilldown'
+      // Logs data source changed
+      | 'logs_data_source_changed'
     );
   };
   // User selects a metric
@@ -108,9 +102,18 @@ export type Interactions = {
       | 'close'
     )
   };
+  // User types in the quick search bar
+  quick_search_used: {};
   sorting_changed: {
-      // type of sorting
-      sortBy: string
+    // By clicking on the sort by variable in the metrics reducer
+    from: 'metrics-reducer',
+    // The sort by option selected
+    sortBy: MetricsReducerSortByOption
+  } | {
+    // By clicking on the sort by component in the label breakdown
+    from: 'label-breakdown',
+    // The sort by option selected
+    sortBy: BreakdownSortByOption
   };
   wasm_not_supported: {},
   missing_otel_labels_by_truncating_job_and_instance: {
@@ -155,6 +158,11 @@ export type Interactions = {
       | 'non_rules_metrics'
       | 'recording_rules'
     )
+  },
+  // User applies a label filter from the sidebar
+  sidebar_group_by_label_filter_applied: {
+    // The label that was applied (optional)
+    label?: string;
   }
 };
 
