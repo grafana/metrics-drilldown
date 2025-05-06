@@ -34,10 +34,6 @@ export type Interactions = {
     cause: (
       // a bookmark was clicked from the home page
       | 'bookmark_clicked'
-      // a recent exploration was clicked from the home page
-      | 'recent_clicked'
-      // "new exploration" was clicked from the home page
-      | 'new_clicked'
       // the page was loaded (or reloaded) from a URL which matches one of the recent explorations
       | 'loaded_local_recent_url'
       // the page was loaded from a URL which did not match one of the recent explorations, and is assumed shared
