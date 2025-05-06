@@ -32,14 +32,7 @@ export type Interactions = {
   // A metric exploration has started due to one of the following causes
   exploration_started: {
     cause: (
-      // a bookmark was clicked from the home page
       | 'bookmark_clicked'
-      // the page was loaded (or reloaded) from a URL which matches one of the recent explorations
-      | 'loaded_local_recent_url'
-      // the page was loaded from a URL which did not match one of the recent explorations, and is assumed shared
-      | 'loaded_shared_url'
-      // the exploration was opened from the dashboard panel menu and is embedded in a drawer
-      | 'dashboard_panel'
     );
   };
   // A user has changed a bookmark
