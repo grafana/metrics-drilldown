@@ -162,10 +162,10 @@ export class TrailStore {
     this._lastModified = Date.now();
   }
 
-  setRecentTrail(recentTrail: DataTrail, fromHome?: boolean) {
+  setRecentTrail(recentTrail: DataTrail) {
     const notActivated = !recentTrail.state.trailActivated;
 
-    if (notActivated || fromHome) {
+    if (notActivated) {
       // We do not set an uninitialized trail, or a RECENT single node "start" trail
       return;
     }
