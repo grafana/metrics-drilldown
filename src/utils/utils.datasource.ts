@@ -18,36 +18,88 @@ export function isPrometheusDataSource(input: unknown): input is PrometheusDatas
   );
 }
 
-export async function findHealthyDataSources(type: 'prometheus' | 'loki', verbose = false) {
-  const allDataSourcesOfType = getDataSourceSrv().getList({
-    logs: true,
-    type,
-    filter: (ds) => ds.uid !== 'grafana',
-  });
-  const healthyDataSources: DataSource[] = [];
-  const unhealthyDataSources: DataSource[] = [];
+type DataSourceType = 'prometheus' | 'loki';
 
-  await Promise.all(
-    allDataSourcesOfType.map((ds) =>
-      getBackendSrv()
-        .get(`/api/datasources/uid/${ds.uid}/health`, undefined, undefined, {
-          showSuccessAlert: false,
-          showErrorAlert: false,
-        })
-        .then((health) => (health?.status === 'OK' ? healthyDataSources.push(ds) : unhealthyDataSources.push(ds)))
-        .catch(() => unhealthyDataSources.push(ds))
-    )
-  );
+/**
+ * Fetches and caches healthy data sources
+ */
+export class DataSourceFetcher {
+  private readonly pendingRequests = new Map<DataSourceType, Promise<DataSource[]>>();
+  private readonly cache = new Map<DataSourceType, DataSource[]>();
 
-  if (verbose && unhealthyDataSources.length) {
-    // Why not use `logger.warn` here? While this information might be useful for observant users
-    // who open DevTools, it's not an actionable insight for Grafana Metrics Drilldown developers.
-    console.warn(
-      `Found ${unhealthyDataSources.length} unhealthy ${type} data sources: ${unhealthyDataSources
-        .map((ds) => ds.name)
-        .join(', ')}`
-    );
+  /**
+   * Retrieves healthy data sources of the specified type
+   * Results are cached indefinitely until the `DataSourceFetcher` is destroyed
+   *
+   * @param type - The type of data source to retrieve ('prometheus' or loki)
+   * @returns Array of healthy data sources
+   */
+  public async getHealthyDataSources(type: DataSourceType): Promise<DataSource[]> {
+    // Check if we have cached results
+    const cachedDataSources = this.cache.get(type);
+    if (cachedDataSources?.length) {
+      return cachedDataSources;
+    }
+
+    // If there's already a pending request for this type, wait for it
+    let pendingRequest = this.pendingRequests.get(type);
+    if (!pendingRequest) {
+      pendingRequest = this.fetchHealthyDataSources(type).finally(() => {
+        // Clean up the pending request after it completes
+        this.pendingRequests.delete(type);
+      });
+      this.pendingRequests.set(type, pendingRequest);
+    }
+
+    // Wait for the request to complete and update cache
+    const dataSources = await pendingRequest;
+    this.cache.set(type, dataSources);
+
+    return dataSources;
   }
 
-  return healthyDataSources;
+  /**
+   * Fetches healthy data sources of the specified type
+   */
+  private async fetchHealthyDataSources(type: DataSourceType): Promise<DataSource[]> {
+    const allDataSourcesOfType = getDataSourceSrv().getList({
+      logs: true,
+      type,
+      filter: (ds) => ds.uid !== 'grafana',
+    });
+
+    const healthyDataSources: DataSource[] = [];
+    const unhealthyDataSources: DataSource[] = [];
+
+    await Promise.all(
+      allDataSourcesOfType.map(async (ds) => {
+        try {
+          const health = await getBackendSrv().get(`/api/datasources/uid/${ds.uid}/health`, undefined, undefined, {
+            showSuccessAlert: false,
+            showErrorAlert: false,
+          });
+
+          if (health?.status === 'OK') {
+            healthyDataSources.push(ds);
+          } else {
+            unhealthyDataSources.push(ds);
+          }
+        } catch (error) {
+          unhealthyDataSources.push(ds);
+        }
+      })
+    );
+
+    if (unhealthyDataSources.length > 0) {
+      // Why not use `logger.warn` here? While this information might be useful for observant users
+      // who open DevTools, it's not an actionable insight for Grafana Metrics Drilldown developers.
+      console.warn(
+        `Found ${unhealthyDataSources.length} unhealthy ${type} data sources: ${unhealthyDataSources
+          .map((ds) => ds.name)
+          .join(', ')}`
+      );
+    }
+
+    return healthyDataSources;
+  }
 }

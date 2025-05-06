@@ -65,6 +65,7 @@ import {
 } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { currentPathIncludes, getTrailFor, limitAdhocProviders } from './utils';
+import { DataSourceFetcher } from './utils/utils.datasource';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
@@ -105,6 +106,8 @@ export interface DataTrailState extends SceneObjectState {
   nativeHistogramMetric: string;
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
+
+  datasourceFetcher: DataSourceFetcher;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -136,6 +139,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
       trailActivated: state.trailActivated ?? false,
+      datasourceFetcher: state.datasourceFetcher ?? new DataSourceFetcher(),
       ...state,
     });
 
@@ -146,7 +150,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.setState({ trailActivated: true });
 
     if (!this.state.topScene) {
-      this.setState({ topScene: getTopSceneFor(this.state.metric) });
+      this.setState({ topScene: this.getTopSceneFor(this.state.metric) });
     }
 
     // Some scene elements publish this
@@ -352,7 +356,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // must pass this native histogram prometheus knowledge deep into
     // the topscene set on the trail > MetricScene > getAutoQueriesForMetric() > createHistogramMetricQueryDefs();
     stateUpdate.nativeHistogramMetric = nativeHistogramMetric ? '1' : '';
-    stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
+    stateUpdate.topScene = this.getTopSceneFor(metric, nativeHistogramMetric);
 
     return stateUpdate;
   }
@@ -588,6 +592,18 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     }, []);
   }
 
+  private getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
+    if (metric) {
+      return new MetricScene({
+        metric: metric,
+        nativeHistogram: nativeHistogram ?? false,
+        datasourceFetcher: this.state.datasourceFetcher,
+      });
+    } else {
+      return getFreshTopScene();
+    }
+  }
+
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const { controls, topScene, settings, pluginInfo, useOtelExperience, embedded } = model.useState();
 
@@ -639,14 +655,6 @@ export function getFreshTopScene() {
     return new MetricsReducer();
   } else {
     return new MetricSelectScene({});
-  }
-}
-
-export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
-  if (metric) {
-    return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
-  } else {
-    return getFreshTopScene();
   }
 }
 
