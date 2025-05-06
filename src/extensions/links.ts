@@ -178,7 +178,7 @@ export function parsePromQueryRegex(query: string): ParsedPromQuery {
 
 function parseLabels(labelsContent: string, labelFilters: PromLabelFilter[]): void {
   const labelParts = labelsContent.split(',');
-  const labelRegex = /^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*([=!~]+)\s*"((?:[^"\\]|\\.)*)"\s*$/;
+  const labelRegex = /^\s*([a-zA-Z_]\w*)\s*([=!~]+)\s*"((?:[^"\\]|\\.)*)"\s*$/;
 
   labelParts.forEach((part) => {
     if (part.trim() === '') {
