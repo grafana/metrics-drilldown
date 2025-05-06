@@ -1,3 +1,6 @@
+// TODO: delete this file! It has been deprecated in favor of the MetricsReducer scene */
+/* eslint-disable */
+
 import { css } from '@emotion/css';
 import { type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange, type SelectableValue } from '@grafana/data';
 import { config, isFetchError } from '@grafana/runtime';
