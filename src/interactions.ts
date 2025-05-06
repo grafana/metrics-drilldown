@@ -52,15 +52,15 @@ export type Interactions = {
       // Toggled on or off from the bookmark icon
       | 'toggled_on'
       | 'toggled_off'
-      // Deleted from the homepage bookmarks list
+      // Deleted from the sidebar bookmarks list
       | 'deleted'
     );
   };
   // User changes metric explore settings
   settings_changed: { stickyMainGraph?: boolean };
   // User clicks on tab to change the action view
-  metric_action_view_changed: { 
-    view: ActionViewType 
+  metric_action_view_changed: {
+    view: ActionViewType
 
     // The number of related logs
     related_logs_count?: number
