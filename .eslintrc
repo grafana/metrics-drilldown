@@ -39,7 +39,8 @@
       }
     ],
     "sonarjs/todo-tag": ["warn"],
-    "sonarjs/fixme-tag": ["warn"]
+    "sonarjs/fixme-tag": ["warn"],
+    "sonarjs/prefer-regexp-exec": ["off"]
   },
   "overrides": [
     {
