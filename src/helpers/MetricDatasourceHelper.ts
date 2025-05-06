@@ -201,7 +201,7 @@ export class MetricDatasourceHelper {
     // This works because the `fetchLabelValues` method happens to have changed in a way that
     // can be used as a heuristic to check if the runtime datasource uses the G12-style
     // language provider methods introduced in https://github.com/grafana/grafana/pull/101889.
-    return ds.languageProvider.fetchLabelValues.length > 2;
+    return ds.languageProvider.fetchLabelValues.length > 1;
   }
 }
 
