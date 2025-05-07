@@ -1,4 +1,4 @@
-export const DEFAULT_UNIT = 'short';
+export const DEFAULT_UNIT = 'none';
 export const DEFAULT_RATE_UNIT = 'cps'; // Count per second
 
 // Unit constants

@@ -234,7 +234,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
         }
       });
     }
-    reportExploreMetrics('sorting_changed', { sortBy: event.sortBy });
+    reportExploreMetrics('sorting_changed', { from: 'label-breakdown', sortBy: event.sortBy });
   };
 
   private onReferencedVariableValueChanged() {
@@ -640,7 +640,7 @@ export class SelectLabelAction extends SceneObjectBase<SelectLabelActionState> {
 
   public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick}>
+      <Button variant="secondary" size="sm" fill="outline" onClick={model.onClick}>
         Select
       </Button>
     );

@@ -17,7 +17,6 @@ import {
   type AdHocFiltersVariable,
   type SceneObject,
   type SceneObjectState,
-  type SceneObjectUrlValues,
   type SceneVariable,
   type SceneVariableState,
 } from '@grafana/scenes';
@@ -53,15 +52,7 @@ export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean
 
 export function getUrlForTrail(trail: DataTrail) {
   const params = sceneUtils.getUrlState(trail);
-  return getUrlForValues(params);
-}
-
-// TODO: We can simplify this when we remove the Homepage and/or the Trail experience
-export function getUrlForValues(values: SceneObjectUrlValues) {
-  return urlUtil.renderUrl(
-    getCurrentPath().includes(ROUTES.TrailWithSidebar) ? ROUTES.TrailWithSidebar : ROUTES.Trail,
-    values
-  );
+  return urlUtil.renderUrl(ROUTES.Drilldown, params);
 }
 
 export function getCurrentPath(): Location['pathname'] {

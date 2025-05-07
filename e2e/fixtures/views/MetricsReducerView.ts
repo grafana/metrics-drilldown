@@ -5,6 +5,15 @@ import { PLUGIN_BASE_URL } from '../../../src/constants';
 import { UI_TEXT } from '../../../src/constants/ui';
 import { QuickSearch } from '../components/QuickSearchInput';
 
+const sidebarButtonNames = [
+  'Rules filters',
+  'Prefix filters',
+  'Suffix filters',
+  'Group by labels',
+  'Bookmarks',
+  'Settings',
+] as const;
+type ButtonName = (typeof sidebarButtonNames)[number];
 export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
 
 export class MetricsReducerView extends DrilldownView {
@@ -56,26 +65,20 @@ export class MetricsReducerView extends DrilldownView {
 
   /* Side bar */
 
-  async getSideBar() {
-    return this.getByTestId('sidebar-buttons');
+  getSideBar() {
+    return this.getByTestId('sidebar');
   }
 
-  async toggleSideBarButton(buttonName: string) {
-    const sidebar = await this.getSideBar();
+  async toggleSideBarButton(buttonName: ButtonName) {
+    const sidebar = this.getSideBar();
     await sidebar.getByRole('button', { name: buttonName }).click();
+    await this.mouse.move(0, 0); // prevents the tooltip to cover controls within the side bar
   }
 
   async assertSidebar() {
-    const sidebar = await this.getSideBar();
+    const sidebar = this.getSideBar();
 
-    for (const buttonName of [
-      'Rules filters',
-      'Prefix filters',
-      'Suffix filters',
-      'Group by labels',
-      'Bookmarks',
-      'Settings',
-    ]) {
+    for (const buttonName of sidebarButtonNames) {
       await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
     }
   }
@@ -89,8 +92,10 @@ export class MetricsReducerView extends DrilldownView {
     await expect(this.getByText('Bookmark created')).toBeVisible();
   }
 
-  async assertBookmarkCreated(title: string) {
-    await expect(this.getByRole('button', { name: title })).toBeVisible();
+  async assertBookmarkCreated(metricName: string) {
+    // Only consider the first 20 characters, to account for truncation of long meric names
+    const possiblyTruncatedMetricName = new RegExp(`^${metricName.substring(0, 20)}`);
+    await expect(this.getByRole('button', { name: possiblyTruncatedMetricName })).toBeVisible();
   }
 
   /* Metrics list */
@@ -142,5 +147,27 @@ export class MetricsReducerView extends DrilldownView {
   async changeSortOption(sortBy: SortOption) {
     await this.page.getByTestId('list-controls').getByTestId('data-testid template variable').click();
     await this.page.getByRole('option', { name: sortBy }).locator('span').click();
+  }
+
+  async selectPrefixFilters(prefixes: string[]) {
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('button', { name: 'Prefix filters' }).click();
+    for (const prefix of prefixes) {
+      await sidebar.getByTitle(prefix, { exact: true }).locator('label').click();
+    }
+  }
+
+  async selectSuffixFilters(suffixes: string[]) {
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('button', { name: 'Suffix filters' }).click();
+    for (const suffix of suffixes) {
+      await sidebar.getByTitle(suffix, { exact: true }).locator('label').click();
+    }
+  }
+
+  async selectGroupByLabel(labelName: string) {
+    await this.toggleSideBarButton('Group by labels');
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('radio', { name: labelName, exact: true }).check();
   }
 }

@@ -2,13 +2,9 @@ import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { expect, test } from '../fixtures';
 import { type SortOption } from '../fixtures/views/MetricsReducerView';
 
-// Keep this in sync with MAX_RECENT_METRICS in MetricsSorter.tsx
-// If updating MAX_RECENT_METRICS, also update the tests below.
-const MAX_RECENT_METRICS = 6;
-
 test.describe('Metrics reducer view', () => {
   test('Core UI elements', async ({ metricsReducerView }) => {
-    await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+    await metricsReducerView.gotoVariant('/drilldown');
     await metricsReducerView.assertListControls();
     await metricsReducerView.assertSidebar();
     await metricsReducerView.assertMetricsList();
@@ -16,7 +12,7 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Metrics sorting', () => {
     test.beforeEach(async ({ metricsReducerView }) => {
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar', DEFAULT_STATIC_URL_SEARCH_PARAMS);
+      await metricsReducerView.gotoVariant('/drilldown', DEFAULT_STATIC_URL_SEARCH_PARAMS);
     });
 
     test('Default sorting shows recent metrics first, then alphabetical', async ({ metricsReducerView, page }) => {
@@ -91,17 +87,66 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Sidebar buttons', () => {
     test.beforeEach(async ({ metricsReducerView }) => {
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar');
+      await metricsReducerView.gotoVariant('/drilldown', DEFAULT_STATIC_URL_SEARCH_PARAMS);
     });
 
-    test('Bookmarks', async ({ metricsReducerView }) => {
-      const panelTitle = 'a.utf8.metric 🤘';
-      await metricsReducerView.selectMetricPanel(panelTitle);
-      await metricsReducerView.createBookmark();
-      await metricsReducerView.assertBookmarkAlert();
-      await metricsReducerView.gotoVariant('/trail-filters-sidebar');
-      await metricsReducerView.toggleSideBarButton('Bookmarks');
-      await metricsReducerView.assertBookmarkCreated(panelTitle);
+    test.describe('Bookmarks', () => {
+      test('New bookmarks appear in the sidebar', async ({ metricsReducerView, page }) => {
+        const panelTitle = 'deprecated_flags_inuse_total';
+        await metricsReducerView.selectMetricPanel(panelTitle);
+        await metricsReducerView.createBookmark();
+        await metricsReducerView.assertBookmarkAlert();
+        await page.goBack();
+        await metricsReducerView.toggleSideBarButton('Bookmarks');
+        await metricsReducerView.assertBookmarkCreated(panelTitle);
+      });
+    });
+
+    test.describe('Group by label', () => {
+      test('A list of metrics is shown when metrics are grouped by label', async ({ page, metricsReducerView }) => {
+        await metricsReducerView.selectGroupByLabel('action');
+        await metricsReducerView.assertMetricsGroupByList();
+        await expect(page).toHaveScreenshot({
+          stylePath: './e2e/fixtures/css/hide-app-controls.css',
+        });
+      });
+    });
+  });
+
+  test.describe('Metrics counts', () => {
+    test.beforeEach(async ({ metricsReducerView }) => {
+      await metricsReducerView.gotoVariant('/drilldown', DEFAULT_STATIC_URL_SEARCH_PARAMS);
+    });
+
+    test.describe('Filter logic behavior', () => {
+      test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
+        metricsReducerView,
+        page,
+      }) => {
+        await metricsReducerView.assertMetricsList();
+
+        // Select multiple prefixes to demonstrate OR behavior within a group
+        await metricsReducerView.selectPrefixFilters(['prometheus', 'pyroscope']);
+
+        // Verify OR behavior by checking that metrics with either prefix are shown
+        await expect(page).toHaveScreenshot('prefixes-selected-metric-counts.png');
+      });
+
+      test('Between filter groups, selections use AND logic ((prefix.one OR prefix.two) AND (suffix.one OR suffix.two))', async ({
+        metricsReducerView,
+        page,
+      }) => {
+        await metricsReducerView.assertMetricsList();
+
+        // First select prefixes
+        await metricsReducerView.selectPrefixFilters(['prometheus', 'pyroscope']);
+
+        // Then select suffixes to demonstrate AND behavior between groups
+        await metricsReducerView.selectSuffixFilters(['bytes', 'count']);
+
+        // Verify AND behavior between filter groups
+        await expect(page).toHaveScreenshot('prefixes-and-suffixes-selected-metric-counts.png');
+      });
     });
   });
 });

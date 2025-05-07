@@ -28,6 +28,41 @@ export class MetricsVariableFilterEngine {
     this.initOptions = cloneDeep(options);
   }
 
+  /**
+   * Get a copy of the current filters
+   */
+  public getFilters(): MetricFilters {
+    return this.filters;
+  }
+
+  /**
+   * Compute options based on filters.
+   * @param options The options to filter
+   * @param filters The filters to apply
+   * @returns Filtered options
+   */
+  public static getFilteredOptions(options: VariableValueOption[], filters: MetricFilters): MetricOptions {
+    let filteredOptions = options as MetricOptions;
+
+    if (filters.categories.length > 0) {
+      filteredOptions = MetricsVariableFilterEngine.applyCategoryFilters(filteredOptions, filters.categories);
+    }
+
+    if (filters.prefixes.length > 0) {
+      filteredOptions = MetricsVariableFilterEngine.applyPrefixFilters(filteredOptions, filters.prefixes);
+    }
+
+    if (filters.suffixes.length > 0) {
+      filteredOptions = MetricsVariableFilterEngine.applySuffixFilters(filteredOptions, filters.suffixes);
+    }
+
+    if (filters.names.length > 0) {
+      filteredOptions = MetricsVariableFilterEngine.applyNameFilters(filteredOptions, filters.names);
+    }
+
+    return filteredOptions;
+  }
+
   public applyFilters(filters: Partial<MetricFilters> = this.filters, settings = { forceUpdate: false, notify: true }) {
     const updatedFilters: MetricFilters = {
       ...this.filters,
@@ -55,26 +90,9 @@ export class MetricsVariableFilterEngine {
       return;
     }
 
-    const allOptions = this.initOptions;
-    let filteredOptions = allOptions as MetricOptions;
-
-    if (updatedFilters.categories.length > 0) {
-      filteredOptions = MetricsVariableFilterEngine.applyCategoryFilters(filteredOptions, updatedFilters.categories);
-    }
-
-    if (updatedFilters.prefixes.length > 0) {
-      filteredOptions = MetricsVariableFilterEngine.applyPrefixFilters(filteredOptions, updatedFilters.prefixes);
-    }
-
-    if (updatedFilters.suffixes.length > 0) {
-      filteredOptions = MetricsVariableFilterEngine.applySuffixFilters(filteredOptions, updatedFilters.suffixes);
-    }
-
-    if (updatedFilters.names.length > 0) {
-      filteredOptions = MetricsVariableFilterEngine.applyNameFilters(filteredOptions, updatedFilters.names);
-    }
-
     this.filters = updatedFilters;
+
+    const filteredOptions = MetricsVariableFilterEngine.getFilteredOptions(this.initOptions, this.filters);
 
     this.variable.setState({ options: filteredOptions });
 
@@ -111,7 +129,9 @@ export class MetricsVariableFilterEngine {
 
     const prefixesRegex = MetricsVariableFilterEngine.buildRegex(`(${pattern})`);
 
-    return options.filter((option) => prefixesRegex.test(option.value as string));
+    const filteredOptions = options.filter((option) => prefixesRegex.test(option.value as string));
+
+    return filteredOptions;
   }
 
   private static applySuffixFilters(options: MetricOptions, suffixes: string[]): MetricOptions {
@@ -131,7 +151,9 @@ export class MetricsVariableFilterEngine {
 
     const suffixesRegex = MetricsVariableFilterEngine.buildRegex(`(${pattern})`);
 
-    return options.filter((option) => suffixesRegex.test(option.value as string));
+    const filteredOptions = options.filter((option) => suffixesRegex.test(option.value as string));
+
+    return filteredOptions;
   }
 
   private static applyNameFilters(options: MetricOptions, names: string[]): MetricOptions {

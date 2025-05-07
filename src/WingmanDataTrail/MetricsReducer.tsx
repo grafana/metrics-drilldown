@@ -15,8 +15,10 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
+import { debounce } from 'lodash';
 import React from 'react';
 
+import { reportExploreMetrics } from 'interactions';
 import { getColorByIndex, getTrailFor } from 'utils';
 
 import { MetricSelectedEvent } from '../shared';
@@ -71,6 +73,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     },
   });
 
+  // Report when a user completes typing (after 1 second)
+  private readonly _debounceReportQuickSearchChange = debounce((searchText: string) => {
+    if (searchText) {
+      reportExploreMetrics('quick_search_used', {});
+    }
+  }, 1000);
+
   public constructor() {
     super({
       $variables: new SceneVariableSet({
@@ -106,7 +115,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     );
 
     this._subs.add(
-      this.subscribeToEvent(EventApplyFunction, (event) => {
+      this.subscribeToEvent(EventApplyFunction, () => {
         this.state.drawer.close();
       })
     );
@@ -193,6 +202,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
           sortEngine.sort(sortByVariable.state.value as SortingOption);
         }
+
+        this._debounceReportQuickSearchChange(searchText);
       })
     );
 
@@ -216,6 +227,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         for (const [, { sortEngine }] of this.state.enginesMap) {
           sortEngine.sort(sortBy);
         }
+
+        reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
       })
     );
   }
@@ -230,6 +243,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   }
 
   private openConfigureDrawer(metricName: string) {
+    const trail = getTrailFor(this);
+
     this.state.drawer.open({
       title: 'Choose a new Prometheus function',
       subTitle: metricName,
@@ -244,9 +259,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           }),
         ],
         children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map((option, colorIndex) => {
-          const trail = getTrailFor(this);
-          const isNativeHistogram = trail.isNativeHistogram(metricName);
-
           return new SceneCSSGridItem({
             body: new MetricVizPanel({
               title: option.label,
@@ -256,7 +268,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
               height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
               hideLegend: true,
               highlight: colorIndex === 1,
-              isNativeHistogram,
+              isNativeHistogram: trail.isNativeHistogram(metricName),
               headerActions: [
                 new ApplyAction({
                   metricName,

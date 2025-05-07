@@ -1,43 +1,45 @@
 import { css } from '@emotion/css';
-import { BusEventBase, type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { BusEventBase, type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Combobox, Field, IconButton, useStyles2 } from '@grafana/ui';
+import { Combobox, Field, IconButton, useStyles2, type ComboboxOption } from '@grafana/ui';
 import React from 'react';
 
 import { getSortByPreference, setSortByPreference } from '../services/store';
 
 export interface SortBySceneState extends SceneObjectState {
   target: 'fields' | 'labels';
-  sortBy: string;
+  sortBy: LabelBreakdownSortingOption;
 }
 
 export class SortCriteriaChanged extends BusEventBase {
-  constructor(public target: 'fields' | 'labels', public sortBy: string) {
+  constructor(public target: 'fields' | 'labels', public sortBy: LabelBreakdownSortingOption) {
     super();
   }
 
   public static type = 'sort-criteria-changed';
 }
 
-export class SortByScene extends SceneObjectBase<SortBySceneState> {
-  public sortingOptions = [
-    {
-      value: 'outliers',
-      label: 'Outlying series',
-      description: 'Prioritizes values that show distinct behavior from others within the same label',
-    },
-    {
-      value: 'alphabetical',
-      label: 'Name [A-Z]',
-      description: 'Alphabetical order',
-    },
-    {
-      value: 'alphabetical-reversed',
-      label: 'Name [Z-A]',
-      description: 'Reversed alphabetical order',
-    },
-  ];
+export type LabelBreakdownSortingOption = 'outliers' | 'alphabetical' | 'alphabetical-reversed';
 
+const sortingOptions: Array<ComboboxOption<LabelBreakdownSortingOption>> = [
+  {
+    value: 'outliers',
+    label: 'Outlying series',
+    description: 'Prioritizes values that show distinct behavior from others within the same label',
+  },
+  {
+    value: 'alphabetical',
+    label: 'Name [A-Z]',
+    description: 'Alphabetical order',
+  },
+  {
+    value: 'alphabetical-reversed',
+    label: 'Name [Z-A]',
+    description: 'Reversed alphabetical order',
+  },
+];
+
+export class SortByScene extends SceneObjectBase<SortBySceneState> {
   constructor(state: Pick<SortBySceneState, 'target'>) {
     const { sortBy } = getSortByPreference(state.target, 'outliers');
     super({
@@ -46,7 +48,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
     });
   }
 
-  public onCriteriaChange = (criteria: SelectableValue<string> | null) => {
+  public onCriteriaChange = (criteria: ComboboxOption<LabelBreakdownSortingOption> | null) => {
     if (!criteria?.value) {
       return;
     }
@@ -58,7 +60,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
   public static Component = ({ model }: SceneComponentProps<SortByScene>) => {
     const styles = useStyles2(getStyles);
     const { sortBy } = model.useState();
-    const value = model.sortingOptions.find((option) => option.value === sortBy);
+    const value = sortingOptions.find((option) => option.value === sortBy);
     return (
       <Field
         htmlFor="sort-by-criteria"
@@ -78,7 +80,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
           id="sort-by-criteria"
           value={value}
           width={20}
-          options={model.sortingOptions}
+          options={sortingOptions}
           placeholder={'Choose criteria'}
           onChange={model.onCriteriaChange}
           isClearable={false}

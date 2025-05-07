@@ -43,7 +43,7 @@ export class ApplyAction extends SceneObjectBase<ApplyActionState> {
     return (
       <Button
         variant="primary"
-        fill="text"
+        fill="outline"
         size="sm"
         className={styles.selectButton}
         onClick={model.onClick}

@@ -23,7 +23,6 @@ import {
 import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
-
 interface QuickSearchState extends SceneObjectState {
   value: string;
   counts: { current: number; total: number };
@@ -176,7 +175,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
             <Tooltip content={tooltipContent} placement="top">
               <Tag className={styles.counts} name={tagName} colorIndex={9} />
             </Tooltip>
-            <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={model.clear} />
+            <IconButton
+              name="times"
+              variant="secondary"
+              tooltip="Clear search"
+              onClick={model.clear}
+              disabled={!value}
+            />
           </>
         }
       />

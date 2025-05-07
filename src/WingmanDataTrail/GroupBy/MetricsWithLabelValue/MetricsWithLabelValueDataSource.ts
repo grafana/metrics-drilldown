@@ -11,6 +11,7 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
+import { MetricDatasourceHelper } from 'helpers/MetricDatasourceHelper';
 import { VAR_DATASOURCE } from 'shared';
 import { isPrometheusRule } from 'WingmanDataTrail/helpers/isPrometheusRule';
 
@@ -56,11 +57,11 @@ export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
     const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
     let metricsList: string[] = [];
 
-    let removeRules = query.startsWith('removeRules');
+    const removeRules = query.startsWith('removeRules');
     const matcher = removeRules ? query.replace('removeRules', '') : query;
 
-    if (ds.languageProvider.fetchLabelValues.length === 2) {
-      // @ts-ignore: Ignoring type error due to breaking change in fetchLabelValues signature
+    if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
+      // @ts-expect-error: Ignoring type error due to breaking change in fetchSeriesValuesWithMatch signature
       metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch(timeRange, '__name__', matcher);
     } else {
       metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch('__name__', matcher);
