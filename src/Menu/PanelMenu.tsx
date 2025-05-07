@@ -153,13 +153,12 @@ const getInvestigationLink = async (addToExplorations: AddToExplorationButton) =
 
   // `getObservablePluginLinks` is introduced in Grafana v12
   if (getObservablePluginLinks !== undefined) {
-    const links: PluginExtensionLink[] =
-      (await firstValueFrom(
-        getObservablePluginLinks({
-          extensionPointId,
-          context,
-        })
-      )) ?? [];
+    const links: PluginExtensionLink[] = await firstValueFrom(
+      getObservablePluginLinks({
+        extensionPointId,
+        context,
+      })
+    );
 
     return links[0];
   }
