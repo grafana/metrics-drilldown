@@ -35,6 +35,6 @@ describe('createDefaultMetricQueryDefs', () => {
     expect(result.main.title).toBe('${metric} (average)');
     expect(result.main.queries[0].expr).toBe('avg(${metric}{${filters}} ${otel_join_query})');
     expect(result.breakdown.queries[0].expr).toBe('avg(${metric}{${filters}} ${otel_join_query})by(${groupby})');
-    expect(result.preview.unit).toBe('short');
+    expect(result.preview.unit).toBe('none');
   });
 });
