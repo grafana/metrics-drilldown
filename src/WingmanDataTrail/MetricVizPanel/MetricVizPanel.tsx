@@ -248,7 +248,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     return { isRateQuery, groupings };
   }
 
-  public static Component = ({ model }: SceneComponentProps<MetricVizPanel>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricVizPanel>) => {
     const { body, height, highlight } = model.useState();
     const styles = useStyles2(getStyles, height);
 
