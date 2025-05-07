@@ -62,6 +62,9 @@ export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
 
     if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
       metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch(timeRange, '__name__', matcher);
+    } else {
+      // @ts-expect-error: Ignoring type error due to breaking change in fetchSeriesValuesWithMatch signature
+      metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch('__name__', matcher);
     }
 
     if (removeRules) {
