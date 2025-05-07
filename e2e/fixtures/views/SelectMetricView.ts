@@ -149,7 +149,7 @@ export class SelectMetricView extends DrilldownView {
 
   async assertPanelIsNativeHistogram(panelTitle: string) {
     const panel = this.getPanelByTitle(panelTitle);
-    await expect(panel.getByTestId('header-container').getByText('Native Histogram')).toBeVisible();
+    await expect(panel.getByText('Native Histogram')).toBeVisible();
   }
 
   selectMetricPanel(panelTitle: string) {
