@@ -20,7 +20,7 @@ import {
   type SceneVariable,
   type SceneVariableState,
 } from '@grafana/scenes';
-import { lastValueFrom, type Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 
 import { ROUTES } from './constants';
 import { DataTrail } from './DataTrail';
@@ -255,7 +255,7 @@ export async function callSuggestionsApi(
   limit: number | undefined,
   requestId: string
 ): Promise<FetchResponse<SuggestionsResponse>> {
-  return (await lastValueFrom(
+  return await lastValueFrom(
     getBackendSrv().fetch<SuggestionsResponse>({
       url: `/api/datasources/uid/${dataSourceUid}/resources/suggestions`,
       data: {
@@ -281,8 +281,8 @@ export async function callSuggestionsApi(
       headers: {
         'Content-Type': 'application/json',
       },
-    }) as unknown as Observable<FetchResponse<SuggestionsResponse>>
-  )) as FetchResponse<SuggestionsResponse>;
+    })
+  );
 }
 
 interface SceneType<T> extends Function {
