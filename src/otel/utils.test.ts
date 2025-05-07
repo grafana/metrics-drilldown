@@ -3,6 +3,7 @@ import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
 import { DataTrail } from '../DataTrail';
+import { getFilteredResourceAttributes } from './api';
 import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
 import {
   VAR_FILTERS,
@@ -203,7 +204,12 @@ describe('updateOtelJoinWithGroupLeft', () => {
   }
 
   beforeEach(() => {
+    (getFilteredResourceAttributes as jest.Mock).mockResolvedValue({
+      attributes: ['resourceAttribute'],
+      missingOtelTargets: false,
+    });
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
+
     setDataSourceSrv(
       new MockDataSourceSrv({
         prom: {
@@ -341,6 +347,7 @@ describe('util functions that rely on trail and variable setup', () => {
   afterEach(() => {
     trail.setState({ initialOtelCheckComplete: false });
   });
+
   describe('updateOtelData', () => {
     it('should automatically add the deployment environment on loading a data trail from start', () => {
       trail.setState({ startButtonClicked: true });

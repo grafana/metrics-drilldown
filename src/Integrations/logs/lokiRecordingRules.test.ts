@@ -64,7 +64,8 @@ export const mockRuleGroups2: RecordingRuleGroup[] = [
 ];
 
 // Create spy functions
-const getListSpy = jest.fn().mockReturnValue([mockLokiDS1, mockLokiDS2]);
+const getListSpy = jest.fn();
+
 const defaultFetchImpl = (req: Request) => {
   if (req.url.includes('loki1')) {
     return of({
@@ -91,7 +92,8 @@ const defaultFetchImpl = (req: Request) => {
     config: { url: req.url },
   } as runtime.FetchResponse);
 };
-const fetchSpy = jest.fn().mockImplementation(defaultFetchImpl);
+
+const fetchSpy = jest.fn();
 
 // Mock the entire @grafana/runtime module
 jest.mock('@grafana/runtime', () => ({
@@ -118,14 +120,9 @@ describe('LokiRecordingRulesConnector', () => {
   let consoleSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    getListSpy.mockClear();
-    fetchSpy.mockClear();
+    getListSpy.mockReturnValue([mockLokiDS1, mockLokiDS2]);
     fetchSpy.mockImplementation(defaultFetchImpl);
     consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-  });
-
-  afterEach(() => {
-    consoleSpy.mockRestore();
   });
 
   describe('getDataSources', () => {

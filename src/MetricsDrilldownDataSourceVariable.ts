@@ -2,6 +2,7 @@ import { config } from '@grafana/runtime';
 import { DataSourceVariable } from '@grafana/scenes';
 
 import { VAR_DATASOURCE } from 'shared';
+import { logger } from 'tracking/logger/logger';
 
 export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
   private static LOCAL_STORAGE_KEY = 'metricsDrilldownDataSource';
@@ -46,7 +47,7 @@ export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
       prometheusDataSources[0];
 
     if (!currentDataSource) {
-      console.warn('Cannot find any Prometheus data source!');
+      logger.warn('Cannot find any Prometheus data source!');
       return 'no-data-source-configured';
     }
 

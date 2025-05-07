@@ -5,14 +5,12 @@ import { getDeploymentEnvironments, getFilteredResourceAttributes, totalOtelReso
 
 jest.mock('./util', () => ({
   ...jest.requireActual('./util'),
-  limitOtelMatchTerms: jest.fn().mockImplementation(() => {
-    return {
-      jobsRegex: 'job=~"job1|job2"',
-      instancesRegex: 'instance=~"instance1|instance2"',
-      // this flag is used when the values exceed 2000 characters
-      // in this mock we are not including more, just flipping the flag
-      missingOtelTargets: true,
-    };
+  limitOtelMatchTerms: () => ({
+    jobsRegex: 'job=~"job1|job2"',
+    instancesRegex: 'instance=~"instance1|instance2"',
+    // this flag is used when the values exceed 2000 characters
+    // in this mock we are not including more, just flipping the flag
+    missingOtelTargets: true,
   }),
 }));
 
@@ -24,7 +22,7 @@ jest.mock('@grafana/runtime', () => ({
   },
   getBackendSrv: () => {
     return {
-      get: (
+      get: async (
         url: string,
         params?: Record<string, string | number>,
         requestId?: string,
@@ -35,30 +33,37 @@ jest.mock('@grafana/runtime', () => ({
           requestId === 'metrics-drilldown-otel-check-total-count(target_info{}) by (job, instance)' ||
           requestId === 'metrics-drilldown-otel-check-total-count(metric) by (job, instance)'
         ) {
-          return Promise.resolve({
+          return {
             data: {
               result: [
                 { metric: { job: 'job1', instance: 'instance1' } },
                 { metric: { job: 'job2', instance: 'instance2' } },
               ],
             },
-          });
-        } else if (requestId === 'metrics-drilldown-otel-resources-deployment-env') {
-          return Promise.resolve({ data: ['env1', 'env2'] });
-        } else if (
+          };
+        }
+
+        if (requestId === 'metrics-drilldown-otel-resources-deployment-env') {
+          return { data: ['env1', 'env2'] };
+        }
+
+        if (
           requestId ===
           'metrics-drilldown-otel-resources-metric-job-instance-metric{job=~"job1|job2",instance=~"instance1|instance2"}'
         ) {
           // part of getFilteredResourceAttributes to get metric labels. We prioritize metric labels over resource attributes so we use these to filter
-          return Promise.resolve({ data: ['promotedResourceAttribute'] });
-        } else if (
+          return { data: ['promotedResourceAttribute'] };
+        }
+
+        if (
           requestId ===
           'metrics-drilldown-otel-resources-metric-job-instance-target_info{job=~"job1|job2",instance=~"instance1|instance2"}'
         ) {
           // part of getFilteredResourceAttributes to get instance labels
-          return Promise.resolve({ data: ['promotedResourceAttribute', 'resourceAttribute'] });
+          return { data: ['promotedResourceAttribute', 'resourceAttribute'] };
         }
-        return [];
+
+        return {};
       },
     };
   },
@@ -70,10 +75,6 @@ describe('OTEL API', () => {
     from: 'now-1h',
     to: 'now',
   };
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
 
   describe('totalOtelResources', () => {
     it('should fetch total OTEL resources', async () => {

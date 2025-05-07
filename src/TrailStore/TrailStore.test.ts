@@ -4,26 +4,13 @@ import { type DataSourceRef } from '@grafana/schema';
 import { DataTrail } from '../DataTrail';
 import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
 import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY } from '../shared';
-import { getTrailStore, type UrlSerializedTrail } from './TrailStore';
+import { TrailStore, type UrlSerializedTrail } from './TrailStore';
 
-jest.mock('@grafana/runtime', () => ({
+const getDataSourceSrvSpy = jest.fn();
+
+jest.doMock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
-  getDataSourceSrv: jest.fn(() => {
-    return {
-      get: (ds: DataSourceWithBackend) => Promise.resolve(ds),
-      getList: () => [mockDataSource],
-      getInstanceSettings: (ref: DataSourceRef) => ({
-        id: 1,
-        uid: 'ds',
-        type: DataSourceType.Prometheus,
-        name: 'Prometheus',
-        jsonData: {},
-        access: 'proxy',
-        readOnly: false,
-      }),
-    };
-  }),
-
+  getDataSourceSrv: getDataSourceSrvSpy,
   getTemplateSrv: () => ({
     getAdhocFilters: jest.fn().mockReturnValue([{ key: 'origKey', operator: '=', value: '' }]),
   }),
@@ -46,7 +33,27 @@ const URL_VALUES_BOOKMARK = {
 };
 
 describe('TrailStore', () => {
-  beforeAll(() => {
+  let store: TrailStore;
+
+  beforeEach(() => {
+    store = new TrailStore();
+
+    getDataSourceSrvSpy.mockImplementation(() => {
+      return {
+        get: (ds: DataSourceWithBackend) => Promise.resolve(ds),
+        getList: () => [mockDataSource],
+        getInstanceSettings: (ref: DataSourceRef) => ({
+          id: 1,
+          uid: 'ds',
+          type: DataSourceType.Prometheus,
+          name: 'Prometheus',
+          jsonData: {},
+          access: 'proxy',
+          readOnly: false,
+        }),
+      };
+    });
+
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
 
     let localStore: Record<string, string> = {};
@@ -73,8 +80,6 @@ describe('TrailStore', () => {
   });
 
   describe('Empty store', () => {
-    const store = getTrailStore();
-
     it('should have no recent trails', () => {
       expect(store.recent.length).toBe(0);
     });
@@ -117,16 +122,14 @@ describe('TrailStore', () => {
     beforeEach(() => {
       localStorage.clear();
       localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify([{ urlSerializedTrails }]));
-      getTrailStore().load();
+      store.load();
     });
 
     it('should accurately load recent trails', () => {
-      const store = getTrailStore();
       expect(store.recent.length).toBe(1);
     });
 
     it('should have no bookmarked trails', () => {
-      const store = getTrailStore();
       expect(store.bookmarks.length).toBe(0);
     });
   });
@@ -142,10 +145,8 @@ describe('TrailStore', () => {
           },
         ])
       );
-      getTrailStore().load();
+      store.load();
     });
-
-    const store = getTrailStore();
 
     it('should have no recent trails', () => {
       expect(store.recent.length).toBe(0);
@@ -201,7 +202,6 @@ describe('TrailStore', () => {
       expect(store.bookmarks.length).toBe(0);
 
       jest.advanceTimersByTime(2000);
-
       expect(localStorage.getItem(TRAIL_BOOKMARKS_KEY)).toBe('[]');
     });
   });
@@ -247,10 +247,8 @@ describe('TrailStore', () => {
           },
         ])
       );
-      getTrailStore().load();
+      store.load();
     });
-
-    const store = getTrailStore();
 
     it('should have no recent trails', () => {
       expect(store.recent.length).toBe(0);
@@ -311,10 +309,8 @@ describe('TrailStore', () => {
           },
         ])
       );
-      getTrailStore().load();
+      store.load();
     });
-
-    const store = getTrailStore();
 
     it('should have no recent trails', () => {
       expect(store.recent.length).toBe(0);
@@ -360,10 +356,8 @@ describe('TrailStore', () => {
           },
         ])
       );
-      getTrailStore().load();
+      store.load();
     });
-
-    const store = getTrailStore();
 
     it('should have 1 recent trail', () => {
       expect(store.recent.length).toBe(1);
@@ -409,10 +403,11 @@ describe('TrailStore', () => {
       expect(store.getBookmarkIndex(trail)).toBe(0);
     });
 
-    it('should remove a bookmark', () => {
+    it('should remove a bookmark', async () => {
       expect(store.bookmarks.length).toBe(1);
       store.removeBookmark(0);
       expect(store.bookmarks.length).toBe(0);
+
       jest.advanceTimersByTime(2000);
       expect(localStorage.getItem(TRAIL_BOOKMARKS_KEY)).toBe('[]');
     });

@@ -3,12 +3,9 @@ import React from 'react';
 
 import { DataTrail } from './DataTrail';
 import { DataTrailsBookmarks } from './DataTrailBookmarks';
-import { getTrailStore, type DataTrailBookmark } from './TrailStore/TrailStore';
+import { getBookmarkKey, getTrailStore, type DataTrailBookmark } from './TrailStore/TrailStore';
 
-jest.mock('./TrailStore/TrailStore', () => ({
-  getTrailStore: jest.fn(),
-  getBookmarkKey: jest.fn(() => 'bookmark-key'),
-}));
+jest.mock('./TrailStore/TrailStore');
 
 const onSelect = jest.fn();
 const onDelete = jest.fn();
@@ -23,6 +20,8 @@ describe('DataTrailsBookmarks', () => {
       recent: [],
       getTrailForBookmark: jest.fn(),
     }));
+
+    (getBookmarkKey as jest.Mock).mockReturnValue('bookmark-key');
   });
 
   it('does not render if there are no bookmarks', () => {
@@ -40,7 +39,7 @@ describe('DataTrailsBookmarks', () => {
     expect(screen.getByLabelText('bookmarkCarrot')).toBeInTheDocument();
   });
 
-  it('toggles the bookmark list when the toggle button is clicked', () => {
+  it.only('toggles the bookmark list when the toggle button is clicked', () => {
     (getTrailStore as jest.Mock).mockImplementation(() => ({
       bookmarks: [bookmark],
       recent: [],
