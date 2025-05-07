@@ -14,7 +14,6 @@ const onSelect = jest.fn();
 
 describe('DataTrailsRecentMetrics', () => {
   beforeEach(() => {
-    onSelect.mockClear();
     (getTrailStore as jest.Mock).mockImplementation(() => ({
       bookmarks: [],
       recent: [],

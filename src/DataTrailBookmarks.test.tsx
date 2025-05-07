@@ -18,7 +18,6 @@ describe('DataTrailsBookmarks', () => {
   const bookmark: DataTrailBookmark = { urlValues: { key: '1', metric: '' }, createdAt: Date.now() };
 
   beforeEach(() => {
-    onSelect.mockClear();
     (getTrailStore as jest.Mock).mockImplementation(() => ({
       bookmarks: [],
       recent: [],
