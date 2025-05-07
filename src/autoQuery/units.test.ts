@@ -70,7 +70,7 @@ describe('getUnit', () => {
 describe('getPerSecondRateUnit', () => {
   it('should return the mapped rate unit for a valid metric part', () => {
     expect(getPerSecondRateUnit('bytes')).toBe(RATE_BYTES_PER_SECOND);
-    expect(getPerSecondRateUnit('seconds')).toBe('short');
+    expect(getPerSecondRateUnit('seconds')).toBe('none');
   });
 
   it('should return the default rate unit if the metric part is undefined', () => {
