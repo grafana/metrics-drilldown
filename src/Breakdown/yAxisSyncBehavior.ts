@@ -50,7 +50,7 @@ export const yAxisSyncBehavior: SceneStatelessBehavior = (sceneObject: SceneCSSG
     }
 
     // Report the panel data whenever it is updated
-    dataProvider.subscribeToState(({ data }, _) => {
+    dataProvider.subscribeToState(({ data }) => {
       breakdownScene.reportBreakdownPanelData(data);
     });
   }

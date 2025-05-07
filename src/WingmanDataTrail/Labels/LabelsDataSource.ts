@@ -1,7 +1,6 @@
 import {
   FieldType,
   LoadingState,
-  type DataQueryRequest,
   type DataQueryResponse,
   type LegacyMetricFindQueryOptions,
   type MetricFindValue,
@@ -28,7 +27,7 @@ export class LabelsDataSource extends RuntimeDataSource {
     super(LabelsDataSource.uid, LabelsDataSource.uid);
   }
 
-  async query(request: DataQueryRequest): Promise<DataQueryResponse> {
+  async query(): Promise<DataQueryResponse> {
     return {
       state: LoadingState.Done,
       data: [

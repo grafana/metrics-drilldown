@@ -22,7 +22,7 @@ export const mockDataSource: DataSourceApi = {
     module: '',
     baseUrl: '',
   },
-  query: (_request) => Promise.resolve({ data: [] }),
+  query: () => Promise.resolve({ data: [] }),
   testDatasource: () => Promise.resolve({ status: 'success', message: 'Success' }),
   getRef: () => ({ type: 'prometheus', uid: 'ds' }),
 };
@@ -56,7 +56,7 @@ class MockDataSource implements DataSourceApi {
     this.meta = settings.meta || mockDataSource.meta;
   }
 
-  query(_request: any) {
+  query() {
     return Promise.resolve({ data: [] });
   }
 
@@ -118,7 +118,7 @@ export class MockDataSourceSrv implements DataSourceSrv {
     return Promise.resolve();
   }
 
-  registerRuntimeDataSource(dataSource: any): void {
+  registerRuntimeDataSource(): void {
     // No-op implementation for mock
   }
 }

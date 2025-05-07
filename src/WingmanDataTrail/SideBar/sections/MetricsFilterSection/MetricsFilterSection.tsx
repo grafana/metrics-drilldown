@@ -288,7 +288,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
             onChange={(e) => setSearchValue(e.currentTarget.value)}
             onKeyDown={onKeyDown}
             suffix={
-              <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={(e) => setSearchValue('')} />
+              <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={() => setSearchValue('')} />
             }
           />
         )}

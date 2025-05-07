@@ -38,6 +38,7 @@
         "fixStyle": "inline-type-imports"
       }
     ],
+    "no-unused-vars": ["error"],
     "sonarjs/todo-tag": ["warn"],
     "sonarjs/fixme-tag": ["warn"],
     "sonarjs/prefer-regexp-exec": ["off"]

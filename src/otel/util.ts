@@ -97,7 +97,7 @@ export function getOtelJoinQuery(otelResourcesObject: OtelResourcesObject, scene
  * @param firstQueryVal
  * @returns
  */
-export function getOtelResourcesObject(scene: SceneObject, firstQueryVal?: string): OtelResourcesObject {
+export function getOtelResourcesObject(scene: SceneObject): OtelResourcesObject {
   const otelResources = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, scene);
   let otelResourcesObject = { labels: '', filters: '' };
 

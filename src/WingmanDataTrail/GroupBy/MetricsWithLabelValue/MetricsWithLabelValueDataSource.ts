@@ -1,7 +1,6 @@
 import {
   FieldType,
   LoadingState,
-  type DataQueryRequest,
   type DataQueryResponse,
   type DataSourceApi,
   type LegacyMetricFindQueryOptions,
@@ -26,7 +25,7 @@ export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
     super(MetricsWithLabelValueDataSource.uid, MetricsWithLabelValueDataSource.uid);
   }
 
-  async query(request: DataQueryRequest): Promise<DataQueryResponse> {
+  async query(): Promise<DataQueryResponse> {
     return {
       state: LoadingState.Done,
       data: [

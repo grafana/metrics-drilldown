@@ -157,10 +157,7 @@ export function limitAdhocProviders(
   }
 
   limitedFilterVariable.setState({
-    getTagKeysProvider: async (
-      variable: AdHocFiltersVariable,
-      currentKey: string | null
-    ): Promise<{
+    getTagKeysProvider: async (): Promise<{
       replace?: boolean;
       values: GetTagResponse | MetricFindValue[];
     }> => {
@@ -176,7 +173,7 @@ export function limitAdhocProviders(
 
       const opts = {
         filters,
-        scopes: getClosestScopesFacade(variable)?.value,
+        scopes: getClosestScopesFacade()?.value,
         queries: dataTrail.getQueries(),
       };
 
@@ -220,7 +217,7 @@ export function limitAdhocProviders(
       const opts = {
         key: filter.key,
         filters,
-        scopes: getClosestScopesFacade(variable)?.value,
+        scopes: getClosestScopesFacade()?.value,
         queries: dataTrail.getQueries(),
       };
 
