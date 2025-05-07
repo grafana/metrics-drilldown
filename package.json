@@ -75,6 +75,7 @@
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-deprecation": "^2.0.0",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-jsdoc": "^46.8.0",
     "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",

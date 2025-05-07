@@ -1,6 +1,11 @@
 {
-  "extends": ["./.config/.eslintrc", "plugin:import/recommended", "plugin:import/typescript"],
-  "plugins": ["import"],
+  "extends": [
+    "./.config/.eslintrc",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:jest/recommended"
+  ],
+  "plugins": ["import", "jest"],
   "settings": {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"]
@@ -39,6 +44,12 @@
       "files": ["jest.config.js"],
       "rules": {
         "import/order": "off"
+      }
+    },
+    {
+      "files": ["e2e/**/*"],
+      "rules": {
+        "jest/no-standalone-expect": "off"
       }
     }
   ]

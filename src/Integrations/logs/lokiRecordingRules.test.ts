@@ -7,7 +7,7 @@ import { getMockPlugin } from '../../mocks/plugin';
 import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
 import type * as runtime from '@grafana/runtime';
 
-export const mockLokiDS1: DataSourceInstanceSettings<DataSourceJsonData> = {
+const mockLokiDS1: DataSourceInstanceSettings<DataSourceJsonData> = {
   access: 'proxy',
   id: 1,
   uid: 'loki1',
@@ -25,14 +25,14 @@ export const mockLokiDS1: DataSourceInstanceSettings<DataSourceJsonData> = {
   withCredentials: false,
 };
 
-export const mockLokiDS2: DataSourceInstanceSettings<DataSourceJsonData> = {
+const mockLokiDS2: DataSourceInstanceSettings<DataSourceJsonData> = {
   ...mockLokiDS1,
   id: 2,
   uid: 'loki2',
   name: 'Loki Secondary',
 };
 
-export const mockRuleGroups1: RecordingRuleGroup[] = [
+const mockRuleGroups1: RecordingRuleGroup[] = [
   {
     name: 'group1',
     rules: [
@@ -50,7 +50,7 @@ export const mockRuleGroups1: RecordingRuleGroup[] = [
   },
 ];
 
-export const mockRuleGroups2: RecordingRuleGroup[] = [
+const mockRuleGroups2: RecordingRuleGroup[] = [
   {
     name: 'group2',
     rules: [

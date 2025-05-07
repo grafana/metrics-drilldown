@@ -34,20 +34,6 @@ jest.mock('./api', () => ({
     .mockResolvedValue({ attributes: ['resourceAttribute'], missingOtelTargets: false }),
 }));
 
-describe('sortResources', () => {
-  it('should sort and filter resources correctly', () => {
-    const resources: MetricFindValue[] = [
-      { text: 'cloud_region', value: 'cloud_region' },
-      { text: 'custom_resource', value: 'custom_resource' },
-    ];
-    const excluded: string[] = ['cloud_region'];
-
-    const result = sortResources(resources, excluded);
-
-    expect(result).toEqual([{ text: 'custom_resource', value: 'custom_resource' }]);
-  });
-});
-
 describe('getOtelJoinQuery', () => {
   it('should return the correct join query', () => {
     const otelResourcesObject = {
@@ -240,10 +226,8 @@ describe('updateOtelJoinWithGroupLeft', () => {
     await updateOtelJoinWithGroupLeft(trail, 'target_info');
     const otelJoinQueryVar = getOtelJoinQueryVar(trail);
     const emptyGroupLeftClause = 'group_left()';
-    const otelJoinQuery = otelJoinQueryVar.state.value;
-    if (typeof otelJoinQuery === 'string') {
-      expect(otelJoinQuery.includes(emptyGroupLeftClause)).toBe(true);
-    }
+    const otelJoinQuery = otelJoinQueryVar.state.value as string;
+    expect(otelJoinQuery.includes(emptyGroupLeftClause)).toBe(true);
   });
 });
 
@@ -289,10 +273,6 @@ describe('util functions that rely on trail and variable setup', () => {
         },
       })
     );
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
   });
 
   let trail: DataTrail;

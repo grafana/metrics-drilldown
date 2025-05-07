@@ -39,7 +39,7 @@ describe('DataTrailsBookmarks', () => {
     expect(screen.getByLabelText('bookmarkCarrot')).toBeInTheDocument();
   });
 
-  it.only('toggles the bookmark list when the toggle button is clicked', () => {
+  it('toggles the bookmark list when the toggle button is clicked', () => {
     (getTrailStore as jest.Mock).mockImplementation(() => ({
       bookmarks: [bookmark],
       recent: [],

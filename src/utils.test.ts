@@ -73,34 +73,26 @@ describe('limitAdhocProviders', () => {
     } as unknown as DataTrail;
   });
 
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
   it('should limit the number of tag keys returned in the variable to 10000', async () => {
     limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
 
-    if (isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.getTagKeysProvider) {
-      console.log = jest.fn();
+    const result = await filtersVariable.state!.getTagKeysProvider!(filtersVariable, null);
 
-      const result = await filtersVariable.state.getTagKeysProvider(filtersVariable, null);
-      expect(result.values).toHaveLength(10000);
-      expect(result.replace).toBe(true);
-    }
+    expect(result.values).toHaveLength(10000);
+    expect(result.replace).toBe(true);
   });
 
   it('should limit the number of tag values returned in the variable to 10000', async () => {
     limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
 
-    if (isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.getTagValuesProvider) {
-      const result = await filtersVariable.state.getTagValuesProvider(filtersVariable, {
-        key: 'testKey',
-        operator: '=',
-        value: 'testValue',
-      });
-      expect(result.values).toHaveLength(10000);
-      expect(result.replace).toBe(true);
-    }
+    const result = await filtersVariable.state!.getTagValuesProvider!(filtersVariable, {
+      key: 'testKey',
+      operator: '=',
+      value: 'testValue',
+    });
+
+    expect(result.values).toHaveLength(10000);
+    expect(result.replace).toBe(true);
   });
 
   it('should call sort resources and sort the promoted otel resources list if using the otel and metrics filter', async () => {
