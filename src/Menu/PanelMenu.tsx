@@ -158,7 +158,7 @@ const getInvestigationLink = async (addToExplorations: AddToExplorationButton) =
         getObservablePluginLinks({
           extensionPointId,
           context,
-        }) as any
+        })
       )) ?? [];
 
     return links[0];
