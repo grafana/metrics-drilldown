@@ -51,10 +51,13 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.changeSortOption(sortOption);
 
         // Wait for the usage count to load
-        const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
-        const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
-        const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
-        expect(usageCount).toBeGreaterThan(0);
+        // eslint-disable-next-line sonarjs/no-nested-functions
+        await expect(async () => {
+          const firstPanel = await metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
+          const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
+          const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
+          expect(usageCount).toBeGreaterThan(0);
+        }).toPass();
 
         // Verify metrics are sorted by alerting usage count
         const usageCounts: Record<string, number> = {};
