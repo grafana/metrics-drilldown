@@ -8,7 +8,7 @@ type SectionTitleProps = {
   description: string;
 };
 
-export function SectionTitle({ title, description }: SectionTitleProps) {
+export function SectionTitle({ title, description }: Readonly<SectionTitleProps>) {
   const styles = useStyles2(getStyles);
 
   return (

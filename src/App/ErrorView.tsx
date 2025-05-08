@@ -6,7 +6,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { InlineBanner } from './InlineBanner';
 
-export function ErrorView({ error }: { error: Error }) {
+type ErrorViewProps = { error: Error };
+
+export function ErrorView({ error }: Readonly<ErrorViewProps>) {
   const styles = useStyles2(getStyles);
 
   const navigate = useNavigate();

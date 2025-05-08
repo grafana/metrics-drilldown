@@ -5,7 +5,11 @@ import { getTrailStore } from 'TrailStore/TrailStore';
 
 import type { DataTrail } from 'DataTrail';
 
-export default function Trail({ trail }: { trail: DataTrail }) {
+type TrailProps = {
+  trail: DataTrail;
+};
+
+export default function Trail({ trail }: Readonly<TrailProps>) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {

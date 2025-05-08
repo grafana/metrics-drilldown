@@ -6,5 +6,5 @@ interface ShowModalReactPayload {
 }
 
 export class ShowModalReactEvent extends BusEventWithPayload<ShowModalReactPayload> {
-  static type = 'show-react-modal';
+  static readonly type = 'show-react-modal';
 }

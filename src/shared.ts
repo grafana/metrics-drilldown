@@ -70,9 +70,9 @@ export function getVariablesWithOtelJoinQueryConstant() {
 }
 
 export class MetricSelectedEvent extends BusEventWithPayload<string | undefined> {
-  public static type = 'metric-selected-event';
+  public static readonly type = 'metric-selected-event';
 }
 
 export class RefreshMetricsEvent extends BusEventBase {
-  public static type = 'refresh-metrics-event';
+  public static readonly type = 'refresh-metrics-event';
 }

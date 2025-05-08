@@ -1,5 +1,4 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
-import { type DataSourceRef } from '@grafana/schema';
 
 import { DataTrail } from '../DataTrail';
 import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
@@ -12,7 +11,7 @@ jest.mock('@grafana/runtime', () => ({
     return {
       get: (ds: DataSourceWithBackend) => Promise.resolve(ds),
       getList: () => [mockDataSource],
-      getInstanceSettings: (ref: DataSourceRef) => ({
+      getInstanceSettings: () => ({
         id: 1,
         uid: 'ds',
         type: DataSourceType.Prometheus,

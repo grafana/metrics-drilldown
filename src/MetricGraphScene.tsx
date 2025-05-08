@@ -34,7 +34,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     });
   }
 
-  public static Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {
     const { topView, selectedTab } = model.useState();
     const { stickyMainGraph } = getTrailSettings(model).useState();
     const chromeHeaderHeight = useChromeHeaderHeight();

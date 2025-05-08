@@ -28,7 +28,7 @@ import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
 import { ListControls } from './ListControls/ListControls';
-import { EventSortByChanged } from './ListControls/MetricsSorter/EventSortByChanged';
+import { EventSortByChanged } from './ListControls/MetricsSorter/events/EventSortByChanged';
 import {
   addRecentMetric,
   MetricsSorter,
@@ -274,7 +274,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     });
   }
 
-  public static Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 

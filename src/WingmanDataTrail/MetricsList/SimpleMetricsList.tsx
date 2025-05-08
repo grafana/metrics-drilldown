@@ -123,7 +123,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  public static Component = ({ model }: SceneComponentProps<SimpleMetricsList>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<SimpleMetricsList>) => {
     const { body } = model.useState();
     const styles = useStyles2(getStyles);
 

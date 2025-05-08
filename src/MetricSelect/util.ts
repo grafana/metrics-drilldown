@@ -20,7 +20,8 @@ export function createJSRegExpFromSearchTerms(searchQuery?: string) {
   const regex = searchParts.join('');
   //  (?=(.*expr1.*)(?=(.*expr2.*))...
   // The ?=(...) lookahead allows us to match these in any order.
-  return new RegExp(regex, 'igy');
+  // we disable the ESLint rule for now, waiting to remove this file completely (see main comment in src/MetricSelect/MetricSelectScene.tsx)
+  return new RegExp(regex, 'igy'); // eslint-disable-line sonarjs/stateful-regex
 }
 
 export function createPromRegExp(searchQuery?: string) {

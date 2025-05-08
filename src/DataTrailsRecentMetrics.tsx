@@ -9,7 +9,7 @@ import { getTrailStore } from './TrailStore/TrailStore';
 
 type Props = { onSelect: (trail: DataTrail) => void };
 
-export function DataTrailsRecentMetrics({ onSelect }: Props) {
+export function DataTrailsRecentMetrics({ onSelect }: Readonly<Props>) {
   const styles = useStyles2(getStyles);
   const recentMetrics = getTrailStore().recent;
   const theme = useTheme2();
