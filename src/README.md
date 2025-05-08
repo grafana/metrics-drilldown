@@ -8,7 +8,7 @@ Requires Grafana 11.6.0 or newer.
 
 ## Getting Started
 
-See the [docs](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/#standalone-experience) for more info using Grafana Metrics Drilldown.
+See the [docs](https://grafana.com/docs/grafana-cloud/visualizations/simplified-exploration/metrics/) for more info using Grafana Metrics Drilldown.
 
 ## Documentation
 
