@@ -8,15 +8,13 @@ import { type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/metricLab
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
 
-export function CheckBoxList({
-  groups,
-  selectedGroups,
-  onSelectionChange,
-}: {
+type CheckBoxListProps = {
   groups: MetricsFilterSectionState['groups'];
   selectedGroups: MetricsFilterSectionState['selectedGroups'];
   onSelectionChange: (newGroups: MetricsFilterSectionState['selectedGroups']) => void;
-}) {
+};
+
+export function CheckBoxList({ groups, selectedGroups, onSelectionChange }: Readonly<CheckBoxListProps>) {
   const styles = useStyles2(getStyles);
 
   return (

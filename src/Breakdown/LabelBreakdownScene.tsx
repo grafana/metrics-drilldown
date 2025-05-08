@@ -38,7 +38,7 @@ import { BreakdownSearchReset, BreakdownSearchScene } from './BreakdownSearchSce
 import { ByFrameRepeater } from './ByFrameRepeater';
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { SortByScene, SortCriteriaChanged } from './SortByScene';
-import { type BreakdownLayoutChangeCallback, type BreakdownLayoutType } from './types';
+import { type BreakdownLayoutChangeCallback } from './types';
 import { getLabelOptions } from './utils';
 import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
 import { PanelMenu } from '../Menu/PanelMenu';
@@ -263,7 +263,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
     if (!variable.state.loading && variable.state.options.length) {
       stateUpdate.body = variable.hasAllValue()
-        ? buildAllLayout(allLabelOptions, this._query!, this.onBreakdownLayoutChange, trail.state.useOtelExperience)
+        ? buildAllLayout(allLabelOptions, this._query!, this.onBreakdownLayoutChange)
         : buildNormalLayout(this._query!, this.onBreakdownLayoutChange, this.state.search);
     } else if (!variable.state.loading) {
       stateUpdate.body = undefined;
@@ -275,7 +275,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     this.setState(stateUpdate);
   }
 
-  public onBreakdownLayoutChange = (_: BreakdownLayoutType) => {
+  public onBreakdownLayoutChange = () => {
     this.clearBreakdownPanelAxisValues();
   };
 
@@ -330,7 +330,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return allLabelOptions;
   }
 
-  public static Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
     const { labels, body, search, sortBy, loading, value, blockingMessage } = model.useState();
     const styles = useStyles2(getStyles);
 
@@ -363,7 +363,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       <div className={styles.container}>
         <StatusWrapper {...{ isLoading: loading, blockingMessage }}>
           <div className={styles.controls}>
-            {!loading && labels.length && (
+            {!loading && labels.length > 0 && (
               <Field label={useOtelExperience ? 'By attribute' : 'By label'}>
                 <BreakdownLabelSelector options={allLabelOptions} value={value} onChange={model.onChange} />
               </Field>
@@ -438,8 +438,7 @@ function getStyles(theme: GrafanaTheme2) {
 export function buildAllLayout(
   options: Array<SelectableValue<string>>,
   queryDef: AutoQueryDef,
-  onBreakdownLayoutChange: BreakdownLayoutChangeCallback,
-  useOtelExperience?: boolean
+  onBreakdownLayoutChange: BreakdownLayoutChangeCallback
 ) {
   const children: SceneFlexItemLike[] = [];
 
@@ -638,7 +637,7 @@ export class SelectLabelAction extends SceneObjectBase<SelectLabelActionState> {
     getBreakdownSceneFor(this).onChange(label);
   };
 
-  public static Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     return (
       <Button variant="secondary" size="sm" fill="outline" onClick={model.onClick}>
         Select
@@ -660,7 +659,7 @@ function getBreakdownSceneFor(model: SceneObject): LabelBreakdownScene {
 }
 
 function fixLegendForUnspecifiedLabelValueBehavior(vizPanel: VizPanel) {
-  vizPanel.state.$data?.subscribeToState((newState, prevState) => {
+  vizPanel.state.$data?.subscribeToState((newState) => {
     const target = newState.data?.request?.targets[0];
     if (hasLegendFormat(target)) {
       const { legendFormat } = target;

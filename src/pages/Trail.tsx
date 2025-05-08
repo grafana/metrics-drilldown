@@ -4,7 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { type DataTrail } from 'DataTrail';
 import { getTrailStore } from 'TrailStore/TrailStore';
 
-export default function Trail({ trail }: { trail: DataTrail }) {
+type TrailProps = {
+  trail: DataTrail;
+};
+
+export default function Trail({ trail }: Readonly<TrailProps>) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {

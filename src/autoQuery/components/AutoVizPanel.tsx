@@ -70,7 +70,7 @@ export class AutoVizPanel extends SceneObjectBase<AutoVizPanelState> {
       .build();
   }
 
-  public static Component = ({ model }: SceneComponentProps<AutoVizPanel>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<AutoVizPanel>) => {
     const { panel } = model.useState();
 
     if (!panel) {

@@ -9,7 +9,7 @@ type Props = {
   children?: ReactNode;
 };
 
-export function StatusWrapper({ blockingMessage, isLoading, children }: Props) {
+export function StatusWrapper({ blockingMessage, isLoading, children }: Readonly<Props>) {
   const styles = useStyles2(getStyles);
 
   if (isLoading && !blockingMessage) {
@@ -21,7 +21,7 @@ export function StatusWrapper({ blockingMessage, isLoading, children }: Props) {
   }
 
   if (!blockingMessage) {
-    return children;
+    return <>{children}</>;
   }
 
   return <div className={styles.statusMessage}>{blockingMessage}</div>;

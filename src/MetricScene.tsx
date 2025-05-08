@@ -123,13 +123,13 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         }
       }
     } else if (values.actionView === null) {
-      this.setActionView(undefined);
+      this.setActionView(null);
     }
   }
 
-  public setActionView(actionView?: ActionViewType) {
+  public setActionView(actionViewType: ActionViewType | null) {
     const { body } = this.state;
-    const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
+    const actionViewDef = actionViewType ? actionViewsDefinitions.find((v) => v.value === actionViewType) : null;
 
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
       // reduce max height for main panel to reduce height flicker
@@ -144,7 +144,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
   }
 
-  static Component = ({ model }: SceneComponentProps<MetricScene>) => {
+  static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
     const { body } = model.useState();
     return (
       <div data-testid="metric-scene">
@@ -210,7 +210,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     });
   };
 
-  public static Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
     const trail = getTrailFor(model);

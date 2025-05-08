@@ -1,12 +1,12 @@
 import { type Scope } from '@grafana/data';
-import { SceneObjectBase, type SceneObject, type SceneObjectState } from '@grafana/scenes';
+import { SceneObjectBase, type SceneObjectState } from '@grafana/scenes';
 
 export function getSelectedScopes(): Scope[] {
   return [];
 }
 
-export function getClosestScopesFacade(_scene: SceneObject): ScopesFacade {
-  return new ScopesFacade({});
+export function getClosestScopesFacade(): ScopesFacade {
+  return new ScopesFacade();
 }
 
 interface SelectedScope {
@@ -26,7 +26,7 @@ export class ScopesFacade extends SceneObjectBase<ScopesFacadeState> {
   private selectedScopes: SelectedScope[] = [];
   private onScopesChangeCallbacks: Array<(scopes: SelectedScope[]) => void> = [];
 
-  constructor(_state: ScopesFacadeState) {
+  constructor() {
     super({});
   }
 

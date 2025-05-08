@@ -33,7 +33,7 @@ export class DataTrailSettings extends SceneObjectBase<DataTrailSettingsState> {
     this.setState({ isOpen });
   };
 
-  static Component = ({ model }: SceneComponentProps<DataTrailSettings>) => {
+  static readonly Component = ({ model }: SceneComponentProps<DataTrailSettings>) => {
     const { stickyMainGraph, isOpen } = model.useState();
     const styles = useStyles2(getStyles);
 

@@ -113,13 +113,7 @@ describe('sortResources', () => {
 describe('limitOtelMatchTerms', () => {
   it('should limit the OTel match terms if the total match term character count exceeds 2000', () => {
     // the initial match is 1980 characters
-    const promMatchTerms: string[] = [
-      `${[...Array(1979).keys()]
-        .map((el) => {
-          return '0';
-        })
-        .join('')}"`,
-    ];
+    const promMatchTerms: string[] = [`${[...Array(1979).keys()].map(() => '0').join('')}"`];
     // job=~"" is 7 chars
     // instance=~"" is 12 characters
 
@@ -138,13 +132,7 @@ describe('limitOtelMatchTerms', () => {
 
   it('should include | char in the count', () => {
     // the initial match is 1980 characters
-    const promMatchTerms: string[] = [
-      `${[...Array(1975).keys()]
-        .map((el) => {
-          return '0';
-        })
-        .join('')}"`,
-    ];
+    const promMatchTerms: string[] = [`${[...Array(1975).keys()].map(() => '0').join('')}"`];
     // job=~"" is 7 chars
     // instance=~"" is 12 characters
 

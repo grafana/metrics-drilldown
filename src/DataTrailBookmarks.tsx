@@ -11,7 +11,7 @@ type Props = {
   onDelete: (index: number) => void;
 };
 
-export function DataTrailsBookmarks({ onSelect, onDelete }: Props) {
+export function DataTrailsBookmarks({ onSelect, onDelete }: Readonly<Props>) {
   const [toggleBookmark, setToggleBookmark] = useState(() => {
     const savedState = localStorage.getItem('toggleBookmark');
     return savedState ? JSON.parse(savedState) : false;

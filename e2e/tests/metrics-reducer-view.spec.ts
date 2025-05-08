@@ -51,12 +51,10 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.changeSortOption(sortOption);
 
         // Wait for the usage count to load
-        await expect(async () => {
-          const firstPanel = await metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
-          const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
-          const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
-          expect(usageCount).toBeGreaterThan(0);
-        }).toPass();
+        const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
+        const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
+        const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
+        expect(usageCount).toBeGreaterThan(0);
 
         // Verify metrics are sorted by alerting usage count
         const usageCounts: Record<string, number> = {};

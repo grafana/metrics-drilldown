@@ -64,7 +64,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 
           return query;
         });
-      } catch (e) {}
+      } catch {}
 
       // Navigation options (all panels)
       const items: PanelMenuItem[] = [
@@ -118,7 +118,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
     }
   }
 
-  public static Component = ({ model }: SceneComponentProps<PanelMenu>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<PanelMenu>) => {
     const { body } = model.useState();
 
     if (body) {
@@ -152,7 +152,7 @@ const getInvestigationLink = async (addToExplorations: AddToExplorationButton) =
   }
 
   // `getObservablePluginLinks` is introduced in Grafana v12
-  if (getObservablePluginLinks !== undefined) {
+  if (typeof getObservablePluginLinks === 'function') {
     const links: PluginExtensionLink[] = await firstValueFrom(
       getObservablePluginLinks({
         extensionPointId,
