@@ -1,6 +1,6 @@
 import { BusEventWithPayload } from '@grafana/data';
 
-import { type SortingOption } from './MetricsSorter';
+import { type SortingOption } from '../MetricsSorter';
 
 export interface EventSortByChangedPayload {
   sortBy: SortingOption;

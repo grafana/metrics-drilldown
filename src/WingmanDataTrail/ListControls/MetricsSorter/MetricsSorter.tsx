@@ -13,7 +13,7 @@ import React from 'react';
 
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
-import { EventSortByChanged } from './EventSortByChanged';
+import { EventSortByChanged } from './events/EventSortByChanged';
 import { MetricUsageFetcher, type MetricUsageType } from './metricUsageFetcher';
 import { logger } from '../../../tracking/logger/logger';
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
