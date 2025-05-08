@@ -20,6 +20,7 @@ import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
+import { EventShowMetricsTree } from './EventShowMetricsTree';
 import { reportExploreMetrics } from '../../interactions';
 import { BookmarksList } from './sections/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
@@ -248,6 +249,10 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     }
   }
 
+  private openTreeFilter() {
+    this.publishEvent(new EventShowMetricsTree({}), true);
+  }
+
   public static Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
     const { sections, visibleSection, sectionValues } = model.useState();
@@ -277,6 +282,17 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               </div>
             );
           })}
+          <div className={styles.buttonContainer}>
+            <SideBarButton
+              ariaLabel="Metrics tree"
+              disabled={false}
+              visible={false}
+              active={false}
+              tooltip="Metrics tree"
+              onClick={() => model.openTreeFilter()}
+              iconOrText="tree"
+            />
+          </div>
         </div>
         {visibleSection && (
           <div className={styles.content} data-testid="sidebar-content">

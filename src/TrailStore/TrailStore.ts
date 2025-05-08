@@ -183,7 +183,7 @@ export class TrailStore {
       return !isEqual(recentUrlState, urlState);
     });
 
-    this._recent.unshift(recentTrail.getRef());
+    this._recent.unshift((recentTrail as DataTrail).getRef());
     this._save();
   }
 

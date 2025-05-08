@@ -35,6 +35,7 @@ import {
   VAR_WINGMAN_SORT_BY,
   type SortingOption,
 } from './ListControls/MetricsSorter/MetricsSorter';
+import { MetricsTreeFilter } from './ListControls/MetricsTreeFilter/MetricsTreeFilter';
 import { EventQuickSearchChanged } from './ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './ListControls/QuickSearch/QuickSearch';
 import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
@@ -51,6 +52,7 @@ import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction'
 import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
 import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
 import { SceneDrawer } from './SceneDrawer';
+import { EventShowMetricsTree } from './SideBar/EventShowMetricsTree';
 import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { MetricsFilterSection } from './SideBar/sections/MetricsFilterSection/MetricsFilterSection';
 import { SideBar } from './SideBar/SideBar';
@@ -108,7 +110,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
     this._subs.add(
       this.subscribeToEvent(EventConfigureFunction, (event) => {
-        this.openDrawer(event.payload.metricName);
+        this.openConfigureDrawer(event.payload.metricName);
       })
     );
 
@@ -123,6 +125,12 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         if (event.payload !== undefined) {
           addRecentMetric(event.payload);
         }
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventShowMetricsTree, () => {
+        this.openMetricsTreeDrawer();
       })
     );
   }
@@ -234,8 +242,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     });
   }
 
-  private openDrawer(metricName: string) {
+  private openConfigureDrawer(metricName: string) {
     const trail = getTrailFor(this);
+
     this.state.drawer.open({
       title: 'Choose a new Prometheus function',
       subTitle: metricName,
@@ -270,6 +279,20 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             }),
           });
         }),
+      }),
+    });
+  }
+
+  private openMetricsTreeDrawer() {
+    this.state.drawer.open({
+      title: 'Metrics tree',
+      body: new MetricsTreeFilter({
+        onClickApply: () => {
+          this.state.drawer.close();
+        },
+        onClickCancel: () => {
+          this.state.drawer.close();
+        },
       }),
     });
   }

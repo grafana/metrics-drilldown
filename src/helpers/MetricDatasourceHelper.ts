@@ -17,7 +17,7 @@ import { isPrometheusDataSource } from '../utils/utils.datasource';
 
 export class MetricDatasourceHelper {
   constructor(trail: DataTrail) {
-    this._trail = trail;
+    this._trail = trail as DataTrail;
   }
 
   public reset() {
