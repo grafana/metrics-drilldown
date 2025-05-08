@@ -41,50 +41,7 @@ export async function fetchAlertingMetrics(): Promise<Record<string, number>> {
       usageRequestOptions
     );
 
-    // Create a map to count metric occurrences
-    const metricCounts: Record<string, number> = {};
-
-    // Process each alert rule
-    for (const rule of alertingRules) {
-      if (!rule.data?.length) {
-        continue;
-      }
-
-      // Process each query in the rule
-      for (const query of rule.data) {
-        // Skip non-Prometheus queries or expression queries (like threshold or reduce expressions)
-        if (!query.model || query.datasourceUid === '__expr__') {
-          continue;
-        }
-
-        // Extract expression from the model
-        const expr = query.model.expr;
-        if (!expr || typeof expr !== 'string') {
-          continue;
-        }
-
-        try {
-          // Extract metrics from the PromQL expression
-          const metrics = extractMetricNames(expr);
-
-          // Count each metric occurrence
-          for (const metric of metrics) {
-            if (!metric) {
-              continue;
-            }
-
-            metricCounts[metric] = (metricCounts[metric] || 0) + 1;
-          }
-        } catch (error) {
-          // Log parsing errors but continue processing other expressions
-          logger.warn(error, {
-            message: `Failed to parse PromQL expression in alert rule ${rule.title}`,
-          });
-        }
-      }
-    }
-
-    return metricCounts;
+    return parseAlertingRules(alertingRules);
   } catch (err) {
     const error = typeof err === 'string' ? new Error(err) : (err as Error);
     logger.error(error, {
@@ -93,4 +50,37 @@ export async function fetchAlertingMetrics(): Promise<Record<string, number>> {
     // Return empty object when fetch fails
     return {};
   }
+}
+
+function parseAlertingRules(alertingRules: AlertingRule[]): Record<string, number> {
+  // Create a map to count metric occurrences
+  const metricCounts: Record<string, number> = {};
+
+  const relevantRules = alertingRules.filter((rule) => rule?.data.length > 0);
+
+  for (const rule of relevantRules) {
+    // Skip non-Prometheus queries or expression queries (like threshold or reduce expressions)
+    const prometheusQueries = rule.data.filter(
+      (query) => typeof query.model?.expr === 'string' && query.datasourceUid !== '__expr__'
+    );
+
+    for (const query of prometheusQueries) {
+      try {
+        // Extract metrics from the PromQL expression
+        const metrics = extractMetricNames(query.model.expr as string);
+
+        // Count each metric occurrence
+        for (const metric of metrics) {
+          metricCounts[metric] = (metricCounts[metric] || 0) + 1;
+        }
+      } catch (error) {
+        // Log parsing errors but continue processing other expressions
+        logger.warn(error, {
+          message: `Failed to parse PromQL expression in alert rule ${rule.title}`,
+        });
+      }
+    }
+  }
+
+  return metricCounts;
 }

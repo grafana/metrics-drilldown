@@ -7,7 +7,7 @@ import {
   sortMetricsWithRecentFirst,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
-import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/metricUsageFetcher';
+import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricUsageFetcher';
 
 import { areArraysEqual } from './helpers/areArraysEqual';
 

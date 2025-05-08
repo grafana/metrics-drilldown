@@ -11,20 +11,27 @@ export function extractMetricNames(promqlExpression: string): string[] {
   const cursor = tree.cursor();
 
   do {
-    // when we find a VectorSelector...
-    if (cursor.type.is('VectorSelector')) {
-      // go to its first child
-      if (cursor.firstChild()) {
-        do {
-          // look for the Identifier node
-          if (cursor.type.is('Identifier')) {
-            const metricName = promqlExpression.slice(cursor.from, cursor.to);
-            metricNames.add(metricName);
-          }
-        } while (cursor.nextSibling());
-        cursor.parent();
-      }
+    // have we found a VectorSelector?
+    if (!cursor.type.is('VectorSelector')) {
+      continue;
     }
+
+    // does it have a first child?
+    if (!cursor.firstChild()) {
+      continue;
+    }
+
+    do {
+      // ...let's look for any Identifier node
+      if (cursor.type.is('Identifier')) {
+        const metricName = promqlExpression.slice(cursor.from, cursor.to);
+        if (metricName) {
+          metricNames.add(metricName);
+        }
+      }
+    } while (cursor.nextSibling());
+
+    cursor.parent();
   } while (cursor.next());
 
   return Array.from(metricNames);
