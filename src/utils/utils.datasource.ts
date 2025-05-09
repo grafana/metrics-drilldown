@@ -1,6 +1,7 @@
 import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
 import { type PrometheusDatasource } from '@grafana/prometheus';
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+
 import { logger } from '../tracking/logger/logger';
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
