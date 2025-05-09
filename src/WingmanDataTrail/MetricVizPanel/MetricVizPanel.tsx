@@ -44,8 +44,8 @@ interface MetricVizPanelState
   body: VizPanel;
 }
 
-export const METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '240px';
-export const METRICS_VIZ_PANEL_HEIGHT = '200px';
+export const METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '260px';
+export const METRICS_VIZ_PANEL_HEIGHT = '220px';
 export const METRICS_VIZ_PANEL_HEIGHT_SMALL = '160px';
 const rateQueryMetricSuffixes = new Set(['count', 'total', 'sum', 'bucket']);
 
