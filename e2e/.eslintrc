@@ -1,6 +1,0 @@
-{
-  "root": false,
-  "rules": {
-    "jest/no-standalone-expect": "off"
-  }
-}

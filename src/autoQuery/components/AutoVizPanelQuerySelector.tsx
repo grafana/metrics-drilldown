@@ -30,7 +30,7 @@ export class AutoVizPanelQuerySelector extends SceneObjectBase<QuerySelectorStat
     this.setState({ options: autoQuery.variants.map((q) => ({ label: q.variant, value: q.variant })) });
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<AutoVizPanelQuerySelector>) => {
+  public static Component = ({ model }: SceneComponentProps<AutoVizPanelQuerySelector>) => {
     const { options, onChangeQuery, queryDef } = model.useState();
 
     if (!options) {

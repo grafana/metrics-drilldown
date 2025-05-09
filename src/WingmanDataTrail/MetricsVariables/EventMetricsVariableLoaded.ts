@@ -7,5 +7,5 @@ export interface EventMetricsVariableLoadedPayload {
 }
 
 export class EventMetricsVariableLoaded extends BusEventWithPayload<EventMetricsVariableLoadedPayload> {
-  public static readonly type = 'metrics-variable-loaded';
+  public static type = 'metrics-variable-loaded';
 }

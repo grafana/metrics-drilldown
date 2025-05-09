@@ -99,7 +99,7 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
     return { isRateQuery, groupings };
   }
 
-  static readonly Component = ({ model }: SceneComponentProps<PreviewPanel>) => {
+  static Component = ({ model }: SceneComponentProps<PreviewPanel>) => {
     const { body } = model.useState();
 
     return <body.Component model={body} />;

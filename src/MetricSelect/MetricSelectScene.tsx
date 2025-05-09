@@ -1,6 +1,3 @@
-// TODO: delete this file! It has been deprecated in favor of the MetricsReducer scene */
-/* eslint-disable */
-
 import { css } from '@emotion/css';
 import { type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange, type SelectableValue } from '@grafana/data';
 import { config, isFetchError } from '@grafana/runtime';
@@ -386,7 +383,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       // If there is a current metric, do not present it
       const currentMetric = sceneGraph.getAncestor(this, MetricScene).state.metric;
       delete metricsMap[currentMetric];
-    } catch {
+    } catch (err) {
       // There is no current metric
     }
 
@@ -494,7 +491,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     trail.setState({ useOtelExperience: !useOtelExperience, resettingOtel, startButtonClicked });
   };
 
-  public static readonly Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
+  public static Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
     const {
       body,
       metricNames,
@@ -517,15 +514,14 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     const noMetrics = !metricNamesLoading && metricNames && metricNames.length === 0;
 
     const isLoading = metricNamesLoading && children.length === 0;
-    let blockingMessage;
 
-    if (!isLoading) {
-      blockingMessage = missingOtelTargets
-        ? 'There are no metrics found. Please adjust your filters based on your OTel resource attributes.'
-        : (noMetrics && 'There are no results found. Try a different time range or a different data source.') ||
-          (tooStrict && 'There are no results found. Try adjusting your search or filters.') ||
-          undefined;
-    }
+    const blockingMessage = isLoading
+      ? undefined
+      : missingOtelTargets
+      ? 'There are no metrics found. Please adjust your filters based on your OTel resource attributes.'
+      : (noMetrics && 'There are no results found. Try a different time range or a different data source.') ||
+        (tooStrict && 'There are no results found. Try adjusting your search or filters.') ||
+        undefined;
 
     const metricNamesWarningIcon = metricNamesWarning ? (
       <Tooltip

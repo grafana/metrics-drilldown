@@ -29,7 +29,7 @@ export function SideBarButton({
   tooltip,
   iconOrText,
   onClick,
-}: Readonly<SideBarButtonProps>) {
+}: SideBarButtonProps) {
   const styles = useStyles2(getStyles);
 
   let buttonIcon;

@@ -10,7 +10,7 @@ interface ConfigureActionState extends SceneObjectState {
 }
 
 export class ConfigureAction extends SceneObjectBase<ConfigureActionState> {
-  static readonly PROMETHEUS_FN_OPTIONS = [
+  static PROMETHEUS_FN_OPTIONS = [
     { label: 'Average', value: 'avg' },
     { label: 'Sum', value: 'sum' },
     { label: 'Minimum', value: 'min' },
@@ -29,7 +29,7 @@ export class ConfigureAction extends SceneObjectBase<ConfigureActionState> {
     this.publishEvent(new EventConfigureFunction({ metricName: this.state.metricName }), true);
   };
 
-  public static readonly Component = ({ model }: SceneComponentProps<ConfigureAction>) => {
+  public static Component = ({ model }: SceneComponentProps<ConfigureAction>) => {
     const styles = useStyles2(getStyles);
 
     return (

@@ -13,7 +13,7 @@ export type SceneDrawerProps = {
   onDismiss: () => void;
 };
 
-export function SceneDrawer(props: Readonly<SceneDrawerProps>) {
+export function SceneDrawer(props: SceneDrawerProps) {
   const { scene, title, onDismiss } = props;
   const styles = useStyles2(getStyles);
 

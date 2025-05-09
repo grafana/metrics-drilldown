@@ -173,7 +173,7 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
     };
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<SceneByVariableRepeater>) => {
+  public static Component = ({ model }: SceneComponentProps<SceneByVariableRepeater>) => {
     const { body, loadingLayout, errorLayout, emptyLayout } = model.useState();
 
     if (loadingLayout) {

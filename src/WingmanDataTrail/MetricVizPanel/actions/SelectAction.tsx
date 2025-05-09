@@ -32,7 +32,7 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
     this.publishEvent(new MetricSelectedEvent(this.state.metricName), true);
   };
 
-  public static readonly Component = ({ model }: SceneComponentProps<SelectAction>) => {
+  public static Component = ({ model }: SceneComponentProps<SelectAction>) => {
     const { variant, fill } = model.useState();
 
     return (

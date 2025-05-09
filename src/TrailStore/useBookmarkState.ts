@@ -15,7 +15,7 @@ export function useBookmarkState(trail: DataTrail) {
   const [bookmarkIndex, setBookmarkIndex] = useState(indexOnRender);
 
   useEffect(() => {
-    const sub = trail.subscribeToEvent(SceneObjectStateChangedEvent, () => {
+    const sub = trail.subscribeToEvent(SceneObjectStateChangedEvent, ({ payload: { prevState, newState } }) => {
       setBookmarkIndex(getTrailStore().getBookmarkIndex(trail));
     });
     return () => sub.unsubscribe();

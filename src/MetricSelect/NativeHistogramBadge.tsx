@@ -5,7 +5,7 @@ import { Badge, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 export class NativeHistogramBadge extends SceneObjectBase {
-  public static readonly Component = () => {
+  public static Component = () => {
     const styles = useStyles2(getStyles);
     return <Badge className={styles.badge} color="blue" text="Native Histogram" />;
   };

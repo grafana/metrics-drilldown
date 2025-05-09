@@ -6,5 +6,5 @@ export interface EventSectionValueChangedPayload {
 }
 
 export class EventSectionValueChanged extends BusEventWithPayload<EventSectionValueChangedPayload> {
-  public static readonly type = 'section-value-changed';
+  public static type = 'section-value-changed';
 }

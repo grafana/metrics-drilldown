@@ -36,7 +36,7 @@ export class ApplyAction extends SceneObjectBase<ApplyActionState> {
     );
   };
 
-  public static readonly Component = ({ model }: SceneComponentProps<ApplyAction>) => {
+  public static Component = ({ model }: SceneComponentProps<ApplyAction>) => {
     const styles = useStyles2(getStyles);
     const { disabled } = model.useState();
 

@@ -12,7 +12,7 @@ import { LabelBreakdownScene } from './LabelBreakdownScene';
 import { findSceneObjectsByType } from './utils';
 
 export class BreakdownAxisChangeEvent extends BusEventWithPayload<{ min: number; max: number }> {
-  public static readonly type = 'selected-metric-query-results-event';
+  public static type = 'selected-metric-query-results-event';
 }
 
 export const yAxisSyncBehavior: SceneStatelessBehavior = (sceneObject: SceneCSSGridItem) => {
@@ -50,7 +50,7 @@ export const yAxisSyncBehavior: SceneStatelessBehavior = (sceneObject: SceneCSSG
     }
 
     // Report the panel data whenever it is updated
-    dataProvider.subscribeToState(({ data }) => {
+    dataProvider.subscribeToState(({ data }, _) => {
       breakdownScene.reportBreakdownPanelData(data);
     });
   }

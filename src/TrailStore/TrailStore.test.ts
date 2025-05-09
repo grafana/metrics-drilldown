@@ -1,4 +1,5 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
+import { type DataSourceRef } from '@grafana/schema';
 
 import { DataTrail } from '../DataTrail';
 import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
@@ -41,7 +42,7 @@ describe('TrailStore', () => {
       return {
         get: (ds: DataSourceWithBackend) => Promise.resolve(ds),
         getList: () => [mockDataSource],
-        getInstanceSettings: () => ({
+        getInstanceSettings: (ref: DataSourceRef) => ({
           id: 1,
           uid: 'ds',
           type: DataSourceType.Prometheus,

@@ -20,7 +20,7 @@ export function getPromqlFunction(
   isRateQuery: boolean,
   nonRateQueryFunction: NonRateQueryFunction = DEFAULT_NON_RATE_QUERY_FUNCTION
 ): NonRateQueryFunction | 'sum' {
-  return isRateQuery ? 'sum' : nonRateQueryFunction; // eslint-disable-line sonarjs/no-selector-parameter
+  return isRateQuery ? 'sum' : nonRateQueryFunction;
 }
 
 export function buildPrometheusQuery({

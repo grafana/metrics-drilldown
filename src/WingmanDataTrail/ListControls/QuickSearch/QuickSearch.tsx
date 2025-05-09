@@ -157,7 +157,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     };
   }
 
-  static readonly Component = ({ model }: { model: QuickSearch }) => {
+  static Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
     const { value } = model.useState();
 

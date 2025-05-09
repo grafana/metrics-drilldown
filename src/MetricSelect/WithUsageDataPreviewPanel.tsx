@@ -16,7 +16,7 @@ import {
   VAR_WINGMAN_SORT_BY,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
-import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricUsageFetcher';
+import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/metricUsageFetcher';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import {
@@ -88,7 +88,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     }
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<WithUsageDataPreviewPanel>) => {
+  public static Component = ({ model }: SceneComponentProps<WithUsageDataPreviewPanel>) => {
     const {
       vizPanelInGridItem,
       sortBy,
@@ -147,7 +147,7 @@ interface UsageSectionProps {
   icon: IconName;
 }
 
-function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: Readonly<UsageSectionProps>) {
+function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: UsageSectionProps) {
   const styles = useStyles2(getStyles);
 
   return (

@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-nested-functions */
-
 import { VariableHide } from '@grafana/data';
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';

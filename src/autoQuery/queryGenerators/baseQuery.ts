@@ -20,13 +20,13 @@ export function generateBaseQuery({
   isUtf8Metric?: boolean;
 }): string {
   // Determine base query template
-  let baseQuery;
-
-  if (isUtf8Metric) {
-    baseQuery = isRateQuery ? RATE_BASE_QUERY_UTF8_METRIC_TEMPLATE : BASE_QUERY_UTF8_METRIC_TEMPLATE;
-  } else {
-    baseQuery = isRateQuery ? RATE_BASE_QUERY_TEMPLATE : BASE_QUERY_TEMPLATE;
-  }
+  const baseQuery = isUtf8Metric
+    ? isRateQuery
+      ? RATE_BASE_QUERY_UTF8_METRIC_TEMPLATE
+      : BASE_QUERY_UTF8_METRIC_TEMPLATE
+    : isRateQuery
+    ? RATE_BASE_QUERY_TEMPLATE
+    : BASE_QUERY_TEMPLATE;
 
   // Apply groupings (e.g., `sum by(le, instance)`)
   if (groupings.length > 0) {

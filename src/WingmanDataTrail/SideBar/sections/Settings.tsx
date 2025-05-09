@@ -37,7 +37,7 @@ export class Settings extends SceneObjectBase<SettingsState> {
 
   private onActivate() {}
 
-  public static readonly Component = ({ model }: SceneComponentProps<Settings>) => {
+  public static Component = ({ model }: SceneComponentProps<Settings>) => {
     const styles = useStyles2(getStyles);
     const { title, description } = model.useState();
 

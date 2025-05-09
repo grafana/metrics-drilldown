@@ -12,7 +12,7 @@ type LabelsListProps = {
   onClickClearSelection: () => void;
 };
 
-export function LabelsList({ labels, selectedLabel, onClickLabel, onClickClearSelection }: Readonly<LabelsListProps>) {
+export function LabelsList({ labels, selectedLabel, onClickLabel, onClickClearSelection }: LabelsListProps) {
   const styles = useStyles2(getStyles);
 
   return (

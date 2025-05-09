@@ -21,12 +21,12 @@ export interface LayoutSwitcherState extends SceneObjectState {
 export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['layout'] });
 
-  static readonly OPTIONS = [
+  static OPTIONS = [
     { label: 'Grid', value: LayoutType.GRID },
     { label: 'Rows', value: LayoutType.ROWS },
   ];
 
-  static readonly DEFAULT_LAYOUT = LayoutType.GRID;
+  static DEFAULT_LAYOUT = LayoutType.GRID;
 
   constructor() {
     super({
@@ -57,7 +57,7 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> {
     this.setState({ layout });
   };
 
-  static readonly Component = ({ model }: SceneComponentProps<LayoutSwitcher>) => {
+  static Component = ({ model }: SceneComponentProps<LayoutSwitcher>) => {
     const { layout } = model.useState();
 
     return (

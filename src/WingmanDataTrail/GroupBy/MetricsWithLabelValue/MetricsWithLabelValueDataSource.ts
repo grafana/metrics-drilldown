@@ -1,6 +1,7 @@
 import {
   FieldType,
   LoadingState,
+  type DataQueryRequest,
   type DataQueryResponse,
   type DataSourceApi,
   type LegacyMetricFindQueryOptions,
@@ -19,13 +20,13 @@ import type { PrometheusDatasource } from '@grafana/prometheus';
 export const NULL_GROUP_BY_VALUE = '(none)';
 
 export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
-  static readonly uid = 'grafana-prometheus-metrics-with-label-values-datasource';
+  static uid = 'grafana-prometheus-metrics-with-label-values-datasource';
 
   constructor() {
     super(MetricsWithLabelValueDataSource.uid, MetricsWithLabelValueDataSource.uid);
   }
 
-  async query(): Promise<DataQueryResponse> {
+  async query(request: DataQueryRequest): Promise<DataQueryResponse> {
     return {
       state: LoadingState.Done,
       data: [

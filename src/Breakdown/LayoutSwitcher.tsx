@@ -70,7 +70,7 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> impleme
     this.state.onBreakdownLayoutChange(active);
   };
 
-  public static readonly Component = ({ model }: SceneComponentProps<LayoutSwitcher>) => {
+  public static Component = ({ model }: SceneComponentProps<LayoutSwitcher>) => {
     const { breakdownLayouts, breakdownLayoutOptions, activeBreakdownLayout } = model.useState();
 
     const index = breakdownLayoutOptions.findIndex((o) => o.value === activeBreakdownLayout);

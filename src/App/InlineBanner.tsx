@@ -12,7 +12,7 @@ type InlineBannerProps = {
   children?: React.ReactNode;
 };
 
-export function InlineBanner({ severity, title, message, error, errorContext, children }: Readonly<InlineBannerProps>) {
+export function InlineBanner({ severity, title, message, error, errorContext, children }: InlineBannerProps) {
   let errorObject;
 
   if (error) {

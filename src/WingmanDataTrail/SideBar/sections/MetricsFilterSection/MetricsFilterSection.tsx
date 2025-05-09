@@ -13,6 +13,7 @@ import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/u
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
 import { logger } from 'tracking/logger/logger';
+import { EventFiltersChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventFiltersChanged';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
@@ -34,7 +35,6 @@ import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
-import { EventFiltersChanged } from './EventFiltersChanged';
 
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
@@ -242,7 +242,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     }
   };
 
-  public static readonly Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {
+  public static Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {
     const styles = useStyles2(getStyles);
     const { groups, selectedGroups, loading, title, description, showHideEmpty, showSearch } = model.useState();
 
@@ -288,7 +288,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
             onChange={(e) => setSearchValue(e.currentTarget.value)}
             onKeyDown={onKeyDown}
             suffix={
-              <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={() => setSearchValue('')} />
+              <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={(e) => setSearchValue('')} />
             }
           />
         )}

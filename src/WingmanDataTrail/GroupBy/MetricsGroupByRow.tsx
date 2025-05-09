@@ -141,7 +141,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
+  public static Component = ({ model }: SceneComponentProps<MetricsGroupByRow>) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const styles = useStyles2(getStyles);
 

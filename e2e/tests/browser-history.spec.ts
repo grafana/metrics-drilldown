@@ -1,5 +1,6 @@
+import { testIds } from '../../src/App/testIds';
 import { ROUTES } from '../../src/constants';
-import { test } from '../fixtures';
+import { expect, test } from '../fixtures';
 
 test.describe('Browser History', () => {
   test('From Wingman', async ({ gotoPage, page, metricsReducerView }) => {

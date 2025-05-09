@@ -1,5 +1,3 @@
-// TODO: OTEL is being deprecated, we will remove this file in the future so, we can safely disable this ESLint rule
-/* eslint-disable sonarjs/cognitive-complexity */
 import { VariableHide, type AdHocVariableFilter, type MetricFindValue, type RawTimeRange } from '@grafana/data';
 import { isValidLegacyName } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
@@ -99,7 +97,7 @@ export function getOtelJoinQuery(otelResourcesObject: OtelResourcesObject, scene
  * @param firstQueryVal
  * @returns
  */
-export function getOtelResourcesObject(scene: SceneObject): OtelResourcesObject {
+export function getOtelResourcesObject(scene: SceneObject, firstQueryVal?: string): OtelResourcesObject {
   const otelResources = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, scene);
   let otelResourcesObject = { labels: '', filters: '' };
 

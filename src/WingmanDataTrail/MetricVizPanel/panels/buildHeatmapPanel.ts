@@ -3,12 +3,13 @@ import { HeatmapColorMode } from '@grafana/schema/dist/esm/raw/composable/heatma
 
 interface PanelProps {
   panelTitle: string;
+  color: string;
   queryRunner: SceneQueryRunner;
   hideLegend: boolean;
   headerActions: SceneObject[];
 }
 
-export function buildHeatmapPanel({ panelTitle, queryRunner, headerActions, hideLegend }: PanelProps) {
+export function buildHeatmapPanel({ panelTitle, queryRunner, color, headerActions, hideLegend }: PanelProps) {
   return (
     PanelBuilders.heatmap()
       .setTitle(panelTitle)

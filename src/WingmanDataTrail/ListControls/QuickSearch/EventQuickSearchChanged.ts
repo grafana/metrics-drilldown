@@ -5,5 +5,5 @@ export interface EventQuickSearchChangedPayload {
 }
 
 export class EventQuickSearchChanged extends BusEventWithPayload<EventQuickSearchChangedPayload> {
-  public static readonly type = 'quick-search-changed';
+  public static type = 'quick-search-changed';
 }

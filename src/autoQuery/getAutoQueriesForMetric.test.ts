@@ -1,5 +1,3 @@
-/* eslint-disable sonarjs/no-nested-functions */
-
 import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR, VAR_OTEL_JOIN_QUERY_EXPR } from '../shared';
 import { getAutoQueriesForMetric } from './getAutoQueriesForMetric';
 import { generateBaseQuery } from './queryGenerators/baseQuery';

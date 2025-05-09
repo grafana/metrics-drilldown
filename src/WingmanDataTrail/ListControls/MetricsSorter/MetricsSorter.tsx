@@ -13,8 +13,8 @@ import React from 'react';
 
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
-import { EventSortByChanged } from './events/EventSortByChanged';
-import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
+import { EventSortByChanged } from './EventSortByChanged';
+import { MetricUsageFetcher, type MetricUsageType } from './metricUsageFetcher';
 import { logger } from '../../../tracking/logger/logger';
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
 
@@ -148,7 +148,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     return this.usageFetcher.getUsageMetrics(usageType);
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
+  public static Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
     const { inputControls } = model.useState();
 
     return <inputControls.Component model={inputControls} data-testid="sort-by-select" />;

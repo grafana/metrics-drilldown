@@ -46,7 +46,7 @@ export class MetricDatasourceHelper {
   }
 
   // store metadata in a more easily accessible form
-  _metricsMetadata?: PromMetricsMetadata;
+  _metricsMetadata?: PromMetricsMetadata | undefined;
 
   private async _getMetricsMetadata() {
     const ds = await this.getDatasource();
@@ -146,7 +146,11 @@ export class MetricDatasourceHelper {
     }
 
     // check for comparison when there is overlap between native and classic histograms
-    return this._classicHistograms[`${metric}_bucket`] > 0;
+    if (this._classicHistograms[`${metric}_bucket`]) {
+      return true;
+    }
+
+    return false;
   }
 
   private addNativeHistogram(metric: string) {

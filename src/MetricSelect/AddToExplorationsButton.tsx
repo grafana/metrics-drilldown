@@ -84,60 +84,48 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
     }
   };
 
-  private getPanelConfigAndDataFrames() {
+  private readonly getFieldConfig = () => {
     const panel = findObjectOfType(this, (o) => o instanceof VizPanel, VizPanel);
     const data = sceneGraph.getData(this);
+    const frames = data?.state.data?.series;
+    let fieldConfig = panel?.state.fieldConfig;
+    if (fieldConfig && frames?.length) {
+      for (const frame of frames) {
+        for (const field of frame.fields) {
+          const configKeys = Object.keys(field.config);
+          const properties = configKeys.map((key) => ({
+            id: key,
+            value: field.config[key as keyof FieldConfig],
+          }));
 
-    return {
-      fieldConfig: panel?.state.fieldConfig,
-      frames: data?.state.data?.series,
-    };
-  }
+          // check if the override already exists
+          const existingOverride = fieldConfig.overrides.find(
+            (o) =>
+              o.matcher.options === (field.config.displayNameFromDS ?? field.config.displayName ?? field.name) &&
+              o.matcher.id === 'byName'
+          );
+          if (!existingOverride) {
+            // add as first override
+            fieldConfig.overrides.unshift({
+              matcher: {
+                id: 'byName',
+                options: field.config.displayNameFromDS ?? field.config.displayName ?? field.name,
+              },
+              properties,
+            });
+          }
 
-  private readonly updateFieldConfigOverrides = () => {
-    const { fieldConfig, frames } = this.getPanelConfigAndDataFrames();
-
-    if (!fieldConfig || !frames?.length) {
-      return undefined;
-    }
-
-    for (const frame of frames) {
-      for (const field of frame.fields) {
-        const configKeys = Object.keys(field.config);
-        const properties = configKeys.map((key) => ({
-          id: key,
-          value: field.config[key as keyof FieldConfig],
-        }));
-
-        // check if the override already exists
-        const existingOverride = fieldConfig.overrides.find(
-          (o) =>
-            o.matcher.options === (field.config.displayNameFromDS ?? field.config.displayName ?? field.name) &&
-            o.matcher.id === 'byName'
-        );
-
-        if (!existingOverride) {
-          // add as first override
-          fieldConfig.overrides.unshift({
-            matcher: {
-              id: 'byName',
-              options: field.config.displayNameFromDS ?? field.config.displayName ?? field.name,
-            },
-            properties,
-          });
-        }
-
-        if (existingOverride && JSON.stringify(existingOverride.properties) !== JSON.stringify(properties)) {
-          existingOverride.properties = properties;
+          if (existingOverride && JSON.stringify(existingOverride.properties) !== JSON.stringify(properties)) {
+            existingOverride.properties = properties;
+          }
         }
       }
     }
-
     return fieldConfig;
   };
 
   private readonly getContext = () => {
-    const fieldConfig = this.updateFieldConfigOverrides();
+    const fieldConfig = this.getFieldConfig();
     const { queries, dsUid, labelName, fieldName } = this.state;
     const timeRange = sceneGraph.getTimeRange(this);
 
@@ -152,7 +140,7 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
       datasource: { uid: dsUid },
       url: window.location.href,
       id: `${JSON.stringify(queries)}${labelName}${fieldName}`,
-      title: labelName + (fieldName ? ` > ${fieldName}` : ''),
+      title: `${labelName}${fieldName ? ` > ${fieldName}` : ''}`,
       logoPath: MimirLogo,
       drillDownLabel: fieldName,
       fieldConfig,
@@ -162,7 +150,7 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
     }
   };
 
-  public static readonly Component = ({ model }: SceneComponentProps<AddToExplorationButton>) => {
+  public static Component = ({ model }: SceneComponentProps<AddToExplorationButton>) => {
     const { context } = model.useState();
     const { links } = usePluginLinks({ extensionPointId, context, limitPerPlugin: 1 });
     const link = links.find((link) => link.pluginId === investigationsPluginId);

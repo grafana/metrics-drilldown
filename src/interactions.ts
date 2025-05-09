@@ -172,55 +172,6 @@ export function reportExploreMetrics<E extends keyof Interactions, P extends Int
   reportInteraction(`${PREFIX}${event}`, payload);
 }
 
-/**
- * Reports a single label filter change event
- */
-function reportLabelFilterChange(label: string, action: 'added' | 'removed' | 'changed', otel?: boolean) {
-  reportExploreMetrics('label_filter_changed', {
-    label,
-    action,
-    cause: 'adhoc_filter',
-    otel_resource_attribute: otel ?? false,
-  });
-}
-
-/**
- * Detects and reports changes to an existing filter
- */
-function detectChangedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[], otel?: boolean) {
-  for (const oldFilter of oldFilters) {
-    for (const newFilter of newFilters) {
-      if (oldFilter.key === newFilter.key && oldFilter.value !== newFilter.value) {
-        reportLabelFilterChange(oldFilter.key, 'changed', otel);
-      }
-    }
-  }
-}
-
-/**
- * Detects and reports removed filters
- */
-function detectRemovedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[]) {
-  for (const oldFilter of oldFilters) {
-    const stillExists = newFilters.some((newFilter) => newFilter.key === oldFilter.key);
-    if (!stillExists) {
-      reportLabelFilterChange(oldFilter.key, 'removed');
-    }
-  }
-}
-
-/**
- * Detects and reports added filters
- */
-function detectAddedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[]) {
-  for (const newFilter of newFilters) {
-    const isNew = !oldFilters.some((oldFilter) => oldFilter.key === newFilter.key);
-    if (isNew) {
-      reportLabelFilterChange(newFilter.key, 'added');
-    }
-  }
-}
-
 /** Detect the single change in filters and report the event, assuming it came from manipulating the adhoc filter */
 export function reportChangeInLabelFilters(
   newFilters: AdHocVariableFilter[],
@@ -228,13 +179,49 @@ export function reportChangeInLabelFilters(
   otel?: boolean
 ) {
   if (newFilters.length === oldFilters.length) {
-    // Same number of filters - check for changed values
-    detectChangedFilters(newFilters, oldFilters, otel);
+    for (const oldFilter of oldFilters) {
+      for (const newFilter of newFilters) {
+        if (oldFilter.key === newFilter.key) {
+          if (oldFilter.value !== newFilter.value) {
+            reportExploreMetrics('label_filter_changed', {
+              label: oldFilter.key,
+              action: 'changed',
+              cause: 'adhoc_filter',
+              otel_resource_attribute: otel ?? false,
+            });
+          }
+        }
+      }
+    }
   } else if (newFilters.length < oldFilters.length) {
-    // Filters were removed
-    detectRemovedFilters(newFilters, oldFilters);
+    for (const oldFilter of oldFilters) {
+      let foundOldLabel = false;
+      for (const newFilter of newFilters) {
+        if (oldFilter.key === newFilter.key) {
+          foundOldLabel = true;
+          break;
+        }
+      }
+      if (!foundOldLabel) {
+        reportExploreMetrics('label_filter_changed', {
+          label: oldFilter.key,
+          action: 'removed',
+          cause: 'adhoc_filter',
+        });
+      }
+    }
   } else {
-    // Filters were added
-    detectAddedFilters(newFilters, oldFilters);
+    for (const newFilter of newFilters) {
+      let foundNewLabel = false;
+      for (const oldFilter of oldFilters) {
+        if (oldFilter.key === newFilter.key) {
+          foundNewLabel = true;
+          break;
+        }
+      }
+      if (!foundNewLabel) {
+        reportExploreMetrics('label_filter_changed', { label: newFilter.key, action: 'added', cause: 'adhoc_filter' });
+      }
+    }
   }
 }
