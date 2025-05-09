@@ -93,8 +93,6 @@ export class DataSourceFetcher {
     );
 
     if (unhealthyDataSources.length > 0) {
-      // Why not use `logger.warn` here? While this information might be useful for observant users
-      // who open DevTools, it's not an actionable insight for Grafana Metrics Drilldown developers.
       logger.warn(
         `Found ${unhealthyDataSources.length} unhealthy ${type} data sources: ${unhealthyDataSources
           .map((ds) => ds.name)
