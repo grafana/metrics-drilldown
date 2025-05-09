@@ -27,6 +27,8 @@ import { Alert, Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/u
 import { isNumber, max, min, throttle } from 'lodash';
 import React, { useEffect, useState } from 'react';
 
+import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef } from '../autoQuery/types';
 import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
@@ -495,13 +497,13 @@ export function buildAllLayout(
     breakdownLayouts: [
       new SceneCSSGridLayout({
         templateColumns: GRID_TEMPLATE_COLUMNS,
-        autoRows: '200px',
+        autoRows: METRICS_VIZ_PANEL_HEIGHT,
         children: children,
         isLazy: true,
       }),
       new SceneCSSGridLayout({
         templateColumns: '1fr',
-        autoRows: '200px',
+        autoRows: METRICS_VIZ_PANEL_HEIGHT,
         // Clone children since a scene object can only have one parent at a time
         children: children.map((c) => c.clone()),
         isLazy: true,
@@ -575,7 +577,7 @@ function buildNormalLayout(
       new ByFrameRepeater({
         body: new SceneCSSGridLayout({
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: '200px',
+          autoRows: METRICS_VIZ_PANEL_HEIGHT,
           children: [
             new SceneFlexItem({
               body: new SceneReactObject({
@@ -591,7 +593,7 @@ function buildNormalLayout(
       new ByFrameRepeater({
         body: new SceneCSSGridLayout({
           templateColumns: '1fr',
-          autoRows: '200px',
+          autoRows: METRICS_VIZ_PANEL_HEIGHT,
           children: [],
         }),
         getLayoutChild,
