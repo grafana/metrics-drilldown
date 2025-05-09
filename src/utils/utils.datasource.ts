@@ -1,7 +1,7 @@
 import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
 import { type PrometheusDatasource } from '@grafana/prometheus';
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
-
+import { logger } from '../tracking/logger/logger';
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
 /**
@@ -95,7 +95,7 @@ export class DataSourceFetcher {
     if (unhealthyDataSources.length > 0) {
       // Why not use `logger.warn` here? While this information might be useful for observant users
       // who open DevTools, it's not an actionable insight for Grafana Metrics Drilldown developers.
-      console.warn(
+      logger.warn(
         `Found ${unhealthyDataSources.length} unhealthy ${type} data sources: ${unhealthyDataSources
           .map((ds) => ds.name)
           .join(', ')}`
