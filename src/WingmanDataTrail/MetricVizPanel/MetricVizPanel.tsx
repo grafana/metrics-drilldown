@@ -18,7 +18,6 @@ import { trailDS } from 'shared';
 
 import { type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
-import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
 import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
 import { buildTimeseriesPanel } from './panels/buildTimeseriesPanel';
@@ -26,11 +25,11 @@ import { buildTimeseriesPanel } from './panels/buildTimeseriesPanel';
 interface MetricVizPanelProps {
   metricName: string;
   color: string;
+  isNativeHistogram: boolean;
   headerActions?: SceneObject[];
   height?: string;
   hideLegend?: boolean;
   highlight?: boolean;
-  isNativeHistogram: boolean;
   matchers?: string[];
   prometheusFunction?: PrometheusFn;
   title?: string;
@@ -38,7 +37,10 @@ interface MetricVizPanelProps {
 
 interface MetricVizPanelState
   extends SceneObjectState,
-    Pick<Required<MetricVizPanelProps>, 'height' | 'highlight' | 'prometheusFunction'> {
+    Pick<
+      Required<MetricVizPanelProps>,
+      'isNativeHistogram' | 'headerActions' | 'height' | 'hideLegend' | 'highlight' | 'prometheusFunction'
+    > {
   body: VizPanel;
 }
 
@@ -61,10 +63,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       height: props.height || METRICS_VIZ_PANEL_HEIGHT,
       hideLegend: Boolean(props.hideLegend),
       highlight: Boolean(props.highlight),
-      headerActions: [
-        ...(props.isNativeHistogram ? [new NativeHistogramBadge({})] : []),
-        ...(props.headerActions || [new SelectAction({ metricName: props.metricName })]),
-      ],
+      headerActions: [...(props.headerActions || [new SelectAction({ metricName: props.metricName })])],
     };
 
     super({
@@ -248,16 +247,47 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricVizPanel>) => {
-    const { body, height, highlight } = model.useState();
+    const { body, height, highlight, isNativeHistogram } = model.useState();
     const styles = useStyles2(getStyles, height);
 
     return (
-      <div className={cx(styles.container, highlight && styles.highlight)}>
+      <div className={cx(styles.container, highlight && styles.highlight, isNativeHistogram && styles.nativeHistogram)}>
         {body && <body.Component model={body} />}
       </div>
     );
   };
 }
+
+// TODO: don't export only to use it in PreviewPanel.tsx
+// instead, use only MetricVizPanel across the whole app
+export const nativeHistogramStyles = (theme: GrafanaTheme2) => {
+  const nativeHistogramBadgeWidth = 124;
+
+  return css({
+    '[class$="-panel-header"]': {
+      position: 'relative',
+      paddingLeft: `${nativeHistogramBadgeWidth + 8}px`,
+    },
+    '[class$="-panel-title"]::before': {
+      content: '"Native Histogram"',
+      fontSize: '12px',
+      color: 'rgb(158, 193, 247)',
+      position: 'absolute',
+      left: '8px',
+      top: '7px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: `${nativeHistogramBadgeWidth}px`,
+      height: '22px',
+      padding: 0,
+      border: `1px solid ${theme.colors.info.text}`,
+      borderRadius: theme.shape.radius.pill,
+      background: theme.colors.info.transparent,
+      cursor: 'auto',
+    },
+  });
+};
 
 function getStyles(theme: GrafanaTheme2, height: string) {
   return {
@@ -267,5 +297,6 @@ function getStyles(theme: GrafanaTheme2, height: string) {
     highlight: css({
       border: `2px solid ${theme.colors.primary.main}`,
     }),
+    nativeHistogram: nativeHistogramStyles(theme),
   };
 }
