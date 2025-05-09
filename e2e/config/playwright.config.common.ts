@@ -79,7 +79,7 @@ export function config(config: CustomEnvConfig) {
       {
         name: 'auth',
         testDir: pluginE2eAuth,
-        testMatch: [/.*\.js/],
+        testMatch: [/.*\.js/], // eslint-disable-line sonarjs/slow-regex
       },
       // 2. Run tests in Google Chrome. Every test will start authenticated as admin user.
       {

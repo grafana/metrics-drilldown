@@ -14,10 +14,10 @@ export class SelectMetricAction extends SceneObjectBase<SelectMetricActionState>
     this.publishEvent(new MetricSelectedEvent(this.state.metric), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<SelectMetricAction>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<SelectMetricAction>) => {
     const { title, metric } = model.useState();
     return (
-      <Button variant="secondary" size="sm" fill="solid" onClick={model.onClick} data-testid={`select ${metric}`}>
+      <Button variant="primary" size="sm" fill="outline" onClick={model.onClick} data-testid={`select ${metric}`}>
         {title}
       </Button>
     );

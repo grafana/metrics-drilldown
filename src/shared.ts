@@ -30,6 +30,7 @@ export const VAR_MISSING_OTEL_TARGETS_EXPR = '${missing_otel_targets}';
 // for consolidating otel and metric filters into one adhoc filter set
 export const VAR_OTEL_AND_METRIC_FILTERS = 'otel_and_metric_filters';
 export const VAR_OTEL_AND_METRIC_FILTERS_EXPR = '${otel_and_metric_filters}';
+export const VAR_OTHER_METRIC_FILTERS = 'other_metric_filters';
 
 export const LOGS_METRIC = '$__logs__';
 export const KEY_SQR_METRIC_VIZ_QUERY = 'sqr-metric-viz-query';
@@ -69,9 +70,9 @@ export function getVariablesWithOtelJoinQueryConstant() {
 }
 
 export class MetricSelectedEvent extends BusEventWithPayload<string | undefined> {
-  public static type = 'metric-selected-event';
+  public static readonly type = 'metric-selected-event';
 }
 
 export class RefreshMetricsEvent extends BusEventBase {
-  public static type = 'refresh-metrics-event';
+  public static readonly type = 'refresh-metrics-event';
 }

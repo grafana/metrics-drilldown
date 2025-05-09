@@ -1,3 +1,6 @@
+// TODO: delete this file! It has been deprecated in favor of the MetricsReducer scene */
+/* eslint-disable */
+
 import { css } from '@emotion/css';
 import { type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange, type SelectableValue } from '@grafana/data';
 import { config, isFetchError } from '@grafana/runtime';
@@ -18,7 +21,7 @@ import {
   type SceneObjectUrlValues,
   type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
-import { Alert, Badge, Field, Icon, IconButton, InlineSwitch, Input, Select, Tooltip, useStyles2 } from '@grafana/ui';
+import { Alert, Badge, Combobox, Field, Icon, IconButton, InlineSwitch, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
@@ -133,17 +136,14 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
     this._subs.add(
       trail.subscribeToEvent(MetricSelectedEvent, (event) => {
-        const { steps, currentStep } = trail.state.history.state;
-        const prevStep = steps[currentStep].parentIndex;
-        const previousMetric = steps[prevStep].trailState.metric;
-        const isRelatedMetricSelector = previousMetric !== undefined;
-
         if (event.payload !== undefined) {
           const metricSearch = getMetricSearch(trail);
           const searchTermCount = deriveSearchTermsFromInput(metricSearch).length;
 
           reportExploreMetrics('metric_selected', {
-            from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+            from: 'metric_list',
+            // HISTORY: need way to identify selected metrics from related metrics
+            // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
             searchTermCount,
           });
         }
@@ -385,7 +385,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       // If there is a current metric, do not present it
       const currentMetric = sceneGraph.getAncestor(this, MetricScene).state.metric;
       delete metricsMap[currentMetric];
-    } catch (err) {
+    } catch {
       // There is no current metric
     }
 
@@ -466,13 +466,10 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
   };
 
   public reportPrefixFilterInteraction = (isMenuOpen: boolean) => {
-    const trail = getTrailFor(this);
-    const { steps, currentStep } = trail.state.history.state;
-    const previousMetric = steps[currentStep]?.trailState.metric;
-    const isRelatedMetricSelector = previousMetric !== undefined;
-
     reportExploreMetrics('prefix_filter_clicked', {
-      from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+      // HISTORY: need way to identify selected metrics from related metrics
+      // from: isRelatedMetricSelector ? 'related_metrics' : 'metric_list',
+      from: 'metric_list',
       action: isMenuOpen ? 'open' : 'close',
     });
   };
@@ -496,7 +493,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     trail.setState({ useOtelExperience: !useOtelExperience, resettingOtel, startButtonClicked });
   };
 
-  public static Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
     const {
       body,
       metricNames,
@@ -519,14 +516,15 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     const noMetrics = !metricNamesLoading && metricNames && metricNames.length === 0;
 
     const isLoading = metricNamesLoading && children.length === 0;
+    let blockingMessage;
 
-    const blockingMessage = isLoading
-      ? undefined
-      : missingOtelTargets
-      ? 'There are no metrics found. Please adjust your filters based on your OTel resource attributes.'
-      : (noMetrics && 'There are no results found. Try a different time range or a different data source.') ||
-        (tooStrict && 'There are no results found. Try adjusting your search or filters.') ||
-        undefined;
+    if (!isLoading) {
+      blockingMessage = missingOtelTargets
+        ? 'There are no metrics found. Please adjust your filters based on your OTel resource attributes.'
+        : (noMetrics && 'There are no results found. Try a different time range or a different data source.') ||
+          (tooStrict && 'There are no results found. Try adjusting your search or filters.') ||
+          undefined;
+    }
 
     const metricNamesWarningIcon = metricNamesWarning ? (
       <Tooltip
@@ -562,11 +560,9 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
             }
             className={styles.displayOption}
           >
-            <Select
+            <Combobox
               value={metricPrefix}
-              onChange={model.onPrefixFilterChange}
-              onOpenMenu={() => model.reportPrefixFilterInteraction(true)}
-              onCloseMenu={() => model.reportPrefixFilterInteraction(false)}
+              onChange={(selected) => model.onPrefixFilterChange(selected)}
               options={[
                 {
                   label: 'All metric names',
@@ -574,7 +570,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 },
                 ...Array.from(rootGroup?.groups.keys() ?? []).map((g) => ({ label: `${g}_`, value: g })),
               ]}
-              className="metrics-drilldown-metric-prefix-select"
+              width={16}
             />
           </Field>
           {!metric && hasOtelResources && (
@@ -583,14 +579,46 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
                 <>
                   <div className={styles.displayOptionTooltip}>
                     Filter by
-                    <IconButton
-                      name={'info-circle'}
-                      size="sm"
-                      variant={'secondary'}
-                      tooltip="This switch enables filtering by OTel resources for OTel native data sources."
-                    />
+                    <Tooltip
+                      content={
+                        <div>
+                          <p>The OTel experience is deprecated in Grafana Metrics Drilldown.</p>
+                          <p>
+                            Please use the following docs to promote your OTel resource attributes as metric labels with{' '}
+                            <a
+                              href="https://grafana.com/docs/mimir/latest/configure/configure-otel-collector/#work-with-default-opentelemetry-labels"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'underline' }}
+                            >
+                              Mimir
+                            </a>{' '}
+                            and{' '}
+                            <a
+                              href="https://prometheus.io/docs/guides/opentelemetry/#promoting-resource-attributes"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'underline' }}
+                            >
+                              Prometheus
+                            </a>
+                            .
+                          </p>
+                        </div>
+                      }
+                      placement="bottom"
+                      interactive={true}
+                    >
+                      <IconButton
+                        name={'info-circle'}
+                        size="sm"
+                        variant={'secondary'}
+                        aria-label="Information about OTel experience"
+                      />
+                    </Tooltip>
                     <div>
-                      <Badge text="New" color={'blue'} className={styles.badgeStyle}></Badge>
+                      {/* badge color does not align with theme warning color so we explicitly set it here */}
+                      <Badge text="Deprecated" color={'orange'} className={styles.badgeStyle}></Badge>
                     </div>
                   </div>
                 </>
@@ -681,7 +709,9 @@ function getStyles(theme: GrafanaTheme2) {
       padding: '0rem 0.25rem 0 0.30rem',
       alignItems: 'center',
       borderRadius: theme.shape.radius.pill,
-      border: `1px solid ${theme.colors.info.text}`,
+      border: `1px solid ${theme.colors.warning.text}`,
+      // badge color does not align with theme warning color so we explicitly set it here
+      color: `${theme.colors.warning.text}`,
       background: theme.colors.info.transparent,
       marginTop: '4px',
       marginLeft: '-3px',

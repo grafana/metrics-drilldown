@@ -1,7 +1,6 @@
 import {
   FieldType,
   LoadingState,
-  type DataQueryRequest,
   type DataQueryResponse,
   type DataSourceApi,
   type LegacyMetricFindQueryOptions,
@@ -11,6 +10,7 @@ import {
 import { getDataSourceSrv } from '@grafana/runtime';
 import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
+import { MetricDatasourceHelper } from 'helpers/MetricDatasourceHelper';
 import { VAR_DATASOURCE } from 'shared';
 import { isPrometheusRule } from 'WingmanDataTrail/helpers/isPrometheusRule';
 
@@ -19,13 +19,13 @@ import type { PrometheusDatasource } from '@grafana/prometheus';
 export const NULL_GROUP_BY_VALUE = '(none)';
 
 export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
-  static uid = 'grafana-prometheus-metrics-with-label-values-datasource';
+  static readonly uid = 'grafana-prometheus-metrics-with-label-values-datasource';
 
   constructor() {
     super(MetricsWithLabelValueDataSource.uid, MetricsWithLabelValueDataSource.uid);
   }
 
-  async query(request: DataQueryRequest): Promise<DataQueryResponse> {
+  async query(): Promise<DataQueryResponse> {
     return {
       state: LoadingState.Done,
       data: [
@@ -56,13 +56,13 @@ export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
     const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
     let metricsList: string[] = [];
 
-    let removeRules = query.startsWith('removeRules');
+    const removeRules = query.startsWith('removeRules');
     const matcher = removeRules ? query.replace('removeRules', '') : query;
 
-    if (ds.languageProvider.fetchLabelValues.length === 2) {
-      // @ts-ignore: Ignoring type error due to breaking change in fetchLabelValues signature
+    if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
       metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch(timeRange, '__name__', matcher);
     } else {
+      // @ts-expect-error: Ignoring type error due to breaking change in fetchSeriesValuesWithMatch signature
       metricsList = await ds.languageProvider.fetchSeriesValuesWithMatch('__name__', matcher);
     }
 

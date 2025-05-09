@@ -6,5 +6,5 @@ export interface EventApplyFunctionPayload {
 }
 
 export class EventApplyFunction extends BusEventWithPayload<EventApplyFunctionPayload> {
-  public static type = 'apply-function';
+  public static readonly type = 'apply-function';
 }

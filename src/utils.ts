@@ -17,7 +17,6 @@ import {
   type AdHocFiltersVariable,
   type SceneObject,
   type SceneObjectState,
-  type SceneObjectUrlValues,
   type SceneVariable,
   type SceneVariableState,
 } from '@grafana/scenes';
@@ -52,11 +51,15 @@ export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean
 
 export function getUrlForTrail(trail: DataTrail) {
   const params = sceneUtils.getUrlState(trail);
-  return getUrlForValues(params);
+  return urlUtil.renderUrl(ROUTES.Drilldown, params);
 }
 
-export function getUrlForValues(values: SceneObjectUrlValues) {
-  return urlUtil.renderUrl(ROUTES.Trail, values);
+export function getCurrentPath(): Location['pathname'] {
+  return window.location.pathname;
+}
+
+export function currentPathIncludes(path: string) {
+  return getCurrentPath().includes(path);
 }
 
 export function getMetricSceneFor(model: SceneObject): MetricScene {
@@ -153,10 +156,7 @@ export function limitAdhocProviders(
   }
 
   limitedFilterVariable.setState({
-    getTagKeysProvider: async (
-      variable: AdHocFiltersVariable,
-      currentKey: string | null
-    ): Promise<{
+    getTagKeysProvider: async (): Promise<{
       replace?: boolean;
       values: GetTagResponse | MetricFindValue[];
     }> => {
@@ -172,7 +172,11 @@ export function limitAdhocProviders(
 
       const opts = {
         filters,
+<<<<<<< HEAD
         scopes: sceneGraph.getScopesBridge(variable)?.getValue(),
+=======
+        scopes: getClosestScopesFacade()?.value,
+>>>>>>> main
         queries: dataTrail.getQueries(),
       };
 
@@ -216,7 +220,11 @@ export function limitAdhocProviders(
       const opts = {
         key: filter.key,
         filters,
+<<<<<<< HEAD
         scopes: sceneGraph.getScopesBridge(variable)?.getValue(),
+=======
+        scopes: getClosestScopesFacade()?.value,
+>>>>>>> main
         queries: dataTrail.getQueries(),
       };
 

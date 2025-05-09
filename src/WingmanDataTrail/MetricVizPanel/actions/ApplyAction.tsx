@@ -36,14 +36,14 @@ export class ApplyAction extends SceneObjectBase<ApplyActionState> {
     );
   };
 
-  public static Component = ({ model }: SceneComponentProps<ApplyAction>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<ApplyAction>) => {
     const styles = useStyles2(getStyles);
     const { disabled } = model.useState();
 
     return (
       <Button
         variant="primary"
-        fill="text"
+        fill="outline"
         size="sm"
         className={styles.selectButton}
         onClick={model.onClick}

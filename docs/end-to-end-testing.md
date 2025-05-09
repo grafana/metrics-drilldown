@@ -20,7 +20,7 @@ Install Playwright with Chromium:
 ```shell
 npm i
 
-npm run e2e:local:prepare
+npm run e2e:prepare
 ```
 
 ### Each time you want to develop a new test
@@ -34,19 +34,19 @@ npm run dev
 And in another terminal tab, start Grafana and Prometheus:
 
 ```shell
-npm run e2e:local:server
+npm run e2e:server
 ```
 
 Then you can start the tests in interactive UI mode (with a built-in watch mode):
 
 ```shell
-npm run e2e:local:watch
+npm run e2e:watch
 ```
 
 You can also run the [code generator](https://playwright.dev/docs/codegen#running-codegen):
 
 ```shell
-npm run e2e:local:codegen -- http://localhost:3001
+npm run e2e:codegen -- http://localhost:3001
 ```
 
 If you write tests that generate screenshots, please read the next section.
@@ -94,6 +94,6 @@ In build time (PR and main branch), we run the same [dockerized Prometheus with 
 
 - Identify the current Playwright version, e.g. `1.50.0`
 - Identify the new Playwright version, e.g. `1.51.0`
-- In a terminal, execute: `./scripts/upgrade-playwright 1.50.0 1.51.0`
+- In a terminal, execute: `./scripts/upgrade-playwright.sh 1.50.0 1.51.0`
 - Launch the E2E tests locally with Docker to verify that the new version works: `npm run e2e:ci:server:up && npm run e2e:ci`
 - Push the modified files to the PR

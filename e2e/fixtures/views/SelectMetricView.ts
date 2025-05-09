@@ -3,10 +3,15 @@ import { expect, type Page } from '@playwright/test';
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
 import { UI_TEXT } from '../../../src/constants/ui';
+import { QuickSearch } from '../components/QuickSearchInput';
 
 export class SelectMetricView extends DrilldownView {
+  public quickSearch: QuickSearch;
+
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
     super(page, `${PLUGIN_BASE_URL}/${ROUTES.Trail}`, new URLSearchParams(defaultUrlSearchParams));
+
+    this.quickSearch = new QuickSearch(page);
   }
 
   goto(urlSearchParams = new URLSearchParams()) {
@@ -104,31 +109,18 @@ export class SelectMetricView extends DrilldownView {
     return this.getControls().getByTestId('plugin-info-button');
   }
 
-  /* Quick filter */
-
-  getQuickFilterInput() {
-    return this.getByPlaceholder('Search metrics');
-  }
-
-  async assertQuickFilter(explectedPlaceholder: string, expectedValue: string, expectedResultsCount: number) {
-    expect(await this.getQuickFilterInput().getAttribute('placeholder')).toBe(explectedPlaceholder);
-    await expect(this.getQuickFilterInput()).toHaveValue(expectedValue);
-    await this.assertQuickFilterResultsCount(expectedResultsCount);
-  }
-
-  async enterQuickFilterText(searchText: string) {
-    await this.getQuickFilterInput().fill(searchText);
-    await this.waitForTimeout(250); // see SceneQuickFilter.DEBOUNCE_DELAY
-  }
-
-  async assertQuickFilterResultsCount(expectedCount: number) {
-    await expect(this.getByTestId('quick-filter-results-count')).toHaveText(String(expectedCount));
-  }
-
   /* Otel */
 
+  getOtelExperienceSwitch() {
+    return this.page.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL, { exact: true });
+  }
+
+  async assertOtelExperienceSwitchIsVisible() {
+    await expect(this.getOtelExperienceSwitch()).toBeVisible();
+  }
+
   async toggleOtelExperience(switchOn: boolean) {
-    const otelSwitch = this.page.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL);
+    const otelSwitch = this.getOtelExperienceSwitch();
 
     if (switchOn) {
       await expect(otelSwitch).not.toBeChecked();
@@ -157,7 +149,7 @@ export class SelectMetricView extends DrilldownView {
 
   async assertPanelIsNativeHistogram(panelTitle: string) {
     const panel = this.getPanelByTitle(panelTitle);
-    await expect(panel.getByTestId('header-container').getByText('Native Histogram')).toBeVisible();
+    await expect(panel.getByText('Native Histogram')).toBeVisible();
   }
 
   selectMetricPanel(panelTitle: string) {
@@ -198,29 +190,5 @@ export class SelectMetricView extends DrilldownView {
 
   async selectNewMetric() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP).click();
-  }
-
-  /* Native Histogram */
-  async assertNativeHistogramBanner() {
-    const alert = this.getByTestId('data-testid Alert info');
-    await expect(alert).toBeVisible();
-    await expect(alert.getByText('Native Histogram Support')).toBeVisible();
-  }
-
-  async assertNativeHistogramBannerIsNotVisible() {
-    const alert = this.getByTestId('data-testid Alert info');
-    await expect(alert).not.toBeVisible();
-  }
-
-  async expandNativeHistogramBanner() {
-    await this.getByRole('button', { name: '> See examples' }).click();
-  }
-
-  async selectNativeHistogramExample(name: string) {
-    await this.getByRole('button', { name }).click();
-  }
-
-  async assertHeatmapLabel(panelTitle: string) {
-    await expect(this.getPanelByTitle(panelTitle).getByLabel('heatmap')).toBeVisible();
   }
 }

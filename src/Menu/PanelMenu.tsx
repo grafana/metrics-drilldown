@@ -1,8 +1,5 @@
 import { type DataFrame, type PanelMenuItem, type PluginExtensionLink } from '@grafana/data';
-// Certain imports are not available in the dependant package, but can be if the plugin is running in a different Grafana version.
-// We need both imports to support Grafana v11 and v12.
-// @ts-expect-error
-import { getObservablePluginLinks, getPluginLinkExtensions } from '@grafana/runtime';
+import { config, getObservablePluginLinks } from '@grafana/runtime';
 import {
   getExploreURL,
   sceneGraph,
@@ -67,7 +64,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 
           return query;
         });
-      } catch (e) {}
+      } catch {}
 
       // Navigation options (all panels)
       const items: PanelMenuItem[] = [
@@ -121,7 +118,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
     }
   }
 
-  public static Component = ({ model }: SceneComponentProps<PanelMenu>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<PanelMenu>) => {
     const { body } = model.useState();
 
     if (body) {
@@ -135,18 +132,27 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 const getInvestigationLink = async (addToExplorations: AddToExplorationButton) => {
   const context = addToExplorations.state.context;
 
-  // `getPluginLinkExtensions` is removed in Grafana v12
-  if (getPluginLinkExtensions !== undefined) {
-    const links = getPluginLinkExtensions({
-      extensionPointId,
-      context,
-    });
+  // Check if we're running on Grafana v11
+  if (config.buildInfo.version.startsWith('11.')) {
+    try {
+      const runtime = await import('@grafana/runtime');
+      const getPluginLinkExtensions = (runtime as any).getPluginLinkExtensions;
+      if (getPluginLinkExtensions !== undefined) {
+        const links = getPluginLinkExtensions({
+          extensionPointId,
+          context,
+        });
 
-    return links.extensions[0];
+        return links.extensions[0];
+      }
+    } catch (e) {
+      // Ignore import error and fall through to v12 implementation
+      console.error('Error importing getPluginLinkExtensions', e);
+    }
   }
 
   // `getObservablePluginLinks` is introduced in Grafana v12
-  if (getObservablePluginLinks !== undefined) {
+  if (typeof getObservablePluginLinks === 'function') {
     const links: PluginExtensionLink[] = await firstValueFrom(
       getObservablePluginLinks({
         extensionPointId,

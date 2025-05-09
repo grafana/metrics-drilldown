@@ -2,53 +2,50 @@ import { expect, type Page } from '@playwright/test';
 
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL } from '../../../src/constants';
+import { UI_TEXT } from '../../../src/constants/ui';
+import { QuickSearch } from '../components/QuickSearchInput';
+
+const sidebarButtonNames = [
+  'Rules filters',
+  'Prefix filters',
+  'Suffix filters',
+  'Group by labels',
+  'Bookmarks',
+  'Settings',
+] as const;
+type ButtonName = (typeof sidebarButtonNames)[number];
+export type SortOption = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
 
 export class MetricsReducerView extends DrilldownView {
+  public quickSearch: QuickSearch;
+
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
+
+    this.quickSearch = new QuickSearch(page);
   }
 
   gotoVariant(variantPath: string, urlSearchParams = new URLSearchParams()) {
     super.setPathName(`${PLUGIN_BASE_URL}${variantPath}`);
-    return super.goto(new URLSearchParams([...this.urlParams, ...new URLSearchParams(urlSearchParams)]));
+    // the spread order is important to override the default params (e.g. overriding "from" and "to")
+    return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
 
-  /* Header controls */
+  /* List controls */
 
-  getHeaderControls() {
-    return this.getByTestId('header-controls');
+  getListControls() {
+    return this.getByTestId('list-controls');
   }
 
-  async assertHeaderControls() {
-    const headerControls = this.getHeaderControls();
+  async assertListControls() {
+    const listControls = this.getListControls();
 
-    await expect(headerControls.getByText('Group by label')).toBeVisible();
-    await expect(headerControls.getByText('Sort by')).toBeVisible();
+    await expect(listControls.getByText('Sort by')).toBeVisible();
 
-    await expect(this.getQuickFilterInput()).toBeVisible();
+    await expect(this.quickSearch.getInput()).toBeVisible();
+
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
-    return;
-  }
-
-  /* Quick filter */
-
-  getQuickFilterInput() {
-    return this.getHeaderControls().getByPlaceholder('Search metrics');
-  }
-
-  async assertQuickFilter(expectedValue: string, expectedResultsCount: number) {
-    await expect(this.getQuickFilterInput()).toHaveValue(expectedValue);
-    await this.assertQuickFilterResultsCount(expectedResultsCount);
-  }
-
-  async enterQuickFilterText(searchText: string) {
-    await this.getQuickFilterInput().fill(searchText);
-    await this.waitForTimeout(250); // see SceneQuickFilter.DEBOUNCE_DELAY
-  }
-
-  async assertQuickFilterResultsCount(expectedCount: number) {
-    await expect(this.getByTestId('quick-filter-results-count')).toHaveText(String(expectedCount));
   }
 
   /* Layout switcher */
@@ -68,31 +65,37 @@ export class MetricsReducerView extends DrilldownView {
 
   /* Side bar */
 
+  getSideBar() {
+    return this.getByTestId('sidebar');
+  }
+
+  async toggleSideBarButton(buttonName: ButtonName) {
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('button', { name: buttonName }).click();
+    await this.mouse.move(0, 0); // prevents the tooltip to cover controls within the side bar
+  }
+
   async assertSidebar() {
-    const sidebar = this.getByTestId('sidebar');
+    const sidebar = this.getSideBar();
 
-    const metricPrefixFilters = sidebar.getByTestId('metric-prefix-filters');
+    for (const buttonName of sidebarButtonNames) {
+      await expect(sidebar.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
+    }
+  }
 
-    await expect(metricPrefixFilters.getByRole('heading', { name: /metric prefix filters/i, level: 5 })).toBeVisible();
-    await expect(metricPrefixFilters.getByRole('switch', { name: /hide empty/i })).toBeChecked();
+  /* Bookmarks */
+  async createBookmark() {
+    await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL).click();
+  }
 
-    await expect(metricPrefixFilters.getByText('0 selected')).toBeVisible();
-    await expect(metricPrefixFilters.getByRole('button', { name: 'clear', exact: true })).toBeVisible();
+  async assertBookmarkAlert() {
+    await expect(this.getByText('Bookmark created')).toBeVisible();
+  }
 
-    const prefixesListItemsCount = await metricPrefixFilters.getByTestId('checkbox-filters-list').locator('li').count();
-    expect(prefixesListItemsCount).toBeGreaterThan(0);
-
-    // Metric suffix filters
-    const suffixFilters = sidebar.getByTestId('metric-suffix-filters');
-
-    await expect(suffixFilters.getByRole('heading', { name: /metric suffix filters/i, level: 5 })).toBeVisible();
-    await expect(suffixFilters.getByRole('switch', { name: /hide empty/i })).toBeChecked();
-
-    await expect(suffixFilters.getByText('0 selected')).toBeVisible();
-    await expect(suffixFilters.getByRole('button', { name: 'clear', exact: true })).toBeVisible();
-
-    const suffixesListItemsCount = await suffixFilters.getByTestId('checkbox-filters-list').locator('li').count();
-    expect(suffixesListItemsCount).toBeGreaterThan(0);
+  async assertBookmarkCreated(metricName: string) {
+    // Only consider the first 20 characters, to account for truncation of long meric names
+    const possiblyTruncatedMetricName = new RegExp(`^${metricName.substring(0, 20)}`);
+    await expect(this.getByRole('button', { name: possiblyTruncatedMetricName })).toBeVisible();
   }
 
   /* Metrics list */
@@ -114,6 +117,16 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
+  getPanelByTitle(panelTitle: string) {
+    return this.getByTestId(`data-testid Panel header ${panelTitle}`);
+  }
+
+  selectMetricPanel(panelTitle: string) {
+    return this.getPanelByTitle(panelTitle)
+      .getByRole('button', { name: /select/i })
+      .click();
+  }
+
   getMetricsGroupByList() {
     return this.getByTestId('metrics-groupby-list');
   }
@@ -129,5 +142,32 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+  }
+
+  async changeSortOption(sortBy: SortOption) {
+    await this.page.getByTestId('list-controls').getByTestId('data-testid template variable').click();
+    await this.page.getByRole('option', { name: sortBy }).locator('span').click();
+  }
+
+  async selectPrefixFilters(prefixes: string[]) {
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('button', { name: 'Prefix filters' }).click();
+    for (const prefix of prefixes) {
+      await sidebar.getByTitle(prefix, { exact: true }).locator('label').click();
+    }
+  }
+
+  async selectSuffixFilters(suffixes: string[]) {
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('button', { name: 'Suffix filters' }).click();
+    for (const suffix of suffixes) {
+      await sidebar.getByTitle(suffix, { exact: true }).locator('label').click();
+    }
+  }
+
+  async selectGroupByLabel(labelName: string) {
+    await this.toggleSideBarButton('Group by labels');
+    const sidebar = this.getSideBar();
+    await sidebar.getByRole('radio', { name: labelName, exact: true }).check();
   }
 }

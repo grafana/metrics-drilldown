@@ -1,5 +1,4 @@
 import { type RawTimeRange } from '@grafana/data';
-import { type BackendSrvRequest } from '@grafana/runtime';
 
 import { getDeploymentEnvironments, getFilteredResourceAttributes, totalOtelResources } from './api';
 
@@ -24,12 +23,7 @@ jest.mock('@grafana/runtime', () => ({
   },
   getBackendSrv: () => {
     return {
-      get: (
-        url: string,
-        params?: Record<string, string | number>,
-        requestId?: string,
-        options?: Partial<BackendSrvRequest>
-      ) => {
+      get: (url: string, params?: Record<string, string | number>, requestId?: string) => {
         // metrics-drilldown-otel-resources
         if (
           requestId === 'metrics-drilldown-otel-check-total-count(target_info{}) by (job, instance)' ||
@@ -58,7 +52,7 @@ jest.mock('@grafana/runtime', () => ({
           // part of getFilteredResourceAttributes to get instance labels
           return Promise.resolve({ data: ['promotedResourceAttribute', 'resourceAttribute'] });
         }
-        return [];
+        return Promise.resolve([]);
       },
     };
   },

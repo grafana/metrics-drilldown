@@ -1,8 +1,10 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { reportInteraction } from '@grafana/runtime';
 
+import { type LabelBreakdownSortingOption as BreakdownSortByOption } from 'Breakdown/SortByScene';
+import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+
 import { type BreakdownLayoutType } from './Breakdown/types';
-import { type TrailStepType } from './DataTrailsHistory';
 import { type ActionViewType } from './MetricScene';
 
 // prettier-ignore
@@ -18,7 +20,7 @@ export type Interactions = {
     );
     otel_resource_attribute?: boolean;
   };
-  // User changed a label filter.
+  // User changed a label filter
   label_filter_changed: {
     label: string;
     action: 'added' | 'removed' | 'changed';
@@ -30,18 +32,7 @@ export type Interactions = {
   // A metric exploration has started due to one of the following causes
   exploration_started: {
     cause: (
-      // a bookmark was clicked from the home page
       | 'bookmark_clicked'
-      // a recent exploration was clicked from the home page
-      | 'recent_clicked'
-      // "new exploration" was clicked from the home page
-      | 'new_clicked'
-      // the page was loaded (or reloaded) from a URL which matches one of the recent explorations
-      | 'loaded_local_recent_url'
-      // the page was loaded from a URL which did not match one of the recent explorations, and is assumed shared
-      | 'loaded_shared_url'
-      // the exploration was opened from the dashboard panel menu and is embedded in a drawer
-      | 'dashboard_panel'
     );
   };
   // A user has changed a bookmark
@@ -50,28 +41,15 @@ export type Interactions = {
       // Toggled on or off from the bookmark icon
       | 'toggled_on'
       | 'toggled_off'
-      // Deleted from the homepage bookmarks list
+      // Deleted from the sidebar bookmarks list
       | 'deleted'
     );
   };
   // User changes metric explore settings
   settings_changed: { stickyMainGraph?: boolean };
-  // User clicks on history nodes to navigate exploration history
-  history_step_clicked: {
-    type: (
-      // One of the standard step types
-      | TrailStepType
-      // The special metric step type that is created when the user de-selects the current metric
-      | 'metric-clear'
-    );
-    // Which step index was clicked on
-    step: number;
-    // The total number of steps currently in the trail
-    numberOfSteps: number;
-  };
   // User clicks on tab to change the action view
-  metric_action_view_changed: { 
-    view: ActionViewType 
+  metric_action_view_changed: {
+    view: ActionViewType
 
     // The number of related logs
     related_logs_count?: number
@@ -92,8 +70,10 @@ export type Interactions = {
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: (
-      // Opens Explore Logs
-      | 'open_explore_logs'
+      // Opens Logs Drilldown
+      | 'open_logs_drilldown'
+      // Logs data source changed
+      | 'logs_data_source_changed'
     );
   };
   // User selects a metric
@@ -122,9 +102,18 @@ export type Interactions = {
       | 'close'
     )
   };
+  // User types in the quick search bar
+  quick_search_used: {};
   sorting_changed: {
-      // type of sorting
-      sortBy: string
+    // By clicking on the sort by variable in the metrics reducer
+    from: 'metrics-reducer',
+    // The sort by option selected
+    sortBy: MetricsReducerSortByOption
+  } | {
+    // By clicking on the sort by component in the label breakdown
+    from: 'label-breakdown',
+    // The sort by option selected
+    sortBy: BreakdownSortByOption
   };
   wasm_not_supported: {},
   missing_otel_labels_by_truncating_job_and_instance: {
@@ -139,12 +128,97 @@ export type Interactions = {
   native_histogram_example_clicked: {
     metric: string;
   },
+  // User toggles the Wingman sidebar
+  metrics_sidebar_toggled: {
+    action: (
+      // Opens the sidebar section
+      | 'opened'
+      // Closes the sidebar section
+      | 'closed'
+    ),
+    section?: string
+  },
+  // User clicks into the prefix filter section of the sidebar
+  sidebar_prefix_filter_section_clicked: {},
+  // User applies any prefix filter from the sidebar
+  sidebar_prefix_filter_applied: {
+    // Number of prefix filters applied (optional)
+    filter_count?: number;
+  },
+  // User clicks into the suffix filter section of the sidebar
+  sidebar_suffix_filter_section_clicked: {},
+  // User applies any suffix filter from the sidebar
+  sidebar_suffix_filter_applied: {
+    // Number of suffix filters applied (optional)
+    filter_count?: number;
+  },
+  // User selects a rules filter from the Wingman sidebar
+  sidebar_rules_filter_selected: {
+    filter_type: (
+      | 'non_rules_metrics'
+      | 'recording_rules'
+    )
+  },
+  // User applies a label filter from the sidebar
+  sidebar_group_by_label_filter_applied: {
+    // The label that was applied (optional)
+    label?: string;
+  }
 };
 
 const PREFIX = 'grafana_explore_metrics_';
 
 export function reportExploreMetrics<E extends keyof Interactions, P extends Interactions[E]>(event: E, payload: P) {
   reportInteraction(`${PREFIX}${event}`, payload);
+}
+
+/**
+ * Reports a single label filter change event
+ */
+function reportLabelFilterChange(label: string, action: 'added' | 'removed' | 'changed', otel?: boolean) {
+  reportExploreMetrics('label_filter_changed', {
+    label,
+    action,
+    cause: 'adhoc_filter',
+    otel_resource_attribute: otel ?? false,
+  });
+}
+
+/**
+ * Detects and reports changes to an existing filter
+ */
+function detectChangedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[], otel?: boolean) {
+  for (const oldFilter of oldFilters) {
+    for (const newFilter of newFilters) {
+      if (oldFilter.key === newFilter.key && oldFilter.value !== newFilter.value) {
+        reportLabelFilterChange(oldFilter.key, 'changed', otel);
+      }
+    }
+  }
+}
+
+/**
+ * Detects and reports removed filters
+ */
+function detectRemovedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[]) {
+  for (const oldFilter of oldFilters) {
+    const stillExists = newFilters.some((newFilter) => newFilter.key === oldFilter.key);
+    if (!stillExists) {
+      reportLabelFilterChange(oldFilter.key, 'removed');
+    }
+  }
+}
+
+/**
+ * Detects and reports added filters
+ */
+function detectAddedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[]) {
+  for (const newFilter of newFilters) {
+    const isNew = !oldFilters.some((oldFilter) => oldFilter.key === newFilter.key);
+    if (isNew) {
+      reportLabelFilterChange(newFilter.key, 'added');
+    }
+  }
 }
 
 /** Detect the single change in filters and report the event, assuming it came from manipulating the adhoc filter */
@@ -154,49 +228,13 @@ export function reportChangeInLabelFilters(
   otel?: boolean
 ) {
   if (newFilters.length === oldFilters.length) {
-    for (const oldFilter of oldFilters) {
-      for (const newFilter of newFilters) {
-        if (oldFilter.key === newFilter.key) {
-          if (oldFilter.value !== newFilter.value) {
-            reportExploreMetrics('label_filter_changed', {
-              label: oldFilter.key,
-              action: 'changed',
-              cause: 'adhoc_filter',
-              otel_resource_attribute: otel ?? false,
-            });
-          }
-        }
-      }
-    }
+    // Same number of filters - check for changed values
+    detectChangedFilters(newFilters, oldFilters, otel);
   } else if (newFilters.length < oldFilters.length) {
-    for (const oldFilter of oldFilters) {
-      let foundOldLabel = false;
-      for (const newFilter of newFilters) {
-        if (oldFilter.key === newFilter.key) {
-          foundOldLabel = true;
-          break;
-        }
-      }
-      if (!foundOldLabel) {
-        reportExploreMetrics('label_filter_changed', {
-          label: oldFilter.key,
-          action: 'removed',
-          cause: 'adhoc_filter',
-        });
-      }
-    }
+    // Filters were removed
+    detectRemovedFilters(newFilters, oldFilters);
   } else {
-    for (const newFilter of newFilters) {
-      let foundNewLabel = false;
-      for (const oldFilter of oldFilters) {
-        if (oldFilter.key === newFilter.key) {
-          foundNewLabel = true;
-          break;
-        }
-      }
-      if (!foundNewLabel) {
-        reportExploreMetrics('label_filter_changed', { label: newFilter.key, action: 'added', cause: 'adhoc_filter' });
-      }
-    }
+    // Filters were added
+    detectAddedFilters(newFilters, oldFilters);
   }
 }

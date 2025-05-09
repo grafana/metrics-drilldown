@@ -7,8 +7,8 @@ if [ -z "$OLD_VERSION" ] || [ -z "$NEW_VERSION" ]; then
     exit 1
 fi
 
-npm up @playwright/test
+npm up @playwright/test --save
 
-find ./e2e/docker/Dockerfile.plugin -type f -exec sed -i "" "s/$OLD_VERSION/$NEW_VERSION/g" {} \;
+find ./e2e/docker/Dockerfile.playwright -type f -exec sed -i "" "s/$OLD_VERSION/$NEW_VERSION/g" {} \;
 
 npm run e2e:ci:prepare

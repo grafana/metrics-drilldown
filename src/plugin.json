@@ -16,10 +16,6 @@
     },
     "screenshots": [
       {
-        "name": "homepage",
-        "path": "img/homepage.png"
-      },
-      {
         "name": "metricselect",
         "path": "img/metricselect.png"
       },
@@ -45,7 +41,7 @@
     {
       "type": "page",
       "name": "Grafana Metrics Drilldown",
-      "path": "/a/%PLUGIN_ID%/",
+      "path": "/a/%PLUGIN_ID%/drilldown",
       "action": "datasources:explore",
       "addToNav": true,
       "defaultNav": true
@@ -57,7 +53,13 @@
   },
   "preload": true,
   "extensions": {
-    "addedLinks": [],
+    "addedLinks": [
+      {
+        "targets": ["grafana/dashboard/panel/menu", "grafana/explore/toolbar/action"],
+        "title": "Open in Grafana Metrics Drilldown",
+        "description": "Open current query in the Grafana Metrics Drilldown view"
+      }
+    ],
     "extensionPoints": [
       {
         "id": "grafana-exploremetrics-app/investigation/v1"

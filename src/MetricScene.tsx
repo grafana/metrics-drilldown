@@ -46,8 +46,6 @@ import { ShareTrailButton } from './ShareTrailButton';
 import { useBookmarkState } from './TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from './utils';
 
-const relatedLogsFeatureEnabled = config.featureToggles.exploreMetricsRelatedLogs;
-
 export interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
@@ -73,9 +71,8 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     variableNames: [VAR_FILTERS],
     onReferencedVariableValueChanged: () => {
       // When filters change, we need to re-check for related logs
-      if (relatedLogsFeatureEnabled) {
-        this.relatedLogsOrchestrator.handleFiltersChange();
-      }
+
+      this.relatedLogsOrchestrator.handleFiltersChange();
     },
   });
 
@@ -97,12 +94,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.setActionView(actionViews.breakdown);
     }
 
-    if (relatedLogsFeatureEnabled) {
-      this.relatedLogsOrchestrator.findAndCheckAllDatasources();
-      this.relatedLogsOrchestrator.addRelatedLogsCountChangeHandler((count) => {
-        this.setState({ relatedLogsCount: count });
-      });
-    }
+    this.relatedLogsOrchestrator.findAndCheckAllDatasources();
+    this.relatedLogsOrchestrator.addRelatedLogsCountChangeHandler((count) => {
+      this.setState({ relatedLogsCount: count });
+    });
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
       // Push the scopes change event to the tabs
@@ -128,13 +123,13 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         }
       }
     } else if (values.actionView === null) {
-      this.setActionView(undefined);
+      this.setActionView(null);
     }
   }
 
-  public setActionView(actionView?: ActionViewType) {
+  public setActionView(actionViewType: ActionViewType | null) {
     const { body } = this.state;
-    const actionViewDef = actionViewsDefinitions.find((v) => v.value === actionView);
+    const actionViewDef = actionViewType ? actionViewsDefinitions.find((v) => v.value === actionViewType) : null;
 
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
       // reduce max height for main panel to reduce height flicker
@@ -149,7 +144,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     }
   }
 
-  static Component = ({ model }: SceneComponentProps<MetricScene>) => {
+  static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
     const { body } = model.useState();
     return (
       <div data-testid="metric-scene">
@@ -180,16 +175,13 @@ const actionViewsDefinitions: ActionViewDefinition[] = [
     getScene: buildRelatedMetricsScene,
     description: 'Relevant metrics based on current label filters',
   },
-];
-
-if (relatedLogsFeatureEnabled) {
-  actionViewsDefinitions.push({
+  {
     displayName: 'Related logs',
     value: actionViews.relatedLogs,
     getScene: (metricScene: MetricScene) => metricScene.createRelatedLogsScene(),
     description: 'Relevant logs based on current label filters and time range',
-  });
-}
+  },
+];
 
 export interface MetricActionBarState extends SceneObjectState {}
 
@@ -218,7 +210,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     });
   };
 
-  public static Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
     const trail = getTrailFor(model);
@@ -270,7 +262,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
           </Stack>
         </div>
 
-        <TabsBar>
+        <TabsBar className={styles.customTabsBar}>
           {actionViewsDefinitions.map((tab, index) => {
             const label = tab.displayName;
             const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
@@ -284,10 +276,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
                 onChangeTab={() => {
                   const actionViewChangedPayload: Interactions['metric_action_view_changed'] = { view: tab.value };
 
-                  if (
-                    relatedLogsFeatureEnabled &&
-                    metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()
-                  ) {
+                  if (metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()) {
                     actionViewChangedPayload.related_logs_count = counter;
                   }
 
@@ -321,6 +310,9 @@ function getStyles(theme: GrafanaTheme2) {
         top: 16,
         zIndex: 2,
       },
+    }),
+    customTabsBar: css({
+      paddingBottom: theme.spacing(1),
     }),
   };
 }

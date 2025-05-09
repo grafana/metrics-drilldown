@@ -8,6 +8,7 @@ export const DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY = 'grafana.navigation.docked';
 export const DEFAULT_STATIC_URL_SEARCH_PARAMS = new URLSearchParams({
   from: '2025-02-18T13:30:00.000Z',
   to: '2025-02-18T16:15:00.000Z',
+  timezone: 'utc',
 });
 
 export const DEFAULT_URL_SEARCH_PARAMS = new URLSearchParams({

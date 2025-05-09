@@ -47,28 +47,58 @@ function InfoMenu() {
       <Menu.Item
         label="Changelog"
         icon="list-ul"
-        onClick={() => window.open('https://github.com/grafana/metrics-drilldown/blob/main/CHANGELOG.md')}
+        onClick={() =>
+          window.open(
+            'https://github.com/grafana/metrics-drilldown/blob/main/CHANGELOG.md',
+            '_blank',
+            'noopener,noreferrer'
+          )
+        }
       />
       <Menu.Item
         label="Contribute"
         icon="external-link-alt"
-        onClick={() => window.open('https://github.com/grafana/metrics-drilldown/blob/main/docs/contributing.md')}
+        onClick={() =>
+          window.open(
+            'https://github.com/grafana/metrics-drilldown/blob/main/docs/contributing.md',
+            '_blank',
+            'noopener,noreferrer'
+          )
+        }
       />
       <Menu.Item
         label="Documentation"
         icon="document-info"
-        onClick={() => window.open('https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics')}
+        onClick={() =>
+          window.open(
+            'https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics',
+            '_blank',
+            'noopener,noreferrer'
+          )
+        }
       />
       <Menu.Item
         label="Report an issue"
         icon="bug"
-        onClick={() => window.open('https://github.com/grafana/metrics-drilldown/issues/new?template=bug_report.md')}
+        onClick={() =>
+          window.open(
+            'https://github.com/grafana/metrics-drilldown/issues/new?template=bug_report.md',
+            '_blank',
+            'noopener,noreferrer'
+          )
+        }
       />
       <Menu.Divider />
       <Menu.Item
         label={`Grafana ${grafanaBuildInfo.edition} v${grafanaBuildInfo.version} (${grafanaBuildInfo.env})`}
         icon="grafana"
-        onClick={() => window.open(`https://github.com/grafana/grafana/commit/${grafanaBuildInfo.commit}`)}
+        onClick={() =>
+          window.open(
+            `https://github.com/grafana/grafana/commit/${grafanaBuildInfo.commit}`,
+            '_blank',
+            'noopener,noreferrer'
+          )
+        }
       />
     </Menu>
   );

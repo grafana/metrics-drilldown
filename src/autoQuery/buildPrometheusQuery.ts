@@ -3,6 +3,8 @@ import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import { Expression, MatchingOperator, promql } from 'tsqtsq';
 
 import { VAR_OTEL_JOIN_QUERY_EXPR } from 'shared';
+export type NonRateQueryFunction = 'avg' | 'min' | 'max';
+export const DEFAULT_NON_RATE_QUERY_FUNCTION: NonRateQueryFunction = 'avg';
 
 export interface BuildPrometheusQueryParams {
   metric: string;
@@ -11,7 +13,14 @@ export interface BuildPrometheusQueryParams {
   useOtelJoin: boolean;
   groupings?: string[];
   ignoreUsage?: boolean;
-  nonRateQueryFunction?: 'avg' | 'min' | 'max';
+  nonRateQueryFunction?: NonRateQueryFunction;
+}
+
+export function getPromqlFunction(
+  isRateQuery: boolean,
+  nonRateQueryFunction: NonRateQueryFunction = DEFAULT_NON_RATE_QUERY_FUNCTION
+): NonRateQueryFunction | 'sum' {
+  return isRateQuery ? 'sum' : nonRateQueryFunction; // eslint-disable-line sonarjs/no-selector-parameter
 }
 
 export function buildPrometheusQuery({
@@ -21,7 +30,7 @@ export function buildPrometheusQuery({
   useOtelJoin,
   groupings,
   ignoreUsage = false,
-  nonRateQueryFunction = 'avg',
+  nonRateQueryFunction = DEFAULT_NON_RATE_QUERY_FUNCTION,
 }: BuildPrometheusQueryParams): string {
   // Check if metric name contains UTF-8 characters
   const isUtf8Metric = !isValidLegacyName(metric);
@@ -58,7 +67,8 @@ export function buildPrometheusQuery({
   const innerQueryString = useOtelJoin ? `${metricPartString} ${VAR_OTEL_JOIN_QUERY_EXPR}` : metricPartString;
 
   // Build final query using tsqtsq
-  return promql[isRateQuery ? 'sum' : nonRateQueryFunction]({
+  // native histograms will not get `sum by (le)` here because they are not identified as rate queries in `determineProperties` function because they don't have the suffix bucket. The `rate` function is defined much earlier for them in `MetricVizPanel.buildQueryRunner` and is passed here as the `nonRateQueryFunction`.
+  return promql[getPromqlFunction(isRateQuery, nonRateQueryFunction)]({
     expr: innerQueryString,
     ...(groupings?.length ? { by: groupings } : {}),
   });

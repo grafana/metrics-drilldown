@@ -1,3 +1,5 @@
+// we disable ESLint in this file - see main comment in src/MetricSelect/MetricSelectScene.tsx
+/* eslint-disable */
 export { Parser, prefixDelimited };
 
 interface Config {

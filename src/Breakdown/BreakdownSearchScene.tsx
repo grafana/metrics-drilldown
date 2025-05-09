@@ -7,7 +7,7 @@ import { LabelBreakdownScene } from './LabelBreakdownScene';
 import { SearchInput } from './SearchInput';
 
 export class BreakdownSearchReset extends BusEventBase {
-  public static type = 'breakdown-search-reset';
+  public static readonly type = 'breakdown-search-reset';
 }
 
 export interface BreakdownSearchSceneState extends SceneObjectState {
@@ -26,7 +26,7 @@ export class BreakdownSearchScene extends SceneObjectBase<BreakdownSearchSceneSt
     this.cacheKey = cacheKey;
   }
 
-  public static Component = ({ model }: SceneComponentProps<BreakdownSearchScene>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<BreakdownSearchScene>) => {
     const { filter } = model.useState();
     return (
       <SearchInput
