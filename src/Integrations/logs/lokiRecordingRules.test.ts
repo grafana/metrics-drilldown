@@ -5,6 +5,7 @@ import { DataSourceFetcher } from 'utils/utils.datasource';
 import { type MetricsLogsConnector } from './base';
 import { createLokiRecordingRulesConnector, type RecordingRuleGroup } from './lokiRecordingRules';
 import { getMockPlugin } from '../../mocks/plugin';
+import { logger } from '../../tracking/logger/logger';
 
 import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
 import type * as runtime from '@grafana/runtime';
@@ -119,12 +120,12 @@ jest.mock('@grafana/runtime', () => ({
 }));
 
 describe('LokiRecordingRulesConnector', () => {
-  let consoleSpy: jest.SpyInstance;
+  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(() => {
     getListSpy.mockReturnValue([mockLokiDS1, mockLokiDS2]);
     fetchSpy.mockImplementation(defaultFetchImpl);
-    consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
   });
 
   describe('getDataSources', () => {
@@ -149,23 +150,32 @@ describe('LokiRecordingRulesConnector', () => {
     });
 
     it('should handle datasource fetch errors gracefully', async () => {
-      // Make the second datasource fail
-      fetchSpy.mockImplementation((req) => {
-        if (req.url.includes('loki1')) {
-          return of({
-            data: { data: { groups: mockRuleGroups1 } },
-            ok: true,
-            status: 200,
-            statusText: 'OK',
-            headers: new Headers(),
-            redirected: false,
-            type: 'basic',
-            url: req.url,
-            config: { url: req.url },
-          } as runtime.FetchResponse);
-        }
-        throw new Error('Failed to fetch');
-      });
+      // Make the second datasource fail with an error response
+      fetchSpy.mockImplementation((req) =>
+        req.url.includes('loki2')
+          ? of({
+              data: { message: 'Failed to fetch' },
+              ok: false,
+              status: 500,
+              statusText: 'Internal Server Error',
+              headers: new Headers(),
+              redirected: false,
+              type: 'basic',
+              url: req.url,
+              config: { url: req.url },
+            } as runtime.FetchResponse)
+          : of({
+              data: { data: { groups: mockRuleGroups1 } },
+              ok: true,
+              status: 200,
+              statusText: 'OK',
+              headers: new Headers(),
+              redirected: false,
+              type: 'basic',
+              url: req.url,
+              config: { url: req.url },
+            } as runtime.FetchResponse)
+      );
 
       const connector = createLokiRecordingRulesConnector(new DataSourceFetcher());
       const result = await connector.getDataSources('metric_a_total');
@@ -173,7 +183,7 @@ describe('LokiRecordingRulesConnector', () => {
       // Should still get results from the working datasource
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({ name: 'Loki Main', uid: 'loki1' });
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(loggerWarnSpy).toHaveBeenCalled();
     });
   });
 

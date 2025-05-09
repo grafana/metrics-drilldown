@@ -45,7 +45,7 @@ async function fetchRecordingRuleGroups(datasourceSettings: DataSourceInstanceSe
   >(getBackendSrv().fetch(recordingRules));
 
   if (!res.ok) {
-    console.warn(`Failed to fetch recording rules from Loki data source: ${datasourceSettings.name}`);
+    logger.warn(`Failed to fetch recording rules from Loki data source: ${datasourceSettings.name}`);
     return [];
   }
 
@@ -154,7 +154,7 @@ export function getLokiQueryForRelatedMetric(
  * @returns {Promise<ExtractedRecordingRules>} A promise that resolves to an object containing
  * the extracted recording rules, keyed by data source UID.
  *
- * @throws Will log an error to the console if fetching or extracting rules fails for any data source.
+ * @throws Will log a warning if fetching or extracting rules fails for any data source.
  */
 export async function fetchAndExtractLokiRecordingRules(dataSourceFetcher: DataSourceFetcher) {
   const lokiDataSources = await dataSourceFetcher.getHealthyDataSources('loki');
