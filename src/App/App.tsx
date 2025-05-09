@@ -57,13 +57,19 @@ function App(props: Readonly<AppRootProps>) {
     );
   }
 
+  const scopesBridge = trail.state.scopesBridge;
+
   return (
     <div className={styles.appContainer} data-testid="metrics-drilldown-app">
-      <PluginPropsContext.Provider value={props}>
-        <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
-          <AppRoutes />
-        </MetricsContext.Provider>
-      </PluginPropsContext.Provider>
+      <>
+        <PluginPropsContext.Provider value={props}>
+          <MetricsContext.Provider value={{ trail, goToUrlForTrail }}>
+            {scopesBridge && <scopesBridge.Component model={scopesBridge} />}
+
+            <AppRoutes />
+          </MetricsContext.Provider>
+        </PluginPropsContext.Provider>
+      </>
     </div>
   );
 }

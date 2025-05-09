@@ -30,7 +30,6 @@ import { MetricScene } from './MetricScene';
 import { sortResources } from './otel/util';
 import { LOGS_METRIC, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
-import { getClosestScopesFacade } from './utils/utils.scopes';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 export function getTrailFor(model: SceneObject): DataTrail {
@@ -173,7 +172,11 @@ export function limitAdhocProviders(
 
       const opts = {
         filters,
+<<<<<<< HEAD
+        scopes: sceneGraph.getScopesBridge(variable)?.getValue(),
+=======
         scopes: getClosestScopesFacade()?.value,
+>>>>>>> main
         queries: dataTrail.getQueries(),
       };
 
@@ -217,7 +220,11 @@ export function limitAdhocProviders(
       const opts = {
         key: filter.key,
         filters,
+<<<<<<< HEAD
+        scopes: sceneGraph.getScopesBridge(variable)?.getValue(),
+=======
         scopes: getClosestScopesFacade()?.value,
+>>>>>>> main
         queries: dataTrail.getQueries(),
       };
 

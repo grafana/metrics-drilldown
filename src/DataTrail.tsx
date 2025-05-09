@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { useChromeHeaderHeight } from '@grafana/runtime';
+import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
@@ -12,6 +12,7 @@ import {
   SceneObjectUrlSyncConfig,
   SceneReactObject,
   SceneRefreshPicker,
+  SceneScopesBridge,
   SceneTimePicker,
   SceneTimeRange,
   SceneVariableSet,
@@ -52,6 +53,7 @@ import {
 import {
   getVariablesWithOtelJoinQueryConstant,
   MetricSelectedEvent,
+  RefreshMetricsEvent,
   trailDS,
   VAR_DATASOURCE,
   VAR_DATASOURCE_EXPR,
@@ -66,7 +68,6 @@ import {
 import { getTrailStore } from './TrailStore/TrailStore';
 import { currentPathIncludes, getTrailFor, limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
-import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
 
 export interface DataTrailState extends SceneObjectState {
@@ -104,22 +105,63 @@ export interface DataTrailState extends SceneObjectState {
   nativeHistograms: string[];
   nativeHistogramMetric: string;
 
+  // Scopes support
+  scopesBridge: SceneScopesBridge | undefined;
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
+  protected _renderBeforeActivation = true;
+
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
   });
 
   public constructor(state: Partial<DataTrailState>) {
+    const scopesBridge =
+      config.featureToggles.scopeFilters && config.featureToggles.enableScopesInMetricsExplore
+        ? new SceneScopesBridge({
+            $behaviors: [
+              () => {
+                if (!scopesBridge) {
+                  return;
+                }
+                const sub = scopesBridge.subscribeToValue(() => {
+                  this.publishEvent(new RefreshMetricsEvent());
+                  this.checkDataSourceForOTelResources();
+                });
+
+                return () => {
+                  sub.unsubscribe();
+                };
+              },
+            ],
+          })
+        : undefined;
+
+    scopesBridge?.addActivationHandler(() => {
+      if (!scopesBridge) {
+        return;
+      }
+      scopesBridge.setEnabled(true);
+
+      return () => {
+        scopesBridge.setEnabled(false);
+      };
+    });
+
+    const scopeFilters = scopesBridge?.getValue().flatMap((scope) => scope.spec.filters as AdHocVariableFilter[]) || [];
+
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       // the initial variables should include a metric for metric scene and the otelJoinQuery.
       // NOTE: The other OTEL filters should be included too before this work is merged
-      $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
+      $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters, scopeFilters),
+
       controls: state.controls ?? [
-        new VariableValueSelectors({ layout: 'vertical' }),
+        new VariableValueSelectors({
+          layout: 'vertical',
+        }),
         new SceneControlsSpacer(),
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
@@ -135,6 +177,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       nativeHistograms: state.nativeHistograms ?? [],
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
+      scopesBridge,
+
       trailActivated: state.trailActivated ?? false,
       ...state,
     });
@@ -470,7 +514,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         previouslyUsedOtelResources: false,
       };
     }
-    const deploymentEnvironments = await getDeploymentEnvironments(datasourceUid, timeRange, getSelectedScopes());
+
+    const deploymentEnvironments = await getDeploymentEnvironments(
+      datasourceUid,
+      timeRange,
+      this.state.scopesBridge?.getValue() ?? []
+    );
     const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
 
     // Future refactor: non promoted resources could be the full check
@@ -650,7 +699,15 @@ export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   }
 }
 
-function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
+function getVariableSet(
+  initialDS?: string,
+  metric?: string,
+  initialFilters?: AdHocVariableFilter[],
+  scopeFilters?: AdHocVariableFilter[]
+) {
+  const baseFilters = scopeFilters
+    ? scopeFilters.concat(getBaseFiltersForMetric(metric))
+    : getBaseFiltersForMetric(metric);
   return new SceneVariableSet({
     variables: [
       new MetricsDrilldownDataSourceVariable({ initialDS }),
@@ -674,14 +731,14 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         hide: VariableHide.hideLabel,
         layout: 'combobox',
         filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
+        baseFilters: baseFilters,
         applyMode: 'manual',
         allowCustomValue: true,
         expressionBuilder: (filters: AdHocVariableFilter[]) => {
           // remove any filters that include __name__ key in the expression
           // to prevent the metric name from being set twice in the query and causing an error.
           const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
-          return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
+          return [...baseFilters, ...filtersWithoutMetricName]
             .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
@@ -704,7 +761,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         hide: VariableHide.hideVariable,
         layout: 'combobox',
         filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
+        baseFilters: baseFilters,
         applyMode: 'manual',
         allowCustomValue: true,
         // skipUrlSync: true
