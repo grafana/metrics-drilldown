@@ -32,11 +32,7 @@ jest.mock('@grafana/runtime', () => ({
 }));
 
 describe('AddToExplorationButton', () => {
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
-  it("shouldn't render when a plugin extension link isn't provided by the Explorations app ", async () => {
+  it("shouldn't render when a plugin extension link isn't provided by the Explorations app", async () => {
     setPluginLinksHook(() => ({
       links: [],
       isLoading: false,

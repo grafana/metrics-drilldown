@@ -22,10 +22,6 @@ describe('getPreviewPanelFor', () => {
     sceneGraphSpy.mockReturnValue(variables ? createAdHocVariableStub(variables) : null);
   }
 
-  beforeEach(() => {
-    sceneGraphSpy.mockClear();
-  });
-
   describe('includes __ignore_usage__ indicator', () => {
     const metricName = 'METRIC';
 

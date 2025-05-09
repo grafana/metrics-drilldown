@@ -21,10 +21,6 @@ describe('MetricDatasourceHelper', () => {
     };
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('isNativeHistogram', () => {
     it('should return false if metric is not provided', async () => {
       const result = await metricDatasourceHelper.isNativeHistogram('');

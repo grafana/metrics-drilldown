@@ -3,6 +3,7 @@ import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
 import { DataTrail } from '../DataTrail';
+import { getFilteredResourceAttributes } from './api';
 import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
 import {
   VAR_FILTERS,
@@ -32,20 +33,6 @@ jest.mock('./api', () => ({
     .fn()
     .mockResolvedValue({ attributes: ['resourceAttribute'], missingOtelTargets: false }),
 }));
-
-describe('sortResources', () => {
-  it('should sort and filter resources correctly', () => {
-    const resources: MetricFindValue[] = [
-      { text: 'cloud_region', value: 'cloud_region' },
-      { text: 'custom_resource', value: 'custom_resource' },
-    ];
-    const excluded: string[] = ['cloud_region'];
-
-    const result = sortResources(resources, excluded);
-
-    expect(result).toEqual([{ text: 'custom_resource', value: 'custom_resource' }]);
-  });
-});
 
 describe('getOtelJoinQuery', () => {
   it('should return the correct join query', () => {
@@ -191,7 +178,12 @@ describe('updateOtelJoinWithGroupLeft', () => {
   }
 
   beforeEach(() => {
+    (getFilteredResourceAttributes as jest.Mock).mockResolvedValue({
+      attributes: ['resourceAttribute'],
+      missingOtelTargets: false,
+    });
     jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
+
     setDataSourceSrv(
       new MockDataSourceSrv({
         prom: {
@@ -222,10 +214,8 @@ describe('updateOtelJoinWithGroupLeft', () => {
     await updateOtelJoinWithGroupLeft(trail, 'target_info');
     const otelJoinQueryVar = getOtelJoinQueryVar(trail);
     const emptyGroupLeftClause = 'group_left()';
-    const otelJoinQuery = otelJoinQueryVar.state.value;
-    if (typeof otelJoinQuery === 'string') {
-      expect(otelJoinQuery.includes(emptyGroupLeftClause)).toBe(true);
-    }
+    const otelJoinQuery = otelJoinQueryVar.state.value as string;
+    expect(otelJoinQuery.includes(emptyGroupLeftClause)).toBe(true);
   });
 });
 
@@ -271,10 +261,6 @@ describe('util functions that rely on trail and variable setup', () => {
         },
       })
     );
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
   });
 
   let trail: DataTrail;
@@ -329,6 +315,7 @@ describe('util functions that rely on trail and variable setup', () => {
   afterEach(() => {
     trail.setState({ initialOtelCheckComplete: false });
   });
+
   describe('updateOtelData', () => {
     it('should automatically add the deployment environment on loading a data trail from start', () => {
       trail.setState({ startButtonClicked: true });

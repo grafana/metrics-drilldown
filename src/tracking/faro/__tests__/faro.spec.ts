@@ -44,8 +44,6 @@ function setup(location: Partial<Location>) {
 describe('initFaro()', () => {
   afterEach(() => {
     setFaro(null);
-
-    jest.clearAllMocks();
   });
 
   describe('when running in environment where the host not defined', () => {

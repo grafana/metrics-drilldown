@@ -16,10 +16,6 @@ describe('DataTrailCard', () => {
   const bookmark: DataTrailBookmark = { urlValues: { key: '1', metric: 'Test Bookmark' }, createdAt: Date.now() };
   const onSelect = jest.fn();
   const onDelete = jest.fn();
-  beforeEach(() => {
-    onSelect.mockClear();
-    onDelete.mockClear();
-  });
 
   it('renders the card with recent metric exploration', () => {
     render(<DataTrailCard trail={trail} onSelect={onSelect} onDelete={onDelete} />);
