@@ -157,14 +157,18 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       };
     });
 
+    const scopeFilters = scopesBridge?.getValue().flatMap((scope) => scope.spec.filters as AdHocVariableFilter[]) || [];
+
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       // the initial variables should include a metric for metric scene and the otelJoinQuery.
       // NOTE: The other OTEL filters should be included too before this work is merged
-      $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
+      $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters, scopeFilters),
 
       controls: state.controls ?? [
-        new VariableValueSelectors({ layout: 'vertical' }),
+        new VariableValueSelectors({
+          layout: 'vertical',
+        }),
         new SceneControlsSpacer(),
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
@@ -558,7 +562,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const deploymentEnvironments = await getDeploymentEnvironments(
       datasourceUid,
       timeRange,
-      sceneGraph.getScopesBridge(this)?.getValue() ?? []
+      this.state.scopesBridge?.getValue() ?? []
     );
     const hasOtelResources = otelTargets.jobs.length > 0 && otelTargets.instances.length > 0;
 
@@ -751,7 +755,15 @@ export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   }
 }
 
-function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
+function getVariableSet(
+  initialDS?: string,
+  metric?: string,
+  initialFilters?: AdHocVariableFilter[],
+  scopeFilters?: AdHocVariableFilter[]
+) {
+  const baseFilters = scopeFilters
+    ? scopeFilters.concat(getBaseFiltersForMetric(metric))
+    : getBaseFiltersForMetric(metric);
   return new SceneVariableSet({
     variables: [
       new MetricsDrilldownDataSourceVariable({ initialDS }),
@@ -775,14 +787,14 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         hide: VariableHide.hideLabel,
         layout: 'combobox',
         filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
+        baseFilters: baseFilters,
         applyMode: 'manual',
         allowCustomValue: true,
         expressionBuilder: (filters: AdHocVariableFilter[]) => {
           // remove any filters that include __name__ key in the expression
           // to prevent the metric name from being set twice in the query and causing an error.
           const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
-          return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
+          return [...baseFilters, ...filtersWithoutMetricName]
             .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
@@ -805,7 +817,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         hide: VariableHide.hideVariable,
         layout: 'combobox',
         filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
+        baseFilters: baseFilters,
         applyMode: 'manual',
         allowCustomValue: true,
         // skipUrlSync: true
