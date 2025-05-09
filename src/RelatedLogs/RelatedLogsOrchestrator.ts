@@ -1,14 +1,12 @@
-import { LoadingState, type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
-import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { LoadingState } from '@grafana/data';
 import { SceneQueryRunner } from '@grafana/scenes';
 
 import { type MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
-import { lokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
+import { createLokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { type MetricScene } from '../MetricScene';
 import pluginJson from '../plugin.json';
-
-type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
+import { type DataSource, type DataSourceFetcher } from '../utils/utils.datasource';
 
 /**
  * Manager class that handles the orchestration of related logs functionality.
@@ -17,6 +15,7 @@ type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 export class RelatedLogsOrchestrator {
   private readonly _logsConnectors: MetricsLogsConnector[];
   private readonly _metricScene: MetricScene;
+  private readonly _dataSourceFetcher: DataSourceFetcher;
   private readonly _changeHandlers = {
     lokiDataSources: [] as Array<(dataSources: DataSource[]) => void>,
     relatedLogsCount: [] as Array<(count: number) => void>,
@@ -29,9 +28,13 @@ export class RelatedLogsOrchestrator {
     lokiDataSources: [] as DataSource[],
   };
 
-  constructor(metricScene: MetricScene) {
+  constructor(metricScene: MetricScene, dataSourceFetcher: DataSourceFetcher) {
     this._metricScene = metricScene;
-    this._logsConnectors = [lokiRecordingRulesConnector, createLabelsCrossReferenceConnector(metricScene)];
+    this._dataSourceFetcher = dataSourceFetcher;
+    this._logsConnectors = [
+      createLokiRecordingRulesConnector(this._dataSourceFetcher),
+      createLabelsCrossReferenceConnector(metricScene, this._dataSourceFetcher),
+    ];
   }
 
   get lokiDataSources() {
@@ -92,7 +95,7 @@ export class RelatedLogsOrchestrator {
    */
   public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
-    const allLokiDatasources = await findHealthyLokiDataSources();
+    const allLokiDatasources = await this._dataSourceFetcher.getHealthyDataSources('loki');
 
     // Check all datasources for logs
     if (allLokiDatasources.length > 0) {
@@ -194,38 +197,4 @@ export class RelatedLogsOrchestrator {
   public checkConditionsMetForRelatedLogs(): boolean {
     return this._logsConnectors.some((connector) => connector.checkConditionsMetForRelatedLogs());
   }
-}
-
-export async function findHealthyLokiDataSources() {
-  const lokiDataSources = getDataSourceSrv().getList({
-    logs: true,
-    type: 'loki',
-    filter: (ds) => ds.uid !== 'grafana',
-  });
-  const healthyLokiDataSources: DataSource[] = [];
-  const unhealthyLokiDataSources: DataSource[] = [];
-
-  await Promise.all(
-    lokiDataSources.map((ds) =>
-      getBackendSrv()
-        .get(`/api/datasources/${ds.id}/health`, undefined, undefined, {
-          showSuccessAlert: false,
-          showErrorAlert: false,
-        })
-        .then((health) =>
-          health?.status === 'OK' ? healthyLokiDataSources.push(ds) : unhealthyLokiDataSources.push(ds)
-        )
-        .catch(() => unhealthyLokiDataSources.push(ds))
-    )
-  );
-
-  if (unhealthyLokiDataSources.length) {
-    console.warn(
-      `Found ${unhealthyLokiDataSources.length} unhealthy Loki data sources: ${unhealthyLokiDataSources
-        .map((ds) => ds.name)
-        .join(', ')}`
-    );
-  }
-
-  return healthyLokiDataSources;
 }

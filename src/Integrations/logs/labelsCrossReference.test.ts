@@ -1,6 +1,8 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { sceneGraph, type AdHocFiltersVariable } from '@grafana/scenes';
 
+import { DataSourceFetcher } from 'utils/utils.datasource';
+
 import { createLabelsCrossReferenceConnector } from './labelsCrossReference';
 import { type RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared';
@@ -36,7 +38,7 @@ function buildConnector(filters: AdHocVariableFilter[] | null) {
     useState: jest.fn(),
   } as unknown as RelatedLogsScene;
 
-  const connector = createLabelsCrossReferenceConnector(mockScene);
+  const connector = createLabelsCrossReferenceConnector(mockScene, dataSourceFetcher);
 
   jest.spyOn(sceneGraph, 'lookupVariable').mockReturnValue(
     filters
@@ -91,6 +93,8 @@ function buildDataSources() {
 
   return datasources;
 }
+
+const dataSourceFetcher = new DataSourceFetcher();
 
 describe('LabelsCrossReferenceConnector', () => {
   const basicFilters: AdHocVariableFilter[] = [

@@ -17,6 +17,8 @@ import {
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { type DataSourceFetcher } from 'utils/utils.datasource';
+
 import { buildRelatedMetricsScene } from './ActionTabs/RelatedMetricsScene';
 import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
@@ -50,6 +52,7 @@ export interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
   autoQuery: AutoQueryInfo;
+  datasourceFetcher: DataSourceFetcher;
   nativeHistogram?: boolean;
   actionView?: ActionViewType;
   queryDef?: AutoQueryDef;
@@ -65,7 +68,7 @@ export const actionViews = {
 export type ActionViewType = (typeof actionViews)[keyof typeof actionViews];
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
-  public readonly relatedLogsOrchestrator = new RelatedLogsOrchestrator(this);
+  public readonly relatedLogsOrchestrator: RelatedLogsOrchestrator;
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
@@ -76,16 +79,17 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     },
   });
 
-  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'autoQuery'>) {
-    const autoQuery = state.autoQuery ?? getAutoQueriesForMetric(state.metric, state.nativeHistogram);
+  public constructor(props: MakeOptional<MetricSceneState, 'body' | 'autoQuery'>) {
+    const autoQuery = props.autoQuery ?? getAutoQueriesForMetric(props.metric, props.nativeHistogram);
     super({
-      $variables: state.$variables ?? getVariableSet(state.metric),
-      body: state.body ?? new MetricGraphScene({}),
+      $variables: props.$variables ?? getVariableSet(props.metric),
+      body: props.body ?? new MetricGraphScene({}),
       autoQuery,
-      queryDef: state.queryDef ?? autoQuery.main,
-      ...state,
+      queryDef: props.queryDef ?? autoQuery.main,
+      ...props,
     });
 
+    this.relatedLogsOrchestrator = new RelatedLogsOrchestrator(this, props.datasourceFetcher);
     this.addActivationHandler(this._onActivate.bind(this));
   }
 
