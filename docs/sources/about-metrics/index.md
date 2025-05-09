@@ -13,7 +13,7 @@ weight: 10
 Metrics, logs, traces, and profiles form the pillars of observability.
 Correlating between the four pillars of observability helps create a holistic view of your application and infrastructure.
 
-![The four pillars of observability](../images/four-pillars-observe.png)
+![The four pillars of observability](/media/metrics-explore/four-pillars-observe.png)
 
 ## Metrics
 
@@ -36,7 +36,7 @@ Profiles help you understand how your applications utilize compute resources suc
 
 Metrics tell you how much of something exists, such as how much memory a computer system has available or how many centimeters long a desktop is. In the case of Grafana, metrics are most useful when they are recorded repeatedly over time. This permits us to compare things like how running a program affects the availability of system resources, as shown in the following dashboard.
 
-![Sample visualization dashboard](../images/visualization_sample.png)
+![Sample visualization dashboard](/media/metrics-explore/visualization_sample.png)
 
 Metrics like these are stored in a time series database (TSDB), like [Prometheus](https://prometheus.io/), by recording a metric and pairing that entry with a time stamp. Each TSDB uses a slightly different [data model](https://prometheus.io/docs/concepts/data_model/), but all combine these two aspects and Grafana and Grafana Cloud can accept their different metrics formats for visualization.
 
