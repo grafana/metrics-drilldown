@@ -82,7 +82,7 @@ export class LabelsVariable extends QueryVariable {
     this.setState({ query: `{__name__=~".+",${filterExpression}}` });
   }
 
-  static Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
+  static readonly Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
     const styles = useStyles2(getStyles);
     const { label } = model.useState();
 

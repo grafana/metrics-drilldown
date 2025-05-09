@@ -151,7 +151,6 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     if (isHistogram) {
       return buildHeatmapPanel({
         panelTitle,
-        color,
         headerActions,
         hideLegend,
         queryRunner: MetricVizPanel.buildQueryRunner({

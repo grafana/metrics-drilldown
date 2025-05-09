@@ -293,7 +293,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     if (!this.state.histogramsLoaded) {
       try {
         await this.datasourceHelper.initializeHistograms();
-      } catch (error) {
+      } catch {
         displayWarning(['Error while initializing histograms!']);
       }
 
@@ -588,7 +588,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     }, []);
   }
 
-  static Component = ({ model }: SceneComponentProps<DataTrail>) => {
+  static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const { controls, topScene, settings, pluginInfo, useOtelExperience, embedded } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight();

@@ -153,7 +153,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     this.publishEvent(new BreakdownSearchReset(), true);
   };
 
-  public static Component = ({ model }: SceneComponentProps<SceneByFrameRepeater>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<SceneByFrameRepeater>) => {
     const { body } = model.useState();
     return <body.Component model={body} />;
   };

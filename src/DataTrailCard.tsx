@@ -28,7 +28,7 @@ const truncateValue = (key: string, value: string, maxLength: number) => {
   return value;
 };
 
-export function DataTrailCard(props: Props) {
+export function DataTrailCard(props: Readonly<Props>) {
   const { onSelect, onDelete, bookmark } = props;
   const styles = useStyles2(getStyles);
 
@@ -93,7 +93,7 @@ export function DataTrailCard(props: Props) {
       </Card>
       <div className={styles.date}>
         <div className={styles.secondaryFont}>Date created: </div>
-        <div className={styles.primaryFont}>{createdAt && dateTimeFormat(createdAt, { format: 'YYYY-MM-DD' })}</div>
+        <div className={styles.primaryFont}>{createdAt > 0 && dateTimeFormat(createdAt, { format: 'YYYY-MM-DD' })}</div>
       </div>
     </article>
   );

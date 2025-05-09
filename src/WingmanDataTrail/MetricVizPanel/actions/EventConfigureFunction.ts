@@ -5,5 +5,5 @@ export interface EventConfigureFunctionPayload {
 }
 
 export class EventConfigureFunction extends BusEventWithPayload<EventConfigureFunctionPayload> {
-  public static type = 'configure-function';
+  public static readonly type = 'configure-function';
 }

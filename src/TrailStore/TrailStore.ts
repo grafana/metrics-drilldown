@@ -99,7 +99,7 @@ export class TrailStore {
     const isSerializedTrail = 'history' in t;
     const urlSerializedTrail = 'urlValues' in t;
     if (isSerializedTrail) {
-      t.history.map((step) => {
+      t.history.forEach((step) => {
         // will go through all steps until the last one and load the most recent one
         this._loadFromUrl(trail, step.urlValues);
       });

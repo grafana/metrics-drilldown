@@ -35,7 +35,7 @@ export class SceneDrawer extends SceneObjectBase<SceneDrawerState> {
     this.setState({ isOpen: false });
   };
 
-  static Component = ({ model }: SceneComponentProps<SceneDrawer>) => {
+  static readonly Component = ({ model }: SceneComponentProps<SceneDrawer>) => {
     const { isOpen, title, subTitle, body } = model.useState();
 
     return (
