@@ -85,9 +85,7 @@ export class DataSourceFetcher {
           } else {
             unhealthyDataSources.push(ds);
           }
-          // NOTE: This appears to be a false positive from sonarjs
-          // eslint-disable-next-line sonarjs/no-ignored-exceptions
-        } catch (error) {
+        } catch {
           unhealthyDataSources.push(ds);
         }
       })
