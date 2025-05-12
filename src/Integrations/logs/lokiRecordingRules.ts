@@ -5,7 +5,8 @@ import { type SyntaxNode } from '@lezer/common';
 import { lastValueFrom } from 'rxjs';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsOrchestrator';
+import { logger } from '../../tracking/logger/logger';
+import { getDataSourceFetcher } from '../../utils/utils.datasource';
 
 export interface RecordingRuleGroup {
   name: string;
@@ -44,7 +45,7 @@ async function fetchRecordingRuleGroups(datasourceSettings: DataSourceInstanceSe
   >(getBackendSrv().fetch(recordingRules));
 
   if (!res.ok) {
-    console.warn(`Failed to fetch recording rules from Loki data source: ${datasourceSettings.name}`);
+    logger.warn(`Failed to fetch recording rules from Loki data source: ${datasourceSettings.name}`);
     return [];
   }
 
@@ -153,10 +154,10 @@ export function getLokiQueryForRelatedMetric(
  * @returns {Promise<ExtractedRecordingRules>} A promise that resolves to an object containing
  * the extracted recording rules, keyed by data source UID.
  *
- * @throws Will log an error to the console if fetching or extracting rules fails for any data source.
+ * @throws Will log a warning if fetching or extracting rules fails for any data source.
  */
 export async function fetchAndExtractLokiRecordingRules() {
-  const lokiDataSources = await findHealthyLokiDataSources();
+  const lokiDataSources = await getDataSourceFetcher().getHealthyDataSources('loki');
   const extractedRecordingRules: ExtractedRecordingRules = {};
   await Promise.all(
     lokiDataSources.map(async (dataSource) => {
@@ -165,7 +166,7 @@ export async function fetchAndExtractLokiRecordingRules() {
         const extractedRules = extractRecordingRulesFromRuleGroups(ruleGroups, dataSource);
         extractedRecordingRules[dataSource.uid] = extractedRules;
       } catch (err) {
-        console.warn(err);
+        logger.warn(err);
       }
     })
   );
@@ -173,7 +174,7 @@ export async function fetchAndExtractLokiRecordingRules() {
   return extractedRecordingRules;
 }
 
-const createLokiRecordingRulesConnector = () => {
+export const createLokiRecordingRulesConnector = () => {
   let lokiRecordingRules: ExtractedRecordingRules = {};
 
   // In this connector, conditions have been met for related logs
@@ -196,8 +197,6 @@ const createLokiRecordingRulesConnector = () => {
     },
   });
 };
-
-export const lokiRecordingRulesConnector = createLokiRecordingRulesConnector();
 
 /**
  * Returns whether the given query is a logs query (not a metrics query)
