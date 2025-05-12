@@ -12,8 +12,10 @@ test.describe('Native Histogram', () => {
     await selectMetricView.quickSearch.enterText(NATIVE_HISTOGRAM_LABEL);
     await selectMetricView.assertPanel(NATIVE_HISTOGRAM_LABEL);
 
-    const panelHeader = selectMetricView.getPanelByTitle(NATIVE_HISTOGRAM_LABEL).getByTestId('header-container');
+    const panelHeader = selectMetricView
+      .getPanelByTitle(NATIVE_HISTOGRAM_LABEL)
+      .getByTestId('data-testid header-container');
 
-    await expect(panelHeader).toHaveScreenshot('native-histogram-panel-header.png');
+    await expect(panelHeader).toHaveScreenshot();
   });
 });
