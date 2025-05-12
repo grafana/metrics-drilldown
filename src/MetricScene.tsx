@@ -17,8 +17,6 @@ import {
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type DataSourceFetcher } from 'utils/utils.datasource';
-
 import { buildRelatedMetricsScene } from './ActionTabs/RelatedMetricsScene';
 import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
@@ -52,7 +50,6 @@ export interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
   autoQuery: AutoQueryInfo;
-  datasourceFetcher: DataSourceFetcher;
   nativeHistogram?: boolean;
   actionView?: ActionViewType;
   queryDef?: AutoQueryDef;
@@ -89,7 +86,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       ...props,
     });
 
-    this.relatedLogsOrchestrator = new RelatedLogsOrchestrator(this, props.datasourceFetcher);
+    this.relatedLogsOrchestrator = new RelatedLogsOrchestrator(this);
     this.addActivationHandler(this._onActivate.bind(this));
   }
 

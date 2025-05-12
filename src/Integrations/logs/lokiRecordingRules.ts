@@ -6,7 +6,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 import { logger } from '../../tracking/logger/logger';
-import { type DataSourceFetcher } from '../../utils/utils.datasource';
+import { getDataSourceFetcher } from '../../utils/utils.datasource';
 
 export interface RecordingRuleGroup {
   name: string;
@@ -156,8 +156,8 @@ export function getLokiQueryForRelatedMetric(
  *
  * @throws Will log a warning if fetching or extracting rules fails for any data source.
  */
-export async function fetchAndExtractLokiRecordingRules(dataSourceFetcher: DataSourceFetcher) {
-  const lokiDataSources = await dataSourceFetcher.getHealthyDataSources('loki');
+export async function fetchAndExtractLokiRecordingRules() {
+  const lokiDataSources = await getDataSourceFetcher().getHealthyDataSources('loki');
   const extractedRecordingRules: ExtractedRecordingRules = {};
   await Promise.all(
     lokiDataSources.map(async (dataSource) => {
@@ -174,7 +174,7 @@ export async function fetchAndExtractLokiRecordingRules(dataSourceFetcher: DataS
   return extractedRecordingRules;
 }
 
-export const createLokiRecordingRulesConnector = (dataSourceFetcher: DataSourceFetcher) => {
+export const createLokiRecordingRulesConnector = () => {
   let lokiRecordingRules: ExtractedRecordingRules = {};
 
   // In this connector, conditions have been met for related logs
@@ -186,7 +186,7 @@ export const createLokiRecordingRulesConnector = (dataSourceFetcher: DataSourceF
     name: 'lokiRecordingRules',
     checkConditionsMetForRelatedLogs: () => conditionsMetForRelatedLogs,
     async getDataSources(selectedMetric: string): Promise<FoundLokiDataSource[]> {
-      lokiRecordingRules = await fetchAndExtractLokiRecordingRules(dataSourceFetcher);
+      lokiRecordingRules = await fetchAndExtractLokiRecordingRules();
       const lokiDataSources = getDataSourcesWithRecordingRulesContainingMetric(selectedMetric, lokiRecordingRules);
       conditionsMetForRelatedLogs = Boolean(lokiDataSources.length);
 

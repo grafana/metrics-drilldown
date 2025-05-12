@@ -65,7 +65,6 @@ import {
 } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { currentPathIncludes, getTrailFor, limitAdhocProviders } from './utils';
-import { DataSourceFetcher } from './utils/utils.datasource';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getSelectedScopes } from './utils/utils.scopes';
 import { isAdHocFiltersVariable, isConstantVariable } from './utils/utils.variables';
@@ -106,8 +105,6 @@ export interface DataTrailState extends SceneObjectState {
   nativeHistogramMetric: string;
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
-
-  datasourceFetcher: DataSourceFetcher;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -139,7 +136,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
       trailActivated: state.trailActivated ?? false,
-      datasourceFetcher: state.datasourceFetcher ?? new DataSourceFetcher(),
       ...state,
     });
 
@@ -597,7 +593,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       return new MetricScene({
         metric: metric,
         nativeHistogram: nativeHistogram ?? false,
-        datasourceFetcher: this.state.datasourceFetcher,
       });
     } else {
       return getFreshTopScene();

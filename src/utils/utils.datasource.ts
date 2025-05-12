@@ -102,3 +102,13 @@ export class DataSourceFetcher {
     return healthyDataSources;
   }
 }
+
+let dataSourceFetcherSingleton: DataSourceFetcher | undefined;
+
+export function getDataSourceFetcher(): DataSourceFetcher {
+  if (!dataSourceFetcherSingleton) {
+    dataSourceFetcherSingleton = new DataSourceFetcher();
+  }
+
+  return dataSourceFetcherSingleton;
+}

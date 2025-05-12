@@ -6,7 +6,7 @@ import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labels
 import { createLokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
 import { type MetricScene } from '../MetricScene';
 import pluginJson from '../plugin.json';
-import { type DataSource, type DataSourceFetcher } from '../utils/utils.datasource';
+import { getDataSourceFetcher, type DataSource } from '../utils/utils.datasource';
 
 /**
  * Manager class that handles the orchestration of related logs functionality.
@@ -15,7 +15,7 @@ import { type DataSource, type DataSourceFetcher } from '../utils/utils.datasour
 export class RelatedLogsOrchestrator {
   private readonly _logsConnectors: MetricsLogsConnector[];
   private readonly _metricScene: MetricScene;
-  private readonly _dataSourceFetcher: DataSourceFetcher;
+  private readonly _dataSourceFetcher = getDataSourceFetcher();
   private readonly _changeHandlers = {
     lokiDataSources: [] as Array<(dataSources: DataSource[]) => void>,
     relatedLogsCount: [] as Array<(count: number) => void>,
@@ -28,13 +28,9 @@ export class RelatedLogsOrchestrator {
     lokiDataSources: [] as DataSource[],
   };
 
-  constructor(metricScene: MetricScene, dataSourceFetcher: DataSourceFetcher) {
+  constructor(metricScene: MetricScene) {
     this._metricScene = metricScene;
-    this._dataSourceFetcher = dataSourceFetcher;
-    this._logsConnectors = [
-      createLokiRecordingRulesConnector(this._dataSourceFetcher),
-      createLabelsCrossReferenceConnector(metricScene, this._dataSourceFetcher),
-    ];
+    this._logsConnectors = [createLokiRecordingRulesConnector(), createLabelsCrossReferenceConnector(metricScene)];
   }
 
   get lokiDataSources() {

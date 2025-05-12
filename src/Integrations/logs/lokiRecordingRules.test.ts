@@ -1,7 +1,5 @@
 import { of } from 'rxjs';
 
-import { DataSourceFetcher } from 'utils/utils.datasource';
-
 import { type MetricsLogsConnector } from './base';
 import { createLokiRecordingRulesConnector, type RecordingRuleGroup } from './lokiRecordingRules';
 import { getMockPlugin } from '../../mocks/plugin';
@@ -130,7 +128,7 @@ describe('LokiRecordingRulesConnector', () => {
 
   describe('getDataSources', () => {
     it('should find all data sources containing the metric', async () => {
-      const connector = createLokiRecordingRulesConnector(new DataSourceFetcher());
+      const connector = createLokiRecordingRulesConnector();
       const result = await connector.getDataSources('metric_a_total');
 
       expect(result).toHaveLength(2);
@@ -143,7 +141,7 @@ describe('LokiRecordingRulesConnector', () => {
     });
 
     it('should handle non-existent metrics', async () => {
-      const connector = createLokiRecordingRulesConnector(new DataSourceFetcher());
+      const connector = createLokiRecordingRulesConnector();
       const result = await connector.getDataSources('non_existent_metric');
 
       expect(result).toHaveLength(0);
@@ -177,7 +175,7 @@ describe('LokiRecordingRulesConnector', () => {
             } as runtime.FetchResponse)
       );
 
-      const connector = createLokiRecordingRulesConnector(new DataSourceFetcher());
+      const connector = createLokiRecordingRulesConnector();
       const result = await connector.getDataSources('metric_a_total');
 
       // Should still get results from the working datasource
@@ -191,7 +189,7 @@ describe('LokiRecordingRulesConnector', () => {
     let connector: MetricsLogsConnector;
 
     beforeEach(async () => {
-      connector = createLokiRecordingRulesConnector(new DataSourceFetcher());
+      connector = createLokiRecordingRulesConnector();
       // Populate the rules first
       await connector.getDataSources('metric_a_total');
     });
