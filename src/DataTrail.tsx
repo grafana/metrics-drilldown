@@ -644,10 +644,7 @@ export function getFreshTopScene() {
 
 export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   if (metric) {
-    return new MetricScene({
-      metric: metric,
-      nativeHistogram: nativeHistogram ?? false,
-    });
+    return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
   } else {
     return getFreshTopScene();
   }
