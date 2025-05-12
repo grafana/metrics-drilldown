@@ -65,7 +65,7 @@ export const actionViews = {
 export type ActionViewType = (typeof actionViews)[keyof typeof actionViews];
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
-  public readonly relatedLogsOrchestrator: RelatedLogsOrchestrator;
+  public readonly relatedLogsOrchestrator = new RelatedLogsOrchestrator(this);
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
@@ -76,17 +76,16 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     },
   });
 
-  public constructor(props: MakeOptional<MetricSceneState, 'body' | 'autoQuery'>) {
-    const autoQuery = props.autoQuery ?? getAutoQueriesForMetric(props.metric, props.nativeHistogram);
+  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'autoQuery'>) {
+    const autoQuery = state.autoQuery ?? getAutoQueriesForMetric(state.metric, state.nativeHistogram);
     super({
-      $variables: props.$variables ?? getVariableSet(props.metric),
-      body: props.body ?? new MetricGraphScene({}),
+      $variables: state.$variables ?? getVariableSet(state.metric),
+      body: state.body ?? new MetricGraphScene({}),
       autoQuery,
-      queryDef: props.queryDef ?? autoQuery.main,
-      ...props,
+      queryDef: state.queryDef ?? autoQuery.main,
+      ...state,
     });
 
-    this.relatedLogsOrchestrator = new RelatedLogsOrchestrator(this);
     this.addActivationHandler(this._onActivate.bind(this));
   }
 

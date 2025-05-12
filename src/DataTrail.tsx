@@ -146,7 +146,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.setState({ trailActivated: true });
 
     if (!this.state.topScene) {
-      this.setState({ topScene: this.getTopSceneFor(this.state.metric) });
+      this.setState({ topScene: getTopSceneFor(this.state.metric) });
     }
 
     // Some scene elements publish this
@@ -352,7 +352,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // must pass this native histogram prometheus knowledge deep into
     // the topscene set on the trail > MetricScene > getAutoQueriesForMetric() > createHistogramMetricQueryDefs();
     stateUpdate.nativeHistogramMetric = nativeHistogramMetric ? '1' : '';
-    stateUpdate.topScene = this.getTopSceneFor(metric, nativeHistogramMetric);
+    stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
 
     return stateUpdate;
   }
@@ -588,17 +588,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     }, []);
   }
 
-  private getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
-    if (metric) {
-      return new MetricScene({
-        metric: metric,
-        nativeHistogram: nativeHistogram ?? false,
-      });
-    } else {
-      return getFreshTopScene();
-    }
-  }
-
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const { controls, topScene, settings, pluginInfo, useOtelExperience, embedded } = model.useState();
 
@@ -650,6 +639,17 @@ export function getFreshTopScene() {
     return new MetricsReducer();
   } else {
     return new MetricSelectScene({});
+  }
+}
+
+export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
+  if (metric) {
+    return new MetricScene({
+      metric: metric,
+      nativeHistogram: nativeHistogram ?? false,
+    });
+  } else {
+    return getFreshTopScene();
   }
 }
 
