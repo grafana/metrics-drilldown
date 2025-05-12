@@ -1,35 +1,29 @@
 import { addRecentMetric, getRecentMetrics, sortMetricsWithRecentFirst } from './MetricsSorter';
 
-const mockLocalStorage = (() => {
-  let store: Record<string, string> = {};
-
-  return {
-    getItem: jest.fn((key: string): string | null => {
-      return store[key] || null;
-    }),
-    setItem: jest.fn((key: string, value: string): void => {
-      store[key] = value;
-    }),
-    clear: jest.fn((): void => {
-      store = {};
-    }),
-    removeItem: jest.fn((key: string): void => {
-      delete store[key];
-    }),
-    getAll: (): Record<string, string> => ({ ...store }),
-  };
-})();
-
-Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage,
-  writable: true,
-});
-
 describe('MetricsSorter', () => {
-  // Clear localStorage before each test
   beforeEach(() => {
-    mockLocalStorage.clear();
-    jest.clearAllMocks();
+    Object.defineProperty(window, 'localStorage', {
+      value: (() => {
+        let store: Record<string, string> = {};
+
+        return {
+          getItem: jest.fn((key: string): string | null => {
+            return store[key] || null;
+          }),
+          setItem: jest.fn((key: string, value: string): void => {
+            store[key] = value;
+          }),
+          clear: jest.fn((): void => {
+            store = {};
+          }),
+          removeItem: jest.fn((key: string): void => {
+            delete store[key];
+          }),
+          getAll: (): Record<string, string> => ({ ...store }),
+        };
+      })(),
+      writable: true,
+    });
   });
 
   describe('sortMetricsWithRecentFirst', () => {
@@ -68,7 +62,7 @@ describe('MetricsSorter', () => {
       expect(result).toEqual(['c', 'a', 'b']);
 
       // Verify localStorage was accessed
-      expect(mockLocalStorage.getItem).toHaveBeenCalled();
+      expect(window.localStorage.getItem).toHaveBeenCalled();
     });
 
     it('should only include recent metrics that exist in the input', () => {
@@ -130,7 +124,7 @@ describe('MetricsSorter', () => {
         { name: 'metric_a', timestamp: now - 1000 },
       ];
 
-      mockLocalStorage.setItem('metrics-drilldown-recent-metrics/v1', JSON.stringify(recentMetrics));
+      window.localStorage.setItem('metrics-drilldown-recent-metrics/v1', JSON.stringify(recentMetrics));
 
       const result = getRecentMetrics();
 
@@ -144,7 +138,7 @@ describe('MetricsSorter', () => {
       addRecentMetric('test_metric');
 
       // Get the data from localStorage
-      const storedData = mockLocalStorage.getItem('metrics-drilldown-recent-metrics/v1');
+      const storedData = window.localStorage.getItem('metrics-drilldown-recent-metrics/v1');
       const recentMetrics = JSON.parse(storedData || '[]');
 
       // Should have added our metric

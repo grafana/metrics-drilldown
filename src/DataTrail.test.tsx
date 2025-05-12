@@ -38,10 +38,6 @@ describe('DataTrail', () => {
     );
   });
 
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
   describe('Given starting non-embedded trail with url sync and no url state', () => {
     let trail: DataTrail;
     const preTrailUrl = '/';

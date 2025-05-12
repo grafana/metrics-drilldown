@@ -52,6 +52,7 @@ import { isSceneCSSGridLayout, isSceneFlexLayout } from '../utils/utils.layout';
 import { getSelectedScopes } from '../utils/utils.scopes';
 import { isSceneTimeRange, isSceneTimeRangeState } from '../utils/utils.timerange';
 import { isAdHocFiltersVariable } from '../utils/utils.variables';
+import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 interface MetricPanel {
   name: string;
@@ -73,7 +74,6 @@ export interface MetricSelectSceneState extends SceneObjectState {
   missingOtelTargets?: boolean;
 }
 
-const ROW_PREVIEW_HEIGHT = '175px';
 const METRIC_PREFIX_ALL = 'all';
 
 const MAX_METRIC_NAMES = 20000;
@@ -95,7 +95,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
         new SceneCSSGridLayout({
           children: [],
           templateColumns: 'repeat(auto-fill, minmax(450px, 1fr))',
-          autoRows: ROW_PREVIEW_HEIGHT,
+          autoRows: METRICS_VIZ_PANEL_HEIGHT,
           isLazy: true,
         }),
       ...state,
@@ -439,7 +439,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       children.push(panel);
     }
 
-    this.state.body.setState({ children, autoRows: ROW_PREVIEW_HEIGHT });
+    this.state.body.setState({ children, autoRows: METRICS_VIZ_PANEL_HEIGHT });
   }
 
   public updateMetricPanel = (metric: string, isLoaded?: boolean, isEmpty?: boolean) => {

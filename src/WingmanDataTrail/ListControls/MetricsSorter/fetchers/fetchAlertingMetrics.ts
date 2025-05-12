@@ -1,7 +1,7 @@
 import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 
-import { extractMetricNames } from './extractMetricNames';
 import { logger } from '../../../../tracking/logger/logger';
+import { extractMetricNames } from '../../../../utils/utils.promql';
 
 interface AlertingRule {
   id: number;
