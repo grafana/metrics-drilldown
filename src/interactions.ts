@@ -1,11 +1,13 @@
 import { type AdHocVariableFilter } from '@grafana/data';
-import { reportInteraction } from '@grafana/runtime';
+import { config, reportInteraction } from '@grafana/runtime';
 
 import { type LabelBreakdownSortingOption as BreakdownSortByOption } from 'Breakdown/SortByScene';
 import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 import { type BreakdownLayoutType } from './Breakdown/types';
+import { PLUGIN_ID } from './constants';
 import { type ActionViewType } from './MetricScene';
+import { GIT_COMMIT } from './version';
 
 // prettier-ignore
 export type Interactions = {
@@ -161,15 +163,23 @@ export type Interactions = {
   },
   // User applies a label filter from the sidebar
   sidebar_group_by_label_filter_applied: {
-    // The label that was applied (optional)
-    label?: string;
+    label: string;
   }
 };
 
-const PREFIX = 'grafana_explore_metrics_';
+const META_PROPERTIES: Record<string, any> = {
+  // same naming as Faro (see src/shared/infrastructure/tracking/faro/faro.ts)
+  appRelease: config.apps[PLUGIN_ID].version,
+  appVersion: GIT_COMMIT,
+};
+
+const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 
 export function reportExploreMetrics<E extends keyof Interactions, P extends Interactions[E]>(event: E, payload: P) {
-  reportInteraction(`${PREFIX}${event}`, payload);
+  reportInteraction(`${INTERACTION_NAME_PREFIX}${event}`, {
+    ...payload,
+    meta: META_PROPERTIES,
+  });
 }
 
 /**
