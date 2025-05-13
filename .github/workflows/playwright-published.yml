@@ -49,6 +49,12 @@ jobs:
           name=$(jq -r .info.id dist/plugin.json)
           echo "plugin-name=$name" >> $GITHUB_OUTPUT
 
+      - name: Check other inputs
+        run: echo "${PLUGIN_ID}-${PLUGIN_VERSION}.zip"
+        env:
+          PLUGIN_ID: ${{ steps.get-name.outputs.plugin-name }}
+          PLUGIN_VERSION: ${{ steps.get-version.outputs.plugin-version }}
+
       - name: Sign and package
         uses: grafana/plugin-ci-workflows/actions/plugins/package@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
         with:
