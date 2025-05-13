@@ -46,7 +46,7 @@ jobs:
       - name: Get plugin name
         id: get-name
         run: |
-          name=$(jq -r .info.id dist/plugin.json)
+          name=$(jq -r .id dist/plugin.json)
           echo "plugin-name=$name" >> $GITHUB_OUTPUT
 
       - name: Check other inputs
