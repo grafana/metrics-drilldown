@@ -10,8 +10,7 @@ on:
         default: false
   pull_request:
     branches:
-      #- main
-      - dev
+      - main
 
 permissions:
   contents: 'read'
