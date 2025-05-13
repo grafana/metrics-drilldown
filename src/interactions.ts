@@ -168,7 +168,7 @@ export type Interactions = {
 };
 
 const META_PROPERTIES: Record<string, any> = {
-  // same naming as Faro (see src/shared/infrastructure/tracking/faro/faro.ts)
+  // same naming as Faro (see src/tracking/faro/faro.ts)
   appRelease: config.apps[PLUGIN_ID].version,
   appVersion: GIT_COMMIT,
 };
