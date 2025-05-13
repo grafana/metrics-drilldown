@@ -60,6 +60,12 @@ jobs:
       - name: Check GitHub artifact
         run: ls /tmp/dist-artifacts
 
+      - name: Check other inputs
+        run: echo "${PLUGIN_ID}-${PLUGIN_VERSION}.zip"
+        env:
+          PLUGIN_ID: ${{ github.event.repository.name }}
+          PLUGIN_VERSION: ${{ needs.build.outputs.plugin-version }}
+
   playwright:
     needs: build
     uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@main
