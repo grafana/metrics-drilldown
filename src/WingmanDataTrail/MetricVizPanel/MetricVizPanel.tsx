@@ -261,12 +261,12 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
 // TODO: don't export only to use it in PreviewPanel.tsx
 // instead, use only MetricVizPanel across the whole app
 export const nativeHistogramStyles = (theme: GrafanaTheme2) => {
-  const nativeHistogramBadgeWidth = 124;
+  const nativeHistogramBadgeWidth = 116;
 
   return css({
     '[class$="-panel-header"]': {
       position: 'relative',
-      paddingLeft: `${nativeHistogramBadgeWidth + 8}px`,
+      paddingLeft: `${nativeHistogramBadgeWidth + 4}px`,
     },
     '[class$="-panel-title"]::before': {
       content: '"Native Histogram"',
