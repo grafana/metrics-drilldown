@@ -3,9 +3,9 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type SceneObject } from '@grafana/scenes';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { findHealthyLokiDataSources } from '../../RelatedLogs/RelatedLogsOrchestrator';
 import { VAR_FILTERS } from '../../shared';
 import { getTrailFor } from '../../utils';
+import { getDataSourceFetcher } from '../../utils/utils.datasource';
 import { isAdHocFiltersVariable } from '../../utils/utils.variables';
 
 const knownLabelNameDiscrepancies = {
@@ -98,7 +98,7 @@ export const createLabelsCrossReferenceConnector = (scene: SceneObject) => {
       // Get current time range if available
       const timeRange = scene.state.$timeRange?.state.value;
 
-      const lokiDataSources = await findHealthyLokiDataSources();
+      const lokiDataSources = await getDataSourceFetcher().getHealthyDataSources('loki');
       const results = await Promise.all(
         lokiDataSources.map(async ({ uid, name }) => {
           const hasLabels = await hasMatchingLabels(uid, filters, timeRange);
