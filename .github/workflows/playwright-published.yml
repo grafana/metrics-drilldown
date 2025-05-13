@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       plugin-version: ${{ steps.get-version.outputs.plugin-version }}
+      plugin-name: ${{ steps.get-name.outputs.plugin-name }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -33,6 +34,18 @@ jobs:
       - name: Build frontend
         run: npm run build -- --profile --json stats.json
 
+      - name: Get plugin version
+        id: get-version
+        run: |
+          version=$(jq -r .info.version dist/plugin.json)
+          echo "plugin-version=$version" >> $GITHUB_OUTPUT
+
+      - name: Get plugin name
+        id: get-name
+        run: |
+          name=$(jq -r .info.id dist/plugin.json)
+          echo "plugin-name=$name" >> $GITHUB_OUTPUT
+
       - name: Sign and package
         uses: grafana/plugin-ci-workflows/actions/plugins/package@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
         with:
@@ -40,12 +53,6 @@ jobs:
           universal: 'true'
           dist-folder: dist
           access-policy-token: ${{ secrets.ACCESS_POLICY_TOKEN }}
-
-      - name: Get version
-        id: get-version
-        run: |
-          version=$(jq -r .info.version dist/plugin.json)
-          echo "plugin-version=$version" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -58,7 +65,7 @@ jobs:
     needs: build
     uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@main
     with:
-      id: grafana-metricsdrilldown-app
+      id: ${{ needs.build.outputs.plugin-name }}
       version: ${{ needs.build.outputs.plugin-version }}
       upload-artifacts: true
       report-path: e2e/test-reports/
