@@ -57,21 +57,6 @@ jobs:
           path: dist-artifacts/
           retention-days: 7
 
-      - name: Download GitHub artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: dist-artifacts
-          path: /tmp/dist-artifacts
-
-      - name: Check GitHub artifact
-        run: ls /tmp/dist-artifacts
-
-      - name: Check other inputs
-        run: echo "${PLUGIN_ID}-${PLUGIN_VERSION}.zip"
-        env:
-          PLUGIN_ID: grafana-metricsdrilldown-app
-          PLUGIN_VERSION: ${{ steps.get-version.outputs.plugin-version }}
-
   playwright:
     needs: build
     uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@main
