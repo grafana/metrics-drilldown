@@ -13,6 +13,7 @@ module.exports = {
     ...baseConfig.moduleNameMapper,
     '\\.svg$': '<rootDir>/src/mocks/svgMock.js',
     '^.+/logger/logger$': '<rootDir>/src/mocks/loggerMock.ts',
+    '^.+/interactions$': '<rootDir>/src/mocks/interactionsMock.ts',
   },
   transform: {
     '^.+\\.(t|j)sx?$': [
