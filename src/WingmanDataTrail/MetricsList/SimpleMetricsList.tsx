@@ -11,7 +11,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { DashboardCursorSync } from '@grafana/schema';
-import { Button, Spinner, useStyles2 } from '@grafana/ui';
+import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
@@ -29,6 +29,7 @@ import {
   MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
+import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 export const GRID_TEMPLATE_ROWS = '1fr';
@@ -145,9 +146,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
         </div>
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <Button variant="secondary" fill="outline" onClick={onClickShowMore}>
-              Show {batchSizes.increment} more metrics ({batchSizes.current}/{batchSizes.total})
-            </Button>
+            <ShowMoreButton label="metric" batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
       </div>
