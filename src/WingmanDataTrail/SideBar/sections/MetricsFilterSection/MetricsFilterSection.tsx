@@ -212,9 +212,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       reportExploreMetrics('sidebar_prefix_filter_applied', {
         filter_count: selectedGroups.length,
       });
-    }
-
-    if (this.state.type === 'suffixes') {
+    } else if (this.state.type === 'suffixes') {
       reportExploreMetrics('sidebar_suffix_filter_applied', {
         filter_count: selectedGroups.length,
       });

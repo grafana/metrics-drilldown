@@ -215,12 +215,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this._subs.add(
       this.subscribeToEvent(EventSortByChanged, (event) => {
         const { sortBy } = event.payload;
+        reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
 
         for (const [, { sortEngine }] of this.state.enginesMap) {
           sortEngine.sort(sortBy);
         }
-
-        reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
       })
     );
   }
