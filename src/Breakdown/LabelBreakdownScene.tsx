@@ -229,6 +229,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     if (event.target !== 'labels') {
       return;
     }
+
+    reportExploreMetrics('sorting_changed', { from: 'label-breakdown', sortBy: event.sortBy });
+
     if (this.state.body instanceof LayoutSwitcher) {
       this.state.body.state.breakdownLayouts.forEach((layout) => {
         if (layout instanceof ByFrameRepeater) {
@@ -236,7 +239,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
         }
       });
     }
-    reportExploreMetrics('sorting_changed', { from: 'label-breakdown', sortBy: event.sortBy });
   };
 
   private onReferencedVariableValueChanged() {
