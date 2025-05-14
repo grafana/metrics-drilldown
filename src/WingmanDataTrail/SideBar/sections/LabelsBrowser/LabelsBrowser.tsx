@@ -67,8 +67,8 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
   }
 
   private onClickLabel = (label: string) => {
-    this.selectLabel(label);
     reportExploreMetrics('sidebar_group_by_label_filter_applied', { label });
+    this.selectLabel(label);
   };
 
   private onClickClearSelection = () => {

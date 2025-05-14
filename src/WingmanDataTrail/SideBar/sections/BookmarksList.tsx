@@ -74,8 +74,8 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
     };
 
     const onDelete = (index: number) => {
-      getTrailStore().removeBookmark(index);
       reportExploreMetrics('bookmark_changed', { action: 'deleted' });
+      getTrailStore().removeBookmark(index);
       setLastDelete(Date.now()); // trigger re-render
     };
 

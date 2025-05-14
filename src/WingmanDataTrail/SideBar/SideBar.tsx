@@ -235,17 +235,15 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       section: sectionKey,
     });
 
+    if (sectionKey === 'filters-prefix') {
+      reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
+    } else if (sectionKey === 'filters-suffix') {
+      reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
+    }
+
     this.setState({
       visibleSection: sections.find((section) => section.state.key === sectionKey) ?? null,
     });
-
-    if (sectionKey === 'filters-prefix') {
-      reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
-    }
-
-    if (sectionKey === 'filters-suffix') {
-      reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
-    }
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<SideBar>) => {
