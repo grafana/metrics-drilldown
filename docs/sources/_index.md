@@ -37,6 +37,8 @@ weight: 200
 
 Grafana Metrics Drilldown is a queryless experience for browsing Prometheus-compatible metrics. Quickly find related metrics with just a few simple clicks, without needing to write a PromQL query.
 
+{{< docs/learning-journeys title="Explore data using Metrics Drilldown" url="https://grafana.com/docs/learning-journeys/drilldown-metrics/" >}}
+
 {{< docs/shared source="grafana" lookup="plugins/rename-note.md" version="<GRAFANA_VERSION>" >}}
 
 With Metrics Drilldown, you can:
