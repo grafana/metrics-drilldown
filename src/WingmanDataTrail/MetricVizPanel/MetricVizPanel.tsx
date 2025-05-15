@@ -16,9 +16,9 @@ import { buildPrometheusQuery, getPromqlFunction, type NonRateQueryFunction } fr
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
+import { NativeHistogramBadge } from '../../NativeHistogramBadge';
 import { type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
-import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
 import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
 import { buildTimeseriesPanel } from './panels/buildTimeseriesPanel';
