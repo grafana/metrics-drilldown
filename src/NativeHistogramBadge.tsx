@@ -14,12 +14,14 @@ export class NativeHistogramBadge extends SceneObjectBase {
 function getStyles(theme: GrafanaTheme2) {
   return {
     badge: css({
+      cursor: 'auto',
+      background: theme.colors.info.transparent,
       borderRadius: theme.shape.radius.pill,
       border: `1px solid ${theme.colors.info.text}`,
-      background: theme.colors.info.transparent,
-      cursor: 'auto',
-      width: '112px',
       padding: '0rem 0.25rem 0 0.35rem',
+      width: '116px',
+      height: '24px',
+      fontSize: '12px',
     }),
   };
 }

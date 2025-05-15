@@ -1,18 +1,13 @@
-import { ROUTES } from '../../src/constants';
 import { test } from '../fixtures';
 
 test.describe('Browser History', () => {
-  test('From Wingman', async ({ gotoPage, page, metricsReducerView }) => {
-    await gotoPage(`/${ROUTES.Drilldown}`);
-    await metricsReducerView.assertListControls();
-    await metricsReducerView.assertSidebar();
-    await metricsReducerView.assertMetricsList();
+  test('The back button works', async ({ metricsReducerView }) => {
+    await metricsReducerView.goto();
+    await metricsReducerView.assertCoreUI();
 
-    await metricsReducerView.selectMetricPanel('a_utf8_http_requests_total');
-    await page.goBack();
+    await metricsReducerView.selectMetricPanel('go_cgo_go_to_c_calls_calls_total');
+    await metricsReducerView.goBack();
 
-    await metricsReducerView.assertListControls();
-    await metricsReducerView.assertSidebar();
-    await metricsReducerView.assertMetricsList();
+    await metricsReducerView.assertCoreUI();
   });
 });
