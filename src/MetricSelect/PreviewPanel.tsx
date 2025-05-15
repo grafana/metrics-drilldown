@@ -20,8 +20,8 @@ import { PanelMenu } from '../Menu/PanelMenu';
 import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS, VAR_FILTERS } from '../shared';
 import { getColorByIndex } from '../utils';
 import { hideEmptyPreviews } from './hideEmptyPreviews';
-import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { SelectMetricAction } from './SelectMetricAction';
+import { NativeHistogramBadge } from '../NativeHistogramBadge';
 
 interface PreviewPanelState extends SceneObjectState {
   body: SceneObject;
