@@ -15,6 +15,7 @@ import {
   SceneTimePicker,
   SceneTimeRange,
   SceneVariableSet,
+  ScopesVariable,
   UrlSyncContextProvider,
   VariableDependencyConfig,
   VariableValueSelectors,
@@ -28,13 +29,11 @@ import {
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
-
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { getOtelExperienceToggleState } from 'services/store';
 import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-
 import { ROUTES } from './constants';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
@@ -653,6 +652,9 @@ export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   return new SceneVariableSet({
     variables: [
+      new ScopesVariable({
+        enable: true,
+      }),
       new MetricsDrilldownDataSourceVariable({ initialDS }),
       new AdHocFiltersVariable({
         name: VAR_OTEL_RESOURCES,
