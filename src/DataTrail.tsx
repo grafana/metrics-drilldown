@@ -13,6 +13,7 @@ import {
   SceneTimePicker,
   SceneTimeRange,
   SceneVariableSet,
+  ScopesVariable,
   UrlSyncContextProvider,
   VariableDependencyConfig,
   VariableValueSelectors,
@@ -388,6 +389,9 @@ export function getTopSceneFor(metric?: string, nativeHistogram = false) {
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   return new SceneVariableSet({
     variables: [
+      new ScopesVariable({
+        enable: true,
+      }),
       new MetricsDrilldownDataSourceVariable({ initialDS }),
       new AdHocFiltersVariable({
         key: VAR_FILTERS,
