@@ -100,7 +100,7 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.quickSearch.clear();
       await metricsReducerView.assertMetricsList();
 
-      await expect(page).toHaveScreenshot('metrics-reducer-default-sort', {
+      await expect(page).toHaveScreenshot('metrics-reducer-default-sort.png', {
         stylePath: './e2e/fixtures/css/hide-app-controls.css',
       });
     });
