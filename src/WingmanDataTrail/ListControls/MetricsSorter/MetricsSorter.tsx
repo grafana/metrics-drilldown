@@ -151,7 +151,11 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
     const { inputControls } = model.useState();
 
-    return <inputControls.Component model={inputControls} data-testid="sort-by-select" />;
+    return (
+      <div data-testid="sort-by-select">
+        <inputControls.Component model={inputControls} />
+      </div>
+    );
   };
 }
 
