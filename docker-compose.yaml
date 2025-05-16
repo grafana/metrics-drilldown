@@ -9,9 +9,9 @@ services:
       args:
         grafana_version: ${GRAFANA_VERSION:-11.6.0}
     ports: !override
-      - '${GRAFANA_PORT:-3001}:3000'
+      - '${GRAFANA_PORT:-3000}:3000'
     environment:
-      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin
     volumes:
       - ./provisioning/dashboards/dashboardJson:/etc/dashboards
@@ -37,4 +37,4 @@ services:
       # based on the GRAFANA_PORT environment variable.
       # To add support for a new port (e.g. 3002), create a new config file:
       # config/prometheus.3002.yaml with the appropriate host.docker.internal:<port> value
-      - ./config/prometheus.${GRAFANA_PORT:-3001}.yaml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus.${GRAFANA_PORT:-3000}.yaml:/etc/prometheus/prometheus.yml

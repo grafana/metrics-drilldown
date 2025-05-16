@@ -10,7 +10,7 @@ The Prometheus configuration is set up to use different files based on the Grafa
 
    ```yaml
    volumes:
-     - ./config/prometheus.${GRAFANA_PORT:-3001}.yaml:/etc/prometheus/prometheus.yml
+     - ./config/prometheus.${GRAFANA_PORT:-3000}.yaml:/etc/prometheus/prometheus.yml
    ```
 
 2. This means:

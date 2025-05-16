@@ -20,7 +20,7 @@ export function getGrafanaUrl() {
     return process.env.GRAFANA_URL;
   }
 
-  const grafanaPort = process.env.GRAFANA_PORT || 3001;
+  const grafanaPort = process.env.GRAFANA_PORT || 3000;
   return `http://localhost:${grafanaPort}`;
 }
 
