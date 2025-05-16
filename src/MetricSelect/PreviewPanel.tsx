@@ -1,3 +1,5 @@
+import { css, cx } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
 import {
   SceneCSSGridItem,
   sceneGraph,
@@ -9,9 +11,11 @@ import {
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { METRICS_VIZ_PANEL_HEIGHT, nativeHistogramStyles } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { buildPrometheusQuery } from '../autoQuery/buildPrometheusQuery';
 import { heatmapGraphBuilder, simpleGraphBuilder } from '../autoQuery/graphBuilders';
@@ -21,15 +25,16 @@ import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS, VAR_FILTER
 import { getColorByIndex } from '../utils';
 import { hideEmptyPreviews } from './hideEmptyPreviews';
 import { SelectMetricAction } from './SelectMetricAction';
-import { NativeHistogramBadge } from '../NativeHistogramBadge';
 
 interface PreviewPanelState extends SceneObjectState {
   body: SceneObject;
   metric: string;
   hasOtelResources: boolean;
   isHistogram: boolean;
+  isNativeHistogram: boolean;
 }
 
+// TODO: deprecate and use only MetricVizPanel across the whole app
 export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
   protected _variableDependency: VariableDependencyConfig<PreviewPanelState>;
 
@@ -100,9 +105,23 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
   }
 
   static readonly Component = ({ model }: SceneComponentProps<PreviewPanel>) => {
-    const { body } = model.useState();
+    const { body, isNativeHistogram } = model.useState();
+    const styles = useStyles2(getStyles);
 
-    return <body.Component model={body} />;
+    return (
+      <div className={cx(styles.container, isNativeHistogram && styles.nativeHistogram)}>
+        <body.Component model={body} />
+      </div>
+    );
+  };
+}
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    container: css({
+      height: METRICS_VIZ_PANEL_HEIGHT,
+    }),
+    nativeHistogram: nativeHistogramStyles(theme),
   };
 }
 
@@ -111,7 +130,7 @@ export function getPreviewPanelFor(
   index: number,
   hasOtelResources: boolean,
   description?: string,
-  nativeHistogram?: boolean,
+  isNativeHistogram?: boolean,
   hideMenu?: boolean
 ) {
   const parts = metric.split('_');
@@ -119,14 +138,8 @@ export function getPreviewPanelFor(
   const unitSuffix = parts.at(-2);
   const unit = getUnit(unitSuffix);
 
-  let actions: Array<SelectMetricAction | NativeHistogramBadge> = [new SelectMetricAction({ metric, title: 'Select' })];
-
-  if (nativeHistogram) {
-    actions.unshift(new NativeHistogramBadge({}));
-  }
-
   // Choose the appropriate visualization based on the metric's suffix
-  const isHistogram = Boolean(suffix === 'bucket' || nativeHistogram);
+  const isHistogram = Boolean(suffix === 'bucket' || isNativeHistogram);
 
   let vizPanelBuilder = isHistogram
     ? heatmapGraphBuilder({ title: metric, unit })
@@ -135,7 +148,7 @@ export function getPreviewPanelFor(
   vizPanelBuilder = vizPanelBuilder
     .setColor({ mode: 'fixed', fixedColor: getColorByIndex(index) })
     .setDescription(description)
-    .setHeaderActions(actions)
+    .setHeaderActions([new SelectMetricAction({ metric, title: 'Select' })])
     .setShowMenuAlways(true);
 
   if (!hideMenu) {
@@ -154,6 +167,7 @@ export function getPreviewPanelFor(
       metric,
       hasOtelResources,
       isHistogram,
+      isNativeHistogram: Boolean(isNativeHistogram),
     }),
   });
 }
