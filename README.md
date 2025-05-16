@@ -2,6 +2,8 @@
 
 The [Grafana Metrics Drilldown](https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics) app provides a queryless experience for browsing Prometheus-compatible metrics. Quickly find related metrics without writing PromQL queries.
 
+![Metrics Drilldown](src/img/metrics-drilldown.png)
+
 ## Installing in your own Grafana instance
 
 Grafana Metrics Drilldown will be preinstalled by default in all Grafana instances in the near future.
