@@ -9,12 +9,13 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Button, Spinner, useStyles2 } from '@grafana/ui';
+import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { LabelValuesVariable, VAR_LABEL_VALUES } from 'WingmanDataTrail/Labels/LabelValuesVariable';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
+import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
 
@@ -96,9 +97,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
 
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <Button variant="secondary" fill="outline" onClick={onClickShowMore}>
-              Show {batchSizes.increment} more &quot;{labelName}&quot; values ({batchSizes.current}/{batchSizes.total})
-            </Button>
+            <ShowMoreButton label={`"${labelName}" value`} batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
 

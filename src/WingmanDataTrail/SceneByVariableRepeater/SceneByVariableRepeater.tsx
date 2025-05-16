@@ -166,10 +166,13 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
   public useSizes() {
     const { currentBatchSize, pageSizeIncrement } = this.useState();
     const variable = sceneGraph.lookupVariable(this.state.variableName, this);
+    const total = (variable as MultiValueVariable).state.options.length;
+    const remaining = total - currentBatchSize;
+    const increment = remaining < pageSizeIncrement ? remaining : pageSizeIncrement;
     return {
-      increment: pageSizeIncrement,
+      increment,
       current: currentBatchSize,
-      total: (variable as MultiValueVariable).state.options.length,
+      total,
     };
   }
 
