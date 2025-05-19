@@ -46,7 +46,7 @@ npm run e2e:watch
 You can also run the [code generator](https://playwright.dev/docs/codegen#running-codegen):
 
 ```shell
-npm run e2e:codegen -- http://localhost:3001
+npm run e2e:codegen -- http://localhost:3000
 ```
 
 If you write tests that generate screenshots, please read the next section.

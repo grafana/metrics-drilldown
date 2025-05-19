@@ -7,7 +7,7 @@ Welcome! We're excited that you're interested in contributing. Below are some ba
 Grafana Metrics Drilldown follows a standard GitHub pull request workflow. If you're unfamiliar with this workflow, read the very helpful [Understanding the GitHub flow](https://guides.github.com/introduction/flow/) guide from GitHub.
 
 You are welcome to create draft PRs at any stage of readiness - this
-can be helpful to ask for assistance or to develop an idea.  
+can be helpful to ask for assistance or to develop an idea.
 Before a piece of work is finished, it should:
 
 - Be organised into one or more commits, each of which has a commit message that describes all changes made in that commit ('why' more than 'what' - we can read the diffs to see the code that changed).
@@ -27,7 +27,7 @@ Before a piece of work is finished, it should:
 3. Build the plugin in dev mode: `npm run dev`
 4. Start the Grafana server (with static data): `npm run server`
 
-Then visit http://localhost:3001/a/grafana-metricsdrilldown-app/
+Then visit http://localhost:3000/a/grafana-metricsdrilldown-app/
 
 ## Contribution guidelines
 
