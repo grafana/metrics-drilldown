@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { useChromeHeaderHeight } from '@grafana/runtime';
+import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   SceneControlsSpacer,
@@ -387,34 +387,37 @@ export function getTopSceneFor(metric?: string, nativeHistogram = false) {
 }
 
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
+  let variables: SceneVariable[] = [
+    new MetricsDrilldownDataSourceVariable({ initialDS }),
+    new AdHocFiltersVariable({
+      key: VAR_FILTERS,
+      name: VAR_FILTERS,
+      addFilterButtonText: 'Add label',
+      datasource: trailDS,
+      // default to use var filters and have otel off
+      hide: VariableHide.hideLabel,
+      layout: 'combobox',
+      filters: initialFilters ?? [],
+      baseFilters: getBaseFiltersForMetric(metric),
+      applyMode: 'manual',
+      allowCustomValue: true,
+      expressionBuilder: (filters: AdHocVariableFilter[]) => {
+        // remove any filters that include __name__ key in the expression
+        // to prevent the metric name from being set twice in the query and causing an error.
+        const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
+        return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
+          .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
+          .join(',');
+      },
+    }),
+  ];
+
+  if (config.featureToggles.scopeFilters && config.featureToggles.enableScopesInMetricsExplore) {
+    variables.unshift(new ScopesVariable({ enable: true }));
+  }
+
   return new SceneVariableSet({
-    variables: [
-      new ScopesVariable({
-        enable: true,
-      }),
-      new MetricsDrilldownDataSourceVariable({ initialDS }),
-      new AdHocFiltersVariable({
-        key: VAR_FILTERS,
-        name: VAR_FILTERS,
-        label: 'Filters',
-        addFilterButtonText: 'Add label',
-        datasource: trailDS,
-        hide: VariableHide.dontHide,
-        layout: 'combobox',
-        filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
-        applyMode: 'manual',
-        allowCustomValue: true,
-        expressionBuilder: (filters: AdHocVariableFilter[]) => {
-          // remove any filters that include __name__ key in the expression
-          // to prevent the metric name from being set twice in the query and causing an error.
-          return filters
-            .filter((filter) => filter.key !== '__name__')
-            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
-            .join(',');
-        },
-      }),
-    ],
+    variables,
   });
 }
 
