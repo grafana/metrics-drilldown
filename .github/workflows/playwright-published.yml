@@ -73,7 +73,7 @@ jobs:
       version: ${{ needs.build.outputs.plugin-version }}
       upload-artifacts: true
       report-path: e2e/test-reports/
-      grafana-compose-file: e2e/docker/docker-compose.e2e.yaml
+      grafana-compose-file: docker-compose.yaml
       playwright-compose-file: e2e/docker/docker-compose.playwright.yaml
       grafana-url: http://localhost:3000
     permissions:
