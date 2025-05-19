@@ -1,6 +1,6 @@
 import { type Page } from '@playwright/test';
 
-export class QuickSearch {
+export class QuickSearchInput {
   private page: Page;
 
   constructor(page: Page) {
