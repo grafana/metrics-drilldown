@@ -23,10 +23,9 @@ services:
 
   prometheus:
     container_name: 'prometheus'
-    image: prom/prometheus:v3.2.1
-    # build:
-    #   dockerfile: ./e2e/docker/Dockerfile.prometheus-static-data
-    #   context: .
+    build:
+      dockerfile: ./e2e/docker/Dockerfile.prometheus-static-data
+      context: .
     ports:
       - '9099:9090'
     extra_hosts:
@@ -40,7 +39,6 @@ services:
       --storage.tsdb.retention.time=42y
     volumes:
       - ./e2e/provisioning/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./e2e/provisioning/prometheus/data:/prometheus/data
 
   fake-server-utf8:
     # Grabbed from: https://github.com/grafana/grafana/tree/main/devenv/docker/blocks/prometheus_utf8
