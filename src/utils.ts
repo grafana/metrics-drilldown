@@ -27,8 +27,7 @@ import { DataTrail } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { MetricScene } from './MetricScene';
-import { sortResources } from './otel/util';
-import { LOGS_METRIC, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
+import { LOGS_METRIC, VAR_DATASOURCE_EXPR } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getClosestScopesFacade } from './utils/utils.scopes';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
@@ -41,12 +40,11 @@ export function getTrailSettings(model: SceneObject): DataTrailSettings {
   return sceneGraph.getAncestor(model, DataTrail).state.settings;
 }
 
-export function newMetricsTrail(initialDS?: string, startButtonClicked?: boolean): DataTrail {
+export function newMetricsTrail(initialDS?: string): DataTrail {
   return new DataTrail({
     initialDS,
     $timeRange: new SceneTimeRange({ from: 'now-1h', to: 'now' }),
     embedded: false,
-    startButtonClicked,
   });
 }
 
@@ -185,13 +183,6 @@ export function limitAdhocProviders(
 
       let values = (await datasourceHelper.getTagKeys(opts)).slice(0, MAX_ADHOC_VARIABLE_OPTIONS);
 
-      // sort the values for otel resources at the top
-      if (limitedFilterVariable.state.name === VAR_OTEL_AND_METRIC_FILTERS) {
-        values = sortResources(
-          values,
-          filters.map((f) => f.key)
-        );
-      }
       // use replace: true to override the default lookup in adhoc filter variable
       return { replace: true, values };
     },
