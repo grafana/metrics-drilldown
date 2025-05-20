@@ -362,8 +362,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         name: VAR_FILTERS,
         addFilterButtonText: 'Add label',
         datasource: trailDS,
-        // show this variable now because otel is removed
-        hide: VariableHide.hideLabel,
+        hide: VariableHide.dontHide,
         layout: 'combobox',
         filters: initialFilters ?? [],
         baseFilters: getBaseFiltersForMetric(metric),
