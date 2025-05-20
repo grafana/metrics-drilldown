@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type RawTimeRange } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { useChromeHeaderHeight } from '@grafana/runtime';
+import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   ConstantVariable,
@@ -15,6 +15,7 @@ import {
   SceneTimePicker,
   SceneTimeRange,
   SceneVariableSet,
+  ScopesVariable,
   UrlSyncContextProvider,
   VariableDependencyConfig,
   VariableValueSelectors,
@@ -651,76 +652,82 @@ export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
 }
 
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
+  let variables: SceneVariable[] = [
+    new MetricsDrilldownDataSourceVariable({ initialDS }),
+    new AdHocFiltersVariable({
+      name: VAR_OTEL_RESOURCES,
+      label: 'Select resource attributes',
+      addFilterButtonText: 'Select resource attributes',
+      datasource: trailDS,
+      hide: VariableHide.hideVariable,
+      layout: 'combobox',
+      defaultKeys: [],
+      applyMode: 'manual',
+      allowCustomValue: true,
+    }),
+    new AdHocFiltersVariable({
+      key: VAR_FILTERS,
+      name: VAR_FILTERS,
+      addFilterButtonText: 'Add label',
+      datasource: trailDS,
+      // default to use var filters and have otel off
+      hide: VariableHide.hideLabel,
+      layout: 'combobox',
+      filters: initialFilters ?? [],
+      baseFilters: getBaseFiltersForMetric(metric),
+      applyMode: 'manual',
+      allowCustomValue: true,
+      expressionBuilder: (filters: AdHocVariableFilter[]) => {
+        // remove any filters that include __name__ key in the expression
+        // to prevent the metric name from being set twice in the query and causing an error.
+        const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
+        return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
+          .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
+          .join(',');
+      },
+    }),
+    ...getVariablesWithOtelJoinQueryConstant(),
+    new ConstantVariable({
+      name: VAR_OTEL_GROUP_LEFT,
+      value: undefined,
+      hide: VariableHide.hideVariable,
+    }),
+    new ConstantVariable({
+      name: VAR_MISSING_OTEL_TARGETS,
+      hide: VariableHide.hideVariable,
+      value: false,
+    }),
+    new AdHocFiltersVariable({
+      name: VAR_OTEL_AND_METRIC_FILTERS,
+      addFilterButtonText: 'Filter',
+      datasource: trailDS,
+      hide: VariableHide.hideVariable,
+      layout: 'combobox',
+      filters: initialFilters ?? [],
+      baseFilters: getBaseFiltersForMetric(metric),
+      applyMode: 'manual',
+      allowCustomValue: true,
+      // skipUrlSync: true
+    }),
+    // Legacy variable needed for bookmarking which is necessary because
+    // url sync method does not handle multiple dep env values
+    // Remove this when the rudderstack event "deployment_environment_migrated" tapers off
+    new CustomVariable({
+      name: VAR_OTEL_DEPLOYMENT_ENV,
+      label: 'Deployment environment',
+      hide: VariableHide.hideVariable,
+      value: undefined,
+      placeholder: 'Select',
+      isMulti: true,
+    }),
+  ];
+
+  if (config.featureToggles.scopeFilters && config.featureToggles.enableScopesInMetricsExplore) {
+    variables.unshift(new ScopesVariable({ enable: true }));
+  }
+
   return new SceneVariableSet({
-    variables: [
-      new MetricsDrilldownDataSourceVariable({ initialDS }),
-      new AdHocFiltersVariable({
-        name: VAR_OTEL_RESOURCES,
-        label: 'Select resource attributes',
-        addFilterButtonText: 'Select resource attributes',
-        datasource: trailDS,
-        hide: VariableHide.hideVariable,
-        layout: 'combobox',
-        defaultKeys: [],
-        applyMode: 'manual',
-        allowCustomValue: true,
-      }),
-      new AdHocFiltersVariable({
-        key: VAR_FILTERS,
-        name: VAR_FILTERS,
-        addFilterButtonText: 'Add label',
-        datasource: trailDS,
-        // default to use var filters and have otel off
-        hide: VariableHide.hideLabel,
-        layout: 'combobox',
-        filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
-        applyMode: 'manual',
-        allowCustomValue: true,
-        expressionBuilder: (filters: AdHocVariableFilter[]) => {
-          // remove any filters that include __name__ key in the expression
-          // to prevent the metric name from being set twice in the query and causing an error.
-          const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
-          return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
-            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
-            .join(',');
-        },
-      }),
-      ...getVariablesWithOtelJoinQueryConstant(),
-      new ConstantVariable({
-        name: VAR_OTEL_GROUP_LEFT,
-        value: undefined,
-        hide: VariableHide.hideVariable,
-      }),
-      new ConstantVariable({
-        name: VAR_MISSING_OTEL_TARGETS,
-        hide: VariableHide.hideVariable,
-        value: false,
-      }),
-      new AdHocFiltersVariable({
-        name: VAR_OTEL_AND_METRIC_FILTERS,
-        addFilterButtonText: 'Filter',
-        datasource: trailDS,
-        hide: VariableHide.hideVariable,
-        layout: 'combobox',
-        filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
-        applyMode: 'manual',
-        allowCustomValue: true,
-        // skipUrlSync: true
-      }),
-      // Legacy variable needed for bookmarking which is necessary because
-      // url sync method does not handle multiple dep env values
-      // Remove this when the rudderstack event "deployment_environment_migrated" tapers off
-      new CustomVariable({
-        name: VAR_OTEL_DEPLOYMENT_ENV,
-        label: 'Deployment environment',
-        hide: VariableHide.hideVariable,
-        value: undefined,
-        placeholder: 'Select',
-        isMulti: true,
-      }),
-    ],
+    variables,
   });
 }
 
