@@ -142,7 +142,7 @@ const MAX_ADHOC_VARIABLE_OPTIONS = 10000;
  * This function still uses these functions from inside the data source helper.
  *
  * @param dataTrail
- * @param limitedFilterVariable Depending on otel experience flag, either filtersVar or otelAndMetricsVar
+ * @param limitedFilterVariable this is the filters variable
  * @param datasourceHelper
  */
 export function limitAdhocProviders(
