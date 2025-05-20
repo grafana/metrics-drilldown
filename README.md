@@ -37,7 +37,7 @@ Begin by starting the Grafana server in a separate terminal:
 npm run server
 ```
 
-This will start the Grafana server on port 3000. If you'd like to use a different port, follow the instructions in the [Configuration](#configuration) section below.
+This will start the Grafana server on port 3001. If you'd like to use a different port, follow the instructions in the [Configuration](#configuration) section below.
 
 Then, run the plugin in watch mode:
 
@@ -45,7 +45,7 @@ Then, run the plugin in watch mode:
 npm run dev
 ```
 
-You can now visit `http://localhost:3000/a/grafana-metricsdrilldown-app` to use the local version of the Grafana Metrics Drilldown app.
+You can now visit `http://localhost:3001/a/grafana-metricsdrilldown-app` to use the local version of the Grafana Metrics Drilldown app.
 
 #### Running tests
 
@@ -93,5 +93,5 @@ If you'd like to customize the exposed port of the Grafana instance that is used
 
 ```bash
 # .env
-GRAFANA_PORT=3000
+GRAFANA_PORT=3001
 ```

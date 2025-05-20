@@ -235,7 +235,7 @@ describe('buildPrometheusQuery', () => {
         filters: [
           {
             key: 'instance',
-            value: 'host.docker.internal:3000',
+            value: 'host.docker.internal:3001',
             operator: '=',
           },
           {
@@ -246,7 +246,7 @@ describe('buildPrometheusQuery', () => {
         ],
       });
 
-      const expected = 'avg(test_metric{instance="host.docker.internal:3000", namespace="my-namespace"})';
+      const expected = 'avg(test_metric{instance="host.docker.internal:3001", namespace="my-namespace"})';
       expect(result).toBe(expected);
     });
 
@@ -300,13 +300,13 @@ describe('buildPrometheusQuery', () => {
         filters: [
           {
             key: 'instance',
-            value: 'host.docker.internal:3000',
+            value: 'host.docker.internal:3001',
             operator: '=',
           },
         ],
       });
 
-      const expected = 'avg(test_metric{__ignore_usage__="", instance="host.docker.internal:3000"})';
+      const expected = 'avg(test_metric{__ignore_usage__="", instance="host.docker.internal:3001"})';
       expect(result).toBe(expected);
     });
 

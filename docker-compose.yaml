@@ -9,9 +9,9 @@ services:
       args:
         grafana_version: ${GRAFANA_VERSION:-11.6.0}
     ports: !override
-      - '${GRAFANA_PORT:-3000}:3000/tcp'
+      - '${GRAFANA_PORT:-3001}:3000/tcp'
     environment:
-      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3000}'
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin
       # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
       GF_PLUGINS_PREINSTALL_DISABLED: true

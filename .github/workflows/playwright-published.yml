@@ -75,7 +75,7 @@ jobs:
       report-path: e2e/test-reports/
       grafana-compose-file: docker-compose.yaml
       playwright-compose-file: e2e/docker/docker-compose.playwright.yaml
-      grafana-url: http://localhost:3000
+      grafana-url: http://localhost:3001
     permissions:
       contents: read
       id-token: write

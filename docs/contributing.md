@@ -27,7 +27,7 @@ Before a piece of work is finished, it should:
 3. Build the plugin in dev mode: `npm run dev`
 4. Start the Grafana server (with static data): `npm run server`
 
-Then visit http://localhost:3000/a/grafana-metricsdrilldown-app/
+Then visit http://localhost:3001/a/grafana-metricsdrilldown-app/
 
 ## Contribution guidelines
 
