@@ -42,13 +42,7 @@ import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
-import {
-  getOtelJoinQuery,
-  getOtelResourcesObject,
-  manageOtelAndMetricFilters,
-  updateOtelData,
-  updateOtelJoinWithGroupLeft,
-} from './otel/util';
+import { updateOtelData, updateOtelJoinWithGroupLeft } from './otel/util';
 import {
   getVariablesWithOtelJoinQueryConstant,
   MetricSelectedEvent,
@@ -158,45 +152,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         filtersVariable?.subscribeToState((newState, prevState) => {
           if (!this._addingFilterWithoutReportingInteraction) {
             reportChangeInLabelFilters(newState.filters, prevState.filters);
-          }
-        })
-      );
-    }
-
-    // This is for OTel consolidation filters
-    // whenever the otel and metric filter is updated,
-    // we need to add that filter to the correct otel resource var or var filter
-    // so the filter can be interpolated in the query correctly
-    const otelAndMetricsFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_AND_METRIC_FILTERS, this);
-    const otelFiltersVariable = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, this);
-    const otelJoinQueryVariable = sceneGraph.lookupVariable(VAR_OTEL_JOIN_QUERY, this);
-    if (
-      isAdHocFiltersVariable(otelAndMetricsFiltersVariable) &&
-      isAdHocFiltersVariable(otelFiltersVariable) &&
-      isAdHocFiltersVariable(filtersVariable) &&
-      isConstantVariable(otelJoinQueryVariable)
-    ) {
-      this._subs.add(
-        otelAndMetricsFiltersVariable?.subscribeToState((newState, prevState) => {
-          // identify the added, updated or removed variables and update the correct filter,
-          // either the otel resource or the var filter
-          // do not update on switching on otel experience or the initial check
-          // do not update when selecting a label from metric scene breakdown
-          if (
-            this.state.useOtelExperience &&
-            this.state.initialOtelCheckComplete &&
-            !this.state.addingLabelFromBreakdown
-          ) {
-            const nonPromotedOtelResources = this.state.nonPromotedOtelResources ?? [];
-            manageOtelAndMetricFilters(
-              newState.filters,
-              prevState.filters,
-              nonPromotedOtelResources,
-              otelFiltersVariable,
-              filtersVariable
-            );
-            const otelResourcesObject = getOtelResourcesObject(this);
-            otelJoinQueryVariable.setState({ value: getOtelJoinQuery(otelResourcesObject) });
           }
         })
       );
