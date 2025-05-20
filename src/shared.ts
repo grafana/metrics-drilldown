@@ -43,16 +43,6 @@ export function getVariablesWithMetricConstant(metric: string) {
   ];
 }
 
-export function getVariablesWithOtelJoinQueryConstant() {
-  return [
-    new ConstantVariable({
-      name: VAR_OTEL_JOIN_QUERY,
-      value: '',
-      hide: VariableHide.hideVariable,
-    }),
-  ];
-}
-
 export class MetricSelectedEvent extends BusEventWithPayload<string | undefined> {
   public static readonly type = 'metric-selected-event';
 }
