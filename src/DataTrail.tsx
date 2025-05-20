@@ -255,10 +255,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
     const metric = evt.payload ?? '';
 
-    if (this.state.useOtelExperience) {
-      await updateOtelJoinWithGroupLeft(this, metric);
-    }
-
     // from the metric preview panel we have the info loaded to determine that a metric is a native histogram
     let nativeHistogramMetric = false;
     if (this.isNativeHistogram(metric)) {
