@@ -243,15 +243,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
         // reset native histograms
         this.resetNativeHistograms();
-
-        if (this.state.afterFirstOtelCheck) {
-          // we need a new check for OTel
-          this.setState({ initialOtelCheckComplete: false });
-          // clear out the OTel filters, do not clear out var filters
-          this.resetOtelExperience();
-        }
-        // fresh check for otel experience
-        this.checkDataSourceForOTelResources();
       }
     },
   });
