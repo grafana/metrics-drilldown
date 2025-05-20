@@ -42,7 +42,7 @@ import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions
 import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
-import { updateOtelData, updateOtelJoinWithGroupLeft } from './otel/util';
+import { updateOtelData } from './otel/util';
 import {
   getVariablesWithOtelJoinQueryConstant,
   MetricSelectedEvent,
