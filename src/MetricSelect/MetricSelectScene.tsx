@@ -230,18 +230,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     this.setState({ metricNamesLoading: true, metricNamesError: undefined, metricNamesWarning: undefined });
 
     try {
-      let jobsList: string[] = [];
-      let instancesList: string[] = [];
-
-      const response = await getMetricNames(
-        datasourceUid,
-        timeRange,
-        getSelectedScopes(),
-        filters,
-        jobsList,
-        instancesList,
-        MAX_METRIC_NAMES
-      );
+      const response = await getMetricNames(datasourceUid, timeRange, getSelectedScopes(), filters, MAX_METRIC_NAMES);
       const searchRegex = createJSRegExpFromSearchTerms(getMetricSearch(this));
       let metricNames = searchRegex
         ? response.data.filter((metric: string) => !searchRegex || searchRegex.test(metric))
