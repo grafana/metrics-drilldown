@@ -377,7 +377,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       }
       // refactor this into the query generator in future
       const isNative = trail.isNativeHistogram(metric.name);
-      const panel = getPreviewPanelFor(metric.name, index, false, description, isNative, true);
+      const panel = getPreviewPanelFor(metric.name, index, description, isNative, true);
       metric.itemRef = panel.getRef();
       metric.isPanel = true;
       children.push(panel);
