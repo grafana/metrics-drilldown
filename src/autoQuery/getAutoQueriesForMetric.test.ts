@@ -1,14 +1,12 @@
 /* eslint-disable sonarjs/no-nested-functions */
 
-import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR, VAR_OTEL_JOIN_QUERY_EXPR } from '../shared';
+import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR } from '../shared';
 import { getAutoQueriesForMetric } from './getAutoQueriesForMetric';
 import { generateBaseQuery } from './queryGenerators/baseQuery';
 
 function expandExpr(shortenedExpr: string) {
   return shortenedExpr.replace('...', '${metric}{${filters}}');
 }
-
-const otelJoinQuery = '${otel_join_query}';
 
 describe('getAutoQueriesForMetric', () => {
   describe('for the summary/histogram types', () => {
@@ -20,20 +18,20 @@ describe('getAutoQueriesForMetric', () => {
 
       test('main query is the mean', () => {
         const [{ expr }] = result.main.queries;
-        const mean = `sum(rate(SUM_OR_HIST_sum${etc}) ${otelJoinQuery})/sum(rate(SUM_OR_HIST_count${etc}) ${otelJoinQuery})`;
+        const mean = `sum(rate(SUM_OR_HIST_sum${etc}))/sum(rate(SUM_OR_HIST_count${etc}))`;
 
         expect(expr).toBe(mean);
       });
 
       test('preview query is the mean', () => {
         const [{ expr }] = result.preview.queries;
-        const mean = `sum(rate(SUM_OR_HIST_sum${etc}) ${otelJoinQuery})/sum(rate(SUM_OR_HIST_count${etc}) ${otelJoinQuery})`;
+        const mean = `sum(rate(SUM_OR_HIST_sum${etc}))/sum(rate(SUM_OR_HIST_count${etc}))`;
         expect(expr).toBe(mean);
       });
 
       test('breakdown query is the mean by group', () => {
         const [{ expr }] = result.breakdown.queries;
-        const meanBreakdown = `sum(rate(SUM_OR_HIST_sum${etc}) ${otelJoinQuery})${byGroup}/sum(rate(SUM_OR_HIST_count${etc}) ${otelJoinQuery})${byGroup}`;
+        const meanBreakdown = `sum(rate(SUM_OR_HIST_sum${etc}))${byGroup}/sum(rate(SUM_OR_HIST_count${etc}))${byGroup}`;
         expect(expr).toBe(meanBreakdown);
       });
 
@@ -47,19 +45,19 @@ describe('getAutoQueriesForMetric', () => {
 
       test('main query is an overall rate', () => {
         const [{ expr }] = result.main.queries;
-        const overallRate = `sum(rate(\${metric}${etc}) ${otelJoinQuery})`;
+        const overallRate = `sum(rate(\${metric}${etc}))`;
         expect(expr).toBe(overallRate);
       });
 
       test('preview query is an overall rate', () => {
         const [{ expr }] = result.preview.queries;
-        const overallRate = `sum(rate(\${metric}${etc}) ${otelJoinQuery})`;
+        const overallRate = `sum(rate(\${metric}${etc}))`;
         expect(expr).toBe(overallRate);
       });
 
       test('breakdown query is an overall rate by group', () => {
         const [{ expr }] = result.breakdown.queries;
-        const overallRateBreakdown = `sum(rate(\${metric}${etc}) ${otelJoinQuery})${byGroup}`;
+        const overallRateBreakdown = `sum(rate(\${metric}${etc}))${byGroup}`;
         expect(expr).toBe(overallRateBreakdown);
       });
 
@@ -109,7 +107,7 @@ describe('getAutoQueriesForMetric', () => {
 
       test('preview panel has heatmap query', () => {
         const [{ expr }] = result.preview.queries;
-        const expected = 'sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query})';
+        const expected = 'sum by(le) (rate(${metric}{${filters}}[$__rate_interval]))';
         expect(expr).toBe(expected);
       });
 
@@ -139,35 +137,35 @@ describe('getAutoQueriesForMetric', () => {
   describe('Consider result.main query (only first)', () => {
     it.each([
       // no rate
-      ['PREFIX_general', 'avg(... ${otel_join_query})', 'none', 1],
-      ['PREFIX_bytes', 'avg(... ${otel_join_query})', 'bytes', 1],
-      ['PREFIX_seconds', 'avg(... ${otel_join_query})', 's', 1],
+      ['PREFIX_general', 'avg(...)', 'none', 1],
+      ['PREFIX_bytes', 'avg(...)', 'bytes', 1],
+      ['PREFIX_seconds', 'avg(...)', 's', 1],
       // rate with counts per second
-      ['PREFIX_count', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'cps', 1], // cps = counts per second
-      ['PREFIX_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'cps', 1],
-      ['PREFIX_seconds_count', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'cps', 1],
+      ['PREFIX_count', 'sum(rate(...[$__rate_interval]))', 'cps', 1], // cps = counts per second
+      ['PREFIX_total', 'sum(rate(...[$__rate_interval]))', 'cps', 1],
+      ['PREFIX_seconds_count', 'sum(rate(...[$__rate_interval]))', 'cps', 1],
       // rate with seconds per second
-      ['PREFIX_seconds_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'none', 1], // s/s
+      ['PREFIX_seconds_total', 'sum(rate(...[$__rate_interval]))', 'none', 1], // s/s
       // rate with bytes per second
-      ['PREFIX_bytes_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'Bps', 1], // bytes/s
+      ['PREFIX_bytes_total', 'sum(rate(...[$__rate_interval]))', 'Bps', 1], // bytes/s
       // mean with non-rated units
       [
         'PREFIX_seconds_sum',
-        'sum(rate(PREFIX_seconds_sum{${filters}}[$__rate_interval]) ${otel_join_query})/sum(rate(PREFIX_seconds_count{${filters}}[$__rate_interval]) ${otel_join_query})',
+        'sum(rate(PREFIX_seconds_sum{${filters}}[$__rate_interval]))/sum(rate(PREFIX_seconds_count{${filters}}[$__rate_interval]))',
         's',
         1,
       ],
       [
         'PREFIX_bytes_sum',
-        'sum(rate(PREFIX_bytes_sum{${filters}}[$__rate_interval]) ${otel_join_query})/sum(rate(PREFIX_bytes_count{${filters}}[$__rate_interval]) ${otel_join_query})',
+        'sum(rate(PREFIX_bytes_sum{${filters}}[$__rate_interval]))/sum(rate(PREFIX_bytes_count{${filters}}[$__rate_interval]))',
         'bytes',
         1,
       ],
       // ***WE DEFAULT TO HEATMAP HERE
       // Bucket
-      ['PREFIX_bucket', 'sum by(le) (rate(...[$__rate_interval]) ${otel_join_query})', 'none', 1],
-      ['PREFIX_seconds_bucket', 'sum by(le) (rate(...[$__rate_interval]) ${otel_join_query})', 's', 1],
-      ['PREFIX_bytes_bucket', 'sum by(le) (rate(...[$__rate_interval]) ${otel_join_query})', 'bytes', 1],
+      ['PREFIX_bucket', 'sum by(le) (rate(...[$__rate_interval]))', 'none', 1],
+      ['PREFIX_seconds_bucket', 'sum by(le) (rate(...[$__rate_interval]))', 's', 1],
+      ['PREFIX_bytes_bucket', 'sum by(le) (rate(...[$__rate_interval]))', 'bytes', 1],
     ])('Given metric %p expect %p with unit %p', (metric, expr, unit, queryCount) => {
       const result = getAutoQueriesForMetric(metric);
 
@@ -183,32 +181,32 @@ describe('getAutoQueriesForMetric', () => {
   describe('Consider result.preview query (only first)', () => {
     it.each([
       // no rate
-      ['PREFIX_general', 'avg(... ${otel_join_query})', 'none'],
-      ['PREFIX_bytes', 'avg(... ${otel_join_query})', 'bytes'],
-      ['PREFIX_seconds', 'avg(... ${otel_join_query})', 's'],
+      ['PREFIX_general', 'avg(...)', 'none'],
+      ['PREFIX_bytes', 'avg(...)', 'bytes'],
+      ['PREFIX_seconds', 'avg(...)', 's'],
       // rate with counts per second
-      ['PREFIX_count', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'cps'], // cps = counts per second
-      ['PREFIX_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'cps'],
-      ['PREFIX_seconds_count', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'cps'],
+      ['PREFIX_count', 'sum(rate(...[$__rate_interval]))', 'cps'], // cps = counts per second
+      ['PREFIX_total', 'sum(rate(...[$__rate_interval]))', 'cps'],
+      ['PREFIX_seconds_count', 'sum(rate(...[$__rate_interval]))', 'cps'],
       // rate with seconds per second
-      ['PREFIX_seconds_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'none'], // s/s
+      ['PREFIX_seconds_total', 'sum(rate(...[$__rate_interval]))', 'none'], // s/s
       // rate with bytes per second
-      ['PREFIX_bytes_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})', 'Bps'], // bytes/s
+      ['PREFIX_bytes_total', 'sum(rate(...[$__rate_interval]))', 'Bps'], // bytes/s
       // mean with non-rated units
       [
         'PREFIX_seconds_sum',
-        'sum(rate(PREFIX_seconds_sum{${filters}}[$__rate_interval]) ${otel_join_query})/sum(rate(PREFIX_seconds_count{${filters}}[$__rate_interval]) ${otel_join_query})',
+        'sum(rate(PREFIX_seconds_sum{${filters}}[$__rate_interval]))/sum(rate(PREFIX_seconds_count{${filters}}[$__rate_interval]))',
         's',
       ],
       [
         'PREFIX_bytes_sum',
-        'sum(rate(PREFIX_bytes_sum{${filters}}[$__rate_interval]) ${otel_join_query})/sum(rate(PREFIX_bytes_count{${filters}}[$__rate_interval]) ${otel_join_query})',
+        'sum(rate(PREFIX_bytes_sum{${filters}}[$__rate_interval]))/sum(rate(PREFIX_bytes_count{${filters}}[$__rate_interval]))',
         'bytes',
       ],
       // Bucket
-      ['PREFIX_bucket', 'sum by(le) (rate(...[$__rate_interval]) ${otel_join_query})', 'none'],
-      ['PREFIX_seconds_bucket', 'sum by(le) (rate(...[$__rate_interval]) ${otel_join_query})', 's'],
-      ['PREFIX_bytes_bucket', 'sum by(le) (rate(...[$__rate_interval]) ${otel_join_query})', 'bytes'],
+      ['PREFIX_bucket', 'sum by(le) (rate(...[$__rate_interval]))', 'none'],
+      ['PREFIX_seconds_bucket', 'sum by(le) (rate(...[$__rate_interval]))', 's'],
+      ['PREFIX_bytes_bucket', 'sum by(le) (rate(...[$__rate_interval]))', 'bytes'],
     ])('Given metric %p expect %p with unit %p', (metric, expr, unit) => {
       const result = getAutoQueriesForMetric(metric);
 
@@ -226,44 +224,32 @@ describe('getAutoQueriesForMetric', () => {
   describe('Consider result.breakdown query (only first)', () => {
     it.each([
       // no rate
-      ['PREFIX_general', 'avg(... ${otel_join_query})by(${groupby})', 'none'],
-      ['PREFIX_bytes', 'avg(... ${otel_join_query})by(${groupby})', 'bytes'],
-      ['PREFIX_seconds', 'avg(... ${otel_join_query})by(${groupby})', 's'],
+      ['PREFIX_general', 'avg(...)by(${groupby})', 'none'],
+      ['PREFIX_bytes', 'avg(...)by(${groupby})', 'bytes'],
+      ['PREFIX_seconds', 'avg(...)by(${groupby})', 's'],
       // rate with counts per second
-      ['PREFIX_count', 'sum(rate(...[$__rate_interval]) ${otel_join_query})by(${groupby})', 'cps'], // cps = counts per second
-      ['PREFIX_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})by(${groupby})', 'cps'],
-      ['PREFIX_seconds_count', 'sum(rate(...[$__rate_interval]) ${otel_join_query})by(${groupby})', 'cps'],
+      ['PREFIX_count', 'sum(rate(...[$__rate_interval]))by(${groupby})', 'cps'], // cps = counts per second
+      ['PREFIX_total', 'sum(rate(...[$__rate_interval]))by(${groupby})', 'cps'],
+      ['PREFIX_seconds_count', 'sum(rate(...[$__rate_interval]))by(${groupby})', 'cps'],
       // rate with seconds per second
-      ['PREFIX_seconds_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})by(${groupby})', 'none'], // s/s
+      ['PREFIX_seconds_total', 'sum(rate(...[$__rate_interval]))by(${groupby})', 'none'], // s/s
       // rate with bytes per second
-      ['PREFIX_bytes_total', 'sum(rate(...[$__rate_interval]) ${otel_join_query})by(${groupby})', 'Bps'], // bytes/s
+      ['PREFIX_bytes_total', 'sum(rate(...[$__rate_interval]))by(${groupby})', 'Bps'], // bytes/s
       // mean with non-rated units
       [
         'PREFIX_seconds_sum',
-        'sum(rate(PREFIX_seconds_sum{${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})/sum(rate(PREFIX_seconds_count{${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})',
+        'sum(rate(PREFIX_seconds_sum{${filters}}[$__rate_interval]))by(${groupby})/sum(rate(PREFIX_seconds_count{${filters}}[$__rate_interval]))by(${groupby})',
         's',
       ],
       [
         'PREFIX_bytes_sum',
-        'sum(rate(PREFIX_bytes_sum{${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})/sum(rate(PREFIX_bytes_count{${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})',
+        'sum(rate(PREFIX_bytes_sum{${filters}}[$__rate_interval]))by(${groupby})/sum(rate(PREFIX_bytes_count{${filters}}[$__rate_interval]))by(${groupby})',
         'bytes',
       ],
       // Bucket
-      [
-        'PREFIX_bucket',
-        'histogram_quantile(0.5, sum by(le, ${groupby}) (rate(...[$__rate_interval]) ${otel_join_query}))',
-        'none',
-      ],
-      [
-        'PREFIX_seconds_bucket',
-        'histogram_quantile(0.5, sum by(le, ${groupby}) (rate(...[$__rate_interval]) ${otel_join_query}))',
-        's',
-      ],
-      [
-        'PREFIX_bytes_bucket',
-        'histogram_quantile(0.5, sum by(le, ${groupby}) (rate(...[$__rate_interval]) ${otel_join_query}))',
-        'bytes',
-      ],
+      ['PREFIX_bucket', 'histogram_quantile(0.5, sum by(le, ${groupby}) (rate(...[$__rate_interval])))', 'none'],
+      ['PREFIX_seconds_bucket', 'histogram_quantile(0.5, sum by(le, ${groupby}) (rate(...[$__rate_interval])))', 's'],
+      ['PREFIX_bytes_bucket', 'histogram_quantile(0.5, sum by(le, ${groupby}) (rate(...[$__rate_interval])))', 'bytes'],
     ])('Given metric %p expect %p with unit %p', (metric, expr, unit) => {
       const result = getAutoQueriesForMetric(metric);
 
@@ -296,15 +282,15 @@ describe('getAutoQueriesForMetric', () => {
             variant: 'percentiles',
             unit: 'none',
             exprs: [
-              'histogram_quantile(0.99, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
-              'histogram_quantile(0.9, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
-              'histogram_quantile(0.5, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
+              'histogram_quantile(0.99, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
+              'histogram_quantile(0.9, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
+              'histogram_quantile(0.5, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
             ],
           },
           {
             variant: 'heatmap',
             unit: 'none',
-            exprs: ['sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query})'],
+            exprs: ['sum by(le) (rate(${metric}{${filters}}[$__rate_interval]))'],
           },
         ],
       ],
@@ -315,15 +301,15 @@ describe('getAutoQueriesForMetric', () => {
             variant: 'percentiles',
             unit: 's',
             exprs: [
-              'histogram_quantile(0.99, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
-              'histogram_quantile(0.9, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
-              'histogram_quantile(0.5, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
+              'histogram_quantile(0.99, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
+              'histogram_quantile(0.9, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
+              'histogram_quantile(0.5, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
             ],
           },
           {
             variant: 'heatmap',
             unit: 's',
-            exprs: ['sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query})'],
+            exprs: ['sum by(le) (rate(${metric}{${filters}}[$__rate_interval]))'],
           },
         ],
       ],
@@ -334,15 +320,15 @@ describe('getAutoQueriesForMetric', () => {
             variant: 'percentiles',
             unit: 'bytes',
             exprs: [
-              'histogram_quantile(0.99, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
-              'histogram_quantile(0.9, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
-              'histogram_quantile(0.5, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))',
+              'histogram_quantile(0.99, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
+              'histogram_quantile(0.9, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
+              'histogram_quantile(0.5, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))',
             ],
           },
           {
             variant: 'heatmap',
             unit: 'bytes',
-            exprs: ['sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query})'],
+            exprs: ['sum by(le) (rate(${metric}{${filters}}[$__rate_interval]))'],
           },
         ],
       ],
@@ -360,7 +346,7 @@ describe('getAutoQueriesForMetric', () => {
   });
 
   describe('Able to handle unconventional metric names', () => {
-    it.each([['PRODUCT_High_Priority_items_', 'avg(... ${otel_join_query})', 'none', 1]])(
+    it.each([['PRODUCT_High_Priority_items_', 'avg(...)', 'none', 1]])(
       'Given metric %p expect %p with unit %p',
       (metric, expr, unit, queryCount) => {
         const result = getAutoQueriesForMetric(metric);
@@ -379,25 +365,25 @@ describe('getAutoQueriesForMetric', () => {
 describe('generateBaseQuery', () => {
   it('should generate a non-rate non-UTF8 base query', () => {
     expect(generateBaseQuery({ isRateQuery: false, isUtf8Metric: false })).toBe(
-      `${VAR_METRIC_EXPR}{${VAR_FILTERS_EXPR}} ${VAR_OTEL_JOIN_QUERY_EXPR}`
+      `${VAR_METRIC_EXPR}{${VAR_FILTERS_EXPR}}`
     );
   });
 
   it('should generate a rate non-UTF8 base query', () => {
     expect(generateBaseQuery({ isRateQuery: true, isUtf8Metric: false })).toBe(
-      `rate(${VAR_METRIC_EXPR}{${VAR_FILTERS_EXPR}}[$__rate_interval]) ${VAR_OTEL_JOIN_QUERY_EXPR}`
+      `rate(${VAR_METRIC_EXPR}{${VAR_FILTERS_EXPR}}[$__rate_interval])`
     );
   });
 
   it('should generate a non-rate UTF8 base query', () => {
     expect(generateBaseQuery({ isRateQuery: false, isUtf8Metric: true })).toBe(
-      `{"${VAR_METRIC_EXPR}", ${VAR_FILTERS_EXPR}} ${VAR_OTEL_JOIN_QUERY_EXPR}`
+      `{"${VAR_METRIC_EXPR}", ${VAR_FILTERS_EXPR}}`
     );
   });
 
   it('should generate a rate UTF8 base query', () => {
     expect(generateBaseQuery({ isRateQuery: true, isUtf8Metric: true })).toBe(
-      `rate({"${VAR_METRIC_EXPR}", ${VAR_FILTERS_EXPR}}[$__rate_interval]) ${VAR_OTEL_JOIN_QUERY_EXPR}`
+      `rate({"${VAR_METRIC_EXPR}", ${VAR_FILTERS_EXPR}}[$__rate_interval])`
     );
   });
 
@@ -408,9 +394,7 @@ describe('generateBaseQuery', () => {
         isUtf8Metric: false,
         groupings: ['le', 'job'],
       })
-    ).toBe(
-      `sum by(le, job) (rate(${VAR_METRIC_EXPR}{${VAR_FILTERS_EXPR}}[$__rate_interval]) ${VAR_OTEL_JOIN_QUERY_EXPR})`
-    );
+    ).toBe(`sum by(le, job) (rate(${VAR_METRIC_EXPR}{${VAR_FILTERS_EXPR}}[$__rate_interval]))`);
   });
 
   it('should generate a grouped UTF8 rate query', () => {
@@ -420,8 +404,6 @@ describe('generateBaseQuery', () => {
         isUtf8Metric: true,
         groupings: ['le', 'instance'],
       })
-    ).toBe(
-      `sum by(le, instance) (rate({"${VAR_METRIC_EXPR}", ${VAR_FILTERS_EXPR}}[$__rate_interval]) ${VAR_OTEL_JOIN_QUERY_EXPR})`
-    );
+    ).toBe(`sum by(le, instance) (rate({"${VAR_METRIC_EXPR}", ${VAR_FILTERS_EXPR}}[$__rate_interval]))`);
   });
 });

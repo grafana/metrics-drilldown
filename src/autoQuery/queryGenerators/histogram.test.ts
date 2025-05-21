@@ -21,7 +21,7 @@ describe('createHistogramMetricQueryDefs utf8=false', () => {
     const p50Query = result.breakdown.queries[0];
 
     expect(p50Query.expr).toBe(
-      'histogram_quantile(0.5, sum by(le, ${groupby}) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))'
+      'histogram_quantile(0.5, sum by(le, ${groupby}) (rate(${metric}{${filters}}[$__rate_interval])))'
     );
     expect(p50Query.legendFormat).toBe('{{${groupby}}}');
   });
@@ -31,13 +31,13 @@ describe('createHistogramMetricQueryDefs utf8=false', () => {
     const percentileQueries = result.variants[0].queries;
 
     expect(percentileQueries[0].expr).toBe(
-      'histogram_quantile(0.99, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))'
+      'histogram_quantile(0.99, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))'
     );
     expect(percentileQueries[1].expr).toBe(
-      'histogram_quantile(0.9, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))'
+      'histogram_quantile(0.9, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))'
     );
     expect(percentileQueries[2].expr).toBe(
-      'histogram_quantile(0.5, sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query}))'
+      'histogram_quantile(0.5, sum by(le) (rate(${metric}{${filters}}[$__rate_interval])))'
     );
   });
 
@@ -45,7 +45,7 @@ describe('createHistogramMetricQueryDefs utf8=false', () => {
     const result = createHistogramMetricQueryDefs(ctx);
     const heatmapQuery = result.preview.queries[0];
 
-    expect(heatmapQuery.expr).toBe('sum by(le) (rate(${metric}{${filters}}[$__rate_interval]) ${otel_join_query})');
+    expect(heatmapQuery.expr).toBe('sum by(le) (rate(${metric}{${filters}}[$__rate_interval]))');
     expect(result.preview.variant).toBe('heatmap');
   });
 });
@@ -70,7 +70,7 @@ describe('createHistogramMetricQueryDefs utf8=true', () => {
     const p50Query = result.breakdown.queries[0];
 
     expect(p50Query.expr).toBe(
-      'histogram_quantile(0.5, sum by(le, ${groupby}) (rate({"${metric}", ${filters}}[$__rate_interval]) ${otel_join_query}))'
+      'histogram_quantile(0.5, sum by(le, ${groupby}) (rate({"${metric}", ${filters}}[$__rate_interval])))'
     );
     expect(p50Query.legendFormat).toBe('{{${groupby}}}');
   });
@@ -80,13 +80,13 @@ describe('createHistogramMetricQueryDefs utf8=true', () => {
     const percentileQueries = result.variants[0].queries;
 
     expect(percentileQueries[0].expr).toBe(
-      'histogram_quantile(0.99, sum by(le) (rate({"${metric}", ${filters}}[$__rate_interval]) ${otel_join_query}))'
+      'histogram_quantile(0.99, sum by(le) (rate({"${metric}", ${filters}}[$__rate_interval])))'
     );
     expect(percentileQueries[1].expr).toBe(
-      'histogram_quantile(0.9, sum by(le) (rate({"${metric}", ${filters}}[$__rate_interval]) ${otel_join_query}))'
+      'histogram_quantile(0.9, sum by(le) (rate({"${metric}", ${filters}}[$__rate_interval])))'
     );
     expect(percentileQueries[2].expr).toBe(
-      'histogram_quantile(0.5, sum by(le) (rate({"${metric}", ${filters}}[$__rate_interval]) ${otel_join_query}))'
+      'histogram_quantile(0.5, sum by(le) (rate({"${metric}", ${filters}}[$__rate_interval])))'
     );
   });
 
@@ -94,7 +94,7 @@ describe('createHistogramMetricQueryDefs utf8=true', () => {
     const result = createHistogramMetricQueryDefs(ctx);
     const heatmapQuery = result.preview.queries[0];
 
-    expect(heatmapQuery.expr).toBe('sum by(le) (rate({"${metric}", ${filters}}[$__rate_interval]) ${otel_join_query})');
+    expect(heatmapQuery.expr).toBe('sum by(le) (rate({"${metric}", ${filters}}[$__rate_interval]))');
     expect(result.preview.variant).toBe('heatmap');
   });
 });

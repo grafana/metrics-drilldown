@@ -2,7 +2,6 @@ import { type AdHocVariableFilter, type RawTimeRange, type Scope } from '@grafan
 import { getPrometheusTime, PromQueryModeller, utf8Support } from '@grafana/prometheus';
 import { config, getBackendSrv } from '@grafana/runtime';
 
-import { limitOtelMatchTerms } from '../otel/util';
 import { callSuggestionsApi, type SuggestionsResponse } from '../utils';
 
 const LIMIT_REACHED = 'results truncated due to limit';
@@ -14,23 +13,19 @@ export async function getMetricNames(
   timeRange: RawTimeRange,
   scopes: Scope[],
   filters: AdHocVariableFilter[],
-  jobs: string[],
-  instances: string[],
   limit?: number
-): Promise<SuggestionsResponse & { limitReached: boolean; missingOtelTargets: boolean }> {
+): Promise<SuggestionsResponse & { limitReached: boolean }> {
   if (!config.featureToggles.enableScopesInMetricsExplore) {
-    return await getMetricNamesWithoutScopes(dataSourceUid, timeRange, filters, jobs, instances, limit);
+    return await getMetricNamesWithoutScopes(dataSourceUid, timeRange, filters, limit);
   }
 
-  return getMetricNamesWithScopes(dataSourceUid, timeRange, scopes, filters, jobs, instances, limit);
+  return getMetricNamesWithScopes(dataSourceUid, timeRange, scopes, filters, limit);
 }
 
 export async function getMetricNamesWithoutScopes(
   dataSourceUid: string,
   timeRange: RawTimeRange,
   adhocFilters: AdHocVariableFilter[],
-  jobs: string[],
-  instances: string[],
   limit?: number
 ) {
   const matchTerms = config.featureToggles.prometheusSpecialCharsInLabelValues
@@ -38,14 +33,6 @@ export async function getMetricNamesWithoutScopes(
         removeBrackets(queryModeller.renderLabels([{ label: filter.key, op: filter.operator, value: filter.value }]))
       )
     : adhocFilters.map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`);
-  let missingOtelTargets = false;
-
-  if (jobs.length > 0 && instances.length > 0) {
-    const otelMatches = limitOtelMatchTerms(matchTerms, jobs, instances);
-    missingOtelTargets = otelMatches.missingOtelTargets;
-    matchTerms.push(otelMatches.jobsRegex);
-    matchTerms.push(otelMatches.instancesRegex);
-  }
 
   const filters = `{${matchTerms.join(',')}}`;
 
@@ -60,10 +47,10 @@ export async function getMetricNamesWithoutScopes(
   const response = await getBackendSrv().get<SuggestionsResponse>(url, params, 'metrics-drilldown-names');
 
   if (limit && response.warnings?.includes(LIMIT_REACHED)) {
-    return { ...response, limitReached: true, missingOtelTargets };
+    return { ...response, limitReached: true };
   }
 
-  return { ...response, limitReached: false, missingOtelTargets };
+  return { ...response, limitReached: false };
 }
 
 export async function getMetricNamesWithScopes(
@@ -71,8 +58,6 @@ export async function getMetricNamesWithScopes(
   timeRange: RawTimeRange,
   scopes: Scope[],
   filters: AdHocVariableFilter[],
-  jobs: string[],
-  instances: string[],
   limit?: number
 ) {
   const response = await callSuggestionsApi(
@@ -85,24 +70,9 @@ export async function getMetricNamesWithScopes(
     'metrics-drilldown-names'
   );
 
-  if (jobs.length > 0 && instances.length > 0) {
-    filters.push({
-      key: 'job',
-      operator: '=~',
-      value: jobs?.join('|') || '',
-    });
-
-    filters.push({
-      key: 'instance',
-      operator: '=~',
-      value: instances?.join('|') || '',
-    });
-  }
-
   return {
     ...response.data,
     limitReached: !!limit && !!response.data.warnings?.includes(LIMIT_REACHED),
-    missingOtelTargets: false,
   };
 }
 

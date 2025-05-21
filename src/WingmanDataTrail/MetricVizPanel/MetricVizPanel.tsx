@@ -210,7 +210,6 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       metric: metricName,
       filters,
       isRateQuery,
-      useOtelJoin: false,
       ignoreUsage: true,
       groupings,
       ...(prometheusFunction ? { nonRateQueryFunction: prometheusFunction as NonRateQueryFunction } : {}),
