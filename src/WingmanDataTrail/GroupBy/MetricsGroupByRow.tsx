@@ -29,6 +29,7 @@ import {
   MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
+import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 import { GroupsIcon } from 'WingmanDataTrail/SideBar/custom-icons/GroupsIcon';
 
 import {
@@ -201,15 +202,12 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
             {shouldDisplayShowMoreButton && (
               <div className={styles.footer}>
-                <Button
-                  variant="secondary"
-                  fill="outline"
+                <ShowMoreButton
+                  label="metric"
+                  batchSizes={batchSizes}
                   onClick={onClickShowMore}
                   tooltip={`Show more metrics for ${labelName}="${labelValue}"`}
-                  tooltipPlacement="top"
-                >
-                  Show {batchSizes.increment} more metrics ({batchSizes.current}/{batchSizes.total})
-                </Button>
+                />
               </div>
             )}
           </CollapsableSection>

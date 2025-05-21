@@ -20,13 +20,12 @@ import { PanelMenu } from '../Menu/PanelMenu';
 import { getVariablesWithMetricConstant, MDP_METRIC_PREVIEW, trailDS, VAR_FILTERS } from '../shared';
 import { getColorByIndex } from '../utils';
 import { hideEmptyPreviews } from './hideEmptyPreviews';
-import { NativeHistogramBadge } from './NativeHistogramBadge';
 import { SelectMetricAction } from './SelectMetricAction';
+import { NativeHistogramBadge } from '../NativeHistogramBadge';
 
 interface PreviewPanelState extends SceneObjectState {
   body: SceneObject;
   metric: string;
-  hasOtelResources: boolean;
   isHistogram: boolean;
 }
 
@@ -60,7 +59,6 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
       isRateQuery,
       groupings,
       ignoreUsage: true,
-      useOtelJoin: this.state.hasOtelResources,
     });
 
     this.setState({
@@ -109,7 +107,6 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
 export function getPreviewPanelFor(
   metric: string,
   index: number,
-  hasOtelResources: boolean,
   description?: string,
   nativeHistogram?: boolean,
   hideMenu?: boolean
@@ -152,7 +149,6 @@ export function getPreviewPanelFor(
       }),
       body: vizPanel,
       metric,
-      hasOtelResources,
       isHistogram,
     }),
   });
