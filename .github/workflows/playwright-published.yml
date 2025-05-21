@@ -56,6 +56,7 @@ jobs:
           # Secrets placed in the ci/repo/grafana/<repo>/<path> path in Vault
           repo_secrets: |
             policy_token=ci:ACCESS_POLICY_TOKEN
+          export_env: false
 
       - name: Sign and package
         uses: grafana/plugin-ci-workflows/actions/plugins/package@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
