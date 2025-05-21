@@ -4,7 +4,7 @@ import { SceneQueryRunner } from '@grafana/scenes';
 import { type MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
 import { createLokiRecordingRulesConnector } from '../Integrations/logs/lokiRecordingRules';
-import { type MetricScene } from '../MetricScene/MetricScene';
+import { type MetricScene } from '../MetricScene';
 import pluginJson from '../plugin.json';
 import { getDataSourceFetcher, type DataSource } from '../utils/utils.datasource';
 

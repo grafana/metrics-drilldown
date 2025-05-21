@@ -7,7 +7,7 @@ import React from 'react';
 import { MetricSelectScene } from 'MetricSelect/MetricSelectScene';
 
 import { reportExploreMetrics } from './interactions';
-import { MetricScene } from './MetricScene/MetricScene';
+import { MetricScene } from './MetricScene';
 import { getTrailFor } from './utils';
 
 export interface DataTrailSettingsState extends SceneObjectState {

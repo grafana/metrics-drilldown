@@ -15,13 +15,12 @@ import {
 import { Alert, Button } from '@grafana/ui';
 import React from 'react';
 
-import { getLabelValueFromDataFrame } from 'services/levels';
-import { fuzzySearch } from 'services/search';
-import { sortSeries } from 'services/sorting';
-
 import { BreakdownSearchReset } from './BreakdownSearchScene';
 import { type LabelBreakdownSortingOption } from './SortByScene';
 import { findSceneObjectsByType } from './utils';
+import { getLabelValueFromDataFrame } from '../services/levels';
+import { fuzzySearch } from '../services/search';
+import { sortSeries } from '../services/sorting';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;

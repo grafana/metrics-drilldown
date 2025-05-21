@@ -5,7 +5,7 @@ import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
 import { DataTrail } from './DataTrail';
-import { MetricScene } from './MetricScene/MetricScene';
+import { MetricScene } from './MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { DataSourceType, MockDataSourceSrv } from './mocks/datasource';
 import {

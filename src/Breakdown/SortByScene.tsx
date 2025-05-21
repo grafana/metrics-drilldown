@@ -4,7 +4,7 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Combobox, Field, IconButton, useStyles2, type ComboboxOption } from '@grafana/ui';
 import React from 'react';
 
-import { getSortByPreference, setSortByPreference } from '../../services/store';
+import { getSortByPreference, setSortByPreference } from '../services/store';
 
 export interface SortBySceneState extends SceneObjectState {
   target: 'fields' | 'labels';

@@ -3,10 +3,10 @@ import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObject
 import { Button } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from 'interactions';
-import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_GROUP_LEFT, VAR_OTEL_RESOURCES } from 'shared';
-import { getTrailFor } from 'utils';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { reportExploreMetrics } from '../interactions';
+import { VAR_OTEL_AND_METRIC_FILTERS, VAR_OTEL_GROUP_LEFT, VAR_OTEL_RESOURCES } from '../shared';
+import { getTrailFor } from '../utils';
+import { isAdHocFiltersVariable } from '../utils/utils.variables';
 
 export interface AddToFiltersGraphActionState extends SceneObjectState {
   frame: DataFrame;

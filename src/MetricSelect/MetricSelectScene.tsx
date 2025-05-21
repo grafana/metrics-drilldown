@@ -33,7 +33,7 @@ import { setOtelExperienceToggleState } from 'services/store';
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
-import { MetricScene } from '../MetricScene/MetricScene';
+import { MetricScene } from '../MetricScene';
 import {
   MetricSelectedEvent,
   RefreshMetricsEvent,
