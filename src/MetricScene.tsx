@@ -218,7 +218,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     const { actionView } = metricScene.useState();
 
     return (
-      <Box paddingY={1} data-testid="metric-scene-details">
+      <Box paddingY={1} data-testid="action-bar">
         <div className={styles.actions}>
           <Stack gap={1}>
             <ToolbarButton

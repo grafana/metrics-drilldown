@@ -9,6 +9,6 @@ test.describe('Metrics Scene view', () => {
   });
 
   test('Core UI elements', async ({ metricSceneView }) => {
-    await metricSceneView.assertCoreUI();
+    await metricSceneView.assertCoreUI(METRIC_NAME);
   });
 });
