@@ -401,7 +401,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
             </Alert>
           )}
 
-          <div className={styles.content}>{body && <body.Component model={body} />}</div>
+          <div className={styles.content} data-testid="panels-list">
+            {body && <body.Component model={body} />}
+          </div>
         </StatusWrapper>
       </div>
     );

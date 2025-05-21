@@ -34,25 +34,21 @@ export class MetricSceneView extends DrilldownView {
     await this.appControls.assert(true);
 
     await expect(this.page.getByTestId('top-view').getByText(metricName)).toBeVisible();
-    await this.assertActionBar();
-  }
-
-  /* Action bar */
-
-  getActionBar() {
-    return this.page.getByTestId('action-bar');
-  }
-
-  async assertActionBar() {
-    await expect(this.getActionBar()).toBeVisible();
+    await expect(this.page.getByTestId('action-bar')).toBeVisible();
 
     await this.assertTabs();
+  }
+
+  /* Main vizualization */
+
+  getMainViz() {
+    return this.page.getByTestId('top-view').locator('[data-viz-panel-key]');
   }
 
   /* Tabs */
 
   getTabsList() {
-    return this.getActionBar().getByRole('tablist');
+    return this.page.getByRole('tablist');
   }
 
   async assertTabs() {
@@ -67,5 +63,31 @@ export class MetricSceneView extends DrilldownView {
 
   async selectTab(tabLabel: string) {
     await this.getTabsList().getByRole('tab', { name: tabLabel }).click();
+  }
+
+  /* Breakdown */
+
+  getLabelDropdown() {
+    return this.page.getByTestId('breakdown-label-selector');
+  }
+
+  async assertLabelDropdown(optionLabel: string) {
+    await expect(this.getLabelDropdown().locator('input')).toHaveValue(optionLabel);
+  }
+
+  getPanelsList() {
+    return this.getByTestId('panels-list');
+  }
+
+  async assertPanelsList() {
+    const panelsList = this.getPanelsList();
+    await expect(panelsList).toBeVisible();
+
+    // we have to wait... if not, the assertion below (on the count) will fail without waiting for elements to be in the DOM
+    // AFAIK, Playwright does not have an API to wait for multiple elements to be visible
+    await expect(panelsList.locator('[data-viz-panel-key]').first()).toBeVisible();
+
+    const panelsCount = await panelsList.locator('[data-viz-panel-key]').count();
+    expect(panelsCount).toBeGreaterThan(0);
   }
 }
