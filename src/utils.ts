@@ -26,7 +26,7 @@ import { ROUTES } from './constants';
 import { DataTrail } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { MetricScene } from './MetricScene';
+import { MetricScene } from './MetricScene/MetricScene';
 import { sortResources } from './otel/util';
 import { LOGS_METRIC, VAR_DATASOURCE_EXPR, VAR_OTEL_AND_METRIC_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';

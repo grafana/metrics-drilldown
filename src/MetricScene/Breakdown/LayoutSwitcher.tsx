@@ -11,9 +11,10 @@ import {
 import { RadioButtonGroup } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from '../interactions';
-import { getVewByPreference, setVewByPreference } from '../services/store';
-import { type MakeOptional } from '../shared';
+import { reportExploreMetrics } from 'interactions';
+import { getVewByPreference, setVewByPreference } from 'services/store';
+import { type MakeOptional } from 'shared';
+
 import { isBreakdownLayoutType, type BreakdownLayoutChangeCallback, type BreakdownLayoutType } from './types';
 
 export interface LayoutSwitcherState extends SceneObjectState {

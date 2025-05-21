@@ -27,26 +27,16 @@ import { Alert, Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/u
 import { isNumber, max, min, throttle } from 'lodash';
 import React, { useEffect, useState } from 'react';
 
-import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-
-import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
-import { type AutoQueryDef } from '../autoQuery/types';
-import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
-import { type DataTrail } from '../DataTrail';
-import { reportExploreMetrics } from '../interactions';
-import { MetricScene } from '../MetricScene';
-import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
-import { BreakdownSearchReset, BreakdownSearchScene } from './BreakdownSearchScene';
-import { ByFrameRepeater } from './ByFrameRepeater';
-import { LayoutSwitcher } from './LayoutSwitcher';
-import { SortByScene, SortCriteriaChanged } from './SortByScene';
-import { type BreakdownLayoutChangeCallback } from './types';
-import { getLabelOptions } from './utils';
-import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
-import { PanelMenu } from '../Menu/PanelMenu';
-import { updateOtelJoinWithGroupLeft } from '../otel/util';
-import { getSortByPreference } from '../services/store';
-import { ALL_VARIABLE_VALUE } from '../services/variables';
+import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
+import { type AutoQueryDef } from 'autoQuery/types';
+import { BreakdownLabelSelector } from 'BreakdownLabelSelector';
+import { type DataTrail } from 'DataTrail';
+import { reportExploreMetrics } from 'interactions';
+import { PanelMenu } from 'Menu/PanelMenu';
+import { MetricScene } from 'MetricScene/MetricScene';
+import { updateOtelJoinWithGroupLeft } from 'otel/util';
+import { getSortByPreference } from 'services/store';
+import { ALL_VARIABLE_VALUE } from 'services/variables';
 import {
   MDP_METRIC_PREVIEW,
   RefreshMetricsEvent,
@@ -56,10 +46,20 @@ import {
   VAR_GROUP_BY_EXP,
   VAR_MISSING_OTEL_TARGETS,
   VAR_OTEL_GROUP_LEFT,
-} from '../shared';
-import { StatusWrapper } from '../StatusWrapper';
-import { getColorByIndex, getTrailFor } from '../utils';
-import { isConstantVariable, isQueryVariable } from '../utils/utils.variables';
+} from 'shared';
+import { StatusWrapper } from 'StatusWrapper';
+import { getColorByIndex, getTrailFor } from 'utils';
+import { isConstantVariable, isQueryVariable } from 'utils/utils.variables';
+import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+
+import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
+import { BreakdownSearchReset, BreakdownSearchScene } from './BreakdownSearchScene';
+import { ByFrameRepeater } from './ByFrameRepeater';
+import { LayoutSwitcher } from './LayoutSwitcher';
+import { SortByScene, SortCriteriaChanged } from './SortByScene';
+import { type BreakdownLayoutChangeCallback } from './types';
+import { getLabelOptions } from './utils';
+import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
 
 const MAX_PANELS_IN_ALL_LABELS_BREAKDOWN = 60;
 
@@ -460,7 +460,6 @@ export function buildAllLayout(
 
     const vizPanel = PanelBuilders.timeseries()
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setOption('legend', { showLegend: false })
       .setTitle(option.label!)
       .setData(
         new SceneQueryRunner({

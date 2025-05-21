@@ -39,7 +39,7 @@ import { ROUTES } from './constants';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
-import { MetricScene } from './MetricScene';
+import { MetricScene } from './MetricScene/MetricScene';
 import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { getDeploymentEnvironments, getNonPromotedOtelResources, totalOtelResources } from './otel/api';
 import {

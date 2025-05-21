@@ -1,4 +1,4 @@
-import { type LabelBreakdownSortingOption } from 'Breakdown/SortByScene';
+import { type LabelBreakdownSortingOption } from 'MetricScene/Breakdown/SortByScene';
 
 import { OTEL_EXPERIENCE_ENABLED_KEY, TRAIL_BREAKDOWN_SORT_KEY, TRAIL_BREAKDOWN_VIEW_KEY } from '../shared';
 
