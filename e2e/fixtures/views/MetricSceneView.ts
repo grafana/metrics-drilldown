@@ -18,6 +18,10 @@ export class MetricSceneView extends DrilldownView {
   goto(urlSearchParams = new URLSearchParams()) {
     super.setPathName(`${PLUGIN_BASE_URL}/${ROUTES.Drilldown}`);
 
+    if (!urlSearchParams.has('metric')) {
+      throw new Error('goto Error: No metric specified in the URL search parameters!');
+    }
+
     // the spread order is important to override the default params (e.g. overriding "from" and "to")
     return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
