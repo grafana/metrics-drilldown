@@ -16,10 +16,10 @@ describe('createSummaryMetricQueryDefs', () => {
     expect(result.main.title).toBe('http.requests (average)');
     expect(result.breakdown.title).toBe('${metric}');
     expect(result.preview.queries[0].expr).toBe(
-      'sum(rate({"http.requests_sum", ${filters}}[$__rate_interval]) ${otel_join_query})/sum(rate({"http.requests_count", ${filters}}[$__rate_interval]) ${otel_join_query})'
+      'sum(rate({"http.requests_sum", ${filters}}[$__rate_interval]))/sum(rate({"http.requests_count", ${filters}}[$__rate_interval]))'
     );
     expect(result.breakdown.queries[0].expr).toBe(
-      'sum(rate({"http.requests_sum", ${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})/sum(rate({"http.requests_count", ${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})'
+      'sum(rate({"http.requests_sum", ${filters}}[$__rate_interval]))by(${groupby})/sum(rate({"http.requests_count", ${filters}}[$__rate_interval]))by(${groupby})'
     );
     expect(result.preview.unit).toBe('ms');
   });
@@ -38,10 +38,10 @@ describe('createSummaryMetricQueryDefs', () => {
     expect(result.main.title).toBe('cpu_usage_seconds (average)');
     expect(result.breakdown.title).toBe('${metric}');
     expect(result.preview.queries[0].expr).toBe(
-      'sum(rate(cpu_usage_seconds_sum{${filters}}[$__rate_interval]) ${otel_join_query})/sum(rate(cpu_usage_seconds_count{${filters}}[$__rate_interval]) ${otel_join_query})'
+      'sum(rate(cpu_usage_seconds_sum{${filters}}[$__rate_interval]))/sum(rate(cpu_usage_seconds_count{${filters}}[$__rate_interval]))'
     );
     expect(result.breakdown.queries[0].expr).toBe(
-      'sum(rate(cpu_usage_seconds_sum{${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})/sum(rate(cpu_usage_seconds_count{${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})'
+      'sum(rate(cpu_usage_seconds_sum{${filters}}[$__rate_interval]))by(${groupby})/sum(rate(cpu_usage_seconds_count{${filters}}[$__rate_interval]))by(${groupby})'
     );
     expect(result.preview.unit).toBe('s');
   });
