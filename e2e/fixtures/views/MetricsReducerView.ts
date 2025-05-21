@@ -147,11 +147,11 @@ export class MetricsReducerView extends DrilldownView {
     return this.getListControls().getByTestId('sort-by-select');
   }
 
-  async assertSelectedSortBy(expectedOptionName: SortByOption) {
+  async assertSelectedSortBy(expectedOptionName: SortByOptionNames) {
     await expect(this.getSortByDropdown().getByText(expectedOptionName)).toBeVisible();
   }
 
-  async selectSortByOption(expectedOptionName: SortByOption) {
+  async selectSortByOption(expectedOptionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
     await this.page.getByRole('option', { name: expectedOptionName }).locator('span').click();
   }
