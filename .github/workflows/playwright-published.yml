@@ -20,6 +20,17 @@ jobs:
       plugin-version: ${{ steps.get-version.outputs.plugin-version }}
       plugin-name: ${{ steps.get-name.outputs.plugin-name }}
     steps:
+      - name: Get vault secrets
+        id: get-secrets
+        uses: grafana/shared-workflows/actions/get-vault-secrets@get-vault-secrets-v1.2.0
+        with:
+          # Secrets placed in the ci/repo/grafana/<repo>/<path> path in Vault
+          repo_secrets: |
+            access_policy_token=ci:access_policy_token
+          export_env: false
+        permissions:
+          id-token: write
+
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -48,17 +59,6 @@ jobs:
         run: |
           name=$(jq -r .id dist/plugin.json)
           echo "plugin-name=$name" >> $GITHUB_OUTPUT
-
-      - name: Get vault secrets
-        id: get-secrets
-        uses: grafana/shared-workflows/actions/get-vault-secrets@get-vault-secrets-v1.2.0
-        with:
-          # Secrets placed in the ci/repo/grafana/<repo>/<path> path in Vault
-          repo_secrets: |
-            access_policy_token=ci:access_policy_token
-          export_env: false
-        permissions:
-          id-token: write
 
       - name: Sign and package
         uses: grafana/plugin-ci-workflows/actions/plugins/package@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
