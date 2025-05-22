@@ -57,6 +57,8 @@ jobs:
           repo_secrets: |
             access_policy_token=ci:access_policy_token
           export_env: false
+        permissions:
+          id-token: write
 
       - name: Sign and package
         uses: grafana/plugin-ci-workflows/actions/plugins/package@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
