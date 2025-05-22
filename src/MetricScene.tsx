@@ -266,14 +266,19 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
           {actionViewsDefinitions.map((tab, index) => {
             const label = tab.displayName;
             const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
+            const isActive = actionView === tab.value;
 
             const tabRender = (
               <Tab
                 key={index}
                 label={label}
                 counter={counter}
-                active={actionView === tab.value}
+                active={isActive}
                 onChangeTab={() => {
+                  if (isActive) {
+                    return;
+                  }
+
                   reportExploreMetrics('metric_action_view_changed', {
                     view: tab.value,
                     related_logs_count: metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()
