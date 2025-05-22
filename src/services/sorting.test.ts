@@ -41,6 +41,7 @@ const frameC = toDataFrame({
     },
   ],
 });
+const frameEmpty = toDataFrame({ fields: [] });
 
 describe('sortSeries', () => {
   test('Sorts series by standard deviation, descending', () => {
@@ -70,5 +71,10 @@ describe('sortSeries', () => {
 
     const result = sortSeries(series, 'alphabetical', 'desc');
     expect(result).toEqual(sortedSeries);
+  });
+  test('Does not throw on empty series', () => {
+    const series = [frameEmpty];
+
+    expect(() => sortSeries(series, 'alphabetical', 'asc')).not.toThrow();
   });
 });
