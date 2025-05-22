@@ -24,7 +24,6 @@ jobs:
         id: get-secrets
         uses: grafana/shared-workflows/actions/get-vault-secrets@get-vault-secrets-v1.2.0
         with:
-          # Secrets placed in the ci/repo/grafana/<repo>/<path> path in Vault
           repo_secrets: |
             access_policy_token=ci:access_policy_token
           export_env: false
