@@ -16,6 +16,8 @@ jobs:
   build:
     name: Build plugin
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     outputs:
       plugin-version: ${{ steps.get-version.outputs.plugin-version }}
       plugin-name: ${{ steps.get-name.outputs.plugin-name }}
@@ -44,8 +46,6 @@ jobs:
           repo_secrets: |
             access_policy_token=ci:access_policy_token
           export_env: false
-        permissions:
-          id-token: write
 
       - name: Get plugin version
         id: get-version
