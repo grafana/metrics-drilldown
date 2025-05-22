@@ -347,7 +347,7 @@ export function buildAllLayout(
 
     const vizPanel = PanelBuilders.timeseries()
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setOption('legend', { showLegend: false })
+      .setOption('legend', { showLegend: true })
       .setTitle(option.label!)
       .setData(
         new SceneQueryRunner({
