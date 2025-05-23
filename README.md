@@ -23,6 +23,26 @@ grafana cli plugins install grafana-metricsdrilldown-app
 - Node.js 22+
 - Docker Desktop
 
+For VSCode users, here's a handy project configuration:
+
+```json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.validate": ["typescript", "typescriptreact"]
+}
+```
+
 #### Install dependencies
 
 ```bash
