@@ -6,12 +6,14 @@ import {
   DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY,
   DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY,
 } from '../config/constants';
+import { MetricSceneView } from './views/MetricSceneView';
 import { MetricsReducerView } from './views/MetricsReducerView';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
   gotoPage: (path?: string) => Promise<AppPage>;
   metricsReducerView: MetricsReducerView;
+  metricSceneView: MetricSceneView;
 };
 
 export const test = base.extend<AppTestFixture>({
@@ -46,6 +48,10 @@ export const test = base.extend<AppTestFixture>({
   metricsReducerView: async ({ page }, use) => {
     const metricsReducerView = new MetricsReducerView(page, DEFAULT_STATIC_URL_SEARCH_PARAMS);
     await use(metricsReducerView);
+  },
+  metricSceneView: async ({ page }, use) => {
+    const metricSceneView = new MetricSceneView(page, DEFAULT_STATIC_URL_SEARCH_PARAMS);
+    await use(metricSceneView);
   },
 });
 

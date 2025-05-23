@@ -13,7 +13,7 @@ export function BreakdownLabelSelector({ options, value, onChange }: Readonly<Pr
   const styles = useStyles2(getStyles);
 
   return (
-    <div className={styles.select}>
+    <div className={styles.select} data-testid="breakdown-label-selector">
       <Combobox
         options={options.map((opt) => ({ label: opt.label || '', value: opt.value || '' }))}
         value={value || ''}

@@ -1,27 +1,27 @@
-import { type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 
 export class QuickSearchInput {
-  private page: Page;
+  private readonly locator: Locator;
 
-  constructor(page: Page) {
-    this.page = page;
+  constructor(private readonly page: Page) {
+    this.locator = page.getByRole('textbox', { name: /search metrics/i });
   }
 
-  getInput() {
-    return this.page.getByRole('textbox', { name: /search metrics/i });
+  get() {
+    return this.locator;
   }
 
   async enterText(searchText: string) {
-    await this.getInput().fill(searchText);
+    await this.get().fill(searchText);
     await this.page.waitForTimeout(250); // see SceneQuickFilter.DEBOUNCE_DELAY
   }
 
   clear() {
-    return this.getInput().clear();
+    return this.get().clear();
   }
 
   async assert(expectedValue: string, expectedResultsCount: string) {
-    await expect(this.getInput()).toHaveValue(expectedValue);
+    await expect(this.get()).toHaveValue(expectedValue);
     await expect(this.page.getByTestId('quick-filter-results-count')).toHaveText(expectedResultsCount);
   }
 }

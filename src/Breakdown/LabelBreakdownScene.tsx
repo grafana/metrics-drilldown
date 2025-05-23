@@ -290,7 +290,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
               </Field>
             )}
           </div>
-          <div className={styles.content}>{body && <body.Component model={body} />}</div>
+          <div className={styles.content} data-testid="panels-list">
+            {body && <body.Component model={body} />}
+          </div>
         </StatusWrapper>
       </div>
     );
@@ -345,7 +347,7 @@ export function buildAllLayout(
 
     const vizPanel = PanelBuilders.timeseries()
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setOption('legend', { showLegend: false })
+      .setOption('legend', { showLegend: true })
       .setTitle(option.label!)
       .setData(
         new SceneQueryRunner({

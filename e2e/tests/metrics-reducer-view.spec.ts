@@ -8,7 +8,6 @@ test.describe('Metrics reducer view', () => {
   });
 
   test('Core UI elements', async ({ metricsReducerView }) => {
-    await metricsReducerView.goto();
     await metricsReducerView.assertCoreUI();
   });
 
