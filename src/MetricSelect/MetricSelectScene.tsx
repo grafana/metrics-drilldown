@@ -543,9 +543,7 @@ function getStyles(theme: GrafanaTheme2) {
       marginBottom: theme.spacing(2),
     }),
     displayOption: css({
-      flexGrow: 0,
       marginBottom: 0,
-      minWidth: '184px',
     }),
     displayOptionTooltip: css({
       display: 'flex',
