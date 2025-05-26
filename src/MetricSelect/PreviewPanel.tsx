@@ -29,7 +29,6 @@ import { SelectMetricAction } from './SelectMetricAction';
 interface PreviewPanelState extends SceneObjectState {
   body: SceneObject;
   metric: string;
-  hasOtelResources: boolean;
   isHistogram: boolean;
   isNativeHistogram: boolean;
 }
@@ -65,7 +64,6 @@ export class PreviewPanel extends SceneObjectBase<PreviewPanelState> {
       isRateQuery,
       groupings,
       ignoreUsage: true,
-      useOtelJoin: this.state.hasOtelResources,
     });
 
     this.setState({
@@ -128,7 +126,6 @@ function getStyles(theme: GrafanaTheme2) {
 export function getPreviewPanelFor(
   metric: string,
   index: number,
-  hasOtelResources: boolean,
   description?: string,
   isNativeHistogram?: boolean,
   hideMenu?: boolean
@@ -165,7 +162,6 @@ export function getPreviewPanelFor(
       }),
       body: vizPanel,
       metric,
-      hasOtelResources,
       isHistogram,
       isNativeHistogram: Boolean(isNativeHistogram),
     }),

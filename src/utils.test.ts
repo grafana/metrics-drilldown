@@ -2,11 +2,8 @@ import { AdHocFiltersVariable, SceneObjectRef } from '@grafana/scenes';
 
 import { DataTrail } from './DataTrail';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { sortResources } from './otel/util';
-import { VAR_OTEL_AND_METRIC_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getDatasourceForNewTrail, limitAdhocProviders } from './utils';
-import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 jest.mock('./TrailStore/TrailStore', () => ({
   getTrailStore: jest.fn(),
@@ -36,13 +33,8 @@ jest.mock('@grafana/runtime', () => ({
   }),
 }));
 
-jest.mock('./otel/util', () => ({
-  sortResources: jest.fn(),
-}));
-
 describe('limitAdhocProviders', () => {
   let filtersVariable: AdHocFiltersVariable;
-  let otelAndMetricsVariable: AdHocFiltersVariable;
   let datasourceHelper: MetricDatasourceHelper;
   let dataTrail: DataTrail;
 
@@ -53,12 +45,6 @@ describe('limitAdhocProviders', () => {
 
     filtersVariable = new AdHocFiltersVariable({
       name: 'testVariable',
-      label: 'Test Variable',
-      type: 'adhoc',
-    });
-
-    otelAndMetricsVariable = new AdHocFiltersVariable({
-      name: VAR_OTEL_AND_METRIC_FILTERS,
       label: 'Test Variable',
       type: 'adhoc',
     });
@@ -93,14 +79,6 @@ describe('limitAdhocProviders', () => {
 
     expect(result.values).toHaveLength(10000);
     expect(result.replace).toBe(true);
-  });
-
-  it('should call sort resources and sort the promoted otel resources list if using the otel and metrics filter', async () => {
-    limitAdhocProviders(dataTrail, otelAndMetricsVariable, datasourceHelper);
-    if (isAdHocFiltersVariable(otelAndMetricsVariable) && otelAndMetricsVariable.state.getTagKeysProvider) {
-      await otelAndMetricsVariable.state.getTagKeysProvider(otelAndMetricsVariable, null);
-    }
-    expect(sortResources).toHaveBeenCalled();
   });
 });
 

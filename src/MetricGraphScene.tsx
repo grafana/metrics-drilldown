@@ -43,7 +43,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
     return (
       <div className={styles.container}>
-        <div className={stickyMainGraph ? styles.sticky : styles.nonSticky}>
+        <div className={stickyMainGraph ? styles.sticky : styles.nonSticky} data-testid="top-view">
           <topView.Component model={topView} />
         </div>
         {selectedTab && <selectedTab.Component model={selectedTab} />}

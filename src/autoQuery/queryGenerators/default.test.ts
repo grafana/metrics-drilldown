@@ -13,11 +13,9 @@ describe('createDefaultMetricQueryDefs', () => {
     const result = createDefaultMetricQueryDefs(context);
 
     expect(result.main.title).toBe('${metric} (overall per-second rate)');
-    expect(result.main.queries[0].expr).toBe(
-      'sum(rate({"${metric}", ${filters}}[$__rate_interval]) ${otel_join_query})'
-    );
+    expect(result.main.queries[0].expr).toBe('sum(rate({"${metric}", ${filters}}[$__rate_interval]))');
     expect(result.breakdown.queries[0].expr).toBe(
-      'sum(rate({"${metric}", ${filters}}[$__rate_interval]) ${otel_join_query})by(${groupby})'
+      'sum(rate({"${metric}", ${filters}}[$__rate_interval]))by(${groupby})'
     );
     expect(result.preview.unit).toBe('cps');
   });
@@ -33,8 +31,8 @@ describe('createDefaultMetricQueryDefs', () => {
     const result = createDefaultMetricQueryDefs(context);
 
     expect(result.main.title).toBe('${metric} (average)');
-    expect(result.main.queries[0].expr).toBe('avg(${metric}{${filters}} ${otel_join_query})');
-    expect(result.breakdown.queries[0].expr).toBe('avg(${metric}{${filters}} ${otel_join_query})by(${groupby})');
+    expect(result.main.queries[0].expr).toBe('avg(${metric}{${filters}})');
+    expect(result.breakdown.queries[0].expr).toBe('avg(${metric}{${filters}})by(${groupby})');
     expect(result.preview.unit).toBe('none');
   });
 });

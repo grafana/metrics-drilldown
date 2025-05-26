@@ -26,7 +26,7 @@ describe('getPreviewPanelFor', () => {
     const metricName = 'METRIC';
 
     function callAndGetExpr() {
-      const gridItem = getPreviewPanelFor(metricName, 0, false);
+      const gridItem = getPreviewPanelFor(metricName, 0);
       expect(gridItem).toBeInstanceOf(SceneCSSGridItem);
       const previewPanel = gridItem.state.body as PreviewPanel;
       expect(previewPanel).toBeInstanceOf(PreviewPanel);
@@ -59,7 +59,7 @@ describe('getPreviewPanelFor', () => {
   describe('heatmap panels', () => {
     test('When the metric name ends with _bucket, the query is formatted for a heatmap', () => {
       const metricName = 'METRIC_bucket';
-      const gridItem = getPreviewPanelFor(metricName, 0, false);
+      const gridItem = getPreviewPanelFor(metricName, 0);
       expect(gridItem).toBeInstanceOf(SceneCSSGridItem);
       const previewPanel = gridItem.state.body as PreviewPanel;
       expect(previewPanel).toBeInstanceOf(PreviewPanel);
@@ -71,7 +71,7 @@ describe('getPreviewPanelFor', () => {
 
     test('When the metric is a native histogram, the query is formatted for a heatmap', () => {
       const metricName = 'METRIC';
-      const gridItem = getPreviewPanelFor(metricName, 0, false, undefined, true);
+      const gridItem = getPreviewPanelFor(metricName, 0, undefined, true);
       expect(gridItem).toBeInstanceOf(SceneCSSGridItem);
       const previewPanel = gridItem.state.body as PreviewPanel;
       expect(previewPanel).toBeInstanceOf(PreviewPanel);

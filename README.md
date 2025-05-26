@@ -2,6 +2,8 @@
 
 The [Grafana Metrics Drilldown](https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics) app provides a queryless experience for browsing Prometheus-compatible metrics. Quickly find related metrics without writing PromQL queries.
 
+![Metrics Drilldown](src/img/metrics-drilldown.png)
+
 ## Installing in your own Grafana instance
 
 Grafana Metrics Drilldown will be preinstalled by default in all Grafana instances in the near future.
@@ -18,8 +20,8 @@ grafana cli plugins install grafana-metricsdrilldown-app
 
 #### Prerequisites
 
-- Node.js 22+
-- Docker Desktop
+- [Node.js 22+](https://nodejs.org/en)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) or any alternative, like [Orbstack](https://orbstack.dev/)
 
 #### Install dependencies
 
@@ -51,25 +53,15 @@ You can now visit `http://localhost:3001/a/grafana-metricsdrilldown-app` to use 
 
 ```bash
 # Runs the tests and watches for changes
-npm run test
+npm run tdd
 
-# Exits after running all the tests
-npm run test:ci
+# Exits after running all the tests and compute code coverage
+npm run test
 ```
 
 ##### End-to-end tests
 
-First, ensure that the Grafana server is running:
-
-```bash
-npm run server
-```
-
-Then, run the E2E tests:
-
-```bash
-npm run e2e
-```
+Please check our [end to end testing documentation](./docs/end-to-end-testing.md) for setup and guidelines.
 
 #### Run the linter
 

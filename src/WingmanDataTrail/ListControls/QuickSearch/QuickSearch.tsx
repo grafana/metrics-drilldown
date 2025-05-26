@@ -13,6 +13,7 @@ import { IconButton, Input, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce } from 'lodash';
 import React, { type KeyboardEvent } from 'react';
 
+import { reportExploreMetrics } from 'interactions';
 import { VAR_DATASOURCE } from 'shared';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
@@ -117,6 +118,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   }, 250);
 
   private updateValue(value: string) {
+    const wasEmpty = this.state.value === '';
+    const isNewSearch = wasEmpty && value !== '';
+
+    if (isNewSearch) {
+      reportExploreMetrics('quick_search_used', {});
+    }
+
     this.setState({ value });
     this.notifyValueChange(value);
   }

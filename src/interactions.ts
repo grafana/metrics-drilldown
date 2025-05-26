@@ -17,14 +17,12 @@ type Interactions = {
     | 'breakdown_panel'
       // By clicking on the label selector at the top of the breakdown
       | 'selector';
-    otel_resource_attribute?: boolean;
   };
   // User changed a label filter
   label_filter_changed: {
     label: string;
     action: 'added' | 'removed' | 'changed';
     cause: 'breakdown' | 'adhoc_filter';
-    otel_resource_attribute?: boolean;
   };
   // User changed the breakdown layout
   breakdown_layout_changed: { layout: BreakdownLayoutType };
@@ -103,14 +101,6 @@ type Interactions = {
         sortBy: BreakdownSortByOption;
       };
   wasm_not_supported: {};
-  missing_otel_labels_by_truncating_job_and_instance: {
-    metric?: string;
-  };
-  deployment_environment_migrated: {};
-  otel_experience_used: {};
-  otel_experience_toggled: {
-    value: 'on' | 'off';
-  };
   native_histogram_examples_closed: {};
   native_histogram_example_clicked: {
     metric: string;
@@ -163,23 +153,22 @@ export function reportExploreMetrics<E extends keyof Interactions, P extends Int
 /**
  * Reports a single label filter change event
  */
-function reportLabelFilterChange(label: string, action: 'added' | 'removed' | 'changed', otel?: boolean) {
+function reportLabelFilterChange(label: string, action: 'added' | 'removed' | 'changed') {
   reportExploreMetrics('label_filter_changed', {
     label,
     action,
     cause: 'adhoc_filter',
-    otel_resource_attribute: otel ?? false,
   });
 }
 
 /**
  * Detects and reports changes to an existing filter
  */
-function detectChangedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[], otel?: boolean) {
+function detectChangedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[]) {
   for (const oldFilter of oldFilters) {
     for (const newFilter of newFilters) {
       if (oldFilter.key === newFilter.key && oldFilter.value !== newFilter.value) {
-        reportLabelFilterChange(oldFilter.key, 'changed', otel);
+        reportLabelFilterChange(oldFilter.key, 'changed');
       }
     }
   }
@@ -210,14 +199,10 @@ function detectAddedFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHoc
 }
 
 /** Detect the single change in filters and report the event, assuming it came from manipulating the adhoc filter */
-export function reportChangeInLabelFilters(
-  newFilters: AdHocVariableFilter[],
-  oldFilters: AdHocVariableFilter[],
-  otel?: boolean
-) {
+export function reportChangeInLabelFilters(newFilters: AdHocVariableFilter[], oldFilters: AdHocVariableFilter[]) {
   if (newFilters.length === oldFilters.length) {
     // Same number of filters - check for changed values
-    detectChangedFilters(newFilters, oldFilters, otel);
+    detectChangedFilters(newFilters, oldFilters);
   } else if (newFilters.length < oldFilters.length) {
     // Filters were removed
     detectRemovedFilters(newFilters, oldFilters);

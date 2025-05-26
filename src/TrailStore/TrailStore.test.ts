@@ -1,6 +1,5 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 
-import { DataTrail } from '../DataTrail';
 import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
 import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY } from '../shared';
 import { TrailStore, type UrlSerializedTrail } from './TrailStore';
@@ -22,10 +21,7 @@ const URL_VALUES_BOOKMARK = {
   to: 'now',
   timezone: 'browser',
   // 'var-ds': 'edwxqcebl0cg0c',
-  'var-otel_resources': [''],
   'var-filters': [],
-  'var-otel_and_metric_filters': [''],
-  'var-deployment_environment': ['undefined'],
   // 'var-variant': 'onboard-filters-sidebar',
   // 'var-labelsWingman': '',
   'var-groupby': '$__all',
@@ -52,8 +48,6 @@ describe('TrailStore', () => {
         }),
       };
     });
-
-    jest.spyOn(DataTrail.prototype, 'checkDataSourceForOTelResources').mockImplementation(() => Promise.resolve());
 
     let localStore: Record<string, string> = {};
 
@@ -338,10 +332,7 @@ describe('TrailStore', () => {
               to: 'now',
               timezone,
               'var-ds': 'prom-mock',
-              'var-otel_resources': [''],
               'var-filters': [],
-              'var-otel_and_metric_filters': [''],
-              'var-deployment_environment': [''],
               refresh: '',
             },
           },

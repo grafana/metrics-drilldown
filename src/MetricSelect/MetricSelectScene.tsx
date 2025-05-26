@@ -21,27 +21,17 @@ import {
   type SceneObjectUrlValues,
   type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
-import { Alert, Badge, Combobox, Field, Icon, IconButton, InlineSwitch, Input, Tooltip, useStyles2 } from '@grafana/ui';
+import { Alert, Combobox, Field, Icon, IconButton, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce, isEqual } from 'lodash';
 import React, { useReducer, type SyntheticEvent } from 'react';
 
 import { UI_TEXT } from 'constants/ui';
-import { totalOtelResources } from 'otel/api';
-import { getOtelResourcesObject } from 'otel/util';
-import { setOtelExperienceToggleState } from 'services/store';
 
 import { Parser, type Node } from '../groop/parser';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
-import {
-  MetricSelectedEvent,
-  RefreshMetricsEvent,
-  VAR_DATASOURCE,
-  VAR_DATASOURCE_EXPR,
-  VAR_FILTERS,
-  VAR_OTEL_RESOURCES,
-} from '../shared';
+import { MetricSelectedEvent, RefreshMetricsEvent, VAR_DATASOURCE, VAR_DATASOURCE_EXPR, VAR_FILTERS } from '../shared';
 import { StatusWrapper } from '../StatusWrapper';
 import { getTrailFor } from '../utils';
 import { getMetricNames } from './api';
@@ -71,7 +61,6 @@ export interface MetricSelectSceneState extends SceneObjectState {
   metricNamesLoading?: boolean;
   metricNamesError?: string;
   metricNamesWarning?: string;
-  missingOtelTargets?: boolean;
 }
 
 const METRIC_PREFIX_ALL = 'all';
@@ -106,7 +95,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['metricPrefix'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE, VAR_OTEL_RESOURCES],
+    variableNames: [VAR_DATASOURCE],
     onReferencedVariableValueChanged: () => {
       // In all cases, we want to reload the metric names
       this._debounceRefreshMetricNames();
@@ -181,26 +170,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       }
     });
 
-    const otelResourcesVar = sceneGraph.lookupVariable(VAR_OTEL_RESOURCES, trail);
-    if (isAdHocFiltersVariable(otelResourcesVar)) {
-      this._subs.add(
-        otelResourcesVar.subscribeToState((newState, oldState) => {
-          // Only refresh if the filters have changed
-          if (!isEqual(newState.filters, oldState.filters)) {
-            this._debounceRefreshMetricNames();
-          }
-        })
-      );
-    }
-
-    this._subs.add(
-      trail.subscribeToState(() => {
-        // users will most likely not switch this off but for now,
-        // update metric names when changing useOtelExperience
-        this._debounceRefreshMetricNames();
-      })
-    );
-
     this._subs.add(
       trail.subscribeToState(() => {
         // build layout when toggled
@@ -261,24 +230,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     this.setState({ metricNamesLoading: true, metricNamesError: undefined, metricNamesWarning: undefined });
 
     try {
-      let jobsList: string[] = [];
-      let instancesList: string[] = [];
-      if (trail.state.useOtelExperience) {
-        const otelResourcesObject = getOtelResourcesObject(trail);
-        const otelTargets = await totalOtelResources(datasourceUid, timeRange, otelResourcesObject.filters);
-        jobsList = otelTargets?.jobs ?? [];
-        instancesList = otelTargets?.instances ?? [];
-      }
-
-      const response = await getMetricNames(
-        datasourceUid,
-        timeRange,
-        getSelectedScopes(),
-        filters,
-        jobsList,
-        instancesList,
-        MAX_METRIC_NAMES
-      );
+      const response = await getMetricNames(datasourceUid, timeRange, getSelectedScopes(), filters, MAX_METRIC_NAMES);
       const searchRegex = createJSRegExpFromSearchTerms(getMetricSearch(this));
       let metricNames = searchRegex
         ? response.data.filter((metric: string) => !searchRegex || searchRegex.test(metric))
@@ -300,12 +252,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
           `Add search terms or label filters to narrow down the number of metric names returned.`
         : undefined;
 
-      // if there are no otel targets for otel resources, there will be no labels
-      if (trail.state.useOtelExperience && (jobsList.length === 0 || instancesList.length === 0)) {
-        metricNames = [];
-        metricNamesWarning = undefined;
-      }
-
       let bodyLayout = this.state.body;
 
       // generate groups based on the search metrics input
@@ -318,7 +264,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
         metricNamesLoading: false,
         metricNamesWarning,
         metricNamesError: response.error,
-        missingOtelTargets: response.missingOtelTargets,
       });
     } catch (err: unknown) {
       let error = 'Unknown error';
@@ -432,8 +377,7 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
       }
       // refactor this into the query generator in future
       const isNative = trail.isNativeHistogram(metric.name);
-      const hasOtelResources = Boolean(trail.state.hasOtelResources);
-      const panel = getPreviewPanelFor(metric.name, index, hasOtelResources, description, isNative, true);
+      const panel = getPreviewPanelFor(metric.name, index, description, isNative, true);
       metric.itemRef = panel.getRef();
       metric.isPanel = true;
       children.push(panel);
@@ -475,43 +419,16 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     });
   };
 
-  public onToggleOtelExperience = () => {
-    const trail = getTrailFor(this);
-    const useOtelExperience = trail.state.useOtelExperience;
-    // set the startButtonClicked to null as we have gone past the owrkflow this is needed for
-    let startButtonClicked = false;
-    let resettingOtel = true;
-    if (useOtelExperience) {
-      reportExploreMetrics('otel_experience_toggled', { value: 'off' });
-      // if turning off OTel
-      resettingOtel = false;
-      trail.resetOtelExperience();
-    } else {
-      reportExploreMetrics('otel_experience_toggled', { value: 'on' });
-      trail.checkDataSourceForOTelResources();
-    }
-    setOtelExperienceToggleState(!useOtelExperience);
-    trail.setState({ useOtelExperience: !useOtelExperience, resettingOtel, startButtonClicked });
-  };
-
   public static readonly Component = ({ model }: SceneComponentProps<MetricSelectScene>) => {
-    const {
-      body,
-      metricNames,
-      metricNamesError,
-      metricNamesLoading,
-      metricNamesWarning,
-      rootGroup,
-      metricPrefix,
-      missingOtelTargets,
-    } = model.useState();
+    const { body, metricNames, metricNamesError, metricNamesLoading, metricNamesWarning, rootGroup, metricPrefix } =
+      model.useState();
     const { children } = body.useState();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles);
 
     const [warningDismissed, dismissWarning] = useReducer(() => true, false);
 
-    const { metricSearch, useOtelExperience, hasOtelResources, isStandardOtel, metric } = trail.useState();
+    const { metricSearch } = trail.useState();
 
     const tooStrict = children.length === 0 && metricSearch;
     const noMetrics = !metricNamesLoading && metricNames && metricNames.length === 0;
@@ -520,11 +437,11 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
     let blockingMessage;
 
     if (!isLoading) {
-      blockingMessage = missingOtelTargets
-        ? 'There are no metrics found. Please adjust your filters based on your OTel resource attributes.'
-        : (noMetrics && 'There are no results found. Try a different time range or a different data source.') ||
-          (tooStrict && 'There are no results found. Try adjusting your search or filters.') ||
-          undefined;
+      blockingMessage = noMetrics
+        ? 'There are no results found. Try a different time range or a different data source.'
+        : tooStrict
+        ? 'There are no results found. Try adjusting your search or filters.'
+        : undefined;
     }
 
     const metricNamesWarningIcon = metricNamesWarning ? (
@@ -574,73 +491,6 @@ export class MetricSelectScene extends SceneObjectBase<MetricSelectSceneState> i
               width={16}
             />
           </Field>
-          {!metric && hasOtelResources && (
-            <Field
-              label={
-                <>
-                  <div className={styles.displayOptionTooltip}>
-                    Filter by
-                    <Tooltip
-                      content={
-                        <div>
-                          <p>The OTel experience is deprecated in Grafana Metrics Drilldown.</p>
-                          <p>
-                            Please use the following docs to promote your OTel resource attributes as metric labels with{' '}
-                            <a
-                              href="https://grafana.com/docs/mimir/latest/configure/configure-otel-collector/#work-with-default-opentelemetry-labels"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ textDecoration: 'underline' }}
-                            >
-                              Mimir
-                            </a>{' '}
-                            and{' '}
-                            <a
-                              href="https://prometheus.io/docs/guides/opentelemetry/#promoting-resource-attributes"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ textDecoration: 'underline' }}
-                            >
-                              Prometheus
-                            </a>
-                            .
-                          </p>
-                        </div>
-                      }
-                      placement="bottom"
-                      interactive={true}
-                    >
-                      <IconButton
-                        name={'info-circle'}
-                        size="sm"
-                        variant={'secondary'}
-                        aria-label="Information about OTel experience"
-                      />
-                    </Tooltip>
-                    <div>
-                      {/* badge color does not align with theme warning color so we explicitly set it here */}
-                      <Badge text="Deprecated" color={'orange'} className={styles.badgeStyle}></Badge>
-                    </div>
-                  </div>
-                </>
-              }
-              className={styles.displayOption}
-            >
-              <div
-                title={
-                  !isStandardOtel ? 'This setting is disabled because this is not an OTel native data source.' : ''
-                }
-              >
-                <InlineSwitch
-                  disabled={!isStandardOtel}
-                  showLabel={true}
-                  label={UI_TEXT.METRIC_SELECT_SCENE.OTEL_LABEL}
-                  value={useOtelExperience}
-                  onChange={model.onToggleOtelExperience}
-                />
-              </div>
-            </Field>
-          )}
         </div>
         {metricNamesError && (
           <Alert title="Unable to retrieve metric names" severity="error">
@@ -693,9 +543,7 @@ function getStyles(theme: GrafanaTheme2) {
       marginBottom: theme.spacing(2),
     }),
     displayOption: css({
-      flexGrow: 0,
       marginBottom: 0,
-      minWidth: '184px',
     }),
     displayOptionTooltip: css({
       display: 'flex',

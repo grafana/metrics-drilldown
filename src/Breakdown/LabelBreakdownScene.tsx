@@ -1,7 +1,7 @@
 import init from '@bsull/augurs/outlier';
 import { css } from '@emotion/css';
 import { FieldType, type DataFrame, type GrafanaTheme2, type PanelData, type SelectableValue } from '@grafana/data';
-import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
+import { utf8Support } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import {
   PanelBuilders,
@@ -23,16 +23,15 @@ import {
   type VizPanel,
 } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type DataQuery } from '@grafana/schema';
-import { Alert, Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
+import { Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { isNumber, max, min, throttle } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef } from '../autoQuery/types';
 import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
-import { type DataTrail } from '../DataTrail';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
@@ -44,7 +43,6 @@ import { type BreakdownLayoutChangeCallback } from './types';
 import { getLabelOptions } from './utils';
 import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
 import { PanelMenu } from '../Menu/PanelMenu';
-import { updateOtelJoinWithGroupLeft } from '../otel/util';
 import { getSortByPreference } from '../services/store';
 import { ALL_VARIABLE_VALUE } from '../services/variables';
 import {
@@ -54,12 +52,10 @@ import {
   VAR_FILTERS,
   VAR_GROUP_BY,
   VAR_GROUP_BY_EXP,
-  VAR_MISSING_OTEL_TARGETS,
-  VAR_OTEL_GROUP_LEFT,
 } from '../shared';
 import { StatusWrapper } from '../StatusWrapper';
 import { getColorByIndex, getTrailFor } from '../utils';
-import { isConstantVariable, isQueryVariable } from '../utils/utils.variables';
+import { isQueryVariable } from '../utils/utils.variables';
 
 const MAX_PANELS_IN_ALL_LABELS_BREAKDOWN = 60;
 
@@ -139,27 +135,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       // The change in time range will cause a refresh of panel values.
       this.clearBreakdownPanelAxisValues();
     });
-
-    // OTEL
-    this._subs.add(
-      trail.subscribeToState(({ useOtelExperience }, oldState) => {
-        // if otel changes
-        if (useOtelExperience !== oldState.useOtelExperience) {
-          this.updateBody(variable);
-        }
-      })
-    );
-
-    // OTEL
-    const resourceAttributes = sceneGraph.lookupVariable(VAR_OTEL_GROUP_LEFT, trail);
-    if (isConstantVariable(resourceAttributes)) {
-      resourceAttributes?.subscribeToState((newState, oldState) => {
-        // wait for the resource attributes to be loaded
-        if (newState.value !== oldState.value) {
-          this.updateBody(variable);
-        }
-      });
-    }
 
     this.updateBody(variable);
   }
@@ -250,24 +225,17 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   private updateBody(variable: QueryVariable) {
     const options = getLabelOptions(this, variable);
 
-    const trail = getTrailFor(this);
-
-    let allLabelOptions = options;
-    if (trail.state.useOtelExperience) {
-      allLabelOptions = this.updateLabelOptions(trail, allLabelOptions);
-    }
-
     const stateUpdate: Partial<LabelBreakdownSceneState> = {
       loading: variable.state.loading,
       value: String(variable.state.value),
-      labels: allLabelOptions,
+      labels: options,
       error: variable.state.error,
       blockingMessage: undefined,
     };
 
     if (!variable.state.loading && variable.state.options.length) {
       stateUpdate.body = variable.hasAllValue()
-        ? buildAllLayout(allLabelOptions, this._query!, this.onBreakdownLayoutChange)
+        ? buildAllLayout(options, this._query!, this.onBreakdownLayoutChange)
         : buildNormalLayout(this._query!, this.onBreakdownLayoutChange, this.state.search);
     } else if (!variable.state.loading) {
       stateUpdate.body = undefined;
@@ -294,82 +262,17 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     variable.changeValueTo(value);
   };
 
-  private async updateOtelGroupLeft() {
-    const trail = getTrailFor(this);
-
-    if (trail.state.useOtelExperience) {
-      await updateOtelJoinWithGroupLeft(trail, trail.state.metric ?? '');
-    }
-  }
-
-  /**
-   * supplement normal label options with resource attributes
-   * @param trail
-   * @param allLabelOptions
-   * @returns
-   */
-  private updateLabelOptions(trail: DataTrail, allLabelOptions: SelectableValue[]): Array<SelectableValue<string>> {
-    // when the group left variable is changed we should get all the resource attributes + labels
-    const resourceAttributes = sceneGraph.lookupVariable(VAR_OTEL_GROUP_LEFT, trail)?.getValue();
-    if (typeof resourceAttributes !== 'string') {
-      return [];
-    }
-
-    const attributeArray: SelectableValue[] = resourceAttributes.split(',').map((el) => {
-      let label = el;
-      if (!isValidLegacyName(el)) {
-        // remove '' from label
-        label = el.slice(1, -1);
-      }
-      return { label, value: el };
-    });
-    // shift ALL value to the front
-    const all: SelectableValue = [{ label: 'All', value: ALL_VARIABLE_VALUE }];
-    const firstGroup = all.concat(attributeArray);
-
-    // remove duplicates of ALL option
-    allLabelOptions = allLabelOptions.filter((option) => option.value !== ALL_VARIABLE_VALUE);
-    allLabelOptions = firstGroup.concat(allLabelOptions);
-
-    return allLabelOptions;
-  }
-
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
     const { labels, body, search, sortBy, loading, value, blockingMessage } = model.useState();
     const styles = useStyles2(getStyles);
-
-    const trail = getTrailFor(model);
-    const { useOtelExperience } = trail.useState();
-
-    let allLabelOptions = labels;
-    if (trail.state.useOtelExperience) {
-      // All value moves to the middle because it is part of the label options variable
-      const all: SelectableValue = [{ label: 'All', value: ALL_VARIABLE_VALUE }];
-      allLabelOptions.filter((option) => option.value !== ALL_VARIABLE_VALUE).unshift(all);
-    }
-
-    const [dismissOtelWarning, updateDismissOtelWarning] = useState(false);
-    const missingOtelTargets = sceneGraph.lookupVariable(VAR_MISSING_OTEL_TARGETS, trail)?.getValue();
-    if (missingOtelTargets && !dismissOtelWarning) {
-      reportExploreMetrics('missing_otel_labels_by_truncating_job_and_instance', {
-        metric: trail.state.metric,
-      });
-    }
-
-    useEffect(() => {
-      if (useOtelExperience) {
-        // this will update the group left variable
-        model.updateOtelGroupLeft();
-      }
-    }, [model, useOtelExperience]);
 
     return (
       <div className={styles.container}>
         <StatusWrapper {...{ isLoading: loading, blockingMessage }}>
           <div className={styles.controls}>
             {!loading && labels.length > 0 && (
-              <Field label={useOtelExperience ? 'By attribute' : 'By label'}>
-                <BreakdownLabelSelector options={allLabelOptions} value={value} onChange={model.onChange} />
+              <Field label={'By label'}>
+                <BreakdownLabelSelector options={labels} value={value} onChange={model.onChange} />
               </Field>
             )}
 
@@ -387,21 +290,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
               </Field>
             )}
           </div>
-          {missingOtelTargets && !dismissOtelWarning && (
-            <Alert
-              title={`Warning: There may be missing Open Telemetry resource attributes.`}
-              severity={'warning'}
-              key={'warning'}
-              onRemove={() => updateDismissOtelWarning(true)}
-              className={styles.truncatedOTelResources}
-            >
-              This metric has too many job and instance label values to call the Prometheus label_values endpoint with
-              the match[] parameter. These label values are used to join the metric with target_info, which contains the
-              resource attributes. Please include more resource attributes filters.
-            </Alert>
-          )}
-
-          <div className={styles.content}>{body && <body.Component model={body} />}</div>
+          <div className={styles.content} data-testid="panels-list">
+            {body && <body.Component model={body} />}
+          </div>
         </StatusWrapper>
       </div>
     );
@@ -432,10 +323,6 @@ function getStyles(theme: GrafanaTheme2) {
       gap: theme.spacing(2),
       justifyContent: 'space-between',
     }),
-    truncatedOTelResources: css({
-      minWidth: '30vw',
-      flexGrow: 0,
-    }),
   };
 }
 
@@ -460,7 +347,7 @@ export function buildAllLayout(
 
     const vizPanel = PanelBuilders.timeseries()
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setOption('legend', { showLegend: false })
+      .setOption('legend', { showLegend: true })
       .setTitle(option.label!)
       .setData(
         new SceneQueryRunner({
@@ -629,15 +516,7 @@ export class SelectLabelAction extends SceneObjectBase<SelectLabelActionState> {
   public onClick = () => {
     const label = this.state.labelName;
 
-    // check that it is resource or label and update the rudderstack event
-    const trail = getTrailFor(this);
-    const resourceAttributes = sceneGraph.lookupVariable(VAR_OTEL_GROUP_LEFT, trail)?.getValue();
-    let otel_resource_attribute = false;
-    if (typeof resourceAttributes === 'string') {
-      otel_resource_attribute = resourceAttributes?.split(',').includes(label);
-    }
-
-    reportExploreMetrics('label_selected', { label, cause: 'breakdown_panel', otel_resource_attribute });
+    reportExploreMetrics('label_selected', { label, cause: 'breakdown_panel' });
     getBreakdownSceneFor(this).onChange(label);
   };
 
