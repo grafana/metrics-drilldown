@@ -45,7 +45,7 @@ test.describe('Metrics reducer view', () => {
 
     test.describe('Group by label', () => {
       test('A list of metrics is shown when metrics are grouped by label', async ({ page, metricsReducerView }) => {
-        await metricsReducerView.sidebar.selectGroupByLabel('action');
+        await metricsReducerView.sidebar.selectGroupByLabel('vehicle');
         await metricsReducerView.assertMetricsGroupByList();
 
         await expect(page).toHaveScreenshot('metrics-reducer-group-by-label.png', {

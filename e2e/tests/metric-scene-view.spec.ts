@@ -1,6 +1,6 @@
 import { expect, test } from '../fixtures';
 
-const METRIC_NAME = 'go_gc_duration_seconds';
+const METRIC_NAME = 'handler_duration_seconds_count';
 const URL_SEARCH_PARAMS_WITH_METRIC_NAME = new URLSearchParams([['metric', METRIC_NAME]]);
 
 test.describe('Metrics Scene view', () => {
