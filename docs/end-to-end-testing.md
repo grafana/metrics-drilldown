@@ -34,7 +34,7 @@ npm run dev
 And in another terminal tab, start Grafana and Prometheus:
 
 ```shell
-npm run e2e:server
+npm run server
 ```
 
 Then you can start the tests in interactive UI mode (with a built-in watch mode):

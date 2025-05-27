@@ -17,7 +17,6 @@
     "server": "docker compose up --build",
     "sign": "npx --yes @grafana/sign-plugin@latest",
     "e2e:prepare": "npm exec playwright install chromium",
-    "e2e:server": "docker compose down --remove-orphans && docker compose up --build --abort-on-container-exit",
     "e2e:watch": "npm run e2e -- --ui",
     "e2e:codegen": "playwright codegen",
     "e2e": "playwright test -c ./e2e/config/playwright.config.local.ts",
