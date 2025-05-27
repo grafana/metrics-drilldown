@@ -1,6 +1,6 @@
 import { expect, test } from '../fixtures';
 
-const METRIC_NAME = 'target_info';
+const METRIC_NAME = 'grafana_plugin_target_info';
 const URL_SEARCH_PARAMS_WITH_METRIC_NAME = new URLSearchParams([['metric', METRIC_NAME]]);
 
 test.describe('Metrics Scene view', () => {
