@@ -22,8 +22,8 @@ services:
       - 'host.docker.internal:host-gateway'
 
   # We use this for displaying the metrics in our app
-  prometheus:
-    container_name: 'prometheus'
+  prometheus-gmd:
+    container_name: 'prometheus-gmd'
     build:
       dockerfile: ./e2e/docker/Dockerfile.prometheus-static-data
       context: .
