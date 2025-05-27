@@ -4,7 +4,7 @@
   "name": "Grafana Metrics Drilldown",
   "id": "grafana-metricsdrilldown-app",
   "dependencies": {
-    "grafanaDependency": ">=12.0.0",
+    "grafanaDependency": ">=11.6.0",
     "plugins": []
   },
   "preload": true,
