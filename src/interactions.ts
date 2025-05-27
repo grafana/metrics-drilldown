@@ -9,6 +9,8 @@ import { PLUGIN_ID } from './constants';
 import { type ActionViewType } from './MetricScene';
 import { GIT_COMMIT } from './version';
 
+export type ViewName = 'metrics-reducer' | 'metric-details';
+
 type Interactions = {
   // User selected a label to view its breakdown.
   label_selected: {
@@ -134,6 +136,9 @@ type Interactions = {
   // User applies a label filter from the sidebar
   sidebar_group_by_label_filter_applied: {
     label: string;
+  };
+  app_initialized: {
+    view: ViewName;
   };
 };
 

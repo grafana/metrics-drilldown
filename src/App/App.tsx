@@ -11,6 +11,7 @@ import { getUrlForTrail, newMetricsTrail } from 'utils';
 import { ErrorView } from './ErrorView';
 import { AppRoutes } from './Routes';
 import { useCatchExceptions } from './useCatchExceptions';
+import { useReportAppInitialized } from './useReportAppInitialized';
 import { PluginPropsContext } from '../utils/utils.plugin';
 import { navigationEvents } from '../WingmanDataTrail/SideBar/sections/BookmarksList';
 
@@ -30,6 +31,8 @@ function App(props: Readonly<AppRootProps>) {
   const [error] = useCatchExceptions();
   const [trail, setTrail] = useState<DataTrail>(newMetricsTrail());
   const styles = useStyles2(getStyles);
+
+  useReportAppInitialized();
 
   const goToUrlForTrail = (trail: DataTrail) => {
     locationService.push(getUrlForTrail(trail));
