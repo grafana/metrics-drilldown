@@ -15,15 +15,13 @@
     "lint": "eslint --cache --ignore-path ./.gitignore --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "npm run lint -- --fix && prettier --write --list-different .",
     "server": "docker compose up --build",
-    "server:ci": "docker compose up --build -d",
-    "server:down": "docker compose down",
     "sign": "npx --yes @grafana/sign-plugin@latest",
     "e2e:prepare": "npm exec playwright install chromium",
     "e2e:server": "docker compose down --remove-orphans && docker compose up --build --abort-on-container-exit",
     "e2e:watch": "npm run e2e -- --ui",
     "e2e:codegen": "playwright codegen",
     "e2e": "playwright test -c ./e2e/config/playwright.config.local.ts",
-    "e2e:ci": "docker compose --profile playwright  up --build --abort-on-container-exit"
+    "e2e:ci": "docker compose --profile playwright  up --build --attach playwright --abort-on-container-exit"
   },
   "packageManager": "npm@10.9.2",
   "engines": {
