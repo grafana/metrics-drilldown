@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   CI:
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@97b7a6757b389a0048ccbd5bed6a15eed593f1fd
+    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@fb156a03982a2a5c31ac7c74e873a25675ce6e34
     with:
       run-playwright: false
       run-playwright-docker: true

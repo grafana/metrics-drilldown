@@ -67,7 +67,7 @@ jobs:
 
   playwright:
     needs: build
-    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@97b7a6757b389a0048ccbd5bed6a15eed593f1fd
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@fb156a03982a2a5c31ac7c74e873a25675ce6e34
     with:
       id: ${{ github.event.repository.name }}
       version: ${{ needs.build.outputs.plugin-version }}
