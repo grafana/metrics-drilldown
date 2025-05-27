@@ -3,6 +3,11 @@
   "type": "app",
   "name": "Grafana Metrics Drilldown",
   "id": "grafana-metricsdrilldown-app",
+  "dependencies": {
+    "grafanaDependency": ">=12.0.0",
+    "plugins": []
+  },
+  "preload": true,
   "autoEnabled": true,
   "info": {
     "keywords": ["drilldown", "metrics", "app", "prometheus", "mimir"],
@@ -47,11 +52,6 @@
       "defaultNav": true
     }
   ],
-  "dependencies": {
-    "grafanaDependency": ">=11.6.0",
-    "plugins": []
-  },
-  "preload": true,
   "extensions": {
     "addedLinks": [
       {
