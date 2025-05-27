@@ -19,8 +19,6 @@ Install Playwright with Chromium:
 
 ```shell
 npm i
-
-npm run e2e:prepare
 ```
 
 ### Each time you want to develop a new test
