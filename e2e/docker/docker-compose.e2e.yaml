@@ -38,3 +38,15 @@ services:
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.path=/prometheus/data
       --storage.tsdb.retention.time=42y
+
+  playwright:
+    network_mode: host
+    container_name: 'playwright-e2e'
+    build:
+      dockerfile: ./docker/Dockerfile.playwright
+      context: ..
+    volumes:
+      - ../../e2e:/app/e2e
+      - ../../src:/app/src
+    command: ${PLAYWRIGHT_ARGS:-}
+    profiles: [playwright]

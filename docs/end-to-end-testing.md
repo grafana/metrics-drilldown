@@ -58,12 +58,7 @@ When launching the tests locally, the screenshots generated on your machine are 
 In order to generate the correct screenshots that will always match the ones that will be generated during the CI build, **we have to launch Playwright in Docker**:
 
 ```shell
-npm run e2e:ci:server:up
-
 npm run e2e:ci
-
-# then once finished
-npm run e2e:ci:server:down
 ```
 
 The screenshots are generated in subfolders within the [e2e/tests](../e2e/tests) folder, next to their corresponding tests. They must be commited to Git.
@@ -73,7 +68,7 @@ The screenshots are generated in subfolders within the [e2e/tests](../e2e/tests)
 Just pass the extra arguments in a `PLAYWRIGHT_ARGS` environment variable when executing `npm run e2e:ci`, e.g. to regenerate the screenshots of the `select-metric-view.spec.ts` test file:
 
 ```shell
-PLAYWRIGHT_ARGS="select-metric-view.spec.ts -u" npm run e2e:ci
+PLAYWRIGHT_ARGS="metrics-reducer-view.spec.ts -u" npm run e2e:ci
 ```
 
 ### CI build
@@ -95,5 +90,5 @@ In build time (PR and main branch), we run the same [dockerized Prometheus with 
 - Identify the current Playwright version, e.g. `1.50.0`
 - Identify the new Playwright version, e.g. `1.51.0`
 - In a terminal, execute: `./scripts/upgrade-playwright.sh 1.50.0 1.51.0`
-- Launch the E2E tests locally with Docker to verify that the new version works: `npm run e2e:ci:server:up && npm run e2e:ci`
+- Launch the E2E tests locally with Docker to verify that the new version works: `npm run e2e:server && npm run e2e:ci`
 - Push the modified files to the PR
