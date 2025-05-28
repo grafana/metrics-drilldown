@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { reportExploreMetrics, type ViewName } from 'interactions';
 
 export function useReportAppInitialized() {
-  const [initialized, setInitialized] = useState(false);
+  const initRef = useRef(false);
 
   useEffect(() => {
-    if (!initialized) {
-      setInitialized(true);
+    if (!initRef.current) {
+      initRef.current = true;
 
       const view: ViewName = new URL(window.location.href).searchParams.get('metric')
         ? 'metric-details'
@@ -15,5 +15,5 @@ export function useReportAppInitialized() {
 
       reportExploreMetrics('app_initialized', { view });
     }
-  }, [initialized]);
+  }, []);
 }
