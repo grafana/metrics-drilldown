@@ -1,27 +1,32 @@
 name: 'metrics-drilldown'
 services:
   grafana:
-    container_name: 'grafana-gmd'
+    container_name: 'grafana'
     extends:
       file: .config/docker-compose-base.yaml
       service: grafana
     build:
       args:
         grafana_version: ${GRAFANA_VERSION:-11.6.0}
-    ports: !override
-      - '${GRAFANA_PORT:-3001}:3000'
+    ports:
+      - '${GRAFANA_PORT:-3001}:3000/tcp'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin
+      # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
+      GF_PLUGINS_PREINSTALL_DISABLED: true
     volumes:
       - ./provisioning/dashboards/dashboardJson:/etc/dashboards
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
       - 'host.docker.internal:host-gateway'
 
-  prometheus:
+  # We use this for displaying the metrics in our app
+  prometheus-gmd:
     container_name: 'prometheus-gmd'
-    image: prom/prometheus:v3.2.1
+    build:
+      dockerfile: ./e2e/docker/Dockerfile.prometheus-static-data
+      context: .
     ports:
       - '9099:9090'
     extra_hosts:
@@ -31,10 +36,30 @@ services:
       --enable-feature=exemplar-storage
       --enable-feature=native-histograms
       --config.file=/etc/prometheus/prometheus.yml
-      --storage.tsdb.path=/prometheus
+      --storage.tsdb.path=/prometheus/data
+      --storage.tsdb.retention.time=42y
     volumes:
-      # This uses Docker Compose's variable substitution to select the correct config file
-      # based on the GRAFANA_PORT environment variable.
-      # To add support for a new port (e.g. 3002), create a new config file:
-      # config/prometheus.3002.yaml with the appropriate host.docker.internal:<port> value
-      - ./config/prometheus.${GRAFANA_PORT:-3001}.yaml:/etc/prometheus/prometheus.yml
+      - ./e2e/provisioning/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  # This helps with creating data for e2e testing
+  fake-server-utf8:
+    # Grabbed from: https://github.com/grafana/grafana/tree/main/devenv/docker/blocks/prometheus_utf8
+    container_name: 'utf8'
+    build: ./e2e/docker/fake-server-utf8
+    ports:
+      - '9112:9112'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  # e2e testing
+  playwright:
+    network_mode: host
+    container_name: 'playwright-e2e'
+    build:
+      dockerfile: ./e2e/docker/Dockerfile.playwright
+      context: .
+    volumes:
+      - ./e2e:/app/e2e
+      - ./src:/app/src
+    command: ${PLAYWRIGHT_ARGS:-}
+    profiles: [playwright]

@@ -57,7 +57,7 @@ jobs:
           echo "plugin-name=$name" >> $GITHUB_OUTPUT
 
       - name: Sign and package
-        uses: grafana/plugin-ci-workflows/actions/plugins/package@9bacf72016cc3cd1b0fdd0eacf10baccdaf4f87c
+        uses: grafana/plugin-ci-workflows/actions/plugins/package@main
         with:
           output-folder: dist-artifacts
           universal: 'true'
@@ -79,8 +79,7 @@ jobs:
       version: ${{ needs.build.outputs.plugin-version }}
       upload-artifacts: true
       report-path: e2e/test-reports/
-      grafana-compose-file: e2e/docker/docker-compose.e2e.yaml
-      playwright-compose-file: e2e/docker/docker-compose.playwright.yaml
+      grafana-compose-file: docker-compose.yaml
       grafana-url: http://localhost:3001
     permissions:
       contents: read
