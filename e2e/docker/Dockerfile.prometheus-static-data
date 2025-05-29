@@ -1,10 +1,10 @@
-FROM docker.io/prom/prometheus:v3.1.0
+FROM docker.io/prom/prometheus:v3.2.1
 
 USER nobody
 
 # data from ~ 2025-05-26 11:00 to 2025-05-26 12:05
-COPY provisioning/prometheus/data.zip /prometheus/data.zip
+COPY e2e/provisioning/prometheus/data.zip /prometheus/data.zip
 RUN unzip /prometheus/data.zip 
 RUN rm /prometheus/data.zip 
 
-COPY provisioning/prometheus/prometheus.yml /etc/prometheus/prometheus.yml
+COPY e2e/provisioning/prometheus/prometheus.yml /etc/prometheus/prometheus.yml

@@ -1,6 +1,6 @@
 name: 'metrics-drilldown'
 services:
-  grafana:
+  grafana-gmd:
     container_name: 'grafana-gmd'
     extends:
       file: .config/docker-compose-base.yaml
@@ -13,15 +13,19 @@ services:
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin
+      # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
+      GF_PLUGINS_PREINSTALL_DISABLED: true
     volumes:
       - ./provisioning/dashboards/dashboardJson:/etc/dashboards
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
       - 'host.docker.internal:host-gateway'
 
-  prometheus:
+  prometheus-gmd:
     container_name: 'prometheus-gmd'
-    image: prom/prometheus:v3.2.1
+    build:
+      dockerfile: ./e2e/docker/Dockerfile.prometheus-static-data
+      context: .
     ports:
       - '9099:9090'
     extra_hosts:
@@ -31,10 +35,18 @@ services:
       --enable-feature=exemplar-storage
       --enable-feature=native-histograms
       --config.file=/etc/prometheus/prometheus.yml
-      --storage.tsdb.path=/prometheus
+      --storage.tsdb.path=/prometheus/data
+      --storage.tsdb.retention.time=42y
+
+  # e2e testing
+  playwright:
+    network_mode: host
+    container_name: 'playwright-e2e'
+    build:
+      dockerfile: ./e2e/docker/Dockerfile.playwright
+      context: .
     volumes:
-      # This uses Docker Compose's variable substitution to select the correct config file
-      # based on the GRAFANA_PORT environment variable.
-      # To add support for a new port (e.g. 3002), create a new config file:
-      # config/prometheus.3002.yaml with the appropriate host.docker.internal:<port> value
-      - ./config/prometheus.${GRAFANA_PORT:-3001}.yaml:/etc/prometheus/prometheus.yml
+      - ./e2e:/app/e2e
+      - ./src:/app/src
+    command: ${PLAYWRIGHT_ARGS:-}
+    profiles: [playwright]

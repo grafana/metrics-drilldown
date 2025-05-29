@@ -34,7 +34,7 @@ npm run dev
 And in another terminal tab, start Grafana and Prometheus:
 
 ```shell
-npm run e2e:server
+npm run server
 ```
 
 Then you can start the tests in interactive UI mode (with a built-in watch mode):
@@ -90,5 +90,5 @@ In build time (PR and main branch), we run the same [dockerized Prometheus with 
 - Identify the current Playwright version, e.g. `1.50.0`
 - Identify the new Playwright version, e.g. `1.51.0`
 - In a terminal, execute: `./scripts/upgrade-playwright.sh 1.50.0 1.51.0`
-- Launch the E2E tests locally with Docker to verify that the new version works: `npm run e2e:server && npm run e2e:ci`
+- Launch the E2E tests locally with Docker to verify that the new version works: `npm run e2e:ci`
 - Push the modified files to the PR

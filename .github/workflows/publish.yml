@@ -56,5 +56,5 @@ jobs:
       upload-playwright-artifacts: true # IMPORTANT: we must ensure there are no unmasked secrets in the E2E tests
       run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
       playwright-report-path: e2e/test-reports/
-      playwright-docker-compose-file: e2e/docker/docker-compose.e2e.yaml
+      playwright-docker-compose-file: docker-compose.yaml
       playwright-grafana-url: http://localhost:3001
