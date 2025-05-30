@@ -2,10 +2,9 @@ FROM docker.io/prom/prometheus:v3.2.1
 
 USER nobody
 
-# data from ~ 2025-02-18 14:30 to 2025-02-18 17:15
+# data from ~ 2025-05-26 11:00 to 2025-05-26 12:05
 COPY e2e/provisioning/prometheus/data.zip /prometheus/data.zip
-RUN mkdir -p /prometheus/data && \
-    cd /prometheus && \
-    unzip -o data.zip && \
-    rm data.zip && \
-    chown -R nobody:nobody /prometheus/data
+RUN unzip /prometheus/data.zip 
+RUN rm /prometheus/data.zip 
+
+COPY e2e/provisioning/prometheus/prometheus.yml /etc/prometheus/prometheus.yml

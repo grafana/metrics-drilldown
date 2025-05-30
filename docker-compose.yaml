@@ -1,15 +1,15 @@
 name: 'metrics-drilldown'
 services:
-  grafana:
-    container_name: 'grafana'
+  grafana-gmd:
+    container_name: 'grafana-gmd'
     extends:
       file: .config/docker-compose-base.yaml
       service: grafana
     build:
       args:
         grafana_version: ${GRAFANA_VERSION:-11.6.0}
-    ports:
-      - '${GRAFANA_PORT:-3001}:3000/tcp'
+    ports: !override
+      - '${GRAFANA_PORT:-3001}:3000'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin
@@ -21,7 +21,6 @@ services:
       # This allows us to connect to other services running on the host machine.
       - 'host.docker.internal:host-gateway'
 
-  # We use this for displaying the metrics in our app
   prometheus-gmd:
     container_name: 'prometheus-gmd'
     build:
@@ -38,18 +37,6 @@ services:
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.path=/prometheus/data
       --storage.tsdb.retention.time=42y
-    volumes:
-      - ./e2e/provisioning/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-
-  # This helps with creating data for e2e testing
-  fake-server-utf8:
-    # Grabbed from: https://github.com/grafana/grafana/tree/main/devenv/docker/blocks/prometheus_utf8
-    container_name: 'utf8'
-    build: ./e2e/docker/fake-server-utf8
-    ports:
-      - '9112:9112'
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
 
   # e2e testing
   playwright:

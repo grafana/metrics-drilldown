@@ -45,7 +45,7 @@ test.describe('Metrics reducer view', () => {
 
     test.describe('Group by label', () => {
       test('A list of metrics is shown when metrics are grouped by label', async ({ page, metricsReducerView }) => {
-        await metricsReducerView.sidebar.selectGroupByLabel('action');
+        await metricsReducerView.sidebar.selectGroupByLabel('db_name');
         await metricsReducerView.assertMetricsGroupByList();
 
         await expect(page).toHaveScreenshot('metrics-reducer-group-by-label.png', {
@@ -81,7 +81,7 @@ test.describe('Metrics reducer view', () => {
 
       // We'll select seven metrics, but only the 6 most recent metrics should be shown above the alphabetical list
       const metricsToSelect = [
-        'pyroscope_write_path_downstream_request_duration_seconds_sum', // This one should not appear in the screenshot
+        'pyroscope_write_path_downstream_request_duration_seconds', // This one should not appear in the screenshot
         'grafana_access_evaluation_duration_bucket',
         'process_network_transmit_bytes_total',
         'memberlist_client_cas_success_total',
