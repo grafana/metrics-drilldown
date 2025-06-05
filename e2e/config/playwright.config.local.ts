@@ -5,6 +5,6 @@ export default config({
     ['list', { printSteps: true }],
     ['html', { outputFolder: '../test-reports', open: 'never' }],
   ],
-  workers: 4,
+  workers: 8,
   forbidOnly: false,
 });
