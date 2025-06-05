@@ -58,3 +58,4 @@ jobs:
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: docker-compose.yaml
       playwright-grafana-url: http://localhost:3001
+      argo-workflow-slack-channel: '#proj-metricsdrilldown-dev'
