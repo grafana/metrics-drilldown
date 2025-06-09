@@ -21,6 +21,7 @@ import { SelectAction } from './actions/SelectAction';
 import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
 import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
 import { buildTimeseriesPanel } from './panels/buildTimeseriesPanel';
+import { parseMatcher } from './parseMatcher';
 
 interface MetricVizPanelProps {
   metricName: string;
@@ -196,14 +197,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     prometheusFunction?: PrometheusFn;
     queryOptions?: Partial<SceneDataQuery>;
   }): SceneQueryRunner {
-    const filters = matchers.map((matcher) => {
-      const [key, value] = matcher.split('=');
-      return {
-        key,
-        value: value.replace(/['"]/g, ''),
-        operator: '=',
-      };
-    });
+    const filters = matchers.map(parseMatcher);
     const { isRateQuery, groupings } = MetricVizPanel.determineQueryProperties(metricName, isHistogram);
     const expr = buildPrometheusQuery({
       metric: metricName,
