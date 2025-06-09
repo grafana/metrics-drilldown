@@ -9,6 +9,30 @@ A queryless experience for browsing Prometheus-compatible metrics. Quickly find 
 
 ![Metrics Drilldown](src/img/metrics-drilldown.png)
 
+## 📖 Overview
+
+Grafana Metrics Drilldown transforms how you explore Prometheus-compatible metrics by providing an intuitive, queryless interface. Built with React 18 and Grafana's Scenes framework for declarative state management, it uses WASM optimizations for performance-critical operations like sorting. Instead of writing complex PromQL queries, simply click through your metrics to discover insights and relationships.
+
+### Key Features
+
+- **🔍 Queryless Exploration**: Browse metrics without writing PromQL
+- **🏷️ Smart Segmentation**: Filter and segment metrics by labels to spot anomalies
+- **📊 Auto-Visualization**: Optimal chart types selected automatically (gauge vs counter)
+- **🔗 Metric Relationships**: Discover related metrics effortlessly
+- **🌐 Telemetry Pivoting**: Seamlessly jump between metrics and logs
+- **⚡ Advanced Filtering**: Filter by metric name prefixes/suffixes and group by labels
+- **📱 Modern UI**: Collapsible sidebar and enhanced user experience
+
+### Recent Enhancements
+
+- **Native Histogram Support**: Higher resolution for Prometheus-compatible histograms
+- **OpenTelemetry Integration**: Automated label joins for OTel metrics
+- **Exemplars**: Direct links from metrics to corresponding traces
+- **Enhanced Filtering**: Prefix/suffix filtering and label grouping
+- **Scenes Framework**: Declarative UI state management instead of Redux
+- **Event-Driven Architecture**: Components communicate via scene events (MetricSelectedEvent, EventFiltersChanged)
+- **WASM Performance**: Optimized sorting algorithms for large metric sets
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -36,29 +60,46 @@ One-click installation available through the Grafana Cloud marketplace.
 2. Find "Grafana Metrics Drilldown" in the Apps section
 3. Click **Config** and then **Enable**
 
-## 📖 Overview
+## 🎯 Usage
 
-Grafana Metrics Drilldown transforms how you explore Prometheus-compatible metrics by providing an intuitive, queryless interface. Built with React 18 and Grafana's Scenes framework for declarative state management, it uses WASM optimizations for performance-critical operations like sorting. Instead of writing complex PromQL queries, simply click through your metrics to discover insights and relationships.
+### Basic Workflow
 
-### Key Features
+1. **Navigate** to the Metrics Drilldown app in Grafana
+2. **Select** a Prometheus-compatible data source
+3. **Filter** metrics using the sidebar controls
+4. **Segment** data by labels to identify patterns
+5. **Drill down** into specific metrics for detailed analysis
+6. **Export** or share your findings
 
-- **🔍 Queryless Exploration**: Browse metrics without writing PromQL
-- **🏷️ Smart Segmentation**: Filter and segment metrics by labels to spot anomalies
-- **📊 Auto-Visualization**: Optimal chart types selected automatically (gauge vs counter)
-- **🔗 Metric Relationships**: Discover related metrics effortlessly
-- **🌐 Telemetry Pivoting**: Seamlessly jump between metrics and logs
-- **⚡ Advanced Filtering**: Filter by metric name prefixes/suffixes and group by labels
-- **📱 Modern UI**: Collapsible sidebar and enhanced user experience
+### Advanced Features
 
-### Recent Enhancements
+#### Filtering Options
 
-- **Native Histogram Support**: Higher resolution for Prometheus-compatible histograms
-- **OpenTelemetry Integration**: Automated label joins for OTel metrics
-- **Exemplars**: Direct links from metrics to corresponding traces
-- **Enhanced Filtering**: Prefix/suffix filtering and label grouping
-- **Scenes Framework**: Declarative UI state management instead of Redux
-- **Event-Driven Architecture**: Components communicate via scene events (MetricSelectedEvent, EventFiltersChanged)
-- **WASM Performance**: Optimized sorting algorithms for large metric sets
+- **Prefix/Suffix Filtering**: Leverage metric naming conventions
+- **Label Grouping**: Group metrics by specific label names
+- **Pattern Matching**: Find metrics matching specific patterns
+
+#### Visualization
+
+- Automatic chart type selection based on metric type
+- Native histogram support for enhanced detail
+- Exemplar integration for trace correlation
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### Data Source Compatibility
+
+**Requirement**: Prometheus or Prometheus-compatible data sources only  
+**Solution**: Ensure your data source supports PromQL queries
+
+### Getting Help
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/grafana/metrics-drilldown/issues)
+- **Grafana Community**: [Community forums](https://community.grafana.com/)
+- **Grafana Cloud Support**: Open a support ticket for urgent issues
+- **Documentation**: [Official plugin docs](https://grafana.com/docs/plugins/grafana-metricsdrilldown-app/)
 
 ## 🛠️ Development Setup
 
@@ -147,53 +188,6 @@ metrics-drilldown/
 ├── provisioning/             # Grafana/Docker configuration
 └── README.md
 ```
-
-## 🎯 Usage
-
-### Basic Workflow
-
-1. **Navigate** to the Metrics Drilldown app in Grafana
-2. **Select** a Prometheus-compatible data source
-3. **Filter** metrics using the sidebar controls
-4. **Segment** data by labels to identify patterns
-5. **Drill down** into specific metrics for detailed analysis
-6. **Export** or share your findings
-
-### Advanced Features
-
-#### Filtering Options
-
-- **Prefix/Suffix Filtering**: Leverage metric naming conventions
-- **Label Grouping**: Group metrics by specific label names
-- **Pattern Matching**: Find metrics matching specific patterns
-
-#### Visualization
-
-- Automatic chart type selection based on metric type
-- Native histogram support for enhanced detail
-- Exemplar integration for trace correlation
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### Dashboard Panel Links
-
-**Issue**: Broken queries when opening from dashboard panel menu  
-**Status**: Known issue being addressed in core Grafana  
-**Workaround**: Access Metrics Drilldown directly from the Apps menu
-
-#### Data Source Compatibility
-
-**Requirement**: Prometheus or Prometheus-compatible data sources only  
-**Solution**: Ensure your data source supports PromQL queries
-
-### Getting Help
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/grafana/metrics-drilldown/issues)
-- **Grafana Community**: [Community forums](https://community.grafana.com/)
-- **Grafana Cloud Support**: Open a support ticket for urgent issues
-- **Documentation**: [Official plugin docs](https://grafana.com/docs/plugins/grafana-metricsdrilldown-app/)
 
 ## 🤝 Contributing
 
