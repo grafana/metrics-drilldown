@@ -38,7 +38,7 @@ One-click installation available through the Grafana Cloud marketplace.
 
 ## 📖 Overview
 
-Grafana Metrics Drilldown transforms how you explore Prometheus-compatible metrics by providing an intuitive, queryless interface. Instead of writing complex PromQL queries, simply click through your metrics to discover insights and relationships.
+Grafana Metrics Drilldown transforms how you explore Prometheus-compatible metrics by providing an intuitive, queryless interface. Built with React 18 and Grafana's Scenes framework for declarative state management, it uses WASM optimizations for performance-critical operations like sorting. Instead of writing complex PromQL queries, simply click through your metrics to discover insights and relationships.
 
 ### Key Features
 
@@ -52,16 +52,19 @@ Grafana Metrics Drilldown transforms how you explore Prometheus-compatible metri
 
 ### Recent Enhancements
 
-- **Native Histogram Support**: Higher resolution for compatible histograms
+- **Native Histogram Support**: Higher resolution for Prometheus-compatible histograms
 - **OpenTelemetry Integration**: Automated label joins for OTel metrics
 - **Exemplars**: Direct links from metrics to corresponding traces
 - **Enhanced Filtering**: Prefix/suffix filtering and label grouping
+- **Scenes Framework**: Declarative UI state management instead of Redux
+- **Event-Driven Architecture**: Components communicate via scene events (MetricSelectedEvent, EventFiltersChanged)
+- **WASM Performance**: Optimized sorting algorithms for large metric sets
 
 ## 🛠️ Development Setup
 
 ### Prerequisites
 
-- **Node.js 22+**
+- **Node.js 22+** (required)
 - **Docker Desktop** (or alternative like OrbStack)
 - **Git**
 
@@ -107,23 +110,41 @@ GRAFANA_PORT=3001
 # Run tests in watch mode
 npm run tdd
 
-# Run all tests
+# Run all tests with coverage
 npm run test
+
+# End-to-end tests
+npm run e2e
+
+# Type checking
+npm run typecheck
 
 # Linting
 npm run lint
 npm run lint:fix
+
+# Build
+npm run build
+npm run analyze    # Bundle analysis
 ```
 
 ## 📁 Project Structure
 
 ```
 metrics-drilldown/
-├── src/                 # Source code (TypeScript)
-├── e2e/                 # End-to-end tests
-├── docs/                # Documentation
-├── scripts/             # Build and utility scripts
-├── provisioning/        # Grafana configuration
+├── src/
+│   ├── WingmanDataTrail/     # Main metrics exploration interface
+│   ├── autoQuery/            # Automatic query generation for different metric types
+│   ├── Breakdown/            # Label breakdown and search functionality
+│   ├── MetricSelect/         # Metric selection interface
+│   ├── TrailStore/           # State persistence and bookmarks
+│   ├── tracking/             # Analytics and telemetry (Faro/Rudderstack)
+│   ├── App/                  # Main app components and routing
+│   └── utils/                # Shared utilities
+├── e2e/                      # Playwright end-to-end tests
+├── docs/                     # Documentation
+├── scripts/                  # Build and utility scripts
+├── provisioning/             # Grafana/Docker configuration
 └── README.md
 ```
 
@@ -200,7 +221,7 @@ We welcome contributions! This project doesn't have a formal proposal process.
 
 - TypeScript (98.7% of codebase)
 - ESLint configuration provided
-- VSCode settings included for consistency
+- Prettier formatting enforced
 
 ## 📄 License
 
@@ -222,6 +243,6 @@ This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE)
 
 ---
 
-**Note**: This plugin will be preinstalled by default in all Grafana instances in the near future.
+**Note**: Grafana Metrics Drilldown will be preinstalled by default in all Grafana instances in the near future.
 
 _Maintained by [Grafana Labs](https://grafana.com) with ❤️ from the community_
