@@ -181,7 +181,7 @@ metrics-drilldown/
 
 ## 🤝 Contributing
 
-We welcome contributions! This project doesn't have a formal proposal process.
+We welcome contributions!
 
 ### How to Contribute
 
