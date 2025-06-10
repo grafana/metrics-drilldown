@@ -221,7 +221,3 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     );
   };
 }
-
-export function buildRelatedLogsScene(props: RelatedLogsSceneProps) {
-  return new RelatedLogsScene(props);
-}
