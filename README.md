@@ -11,7 +11,7 @@ A queryless experience for browsing Prometheus-compatible metrics. Quickly find 
 
 ## 📖 Overview
 
-Grafana Metrics Drilldown transforms how you explore Prometheus-compatible metrics by providing an intuitive, queryless interface. Built with React 18 and Grafana's Scenes framework for declarative state management, it uses WASM optimizations for performance-critical operations like sorting. Instead of writing complex PromQL queries, simply click through your metrics to discover insights and relationships.
+Grafana Metrics Drilldown transforms how you explore Prometheus-compatible metrics by providing an intuitive, queryless interface. Instead of writing complex PromQL queries, simply click through your metrics to discover insights and relationships.
 
 ### Key Features
 
