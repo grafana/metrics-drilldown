@@ -23,16 +23,6 @@ Grafana Metrics Drilldown transforms how you explore Prometheus-compatible metri
 - **⚡ Advanced Filtering**: Filter by metric name prefixes/suffixes and group by labels
 - **📱 Modern UI**: Collapsible sidebar and enhanced user experience
 
-### Recent Enhancements
-
-- **Native Histogram Support**: Higher resolution for Prometheus-compatible histograms
-- **OpenTelemetry Integration**: Automated label joins for OTel metrics
-- **Exemplars**: Direct links from metrics to corresponding traces
-- **Enhanced Filtering**: Prefix/suffix filtering and label grouping
-- **Scenes Framework**: Declarative UI state management instead of Redux
-- **Event-Driven Architecture**: Components communicate via scene events (MetricSelectedEvent, EventFiltersChanged)
-- **WASM Performance**: Optimized sorting algorithms for large metric sets
-
 ## 🚀 Quick Start
 
 ### Installation
