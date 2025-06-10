@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
+import { config } from '@grafana/runtime';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -9,12 +10,14 @@ import { ErrorView } from './ErrorView';
 import { Onboarding } from './Onboarding';
 import { AppRoutes } from './Routes';
 import { useCatchExceptions } from './useCatchExceptions';
-import { useListPrometheusDataSources } from './useListPrometheusDataSources';
 import { useReportAppInitialized } from './useReportAppInitialized';
 import { MetricsContext, useTrail } from './useTrail';
+import { isPrometheusDataSource } from '../utils/utils.datasource';
 import { PluginPropsContext } from '../utils/utils.plugin';
 
 initFaro();
+
+const prometheusDatasources = Object.values(config.datasources).filter(isPrometheusDataSource);
 
 export default function App(props: Readonly<AppRootProps>) {
   const styles = useStyles2(getStyles);
@@ -22,8 +25,6 @@ export default function App(props: Readonly<AppRootProps>) {
   const { trail, goToUrlForTrail } = useTrail();
 
   useReportAppInitialized();
-
-  const { datasources } = useListPrometheusDataSources();
 
   if (error) {
     return (
@@ -33,7 +34,7 @@ export default function App(props: Readonly<AppRootProps>) {
     );
   }
 
-  if (!datasources.length) {
+  if (!prometheusDatasources.length) {
     return <Onboarding />;
   }
 
