@@ -238,15 +238,8 @@ This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE)
 - **Demo**: [Grafana Play](https://play.grafana.org/a/grafana-metricsdrilldown-app/trail)
 - **Blog**: [What's New in Metrics Drilldown](https://grafana.com/blog/2025/05/29/whats-new-in-grafana-metrics-drilldown-advanced-filtering-options-ui-enhancements-and-more/)
 
-## 🌟 Future Roadmap
-
-- Default installation in all Grafana instances
-- Enhanced OTel integration
-- Additional data source support
-- Improved performance optimizations
-
 ---
 
-**Note**: Grafana Metrics Drilldown will be preinstalled by default in all Grafana instances in the near future.
+**Note**: Grafana Metrics Drilldown comes preinstalled by default in all Grafana 12+ instances.
 
 _Maintained by [Grafana Labs](https://grafana.com) with ❤️ from the community_
