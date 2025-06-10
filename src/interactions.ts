@@ -2,11 +2,11 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
 import { type LabelBreakdownSortingOption as BreakdownSortByOption } from 'Breakdown/SortByScene';
+import { type ActionViewType } from 'MetricActionBar';
 import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 import { type BreakdownLayoutType } from './Breakdown/types';
 import { PLUGIN_ID } from './constants';
-import { type ActionViewType } from './MetricScene';
 import { GIT_COMMIT } from './version';
 
 export type ViewName = 'metrics-reducer' | 'metric-details';
