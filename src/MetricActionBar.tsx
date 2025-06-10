@@ -22,7 +22,7 @@ import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
 
-import { buildLabelBreakdownActionScene } from './Breakdown/LabelBreakdownScene';
+import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 
 export const actionViews = {
   breakdown: 'breakdown',
@@ -40,7 +40,11 @@ interface ActionViewDefinition {
 }
 
 export const actionViewsDefinitions: ActionViewDefinition[] = [
-  { displayName: 'Breakdown', value: actionViews.breakdown, getScene: buildLabelBreakdownActionScene },
+  {
+    displayName: 'Breakdown',
+    value: actionViews.breakdown,
+    getScene: () => new LabelBreakdownScene({}),
+  },
   {
     displayName: 'Related metrics',
     value: actionViews.related,
