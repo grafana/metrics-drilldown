@@ -12,6 +12,9 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsSorter } from './MetricsSorter/MetricsSorter';
 import { QuickSearch } from './QuickSearch/QuickSearch';
@@ -34,7 +37,13 @@ export class ListControls extends EmbeddedScene {
         maxHeight: '32px',
         children: [
           new SceneFlexItem({
-            body: new QuickSearch(),
+            body: new QuickSearch({
+              targetName: 'metric',
+              variableNames: {
+                nonFiltered: VAR_METRICS_VARIABLE,
+                filtered: VAR_FILTERED_METRICS_VARIABLE,
+              },
+            }),
           }),
           new SceneFlexItem({
             width: 'auto',

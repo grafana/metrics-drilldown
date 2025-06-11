@@ -66,7 +66,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_WINGMAN_GROUP_BY],
     onReferencedVariableValueChanged: (variable) => {
-      this.updateBodyBasedOnGroupBy((variable as LabelsVariable).state.value as string);
+      this.updateBasedOnGroupBy((variable as LabelsVariable).state.value as string);
     },
   });
 
@@ -88,11 +88,24 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   }
 
   private onActivate() {
-    this.updateBodyBasedOnGroupBy(
-      (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable).state.value as string
-    );
+    const groupByValue = (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as LabelsVariable).state
+      .value as string;
+
+    this.updateBasedOnGroupBy(groupByValue);
 
     this.subscribeToEvents();
+  }
+
+  private updateBasedOnGroupBy(groupByValue: string) {
+    const hasGroupByValue = Boolean(groupByValue && groupByValue !== NULL_GROUP_BY_VALUE);
+
+    sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch).toggleCountsDisplay(!hasGroupByValue);
+
+    this.setState({
+      body: hasGroupByValue
+        ? (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase)
+        : (new SimpleMetricsList() as unknown as SceneObjectBase),
+    });
   }
 
   private subscribeToEvents() {
@@ -212,15 +225,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         }
       })
     );
-  }
-
-  private updateBodyBasedOnGroupBy(groupByValue: string) {
-    this.setState({
-      body:
-        !groupByValue || groupByValue === NULL_GROUP_BY_VALUE
-          ? (new SimpleMetricsList() as unknown as SceneObjectBase)
-          : (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase),
-    });
   }
 
   private openDrawer(metricName: string) {
