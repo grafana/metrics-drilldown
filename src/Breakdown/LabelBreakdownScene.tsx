@@ -504,10 +504,6 @@ function getLabelValue(frame: DataFrame) {
   return labels[keys[0]];
 }
 
-export function buildLabelBreakdownActionScene() {
-  return new LabelBreakdownScene({});
-}
-
 interface SelectLabelActionState extends SceneObjectState {
   labelName: string;
 }
