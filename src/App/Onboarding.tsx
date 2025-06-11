@@ -26,7 +26,7 @@ export function Onboarding() {
           We noticed there is no Prometheus datasource configured.
           <br />
           Add a{' '}
-          <a className={'external-link'} href={locationUtil.assureBaseUrl(`/connections/datasources/new`)}>
+          <a className="external-link" href={locationUtil.assureBaseUrl('/connections/datasources/new')}>
             Prometheus datasource
           </a>{' '}
           to view metrics.
@@ -35,16 +35,26 @@ export function Onboarding() {
         <br />
 
         <p>
-          Click{' '}
+          Check{' '}
           <a
-            href={'https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics/'}
-            target={'_blank'}
-            className={'external-link'}
+            href="https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics/"
+            target="_blank"
+            className="external-link"
             rel="noreferrer"
           >
-            here
+            our docs
           </a>{' '}
-          to learn more...
+          to learn more or
+          <br />
+          <a
+            href="https://play.grafana.org/a/grafana-metricsdrilldown-app/drilldown"
+            target="_blank"
+            className="external-link"
+            rel="noreferrer"
+          >
+            try it online
+          </a>{' '}
+          in Grafana Play!
         </p>
       </div>
     </div>
