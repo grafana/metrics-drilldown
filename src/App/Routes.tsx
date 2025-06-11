@@ -2,7 +2,7 @@ import React, { lazy, useContext } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { ROUTES } from '../constants';
-import { MetricsContext } from './App';
+import { MetricsContext } from './useTrail';
 
 const Wingman = lazy(() => import('../pages/TrailWingman'));
 
