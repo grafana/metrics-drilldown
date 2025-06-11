@@ -18,7 +18,7 @@ import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { MAIN_PANEL_MAX_HEIGHT, MAIN_PANEL_MIN_HEIGHT, MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
-import { buildRelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
+import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import {
   getVariablesWithMetricConstant,
   RefreshMetricsEvent,
@@ -129,7 +129,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   };
 
   public createRelatedLogsScene(): SceneObject<SceneObjectState> {
-    return buildRelatedLogsScene({
+    return new RelatedLogsScene({
       orchestrator: this.relatedLogsOrchestrator,
     });
   }
