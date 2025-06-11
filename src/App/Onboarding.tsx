@@ -46,7 +46,6 @@ export function Onboarding() {
           </a>{' '}
           to learn more or
           <br />
-          or{' '}
           <a
             href="https://play.grafana.org/a/grafana-metricsdrilldown-app/drilldown"
             target="_blank"
