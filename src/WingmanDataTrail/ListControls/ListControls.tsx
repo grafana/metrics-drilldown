@@ -38,6 +38,7 @@ export class ListControls extends EmbeddedScene {
         children: [
           new SceneFlexItem({
             body: new QuickSearch({
+              urlSearchParamName: 'search_txt',
               targetName: 'metric',
               variableNames: {
                 nonFiltered: VAR_METRICS_VARIABLE,

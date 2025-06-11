@@ -19,6 +19,7 @@ import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArr
 
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
 interface QuickSearchState extends SceneObjectState {
+  urlSearchParamName: string;
   targetName: string;
   variableNames: {
     nonFiltered: string;
@@ -30,8 +31,6 @@ interface QuickSearchState extends SceneObjectState {
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
-  public static readonly URL_SEARCH_PARAM_NAME = 'search_txt';
-
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_DATASOURCE],
     onReferencedVariableValueChanged: () => {
@@ -40,15 +39,15 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: [QuickSearch.URL_SEARCH_PARAM_NAME],
+    keys: [this.state.urlSearchParamName],
   });
 
   getUrlState() {
-    return { [QuickSearch.URL_SEARCH_PARAM_NAME]: this.state.value };
+    return { [this.state.urlSearchParamName]: this.state.value };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
-    const newValue = (values[QuickSearch.URL_SEARCH_PARAM_NAME] as string) || '';
+    const newValue = (values[this.state.urlSearchParamName] as string) || '';
 
     if (newValue !== this.state.value) {
       this.setState({ value: newValue });
@@ -56,14 +55,17 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   }
 
   public constructor({
+    urlSearchParamName,
     targetName,
     variableNames,
   }: {
+    urlSearchParamName: QuickSearchState['urlSearchParamName'];
     targetName: QuickSearchState['targetName'];
     variableNames: QuickSearchState['variableNames'];
   }) {
     super({
       key: 'quick-search',
+      urlSearchParamName,
       targetName,
       variableNames,
       value: '',
