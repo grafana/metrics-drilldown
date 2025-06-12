@@ -16,12 +16,12 @@ import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex, getTrailFor } from 'utils';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 

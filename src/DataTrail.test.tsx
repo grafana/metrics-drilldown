@@ -2,9 +2,10 @@
 import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene';
-import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { DataSourceType, MockDataSourceSrv } from './mocks/datasource';
 import { MetricSelectedEvent, VAR_FILTERS } from './shared';
 import { activateFullSceneTree } from './utils/utils.testing';
@@ -33,8 +34,8 @@ describe('DataTrail', () => {
       activateFullSceneTree(trail);
     });
 
-    it('Should default to metric select scene', () => {
-      expect(trail.state.topScene).toBeInstanceOf(MetricSelectScene);
+    it('Should default to metric reducer scene', () => {
+      expect(trail.state.topScene).toBeInstanceOf(MetricsReducer);
     });
 
     describe('And metric is selected', () => {
