@@ -19,8 +19,6 @@ import { InlineBanner } from 'App/InlineBanner';
 import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex, getTrailFor } from 'utils';
-import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
-import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
@@ -167,7 +165,9 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
       });
 
-      (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
+      // Don't reset the group-by variable when selecting a group
+      // The group-by should only be reset when the filter is cleared
+      // (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
     };
 
     return (
