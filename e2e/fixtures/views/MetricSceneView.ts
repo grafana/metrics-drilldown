@@ -142,6 +142,6 @@ export class MetricSceneView extends DrilldownView {
 
   async selectPrefixFilterOption(expectedOptionName: string) {
     await this.getPrefixFilterDropdown().locator('input').click();
-    await this.page.getByRole('option', { name: expectedOptionName }).locator('span').click();
+    await this.page.getByRole('option', { name: expectedOptionName }).click();
   }
 }
