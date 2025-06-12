@@ -16,7 +16,7 @@ import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
+import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricsList/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex, getTrailFor } from 'utils';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';

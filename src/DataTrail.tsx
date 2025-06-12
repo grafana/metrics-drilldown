@@ -32,15 +32,13 @@ import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
-import { ROUTES } from './constants';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters } from './interactions';
 import { MetricScene } from './MetricScene';
-import { MetricSelectScene } from './MetricSelect/MetricSelectScene';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
-import { currentPathIncludes, limitAdhocProviders } from './utils';
+import { limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
@@ -272,7 +270,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
     } else if (values.metric == null) {
       stateUpdate.metric = undefined;
-      stateUpdate.topScene = getFreshTopScene();
+      stateUpdate.topScene = new MetricsReducer();
     }
 
     if (typeof values.metricSearch === 'string') {
@@ -337,19 +335,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
-export function getFreshTopScene() {
-  if (currentPathIncludes(ROUTES.Drilldown)) {
-    return new MetricsReducer();
-  } else {
-    return new MetricSelectScene({});
-  }
-}
-
 export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
   if (metric) {
     return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
   } else {
-    return getFreshTopScene();
+    return new MetricsReducer();
   }
 }
 
