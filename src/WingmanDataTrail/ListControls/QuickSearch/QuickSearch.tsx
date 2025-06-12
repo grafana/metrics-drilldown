@@ -15,102 +15,107 @@ import React, { type KeyboardEvent } from 'react';
 
 import { reportExploreMetrics } from 'interactions';
 import { VAR_DATASOURCE } from 'shared';
-import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
-import { VAR_WINGMAN_GROUP_BY } from 'WingmanDataTrail/Labels/LabelsVariable';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
 
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
 interface QuickSearchState extends SceneObjectState {
+  urlSearchParamName: string;
+  targetName: string;
+  variableNames: {
+    nonFiltered: string;
+    filtered: string;
+  };
   value: string;
   counts: { current: number; total: number };
-  disableRatioDisplay: boolean;
+  displayCounts: boolean;
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
-  public static readonly URL_SEARCH_PARAM_NAME = 'search_txt';
-
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE, VAR_METRICS_VARIABLE, VAR_FILTERED_METRICS_VARIABLE, VAR_WINGMAN_GROUP_BY],
-    onAnyVariableChanged: (variable) => {
-      if ([VAR_METRICS_VARIABLE, VAR_FILTERED_METRICS_VARIABLE].includes(variable.state.name)) {
-        const { counts } = this.state;
-        const key = variable.state.name === VAR_METRICS_VARIABLE ? 'total' : 'current';
-        const newCount = (sceneGraph.lookupVariable(variable.state.name, this) as MultiValueVariable).state.options
-          .length;
-
-        if (newCount !== counts[key]) {
-          this.setState({ counts: { ...counts, [key]: newCount } });
-        }
-        return;
-      }
-
-      if (variable.state.name === VAR_WINGMAN_GROUP_BY) {
-        const value = (variable as MultiValueVariable).state.value;
-        this.setState({ disableRatioDisplay: Boolean(value && value !== NULL_GROUP_BY_VALUE) });
-        return;
-      }
-
-      this.setState({ disableRatioDisplay: false });
-
-      if (variable.state.name === VAR_DATASOURCE) {
-        this.setState({ value: '' });
-      }
+    variableNames: [VAR_DATASOURCE],
+    onReferencedVariableValueChanged: () => {
+      this.setState({ value: '' });
     },
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: [QuickSearch.URL_SEARCH_PARAM_NAME],
+    keys: [this.state.urlSearchParamName],
   });
 
   getUrlState() {
-    return { [QuickSearch.URL_SEARCH_PARAM_NAME]: this.state.value };
+    return { [this.state.urlSearchParamName]: this.state.value };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
-    const newValue = (values[QuickSearch.URL_SEARCH_PARAM_NAME] as string) || '';
+    const newValue = (values[this.state.urlSearchParamName] as string) || '';
 
     if (newValue !== this.state.value) {
       this.setState({ value: newValue });
     }
   }
 
-  public constructor() {
+  public constructor({
+    urlSearchParamName,
+    targetName,
+    variableNames,
+    displayCounts,
+  }: {
+    urlSearchParamName: QuickSearchState['urlSearchParamName'];
+    targetName: QuickSearchState['targetName'];
+    variableNames: QuickSearchState['variableNames'];
+    displayCounts?: QuickSearchState['displayCounts'];
+  }) {
     super({
       key: 'quick-search',
+      urlSearchParamName,
+      targetName,
+      variableNames,
       value: '',
       counts: {
         current: 0,
         total: 0,
       },
-      disableRatioDisplay: false,
+      displayCounts: Boolean(displayCounts),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
   private onActivate() {
-    this.setState({
-      counts: {
-        current: (sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this) as FilteredMetricsVariable).state
-          .options.length,
-        total: (sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable).state.options.length,
-      },
-    });
+    const { variableNames } = this.state;
 
-    this.updateDisableRatioDisplay();
+    const filteredVariable = sceneGraph.lookupVariable(variableNames.filtered, this) as MultiValueVariable;
+    const nonFilteredVariable = sceneGraph.lookupVariable(variableNames.nonFiltered, this) as MultiValueVariable;
+
+    this._subs.add(
+      filteredVariable.subscribeToState((newState, prevState) => {
+        if (!newState.loading && !prevState.loading && !areArraysEqual(newState.options, prevState.options)) {
+          this.setState({
+            counts: {
+              current: newState.options.length,
+              total: nonFilteredVariable.state.options.length,
+            },
+          });
+        }
+      })
+    );
+
+    this._subs.add(
+      nonFilteredVariable.subscribeToState((newState, prevState) => {
+        if (!areArraysEqual(newState.options, prevState.options)) {
+          this.setState({
+            counts: {
+              current: filteredVariable.state.options.length,
+              total: newState.options.length,
+            },
+          });
+        }
+      })
+    );
   }
 
-  private updateDisableRatioDisplay() {
-    const groupByVariable = sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, this) as MultiValueVariable;
-    const groupByValue = groupByVariable.state.value;
-
-    this.setState({
-      disableRatioDisplay: Boolean(groupByValue && groupByValue !== NULL_GROUP_BY_VALUE),
-    });
+  public toggleCountsDisplay(displayCounts: boolean) {
+    this.setState({ displayCounts });
   }
 
   private notifyValueChange = debounce((value: string) => {
@@ -133,7 +138,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     this.updateValue(e.currentTarget.value);
   };
 
-  public clear = () => {
+  private clear = () => {
     this.updateValue('');
   };
 
@@ -145,14 +150,19 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   };
 
   private getHumanFriendlyCountsMessage() {
-    const { counts, disableRatioDisplay } = this.state;
+    const { targetName, counts, displayCounts } = this.state;
 
-    if (disableRatioDisplay || counts.current === counts.total) {
-      // we keep current because it's the count of the active variable (e.g. MetricsWithLabelValueVariable) after selecting a "Group by" value
-      // (total is always the count of options of MetricsVariable)
+    if (!displayCounts) {
+      return {
+        tagName: '',
+        tooltipContent: '',
+      };
+    }
+
+    if (counts.current === counts.total) {
       return {
         tagName: `${counts.current}`,
-        tooltipContent: counts.current !== 1 ? `${counts.current} metrics in total` : '1 metric in total',
+        tooltipContent: counts.current !== 1 ? `${counts.current} ${targetName}s in total` : `1 ${targetName} in total`,
       };
     }
 
@@ -160,15 +170,14 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       tagName: `${counts.current}/${counts.total}`,
       tooltipContent:
         counts.current !== 1
-          ? `${counts.current} out of ${counts.total} metrics in total`
-          : `1 out of ${counts.total} metrics in total`,
+          ? `${counts.current} out of ${counts.total} ${targetName}s in total`
+          : `1 out of ${counts.total} ${targetName}s in total`,
     };
   }
 
   static readonly Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
-    const { value } = model.useState();
-
+    const { targetName, value } = model.useState();
     const { tagName, tooltipContent } = model.getHumanFriendlyCountsMessage();
 
     return (
@@ -176,13 +185,15 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         value={value}
         onChange={model.onChange}
         onKeyDown={model.onKeyDown}
-        placeholder="Quick search metrics..."
+        placeholder={`Quick search ${targetName}s`}
         prefix={<i className="fa fa-search" />}
         suffix={
           <>
-            <Tooltip content={tooltipContent} placement="top">
-              <Tag className={styles.counts} name={tagName} colorIndex={9} />
-            </Tooltip>
+            {tagName && (
+              <Tooltip content={tooltipContent} placement="top">
+                <Tag className={styles.counts} name={tagName} colorIndex={9} />
+              </Tooltip>
+            )}
             <IconButton
               name="times"
               variant="secondary"

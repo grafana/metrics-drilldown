@@ -1,5 +1,6 @@
 import { sceneGraph, SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
 
+import { sortRelatedMetrics } from 'MetricSelect/relatedMetrics';
 import { logger } from 'tracking/logger/logger';
 import {
   MetricsSorter,
@@ -14,7 +15,7 @@ import { areArraysEqual } from './helpers/areArraysEqual';
 export class MetricsVariableSortEngine {
   private variable: QueryVariable;
   private lastMetrics: string[];
-  private sortBy?: SortingOption;
+  private sortBy?: SortingOption | 'related';
 
   constructor(variable: QueryVariable) {
     this.variable = variable;
@@ -22,7 +23,7 @@ export class MetricsVariableSortEngine {
     this.lastMetrics = [];
   }
 
-  public async sort(sortBy = this.sortBy) {
+  public async sort(sortBy = this.sortBy, options: Record<string, any> = {}) {
     const metrics = this.variable.state.options.map((option) => option.value as string);
 
     if (sortBy === this.sortBy && areArraysEqual(metrics, this.lastMetrics)) {
@@ -36,6 +37,11 @@ export class MetricsVariableSortEngine {
       case 'alerting-usage':
         sortedMetrics = await this.sortByUsage(metrics, sortBy);
         break;
+
+      case 'related':
+        sortedMetrics = sortRelatedMetrics(metrics, options.metric);
+        break;
+
       default:
         sortedMetrics = sortMetricsWithRecentFirst(metrics);
         break;

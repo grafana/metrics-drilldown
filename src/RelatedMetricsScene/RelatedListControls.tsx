@@ -12,43 +12,43 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { LayoutSwitcher } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
+import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
-import { LayoutSwitcher } from './LayoutSwitcher';
-import { MetricsSorter } from './MetricsSorter/MetricsSorter';
-import { QuickSearch } from './QuickSearch/QuickSearch';
+import { PrefixFilterDropdown } from './PrefixFilterDropdown';
 
-interface ListControlsState extends SceneObjectState {
+interface RelatedListControlsState extends SceneObjectState {
   $variables?: SceneVariableSet;
   inputControls?: SceneReactObject;
   onChange?: (value: SelectableValue<string>) => void; // Keeping for backward compatibility
 }
 
-// @ts-ignore to fix build error. Is there a Scenes friend way of doing this?
-export class ListControls extends EmbeddedScene {
-  constructor(state: Partial<ListControlsState>) {
+export class RelatedListControls extends EmbeddedScene {
+  constructor(state: Partial<RelatedListControlsState>) {
     super({
       ...state,
-      key: 'list-controls',
+      key: 'related-list-controls',
       body: new SceneFlexLayout({
         direction: 'row',
         width: '100%',
         maxHeight: '32px',
         children: [
           new SceneFlexItem({
+            width: 'auto',
+            body: new PrefixFilterDropdown({}),
+          }),
+          new SceneFlexItem({
             body: new QuickSearch({
-              urlSearchParamName: 'search_txt',
-              targetName: 'metric',
+              urlSearchParamName: 'gmd-relatedSearchText',
+              targetName: 'related metric',
               variableNames: {
                 nonFiltered: VAR_METRICS_VARIABLE,
                 filtered: VAR_FILTERED_METRICS_VARIABLE,
               },
+              displayCounts: true,
             }),
-          }),
-          new SceneFlexItem({
-            width: 'auto',
-            body: new MetricsSorter({}),
           }),
           new SceneFlexItem({
             width: 'auto',
@@ -59,12 +59,12 @@ export class ListControls extends EmbeddedScene {
     });
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<ListControls>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<RelatedListControls>) => {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
 
     return (
-      <div className={styles.headerWrapper}>
+      <div className={styles.headerWrapper} data-testid="related-list-controls">
         <body.Component model={body} />
       </div>
     );
