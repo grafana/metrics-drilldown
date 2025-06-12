@@ -140,6 +140,11 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
+  async assertFilter(filterName: string) {
+    const filter = this.getByRole('button', { name: `Remove filter with key ${filterName}` });
+    await expect(filter).toBeVisible();
+  }
+
   // TODO: If it's used once, don't declare it here, just use it in a single test
   async openPanelInExplore() {
     const explorePromise = this.page.waitForEvent('popup');

@@ -52,6 +52,16 @@ test.describe('Metrics reducer view', () => {
           stylePath: './e2e/fixtures/css/hide-app-controls.css',
         });
       });
+
+      test('clearing the filter should clear the status', async ({ metricsReducerView }) => {
+        await metricsReducerView.sidebar.selectGroupByLabel('db_name');
+        await metricsReducerView.assertMetricsGroupByList();
+        // select the first group
+        // asset the filter is applied
+        await metricsReducerView.assertFilter('db_name');
+        // clear filter pill
+        // assert sidebar icon is not active
+      });
     });
 
     test.describe('Bookmarks', () => {
