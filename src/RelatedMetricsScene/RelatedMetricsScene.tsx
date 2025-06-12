@@ -149,7 +149,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
           <listControls.Component model={listControls} />
         </div>
         <div className={styles.body}>
-          <div className={styles.list}>
+          <div className={styles.list} data-testid="panels-list">
             <body.Component model={body} />
           </div>
         </div>

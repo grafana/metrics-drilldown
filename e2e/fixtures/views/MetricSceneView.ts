@@ -3,9 +3,11 @@ import { expect, type Page } from '@playwright/test';
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
 import { AppControls } from '../components/AppControls';
+import { QuickSearchInput } from '../components/QuickSearchInput';
 
 export class MetricSceneView extends DrilldownView {
   public appControls: AppControls;
+  public quickSearch: QuickSearchInput;
 
   private static readonly ACTION_BAR_TABS = ['Breakdown', 'Related metrics', 'Related logs'] as const;
 
@@ -13,6 +15,7 @@ export class MetricSceneView extends DrilldownView {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
 
     this.appControls = new AppControls(page);
+    this.quickSearch = new QuickSearchInput(page, 'Quick search related metrics');
   }
 
   /* Navigation */
@@ -61,19 +64,30 @@ export class MetricSceneView extends DrilldownView {
     await expect(tabsList.getByRole('tab', { name: 'Breakdown', selected: true })).toBeVisible();
   }
 
-  async selectTab(tabLabel: string) {
+  async selectTab(tabLabel: 'Breakdown' | 'Related metrics' | 'Related logs') {
     await this.getTabsList().getByRole('tab', { name: tabLabel }).click();
   }
 
-  /* Breakdown */
-
-  getLabelDropdown() {
-    return this.page.getByTestId('breakdown-label-selector');
+  getTabContent() {
+    return this.page.getByTestId('tab-content');
   }
 
-  async assertLabelDropdown(optionLabel: string) {
-    await expect(this.getLabelDropdown().locator('input')).toHaveValue(optionLabel);
+  /* Layout switcher */
+
+  getLayoutSwitcher() {
+    return this.getByLabel('Layout switcher');
   }
+
+  async assertSelectedLayout(expectedLayoutName: 'Grid' | 'Row') {
+    const layoutName = await this.getLayoutSwitcher().locator('input[checked]~label').textContent();
+    await expect(layoutName?.trim()).toBe(expectedLayoutName);
+  }
+
+  selectLayout(layoutName: string) {
+    return this.getLayoutSwitcher().getByLabel(layoutName).click();
+  }
+
+  /* Panels list */
 
   getPanelsList() {
     return this.getByTestId('panels-list');
@@ -89,5 +103,45 @@ export class MetricSceneView extends DrilldownView {
 
     const panelsCount = await panelsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+  }
+
+  /* Breakdown tab */
+
+  async assertBreadownListControls() {
+    await this.assertLabelDropdown('All');
+    await expect(this.getLayoutSwitcher()).toBeVisible();
+    await this.assertSelectedLayout('Grid');
+  }
+
+  getLabelDropdown() {
+    return this.page.getByTestId('breakdown-label-selector');
+  }
+
+  async assertLabelDropdown(optionLabel: string) {
+    await expect(this.getLabelDropdown().locator('input')).toHaveValue(optionLabel);
+  }
+
+  /* Related metrics tab */
+
+  async assertRelatedMetricsListControls() {
+    await this.assertPrefixFilterDropdown('All metric names');
+
+    await expect(this.quickSearch.get()).toBeVisible();
+
+    await expect(this.getLayoutSwitcher()).toBeVisible();
+    await this.assertSelectedLayout('Grid');
+  }
+
+  getPrefixFilterDropdown() {
+    return this.page.getByTestId('prefix-filter-selector');
+  }
+
+  async assertPrefixFilterDropdown(optionLabel: string) {
+    await expect(this.getPrefixFilterDropdown().locator('input')).toHaveValue(optionLabel);
+  }
+
+  async selectPrefixFilterOption(expectedOptionName: string) {
+    await this.getPrefixFilterDropdown().locator('input').click();
+    await this.page.getByRole('option', { name: expectedOptionName }).locator('span').click();
   }
 }
