@@ -16,7 +16,7 @@ import { UI_TEXT } from 'constants/ui';
 import { reportExploreMetrics } from 'interactions';
 import { METRIC_AUTOVIZPANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
-import { MetricSelectScene } from 'MetricSelect/MetricSelectScene';
+import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
 import { MetricSelectedEvent } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
@@ -48,7 +48,7 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
   {
     displayName: 'Related metrics',
     value: actionViews.related,
-    getScene: () => new MetricSelectScene({}),
+    getScene: (metricScene: MetricScene) => new RelatedMetricsScene({ metric: metricScene.state.metric }),
     description: 'Relevant metrics based on current label filters',
   },
   {
@@ -169,7 +169,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 
             if (tab.description) {
               return (
-                <Tooltip key={index} content={tab.description} placement="bottom-start" theme="info">
+                <Tooltip key={index} content={tab.description} placement="top" theme="info">
                   {tabRender}
                 </Tooltip>
               );

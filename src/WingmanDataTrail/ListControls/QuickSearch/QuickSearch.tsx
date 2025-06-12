@@ -58,10 +58,12 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     urlSearchParamName,
     targetName,
     variableNames,
+    displayCounts,
   }: {
     urlSearchParamName: QuickSearchState['urlSearchParamName'];
     targetName: QuickSearchState['targetName'];
     variableNames: QuickSearchState['variableNames'];
+    displayCounts?: QuickSearchState['displayCounts'];
   }) {
     super({
       key: 'quick-search',
@@ -73,7 +75,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         current: 0,
         total: 0,
       },
-      displayCounts: false,
+      displayCounts: Boolean(displayCounts),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));

@@ -52,6 +52,7 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> impleme
 
     return (
       <RadioButtonGroup
+        aria-label="Layout switcher"
         options={breakdownLayoutOptions}
         value={activeBreakdownLayout}
         onChange={model.onLayoutChange}
