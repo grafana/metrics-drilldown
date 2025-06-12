@@ -164,10 +164,6 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         // TOOD: keep unique filters
         filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
       });
-
-      // Don't reset the group-by variable when selecting a group
-      // The group-by should only be reset when the filter is cleared
-      // (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
     };
 
     return (
