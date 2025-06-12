@@ -22,7 +22,7 @@ interface PrefixFilterDropdownState extends SceneObjectState {
   loading: boolean;
   error: Error | null;
   options: ComboboxOption[];
-  value?: string;
+  value: string;
 }
 
 const METRIC_PREFIX_ALL_OPTION = {
@@ -50,7 +50,10 @@ export class PrefixFilterDropdown extends SceneObjectBase<PrefixFilterDropdownSt
       if (this.state.value !== values.metricPrefix) {
         this.setState({ value: values.metricPrefix });
       }
+      return;
     }
+
+    this.setState({ value: METRIC_PREFIX_ALL_OPTION.value });
   }
 
   constructor(state: Partial<PrefixFilterDropdownState>) {
@@ -59,8 +62,8 @@ export class PrefixFilterDropdown extends SceneObjectBase<PrefixFilterDropdownSt
       key: 'related-prefix-filter',
       loading: true,
       error: null,
-      options: [],
-      value: undefined,
+      options: [METRIC_PREFIX_ALL_OPTION],
+      value: METRIC_PREFIX_ALL_OPTION.value,
     });
   }
 
