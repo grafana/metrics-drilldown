@@ -36,11 +36,11 @@ import {
 } from './ListControls/MetricsSorter/MetricsSorter';
 import { EventQuickSearchChanged } from './ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './ListControls/QuickSearch/QuickSearch';
-import { GRID_TEMPLATE_COLUMNS, SimpleMetricsList } from './MetricsList/SimpleMetricsList';
+import { GRID_TEMPLATE_COLUMNS, MetricsList } from './MetricsList/MetricsList';
 import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
-import { FilteredMetricsVariable } from './MetricsVariables/FilteredMetricsVariable';
+import { FilteredMetricsVariable, VAR_FILTERED_METRICS_VARIABLE } from './MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
@@ -77,7 +77,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       }),
       listControls: new ListControls({}),
       sidebar: new SideBar({}),
-      body: new SimpleMetricsList() as unknown as SceneObjectBase,
+      body: new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }) as unknown as SceneObjectBase,
       drawer: new SceneDrawer({}),
       enginesMap: new Map(),
     });
@@ -104,7 +104,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this.setState({
       body: hasGroupByValue
         ? (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase)
-        : (new SimpleMetricsList() as unknown as SceneObjectBase),
+        : (new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }) as unknown as SceneObjectBase),
     });
   }
 

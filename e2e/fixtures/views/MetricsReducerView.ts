@@ -18,7 +18,7 @@ export class MetricsReducerView extends DrilldownView {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
 
     this.appControls = new AppControls(page);
-    this.quickSearch = new QuickSearchInput(page);
+    this.quickSearch = new QuickSearchInput(page, 'Quick search metrics');
     this.sidebar = new Sidebar(page);
   }
 

@@ -13,7 +13,7 @@ import {
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
 
-import { AddToExplorationButton, extensionPointId } from '../MetricSelect/AddToExplorationsButton';
+import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';

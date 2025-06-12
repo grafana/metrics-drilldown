@@ -7,6 +7,7 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneReactObject,
+  type MultiValueVariable,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
@@ -15,42 +16,37 @@ import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex, getTrailFor } from 'utils';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import {
-  METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
-  MetricVizPanel,
-} from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 export const GRID_TEMPLATE_ROWS = '1fr';
 
-interface SimpleMetricsListState extends SceneObjectState {
+interface MetricsListState extends SceneObjectState {
+  variableName: string;
   body: SceneByVariableRepeater;
 }
 
-export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
-  constructor() {
+export class MetricsList extends SceneObjectBase<MetricsListState> {
+  constructor({ variableName }: { variableName: MetricsListState['variableName'] }) {
     super({
-      key: 'simple-metrics-list',
+      key: 'metrics-list',
+      variableName,
       body: new SceneByVariableRepeater({
-        variableName: VAR_FILTERED_METRICS_VARIABLE,
+        variableName,
         initialPageSize: 120,
         pageSizeIncrement: 9,
         body: new SceneCSSGridLayout({
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+          autoRows: METRICS_VIZ_PANEL_HEIGHT,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -124,11 +120,11 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<SimpleMetricsList>) => {
-    const { body } = model.useState();
+  public static readonly Component = ({ model }: SceneComponentProps<MetricsList>) => {
+    const { variableName, body } = model.useState();
     const styles = useStyles2(getStyles);
 
-    const variable = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, model) as FilteredMetricsVariable;
+    const variable = sceneGraph.lookupVariable(variableName, model) as MultiValueVariable;
     const { loading, error } = variable.useState();
 
     const batchSizes = body.useSizes();

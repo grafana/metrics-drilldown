@@ -25,12 +25,14 @@ import {
   type MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
+type SortBy = Exclude<SortingOption, 'related'>;
+
 type WithUsageDataPreviewPanelState = SceneObjectState & {
   [key in MetricUsageType]: number;
 } & {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
-  sortBy: SortingOption;
+  sortBy: SortBy;
 };
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
@@ -46,25 +48,36 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
   }
 
   private _onActivate() {
-    const metricsReducer = sceneGraph.getAncestor(this, MetricsReducer);
+    let metricsReducer;
+
+    try {
+      metricsReducer = sceneGraph.getAncestor(this, MetricsReducer);
+    } catch {
+      return;
+    }
+
     const filteredMetricsEngine = metricsReducer.state.enginesMap.get(VAR_FILTERED_METRICS_VARIABLE);
     if (!filteredMetricsEngine) {
       return;
     }
+
     const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
     const sortByVar = sceneGraph.getVariables(metricsSorter).getByName(VAR_WINGMAN_SORT_BY);
 
     if (isCustomVariable(sortByVar)) {
-      this.updateSortBy(metricsSorter, sortByVar.getValue() as SortingOption);
+      this.updateSortBy(metricsSorter, sortByVar.getValue() as SortBy);
+
       this._subs.add(
         sortByVar.subscribeToState(({ value }) => {
-          this.updateSortBy(metricsSorter, value as SortingOption);
+          this.updateSortBy(metricsSorter, value as SortBy);
         })
       );
     }
   }
-  private updateSortBy(metricsSorter: MetricsSorter, sortBy: SortingOption) {
+
+  private updateSortBy(metricsSorter: MetricsSorter, sortBy: SortBy) {
     this.setState({ sortBy });
+
     const gridLayout = sceneGraph.getAncestor(this, SceneCSSGridLayout);
     const currentGridLayoutHeight = gridLayout?.state.autoRows;
 
@@ -95,20 +108,20 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       'alerting-usage': metricUsedInAlertingRulesCount,
       'dashboard-usage': metricUsedInDashboardsCount,
     } = model.useState();
+
     if (!vizPanelInGridItem) {
       console.log('no viz panel');
       return;
     }
 
-    const styles = useStyles2(getStyles);
-
     if (sortBy === 'default') {
       return (
-        <div className={styles.panelContainer} data-testid="with-usage-data-preview-panel">
+        <div data-testid="with-usage-data-preview-panel">
           <vizPanelInGridItem.Component model={vizPanelInGridItem} />
         </div>
       );
     }
+
     const usageDetails: Record<MetricUsageType, Omit<UsageSectionProps, 'usageType'>> = {
       'dashboard-usage': {
         usageCount: metricUsedInDashboardsCount,
@@ -125,7 +138,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     };
 
     return (
-      <div className={styles.panelContainer} data-testid="with-usage-data-preview-panel">
+      <div data-testid="with-usage-data-preview-panel">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
         <UsageData
           usageType={sortBy}
@@ -163,11 +176,9 @@ function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, 
     </div>
   );
 }
-export function getStyles(theme: GrafanaTheme2) {
+
+function getStyles(theme: GrafanaTheme2) {
   return {
-    panelContainer: css({
-      // height: '175px',
-    }),
     usageContainer: css({
       display: 'flex',
       flexDirection: 'row',
