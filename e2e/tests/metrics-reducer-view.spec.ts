@@ -56,11 +56,14 @@ test.describe('Metrics reducer view', () => {
       test('clearing the filter should clear the status', async ({ metricsReducerView }) => {
         await metricsReducerView.sidebar.selectGroupByLabel('db_name');
         await metricsReducerView.assertMetricsGroupByList();
+        await expect(await metricsReducerView.sidebar.getSidebarToggle('Group by labels')).toContainClass('active');
         // select the first group
-        // asset the filter is applied
+        // is there a nicer way of doing this?
+        await metricsReducerView.getByRole('button', { name: 'Select' }).nth(1).click();
         await metricsReducerView.assertFilter('db_name');
-        // clear filter pill
+        await metricsReducerView.clearFilter('db_name');
         // assert sidebar icon is not active
+        await expect(await metricsReducerView.sidebar.getSidebarToggle('Group by labels')).not.toContainClass('active');
       });
     });
 

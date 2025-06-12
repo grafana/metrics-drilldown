@@ -145,6 +145,10 @@ export class MetricsReducerView extends DrilldownView {
     await expect(filter).toBeVisible();
   }
 
+  async clearFilter(filterName: string) {
+    await this.getByRole('button', { name: `Remove filter with key ${filterName}` }).click();
+  }
+
   // TODO: If it's used once, don't declare it here, just use it in a single test
   async openPanelInExplore() {
     const explorePromise = this.page.waitForEvent('popup');
