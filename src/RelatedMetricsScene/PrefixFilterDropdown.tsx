@@ -105,13 +105,15 @@ export class PrefixFilterDropdown extends SceneObjectBase<PrefixFilterDropdownSt
     this.selectOption({ value: newValue, label: newValue });
   }
 
-  private selectOption = (option: ComboboxOption) => {
-    this.setState({ value: option.value });
+  private selectOption = (option: ComboboxOption | null) => {
+    const value = option === null ? METRIC_PREFIX_ALL_OPTION.value : option.value;
+
+    this.setState({ value });
 
     this.publishEvent(
       new EventFiltersChanged({
         type: 'prefixes',
-        filters: option.value === METRIC_PREFIX_ALL_OPTION.value ? [] : [option.value],
+        filters: value === METRIC_PREFIX_ALL_OPTION.value ? [] : [value],
       }),
       true
     );
@@ -122,7 +124,7 @@ export class PrefixFilterDropdown extends SceneObjectBase<PrefixFilterDropdownSt
     const { loading, options, value, error } = model.useState();
 
     return (
-      <div className={styles.container} data-testid="prefix-filter">
+      <div className={styles.container} data-testid="prefix-filter-selector">
         <InlineField
           disabled={loading}
           error={error && error.toString()}
