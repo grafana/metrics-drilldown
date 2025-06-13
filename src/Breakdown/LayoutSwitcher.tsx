@@ -1,4 +1,5 @@
-import { type SelectableValue } from '@grafana/data';
+import { css } from '@emotion/css';
+import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import {
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
@@ -8,7 +9,7 @@ import {
   type SceneObjectUrlValues,
   type SceneObjectWithUrlSync,
 } from '@grafana/scenes';
-import { RadioButtonGroup } from '@grafana/ui';
+import { RadioButtonGroup, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from '../interactions';
@@ -73,6 +74,7 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> impleme
 
   public static readonly Component = ({ model }: SceneComponentProps<LayoutSwitcher>) => {
     const { breakdownLayouts, breakdownLayoutOptions, activeBreakdownLayout } = model.useState();
+    const styles = useStyles2(getStyles);
 
     const index = breakdownLayoutOptions.findIndex((o) => o.value === activeBreakdownLayout);
     if (index === -1) {
@@ -81,6 +83,21 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> impleme
 
     const layout = breakdownLayouts[index];
 
-    return <layout.Component model={layout} />;
+    return (
+      <div className={styles.container}>
+        <layout.Component model={layout} />
+      </div>
+    );
+  };
+}
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    container: css({
+      display: 'flex',
+      flexDirection: 'row',
+      flexGrow: 1,
+      paddingTop: theme.spacing(0),
+    }),
   };
 }
