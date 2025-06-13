@@ -57,6 +57,10 @@ export class Sidebar {
     await this.locator.getByRole('radio', { name: labelName, exact: true }).check();
   }
 
+  async getSidebarToggle(name: string) {
+    return this.get().getByTestId(`sidebar-component ${name}`);
+  }
+
   /* Bookmarks */
 
   async assertBookmarkCreated(metricName: string) {
