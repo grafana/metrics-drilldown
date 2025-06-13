@@ -13,13 +13,13 @@ import { TooltipDisplayMode, useStyles2 } from '@grafana/ui';
 import { merge } from 'lodash';
 import React from 'react';
 
-import { EventTimeseriesDataReceived } from 'Breakdown/events/EventTimeseriesDataReceived';
 import { SelectLabelAction } from 'Breakdown/LabelBreakdownScene';
+import { EventTimeseriesDataReceived } from 'Breakdown/MetricLabelsList/events/EventTimeseriesDataReceived';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
-import { fixLegendForUnspecifiedLabelValueBehavior } from '../behaviours/fixLegendForUnspecifiedLabelValueBehavior';
+import { fixLegendForUnspecifiedLabelValueBehavior } from './behaviours/fixLegendForUnspecifiedLabelValueBehavior';
 
 interface LabelVizPanelState extends SceneObjectState {
   metric: string;

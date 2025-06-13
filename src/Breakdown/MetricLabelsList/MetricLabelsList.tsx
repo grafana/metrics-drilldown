@@ -17,7 +17,7 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
-import { syncYAxis } from 'Breakdown/behaviours/syncYAxis';
+import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviours/syncYAxis';
 import { VAR_GROUP_BY, VAR_GROUP_BY_EXP } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';

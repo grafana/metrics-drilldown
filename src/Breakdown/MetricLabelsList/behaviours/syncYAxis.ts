@@ -1,7 +1,7 @@
 import { sceneGraph, VizPanel, type SceneObject, type SceneObjectState } from '@grafana/scenes';
 import { cloneDeep, merge } from 'lodash';
 
-import { EventTimeseriesDataReceived } from 'Breakdown/events/EventTimeseriesDataReceived';
+import { EventTimeseriesDataReceived } from 'Breakdown/MetricLabelsList/events/EventTimeseriesDataReceived';
 
 export function syncYAxis() {
   return (vizPanel: SceneObject<SceneObjectState>) => {
