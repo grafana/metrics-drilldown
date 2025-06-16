@@ -3,30 +3,37 @@ import { cloneDeep, merge } from 'lodash';
 
 import { EventTimeseriesDataReceived } from 'Breakdown/MetricLabelsList/events/EventTimeseriesDataReceived';
 
+/**
+ * Synchronizes the Y-axis ranges across children timeseries panels by listening to data updates from publishTimeseriesData.
+ * When new data arrives, it calculates the global min/max values and updates all children panels to use the same scale.
+ */
 export function syncYAxis() {
-  return (vizPanel: SceneObject<SceneObjectState>) => {
+  return (vizPanelsParent: SceneObject<SceneObjectState>) => {
     let max = Number.NEGATIVE_INFINITY;
     let min = Number.POSITIVE_INFINITY;
 
-    const timeRangeSub = sceneGraph.getTimeRange(vizPanel).subscribeToState(() => {
+    const timeRangeSub = sceneGraph.getTimeRange(vizPanelsParent).subscribeToState(() => {
       max = Number.NEGATIVE_INFINITY;
       min = Number.POSITIVE_INFINITY;
     });
 
-    const eventSub = vizPanel.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
+    const eventSub = vizPanelsParent.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
       const series = event.payload.series || [];
+      let newMax = max;
+      let newMin = min;
 
       for (const s of series) {
         const values = s.fields[1]?.values.filter(Boolean);
 
         if (values) {
-          max = Math.max(max, ...values);
-          min = Math.min(min, ...values);
+          newMax = Math.max(newMax, ...values);
+          newMin = Math.min(newMin, ...values);
         }
       }
 
-      if (max !== Number.NEGATIVE_INFINITY && min !== Number.POSITIVE_INFINITY) {
-        updateTimeseriesAxis(vizPanel, max, min);
+      if (newMax !== max && newMin !== min && newMax !== newMin) {
+        [max, min] = [newMax, newMin];
+        updateTimeseriesAxis(vizPanelsParent, max, min);
       }
     });
 
@@ -37,10 +44,10 @@ export function syncYAxis() {
   };
 }
 
-function updateTimeseriesAxis(vizPanel: SceneObject, max: number, min: number) {
+function updateTimeseriesAxis(vizPanelsParent: SceneObject, max: number, min: number) {
   // findAllObjects searches down the full scene graph
   const timeseries = sceneGraph.findAllObjects(
-    vizPanel,
+    vizPanelsParent,
     (o) => o instanceof VizPanel && o.state.pluginId === 'timeseries'
   ) as VizPanel[];
 
