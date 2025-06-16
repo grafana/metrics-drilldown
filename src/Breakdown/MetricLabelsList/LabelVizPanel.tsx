@@ -2,6 +2,7 @@ import { css } from '@emotion/css';
 import { FieldMatcherID, LoadingState, type DataFrame } from '@grafana/data';
 import {
   PanelBuilders,
+  SceneDataTransformer,
   SceneObjectBase,
   SceneQueryRunner,
   type SceneComponentProps,
@@ -14,12 +15,12 @@ import { merge } from 'lodash';
 import React from 'react';
 
 import { SelectLabelAction } from 'Breakdown/LabelBreakdownScene';
-import { EventTimeseriesDataReceived } from 'Breakdown/MetricLabelsList/events/EventTimeseriesDataReceived';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
-import { fixLegendForUnspecifiedLabelValueBehavior } from './behaviours/fixLegendForUnspecifiedLabelValueBehavior';
+import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
+import { addRefId } from './transformations/addRefId';
 
 interface LabelVizPanelState extends SceneObjectState {
   metric: string;
@@ -59,6 +60,49 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
+  private static buildVizPanel({
+    metric,
+    label,
+    query,
+    unit,
+  }: {
+    metric: LabelVizPanelState['label'];
+    label: LabelVizPanelState['label'];
+    query: LabelVizPanelState['query'];
+    unit: LabelVizPanelState['unit'];
+  }) {
+    const data = new SceneDataTransformer({
+      $data: new SceneQueryRunner({
+        datasource: trailDS,
+        maxDataPoints: MDP_METRIC_PREVIEW,
+        queries: [
+          {
+            refId: `${metric}-${label}`,
+            expr: query,
+            legendFormat: `{{${label}}}`,
+            fromExploreMetrics: true,
+          },
+        ],
+      }),
+      // addRefId is required for setting the overrides below
+      transformations: [addRefId],
+    });
+
+    const vizPanel = PanelBuilders.timeseries()
+      .setTitle(label)
+      .setUnit(unit)
+      .setData(data)
+      // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList)
+      .setBehaviors([publishTimeseriesData()])
+      .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
+      .setHeaderActions([new SelectLabelAction({ labelName: label })])
+      .setMenu(new PanelMenu({ labelName: label }))
+      .setShowMenuAlways(true)
+      .build();
+
+    return vizPanel;
+  }
+
   private onActivate() {
     const { body } = this.state;
 
@@ -67,15 +111,14 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
         if (newState.data?.state !== LoadingState.Done) {
           return;
         }
+
         const { series } = newState.data;
 
         if (series?.length) {
           const config = this.getAllValuesConfig(series);
+
           body.setState(merge({}, body.state, config));
         }
-
-        // we publish the event only after setting the new config so that the subscribers can modify it (e.g. for syncing y-axis)
-        this.publishEvent(new EventTimeseriesDataReceived({ series }), true);
       })
     );
   }
@@ -92,14 +135,12 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
     const { label, startColorIndex } = this.state;
 
     return series.map((s, i) => {
-      const displayName = s.fields[1]?.labels?.[label] || `<unspecified ${label}>`;
-
       return {
-        matcher: { id: FieldMatcherID.byName, options: displayName },
+        matcher: { id: FieldMatcherID.byFrameRefID, options: s.refId },
         properties: [
           {
             id: 'displayName',
-            value: displayName,
+            value: s.fields[1]?.labels?.[label] || `<unspecified ${label}>`,
           },
           {
             id: 'color',
@@ -108,44 +149,6 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
         ],
       };
     });
-  }
-
-  private static buildVizPanel({
-    metric,
-    label,
-    query,
-    unit,
-  }: {
-    metric: LabelVizPanelState['label'];
-    label: LabelVizPanelState['label'];
-    query: LabelVizPanelState['query'];
-    unit: LabelVizPanelState['unit'];
-  }) {
-    const vizPanel = PanelBuilders.timeseries()
-      .setTitle(label!)
-      .setData(
-        new SceneQueryRunner({
-          datasource: trailDS,
-          maxDataPoints: MDP_METRIC_PREVIEW,
-          queries: [
-            {
-              refId: `${metric}-${label}`,
-              expr: query,
-              legendFormat: `{{${label}}}`,
-              fromExploreMetrics: true,
-            },
-          ],
-        })
-      )
-      .setUnit(unit)
-      .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setHeaderActions([new SelectLabelAction({ labelName: String(label) })])
-      .setMenu(new PanelMenu({ labelName: String(label) }))
-      .setShowMenuAlways(true)
-      .setBehaviors([fixLegendForUnspecifiedLabelValueBehavior])
-      .build();
-
-    return vizPanel;
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<LabelVizPanel>) => {
