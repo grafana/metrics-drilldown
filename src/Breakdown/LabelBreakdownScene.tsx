@@ -1,7 +1,6 @@
 import init from '@bsull/augurs/outlier';
 import { css } from '@emotion/css';
 import { FieldType, type DataFrame, type GrafanaTheme2, type PanelData, type SelectableValue } from '@grafana/data';
-import { utf8Support } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import {
   PanelBuilders,
@@ -17,12 +16,11 @@ import {
   VariableDependencyConfig,
   type QueryVariable,
   type SceneComponentProps,
-  type SceneFlexItemLike,
   type SceneObject,
   type SceneObjectState,
   type VizPanel,
 } from '@grafana/scenes';
-import { SortOrder, TooltipDisplayMode, type DataQuery } from '@grafana/schema';
+import { SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { isNumber, max, min, throttle } from 'lodash';
 import React from 'react';
@@ -45,22 +43,14 @@ import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior
 import { PanelMenu } from '../Menu/PanelMenu';
 import { getSortByPreference } from '../services/store';
 import { ALL_VARIABLE_VALUE } from '../services/variables';
-import {
-  MDP_METRIC_PREVIEW,
-  RefreshMetricsEvent,
-  trailDS,
-  VAR_FILTERS,
-  VAR_GROUP_BY,
-  VAR_GROUP_BY_EXP,
-} from '../shared';
+import { MDP_METRIC_PREVIEW, RefreshMetricsEvent, trailDS, VAR_FILTERS, VAR_GROUP_BY } from '../shared';
 import { StatusWrapper } from '../StatusWrapper';
 import { getColorByIndex, getTrailFor } from '../utils';
 import { isQueryVariable } from '../utils/utils.variables';
-
-const MAX_PANELS_IN_ALL_LABELS_BREAKDOWN = 60;
+import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 
 export interface LabelBreakdownSceneState extends SceneObjectState {
-  body?: LayoutSwitcher;
+  body?: LayoutSwitcher | MetricLabelsList;
   search: BreakdownSearchScene;
   sortBy: SortByScene;
   labels: Array<SelectableValue<string>>;
@@ -234,8 +224,10 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     };
 
     if (!variable.state.loading && variable.state.options.length) {
+      const metricScene = sceneGraph.getAncestor(this, MetricScene);
+
       stateUpdate.body = variable.hasAllValue()
-        ? buildAllLayout(options, this._query!, this.onBreakdownLayoutChange)
+        ? new MetricLabelsList({ metric: metricScene.state.metric })
         : buildNormalLayout(this._query!, this.onBreakdownLayoutChange, this.state.search);
     } else if (!variable.state.loading) {
       stateUpdate.body = undefined;
@@ -289,9 +281,15 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
                 <body.Selector model={body} />
               </Field>
             )}
+            {body instanceof MetricLabelsList && (
+              <Field label="View">
+                <body.Selector model={body} />
+              </Field>
+            )}
           </div>
-          <div className={styles.content} data-testid="panels-list">
-            {body && <body.Component model={body} />}
+          <div data-testid="panels-list">
+            {body instanceof LayoutSwitcher && <body.Component model={body} />}
+            {body instanceof MetricLabelsList && <body.Component model={body} />}
           </div>
         </StatusWrapper>
       </div>
@@ -308,11 +306,6 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       paddingTop: theme.spacing(1),
     }),
-    content: css({
-      flexGrow: 1,
-      display: 'flex',
-      paddingTop: theme.spacing(0),
-    }),
     searchField: css({
       flexGrow: 1,
     }),
@@ -324,81 +317,6 @@ function getStyles(theme: GrafanaTheme2) {
       justifyContent: 'space-between',
     }),
   };
-}
-
-export function buildAllLayout(
-  options: Array<SelectableValue<string>>,
-  queryDef: AutoQueryDef,
-  onBreakdownLayoutChange: BreakdownLayoutChangeCallback
-) {
-  const children: SceneFlexItemLike[] = [];
-
-  for (const option of options) {
-    if (option.value === ALL_VARIABLE_VALUE) {
-      continue;
-    }
-
-    if (children.length === MAX_PANELS_IN_ALL_LABELS_BREAKDOWN) {
-      break;
-    }
-
-    const expr = queryDef.queries[0].expr.replaceAll(VAR_GROUP_BY_EXP, utf8Support(String(option.value)));
-    const unit = queryDef.unit;
-
-    const vizPanel = PanelBuilders.timeseries()
-      .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setOption('legend', { showLegend: true })
-      .setTitle(option.label!)
-      .setData(
-        new SceneQueryRunner({
-          maxDataPoints: MDP_METRIC_PREVIEW,
-          datasource: trailDS,
-          queries: [
-            {
-              refId: `A-${option.label}`,
-              expr,
-              legendFormat: `{{${option.label}}}`,
-              fromExploreMetrics: true,
-            },
-          ],
-        })
-      )
-      .setHeaderActions([new SelectLabelAction({ labelName: String(option.value) })])
-      .setShowMenuAlways(true)
-      .setMenu(new PanelMenu({ labelName: String(option.value) }))
-      .setUnit(unit)
-      .setBehaviors([fixLegendForUnspecifiedLabelValueBehavior])
-      .build();
-
-    children.push(
-      new SceneCSSGridItem({
-        $behaviors: [yAxisSyncBehavior],
-        body: vizPanel,
-      })
-    );
-  }
-  return new LayoutSwitcher({
-    breakdownLayoutOptions: [
-      { value: 'grid', label: 'Grid' },
-      { value: 'rows', label: 'Rows' },
-    ],
-    onBreakdownLayoutChange,
-    breakdownLayouts: [
-      new SceneCSSGridLayout({
-        templateColumns: GRID_TEMPLATE_COLUMNS,
-        autoRows: METRICS_VIZ_PANEL_HEIGHT,
-        children: children,
-        isLazy: true,
-      }),
-      new SceneCSSGridLayout({
-        templateColumns: '1fr',
-        autoRows: METRICS_VIZ_PANEL_HEIGHT,
-        // Clone children since a scene object can only have one parent at a time
-        children: children.map((c) => c.clone()),
-        isLazy: true,
-      }),
-    ],
-  });
 }
 
 const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
@@ -535,28 +453,4 @@ function getBreakdownSceneFor(model: SceneObject): LabelBreakdownScene {
   }
 
   throw new Error('Unable to find breakdown scene');
-}
-
-function fixLegendForUnspecifiedLabelValueBehavior(vizPanel: VizPanel) {
-  vizPanel.state.$data?.subscribeToState((newState) => {
-    const target = newState.data?.request?.targets[0];
-    if (hasLegendFormat(target)) {
-      const { legendFormat } = target;
-      // Assume {{label}}
-      const label = legendFormat.slice(2, -2);
-
-      newState.data?.series.forEach((series) => {
-        if (!series.fields[1]?.labels?.[label]) {
-          const labels = series.fields[1]?.labels;
-          if (labels) {
-            labels[label] = `<unspecified ${label}>`;
-          }
-        }
-      });
-    }
-  });
-}
-
-function hasLegendFormat(target: DataQuery | undefined): target is DataQuery & { legendFormat: string } {
-  return target !== undefined && 'legendFormat' in target && typeof target.legendFormat === 'string';
 }
