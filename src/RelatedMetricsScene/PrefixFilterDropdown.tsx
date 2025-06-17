@@ -65,6 +65,12 @@ export class PrefixFilterDropdown extends SceneObjectBase<PrefixFilterDropdownSt
       options: [METRIC_PREFIX_ALL_OPTION],
       value: METRIC_PREFIX_ALL_OPTION.value,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    this.parseMetricPrefixes();
   }
 
   private parseMetricPrefixes() {
