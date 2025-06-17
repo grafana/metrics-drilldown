@@ -54,7 +54,27 @@ export class Sidebar {
 
   async selectGroupByLabel(labelName: string) {
     await this.toggleButton('Group by labels');
-    await this.locator.getByRole('radio', { name: labelName, exact: true }).check();
+    await this.locator.getByRole('radio', { name: labelName, exact: true }).check({ force: true });
+  }
+
+  async assertGroupByLabelChecked(labelName: string) {
+    const labelsBrowser = this.locator.getByTestId('labels-browser');
+    const radioButton = labelsBrowser.getByRole('radio', { name: labelName, exact: true });
+    await expect(radioButton).toBeChecked();
+  }
+
+  async assertGroupByCleared() {
+    // When group-by is cleared, the labels-browser section should not be visible
+    // or should not contain any selected radio buttons
+    const labelsBrowser = this.locator.getByTestId('labels-browser');
+
+    // Check if the labels browser has any checked radio buttons
+    const checkedRadios = labelsBrowser.getByRole('radio', { checked: true });
+    await expect(checkedRadios).toHaveCount(0);
+  }
+
+  async getSidebarToggle(name: string) {
+    return this.get().getByTestId(`sidebar-component ${name}`);
   }
 
   /* Bookmarks */
