@@ -4,9 +4,15 @@ type Filter = {
   value: string;
 };
 
+const LABEL_REGEX = '[a-zA-Z_]\\w*'; // see https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels
+const OPERATOR_REGEX = '>|<|!~|=~|!=|=';
+const VALUE_REGEX = '.+';
+
+const MATCHER_REGEX = new RegExp(`(${LABEL_REGEX})(${OPERATOR_REGEX})(${VALUE_REGEX})`);
+
 export function parseMatcher(matcher: string): Filter {
   // eslint-disable-next-line sonarjs/slow-regex
-  const [, rawKey, rawOperator, rawValue] = matcher.match(/([a-z0-9]+)(>|<|!~|=~|!=|=)(.+)/i) || [, '', '', ''];
+  const [, rawKey, rawOperator, rawValue] = matcher.match(MATCHER_REGEX) || [, '', '', ''];
   return {
     key: rawKey.trim(),
     value: rawValue.replace(/['" ]/g, ''),
