@@ -57,15 +57,20 @@ export class Sidebar {
     await this.locator.getByRole('radio', { name: labelName, exact: true }).check({ force: true });
   }
 
-  async assertGroupByLabelChecked(labelName: string, shouldBeChecked = true) {
+  async assertGroupByLabelChecked(labelName: string) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
     const radioButton = labelsBrowser.getByRole('radio', { name: labelName, exact: true });
+    await expect(radioButton).toBeChecked();
+  }
 
-    if (shouldBeChecked) {
-      await expect(radioButton).toBeChecked();
-    } else {
-      await expect(radioButton).not.toBeChecked();
-    }
+  async assertGroupByCleared() {
+    // When group-by is cleared, the labels-browser section should not be visible
+    // or should not contain any selected radio buttons
+    const labelsBrowser = this.locator.getByTestId('labels-browser');
+
+    // Check if the labels browser has any checked radio buttons
+    const checkedRadios = labelsBrowser.getByRole('radio', { checked: true });
+    await expect(checkedRadios).toHaveCount(0);
   }
 
   async getSidebarToggle(name: string) {

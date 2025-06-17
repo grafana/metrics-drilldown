@@ -66,7 +66,8 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.clearFilter('db_name');
         // assert sidebar icon is not active
         await expect(await metricsReducerView.sidebar.getSidebarToggle('Group by labels')).not.toContainClass('active');
-        await metricsReducerView.sidebar.assertGroupByLabelChecked('db_name', false);
+        // assert group-by selection is cleared
+        await metricsReducerView.sidebar.assertGroupByCleared();
       });
     });
 

@@ -104,12 +104,6 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
   private selectLabel(label: string) {
     const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
     labelsVariable.changeValueTo(label);
-
-    const active = Boolean(label && label !== NULL_GROUP_BY_VALUE);
-
-    this.setState({ active });
-
-    this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [label] : [] }), true);
   }
 
   private onClickLabel = (label: string) => {
