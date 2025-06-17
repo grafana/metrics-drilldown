@@ -1,12 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
-import {
-  sceneGraph,
-  SceneObjectBase,
-  VariableDependencyConfig,
-  type AdHocFiltersVariable,
-  type SceneComponentProps,
-} from '@grafana/scenes';
+import { sceneGraph, SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { Icon, IconButton, Input, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
 
@@ -14,7 +8,6 @@ import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 
 import { reportExploreMetrics } from '../../../../interactions';
-import { VAR_FILTERS } from '../../../../shared';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
@@ -25,8 +18,6 @@ interface LabelsBrowserState extends SideBarSectionState {
 }
 
 export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
-  protected _variableDependency: VariableDependencyConfig<LabelsBrowserState>;
-
   constructor({
     key,
     variableName,
@@ -54,17 +45,6 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       active: active ?? false,
     });
 
-    this._variableDependency = new VariableDependencyConfig(this, {
-      variableNames: [VAR_FILTERS, variableName],
-      onReferencedVariableValueChanged: (variable) => {
-        if (variable.state.name === VAR_FILTERS) {
-          this.onFiltersChanged(variable as AdHocFiltersVariable);
-        } else if (variable.state.name === variableName) {
-          this.onGroupByVariableChanged(variable as LabelsVariable);
-        }
-      },
-    });
-
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
@@ -75,35 +55,15 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     this.setState({ active: Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE) });
   }
 
-  private onGroupByVariableChanged(labelsVariable: LabelsVariable) {
-    const labelValue = labelsVariable.state.value as string;
-    const active = Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE);
-
-    this.setState({ active });
-    this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [labelValue] : [] }), true);
-  }
-
-  private onFiltersChanged(filtersVariable: AdHocFiltersVariable) {
-    const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
-    const currentGroupByLabel = labelsVariable.state.value as string;
-
-    // Only check if we currently have a group-by label selected
-    if (!currentGroupByLabel || currentGroupByLabel === NULL_GROUP_BY_VALUE) {
-      return;
-    }
-
-    // Check if there are any filters for the current group-by label
-    const hasFilterForCurrentLabel = filtersVariable.state.filters.some((filter) => filter.key === currentGroupByLabel);
-
-    // If no filters exist for the current group-by label, reset the group-by state
-    if (!hasFilterForCurrentLabel) {
-      this.selectLabel(NULL_GROUP_BY_VALUE);
-    }
-  }
-
   private selectLabel(label: string) {
     const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
     labelsVariable.changeValueTo(label);
+
+    const active = Boolean(label && label !== NULL_GROUP_BY_VALUE);
+
+    this.setState({ active });
+
+    this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [label] : [] }), true);
   }
 
   private onClickLabel = (label: string) => {

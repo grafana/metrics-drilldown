@@ -18,6 +18,8 @@ import React, { useState } from 'react';
 import { InlineBanner } from 'App/InlineBanner';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex, getTrailFor } from 'utils';
+import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
+import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
@@ -164,6 +166,8 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         // TOOD: keep unique filters
         filters: [...adHocFiltersVariable.state.filters, { key: labelName, operator: '=', value: labelValue }],
       });
+
+      (sceneGraph.lookupVariable(VAR_WINGMAN_GROUP_BY, model) as LabelsVariable)?.changeValueTo(NULL_GROUP_BY_VALUE);
     };
 
     return (

@@ -52,23 +52,6 @@ test.describe('Metrics reducer view', () => {
           stylePath: './e2e/fixtures/css/hide-app-controls.css',
         });
       });
-
-      test('clearing the filter should clear the status', async ({ metricsReducerView }) => {
-        await metricsReducerView.sidebar.selectGroupByLabel('db_name');
-        await metricsReducerView.sidebar.assertGroupByLabelChecked('db_name');
-        await metricsReducerView.assertMetricsGroupByList();
-        await expect(await metricsReducerView.sidebar.getSidebarToggle('Group by labels')).toContainClass('active');
-        // select the first group
-        // is there a nicer way of doing this?
-        await metricsReducerView.getByRole('button', { name: 'Select' }).nth(1).click();
-        await metricsReducerView.sidebar.assertGroupByLabelChecked('db_name');
-        await metricsReducerView.assertFilter('db_name');
-        await metricsReducerView.clearFilter('db_name');
-        // assert sidebar icon is not active
-        await expect(await metricsReducerView.sidebar.getSidebarToggle('Group by labels')).not.toContainClass('active');
-        // assert group-by selection is cleared
-        await metricsReducerView.sidebar.assertGroupByCleared();
-      });
     });
 
     test.describe('Bookmarks', () => {
@@ -133,7 +116,7 @@ test.describe('Metrics reducer view', () => {
         // Wait for the usage count to load
         // eslint-disable-next-line sonarjs/no-nested-functions
         await expect(async () => {
-          const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
+          const firstPanel = await metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
           const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
           const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
           expect(usageCount).toBeGreaterThan(0);

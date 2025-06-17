@@ -81,7 +81,7 @@ export class MetricsReducerView extends DrilldownView {
 
   async assertSelectedLayout(expectedLayoutName: 'Grid' | 'Row') {
     const layoutName = await this.getLayoutSwitcher().locator('input[checked]~label').textContent();
-    expect(layoutName?.trim()).toBe(expectedLayoutName);
+    await expect(layoutName?.trim()).toBe(expectedLayoutName);
   }
 
   selectLayout(layoutName: string) {
@@ -138,15 +138,6 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
-  }
-
-  async assertFilter(filterName: string) {
-    const filter = this.getByRole('button', { name: `Remove filter with key ${filterName}` });
-    await expect(filter).toBeVisible();
-  }
-
-  async clearFilter(filterName: string) {
-    await this.getByRole('button', { name: `Remove filter with key ${filterName}` }).click();
   }
 
   // TODO: If it's used once, don't declare it here, just use it in a single test
