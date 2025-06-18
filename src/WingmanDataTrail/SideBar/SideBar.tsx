@@ -261,6 +261,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             return (
               <div
                 key={key}
+                data-testid={`sidebar-component ${title}`}
                 className={cx(styles.buttonContainer, visible && 'visible', active && 'active', disabled && 'disabled')}
               >
                 <SideBarButton
