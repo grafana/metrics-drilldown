@@ -21,6 +21,7 @@ import { getColorByIndex } from 'utils';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
 import { addRefId } from './transformations/addRefId';
+import { SERIES_COUNT_STATS_NAME, sliceSeries } from './transformations/sliceSeries';
 
 interface LabelVizPanelState extends SceneObjectState {
   metric: string;
@@ -31,6 +32,7 @@ interface LabelVizPanelState extends SceneObjectState {
   body: VizPanel;
 }
 
+const MAX_SERIES_TO_RENDER = 20;
 export const LABELS_VIZ_PANEL_HEIGHT = '220px';
 
 export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
@@ -85,7 +87,7 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
         ],
       }),
       // addRefId is required for setting the overrides below
-      transformations: [addRefId],
+      transformations: [sliceSeries(0, MAX_SERIES_TO_RENDER), addRefId],
     });
 
     const vizPanel = PanelBuilders.timeseries()
@@ -124,7 +126,18 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
   }
 
   getAllValuesConfig(series: DataFrame[]) {
+    const { label } = this.state;
+
+    const seriesCountStats = series[0].meta?.stats?.find((s) => s.displayName === SERIES_COUNT_STATS_NAME);
+    const seriesCount = seriesCountStats ? seriesCountStats.value : series.length;
+    const description =
+      series.length < seriesCount
+        ? `Showing only ${series.length} series out of ${seriesCount} to keep the data easy to read. Click on "Select" on this panel to view a breakdown of all the "${label}" label's values.`
+        : '';
+
     return {
+      title: `${label} (${seriesCount})`,
+      description,
       fieldConfig: {
         overrides: this.getOverrides(series),
       },
