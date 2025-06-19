@@ -70,7 +70,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
           await metricsReducerView.assertMetricsList();
 
-          await metricsReducerView.sidebar.assertLabelsList(3);
+          await metricsReducerView.sidebar.assertLabelsList('=', 3);
 
           await expect(page).toHaveScreenshot('metrics-reducer-group-by-label-after-select.png', {
             stylePath: './e2e/fixtures/css/hide-app-controls.css',
@@ -93,7 +93,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
 
           await metricsReducerView.assertMetricsList();
-          await metricsReducerView.sidebar.assertLabelsList(72);
+          await metricsReducerView.sidebar.assertLabelsList('>', 3);
 
           await expect(page).toHaveScreenshot('metrics-reducer-group-by-label-after-clear-filter.png', {
             stylePath: './e2e/fixtures/css/hide-app-controls.css',

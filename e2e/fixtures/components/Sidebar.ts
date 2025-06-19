@@ -94,10 +94,21 @@ export class Sidebar {
     await expect(radioButton).toBeChecked();
   }
 
-  async assertLabelsList(count: number) {
+  async assertLabelsList(operator: '=' | '>', count: number) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
-    const radios = labelsBrowser.getByRole('radio');
-    await expect(radios).toHaveCount(count);
+    const radiosCount = await labelsBrowser.getByRole('radio').count();
+
+    if (operator === '=') {
+      await expect(radiosCount).toBe(count);
+      return;
+    }
+
+    if (operator === '>') {
+      await expect(radiosCount).toBeGreaterThan(count);
+      return;
+    }
+
+    throw new TypeError(`Unsupported operator "${operator}"! Choose "=" or ">".`);
   }
 
   /* Bookmarks section */
