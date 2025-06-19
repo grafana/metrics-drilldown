@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
+import { utf8Support } from '@grafana/prometheus';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -7,55 +8,57 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneReactObject,
+  type MultiValueVariable,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { DashboardCursorSync } from '@grafana/schema';
 import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
-import { VAR_FILTERS } from 'shared';
-import { getColorByIndex, getTrailFor } from 'utils';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
+import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
+import { VAR_GROUP_BY, VAR_GROUP_BY_EXP } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import {
-  METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
-  MetricVizPanel,
-} from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
-export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
-export const GRID_TEMPLATE_ROWS = '1fr';
+import { LABELS_VIZ_PANEL_HEIGHT, LabelVizPanel } from './LabelVizPanel';
 
-interface SimpleMetricsListState extends SceneObjectState {
+interface MetricLabelsListState extends SceneObjectState {
+  metric: string;
+  layoutSwitcher: LayoutSwitcher;
   body: SceneByVariableRepeater;
 }
 
-export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
-  constructor() {
+export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
+  constructor({ metric }: { metric: MetricLabelsListState['metric'] }) {
+    const queryDef = getAutoQueriesForMetric(metric).breakdown;
+    const { expr } = queryDef.queries[0];
+    const unit = queryDef.unit;
+
     super({
-      key: 'simple-metrics-list',
+      key: 'metric-labels-list',
+      metric,
+      // TODO: we add the layout switcher here for now to keep the changes in the LabelBreakdownScene component minimal
+      // but we should refactor further and move it to LabelBreakdownScene
+      layoutSwitcher: new LayoutSwitcher(),
       body: new SceneByVariableRepeater({
-        variableName: VAR_FILTERED_METRICS_VARIABLE,
-        initialPageSize: 120,
+        variableName: VAR_GROUP_BY,
+        initialPageSize: 60,
         pageSizeIncrement: 9,
         body: new SceneCSSGridLayout({
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+          autoRows: LABELS_VIZ_PANEL_HEIGHT,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
               sync: DashboardCursorSync.Crosshair,
             }),
+            syncYAxis(),
           ],
         }),
         getLayoutLoading: () =>
@@ -66,34 +69,24 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
           new SceneReactObject({
             reactNode: (
               <InlineBanner title="" severity="info">
-                No metrics found for the current filters and time range.
+                No labels found for the current filters and time range.
               </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
-            reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
+            reactNode: <InlineBanner severity="error" title="Error while loading labels!" error={error} />,
           }),
-        getLayoutChild: (option, colorIndex) => {
-          const trail = getTrailFor(this);
-          const isNativeHistogram = trail.isNativeHistogram(option.value as string);
-
-          // get the VAR_FILTERS variable to pass in the correct matchers for the functions
-          const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-
-          const matchers = isAdHocFiltersVariable(filtersVariable)
-            ? filtersVariable.state.filters.map((filter) => `${filter.key}${filter.operator}${filter.value}`)
-            : [];
+        getLayoutChild: (option, startColorIndex) => {
+          const query = expr.replaceAll(VAR_GROUP_BY_EXP, utf8Support(String(option.value)));
 
           return new SceneCSSGridItem({
-            body: new WithUsageDataPreviewPanel({
-              vizPanelInGridItem: new MetricVizPanel({
-                metricName: option.value as string,
-                color: getColorByIndex(colorIndex),
-                isNativeHistogram,
-                matchers,
-              }),
-              metric: option.value as string,
+            body: new LabelVizPanel({
+              metric,
+              label: option.value as string,
+              query,
+              unit,
+              startColorIndex,
             }),
           });
         },
@@ -124,11 +117,16 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<SimpleMetricsList>) => {
+  public Selector({ model }: { model: MetricLabelsList }) {
+    const { layoutSwitcher } = model.useState();
+    return <layoutSwitcher.Component model={layoutSwitcher} />;
+  }
+
+  public static readonly Component = ({ model }: SceneComponentProps<MetricLabelsList>) => {
     const { body } = model.useState();
     const styles = useStyles2(getStyles);
 
-    const variable = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, model) as FilteredMetricsVariable;
+    const variable = sceneGraph.lookupVariable(VAR_GROUP_BY, model) as MultiValueVariable;
     const { loading, error } = variable.useState();
 
     const batchSizes = body.useSizes();
@@ -140,13 +138,13 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
     };
 
     return (
-      <div data-testid="metrics-list">
+      <div data-testid="labels-list">
         <div className={styles.container}>
           <body.Component model={body} />
         </div>
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <ShowMoreButton label="metric" batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton label="label" batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
       </div>
@@ -156,7 +154,7 @@ export class SimpleMetricsList extends SceneObjectBase<SimpleMetricsListState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css({}),
+    container: css({ width: '100%' }),
     footer: css({
       display: 'flex',
       justifyContent: 'center',

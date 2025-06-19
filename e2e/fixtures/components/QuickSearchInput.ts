@@ -3,8 +3,8 @@ import { type Locator, type Page } from '@playwright/test';
 export class QuickSearchInput {
   private readonly locator: Locator;
 
-  constructor(private readonly page: Page) {
-    this.locator = page.getByRole('textbox', { name: /search metrics/i });
+  constructor(private readonly page: Page, name: string) {
+    this.locator = page.getByRole('textbox', { name });
   }
 
   get() {

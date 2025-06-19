@@ -1,56 +1,30 @@
 import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
-import { locationService } from '@grafana/runtime';
+import { config } from '@grafana/runtime';
 import { useStyles2 } from '@grafana/ui';
-import React, { createContext, useEffect, useState } from 'react';
+import React from 'react';
 
-import { type DataTrail } from 'DataTrail';
 import { initFaro } from 'tracking/faro/faro';
-import { getUrlForTrail, newMetricsTrail } from 'utils';
 
 import { ErrorView } from './ErrorView';
+import { Onboarding } from './Onboarding';
 import { AppRoutes } from './Routes';
 import { useCatchExceptions } from './useCatchExceptions';
 import { useReportAppInitialized } from './useReportAppInitialized';
+import { MetricsContext, useTrail } from './useTrail';
+import { isPrometheusDataSource } from '../utils/utils.datasource';
 import { PluginPropsContext } from '../utils/utils.plugin';
-import { navigationEvents } from '../WingmanDataTrail/SideBar/sections/BookmarksList';
 
 initFaro();
 
-interface MetricsAppContext {
-  trail: DataTrail;
-  goToUrlForTrail: (trail: DataTrail) => void;
-}
+const prometheusDatasources = Object.values(config.datasources).filter(isPrometheusDataSource);
 
-export const MetricsContext = createContext<MetricsAppContext>({
-  trail: newMetricsTrail(),
-  goToUrlForTrail: () => {},
-});
-
-function App(props: Readonly<AppRootProps>) {
-  const [error] = useCatchExceptions();
-  const [trail, setTrail] = useState<DataTrail>(newMetricsTrail());
+export default function App(props: Readonly<AppRootProps>) {
   const styles = useStyles2(getStyles);
+  const [error] = useCatchExceptions();
+  const { trail, goToUrlForTrail } = useTrail();
 
   useReportAppInitialized();
-
-  const goToUrlForTrail = (trail: DataTrail) => {
-    locationService.push(getUrlForTrail(trail));
-    setTrail(trail);
-  };
-
-  // Subscribe to navigation events from BookmarksList
-  useEffect(() => {
-    const handleNavigation = (trail: DataTrail) => {
-      goToUrlForTrail(trail);
-    };
-
-    // Subscribe to navigation events
-    const unsubscribe = navigationEvents.subscribe(handleNavigation);
-
-    // Clean up subscription
-    return () => unsubscribe();
-  }, []);
 
   if (error) {
     return (
@@ -58,6 +32,10 @@ function App(props: Readonly<AppRootProps>) {
         <ErrorView error={error} />
       </div>
     );
+  }
+
+  if (!prometheusDatasources.length) {
+    return <Onboarding />;
   }
 
   return (
@@ -70,8 +48,6 @@ function App(props: Readonly<AppRootProps>) {
     </div>
   );
 }
-
-export default App;
 
 function getStyles(theme: GrafanaTheme2) {
   return {

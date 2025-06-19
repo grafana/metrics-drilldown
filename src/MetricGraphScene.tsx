@@ -13,8 +13,9 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricActionBar } from 'MetricActionBar';
+
 import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
-import { MetricActionBar } from './MetricScene';
 import { getTrailFor, getTrailSettings } from './utils';
 
 export const MAIN_PANEL_MIN_HEIGHT = 280;
@@ -46,7 +47,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         <div className={stickyMainGraph ? styles.sticky : styles.nonSticky} data-testid="top-view">
           <topView.Component model={topView} />
         </div>
-        {selectedTab && <selectedTab.Component model={selectedTab} />}
+        {selectedTab && (
+          <div data-testid="tab-content">
+            <selectedTab.Component model={selectedTab} />
+          </div>
+        )}
       </div>
     );
   };

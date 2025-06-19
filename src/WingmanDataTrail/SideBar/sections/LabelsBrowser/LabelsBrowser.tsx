@@ -53,6 +53,15 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     const labelValue = labelsVariable.state.value;
 
     this.setState({ active: Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE) });
+
+    // Subscribe to variable changes to update active state when the variable is changed externally
+    this._subs.add(
+      labelsVariable.subscribeToState((newState) => {
+        const active = Boolean(newState.value && newState.value !== NULL_GROUP_BY_VALUE);
+        this.setState({ active });
+        this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [newState.value as string] : [] }), true);
+      })
+    );
   }
 
   private selectLabel(label: string) {
