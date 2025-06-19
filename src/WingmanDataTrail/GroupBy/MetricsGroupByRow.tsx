@@ -171,7 +171,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     };
 
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid={`${labelName}-${labelValue}-metrics-group`}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
             <Button
