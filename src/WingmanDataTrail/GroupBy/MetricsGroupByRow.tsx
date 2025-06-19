@@ -174,7 +174,13 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
       <div className={styles.container}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
-            <Button className={styles.selectButton} variant="secondary" onClick={onClickSelect}>
+            <Button
+              className={styles.selectButton}
+              variant="secondary"
+              onClick={onClickSelect}
+              tooltip={`See metrics with ${labelName}=${labelValue}`}
+              tooltipPlacement="top"
+            >
               Select
             </Button>
           </div>
