@@ -1,17 +1,19 @@
 import { expect, type Locator, type Mouse, type Page } from '@playwright/test';
 
+const BUTTON_NAMES = [
+  'Rules filters',
+  'Prefix filters',
+  'Suffix filters',
+  'Group by labels',
+  'Bookmarks',
+  'Settings',
+] as const;
+
+type ButtonName = (typeof BUTTON_NAMES)[number];
+
 export class Sidebar {
   private readonly locator: Locator;
   private readonly mouse: Mouse;
-
-  private static readonly BUTTON_NAMES = [
-    'Rules filters',
-    'Prefix filters',
-    'Suffix filters',
-    'Group by labels',
-    'Bookmarks',
-    'Settings',
-  ] as const;
 
   constructor(private readonly page: Page) {
     this.locator = page.getByTestId('sidebar');
@@ -27,16 +29,34 @@ export class Sidebar {
     await this.assertAllButtons();
   }
 
-  async toggleButton(buttonName: (typeof Sidebar.BUTTON_NAMES)[number]) {
-    await this.locator.getByRole('button', { name: buttonName }).click();
+  /* Buttons */
+
+  getButton(buttonName: ButtonName) {
+    return this.locator.getByRole('button', { name: buttonName, exact: true });
+  }
+
+  async toggleButton(buttonName: ButtonName) {
+    await this.getButton(buttonName).click();
     await this.mouse.move(0, 0); // prevents the tooltip to cover controls within the side bar
   }
 
   async assertAllButtons() {
-    for (const buttonName of Sidebar.BUTTON_NAMES) {
+    for (const buttonName of BUTTON_NAMES) {
       await expect(this.locator.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
     }
   }
+
+  async assertActiveButton(buttonName: ButtonName, expectToBeActive: boolean) {
+    const sidebarButton = await this.getButton(buttonName);
+
+    if (expectToBeActive) {
+      await expect(sidebarButton).toContainClass('active');
+    } else {
+      await expect(sidebarButton).not.toContainClass('active');
+    }
+  }
+
+  /* Prefix section */
 
   async selectPrefixFilters(prefixes: string[]) {
     await this.locator.getByRole('button', { name: 'Prefix filters' }).click();
@@ -45,6 +65,8 @@ export class Sidebar {
     }
   }
 
+  /* Suffix section */
+
   async selectSuffixFilters(suffixes: string[]) {
     await this.locator.getByRole('button', { name: 'Suffix filters' }).click();
     for (const suffix of suffixes) {
@@ -52,32 +74,44 @@ export class Sidebar {
     }
   }
 
+  /* Group by label section */
+
   async selectGroupByLabel(labelName: string) {
-    await this.toggleButton('Group by labels');
-    await this.locator.getByRole('radio', { name: labelName, exact: true }).check({ force: true });
+    const labelsBrowser = this.locator.getByTestId('labels-browser');
+    await labelsBrowser.getByRole('radio', { name: labelName, exact: true }).check();
   }
 
-  async assertGroupByLabelChecked(labelName: string) {
+  async assertGroupByLabelChecked(labelName: string | null) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
+
+    if (labelName === null) {
+      const checkedRadios = labelsBrowser.getByRole('radio', { checked: true });
+      await expect(checkedRadios).toHaveCount(0);
+      return;
+    }
+
     const radioButton = labelsBrowser.getByRole('radio', { name: labelName, exact: true });
     await expect(radioButton).toBeChecked();
   }
 
-  async assertGroupByCleared() {
-    // When group-by is cleared, the labels-browser section should not be visible
-    // or should not contain any selected radio buttons
+  async assertLabelsList(operator: '=' | '>', count: number) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
+    const radiosCount = await labelsBrowser.getByRole('radio').count();
 
-    // Check if the labels browser has any checked radio buttons
-    const checkedRadios = labelsBrowser.getByRole('radio', { checked: true });
-    await expect(checkedRadios).toHaveCount(0);
+    if (operator === '=') {
+      await expect(radiosCount).toBe(count);
+      return;
+    }
+
+    if (operator === '>') {
+      await expect(radiosCount).toBeGreaterThan(count);
+      return;
+    }
+
+    throw new TypeError(`Unsupported operator "${operator}"! Choose "=" or ">".`);
   }
 
-  async getSidebarToggle(name: string) {
-    return this.get().getByTestId(`sidebar-component ${name}`);
-  }
-
-  /* Bookmarks */
+  /* Bookmarks section */
 
   async assertBookmarkCreated(metricName: string) {
     // Only consider the first 20 characters, to account for truncation of long meric names
