@@ -31,7 +31,12 @@ export function syncYAxis() {
         }
       }
 
-      if (newMax !== max && newMin !== min && newMax !== newMin) {
+      if (
+        newMax !== newMin &&
+        newMax !== Number.NEGATIVE_INFINITY &&
+        newMin !== Number.POSITIVE_INFINITY &&
+        (newMax !== max || newMin !== min)
+      ) {
         [max, min] = [newMax, newMin];
         updateTimeseriesAxis(vizPanelsParent, max, min);
       }
