@@ -29,15 +29,13 @@ const App = (props: AppRootProps) => (
   </Suspense>
 );
 
-export const plugin = new AppPlugin<{}>().setRootPage(App);
-
-for (const linkConfig of linkConfigs) {
-  plugin.addLink(linkConfig);
-}
-
-plugin.exposeComponent({
+export const plugin = new AppPlugin<{}>().setRootPage(App).exposeComponent({
   id: 'grafana-metricsdrilldown-app/breakdown-extension/v1',
   title: 'Label Breakdown',
   description: 'A metrics label breakdown view from the Metrics Drilldown app.',
   component: LabelBreakdown,
 });
+
+for (const linkConfig of linkConfigs) {
+  plugin.addLink(linkConfig);
+}
