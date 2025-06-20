@@ -2,6 +2,7 @@ import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
 
+import { LabelBreakdown } from 'exposedComponents';
 import { linkConfigs } from 'extensions/links';
 
 const LazyApp = lazy(async () => {
@@ -27,3 +28,10 @@ export const plugin = new AppPlugin<{}>().setRootPage(App);
 for (const linkConfig of linkConfigs) {
   plugin.addLink(linkConfig);
 }
+
+plugin.exposeComponent({
+  id: 'grafana-metricsdrilldown-app/breakdown-extension/v1',
+  title: 'Label Breakdown',
+  description: 'A metrics label breakdown view from the Metrics Drilldown app.',
+  component: LabelBreakdown,
+});
