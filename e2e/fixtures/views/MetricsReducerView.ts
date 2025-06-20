@@ -44,6 +44,21 @@ export class MetricsReducerView extends DrilldownView {
     await this.assertMetricsList();
   }
 
+  /* Ad Hoc filters */
+
+  async assertAdHocFilter(labelName: string, operator: string, labelValue: string) {
+    const filter = this.getByRole('button', { name: `Edit filter with key ${labelName}` });
+    await expect(filter).toBeVisible();
+
+    const filterText = await filter.textContent();
+    expect(filterText).toBe(`${labelName} ${operator} ${labelValue}`);
+  }
+
+  async clearAdHocFilter(labelName: string) {
+    await this.getByRole('button', { name: `Remove filter with key ${labelName}` }).click();
+    await this.getByTestId('metrics-drilldown-app').click(); // prevents the dropdown to appear
+  }
+
   /* List controls */
 
   getListControls() {
@@ -140,16 +155,14 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
-  async assertFilter(filterName: string) {
-    const filter = this.getByRole('button', { name: `Remove filter with key ${filterName}` });
-    await expect(filter).toBeVisible();
+  selectMetricsGroup(labelName: string, labelValue: string) {
+    this.getMetricsGroupByList()
+      .getByTestId(`${labelName}-${labelValue}-metrics-group`)
+      .getByRole('button', { name: 'Select' })
+      .first()
+      .click();
   }
 
-  async clearFilter(filterName: string) {
-    await this.getByRole('button', { name: `Remove filter with key ${filterName}` }).click();
-  }
-
-  // TODO: If it's used once, don't declare it here, just use it in a single test
   async openPanelInExplore() {
     const explorePromise = this.page.waitForEvent('popup');
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL).click();
@@ -157,7 +170,6 @@ export class MetricsReducerView extends DrilldownView {
     return explorePage;
   }
 
-  // TODO: If it's used once, don't declare it here, just use it in a single test
   async clickCopyPanelUrl() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL).click();
   }

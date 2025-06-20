@@ -1,6 +1,7 @@
 {
   "root": false,
   "rules": {
-    "jest/no-standalone-expect": "off"
+    "jest/no-standalone-expect": "off",
+    "sonarjs/no-nested-functions": "off"
   }
 }
