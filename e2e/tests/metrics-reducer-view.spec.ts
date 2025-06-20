@@ -18,7 +18,6 @@ test.describe('Metrics reducer view', () => {
       }) => {
         await metricsReducerView.assertMetricsList();
 
-        // Select multiple prefixes to demonstrate OR behavior within a group
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
 
         // Verify OR behavior by checking that metrics with either prefix are shown
@@ -30,13 +29,10 @@ test.describe('Metrics reducer view', () => {
       }) => {
         await metricsReducerView.assertMetricsList();
 
-        // First select prefixes
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
-
-        // Then select suffixes to demonstrate AND behavior between groups
         await metricsReducerView.sidebar.selectSuffixFilters(['bytes', 'count']);
 
-        // Verify AND behavior between filter groups
+        // Verify AND behavior between the two filter groups
         await expect(metricsReducerView.page).toHaveScreenshot(
           'sidebar-prefixes-and-suffixes-selected-metric-counts.png'
         );
@@ -44,40 +40,65 @@ test.describe('Metrics reducer view', () => {
     });
 
     test.describe('Group by label', () => {
-      test('A list of metrics is shown when metrics are grouped by label', async ({ page, metricsReducerView }) => {
-        await metricsReducerView.sidebar.selectGroupByLabel('db_name');
-        await metricsReducerView.assertMetricsGroupByList();
+      test.describe('When selecting a value in the side bar', () => {
+        test('A list of metrics grouped by label values is displayed, each with a "Select" button', async ({
+          page,
+          metricsReducerView,
+        }) => {
+          await metricsReducerView.sidebar.toggleButton('Group by labels');
+          await metricsReducerView.sidebar.selectGroupByLabel('db_name');
+          await metricsReducerView.sidebar.assertActiveButton('Group by labels', true);
+          await metricsReducerView.assertMetricsGroupByList();
 
-        await expect(page).toHaveScreenshot('metrics-reducer-group-by-label.png', {
-          stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label.png', {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          });
         });
-      });
 
-      test('selecting a label basic assertion', async ({ metricsReducerView }) => {
-        await metricsReducerView.sidebar.selectGroupByLabel('db_name');
-        await metricsReducerView.assertMetricsGroupByList();
-        await expect(await metricsReducerView.sidebar.getSidebarToggle('Group by labels')).toContainClass('active');
-        const groupByList = metricsReducerView.getByTestId('metrics-groupby-list');
-        await expect(groupByList).toBeVisible();
-        await groupByList.getByRole('button', { name: 'Select' }).nth(0).click();
-        await metricsReducerView.assertFilter('db_name');
-        await expect(groupByList).not.toBeVisible();
-      });
+        test('When clicking on the "Select" button, it drills down the selected label value (adds a new filter, displays a non-grouped list of metrics and updates the list of label values)', async ({
+          page,
+          metricsReducerView,
+        }) => {
+          await metricsReducerView.sidebar.toggleButton('Group by labels');
+          await metricsReducerView.sidebar.selectGroupByLabel('db_name');
+          await metricsReducerView.assertMetricsGroupByList();
 
-      test('clearing the filter should clear the status', async ({ metricsReducerView }) => {
-        await metricsReducerView.sidebar.selectGroupByLabel('db_name');
-        await metricsReducerView.sidebar.assertGroupByLabelChecked('db_name');
-        await metricsReducerView.assertMetricsGroupByList();
-        const groupByList = metricsReducerView.getByTestId('metrics-groupby-list');
-        await groupByList.getByRole('button', { name: 'Select' }).nth(0).click();
-        // After clicking Select, the group-by should be cleared and filter should be applied
-        await metricsReducerView.sidebar.assertGroupByCleared();
-        await metricsReducerView.assertFilter('db_name');
-        await metricsReducerView.clearFilter('db_name');
-        // assert sidebar icon is not active
-        await expect(await metricsReducerView.sidebar.getSidebarToggle('Group by labels')).not.toContainClass('active');
-        // assert group-by selection is cleared
-        await metricsReducerView.sidebar.assertGroupByCleared();
+          await metricsReducerView.selectMetricsGroup('db_name', 'grafana');
+          await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
+
+          await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
+          await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
+          await metricsReducerView.assertMetricsList();
+
+          await metricsReducerView.sidebar.assertLabelsList('=', 3);
+
+          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label-after-select.png', {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          });
+        });
+
+        test('When clearing the filter, it updates the list of label values and marks the sidebar button as inactive', async ({
+          page,
+          metricsReducerView,
+        }) => {
+          await metricsReducerView.sidebar.toggleButton('Group by labels');
+          await metricsReducerView.sidebar.selectGroupByLabel('db_name');
+          await metricsReducerView.assertMetricsGroupByList();
+
+          await metricsReducerView.selectMetricsGroup('db_name', 'grafana');
+          await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
+          await metricsReducerView.clearAdHocFilter('db_name');
+
+          await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
+          await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
+
+          await metricsReducerView.assertMetricsList();
+          await metricsReducerView.sidebar.assertLabelsList('>', 3);
+
+          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label-after-clear-filter.png', {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          });
+        });
       });
     });
 

@@ -1,16 +1,17 @@
 import { css } from '@emotion/css';
 import { VariableHide, VariableRefresh, type GrafanaTheme2 } from '@grafana/data';
 import {
+  AdHocFiltersVariable,
+  DataSourceVariable,
   QueryVariable,
   sceneGraph,
-  type DataSourceVariable,
   type MultiValueVariable,
   type SceneComponentProps,
 } from '@grafana/scenes';
 import { Label, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_DATASOURCE, VAR_FILTERS_EXPR } from 'shared';
+import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
 
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './LabelsDataSource';
 
@@ -49,7 +50,7 @@ export class LabelsVariable extends QueryVariable {
     );
 
     this._subs.add(
-      (sceneGraph.findByKey(this, VAR_DATASOURCE) as DataSourceVariable).subscribeToState((newState, prevState) => {
+      sceneGraph.findByKeyAndType(this, VAR_DATASOURCE, DataSourceVariable).subscribeToState((newState, prevState) => {
         if (newState.value !== prevState.value) {
           this.setState({ value: NULL_GROUP_BY_VALUE });
           this.refreshOptions();
@@ -57,7 +58,19 @@ export class LabelsVariable extends QueryVariable {
       })
     );
 
+    this._subs.add(
+      sceneGraph.findByKeyAndType(this, VAR_FILTERS, AdHocFiltersVariable).subscribeToState((newState, prevState) => {
+        if (newState.filterExpression !== prevState.filterExpression) {
+          this.updateQuery();
+        }
+      })
+    );
+
     // hack to ensure that labels are loaded when landing: sometimes filters are not interpolated and fetching labels give no results
+    this.updateQuery();
+  }
+
+  private updateQuery() {
     const filterExpression = sceneGraph.interpolate(this, VAR_FILTERS_EXPR, {});
     this.setState({ query: `{__name__=~".+",${filterExpression}}` });
   }
