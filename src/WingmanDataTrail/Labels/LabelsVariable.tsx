@@ -12,10 +12,6 @@ import { Label, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './LabelsDataSource';
 
@@ -40,22 +36,6 @@ export class LabelsVariable extends QueryVariable {
   }
 
   onActivate() {
-    const filteredMetricsVariable = sceneGraph.lookupVariable(
-      VAR_FILTERED_METRICS_VARIABLE,
-      this
-    ) as FilteredMetricsVariable;
-
-    // TODO: publish event instead?
-    filteredMetricsVariable.updateGroupByQuery(this.state.value as string);
-
-    this._subs.add(
-      this.subscribeToState((newState, prevState) => {
-        if (newState.value !== prevState.value) {
-          filteredMetricsVariable.updateGroupByQuery(this.state.value as string);
-        }
-      })
-    );
-
     this._subs.add(
       this.subscribeToState((newState, prevState) => {
         if (newState.query !== prevState.query) {
