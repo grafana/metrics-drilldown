@@ -17,12 +17,15 @@ import { reportExploreMetrics } from 'interactions';
 import { METRIC_AUTOVIZPANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
-import { MetricSelectedEvent } from 'shared';
+import { MetricSelectedEvent, PanelDataRequestEvent } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
+import { getQueryRunnerFor } from 'utils/utils.queries';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
+
+import type { Panel } from '@grafana/schema';
 
 export const actionViews = {
   breakdown: 'breakdown',
@@ -86,6 +89,70 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     });
   };
 
+  public getPanelData = () => {
+    const metricScene = sceneGraph.getAncestor(this, MetricScene);
+    const autoVizPanel = sceneGraph.findByKeyAndType(this, METRIC_AUTOVIZPANEL_KEY, AutoVizPanel);
+    
+    if (!autoVizPanel.state.panel) {
+      throw new Error('Panel not yet initialized');
+    }
+
+    const vizPanel = autoVizPanel.state.panel;
+
+    const queryRunner = getQueryRunnerFor(vizPanel);
+    
+    // Get the time range from the scene
+    const timeRange = sceneGraph.getTimeRange(this);
+    // DTO (dashboard transfer object) in Grafana requires raw timerange
+    const range = timeRange.state.value;
+    
+    const panel: Panel = {
+      // Panel basic info from VizPanel
+      type: vizPanel.state.pluginId,
+      title: vizPanel.state.title ? sceneGraph.interpolate(metricScene, vizPanel.state.title) : vizPanel.state.title,
+      
+      // Targets (queries) from QueryRunner with interpolated variables
+      targets: queryRunner?.state.queries?.map((query) => ({
+        ...query,
+        expr: query.expr ? sceneGraph.interpolate(metricScene, query.expr) : query.expr,
+        legendFormat: query.legendFormat ? sceneGraph.interpolate(metricScene, query.legendFormat) : query.legendFormat,
+        // remove the field fromExploreMetrics from the query because this will become a panel in the dashboard
+        fromExploreMetrics: false,
+      })) || [],
+      
+      // Datasource from QueryRunner with interpolated variables
+      datasource: queryRunner?.state.datasource ? {
+        ...queryRunner.state.datasource,
+        uid: queryRunner.state.datasource.uid ? sceneGraph.interpolate(metricScene, queryRunner.state.datasource.uid) : queryRunner.state.datasource.uid
+      } : queryRunner?.state.datasource,
+      
+      // Panel options from VizPanel
+      options: vizPanel.state.options,
+      
+      // Field configuration from VizPanel
+      fieldConfig: vizPanel.state.fieldConfig as any,
+      
+      // Additional properties from VizPanel
+      ...(vizPanel.state.description && { description: vizPanel.state.description }),
+      ...(queryRunner?.state.maxDataPoints && { maxDataPoints: queryRunner.state.maxDataPoints }),
+    };
+    return { panel, range }
+  };
+
+  public onGetPanelData = () => {
+    try {
+      const panelData = this.getPanelData();
+      console.log('Panel Data for Dashboard Creation:', panelData);
+      
+      // Fire the event with panel data to trigger the modal
+      const trail = getTrailFor(this);
+      trail.publishEvent(new PanelDataRequestEvent(panelData), true);
+    } catch (error) {
+      console.error('Error getting panel data:', error);
+      alert('Error getting panel data. Check console for details.');
+    }
+  };
+
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
@@ -112,6 +179,12 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               icon="compass"
               tooltip={UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL}
               onClick={model.openExploreLink}
+            />
+            <ToolbarButton
+              variant={'canvas'}
+              icon="panel-add"
+              tooltip="Add to dashboard"
+              onClick={model.onGetPanelData}
             />
             <ShareTrailButton trail={trail} />
             <ToolbarButton
