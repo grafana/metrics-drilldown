@@ -1,7 +1,8 @@
 import { css } from '@emotion/css';
-import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
+import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { useChromeHeaderHeight } from '@grafana/runtime';
+// @ts-ignore - run this locally to get access to getAddToDashboardService
+import { getAddToDashboardService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   SceneControlsSpacer,
@@ -24,8 +25,8 @@ import {
   type SceneQueryRunner,
   type SceneVariable,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
-import React, { useEffect } from 'react';
+import { Button, Modal, useStyles2 } from '@grafana/ui';
+import React, { createElement, useEffect, useState } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
@@ -36,11 +37,13 @@ import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters } from './interactions';
 import { MetricScene } from './MetricScene';
-import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
+import { MetricSelectedEvent, PanelDataRequestEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
+
+import type { Panel } from '@grafana/schema';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -67,6 +70,9 @@ export interface DataTrailState extends SceneObjectState {
   nativeHistogramMetric: string;
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
+  
+  // Panel data for dashboard creation
+  panelData?: { panel: Panel, range: TimeRange };
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -108,6 +114,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     // Some scene elements publish this
     this.subscribeToEvent(MetricSelectedEvent, this._handleMetricSelectedEvent.bind(this));
+    
+    // Listen for panel data requests to open the add to dashboard modal
+    this.subscribeToEvent(PanelDataRequestEvent, this._handlePanelDataRequestEvent.bind(this));
 
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (isAdHocFiltersVariable(filtersVariable)) {
@@ -232,6 +241,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     }
   }
 
+  private _handlePanelDataRequestEvent(evt: PanelDataRequestEvent) {
+    // Store the panel data and trigger the modal to open
+    this.setState({ panelData: evt.payload });
+    // The modal opening will be handled in the component with setIsModalOpen(true)
+  }
+
   private getSceneUpdatesForNewMetricValue(metric: string | undefined, nativeHistogramMetric?: boolean) {
     const stateUpdate: Partial<DataTrailState> = {};
     stateUpdate.metric = metric;
@@ -299,7 +314,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, settings, pluginInfo, embedded } = model.useState();
+    const { controls, topScene, settings, pluginInfo, embedded, panelData } = model.useState();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const chromeHeaderHeight = useChromeHeaderHeight();
     const styles = useStyles2(getStyles, embedded ? 0 : chromeHeaderHeight ?? 0);
@@ -312,8 +328,37 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       limitAdhocProviders(model, filtersVariable, datasourceHelper);
     }, [model]);
 
+    // Open modal when panel data is received
+    useEffect(() => {
+      if (panelData) {
+        setIsModalOpen(true);
+      }
+    }, [panelData]);
+
     return (
       <div className={styles.container}>
+        {/* add modal at the top of the trail here, in case we add a button for all panels */}
+        <div>
+          <Button onClick={() => setIsModalOpen(true)}>
+            Add to Dashboard
+          </Button>
+          
+          <Modal
+            title="Add to Dashboard"
+            isOpen={isModalOpen}
+            // also set panelData to nothing when we close.
+            onDismiss={() => {
+              setIsModalOpen(false);
+              model.setState({ panelData: undefined });
+            }}
+          >
+            {createElement(getAddToDashboardService().getExploreToDashboardPanel(), {
+              panelData,
+              onClose: () => {},
+              exploreId: 'metrics-drilldown',
+            })}
+          </Modal>
+        </div>
         {controls && (
           <div className={styles.controls} data-testid="app-controls">
             {controls.map((control) => (
