@@ -50,3 +50,7 @@ export class MetricSelectedEvent extends BusEventWithPayload<string | undefined>
 export class RefreshMetricsEvent extends BusEventBase {
   public static readonly type = 'refresh-metrics-event';
 }
+
+export class PanelDataRequestEvent extends BusEventWithPayload<any> {
+  public static readonly type = 'panel-data-request-event';
+}
