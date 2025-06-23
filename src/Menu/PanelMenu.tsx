@@ -78,6 +78,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           onClick: () => exploreUrl?.then((url) => url && window.open(url, '_blank')),
           shortcut: 'p x',
         },
+        // this is where we might add the add to dashboard button, directly on the panel
       ];
 
       this.setState({
