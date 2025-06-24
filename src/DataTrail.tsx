@@ -338,22 +338,20 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return (
       <div className={styles.container}>
         {/* add modal at the top of the trail here, in case we add a button for all panels */}
-        <div>
-          <Button onClick={() => setIsModalOpen(true)}>
-            Add to Dashboard
-          </Button>
-          
+        <div>          
           <Modal
             title="Add to Dashboard"
             isOpen={isModalOpen}
-            // also set panelData to nothing when we close.
+            // also set trail state for panelData to undefined when we close.
             onDismiss={() => {
               setIsModalOpen(false);
               model.setState({ panelData: undefined });
             }}
           >
             {createElement(getAddToDashboardService().getExploreToDashboardPanel(), {
+              // props specific to explore apps
               panelData,
+              // grafana legacy props for the modal
               onClose: () => {},
               exploreId: 'metrics-drilldown',
             })}
