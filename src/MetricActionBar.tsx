@@ -17,7 +17,7 @@ import { reportExploreMetrics } from 'interactions';
 import { METRIC_AUTOVIZPANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
-import { MetricSelectedEvent, PanelDataRequestEvent } from 'shared';
+import { MetricSelectedEvent, PanelDataRequestEvent, type PanelDataRequestPayload } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
@@ -89,7 +89,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     });
   };
 
-  public getPanelData = () => {
+  public getPanelData = (): PanelDataRequestPayload => {
     const metricScene = sceneGraph.getAncestor(this, MetricScene);
     const autoVizPanel = sceneGraph.findByKeyAndType(this, METRIC_AUTOVIZPANEL_KEY, AutoVizPanel);
     

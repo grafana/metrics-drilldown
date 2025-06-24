@@ -1,6 +1,6 @@
-import { BusEventBase, BusEventWithPayload } from '@grafana/data';
+import { BusEventBase, BusEventWithPayload, type TimeRange } from '@grafana/data';
 import { ConstantVariable } from '@grafana/scenes';
-import { VariableHide } from '@grafana/schema';
+import { VariableHide, type Panel } from '@grafana/schema';
 
 export const TRAILS_ROUTE = '/explore/metrics/trail';
 export const HOME_ROUTE = '/explore/metrics';
@@ -51,6 +51,11 @@ export class RefreshMetricsEvent extends BusEventBase {
   public static readonly type = 'refresh-metrics-event';
 }
 
-export class PanelDataRequestEvent extends BusEventWithPayload<any> {
+export interface PanelDataRequestPayload {
+  panel: Panel;
+  range: TimeRange;
+}
+
+export class PanelDataRequestEvent extends BusEventWithPayload<PanelDataRequestPayload> {
   public static readonly type = 'panel-data-request-event';
 }

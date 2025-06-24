@@ -25,7 +25,7 @@ import {
   type SceneQueryRunner,
   type SceneVariable,
 } from '@grafana/scenes';
-import { Button, Modal, useStyles2 } from '@grafana/ui';
+import { Modal, useStyles2 } from '@grafana/ui';
 import React, { createElement, useEffect, useState } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
