@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
+import { getAppEvents } from '@grafana/runtime';
 import {
   getExploreURL,
   sceneGraph,
@@ -149,7 +150,10 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
       trail.publishEvent(new PanelDataRequestEvent(panelData), true);
     } catch (error) {
       console.error('Error getting panel data:', error);
-      alert('Error getting panel data. Check console for details.');
+      getAppEvents().publish({
+        type: AppEvents.alertError.name,
+        payload: ['Failed to retrieve panel data. Please check the console for more details.'],
+      });
     }
   };
 
