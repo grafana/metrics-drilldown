@@ -17,13 +17,6 @@ description: Upload new plugin artifact to GCS & publish to plugin catalog
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        required: true
-        type: choice
-        options:
-          - dev
-          - ops
-          - prod
       skip-grafana-dev-image:
         required: false
         type: boolean
@@ -49,7 +42,7 @@ jobs:
       )
     uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
     with:
-      environment: ${{ inputs.environment || 'prod' }}
+      environment: 'prod' # publishing to 'prod' will also deploy to 'ops' and 'dev'
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
       run-playwright: false
       run-playwright-docker: true
@@ -58,3 +51,4 @@ jobs:
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: docker-compose.yaml
       playwright-grafana-url: http://localhost:3001
+      argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
