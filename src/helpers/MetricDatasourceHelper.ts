@@ -272,8 +272,8 @@ export class MetricDatasourceHelper {
    * It handles three different `@grafana/prometheus` API styles:
    *
    * 1. **(12.1.0+)**: Uses the modern `queryLabelValues` method
-   * 2. **(12.0.0)**: Uses `fetchSeriesValuesWithMatch` with timeRange parameter
-   * 3. **(11.6.0-11.x)**: Uses `fetchSeriesValuesWithMatch` without timeRange parameter
+   * 2. **(12.0.0)**: Uses `fetchLabelValues` or `fetchSeriesValuesWithMatch` with timeRange parameter
+   * 3. **(11.6.0-11.x)**: Uses `fetchLabelValues` or `fetchSeriesValuesWithMatch` without timeRange parameter
    *
    * @param params - Configuration object containing datasource, label name, time range, and optional matcher
    * @param params.ds - The Prometheus datasource instance
@@ -299,17 +299,17 @@ export class MetricDatasourceHelper {
       return ds.languageProvider.queryLabelValues(timeRange, labelName, matcher);
     }
 
+    // If a matcher isn't provided, use the simpler `fetchLabelValues` method.
     const fetchLabelValuesWithOptionalMatcher = matcher
       ? ds.languageProvider.fetchSeriesValuesWithMatch // eslint-disable-line sonarjs/deprecation
       : ds.languageProvider.fetchLabelValues; // eslint-disable-line sonarjs/deprecation
 
     if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
-      // eslint-disable-next-line sonarjs/deprecation
       return fetchLabelValuesWithOptionalMatcher(timeRange, labelName, matcher);
     }
 
     // @ts-expect-error: Ignoring type error due to breaking change in fetchSeriesValuesWithMatch signature
-    return fetchLabelValuesWithOptionalMatcher(labelName, matcher); // eslint-disable-line sonarjs/deprecation
+    return fetchLabelValuesWithOptionalMatcher(labelName, matcher);
   }
 
   public static async getPrometheusDataSourceForScene(
