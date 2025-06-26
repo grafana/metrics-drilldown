@@ -49,7 +49,7 @@ export class LabelsDataSource extends RuntimeDataSource {
   async metricFindQuery(matcher: string, options: LegacyMetricFindQueryOptions): Promise<MetricFindValue[]> {
     const sceneObject = options.scopedVars?.__sceneObject?.valueOf() as SceneObject;
 
-    const ds = (await MetricDatasourceHelper.getPrometheusDataSourceForScene(sceneObject)) as PrometheusDatasource;
+    const ds = await MetricDatasourceHelper.getPrometheusDataSourceForScene(sceneObject);
     if (!ds) {
       return [];
     }
@@ -140,6 +140,12 @@ export class LabelsDataSource extends RuntimeDataSource {
         labelName,
         timeRange: sceneGraph.getTimeRange(sceneObject).state.value,
       });
+      // const args = MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)
+      //   ? [sceneGraph.getTimeRange(sceneObject).state.value, labelName]
+      //   : [labelName];
+
+      // // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelValues signature
+      // return await ds.languageProvider.fetchLabelValues(...args); // eslint-disable-line sonarjs/deprecation
     } catch (error) {
       displayWarning([
         `Error while retrieving label "${labelName}" values! Defaulting to an empty array.`,
