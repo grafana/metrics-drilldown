@@ -11,12 +11,14 @@ test.describe('Metrics reducer view', () => {
     await metricsReducerView.assertCoreUI();
   });
 
-  test('AdHoc Filters', async ({ metricsReducerView, selectors }) => {
-    await metricsReducerView.goto();
-    await metricsReducerView.getByRole('combobox', { name: 'Filter by label values' }).click();
-    const option = selectors.components.Select.option;
-    await expect(metricsReducerView.getByGrafanaSelector(option)).not.toHaveText(['__name__']);
-    await expect(metricsReducerView.getByRole('option', { name: '__name__' })).not.toBeVisible();
+  test.describe('AdHoc Filters', async () => {
+    test('__name__ should be filtered out of the options', async ({ metricsReducerView, selectors }) => {
+      await metricsReducerView.goto();
+      await metricsReducerView.getByRole('combobox', { name: 'Filter by label values' }).click();
+      const option = selectors.components.Select.option;
+      await expect(metricsReducerView.getByGrafanaSelector(option)).not.toHaveText(['__name__']);
+      await expect(metricsReducerView.getByRole('option', { name: '__name__' })).not.toBeVisible();
+    });
   });
 
   test.describe('Sidebar', () => {
