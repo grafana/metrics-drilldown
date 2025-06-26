@@ -66,6 +66,16 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
 interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
+  private _isAddToDashboardServiceAvailable(): boolean {
+    try {
+      // @ts-ignore - accessing getAddToDashboardService dynamically
+      const { getAddToDashboardService } = require('@grafana/runtime');
+      return typeof getAddToDashboardService === 'function' && getAddToDashboardService() != null;
+    } catch {
+      return false;
+    }
+  }
+
   public getLinkToExplore = async () => {
     const metricScene = sceneGraph.getAncestor(this, MetricScene);
     const autoVizPanel = sceneGraph.findByKeyAndType(this, METRIC_AUTOVIZPANEL_KEY, AutoVizPanel);
@@ -184,12 +194,14 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               tooltip={UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL}
               onClick={model.openExploreLink}
             />
-            <ToolbarButton
-              variant={'canvas'}
-              icon="panel-add"
-              tooltip="Add to dashboard"
-              onClick={model.onGetPanelData}
-            />
+            {model._isAddToDashboardServiceAvailable() && (
+              <ToolbarButton
+                variant={'canvas'}
+                icon="panel-add"
+                tooltip="Add to dashboard"
+                onClick={model.onGetPanelData}
+              />
+            )}
             <ShareTrailButton trail={trail} />
             <ToolbarButton
               variant={'canvas'}

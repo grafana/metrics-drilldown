@@ -116,8 +116,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // Some scene elements publish this
     this.subscribeToEvent(MetricSelectedEvent, this._handleMetricSelectedEvent.bind(this));
     
-    // Listen for panel data requests to open the add to dashboard modal
-    this.subscribeToEvent(PanelDataRequestEvent, this._handlePanelDataRequestEvent.bind(this));
+    // Listen for panel data requests to open the add to dashboard modal (only if service is available)
+    if (this._isAddToDashboardServiceAvailable()) {
+      this.subscribeToEvent(PanelDataRequestEvent, this._handlePanelDataRequestEvent.bind(this));
+    }
 
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (isAdHocFiltersVariable(filtersVariable)) {
@@ -180,6 +182,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   private _addingFilterWithoutReportingInteraction = false;
   private datasourceHelper = new MetricDatasourceHelper(this);
+
+  private _isAddToDashboardServiceAvailable(): boolean {
+    try {
+      return typeof getAddToDashboardService === 'function' && getAddToDashboardService() != null;
+    } catch {
+      return false;
+    }
+  }
 
   public getMetricMetadata(metric?: string) {
     return this.datasourceHelper.getMetricMetadata(metric);
@@ -335,21 +345,23 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return (
       <div className={styles.container}>
         {/* add modal at the top of the trail here, in case we add a button for all panels */}
-        <div>          
-          <Modal
-            title="Add to Dashboard"
-            isOpen={openAddToDashboardModal}
-            onDismiss={model._closeAddToDashboardModal}
-          >
-            {createElement(getAddToDashboardService().getExploreToDashboardPanel(), {
-              // props specific to explore apps
-              panelData,
-              // closes the modal when opening in a new tab
-              onClose: model._closeAddToDashboardModal,
-              exploreId: 'metrics-drilldown',
-            })}
-          </Modal>
-        </div>
+        {model._isAddToDashboardServiceAvailable() && (
+          <div>          
+            <Modal
+              title="Add to Dashboard"
+              isOpen={openAddToDashboardModal}
+              onDismiss={model._closeAddToDashboardModal}
+            >
+              {createElement(getAddToDashboardService().getExploreToDashboardPanel(), {
+                // props specific to explore apps
+                panelData,
+                // closes the modal when opening in a new tab
+                onClose: model._closeAddToDashboardModal,
+                exploreId: 'metrics-drilldown',
+              })}
+            </Modal>
+          </div>
+        )}
         {controls && (
           <div className={styles.controls} data-testid="app-controls">
             {controls.map((control) => (
