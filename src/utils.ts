@@ -181,7 +181,9 @@ export function limitAdhocProviders(
         opts.queries = [];
       }
 
-      let values = (await datasourceHelper.getTagKeys(opts)).slice(0, MAX_ADHOC_VARIABLE_OPTIONS);
+      let values = (await datasourceHelper.getTagKeys(opts))
+        .filter((filter) => filter.text !== '__name__')
+        .slice(0, MAX_ADHOC_VARIABLE_OPTIONS);
 
       // use replace: true to override the default lookup in adhoc filter variable
       return { replace: true, values };
