@@ -63,7 +63,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
           await metricsReducerView.assertMetricsGroupByList();
 
-          await metricsReducerView.selectMetricsGroup('db_name', 'grafana');
+          metricsReducerView.selectMetricsGroup('db_name', 'grafana');
           await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
 
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
@@ -85,7 +85,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
           await metricsReducerView.assertMetricsGroupByList();
 
-          await metricsReducerView.selectMetricsGroup('db_name', 'grafana');
+          metricsReducerView.selectMetricsGroup('db_name', 'grafana');
           await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
           await metricsReducerView.clearAdHocFilter('db_name');
 
