@@ -187,7 +187,7 @@ export function limitAdhocProviders(
       return { replace: true, values };
     },
     getTagValuesProvider: async (
-      variable: AdHocFiltersVariable,
+      _: AdHocFiltersVariable,
       filter: AdHocVariableFilter
     ): Promise<{
       replace?: boolean;

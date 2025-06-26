@@ -39,11 +39,13 @@ export function buildPrometheusQuery({
     defaultSelectors: [
       ...(isUtf8Metric ? [{ label: utf8Support(metric), operator: MatchingOperator.equal, value: '__REMOVE__' }] : []),
       ...(ignoreUsage ? [{ label: '__ignore_usage__', operator: MatchingOperator.equal, value: '' }] : []),
-      ...filters.map(({ key, value, operator }) => ({
-        label: utf8Support(key),
-        operator: operator as MatchingOperator,
-        value,
-      })),
+      ...filters
+        .filter((filter) => filter.key !== '__name__')
+        .map(({ key, value, operator }) => ({
+          label: utf8Support(key),
+          operator: operator as MatchingOperator,
+          value,
+        })),
     ],
   });
 
