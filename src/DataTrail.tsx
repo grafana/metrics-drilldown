@@ -26,7 +26,7 @@ import {
   type SceneVariable,
 } from '@grafana/scenes';
 import { Modal, useStyles2 } from '@grafana/ui';
-import React, { createElement, useEffect, useState } from 'react';
+import React, { createElement, useEffect } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
@@ -73,6 +73,7 @@ export interface DataTrailState extends SceneObjectState {
   
   // Panel data for dashboard creation
   panelData?: { panel: Panel, range: TimeRange };
+  openAddToDashboardModal?: boolean;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -243,8 +244,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   private _handlePanelDataRequestEvent(evt: PanelDataRequestEvent) {
     // Store the panel data and trigger the modal to open
-    this.setState({ panelData: evt.payload });
+    this.setState({ panelData: evt.payload, openAddToDashboardModal: true });
     // The modal opening will be handled in the component with setIsModalOpen(true)
+  }
+
+  private _closeAddToDashboardModal = () => {
+    this.setState({ openAddToDashboardModal: false, panelData: undefined });
   }
 
   private getSceneUpdatesForNewMetricValue(metric: string | undefined, nativeHistogramMetric?: boolean) {
@@ -314,8 +319,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, settings, pluginInfo, embedded, panelData } = model.useState();
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { controls, topScene, settings, pluginInfo, embedded, panelData, openAddToDashboardModal } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight();
     const styles = useStyles2(getStyles, embedded ? 0 : chromeHeaderHeight ?? 0);
@@ -328,31 +332,20 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       limitAdhocProviders(model, filtersVariable, datasourceHelper);
     }, [model]);
 
-    // Open modal when panel data is received
-    useEffect(() => {
-      if (panelData) {
-        setIsModalOpen(true);
-      }
-    }, [panelData]);
-
     return (
       <div className={styles.container}>
         {/* add modal at the top of the trail here, in case we add a button for all panels */}
         <div>          
           <Modal
             title="Add to Dashboard"
-            isOpen={isModalOpen}
-            // also set trail state for panelData to undefined when we close.
-            onDismiss={() => {
-              setIsModalOpen(false);
-              model.setState({ panelData: undefined });
-            }}
+            isOpen={openAddToDashboardModal}
+            onDismiss={model._closeAddToDashboardModal}
           >
             {createElement(getAddToDashboardService().getExploreToDashboardPanel(), {
               // props specific to explore apps
               panelData,
-              // grafana legacy props for the modal
-              onClose: () => {},
+              // closes the modal when opening in a new tab
+              onClose: model._closeAddToDashboardModal,
               exploreId: 'metrics-drilldown',
             })}
           </Modal>
