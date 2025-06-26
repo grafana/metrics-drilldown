@@ -247,7 +247,7 @@ export class MetricDatasourceHelper {
    * });
    * ```
    */
-  public static fetchLabels(params: FetchLabelsOptions) {
+  public static fetchLabels(params: FetchLabelsOptions): Promise<string[]> {
     const { ds, timeRange, matcher } = params;
 
     if (typeof ds.languageProvider.queryLabelKeys === 'function') {
@@ -256,11 +256,11 @@ export class MetricDatasourceHelper {
 
     if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
       // eslint-disable-next-line sonarjs/deprecation
-      return ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher);
+      return ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher).then((labels) => Object.keys(labels));
     }
 
     // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelsWithMatch signature
-    return ds.languageProvider.fetchLabelsWithMatch(matcher); // eslint-disable-line sonarjs/deprecation
+    return ds.languageProvider.fetchLabelsWithMatch(matcher).then((labels) => Object.keys(labels)); // eslint-disable-line sonarjs/deprecation
   }
 
   /**

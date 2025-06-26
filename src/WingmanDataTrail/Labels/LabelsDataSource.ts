@@ -95,9 +95,9 @@ export class LabelsDataSource extends RuntimeDataSource {
     });
 
     return this.processLabelOptions(
-      Object.entries(response).map(([key, value]) => ({
-        value: key,
-        text: Array.isArray(value) ? value[0] : value || key,
+      response.map((label) => ({
+        value: label,
+        text: label,
       }))
     );
   }
