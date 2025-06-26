@@ -299,13 +299,17 @@ export class MetricDatasourceHelper {
       return ds.languageProvider.queryLabelValues(timeRange, labelName, matcher);
     }
 
+    const fetchLabelValuesWithOptionalMatcher = matcher
+      ? ds.languageProvider.fetchSeriesValuesWithMatch // eslint-disable-line sonarjs/deprecation
+      : ds.languageProvider.fetchLabelValues; // eslint-disable-line sonarjs/deprecation
+
     if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
       // eslint-disable-next-line sonarjs/deprecation
-      return ds.languageProvider.fetchSeriesValuesWithMatch(timeRange, '__name__', matcher);
+      return fetchLabelValuesWithOptionalMatcher(timeRange, labelName, matcher);
     }
 
     // @ts-expect-error: Ignoring type error due to breaking change in fetchSeriesValuesWithMatch signature
-    return ds.languageProvider.fetchSeriesValuesWithMatch('__name__', matcher); // eslint-disable-line sonarjs/deprecation
+    return fetchLabelValuesWithOptionalMatcher(labelName, matcher); // eslint-disable-line sonarjs/deprecation
   }
 
   public static async getPrometheusDataSourceForScene(
