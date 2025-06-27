@@ -12,7 +12,7 @@ test.describe('Metrics reducer view', () => {
   });
 
   test.describe('AdHoc Filters', async () => {
-    test('__name__ filter is not interpolated into the query', async ({ metricsReducerView, selectors, page }) => {
+    test('__name__ filter is not interpolated into the query', async ({ metricsReducerView, selectors }) => {
       await metricsReducerView.goto();
       await metricsReducerView.setAdHocFilter('__name__', '=', 'grafana_database_conn_idle');
       await metricsReducerView.getByGrafanaSelector(selectors.components.RefreshPicker.runButtonV2).click();
