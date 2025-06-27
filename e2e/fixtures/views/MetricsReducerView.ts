@@ -155,8 +155,8 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
-  selectMetricsGroup(labelName: string, labelValue: string) {
-    this.getMetricsGroupByList()
+  async selectMetricsGroup(labelName: string, labelValue: string) {
+    await this.getMetricsGroupByList()
       .getByTestId(`${labelName}-${labelValue}-metrics-group`)
       .getByRole('button', { name: 'Select' })
       .first()
