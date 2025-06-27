@@ -1,6 +1,5 @@
 import { css } from '@emotion/css';
-import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
-import { getAppEvents } from '@grafana/runtime';
+import { type GrafanaTheme2 } from '@grafana/data';
 import {
   getExploreURL,
   sceneGraph,
@@ -23,6 +22,7 @@ import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
 import { getQueryRunnerFor } from 'utils/utils.queries';
+import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 
@@ -153,17 +153,11 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
   public onGetPanelData = () => {
     try {
       const panelData = this.getPanelData();
-      console.log('Panel Data for Dashboard Creation:', panelData);
-      
       // Fire the event with panel data to trigger the modal
       const trail = getTrailFor(this);
       trail.publishEvent(new PanelDataRequestEvent(panelData), true);
     } catch (error) {
-      console.error('Error getting panel data:', error);
-      getAppEvents().publish({
-        type: AppEvents.alertError.name,
-        payload: ['Failed to retrieve panel data. Please check the console for more details.'],
-      });
+      displayError(error as Error, ['Failed to retrieve panel data. Please check the console for more details.']);
     }
   };
 
