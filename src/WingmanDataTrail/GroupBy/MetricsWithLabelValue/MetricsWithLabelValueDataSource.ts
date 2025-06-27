@@ -16,8 +16,6 @@ import { isPrometheusRule } from 'WingmanDataTrail/helpers/isPrometheusRule';
 
 import type { PrometheusDatasource } from '@grafana/prometheus';
 
-export const NULL_GROUP_BY_VALUE = '(none)';
-
 export class MetricsWithLabelValueDataSource extends RuntimeDataSource {
   static readonly uid = 'grafana-prometheus-metrics-with-label-values-datasource';
 

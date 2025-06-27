@@ -15,6 +15,7 @@ export function buildTimeseriesPanel({ panelTitle, queryRunner, color, headerAct
       .setData(queryRunner)
       .setColor({ mode: 'fixed', fixedColor: color })
       .setCustomFieldConfig('fillOpacity', 9)
+      .setCustomFieldConfig('pointSize', 1)
       // we clone to prevent Scenes warnings "SceneObject already has a parent set that is different from the new parent. You cannot share the same SceneObject instance in multiple scenes or in multiple different places of the same scene graph. Use SceneObject.clone() to duplicate a SceneObject or store a state key reference and use sceneGraph.findObject to locate it."
       .setHeaderActions(headerActions.map((action) => action.clone()))
       .setOption('legend', { showLegend: !hideLegend })

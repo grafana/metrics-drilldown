@@ -19,17 +19,6 @@ export interface DataTrailState extends SceneObjectState {
   initialDS?: string;
   initialFilters?: AdHocVariableFilter[];
 
-  // this is for otel, if the data source has it, it will be updated here
-  hasOtelResources?: boolean;
-  useOtelExperience?: boolean;
-  isStandardOtel?: boolean;
-  nonPromotedOtelResources?: string[];
-  initialOtelCheckComplete?: boolean; // updated after the first otel check
-  startButtonClicked?: boolean; // from original landing page
-  resettingOtel?: boolean; // when switching OTel off from the switch
-  addingLabelFromBreakdown?: boolean; // do not use the otel and metrics var subscription when adding label from the breakdown
-  afterFirstOtelCheck?: boolean; // don't reset because of the migration on the first otel check from the data source updating
-
   // Synced with url
   metric?: string;
   metricSearch?: string;

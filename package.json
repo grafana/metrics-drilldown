@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
@@ -15,18 +15,13 @@
     "lint": "eslint --cache --ignore-path ./.gitignore --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "npm run lint -- --fix && prettier --write --list-different .",
     "server": "docker compose up --build",
-    "server:ci": "docker compose up --build -d",
-    "server:down": "docker compose down",
     "sign": "npx --yes @grafana/sign-plugin@latest",
+    "e2e:server": "docker compose up --build",
+    "e2e:ci": "docker compose --profile playwright up --build --attach playwright",
     "e2e:prepare": "npm exec playwright install chromium",
-    "e2e:server": "docker compose down --remove-orphans && docker compose -f e2e/docker/docker-compose.e2e.yaml up --build --abort-on-container-exit",
-    "e2e:watch": "npm run e2e -- --ui",
-    "e2e:codegen": "playwright codegen",
     "e2e": "playwright test -c ./e2e/config/playwright.config.local.ts",
-    "e2e:ci:prepare": "docker build --progress=auto -t metrics-drilldown-e2e:latest -f e2e/docker/Dockerfile.playwright .",
-    "e2e:ci:server:up": "docker compose -f e2e/docker/docker-compose.e2e.yaml up --build -d",
-    "e2e:ci:server:down": "docker compose down",
-    "e2e:ci": "docker compose -f e2e/docker/docker-compose.playwright.yaml up --build"
+    "e2e:watch": "npm run e2e -- --ui",
+    "e2e:codegen": "playwright codegen"
   },
   "packageManager": "npm@10.9.2",
   "engines": {
@@ -55,7 +50,7 @@
     "@grafana/eslint-config": "^8.0.0",
     "@grafana/plugin-e2e": "^1.19.9",
     "@grafana/tsconfig": "^2.0.0",
-    "@playwright/test": "^1.52.0",
+    "@playwright/test": "^1.53.1",
     "@stylistic/eslint-plugin-ts": "^2.13.0",
     "@swc/core": "^1.11.24",
     "@swc/helpers": "^0.5.17",

@@ -3,19 +3,22 @@ import { expect, type Page } from '@playwright/test';
 import { DrilldownView } from './DrilldownView';
 import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
 import { UI_TEXT } from '../../../src/constants/ui';
+import { AppControls } from '../components/AppControls';
 import { QuickSearchInput } from '../components/QuickSearchInput';
 import { Sidebar } from '../components/Sidebar';
 
 export type SortByOptionNames = 'Default' | 'Dashboard Usage' | 'Alerting Usage';
 
 export class MetricsReducerView extends DrilldownView {
+  public appControls: AppControls;
   public quickSearch: QuickSearchInput;
   public sidebar: Sidebar;
 
   constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
 
-    this.quickSearch = new QuickSearchInput(page);
+    this.appControls = new AppControls(page);
+    this.quickSearch = new QuickSearchInput(page, 'Quick search metrics');
     this.sidebar = new Sidebar(page);
   }
 
@@ -35,96 +38,25 @@ export class MetricsReducerView extends DrilldownView {
   /* Core UI assertions */
 
   async assertCoreUI() {
-    await this.assertAppControls();
-    await this.assertListControls();
+    await this.appControls.assert();
     await this.sidebar.assert();
+    await this.assertListControls();
     await this.assertMetricsList();
-  }
-
-  /* App controls */
-
-  getAppControls() {
-    return this.getByTestId('app-controls');
-  }
-
-  async assertAppControls() {
-    await expect(this.getAppControls()).toBeVisible();
-
-    // left
-    await expect(this.getDataSourceDropdown()).toBeVisible();
-    await expect(this.getAdHocFilters()).toBeVisible();
-
-    // right
-    await expect(this.getTimePickerButton()).toBeVisible();
-    await expect(this.getRefreshPicker()).toBeVisible();
-    await expect(this.getPluginInfoButton()).toBeVisible();
-  }
-
-  /* Data source */
-
-  getDataSourceDropdown() {
-    return this.getAppControls().getByText('Data source');
-  }
-
-  async assertSelectedDataSource(expectedDataSource: string) {
-    const name = await this.getDataSourceDropdown().textContent();
-    expect(name?.trim()).toBe(expectedDataSource);
   }
 
   /* Ad Hoc filters */
 
-  getAdHocFilters() {
-    return this.getAppControls().getByPlaceholder('Filter by label values');
+  async assertAdHocFilter(labelName: string, operator: string, labelValue: string) {
+    const filter = this.getByRole('button', { name: `Edit filter with key ${labelName}` });
+    await expect(filter).toBeVisible();
+
+    const filterText = await filter.textContent();
+    expect(filterText).toBe(`${labelName} ${operator} ${labelValue}`);
   }
 
-  async setAdHocFilter(label: string, operator: string, value: string) {
-    await this.getAdHocFilters().click();
-
-    for (const text of [label, operator, value]) {
-      await this.page.keyboard.type(text);
-      await this.page.keyboard.press('Enter');
-    }
-  }
-
-  async assertAdHocFilters(expectedFilters: string[]) {
-    const appControls = this.getByTestId('app-controls');
-
-    for (const expectedFilter of expectedFilters) {
-      await expect(appControls.getByText(expectedFilter)).toBeVisible();
-    }
-  }
-
-  /* Time picker/refresh */
-
-  getTimePickerButton() {
-    return this.getAppControls().getByTestId('data-testid TimePicker Open Button');
-  }
-
-  async assertSelectedTimeRange(expectedTimeRange: string) {
-    await expect(this.getTimePickerButton()).toContainText(expectedTimeRange);
-  }
-
-  async selectTimeRange(quickRangeLabel: string) {
-    await this.getTimePickerButton().click();
-    await this.getByTestId('data-testid TimePicker Overlay Content').getByText(quickRangeLabel).click();
-  }
-
-  getRefreshPicker() {
-    return this.getAppControls().getByTestId('data-testid RefreshPicker run button');
-  }
-
-  clickOnRefresh() {
-    return this.getRefreshPicker().click();
-  }
-
-  /* Settings/plugin info */
-
-  getSettingsButton() {
-    return this.getAppControls().getByTestId('settings-button');
-  }
-
-  getPluginInfoButton() {
-    return this.getAppControls().getByTestId('plugin-info-button');
+  async clearAdHocFilter(labelName: string) {
+    await this.getByRole('button', { name: `Remove filter with key ${labelName}` }).click();
+    await this.getByTestId('metrics-drilldown-app').click(); // prevents the dropdown to appear
   }
 
   /* List controls */
@@ -135,7 +67,7 @@ export class MetricsReducerView extends DrilldownView {
 
   async assertListControls() {
     await expect(this.getListControls()).toBeVisible();
-    await expect(this.quickSearch.getInput()).toBeVisible();
+    await expect(this.quickSearch.get()).toBeVisible();
     await expect(this.getSortByDropdown()).toBeVisible();
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
@@ -147,11 +79,11 @@ export class MetricsReducerView extends DrilldownView {
     return this.getListControls().getByTestId('sort-by-select');
   }
 
-  async assertSelectedSortBy(expectedOptionName: SortByOption) {
+  async assertSelectedSortBy(expectedOptionName: SortByOptionNames) {
     await expect(this.getSortByDropdown().getByText(expectedOptionName)).toBeVisible();
   }
 
-  async selectSortByOption(expectedOptionName: SortByOption) {
+  async selectSortByOption(expectedOptionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
     await this.page.getByRole('option', { name: expectedOptionName }).locator('span').click();
   }
@@ -164,7 +96,7 @@ export class MetricsReducerView extends DrilldownView {
 
   async assertSelectedLayout(expectedLayoutName: 'Grid' | 'Row') {
     const layoutName = await this.getLayoutSwitcher().locator('input[checked]~label').textContent();
-    await expect(layoutName?.trim()).toBe(expectedLayoutName);
+    expect(layoutName?.trim()).toBe(expectedLayoutName);
   }
 
   selectLayout(layoutName: string) {
@@ -223,7 +155,14 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
-  // TODO: If it's used once, don't declare it here, just use it in a single test
+  selectMetricsGroup(labelName: string, labelValue: string) {
+    this.getMetricsGroupByList()
+      .getByTestId(`${labelName}-${labelValue}-metrics-group`)
+      .getByRole('button', { name: 'Select' })
+      .first()
+      .click();
+  }
+
   async openPanelInExplore() {
     const explorePromise = this.page.waitForEvent('popup');
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL).click();
@@ -231,7 +170,6 @@ export class MetricsReducerView extends DrilldownView {
     return explorePage;
   }
 
-  // TODO: If it's used once, don't declare it here, just use it in a single test
   async clickCopyPanelUrl() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL).click();
   }

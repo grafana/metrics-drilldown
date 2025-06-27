@@ -94,7 +94,7 @@ export class MetricDatasourceHelper {
     const ds = await this.getDatasource();
     if (ds && Object.keys(this._classicHistograms).length === 0) {
       const classicHistogramsCall = ds.metricFindQuery('metrics(.*_bucket)');
-      const allMetricsCall = ds.metricFindQuery('metrics(.*)');
+      const allMetricsCall = ds.metricFindQuery('metrics(.+)');
 
       const [classicHistograms, allMetrics] = await Promise.all([classicHistogramsCall, allMetricsCall]);
 

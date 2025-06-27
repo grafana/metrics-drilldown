@@ -6,8 +6,9 @@ export const DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY = 'grafana.navigation.open';
 export const DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY = 'grafana.navigation.docked';
 
 export const DEFAULT_STATIC_URL_SEARCH_PARAMS = new URLSearchParams({
-  from: '2025-02-18T13:30:00.000Z',
-  to: '2025-02-18T16:15:00.000Z',
+  'var-ds': 'gdev-prometheus',
+  from: '2025-05-26T11:00:00.000Z',
+  to: '2025-05-26T12:05:00.000Z',
   timezone: 'utc',
 });
 

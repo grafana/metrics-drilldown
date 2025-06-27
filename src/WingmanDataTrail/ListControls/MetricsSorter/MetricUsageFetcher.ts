@@ -1,6 +1,5 @@
 import { fetchAlertingMetrics } from './fetchers/fetchAlertingMetrics';
 import { fetchDashboardMetrics } from './fetchers/fetchDashboardMetrics';
-import { type SortingOption } from './MetricsSorter';
 
 interface MetricsUsageState {
   metrics: Record<string, number>;
@@ -8,7 +7,7 @@ interface MetricsUsageState {
   fetcher: () => Promise<Record<string, number>>;
 }
 
-export type MetricUsageType = Exclude<SortingOption, 'default'>;
+export type MetricUsageType = 'dashboard-usage' | 'alerting-usage';
 
 export class MetricUsageFetcher {
   private _usageState: Record<MetricUsageType, MetricsUsageState> = {

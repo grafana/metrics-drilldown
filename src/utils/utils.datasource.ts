@@ -5,6 +5,9 @@ import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import { logger } from '../tracking/logger/logger';
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
+// This regex matches Grafana developed Prometheus data sources that are compatible with the vanilla Prometheus data source
+const PROMETHEUS_DATA_SOURCE_REGEX = /^grafana-[0-9a-z]+prometheus-datasource$/;
+
 /**
  * Helper function to determine if a datasource is a Prometheus datasource
  */
@@ -13,7 +16,8 @@ export function isPrometheusDataSource(input: unknown): input is PrometheusDatas
     typeof input === 'object' &&
     input !== null &&
     'type' in input &&
-    input.type === 'prometheus' &&
+    typeof input.type === 'string' &&
+    (input.type === 'prometheus' || PROMETHEUS_DATA_SOURCE_REGEX.test(input.type)) &&
     'uid' in input &&
     typeof input.uid === 'string'
   );

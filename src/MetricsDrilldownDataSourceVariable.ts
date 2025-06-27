@@ -3,6 +3,7 @@ import { DataSourceVariable } from '@grafana/scenes';
 
 import { VAR_DATASOURCE } from 'shared';
 import { logger } from 'tracking/logger/logger';
+import { isPrometheusDataSource } from 'utils/utils.datasource';
 
 export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
   private static LOCAL_STORAGE_KEY = 'metricsDrilldownDataSource';
@@ -35,7 +36,7 @@ export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
   }
 
   private static getCurrentDataSource(): string {
-    const prometheusDataSources = Object.values(config.datasources).filter((ds) => ds.type === 'prometheus');
+    const prometheusDataSources = Object.values(config.datasources).filter((ds) => isPrometheusDataSource(ds));
 
     const uidFromUrl = new URL(window.location.href).searchParams.get(`var-${VAR_DATASOURCE}`);
     const uidFromLocalStorage = localStorage.getItem(MetricsDrilldownDataSourceVariable.LOCAL_STORAGE_KEY);

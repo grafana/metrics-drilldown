@@ -2,7 +2,6 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import { Expression, MatchingOperator, promql } from 'tsqtsq';
 
-import { VAR_OTEL_JOIN_QUERY_EXPR } from 'shared';
 export type NonRateQueryFunction = 'avg' | 'min' | 'max';
 export const DEFAULT_NON_RATE_QUERY_FUNCTION: NonRateQueryFunction = 'avg';
 
@@ -10,7 +9,6 @@ export interface BuildPrometheusQueryParams {
   metric: string;
   filters: AdHocVariableFilter[];
   isRateQuery: boolean;
-  useOtelJoin: boolean;
   groupings?: string[];
   ignoreUsage?: boolean;
   nonRateQueryFunction?: NonRateQueryFunction;
@@ -27,7 +25,6 @@ export function buildPrometheusQuery({
   metric,
   filters,
   isRateQuery,
-  useOtelJoin,
   groupings,
   ignoreUsage = false,
   nonRateQueryFunction = DEFAULT_NON_RATE_QUERY_FUNCTION,
@@ -42,11 +39,13 @@ export function buildPrometheusQuery({
     defaultSelectors: [
       ...(isUtf8Metric ? [{ label: utf8Support(metric), operator: MatchingOperator.equal, value: '__REMOVE__' }] : []),
       ...(ignoreUsage ? [{ label: '__ignore_usage__', operator: MatchingOperator.equal, value: '' }] : []),
-      ...filters.map(({ key, value, operator }) => ({
-        label: utf8Support(key),
-        operator: operator as MatchingOperator,
-        value,
-      })),
+      ...filters
+        .filter((filter) => filter.key !== '__name__')
+        .map(({ key, value, operator }) => ({
+          label: utf8Support(key),
+          operator: operator as MatchingOperator,
+          value,
+        })),
     ],
   });
 
@@ -63,13 +62,10 @@ export function buildPrometheusQuery({
     metricPartString = promql.rate({ expr: metricPartString, interval: '$__rate_interval' });
   }
 
-  // Combine with OTel join string if requested
-  const innerQueryString = useOtelJoin ? `${metricPartString} ${VAR_OTEL_JOIN_QUERY_EXPR}` : metricPartString;
-
   // Build final query using tsqtsq
   // native histograms will not get `sum by (le)` here because they are not identified as rate queries in `determineProperties` function because they don't have the suffix bucket. The `rate` function is defined much earlier for them in `MetricVizPanel.buildQueryRunner` and is passed here as the `nonRateQueryFunction`.
   return promql[getPromqlFunction(isRateQuery, nonRateQueryFunction)]({
-    expr: innerQueryString,
+    expr: metricPartString,
     ...(groupings?.length ? { by: groupings } : {}),
   });
 }

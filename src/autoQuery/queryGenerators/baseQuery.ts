@@ -1,4 +1,4 @@
-import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR, VAR_OTEL_JOIN_QUERY_EXPR } from '../../shared';
+import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR } from '../../shared';
 
 // For usual non-utf8-metrics we use filters in the curly braces
 // metric_name{filter_label="filter_value"}
@@ -30,8 +30,8 @@ export function generateBaseQuery({
 
   // Apply groupings (e.g., `sum by(le, instance)`)
   if (groupings.length > 0) {
-    return `sum by(${groupings.join(', ')}) (${baseQuery} ${VAR_OTEL_JOIN_QUERY_EXPR})`;
+    return `sum by(${groupings.join(', ')}) (${baseQuery})`;
   }
 
-  return `${baseQuery} ${VAR_OTEL_JOIN_QUERY_EXPR}`;
+  return `${baseQuery}`;
 }

@@ -16,18 +16,18 @@ import { Button, CollapsableSection, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { WithUsageDataPreviewPanel } from 'MetricSelect/WithUsageDataPreviewPanel';
 import { VAR_FILTERS } from 'shared';
 import { getColorByIndex, getTrailFor } from 'utils';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/SimpleMetricsList';
+import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 import {
   METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
   MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 import { GroupsIcon } from 'WingmanDataTrail/SideBar/custom-icons/GroupsIcon';
@@ -171,10 +171,16 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     };
 
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid={`${labelName}-${labelValue}-metrics-group`}>
         <div className={styles.containerHeader}>
           <div className={styles.headerButtons}>
-            <Button className={styles.selectButton} variant="secondary" onClick={onClickSelect}>
+            <Button
+              className={styles.selectButton}
+              variant="secondary"
+              onClick={onClickSelect}
+              tooltip={`See metrics with ${labelName}=${labelValue}`}
+              tooltipPlacement="top"
+            >
               Select
             </Button>
           </div>

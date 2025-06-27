@@ -1,5 +1,3 @@
-import { VAR_OTEL_JOIN_QUERY_EXPR } from 'shared';
-
 import { buildPrometheusQuery, type BuildPrometheusQueryParams } from './buildPrometheusQuery';
 
 describe('buildPrometheusQuery', () => {
@@ -8,7 +6,6 @@ describe('buildPrometheusQuery', () => {
     filters: [],
     isRateQuery: false,
     ignoreUsage: false,
-    useOtelJoin: false,
   };
 
   describe('basic metrics (no rate)', () => {
@@ -69,18 +66,6 @@ describe('buildPrometheusQuery', () => {
       });
 
       const expected = 'sum by (le) (rate(test_histogram{}[$__rate_interval]))';
-      expect(result).toBe(expected);
-    });
-  });
-
-  describe('OTel resource queries', () => {
-    it('should append the OTel join query variable name to the inner query by default', () => {
-      const result = buildPrometheusQuery({
-        ...defaultParams,
-        useOtelJoin: true,
-      });
-
-      const expected = `avg(test_metric{} ${VAR_OTEL_JOIN_QUERY_EXPR})`;
       expect(result).toBe(expected);
     });
   });

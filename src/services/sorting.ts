@@ -61,17 +61,20 @@ export const sortSeries = memoize(
     return seriesCalcs.map(({ dataFrame }) => dataFrame);
   },
   (series: DataFrame[], sortBy: string, direction = 'asc') => {
-    const firstTimestamp = series.length > 0 ? series[0].fields[0].values[0] : 0;
-    const lastTimestamp =
-      series.length > 0
-        ? series[series.length - 1].fields[0].values[series[series.length - 1].fields[0].values.length - 1]
-        : 0;
+    const firstTimestamp = seriesIsNotEmpty(series) ? series[0].fields[0].values[0] : 0;
+    const lastTimestamp = seriesIsNotEmpty(series)
+      ? series[series.length - 1].fields[0].values[series[series.length - 1].fields[0].values.length - 1]
+      : 0;
     const firstValue = series.length > 0 ? getLabelValueFromDataFrame(series[0]) : '';
     const lastValue = series.length > 0 ? getLabelValueFromDataFrame(series[series.length - 1]) : '';
     const key = `${firstValue}_${lastValue}_${firstTimestamp}_${lastTimestamp}_${series.length}_${sortBy}_${direction}`;
     return key;
   }
 );
+
+function seriesIsNotEmpty(series: DataFrame[]) {
+  return series.length > 0 && series[0].fields.length > 0 && series[0].fields[0].values.length > 0;
+}
 
 const initOutlierDetector = (series: DataFrame[]) => {
   if (!wasmSupported()) {

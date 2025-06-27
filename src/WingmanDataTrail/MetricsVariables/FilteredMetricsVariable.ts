@@ -1,6 +1,3 @@
-import { VAR_FILTERS } from 'shared';
-import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
-
 import { MetricsVariable } from './MetricsVariable';
 import { withLifecycleEvents } from './withLifecycleEvents';
 
@@ -16,17 +13,5 @@ export class FilteredMetricsVariable extends MetricsVariable {
 
     // required for filtering and sorting
     return withLifecycleEvents<FilteredMetricsVariable>(this);
-  }
-
-  public updateGroupByQuery(groupByValue: string) {
-    const matcher =
-      groupByValue && groupByValue !== NULL_GROUP_BY_VALUE ? `${groupByValue}!="",$${VAR_FILTERS}` : `$${VAR_FILTERS}`;
-
-    const query = `label_values({${matcher}}, __name__)`;
-
-    if (query !== this.state.query) {
-      this.setState({ query });
-      this.refreshOptions();
-    }
   }
 }

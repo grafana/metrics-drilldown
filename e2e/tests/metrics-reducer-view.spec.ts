@@ -8,8 +8,33 @@ test.describe('Metrics reducer view', () => {
   });
 
   test('Core UI elements', async ({ metricsReducerView }) => {
-    await metricsReducerView.goto();
     await metricsReducerView.assertCoreUI();
+  });
+
+  test.describe('AdHoc Filters', async () => {
+    test('__name__ filter is not interpolated into the query', async ({ metricsReducerView, selectors, page }) => {
+      await metricsReducerView.goto();
+      await metricsReducerView.getByRole('combobox', { name: 'Filter by label values' }).click();
+      await metricsReducerView.getByRole('option', { name: '__name__' }).click();
+      await page.keyboard.type('=');
+      await page.keyboard.press('Enter');
+      await page.keyboard.type('grafana_database_conn_idle');
+      await page.keyboard.press('Enter');
+      await metricsReducerView.getByGrafanaSelector(selectors.components.RefreshPicker.runButtonV2).click();
+
+      await metricsReducerView.getByTestId('select-action-a_utf8_http_requests_total').click();
+
+      await metricsReducerView
+        .getByRole('button', { name: UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP })
+        .click();
+
+      await metricsReducerView.assertCoreUI();
+      await expect(
+        metricsReducerView
+          .getByTestId('data-testid Panel header a_utf8_http_requests_total')
+          .getByTestId('data-testid Panel status error')
+      ).not.toBeVisible();
+    });
   });
 
   test.describe('Sidebar', () => {
@@ -19,7 +44,6 @@ test.describe('Metrics reducer view', () => {
       }) => {
         await metricsReducerView.assertMetricsList();
 
-        // Select multiple prefixes to demonstrate OR behavior within a group
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
 
         // Verify OR behavior by checking that metrics with either prefix are shown
@@ -31,13 +55,10 @@ test.describe('Metrics reducer view', () => {
       }) => {
         await metricsReducerView.assertMetricsList();
 
-        // First select prefixes
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
-
-        // Then select suffixes to demonstrate AND behavior between groups
         await metricsReducerView.sidebar.selectSuffixFilters(['bytes', 'count']);
 
-        // Verify AND behavior between filter groups
+        // Verify AND behavior between the two filter groups
         await expect(metricsReducerView.page).toHaveScreenshot(
           'sidebar-prefixes-and-suffixes-selected-metric-counts.png'
         );
@@ -45,12 +66,64 @@ test.describe('Metrics reducer view', () => {
     });
 
     test.describe('Group by label', () => {
-      test('A list of metrics is shown when metrics are grouped by label', async ({ page, metricsReducerView }) => {
-        await metricsReducerView.sidebar.selectGroupByLabel('action');
-        await metricsReducerView.assertMetricsGroupByList();
+      test.describe('When selecting a value in the side bar', () => {
+        test('A list of metrics grouped by label values is displayed, each with a "Select" button', async ({
+          page,
+          metricsReducerView,
+        }) => {
+          await metricsReducerView.sidebar.toggleButton('Group by labels');
+          await metricsReducerView.sidebar.selectGroupByLabel('db_name');
+          await metricsReducerView.sidebar.assertActiveButton('Group by labels', true);
+          await metricsReducerView.assertMetricsGroupByList();
 
-        await expect(page).toHaveScreenshot('metrics-reducer-group-by-label.png', {
-          stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label.png', {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          });
+        });
+
+        test('When clicking on the "Select" button, it drills down the selected label value (adds a new filter, displays a non-grouped list of metrics and updates the list of label values)', async ({
+          page,
+          metricsReducerView,
+        }) => {
+          await metricsReducerView.sidebar.toggleButton('Group by labels');
+          await metricsReducerView.sidebar.selectGroupByLabel('db_name');
+          await metricsReducerView.assertMetricsGroupByList();
+
+          metricsReducerView.selectMetricsGroup('db_name', 'grafana');
+          await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
+
+          await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
+          await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
+          await metricsReducerView.assertMetricsList();
+
+          await metricsReducerView.sidebar.assertLabelsList('=', 3);
+
+          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label-after-select.png', {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          });
+        });
+
+        test('When clearing the filter, it updates the list of label values and marks the sidebar button as inactive', async ({
+          page,
+          metricsReducerView,
+        }) => {
+          await metricsReducerView.sidebar.toggleButton('Group by labels');
+          await metricsReducerView.sidebar.selectGroupByLabel('db_name');
+          await metricsReducerView.assertMetricsGroupByList();
+
+          metricsReducerView.selectMetricsGroup('db_name', 'grafana');
+          await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
+          await metricsReducerView.clearAdHocFilter('db_name');
+
+          await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
+          await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
+
+          await metricsReducerView.assertMetricsList();
+          await metricsReducerView.sidebar.assertLabelsList('>', 3);
+
+          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label-after-clear-filter.png', {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          });
         });
       });
     });
@@ -82,7 +155,7 @@ test.describe('Metrics reducer view', () => {
 
       // We'll select seven metrics, but only the 6 most recent metrics should be shown above the alphabetical list
       const metricsToSelect = [
-        'pyroscope_write_path_downstream_request_duration_seconds_sum', // This one should not appear in the screenshot
+        'pyroscope_write_path_downstream_request_duration_seconds', // This one should not appear in the screenshot
         'grafana_access_evaluation_duration_bucket',
         'process_network_transmit_bytes_total',
         'memberlist_client_cas_success_total',
@@ -117,7 +190,7 @@ test.describe('Metrics reducer view', () => {
         // Wait for the usage count to load
         // eslint-disable-next-line sonarjs/no-nested-functions
         await expect(async () => {
-          const firstPanel = await metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
+          const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
           const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
           const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
           expect(usageCount).toBeGreaterThan(0);
