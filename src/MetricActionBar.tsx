@@ -11,6 +11,7 @@ import {
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { getPanelData } from 'AddToDashboard/utils';
 import { AutoVizPanel } from 'autoQuery/components/AutoVizPanel';
 import { UI_TEXT } from 'constants/ui';
 import { reportExploreMetrics } from 'interactions';
@@ -21,12 +22,9 @@ import { MetricSelectedEvent, PanelDataRequestEvent, type PanelDataRequestPayloa
 import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
-import { getQueryRunnerFor } from 'utils/utils.queries';
 import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
-
-import type { Panel } from '@grafana/schema';
 
 export const actionViews = {
   breakdown: 'breakdown',
@@ -100,8 +98,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     });
   };
 
-  public getPanelData = (): PanelDataRequestPayload => {
-    const metricScene = sceneGraph.getAncestor(this, MetricScene);
+  public getMetricScenePanelData = (): PanelDataRequestPayload => {
     const autoVizPanel = sceneGraph.findByKeyAndType(this, METRIC_AUTOVIZPANEL_KEY, AutoVizPanel);
     
     if (!autoVizPanel.state.panel) {
@@ -110,49 +107,12 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 
     const vizPanel = autoVizPanel.state.panel;
 
-    const queryRunner = getQueryRunnerFor(vizPanel);
-    
-    // Get the time range from the scene
-    const timeRange = sceneGraph.getTimeRange(this);
-    // DTO (dashboard transfer object) in Grafana requires raw timerange
-    const range = timeRange.state.value;
-    
-    const panel: Panel = {
-      // Panel basic info from VizPanel
-      type: vizPanel.state.pluginId,
-      title: vizPanel.state.title ? sceneGraph.interpolate(metricScene, vizPanel.state.title) : vizPanel.state.title,
-      
-      // Targets (queries) from QueryRunner with interpolated variables
-      targets: queryRunner?.state.queries?.map((query) => ({
-        ...query,
-        expr: query.expr ? sceneGraph.interpolate(metricScene, query.expr) : query.expr,
-        legendFormat: query.legendFormat ? sceneGraph.interpolate(metricScene, query.legendFormat) : query.legendFormat,
-        // remove the field fromExploreMetrics from the query because this will become a panel in the dashboard
-        fromExploreMetrics: false,
-      })) || [],
-      
-      // Datasource from QueryRunner with interpolated variables
-      datasource: queryRunner?.state.datasource ? {
-        ...queryRunner.state.datasource,
-        uid: queryRunner.state.datasource.uid ? sceneGraph.interpolate(metricScene, queryRunner.state.datasource.uid) : queryRunner.state.datasource.uid
-      } : queryRunner?.state.datasource,
-      
-      // Panel options from VizPanel
-      options: vizPanel.state.options,
-      
-      // Field configuration from VizPanel
-      fieldConfig: vizPanel.state.fieldConfig as any,
-      
-      // Additional properties from VizPanel
-      ...(vizPanel.state.description && { description: vizPanel.state.description }),
-      ...(queryRunner?.state.maxDataPoints && { maxDataPoints: queryRunner.state.maxDataPoints }),
-    };
-    return { panel, range }
-  };
+    return getPanelData(vizPanel);
+  }
 
   public onGetPanelData = () => {
     try {
-      const panelData = this.getPanelData();
+      const panelData = this.getMetricScenePanelData();
       // Fire the event with panel data to trigger the modal
       const trail = getTrailFor(this);
       trail.publishEvent(new PanelDataRequestEvent(panelData), true);
