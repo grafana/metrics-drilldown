@@ -9,9 +9,10 @@ import {
 } from '@grafana/data';
 import { memoize } from 'lodash';
 
+import { logger } from 'tracking/logger/logger';
+
 import { reportExploreMetrics } from '../interactions';
 import { getLabelValueFromDataFrame } from './levels';
-import { logger } from 'tracking/logger/logger';
 
 export const sortSeries = memoize(
   (series: DataFrame[], sortBy: string, direction = 'asc') => {
