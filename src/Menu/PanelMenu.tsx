@@ -13,9 +13,10 @@ import {
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
 
+import { logger } from 'tracking/logger/logger';
+
 import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
-import { logger } from 'tracking/logger/logger';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible

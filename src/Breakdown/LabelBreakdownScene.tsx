@@ -25,6 +25,7 @@ import { Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { isNumber, max, min, throttle } from 'lodash';
 import React from 'react';
 
+import { logger } from 'tracking/logger/logger';
 import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
@@ -48,7 +49,6 @@ import { StatusWrapper } from '../StatusWrapper';
 import { getColorByIndex, getTrailFor } from '../utils';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
-import { logger } from 'tracking/logger/logger';
 
 export interface LabelBreakdownSceneState extends SceneObjectState {
   body?: LayoutSwitcher | MetricLabelsList;

@@ -10,6 +10,7 @@ import {
   type VariableValueOption,
 } from '@grafana/scenes';
 import React from 'react';
+
 import { logger } from 'tracking/logger/logger';
 
 /**

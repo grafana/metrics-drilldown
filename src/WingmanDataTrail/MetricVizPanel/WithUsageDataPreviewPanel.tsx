@@ -9,8 +9,8 @@ import {
 } from '@grafana/scenes';
 import { Icon, Tooltip, useStyles2, type IconName } from '@grafana/ui';
 import React from 'react';
-import { logger } from 'tracking/logger/logger';
 
+import { logger } from 'tracking/logger/logger';
 import { isCustomVariable } from 'utils/utils.variables';
 import {
   MetricsSorter,
