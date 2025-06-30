@@ -11,6 +11,7 @@ import { memoize } from 'lodash';
 
 import { reportExploreMetrics } from '../interactions';
 import { getLabelValueFromDataFrame } from './levels';
+import { logger } from 'tracking/logger/logger';
 
 export const sortSeries = memoize(
   (series: DataFrame[], sortBy: string, direction = 'asc') => {
@@ -32,7 +33,7 @@ export const sortSeries = memoize(
           return calculateOutlierValue(series, dataFrame);
         }
       } catch (e) {
-        console.error(e);
+        logger.error(e as Error, { message: 'ML sorting panicked, fallback to stdDev' });
         // ML sorting panicked, fallback to stdDev
         sortBy = ReducerID.stdDev;
       }
@@ -95,7 +96,7 @@ const initOutlierDetector = (series: DataFrame[]) => {
     const detector = OutlierDetector.dbscan({ sensitivity: 0.4 }).preprocess(points);
     outliers = detector.detect();
   } catch (e) {
-    console.error(e);
+    logger.error(e as Error, { message: 'Error initializing outlier detector' });
     outliers = undefined;
   }
 };

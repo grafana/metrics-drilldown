@@ -31,6 +31,8 @@ import { LOGS_METRIC, VAR_DATASOURCE_EXPR } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getClosestScopesFacade } from './utils/utils.scopes';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
+import { logger } from 'tracking/logger/logger';
+import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 
 export function getTrailFor(model: SceneObject): DataTrail {
   return sceneGraph.getAncestor(model, DataTrail);
@@ -69,10 +71,10 @@ export function getMetricSceneFor(model: SceneObject): MetricScene {
   if (model.parent) {
     return getMetricSceneFor(model.parent);
   }
+  const error = new Error('Unable to find graph view for model');
+  logger.error(error, { model: model.toString(), message: 'Unable to find graph view for model' });
 
-  console.error('Unable to find graph view for', model);
-
-  throw new Error('Unable to find trail');
+  throw error;
 }
 
 export function getDataSource(trail: DataTrail) {
@@ -286,7 +288,7 @@ export function findObjectOfType<T extends SceneObject>(
   if (obj instanceof returnType) {
     return obj;
   } else if (obj !== null) {
-    console.warn(`invalid return type: ${returnType.toString()}`);
+    logger.warn(`invalid return type: ${returnType.toString()}`);
   }
 
   return null;

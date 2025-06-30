@@ -48,6 +48,7 @@ import { StatusWrapper } from '../StatusWrapper';
 import { getColorByIndex, getTrailFor } from '../utils';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
+import { logger } from 'tracking/logger/logger';
 
 export interface LabelBreakdownSceneState extends SceneObjectState {
   body?: LayoutSwitcher | MetricLabelsList;
@@ -81,7 +82,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
   private _onActivate() {
     // eslint-disable-next-line no-console
-    init().then(() => console.debug('Grafana ML initialized'));
+    init().then(() => logger.debug('Grafana ML initialized'));
 
     const variable = this.getVariable();
 

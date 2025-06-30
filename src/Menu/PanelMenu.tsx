@@ -15,6 +15,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
+import { logger } from 'tracking/logger/logger';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
@@ -147,7 +148,7 @@ const getInvestigationLink = async (addToExplorations: AddToExplorationButton) =
       }
     } catch (e) {
       // Ignore import error and fall through to v12 implementation
-      console.error('Error importing getPluginLinkExtensions', e);
+      logger.error(e as Error, {message: 'Error importing getPluginLinkExtensions'});
     }
   }
 

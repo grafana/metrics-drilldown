@@ -10,6 +10,7 @@ import {
   type VariableValueOption,
 } from '@grafana/scenes';
 import React from 'react';
+import { logger } from 'tracking/logger/logger';
 
 /**
  * This component has been borrowd from Scenes v5,41,1, which is the version Metrics Drilldown currently use.
@@ -100,7 +101,8 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
 
     const variable = sceneGraph.lookupVariable(this.state.variableName, this);
     if (!(variable instanceof MultiValueVariable)) {
-      console.error('SceneByVariableRepeater: variable is not a MultiValueVariable!', variable);
+      const error = new Error('SceneByVariableRepeater: variable is not a MultiValueVariable!');
+      logger.error(error);
       return;
     }
 
