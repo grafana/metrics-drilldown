@@ -9,6 +9,8 @@ import {
 } from '@grafana/data';
 import { memoize } from 'lodash';
 
+import { logger } from 'tracking/logger/logger';
+
 import { reportExploreMetrics } from '../interactions';
 import { getLabelValueFromDataFrame } from './levels';
 
@@ -32,7 +34,7 @@ export const sortSeries = memoize(
           return calculateOutlierValue(series, dataFrame);
         }
       } catch (e) {
-        console.error(e);
+        logger.error(e as Error, { message: 'ML sorting panicked, fallback to stdDev' });
         // ML sorting panicked, fallback to stdDev
         sortBy = ReducerID.stdDev;
       }
@@ -95,7 +97,7 @@ const initOutlierDetector = (series: DataFrame[]) => {
     const detector = OutlierDetector.dbscan({ sensitivity: 0.4 }).preprocess(points);
     outliers = detector.detect();
   } catch (e) {
-    console.error(e);
+    logger.error(e as Error, { message: 'Error initializing outlier detector' });
     outliers = undefined;
   }
 };
