@@ -12,28 +12,12 @@ test.describe('Metrics reducer view', () => {
   });
 
   test.describe('AdHoc Filters', async () => {
-    test('__name__ filter is not interpolated into the query', async ({ metricsReducerView, selectors, page }) => {
+    test('__name__ filter is not interpolated into the query', async ({ metricsReducerView, selectors }) => {
       await metricsReducerView.goto();
-      await metricsReducerView.getByRole('combobox', { name: 'Filter by label values' }).click();
-      await metricsReducerView.getByRole('option', { name: '__name__' }).click();
-      await page.keyboard.type('=');
-      await page.keyboard.press('Enter');
-      await page.keyboard.type('grafana_database_conn_idle');
-      await page.keyboard.press('Enter');
+      await metricsReducerView.setAdHocFilter('__name__', '=', 'grafana_database_conn_idle');
       await metricsReducerView.getByGrafanaSelector(selectors.components.RefreshPicker.runButtonV2).click();
-
-      await metricsReducerView.getByTestId('select-action-a_utf8_http_requests_total').click();
-
-      await metricsReducerView
-        .getByRole('button', { name: UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP })
-        .click();
-
-      await metricsReducerView.assertCoreUI();
-      await expect(
-        metricsReducerView
-          .getByTestId('data-testid Panel header a_utf8_http_requests_total')
-          .getByTestId('data-testid Panel status error')
-      ).not.toBeVisible();
+      const panel = metricsReducerView.getPanelByTitle('a_utf8_http_requests_total');
+      await expect(panel.getByTestId('data-testid Panel status error')).not.toBeVisible();
     });
   });
 
@@ -89,7 +73,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
           await metricsReducerView.assertMetricsGroupByList();
 
-          metricsReducerView.selectMetricsGroup('db_name', 'grafana');
+          await metricsReducerView.selectMetricsGroup('db_name', 'grafana');
           await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
 
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
@@ -111,7 +95,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
           await metricsReducerView.assertMetricsGroupByList();
 
-          metricsReducerView.selectMetricsGroup('db_name', 'grafana');
+          await metricsReducerView.selectMetricsGroup('db_name', 'grafana');
           await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
           await metricsReducerView.clearAdHocFilter('db_name');
 

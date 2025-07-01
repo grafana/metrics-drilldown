@@ -311,5 +311,25 @@ describe('buildPrometheusQuery', () => {
       const expected = 'avg(test_metric{__ignore_usage__="", "label with 📈"="metrics"})';
       expect(result).toBe(expected);
     });
+
+    it('should not interpolate __name__ filter into the query', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        filters: [
+          {
+            key: 'label with 📈',
+            value: 'metrics',
+            operator: '=',
+          },
+          {
+            key: '__name__',
+            value: 'test_metric',
+            operator: '=',
+          },
+        ],
+      });
+      const expected = 'avg(test_metric{"label with 📈"="metrics"})';
+      expect(result).toBe(expected);
+    });
   });
 });
