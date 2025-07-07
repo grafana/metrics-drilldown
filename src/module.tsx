@@ -25,7 +25,7 @@ const App = (props: AppRootProps) => (
 );
 
 export const plugin = new AppPlugin<{}>().setRootPage(App).exposeComponent({
-  id: 'grafana-metricsdrilldown-app/breakdown-extension/v1',
+  id: 'grafana-metricsdrilldown-app/label-breakdown-component/v1',
   title: 'Label Breakdown',
   description: 'A metrics label breakdown view from the Metrics Drilldown app.',
   component: LabelBreakdown,

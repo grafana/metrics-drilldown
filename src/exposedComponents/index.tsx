@@ -1,5 +1,5 @@
 import React from 'react';
 
 export const LabelBreakdown = () => {
-  return <div>LabelBreakdown</div>;
+  return <div>Hello from Grafana Metrics Drilldown 📈</div>;
 };
