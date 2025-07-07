@@ -76,7 +76,7 @@
     "exposedComponents": [
       {
         "id": "grafana-metricsdrilldown-app/breakdown-extension/v1",
-        "title": "Open in Metrics Drilldown button",
+        "title": "Label Breakdown",
         "description": "A metrics label breakdown view from the Metrics Drilldown app."
       }
     ]
