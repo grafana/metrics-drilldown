@@ -17,6 +17,13 @@ interface DashboardSearchItem {
   isStarred: boolean;
 }
 
+interface MetricUsageDetails {
+  count: number;
+  dashboards: Record<string, number>; // e.g., {"Dashboard A": 2, "Dashboard B": 1}
+}
+
+type MetricUsageMap = Record<string, MetricUsageDetails>;
+
 const usageRequestOptions: Partial<BackendSrvRequest> = {
   showSuccessAlert: false,
   showErrorAlert: false,
@@ -61,7 +68,7 @@ const getDashboardLimited = limitFunction(
  * Fetches metric usage data from dashboards
  * @returns A record mapping metric names to their occurrence count in dashboards
  */
-export async function fetchDashboardMetrics(): Promise<Record<string, number>> {
+export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsageDetails>> {
   try {
     const dashboards = await getBackendSrv().get<DashboardSearchItem[]>(
       '/api/search',
@@ -89,15 +96,16 @@ export async function fetchDashboardMetrics(): Promise<Record<string, number>> {
   }
 }
 
-function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard | null>): Record<string, number> {
-  // Create a map to count metric occurrences
-  const counts: Record<string, number> = {};
+function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard | null>): MetricUsageMap {
+  // Create a map to track metric names and their usage details
+  const dashboardData: Record<string, MetricUsageDetails> = {};
 
   const relevantDashboards = dashboardSearchResponse.filter(
     (dashboard) => dashboard && dashboard?.panels?.length
   ) as Array<Dashboard & { panels: NonNullable<Panel[]> }>;
-
+  // Note: For each dashboard, for each panel in that dashboard, for each query in that panel, what metrics does that query use
   for (const dashboard of relevantDashboards) {
+    const dashboardName = dashboard.title || `Dashboard ${dashboard.uid}`;
     // Skip panels with non-Prometheus data sources
     const relevantPanels = dashboard.panels.filter(
       (panel) => isPrometheusDataSource(panel.datasource) && 'targets' in panel && panel.targets?.length
@@ -107,15 +115,21 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard |
       for (const target of panel.targets) {
         const expr = typeof target.expr === 'string' ? target.expr : '';
 
-        const metrics = extractMetricNames(expr);
+        const metrics = extractMetricNames(expr); // Note: This is an array of metric names used in the query
 
         // Count each metric occurrence
         for (const metric of metrics) {
-          counts[metric] = (counts[metric] || 0) + 1;
+          if (!dashboardData[metric]) {
+            dashboardData[metric] = { count: 0, dashboards: {} };
+          }
+
+          dashboardData[metric].count = dashboardData[metric].count + 1;
+
+          dashboardData[metric].dashboards[dashboardName] = (dashboardData[metric].dashboards[dashboardName] || 0) + 1;
         }
       }
     }
   }
 
-  return counts;
+  return dashboardData;
 }
