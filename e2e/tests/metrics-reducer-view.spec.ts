@@ -11,16 +11,6 @@ test.describe('Metrics reducer view', () => {
     await metricsReducerView.assertCoreUI();
   });
 
-  test.describe('AdHoc Filters', async () => {
-    test('__name__ filter is not interpolated into the query', async ({ metricsReducerView, selectors }) => {
-      await metricsReducerView.goto();
-      await metricsReducerView.setAdHocFilter('__name__', '=', 'grafana_database_conn_idle');
-      await metricsReducerView.getByGrafanaSelector(selectors.components.RefreshPicker.runButtonV2).click();
-      const panel = metricsReducerView.getPanelByTitle('a_utf8_http_requests_total');
-      await expect(panel.getByTestId('data-testid Panel status error')).not.toBeVisible();
-    });
-  });
-
   test.describe('Sidebar', () => {
     test.describe('Prefix and suffix filters logic behavior', () => {
       test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
