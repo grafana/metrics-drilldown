@@ -1,5 +1,4 @@
 import { LoadingState } from '@grafana/data';
-import { config } from '@grafana/runtime';
 import {
   CustomVariable,
   PanelBuilders,
@@ -12,17 +11,19 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
   VariableValueSelectors,
+  type QueryRunnerState,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
   type SceneVariable,
 } from '@grafana/scenes';
-import { LinkButton, Stack } from '@grafana/ui';
+import { Stack } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from '../interactions';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../shared';
 import { NoRelatedLogs } from './NoRelatedLogsFound';
+import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './OpenInLogsDrilldownButton';
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { isCustomVariable } from '../utils/utils.variables';
 
@@ -33,6 +34,7 @@ interface RelatedLogsSceneProps {
 export interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
   controls: SceneObject[];
   body: SceneCSSGridLayout;
+  logsDrilldownLinkContext: LogsDrilldownLinkContext;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
@@ -55,6 +57,9 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
         ],
       }),
       orchestrator: props.orchestrator,
+      logsDrilldownLinkContext: {
+        targets: [],
+      },
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
@@ -84,17 +89,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private setupLogsPanel(): void {
-    if (!this.state.orchestrator.lokiDataSources.length) {
-      this.showNoLogsFound();
-      return;
-    }
-
-    // Clean up existing query runner if it exists
-    if (this._queryRunner) {
-      this._queryRunner.setState({ queries: [] });
-      this._queryRunner = undefined;
-    }
-
     // Initialize query runner
     this._queryRunner = new SceneQueryRunner({
       datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
@@ -102,20 +96,29 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       key: RELATED_LOGS_QUERY_KEY,
     });
 
+    if (!this.state.orchestrator.lokiDataSources.length) {
+      this.showNoLogsFound();
+      return;
+    }
+
     // Set up subscription to query results
     this._subs.add(
       this._queryRunner.subscribeToState((state) => {
-        // Only process completed query results
-        if (state.data?.state === LoadingState.Done) {
-          const totalRows = state.data.series
-            ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
-            : 0;
-
-          // Show NoRelatedLogs if no logs found
-          if (totalRows === 0 || !state.data.series?.length) {
-            this.showNoLogsFound();
-          }
+        if (state.data?.state !== LoadingState.Done) {
+          // Only process completed query results
+          return;
         }
+
+        const totalRows = state.data.series
+          ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
+          : 0;
+
+        if (totalRows === 0 || !state.data.series?.length) {
+          // Show NoRelatedLogs if no logs found
+          this.showNoLogsFound();
+        }
+
+        this._constructLogsDrilldownLinkContext(state);
       })
     );
 
@@ -145,6 +148,42 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
     // Update Loki query
     this.updateLokiQuery();
+  }
+
+  /**
+   * Construct the Logs Drilldown link context based on the query runner state
+   * @param state - The query runner state.
+   */
+  private _constructLogsDrilldownLinkContext(state: QueryRunnerState) {
+    const dsUid = (sceneGraph.lookupVariable(VAR_LOGS_DATASOURCE, this)?.getValue() ?? '') as string;
+    const query = state.queries[0];
+
+    if (!dsUid || !query) {
+      this.setState({
+        logsDrilldownLinkContext: {
+          targets: [],
+        },
+      });
+      return;
+    }
+
+    const timeRange = sceneGraph.getTimeRange(this).state;
+    const context: LogsDrilldownLinkContext = {
+      timeRange,
+      targets: [
+        {
+          ...query,
+          datasource: {
+            uid: dsUid,
+            type: 'loki',
+          },
+        },
+      ],
+    };
+
+    this.setState({
+      logsDrilldownLinkContext: context,
+    });
   }
 
   /**
@@ -194,7 +233,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   });
 
   static readonly Component = ({ model }: SceneComponentProps<RelatedLogsScene>) => {
-    const { controls, body } = model.useState();
+    const { controls, body, logsDrilldownLinkContext } = model.useState();
 
     return (
       <Stack gap={1} direction={'column'} grow={1}>
@@ -204,17 +243,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
               <control.Component key={control.state.key} model={control} />
             ))}
           </Stack>
-
-          <LinkButton
-            href={`${config.appSubUrl}/a/grafana-lokiexplore-app`} // We prefix with the appSubUrl for environments that don't host grafana at the root.
-            target="_blank"
-            tooltip="Navigate to the Logs Drilldown app"
-            variant="secondary"
-            size="sm"
-            onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_logs_drilldown' })}
-          >
-            Open Logs Drilldown
-          </LinkButton>
+          <OpenInLogsDrilldownButton context={logsDrilldownLinkContext} />
         </Stack>
         <body.Component model={body} />
       </Stack>
