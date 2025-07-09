@@ -25,6 +25,7 @@ import { Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { isNumber, max, min, throttle } from 'lodash';
 import React from 'react';
 
+import { logger } from 'tracking/logger/logger';
 import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
@@ -81,7 +82,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
   private _onActivate() {
     // eslint-disable-next-line no-console
-    init().then(() => console.debug('Grafana ML initialized'));
+    init().then(() => logger.debug('Grafana ML initialized'));
 
     const variable = this.getVariable();
 

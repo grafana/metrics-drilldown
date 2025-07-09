@@ -192,7 +192,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   public getMetricMetadata(metric?: string) {
-    return this.datasourceHelper.getMetricMetadata(metric);
+    return this.datasourceHelper.getMetadataForMetric(metric);
   }
 
   public isNativeHistogram(metric: string) {

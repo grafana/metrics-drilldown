@@ -13,6 +13,8 @@ import {
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
 
+import { logger } from 'tracking/logger/logger';
+
 import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
 
@@ -148,7 +150,7 @@ const getInvestigationLink = async (addToExplorations: AddToExplorationButton) =
       }
     } catch (e) {
       // Ignore import error and fall through to v12 implementation
-      console.error('Error importing getPluginLinkExtensions', e);
+      logger.error(e as Error, {message: 'Error importing getPluginLinkExtensions'});
     }
   }
 
