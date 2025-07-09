@@ -7,7 +7,7 @@ on:
         description: Skip the grafana dev image e2e test
         required: false
         type: boolean
-        default: false
+        default: true # TEMP until the Docker Hub issue is fixed (2025-07-09)
   pull_request:
     branches:
       - main
