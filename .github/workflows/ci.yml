@@ -7,7 +7,7 @@ on:
         description: Skip the grafana dev image e2e test
         required: false
         type: boolean
-        default: true # TEMP until the Docker Hub issue is fixed (2025-07-09)
+        default: false
   pull_request:
     branches:
       - main
@@ -22,7 +22,9 @@ jobs:
     with:
       run-playwright: false
       run-playwright-docker: true
-      run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
+      # TEMP until the Docker Hub issue is fixed (2025-07-09)
+      run-playwright-with-skip-grafana-dev-image: true
+      # run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
       upload-playwright-artifacts: true
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: docker-compose.yaml
