@@ -1,10 +1,10 @@
 import { fetchAlertingMetrics } from './fetchers/fetchAlertingMetrics';
-import { fetchDashboardMetrics } from './fetchers/fetchDashboardMetrics';
+import { fetchDashboardMetrics, type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 
 interface MetricsUsageState {
-  metrics: Record<string, number>;
-  metricsPromise: Promise<Record<string, number>> | undefined;
-  fetcher: () => Promise<Record<string, number>>;
+  metrics: Record<string, MetricUsageDetails>;
+  metricsPromise: Promise<Record<string, MetricUsageDetails>> | undefined;
+  fetcher: () => Promise<Record<string, MetricUsageDetails>>;
 }
 
 export type MetricUsageType = 'dashboard-usage' | 'alerting-usage';
@@ -23,7 +23,7 @@ export class MetricUsageFetcher {
     },
   };
 
-  public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
+  public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, MetricUsageDetails>> {
     const hasExistingMetrics =
       this._usageState[usageType].metrics && Object.keys(this._usageState[usageType].metrics).length > 0;
 
@@ -43,6 +43,6 @@ export class MetricUsageFetcher {
   }
 
   public getUsageForMetric(metricName: string, usageType: MetricUsageType): Promise<number> {
-    return this.getUsageMetrics(usageType).then((metrics) => metrics[metricName] ?? 0);
+    return this.getUsageMetrics(usageType).then((metrics) => metrics[metricName]?.count ?? 0);
   }
 }

@@ -17,7 +17,7 @@ interface DashboardSearchItem {
   isStarred: boolean;
 }
 
-interface MetricUsageDetails {
+export interface MetricUsageDetails {
   count: number;
   dashboards: Record<string, number>; // e.g., {"Dashboard A": 2, "Dashboard B": 1}
 }
