@@ -3,6 +3,7 @@ import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
 
 import { linkConfigs } from 'extensions/links';
+import { logger } from 'tracking/logger/logger';
 
 const LazyApp = lazy(async () => {
   const { wasmSupported } = await import('./services/sorting');
@@ -10,7 +11,7 @@ const LazyApp = lazy(async () => {
 
   if (wasmSupported()) {
     await initOutlier();
-    console.info('WASM supported');
+    logger.info('WASM supported');
   }
 
   return import('./App/App');

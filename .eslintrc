@@ -18,6 +18,14 @@
     }
   },
   "rules": {
+    // Disallow console usage - suggests using the custom logger instead
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.object.name='console']",
+        "message": "Avoid using console directly. Use the custom logger from 'src/tracking/logger/logger.ts' instead. Example: import { logger } from 'src/tracking/logger/logger'; logger.log('message');"
+      }
+    ],
     "import/order": [
       "error",
       {
