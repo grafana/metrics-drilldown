@@ -88,18 +88,13 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     this.state.orchestrator.relatedLogsCount = 0;
   }
 
-  private setupLogsPanel(): void {
-    // Initialize query runner
+  private _buildQueryRunner(): void {
     this._queryRunner = new SceneQueryRunner({
       datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
       queries: [],
       key: RELATED_LOGS_QUERY_KEY,
     });
-
-    if (!this.state.orchestrator.lokiDataSources.length) {
-      this.showNoLogsFound();
-      return;
-    }
+    this._constructLogsDrilldownLinkContext(this._queryRunner.state);
 
     // Set up subscription to query results
     this._subs.add(
@@ -109,11 +104,9 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           return;
         }
 
-        const totalRows = state.data.series
-          ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
-          : 0;
+        const logLinesCount = this.state.orchestrator.countLogsLines(state);
 
-        if (totalRows === 0 || !state.data.series?.length) {
+        if (logLinesCount === 0) {
           // Show NoRelatedLogs if no logs found
           this.showNoLogsFound();
         }
@@ -121,6 +114,17 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
         this._constructLogsDrilldownLinkContext(state);
       })
     );
+  }
+
+  private setupLogsPanel(): void {
+    // Initialize query runner
+    this._buildQueryRunner();
+
+    // If no datasources can provide related logs given the current conditions, show the NoRelatedLogsScene
+    if (!this.state.orchestrator.lokiDataSources.length) {
+      this.showNoLogsFound();
+      return;
+    }
 
     // Set up UI for logs panel
     const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
@@ -156,33 +160,23 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
    */
   private _constructLogsDrilldownLinkContext(state: QueryRunnerState) {
     const dsUid = (sceneGraph.lookupVariable(VAR_LOGS_DATASOURCE, this)?.getValue() ?? '') as string;
-    const query = state.queries[0];
+    const queries = state.queries;
+    const targets: LogsDrilldownLinkContext['targets'] = [];
 
-    if (!dsUid || !query) {
-      this.setState({
-        logsDrilldownLinkContext: {
-          targets: [],
-        },
-      });
-      return;
-    }
-
-    const timeRange = sceneGraph.getTimeRange(this).state;
-    const context: LogsDrilldownLinkContext = {
-      timeRange,
-      targets: [
-        {
+    if (dsUid && queries.length) {
+      queries.forEach((query) => {
+        targets.push({
           ...query,
           datasource: {
             uid: dsUid,
             type: 'loki',
           },
-        },
-      ],
-    };
+        });
+      });
+    }
 
     this.setState({
-      logsDrilldownLinkContext: context,
+      logsDrilldownLinkContext: { targets, timeRange: sceneGraph.getTimeRange(this).state },
     });
   }
 
