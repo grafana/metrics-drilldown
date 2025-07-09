@@ -2,6 +2,7 @@ import {
   type DataSourceGetTagKeysOptions,
   type DataSourceGetTagValuesOptions,
   type MetricFindValue,
+  type TimeRange,
 } from '@grafana/data';
 import {
   type PrometheusDatasource,
@@ -10,9 +11,12 @@ import {
   type PromQuery,
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
+import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
+
+import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { type DataTrail } from '../DataTrail';
-import { VAR_DATASOURCE_EXPR } from '../shared';
+import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../shared';
 import { isPrometheusDataSource } from '../utils/utils.datasource';
 
 export class MetricDatasourceHelper {
@@ -48,30 +52,47 @@ export class MetricDatasourceHelper {
   // store metadata in a more easily accessible form
   _metricsMetadata?: PromMetricsMetadata;
 
-  private async _getMetricsMetadata() {
+  private async _ensureMetricsMetadata(): Promise<void> {
+    if (this._metricsMetadata) {
+      return;
+    }
+
+    await this._getMetricsMetadata();
+  }
+
+  private async _getMetricsMetadata(): Promise<void> {
     const ds = await this.getDatasource();
 
     if (!ds) {
-      return undefined;
+      return;
     }
 
-    if (!ds.languageProvider.metricsMetadata) {
-      await ds.languageProvider.loadMetricsMetadata();
+    const queryMetadata =
+      typeof ds.languageProvider.queryMetricsMetadata === 'function'
+        ? ds.languageProvider.queryMetricsMetadata
+        : () => Promise.resolve(ds.languageProvider.metricsMetadata); // eslint-disable-line sonarjs/deprecation
+
+    const loadMetadata =
+      typeof ds.languageProvider.retrieveMetricsMetadata === 'function'
+        ? () => Promise.resolve(ds.languageProvider.retrieveMetricsMetadata())
+        : () => (ds.languageProvider.loadMetricsMetadata() as unknown as Promise<void>).then(queryMetadata); // eslint-disable-line sonarjs/deprecation
+
+    let metadata = await queryMetadata();
+
+    if (!metadata) {
+      metadata = await loadMetadata();
     }
 
-    return ds.languageProvider.metricsMetadata!;
+    this._metricsMetadata = metadata;
   }
 
-  public async getMetricMetadata(metric?: string) {
+  public async getMetadataForMetric(metric?: string) {
     if (!metric) {
       return undefined;
     }
-    if (!this._metricsMetadata) {
-      this._metricsMetadata = await this._getMetricsMetadata();
-    }
+    await this._ensureMetricsMetadata();
 
-    const metadata = await this._metricsMetadata;
-    return metadata?.[metric];
+    return this._metricsMetadata?.[metric];
   }
 
   private _classicHistograms: Record<string, number> = {};
@@ -102,12 +123,7 @@ export class MetricDatasourceHelper {
         this._classicHistograms[m.text] = 1;
       });
 
-      if (!this._metricsMetadata) {
-        if (!ds.languageProvider.metricsMetadata) {
-          await ds.languageProvider.loadMetricsMetadata();
-        }
-        this._metricsMetadata = ds.languageProvider.metricsMetadata;
-      }
+      await this._ensureMetricsMetadata();
 
       allMetrics.forEach((m) => {
         if (this.isNativeHistogram(m.text)) {
@@ -193,16 +209,136 @@ export class MetricDatasourceHelper {
    * @param ds
    * @returns boolean
    * @remarks
-   * This is a temporary hack to check if the datasource uses time range in language provider methods.
-   * It will be removed when a better way of handling recent breaking changes in `@grafana/prometheus`
-   * is provided to us in that package. For more details, see https://github.com/grafana/metrics-drilldown/issues/370.
+   * This is a hack to check if the datasource uses time range in language provider methods.
+   * It will be removed when we upgrade the Grafana dependency to 12.0.0.
+   * For more details, see https://github.com/grafana/metrics-drilldown/issues/370.
    */
   public static datasourceUsesTimeRangeInLanguageProviderMethods(ds: PrometheusDatasource): boolean {
     // This works because the `fetchLabelValues` method happens to have changed in a way that
     // can be used as a heuristic to check if the runtime datasource uses the G12-style
     // language provider methods introduced in https://github.com/grafana/grafana/pull/101889.
-    return ds.languageProvider.fetchLabelValues.length > 1;
+    return ds.languageProvider.fetchLabelValues.length > 1; // eslint-disable-line sonarjs/deprecation
   }
+
+  /**
+   * Fetches available labels from a Prometheus datasource with version compatibility.
+   *
+   * This method abstracts the complexity of supporting multiple versions of `@grafana/prometheus`
+   * spanning from 11.6.0 up to the latest 12.x versions. It detects which API style the current
+   * datasource supports and calls the appropriate method with the correct signature.
+   * It handles three different `@grafana/prometheus` API styles:
+   *
+   * 1. **(12.1.0+)**: Uses the modern `queryLabelKeys` method
+   * 2. **(12.0.0)**: Uses `fetchLabelsWithMatch` with timeRange parameter
+   * 3. **(11.6.0-11.x)**: Uses `fetchLabelsWithMatch` without timeRange parameter
+   *
+   * @param params - Configuration object containing datasource, time range, and matcher
+   * @param params.ds - The Prometheus datasource instance
+   * @param params.timeRange - Time range for the query
+   * @param params.matcher - PromQL matcher string to filter labels (e.g., '{job="prometheus"}')
+   * @returns Promise that resolves to an array of available label keys
+   *
+   * @example
+   * ```typescript
+   * const labels = await MetricDatasourceHelper.fetchLabels({
+   *   ds: prometheusDatasource,
+   *   timeRange: { from: 'now-1h', to: 'now' },
+   *   matcher: '{job="prometheus"}'
+   * });
+   * ```
+   */
+  public static fetchLabels(params: FetchLabelsOptions): Promise<string[]> {
+    const { ds, timeRange, matcher } = params;
+
+    if (typeof ds.languageProvider.queryLabelKeys === 'function') {
+      return ds.languageProvider.queryLabelKeys(timeRange, matcher);
+    }
+
+    if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
+      // eslint-disable-next-line sonarjs/deprecation
+      return ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher).then((labels) => Object.keys(labels));
+    }
+
+    // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelsWithMatch signature
+    return ds.languageProvider.fetchLabelsWithMatch(matcher).then((labels) => Object.keys(labels)); // eslint-disable-line sonarjs/deprecation
+  }
+
+  /**
+   * Fetches available values for a specific label from a Prometheus datasource with version compatibility.
+   *
+   * This method abstracts the complexity of supporting multiple versions of `@grafana/prometheus`
+   * spanning from 11.6.0 up to the latest 12.x versions. It detects which API style the current
+   * datasource supports and calls the appropriate method with the correct signature.
+   * It handles three different `@grafana/prometheus` API styles:
+   *
+   * 1. **(12.1.0+)**: Uses the modern `queryLabelValues` method
+   * 2. **(12.0.0)**: Uses `fetchLabelValues` or `fetchSeriesValuesWithMatch` with timeRange parameter
+   * 3. **(11.6.0-11.x)**: Uses `fetchLabelValues` or `fetchSeriesValuesWithMatch` without timeRange parameter
+   *
+   * @param params - Configuration object containing datasource, label name, time range, and optional matcher
+   * @param params.ds - The Prometheus datasource instance
+   * @param params.labelName - The name of the label to fetch values for (e.g., 'job', 'instance')
+   * @param params.timeRange - Time range for the query
+   * @param params.matcher - Optional PromQL matcher string to filter results (e.g., '{job="prometheus"}')
+   * @returns Promise that resolves to an array of available values for the specified label
+   *
+   * @example
+   * ```typescript
+   * const jobValues = await MetricDatasourceHelper.fetchLabelValues({
+   *   ds: prometheusDatasource,
+   *   labelName: 'job',
+   *   timeRange: { from: 'now-1h', to: 'now' },
+   *   matcher: '{__name__=~".*_total"}'
+   * });
+   * ```
+   */
+  public static fetchLabelValues(params: FetchLabelValuesOptions) {
+    const { ds, labelName, timeRange, matcher } = params;
+
+    if (typeof ds.languageProvider.queryLabelValues === 'function') {
+      return ds.languageProvider.queryLabelValues(timeRange, labelName, matcher);
+    }
+
+    // If a matcher isn't provided, use the simpler `fetchLabelValues` method.
+    const fetchLabelValuesWithOptionalMatcher = matcher
+      ? ds.languageProvider.fetchSeriesValuesWithMatch // eslint-disable-line sonarjs/deprecation
+      : ds.languageProvider.fetchLabelValues; // eslint-disable-line sonarjs/deprecation
+
+    if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
+      return fetchLabelValuesWithOptionalMatcher(timeRange, labelName, matcher);
+    }
+
+    // @ts-expect-error: Ignoring type error due to breaking change in fetchSeriesValuesWithMatch signature
+    return fetchLabelValuesWithOptionalMatcher(labelName, matcher);
+  }
+
+  public static async getPrometheusDataSourceForScene(
+    sceneObject: SceneObject
+  ): Promise<PrometheusDatasource | undefined> {
+    try {
+      const dsVariable = sceneGraph.findByKey(sceneObject, VAR_DATASOURCE) as DataSourceVariable;
+      const uid = (dsVariable?.state.value as string) ?? '';
+      const ds = await getDataSourceSrv().get({ uid });
+
+      return ds as unknown as PrometheusDatasource; // we trust that VAR_DATASOURCE has been set to a Prometheus datasource
+    } catch (error) {
+      displayError(error as Error, ['Error while getting the Prometheus data source!']);
+      return undefined;
+    }
+  }
+}
+
+interface FetchLabelsOptions {
+  ds: PrometheusDatasource;
+  timeRange: TimeRange;
+  matcher: string;
+}
+
+interface FetchLabelValuesOptions {
+  ds: PrometheusDatasource;
+  timeRange: TimeRange;
+  labelName: string;
+  matcher?: string;
 }
 
 export function getMetricDescription(metadata?: PromMetricsMetadataItem) {
