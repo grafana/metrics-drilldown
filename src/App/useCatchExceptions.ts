@@ -17,17 +17,21 @@ function ensureErrorObject(error: any, defaultMessage: string): Error {
 
 /**
  * Determines if an error should be treated as an application-breaking error.
- * Filters out known non-critical errors like chrome extension errors and ResizeObserver warnings.
+ * Filters out known non-critical errors like browser extension errors and ResizeObserver warnings.
  */
 function shouldTreatAsApplicationError(errorEvent: ErrorEvent): boolean {
-  // Check if error is from a chrome extension
-  if (errorEvent.filename && errorEvent.filename.startsWith('chrome-extension://')) {
-    logger.error(new Error(`Chrome extension error: ${errorEvent.message}`), {
-      filename: errorEvent.filename,
-      lineno: errorEvent.lineno?.toString(),
-      colno: errorEvent.colno?.toString(),
-    });
-    return false;
+  // Check if error is from a browser extension
+  if (errorEvent.filename) {
+    const protocol = new URL(errorEvent.filename).protocol;
+
+    if (protocol.endsWith('extension:')) {
+      logger.error(new Error(`Browser extension error: ${errorEvent.message}`), {
+        filename: errorEvent.filename,
+        lineno: errorEvent.lineno?.toString(),
+        colno: errorEvent.colno?.toString(),
+      });
+      return false;
+    }
   }
 
   // Check for null error with message (like ResizeObserver warnings)

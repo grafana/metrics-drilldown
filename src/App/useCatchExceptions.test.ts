@@ -18,11 +18,11 @@ describe('useCatchExceptions', () => {
     jest.clearAllMocks();
   });
 
-  it('should filter out chrome extension errors and log them', () => {
+  it('should filter out browser extension errors and log them', () => {
     const { result } = renderHook(() => useCatchExceptions());
 
-    // Simulate a chrome extension error
-    const chromeExtensionError = new ErrorEvent('error', {
+    // Simulate a browser extension error
+    const browserExtensionError = new ErrorEvent('error', {
       message: 'Failed to execute appendChild on Node',
       filename: 'chrome-extension://some-extension-id/something.html',
       lineno: 13,
@@ -32,13 +32,13 @@ describe('useCatchExceptions', () => {
 
     // Trigger the error event
     act(() => {
-      window.dispatchEvent(chromeExtensionError);
+      window.dispatchEvent(browserExtensionError);
     });
 
     // The error should be logged but not set as an application error
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.objectContaining({
-        message: 'Chrome extension error: Failed to execute appendChild on Node',
+        message: 'Browser extension error: Failed to execute appendChild on Node',
       }),
       expect.objectContaining({
         filename: 'chrome-extension://some-extension-id/something.html',
@@ -87,7 +87,7 @@ describe('useCatchExceptions', () => {
   it('should catch legitimate application errors', () => {
     const { result } = renderHook(() => useCatchExceptions());
 
-    // Simulate a legitimate application error (not from chrome extension and not null error)
+    // Simulate a legitimate application error (not from browser extension and not null error)
     const appError = new ErrorEvent('error', {
       message: 'Cannot read property of undefined',
       filename: 'https://example.com/app.js',
