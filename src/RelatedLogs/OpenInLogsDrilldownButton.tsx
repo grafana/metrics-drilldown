@@ -31,27 +31,23 @@ export function OpenInLogsDrilldownButton({ context }: Readonly<{ context: LogsD
     );
   }
 
-  const logsDrilldownLinkExists = typeof logsDrilldownLink !== 'undefined';
+  if (typeof logsDrilldownLink === 'undefined') {
+    return null;
+  }
 
   return (
     <LinkButton
       href={
         // We prefix with the appSubUrl for environments that don't host grafana at the root.
-        logsDrilldownLinkExists
-          ? `${config.appSubUrl}${logsDrilldownLink.path}`
-          : `${config.appSubUrl}/a/grafana-lokiexplore-app` // We fall back to the app's landing page if a link can't get generated using the supplied `context`
+        `${config.appSubUrl}${logsDrilldownLink.path}`
       }
       target="_blank"
-      tooltip={
-        logsDrilldownLinkExists
-          ? 'Use the Logs Drilldown app to explore these logs'
-          : 'Navigate to the Logs Drilldown app'
-      }
+      tooltip={'Navigate to the Logs Drilldown app'}
       variant="secondary"
       size="sm"
       onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_logs_drilldown' })}
     >
-      {logsDrilldownLinkExists ? 'Open in Logs Drilldown' : 'Open Logs Drilldown'}
+      Open in Logs Drilldown
     </LinkButton>
   );
 }
