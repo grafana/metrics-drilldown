@@ -15,6 +15,8 @@ const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
+export const ADHOC_URL_DELIMITER = '|'; 
+
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
     targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
@@ -61,7 +63,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
         [UrlParameters.TimeRangeTo, timeRange?.to],
         [UrlParameters.DatasourceId, datasource.uid],
         ...query.labelFilters.map(
-          (f) => [UrlParameters.Filters, `${f.label}${f.op}${f.value}`] as [UrlParameterType, string]
+          (f) => [UrlParameters.Filters, `${f.label}${ADHOC_URL_DELIMITER}${f.op}${ADHOC_URL_DELIMITER}${f.value}`] as [UrlParameterType, string]
         ),
       ]);
 
