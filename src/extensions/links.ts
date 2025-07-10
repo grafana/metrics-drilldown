@@ -72,7 +72,55 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       };
     },
   },
+  {
+    targets: ['grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha'],
+    title: 'Navigate to metrics drilldown',
+    description: 'Build a url path to the metrics drilldown',
+    path: createAppUrl(ROUTES.Drilldown),
+    configure: (context) => {
+      if (typeof context === 'undefined') {
+        return;
+      }
+
+      const navigateToMetrics = (context as MetricsDrilldownContext).navigateToMetrics;
+      if (navigateToMetrics) {
+        const { metric, start, end, datasource_uid, label_filters } = context as MetricsDrilldownContext;
+
+        const filters = label_filters ?? [];
+        // Use the structured context data to build parameters
+        const params = appendUrlParameters([
+          [UrlParameters.Metric, metric],
+          [UrlParameters.TimeRangeFrom, start],
+          [UrlParameters.TimeRangeTo, end],
+          [UrlParameters.DatasourceId, datasource_uid],
+          ...filters.map(
+            (filter) => [UrlParameters.Filters, filter] as [UrlParameterType, string]
+          ),
+        ]);
+
+        const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
+
+        return {
+          path: pathToMetricView,
+        };
+      }
+
+      return {
+        path: createAppUrl(ROUTES.Drilldown),
+      };
+    },
+  },
 ];
+
+// Type for the metrics drilldown context from Grafana Assistant
+type MetricsDrilldownContext = {
+  navigateToMetrics: boolean;
+  datasource_uid: string;
+  label_filters?: string[];
+  metric?: string;
+  start?: string;
+  end?: string;
+};
 
 export function createAppUrl(route: string, urlParams?: URLSearchParams): string {
   const urlParamsAsString = urlParams ? `?${urlParams.toString()}` : '';
