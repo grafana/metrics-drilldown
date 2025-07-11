@@ -213,11 +213,14 @@ export class MetricDatasourceHelper {
    * It will be removed when we upgrade the Grafana dependency to 12.0.0.
    * For more details, see https://github.com/grafana/metrics-drilldown/issues/370.
    */
-  public static datasourceUsesTimeRangeInLanguageProviderMethods(ds: PrometheusDatasource): boolean {
+  public static dsUsesTimeRangeInLegacyLanguageProviderMethods(ds: PrometheusDatasource): boolean {
     // This works because the `fetchLabelValues` method happens to have changed in a way that
     // can be used as a heuristic to check if the runtime datasource uses the G12-style
     // language provider methods introduced in https://github.com/grafana/grafana/pull/101889.
-    return ds.languageProvider.fetchLabelValues.length > 1; // eslint-disable-line sonarjs/deprecation
+    return (
+      // eslint-disable-next-line sonarjs/deprecation
+      typeof ds.languageProvider.fetchLabelValues === 'function' && ds.languageProvider.fetchLabelValues.length > 1
+    );
   }
 
   /**
@@ -254,7 +257,7 @@ export class MetricDatasourceHelper {
       return ds.languageProvider.queryLabelKeys(timeRange, matcher);
     }
 
-    if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
+    if (MetricDatasourceHelper.dsUsesTimeRangeInLegacyLanguageProviderMethods(ds)) {
       // eslint-disable-next-line sonarjs/deprecation
       return ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher).then((labels) => Object.keys(labels));
     }
@@ -304,7 +307,7 @@ export class MetricDatasourceHelper {
       ? ds.languageProvider.fetchSeriesValuesWithMatch // eslint-disable-line sonarjs/deprecation
       : ds.languageProvider.fetchLabelValues; // eslint-disable-line sonarjs/deprecation
 
-    if (MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)) {
+    if (MetricDatasourceHelper.dsUsesTimeRangeInLegacyLanguageProviderMethods(ds)) {
       return fetchLabelValuesWithOptionalMatcher(timeRange, labelName, matcher);
     }
 
