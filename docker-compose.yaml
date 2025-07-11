@@ -17,6 +17,7 @@ services:
       GF_PLUGINS_PREINSTALL_DISABLED: true
     volumes:
       - ./provisioning/dashboards/dashboardJson:/etc/dashboards
+      - ../logs-drilldown/dist:/var/lib/grafana/plugins/grafana-lokiexplore-app
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
       - 'host.docker.internal:host-gateway'

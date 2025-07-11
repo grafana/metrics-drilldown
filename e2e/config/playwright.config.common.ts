@@ -66,9 +66,12 @@ export function config(config: CustomEnvConfig) {
       grafanaAPICredentials: getGrafanaUser(),
       /* Base URL to use in actions like `await page.goto('/')`. */
       baseURL: getGrafanaUrl(),
+      // Record trace only when retrying a test for the first time.
       screenshot: 'only-on-failure',
-      video: 'retain-on-failure',
-      trace: 'retain-on-failure',
+      // Record video only when retrying a test for the first time.
+      video: 'on-first-retry',
+      /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+      trace: 'on-first-retry',
     },
     /* Configure projects for major browsers */
     projects: [
