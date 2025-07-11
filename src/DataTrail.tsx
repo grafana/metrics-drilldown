@@ -67,6 +67,7 @@ export interface DataTrailState extends SceneObjectState {
   nativeHistogramMetric: string;
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
+  urlNamespace?: string;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -268,7 +269,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
         Object.assign(stateUpdate, this.getSceneUpdatesForNewMetricValue(values.metric, nativeHistogramMetric));
       }
-    } else if (values.metric == null) {
+    } else if (values.metric == null && !this.state.metric) {
       stateUpdate.metric = undefined;
       stateUpdate.topScene = new MetricsReducer();
     }
@@ -326,7 +327,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           </div>
         )}
         {topScene && (
-          <UrlSyncContextProvider scene={topScene} createBrowserHistorySteps={true} updateUrlOnInit={true}>
+          <UrlSyncContextProvider
+            scene={topScene}
+            createBrowserHistorySteps={true}
+            updateUrlOnInit={true}
+            namespace={model.state.urlNamespace}
+          >
             <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
           </UrlSyncContextProvider>
         )}
@@ -335,9 +341,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
-export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
+export function getTopSceneFor(metric?: string, nativeHistogram = false) {
   if (metric) {
-    return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
+    return new MetricScene({ metric, nativeHistogram });
   } else {
     return new MetricsReducer();
   }
@@ -363,9 +369,11 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           // remove any filters that include __name__ key in the expression
           // to prevent the metric name from being set twice in the query and causing an error.
           const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
-          return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
+          const filtered = [...filtersWithoutMetricName]
             .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
+
+          return filtered;
         },
       }),
     ],

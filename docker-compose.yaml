@@ -8,6 +8,7 @@ services:
     build:
       args:
         grafana_version: ${GRAFANA_VERSION:-11.6.0}
+        livereload_port: ${WEBPACK_LIVERELOAD_PORT:-35729}
     ports: !override
       - '${GRAFANA_PORT:-3001}:3000'
     environment:
