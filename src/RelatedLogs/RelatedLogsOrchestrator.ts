@@ -1,5 +1,5 @@
 import { LoadingState } from '@grafana/data';
-import { SceneQueryRunner } from '@grafana/scenes';
+import { SceneQueryRunner, type QueryRunnerState } from '@grafana/scenes';
 
 import { type MetricsLogsConnector } from '../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../Integrations/logs/labelsCrossReference';
@@ -165,7 +165,7 @@ export class RelatedLogsOrchestrator {
 
           // Check if we found logs in this datasource
           if (state.data?.series) {
-            const rowCount = state.data.series.reduce((sum: number, frame) => sum + frame.length, 0);
+            const rowCount = this.countLogsLines(state);
             if (rowCount > 0) {
               // This datasource has logs
               datasourcesWithLogs.push(datasource);
@@ -192,5 +192,12 @@ export class RelatedLogsOrchestrator {
    */
   public checkConditionsMetForRelatedLogs(): boolean {
     return this._logsConnectors.some((connector) => connector.checkConditionsMetForRelatedLogs());
+  }
+
+  /**
+   * Given the state of a query runner running a Loki query, count the number of log lines.
+   */
+  public countLogsLines(state: QueryRunnerState): number {
+    return state.data?.series.reduce((sum: number, frame) => sum + frame.length, 0) ?? 0;
   }
 }
