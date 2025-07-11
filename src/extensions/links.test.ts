@@ -1,4 +1,4 @@
-import { parsePromQueryRegex } from './links';
+import { buildNavigateToMetricsParams, parsePromQueryRegex, UrlParameters, type MetricsDrilldownContext } from './links';
 
 describe('parsePromQueryRegex', () => {
   test('should parse basic metric name', () => {
@@ -77,5 +77,54 @@ describe('parsePromQueryRegex', () => {
     const result = parsePromQueryRegex('invalid{query');
     expect(result.metric).toBe('invalid');
     expect(result.labelFilters).toEqual([]);
+  });
+});
+
+describe('buildNavigateToMetricsParams', () => {
+  it('should build URL parameters with all fields populated', () => {
+    const context: MetricsDrilldownContext = {
+      navigateToMetrics: true,
+      datasource_uid: 'test-datasource-uid',
+      metric: 'http_requests_total',
+      start: '2024-01-01T00:00:00Z',
+      end: '2024-01-01T01:00:00Z',
+      label_filters: ['status=200', 'method=GET', 'path=/api/test'],
+    };
+
+    const result = buildNavigateToMetricsParams(context);
+
+    expect(result.get(UrlParameters.Metric)).toBe('http_requests_total');
+    expect(result.get(UrlParameters.TimeRangeFrom)).toBe('2024-01-01T00:00:00Z');
+    expect(result.get(UrlParameters.TimeRangeTo)).toBe('2024-01-01T01:00:00Z');
+    expect(result.get(UrlParameters.DatasourceId)).toBe('test-datasource-uid');
+    expect(result.getAll(UrlParameters.Filters)).toEqual(['status=200', 'method=GET', 'path=/api/test']);
+  });
+
+  it('should build URL parameters with only required fields', () => {
+    const context: MetricsDrilldownContext = {
+      navigateToMetrics: true,
+      datasource_uid: 'test-datasource-uid',
+    };
+
+    const result = buildNavigateToMetricsParams(context);
+
+    expect(result.get(UrlParameters.Metric)).toBeNull();
+    expect(result.get(UrlParameters.TimeRangeFrom)).toBeNull();
+    expect(result.get(UrlParameters.TimeRangeTo)).toBeNull();
+    expect(result.get(UrlParameters.DatasourceId)).toBe('test-datasource-uid');
+    expect(result.getAll(UrlParameters.Filters)).toEqual([]);
+  });
+
+  it('should handle undefined label_filters', () => {
+    const context: MetricsDrilldownContext = {
+      navigateToMetrics: true,
+      datasource_uid: 'test-datasource-uid',
+      label_filters: undefined,
+    };
+
+    const result = buildNavigateToMetricsParams(context);
+
+    expect(result.get(UrlParameters.DatasourceId)).toBe('test-datasource-uid');
+    expect(result.getAll(UrlParameters.Filters)).toEqual([]);
   });
 });
