@@ -17,7 +17,11 @@ const icon = 'gf-prometheus';
 
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
-    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
+    targets: [
+      PluginExtensionPoints.DashboardPanelMenu, 
+      PluginExtensionPoints.ExploreToolbarAction, 
+      PluginExtensionPoints.AlertingRuleQueryEditor
+    ],
     title,
     description,
     icon,
