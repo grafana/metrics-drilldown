@@ -93,7 +93,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
 ];
 
 // Type for the metrics drilldown context from Grafana Assistant
-type MetricsDrilldownContext = {
+export type MetricsDrilldownContext = {
   navigateToMetrics: boolean;
   datasource_uid: string;
   label_filters?: string[];
@@ -102,7 +102,7 @@ type MetricsDrilldownContext = {
   end?: string;
 };
 
-function buildNavigateToMetricsParams(context: MetricsDrilldownContext): URLSearchParams {
+export function buildNavigateToMetricsParams(context: MetricsDrilldownContext): URLSearchParams {
   const { metric, start, end, datasource_uid, label_filters } = context;
 
   const filters = label_filters ?? [];
