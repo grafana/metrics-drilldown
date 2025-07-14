@@ -27,80 +27,8 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     configure: configureDrilldownLink,
   },
 ];
-export interface ParsedPromQLQuery {
-  metric: string;
-  labels: Array<{ label: string; op: string; value: string }>;
-  hasErrors: boolean;
-  errors: string[];
-}
 
-// Helper function to process label matcher nodes
-function processLabelMatcher(node: any, expr: string): { label: string; op: string; value: string } | null {
-  if (node.name !== 'UnquotedLabelMatcher') {
-    return null;
-  }
-
-  const labelNode = node.node;
-  let labelName = '';
-  let op = '';
-  let value = '';
-  
-  // Get children of UnquotedLabelMatcher
-  for (let child = labelNode.firstChild; child; child = child.nextSibling) {
-    if (child.type.name === 'LabelName') {
-      labelName = expr.slice(child.from, child.to);
-    } else if (child.type.name === 'MatchOp') {
-      op = expr.slice(child.from, child.to);
-    } else if (child.type.name === 'StringLiteral') {
-      value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
-    }
-  }
-  
-  if (labelName && op) { // Allow empty string values
-    return { label: labelName, op, value };
-  }
-  return null;
-}
-
-export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
-  const tree = parser.parse(expr);
-  let metric = '';
-  const labels: Array<{ label: string; op: string; value: string }> = [];
-  let hasErrors = false;
-  const errors: string[] = [];
-
-  // Use tree.iterate() - much simpler than manual cursor traversal
-  tree.iterate({
-    enter: (node) => {
-      // Check if this is an error node
-      if (node.type.isError || node.name === '⚠') {
-        hasErrors = true;
-        const errorText = expr.slice(node.from, node.to);
-        const errorMsg = errorText 
-          ? `Parse error at position ${node.from}-${node.to}: "${errorText}"`
-          : `Parse error at position ${node.from}`;
-        errors.push(errorMsg);
-      }
-      
-      // Get the first metric name from any VectorSelector > Identifier
-      if (!metric && node.name === 'Identifier' && node.node.parent?.type.name === 'VectorSelector') {
-        metric = expr.slice(node.from, node.to);
-      }
-      
-      // Extract label matchers using helper function
-      const labelData = processLabelMatcher(node, expr);
-      if (labelData) {
-        labels.push(labelData);
-      }
-    },
-  });
-
-  return { metric, labels, hasErrors, errors };
-}
-
-
-
-export function configureDrilldownLink(context: any) {
+export function configureDrilldownLink(context: object | undefined) {
   if (typeof context === 'undefined') {
     return;
   }
@@ -160,8 +88,76 @@ export function configureDrilldownLink(context: any) {
     };
   }
 }
+export interface ParsedPromQLQuery {
+  metric: string;
+  labels: Array<{ label: string; op: string; value: string }>;
+  hasErrors: boolean;
+  errors: string[];
+}
 
+export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
+  const tree = parser.parse(expr);
+  let metric = '';
+  const labels: Array<{ label: string; op: string; value: string }> = [];
+  let hasErrors = false;
+  const errors: string[] = [];
 
+  // Use tree.iterate() - much simpler than manual cursor traversal
+  tree.iterate({
+    enter: (node) => {
+      // Check if this is an error node
+      if (node.type.isError || node.name === '⚠') {
+        hasErrors = true;
+        const errorText = expr.slice(node.from, node.to);
+        const errorMsg = errorText 
+          ? `Parse error at position ${node.from}-${node.to}: "${errorText}"`
+          : `Parse error at position ${node.from}`;
+        errors.push(errorMsg);
+      }
+      
+      // Get the first metric name from any VectorSelector > Identifier
+      if (!metric && node.name === 'Identifier' && node.node.parent?.type.name === 'VectorSelector') {
+        metric = expr.slice(node.from, node.to);
+      }
+      
+      // Extract label matchers using helper function
+      const labelData = processLabelMatcher(node, expr);
+      if (labelData) {
+        labels.push(labelData);
+      }
+    },
+  });
+
+  return { metric, labels, hasErrors, errors };
+}
+
+// Helper function to process label matcher nodes
+function processLabelMatcher(node: any, expr: string): { label: string; op: string; value: string } | null {
+  if (node.name !== 'UnquotedLabelMatcher') {
+    return null;
+  }
+
+  const labelNode = node.node;
+  let labelName = '';
+  let op = '';
+  let value = '';
+  
+  // Get children of UnquotedLabelMatcher
+  for (let child = labelNode.firstChild; child; child = child.nextSibling) {
+    if (child.type.name === 'LabelName') {
+      labelName = expr.slice(child.from, child.to);
+    } else if (child.type.name === 'MatchOp') {
+      op = expr.slice(child.from, child.to);
+    } else if (child.type.name === 'StringLiteral') {
+      value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
+    }
+  }
+  
+  if (labelName && op) { // Allow empty string values
+    return { label: labelName, op, value };
+  }
+  return null;
+}
 
 export function createAppUrl(route: string, urlParams?: URLSearchParams): string {
   const urlParamsAsString = urlParams ? `?${urlParams.toString()}` : '';
