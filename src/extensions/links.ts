@@ -26,6 +26,24 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
     configure: configureDrilldownLink,
   },
+  {
+    targets: ['grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha'],
+    title: 'Navigate to metrics drilldown',
+    description: 'Build a url path to the metrics drilldown',
+    path: createAppUrl(ROUTES.Drilldown),
+    configure: (context) => {
+      if (typeof context === 'undefined') {
+        return;
+      }
+
+      const navigateToMetrics = (context as MetricsDrilldownContext).navigateToMetrics;
+      const params = navigateToMetrics ? buildNavigateToMetricsParams(context as MetricsDrilldownContext) : undefined;
+
+      return {
+        path: createAppUrl(ROUTES.Drilldown, params),
+      };
+    },
+  },
 ];
 
 export function configureDrilldownLink(context: object | undefined) {
@@ -88,6 +106,7 @@ export function configureDrilldownLink(context: object | undefined) {
     };
   }
 }
+
 export interface ParsedPromQLQuery {
   metric: string;
   labels: Array<{ label: string; op: string; value: string }>;
@@ -157,6 +176,32 @@ function processLabelMatcher(node: any, expr: string): { label: string; op: stri
     return { label: labelName, op, value };
   }
   return null;
+}
+
+// Type for the metrics drilldown context from Grafana Assistant
+export type MetricsDrilldownContext = {
+  navigateToMetrics: boolean;
+  datasource_uid: string;
+  label_filters?: string[];
+  metric?: string;
+  start?: string;
+  end?: string;
+};
+
+export function buildNavigateToMetricsParams(context: MetricsDrilldownContext): URLSearchParams {
+  const { metric, start, end, datasource_uid, label_filters } = context;
+
+  const filters = label_filters ?? [];
+  // Use the structured context data to build parameters
+  return appendUrlParameters([
+    [UrlParameters.Metric, metric],
+    [UrlParameters.TimeRangeFrom, start],
+    [UrlParameters.TimeRangeTo, end],
+    [UrlParameters.DatasourceId, datasource_uid],
+    ...filters.map(
+      (filter) => [UrlParameters.Filters, filter] as [UrlParameterType, string]
+    ),
+  ]);
 }
 
 export function createAppUrl(route: string, urlParams?: URLSearchParams): string {
