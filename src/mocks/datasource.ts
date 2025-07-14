@@ -1,5 +1,6 @@
 import { PluginType, type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
-import { type DataSourceRef, type DataSourceSrv } from '@grafana/runtime';
+import { type DataSourceSrv } from '@grafana/runtime';
+import { type DataSourceRef } from '@grafana/schema';
 
 export const mockDataSource: DataSourceApi = {
   name: 'Prometheus',
