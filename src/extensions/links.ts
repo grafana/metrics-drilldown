@@ -4,8 +4,8 @@ import {
   type PluginExtensionAddedLinkConfig,
   type PluginExtensionPanelContext,
 } from '@grafana/data';
-import { buildVisualQueryFromString } from '@grafana/prometheus';
 import { type DataQuery } from '@grafana/schema';
+import { parser } from '@prometheus-io/lezer-promql';
 
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
 import { logger } from '../tracking/logger/logger';
@@ -15,6 +15,65 @@ const title = `Open in ${PRODUCT_NAME}`;
 const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
+
+export interface ParsedPromQLQuery {
+  metric: string;
+  labels: Array<{ label: string; op: string; value: string }>;
+  hasErrors: boolean;
+  errors: string[];
+}
+
+export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
+  const tree = parser.parse(expr);
+  let metric = '';
+  const labels: Array<{ label: string; op: string; value: string }> = [];
+  let hasErrors = false;
+  const errors: string[] = [];
+
+  // Use tree.iterate() - much simpler than manual cursor traversal
+  tree.iterate({
+    enter: (node) => {
+      // Check if this is an error node
+      if (node.type.isError || node.name === '⚠') {
+        hasErrors = true;
+        const errorText = expr.slice(node.from, node.to);
+        const errorMsg = errorText 
+          ? `Parse error at position ${node.from}-${node.to}: "${errorText}"`
+          : `Parse error at position ${node.from}`;
+        errors.push(errorMsg);
+      }
+      
+      // Get the first metric name from any VectorSelector > Identifier
+      if (!metric && node.name === 'Identifier' && node.node.parent?.type.name === 'VectorSelector') {
+        metric = expr.slice(node.from, node.to);
+      }
+      // Extract label matchers: UnquotedLabelMatcher contains LabelName, MatchOp, StringLiteral
+      if (node.name === 'UnquotedLabelMatcher') {
+        const labelNode = node.node;
+        let labelName = '';
+        let op = '';
+        let value = '';
+        
+        // Get children of UnquotedLabelMatcher
+        for (let child = labelNode.firstChild; child; child = child.nextSibling) {
+          if (child.type.name === 'LabelName') {
+            labelName = expr.slice(child.from, child.to);
+          } else if (child.type.name === 'MatchOp') {
+            op = expr.slice(child.from, child.to);
+          } else if (child.type.name === 'StringLiteral') {
+            value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
+          }
+        }
+        
+        if (labelName && op) { // Allow empty string values
+          labels.push({ label: labelName, op, value });
+        }
+      }
+    },
+  });
+
+  return { metric, labels, hasErrors, errors };
+}
 
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
@@ -44,41 +103,52 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       if (!expr || datasource?.type !== 'prometheus') {
         return;
       }
+        try {
+          const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
 
-      const visualQuery = buildVisualQueryFromString(expr);
+          if (hasErrors) {
+            logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
+          }
 
-      const { errors, query } = visualQuery;
-      if (errors.length > 0) {
-        // parsing prom query expressions does not necessarily mean the query is invalid so we can continue
-        logger.error(new Error(`[Metrics Drilldown] Error building visual query: ${errors.join(', ')}`));
+          if (!metric) {
+            logger.warn('Could not extract metric name from PromQL query');
+            // Still create URL without metric-specific parameters
+            return {
+              path: createAppUrl(ROUTES.Drilldown),
+            };
+          }
+
+        const timeRange =
+          'timeRange' in context &&
+          typeof context.timeRange === 'object' &&
+          context.timeRange !== null &&
+          'from' in context.timeRange &&
+          'to' in context.timeRange
+            ? (context.timeRange as { from: string; to: string })
+            : undefined;
+
+        const params = appendUrlParameters([
+          [UrlParameters.Metric, metric],
+          [UrlParameters.TimeRangeFrom, timeRange?.from],
+          [UrlParameters.TimeRangeTo, timeRange?.to],
+          [UrlParameters.DatasourceId, datasource.uid],
+          ...labels.map(
+            (filter) => [UrlParameters.Filters, `${filter.label}|${filter.op}|${filter.value}`] as [UrlParameterType, string]
+          ),
+        ]);
+
+        const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
+
+        return {
+          path: pathToMetricView,
+        };
+      } catch (error) {
+        logger.error(new Error(`[Metrics Drilldown] Error parsing PromQL query: ${error}`));
+
+        return {
+          path: createAppUrl(ROUTES.Drilldown),
+        };
       }
-      // for future reference we can add operations to the url 
-      const { metric, labels, /* operations*/ } = query;
-
-      const timeRange =
-        'timeRange' in context &&
-        typeof context.timeRange === 'object' &&
-        context.timeRange !== null &&
-        'from' in context.timeRange &&
-        'to' in context.timeRange
-          ? (context.timeRange as { from: string; to: string })
-          : undefined;
-
-      const params = appendUrlParameters([
-        [UrlParameters.Metric, metric],
-        [UrlParameters.TimeRangeFrom, timeRange?.from],
-        [UrlParameters.TimeRangeTo, timeRange?.to],
-        [UrlParameters.DatasourceId, datasource.uid],
-        ...labels.map(
-          (f) => [UrlParameters.Filters, `${f.label}${f.op}${f.value}`] as [UrlParameterType, string]
-        ),
-      ]);
-
-      const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
-
-      return {
-        path: pathToMetricView,
-      };
     },
   },
 ];
