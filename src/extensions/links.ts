@@ -16,6 +16,17 @@ const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
+export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
+  {
+    title,
+    description,
+    category,
+    icon,
+    path: createAppUrl(ROUTES.Drilldown),
+    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
+    configure: configureDrilldownLink,
+  },
+];
 export interface ParsedPromQLQuery {
   metric: string;
   labels: Array<{ label: string; op: string; value: string }>;
@@ -89,76 +100,68 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
 
 
 
-export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
-  {
-    title,
-    description,
-    category,
-    icon,
-    path: createAppUrl(ROUTES.Drilldown),
-    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
-    configure: (context) => {
-      if (typeof context === 'undefined') {
-        return;
-      }
+function configureDrilldownLink(context: any) {
+  if (typeof context === 'undefined') {
+    return;
+  }
 
-      if ('pluginId' in context && context.pluginId !== 'timeseries') {
-        return;
-      }
+  if ('pluginId' in context && context.pluginId !== 'timeseries') {
+    return;
+  }
 
-      const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
+  const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
 
-      if (!queries?.length) {
-        return;
-      }
+  if (!queries?.length) {
+    return;
+  }
 
-      const { datasource, expr } = queries[0];
+  const { datasource, expr } = queries[0];
 
-      if (!expr || datasource?.type !== 'prometheus') {
-        return;
-      }
+  if (!expr || datasource?.type !== 'prometheus') {
+    return;
+  }
 
-      try {
-        const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
+  try {
+    const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
 
-        if (hasErrors) {
-          logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
-        }
+    if (hasErrors) {
+      logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
+    }
 
-        const timeRange =
-          'timeRange' in context &&
-          typeof context.timeRange === 'object' &&
-          context.timeRange !== null &&
-          'from' in context.timeRange &&
-          'to' in context.timeRange
-            ? (context.timeRange as { from: string; to: string })
-            : undefined;
+    const timeRange =
+      'timeRange' in context &&
+      typeof context.timeRange === 'object' &&
+      context.timeRange !== null &&
+      'from' in context.timeRange &&
+      'to' in context.timeRange
+        ? (context.timeRange as { from: string; to: string })
+        : undefined;
 
-        const params = appendUrlParameters([
-          [UrlParameters.Metric, metric], // we can create a path without a metric
-          [UrlParameters.TimeRangeFrom, timeRange?.from],
-          [UrlParameters.TimeRangeTo, timeRange?.to],
-          [UrlParameters.DatasourceId, datasource.uid],
-          ...labels.map(
-            (filter) => [UrlParameters.Filters, `${filter.label}${filter.op}${filter.value}`] as [UrlParameterType, string]
-          ),
-        ]);
+    const params = appendUrlParameters([
+      [UrlParameters.Metric, metric], // we can create a path without a metric
+      [UrlParameters.TimeRangeFrom, timeRange?.from],
+      [UrlParameters.TimeRangeTo, timeRange?.to],
+      [UrlParameters.DatasourceId, datasource.uid],
+      ...labels.map(
+        (filter) => [UrlParameters.Filters, `${filter.label}${filter.op}${filter.value}`] as [UrlParameterType, string]
+      ),
+    ]);
 
-        const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
+    const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
 
-        return {
-          path: pathToMetricView,
-        };
-      } catch (error) {
-        logger.error(new Error(`[Metrics Drilldown] Error parsing PromQL query: ${error}`));
+    return {
+      path: pathToMetricView,
+    };
+  } catch (error) {
+    logger.error(new Error(`[Metrics Drilldown] Error parsing PromQL query: ${error}`));
 
-        return {
-          path: createAppUrl(ROUTES.Drilldown),
-        };
-      }
-    },
-  },
-];
+    return {
+      path: createAppUrl(ROUTES.Drilldown),
+    };
+  }
+}
+
+
 
 export function createAppUrl(route: string, urlParams?: URLSearchParams): string {
   const urlParamsAsString = urlParams ? `?${urlParams.toString()}` : '';
