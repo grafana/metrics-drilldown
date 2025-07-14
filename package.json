@@ -30,7 +30,7 @@
   "dependencies": {
     "@bsull/augurs": "^0.9.0",
     "@emotion/css": "11.13.5",
-    "@grafana/data": "^12.0.0",
+    "@grafana/data": "file:../../../packages/grafana-data",
     "@grafana/faro-web-sdk": "^1.17.2",
     "@grafana/lezer-logql": "^0.2.7",
     "@grafana/prometheus": "^12.1.0-250055",
