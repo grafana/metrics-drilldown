@@ -75,7 +75,7 @@ export class MetricDatasourceHelper {
     const loadMetadata =
       typeof ds.languageProvider.retrieveMetricsMetadata === 'function'
         ? () => Promise.resolve(ds.languageProvider.retrieveMetricsMetadata())
-        : () => (ds.languageProvider.loadMetricsMetadata() as unknown as Promise<void>).then(queryMetadata); // eslint-disable-line sonarjs/deprecation
+        : () => (ds.languageProvider.loadMetricsMetadata() as unknown as Promise<void>).then(() => queryMetadata()); // eslint-disable-line sonarjs/deprecation
 
     let metadata = await queryMetadata();
 
