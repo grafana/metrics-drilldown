@@ -23,6 +23,34 @@ export interface ParsedPromQLQuery {
   errors: string[];
 }
 
+// Helper function to process label matcher nodes
+function processLabelMatcher(node: any, expr: string): { label: string; op: string; value: string } | null {
+  if (node.name !== 'UnquotedLabelMatcher') {
+    return null;
+  }
+
+  const labelNode = node.node;
+  let labelName = '';
+  let op = '';
+  let value = '';
+  
+  // Get children of UnquotedLabelMatcher
+  for (let child = labelNode.firstChild; child; child = child.nextSibling) {
+    if (child.type.name === 'LabelName') {
+      labelName = expr.slice(child.from, child.to);
+    } else if (child.type.name === 'MatchOp') {
+      op = expr.slice(child.from, child.to);
+    } else if (child.type.name === 'StringLiteral') {
+      value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
+    }
+  }
+  
+  if (labelName && op) { // Allow empty string values
+    return { label: labelName, op, value };
+  }
+  return null;
+}
+
 export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
   const tree = parser.parse(expr);
   let metric = '';
@@ -47,27 +75,11 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
       if (!metric && node.name === 'Identifier' && node.node.parent?.type.name === 'VectorSelector') {
         metric = expr.slice(node.from, node.to);
       }
-      // Extract label matchers: UnquotedLabelMatcher contains LabelName, MatchOp, StringLiteral
-      if (node.name === 'UnquotedLabelMatcher') {
-        const labelNode = node.node;
-        let labelName = '';
-        let op = '';
-        let value = '';
-        
-        // Get children of UnquotedLabelMatcher
-        for (let child = labelNode.firstChild; child; child = child.nextSibling) {
-          if (child.type.name === 'LabelName') {
-            labelName = expr.slice(child.from, child.to);
-          } else if (child.type.name === 'MatchOp') {
-            op = expr.slice(child.from, child.to);
-          } else if (child.type.name === 'StringLiteral') {
-            value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
-          }
-        }
-        
-        if (labelName && op) { // Allow empty string values
-          labels.push({ label: labelName, op, value });
-        }
+      
+      // Extract label matchers using helper function
+      const labelData = processLabelMatcher(node, expr);
+      if (labelData) {
+        labels.push(labelData);
       }
     },
   });
@@ -75,14 +87,16 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
   return { metric, labels, hasErrors, errors };
 }
 
+
+
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
-    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
     title,
     description,
-    icon,
     category,
+    icon,
     path: createAppUrl(ROUTES.Drilldown),
+    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
     configure: (context) => {
       if (typeof context === 'undefined') {
         return;
@@ -103,20 +117,13 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       if (!expr || datasource?.type !== 'prometheus') {
         return;
       }
-        try {
-          const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
 
-          if (hasErrors) {
-            logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
-          }
+      try {
+        const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
 
-          if (!metric) {
-            logger.warn('Could not extract metric name from PromQL query');
-            // Still create URL without metric-specific parameters
-            return {
-              path: createAppUrl(ROUTES.Drilldown),
-            };
-          }
+        if (hasErrors) {
+          logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
+        }
 
         const timeRange =
           'timeRange' in context &&
@@ -128,7 +135,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
             : undefined;
 
         const params = appendUrlParameters([
-          [UrlParameters.Metric, metric],
+          [UrlParameters.Metric, metric], // we can create a path without a metric
           [UrlParameters.TimeRangeFrom, timeRange?.from],
           [UrlParameters.TimeRangeTo, timeRange?.to],
           [UrlParameters.DatasourceId, datasource.uid],
