@@ -39,7 +39,7 @@
     "@grafana/schema": "^12.0.0",
     "@grafana/ui": "^12.0.0",
     "@lezer/common": "^1.2.3",
-    "@prometheus-io/lezer-promql": "0.304.1",
+    "@prometheus-io/lezer-promql": "0.304.2",
     "p-limit": "^6.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
