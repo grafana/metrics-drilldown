@@ -100,7 +100,7 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
 
 
 
-function configureDrilldownLink(context: any) {
+export function configureDrilldownLink(context: any) {
   if (typeof context === 'undefined') {
     return;
   }

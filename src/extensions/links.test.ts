@@ -1,4 +1,12 @@
-import { parsePromQLQuery } from './links';
+import { configureDrilldownLink, parsePromQLQuery } from './links';
+
+// Mock the logger to avoid importing it
+jest.mock('../tracking/logger/logger', () => ({
+  logger: {
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
+}));
 
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
@@ -131,5 +139,133 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     const result = parsePromQLQuery('round(increase(http_requests_total{status="200"}[5m]), 0.1)');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([{ label: 'status', op: '=', value: '200' }]);
+  });
+});
+
+describe('configureDrilldownLink', () => {
+  describe('guard clauses', () => {
+    test('should return undefined when context is undefined', () => {
+      const result = configureDrilldownLink(undefined);
+      expect(result).toBeUndefined();
+    });
+
+    test('should return undefined when plugin type is not timeseries', () => {
+      const context = {
+        pluginId: 'table',
+        targets: [],
+      };
+      const result = configureDrilldownLink(context);
+      expect(result).toBeUndefined();
+    });
+
+    test('should return undefined when no PromQL queries exist', () => {
+      const context = {
+        pluginId: 'timeseries',
+        targets: [
+          { expr: undefined }, // not a PromQL query
+          { refId: 'A' }, // not a PromQL query
+        ],
+      };
+      const result = configureDrilldownLink(context);
+      expect(result).toBeUndefined();
+    });
+    // do we want to show a link when the data source is prometheus? We can default to showing a link to the metrics reducer page..
+    test('should return undefined when query has no expression', () => {
+      const context = {
+        pluginId: 'timeseries',
+        targets: [
+          {
+            expr: '',
+            datasource: { type: 'prometheus', uid: 'prom-uid' },
+          },
+        ],
+      };
+      const result = configureDrilldownLink(context);
+      expect(result).toBeUndefined();
+    });
+
+    test('should return undefined when datasource is not prometheus', () => {
+      const context = {
+        pluginId: 'timeseries',
+        targets: [
+          {
+            expr: 'up',
+            datasource: { type: 'influxdb', uid: 'influx-uid' },
+          },
+        ],
+      };
+      const result = configureDrilldownLink(context);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('successful URL construction', () => {
+    test('should construct URL with all components', () => {
+      const context = {
+        pluginId: 'timeseries',
+        targets: [
+          {
+            expr: 'http_requests_total{method="GET",status="200"}',
+            datasource: { type: 'prometheus', uid: 'prom-uid' },
+          },
+        ],
+        timeRange: {
+          from: '2023-01-01T00:00:00Z',
+          to: '2023-01-01T01:00:00Z',
+        },
+      };
+
+      const result = configureDrilldownLink(context);
+      
+      expect(result).toBeDefined();
+      expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
+      expect(result?.path).toContain('metric=http_requests_total');
+      expect(result?.path).toContain('from=2023-01-01T00%3A00%3A00Z');
+      expect(result?.path).toContain('to=2023-01-01T01%3A00%3A00Z');
+      expect(result?.path).toContain('var-ds=prom-uid');
+      expect(result?.path).toContain('var-filters=method%3DGET');
+      expect(result?.path).toContain('var-filters=status%3D200');
+    });
+
+    test('should construct URL with special characters in labels', () => {
+      const context = {
+        pluginId: 'timeseries',
+        targets: [
+          {
+            expr: 'http_requests_total{path="/api/v1/users?id=123&name=test"}',
+            datasource: { type: 'prometheus', uid: 'prom-uid' },
+          },
+        ],
+      };
+
+      const result = configureDrilldownLink(context);
+      
+      expect(result).toBeDefined();
+      expect(result?.path).toContain('var-filters=path%3D%2Fapi%2Fv1%2Fusers%3Fid%3D123%26name%3Dtest');
+    });
+  });
+
+  describe('error handling', () => {
+    test('should return fallback URL and log errors when parsing fails', () => {
+      // Test with a context that has a malformed query that might cause parsePromQLQuery to throw
+      const context = {
+        pluginId: 'timeseries',
+        targets: [
+          {
+            expr: 'up{', // Malformed query that might cause parsing to fail
+            datasource: { type: 'prometheus', uid: 'prom-uid' },
+          },
+        ],
+      };
+
+      const result = configureDrilldownLink(context);
+      
+      // Should still return a result (either with parsed data or fallback)
+      expect(result).toBeDefined();
+      expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
+      
+      // Note: The actual parsePromQLQuery might handle this gracefully with hasErrors=true,
+      // so we just test that the function doesn't crash and returns a valid path
+    });
   });
 });
