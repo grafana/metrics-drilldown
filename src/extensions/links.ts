@@ -47,17 +47,11 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       }
       
       const { navigateToMetrics, datasource_uid, label_filters, metric, start, end }= (context as MetricsDrilldownContext);
-      
+      // parse the labels to the PromQL format
       const parsedLabels = parseFiltersToLabelMatchers(label_filters);
-      
-      const promURLObject = {
-        datasource_uid, 
-        label_filters: parsedLabels, 
-        metric, 
-        start, 
-        end
-      };
-
+      // create the PromURLObject for building params
+      const promURLObject = createPromURLObject(datasource_uid, parsedLabels, metric, start, end);
+      // build the params for the navigateToMetrics
       const params = navigateToMetrics ? buildNavigateToMetricsParams(promURLObject) : undefined;
 
       return {
@@ -104,13 +98,13 @@ export function configureDrilldownLink(context: object | undefined) {
         ? (context.timeRange as { from: string; to: string })
         : undefined;
 
-    const promURLObject = {
-      datasource_uid: datasource.uid, 
-      label_filters: labels, 
-      metric, 
-      start: timeRange?.from, 
-      end: timeRange?.to
-    };
+    const promURLObject = createPromURLObject(
+      datasource.uid,
+      labels,
+      metric,
+      timeRange?.from,
+      timeRange?.to
+    );
 
     const params = buildNavigateToMetricsParams(promURLObject);
 
@@ -225,6 +219,22 @@ type PromURLObject = {
   end?: string;
 };
 
+export function createPromURLObject(
+  datasource_uid?: string,
+  label_filters?: PromQLLabelMatcher[],
+  metric?: string,
+  start?: string,
+  end?: string
+): PromURLObject {
+  return {
+    datasource_uid,
+    label_filters: label_filters ?? [],
+    metric,
+    start,
+    end,
+  };
+}
+
 export function buildNavigateToMetricsParams(promURLObject: PromURLObject): URLSearchParams {
   const { metric, start, end, datasource_uid, label_filters } = promURLObject;
 
@@ -240,7 +250,7 @@ export function buildNavigateToMetricsParams(promURLObject: PromURLObject): URLS
   ]);
 }
 
-function parseFiltersToLabelMatchers(label_filters?: string[]): PromQLLabelMatcher[] {
+export function parseFiltersToLabelMatchers(label_filters?: string[]): PromQLLabelMatcher[] {
   if (!label_filters) {
     return [];
   }

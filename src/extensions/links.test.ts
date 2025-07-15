@@ -1,4 +1,4 @@
-import { buildNavigateToMetricsParams, configureDrilldownLink, parsePromQLQuery, UrlParameters, type MetricsDrilldownContext } from './links';
+import { buildNavigateToMetricsParams, configureDrilldownLink, createPromURLObject, parseFiltersToLabelMatchers, parsePromQLQuery, UrlParameters, type MetricsDrilldownContext } from './links';
 
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
@@ -272,14 +272,18 @@ describe('buildNavigateToMetricsParams', () => {
       end: '2024-01-01T01:00:00Z',
       label_filters: ['status=200', 'method=GET', 'path=/api/test'],
     };
-
-    const result = buildNavigateToMetricsParams(context);
+    // parse the labels to the PromQL format
+    const parsedLabels = parseFiltersToLabelMatchers(context.label_filters);
+    // create the PromURLObject for building params
+    const promURLObject = createPromURLObject(context.datasource_uid, parsedLabels, context.metric, context.start, context.end);
+    // build the params for the navigateToMetrics
+    const result = buildNavigateToMetricsParams(promURLObject);
 
     expect(result.get(UrlParameters.Metric)).toBe('http_requests_total');
     expect(result.get(UrlParameters.TimeRangeFrom)).toBe('2024-01-01T00:00:00Z');
     expect(result.get(UrlParameters.TimeRangeTo)).toBe('2024-01-01T01:00:00Z');
     expect(result.get(UrlParameters.DatasourceId)).toBe('test-datasource-uid');
-    expect(result.getAll(UrlParameters.Filters)).toEqual(['status=200', 'method=GET', 'path=/api/test']);
+    expect(result.getAll(UrlParameters.Filters)).toEqual(['status|=|200', 'method|=|GET', 'path|=|/api/test']);
   });
 
   it('should build URL parameters with only required fields', () => {
@@ -287,8 +291,12 @@ describe('buildNavigateToMetricsParams', () => {
       navigateToMetrics: true,
       datasource_uid: 'test-datasource-uid',
     };
-
-    const result = buildNavigateToMetricsParams(context);
+    // parse the labels to the PromQL format
+    const parsedLabels = parseFiltersToLabelMatchers(context.label_filters);
+    // create the PromURLObject for building params
+    const promURLObject = createPromURLObject(context.datasource_uid, parsedLabels, context.metric, context.start, context.end);
+    // build the params for the navigateToMetrics
+    const result = buildNavigateToMetricsParams(promURLObject);
 
     expect(result.get(UrlParameters.Metric)).toBeNull();
     expect(result.get(UrlParameters.TimeRangeFrom)).toBeNull();
@@ -303,8 +311,12 @@ describe('buildNavigateToMetricsParams', () => {
       datasource_uid: 'test-datasource-uid',
       label_filters: undefined,
     };
-
-    const result = buildNavigateToMetricsParams(context);
+    // parse the labels to the PromQL format
+    const parsedLabels = parseFiltersToLabelMatchers(context.label_filters);
+    // create the PromURLObject for building params
+    const promURLObject = createPromURLObject(context.datasource_uid, parsedLabels, context.metric, context.start, context.end);
+    // build the params for the navigateToMetrics
+    const result = buildNavigateToMetricsParams(promURLObject);
 
     expect(result.get(UrlParameters.DatasourceId)).toBe('test-datasource-uid');
     expect(result.getAll(UrlParameters.Filters)).toEqual([]);
