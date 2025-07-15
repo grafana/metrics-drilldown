@@ -61,7 +61,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   },
 ];
 
-export function configureDrilldownLink(context: object | undefined) {
+export function configureDrilldownLink(context: object | undefined): { path: string } | undefined {
   if (typeof context === 'undefined') {
     return;
   }
