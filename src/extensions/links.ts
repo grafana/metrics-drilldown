@@ -18,6 +18,12 @@ const icon = 'gf-prometheus';
 
 export const ADHOC_URL_DELIMITER = '|';
 
+export type PromQLLabelMatcher = {
+  label: string;
+  op: string;
+  value: string;
+};
+
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
     title,
@@ -109,7 +115,7 @@ export function configureDrilldownLink(context: object | undefined) {
 
 export interface ParsedPromQLQuery {
   metric: string;
-  labels: Array<{ label: string; op: string; value: string }>;
+  labels: PromQLLabelMatcher[];
   hasErrors: boolean;
   errors: string[];
 }
@@ -117,7 +123,7 @@ export interface ParsedPromQLQuery {
 export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
   const tree = parser.parse(expr);
   let metric = '';
-  const labels: Array<{ label: string; op: string; value: string }> = [];
+  const labels: PromQLLabelMatcher[] = [];
   let hasErrors = false;
   const errors: string[] = [];
 
@@ -151,7 +157,7 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
 }
 
 // Helper function to process label matcher nodes
-function processLabelMatcher(node: any, expr: string): { label: string; op: string; value: string } | null {
+function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null {
   if (node.name !== 'UnquotedLabelMatcher') {
     return null;
   }
@@ -178,8 +184,11 @@ function processLabelMatcher(node: any, expr: string): { label: string; op: stri
   return null;
 }
 
-// Helper function to convert filter to URL parameter tuple
-function filterToUrlParameter(filter: { label: string; op: string; value: string }): [UrlParameterType, string] {
+/**
+ * Scenes adhoc variable filters requires a | delimiter 
+ * between the label, operator, and value (see AdHocFiltersVariableUrlSyncHandler.ts in Scenes)
+ */
+function filterToUrlParameter(filter: PromQLLabelMatcher): [UrlParameterType, string] {
   return [UrlParameters.Filters, `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`] as [UrlParameterType, string];
 }
 
