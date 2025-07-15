@@ -1,4 +1,4 @@
-import { buildNavigateToMetricsParams, configureDrilldownLink, createPromURLObject, parseFiltersToLabelMatchers, parsePromQLQuery, UrlParameters, type MetricsDrilldownContext } from './links';
+import { buildNavigateToMetricsParams, configureDrilldownLink, createPromURLObject, parseFiltersToLabelMatchers, parsePromQLQuery, UrlParameters, type GrafanaAssistantMetricsDrilldownContext } from './links';
 
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
@@ -264,7 +264,7 @@ describe('configureDrilldownLink', () => {
 
 describe('buildNavigateToMetricsParams', () => {
   it('should build URL parameters with all fields populated', () => {
-    const context: MetricsDrilldownContext = {
+    const context: GrafanaAssistantMetricsDrilldownContext = {
       navigateToMetrics: true,
       datasource_uid: 'test-datasource-uid',
       metric: 'http_requests_total',
@@ -287,7 +287,7 @@ describe('buildNavigateToMetricsParams', () => {
   });
 
   it('should build URL parameters with only required fields', () => {
-    const context: MetricsDrilldownContext = {
+    const context: GrafanaAssistantMetricsDrilldownContext = {
       navigateToMetrics: true,
       datasource_uid: 'test-datasource-uid',
     };
@@ -306,7 +306,7 @@ describe('buildNavigateToMetricsParams', () => {
   });
 
   it('should handle undefined label_filters', () => {
-    const context: MetricsDrilldownContext = {
+    const context: GrafanaAssistantMetricsDrilldownContext = {
       navigateToMetrics: true,
       datasource_uid: 'test-datasource-uid',
       label_filters: undefined,

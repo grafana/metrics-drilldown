@@ -46,7 +46,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
         return;
       }
       
-      const { navigateToMetrics, datasource_uid, label_filters, metric, start, end }= (context as MetricsDrilldownContext);
+      const { navigateToMetrics, datasource_uid, label_filters, metric, start, end } = (context as GrafanaAssistantMetricsDrilldownContext);
       // parse the labels to the PromQL format
       const parsedLabels = parseFiltersToLabelMatchers(label_filters);
       // create the PromURLObject for building params
@@ -202,7 +202,7 @@ function filterToUrlParameter(filter: PromQLLabelMatcher): [UrlParameterType, st
 }
 
 // Type for the metrics drilldown context from Grafana Assistant
-export type MetricsDrilldownContext = {
+export type GrafanaAssistantMetricsDrilldownContext = {
   navigateToMetrics: boolean;
   datasource_uid: string;
   label_filters?: string[];
