@@ -43,6 +43,15 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     ]);
   });
 
+  test('should handle escaped quotes in label values', () => {
+    const result = parsePromQLQuery('http_requests_total{path="/api/v1/users",method="GET"}');
+    expect(result.metric).toBe('http_requests_total');
+    expect(result.labels).toEqual([
+      { label: 'path', op: '=', value: '/api/v1/users' },
+      { label: 'method', op: '=', value: 'GET' },
+    ]);
+  });
+
   test('should handle function expressions', () => {
     const result = parsePromQLQuery('rate(http_requests_total[5m])');
     expect(result.metric).toBe('http_requests_total');
@@ -105,15 +114,6 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     const result = parsePromQLQuery('namespace:http_requests_total{service="api"}');
     expect(result.metric).toBe('namespace:http_requests_total');
     expect(result.labels).toEqual([{ label: 'service', op: '=', value: 'api' }]);
-  });
-
-  test('should handle path-like label values', () => {
-    const result = parsePromQLQuery('http_requests_total{path="/api/v1/users",method="GET"}');
-    expect(result.metric).toBe('http_requests_total');
-    expect(result.labels).toEqual([
-      { label: 'path', op: '=', value: '/api/v1/users' },
-      { label: 'method', op: '=', value: 'GET' },
-    ]);
   });
 
   test('should handle node_exporter style metrics', () => {
