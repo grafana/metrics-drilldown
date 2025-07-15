@@ -215,8 +215,8 @@ describe('configureDrilldownLink', () => {
       expect(result?.path).toContain('from=2023-01-01T00%3A00%3A00Z');
       expect(result?.path).toContain('to=2023-01-01T01%3A00%3A00Z');
       expect(result?.path).toContain('var-ds=prom-uid');
-      expect(result?.path).toContain('var-filters=method%3DGET');
-      expect(result?.path).toContain('var-filters=status%3D200');
+      expect(result?.path).toContain('var-filters=method%7C%3D%7CGET');
+      expect(result?.path).toContain('var-filters=status%7C%3D%7C200');
     });
 
     test('should construct URL with special characters in labels', () => {
@@ -233,7 +233,7 @@ describe('configureDrilldownLink', () => {
       const result = configureDrilldownLink(context);
       
       expect(result).toBeDefined();
-      expect(result?.path).toContain('var-filters=path%3D%2Fapi%2Fv1%2Fusers%3Fid%3D123%26name%3Dtest');
+      expect(result?.path).toContain('var-filters=path%7C%3D%7C%2Fapi%2Fv1%2Fusers%3Fid%3D123%26name%3Dtest');
     });
   });
 
