@@ -238,7 +238,7 @@ describe('configureDrilldownLink', () => {
   });
 
   describe('error handling', () => {
-    test('should return fallback URL and log errors when parsing fails', () => {
+    test('should return fallback URL when parsing fails', () => {
       // Test with a context that has a malformed query that might cause parsePromQLQuery to throw
       const context = {
         pluginId: 'timeseries',
