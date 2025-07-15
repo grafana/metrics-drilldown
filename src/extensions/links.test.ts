@@ -1,13 +1,5 @@
 import { buildNavigateToMetricsParams, configureDrilldownLink, parsePromQLQuery, UrlParameters, type MetricsDrilldownContext } from './links';
 
-// Mock the logger to avoid importing it
-jest.mock('../tracking/logger/logger', () => ({
-  logger: {
-    warn: jest.fn(),
-    error: jest.fn(),
-  },
-}));
-
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
     const result = parsePromQLQuery('http_requests_total');
