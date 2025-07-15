@@ -7,9 +7,10 @@ import {
 import { type DataQuery } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
 
+import { parseMatcher } from 'WingmanDataTrail/MetricVizPanel/parseMatcher';
+
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
 import { logger } from '../tracking/logger/logger';
-import { parseMatcher } from 'WingmanDataTrail/MetricVizPanel/parseMatcher';
 
 const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
@@ -56,7 +57,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
         start, 
         end
       };
-      
+
       const params = navigateToMetrics ? buildNavigateToMetricsParams(promURLObject) : undefined;
 
       return {
@@ -103,13 +104,15 @@ export function configureDrilldownLink(context: object | undefined) {
         ? (context.timeRange as { from: string; to: string })
         : undefined;
 
-    const params = appendUrlParameters([
-      [UrlParameters.Metric, metric], // we can create a path without a metric
-      [UrlParameters.TimeRangeFrom, timeRange?.from],
-      [UrlParameters.TimeRangeTo, timeRange?.to],
-      [UrlParameters.DatasourceId, datasource.uid],
-      ...labels.map(filterToUrlParameter),
-    ]);
+    const promURLObject = {
+      datasource_uid: datasource.uid, 
+      label_filters: labels, 
+      metric, 
+      start: timeRange?.from, 
+      end: timeRange?.to
+    };
+
+    const params = buildNavigateToMetricsParams(promURLObject);
 
     const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
 
@@ -215,7 +218,7 @@ export type MetricsDrilldownContext = {
 };
 
 type PromURLObject = {
-  datasource_uid: string;
+  datasource_uid?: string;
   label_filters?: PromQLLabelMatcher[];
   metric?: string;
   start?: string;
