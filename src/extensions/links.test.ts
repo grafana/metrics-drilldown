@@ -128,28 +128,3 @@ describe('buildNavigateToMetricsParams', () => {
     expect(result.getAll(UrlParameters.Filters)).toEqual([]);
   });
 });
-
-describe('URL Parameter Label Filter Formatting', () => {
-  test('should format filter parameters with delimiter', () => {
-    const mockLabelFilter = { label: 'method', op: '=', value: 'GET' };
-    const formattedFilter = `${mockLabelFilter.label}${ADHOC_URL_DELIMITER}${mockLabelFilter.op}${ADHOC_URL_DELIMITER}${mockLabelFilter.value}`;
-    
-    expect(formattedFilter).toBe(`method${ADHOC_URL_DELIMITER}=${ADHOC_URL_DELIMITER}GET`);
-  });
-
-  test('should handle multiple filters with delimiter', () => {
-    const mockLabelFilters = [
-      { label: 'method', op: '=', value: 'GET' },
-      { label: 'status', op: '!=', value: '404' },
-      { label: 'path', op: '=~', value: '/api/.*' }
-    ];
-    
-    const formattedFilters = mockLabelFilters.map(f => `${f.label}${ADHOC_URL_DELIMITER}${f.op}${ADHOC_URL_DELIMITER}${f.value}`);
-    
-    expect(formattedFilters).toEqual([
-      `method${ADHOC_URL_DELIMITER}=${ADHOC_URL_DELIMITER}GET`,
-      `status${ADHOC_URL_DELIMITER}!=${ADHOC_URL_DELIMITER}404`,
-      `path${ADHOC_URL_DELIMITER}=~${ADHOC_URL_DELIMITER}/api/.*`
-    ]);
-  });
-});

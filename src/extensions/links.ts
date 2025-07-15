@@ -63,6 +63,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
         [UrlParameters.TimeRangeTo, timeRange?.to],
         [UrlParameters.DatasourceId, datasource.uid],
         ...query.labelFilters.map(
+          // Scenes adhoc variable filters requires a | delimiter between the label, operator, and value (see AdHocFiltersVariableUrlSyncHandler.ts in Scenes)
           (f) => [UrlParameters.Filters, `${f.label}${ADHOC_URL_DELIMITER}${f.op}${ADHOC_URL_DELIMITER}${f.value}`] as [UrlParameterType, string]
         ),
       ]);
