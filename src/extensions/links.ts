@@ -9,6 +9,7 @@ import { parser } from '@prometheus-io/lezer-promql';
 
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
 import { logger } from '../tracking/logger/logger';
+import { parseMatcher } from 'WingmanDataTrail/MetricVizPanel/parseMatcher';
 
 const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
@@ -43,9 +44,20 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       if (typeof context === 'undefined') {
         return;
       }
-
-      const navigateToMetrics = (context as MetricsDrilldownContext).navigateToMetrics;
-      const params = navigateToMetrics ? buildNavigateToMetricsParams(context as MetricsDrilldownContext) : undefined;
+      
+      const { navigateToMetrics, datasource_uid, label_filters, metric, start, end }= (context as MetricsDrilldownContext);
+      
+      const parsedLabels = parseFiltersToLabelMatchers(label_filters);
+      
+      const promURLObject = {
+        datasource_uid, 
+        label_filters: parsedLabels, 
+        metric, 
+        start, 
+        end
+      };
+      
+      const params = navigateToMetrics ? buildNavigateToMetricsParams(promURLObject) : undefined;
 
       return {
         path: createAppUrl(ROUTES.Drilldown, params),
@@ -202,20 +214,42 @@ export type MetricsDrilldownContext = {
   end?: string;
 };
 
-export function buildNavigateToMetricsParams(context: MetricsDrilldownContext): URLSearchParams {
-  const { metric, start, end, datasource_uid, label_filters } = context;
+type PromURLObject = {
+  datasource_uid: string;
+  label_filters?: PromQLLabelMatcher[];
+  metric?: string;
+  start?: string;
+  end?: string;
+};
+
+export function buildNavigateToMetricsParams(promURLObject: PromURLObject): URLSearchParams {
+  const { metric, start, end, datasource_uid, label_filters } = promURLObject;
 
   const filters = label_filters ?? [];
+  
   // Use the structured context data to build parameters
   return appendUrlParameters([
     [UrlParameters.Metric, metric],
     [UrlParameters.TimeRangeFrom, start],
     [UrlParameters.TimeRangeTo, end],
     [UrlParameters.DatasourceId, datasource_uid],
-    ...filters.map(
-      (filter) => [UrlParameters.Filters, filter] as [UrlParameterType, string]
-    ),
+    ...filters.map(filterToUrlParameter),
   ]);
+}
+
+function parseFiltersToLabelMatchers(label_filters?: string[]): PromQLLabelMatcher[] {
+  if (!label_filters) {
+    return [];
+  }
+  
+  return label_filters.map((filter) => {
+    const matcher = parseMatcher(filter);
+    return {
+      label: matcher.key,
+      op: matcher.operator,
+      value: matcher.value,
+    };
+  });
 }
 
 export function createAppUrl(route: string, urlParams?: URLSearchParams): string {
