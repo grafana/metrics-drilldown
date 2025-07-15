@@ -16,6 +16,8 @@ const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
+export const ADHOC_URL_DELIMITER = '|';
+
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
     title,
@@ -88,9 +90,7 @@ export function configureDrilldownLink(context: object | undefined) {
       [UrlParameters.TimeRangeFrom, timeRange?.from],
       [UrlParameters.TimeRangeTo, timeRange?.to],
       [UrlParameters.DatasourceId, datasource.uid],
-      ...labels.map(
-        (filter) => [UrlParameters.Filters, `${filter.label}${filter.op}${filter.value}`] as [UrlParameterType, string]
-      ),
+      ...labels.map(filterToUrlParameter),
     ]);
 
     const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
@@ -176,6 +176,11 @@ function processLabelMatcher(node: any, expr: string): { label: string; op: stri
     return { label: labelName, op, value };
   }
   return null;
+}
+
+// Helper function to convert filter to URL parameter tuple
+function filterToUrlParameter(filter: { label: string; op: string; value: string }): [UrlParameterType, string] {
+  return [UrlParameters.Filters, `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`] as [UrlParameterType, string];
 }
 
 // Type for the metrics drilldown context from Grafana Assistant
