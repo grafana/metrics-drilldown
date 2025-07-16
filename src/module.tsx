@@ -10,8 +10,13 @@ const LazyApp = lazy(async () => {
   const { default: initOutlier } = await import('@bsull/augurs/outlier');
 
   if (wasmSupported()) {
-    await initOutlier();
-    logger.info('WASM supported');
+    try {
+      await initOutlier();
+    } catch (e) {
+      logger.error(e as Error, { message: 'Error while initializing outlier detection' });
+    }
+  } else {
+    logger.warn('WASM not supported, outlier detection will not work');
   }
 
   return import('./App/App');

@@ -16,11 +16,10 @@ import { Alert, Button } from '@grafana/ui';
 import React from 'react';
 
 import { BreakdownSearchReset } from './BreakdownSearchScene';
-import { type LabelBreakdownSortingOption } from './SortByScene';
 import { findSceneObjectsByType } from './utils';
 import { getLabelValueFromDataFrame } from '../services/levels';
 import { fuzzySearch } from '../services/search';
-import { sortSeries } from '../services/sorting';
+import { sortSeries, type SortSeriesByOption } from '../services/sorting';
 
 interface ByFrameRepeaterState extends SceneObjectState {
   body: SceneLayout;
@@ -33,7 +32,7 @@ type FrameIterateCallback = (frames: DataFrame[], seriesIndex: number) => void;
 
 export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
   private unfilteredChildren: SceneFlexItem[] = [];
-  private sortBy: LabelBreakdownSortingOption;
+  private sortBy: SortSeriesByOption;
   private sortedSeries: DataFrame[] = [];
   private getFilter: () => string;
 
@@ -41,7 +40,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     sortBy,
     getFilter,
     ...state
-  }: ByFrameRepeaterState & { sortBy: LabelBreakdownSortingOption; getFilter: () => string }) {
+  }: ByFrameRepeaterState & { sortBy: SortSeriesByOption; getFilter: () => string }) {
     super(state);
 
     this.sortBy = sortBy;
@@ -75,7 +74,7 @@ export class ByFrameRepeater extends SceneObjectBase<ByFrameRepeaterState> {
     });
   }
 
-  public sort = (sortBy: LabelBreakdownSortingOption) => {
+  public sort = (sortBy: SortSeriesByOption) => {
     const data = sceneGraph.getData(this);
     this.sortBy = sortBy;
     if (data.state.data) {
