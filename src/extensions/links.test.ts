@@ -1,4 +1,4 @@
-import { buildNavigateToMetricsParams, configureDrilldownLink, parsePromQLQuery, UrlParameters, type MetricsDrilldownContext } from './links';
+import { buildNavigateToMetricsParams, configureDrilldownLink, createPromURLObject, parseFiltersToLabelMatchers, parsePromQLQuery, UrlParameters, type GrafanaAssistantMetricsDrilldownContext } from './links';
 
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
@@ -215,8 +215,8 @@ describe('configureDrilldownLink', () => {
       expect(result?.path).toContain('from=2023-01-01T00%3A00%3A00Z');
       expect(result?.path).toContain('to=2023-01-01T01%3A00%3A00Z');
       expect(result?.path).toContain('var-ds=prom-uid');
-      expect(result?.path).toContain('var-filters=method%3DGET');
-      expect(result?.path).toContain('var-filters=status%3D200');
+      expect(result?.path).toContain('var-filters=method%7C%3D%7CGET');
+      expect(result?.path).toContain('var-filters=status%7C%3D%7C200');
     });
 
     test('should construct URL with special characters in labels', () => {
@@ -233,12 +233,12 @@ describe('configureDrilldownLink', () => {
       const result = configureDrilldownLink(context);
       
       expect(result).toBeDefined();
-      expect(result?.path).toContain('var-filters=path%3D%2Fapi%2Fv1%2Fusers%3Fid%3D123%26name%3Dtest');
+      expect(result?.path).toContain('var-filters=path%7C%3D%7C%2Fapi%2Fv1%2Fusers%3Fid%3D123%26name%3Dtest');
     });
   });
 
   describe('error handling', () => {
-    test('should return fallback URL and log errors when parsing fails', () => {
+    test('should return fallback URL when parsing fails', () => {
       // Test with a context that has a malformed query that might cause parsePromQLQuery to throw
       const context = {
         pluginId: 'timeseries',
@@ -264,7 +264,7 @@ describe('configureDrilldownLink', () => {
 
 describe('buildNavigateToMetricsParams', () => {
   it('should build URL parameters with all fields populated', () => {
-    const context: MetricsDrilldownContext = {
+    const context: GrafanaAssistantMetricsDrilldownContext = {
       navigateToMetrics: true,
       datasource_uid: 'test-datasource-uid',
       metric: 'http_requests_total',
@@ -272,23 +272,31 @@ describe('buildNavigateToMetricsParams', () => {
       end: '2024-01-01T01:00:00Z',
       label_filters: ['status=200', 'method=GET', 'path=/api/test'],
     };
-
-    const result = buildNavigateToMetricsParams(context);
+    // parse the labels to the PromQL format
+    const parsedLabels = parseFiltersToLabelMatchers(context.label_filters);
+    // create the PromURLObject for building params
+    const promURLObject = createPromURLObject(context.datasource_uid, parsedLabels, context.metric, context.start, context.end);
+    // build the params for the navigateToMetrics
+    const result = buildNavigateToMetricsParams(promURLObject);
 
     expect(result.get(UrlParameters.Metric)).toBe('http_requests_total');
     expect(result.get(UrlParameters.TimeRangeFrom)).toBe('2024-01-01T00:00:00Z');
     expect(result.get(UrlParameters.TimeRangeTo)).toBe('2024-01-01T01:00:00Z');
     expect(result.get(UrlParameters.DatasourceId)).toBe('test-datasource-uid');
-    expect(result.getAll(UrlParameters.Filters)).toEqual(['status=200', 'method=GET', 'path=/api/test']);
+    expect(result.getAll(UrlParameters.Filters)).toEqual(['status|=|200', 'method|=|GET', 'path|=|/api/test']);
   });
 
   it('should build URL parameters with only required fields', () => {
-    const context: MetricsDrilldownContext = {
+    const context: GrafanaAssistantMetricsDrilldownContext = {
       navigateToMetrics: true,
       datasource_uid: 'test-datasource-uid',
     };
-
-    const result = buildNavigateToMetricsParams(context);
+    // parse the labels to the PromQL format
+    const parsedLabels = parseFiltersToLabelMatchers(context.label_filters);
+    // create the PromURLObject for building params
+    const promURLObject = createPromURLObject(context.datasource_uid, parsedLabels, context.metric, context.start, context.end);
+    // build the params for the navigateToMetrics
+    const result = buildNavigateToMetricsParams(promURLObject);
 
     expect(result.get(UrlParameters.Metric)).toBeNull();
     expect(result.get(UrlParameters.TimeRangeFrom)).toBeNull();
@@ -298,13 +306,17 @@ describe('buildNavigateToMetricsParams', () => {
   });
 
   it('should handle undefined label_filters', () => {
-    const context: MetricsDrilldownContext = {
+    const context: GrafanaAssistantMetricsDrilldownContext = {
       navigateToMetrics: true,
       datasource_uid: 'test-datasource-uid',
       label_filters: undefined,
     };
-
-    const result = buildNavigateToMetricsParams(context);
+    // parse the labels to the PromQL format
+    const parsedLabels = parseFiltersToLabelMatchers(context.label_filters);
+    // create the PromURLObject for building params
+    const promURLObject = createPromURLObject(context.datasource_uid, parsedLabels, context.metric, context.start, context.end);
+    // build the params for the navigateToMetrics
+    const result = buildNavigateToMetricsParams(promURLObject);
 
     expect(result.get(UrlParameters.DatasourceId)).toBe('test-datasource-uid');
     expect(result.getAll(UrlParameters.Filters)).toEqual([]);
