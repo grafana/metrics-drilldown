@@ -5,6 +5,9 @@ import {
   type PluginExtensionPanelContext,
 } from '@grafana/data';
 import { type DataQuery } from '@grafana/schema';
+import { parser } from '@prometheus-io/lezer-promql';
+
+import { parseMatcher } from 'WingmanDataTrail/MetricVizPanel/parseMatcher';
 
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
 import { logger } from '../tracking/logger/logger';
@@ -15,62 +18,23 @@ const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
+export const ADHOC_URL_DELIMITER = '|';
+
+export type PromQLLabelMatcher = {
+  label: string;
+  op: string;
+  value: string;
+};
+
 export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
-    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
     title,
     description,
-    icon,
     category,
+    icon,
     path: createAppUrl(ROUTES.Drilldown),
-    configure: (context) => {
-      if (typeof context === 'undefined') {
-        return;
-      }
-
-      if ('pluginId' in context && context.pluginId !== 'timeseries') {
-        return;
-      }
-
-      const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
-
-      if (!queries?.length) {
-        return;
-      }
-
-      const { datasource, expr } = queries[0];
-
-      if (!expr || datasource?.type !== 'prometheus') {
-        return;
-      }
-
-      const query = parsePromQueryRegex(expr);
-
-      const timeRange =
-        'timeRange' in context &&
-        typeof context.timeRange === 'object' &&
-        context.timeRange !== null &&
-        'from' in context.timeRange &&
-        'to' in context.timeRange
-          ? (context.timeRange as { from: string; to: string })
-          : undefined;
-
-      const params = appendUrlParameters([
-        [UrlParameters.Metric, query.metric],
-        [UrlParameters.TimeRangeFrom, timeRange?.from],
-        [UrlParameters.TimeRangeTo, timeRange?.to],
-        [UrlParameters.DatasourceId, datasource.uid],
-        ...query.labelFilters.map(
-          (f) => [UrlParameters.Filters, `${f.label}${f.op}${f.value}`] as [UrlParameterType, string]
-        ),
-      ]);
-
-      const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
-
-      return {
-        path: pathToMetricView,
-      };
-    },
+    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
+    configure: configureDrilldownLink,
   },
   {
     targets: ['grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha'],
@@ -81,9 +45,14 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       if (typeof context === 'undefined') {
         return;
       }
-
-      const navigateToMetrics = (context as MetricsDrilldownContext).navigateToMetrics;
-      const params = navigateToMetrics ? buildNavigateToMetricsParams(context as MetricsDrilldownContext) : undefined;
+      
+      const { navigateToMetrics, datasource_uid, label_filters, metric, start, end } = (context as GrafanaAssistantMetricsDrilldownContext);
+      // parse the labels to the PromQL format
+      const parsedLabels = parseFiltersToLabelMatchers(label_filters);
+      // create the PromURLObject for building params
+      const promURLObject = createPromURLObject(datasource_uid, parsedLabels, metric, start, end);
+      // build the params for the navigateToMetrics
+      const params = navigateToMetrics ? buildNavigateToMetricsParams(promURLObject) : undefined;
 
       return {
         path: createAppUrl(ROUTES.Drilldown, params),
@@ -92,8 +61,148 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   },
 ];
 
+export function configureDrilldownLink(context: object | undefined): { path: string } | undefined {
+  if (typeof context === 'undefined') {
+    return;
+  }
+
+  if ('pluginId' in context && context.pluginId !== 'timeseries') {
+    return;
+  }
+
+  const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
+
+  if (!queries?.length) {
+    return;
+  }
+
+  const { datasource, expr } = queries[0];
+
+  if (!expr || datasource?.type !== 'prometheus') {
+    return;
+  }
+
+  try {
+    const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
+
+    if (hasErrors) {
+      logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
+    }
+
+    const timeRange =
+      'timeRange' in context &&
+      typeof context.timeRange === 'object' &&
+      context.timeRange !== null &&
+      'from' in context.timeRange &&
+      'to' in context.timeRange
+        ? (context.timeRange as { from: string; to: string })
+        : undefined;
+
+    const promURLObject = createPromURLObject(
+      datasource.uid,
+      labels,
+      metric,
+      timeRange?.from,
+      timeRange?.to
+    );
+
+    const params = buildNavigateToMetricsParams(promURLObject);
+
+    const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
+
+    return {
+      path: pathToMetricView,
+    };
+  } catch (error) {
+    logger.error(new Error(`[Metrics Drilldown] Error parsing PromQL query: ${error}`));
+
+    return {
+      path: createAppUrl(ROUTES.Drilldown),
+    };
+  }
+}
+
+export interface ParsedPromQLQuery {
+  metric: string;
+  labels: PromQLLabelMatcher[];
+  hasErrors: boolean;
+  errors: string[];
+}
+
+export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
+  const tree = parser.parse(expr);
+  let metric = '';
+  const labels: PromQLLabelMatcher[] = [];
+  let hasErrors = false;
+  const errors: string[] = [];
+
+  // Use tree.iterate() - much simpler than manual cursor traversal
+  tree.iterate({
+    enter: (node) => {
+      // Check if this is an error node
+      if (node.type.isError || node.name === '⚠') {
+        hasErrors = true;
+        const errorText = expr.slice(node.from, node.to);
+        const errorMsg = errorText 
+          ? `Parse error at position ${node.from}-${node.to}: "${errorText}"`
+          : `Parse error at position ${node.from}`;
+        errors.push(errorMsg);
+      }
+      
+      // Get the first metric name from any VectorSelector > Identifier
+      if (!metric && node.name === 'Identifier' && node.node.parent?.type.name === 'VectorSelector') {
+        metric = expr.slice(node.from, node.to);
+      }
+      
+      // Extract label matchers using helper function
+      const labelData = processLabelMatcher(node, expr);
+      if (labelData) {
+        labels.push(labelData);
+      }
+    },
+  });
+
+  return { metric, labels, hasErrors, errors };
+}
+
+// Helper function to process label matcher nodes
+function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null {
+  if (node.name !== 'UnquotedLabelMatcher') {
+    return null;
+  }
+
+  const labelNode = node.node;
+  let labelName = '';
+  let op = '';
+  let value = '';
+  
+  // Get children of UnquotedLabelMatcher
+  for (let child = labelNode.firstChild; child; child = child.nextSibling) {
+    if (child.type.name === 'LabelName') {
+      labelName = expr.slice(child.from, child.to);
+    } else if (child.type.name === 'MatchOp') {
+      op = expr.slice(child.from, child.to);
+    } else if (child.type.name === 'StringLiteral') {
+      value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
+    }
+  }
+  
+  if (labelName && op) { // Allow empty string values
+    return { label: labelName, op, value };
+  }
+  return null;
+}
+
+/**
+ * Scenes adhoc variable filters requires a | delimiter 
+ * between the label, operator, and value (see AdHocFiltersVariableUrlSyncHandler.ts in Scenes)
+ */
+function filterToUrlParameter(filter: PromQLLabelMatcher): [UrlParameterType, string] {
+  return [UrlParameters.Filters, `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`] as [UrlParameterType, string];
+}
+
 // Type for the metrics drilldown context from Grafana Assistant
-export type MetricsDrilldownContext = {
+export type GrafanaAssistantMetricsDrilldownContext = {
   navigateToMetrics: boolean;
   datasource_uid: string;
   label_filters?: string[];
@@ -102,20 +211,58 @@ export type MetricsDrilldownContext = {
   end?: string;
 };
 
-export function buildNavigateToMetricsParams(context: MetricsDrilldownContext): URLSearchParams {
-  const { metric, start, end, datasource_uid, label_filters } = context;
+type PromURLObject = {
+  datasource_uid?: string;
+  label_filters?: PromQLLabelMatcher[];
+  metric?: string;
+  start?: string;
+  end?: string;
+};
+
+export function createPromURLObject(
+  datasource_uid?: string,
+  label_filters?: PromQLLabelMatcher[],
+  metric?: string,
+  start?: string,
+  end?: string
+): PromURLObject {
+  return {
+    datasource_uid,
+    label_filters: label_filters ?? [],
+    metric,
+    start,
+    end,
+  };
+}
+
+export function buildNavigateToMetricsParams(promURLObject: PromURLObject): URLSearchParams {
+  const { metric, start, end, datasource_uid, label_filters } = promURLObject;
 
   const filters = label_filters ?? [];
+  
   // Use the structured context data to build parameters
   return appendUrlParameters([
     [UrlParameters.Metric, metric],
     [UrlParameters.TimeRangeFrom, start],
     [UrlParameters.TimeRangeTo, end],
     [UrlParameters.DatasourceId, datasource_uid],
-    ...filters.map(
-      (filter) => [UrlParameters.Filters, filter] as [UrlParameterType, string]
-    ),
+    ...filters.map(filterToUrlParameter),
   ]);
+}
+
+export function parseFiltersToLabelMatchers(label_filters?: string[]): PromQLLabelMatcher[] {
+  if (!label_filters) {
+    return [];
+  }
+  
+  return label_filters.map((filter) => {
+    const matcher = parseMatcher(filter);
+    return {
+      label: matcher.key,
+      op: matcher.operator,
+      value: matcher.value,
+    };
+  });
 }
 
 export function createAppUrl(route: string, urlParams?: URLSearchParams): string {
@@ -154,167 +301,3 @@ type PromQuery = DataQuery & { expr: string };
 function isPromQuery(query: DataQuery): query is PromQuery {
   return 'expr' in query;
 }
-
-type PromLabelFilter = { label: string; op: string; value: string };
-type ParsedPromQuery = { metric: string | undefined; labelFilters: PromLabelFilter[]; query: string };
-
-/**
- * Checks if a potential metric name is a known PromQL function/keyword
- */
-function isKnownKeyword(name: string): boolean {
-  return knownKeywords.has(name);
-}
-
-/**
- * Tries to extract a metric name and labels from the beginning of a query
- */
-function extractMainMetric(query: string): { metric: string | undefined; labelFilters: PromLabelFilter[] } {
-  // Regex to match a PromQL metric name and optional label selectors:
-  // - First capture group: metric name (must start with letter/underscore/colon, followed by alphanumeric/underscore/colon)
-  // - Second (optional) capture group: contents inside curly braces (label selectors)
-  // The pattern looks for this at the beginning of the string (^) to identify the main metric
-  const queryMatch = query.match(/^([a-zA-Z_:][a-zA-Z0-9_:]*)\s*(?:\{([^}]*)\})?/);
-
-  if (!queryMatch) {
-    return { metric: undefined, labelFilters: [] };
-  }
-
-  const potentialMetric = queryMatch[1];
-  const labelsContent = queryMatch[2];
-  const labelFilters = parseLabels(labelsContent);
-
-  // Check if this is a function call
-  const nextCharIndex = queryMatch[0].length;
-  const nextChar = query[nextCharIndex];
-  const isLikelyFunctionCall = nextChar === '(';
-
-  // If it's a function call and a known keyword, don't treat it as a metric
-  if (isLikelyFunctionCall && isKnownKeyword(potentialMetric)) {
-    return { metric: undefined, labelFilters };
-  }
-
-  return { metric: potentialMetric, labelFilters };
-}
-
-/**
- * Searches for metrics within a query, skipping known PromQL functions
- */
-function findMetricWithinQuery(query: string): { metric: string | undefined; labelFilters: PromLabelFilter[] } {
-  // Regex similar to the one used for extractMainMetric, but with global flag (g) to find all matches in the query:
-  // - First capture group: metric name pattern (letter/underscore/colon followed by alphanumeric/underscore/colon)
-  // - Second capture group: optional label selector contents inside curly braces
-  // Unlike extractMainMetric regex, this doesn't anchor to the beginning of the string, allowing it to find metrics anywhere
-  const metricPattern = /([a-zA-Z_:][a-zA-Z0-9_:]*)\s*(?:\{([^}]*)\})?/g;
-  let match;
-
-  // Iteratively search through the query for all metric patterns
-  // exec() returns the next match and advances the regex's lastIndex property
-  // This loop continues until no more matches are found (exec returns null)
-  while ((match = metricPattern.exec(query)) !== null) {
-    const potentialMetric = match[1];
-    const labelsContent = match[2];
-
-    if (!isKnownKeyword(potentialMetric)) {
-      return {
-        metric: potentialMetric,
-        labelFilters: parseLabels(labelsContent),
-      };
-    }
-  }
-
-  return { metric: undefined, labelFilters: [] };
-}
-
-/**
- * TODO: Replace this with a `@grafana/prometheus` solution after
- * https://github.com/grafana/grafana/issues/99111 is resolved.
- * This will allow us to parse PromQL queries in a more robust way,
- * without compromising our `module.tsx` bundle size.
- *
- * Parses a PromQL query string using regular expressions to extract the
- * metric name and label filters. This is a lightweight alternative to
- * heavier parsing libraries.
- *
- * Note: This parser is simplified and may not cover all complex PromQL syntaxes,
- * especially nested functions or advanced selectors. It prioritizes common cases.
- */
-export function parsePromQueryRegex(query: string): ParsedPromQuery {
-  const trimmedQuery = query.trim();
-
-  // First try to find a metric at the beginning of the query
-  let { metric, labelFilters } = extractMainMetric(trimmedQuery);
-
-  // If no metric found at the beginning, search within the query
-  if (!metric) {
-    const innerResult = findMetricWithinQuery(trimmedQuery);
-    metric = innerResult.metric;
-    labelFilters = [...labelFilters, ...innerResult.labelFilters];
-  }
-
-  return { metric, labelFilters, query };
-}
-
-function parseLabels(labelsContent: string): PromLabelFilter[] {
-  if (!labelsContent) {
-    return [];
-  }
-
-  const labelFiltersToAdd: PromLabelFilter[] = [];
-  const labelParts = labelsContent.split(',');
-
-  // Regex to parse Prometheus label filters in the format 'label=~"value"':
-  // - First capture group: label name (must start with a letter or underscore, followed by word chars)
-  // - Second capture group: operator (=, !=, =~, !~)
-  // - Third capture group: quoted value (handles escaped characters)
-  const labelRegex = /^\s*([a-zA-Z_]\w*)\s*([=!~]+)\s*"((?:[^"\\]|\\.)*)"\s*$/;
-
-  labelParts.forEach((part) => {
-    if (part.trim() === '') {
-      return;
-    }
-    const match = part.match(labelRegex);
-    if (match) {
-      const unescapedValue = match[3].replace(/\\(.)/g, '$1');
-      labelFiltersToAdd.push({ label: match[1], op: match[2], value: unescapedValue });
-    } else {
-      logger.warn(`[Metrics Drilldown] Could not parse label part: "${part}" for labels: ${labelsContent}`);
-    }
-  });
-
-  return labelFiltersToAdd;
-}
-
-const knownKeywords = new Set([
-  'rate',
-  'increase',
-  'sum',
-  'avg',
-  'count',
-  'max',
-  'min',
-  'stddev',
-  'stdvar',
-  'topk',
-  'bottomk',
-  'quantile',
-  'histogram_quantile',
-  'label_replace',
-  'label_join',
-  'vector',
-  'scalar',
-  'time',
-  'timestamp',
-  'month',
-  'year',
-  'day_of_month',
-  'day_of_week',
-  'days_in_month',
-  'hour',
-  'minute',
-  'by',
-  'without',
-  'on',
-  'ignoring',
-  'group_left',
-  'group_right',
-]);
