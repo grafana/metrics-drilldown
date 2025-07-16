@@ -1,8 +1,8 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
-import { type LabelBreakdownSortingOption as BreakdownSortByOption } from 'Breakdown/SortByScene';
 import { type ActionViewType } from 'MetricActionBar';
+import { type SortSeriesByOption } from 'services/sorting';
 import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 import { type BreakdownLayoutType } from './Breakdown/types';
@@ -100,7 +100,7 @@ type Interactions = {
         // By clicking on the sort by component in the label breakdown
         from: 'label-breakdown';
         // The sort by option selected
-        sortBy: BreakdownSortByOption;
+        sortBy: SortSeriesByOption;
       };
   wasm_not_supported: {};
   native_histogram_examples_closed: {};

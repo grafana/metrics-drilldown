@@ -1,4 +1,3 @@
-import init from '@bsull/augurs/outlier';
 import { css } from '@emotion/css';
 import { FieldType, type DataFrame, type GrafanaTheme2, type PanelData, type SelectableValue } from '@grafana/data';
 import { config } from '@grafana/runtime';
@@ -25,23 +24,19 @@ import { Button, Field, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { isNumber, max, min, throttle } from 'lodash';
 import React from 'react';
 
-import { logger } from 'tracking/logger/logger';
 import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { getAutoQueriesForMetric } from '../autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef } from '../autoQuery/types';
 import { BreakdownLabelSelector } from '../BreakdownLabelSelector';
 import { reportExploreMetrics } from '../interactions';
-import { MetricScene } from '../MetricScene';
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { BreakdownSearchReset, BreakdownSearchScene } from './BreakdownSearchScene';
 import { ByFrameRepeater } from './ByFrameRepeater';
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { SortByScene, SortCriteriaChanged } from './SortByScene';
-import { type BreakdownLayoutChangeCallback } from './types';
-import { getLabelOptions } from './utils';
-import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
 import { PanelMenu } from '../Menu/PanelMenu';
+import { MetricScene } from '../MetricScene';
 import { getSortByPreference } from '../services/store';
 import { ALL_VARIABLE_VALUE } from '../services/variables';
 import { MDP_METRIC_PREVIEW, RefreshMetricsEvent, trailDS, VAR_FILTERS, VAR_GROUP_BY } from '../shared';
@@ -49,6 +44,9 @@ import { StatusWrapper } from '../StatusWrapper';
 import { getColorByIndex, getTrailFor } from '../utils';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
+import { type BreakdownLayoutChangeCallback } from './types';
+import { getLabelOptions } from './utils';
+import { BreakdownAxisChangeEvent, yAxisSyncBehavior } from './yAxisSyncBehavior';
 
 export interface LabelBreakdownSceneState extends SceneObjectState {
   body?: LayoutSwitcher | MetricLabelsList;
@@ -81,9 +79,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   private _query?: AutoQueryDef;
 
   private _onActivate() {
-    // eslint-disable-next-line no-console
-    init().then(() => logger.debug('Grafana ML initialized'));
-
     const variable = this.getVariable();
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
