@@ -28,6 +28,12 @@ export function withLifecycleEvents<T extends MultiValueVariable>(variable: T): 
   variable.addActivationHandler(() => {
     variable.publishEvent(new EventMetricsVariableActivated({ key }), true);
 
+    // We make sure filtering and sorting work in a scenario where the user goes from the MetricsReducer to the MetricScene and back.
+    // Indeed, in this case, the variable may already have its options and not load new ones (issue reported in a dev env).
+    if (!variable.state.loading && variable.state.options.length) {
+      variable.publishEvent(new EventMetricsVariableLoaded({ key, options: variable.state.options }), true);
+    }
+
     variable.subscribeToState((newState: MultiValueVariableState, prevState: MultiValueVariableState) => {
       if (!newState.loading && prevState.loading) {
         variable.publishEvent(new EventMetricsVariableLoaded({ key, options: newState.options }), true);
