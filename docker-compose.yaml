@@ -22,6 +22,16 @@ services:
       # This allows us to connect to other services running on the host machine.
       - 'host.docker.internal:host-gateway'
 
+  grafana-scopes-gmd:
+    container_name: 'grafana-scopes-gmd'
+    extends:
+      service: grafana-gmd
+    ports: !override
+      - '${GRAFANA_SCOPES_PORT:-3002}:3000'
+    environment:
+      GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_SCOPES_PORT:-3002}'
+      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore
+
   prometheus-gmd:
     container_name: 'prometheus-gmd'
     build:
