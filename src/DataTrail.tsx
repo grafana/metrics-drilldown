@@ -313,6 +313,31 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       limitAdhocProviders(model, filtersVariable, datasourceHelper);
     }, [model]);
 
+    // Set CSS custom property for app-controls height in embedded mode
+    useEffect(() => {
+      if (!embedded) {
+        return;
+      }
+
+      // Update on mount and when controls change
+      updateAppControlsHeight();
+
+      // Use ResizeObserver to watch for height changes
+      const appControls = document.querySelector('[data-testid="app-controls"]');
+
+      if (!appControls) {
+        return;
+      }
+
+      const resizeObserver = new ResizeObserver(updateAppControlsHeight);
+      resizeObserver.observe(appControls);
+
+      return () => {
+        resizeObserver.disconnect();
+        document.documentElement.style.removeProperty('--app-controls-height');
+      };
+    }, [embedded, controls]);
+
     return (
       <div className={styles.container}>
         {controls && (
@@ -389,11 +414,14 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       flexDirection: 'column',
       background: theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas,
       padding: theme.spacing(1, 2),
+      position: 'relative',
+      paddingTop: chromeHeaderHeight,
     }),
     body: css({
       flexGrow: 1,
       display: 'flex',
       flexDirection: 'column',
+      minHeight: 0, // Allow body to shrink below its content size
     }),
     controls: css({
       display: 'flex',
@@ -405,6 +433,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       background: theme.isDark ? theme.colors.background.canvas : theme.colors.background.primary,
       zIndex: theme.zIndex.navbarFixed,
       top: chromeHeaderHeight,
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
     settingsInfo: css({
       display: 'flex',
@@ -418,4 +447,12 @@ function getBaseFiltersForMetric(metric?: string): AdHocVariableFilter[] {
     return [{ key: '__name__', operator: '=', value: metric }];
   }
   return [];
+}
+
+function updateAppControlsHeight() {
+  const appControls = document.querySelector('[data-testid="app-controls"]');
+  if (appControls) {
+    const height = appControls.getBoundingClientRect().height;
+    document.documentElement.style.setProperty('--app-controls-height', `${height}px`);
+  }
 }

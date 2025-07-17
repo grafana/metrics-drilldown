@@ -1,9 +1,8 @@
 import { type DataSourceApi } from '@grafana/data';
 import { SceneTimeRange } from '@grafana/scenes';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { Wingman } from 'App/Routes';
-// import { getTopSceneFor } from 'DataTrail';
 import { newMetricsTrail } from 'utils';
 import { parsePromQLQuery } from 'utils/utils.promql';
 
@@ -24,7 +23,6 @@ function formatTime(time: string | number) {
 
 export const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
   const { metricNames, labelFilters } = parsePromQLQuery(query);
-  // const topScene = getTopSceneFor(metricNames[0]);
   const from = formatTime(initialStart);
   const to = formatTime(initialEnd);
   const trail = newMetricsTrail({
@@ -35,13 +33,13 @@ export const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: 
       operator: op,
       value,
     })),
-    // topScene,
     $timeRange: new SceneTimeRange({ from, to }),
+    embedded: true,
   });
-  useEffect(() => {
-    // eslint-disable-next-line no-restricted-syntax
-    console.log('[start, end]', from, to);
-  }, [from, to]);
 
-  return <Wingman trail={trail} />;
+  return (
+    <div data-testid="metrics-drilldown-embedded-label-breakdown">
+      <Wingman trail={trail} />
+    </div>
+  );
 };
