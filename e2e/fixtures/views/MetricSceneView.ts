@@ -98,7 +98,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertPanelsList() {
-    // we wait for 2.5s to make sure that the Y axis are synced
+    // we wait for some time to make sure that the Y axis are synced
     // TODO: how to improve this and not rely on an arbitrary timeout?
     await this.waitForTimeout(1500);
 
