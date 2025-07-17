@@ -63,6 +63,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
     const value = sortingOptions.find((option) => option.value === sortBy);
     return (
       <Field
+        data-testid="sort-by-select"
         htmlFor="sort-by-criteria"
         label={
           <div className={styles.sortByTooltip}>

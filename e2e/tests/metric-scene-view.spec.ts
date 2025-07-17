@@ -10,16 +10,45 @@ test.describe('Metrics Scene view', () => {
 
   test('Core UI elements', async ({ metricSceneView }) => {
     await metricSceneView.assertCoreUI(METRIC_NAME);
+    await metricSceneView.assertAllBreadownListControls();
 
     await expect(metricSceneView.getMainViz()).toHaveScreenshot('metric-scene-main-viz.png');
   });
 
   test.describe('Breakdown tab', () => {
     test('All labels', async ({ metricSceneView }) => {
-      await metricSceneView.assertLabelDropdown('All');
+      await metricSceneView.assertAllBreadownListControls();
       await metricSceneView.assertPanelsList();
 
       await expect(metricSceneView.getPanelsList()).toHaveScreenshot('metric-scene-breakdown-all-panels-list.png');
+    });
+
+    test.describe('After selecting a label', () => {
+      test.describe('Sort by', () => {
+        test('Displays panels sorted by the selected criteria series', async ({ metricSceneView }) => {
+          await metricSceneView.selectLabel('instance');
+          await metricSceneView.assertBreadownListControls({ label: 'instance', sortBy: 'Outlying series' });
+
+          await metricSceneView.assertPanelsList();
+          await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
+            'metric-scene-breakdown-label-sort-outlying-panels-list.png'
+          );
+
+          await metricSceneView.selectSortByOption('Name [Z-A]');
+          await metricSceneView.assertPanelsList();
+
+          await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
+            'metric-scene-breakdown-label-sort-alpha-z-a-panels-list.png'
+          );
+
+          await metricSceneView.selectSortByOption('Name [A-Z]');
+          await metricSceneView.assertPanelsList();
+
+          await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
+            'metric-scene-breakdown-label-sort-alpha-a-z-panels-list.png'
+          );
+        });
+      });
     });
   });
 

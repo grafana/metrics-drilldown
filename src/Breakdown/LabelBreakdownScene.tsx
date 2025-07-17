@@ -196,6 +196,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     if (this.state.body instanceof LayoutSwitcher) {
       this.state.body.state.breakdownLayouts.forEach((layout) => {
         if (layout instanceof ByFrameRepeater) {
+          this.clearBreakdownPanelAxisValues();
           layout.sort(event.sortBy);
         }
       });

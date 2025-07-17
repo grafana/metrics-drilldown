@@ -92,9 +92,9 @@ export class MetricsReducerView extends DrilldownView {
     await expect(this.getSortByDropdown().getByText(expectedOptionName)).toBeVisible();
   }
 
-  async selectSortByOption(expectedOptionName: SortByOptionNames) {
+  async selectSortByOption(optionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
-    await this.page.getByRole('option', { name: expectedOptionName }).locator('span').click();
+    await this.page.getByRole('option', { name: optionName }).locator('span').click();
   }
 
   /* Layout switcher */

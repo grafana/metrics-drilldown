@@ -20,12 +20,10 @@ export type SortSeriesDirection = 'asc' | 'desc';
 
 // Alphabetical sort
 const sortAlphabetical = (series: DataFrame[], direction: SortSeriesDirection = 'asc') => {
-  const sortedSeries = [...series];
-
   const compareFn: (a: string, b: string) => number =
     direction === 'asc' ? (a, b) => localeCompare(a, b) : (a, b) => localeCompare(b, a);
 
-  return sortedSeries.sort((a, b) => {
+  return series.sort((a, b) => {
     const labelA = getLabelValueFromDataFrame(a);
     if (!labelA) {
       return 0;
@@ -86,9 +84,9 @@ const getOutliers = (series: DataFrame[]): OutlierOutput => {
 
   // Get number fields: these are our series.
   const joinedSeries = joined.fields.filter((f) => f.type === FieldType.number);
-  const points = joinedSeries.map((series) => new Float64Array(series.values));
+  const points = joinedSeries.map((series) => new Float64Array(series.values.filter(Boolean)));
 
-  return OutlierDetector.dbscan({ sensitivity: 0.4 }).preprocess(points).detect();
+  return OutlierDetector.dbscan({ sensitivity: 0.9 }).preprocess(points).detect();
 };
 
 const calculateOutlierValue = (outliers: OutlierOutput, index: number): number => {
@@ -99,7 +97,9 @@ const calculateOutlierValue = (outliers: OutlierOutput, index: number): number =
 };
 
 export const sortSeries = memoize(
-  (series: DataFrame[], sortBy: SortSeriesByOption, direction: SortSeriesDirection = 'asc') => {
+  (origSeries: DataFrame[], sortBy: SortSeriesByOption, direction: SortSeriesDirection = 'asc') => {
+    const series = [...origSeries];
+
     // Alphabetical sorting
     if (sortBy === 'alphabetical') {
       return sortAlphabetical(series, 'asc');
