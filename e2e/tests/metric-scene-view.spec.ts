@@ -25,7 +25,7 @@ test.describe('Metrics Scene view', () => {
 
     test.describe('After selecting a label', () => {
       test.describe('Sort by', () => {
-        test('Displays panels sorted by the selected criteria series', async ({ metricSceneView }) => {
+        test('Displays panels sorted by the selected criteria', async ({ metricSceneView }) => {
           await metricSceneView.selectLabel('instance');
           await metricSceneView.assertBreadownListControls({ label: 'instance', sortBy: 'Outlying series' });
 
