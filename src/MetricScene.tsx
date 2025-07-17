@@ -1,6 +1,5 @@
 import { config } from '@grafana/runtime';
 import {
-  QueryVariable,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   SceneVariableSet,
@@ -12,6 +11,7 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
+import { GroupByVariable } from 'Breakdown/GroupByVariable';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
 
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
@@ -19,15 +19,7 @@ import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { MAIN_PANEL_MAX_HEIGHT, MAIN_PANEL_MIN_HEIGHT, MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
-import {
-  getVariablesWithMetricConstant,
-  RefreshMetricsEvent,
-  trailDS,
-  VAR_FILTERS,
-  VAR_GROUP_BY,
-  VAR_METRIC_EXPR,
-  type MakeOptional,
-} from './shared';
+import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from './shared';
 
 export interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
@@ -137,18 +129,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
 function getVariableSet(metric: string) {
   return new SceneVariableSet({
-    variables: [
-      ...getVariablesWithMetricConstant(metric),
-      new QueryVariable({
-        name: VAR_GROUP_BY,
-        label: 'Group by',
-        datasource: trailDS,
-        includeAll: true,
-        defaultToAll: true,
-        query: { query: `label_names(${VAR_METRIC_EXPR})`, refId: 'A' },
-        value: '',
-        text: '',
-      }),
-    ],
+    variables: [...getVariablesWithMetricConstant(metric), new GroupByVariable()],
   });
 }
