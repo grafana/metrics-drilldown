@@ -57,7 +57,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number) {
   return {
     container: css({
       display: 'flex',
@@ -72,7 +72,9 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       position: 'sticky',
       paddingTop: theme.spacing(1),
       marginTop: `-${theme.spacing(1)}`,
-      top: `${chromeHeaderHeight + 70}px`,
+      // When embedded (headerHeight = 0), we need to account for app-controls height
+      // When not embedded (headerHeight > 0), stick to top of viewport accounting for header
+      top: headerHeight > 0 ? headerHeight : 'var(--app-controls-height, 0px)',
       zIndex: 10,
     }),
     nonSticky: css({
