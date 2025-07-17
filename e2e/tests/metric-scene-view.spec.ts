@@ -10,14 +10,14 @@ test.describe('Metrics Scene view', () => {
 
   test('Core UI elements', async ({ metricSceneView }) => {
     await metricSceneView.assertCoreUI(METRIC_NAME);
-    await metricSceneView.assertAllBreadownListControls();
+    await metricSceneView.assertDefaultBreadownListControls();
 
     await expect(metricSceneView.getMainViz()).toHaveScreenshot('metric-scene-main-viz.png');
   });
 
   test.describe('Breakdown tab', () => {
     test('All labels', async ({ metricSceneView }) => {
-      await metricSceneView.assertAllBreadownListControls();
+      await metricSceneView.assertDefaultBreadownListControls();
       await metricSceneView.assertPanelsList();
 
       await expect(metricSceneView.getPanelsList()).toHaveScreenshot('metric-scene-breakdown-all-panels-list.png');

@@ -115,7 +115,7 @@ export class MetricSceneView extends DrilldownView {
 
   /* Breakdown tab */
 
-  async assertAllBreadownListControls() {
+  async assertDefaultBreadownListControls() {
     await this.assertLabelDropdown('All');
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
