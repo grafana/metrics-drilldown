@@ -68,7 +68,7 @@ export interface DataTrailState extends SceneObjectState {
   nativeHistogramMetric: string;
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
-  urlNamespace?: string;
+  urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
