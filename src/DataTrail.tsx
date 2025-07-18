@@ -40,6 +40,7 @@ import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from './sha
 import { getTrailStore } from './TrailStore/TrailStore';
 import { limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
+import { getAppBackgroundColor } from './utils/utils.styles';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 export interface DataTrailState extends SceneObjectState {
@@ -303,7 +304,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const { controls, topScene, settings, pluginInfo, embedded } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight();
-    const styles = useStyles2(getStyles, embedded ? 0 : chromeHeaderHeight ?? 0);
+    const headerHeight = embedded ? 0 : chromeHeaderHeight ?? 0;
+    const transparentBackground = embedded ?? false;
+    const styles = useStyles2(getStyles, headerHeight, transparentBackground, model);
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
     model.initializeHistograms();
 
@@ -405,17 +408,19 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
   });
 }
 
-function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded: boolean, trail: DataTrail) {
+  const background = getAppBackgroundColor(theme, trail);
+
   return {
     container: css({
       flexGrow: 1,
       display: 'flex',
       gap: theme.spacing(1),
       flexDirection: 'column',
-      background: theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas,
       padding: theme.spacing(1, 2),
       position: 'relative',
-      paddingTop: chromeHeaderHeight,
+      paddingTop: headerHeight,
+      background,
     }),
     body: css({
       flexGrow: 1,
@@ -430,9 +435,9 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       alignItems: 'flex-end',
       flexWrap: 'wrap',
       position: 'sticky',
-      background: theme.isDark ? theme.colors.background.canvas : theme.colors.background.primary,
+      background,
       zIndex: theme.zIndex.navbarFixed,
-      top: chromeHeaderHeight,
+      top: headerHeight,
       borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
     settingsInfo: css({
