@@ -4,8 +4,8 @@ import React from 'react';
 
 import { Wingman } from 'App/Routes';
 import { newMetricsTrail } from 'utils';
-import { parsePromQLQuery } from 'utils/utils.promql';
 
+import { parsePromQLQuery } from '../extensions/links';
 import pluginJson from '../plugin.json';
 
 interface LabelBreakdownProps {
@@ -26,13 +26,13 @@ function toSceneTime(time: string | number): string {
 }
 
 const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
-  const { metricNames, labelFilters } = parsePromQLQuery(query);
+  const { metric, labels } = parsePromQLQuery(query);
   const from = toSceneTime(initialStart);
   const to = toSceneTime(initialEnd);
   const trail = newMetricsTrail({
-    metric: metricNames[0],
+    metric,
     initialDS: dataSource.uid,
-    initialFilters: labelFilters.map(({ label, op, value }) => ({
+    initialFilters: labels.map(({ label, op, value }) => ({
       key: label,
       operator: op,
       value,
