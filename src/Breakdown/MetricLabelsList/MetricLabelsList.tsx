@@ -12,7 +12,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Spinner, useStyles2 } from '@grafana/ui';
+import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
@@ -41,9 +41,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
     super({
       key: 'metric-labels-list',
       metric,
-      // TODO: we add the layout switcher here for now to keep the changes in the LabelBreakdownScene component minimal
-      // but we should refactor further and move it to LabelBreakdownScene
-      layoutSwitcher: new LayoutSwitcher(),
+      layoutSwitcher: new LayoutSwitcher({}),
       body: new SceneByVariableRepeater({
         variableName: VAR_GROUP_BY,
         initialPageSize: 60,
@@ -117,9 +115,13 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  public Selector({ model }: { model: MetricLabelsList }) {
+  public Controls({ model }: { model: MetricLabelsList }) {
     const { layoutSwitcher } = model.useState();
-    return <layoutSwitcher.Component model={layoutSwitcher} />;
+    return (
+      <Field label="View">
+        <layoutSwitcher.Component model={layoutSwitcher} />
+      </Field>
+    );
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricLabelsList>) => {

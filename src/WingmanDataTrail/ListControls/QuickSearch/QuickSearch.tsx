@@ -82,6 +82,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   }
 
   private onActivate() {
+    // TODO: refactor to decouple from variable names so we can use it in the Breakdown tab of the MetricScene
     const { variableNames } = this.state;
 
     const filteredVariable = sceneGraph.lookupVariable(variableNames.filtered, this) as MultiValueVariable;
