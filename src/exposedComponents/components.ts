@@ -1,3 +1,3 @@
-import { labelBreakdownConfig } from './LabelBreakdown';
+import { labelBreakdownConfig } from './LabelBreakdown/config';
 
 export const exposedComponentConfigs = [labelBreakdownConfig];

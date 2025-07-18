@@ -1,4 +1,4 @@
-import { type DataSourceApi, type PluginExtensionExposedComponentConfig } from '@grafana/data';
+import { type DataSourceApi } from '@grafana/data';
 import { SceneTimeRange } from '@grafana/scenes';
 import React from 'react';
 
@@ -7,10 +7,9 @@ import { Wingman } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
 import { newMetricsTrail } from 'utils';
 
-import { parsePromQLQuery } from '../extensions/links';
-import pluginJson from '../plugin.json';
+import { parsePromQLQuery } from '../../extensions/links';
 
-interface LabelBreakdownProps {
+export interface LabelBreakdownProps {
   query: string;
   initialStart: string | number;
   initialEnd: string | number;
@@ -51,9 +50,4 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
   );
 };
 
-export const labelBreakdownConfig: PluginExtensionExposedComponentConfig<LabelBreakdownProps> = {
-  id: `${pluginJson.id}/label-breakdown-component/v1`,
-  title: 'Label Breakdown',
-  description: 'A metrics label breakdown view from the Metrics Drilldown app.',
-  component: LabelBreakdown,
-};
+export default LabelBreakdown;
