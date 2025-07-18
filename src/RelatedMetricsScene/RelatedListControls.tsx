@@ -52,7 +52,7 @@ export class RelatedListControls extends EmbeddedScene {
           }),
           new SceneFlexItem({
             width: 'auto',
-            body: new LayoutSwitcher(),
+            body: new LayoutSwitcher({}),
           }),
         ],
       }),
