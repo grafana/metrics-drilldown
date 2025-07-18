@@ -1,3 +1,4 @@
+import { css } from '@emotion/css';
 import { config } from '@grafana/runtime';
 import {
   QueryVariable,
@@ -10,6 +11,7 @@ import {
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
@@ -121,8 +123,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
     const { body } = model.useState();
+    const styles = useStyles2(getStyles);
+
     return (
-      <div data-testid="metric-scene">
+      <div className={styles.container} data-testid="metric-scene">
         <body.Component model={body} />
       </div>
     );
@@ -152,3 +156,14 @@ function getVariableSet(metric: string) {
     ],
   });
 }
+
+const getStyles = () => ({
+  container: css({
+    position: 'relative',
+    height: '100%',
+    width: '100%',
+    // Ensure proper flex behavior for sticky positioning
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+});

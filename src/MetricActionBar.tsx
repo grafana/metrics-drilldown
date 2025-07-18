@@ -13,6 +13,7 @@ import React from 'react';
 
 import { AutoVizPanel } from 'autoQuery/components/AutoVizPanel';
 import { UI_TEXT } from 'constants/ui';
+import { createAppUrl } from 'extensions/links';
 import { reportExploreMetrics } from 'interactions';
 import { METRIC_AUTOVIZPANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
@@ -97,16 +98,28 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
       <Box paddingY={1} data-testid="action-bar">
         <div className={styles.actions}>
           <Stack gap={1}>
-            <ToolbarButton
-              variant={'canvas'}
-              tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
-              onClick={() => {
-                reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
-                trail.publishEvent(new MetricSelectedEvent(undefined));
-              }}
-            >
-              Select new metric
-            </ToolbarButton>
+            {trail.state.embedded ? (
+              <LinkButton
+                href={createAppUrl(getUrlForTrail(trail))}
+                variant={'secondary'}
+                icon="arrow-right"
+                tooltip="Open in Metrics Drilldown"
+                onClick={() => reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' })}
+              >
+                Metrics Drilldown
+              </LinkButton>
+            ) : (
+              <ToolbarButton
+                variant={'canvas'}
+                tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
+                onClick={() => {
+                  reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
+                  trail.publishEvent(new MetricSelectedEvent(undefined));
+                }}
+              >
+                Select new metric
+              </ToolbarButton>
+            )}
             <ToolbarButton
               variant={'canvas'}
               icon="compass"
@@ -126,15 +139,6 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               tooltip={UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL}
               onClick={toggleBookmark}
             />
-            {trail.state.embedded && (
-              <LinkButton
-                href={getUrlForTrail(trail)}
-                variant={'secondary'}
-                onClick={() => reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' })}
-              >
-                Open
-              </LinkButton>
-            )}
           </Stack>
         </div>
 
