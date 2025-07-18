@@ -270,7 +270,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
         Object.assign(stateUpdate, this.getSceneUpdatesForNewMetricValue(values.metric, nativeHistogramMetric));
       }
-    } else if (values.metric == null && !this.state.metric) {
+    } else if (values.metric == null && !this.state.embedded) {
       stateUpdate.metric = undefined;
       stateUpdate.topScene = new MetricsReducer();
     }
