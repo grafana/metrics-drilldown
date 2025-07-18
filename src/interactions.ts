@@ -13,12 +13,11 @@ export type ViewName = 'metrics-reducer' | 'metric-details';
 
 type Interactions = {
   // User selected a label to view its breakdown.
-  label_selected: {
+  groupby_label_changed: {
     label: string;
-    cause: // By clicking the "select" button on that label's breakdown panel
-    | 'breakdown_panel'
-      // By clicking on the label selector at the top of the breakdown
-      | 'selector';
+  };
+  breakdown_panel_selected: {
+    label: string;
   };
   // User changed a label filter
   label_filter_changed: {

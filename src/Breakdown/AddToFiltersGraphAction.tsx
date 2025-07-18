@@ -3,6 +3,8 @@ import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObject
 import { Button } from '@grafana/ui';
 import React from 'react';
 
+import { VAR_FILTERS } from 'shared';
+
 import { reportExploreMetrics } from '../interactions';
 import { getTrailFor } from '../utils';
 import { isAdHocFiltersVariable } from '../utils/utils.variables';
@@ -13,7 +15,7 @@ export interface AddToFiltersGraphActionState extends SceneObjectState {
 
 export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphActionState> {
   public onClick = () => {
-    const variable = sceneGraph.lookupVariable('filters', this);
+    const variable = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (!isAdHocFiltersVariable(variable)) {
       return;
     }
