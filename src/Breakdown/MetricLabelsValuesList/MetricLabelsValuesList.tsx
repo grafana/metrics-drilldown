@@ -220,11 +220,16 @@ export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesLi
   }
 
   public Controls({ model }: { model: MetricLabelsValuesList }) {
-    const { quickSearch, layoutSwitcher, sortBySelector } = model.useState();
+    const { body, quickSearch, layoutSwitcher, sortBySelector } = model.useState();
+
     return (
       <>
-        <quickSearch.Component model={quickSearch} />
-        <sortBySelector.Component model={sortBySelector} />
+        {body instanceof SceneByFrameRepeater && (
+          <>
+            <quickSearch.Component model={quickSearch} />
+            <sortBySelector.Component model={sortBySelector} />
+          </>
+        )}
         <Field label="View">
           <layoutSwitcher.Component model={layoutSwitcher} />
         </Field>
