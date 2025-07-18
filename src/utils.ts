@@ -29,7 +29,7 @@ import { DataTrail } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { MetricScene } from './MetricScene';
-import { LOGS_METRIC, VAR_DATASOURCE_EXPR } from './shared';
+import { LOGS_METRIC, VAR_DATASOURCE_EXPR, VAR_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getClosestScopesFacade } from './utils/utils.scopes';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
@@ -126,7 +126,7 @@ export type SceneTimeRangeState = SceneObjectState & {
 };
 
 export function getFilters(scene: SceneObject) {
-  const filters = sceneGraph.lookupVariable('filters', scene);
+  const filters = sceneGraph.lookupVariable(VAR_FILTERS, scene);
   if (isAdHocFiltersVariable(filters)) {
     return filters.state.filters;
   }
