@@ -132,7 +132,7 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
     const seriesCount = seriesCountStats ? seriesCountStats.value : series.length;
     const description =
       series.length < seriesCount
-        ? `Showing only ${series.length} series out of ${seriesCount} to keep the data easy to read. Click on "Select" on this panel to view a breakdown of all the "${label}" label's values.`
+        ? `Showing only ${series.length} series out of ${seriesCount} to keep the data easy to read. Click on "Select" on this panel to view a breakdown of all the label's values.`
         : '';
 
     return {
