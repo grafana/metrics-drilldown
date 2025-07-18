@@ -143,6 +143,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   }
 
   // FIXME when searching then clicking on "Single" view, then back to (e.g.) "Grid"
+  // FIXME sync y axis after filtering
   public filter(searchText: string) {
     if (!this.panelData) {
       return;
