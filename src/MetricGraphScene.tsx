@@ -74,9 +74,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       position: 'sticky',
       paddingTop: theme.spacing(1),
       marginTop: `-${theme.spacing(1)}`,
-      // When embedded (headerHeight = 0), we need to account for app-controls height
-      // When not embedded (headerHeight > 0), stick to top of viewport accounting for header
-      top: headerHeight > 0 ? headerHeight : 'var(--app-controls-height, 0px)',
+      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px)`,
       zIndex: 10,
     }),
     nonSticky: css({
