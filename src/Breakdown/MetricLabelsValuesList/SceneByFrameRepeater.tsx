@@ -34,6 +34,7 @@ const DEFAULT_PAGE_SIZE_INCREMENT = 9;
 
 export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterState> {
   panelData: PanelData | null = null;
+  filteredPanelData: PanelData | null = null;
 
   public constructor({
     body,
@@ -77,6 +78,11 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
         dataProvider.subscribeToState((newState) => {
           if (newState.data) {
             this.panelData = newState.data;
+
+            if (!this.filteredPanelData) {
+              this.filteredPanelData = this.panelData;
+            }
+
             this.performRepeat(newState.data);
           }
         })
@@ -141,27 +147,32 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       return;
     }
 
+    if (!searchText) {
+      this.filteredPanelData = { ...this.panelData };
+      this.performRepeat(this.panelData);
+      return;
+    }
+
     const series = this.panelData.series || [];
     const allValues = series.map((s) => getLabelValueFromDataFrame(s));
 
     fuzzySearch(allValues, searchText, ([searchResults]) => {
-      const filteredSeries = searchResults.length
+      const filteredSeries = searchResults?.length
         ? series.filter((s) => searchResults.includes(getLabelValueFromDataFrame(s)))
         : [];
 
-      const panelData = {
+      this.filteredPanelData = {
         ...this.panelData,
         series: filteredSeries,
       } as PanelData;
 
-      this.performRepeat(panelData);
+      this.performRepeat(this.filteredPanelData);
     });
   }
 
   // FIXME
   public increaseBatchSize() {
-    const dataProvider = sceneGraph.getData(this);
-    const data = dataProvider.state.data;
+    const data = this.filteredPanelData;
     if (!data) {
       return;
     }
@@ -182,10 +193,8 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     });
   }
 
-  // FIXME
   public useSizes() {
-    const dataProvider = sceneGraph.getData(this);
-    const data = dataProvider.state.data;
+    const data = this.filteredPanelData;
 
     const { currentBatchSize, pageSizeIncrement } = this.useState();
     const total = data ? data.series.length : 0;

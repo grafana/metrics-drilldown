@@ -17,6 +17,7 @@ import {
 } from '@grafana/scenes';
 import { SortOrder } from '@grafana/schema';
 import { Field, Spinner, TooltipDisplayMode, useStyles2 } from '@grafana/ui';
+import { debounce } from 'lodash';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
@@ -24,7 +25,10 @@ import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
 import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
-import { BreakdownSearchScene } from 'Breakdown/MetricLabelsValuesList/BreakdownSearchScene';
+import {
+  BreakdownQuickSearch,
+  type BreakdownQuickSearchState,
+} from 'Breakdown/MetricLabelsValuesList/BreakdownQuickSearch';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -42,7 +46,7 @@ interface MetricLabelsValuesListState extends SceneObjectState {
   metric: string;
   label: string;
   $data: SceneDataTransformer;
-  quickSearch: BreakdownSearchScene;
+  quickSearch: BreakdownQuickSearch;
   layoutSwitcher: LayoutSwitcher;
   sortBySelector: SortBySelector;
   body?: SceneByFrameRepeater | VizPanel;
@@ -68,7 +72,7 @@ export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesLi
         }),
         transformations: [addUnspecifiedLabel(label)],
       }),
-      quickSearch: new BreakdownSearchScene('labels'),
+      quickSearch: new BreakdownQuickSearch(), // TODO: replace by the existing QuickSearch component
       layoutSwitcher: new LayoutSwitcher({
         options: [
           { label: 'Single', value: LayoutType.SINGLE },
@@ -84,8 +88,25 @@ export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesLi
   }
 
   private onActivate() {
-    // TODO: filtering & sorting
+    // TODO: sorting
+    this.subscribeToQuickSearchChange();
     this.subscribeToLayoutChange();
+  }
+
+  // FIXME when data provider receives new data (e.g. after clicking on the refresh button)
+  private subscribeToQuickSearchChange() {
+    const quickSearch = sceneGraph.findByKeyAndType(this, 'breakdown-quick-search', BreakdownQuickSearch);
+
+    const onChangeState = debounce((newState: BreakdownQuickSearchState, prevState?: BreakdownQuickSearchState) => {
+      if (newState.value !== prevState?.value) {
+        const byFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0];
+        if (byFrameRepeater) {
+          byFrameRepeater.filter(newState.value);
+        }
+      }
+    }, 250);
+
+    this._subs.add(quickSearch.subscribeToState(onChangeState));
   }
 
   private subscribeToLayoutChange() {
@@ -110,14 +131,6 @@ export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesLi
 
     const byFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0] || this.buildByFrameRepeater();
     const body = byFrameRepeater.state.body as SceneCSSGridLayout;
-
-    setTimeout(() => {
-      byFrameRepeater.filter('xxx');
-    }, 1500);
-
-    setTimeout(() => {
-      byFrameRepeater.filter('rec');
-    }, 3000);
 
     body.setState({
       templateColumns: layout === LayoutType.ROWS ? GRID_TEMPLATE_ROWS : GRID_TEMPLATE_COLUMNS,
