@@ -10,7 +10,6 @@ services:
         grafana_version: ${GRAFANA_VERSION:-11.5.3}
         development: ${DEVELOPMENT:-false}
         anonymous_auth_enabled: ${ANONYMOUS_AUTH_ENABLED:-true}
-        livereload_port: ${WEBPACK_LIVERELOAD_PORT:-35729}
     ports:
       - 3000:3000/tcp
     volumes:
