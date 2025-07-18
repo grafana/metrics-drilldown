@@ -2,7 +2,9 @@ import { type DataSourceApi, type PluginExtensionExposedComponentConfig } from '
 import { SceneTimeRange } from '@grafana/scenes';
 import React from 'react';
 
+import { ErrorView } from 'App/ErrorView';
 import { Wingman } from 'App/Routes';
+import { useCatchExceptions } from 'App/useCatchExceptions';
 import { newMetricsTrail } from 'utils';
 
 import { parsePromQLQuery } from '../extensions/links';
@@ -26,6 +28,7 @@ function toSceneTime(time: string | number): string {
 }
 
 const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
+  const [error] = useCatchExceptions();
   const { metric, labels } = parsePromQLQuery(query);
   const from = toSceneTime(initialStart);
   const to = toSceneTime(initialEnd);
@@ -43,7 +46,7 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
 
   return (
     <div data-testid="metrics-drilldown-embedded-label-breakdown">
-      <Wingman trail={trail} />
+      {error ? <ErrorView error={error} /> : <Wingman trail={trail} />}
     </div>
   );
 };
