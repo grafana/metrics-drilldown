@@ -1,10 +1,12 @@
-import { type DataSourceApi } from '@grafana/data';
+import { type DataSourceApi, type PluginExtensionExposedComponentConfig } from '@grafana/data';
 import { SceneTimeRange } from '@grafana/scenes';
 import React from 'react';
 
 import { Wingman } from 'App/Routes';
 import { newMetricsTrail } from 'utils';
 import { parsePromQLQuery } from 'utils/utils.promql';
+
+import pluginJson from '../plugin.json';
 
 interface LabelBreakdownProps {
   query: string;
@@ -13,18 +15,20 @@ interface LabelBreakdownProps {
   dataSource: DataSourceApi;
 }
 
-function formatTime(time: string | number) {
+function toSceneTime(time: string | number): string {
   if (typeof time === 'number') {
+    // Convert a unix timestamp to a date string that SceneTimeRange can use
     return new Date(time).toISOString();
   }
 
+  // Could be 'now', 'now-1h', etc. or a date string
   return time;
 }
 
-export const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
+const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
   const { metricNames, labelFilters } = parsePromQLQuery(query);
-  const from = formatTime(initialStart);
-  const to = formatTime(initialEnd);
+  const from = toSceneTime(initialStart);
+  const to = toSceneTime(initialEnd);
   const trail = newMetricsTrail({
     metric: metricNames[0],
     initialDS: dataSource.uid,
@@ -42,4 +46,11 @@ export const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: 
       <Wingman trail={trail} />
     </div>
   );
+};
+
+export const labelBreakdownConfig: PluginExtensionExposedComponentConfig<LabelBreakdownProps> = {
+  id: `${pluginJson.id}/label-breakdown-component/v1`,
+  title: 'Label Breakdown',
+  description: 'A metrics label breakdown view from the Metrics Drilldown app.',
+  component: LabelBreakdown,
 };
