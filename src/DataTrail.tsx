@@ -336,6 +336,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       resizeObserver.observe(appControls);
 
       return () => {
+        // Clean up
         resizeObserver.disconnect();
         document.documentElement.style.removeProperty('--app-controls-height');
       };
@@ -456,8 +457,11 @@ function getBaseFiltersForMetric(metric?: string): AdHocVariableFilter[] {
 
 function updateAppControlsHeight() {
   const appControls = document.querySelector('[data-testid="app-controls"]');
-  if (appControls) {
-    const height = appControls.getBoundingClientRect().height;
-    document.documentElement.style.setProperty('--app-controls-height', `${height}px`);
+
+  if (!appControls) {
+    return;
   }
+
+  const { height } = appControls.getBoundingClientRect();
+  document.documentElement.style.setProperty('--app-controls-height', `${height}px`);
 }
