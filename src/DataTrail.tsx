@@ -318,10 +318,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     // Set CSS custom property for app-controls height in embedded mode
     useEffect(() => {
-      if (!embedded) {
-        return;
-      }
-
       // Update on mount and when controls change
       updateAppControlsHeight();
 
