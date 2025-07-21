@@ -12,8 +12,9 @@ import React from 'react';
 
 import { EventResetSyncYAxis } from 'Breakdown/MetricLabelsList/events/EventResetSyncYAxis';
 import { sortSeries, type SortSeriesByOption } from 'services/sorting';
+import { type CountsData } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
+import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 
-import { BreakdownQuickSearch } from './BreakdownQuickSearch';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { SortBySelector } from './SortBySelector';
 
@@ -38,6 +39,7 @@ interface SceneByFrameRepeaterState extends SceneObjectState {
   loadingLayout?: SceneObject;
   errorLayout?: SceneObject;
   emptyLayout?: SceneObject;
+  counts: CountsData;
 }
 
 const DEFAULT_INITIAL_PAGE_SIZE = 120;
@@ -67,6 +69,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     pageSizeIncrement?: SceneByFrameRepeaterState['pageSizeIncrement'];
   }) {
     super({
+      key: 'breakdown-by-frame-repeater',
       $behaviors,
       body,
       getLayoutChild,
@@ -79,6 +82,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       loadingLayout: undefined,
       errorLayout: undefined,
       emptyLayout: undefined,
+      counts: { current: 0, total: 0 },
     });
 
     this.addActivationHandler(() => {
@@ -132,6 +136,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
         errorLayout: undefined,
         loadingLayout: undefined,
         currentBatchSize: 0,
+        counts: { current: 0, total: data.series.length },
       });
       return;
     }
@@ -141,6 +146,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       errorLayout: undefined,
       emptyLayout: undefined,
       currentBatchSize: this.state.initialPageSize,
+      counts: { current: filteredSeries.length, total: data.series.length },
     });
 
     const newChildren: SceneObject[] = filteredSeries
@@ -148,13 +154,11 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       .map((s, i) => this.state.getLayoutChild(data, s, i))
       .filter(Boolean) as SceneObject[];
 
-    this.state.body.setState({
-      children: newChildren,
-    });
+    this.state.body.setState({ children: newChildren });
   }
 
   private initFilterAndSort() {
-    this.searchText = sceneGraph.findByKeyAndType(this, 'breakdown-quick-search', BreakdownQuickSearch).state.value;
+    this.searchText = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch).state.value;
     this.sortBy = sceneGraph.findByKeyAndType(this, 'breakdown-sort-by', SortBySelector).state.value.value;
   }
 
@@ -194,10 +198,6 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   }
 
   public filter(searchText: string) {
-    if (searchText === this.searchText) {
-      return;
-    }
-
     this.searchText = searchText;
 
     const { data } = sceneGraph.getData(this).state;
@@ -208,10 +208,6 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   }
 
   public sort(sortBy: SortSeriesByOption) {
-    if (sortBy === this.sortBy) {
-      return;
-    }
-
     this.sortBy = sortBy;
 
     const { data } = sceneGraph.getData(this).state;
@@ -254,6 +250,14 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       increment,
       current: currentBatchSize,
       total,
+    };
+  }
+
+  public getCounts() {
+    const { data } = sceneGraph.getData(this).state;
+    return {
+      current: 0,
+      total: data ? data.series.length : 0,
     };
   }
 

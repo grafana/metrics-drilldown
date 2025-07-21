@@ -26,20 +26,18 @@ import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
 import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
-import {
-  BreakdownQuickSearch,
-  type BreakdownQuickSearchState,
-} from 'Breakdown/MetricLabelValuesList/BreakdownQuickSearch';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
+import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
+import { LabelValuesCountsProvider } from './LabelValuesCountProvider';
 import { SceneByFrameRepeater } from './SceneByFrameRepeater';
 import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 
@@ -47,7 +45,7 @@ interface MetricLabelsValuesListState extends SceneObjectState {
   metric: string;
   label: string;
   $data: SceneDataTransformer;
-  quickSearch: BreakdownQuickSearch;
+  quickSearch: QuickSearch;
   layoutSwitcher: LayoutSwitcher;
   sortBySelector: SortBySelector;
   body?: SceneByFrameRepeater | VizPanel;
@@ -73,7 +71,12 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         }),
         transformations: [addUnspecifiedLabel(label)],
       }),
-      quickSearch: new BreakdownQuickSearch(), // TODO: replace by the existing QuickSearch component with a proper CountsProvider
+      quickSearch: new QuickSearch({
+        urlSearchParamName: 'breakdownSearchText',
+        targetName: 'label value',
+        countsProvider: new LabelValuesCountsProvider(),
+        displayCounts: true,
+      }),
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -94,9 +97,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private subscribeToQuickSearchChange() {
-    const quickSearch = sceneGraph.findByKeyAndType(this, 'breakdown-quick-search', BreakdownQuickSearch);
+    const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
 
-    const onChangeState = debounce((newState: BreakdownQuickSearchState, prevState?: BreakdownQuickSearchState) => {
+    const onChangeState = debounce((newState, prevState) => {
       if (newState.value !== prevState?.value) {
         const byFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0];
         if (byFrameRepeater) {
@@ -246,13 +249,16 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   public Controls({ model }: { model: MetricLabelValuesList }) {
+    const styles = useStyles2(getStyles); // eslint-disable-line react-hooks/rules-of-hooks
     const { body, quickSearch, layoutSwitcher, sortBySelector } = model.useState();
 
     return (
       <>
         {body instanceof SceneByFrameRepeater && (
           <>
-            <quickSearch.Component model={quickSearch} />
+            <Field className={styles.quickSearchField} label="Search">
+              <quickSearch.Component model={quickSearch} />
+            </Field>
             <sortBySelector.Component model={sortBySelector} />
           </>
         )}
@@ -337,6 +343,9 @@ function getStyles(theme: GrafanaTheme2) {
         height: '40px',
         borderRadius: '8px',
       },
+    }),
+    quickSearchField: css({
+      flexGrow: 1,
     }),
   };
 }
