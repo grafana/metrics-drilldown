@@ -1,11 +1,9 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
-  sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   VariableDependencyConfig,
-  type MultiValueVariable,
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
@@ -15,19 +13,16 @@ import React, { type KeyboardEvent } from 'react';
 
 import { reportExploreMetrics } from 'interactions';
 import { VAR_DATASOURCE } from 'shared';
-import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
 
+import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
+
 interface QuickSearchState extends SceneObjectState {
   urlSearchParamName: string;
   targetName: string;
-  variableNames: {
-    nonFiltered: string;
-    filtered: string;
-  };
-  value: string;
-  counts: { current: number; total: number };
+  countsProvider: CountsProvider;
   displayCounts: boolean;
+  value: string;
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
@@ -57,62 +52,22 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   public constructor({
     urlSearchParamName,
     targetName,
-    variableNames,
+    countsProvider,
     displayCounts,
   }: {
     urlSearchParamName: QuickSearchState['urlSearchParamName'];
     targetName: QuickSearchState['targetName'];
-    variableNames: QuickSearchState['variableNames'];
+    countsProvider: QuickSearchState['countsProvider'];
     displayCounts?: QuickSearchState['displayCounts'];
   }) {
     super({
       key: 'quick-search',
       urlSearchParamName,
       targetName,
-      variableNames,
-      value: '',
-      counts: {
-        current: 0,
-        total: 0,
-      },
+      countsProvider,
       displayCounts: Boolean(displayCounts),
+      value: '',
     });
-
-    this.addActivationHandler(this.onActivate.bind(this));
-  }
-
-  private onActivate() {
-    // TODO: refactor to decouple from variable names so we can use it in the Breakdown tab of the MetricScene
-    const { variableNames } = this.state;
-
-    const filteredVariable = sceneGraph.lookupVariable(variableNames.filtered, this) as MultiValueVariable;
-    const nonFilteredVariable = sceneGraph.lookupVariable(variableNames.nonFiltered, this) as MultiValueVariable;
-
-    this._subs.add(
-      filteredVariable.subscribeToState((newState, prevState) => {
-        if (!newState.loading && !prevState.loading && !areArraysEqual(newState.options, prevState.options)) {
-          this.setState({
-            counts: {
-              current: newState.options.length,
-              total: nonFilteredVariable.state.options.length,
-            },
-          });
-        }
-      })
-    );
-
-    this._subs.add(
-      nonFilteredVariable.subscribeToState((newState, prevState) => {
-        if (!areArraysEqual(newState.options, prevState.options)) {
-          this.setState({
-            counts: {
-              current: filteredVariable.state.options.length,
-              total: newState.options.length,
-            },
-          });
-        }
-      })
-    );
   }
 
   public toggleCountsDisplay(displayCounts: boolean) {
@@ -150,8 +105,9 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     }
   };
 
-  private getHumanFriendlyCountsMessage() {
-    const { targetName, counts, displayCounts } = this.state;
+  private useHumanFriendlyCountsMessage() {
+    const { targetName, countsProvider, displayCounts } = this.state;
+    const counts = countsProvider.useCounts();
 
     if (!displayCounts) {
       return {
@@ -178,8 +134,8 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   static readonly Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
-    const { targetName, value } = model.useState();
-    const { tagName, tooltipContent } = model.getHumanFriendlyCountsMessage();
+    const { targetName, value, countsProvider } = model.useState();
+    const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
 
     return (
       <Input
@@ -190,6 +146,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         prefix={<i className="fa fa-search" />}
         suffix={
           <>
+            <countsProvider.Component model={countsProvider} />
             {tagName && (
               <Tooltip content={tooltipContent} placement="top">
                 <Tag className={styles.counts} name={tagName} colorIndex={9} />
