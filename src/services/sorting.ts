@@ -86,7 +86,7 @@ const getOutliers = (series: DataFrame[]): OutlierOutput => {
   const joinedSeries = joined.fields.filter((f) => f.type === FieldType.number);
   const points = joinedSeries.map((series) => new Float64Array(series.values.filter(Boolean)));
 
-  return OutlierDetector.dbscan({ sensitivity: 0.4 }).preprocess(points).detect();
+  return OutlierDetector.dbscan({ sensitivity: 0.9 }).preprocess(points).detect();
 };
 
 const calculateOutlierValue = (outliers: OutlierOutput, index: number): number => {
