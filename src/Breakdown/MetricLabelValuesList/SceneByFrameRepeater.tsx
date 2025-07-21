@@ -9,8 +9,11 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
+import { sortSeries, type SortSeriesByOption } from 'services/sorting';
+
+import { BreakdownQuickSearch } from './BreakdownQuickSearch';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
-import { fuzzySearch } from '../../services/search';
+import { SortBySelector } from './SortBySelector';
 
 /**
  * Same idea as in our cusotm SceneByVariableRepeater.tsx, we create a Scene object with more capabilities than the official Scene object.
@@ -33,8 +36,8 @@ const DEFAULT_INITIAL_PAGE_SIZE = 120;
 const DEFAULT_PAGE_SIZE_INCREMENT = 9;
 
 export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterState> {
-  panelData: PanelData | null = null;
-  filteredPanelData: PanelData | null = null;
+  private searchText = '';
+  private sortBy?: SortSeriesByOption;
 
   public constructor({
     body,
@@ -69,20 +72,15 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
 
     this.addActivationHandler(() => {
       const dataProvider = sceneGraph.getData(this);
-
       if (!dataProvider) {
         throw new Error('No data provider found!');
       }
 
+      this.initFilterAndSort();
+
       this._subs.add(
         dataProvider.subscribeToState((newState) => {
           if (newState.data) {
-            this.panelData = newState.data;
-
-            if (!this.filteredPanelData) {
-              this.filteredPanelData = this.panelData;
-            }
-
             this.performRepeat(newState.data);
           }
         })
@@ -115,7 +113,9 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       return;
     }
 
-    if (!data.series.length) {
+    const filteredSeries = this.filterAndSort(data.series);
+
+    if (!filteredSeries.length) {
       this.setState({
         emptyLayout: this.state.getLayoutEmpty?.(),
         errorLayout: undefined,
@@ -132,9 +132,9 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       currentBatchSize: this.state.initialPageSize,
     });
 
-    const newChildren: SceneObject[] = data.series
+    const newChildren: SceneObject[] = filteredSeries
       .slice(0, this.state.initialPageSize)
-      .map((s, index) => this.state.getLayoutChild(data, s, index))
+      .map((s, i) => this.state.getLayoutChild(data, s, i))
       .filter(Boolean) as SceneObject[];
 
     this.state.body.setState({
@@ -142,48 +142,84 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     });
   }
 
-  // FIXME when searching then clicking on "Single" view, then back to (e.g.) "Grid"
-  // FIXME sync y axis after filtering
-  public filter(searchText: string) {
-    if (!this.panelData) {
-      return;
-    }
-
-    if (!searchText) {
-      this.filteredPanelData = { ...this.panelData };
-      this.performRepeat(this.panelData);
-      return;
-    }
-
-    const series = this.panelData.series || [];
-    const allValues = series.map((s) => getLabelValueFromDataFrame(s));
-
-    fuzzySearch(allValues, searchText, ([searchResults]) => {
-      const filteredSeries = searchResults?.length
-        ? series.filter((s) => searchResults.includes(getLabelValueFromDataFrame(s)))
-        : [];
-
-      this.filteredPanelData = {
-        ...this.panelData,
-        series: filteredSeries,
-      } as PanelData;
-
-      this.performRepeat(this.filteredPanelData);
-    });
+  private initFilterAndSort() {
+    this.searchText = sceneGraph.findByKeyAndType(this, 'breakdown-quick-search', BreakdownQuickSearch).state.value;
+    this.sortBy = sceneGraph.findByKeyAndType(this, 'breakdown-sort-by', SortBySelector).state.value.value;
   }
 
-  // FIXME
+  // FIXME: sync y axis after search and sort
+  private filterAndSort(series: PanelData['series']) {
+    let filteredSeries: DataFrame[] = [];
+
+    if (!this.searchText) {
+      filteredSeries = series;
+    } else {
+      const regexes = this.searchText
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .map((r) => {
+          try {
+            return new RegExp(r);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean) as RegExp[];
+
+      for (let i = 0; i < series.length; i += 1) {
+        const s = series[i];
+
+        if (regexes.some((regex) => regex.test(getLabelValueFromDataFrame(s)))) {
+          filteredSeries.push(s);
+        }
+      }
+    }
+
+    if (this.sortBy) {
+      return sortSeries(filteredSeries, this.sortBy);
+    }
+
+    return filteredSeries;
+  }
+
+  public filter(searchText: string) {
+    if (searchText === this.searchText) {
+      return;
+    }
+
+    this.searchText = searchText;
+
+    const { data } = sceneGraph.getData(this).state;
+    if (data) {
+      this.performRepeat(data);
+    }
+  }
+
+  public sort(sortBy: SortSeriesByOption) {
+    if (sortBy === this.sortBy) {
+      return;
+    }
+
+    this.sortBy = sortBy;
+
+    const { data } = sceneGraph.getData(this).state;
+    if (data) {
+      this.performRepeat(data);
+    }
+  }
+
   public increaseBatchSize() {
-    const data = this.filteredPanelData;
+    const { data } = sceneGraph.getData(this).state;
     if (!data) {
       return;
     }
 
     const newBatchSize = this.state.currentBatchSize + this.state.pageSizeIncrement;
 
-    const newChildren: SceneObject[] = data.series
+    const newChildren: SceneObject[] = this.filterAndSort(data.series)
       .slice(this.state.currentBatchSize, newBatchSize)
-      .map((s, index) => this.state.getLayoutChild(data, s, this.state.currentBatchSize + index))
+      .map((s, i) => this.state.getLayoutChild(data, s, i))
       .filter(Boolean) as SceneObject[];
 
     this.state.body.setState({
@@ -196,10 +232,9 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   }
 
   public useSizes() {
-    const data = this.filteredPanelData;
-
     const { currentBatchSize, pageSizeIncrement } = this.useState();
-    const total = data ? data.series.length : 0;
+    const { data } = sceneGraph.getData(this).state;
+    const total = data ? this.filterAndSort(data.series).length : 0;
     const remaining = total - currentBatchSize;
     const increment = remaining < pageSizeIncrement ? remaining : pageSizeIncrement;
 

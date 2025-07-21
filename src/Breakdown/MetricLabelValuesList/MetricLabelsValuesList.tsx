@@ -41,7 +41,7 @@ import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { SceneByFrameRepeater } from './SceneByFrameRepeater';
-import { SortBySelector } from './SortBySelector';
+import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: string;
@@ -73,7 +73,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         }),
         transformations: [addUnspecifiedLabel(label)],
       }),
-      quickSearch: new BreakdownQuickSearch(), // TODO: replace by the existing QuickSearch component
+      quickSearch: new BreakdownQuickSearch(), // TODO: replace by the existing QuickSearch component with a proper CountsProvider
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -90,12 +90,11 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private onActivate() {
-    // TODO: sorting
     this.subscribeToQuickSearchChange();
+    this.subscribeToSortByChange();
     this.subscribeToLayoutChange();
   }
 
-  // FIXME when data provider receives new data (e.g. after clicking on the refresh button)
   private subscribeToQuickSearchChange() {
     const quickSearch = sceneGraph.findByKeyAndType(this, 'breakdown-quick-search', BreakdownQuickSearch);
 
@@ -111,6 +110,21 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     this._subs.add(quickSearch.subscribeToState(onChangeState));
   }
 
+  private subscribeToSortByChange() {
+    const sortBySelector = sceneGraph.findByKeyAndType(this, 'breakdown-sort-by', SortBySelector);
+
+    const onChangeState = (newState: SortBySelectorState, prevState?: SortBySelectorState) => {
+      if (newState.value.value !== prevState?.value.value) {
+        const byFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0];
+        if (byFrameRepeater) {
+          byFrameRepeater.sort(newState.value.value);
+        }
+      }
+    };
+
+    this._subs.add(sortBySelector.subscribeToState(onChangeState));
+  }
+
   private subscribeToLayoutChange() {
     const layoutSwitcher = sceneGraph.findByKeyAndType(this, 'layout-switcher', LayoutSwitcher);
 
@@ -124,7 +138,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     // because MetricLabelsList is created dynamically when LabelBreakdownScene updates its body,
     // LayoutSwitcher is not properly connected to the URL synchronization system
     sceneUtils.syncStateFromSearchParams(layoutSwitcher, new URLSearchParams(window.location.search));
-    onChangeState(layoutSwitcher.state); // ensure layout when landing on the page
+    onChangeState(layoutSwitcher.state);
 
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }

@@ -98,6 +98,10 @@ const calculateOutlierValue = (outliers: OutlierOutput, index: number): number =
 
 export const sortSeries = memoize(
   (origSeries: DataFrame[], sortBy: SortSeriesByOption, direction: SortSeriesDirection = 'asc') => {
+    if (!origSeries.length) {
+      return [];
+    }
+
     const series = [...origSeries];
 
     // Alphabetical sorting

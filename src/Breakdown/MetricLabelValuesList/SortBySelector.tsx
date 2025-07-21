@@ -8,7 +8,7 @@ import { type SortSeriesByOption } from 'services/sorting';
 
 import { getSortByPreference, setSortByPreference } from '../../services/store';
 
-interface SortBySelectorState extends SceneObjectState {
+export interface SortBySelectorState extends SceneObjectState {
   target: 'fields' | 'labels';
   options: Array<ComboboxOption<SortSeriesByOption>>;
   value: ComboboxOption<SortSeriesByOption>;
@@ -37,6 +37,7 @@ export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
     const sortBy = getSortByPreference(state.target);
 
     super({
+      key: 'breakdown-sort-by',
       target: state.target,
       options: SortBySelector.DEFAULT_OPTIONS,
       value:
