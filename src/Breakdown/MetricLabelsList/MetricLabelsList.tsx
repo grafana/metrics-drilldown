@@ -43,7 +43,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
       metric,
       // TODO: we add the layout switcher here for now to keep the changes in the LabelBreakdownScene component minimal
       // but we should refactor further and move it to LabelBreakdownScene
-      layoutSwitcher: new LayoutSwitcher(),
+      layoutSwitcher: new LayoutSwitcher({}),
       body: new SceneByVariableRepeater({
         variableName: VAR_GROUP_BY,
         initialPageSize: 60,
