@@ -90,8 +90,6 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private onActivate() {
-    this.subscribeToQuickSearchChange();
-    this.subscribeToSortByChange();
     this.subscribeToLayoutChange();
   }
 
@@ -145,11 +143,13 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
   private updateBody(layout: LayoutType) {
     if (layout === LayoutType.SINGLE) {
+      // note: in this layout, the QuickSearch and SortBy controls are removed (see comment below)
       this.setState({ body: this.buildSinglePanel() });
       return;
     }
 
-    const byFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0] || this.buildByFrameRepeater();
+    const existingByFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0];
+    const byFrameRepeater = existingByFrameRepeater || this.buildByFrameRepeater();
     const body = byFrameRepeater.state.body as SceneCSSGridLayout;
 
     body.setState({
@@ -157,6 +157,12 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     });
 
     this.setState({ body: byFrameRepeater });
+
+    if (!existingByFrameRepeater) {
+      // we have to re-subscribe every time we build a new SceneByFrameRepeater instance because they are removed when switching to the "Single" layout (see comment above)
+      this.subscribeToQuickSearchChange();
+      this.subscribeToSortByChange();
+    }
   }
 
   private buildSinglePanel() {
@@ -175,18 +181,18 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const unit = queryDef.unit;
 
     return new SceneByFrameRepeater({
+      $behaviors: [
+        syncYAxis(),
+        new behaviors.CursorSync({
+          key: 'metricCrosshairSync',
+          sync: DashboardCursorSync.Crosshair,
+        }),
+      ],
       body: new SceneCSSGridLayout({
         children: [],
         isLazy: true,
         templateColumns: GRID_TEMPLATE_COLUMNS,
         autoRows: METRICS_VIZ_PANEL_HEIGHT,
-        $behaviors: [
-          new behaviors.CursorSync({
-            key: 'metricCrosshairSync',
-            sync: DashboardCursorSync.Crosshair,
-          }),
-          syncYAxis(),
-        ],
       }),
       getLayoutLoading: () =>
         new SceneReactObject({
@@ -224,7 +230,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
           .setTitle(labelValue)
           .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
           // publishTimeseriesData is required for the syncYAxis behavior
-          .setBehaviors([publishTimeseriesData({ sourcePanelKey: panelKey, forceYAxisUpdate: true })])
+          .setBehaviors([publishTimeseriesData()])
           .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
           .setHeaderActions(headerActions)
           .setShowMenuAlways(true)

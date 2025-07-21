@@ -2,7 +2,8 @@ import { sceneGraph, VizPanel, type SceneObject, type SceneObjectState } from '@
 import { cloneDeep, merge } from 'lodash';
 
 import { EventTimeseriesDataReceived } from 'Breakdown/MetricLabelsList/events/EventTimeseriesDataReceived';
-import { logger } from 'tracking/logger/logger';
+
+import { EventResetSyncYAxis } from '../events/EventResetSyncYAxis';
 
 /**
  * Synchronizes the Y-axis ranges across children timeseries panels by listening to data updates from publishTimeseriesData.
@@ -13,13 +14,21 @@ export function syncYAxis() {
     let max = Number.NEGATIVE_INFINITY;
     let min = Number.POSITIVE_INFINITY;
 
+    // reset after timerange changes
     const timeRangeSub = sceneGraph.getTimeRange(vizPanelsParent).subscribeToState(() => {
       max = Number.NEGATIVE_INFINITY;
       min = Number.POSITIVE_INFINITY;
     });
 
-    const eventSub = vizPanelsParent.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
-      const { series, forceYAxisUpdate, sourcePanelKey } = event.payload;
+    // reset after receiving the EventResetSyncYAxis event (e.g. see SceneByFrameRepeater)
+    const resetSub = vizPanelsParent.subscribeToEvent(EventResetSyncYAxis, () => {
+      max = Number.NEGATIVE_INFINITY;
+      min = Number.POSITIVE_INFINITY;
+    });
+
+    // new data coming...
+    const dataReceivedSub = vizPanelsParent.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
+      const { series } = event.payload;
       let newMax = max;
       let newMin = min;
 
@@ -30,24 +39,6 @@ export function syncYAxis() {
           newMax = Math.max(newMax, ...values);
           newMin = Math.min(newMin, ...values);
         }
-      }
-
-      if (forceYAxisUpdate) {
-        if (newMax > max || newMin < min) {
-          max = Math.max(max, newMax);
-          min = Math.min(min, newMin);
-          updateAllTimeseriesAxis(vizPanelsParent, max, min);
-          return;
-        }
-
-        const sourcePanel = sceneGraph.findByKeyAndType(vizPanelsParent, sourcePanelKey as string, VizPanel);
-        if (!sourcePanel) {
-          logger.warn(`Cannot find source panel for key="${sourcePanelKey}"! Will not sync y-axis.`);
-          return;
-        }
-
-        updateSingleTimeseriesAxis(sourcePanel, max, min);
-        return;
       }
 
       if (
@@ -62,7 +53,8 @@ export function syncYAxis() {
     });
 
     return () => {
-      eventSub.unsubscribe();
+      dataReceivedSub.unsubscribe();
+      resetSub.unsubscribe();
       timeRangeSub.unsubscribe();
     };
   };
@@ -76,14 +68,10 @@ function updateAllTimeseriesAxis(vizPanelsParent: SceneObject, max: number, min:
   ) as VizPanel[];
 
   for (const t of timeseries) {
-    updateSingleTimeseriesAxis(t, max, min);
+    t.clearFieldConfigCache(); // required for the fieldConfig update below
+
+    t.setState({
+      fieldConfig: merge(cloneDeep(t.state.fieldConfig), { defaults: { min, max } }),
+    });
   }
-}
-
-function updateSingleTimeseriesAxis(vizPanel: VizPanel, max: number, min: number) {
-  vizPanel.clearFieldConfigCache(); // required for the fieldConfig update below
-
-  vizPanel.setState({
-    fieldConfig: merge(cloneDeep(vizPanel.state.fieldConfig), { defaults: { min, max } }),
-  });
 }

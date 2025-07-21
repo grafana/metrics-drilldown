@@ -6,9 +6,11 @@ import {
   type SceneLayout,
   type SceneObject,
   type SceneObjectState,
+  type SceneStatelessBehavior,
 } from '@grafana/scenes';
 import React from 'react';
 
+import { EventResetSyncYAxis } from 'Breakdown/MetricLabelsList/events/EventResetSyncYAxis';
 import { sortSeries, type SortSeriesByOption } from 'services/sorting';
 
 import { BreakdownQuickSearch } from './BreakdownQuickSearch';
@@ -16,9 +18,15 @@ import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { SortBySelector } from './SortBySelector';
 
 /**
- * Same idea as in our cusotm SceneByVariableRepeater.tsx, we create a Scene object with more capabilities than the official Scene object.
+ * Same idea as in our custom SceneByVariableRepeater.tsx, we create a Scene object with more capabilities than the official Scene object.
+ * Specifically, we're adding:
+ *
+ * 1. Support for pagination
+ * 2. Support for filtering and sorting (we may consider externalizing this to a separate class in the future)
+ * 3. Support for $behaviors, that is used to reset the y axis sync after filtering and/or sorting
  */
 interface SceneByFrameRepeaterState extends SceneObjectState {
+  $behaviors: Array<SceneObject | SceneStatelessBehavior>;
   body: SceneLayout;
   getLayoutChild(data: PanelData, frame: DataFrame, frameIndex: number): SceneObject | null;
   getLayoutLoading?: () => SceneObject;
@@ -40,6 +48,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   private sortBy?: SortSeriesByOption;
 
   public constructor({
+    $behaviors,
     body,
     getLayoutChild,
     getLayoutLoading,
@@ -48,6 +57,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     initialPageSize,
     pageSizeIncrement,
   }: {
+    $behaviors: SceneByFrameRepeaterState['$behaviors'];
     body: SceneByFrameRepeaterState['body'];
     getLayoutChild: SceneByFrameRepeaterState['getLayoutChild'];
     getLayoutLoading?: SceneByFrameRepeaterState['getLayoutLoading'];
@@ -57,6 +67,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     pageSizeIncrement?: SceneByFrameRepeaterState['pageSizeIncrement'];
   }) {
     super({
+      $behaviors,
       body,
       getLayoutChild,
       getLayoutLoading,
@@ -147,7 +158,6 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     this.sortBy = sceneGraph.findByKeyAndType(this, 'breakdown-sort-by', SortBySelector).state.value.value;
   }
 
-  // FIXME: sync y axis after search and sort
   private filterAndSort(series: PanelData['series']) {
     let filteredSeries: DataFrame[] = [];
 
@@ -177,7 +187,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     }
 
     if (this.sortBy) {
-      return sortSeries(filteredSeries, this.sortBy);
+      filteredSeries = sortSeries(filteredSeries, this.sortBy);
     }
 
     return filteredSeries;
@@ -192,6 +202,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
 
     const { data } = sceneGraph.getData(this).state;
     if (data) {
+      this.publishEvent(new EventResetSyncYAxis({}), true);
       this.performRepeat(data);
     }
   }
@@ -205,6 +216,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
 
     const { data } = sceneGraph.getData(this).state;
     if (data) {
+      this.publishEvent(new EventResetSyncYAxis({}), true);
       this.performRepeat(data);
     }
   }
