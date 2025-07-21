@@ -126,7 +126,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertLabelDropdown(optionLabel: string) {
-    await expect(this.getLabelDropdown().locator('input')).toHaveValue(optionLabel);
+    await expect(this.getLabelDropdown().getByText(optionLabel).first()).toBeVisible();
   }
 
   async selectLabel(label: string) {
