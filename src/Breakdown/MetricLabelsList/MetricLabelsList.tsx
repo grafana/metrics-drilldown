@@ -111,7 +111,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
       }
     };
 
-    // We  ensure layout when landing on the page:
+    // We ensure the proper layout when landing on the page:
     // because MetricLabelsList is created dynamically when LabelBreakdownScene updates its body,
     // LayoutSwitcher is not properly connected to the URL synchronization system
     sceneUtils.syncStateFromSearchParams(layoutSwitcher, new URLSearchParams(window.location.search));
