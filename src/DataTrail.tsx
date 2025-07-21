@@ -305,8 +305,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     const chromeHeaderHeight = useChromeHeaderHeight();
     const headerHeight = embedded ? 0 : chromeHeaderHeight ?? 0;
-    const transparentBackground = embedded ?? false;
-    const styles = useStyles2(getStyles, headerHeight, transparentBackground, model);
+    const styles = useStyles2(getStyles, headerHeight, model);
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
     model.initializeHistograms();
 
@@ -405,7 +404,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
   });
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded: boolean, trail: DataTrail) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
   const background = getAppBackgroundColor(theme, trail);
 
   return {
@@ -416,7 +415,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded: boolean
       flexDirection: 'column',
       padding: theme.spacing(1, 2),
       position: 'relative',
-      paddingTop: headerHeight,
       background,
     }),
     body: css({
