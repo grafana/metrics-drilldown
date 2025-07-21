@@ -52,7 +52,7 @@ export class ListControls extends EmbeddedScene {
           }),
           new SceneFlexItem({
             width: 'auto',
-            body: new LayoutSwitcher(),
+            body: new LayoutSwitcher({}),
           }),
         ],
       }),
