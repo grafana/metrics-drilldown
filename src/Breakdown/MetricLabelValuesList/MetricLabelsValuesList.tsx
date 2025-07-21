@@ -18,7 +18,6 @@ import {
 } from '@grafana/scenes';
 import { SortOrder } from '@grafana/schema';
 import { Field, Spinner, TooltipDisplayMode, useStyles2 } from '@grafana/ui';
-import { debounce } from 'lodash';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
@@ -30,6 +29,7 @@ import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
+import { EventQuickSearchChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
@@ -45,8 +45,8 @@ interface MetricLabelsValuesListState extends SceneObjectState {
   metric: string;
   label: string;
   $data: SceneDataTransformer;
-  quickSearch: QuickSearch;
   layoutSwitcher: LayoutSwitcher;
+  quickSearch: QuickSearch;
   sortBySelector: SortBySelector;
   body?: SceneByFrameRepeater | VizPanel;
 }
@@ -71,12 +71,6 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         }),
         transformations: [addUnspecifiedLabel(label)],
       }),
-      quickSearch: new QuickSearch({
-        urlSearchParamName: 'breakdownSearchText',
-        targetName: 'label value',
-        countsProvider: new LabelValuesCountsProvider(),
-        displayCounts: true,
-      }),
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -84,6 +78,12 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
           { label: 'Grid', value: LayoutType.GRID },
           { label: 'Rows', value: LayoutType.ROWS },
         ],
+      }),
+      quickSearch: new QuickSearch({
+        urlSearchParamName: 'breakdownSearchText',
+        targetName: 'label value',
+        countsProvider: new LabelValuesCountsProvider(),
+        displayCounts: true,
       }),
       sortBySelector: new SortBySelector({ target: 'labels' }),
       body: undefined,
@@ -97,22 +97,23 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private subscribeToQuickSearchChange() {
-    const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
+    // We ensure the proper quick search value when landing on the page:
+    // because MetricLabelsList is created dynamically when LabelBreakdownScene updates its body,
+    // QuickSearch is not properly connected to the URL synchronization system
+    sceneUtils.syncStateFromSearchParams(this.state.quickSearch, new URLSearchParams(window.location.search));
 
-    const onChangeState = debounce((newState, prevState) => {
-      if (newState.value !== prevState?.value) {
+    this._subs.add(
+      this.subscribeToEvent(EventQuickSearchChanged, (event) => {
         const byFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0];
         if (byFrameRepeater) {
-          byFrameRepeater.filter(newState.value);
+          byFrameRepeater.filter(event.payload.searchText);
         }
-      }
-    }, 250);
-
-    this._subs.add(quickSearch.subscribeToState(onChangeState));
+      })
+    );
   }
 
   private subscribeToSortByChange() {
-    const sortBySelector = sceneGraph.findByKeyAndType(this, 'breakdown-sort-by', SortBySelector);
+    const { sortBySelector } = this.state;
 
     const onChangeState = (newState: SortBySelectorState, prevState?: SortBySelectorState) => {
       if (newState.value.value !== prevState?.value.value) {
@@ -127,7 +128,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private subscribeToLayoutChange() {
-    const layoutSwitcher = sceneGraph.findByKeyAndType(this, 'layout-switcher', LayoutSwitcher);
+    const { layoutSwitcher } = this.state;
 
     const onChangeState = (newState: LayoutSwitcherState, prevState?: LayoutSwitcherState) => {
       if (newState.layout !== prevState?.layout) {
@@ -146,7 +147,6 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
   private updateBody(layout: LayoutType) {
     if (layout === LayoutType.SINGLE) {
-      // note: in this layout, the QuickSearch and SortBy controls are removed (see comment below)
       this.setState({ body: this.buildSinglePanel() });
       return;
     }
@@ -162,7 +162,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     this.setState({ body: byFrameRepeater });
 
     if (!existingByFrameRepeater) {
-      // we have to re-subscribe every time we build a new SceneByFrameRepeater instance because they are removed when switching to the "Single" layout (see comment above)
+      // we have to re-subscribe every time we build a new SceneByFrameRepeater instance because they are not rendered when switching to the "Single" layout (see comment above)
       this.subscribeToQuickSearchChange();
       this.subscribeToSortByChange();
     }
