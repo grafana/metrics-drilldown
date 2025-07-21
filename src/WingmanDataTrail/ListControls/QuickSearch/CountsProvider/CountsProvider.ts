@@ -13,7 +13,6 @@ export class CountsProvider<T extends CountsProviderState = CountsProviderState>
   constructor(state: Partial<T>) {
     super({
       ...state,
-      key: state.key || 'CountsProvider',
       counts: { current: 0, total: 0 },
     } as T);
   }
