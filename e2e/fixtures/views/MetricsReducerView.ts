@@ -59,6 +59,15 @@ export class MetricsReducerView extends DrilldownView {
     await this.getByTestId('metrics-drilldown-app').click(); // prevents the dropdown to appear
   }
 
+  async setAdHocFilter(labelName: string, operator: string, labelValue: string) {
+    await this.getByRole('combobox', { name: 'Filter by label values' }).click();
+    await this.getByRole('option', { name: labelName }).click();
+    await this.page.keyboard.type(operator);
+    await this.page.keyboard.press('Enter');
+    await this.page.keyboard.type(labelValue);
+    await this.page.keyboard.press('Enter');
+  }
+
   /* List controls */
 
   getListControls() {
@@ -83,9 +92,9 @@ export class MetricsReducerView extends DrilldownView {
     await expect(this.getSortByDropdown().getByText(expectedOptionName)).toBeVisible();
   }
 
-  async selectSortByOption(expectedOptionName: SortByOptionNames) {
+  async selectSortByOption(optionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
-    await this.page.getByRole('option', { name: expectedOptionName }).locator('span').click();
+    await this.page.getByRole('option', { name: optionName }).locator('span').click();
   }
 
   /* Layout switcher */
@@ -155,8 +164,8 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
   }
 
-  selectMetricsGroup(labelName: string, labelValue: string) {
-    this.getMetricsGroupByList()
+  async selectMetricsGroup(labelName: string, labelValue: string) {
+    await this.getMetricsGroupByList()
       .getByTestId(`${labelName}-${labelValue}-metrics-group`)
       .getByRole('button', { name: 'Select' })
       .first()

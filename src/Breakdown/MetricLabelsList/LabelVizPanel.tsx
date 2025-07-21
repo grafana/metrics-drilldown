@@ -14,7 +14,7 @@ import { TooltipDisplayMode, useStyles2 } from '@grafana/ui';
 import { merge } from 'lodash';
 import React from 'react';
 
-import { SelectLabelAction } from 'Breakdown/LabelBreakdownScene';
+import { SelectLabelAction } from 'Breakdown/SelectLabelAction';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -97,7 +97,7 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
       // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList)
       .setBehaviors([publishTimeseriesData()])
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setHeaderActions([new SelectLabelAction({ labelName: label })])
+      .setHeaderActions([new SelectLabelAction({ label })])
       .setMenu(new PanelMenu({ labelName: label }))
       .setShowMenuAlways(true)
       .build();
@@ -132,7 +132,7 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
     const seriesCount = seriesCountStats ? seriesCountStats.value : series.length;
     const description =
       series.length < seriesCount
-        ? `Showing only ${series.length} series out of ${seriesCount} to keep the data easy to read. Click on "Select" on this panel to view a breakdown of all the "${label}" label's values.`
+        ? `Showing only ${series.length} series out of ${seriesCount} to keep the data easy to read. Click on "Select" on this panel to view a breakdown of all the label's values.`
         : '';
 
     return {

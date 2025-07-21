@@ -33,7 +33,7 @@ export class BreakdownSearchScene extends SceneObjectBase<BreakdownSearchSceneSt
         value={filter}
         onChange={model.onValueFilterChange}
         onClear={model.clearValueFilter}
-        placeholder="Search for value"
+        placeholder="Quick search label values"
       />
     );
   };

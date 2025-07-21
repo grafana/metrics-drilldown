@@ -158,7 +158,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
    * normally occur through the call to `reportChangeInLabelFilters`.
    */
   public addFilterWithoutReportingInteraction(filter: AdHocVariableFilter) {
-    const variable = sceneGraph.lookupVariable('filters', this);
+    const variable = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (!isAdHocFiltersVariable(variable)) {
       return;
     }

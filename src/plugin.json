@@ -58,11 +58,19 @@
         "targets": ["grafana/dashboard/panel/menu", "grafana/explore/toolbar/action"],
         "title": "Open in Grafana Metrics Drilldown",
         "description": "Open current query in the Grafana Metrics Drilldown view"
+      },
+      {
+        "targets": ["grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha"],
+        "title": "Navigate to metrics drilldown",
+        "description": "Build a url path to the metrics drilldown"
       }
     ],
     "extensionPoints": [
       {
         "id": "grafana-exploremetrics-app/investigation/v1"
+      },
+      {
+        "id": "grafana-metricsdrilldown-app/open-in-logs-drilldown/v1"
       }
     ]
   }

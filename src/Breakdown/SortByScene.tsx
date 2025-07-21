@@ -4,24 +4,24 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Combobox, Field, IconButton, useStyles2, type ComboboxOption } from '@grafana/ui';
 import React from 'react';
 
+import { type SortSeriesByOption } from 'services/sorting';
+
 import { getSortByPreference, setSortByPreference } from '../services/store';
 
 export interface SortBySceneState extends SceneObjectState {
   target: 'fields' | 'labels';
-  sortBy: LabelBreakdownSortingOption;
+  sortBy: SortSeriesByOption;
 }
 
 export class SortCriteriaChanged extends BusEventBase {
-  constructor(public target: 'fields' | 'labels', public sortBy: LabelBreakdownSortingOption) {
+  constructor(public target: 'fields' | 'labels', public sortBy: SortSeriesByOption) {
     super();
   }
 
   public static readonly type = 'sort-criteria-changed';
 }
 
-export type LabelBreakdownSortingOption = 'outliers' | 'alphabetical' | 'alphabetical-reversed';
-
-const sortingOptions: Array<ComboboxOption<LabelBreakdownSortingOption>> = [
+const sortingOptions: Array<ComboboxOption<SortSeriesByOption>> = [
   {
     value: 'outliers',
     label: 'Outlying series',
@@ -48,7 +48,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
     });
   }
 
-  public onCriteriaChange = (criteria: ComboboxOption<LabelBreakdownSortingOption> | null) => {
+  public onCriteriaChange = (criteria: ComboboxOption<SortSeriesByOption> | null) => {
     if (!criteria?.value) {
       return;
     }
@@ -63,6 +63,7 @@ export class SortByScene extends SceneObjectBase<SortBySceneState> {
     const value = sortingOptions.find((option) => option.value === sortBy);
     return (
       <Field
+        data-testid="sort-by-select"
         htmlFor="sort-by-criteria"
         label={
           <div className={styles.sortByTooltip}>

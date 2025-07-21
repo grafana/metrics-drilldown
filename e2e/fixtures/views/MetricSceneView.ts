@@ -5,9 +5,12 @@ import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
 import { AppControls } from '../components/AppControls';
 import { QuickSearchInput } from '../components/QuickSearchInput';
 
+export type SortByOptionNames = 'Outlying series' | 'Name [A-Z]' | 'Name [Z-A]';
+
 export class MetricSceneView extends DrilldownView {
   public appControls: AppControls;
-  public quickSearch: QuickSearchInput;
+  public quickSearchLabelValues: QuickSearchInput;
+  public quickSearchRelatedMetrics: QuickSearchInput;
 
   private static readonly ACTION_BAR_TABS = ['Breakdown', 'Related metrics', 'Related logs'] as const;
 
@@ -15,7 +18,8 @@ export class MetricSceneView extends DrilldownView {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
 
     this.appControls = new AppControls(page);
-    this.quickSearch = new QuickSearchInput(page, 'Quick search related metrics');
+    this.quickSearchLabelValues = new QuickSearchInput(page, 'Quick search label values');
+    this.quickSearchRelatedMetrics = new QuickSearchInput(page, 'Quick search related metrics');
   }
 
   /* Navigation */
@@ -94,6 +98,10 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertPanelsList() {
+    // we wait for some time to make sure that the Y axis are synced
+    // TODO: how to improve this and not rely on an arbitrary timeout?
+    await this.waitForTimeout(1500);
+
     const panelsList = this.getPanelsList();
     await expect(panelsList).toBeVisible();
 
@@ -107,7 +115,7 @@ export class MetricSceneView extends DrilldownView {
 
   /* Breakdown tab */
 
-  async assertBreadownListControls() {
+  async assertDefaultBreadownListControls() {
     await this.assertLabelDropdown('All');
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
@@ -118,7 +126,34 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertLabelDropdown(optionLabel: string) {
-    await expect(this.getLabelDropdown().locator('input')).toHaveValue(optionLabel);
+    await expect(this.getLabelDropdown().getByText(optionLabel).first()).toBeVisible();
+  }
+
+  async selectLabel(label: string) {
+    await this.getLabelDropdown().locator('input').click();
+    await this.page.getByRole('option', { name: label }).click();
+  }
+
+  async assertBreadownListControls({ label, sortBy }: { label: string; sortBy: string }) {
+    await this.assertLabelDropdown(label);
+    await expect(this.quickSearchLabelValues.get()).toBeVisible();
+    await expect(this.getSortByDropdown()).toBeVisible();
+    await this.assertSelectedSortBy(sortBy);
+    await expect(this.getLayoutSwitcher()).toBeVisible();
+    await this.assertSelectedLayout('Grid');
+  }
+
+  getSortByDropdown() {
+    return this.page.getByTestId('sort-by-select');
+  }
+
+  async assertSelectedSortBy(expectedSortBy: string) {
+    await expect(this.getSortByDropdown().locator('input')).toHaveValue(expectedSortBy);
+  }
+
+  async selectSortByOption(optionName: SortByOptionNames) {
+    await this.getSortByDropdown().locator('input').click();
+    await this.page.getByRole('option', { name: optionName }).getByText(optionName).click();
   }
 
   /* Related metrics tab */
@@ -126,7 +161,7 @@ export class MetricSceneView extends DrilldownView {
   async assertRelatedMetricsListControls() {
     await this.assertPrefixFilterDropdown('All metric names');
 
-    await expect(this.quickSearch.get()).toBeVisible();
+    await expect(this.quickSearchRelatedMetrics.get()).toBeVisible();
 
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
