@@ -3,6 +3,7 @@ import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import { logger } from '../../../../tracking/logger/logger';
 import { extractMetricNames } from '../../../../utils/utils.promql';
 
+import type { MetricUsageDetails } from './fetchDashboardMetrics';
 interface AlertingRule {
   id: number;
   uid: string;
@@ -28,11 +29,23 @@ const usageRequestOptions: Partial<BackendSrvRequest> = {
   showErrorAlert: false,
 } as const;
 
+// TODO: update parseAlertingRules to do what the dashboards function does
+function transformCountsToAlertingUsage(counts: Record<string, number>): Record<string, MetricUsageDetails> {
+  const result: Record<string, MetricUsageDetails> = {};
+  for (const metric in counts) {
+    result[metric] = {
+      usageType: 'alerting-usage',
+      count: counts[metric],
+    };
+  }
+  return result;
+}
+
 /**
  * Fetches metric usage data from alerting rules
  * @returns A record mapping metric names to their occurrence count in alerting rules
  */
-export async function fetchAlertingMetrics(): Promise<Record<string, number>> {
+export async function fetchAlertingMetrics(): Promise<Record<string, MetricUsageDetails>> {
   try {
     const alertingRules = await getBackendSrv().get<AlertingRule[]>(
       '/api/v1/provisioning/alert-rules',
@@ -41,7 +54,7 @@ export async function fetchAlertingMetrics(): Promise<Record<string, number>> {
       usageRequestOptions
     );
 
-    return parseAlertingRules(alertingRules);
+    return transformCountsToAlertingUsage(parseAlertingRules(alertingRules));
   } catch (err) {
     const error = typeof err === 'string' ? new Error(err) : (err as Error);
     logger.error(error, {

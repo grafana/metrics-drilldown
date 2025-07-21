@@ -17,10 +17,9 @@ interface DashboardSearchItem {
   isStarred: boolean;
 }
 
-export interface MetricUsageDetails {
-  count: number;
-  dashboards: Record<string, number>; // e.g., {"Dashboard A": 2, "Dashboard B": 1}
-}
+export type MetricUsageDetails =
+  | { usageType: 'dashboard-usage'; count: number; dashboards: Record<string, number> } // e.g., {"Dashboard A": 2, "Dashboard B": 1}
+  | { usageType: 'alerting-usage'; count: number }; // TODO: implement `alerts: Record<string, number>`
 
 type MetricUsageMap = Record<string, MetricUsageDetails>;
 
@@ -120,12 +119,14 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard |
         // Count each metric occurrence
         for (const metric of metrics) {
           if (!dashboardData[metric]) {
-            dashboardData[metric] = { count: 0, dashboards: {} };
+            dashboardData[metric] = { usageType: 'dashboard-usage', count: 0, dashboards: {} };
           }
 
-          dashboardData[metric].count = dashboardData[metric].count + 1;
-
-          dashboardData[metric].dashboards[dashboardName] = (dashboardData[metric].dashboards[dashboardName] || 0) + 1;
+          dashboardData[metric].count++;
+          if (dashboardData[metric].usageType === 'dashboard-usage') {
+            dashboardData[metric].dashboards[dashboardName] =
+              (dashboardData[metric].dashboards[dashboardName] || 0) + 1;
+          }
         }
       }
     }

@@ -8,7 +8,6 @@ interface MetricsUsageState {
 }
 
 export type MetricUsageType = 'dashboard-usage' | 'alerting-usage';
-
 export class MetricUsageFetcher {
   private _usageState: Record<MetricUsageType, MetricsUsageState> = {
     'dashboard-usage': {
