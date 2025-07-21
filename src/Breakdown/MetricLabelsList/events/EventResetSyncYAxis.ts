@@ -1,7 +1,7 @@
 import { BusEventWithPayload } from '@grafana/data';
 
-interface EventTimeseriesDataReceivedPayload {}
+interface EventResetSyncYAxisPayload {}
 
-export class EventResetSyncYAxis extends BusEventWithPayload<EventTimeseriesDataReceivedPayload> {
+export class EventResetSyncYAxis extends BusEventWithPayload<EventResetSyncYAxisPayload> {
   public static readonly type = 'reset-sync-y-axis';
 }

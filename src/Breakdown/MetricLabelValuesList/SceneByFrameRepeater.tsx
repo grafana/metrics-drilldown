@@ -10,6 +10,7 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
+import { EventForceSyncYAxis } from 'Breakdown/MetricLabelsList/events/EventForceSyncYAxis';
 import { EventResetSyncYAxis } from 'Breakdown/MetricLabelsList/events/EventResetSyncYAxis';
 import { sortSeries, type SortSeriesByOption } from 'services/sorting';
 import { type CountsData } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
@@ -237,6 +238,8 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     this.setState({
       currentBatchSize: newBatchSize,
     });
+
+    this.publishEvent(new EventForceSyncYAxis({}), true);
   }
 
   public useSizes() {
