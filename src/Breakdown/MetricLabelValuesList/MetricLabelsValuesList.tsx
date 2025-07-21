@@ -28,7 +28,7 @@ import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/
 import {
   BreakdownQuickSearch,
   type BreakdownQuickSearchState,
-} from 'Breakdown/MetricLabelsValuesList/BreakdownQuickSearch';
+} from 'Breakdown/MetricLabelValuesList/BreakdownQuickSearch';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -52,7 +52,7 @@ interface MetricLabelsValuesListState extends SceneObjectState {
   body?: SceneByFrameRepeater | VizPanel;
 }
 
-export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesListState> {
+export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesListState> {
   constructor({
     metric,
     label,
@@ -74,6 +74,7 @@ export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesLi
       }),
       quickSearch: new BreakdownQuickSearch(), // TODO: replace by the existing QuickSearch component
       layoutSwitcher: new LayoutSwitcher({
+        urlSearchParamName: 'breakdownLayout',
         options: [
           { label: 'Single', value: LayoutType.SINGLE },
           { label: 'Grid', value: LayoutType.GRID },
@@ -219,7 +220,7 @@ export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesLi
     });
   }
 
-  public Controls({ model }: { model: MetricLabelsValuesList }) {
+  public Controls({ model }: { model: MetricLabelValuesList }) {
     const { body, quickSearch, layoutSwitcher, sortBySelector } = model.useState();
 
     return (
@@ -237,18 +238,18 @@ export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesLi
     );
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<MetricLabelsValuesList>) => {
+  public static readonly Component = ({ model }: SceneComponentProps<MetricLabelValuesList>) => {
     const { body } = model.useState();
 
     return (
       <>
-        {body instanceof VizPanel && <MetricLabelsValuesList.SingleMetricPanelComponent model={model} />}
-        {body instanceof SceneByFrameRepeater && <MetricLabelsValuesList.ByFrameRepeaterComponent model={model} />}
+        {body instanceof VizPanel && <MetricLabelValuesList.SingleMetricPanelComponent model={model} />}
+        {body instanceof SceneByFrameRepeater && <MetricLabelValuesList.ByFrameRepeaterComponent model={model} />}
       </>
     );
   };
 
-  private static readonly SingleMetricPanelComponent = ({ model }: SceneComponentProps<MetricLabelsValuesList>) => {
+  private static readonly SingleMetricPanelComponent = ({ model }: SceneComponentProps<MetricLabelValuesList>) => {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
 
@@ -259,7 +260,7 @@ export class MetricLabelsValuesList extends SceneObjectBase<MetricLabelsValuesLi
     );
   };
 
-  private static readonly ByFrameRepeaterComponent = ({ model }: SceneComponentProps<MetricLabelsValuesList>) => {
+  private static readonly ByFrameRepeaterComponent = ({ model }: SceneComponentProps<MetricLabelValuesList>) => {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
 

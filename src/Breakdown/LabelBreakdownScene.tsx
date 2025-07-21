@@ -11,24 +11,34 @@ import {
 import { Field, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { MetricScene } from '../MetricScene';
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
-import { MetricLabelsValuesList } from './MetricLabelsValuesList/MetricLabelsValuesList';
+import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelsValuesList';
 
 export interface LabelBreakdownSceneState extends SceneObjectState {
-  body?: MetricLabelsList | MetricLabelsValuesList;
+  metric: string;
+  body?: MetricLabelsList | MetricLabelValuesList;
 }
 
 export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneState> {
-  constructor() {
-    super({});
+  constructor({ metric }: { metric: LabelBreakdownSceneState['metric'] }) {
+    super({
+      metric,
+      body: undefined,
+    });
+
     this.addActivationHandler(this.onActivate.bind(this));
   }
 
   private onActivate() {
     const groupByVariable = this.getVariable();
+
+    groupByVariable.subscribeToState((newState, oldState) => {
+      if (newState.value !== oldState.value) {
+        this.updateBody(groupByVariable);
+      }
+    });
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
       this._subs.add(
@@ -37,12 +47,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
         })
       );
     }
-
-    groupByVariable.subscribeToState((newState, oldState) => {
-      if (newState.value !== oldState.value) {
-        this.updateBody(groupByVariable);
-      }
-    });
 
     this.updateBody(groupByVariable);
   }
@@ -56,35 +60,32 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   }
 
   private updateBody(groupByVariable: QueryVariable) {
-    const metricScene = sceneGraph.getAncestor(this, MetricScene);
+    const { metric } = this.state;
 
     this.setState({
       body: groupByVariable.hasAllValue()
-        ? new MetricLabelsList({ metric: metricScene.state.metric })
-        : new MetricLabelsValuesList({
-            metric: metricScene.state.metric,
-            label: groupByVariable.state.value as string,
-          }),
+        ? new MetricLabelsList({ metric })
+        : new MetricLabelValuesList({ metric, label: groupByVariable.state.value as string }),
     });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
-    const variable = model.getVariable();
+    const groupByVariable = model.getVariable();
 
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
           <Field label="By label">
-            <variable.Component model={variable} />
+            <groupByVariable.Component model={groupByVariable} />
           </Field>
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
-          {body instanceof MetricLabelsValuesList && <body.Controls model={body} />}
+          {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
         </div>
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
-          {body instanceof MetricLabelsValuesList && <body.Component model={body} />}
+          {body instanceof MetricLabelValuesList && <body.Component model={body} />}
         </div>
       </div>
     );
