@@ -6,9 +6,14 @@ export const addUnspecifiedLabel = (label: string) => () => (source: Observable<
     map((data: DataFrame[]) => {
       // eslint-disable-next-line sonarjs/no-nested-functions
       return data?.map((d) => {
+        if (!d?.fields[1]) {
+          return d;
+        }
+
         if (!d.fields[1].labels?.[label]) {
           d.fields[1].labels = { ...d.fields[1].labels, [label]: `<unspecified ${label}>` };
         }
+
         return d;
       });
     })
