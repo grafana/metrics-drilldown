@@ -5,7 +5,6 @@ import pluginJson from '../../src/plugin.json';
 import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { MetricSceneView } from './views/MetricSceneView';
 import { MetricsReducerView } from './views/MetricsReducerView';
-import { getGrafanaVersion } from '../config/playwright.config.common';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
@@ -21,9 +20,10 @@ export const test = base.extend<AppTestFixture>({
     });
     await use(configPage);
   },
-  expectToHaveScreenshot: async ({}, use) => {
+  expectToHaveScreenshot: async ({ page }, use) => {
     const expectToHaveScreenshot: AppTestFixture['expectToHaveScreenshot'] = async (locator, fileName, options) => {
-      await base.expect(locator).toHaveScreenshot(`${getGrafanaVersion()}-${fileName}`, options);
+      const grafanaVersion = await page.evaluate(() => window.grafanaBootData.settings['buildInfo']['version']);
+      await base.expect(locator).toHaveScreenshot(`${grafanaVersion}-${fileName}`, options);
     };
 
     await use(expectToHaveScreenshot);

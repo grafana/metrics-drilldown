@@ -15,10 +15,6 @@ const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
  */
 loadDotEnv({ path: resolve(process.cwd(), '.env') });
 
-export function getGrafanaVersion() {
-  return process.env.GRAFANA_VERSION;
-}
-
 export function getGrafanaUrl() {
   if (process.env.GRAFANA_URL) {
     return process.env.GRAFANA_URL;
