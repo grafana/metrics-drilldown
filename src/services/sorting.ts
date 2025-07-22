@@ -9,7 +9,7 @@ import {
 } from '@grafana/data';
 import { memoize } from 'lodash';
 
-import { logger } from 'tracking/logger/logger';
+import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 import { reportExploreMetrics } from '../interactions';
@@ -84,9 +84,9 @@ const getOutliers = (series: DataFrame[]): OutlierOutput => {
 
   // Get number fields: these are our series.
   const joinedSeries = joined.fields.filter((f) => f.type === FieldType.number);
-  const points = joinedSeries.map((series) => new Float64Array(series.values.filter(Boolean)));
+  const points = joinedSeries.map((series) => new Float64Array(series.values));
 
-  return OutlierDetector.dbscan({ sensitivity: 0.9 }).preprocess(points).detect();
+  return OutlierDetector.dbscan({ sensitivity: 0.9 }).detect(points);
 };
 
 const calculateOutlierValue = (outliers: OutlierOutput, index: number): number => {
@@ -98,6 +98,10 @@ const calculateOutlierValue = (outliers: OutlierOutput, index: number): number =
 
 export const sortSeries = memoize(
   (origSeries: DataFrame[], sortBy: SortSeriesByOption, direction: SortSeriesDirection = 'asc') => {
+    if (!origSeries.length) {
+      return [];
+    }
+
     const series = [...origSeries];
 
     // Alphabetical sorting
@@ -114,8 +118,9 @@ export const sortSeries = memoize(
       try {
         return sortByOutliers(series, direction);
       } catch (e) {
-        logger.error(e as Error, { message: 'Error while sorting by outlying series, fallback to stdDev' });
-        // ML sorting panicked, fallback to stdDev
+        const msg = `Error while sorting by outlying series: "${(e as Error).toString()}"!`;
+        displayWarning([msg, 'Falling back to standard deviation to identify the most variable series.']);
+
         return sortByFieldReducer(series, ReducerID.stdDev, direction);
       }
     }

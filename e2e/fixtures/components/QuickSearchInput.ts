@@ -13,7 +13,7 @@ export class QuickSearchInput {
 
   async enterText(searchText: string) {
     await this.get().fill(searchText);
-    await this.page.waitForTimeout(250); // see SceneQuickFilter.DEBOUNCE_DELAY
+    await this.page.waitForTimeout(250);
   }
 
   clear() {
