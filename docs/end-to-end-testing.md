@@ -92,3 +92,8 @@ In build time (PR and main branch), we run the same [dockerized Prometheus with 
 - In a terminal, execute: `./scripts/upgrade-playwright.sh 1.50.0 1.51.0`
 - Launch the E2E tests locally with Docker to verify that the new version works: `npm run e2e:ci`
 - Push the modified files to the PR
+
+### When launching the tests, I see more Prometheus metrics than expected
+
+- Make sure that there are no other local services that are sending metrics to Prometheus
+- Only the services described in the [docker-compose.yaml](../docker-compose.yaml) file should be running
