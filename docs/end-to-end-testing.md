@@ -65,7 +65,7 @@ The screenshots are generated in subfolders within the [e2e/tests](../e2e/tests)
 
 > [!IMPORTANT]
 > You will have to execute the command above for each Grafana version that the app supports.
-> Practically, it means updating your local `.env` file before executing the command or passing the GRAFANA_VERSION on the command line (e.g. `GRAFANA_VERSION=12.0.2 npm run e2e:ci`).
+> Practically, it means updating your local .env file before executing the command or passing the GRAFANA_VERSION on the command line (e.g. GRAFANA_VERSION=12.0.2 npm run e2e:ci).
 > If you don't know which version are currently supported, check a recent "CI" GitHub action execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step
 
 ### Regenerating screenshots
@@ -78,7 +78,7 @@ PLAYWRIGHT_ARGS="metrics-reducer-view.spec.ts -u" npm run e2e:ci
 
 > [!IMPORTANT]
 > You will have to execute the command above for each Grafana version that the app supports.
-> Practically, it means updating your local `.env` file before executing the command or passing the GRAFANA_VERSION on the command line (e.g. `GRAFANA_VERSION=12.0.2 npm run e2e:ci`).
+> Practically, it means updating your local .env file before executing the command or passing the GRAFANA_VERSION on the command line (e.g. GRAFANA_VERSION=12.0.2 npm run e2e:ci).
 > If you don't know which version are currently supported, check a recent "CI" GitHub action execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step
 
 ### CI build
