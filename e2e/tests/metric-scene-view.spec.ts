@@ -25,8 +25,9 @@ test.describe('Metrics Scene view', () => {
 
     test.describe('After selecting a label', () => {
       test.beforeEach(async ({ metricSceneView }) => {
-        await metricSceneView.selectLabel('instance');
-        await metricSceneView.assertBreadownListControls({ label: 'instance', sortBy: 'Outlying series' });
+        const LABEL = 'quantile'; // label chosen to test the outlying series detection (other labels won't have any outlier detected)
+        await metricSceneView.selectLabel(LABEL);
+        await metricSceneView.assertBreadownListControls({ label: LABEL, sortBy: 'Outlying series' });
       });
 
       test.describe('Sort by', () => {
@@ -54,7 +55,8 @@ test.describe('Metrics Scene view', () => {
 
       test.describe('Quick search', () => {
         test('Filters the panels', async ({ metricSceneView }) => {
-          await metricSceneView.quickSearchLabelValues.enterText(':5000');
+          await metricSceneView.selectSortByOption('Name [Z-A]');
+          await metricSceneView.quickSearchLabelValues.enterText('5');
 
           await metricSceneView.assertPanelsList();
 
