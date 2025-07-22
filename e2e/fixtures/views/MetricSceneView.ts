@@ -111,6 +111,9 @@ export class MetricSceneView extends DrilldownView {
 
     const panelsCount = await panelsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+
+    // TODO: find a better way
+    await this.waitForTimeout(1000); // Wait for an extra second for the panels to show data
   }
 
   /* Breakdown tab */

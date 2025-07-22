@@ -129,6 +129,9 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+
+    // TODO: find a better way
+    await this.waitForTimeout(1000); // Wait for an extra second for the panels to show data
   }
 
   /* Panels */
@@ -162,6 +165,9 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+
+    // TODO: find a better way
+    await this.waitForTimeout(1000); // Wait for an extra second for the panels to show data
   }
 
   async selectMetricsGroup(labelName: string, labelValue: string) {

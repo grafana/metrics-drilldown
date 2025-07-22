@@ -61,3 +61,5 @@ services:
       - ./src:/app/src
     command: ${PLAYWRIGHT_ARGS:-}
     profiles: [playwright]
+    environment:
+      GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.3}

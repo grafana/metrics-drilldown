@@ -15,6 +15,10 @@ const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
  */
 loadDotEnv({ path: resolve(process.cwd(), '.env') });
 
+export function getGrafanaVersion() {
+  return process.env.GRAFANA_VERSION;
+}
+
 export function getGrafanaUrl() {
   if (process.env.GRAFANA_URL) {
     return process.env.GRAFANA_URL;
@@ -48,7 +52,7 @@ export function config(config: CustomEnvConfig) {
       timeout: Number(config.expectTimeout) > 0 ? config.expectTimeout : 5000,
       toHaveScreenshot: {
         // tweak me with experience!
-        // currently, the max diff pixel ratio is 1920 * 1080 * 0.005 = 5184 pixels (see ./constants.ts for the viewport dimensions)
+        // currently, the max diff pixel ratio is 1920 * 1080 * 0.0025 = 5184 pixels (see ./constants.ts for the viewport dimensions)
         maxDiffPixelRatio: 0.0025,
       },
     },

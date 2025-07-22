@@ -1,17 +1,15 @@
-import { test as base, type AppConfigPage, type AppPage } from '@grafana/plugin-e2e';
+import { test as base, type AppConfigPage } from '@grafana/plugin-e2e';
+import { type Locator, type Page } from '@playwright/test';
 
 import pluginJson from '../../src/plugin.json';
-import {
-  DEFAULT_STATIC_URL_SEARCH_PARAMS,
-  DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY,
-  DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY,
-} from '../config/constants';
+import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { MetricSceneView } from './views/MetricSceneView';
 import { MetricsReducerView } from './views/MetricsReducerView';
+import { getGrafanaVersion } from '../config/playwright.config.common';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
-  gotoPage: (path?: string) => Promise<AppPage>;
+  expectToHaveScreenshot: (locator: Locator | Page, fileName: string, options?: Record<string, any>) => Promise<void>;
   metricsReducerView: MetricsReducerView;
   metricSceneView: MetricSceneView;
 };
@@ -23,27 +21,12 @@ export const test = base.extend<AppTestFixture>({
     });
     await use(configPage);
   },
-  gotoPage: async ({ gotoAppPage, page }, use) => {
-    await use(async (path) => {
-      const urlParams = DEFAULT_STATIC_URL_SEARCH_PARAMS;
-      const url = `${path}?${urlParams.toString()}`;
+  expectToHaveScreenshot: async ({}, use) => {
+    const expectToHaveScreenshot: AppTestFixture['expectToHaveScreenshot'] = async (locator, fileName, options) => {
+      await base.expect(locator).toHaveScreenshot(`${getGrafanaVersion()}-${fileName}`, options);
+    };
 
-      await page.addInitScript(
-        (keys) => {
-          keys.forEach((key) => {
-            window.localStorage.setItem(key, 'false');
-          });
-        },
-        [DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY, DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY]
-      );
-
-      const appPage = await gotoAppPage({
-        path: url,
-        pluginId: pluginJson.id,
-      });
-
-      return appPage;
-    });
+    await use(expectToHaveScreenshot);
   },
   metricsReducerView: async ({ page }, use) => {
     const metricsReducerView = new MetricsReducerView(page, DEFAULT_STATIC_URL_SEARCH_PARAMS);
