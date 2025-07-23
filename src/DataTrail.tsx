@@ -392,12 +392,10 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         expressionBuilder: (filters: AdHocVariableFilter[]) => {
           // remove any filters that include __name__ key in the expression
           // to prevent the metric name from being set twice in the query and causing an error.
-          const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
-          const filtered = [...filtersWithoutMetricName]
+          return filters
+            .filter((filter) => filter.key !== '__name__')
             .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
-
-          return filtered;
         },
       }),
     ],
