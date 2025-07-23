@@ -74,8 +74,10 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       position: 'sticky',
       paddingTop: theme.spacing(1),
       marginTop: `-${theme.spacing(1)}`,
-      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px)`,
       zIndex: 10,
+      // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
+      // This ensures the main graph sticks below the app-controls in embedded mode
+      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px)`,
     }),
     nonSticky: css({
       display: 'flex',
