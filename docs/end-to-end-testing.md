@@ -34,7 +34,7 @@ npm run dev
 And in another terminal tab, start Grafana and Prometheus:
 
 ```shell
-npm run server
+npm run e2e:server
 ```
 
 Then you can start the tests in interactive UI mode (with a built-in watch mode):
@@ -78,7 +78,7 @@ PLAYWRIGHT_ARGS="metrics-reducer-view.spec.ts -u" npm run e2e:ci
 
 > [!IMPORTANT]
 > You will have to execute the command above for each Grafana version that the app supports.
-> Practically, it means updating your local .env file before executing the command or passing the GRAFANA_VERSION on the command line (e.g. GRAFANA_VERSION=12.0.2 npm run e2e:ci).
+> Practically, it means updating your local .env file before executing the command or passing the GRAFANA_VERSION on the command line (e.g. GRAFANA_VERSION=12.0.2 PLAYWRIGHT_ARGS="metrics-reducer-view.spec.ts -u" npm run e2e:ci).
 > If you don't know which version are currently supported, check a recent "CI" GitHub action execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step
 
 ### CI build
@@ -89,9 +89,9 @@ In build time (PR and main branch), we run the same [dockerized Prometheus with 
 
 ### The build of my PR has failed, how can I see the test reports?
 
-- On your GitHub PR, next to the `CI / Playwright E2E tests` job, click on `View details`
-- On the GitHub actions page, click on `🏠 Summary`
-- At the bottom of the page, click on the `playwright-report-grafana-*` artifact that you want to download
+- On your GitHub PR, click on the `Checks` tab
+- In the left sidebar, click on the `CI`job, you should be in its `🏠 Summary` section
+- Scroll to the bottom of the page, click on the `playwright-report-grafana-*` artifact that you want to download
 - Unzip it and open the `test-reports/index.html` page
 - Navigate the failing tests to see screenshots and videos of what happened
 
