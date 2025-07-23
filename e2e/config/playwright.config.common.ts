@@ -42,7 +42,14 @@ type CustomEnvConfig = {
 
 export function config(config: CustomEnvConfig) {
   return defineConfig<PluginOptions>({
-    // Custom config
+    webServer: {
+      command: 'sleep infinity',
+      url: getGrafanaUrl(),
+      timeout: 30 * 1000,
+      reuseExistingServer: true,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
     reporter: config.reporter,
     expect: {
       timeout: Number(config.expectTimeout) > 0 ? config.expectTimeout : 5000,
