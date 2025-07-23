@@ -131,7 +131,7 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
 
     // TODO: find a better way
-    await this.waitForTimeout(3000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
+    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   /* Panels */
@@ -167,7 +167,7 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
 
     // TODO: find a better way
-    await this.waitForTimeout(3000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
+    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   async selectMetricsGroup(labelName: string, labelValue: string) {
