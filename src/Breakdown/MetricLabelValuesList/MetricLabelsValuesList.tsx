@@ -98,7 +98,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
   private subscribeToQuickSearchChange() {
     // We ensure the proper quick search value when landing on the page:
-    // because MetricLabelsList is created dynamically when LabelBreakdownScene updates its body,
+    // because MetricLabelValuesList is created dynamically when LabelBreakdownScene updates its body,
     // QuickSearch is not properly connected to the URL synchronization system
     sceneUtils.syncStateFromSearchParams(this.state.quickSearch, new URLSearchParams(window.location.search));
 
@@ -115,20 +115,25 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   private subscribeToSortByChange() {
     const { sortBySelector } = this.state;
 
-    const onChangeState = (newState: SortBySelectorState, prevState?: SortBySelectorState) => {
-      if (newState.value.value !== prevState?.value.value) {
-        const byFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0];
-        if (byFrameRepeater) {
-          byFrameRepeater.sort(newState.value.value);
+    this._subs.add(
+      sortBySelector.subscribeToState((newState: SortBySelectorState, prevState?: SortBySelectorState) => {
+        if (newState.value.value !== prevState?.value.value) {
+          const byFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0];
+          if (byFrameRepeater) {
+            byFrameRepeater.sort(newState.value.value);
+          }
         }
-      }
-    };
-
-    this._subs.add(sortBySelector.subscribeToState(onChangeState));
+      })
+    );
   }
 
   private subscribeToLayoutChange() {
     const { layoutSwitcher } = this.state;
+
+    // We ensure the proper layout when landing on the page:
+    // because MetricLabelValuesList is created dynamically when LabelBreakdownScene updates its body,
+    // LayoutSwitcher is not properly connected to the URL synchronization system
+    sceneUtils.syncStateFromSearchParams(layoutSwitcher, new URLSearchParams(window.location.search));
 
     const onChangeState = (newState: LayoutSwitcherState, prevState?: LayoutSwitcherState) => {
       if (newState.layout !== prevState?.layout) {
@@ -136,10 +141,6 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       }
     };
 
-    // We ensure the proper layout when landing on the page:
-    // because MetricLabelsList is created dynamically when LabelBreakdownScene updates its body,
-    // LayoutSwitcher is not properly connected to the URL synchronization system
-    sceneUtils.syncStateFromSearchParams(layoutSwitcher, new URLSearchParams(window.location.search));
     onChangeState(layoutSwitcher.state);
 
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
@@ -153,16 +154,15 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
     const existingByFrameRepeater = sceneGraph.findDescendents(this, SceneByFrameRepeater)[0];
     const byFrameRepeater = existingByFrameRepeater || this.buildByFrameRepeater();
-    const body = byFrameRepeater.state.body as SceneCSSGridLayout;
 
-    body.setState({
+    (byFrameRepeater.state.body as SceneCSSGridLayout).setState({
       templateColumns: layout === LayoutType.ROWS ? GRID_TEMPLATE_ROWS : GRID_TEMPLATE_COLUMNS,
     });
 
     this.setState({ body: byFrameRepeater });
 
     if (!existingByFrameRepeater) {
-      // we have to re-subscribe every time we build a new SceneByFrameRepeater instance because they are not rendered when switching to the "Single" layout (see comment above)
+      // we have to re-subscribe every time we build a new SceneByFrameRepeater instance because these controls (QuickSerach and SortBy) are not rendered when switching to the "Single" layout
       this.subscribeToQuickSearchChange();
       this.subscribeToSortByChange();
     }
@@ -170,10 +170,13 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
   private buildSinglePanel() {
     const { metric } = this.state;
+    const queryDef = getAutoQueriesForMetric(metric).breakdown;
+    const unit = queryDef.unit;
 
     return PanelBuilders.timeseries()
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
       .setOption('legend', { showLegend: true, placement: 'right' })
+      .setUnit(unit)
       .setTitle(metric)
       .build();
   }
@@ -184,6 +187,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const unit = queryDef.unit;
 
     return new SceneByFrameRepeater({
+      // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
       $behaviors: [
         syncYAxis(),
         new behaviors.CursorSync({
@@ -232,8 +236,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
           .vizBuilder()
           .setTitle(labelValue)
           .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
-          // publishTimeseriesData is required for the syncYAxis behavior
-          .setBehaviors([publishTimeseriesData()])
+          .setBehaviors([publishTimeseriesData()]) // publishTimeseriesData is required for the syncYAxis behavior
           .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
           .setHeaderActions(headerActions)
           .setShowMenuAlways(true)
