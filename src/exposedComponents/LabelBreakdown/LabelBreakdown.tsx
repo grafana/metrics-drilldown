@@ -1,4 +1,4 @@
-import { type DataSourceApi } from '@grafana/data';
+import { dateMath, type DataSourceApi } from '@grafana/data';
 import { SceneTimeRange } from '@grafana/scenes';
 import React from 'react';
 
@@ -17,13 +17,12 @@ export interface LabelBreakdownProps {
 }
 
 function toSceneTime(time: string | number): string {
-  if (typeof time === 'number') {
-    // Convert a unix timestamp to a date string that SceneTimeRange can use
-    return new Date(time).toISOString();
+  if (typeof time === 'string' && dateMath.isMathString(time)) {
+    // 'now', 'now-1h', etc.
+    return time;
   }
 
-  // Could be 'now', 'now-1h', etc. or a date string
-  return time;
+  return dateMath.toDateTime(new Date(time), { roundUp: false })!.toISOString();
 }
 
 const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
