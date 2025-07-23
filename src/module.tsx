@@ -2,6 +2,7 @@ import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
 
+import { exposedComponentConfigs } from 'exposedComponents/components';
 import { linkConfigs } from 'extensions/links';
 import { logger } from 'tracking/logger/logger';
 
@@ -32,4 +33,8 @@ export const plugin = new AppPlugin<{}>().setRootPage(App);
 
 for (const linkConfig of linkConfigs) {
   plugin.addLink(linkConfig);
+}
+
+for (const exposedComponent of exposedComponentConfigs) {
+  plugin.exposeComponent(exposedComponent);
 }

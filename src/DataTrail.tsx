@@ -40,6 +40,7 @@ import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from './sha
 import { getTrailStore } from './TrailStore/TrailStore';
 import { limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
+import { getAppBackgroundColor } from './utils/utils.styles';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 export interface DataTrailState extends SceneObjectState {
@@ -67,6 +68,7 @@ export interface DataTrailState extends SceneObjectState {
   nativeHistogramMetric: string;
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
+  urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -268,7 +270,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
         Object.assign(stateUpdate, this.getSceneUpdatesForNewMetricValue(values.metric, nativeHistogramMetric));
       }
-    } else if (values.metric == null) {
+    } else if (values.metric == null && !this.state.embedded) {
       stateUpdate.metric = undefined;
       stateUpdate.topScene = new MetricsReducer();
     }
@@ -301,8 +303,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const { controls, topScene, settings, pluginInfo, embedded } = model.useState();
 
-    const chromeHeaderHeight = useChromeHeaderHeight();
-    const styles = useStyles2(getStyles, embedded ? 0 : chromeHeaderHeight ?? 0);
+    const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
+    const headerHeight = embedded ? 0 : chromeHeaderHeight;
+    const styles = useStyles2(getStyles, headerHeight, model);
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
     model.initializeHistograms();
 
@@ -311,6 +314,28 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       const datasourceHelper = model.datasourceHelper;
       limitAdhocProviders(model, filtersVariable, datasourceHelper);
     }, [model]);
+
+    // Set CSS custom property for app-controls height in embedded mode
+    useEffect(() => {
+      // Update on mount and when controls change
+      updateAppControlsHeight();
+
+      // Use ResizeObserver to watch for height changes
+      const appControls = document.querySelector('[data-testid="app-controls"]');
+
+      if (!appControls) {
+        return;
+      }
+
+      const resizeObserver = new ResizeObserver(updateAppControlsHeight);
+      resizeObserver.observe(appControls);
+
+      return () => {
+        // Clean up
+        resizeObserver.disconnect();
+        document.documentElement.style.removeProperty('--app-controls-height');
+      };
+    }, [embedded, controls]);
 
     return (
       <div className={styles.container}>
@@ -326,7 +351,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           </div>
         )}
         {topScene && (
-          <UrlSyncContextProvider scene={topScene} createBrowserHistorySteps={true} updateUrlOnInit={true}>
+          <UrlSyncContextProvider
+            scene={topScene}
+            createBrowserHistorySteps={true}
+            updateUrlOnInit={true}
+            namespace={model.state.urlNamespace}
+          >
             <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
           </UrlSyncContextProvider>
         )}
@@ -335,9 +365,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
-export function getTopSceneFor(metric?: string, nativeHistogram?: boolean) {
+export function getTopSceneFor(metric?: string, nativeHistogram = false) {
   if (metric) {
-    return new MetricScene({ metric: metric, nativeHistogram: nativeHistogram ?? false });
+    return new MetricScene({ metric, nativeHistogram });
   } else {
     return new MetricsReducer();
   }
@@ -362,8 +392,8 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         expressionBuilder: (filters: AdHocVariableFilter[]) => {
           // remove any filters that include __name__ key in the expression
           // to prevent the metric name from being set twice in the query and causing an error.
-          const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
-          return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
+          return filters
+            .filter((filter) => filter.key !== '__name__')
             .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',');
         },
@@ -372,20 +402,24 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
   });
 }
 
-function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
+  const background = getAppBackgroundColor(theme, trail);
+
   return {
     container: css({
       flexGrow: 1,
       display: 'flex',
       gap: theme.spacing(1),
       flexDirection: 'column',
-      background: theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas,
       padding: theme.spacing(1, 2),
+      position: 'relative',
+      background,
     }),
     body: css({
       flexGrow: 1,
       display: 'flex',
       flexDirection: 'column',
+      minHeight: 0, // Allow body to shrink below its content size
     }),
     controls: css({
       display: 'flex',
@@ -394,9 +428,10 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       alignItems: 'flex-end',
       flexWrap: 'wrap',
       position: 'sticky',
-      background: theme.isDark ? theme.colors.background.canvas : theme.colors.background.primary,
+      background,
       zIndex: theme.zIndex.navbarFixed,
-      top: chromeHeaderHeight,
+      top: headerHeight,
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
     settingsInfo: css({
       display: 'flex',
@@ -410,4 +445,15 @@ function getBaseFiltersForMetric(metric?: string): AdHocVariableFilter[] {
     return [{ key: '__name__', operator: '=', value: metric }];
   }
   return [];
+}
+
+function updateAppControlsHeight() {
+  const appControls = document.querySelector('[data-testid="app-controls"]');
+
+  if (!appControls) {
+    return;
+  }
+
+  const { height } = appControls.getBoundingClientRect();
+  document.documentElement.style.setProperty('--app-controls-height', `${height}px`);
 }

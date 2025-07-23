@@ -25,7 +25,7 @@ import { lastValueFrom } from 'rxjs';
 import { logger } from 'tracking/logger/logger';
 
 import { ROUTES } from './constants';
-import { DataTrail } from './DataTrail';
+import { DataTrail, type DataTrailState } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { MetricScene } from './MetricScene';
@@ -42,11 +42,12 @@ export function getTrailSettings(model: SceneObject): DataTrailSettings {
   return sceneGraph.getAncestor(model, DataTrail).state.settings;
 }
 
-export function newMetricsTrail(initialDS?: string): DataTrail {
+export function newMetricsTrail(state?: Partial<DataTrailState>): DataTrail {
   return new DataTrail({
-    initialDS,
-    $timeRange: new SceneTimeRange({ from: 'now-1h', to: 'now' }),
-    embedded: false,
+    initialDS: state?.initialDS,
+    $timeRange: state?.$timeRange ?? new SceneTimeRange({ from: 'now-1h', to: 'now' }),
+    embedded: state?.embedded ?? false,
+    ...state,
   });
 }
 
