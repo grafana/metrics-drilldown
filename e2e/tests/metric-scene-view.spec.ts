@@ -31,13 +31,14 @@ test.describe('Metrics Scene view', () => {
       });
 
       test.describe('Quick search', () => {
-        test('Filters the panels', async ({ metricSceneView }) => {
+        test('Filters the panels', async ({ metricSceneView, expectToHaveScreenshot }) => {
           await metricSceneView.selectSortByOption('Name [Z-A]');
           await metricSceneView.quickSearchLabelValues.enterText('5');
 
           await metricSceneView.assertPanelsList();
 
-          await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
+          await expectToHaveScreenshot(
+            metricSceneView.getPanelsList(),
             'metric-scene-breakdown-label-quicksearch-panels-list.png'
           );
         });
@@ -66,20 +67,6 @@ test.describe('Metrics Scene view', () => {
           await expectToHaveScreenshot(
             metricSceneView.getPanelsList(),
             'metric-scene-breakdown-label-sort-alpha-a-z-panels-list.png'
-          );
-        });
-      });
-
-      test.describe('Quick search', () => {
-        test('Filters the panels', async ({ metricSceneView, expectToHaveScreenshot }) => {
-          await metricSceneView.selectSortByOption('Name [Z-A]');
-          await metricSceneView.quickSearchLabelValues.enterText('5');
-
-          await metricSceneView.assertPanelsList();
-
-          await expectToHaveScreenshot(
-            metricSceneView.getPanelsList(),
-            'metric-scene-breakdown-label-quicksearch-panels-list.png'
           );
         });
       });
