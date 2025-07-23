@@ -303,8 +303,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const { controls, topScene, settings, pluginInfo, embedded } = model.useState();
 
-    const chromeHeaderHeight = useChromeHeaderHeight();
-    const headerHeight = embedded ? 0 : chromeHeaderHeight ?? 0;
+    const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
+    const headerHeight = embedded ? 0 : chromeHeaderHeight;
     const styles = useStyles2(getStyles, headerHeight, model);
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
     model.initializeHistograms();
