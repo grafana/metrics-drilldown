@@ -43,7 +43,7 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
   {
     displayName: 'Breakdown',
     value: actionViews.breakdown,
-    getScene: () => new LabelBreakdownScene({}),
+    getScene: (metricScene: MetricScene) => new LabelBreakdownScene({ metric: metricScene.state.metric }),
   },
   {
     displayName: 'Related metrics',

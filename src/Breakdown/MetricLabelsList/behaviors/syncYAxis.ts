@@ -1,7 +1,11 @@
+import { type DataFrame } from '@grafana/data';
 import { sceneGraph, VizPanel, type SceneObject, type SceneObjectState } from '@grafana/scenes';
 import { cloneDeep, merge } from 'lodash';
 
 import { EventTimeseriesDataReceived } from 'Breakdown/MetricLabelsList/events/EventTimeseriesDataReceived';
+
+import { EventForceSyncYAxis } from '../events/EventForceSyncYAxis';
+import { EventResetSyncYAxis } from '../events/EventResetSyncYAxis';
 
 /**
  * Synchronizes the Y-axis ranges across children timeseries panels by listening to data updates from publishTimeseriesData.
@@ -12,24 +16,44 @@ export function syncYAxis() {
     let max = Number.NEGATIVE_INFINITY;
     let min = Number.POSITIVE_INFINITY;
 
+    // reset after timerange changes
     const timeRangeSub = sceneGraph.getTimeRange(vizPanelsParent).subscribeToState(() => {
       max = Number.NEGATIVE_INFINITY;
       min = Number.POSITIVE_INFINITY;
     });
 
-    const eventSub = vizPanelsParent.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
-      const series = event.payload.series || [];
-      let newMax = max;
-      let newMin = min;
+    // reset after receiving the EventResetSyncYAxis event (see SceneByFrameRepeater when filtering/sorting)
+    const resetSub = vizPanelsParent.subscribeToEvent(EventResetSyncYAxis, () => {
+      max = Number.NEGATIVE_INFINITY;
+      min = Number.POSITIVE_INFINITY;
+    });
 
-      for (const s of series) {
-        const values = s.fields[1]?.values.filter(Boolean);
+    // force new panels update after receiving the EventForceSyncYAxis event (see SceneByFrameRepeater when paginating)
+    const forceSub = vizPanelsParent.subscribeToEvent(EventForceSyncYAxis, () => {
+      let [newMax, newMin] = [max, min];
 
-        if (values) {
-          newMax = Math.max(newMax, ...values);
-          newMin = Math.min(newMin, ...values);
+      const nonSyncedPanels = findTimeseriesPanels(vizPanelsParent).filter((t) => {
+        const { fieldConfig, $data } = t.state;
+
+        if ('min' in fieldConfig.defaults && 'max' in fieldConfig.defaults) {
+          return false; // we assume it's already synced (see updateTimeseriesAxis below)
         }
+
+        [newMax, newMin] = findNewMaxMin($data?.state.data?.series || [], newMax, newMin);
+        return true;
+      });
+
+      if (newMax === max && newMin === min) {
+        updateTimeseriesAxis(vizPanelsParent, max, min, nonSyncedPanels);
+      } else {
+        [max, min] = [newMax, newMin];
+        updateTimeseriesAxis(vizPanelsParent, newMax, newMin);
       }
+    });
+
+    // new data coming...
+    const dataReceivedSub = vizPanelsParent.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
+      const [newMax, newMin] = findNewMaxMin(event.payload.series || [], max, min);
 
       if (
         newMax !== newMin &&
@@ -38,25 +62,44 @@ export function syncYAxis() {
         (newMax !== max || newMin !== min)
       ) {
         [max, min] = [newMax, newMin];
-        updateTimeseriesAxis(vizPanelsParent, max, min);
+        updateTimeseriesAxis(vizPanelsParent, newMax, newMin);
       }
     });
 
     return () => {
-      eventSub.unsubscribe();
+      dataReceivedSub.unsubscribe();
+      forceSub.unsubscribe();
+      resetSub.unsubscribe();
       timeRangeSub.unsubscribe();
     };
   };
 }
 
-function updateTimeseriesAxis(vizPanelsParent: SceneObject, max: number, min: number) {
+function findNewMaxMin(series: DataFrame[], max: number, min: number) {
+  let [newMax, newMin] = [max, min];
+
+  for (const s of series || []) {
+    const values = s.fields[1]?.values.filter(Boolean);
+
+    if (values) {
+      newMax = Math.max(newMax, ...values);
+      newMin = Math.min(newMin, ...values);
+    }
+  }
+
+  return [newMax, newMin];
+}
+
+function findTimeseriesPanels(vizPanelsParent: SceneObject) {
   // findAllObjects searches down the full scene graph
-  const timeseries = sceneGraph.findAllObjects(
+  return sceneGraph.findAllObjects(
     vizPanelsParent,
     (o) => o instanceof VizPanel && o.state.pluginId === 'timeseries'
   ) as VizPanel[];
+}
 
-  for (const t of timeseries) {
+function updateTimeseriesAxis(vizPanelsParent: SceneObject, max: number, min: number, panels?: VizPanel[]) {
+  for (const t of panels || findTimeseriesPanels(vizPanelsParent)) {
     t.clearFieldConfigCache(); // required for the fieldConfig update below
 
     t.setState({
