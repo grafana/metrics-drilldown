@@ -23,6 +23,11 @@ export const test = base.extend<AppTestFixture>({
   expectToHaveScreenshot: async ({ page }, use) => {
     const expectToHaveScreenshot: AppTestFixture['expectToHaveScreenshot'] = async (locator, fileName, options) => {
       const grafanaVersion = await page.evaluate(() => window.grafanaBootData.settings['buildInfo']['version']);
+
+      if (!grafanaVersion) {
+        throw new Error('Cannot determine Grafana version, which is required for screenshot testing!');
+      }
+
       await base.expect(locator).toHaveScreenshot(`${grafanaVersion}-${fileName}`, options);
     };
 
