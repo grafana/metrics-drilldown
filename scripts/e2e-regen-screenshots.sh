@@ -4,10 +4,12 @@ GRAFANA_VERSIONS=("12.0.2" "11.6.3")
 PLAYWRIGHT_FILTERS=$1
 
 if [ -n "$PLAYWRIGHT_FILTERS" ]; then
-  PLAYWRIGHT_ARGS="$PLAYWRIGHT_FILTERS -u"
+  PLAYWRIGHT_ARGS="-u all $PLAYWRIGHT_FILTERS"
 else
   PLAYWRIGHT_ARGS="-u all"
 fi
+
+echo $PLAYWRIGHT_ARGS
 
 overall_success=true
 
@@ -18,10 +20,10 @@ for grafana_version in "${GRAFANA_VERSIONS[@]}"; do
   exit_code=$?
   
   if [ $exit_code -ne 0 ]; then
-    echo "❌ E2E tests failed for Grafana v$grafana_version (exit code: $exit_code)"
+    echo -e "\n❌ E2E tests failed for Grafana v$grafana_version (exit code: $exit_code)"
     overall_success=false
   else
-    echo "✅ E2E tests completed successfully for Grafana v$grafana_version"
+    echo -e "\n✅ E2E tests completed successfully for Grafana v$grafana_version"
   fi
 done
 

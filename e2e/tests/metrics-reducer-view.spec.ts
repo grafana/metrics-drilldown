@@ -43,7 +43,6 @@ test.describe('Metrics reducer view', () => {
     test.describe('Group by label', () => {
       test.describe('When selecting a value in the side bar', () => {
         test('A list of metrics grouped by label values is displayed, each with a "Select" button', async ({
-          page,
           metricsReducerView,
           expectToHaveScreenshot,
         }) => {
@@ -52,13 +51,16 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', true);
           await metricsReducerView.assertMetricsGroupByList();
 
-          await expectToHaveScreenshot(page, 'metrics-reducer-group-by-label.png', {
-            stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          });
+          await expectToHaveScreenshot(
+            metricsReducerView.getMetricsGroupByList(),
+            'metrics-reducer-group-by-label.png',
+            {
+              stylePath: './e2e/fixtures/css/hide-app-controls.css',
+            }
+          );
         });
 
         test('When clicking on the "Select" button, it drills down the selected label value (adds a new filter, displays a non-grouped list of metrics and updates the list of label values)', async ({
-          page,
           metricsReducerView,
           expectToHaveScreenshot,
         }) => {
@@ -73,15 +75,18 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
           await metricsReducerView.assertMetricsList();
 
-          await metricsReducerView.sidebar.assertLabelsList('=', 3);
+          await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
 
-          await expectToHaveScreenshot(page, 'metrics-reducer-group-by-label-after-select.png', {
-            stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          });
+          await expectToHaveScreenshot(
+            metricsReducerView.getMetricsList(),
+            'metrics-reducer-group-by-label-after-select.png',
+            {
+              stylePath: './e2e/fixtures/css/hide-app-controls.css',
+            }
+          );
         });
 
         test('When clearing the filter, it updates the list of label values and marks the sidebar button as inactive', async ({
-          page,
           metricsReducerView,
           expectToHaveScreenshot,
         }) => {
@@ -96,12 +101,16 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
           await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
 
+          await metricsReducerView.sidebar.assertLabelsListCount('>', 3);
           await metricsReducerView.assertMetricsList();
-          await metricsReducerView.sidebar.assertLabelsList('>', 3);
 
-          await expectToHaveScreenshot(page, 'metrics-reducer-group-by-label-after-clear-filter.png', {
-            stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          });
+          await expectToHaveScreenshot(
+            metricsReducerView.getMetricsList(),
+            'metrics-reducer-group-by-label-after-clear-filter.png',
+            {
+              stylePath: './e2e/fixtures/css/hide-app-controls.css',
+            }
+          );
         });
       });
     });
