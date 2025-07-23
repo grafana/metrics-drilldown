@@ -55,7 +55,7 @@
   "extensions": {
     "addedLinks": [
       {
-        "targets": ["grafana/dashboard/panel/menu", "grafana/explore/toolbar/action"],
+        "targets": ["grafana/dashboard/panel/menu", "grafana/explore/toolbar/action", "grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v1"],
         "title": "Open in Grafana Metrics Drilldown",
         "description": "Open current query in the Grafana Metrics Drilldown view"
       },
