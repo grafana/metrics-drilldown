@@ -11,16 +11,18 @@ import {
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { getPanelData } from 'AddToDashboard/utils';
 import { AutoVizPanel } from 'autoQuery/components/AutoVizPanel';
 import { UI_TEXT } from 'constants/ui';
 import { reportExploreMetrics } from 'interactions';
 import { METRIC_AUTOVIZPANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
-import { MetricSelectedEvent } from 'shared';
+import { MetricSelectedEvent, PanelDataRequestEvent, type PanelDataRequestPayload } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
+import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 
@@ -62,6 +64,16 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
 interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
+  private _isAddToDashboardServiceAvailable(): boolean {
+    try {
+      // @ts-ignore - accessing getAddToDashboardService dynamically
+      const { getAddToDashboardService } = require('@grafana/runtime');
+      return typeof getAddToDashboardService === 'function' && getAddToDashboardService() != null;
+    } catch {
+      return false;
+    }
+  }
+
   public getLinkToExplore = async () => {
     const metricScene = sceneGraph.getAncestor(this, MetricScene);
     const autoVizPanel = sceneGraph.findByKeyAndType(this, METRIC_AUTOVIZPANEL_KEY, AutoVizPanel);
@@ -84,6 +96,29 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
       // if we precompute it we have to keep track of a lot of dependencies
       window.open(link, '_blank');
     });
+  };
+
+  public getMetricScenePanelData = (): PanelDataRequestPayload => {
+    const autoVizPanel = sceneGraph.findByKeyAndType(this, METRIC_AUTOVIZPANEL_KEY, AutoVizPanel);
+    
+    if (!autoVizPanel.state.panel) {
+      throw new Error('Panel not yet initialized');
+    }
+
+    const vizPanel = autoVizPanel.state.panel;
+
+    return getPanelData(vizPanel);
+  }
+
+  public onGetPanelData = () => {
+    try {
+      const panelData = this.getMetricScenePanelData();
+      // Fire the event with panel data to trigger the modal
+      const trail = getTrailFor(this);
+      trail.publishEvent(new PanelDataRequestEvent(panelData), true);
+    } catch (error) {
+      displayError(error as Error, ['Failed to retrieve panel data. Please check the console for more details.']);
+    }
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
@@ -113,6 +148,14 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               tooltip={UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL}
               onClick={model.openExploreLink}
             />
+            {model._isAddToDashboardServiceAvailable() && (
+              <ToolbarButton
+                variant={'canvas'}
+                icon="panel-add"
+                tooltip="Add to dashboard"
+                onClick={model.onGetPanelData}
+              />
+            )}
             <ShareTrailButton trail={trail} />
             <ToolbarButton
               variant={'canvas'}
