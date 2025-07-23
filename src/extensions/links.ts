@@ -18,6 +18,9 @@ const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
+export const ASSISTANT_TARGET_V0 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha';
+export const ASSISTANT_TARGET_V1 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v1';
+
 export const ADHOC_URL_DELIMITER = '|';
 
 export type PromQLLabelMatcher = {
@@ -33,11 +36,11 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     category,
     icon,
     path: createAppUrl(ROUTES.Drilldown),
-    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
+    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction, ASSISTANT_TARGET_V1],
     configure: configureDrilldownLink,
   },
   {
-    targets: ['grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha'],
+    targets: [ASSISTANT_TARGET_V0],
     title: 'Navigate to metrics drilldown',
     description: 'Build a url path to the metrics drilldown',
     path: createAppUrl(ROUTES.Drilldown),
@@ -78,8 +81,14 @@ export function configureDrilldownLink(context: object | undefined): { path: str
 
   const { datasource, expr } = queries[0];
 
-  if (!expr || datasource?.type !== 'prometheus') {
+  if (datasource?.type !== 'prometheus') {
     return;
+  }
+  // allow the user to navigate to the drilldown without a query (metrics reducer view)
+  if (!expr) {
+    return {
+      path: createAppUrl(ROUTES.Drilldown),
+    };
   }
 
   try {
