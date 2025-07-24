@@ -28,13 +28,47 @@ import {
 
 type SortBy = Exclude<SortingOption, 'related'>;
 
+// Add interface for detailed dashboard usage
+interface DashboardUsage {
+  name: string;
+  count: number;
+}
+
 type WithUsageDataPreviewPanelState = SceneObjectState & {
   [key in MetricUsageType]: number;
 } & {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
   sortBy: SortBy;
+  // Add detailed usage data
+  dashboardDetails: DashboardUsage[];
 };
+
+// Generate dummy dashboard data
+function generateDummyDashboardData(): DashboardUsage[] {
+  const dashboardData = [
+    { name: 'Infrastructure Overview Dashboard', count: 12 },
+    { name: 'Application Performance Monitoring', count: 8 },
+    { name: 'Database Metrics Dashboard', count: 15 },
+    { name: 'Network Monitoring Dashboard', count: 6 },
+    { name: 'Security Metrics Dashboard', count: 3 },
+    { name: 'Business Intelligence Dashboard', count: 11 },
+    { name: 'API Gateway Metrics', count: 9 },
+    { name: 'Container Orchestration Dashboard', count: 14 },
+    { name: 'Load Balancer Metrics', count: 5 },
+    { name: 'Cache Performance Dashboard', count: 7 },
+    { name: 'Search Service Metrics', count: 4 },
+    { name: 'Message Queue Dashboard', count: 13 },
+    { name: 'File System Monitoring', count: 2 },
+    { name: 'User Activity Dashboard', count: 10 },
+    { name: 'E-commerce Analytics Dashboard', count: 1 },
+    { name: 'Customer Support Metrics', count: 6 },
+    { name: 'Marketing Campaign Dashboard', count: 8 },
+    { name: 'Sales Performance Dashboard', count: 9 },
+  ];
+
+  return dashboardData;
+}
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
   constructor(state: Pick<WithUsageDataPreviewPanelState, 'vizPanelInGridItem' | 'metric'>) {
@@ -43,6 +77,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       sortBy: 'default',
       'alerting-usage': 0,
       'dashboard-usage': 0,
+      dashboardDetails: [],
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
@@ -84,6 +119,19 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
 
     switch (sortBy) {
       case 'dashboard-usage':
+        // Generate dummy dashboard details
+        const dashboardDetails = generateDummyDashboardData();
+        const totalDashboardUsage = dashboardDetails.reduce((sum, dashboard) => sum + dashboard.count, 0);
+
+        this.setState({
+          'dashboard-usage': totalDashboardUsage,
+          dashboardDetails,
+        });
+
+        if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW) {
+          gridLayout.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW });
+        }
+        break;
       case 'alerting-usage':
         metricsSorter.getUsageForMetric(this.state.metric, sortBy).then((usage) => {
           this.setState({
@@ -108,6 +156,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       sortBy,
       'alerting-usage': metricUsedInAlertingRulesCount,
       'dashboard-usage': metricUsedInDashboardsCount,
+      dashboardDetails,
     } = model.useState();
 
     if (!vizPanelInGridItem) {
@@ -129,12 +178,14 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
         singularUsageType: 'dashboard panel query',
         pluralUsageType: 'dashboard panel queries',
         icon: 'apps',
+        dashboardDetails: dashboardDetails,
       },
       'alerting-usage': {
         usageCount: metricUsedInAlertingRulesCount,
         singularUsageType: 'alert rule',
         pluralUsageType: 'alert rules',
         icon: 'bell',
+        dashboardDetails: [],
       },
     };
 
@@ -147,6 +198,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
           singularUsageType={usageDetails[sortBy].singularUsageType}
           pluralUsageType={usageDetails[sortBy].pluralUsageType}
           icon={usageDetails[sortBy].icon as IconName}
+          dashboardDetails={usageDetails[sortBy].dashboardDetails}
         />
       </div>
     );
@@ -159,16 +211,51 @@ interface UsageSectionProps {
   singularUsageType: string;
   pluralUsageType: string;
   icon: IconName;
+  dashboardDetails: DashboardUsage[];
 }
 
-function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: Readonly<UsageSectionProps>) {
+function UsageData({
+  usageType,
+  usageCount,
+  singularUsageType,
+  pluralUsageType,
+  icon,
+  dashboardDetails,
+}: Readonly<UsageSectionProps>) {
   const styles = useStyles2(getStyles);
+
+  // Create interactive tooltip content for dashboard usage
+  const getTooltipContent = () => {
+    if (usageType === 'dashboard-usage' && dashboardDetails.length > 0) {
+      return (
+        <div className={styles.tooltipContent}>
+          <div className={styles.tooltipHeader}>
+            Used in {usageCount} {usageCount === 1 ? singularUsageType : pluralUsageType}:
+          </div>
+          <div className={styles.dashboardList}>
+            {dashboardDetails.map((dashboard, index) => (
+              <div key={index} className={styles.dashboardItem}>
+                {dashboard.name} ({dashboard.count})
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <span>
+        Metric is used in {usageCount} {usageCount === 1 ? singularUsageType : pluralUsageType}
+      </span>
+    );
+  };
 
   return (
     <div className={styles.usageContainer} data-testid="usage-data-panel">
       <Tooltip
-        content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
+        content={getTooltipContent()}
         placement="top"
+        interactive={usageType === 'dashboard-usage' && dashboardDetails.length > 0}
       >
         <span className={styles.usageItem} data-testid={usageType}>
           <Icon name={icon} /> {usageCount}
@@ -197,6 +284,51 @@ function getStyles(theme: GrafanaTheme2) {
       gap: '4px',
       color: theme.colors.text.secondary,
       opacity: '65%',
+    }),
+    tooltipContent: css({
+      maxWidth: '400px',
+    }),
+    tooltipHeader: css({
+      fontWeight: 'bold',
+      marginBottom: '8px',
+      color: theme.colors.text.primary,
+    }),
+    dashboardList: css({
+      maxHeight: '200px',
+      overflowY: 'auto',
+      marginRight: '-8px',
+      paddingRight: '8px',
+      '&::-webkit-scrollbar': {
+        width: '6px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: theme.colors.border.medium,
+        borderRadius: '3px',
+        '&:hover': {
+          background: theme.colors.border.strong,
+        },
+      },
+      '&::-webkit-scrollbar-corner': {
+        background: 'transparent',
+      },
+    }),
+    dashboardItem: css({
+      padding: '4px 0',
+      color: theme.colors.text.secondary,
+      fontSize: theme.typography.bodySmall.fontSize,
+      '&:not(:last-child)': {
+        borderBottom: `1px solid ${theme.colors.border.weak}`,
+      },
+      '&:hover': {
+        color: theme.colors.text.primary,
+        backgroundColor: theme.colors.background.secondary,
+        padding: '4px 8px',
+        margin: '0 -8px',
+        borderRadius: '4px',
+      },
     }),
   };
 }
