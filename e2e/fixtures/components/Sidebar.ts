@@ -103,7 +103,8 @@ export class Sidebar {
     }
 
     if (operator === '>') {
-      await expect(labelsBrowser.getByRole('radio')).toHaveCount(count);
+      const radiosCount = await labelsBrowser.getByRole('radio').count();
+      await expect(radiosCount). toBeGreaterThan(count);
       return;
     }
 
