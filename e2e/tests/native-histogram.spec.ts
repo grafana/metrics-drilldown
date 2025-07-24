@@ -6,8 +6,8 @@ test.describe('Native histograms', () => {
     await metricsReducerView.goto(new URLSearchParams([['search_txt', METRIC_NAME]]));
     await metricsReducerView.assertPanel(METRIC_NAME);
 
-    // must because the panel is not displayed when landing
-    // FIXME in the plugin code
+    // we have to click on the "Refresh" button must because the panel is not displayed when landing
+    // FIXME fix the plugin code
     await metricsReducerView.appControls.clickOnRefresh();
     await metricsReducerView.assertPanel(METRIC_NAME);
 
