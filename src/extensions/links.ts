@@ -33,7 +33,13 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     category,
     icon,
     path: createAppUrl(ROUTES.Drilldown),
-    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
+    targets: [
+      PluginExtensionPoints.DashboardPanelMenu, 
+      PluginExtensionPoints.ExploreToolbarAction,
+      // for testing purposes, this will be the target for the alerting rule query editor once the PR in grafana is merged
+      // PluginExtensionPoints.AlertingRuleQueryEditor,
+      "grafana/alerting/alertingrule/queryeditor",
+    ],
     configure: configureDrilldownLink,
   },
   {
@@ -69,17 +75,26 @@ export function configureDrilldownLink(context: object | undefined): { path: str
   if ('pluginId' in context && context.pluginId !== 'timeseries') {
     return;
   }
-
-  const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
-
+  // we remove the filter for is prometheus query by checking that the data source is type prometheus
+  const queries = (context as PluginExtensionPanelContext).targets;
+  
   if (!queries?.length) {
     return;
   }
 
-  const { datasource, expr } = queries[0];
+  const { datasource } = queries[0];
 
-  if (!expr || datasource?.type !== 'prometheus') {
+  if (datasource?.type !== 'prometheus') {
     return;
+  }
+  // we determine that it is a prometheus query by checking the data source type
+  const { expr } = queries[0] as PromQuery;
+
+  // allow the user to navigate to the drilldown without a query (metrics reducer view)
+  if (!expr) {
+    return {
+      path: createAppUrl(ROUTES.Drilldown),
+    };
   }
 
   try {
@@ -297,7 +312,3 @@ export function appendUrlParameters(
 }
 
 type PromQuery = DataQuery & { expr: string };
-
-function isPromQuery(query: DataQuery): query is PromQuery {
-  return 'expr' in query;
-}
