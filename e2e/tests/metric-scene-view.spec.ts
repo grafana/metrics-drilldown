@@ -30,9 +30,23 @@ test.describe('Metrics Scene view', () => {
         await metricSceneView.assertBreadownListControls({ label: LABEL, sortBy: 'Outlying series' });
       });
 
+      test.describe('Quick search', () => {
+        test('Filters the panels', async ({ metricSceneView }) => {
+          await metricSceneView.selectSortByOption('Name [Z-A]');
+          await metricSceneView.quickSearchLabelValues.enterText('5');
+
+          await metricSceneView.assertPanelsList();
+
+          await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
+            'metric-scene-breakdown-label-quicksearch-panels-list.png'
+          );
+        });
+      });
+
       test.describe('Sort by', () => {
         test('Displays panels sorted by the selected criteria', async ({ metricSceneView }) => {
           await metricSceneView.assertPanelsList();
+
           await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
             'metric-scene-breakdown-label-sort-outlying-panels-list.png'
           );
@@ -53,15 +67,14 @@ test.describe('Metrics Scene view', () => {
         });
       });
 
-      test.describe('Quick search', () => {
-        test('Filters the panels', async ({ metricSceneView }) => {
-          await metricSceneView.selectSortByOption('Name [Z-A]');
-          await metricSceneView.quickSearchLabelValues.enterText('5');
+      test.describe('Single view', () => {
+        test('Displays a single panel with all the label values series', async ({ metricSceneView }) => {
+          await metricSceneView.selectLayout('single');
 
-          await metricSceneView.assertPanelsList();
+          await expect(metricSceneView.getSingleBreakdownPanel()).toBeVisible();
 
           await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
-            'metric-scene-breakdown-label-quicksearch-panels-list.png'
+            'metric-scene-breakdown-label-single-panel.png'
           );
         });
       });

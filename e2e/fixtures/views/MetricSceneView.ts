@@ -115,6 +115,10 @@ export class MetricSceneView extends DrilldownView {
 
   /* Breakdown tab */
 
+  getSingleBreakdownPanel() {
+    return this.page.getByTestId('single-metric-panel');
+  }
+
   async assertDefaultBreadownListControls() {
     await this.assertLabelDropdown('All');
     await expect(this.getLayoutSwitcher()).toBeVisible();

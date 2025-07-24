@@ -4,7 +4,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ROUTES } from '../constants';
 import { MetricsContext } from './useTrail';
 
-const Wingman = lazy(() => import('../pages/TrailWingman'));
+export const Wingman = lazy(() => import('../pages/TrailWingman'));
 
 // For /trail links, redirect to /drilldown with the same search params
 const TrailRedirect = () => {

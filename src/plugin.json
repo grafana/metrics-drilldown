@@ -72,6 +72,13 @@
       {
         "id": "grafana-metricsdrilldown-app/open-in-logs-drilldown/v1"
       }
+    ],
+    "exposedComponents": [
+      {
+        "id": "grafana-metricsdrilldown-app/label-breakdown-component/v1",
+        "title": "Label Breakdown",
+        "description": "A metrics label breakdown view from the Metrics Drilldown app."
+      }
     ]
   }
 }

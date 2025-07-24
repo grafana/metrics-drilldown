@@ -16,7 +16,9 @@ import React from 'react';
 import { MetricActionBar } from 'MetricActionBar';
 
 import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
+import { type DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
+import { getAppBackgroundColor } from './utils/utils.styles';
 
 export const MAIN_PANEL_MIN_HEIGHT = 280;
 export const MAIN_PANEL_MAX_HEIGHT = '40%';
@@ -40,7 +42,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const { stickyMainGraph } = getTrailSettings(model).useState();
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
 
     return (
       <div className={styles.container}>
@@ -57,7 +59,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
   return {
     container: css({
       display: 'flex',
@@ -68,12 +70,14 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
     sticky: css({
       display: 'flex',
       flexDirection: 'row',
-      background: theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas,
+      background: getAppBackgroundColor(theme, trail),
       position: 'sticky',
       paddingTop: theme.spacing(1),
       marginTop: `-${theme.spacing(1)}`,
-      top: `${chromeHeaderHeight + 70}px`,
       zIndex: 10,
+      // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
+      // This ensures the main graph sticks below the app-controls in embedded mode
+      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px)`,
     }),
     nonSticky: css({
       display: 'flex',

@@ -8,11 +8,12 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneReactObject,
+  sceneUtils,
   type MultiValueVariable,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Spinner, useStyles2 } from '@grafana/ui';
+import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
@@ -41,8 +42,6 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
     super({
       key: 'metric-labels-list',
       metric,
-      // TODO: we add the layout switcher here for now to keep the changes in the LabelBreakdownScene component minimal
-      // but we should refactor further and move it to LabelBreakdownScene
       layoutSwitcher: new LayoutSwitcher({}),
       body: new SceneByVariableRepeater({
         variableName: VAR_GROUP_BY,
@@ -112,14 +111,22 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
       }
     };
 
-    onChangeState(layoutSwitcher.state); // ensure layout when landing on the page
+    // We ensure the proper layout when landing on the page:
+    // because MetricLabelsList is created dynamically when LabelBreakdownScene updates its body,
+    // LayoutSwitcher is not properly connected to the URL synchronization system
+    sceneUtils.syncStateFromSearchParams(layoutSwitcher, new URLSearchParams(window.location.search));
+    onChangeState(layoutSwitcher.state);
 
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  public Selector({ model }: { model: MetricLabelsList }) {
+  public Controls({ model }: { model: MetricLabelsList }) {
     const { layoutSwitcher } = model.useState();
-    return <layoutSwitcher.Component model={layoutSwitcher} />;
+    return (
+      <Field label="View">
+        <layoutSwitcher.Component model={layoutSwitcher} />
+      </Field>
+    );
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricLabelsList>) => {

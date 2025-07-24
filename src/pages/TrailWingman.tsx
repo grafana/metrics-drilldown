@@ -26,7 +26,12 @@ export default function Trail({ trail }: Readonly<TrailProps>) {
   }
 
   return (
-    <UrlSyncContextProvider scene={trail} createBrowserHistorySteps={true} updateUrlOnInit={true}>
+    <UrlSyncContextProvider
+      scene={trail}
+      createBrowserHistorySteps={true}
+      updateUrlOnInit={true}
+      namespace={trail.state.urlNamespace}
+    >
       <trail.Component model={trail} />
     </UrlSyncContextProvider>
   );
