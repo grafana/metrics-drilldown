@@ -104,7 +104,7 @@ export class Sidebar {
 
     if (operator === '>') {
       const radiosCount = await labelsBrowser.getByRole('radio').count();
-      await expect(radiosCount). toBeGreaterThan(count);
+      await expect(radiosCount).toBeGreaterThan(count);
       return;
     }
 
