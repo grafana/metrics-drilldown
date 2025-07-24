@@ -1,6 +1,6 @@
 /**
   We keep track of the Grafana versions that the app supports to enable
-  "./scripts/e2e-regen-screenshots.sh" to update all the screenshots automatically.
+  "./scripts/e2e-gen-screenshots.sh" to update all the screenshots automatically.
  
   Thus, it's very important to keep this array in sync with the versions currently supported.
   If you don't know which version are currently supported, check a recent "CI" GitHub action execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step

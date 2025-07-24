@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # parse Grafana versions and images
+# TODO: automate (see https://github.com/grafana/plugin-actions/blob/main/e2e-version/README.md)
 PARSED_VERSIONS=($(node -e "
 const fs = require('fs');
 const path = require('path');
