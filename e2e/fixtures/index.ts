@@ -8,7 +8,11 @@ import { MetricsReducerView } from './views/MetricsReducerView';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
-  expectToHaveScreenshot: (locator: Locator | Page, fileName: string, options?: Record<string, any>) => Promise<void>;
+  expectScreenshotInCurrentGrafanaVersion: (
+    locator: Locator | Page,
+    fileName: string,
+    options?: Record<string, any>
+  ) => Promise<void>;
   metricsReducerView: MetricsReducerView;
   metricSceneView: MetricSceneView;
 };
@@ -20,8 +24,12 @@ export const test = base.extend<AppTestFixture>({
     });
     await use(configPage);
   },
-  expectToHaveScreenshot: async ({ page }, use) => {
-    const expectToHaveScreenshot: AppTestFixture['expectToHaveScreenshot'] = async (locator, fileName, options) => {
+  expectScreenshotInCurrentGrafanaVersion: async ({ page }, use) => {
+    const expectToHaveScreenshot: AppTestFixture['expectScreenshotInCurrentGrafanaVersion'] = async (
+      locator,
+      fileName,
+      options
+    ) => {
       const grafanaVersion = await page.evaluate(() => window.grafanaBootData.settings['buildInfo']['version']);
 
       if (!grafanaVersion) {

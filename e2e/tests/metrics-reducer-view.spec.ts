@@ -15,27 +15,31 @@ test.describe('Metrics reducer view', () => {
     test.describe('Prefix and suffix filters logic behavior', () => {
       test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
         metricsReducerView,
-        expectToHaveScreenshot,
+        expectScreenshotInCurrentGrafanaVersion,
       }) => {
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
         await metricsReducerView.assertMetricsList();
 
         // Verify OR behavior by checking that metrics with either prefix are shown
-        await expectToHaveScreenshot(metricsReducerView.page, 'sidebar-prefixes-selected-metric-counts.png', {
-          stylePath: './e2e/fixtures/css/hide-app-controls.css',
-        });
+        await expectScreenshotInCurrentGrafanaVersion(
+          metricsReducerView.page,
+          'sidebar-prefixes-selected-metric-counts.png',
+          {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          }
+        );
       });
 
       test('Between filter groups, selections use AND logic ((prefix.one OR prefix.two) AND (suffix.one OR suffix.two))', async ({
         metricsReducerView,
-        expectToHaveScreenshot,
+        expectScreenshotInCurrentGrafanaVersion,
       }) => {
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
         await metricsReducerView.sidebar.selectSuffixFilters(['bytes', 'count']);
         await metricsReducerView.assertMetricsList();
 
         // Verify AND behavior between the two filter groups
-        await expectToHaveScreenshot(
+        await expectScreenshotInCurrentGrafanaVersion(
           metricsReducerView.page,
           'sidebar-prefixes-and-suffixes-selected-metric-counts.png',
           {
