@@ -96,15 +96,14 @@ export class Sidebar {
 
   async assertLabelsList(operator: '=' | '>', count: number) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
-    const radiosCount = await labelsBrowser.getByRole('radio').count();
 
     if (operator === '=') {
-      await expect(radiosCount).toBe(count);
+      await expect(labelsBrowser.getByRole('radio')).toHaveCount(count);
       return;
     }
 
     if (operator === '>') {
-      await expect(radiosCount).toBeGreaterThan(count);
+      await expect(labelsBrowser.getByRole('radio')).toHaveCount(count);
       return;
     }
 
