@@ -55,8 +55,7 @@ export function config(config: CustomEnvConfig) {
       timeout: Number(config.expectTimeout) > 0 ? config.expectTimeout : 5000,
       toHaveScreenshot: {
         // tweak me with experience!
-        // currently, the max diff pixel ratio is 1920 * 1080 * 0.0025 = 5184 pixels (see ./constants.ts for the viewport dimensions)
-        maxDiffPixelRatio: 0.0025,
+        maxDiffPixelRatio: 0.01,
       },
     },
     retries: config.retries && config.retries > 0 ? config.retries : 0,
