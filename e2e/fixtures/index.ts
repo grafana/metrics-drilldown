@@ -31,12 +31,13 @@ export const test = base.extend<AppTestFixture>({
       options
     ) => {
       const grafanaVersion = await page.evaluate(() => window.grafanaBootData.settings['buildInfo']['version']);
-
       if (!grafanaVersion) {
         throw new Error('Cannot determine Grafana version, which is required for screenshot testing!');
       }
 
-      await base.expect(locator).toHaveScreenshot(`${grafanaVersion}-${fileName}`, options);
+      await base
+        .expect(locator)
+        .toHaveScreenshot(`${grafanaVersion}-${fileName}`, { ...options, maxDiffPixelRatio: 0 });
     };
 
     await use(expectToHaveScreenshot);
