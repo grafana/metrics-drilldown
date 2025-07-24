@@ -1,5 +1,8 @@
 # Implementation Plan: DataSource Configuration Extensions for Metrics Drilldown
 
+**Status**: 🚧 **Phase 1 Complete** - Core DataSource Configuration Extensions implemented and tested
+**Current State**: Users can now discover and access Metrics Drilldown directly from Prometheus datasource configuration pages
+
 Based on the specs-core.md and analysis of the metrics-drilldown codebase, here's a comprehensive plan to implement the new DataSource Configuration extension points.
 
 ## 🎯 **Overview & Strategic Value**
@@ -277,27 +280,34 @@ e2e/tests/
 - **Error Rates**: Monitor extension configuration and navigation errors
 - **Compatibility**: Test across different Prometheus implementations
 
-## 🚀 **Implementation Priority & Timeline**
+## 🚀 **Implementation Status & Timeline**
 
-### **Week 1-2: Foundation**
+### **✅ COMPLETED: Phase 1 - Foundation** (Week 1)
 - ✅ **Phase 1**: Core DataSource Configuration Extensions
-- ✅ Unit tests for basic functionality
+  - ✅ Created `src/extensions/datasourceConfigLinks.ts` with "Explore Metrics" action
+  - ✅ Implemented Prometheus-compatible datasource filtering (`prometheus`, `mimir`, `cortex`, `thanos`)
+  - ✅ Added capability-aware descriptions (native histograms, exemplars)
+  - ✅ Built `createDatasourceUrl()` helper for seamless navigation
+  - ✅ Updated `src/module.tsx` to register new extensions
+- ✅ Unit tests for basic functionality (27 tests with 100% coverage)
 - ✅ Integration with existing link infrastructure
 
-### **Week 3: Enhancement**
-- ✅ **Phase 2**: Status-aware extensions and health checking
-- ✅ Enhanced error handling and user feedback
-- ✅ Modal components for metrics preview
+**Commit**: `3dc889a` - "feat: implement Phase 1 DataSource Configuration Extensions"
 
-### **Week 4: Advanced Features**
-- ✅ **Phase 3**: Datasource capability detection
-- ✅ Smart default configuration
-- ✅ Performance optimization
+### **📋 PENDING: Phase 2 - Enhancement** (Week 2-3)
+- ⏳ **Phase 2**: Status-aware extensions and health checking
+- ⏳ Enhanced error handling and user feedback
+- ⏳ Modal components for metrics preview
 
-### **Week 5: Quality & Testing**
-- ✅ **Phase 4**: Comprehensive testing suite
-- ✅ E2E test coverage
-- ✅ Documentation and examples
+### **📋 PENDING: Phase 3 - Advanced Features** (Week 4)
+- ⏳ **Phase 3**: Datasource capability detection
+- ⏳ Smart default configuration
+- ⏳ Performance optimization
+
+### **📋 PENDING: Phase 4 - Quality & Testing** (Week 5)
+- ⏳ **Phase 4**: Comprehensive testing suite
+- ⏳ E2E test coverage
+- ⏳ Documentation and examples
 
 ## 💡 **Key Design Decisions**
 
@@ -321,6 +331,82 @@ e2e/tests/
 **Decision**: Pre-configure datasource selection in metrics drilldown
 **Rationale**: Reduces friction by automatically selecting the relevant datasource
 
+## 📚 **Implementation Learnings & Insights**
+
+### **🔍 Extension Point Discovery**
+**Challenge**: The original specs referenced `PluginExtensionPoints.DataSourceConfigActions` and `PluginExtensionPoints.DataSourceConfigStatus`, but investigation revealed only `PluginExtensionPoints.DataSourceConfig` was available in the current Grafana version.
+
+**Solution**: Adapted implementation to use the single `DataSourceConfig` extension point with dynamic configuration through the `configure` function.
+
+**Learning**: Always verify available extension points in the target Grafana version before implementation.
+
+### **⚡ Context Typing & Developer Experience**
+**Challenge**: Extension configure functions receive loosely-typed context objects, leading to TypeScript errors and poor developer experience.
+
+**Solution**: Created explicit TypeScript interfaces (`DataSourceConfigContext`) to properly type context objects and provide IntelliSense support.
+
+**Learning**: Proper TypeScript interfaces are crucial for maintainable extension code, even when working with loosely-typed plugin APIs.
+
+### **🔧 URL Construction Strategy Evolution**
+**Original Plan**: Use `onClick` handlers for navigation as shown in specs examples.
+
+**Implemented Approach**: Use `path` property with dynamic configuration through `configure` function for cleaner integration.
+
+**Rationale**:
+- Better alignment with existing codebase patterns
+- Simpler testing (no event simulation needed)
+- More declarative approach
+- Follows Grafana's extension best practices
+
+**Learning**: Study existing extension patterns in the codebase before implementing new ones.
+
+### **📦 Bundle Size Optimization**
+**Discovery**: The codebase has careful attention to module.tsx bundle size, evidenced by "CAUTION" comments about imports.
+
+**Implementation**:
+- Kept imports minimal in the new datasource config file
+- Reused existing utility functions from `links.ts`
+- Followed established import patterns
+
+**Learning**: Plugin startup performance matters - every import in module.tsx affects initial load time.
+
+### **🧪 Testing Strategy Adaptations**
+**Original Specs**: Focused on testing the `configureExploreMetricsAction` function separately.
+
+**Final Implementation**: Integrated configuration logic directly into the extension config array for better encapsulation.
+
+**Adaptations Made**:
+- Tested the actual extension configuration objects
+- Added URL encoding tests for special characters
+- Achieved 100% code coverage with 27 comprehensive tests
+- Verified all edge cases (undefined contexts, non-Prometheus datasources, etc.)
+
+**Learning**: Test the actual implementation rather than intermediate abstractions for better coverage.
+
+### **🎯 Capability-Based UX Design**
+**Success**: The capability detection system (`getDatasourceCapabilities`) provides foundation for sophisticated user experience differentiation.
+
+**Examples**:
+- Prometheus/Mimir users see "Includes native histogram support"
+- All Prometheus-compatible users see "View trace exemplars"
+- Clean extensibility for future datasource types
+
+**Learning**: Building capability-aware UX from the start creates better user experiences and easier future enhancements.
+
+### **🔗 Extension Registration Patterns**
+**Discovery**: The module.tsx registration pattern using spread operator for combining extension arrays is clean and maintainable.
+
+**Implementation**: `[...linkConfigs, ...datasourceConfigLinkConfigs]` maintains separation of concerns while keeping registration simple.
+
+**Learning**: Follow established patterns for extension registration to maintain codebase consistency.
+
+### **📊 Real-World Extension Context**
+**Key Insight**: Extension contexts contain rich metadata about datasources, including type, uid, and name, enabling sophisticated filtering and customization.
+
+**Practical Application**: Used this metadata for smart filtering and dynamic URL generation, creating seamless user workflows.
+
+**Learning**: Extension contexts are powerful - explore their full capabilities for richer plugin integrations.
+
 ## 🔮 **Future Enhancements**
 
 ### **Smart Metrics Recommendations**
@@ -336,6 +422,25 @@ e2e/tests/
 - Recording rules discovery and exploration
 - Exemplar-based trace jumping
 
+## 🔄 **Next Steps**
+
+### **Immediate (Phase 2)**
+1. **Implement Status-Aware Extensions**: Add extensions that appear based on datasource health/connection status
+2. **Create Metrics Preview Modal**: Allow users to preview available metrics before navigating
+3. **Enhanced Error Handling**: Better UX for connection issues and troubleshooting
+
+### **Medium-term (Phase 3-4)**
+1. **E2E Testing**: Add comprehensive end-to-end tests for the extension functionality
+2. **Smart Defaults**: Auto-detect and pre-configure common metric patterns
+3. **Multi-tenancy Support**: Enhanced support for Mimir and other multi-tenant setups
+
+### **Long-term**
+1. **Analytics Integration**: Track discovery rates and user engagement metrics
+2. **Cross-plugin Integration**: Connect with other Grafana plugins and features
+3. **Advanced Capabilities**: Leverage future Grafana extension point enhancements
+
 ---
 
-This plan provides a comprehensive implementation strategy that leverages the new Core Grafana extension points to significantly improve the discoverability and usability of the Metrics Drilldown plugin for Prometheus datasource users.
+This plan provides a comprehensive implementation strategy that leverages Core Grafana extension points to significantly improve the discoverability and usability of the Metrics Drilldown plugin for Prometheus datasource users.
+
+**✅ Phase 1 Complete**: Users now have seamless discovery of Metrics Drilldown capabilities directly from their datasource configuration experience.
