@@ -44,15 +44,13 @@ test.describe('Metrics reducer view', () => {
       test.describe('When selecting a value in the side bar', () => {
         test('A list of metrics grouped by label values is displayed, each with a "Select" button', async ({
           metricsReducerView,
-          expectToHaveScreenshot,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', true);
           await metricsReducerView.assertMetricsGroupByList();
 
-          await expectToHaveScreenshot(
-            metricsReducerView.getMetricsGroupByList(),
+          await expect(metricsReducerView.getMetricsGroupByList()).toHaveScreenshot(
             'metrics-reducer-group-by-label.png',
             {
               stylePath: './e2e/fixtures/css/hide-app-controls.css',
@@ -62,7 +60,6 @@ test.describe('Metrics reducer view', () => {
 
         test('When clicking on the "Select" button, it drills down the selected label value (adds a new filter, displays a non-grouped list of metrics and updates the list of label values)', async ({
           metricsReducerView,
-          expectToHaveScreenshot,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
@@ -77,8 +74,7 @@ test.describe('Metrics reducer view', () => {
 
           await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
 
-          await expectToHaveScreenshot(
-            metricsReducerView.getMetricsList(),
+          await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
             'metrics-reducer-group-by-label-after-select.png',
             {
               stylePath: './e2e/fixtures/css/hide-app-controls.css',
@@ -88,7 +84,6 @@ test.describe('Metrics reducer view', () => {
 
         test('When clearing the filter, it updates the list of label values and marks the sidebar button as inactive', async ({
           metricsReducerView,
-          expectToHaveScreenshot,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
@@ -104,8 +99,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertLabelsListCount('>', 3);
           await metricsReducerView.assertMetricsList();
 
-          await expectToHaveScreenshot(
-            metricsReducerView.getMetricsList(),
+          await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
             'metrics-reducer-group-by-label-after-clear-filter.png',
             {
               stylePath: './e2e/fixtures/css/hide-app-controls.css',
@@ -137,11 +131,7 @@ test.describe('Metrics reducer view', () => {
   });
 
   test.describe('Metrics sorting', () => {
-    test('Default sorting shows recent metrics first, then alphabetical', async ({
-      page,
-      metricsReducerView,
-      expectToHaveScreenshot,
-    }) => {
+    test('Default sorting shows recent metrics first, then alphabetical', async ({ page, metricsReducerView }) => {
       await metricsReducerView.assertSelectedSortBy('Default');
 
       // We'll select seven metrics, but only the 6 most recent metrics should be shown above the alphabetical list
@@ -164,7 +154,7 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.quickSearch.clear();
       await metricsReducerView.assertMetricsList();
 
-      await expectToHaveScreenshot(page, 'metrics-reducer-default-sort.png', {
+      await expect(page).toHaveScreenshot('metrics-reducer-default-sort.png', {
         stylePath: './e2e/fixtures/css/hide-app-controls.css',
       });
     });

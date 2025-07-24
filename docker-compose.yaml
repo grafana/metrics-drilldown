@@ -8,7 +8,7 @@ services:
     build:
       args:
         grafana_image: ${GRAFANA_IMAGE:-grafana-enterprise}
-        grafana_version: ${GRAFANA_VERSION:-11.6.3}
+        grafana_version: ${GRAFANA_VERSION:-11.6.4}
     ports: !override
       - '${GRAFANA_PORT:-3001}:3000'
     environment:
@@ -65,4 +65,4 @@ services:
     environment:
       GRAFANA_PORT: ${GRAFANA_PORT:-3001}
       GRAFANA_IMAGE: ${GRAFANA_VERSION:-grafana-enterprise}
-      GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.3}
+      GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.4}

@@ -1,11 +1,15 @@
 #!/bin/bash
 
+# delete existing snapshot files
+echo -e "\n🗑️  Deleting existing screenshots..."
+find ./e2e/tests -name "*.png" -type f -delete
+
 # parse Grafana versions and images
 PARSED_VERSIONS=($(node -e "
 const fs = require('fs');
 const path = require('path');
 const content = fs.readFileSync(path.join(__dirname, './e2e/config/grafana-versions-supported.ts'), 'utf8');
-const objectMatches = content.match(/\{ image: '[^']+', version: '[^']+' \}/g);
+const objectMatches = content.match(/(?<!^[\s]*\/\/.*)(\{ image: '[^']+', version: '[^']+' \})/gm);
 if (objectMatches) {
   objectMatches.forEach((m) => {
     const [, image] = m.match(/image: '([^']+)'/);
@@ -27,15 +31,16 @@ fi
 GRAFANA_VERSIONS=()
 GRAFANA_IMAGES=()
 
+echo -e "\nWill update screenshots for the following Grafana versions:"
 for entry in "${PARSED_VERSIONS[@]}"; do
   IFS=':' read -r image version <<< "$entry"
   GRAFANA_IMAGES+=("$image")
   GRAFANA_VERSIONS+=("$version")
+  echo "  - '$image' v$version"
 done
 
 # get args to pass to Playwright
 PLAYWRIGHT_FILTERS=$1
-
 
 if [ -n "$PLAYWRIGHT_FILTERS" ]; then
   PLAYWRIGHT_ARGS="-u all $PLAYWRIGHT_FILTERS"
