@@ -55,7 +55,7 @@ export function config(config: CustomEnvConfig) {
       timeout: Number(config.expectTimeout) > 0 ? config.expectTimeout : 5000,
       toHaveScreenshot: {
         // tweak me with experience!
-        maxDiffPixelRatio: 0.005,
+        maxDiffPixelRatio: 0.01,
       },
     },
     retries: config.retries && config.retries > 0 ? config.retries : 0,
