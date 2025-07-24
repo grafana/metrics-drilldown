@@ -94,17 +94,17 @@ export class Sidebar {
     await expect(radioButton).toBeChecked();
   }
 
-  async assertLabelsList(operator: '=' | '>', count: number) {
+  async assertLabelsList(operator: '=' | '>', expectedCount: number) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
 
     if (operator === '=') {
-      await expect(labelsBrowser.getByRole('radio')).toHaveCount(count);
+      await expect(labelsBrowser.getByRole('radio')).toHaveCount(expectedCount);
       return;
     }
 
     if (operator === '>') {
       const radiosCount = await labelsBrowser.getByRole('radio').count();
-      await expect(radiosCount).toBeGreaterThan(count);
+      expect(radiosCount).toBeGreaterThan(expectedCount);
       return;
     }
 
