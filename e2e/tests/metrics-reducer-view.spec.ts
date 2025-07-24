@@ -21,7 +21,9 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.assertMetricsList();
 
         // Verify OR behavior by checking that metrics with either prefix are shown
-        await expectToHaveScreenshot(metricsReducerView.page, 'sidebar-prefixes-selected-metric-counts.png');
+        await expectToHaveScreenshot(metricsReducerView.page, 'sidebar-prefixes-selected-metric-counts.png', {
+          stylePath: './e2e/fixtures/css/hide-app-controls.css',
+        });
       });
 
       test('Between filter groups, selections use AND logic ((prefix.one OR prefix.two) AND (suffix.one OR suffix.two))', async ({
@@ -35,7 +37,10 @@ test.describe('Metrics reducer view', () => {
         // Verify AND behavior between the two filter groups
         await expectToHaveScreenshot(
           metricsReducerView.page,
-          'sidebar-prefixes-and-suffixes-selected-metric-counts.png'
+          'sidebar-prefixes-and-suffixes-selected-metric-counts.png',
+          {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          }
         );
       });
     });
@@ -51,10 +56,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.assertMetricsGroupByList();
 
           await expect(metricsReducerView.getMetricsGroupByList()).toHaveScreenshot(
-            'metrics-reducer-group-by-label.png',
-            {
-              stylePath: './e2e/fixtures/css/hide-app-controls.css',
-            }
+            'metrics-reducer-group-by-label.png'
           );
         });
 
@@ -75,10 +77,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
 
           await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
-            'metrics-reducer-group-by-label-after-select.png',
-            {
-              stylePath: './e2e/fixtures/css/hide-app-controls.css',
-            }
+            'metrics-reducer-group-by-label-after-select.png'
           );
         });
 
@@ -100,10 +99,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.assertMetricsList();
 
           await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
-            'metrics-reducer-group-by-label-after-clear-filter.png',
-            {
-              stylePath: './e2e/fixtures/css/hide-app-controls.css',
-            }
+            'metrics-reducer-group-by-label-after-clear-filter.png'
           );
         });
       });
