@@ -7,7 +7,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Icon, Tooltip, useStyles2, type IconName } from '@grafana/ui';
+import { Button, Dropdown, Icon, Tooltip, useStyles2, type IconName } from '@grafana/ui';
 import React from 'react';
 
 import { logger } from 'tracking/logger/logger';
@@ -28,13 +28,47 @@ import {
 
 type SortBy = Exclude<SortingOption, 'related'>;
 
+// Add interface for detailed dashboard usage
+interface DashboardUsage {
+  name: string;
+  count: number;
+}
+
 type WithUsageDataPreviewPanelState = SceneObjectState & {
   [key in MetricUsageType]: number;
 } & {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
   sortBy: SortBy;
+  // Add detailed usage data
+  dashboardDetails: DashboardUsage[];
 };
+
+// Generate dummy dashboard data
+function generateDummyDashboardData(): DashboardUsage[] {
+  const dashboardData = [
+    { name: 'Infrastructure Overview Dashboard', count: 12 },
+    { name: 'Application Performance Monitoring', count: 8 },
+    { name: 'Database Metrics Dashboard', count: 15 },
+    { name: 'Network Monitoring Dashboard', count: 6 },
+    { name: 'Security Metrics Dashboard', count: 3 },
+    { name: 'Business Intelligence Dashboard', count: 11 },
+    { name: 'API Gateway Metrics', count: 9 },
+    { name: 'Container Orchestration Dashboard', count: 14 },
+    { name: 'Load Balancer Metrics', count: 5 },
+    { name: 'Cache Performance Dashboard', count: 7 },
+    { name: 'Search Service Metrics', count: 4 },
+    { name: 'Message Queue Dashboard', count: 13 },
+    { name: 'File System Monitoring', count: 2 },
+    { name: 'User Activity Dashboard', count: 10 },
+    { name: 'E-commerce Analytics Dashboard', count: 1 },
+    { name: 'Customer Support Metrics', count: 6 },
+    { name: 'Marketing Campaign Dashboard', count: 8 },
+    { name: 'Sales Performance Dashboard', count: 9 },
+  ];
+
+  return dashboardData;
+}
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
   constructor(state: Pick<WithUsageDataPreviewPanelState, 'vizPanelInGridItem' | 'metric'>) {
@@ -43,6 +77,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       sortBy: 'default',
       'alerting-usage': 0,
       'dashboard-usage': 0,
+      dashboardDetails: [],
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
@@ -84,6 +119,19 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
 
     switch (sortBy) {
       case 'dashboard-usage':
+        // Generate dummy dashboard details
+        const dashboardDetails = generateDummyDashboardData();
+        const totalDashboardUsage = dashboardDetails.reduce((sum, dashboard) => sum + dashboard.count, 0);
+
+        this.setState({
+          'dashboard-usage': totalDashboardUsage,
+          dashboardDetails,
+        });
+
+        if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW) {
+          gridLayout.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW });
+        }
+        break;
       case 'alerting-usage':
         metricsSorter.getUsageForMetric(this.state.metric, sortBy).then((usage) => {
           this.setState({
@@ -108,6 +156,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       sortBy,
       'alerting-usage': metricUsedInAlertingRulesCount,
       'dashboard-usage': metricUsedInDashboardsCount,
+      dashboardDetails,
     } = model.useState();
 
     if (!vizPanelInGridItem) {
@@ -129,12 +178,14 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
         singularUsageType: 'dashboard panel query',
         pluralUsageType: 'dashboard panel queries',
         icon: 'apps',
+        dashboardDetails: dashboardDetails,
       },
       'alerting-usage': {
         usageCount: metricUsedInAlertingRulesCount,
         singularUsageType: 'alert rule',
         pluralUsageType: 'alert rules',
         icon: 'bell',
+        dashboardDetails: [],
       },
     };
 
@@ -147,6 +198,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
           singularUsageType={usageDetails[sortBy].singularUsageType}
           pluralUsageType={usageDetails[sortBy].pluralUsageType}
           icon={usageDetails[sortBy].icon as IconName}
+          dashboardDetails={usageDetails[sortBy].dashboardDetails}
         />
       </div>
     );
@@ -159,10 +211,53 @@ interface UsageSectionProps {
   singularUsageType: string;
   pluralUsageType: string;
   icon: IconName;
+  dashboardDetails: DashboardUsage[];
 }
 
-function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: Readonly<UsageSectionProps>) {
+function UsageData({
+  usageType,
+  usageCount,
+  singularUsageType,
+  pluralUsageType,
+  icon,
+  dashboardDetails,
+}: Readonly<UsageSectionProps>) {
   const styles = useStyles2(getStyles);
+
+  // Create dropdown menu for dashboard usage
+  const renderDashboardsDropdown = () => {
+    if (usageType !== 'dashboard-usage' || dashboardDetails.length === 0) {
+      return null;
+    }
+
+    const renderDropdownContent = () => (
+      <div className={styles.dashboardMenu}>
+        <div className={styles.menuHeader}>
+          Used in {usageCount} {usageCount === 1 ? singularUsageType : pluralUsageType}:
+        </div>
+        <div className={styles.dashboardList}>
+          {dashboardDetails.map((dashboard, index) => (
+            <div key={index} className={styles.dashboardItem}>
+              {dashboard.name} ({dashboard.count})
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    return (
+      <Dropdown overlay={renderDropdownContent} placement="top-start">
+        <Button
+          icon="bars"
+          variant="secondary"
+          tooltip="See dashboards"
+          fill="text"
+          size="sm"
+          className={styles.dropdownButton}
+        />
+      </Dropdown>
+    );
+  };
 
   return (
     <div className={styles.usageContainer} data-testid="usage-data-panel">
@@ -174,6 +269,7 @@ function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, 
           <Icon name={icon} /> {usageCount}
         </span>
       </Tooltip>
+      {renderDashboardsDropdown()}
     </div>
   );
 }
@@ -197,6 +293,72 @@ function getStyles(theme: GrafanaTheme2) {
       gap: '4px',
       color: theme.colors.text.secondary,
       opacity: '65%',
+    }),
+    dropdownIcon: css({
+      cursor: 'pointer',
+      color: theme.colors.text.secondary,
+      opacity: '65%',
+      '&:hover': {
+        opacity: '100%',
+      },
+    }),
+    dropdownButton: css({
+      color: theme.colors.text.secondary,
+      opacity: '65%',
+      '&:hover': {
+        opacity: '100%',
+      },
+    }),
+    dashboardMenu: css({
+      maxWidth: '400px',
+      minWidth: '300px',
+      backgroundColor: theme.colors.background.primary,
+      border: `1px solid ${theme.colors.border.weak}`,
+      borderRadius: theme.shape.radius.default,
+      boxShadow: theme.shadows.z3,
+    }),
+    menuHeader: css({
+      fontWeight: 'bold',
+      padding: '8px 12px',
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
+      backgroundColor: theme.colors.background.secondary,
+      color: theme.colors.text.primary,
+      fontSize: theme.typography.bodySmall.fontSize,
+    }),
+    dashboardList: css({
+      maxHeight: '200px',
+      overflowY: 'auto',
+      '&::-webkit-scrollbar': {
+        width: '6px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: theme.colors.border.medium,
+        borderRadius: '3px',
+        '&:hover': {
+          background: theme.colors.border.strong,
+        },
+      },
+      '&::-webkit-scrollbar-corner': {
+        background: 'transparent',
+      },
+    }),
+
+    dashboardItem: css({
+      padding: '8px 12px',
+      display: 'block',
+      width: '100%',
+      color: theme.colors.text.secondary,
+      fontSize: theme.typography.bodySmall.fontSize,
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
+      '&:hover': {
+        color: theme.colors.text.primary,
+      },
+      '&:last-child': {
+        borderBottom: 'none',
+      },
     }),
   };
 }
