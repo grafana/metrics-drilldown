@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # delete existing snapshot files
-echo -e "\n🗑️  Deleting existing screenshots..."
-find ./e2e/tests -name "*.png" -type f -delete
+# echo -e "\n🗑️  Deleting existing screenshots..."
+# find ./e2e/tests -name "*.png" -type f -delete
 
 # parse Grafana versions and images
 PARSED_VERSIONS=($(node -e "
