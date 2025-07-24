@@ -65,20 +65,21 @@ The screenshots are generated in subfolders within the [e2e/tests](../e2e/tests)
 
 > [!IMPORTANT]
 > You will have to execute the command above for each Grafana version that the app supports.
-> Practically, it means updating your local .env file before executing the command or passing the GRAFANA_VERSION on the command line (e.g. GRAFANA_VERSION=12.0.2 npm run e2e:ci).
-> If you don't know which version are currently supported, check a recent "CI" GitHub action execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step
+> Practically, it means updating your local .env file before executing the command or passing the GRAFANA_IMAGE and GRAFANA_VERSION environment variables on the command line (e.g. GRAFANA_IMAGE=grafana-enterprise GRAFANA_VERSION=12.0.2 npm run e2e:ci).
+> If you don't know which versions are currently supported, check a recent "CI" GitHub action execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step.
+> Then, make sure that the GRAFANA_VERSIONS_SUPPORTED array in e2e/config/grafana-versions-supported.ts is up-to-date.
 
 ### Regenerating screenshots
 
-Just execute the `./scripts/e2e-regen-screenshots.sh` script. You can also pass an extra argument that will be propagated to Playwright. For example, to regenerate the screenshots of the `select-metric-view.spec.ts` test file:
+Execute the `./scripts/e2e-regen-screenshots.sh` script. You can also pass an extra argument that will be propagated to Playwright. For example, to regenerate the screenshots of the `select-metric-view.spec.ts` test file:
 
 ```shell
-./scripts/e2e-regen-screenshots.sh metrics-reducer-view.spec.ts
+./scripts/e2e-regen-screenshots.sh "metrics-reducer-view.spec.ts"
 ```
 
 > [!IMPORTANT]
-> Make sure that the e2e-regen-screenshots.sh script defines the Grafana versions that the app supports.
-> If you don't know which version are currently supported, check a recent "CI" GitHub action execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step
+> Befaiore executing the script, make sure that the GRAFANA_VERSIONS_SUPPORTED array in e2e/config/grafana-versions-supported.ts is up-to-date.
+> If you don't know which versions are currently supported, check a recent "CI" GitHub action execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step.
 
 ### CI build
 
