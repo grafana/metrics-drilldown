@@ -106,17 +106,17 @@ export class Sidebar {
     }
   }
 
-  async assertLabelsListCount(operator: '=' | '>', count: number) {
+  async assertLabelsListCount(operator: '=' | '>', expectedCount: number) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
-    const radiosCount = await labelsBrowser.getByRole('radio').count();
 
     if (operator === '=') {
-      await expect(radiosCount).toBe(count);
+      await expect(labelsBrowser.getByRole('radio')).toHaveCount(expectedCount);
       return;
     }
 
     if (operator === '>') {
-      await expect(radiosCount).toBeGreaterThan(count);
+      const radiosCount = await labelsBrowser.getByRole('radio').count();
+      expect(radiosCount).toBeGreaterThan(expectedCount);
       return;
     }
 

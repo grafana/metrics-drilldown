@@ -7,6 +7,7 @@ test.describe('Metrics reducer view', () => {
     await metricsReducerView.goto();
   });
 
+  // eslint-disable-next-line playwright/expect-expect
   test('Core UI elements', async ({ metricsReducerView }) => {
     await metricsReducerView.assertCoreUI();
   });
@@ -169,7 +170,6 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.selectSortByOption(sortOptionName);
 
         // Wait for the usage count to load
-        // eslint-disable-next-line sonarjs/no-nested-functions
         await expect(async () => {
           const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
           const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
@@ -192,12 +192,12 @@ test.describe('Metrics reducer view', () => {
         const metricNames = Object.keys(usageCounts);
 
         // Check that metrics are in descending order of usage
+        const currentUsage = usageCounts[metricNames[0]];
+        expect(currentUsage).toBeGreaterThan(0);
+
         for (let i = 0; i < metricNames.length - 1; i++) {
           const currentUsage = usageCounts[metricNames[i]];
           const nextUsage = usageCounts[metricNames[i + 1]];
-          if (i === 0) {
-            expect(currentUsage).toBeGreaterThan(0);
-          }
           expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
         }
       });
