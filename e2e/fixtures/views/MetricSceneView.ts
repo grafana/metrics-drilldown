@@ -83,8 +83,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertSelectedLayout(expectedLayoutName: 'Grid' | 'Row') {
-    const layoutName = await this.getLayoutSwitcher().locator('input[checked]~label').textContent();
-    await expect(layoutName?.trim()).toBe(expectedLayoutName);
+    await expect(this.getLayoutSwitcher().locator('input[checked]~label')).toContainText(expectedLayoutName);
   }
 
   selectLayout(layoutName: string) {
