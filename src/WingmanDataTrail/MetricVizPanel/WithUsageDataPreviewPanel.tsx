@@ -230,13 +230,16 @@ function UsageData({
       return null;
     }
 
+    // Sort dashboards by count in descending order
+    const sortedDashboards = [...dashboardDetails].sort((a, b) => b.count - a.count);
+
     const renderDropdownContent = () => (
       <div className={styles.dashboardMenu}>
         <div className={styles.menuHeader}>
           Used in {usageCount} {usageCount === 1 ? singularUsageType : pluralUsageType}:
         </div>
         <div className={styles.dashboardList}>
-          {dashboardDetails.map((dashboard, index) => (
+          {sortedDashboards.map((dashboard, index) => (
             <div key={index} className={styles.dashboardItem}>
               {dashboard.name} ({dashboard.count})
             </div>
@@ -245,20 +248,27 @@ function UsageData({
       </div>
     );
 
+    const tooltipContent = `Metric used in ${usageCount} dashboards. Click to view them.`;
+
     return (
       <Dropdown overlay={renderDropdownContent} placement="top-start">
-        <Button
-          icon="bars"
-          variant="secondary"
-          tooltip="See dashboards"
-          fill="text"
-          size="sm"
-          className={styles.dropdownButton}
-        />
+        <Button variant="secondary" tooltip={tooltipContent} fill="text" size="sm" className={styles.dropdownButton}>
+          <Icon name="apps" style={{ marginRight: '4px' }} /> {usageCount}
+        </Button>
       </Dropdown>
     );
   };
 
+  // For dashboard usage, show only the dropdown button with icon and count
+  if (usageType === 'dashboard-usage') {
+    return (
+      <div className={styles.usageContainer} data-testid="usage-data-panel">
+        {renderDashboardsDropdown()}
+      </div>
+    );
+  }
+
+  // For other usage types (like alerting), show the original format
   return (
     <div className={styles.usageContainer} data-testid="usage-data-panel">
       <Tooltip
@@ -269,7 +279,6 @@ function UsageData({
           <Icon name={icon} /> {usageCount}
         </span>
       </Tooltip>
-      {renderDashboardsDropdown()}
     </div>
   );
 }
