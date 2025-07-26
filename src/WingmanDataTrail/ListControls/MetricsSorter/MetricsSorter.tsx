@@ -78,7 +78,7 @@ export function getRecentMetrics(): RecentMetric[] {
 
     return validMetrics;
   } catch (error) {
-    logger.error(error as Error, {message: 'Failed to get recent metrics:'});
+    logger.error(error as Error, { message: 'Failed to get recent metrics:' });
     return [];
   }
 }
@@ -145,7 +145,11 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   }
 
   public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
-    return this.usageFetcher.getUsageMetrics(usageType);
+    return this.usageFetcher.getUsageMetrics(usageType).then((metrics) => {
+      return Object.fromEntries(
+        Object.entries(metrics).map(([metricName, metricUsage]) => [metricName, metricUsage.count])
+      );
+    });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
