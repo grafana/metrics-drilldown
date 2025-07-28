@@ -47,7 +47,7 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' });
+      reportExploreMetrics('exposed_component_viewed', { component: 'label_breakdown' });
     }
   }, []);
 
