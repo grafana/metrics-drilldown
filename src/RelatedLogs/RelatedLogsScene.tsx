@@ -17,7 +17,7 @@ import {
   type SceneObjectState,
   type SceneVariable,
 } from '@grafana/scenes';
-import { Stack } from '@grafana/ui';
+import { Spinner, Stack } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from '../interactions';
@@ -32,6 +32,7 @@ interface RelatedLogsSceneProps {
 }
 
 export interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
+  loading: boolean;
   controls: SceneObject[];
   body: SceneCSSGridLayout;
   logsDrilldownLinkContext: LogsDrilldownLinkContext;
@@ -45,6 +46,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
   constructor(props: RelatedLogsSceneProps) {
     super({
+      loading: false,
       controls: [],
       body: new SceneCSSGridLayout({
         templateColumns: '1fr',
@@ -62,16 +64,20 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       },
     });
 
-    this.addActivationHandler(this._onActivate.bind(this));
+    this.addActivationHandler(() => {
+      this._onActivate();
+    });
   }
 
-  private _onActivate() {
+  private async _onActivate() {
     // Register handler for future changes to lokiDataSources
     this.state.orchestrator.addLokiDataSourcesChangeHandler(() => this.setupLogsPanel());
 
     // If data sources have already been loaded, we don't need to fetch them again
     if (!this.state.orchestrator.lokiDataSources.length) {
-      this.state.orchestrator.findAndCheckAllDatasources();
+      this.setState({ loading: true });
+      await this.state.orchestrator.findAndCheckAllDatasources();
+      this.setState({ loading: false });
     } else {
       this.setupLogsPanel();
     }
@@ -227,7 +233,11 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   });
 
   static readonly Component = ({ model }: SceneComponentProps<RelatedLogsScene>) => {
-    const { controls, body, logsDrilldownLinkContext } = model.useState();
+    const { controls, body, logsDrilldownLinkContext, loading } = model.useState();
+
+    if (loading) {
+      return <Spinner />;
+    }
 
     return (
       <Stack gap={1} direction={'column'} grow={1}>
