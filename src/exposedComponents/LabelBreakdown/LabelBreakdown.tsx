@@ -43,8 +43,12 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
     embedded: true,
   });
 
+  const initRef = useRef(false);
   useEffect(() => {
-    reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' });
+    if (!initRef.current) {
+      initRef.current = true;
+      reportExploreMetrics('label_breakdown_viewed', { action: 'open_from_embedded' });
+    }
   }, []);
 
   return (
