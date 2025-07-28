@@ -141,7 +141,7 @@ type Interactions = {
   app_initialized: {
     view: ViewName;
   };
-  // User renders an exposed component
+  // User took an action to view an exposed component
   exposed_component_viewed: {
     component: SnakeCase<ExposedComponentName>;
   };
