@@ -29,14 +29,14 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.quickSearch.enterText(searchText);
 
       await metricsReducerView.assertMetricsList();
-
       await expect(metricsReducerView.getMetricsList()).toHaveScreenshot('metric-list-with-all-types.png');
 
       for (const metricName of metricNames) {
         await metricsReducerView.selectMetricPanel(metricName);
-        await metricSceneView.assertMainViz(metricName);
 
+        await metricSceneView.assertMainViz(metricName);
         await expect(metricSceneView.getMainViz()).toHaveScreenshot(`metric-scene-main-viz-${metricName}.png`);
+
         await metricSceneView.goBack();
       }
     });
