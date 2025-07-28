@@ -1,6 +1,6 @@
 import { dateMath, type DataSourceApi } from '@grafana/data';
 import { SceneTimeRange } from '@grafana/scenes';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
 import { Wingman } from 'App/Routes';
@@ -47,7 +47,7 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      reportExploreMetrics('label_breakdown_viewed', { action: 'open_from_embedded' });
+      reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' });
     }
   }, []);
 
