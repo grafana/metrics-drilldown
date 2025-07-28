@@ -43,6 +43,10 @@ export class DrilldownView {
     await expect(this.getByRole('alert', { name: /error/i })).toBeHidden();
   }
 
+  goBack() {
+    return this.page.goBack();
+  }
+
   locator(selector: string, options?: Record<string, unknown>) {
     return this.page.locator(selector, options);
   }

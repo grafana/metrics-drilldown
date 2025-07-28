@@ -12,6 +12,36 @@ test.describe('Metrics reducer view', () => {
     await metricsReducerView.assertCoreUI();
   });
 
+  test.describe('Panel types', () => {
+    test('Displays each metric type in its corresponding panel', async ({ metricsReducerView, metricSceneView }) => {
+      const metricNames = [
+        'prometheus_http_requests_total', // counter
+        'go_goroutines', // gauge with no unit
+        'go_memstats_heap_inuse_bytes', // gauge with "bytes" unit
+        'http_server_duration_milliseconds_bucket', // histogram
+        'grafana_database_all_migrations_duration_seconds', // native histogram
+        'up', // status (binary)
+        'pyroscope_build_info', // info
+      ];
+
+      // prometheus_http_requests_total,go_goroutines,go_memstats_heap_inuse_bytes,http_server_duration_milliseconds_bucket,grafana_database_all_migrations_duration_seconds,^up$,pyroscope_build_info
+      const searchText = metricNames.map((name) => `^${name}$`).join(',');
+      await metricsReducerView.quickSearch.enterText(searchText);
+
+      await metricsReducerView.assertMetricsList();
+
+      await expect(metricsReducerView.getMetricsList()).toHaveScreenshot('metric-list-with-all-types.png');
+
+      for (const metricName of metricNames) {
+        await metricsReducerView.selectMetricPanel(metricName);
+        await metricSceneView.assertMainViz(metricName);
+
+        await expect(metricSceneView.getMainViz()).toHaveScreenshot(`metric-scene-main-viz-${metricName}.png`);
+        await metricSceneView.goBack();
+      }
+    });
+  });
+
   test.describe('Sidebar', () => {
     test.describe('Prefix and suffix filters logic behavior', () => {
       test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
