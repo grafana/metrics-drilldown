@@ -1,5 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 
+import { expect } from '../';
+
 export class QuickSearchInput {
   private readonly locator: Locator;
 
@@ -13,7 +15,7 @@ export class QuickSearchInput {
 
   async enterText(searchText: string) {
     await this.get().fill(searchText);
-    await this.page.waitForTimeout(250);
+    await this.page.waitForTimeout(250); // eslint-disable-line playwright/no-wait-for-timeout
   }
 
   clear() {
