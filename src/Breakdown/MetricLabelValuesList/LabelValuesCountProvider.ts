@@ -1,13 +1,10 @@
 import { sceneGraph } from '@grafana/scenes';
 
-import {
-  CountsProvider,
-  type CountsProviderState,
-} from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
+import { CountsProvider } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
 
 import { SceneByFrameRepeater } from './SceneByFrameRepeater';
 
-export class LabelValuesCountsProvider extends CountsProvider<CountsProviderState> {
+export class LabelValuesCountsProvider extends CountsProvider {
   constructor() {
     super({ key: 'LabelValuesCountsProvider' });
 

@@ -14,6 +14,7 @@ import React from 'react';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsSorter } from './MetricsSorter/MetricsSorter';
+import { type CountsProvider } from './QuickSearch/CountsProvider/CountsProvider';
 import { MetricVariableCountsProvider } from './QuickSearch/CountsProvider/MetricVariableCountsProvider';
 import { QuickSearch } from './QuickSearch/QuickSearch';
 
@@ -38,7 +39,7 @@ export class ListControls extends EmbeddedScene {
             body: new QuickSearch({
               urlSearchParamName: 'search_txt',
               targetName: 'metric',
-              countsProvider: new MetricVariableCountsProvider(),
+              countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
             }),
           }),
           new SceneFlexItem({
