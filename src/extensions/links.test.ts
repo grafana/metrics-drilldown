@@ -162,18 +162,19 @@ describe('configureDrilldownLink', () => {
       expect(result).toBeUndefined();
     });
     // do we want to show a link when the data source is prometheus? We can default to showing a link to the metrics reducer page..
-    test('should return undefined when query has no expression', () => {
+    test('should return drilldown path when query has no expression but has prometheus datasource', () => {
       const context = {
         pluginId: 'timeseries',
         targets: [
           {
-            expr: '',
+
             datasource: { type: 'prometheus', uid: 'prom-uid' },
           },
         ],
       };
       const result = configureDrilldownLink(context);
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result?.path).toBe('/a/grafana-metricsdrilldown-app/drilldown');
     });
 
     test('should return undefined when datasource is not prometheus', () => {

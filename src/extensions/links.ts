@@ -19,7 +19,7 @@ const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
 export const ASSISTANT_TARGET_V0 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha';
-export const ASSISTANT_TARGET_V1 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v1';
+export const ASSISTANT_TARGET_V1 = 'grafana-assistant-app/navigateToDrilldown/v1';
 
 export const ADHOC_URL_DELIMITER = '|';
 
@@ -73,6 +73,7 @@ export function configureDrilldownLink(context: object | undefined): { path: str
     return;
   }
 
+  // check that the datasource is prometheus
   const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
 
   if (!queries?.length) {
@@ -81,9 +82,6 @@ export function configureDrilldownLink(context: object | undefined): { path: str
 
   const { datasource, expr } = queries[0];
 
-  if (datasource?.type !== 'prometheus') {
-    return;
-  }
   // allow the user to navigate to the drilldown without a query (metrics reducer view)
   if (!expr) {
     return {
@@ -108,7 +106,7 @@ export function configureDrilldownLink(context: object | undefined): { path: str
         : undefined;
 
     const promURLObject = createPromURLObject(
-      datasource.uid,
+      datasource?.uid,
       labels,
       metric,
       timeRange?.from,
@@ -308,5 +306,6 @@ export function appendUrlParameters(
 type PromQuery = DataQuery & { expr: string };
 
 function isPromQuery(query: DataQuery): query is PromQuery {
-  return 'expr' in query;
+  const { datasource } = query;
+  return datasource?.type === 'prometheus';
 }
