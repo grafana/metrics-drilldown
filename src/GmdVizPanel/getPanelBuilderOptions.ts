@@ -2,8 +2,8 @@ import { type Expression } from 'tsqtsq';
 
 import { buildHeatmapQuery } from './heatmap/buildHeatmapQuery';
 import { isHistogramQuery } from './heatmap/isHistogramQuery';
-import { isUpDownMetric } from './isUpDownMetric';
 import { buildStatusHistoryQuery } from './statushistory/buildStatusHistoryQuery';
+import { isUpDownMetric } from './statushistory/isUpDownMetric';
 import { buildTimeseriesQuery } from './timeseries/buildTimeseriesQuery';
 import { getPerSecondRateUnit, getUnit } from './units/getUnit';
 
