@@ -76,7 +76,7 @@ export function configureDrilldownLink(context: object | undefined): { path: str
   // check that the datasource is prometheus
   const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
 
-  if (!queries?.length) {
+  if (!queries.length) {
     return;
   }
 
