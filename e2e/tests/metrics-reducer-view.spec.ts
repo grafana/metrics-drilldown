@@ -46,26 +46,36 @@ test.describe('Metrics reducer view', () => {
     test.describe('Prefix and suffix filters logic behavior', () => {
       test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
         metricsReducerView,
+        expectScreenshotInCurrentGrafanaVersion,
       }) => {
+        await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
         await metricsReducerView.assertMetricsList();
 
-        await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
-
         // Verify OR behavior by checking that metrics with either prefix are shown
-        await expect(metricsReducerView.page).toHaveScreenshot('sidebar-prefixes-selected-metric-counts.png');
+        await expectScreenshotInCurrentGrafanaVersion(
+          metricsReducerView.page,
+          'sidebar-prefixes-selected-metric-counts.png',
+          {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          }
+        );
       });
 
       test('Between filter groups, selections use AND logic ((prefix.one OR prefix.two) AND (suffix.one OR suffix.two))', async ({
         metricsReducerView,
+        expectScreenshotInCurrentGrafanaVersion,
       }) => {
-        await metricsReducerView.assertMetricsList();
-
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
         await metricsReducerView.sidebar.selectSuffixFilters(['bytes', 'count']);
+        await metricsReducerView.assertMetricsList();
 
         // Verify AND behavior between the two filter groups
-        await expect(metricsReducerView.page).toHaveScreenshot(
-          'sidebar-prefixes-and-suffixes-selected-metric-counts.png'
+        await expectScreenshotInCurrentGrafanaVersion(
+          metricsReducerView.page,
+          'sidebar-prefixes-and-suffixes-selected-metric-counts.png',
+          {
+            stylePath: './e2e/fixtures/css/hide-app-controls.css',
+          }
         );
       });
     });
@@ -73,7 +83,6 @@ test.describe('Metrics reducer view', () => {
     test.describe('Group by label', () => {
       test.describe('When selecting a value in the side bar', () => {
         test('A list of metrics grouped by label values is displayed, each with a "Select" button', async ({
-          page,
           metricsReducerView,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
@@ -81,13 +90,12 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', true);
           await metricsReducerView.assertMetricsGroupByList();
 
-          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label.png', {
-            stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          });
+          await expect(metricsReducerView.getMetricsGroupByList()).toHaveScreenshot(
+            'metrics-reducer-group-by-label.png'
+          );
         });
 
         test('When clicking on the "Select" button, it drills down the selected label value (adds a new filter, displays a non-grouped list of metrics and updates the list of label values)', async ({
-          page,
           metricsReducerView,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
@@ -101,15 +109,14 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
           await metricsReducerView.assertMetricsList();
 
-          await metricsReducerView.sidebar.assertLabelsList('=', 3);
+          await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
 
-          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label-after-select.png', {
-            stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          });
+          await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
+            'metrics-reducer-group-by-label-after-select.png'
+          );
         });
 
         test('When clearing the filter, it updates the list of label values and marks the sidebar button as inactive', async ({
-          page,
           metricsReducerView,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
@@ -123,12 +130,12 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
           await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
 
+          await metricsReducerView.sidebar.assertLabelsListCount('>', 3);
           await metricsReducerView.assertMetricsList();
-          await metricsReducerView.sidebar.assertLabelsList('>', 3);
 
-          await expect(page).toHaveScreenshot('metrics-reducer-group-by-label-after-clear-filter.png', {
-            stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          });
+          await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
+            'metrics-reducer-group-by-label-after-clear-filter.png'
+          );
         });
       });
     });
@@ -146,7 +153,7 @@ test.describe('Metrics reducer view', () => {
 
         await metricsReducerView.sidebar.toggleButton('Bookmarks');
 
-        // TODO: use specific cata-testid with the full metric name to simplify this assertion
+        // TODO: use specific data-testid with the full metric name to simplify this assertion
         // Only consider the first 20 characters, to account for truncation of long meric names
         const possiblyTruncatedMetricName = new RegExp(`^${METRIC_NAME.substring(0, 20)}`);
         await expect(metricsReducerView.getByRole('button', { name: possiblyTruncatedMetricName })).toBeVisible();
@@ -155,7 +162,7 @@ test.describe('Metrics reducer view', () => {
   });
 
   test.describe('Metrics sorting', () => {
-    test('Default sorting shows recent metrics first, then alphabetical', async ({ metricsReducerView, page }) => {
+    test('Default sorting shows recent metrics first, then alphabetical', async ({ page, metricsReducerView }) => {
       await metricsReducerView.assertSelectedSortBy('Default');
 
       // We'll select seven metrics, but only the 6 most recent metrics should be shown above the alphabetical list

@@ -105,10 +105,6 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertPanelsList() {
-    // we wait for some time to make sure that the Y axis are synced
-    // TODO: how to improve this and not rely on an arbitrary timeout?
-    await this.waitForTimeout(1500);
-
     const panelsList = this.getPanelsList();
     await expect(panelsList).toBeVisible();
 
@@ -118,6 +114,9 @@ export class MetricSceneView extends DrilldownView {
 
     const panelsCount = await panelsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+
+    // TODO: find a better way
+    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   /* Breakdown tab */
