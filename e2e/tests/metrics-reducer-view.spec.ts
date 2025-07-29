@@ -29,6 +29,11 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.quickSearch.enterText(searchText);
 
       await metricsReducerView.assertMetricsList();
+      // to make sure native histograms are rendered as they should
+      // FIXME in the app code
+      await metricsReducerView.appControls.clickOnRefresh();
+      await metricsReducerView.assertMetricsList();
+
       await expect(metricsReducerView.getMetricsList()).toHaveScreenshot('metric-list-with-all-types.png');
 
       for (const metricName of metricNames) {
