@@ -7,10 +7,11 @@ import React from 'react';
 import { getTrailFor } from 'utils';
 
 import { getPanelBuilderOptions, type LabelMatcher } from './getPanelBuilderOptions';
-import { getPanelHeightInPixels, type PanelHeight } from './getPanelHeightInPixels';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
 import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
+
+export type PanelHeight = 's' | 'm' | 'l' | 'xl';
 
 interface GmdVizPanelState extends SceneObjectState {
   metric: string;
@@ -37,7 +38,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       key: 'GmdVizPanel',
       metric,
       matchers: matchers || [],
-      heightInPixels: `${getPanelHeightInPixels(height || 'm')}px`,
+      heightInPixels: `${GmdVizPanel.getPanelHeightInPixels(height || 'm')}px`,
       isNativeHistogram: false,
       fixedColor,
       body: undefined,
@@ -59,6 +60,20 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.setState({
       body: this.buildBody(),
     });
+  }
+
+  private static getPanelHeightInPixels(h: PanelHeight): number {
+    switch (h) {
+      case 's':
+        return 160;
+      case 'l':
+        return 260;
+      case 'xl':
+        return 280;
+      case 'm':
+      default:
+        return 220;
+    }
   }
 
   private buildBody() {
