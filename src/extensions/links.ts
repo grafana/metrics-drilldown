@@ -37,11 +37,11 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     icon,
     path: createAppUrl(ROUTES.Drilldown),
     targets: [
-      PluginExtensionPoints.DashboardPanelMenu, 
+      PluginExtensionPoints.DashboardPanelMenu,
       PluginExtensionPoints.ExploreToolbarAction,
       // for testing purposes, this will be the target for the alerting rule query editor once the PR in grafana is merged
       // PluginExtensionPoints.AlertingRuleQueryEditor,
-      "grafana/alerting/alertingrule/queryeditor",
+      'grafana/alerting/alertingrule/queryeditor',
       ASSISTANT_TARGET_V1,
     ],
     configure: configureDrilldownLink,
