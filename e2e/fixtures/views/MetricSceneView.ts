@@ -40,7 +40,7 @@ export class MetricSceneView extends DrilldownView {
   async assertCoreUI(metricName: string) {
     await this.appControls.assert(true);
 
-    await expect(this.page.getByTestId('top-view').getByText(metricName)).toBeVisible();
+    await this.assertMainViz(metricName);
     await expect(this.page.getByTestId('action-bar')).toBeVisible();
 
     await this.assertTabs();
@@ -50,6 +50,14 @@ export class MetricSceneView extends DrilldownView {
 
   getMainViz() {
     return this.page.getByTestId('top-view').locator('[data-viz-panel-key]');
+  }
+
+  async assertMainViz(metricName: string) {
+    await expect(this.page.getByTestId('top-view').getByText(metricName)).toBeVisible();
+
+    // we wait for some time to make sure that data is rendered
+    // TODO: how to improve this and not rely on an arbitrary timeout?
+    await this.waitForTimeout(500);
   }
 
   /* Tabs */

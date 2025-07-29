@@ -147,7 +147,7 @@ Here's a typical workflow for adding screenshot tests:
 2. **Generate screenshots locally** using Docker:
 
    ```shell
-   ./scripts/e2e-gen-screenshots.sh "-g 'Simple and comple sidebars'"
+   ./scripts/e2e-gen-screenshots.sh "-g 'Simple and complex sidebars'"
    ```
 
 3. **Review generated screenshots** in the test snapshot directories
