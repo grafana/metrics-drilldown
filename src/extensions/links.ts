@@ -36,7 +36,11 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     category,
     icon,
     path: createAppUrl(ROUTES.Drilldown),
-    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction, ASSISTANT_TARGET_V1],
+    targets: [
+      PluginExtensionPoints.DashboardPanelMenu,
+      PluginExtensionPoints.ExploreToolbarAction,
+      ASSISTANT_TARGET_V1,
+    ],
     configure: configureDrilldownLink,
   },
   {
@@ -48,8 +52,9 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       if (typeof context === 'undefined') {
         return;
       }
-      
-      const { navigateToMetrics, datasource_uid, label_filters, metric, start, end } = (context as GrafanaAssistantMetricsDrilldownContext);
+
+      const { navigateToMetrics, datasource_uid, label_filters, metric, start, end } =
+        context as GrafanaAssistantMetricsDrilldownContext;
       // parse the labels to the PromQL format
       const parsedLabels = parseFiltersToLabelMatchers(label_filters);
       // create the PromURLObject for building params
@@ -73,7 +78,6 @@ export function configureDrilldownLink(context: object | undefined): { path: str
     return;
   }
 
-  // check that the datasource is prometheus
   const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
 
   if (!queries.length) {
@@ -105,13 +109,7 @@ export function configureDrilldownLink(context: object | undefined): { path: str
         ? (context.timeRange as { from: string; to: string })
         : undefined;
 
-    const promURLObject = createPromURLObject(
-      datasource?.uid,
-      labels,
-      metric,
-      timeRange?.from,
-      timeRange?.to
-    );
+    const promURLObject = createPromURLObject(datasource?.uid, labels, metric, timeRange?.from, timeRange?.to);
 
     const params = buildNavigateToMetricsParams(promURLObject);
 
@@ -150,17 +148,17 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
       if (node.type.isError || node.name === '⚠') {
         hasErrors = true;
         const errorText = expr.slice(node.from, node.to);
-        const errorMsg = errorText 
+        const errorMsg = errorText
           ? `Parse error at position ${node.from}-${node.to}: "${errorText}"`
           : `Parse error at position ${node.from}`;
         errors.push(errorMsg);
       }
-      
+
       // Get the first metric name from any VectorSelector > Identifier
       if (!metric && node.name === 'Identifier' && node.node.parent?.type.name === 'VectorSelector') {
         metric = expr.slice(node.from, node.to);
       }
-      
+
       // Extract label matchers using helper function
       const labelData = processLabelMatcher(node, expr);
       if (labelData) {
@@ -182,7 +180,7 @@ function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null
   let labelName = '';
   let op = '';
   let value = '';
-  
+
   // Get children of UnquotedLabelMatcher
   for (let child = labelNode.firstChild; child; child = child.nextSibling) {
     if (child.type.name === 'LabelName') {
@@ -193,19 +191,23 @@ function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null
       value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
     }
   }
-  
-  if (labelName && op) { // Allow empty string values
+
+  if (labelName && op) {
+    // Allow empty string values
     return { label: labelName, op, value };
   }
   return null;
 }
 
 /**
- * Scenes adhoc variable filters requires a | delimiter 
+ * Scenes adhoc variable filters requires a | delimiter
  * between the label, operator, and value (see AdHocFiltersVariableUrlSyncHandler.ts in Scenes)
  */
 function filterToUrlParameter(filter: PromQLLabelMatcher): [UrlParameterType, string] {
-  return [UrlParameters.Filters, `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`] as [UrlParameterType, string];
+  return [
+    UrlParameters.Filters,
+    `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`,
+  ] as [UrlParameterType, string];
 }
 
 // Type for the metrics drilldown context from Grafana Assistant
@@ -246,7 +248,7 @@ export function buildNavigateToMetricsParams(promURLObject: PromURLObject): URLS
   const { metric, start, end, datasource_uid, label_filters } = promURLObject;
 
   const filters = label_filters ?? [];
-  
+
   // Use the structured context data to build parameters
   return appendUrlParameters([
     [UrlParameters.Metric, metric],
@@ -261,7 +263,7 @@ export function parseFiltersToLabelMatchers(label_filters?: string[]): PromQLLab
   if (!label_filters) {
     return [];
   }
-  
+
   return label_filters.map((filter) => {
     const matcher = parseMatcher(filter);
     return {
