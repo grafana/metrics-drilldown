@@ -31,10 +31,6 @@ export class MetricsReducerView extends DrilldownView {
     return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
 
-  goBack() {
-    return this.page.goBack();
-  }
-
   /* Core UI assertions */
 
   async assertCoreUI() {
