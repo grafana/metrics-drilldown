@@ -16,11 +16,10 @@ import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { VAR_FILTERS } from 'shared';
-import { getColorByIndex, getTrailFor } from 'utils';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import { METRICS_VIZ_PANEL_HEIGHT, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
@@ -71,23 +70,11 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
-          const trail = getTrailFor(this);
-          const isNativeHistogram = trail.isNativeHistogram(option.value as string);
-
-          // get the VAR_FILTERS variable to pass in the correct matchers for the functions
-          const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-
-          const matchers = isAdHocFiltersVariable(filtersVariable)
-            ? filtersVariable.state.filters.map((filter) => `${filter.key}${filter.operator}${filter.value}`)
-            : [];
-
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
-              vizPanelInGridItem: new MetricVizPanel({
-                metricName: option.value as string,
-                color: getColorByIndex(colorIndex),
-                isNativeHistogram,
-                matchers,
+              vizPanelInGridItem: new GmdVizPanel({
+                metric: option.value as string,
+                fixedColor: getColorByIndex(colorIndex),
               }),
               metric: option.value as string,
             }),
