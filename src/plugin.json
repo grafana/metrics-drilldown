@@ -55,11 +55,12 @@
   "extensions": {
     "addedLinks": [
       {
-<<<<<<< HEAD
-        "targets": ["grafana/dashboard/panel/menu", "grafana/explore/toolbar/action", "grafana/alerting/alertingrule/queryeditor"],
-=======
-        "targets": ["grafana/dashboard/panel/menu", "grafana/explore/toolbar/action", "grafana-assistant-app/navigateToDrilldown/v1"],
->>>>>>> bohandley/grafana-assistant-expr-based-links
+        "targets": [
+          "grafana/dashboard/panel/menu",
+          "grafana/explore/toolbar/action",
+          "grafana-assistant-app/navigateToDrilldown/v1",
+          "grafana/alerting/alertingrule/queryeditor"
+        ],
         "title": "Open in Grafana Metrics Drilldown",
         "description": "Open current query in the Grafana Metrics Drilldown view"
       },
