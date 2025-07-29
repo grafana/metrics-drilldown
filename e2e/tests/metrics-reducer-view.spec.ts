@@ -7,8 +7,39 @@ test.describe('Metrics reducer view', () => {
     await metricsReducerView.goto();
   });
 
+  // eslint-disable-next-line playwright/expect-expect
   test('Core UI elements', async ({ metricsReducerView }) => {
     await metricsReducerView.assertCoreUI();
+  });
+
+  test.describe('Panel types', () => {
+    test('Displays each metric type in its corresponding panel', async ({ metricsReducerView, metricSceneView }) => {
+      const metricNames = [
+        'prometheus_http_requests_total', // counter
+        'go_goroutines', // gauge with no unit
+        'go_memstats_heap_inuse_bytes', // gauge with "bytes" unit
+        'http_server_duration_milliseconds_bucket', // histogram
+        'grafana_database_all_migrations_duration_seconds', // native histogram
+        'up', // status (binary)
+        'pyroscope_build_info', // info
+      ];
+
+      // prometheus_http_requests_total,go_goroutines,go_memstats_heap_inuse_bytes,http_server_duration_milliseconds_bucket,grafana_database_all_migrations_duration_seconds,^up$,pyroscope_build_info
+      const searchText = metricNames.map((name) => `^${name}$`).join(',');
+      await metricsReducerView.quickSearch.enterText(searchText);
+
+      await metricsReducerView.assertMetricsList();
+      await expect(metricsReducerView.getMetricsList()).toHaveScreenshot('metric-list-with-all-types.png');
+
+      for (const metricName of metricNames) {
+        await metricsReducerView.selectMetricPanel(metricName);
+
+        await metricSceneView.assertMainViz(metricName);
+        await expect(metricSceneView.getMainViz()).toHaveScreenshot(`metric-scene-main-viz-${metricName}.png`);
+
+        await metricSceneView.goBack();
+      }
+    });
   });
 
   test.describe('Sidebar', () => {
@@ -162,7 +193,6 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.selectSortByOption(sortOptionName);
 
         // Wait for the usage count to load
-        // eslint-disable-next-line sonarjs/no-nested-functions
         await expect(async () => {
           const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
           const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
@@ -185,12 +215,12 @@ test.describe('Metrics reducer view', () => {
         const metricNames = Object.keys(usageCounts);
 
         // Check that metrics are in descending order of usage
+        const currentUsage = usageCounts[metricNames[0]];
+        expect(currentUsage).toBeGreaterThan(0);
+
         for (let i = 0; i < metricNames.length - 1; i++) {
           const currentUsage = usageCounts[metricNames[i]];
           const nextUsage = usageCounts[metricNames[i + 1]];
-          if (i === 0) {
-            expect(currentUsage).toBeGreaterThan(0);
-          }
           expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
         }
       });

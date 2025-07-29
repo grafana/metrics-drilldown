@@ -40,7 +40,11 @@ export class DrilldownView {
 
     // TODO: add assertion(s) on loading state?
     await this.page.getByTestId('metrics-drilldown-app').waitFor();
-    await expect(this.getByRole('alert', { name: /error/i })).not.toBeVisible();
+    await expect(this.getByRole('alert', { name: /error/i })).toBeHidden();
+  }
+
+  goBack() {
+    return this.page.goBack();
   }
 
   locator(selector: string, options?: Record<string, unknown>) {
@@ -76,6 +80,7 @@ export class DrilldownView {
   }
 
   waitForTimeout(timeout: number) {
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     return this.page.waitForTimeout(timeout);
   }
 
@@ -84,6 +89,7 @@ export class DrilldownView {
   }
 
   pause() {
+    // eslint-disable-next-line playwright/no-page-pause
     return this.page.pause();
   }
 
@@ -94,8 +100,8 @@ export class DrilldownView {
 
 export function resolveGrafanaSelector(selector: string, options?: Omit<getByGrafanaSelectorOptions, 'root'>): string {
   const startsWith = options?.startsWith ? '^' : '';
-  if (selector.startsWith('data-testid')) {
-    return `[data-testid${startsWith}="${selector}"]`;
-  }
-  return `[aria-label${startsWith}="${selector}"]`;
+
+  return selector.startsWith('data-testid')
+    ? `[data-testid${startsWith}="${selector}"]`
+    : `[aria-label${startsWith}="${selector}"]`;
 }

@@ -31,10 +31,6 @@ export class MetricsReducerView extends DrilldownView {
     return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
 
-  goBack() {
-    return this.page.goBack();
-  }
-
   /* Core UI assertions */
 
   async assertCoreUI() {
@@ -49,9 +45,7 @@ export class MetricsReducerView extends DrilldownView {
   async assertAdHocFilter(labelName: string, operator: string, labelValue: string) {
     const filter = this.getByRole('button', { name: `Edit filter with key ${labelName}` });
     await expect(filter).toBeVisible();
-
-    const filterText = await filter.textContent();
-    expect(filterText).toBe(`${labelName} ${operator} ${labelValue}`);
+    await expect(filter).toHaveText(`${labelName} ${operator} ${labelValue}`);
   }
 
   async clearAdHocFilter(labelName: string) {
