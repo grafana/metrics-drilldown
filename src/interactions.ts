@@ -1,8 +1,10 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
+import { type ExposedComponentName } from 'exposedComponents/components';
 import { type ActionViewType } from 'MetricActionBar';
 import { type SortSeriesByOption } from 'services/sorting';
+import { type SnakeCase } from 'utils/utils.types';
 import { type LayoutType } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
@@ -138,6 +140,10 @@ type Interactions = {
   };
   app_initialized: {
     view: ViewName;
+  };
+  // User took an action to view an exposed component
+  exposed_component_viewed: {
+    component: SnakeCase<ExposedComponentName>;
   };
 };
 

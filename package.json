@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
@@ -17,11 +17,12 @@
     "server": "docker compose up --build",
     "sign": "npx --yes @grafana/sign-plugin@latest",
     "e2e:server": "docker compose up --build",
-    "e2e:ci": "docker compose --profile playwright up --build --attach playwright",
+    "e2e:ci": "docker compose --profile playwright up --build --attach playwright --exit-code-from playwright",
     "e2e:prepare": "npm exec playwright install chromium",
     "e2e": "playwright test -c ./e2e/config/playwright.config.local.ts",
     "e2e:watch": "npm run e2e -- --ui",
-    "e2e:codegen": "playwright codegen"
+    "e2e:codegen": "playwright codegen",
+    "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh"
   },
   "packageManager": "npm@10.9.2",
   "engines": {
@@ -74,6 +75,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-jsdoc": "^46.10.1",
+    "eslint-plugin-playwright": "^2.2.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-sonarjs": "^3.0.2",
