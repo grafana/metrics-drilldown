@@ -1,10 +1,11 @@
 import { dateMath, type DataSourceApi } from '@grafana/data';
 import { SceneTimeRange } from '@grafana/scenes';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
 import { Wingman } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
+import { reportExploreMetrics } from 'interactions';
 import { newMetricsTrail } from 'utils';
 
 import { parsePromQLQuery } from '../../extensions/links';
@@ -41,6 +42,14 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
     $timeRange: new SceneTimeRange({ from, to }),
     embedded: true,
   });
+
+  const initRef = useRef(false);
+  useEffect(() => {
+    if (!initRef.current) {
+      initRef.current = true;
+      reportExploreMetrics('exposed_component_viewed', { component: 'label_breakdown' });
+    }
+  }, []);
 
   return (
     <div data-testid="metrics-drilldown-embedded-label-breakdown">

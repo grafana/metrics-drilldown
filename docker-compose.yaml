@@ -7,7 +7,8 @@ services:
       service: grafana
     build:
       args:
-        grafana_version: ${GRAFANA_VERSION:-11.6.0}
+        grafana_image: ${GRAFANA_IMAGE:-grafana-enterprise}
+        grafana_version: ${GRAFANA_VERSION:-11.6.4}
     ports: !override
       - '${GRAFANA_PORT:-3001}:3000'
     environment:
@@ -61,3 +62,7 @@ services:
       - ./src:/app/src
     command: ${PLAYWRIGHT_ARGS:-}
     profiles: [playwright]
+    environment:
+      GRAFANA_PORT: ${GRAFANA_PORT:-3001}
+      GRAFANA_IMAGE: ${GRAFANA_VERSION:-grafana-enterprise}
+      GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.4}
