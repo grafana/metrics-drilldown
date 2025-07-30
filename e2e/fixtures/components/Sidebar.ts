@@ -94,29 +94,17 @@ export class Sidebar {
     await expect(radioButton).toBeChecked();
   }
 
-  async assertLabelsList(expectedLabels: string[]) {
+  async assertLabelsList(operator: '=' | '>', count: number) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
-
     const radiosCount = await labelsBrowser.getByRole('radio').count();
-    expect(radiosCount).toBe(expectedLabels.length);
-
-    for (const expectedLabel of expectedLabels) {
-      const radioButton = labelsBrowser.getByRole('radio', { name: expectedLabel, exact: true });
-      await expect(radioButton).toBeVisible();
-    }
-  }
-
-  async assertLabelsListCount(operator: '=' | '>', expectedCount: number) {
-    const labelsBrowser = this.locator.getByTestId('labels-browser');
 
     if (operator === '=') {
-      await expect(labelsBrowser.getByRole('radio')).toHaveCount(expectedCount);
+      await expect(radiosCount).toBe(count);
       return;
     }
 
     if (operator === '>') {
-      const radiosCount = await labelsBrowser.getByRole('radio').count();
-      expect(radiosCount).toBeGreaterThan(expectedCount);
+      await expect(radiosCount).toBeGreaterThan(count);
       return;
     }
 

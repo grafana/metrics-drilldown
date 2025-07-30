@@ -13,7 +13,6 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { LayoutSwitcher } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import { type CountsProvider } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
 import { MetricVariableCountsProvider } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/MetricVariableCountsProvider';
 import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 
@@ -43,7 +42,7 @@ export class RelatedListControls extends EmbeddedScene {
             body: new QuickSearch({
               urlSearchParamName: 'gmd-relatedSearchText',
               targetName: 'related metric',
-              countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
+              countsProvider: new MetricVariableCountsProvider(),
               displayCounts: true,
             }),
           }),

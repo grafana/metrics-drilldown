@@ -16,14 +16,11 @@ test.describe('Metrics Scene view', () => {
   });
 
   test.describe('Breakdown tab', () => {
-    test('All labels', async ({ metricSceneView, expectScreenshotInCurrentGrafanaVersion }) => {
+    test('All labels', async ({ metricSceneView }) => {
       await metricSceneView.assertDefaultBreadownListControls();
       await metricSceneView.assertPanelsList();
 
-      await expectScreenshotInCurrentGrafanaVersion(
-        metricSceneView.getPanelsList(),
-        'metric-scene-breakdown-all-panels-list.png'
-      );
+      await expect(metricSceneView.getPanelsList()).toHaveScreenshot('metric-scene-breakdown-all-panels-list.png');
     });
 
     test.describe('After selecting a label', () => {

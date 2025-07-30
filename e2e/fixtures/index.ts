@@ -1,18 +1,17 @@
-import { test as base, type AppConfigPage } from '@grafana/plugin-e2e';
-import { type Locator, type Page } from '@playwright/test';
+import { test as base, type AppConfigPage, type AppPage } from '@grafana/plugin-e2e';
 
 import pluginJson from '../../src/plugin.json';
-import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
+import {
+  DEFAULT_STATIC_URL_SEARCH_PARAMS,
+  DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY,
+  DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY,
+} from '../config/constants';
 import { MetricSceneView } from './views/MetricSceneView';
 import { MetricsReducerView } from './views/MetricsReducerView';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
-  expectScreenshotInCurrentGrafanaVersion: (
-    locator: Locator | Page,
-    fileName: string,
-    options?: Record<string, any>
-  ) => Promise<void>;
+  gotoPage: (path?: string) => Promise<AppPage>;
   metricsReducerView: MetricsReducerView;
   metricSceneView: MetricSceneView;
 };
@@ -24,23 +23,27 @@ export const test = base.extend<AppTestFixture>({
     });
     await use(configPage);
   },
-  expectScreenshotInCurrentGrafanaVersion: async ({ page }, use) => {
-    const expectToHaveScreenshot: AppTestFixture['expectScreenshotInCurrentGrafanaVersion'] = async (
-      locator,
-      fileName,
-      options
-    ) => {
-      const grafanaVersion = await page.evaluate(() => window.grafanaBootData.settings['buildInfo']['version']);
-      if (!grafanaVersion) {
-        throw new Error('Cannot determine Grafana version, which is required for screenshot testing!');
-      }
+  gotoPage: async ({ gotoAppPage, page }, use) => {
+    await use(async (path) => {
+      const urlParams = DEFAULT_STATIC_URL_SEARCH_PARAMS;
+      const url = `${path}?${urlParams.toString()}`;
 
-      await base
-        .expect(locator)
-        .toHaveScreenshot(`${grafanaVersion}-${fileName}`, { ...options, maxDiffPixelRatio: 0 });
-    };
+      await page.addInitScript(
+        (keys) => {
+          keys.forEach((key) => {
+            window.localStorage.setItem(key, 'false');
+          });
+        },
+        [DOCKED_MENU_OPEN_LOCAL_STORAGE_KEY, DOCKED_MENU_DOCKED_LOCAL_STORAGE_KEY]
+      );
 
-    await use(expectToHaveScreenshot);
+      const appPage = await gotoAppPage({
+        path: url,
+        pluginId: pluginJson.id,
+      });
+
+      return appPage;
+    });
   },
   metricsReducerView: async ({ page }, use) => {
     const metricsReducerView = new MetricsReducerView(page, DEFAULT_STATIC_URL_SEARCH_PARAMS);

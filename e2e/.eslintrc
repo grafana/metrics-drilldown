@@ -1,30 +1,7 @@
 {
   "root": false,
-  "plugins": ["playwright"],
-  "extends": ["../.eslintrc", "plugin:playwright/recommended"],
-  "globals": {
-    // Disable Jest globals since we're using Playwright for E2E tests
-    "test": "off",
-    "expect": "off",
-    "describe": "off",
-    "it": "off",
-    "beforeEach": "off",
-    "afterEach": "off",
-    "beforeAll": "off",
-    "afterAll": "off",
-    // Enable used globals
-    "window": true,
-    "require": true,
-    "process": true
-  },
   "rules": {
-    "no-undef": "error",
-    "sonarjs/no-nested-functions": "off",
-    // Disable Jest rules since we're using Playwright for E2E tests
     "jest/no-standalone-expect": "off",
-    "jest/valid-expect": "off",
-    "jest/expect-expect": "off",
-    "jest/valid-describe-callback": "off",
-    "jest/no-done-callback": "off"
+    "sonarjs/no-nested-functions": "off"
   }
 }

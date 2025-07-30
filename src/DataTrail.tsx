@@ -186,8 +186,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     if (!this.state.histogramsLoaded) {
       try {
         await this.datasourceHelper.initializeHistograms();
-      } catch (e) {
-        displayWarning(['Error while initializing histograms!', (e as Error).toString()]);
+      } catch {
+        displayWarning(['Error while initializing histograms!']);
       }
 
       this.setState({
@@ -306,11 +306,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
     const styles = useStyles2(getStyles, headerHeight, model);
-
     // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
-    useEffect(() => {
-      model.initializeHistograms();
-    }, [model]);
+    model.initializeHistograms();
 
     useEffect(() => {
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);

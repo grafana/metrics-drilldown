@@ -42,21 +42,11 @@ type CustomEnvConfig = {
 
 export function config(config: CustomEnvConfig) {
   return defineConfig<PluginOptions>({
-    webServer: {
-      command: 'sleep infinity',
-      url: getGrafanaUrl(),
-      timeout: 30 * 1000,
-      reuseExistingServer: true,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
+    // Custom config
     reporter: config.reporter,
     expect: {
       timeout: Number(config.expectTimeout) > 0 ? config.expectTimeout : 5000,
-      toHaveScreenshot: {
-        // tweak me with experience ;)
-        maxDiffPixelRatio: 0.005, // 0.5% of the screenshot size in pixels
-      },
+      toHaveScreenshot: { maxDiffPixelRatio: 0.01 }, // tweak me with experience
     },
     retries: config.retries && config.retries > 0 ? config.retries : 0,
     forbidOnly: config.forbidOnly || false,

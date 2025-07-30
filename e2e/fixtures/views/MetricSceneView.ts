@@ -40,7 +40,7 @@ export class MetricSceneView extends DrilldownView {
   async assertCoreUI(metricName: string) {
     await this.appControls.assert(true);
 
-    await this.assertMainViz(metricName);
+    await expect(this.page.getByTestId('top-view').getByText(metricName)).toBeVisible();
     await expect(this.page.getByTestId('action-bar')).toBeVisible();
 
     await this.assertTabs();
@@ -50,14 +50,6 @@ export class MetricSceneView extends DrilldownView {
 
   getMainViz() {
     return this.page.getByTestId('top-view').locator('[data-viz-panel-key]');
-  }
-
-  async assertMainViz(metricName: string) {
-    await expect(this.page.getByTestId('top-view').getByText(metricName)).toBeVisible();
-
-    // we wait for some time to make sure that data is rendered
-    // TODO: how to improve this and not rely on an arbitrary timeout?
-    await this.waitForTimeout(500);
   }
 
   /* Tabs */
@@ -91,7 +83,8 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertSelectedLayout(expectedLayoutName: 'Grid' | 'Row') {
-    await expect(this.getLayoutSwitcher().locator('input[checked]~label')).toContainText(expectedLayoutName);
+    const layoutName = await this.getLayoutSwitcher().locator('input[checked]~label').textContent();
+    await expect(layoutName?.trim()).toBe(expectedLayoutName);
   }
 
   selectLayout(layoutName: string) {
@@ -105,6 +98,10 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertPanelsList() {
+    // we wait for some time to make sure that the Y axis are synced
+    // TODO: how to improve this and not rely on an arbitrary timeout?
+    await this.waitForTimeout(1500);
+
     const panelsList = this.getPanelsList();
     await expect(panelsList).toBeVisible();
 
@@ -114,9 +111,6 @@ export class MetricSceneView extends DrilldownView {
 
     const panelsCount = await panelsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
-
-    // TODO: find a better way
-    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   /* Breakdown tab */
