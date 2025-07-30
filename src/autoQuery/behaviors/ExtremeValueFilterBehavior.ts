@@ -31,7 +31,7 @@ export function extremeValueFilterBehavior(sceneObject: SceneObject): CancelActi
 
   // When the query runner's state changes, check if the data is all NaN.
   // If it is, remove the extreme values from the query.
-  const { unsubscribe } = queryRunner.subscribeToState((state) => {
+  const queryRunnerSub = queryRunner.subscribeToState((state) => {
     if (state.data?.state === LoadingState.Done && state.data?.series) {
       const series = state.data.series;
       if (isAllDataNaN(series)) {
@@ -45,7 +45,7 @@ export function extremeValueFilterBehavior(sceneObject: SceneObject): CancelActi
   });
 
   // Return cleanup function
-  return unsubscribe;
+  return () => queryRunnerSub.unsubscribe();
 }
 
 /**
