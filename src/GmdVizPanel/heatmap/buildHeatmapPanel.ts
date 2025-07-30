@@ -16,17 +16,17 @@ type HeatmapPanelOptions = {
 
 export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
   const { metric, matchers, isNativeHistogram } = options;
-  const query = getHeatmapQueryRunnerParams(metric, matchers, isNativeHistogram);
+  const queryParams = getHeatmapQueryRunnerParams(metric, matchers, isNativeHistogram);
   const unit = getUnit(metric);
 
   const queryRunner = new SceneQueryRunner({
     datasource: trailDS,
-    maxDataPoints: query.maxDataPoints,
+    maxDataPoints: queryParams.maxDataPoints,
     queries: [
       {
         refId: options.metric,
-        expr: query.query,
-        format: query.format,
+        expr: queryParams.query,
+        format: queryParams.format,
         fromExploreMetrics: true,
       },
     ],

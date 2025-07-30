@@ -15,16 +15,16 @@ type TimeseriesPanelOptions = {
 
 export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel {
   const { metric, matchers, fixedColor } = options;
-  const query = getTimeseriesQueryRunnerParams(metric, matchers);
-  const unit = query.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
+  const queryParams = getTimeseriesQueryRunnerParams(metric, matchers);
+  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const queryRunner = new SceneQueryRunner({
     datasource: trailDS,
-    maxDataPoints: query.maxDataPoints,
+    maxDataPoints: queryParams.maxDataPoints,
     queries: [
       {
         refId: options.metric,
-        expr: query.query,
+        expr: queryParams.query,
         fromExploreMetrics: true,
       },
     ],
@@ -38,6 +38,6 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     .setColor({ mode: 'fixed', fixedColor })
     .setCustomFieldConfig('fillOpacity', 9)
     .setCustomFieldConfig('pointSize', 1)
-    .setDisplayName(query.fnName)
+    .setDisplayName(queryParams.fnName)
     .build();
 }

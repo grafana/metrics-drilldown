@@ -31,16 +31,16 @@ type StatusHistoryPanelOptions = {
 
 export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): VizPanel {
   const { metric, matchers } = options;
-  const query = getStatushistoryQueryRunnerParams(metric, matchers);
+  const queryParams = getStatushistoryQueryRunnerParams(metric, matchers);
   const unit = 'none';
 
   const queryRunner = new SceneQueryRunner({
     datasource: trailDS,
-    maxDataPoints: query.maxDataPoints,
+    maxDataPoints: queryParams.maxDataPoints,
     queries: [
       {
         refId: options.metric,
-        expr: query.query,
+        expr: queryParams.query,
         fromExploreMetrics: true,
       },
     ],
