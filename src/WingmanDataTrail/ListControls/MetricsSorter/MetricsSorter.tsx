@@ -14,6 +14,7 @@ import React from 'react';
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 import { EventSortByChanged } from './events/EventSortByChanged';
+import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
 import { logger } from '../../../tracking/logger/logger';
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
@@ -144,6 +145,11 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     return this.usageFetcher.getUsageForMetric(metricName, usageType);
   }
 
+  public getUsageDetailsForMetric(metricName: string, usageType: MetricUsageType): Promise<MetricUsageDetails> {
+    return this.usageFetcher.getUsageDetailsForMetric(metricName, usageType);
+  }
+
+  // Converts MetricUsageDetails format to simple counts (Record<string, number>) for backward compatibility with sorting logic
   public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
     return this.usageFetcher.getUsageMetrics(usageType).then((metrics) => {
       return Object.fromEntries(

@@ -12,6 +12,7 @@ import React from 'react';
 
 import { logger } from 'tracking/logger/logger';
 import { isCustomVariable } from 'utils/utils.variables';
+import { type MetricUsageDetails } from 'WingmanDataTrail/ListControls/MetricsSorter/fetchers/fetchDashboardMetrics';
 import {
   MetricsSorter,
   VAR_WINGMAN_SORT_BY,
@@ -34,6 +35,7 @@ type WithUsageDataPreviewPanelState = SceneObjectState & {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
   sortBy: SortBy;
+  metricUsageDetails: MetricUsageDetails;
 };
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
@@ -43,6 +45,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       sortBy: 'default',
       'alerting-usage': 0,
       'dashboard-usage': 0,
+      metricUsageDetails: { usageType: 'dashboard-usage', count: 0, dashboards: {} },
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
@@ -85,9 +88,10 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     switch (sortBy) {
       case 'dashboard-usage':
       case 'alerting-usage':
-        metricsSorter.getUsageForMetric(this.state.metric, sortBy).then((usage) => {
+        metricsSorter.getUsageDetailsForMetric(this.state.metric, sortBy).then((usage) => {
           this.setState({
-            [sortBy]: usage,
+            [sortBy]: usage.count,
+            metricUsageDetails: usage,
           });
         });
         if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW) {
@@ -108,6 +112,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       sortBy,
       'alerting-usage': metricUsedInAlertingRulesCount,
       'dashboard-usage': metricUsedInDashboardsCount,
+      metricUsageDetails,
     } = model.useState();
 
     if (!vizPanelInGridItem) {
@@ -129,12 +134,14 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
         singularUsageType: 'dashboard panel query',
         pluralUsageType: 'dashboard panel queries',
         icon: 'apps',
+        usageDetails: metricUsageDetails,
       },
       'alerting-usage': {
         usageCount: metricUsedInAlertingRulesCount,
         singularUsageType: 'alert rule',
         pluralUsageType: 'alert rules',
         icon: 'bell',
+        usageDetails: metricUsageDetails,
       },
     };
 
@@ -147,22 +154,39 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
           singularUsageType={usageDetails[sortBy].singularUsageType}
           pluralUsageType={usageDetails[sortBy].pluralUsageType}
           icon={usageDetails[sortBy].icon as IconName}
+          usageDetails={usageDetails[sortBy].usageDetails}
         />
       </div>
     );
   };
 }
-
+// TODO: pass full MetricUsageDetailsObject into UsageSectionProps?
 interface UsageSectionProps {
   usageType: MetricUsageType;
   usageCount: number;
   singularUsageType: string;
   pluralUsageType: string;
   icon: IconName;
+  usageDetails: MetricUsageDetails;
 }
 
-function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: Readonly<UsageSectionProps>) {
+function UsageData({
+  usageType,
+  usageCount,
+  singularUsageType,
+  pluralUsageType,
+  icon,
+  usageDetails,
+}: Readonly<UsageSectionProps>) {
   const styles = useStyles2(getStyles);
+
+  if (usageDetails.usageType === 'dashboard-usage') {
+    const { dashboards } = usageDetails;
+    const dashboardItems = Object.entries(dashboards).map(([name, count]) => ({
+      label: `${name} (${count})`,
+      value: name, // unique identifier for if we want to implement "click to navigate to dashboard" functionality
+    }));
+  }
 
   return (
     <div className={styles.usageContainer} data-testid="usage-data-panel">
@@ -174,6 +198,8 @@ function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, 
           <Icon name={icon} /> {usageCount}
         </span>
       </Tooltip>
+      {/* tooltip allows you to have a link, has an interactive field */}
+      {/* TODO: look into tooltip vs dropdown */}
     </div>
   );
 }

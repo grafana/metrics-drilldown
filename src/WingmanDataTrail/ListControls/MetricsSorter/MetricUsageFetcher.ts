@@ -8,6 +8,7 @@ interface MetricsUsageState {
 }
 
 export type MetricUsageType = 'dashboard-usage' | 'alerting-usage';
+// Fetches and stores metric usage data for dashboards and alerting rules
 export class MetricUsageFetcher {
   private _usageState: Record<MetricUsageType, MetricsUsageState> = {
     'dashboard-usage': {
@@ -43,5 +44,15 @@ export class MetricUsageFetcher {
 
   public getUsageForMetric(metricName: string, usageType: MetricUsageType): Promise<number> {
     return this.getUsageMetrics(usageType).then((metrics) => metrics[metricName]?.count ?? 0);
+  }
+
+  public getUsageDetailsForMetric(metricName: string, usageType: MetricUsageType): Promise<MetricUsageDetails> {
+    return this.getUsageMetrics(usageType).then(
+      (metrics) =>
+        metrics[metricName] ??
+        (usageType === 'dashboard-usage'
+          ? { usageType: 'dashboard-usage', count: 0, dashboards: {} }
+          : { usageType: 'alerting-usage', count: 0 })
+    );
   }
 }

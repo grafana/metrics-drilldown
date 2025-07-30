@@ -65,7 +65,7 @@ const getDashboardLimited = limitFunction(
 
 /**
  * Fetches metric usage data from dashboards
- * @returns A record mapping metric names to their occurrence count in dashboards
+ * @returns A record mapping metric names to their dashboard usage data
  */
 export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsageDetails>> {
   try {
