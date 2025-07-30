@@ -47,6 +47,20 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     });
   }
 
+  private static getPanelHeightInPixels(h: PanelHeight): number {
+    switch (h) {
+      case 's':
+        return 160;
+      case 'l':
+        return 260;
+      case 'xl':
+        return 280;
+      case 'm':
+      default:
+        return 220;
+    }
+  }
+
   private async onActivate() {
     const { metric } = this.state;
     const trail = getTrailFor(this);
@@ -73,20 +87,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
   }
 
-  private static getPanelHeightInPixels(h: PanelHeight): number {
-    switch (h) {
-      case 's':
-        return 160;
-      case 'l':
-        return 260;
-      case 'xl':
-        return 280;
-      case 'm':
-      default:
-        return 220;
-    }
-  }
-
   private buildBody(isNativeHistogram: boolean) {
     const { metric, matchers, fixedColor } = this.state;
     const panelBuilderOptions = getPanelBuilderOptions({ metric, matchers, isNativeHistogram, fixedColor });
@@ -107,7 +107,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {
-    const { body, heightInPixels /*, isNativeHistogram*/ } = model.useState();
+    const { body, heightInPixels } = model.useState();
     const styles = useStyles2(getStyles, heightInPixels);
 
     return <div className={styles.container}>{body && <body.Component model={body} />}</div>;
