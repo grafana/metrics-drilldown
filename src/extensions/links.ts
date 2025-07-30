@@ -171,7 +171,7 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
 }
 
 // Helper function to process label matcher nodes
-function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null {
+export function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null {
   if (node.name !== 'UnquotedLabelMatcher') {
     return null;
   }

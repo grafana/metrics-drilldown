@@ -12,6 +12,7 @@ export interface BuildPrometheusQueryParams {
   groupings?: string[];
   ignoreUsage?: boolean;
   nonRateQueryFunction?: NonRateQueryFunction;
+  filterExtremeValues?: boolean;
 }
 
 export function getPromqlFunction(
@@ -28,6 +29,7 @@ export function buildPrometheusQuery({
   groupings,
   ignoreUsage = false,
   nonRateQueryFunction = DEFAULT_NON_RATE_QUERY_FUNCTION,
+  filterExtremeValues = false,
 }: BuildPrometheusQueryParams): string {
   // Check if metric name contains UTF-8 characters
   const isUtf8Metric = !isValidLegacyName(metric);
@@ -55,6 +57,16 @@ export function buildPrometheusQuery({
   // but without extra quotes associated with an empty label value
   if (isUtf8Metric) {
     metricPartString = metricPartString.replace('="__REMOVE__"', '');
+  }
+
+  // Add extreme value filtering if requested
+  if (filterExtremeValues) {
+    // Create a filter expression that excludes extreme values
+    const extremeValueFilter = promql.and({
+      left: metricPartString,
+      right: `${metricPartString} > -Inf`,
+    });
+    metricPartString = extremeValueFilter;
   }
 
   // Add rate if needed
