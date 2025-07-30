@@ -99,10 +99,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     const { body, heightInPixels /*, isNativeHistogram*/ } = model.useState();
     const styles = useStyles2(getStyles, heightInPixels);
 
-    return (
-      // <div className={cx(styles.container, isNativeHistogram && styles.nativeHistogram)}>
-      <div className={styles.container}>{body && <body.Component model={body} />}</div>
-    );
+    return <div className={styles.container}>{body && <body.Component model={body} />}</div>;
   };
 }
 
@@ -111,35 +108,5 @@ function getStyles(theme: GrafanaTheme2, heightInPixels: string) {
     container: css`
       height: ${heightInPixels};
     `,
-    // nativeHistogram: getNativeHistogramStyles(theme),
   };
 }
-
-// const getNativeHistogramStyles = (theme: GrafanaTheme2) => {
-//   const badgeWidth = 116;
-
-//   return css({
-//     '[class$="-panel-header"]': {
-//       position: 'relative',
-//       paddingLeft: `${badgeWidth + 4}px`,
-//     },
-//     '[class$="-panel-title"]::before': {
-//       content: '"Native Histogram"',
-//       fontSize: '12px',
-//       color: 'rgb(158, 193, 247)',
-//       position: 'absolute',
-//       left: '8px',
-//       top: '7px',
-//       display: 'inline-flex',
-//       alignItems: 'center',
-//       justifyContent: 'center',
-//       width: `${badgeWidth}px`,
-//       height: '22px',
-//       padding: 0,
-//       border: `1px solid ${theme.colors.info.text}`,
-//       borderRadius: theme.shape.radius.pill,
-//       background: theme.colors.info.transparent,
-//       cursor: 'auto',
-//     },
-//   });
-// };
