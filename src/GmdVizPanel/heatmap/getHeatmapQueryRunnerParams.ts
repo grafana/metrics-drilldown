@@ -1,13 +1,20 @@
-import { promql } from 'tsqtsq';
+import { promql, type Expression } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
-import { type LabelMatcher, type PanelQueryParams } from '../getPanelBuilderOptions';
+import { buildQueryExpression, expressionToString, type LabelMatcher } from '../buildQueryExpression';
 
-export function buildHeatmapQuery(
+type HeatmapQueryParams = {
+  fnName: string;
+  expression: Expression;
+  query: string;
+  maxDataPoints: number;
+  format: string;
+};
+
+export function getHeatmapQueryRunnerParams(
   metric: string,
-  isNativeHistogram: boolean,
-  matchers: LabelMatcher[]
-): PanelQueryParams {
+  matchers: LabelMatcher[],
+  isNativeHistogram: boolean
+): HeatmapQueryParams {
   const expression = buildQueryExpression(metric, matchers);
   let expr = expressionToString(expression);
 
@@ -25,9 +32,8 @@ export function buildHeatmapQuery(
 
   return {
     fnName,
-    isRateQuery: false,
-    query,
     expression,
+    query,
     maxDataPoints: 250,
     format: 'heatmap',
   };

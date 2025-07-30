@@ -1,12 +1,23 @@
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { HeatmapColorMode } from '@grafana/schema/dist/esm/raw/composable/heatmap/panelcfg/x/HeatmapPanelCfg_types.gen';
 
-import { type PanelBuilderOptions } from 'GmdVizPanel/getPanelBuilderOptions';
+import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
-export function buildHeatmapPanel(options: PanelBuilderOptions): VizPanel {
-  const { query, unit } = options.default;
+import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
+import { type LabelMatcher } from '../buildQueryExpression';
+
+type HeatmapPanelOptions = {
+  metric: string;
+  matchers: LabelMatcher[];
+  isNativeHistogram: boolean;
+};
+
+export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
+  const { metric, matchers, isNativeHistogram } = options;
+  const query = getHeatmapQueryRunnerParams(metric, matchers, isNativeHistogram);
+  const unit = getUnit(metric);
 
   const queryRunner = new SceneQueryRunner({
     datasource: trailDS,

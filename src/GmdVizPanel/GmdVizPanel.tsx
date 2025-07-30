@@ -6,10 +6,14 @@ import React from 'react';
 
 import { getTrailFor } from 'utils';
 
-import { getPanelBuilderOptions, type LabelMatcher } from './getPanelBuilderOptions';
+import { type LabelMatcher } from './buildQueryExpression';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
+import { isHistogramMetric } from './heatmap/isHistogramMetric';
 import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
+import { isUpDownMetric } from './statushistory/isUpDownMetric';
 import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
+
+type PanelType = 'timeseries' | 'heatmap' | 'statushistory';
 
 export type PanelHeight = 's' | 'm' | 'l' | 'xl';
 
@@ -18,6 +22,8 @@ interface GmdVizPanelState extends SceneObjectState {
   matchers: LabelMatcher[];
   heightInPixels: string;
   fixedColor?: string;
+  isNativeHistogram?: boolean;
+  panelType?: PanelType;
   body?: VizPanel;
 }
 
@@ -39,6 +45,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       matchers: matchers || [],
       heightInPixels: `${GmdVizPanel.getPanelHeightInPixels(height || 'm')}px`,
       fixedColor,
+      isNativeHistogram: undefined,
+      panelType: undefined,
       body: undefined,
     });
 
@@ -63,47 +71,91 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
   private async onActivate() {
     const { metric } = this.state;
-    const trail = getTrailFor(this);
-    const isNativeHistogram = trail.isNativeHistogram(metric);
+
+    this.subscribeToStateChanges();
 
     // isNativeHistogram() depends on an async process to load metrics metadata, so it's possibile that
     // when landing on the page, the metadata is not yet loaded and the histogram metrics are not be rendered as heatmap panels.
-    // We still want to render them ASAP and update them later when the metadata has arrived.
+    // But we still want to render them ASAP and update them later when the metadata has arrived.
+    const trail = getTrailFor(this);
+    const isNativeHistogram = trail.isNativeHistogram(metric);
+
     this.setState({
-      body: this.buildBody(isNativeHistogram),
+      panelType: this.getDefaultPanelType(isNativeHistogram),
+      isNativeHistogram,
     });
 
     if (isNativeHistogram) {
       return;
     }
 
+    // ensures that the metrics metadata is loaded and that native histograms can be determined
     await trail.getMetricMetadata(metric);
     const newIsNativeHistogram = trail.isNativeHistogram(metric);
 
-    if (isNativeHistogram !== newIsNativeHistogram) {
+    if (newIsNativeHistogram !== isNativeHistogram) {
       this.setState({
-        body: this.buildBody(newIsNativeHistogram),
+        panelType: this.getDefaultPanelType(newIsNativeHistogram),
+        isNativeHistogram: newIsNativeHistogram,
       });
     }
   }
 
-  private buildBody(isNativeHistogram: boolean) {
-    const { metric, matchers, fixedColor } = this.state;
-    const panelBuilderOptions = getPanelBuilderOptions({ metric, matchers, isNativeHistogram, fixedColor });
+  private getDefaultPanelType(isNativeHistogram: boolean): PanelType {
+    const { metric } = this.state;
 
-    switch (panelBuilderOptions.default.type) {
+    if (isUpDownMetric(metric)) {
+      return 'statushistory';
+    }
+
+    if (isNativeHistogram || isHistogramMetric(metric)) {
+      return 'heatmap';
+    }
+
+    return 'timeseries';
+  }
+
+  private subscribeToStateChanges() {
+    this.subscribeToState((newState, prevState) => {
+      if (newState.isNativeHistogram === undefined || newState.panelType === undefined) {
+        return;
+      }
+
+      if (newState.isNativeHistogram !== prevState.isNativeHistogram || newState.panelType !== prevState.panelType) {
+        this.updateBody();
+      }
+    });
+  }
+
+  private updateBody() {
+    const { panelType, metric, matchers, fixedColor, isNativeHistogram } = this.state;
+
+    switch (panelType) {
       case 'timeseries':
-        return buildTimeseriesPanel(panelBuilderOptions);
+        this.setState({
+          body: buildTimeseriesPanel({ metric, matchers, fixedColor: fixedColor as string }),
+        });
+        return;
 
       case 'heatmap':
-        return buildHeatmapPanel(panelBuilderOptions);
+        this.setState({
+          body: buildHeatmapPanel({ metric, matchers, isNativeHistogram: isNativeHistogram as boolean }),
+        });
+        return;
 
       case 'statushistory':
-        return buildStatushistoryPanel(panelBuilderOptions);
+        this.setState({
+          body: buildStatushistoryPanel({ metric, matchers }),
+        });
+        return;
 
       default:
-        throw new TypeError(`Unsupported panel type "${panelBuilderOptions.default.type}"!`);
+        throw new TypeError(`Unsupported panel type "${panelType}"!`);
     }
+  }
+
+  public changePanelType(newPanelType: PanelType) {
+    this.setState({ panelType: newPanelType });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {

@@ -1,10 +1,17 @@
-import { promql } from 'tsqtsq';
+import { promql, type Expression } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
-import { type LabelMatcher, type PanelQueryParams } from '../getPanelBuilderOptions';
+import { buildQueryExpression, expressionToString, type LabelMatcher } from '../buildQueryExpression';
 import { isRateQuery as isRateQueryFn } from './isRateQuery';
 
-export function buildTimeseriesQuery(metric: string, matchers: LabelMatcher[]): PanelQueryParams {
+type TimeseriesQueryParams = {
+  fnName: string;
+  isRateQuery: boolean;
+  expression: Expression;
+  query: string;
+  maxDataPoints: number;
+};
+
+export function getTimeseriesQueryRunnerParams(metric: string, matchers: LabelMatcher[]): TimeseriesQueryParams {
   const expression = buildQueryExpression(metric, matchers);
   let expr = expressionToString(expression);
 
@@ -24,8 +31,8 @@ export function buildTimeseriesQuery(metric: string, matchers: LabelMatcher[]): 
   return {
     fnName,
     isRateQuery,
-    query,
     expression,
+    query,
     maxDataPoints: 250,
   };
 }

@@ -1,11 +1,22 @@
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 
-import { type PanelBuilderOptions } from 'GmdVizPanel/getPanelBuilderOptions';
+import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
-export function buildTimeseriesPanel(options: PanelBuilderOptions): VizPanel {
-  const { query, unit, fixedColor } = options.default;
+import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
+import { type LabelMatcher } from '../buildQueryExpression';
+
+type TimeseriesPanelOptions = {
+  metric: string;
+  matchers: LabelMatcher[];
+  fixedColor: string;
+};
+
+export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel {
+  const { metric, matchers, fixedColor } = options;
+  const query = getTimeseriesQueryRunnerParams(metric, matchers);
+  const unit = query.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const queryRunner = new SceneQueryRunner({
     datasource: trailDS,

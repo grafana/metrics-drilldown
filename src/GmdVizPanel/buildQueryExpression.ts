@@ -3,7 +3,11 @@ import { Expression, MatchingOperator } from 'tsqtsq';
 
 import { VAR_FILTERS_EXPR } from 'shared';
 
-import { type LabelMatcher } from './getPanelBuilderOptions';
+export type LabelMatcher = {
+  key: string;
+  operator: string;
+  value: string;
+};
 
 export function expressionToString(expression: Expression) {
   // see hacks in buildQueryExpression() below

@@ -2,9 +2,11 @@ import { type ValueMapping } from '@grafana/data';
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { MappingType, VisibilityMode } from '@grafana/schema';
 
-import { type PanelBuilderOptions } from 'GmdVizPanel/getPanelBuilderOptions';
+import { type LabelMatcher } from 'GmdVizPanel/buildQueryExpression';
 import { trailDS } from 'shared';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
+
+import { getStatushistoryQueryRunnerParams } from './getStatushistoryQueryRunnerParams';
 
 const mappings: ValueMapping[] = [
   {
@@ -22,8 +24,15 @@ const mappings: ValueMapping[] = [
   },
 ];
 
-export function buildStatushistoryPanel(options: PanelBuilderOptions): VizPanel {
-  const { query, unit } = options.default;
+type StatusHistoryPanelOptions = {
+  metric: string;
+  matchers: LabelMatcher[];
+};
+
+export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): VizPanel {
+  const { metric, matchers } = options;
+  const query = getStatushistoryQueryRunnerParams(metric, matchers);
+  const unit = 'none';
 
   const queryRunner = new SceneQueryRunner({
     datasource: trailDS,
@@ -39,8 +48,8 @@ export function buildStatushistoryPanel(options: PanelBuilderOptions): VizPanel 
 
   return (
     PanelBuilders.statushistory()
-      .setTitle(options.metric)
-      .setHeaderActions([new SelectAction({ metricName: options.metric })])
+      .setTitle(metric)
+      .setHeaderActions([new SelectAction({ metricName: metric })])
       .setData(queryRunner)
       .setUnit(unit)
       // Use value mappings for both color and text display
@@ -49,7 +58,7 @@ export function buildStatushistoryPanel(options: PanelBuilderOptions): VizPanel 
       .setDisplayName('status')
       .setOption('showValue', VisibilityMode.Never)
       .setOption('legend', { showLegend: true })
-      .setOption('perPage', 0) // hide pagination below the panel
+      .setOption('perPage', 0) // hide pagination at the bottom of the panel
       .build()
   );
 }
