@@ -4,6 +4,7 @@ import { parser } from '@prometheus-io/lezer-promql';
 
 import { processLabelMatcher } from 'extensions/links';
 
+import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR } from '../../shared';
 import { logger } from '../../tracking/logger/logger';
 import { buildPrometheusQuery } from '../buildPrometheusQuery';
 
@@ -108,7 +109,7 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: SceneObject) 
   }
 
   // Parse the original query to extract the metric, filters, groupings, etc.
-  const queryParts = parseQueryForRebuild(queries[0].expr);
+  const queryParts = parseQueryForRebuild(queries[0].expr, queryRunner);
 
   if (!queryParts) {
     logger.warn('ExtremeValueFilterBehavior: Could not parse query for rebuilding');
@@ -143,9 +144,16 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: SceneObject) 
 /**
  * Parses a PromQL query to extract parameters for rebuilding with filtering
  */
-export function parseQueryForRebuild(query: string) {
+export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunner) {
   try {
-    const tree = parser.parse(query);
+    let queryExpression = query;
+    const hasTemplateVariables = query.includes(VAR_METRIC_EXPR) || query.includes(VAR_FILTERS_EXPR);
+
+    if (hasTemplateVariables) {
+      queryExpression = sceneGraph.interpolate(queryRunner, query);
+    }
+
+    const tree = parser.parse(queryExpression);
     let metric = '';
     const labels: AdHocVariableFilter[] = [];
     let isRateQuery = false;
@@ -161,7 +169,7 @@ export function parseQueryForRebuild(query: string) {
           let functionName = '';
           for (let child = node.node.firstChild; child; child = child.nextSibling) {
             if (child.type.name === 'Identifier') {
-              functionName = query.slice(child.from, child.to);
+              functionName = queryExpression.slice(child.from, child.to);
               break;
             }
           }
@@ -176,11 +184,11 @@ export function parseQueryForRebuild(query: string) {
 
         // Get the first metric name from any VectorSelector > Identifier
         if (!metric && node.name === 'Identifier' && node.node.parent?.type.name === 'VectorSelector') {
-          metric = query.slice(node.from, node.to);
+          metric = queryExpression.slice(node.from, node.to);
         }
 
         // Extract label matchers
-        const labelData = processLabelMatcher(node, query);
+        const labelData = processLabelMatcher(node, queryExpression);
         if (labelData) {
           labels.push({
             key: labelData.label,
@@ -191,7 +199,7 @@ export function parseQueryForRebuild(query: string) {
 
         // Extract groupings from by clause
         if (node.name === 'GroupingLabels' && nonRateQueryFunction) {
-          groupings = extractGroupings(node, query);
+          groupings = extractGroupings(node, queryExpression);
         }
       },
     });
