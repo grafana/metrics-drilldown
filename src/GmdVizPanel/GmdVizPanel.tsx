@@ -17,7 +17,6 @@ interface GmdVizPanelState extends SceneObjectState {
   metric: string;
   matchers: LabelMatcher[];
   heightInPixels: string;
-  isNativeHistogram: boolean;
   fixedColor?: string;
   body?: VizPanel;
 }
@@ -39,27 +38,39 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       metric,
       matchers: matchers || [],
       heightInPixels: `${GmdVizPanel.getPanelHeightInPixels(height || 'm')}px`,
-      isNativeHistogram: false,
       fixedColor,
       body: undefined,
     });
 
-    this.addActivationHandler(this.onActivate.bind(this));
+    this.addActivationHandler(() => {
+      this.onActivate();
+    });
   }
 
-  private onActivate() {
+  private async onActivate() {
     const { metric } = this.state;
+    const trail = getTrailFor(this);
+    const isNativeHistogram = trail.isNativeHistogram(metric);
 
+    // isNativeHistogram() depends on an async process to load metrics metadata, so it's possibile that
+    // when landing on the page, the metadata is not yet loaded and the histogram metrics are not be rendered as heatmap panels.
+    // We still want to render them ASAP and update them later when the metadata has arrived.
     this.setState({
-      // FIXME: isNativeHistogram() depends on an async process to load metrics metadata, so...
-      // ...often times, when landing on the page, the metadata is not yet loaded and the histogram metrics will not be rendered as heatmap panels
-      // to improve this, should we subscribe to MetricDatasourceHelper changes in DataTrail?
-      isNativeHistogram: getTrailFor(this).isNativeHistogram(metric),
+      body: this.buildBody(isNativeHistogram),
     });
 
-    this.setState({
-      body: this.buildBody(),
-    });
+    if (isNativeHistogram) {
+      return;
+    }
+
+    await trail.getMetricMetadata(metric);
+    const newIsNativeHistogram = trail.isNativeHistogram(metric);
+
+    if (isNativeHistogram !== newIsNativeHistogram) {
+      this.setState({
+        body: this.buildBody(newIsNativeHistogram),
+      });
+    }
   }
 
   private static getPanelHeightInPixels(h: PanelHeight): number {
@@ -76,8 +87,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
   }
 
-  private buildBody() {
-    const { metric, matchers, fixedColor, isNativeHistogram } = this.state;
+  private buildBody(isNativeHistogram: boolean) {
+    const { metric, matchers, fixedColor } = this.state;
     const panelBuilderOptions = getPanelBuilderOptions({ metric, matchers, isNativeHistogram, fixedColor });
 
     switch (panelBuilderOptions.default.type) {
