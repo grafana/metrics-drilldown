@@ -59,7 +59,6 @@ export function buildPrometheusQuery({
     metricPartString = metricPartString.replace('="__REMOVE__"', '');
   }
 
-  // Add extreme value filtering if requested
   if (filterExtremeValues) {
     // Create a filter expression that excludes extreme values
     const extremeValueFilter = promql.and({
