@@ -89,8 +89,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       return;
     }
 
-    // ensures that the metrics metadata is loaded and that native histograms can be determined
-    await trail.getMetricMetadata(metric);
+    // force initialization
+    await trail.initializeHistograms();
     const newIsNativeHistogram = trail.isNativeHistogram(metric);
 
     if (newIsNativeHistogram !== isNativeHistogram) {
