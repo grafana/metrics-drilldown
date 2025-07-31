@@ -158,18 +158,27 @@ describe('configureDrilldownLink', () => {
       expect(result).toBeUndefined();
     });
 
-    test('should return undefined when no PromQL queries exist', () => {
+    test('should return undefined when no queries exist', () => {
+      const context = {
+        pluginId: 'timeseries',
+        targets: [],
+      };
+      const result = configureDrilldownLink(context);
+      expect(result).toBeUndefined();
+    });
+
+    test('should return undefined when targets have no datasource', () => {
       const context = {
         pluginId: 'timeseries',
         targets: [
-          { expr: undefined }, // not a PromQL query
-          { refId: 'A' }, // not a PromQL query
+          { expr: undefined }, // no datasource
+          { refId: 'A' }, // no datasource
         ],
       };
       const result = configureDrilldownLink(context);
       expect(result).toBeUndefined();
     });
-    // do we want to show a link when the data source is prometheus? We can default to showing a link to the metrics reducer page..
+
     test('should return drilldown path when query has no expression but has prometheus datasource', () => {
       const context = {
         pluginId: 'timeseries',

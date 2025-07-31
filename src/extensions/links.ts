@@ -39,6 +39,9 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     targets: [
       PluginExtensionPoints.DashboardPanelMenu,
       PluginExtensionPoints.ExploreToolbarAction,
+      // for testing purposes, this will be the target for the alerting rule query editor once the PR in grafana is merged
+      // PluginExtensionPoints.AlertingRuleQueryEditor,
+      'grafana/alerting/alertingrule/queryeditor',
       ASSISTANT_TARGET_V1,
     ],
     configure: configureDrilldownLink,
@@ -84,7 +87,7 @@ export function configureDrilldownLink(context: object | undefined): { path: str
     return;
   }
 
-  const { datasource, expr } = queries[0];
+  const { datasource, expr } = queries[0] as PromQuery;
 
   // allow the user to navigate to the drilldown without a query (metrics reducer view)
   if (!expr) {
