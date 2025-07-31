@@ -38,7 +38,7 @@ export function extremeValueFilterBehavior(sceneObject: SceneObject): CancelActi
       if (isAllDataNaN(series)) {
         logger.info(
           'ExtremeValueFilterBehavior: Detected all NaN values, attempting to filter extreme values from query',
-          queryRunner.state.queries[0].expr
+          sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr)
         );
         removeExtremeValues(queryRunner, sceneObject);
       }
@@ -69,33 +69,12 @@ function isAllDataNaN(series: DataFrame[]): boolean {
  */
 function isDataFrameAllNaN(frame: DataFrame): boolean {
   for (const field of frame.fields) {
-    if (isNumericFieldAllNaN(field)) {
+    if (!field.values.some((value: unknown) => !Number.isNaN(value))) {
       continue;
     }
     return false;
   }
   return true;
-}
-
-/**
- * Checks if a specific numeric field contains only NaN values
- */
-function isNumericFieldAllNaN(field: any): boolean {
-  if (field.type !== 'number') {
-    return true;
-  }
-  const values = field.values;
-  if (!values || values.length === 0) {
-    return true;
-  }
-  return areAllValuesNaN(values);
-}
-
-/**
- * Checks if all values in an array are NaN, null, or undefined
- */
-function areAllValuesNaN(values: any[]): boolean {
-  return !values.some((value) => value !== null && value !== undefined && !Number.isNaN(value));
 }
 
 /**
