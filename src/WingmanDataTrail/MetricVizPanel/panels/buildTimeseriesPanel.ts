@@ -1,5 +1,7 @@
 import { PanelBuilders, type SceneObject, type SceneQueryRunner } from '@grafana/scenes';
 
+import { extremeValueFilterBehavior } from '../../../autoQuery/behaviors/ExtremeValueFilterBehavior';
+
 interface PanelProps {
   panelTitle: string;
   color: string;
@@ -19,5 +21,6 @@ export function buildTimeseriesPanel({ panelTitle, queryRunner, color, headerAct
       // we clone to prevent Scenes warnings "SceneObject already has a parent set that is different from the new parent. You cannot share the same SceneObject instance in multiple scenes or in multiple different places of the same scene graph. Use SceneObject.clone() to duplicate a SceneObject or store a state key reference and use sceneGraph.findObject to locate it."
       .setHeaderActions(headerActions.map((action) => action.clone()))
       .setOption('legend', { showLegend: !hideLegend })
+      .setBehaviors([extremeValueFilterBehavior])
   );
 }

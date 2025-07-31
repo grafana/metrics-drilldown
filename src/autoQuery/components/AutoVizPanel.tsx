@@ -9,11 +9,12 @@ import React from 'react';
 
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 
+import { AutoVizPanelQuerySelector } from './AutoVizPanelQuerySelector';
 import { PanelMenu } from '../../Menu/PanelMenu';
 import { MDP_METRIC_OVERVIEW, trailDS } from '../../shared';
 import { getMetricSceneFor, getTrailFor } from '../../utils';
+import { extremeValueFilterBehavior } from '../behaviors/ExtremeValueFilterBehavior';
 import { type AutoQueryDef } from '../types';
-import { AutoVizPanelQuerySelector } from './AutoVizPanelQuerySelector';
 
 export interface AutoVizPanelState extends SceneObjectState {
   panel?: VizPanel;
@@ -67,6 +68,7 @@ export class AutoVizPanel extends SceneObjectBase<AutoVizPanelState> {
       .setHeaderActions([new AutoVizPanelQuerySelector({ queryDef: def, onChangeQuery: this.onChangeQuery })])
       .setShowMenuAlways(true)
       .setMenu(new PanelMenu({ labelName: metric ?? this.state.metric }))
+      .setBehaviors([extremeValueFilterBehavior])
       .build();
   }
 

@@ -70,6 +70,92 @@ describe('buildPrometheusQuery', () => {
     });
   });
 
+  describe('extreme value filtering', () => {
+    it('should add extreme value filtering for basic metrics', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'test_metric',
+        filterExtremeValues: true,
+      });
+
+      const expected = 'avg(test_metric{} and test_metric{} > -Inf)';
+      expect(result).toBe(expected);
+    });
+
+    it('should add extreme value filtering for rate queries', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'test_total',
+        isRateQuery: true,
+        filterExtremeValues: true,
+      });
+
+      const expected = 'sum(rate(test_total{} and test_total{} > -Inf[$__rate_interval]))';
+      expect(result).toBe(expected);
+    });
+
+    it('should add extreme value filtering with filters', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'test_metric',
+        filterExtremeValues: true,
+        filters: [
+          {
+            key: 'instance',
+            value: 'host.docker.internal:3001',
+            operator: '=',
+          },
+          {
+            key: 'namespace',
+            value: 'my-namespace',
+            operator: '=',
+          },
+        ],
+      });
+
+      const expected =
+        'avg(test_metric{instance="host.docker.internal:3001", namespace="my-namespace"} and test_metric{instance="host.docker.internal:3001", namespace="my-namespace"} > -Inf)';
+      expect(result).toBe(expected);
+    });
+
+    it('should add extreme value filtering with ignore usage', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'test_metric',
+        filterExtremeValues: true,
+        ignoreUsage: true,
+      });
+
+      const expected = 'avg(test_metric{__ignore_usage__=""} and test_metric{__ignore_usage__=""} > -Inf)';
+      expect(result).toBe(expected);
+    });
+
+    it('should add extreme value filtering with groupings', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'test_bucket',
+        isRateQuery: true,
+        groupings: ['le'],
+        filterExtremeValues: true,
+      });
+
+      const expected = 'sum by (le) (rate(test_bucket{} and test_bucket{} > -Inf[$__rate_interval]))';
+      expect(result).toBe(expected);
+    });
+
+    it('should add extreme value filtering with different non-rate query functions', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'test_metric',
+        filterExtremeValues: true,
+        nonRateQueryFunction: 'max',
+      });
+
+      const expected = 'max(test_metric{} and test_metric{} > -Inf)';
+      expect(result).toBe(expected);
+    });
+  });
+
   describe('UTF-8 metric support', () => {
     it('should handle UTF-8 metrics correctly', () => {
       const result = buildPrometheusQuery({
@@ -148,6 +234,35 @@ describe('buildPrometheusQuery', () => {
         'sum(rate({"a.utf8.metric 🤘", __ignore_usage__="", "label with 📈"="metrics"}[$__rate_interval]))'
       );
     });
+
+    it('should handle UTF-8 metrics with extreme value filtering', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'a.utf8.metric 🤘',
+        filterExtremeValues: true,
+      });
+
+      expect(result).toBe('avg({"a.utf8.metric 🤘"} and {"a.utf8.metric 🤘"} > -Inf)');
+    });
+
+    it('should handle UTF-8 metrics with extreme value filtering and filters', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'a.utf8.metric 🤘',
+        filterExtremeValues: true,
+        filters: [
+          {
+            key: 'label with 📈',
+            value: 'metrics',
+            operator: '=',
+          },
+        ],
+      });
+
+      expect(result).toBe(
+        'avg({"a.utf8.metric 🤘", "label with 📈"="metrics"} and {"a.utf8.metric 🤘", "label with 📈"="metrics"} > -Inf)'
+      );
+    });
   });
 
   describe('UTF-8 label support for regular metrics', () => {
@@ -193,6 +308,30 @@ describe('buildPrometheusQuery', () => {
 
       const expected =
         'avg(test_metric{"label with 📈"="metrics", "another label 🎯"=~"value", "exclude label 🚫"!="bad"})';
+      expect(result).toBe(expected);
+    });
+
+    it('should handle regular metrics with UTF-8 labels and extreme value filtering', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        metric: 'test_metric',
+        filterExtremeValues: true,
+        filters: [
+          {
+            key: 'label with 📈',
+            value: 'metrics',
+            operator: '=',
+          },
+          {
+            key: 'another label 🎯',
+            value: 'value',
+            operator: '=~',
+          },
+        ],
+      });
+
+      const expected =
+        'avg(test_metric{"label with 📈"="metrics", "another label 🎯"=~"value"} and test_metric{"label with 📈"="metrics", "another label 🎯"=~"value"} > -Inf)';
       expect(result).toBe(expected);
     });
   });
@@ -265,6 +404,28 @@ describe('buildPrometheusQuery', () => {
       const expected = 'avg(test_metric{job="test", env!="prod", service=~"web.*", region!~"us-.*"})';
       expect(result).toBe(expected);
     });
+
+    it('should handle filters with extreme value filtering', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        filterExtremeValues: true,
+        filters: [
+          {
+            key: 'job',
+            value: 'test',
+            operator: '=',
+          },
+          {
+            key: 'env',
+            value: 'prod',
+            operator: '!=',
+          },
+        ],
+      });
+
+      const expected = 'avg(test_metric{job="test", env!="prod"} and test_metric{job="test", env!="prod"} > -Inf)';
+      expect(result).toBe(expected);
+    });
   });
 
   describe('ignore usage filter', () => {
@@ -309,6 +470,36 @@ describe('buildPrometheusQuery', () => {
       });
 
       const expected = 'avg(test_metric{__ignore_usage__="", "label with 📈"="metrics"})';
+      expect(result).toBe(expected);
+    });
+
+    it('should combine ignore usage with extreme value filtering', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        ignoreUsage: true,
+        filterExtremeValues: true,
+      });
+
+      const expected = 'avg(test_metric{__ignore_usage__=""} and test_metric{__ignore_usage__=""} > -Inf)';
+      expect(result).toBe(expected);
+    });
+
+    it('should combine ignore usage with extreme value filtering and other filters', () => {
+      const result = buildPrometheusQuery({
+        ...defaultParams,
+        ignoreUsage: true,
+        filterExtremeValues: true,
+        filters: [
+          {
+            key: 'instance',
+            value: 'host.docker.internal:3001',
+            operator: '=',
+          },
+        ],
+      });
+
+      const expected =
+        'avg(test_metric{__ignore_usage__="", instance="host.docker.internal:3001"} and test_metric{__ignore_usage__="", instance="host.docker.internal:3001"} > -Inf)';
       expect(result).toBe(expected);
     });
 
