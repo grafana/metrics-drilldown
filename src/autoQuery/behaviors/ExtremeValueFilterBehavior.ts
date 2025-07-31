@@ -66,8 +66,14 @@ function isAllDataNaN(series: DataFrame[]): boolean {
   return series.every((frame) => isDataFrameAllNaN(frame));
 }
 
-interface FieldWithEntities extends Field<any> {
-  entities?: Record<string, unknown>;
+interface FieldWithEntitiesNaN extends Field<any> {
+  entities: {
+    NaN: number[];
+  };
+}
+
+function isFieldWithEntitiesNaN(field: Field): field is FieldWithEntitiesNaN {
+  return 'entities' in field && Array.isArray((field as FieldWithEntitiesNaN).entities?.NaN);
 }
 
 /**
@@ -76,11 +82,11 @@ interface FieldWithEntities extends Field<any> {
 function isDataFrameAllNaN(frame: DataFrame): boolean {
   const valuesField = frame.fields.find((field) => field.name === 'Value');
 
-  if (!valuesField || !('entities' in valuesField)) {
+  if (!valuesField || !isFieldWithEntitiesNaN(valuesField)) {
     return false;
   }
 
-  return Object.keys(valuesField.entities as FieldWithEntities)[0] === 'NaN';
+  return valuesField.entities.NaN.length === frame.length;
 }
 
 /**
