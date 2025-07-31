@@ -22,8 +22,8 @@ import { buildPrometheusQuery } from '../buildPrometheusQuery';
  * That way, we can keep queries simpler by default, and only apply the extreme values filtering
  * when it's necessary.
  */
-export function extremeValueFilterBehavior(sceneObject: SceneObject): CancelActivationHandler | void {
-  const [queryRunner] = sceneGraph.findDescendents(sceneObject, SceneQueryRunner);
+export function extremeValueFilterBehavior(panel: SceneObject): CancelActivationHandler | void {
+  const [queryRunner] = sceneGraph.findDescendents(panel, SceneQueryRunner);
 
   if (!queryRunner) {
     logger.warn('ExtremeValueFilterBehavior: No query runner found for viz panel');
@@ -40,7 +40,7 @@ export function extremeValueFilterBehavior(sceneObject: SceneObject): CancelActi
           'ExtremeValueFilterBehavior: Detected all NaN values, attempting to filter extreme values from query',
           sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr)
         );
-        removeExtremeValues(queryRunner, sceneObject);
+        removeExtremeValues(queryRunner, panel);
       }
     }
   });
