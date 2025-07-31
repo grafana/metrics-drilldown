@@ -1,5 +1,5 @@
 import { LoadingState, type AdHocVariableFilter, type DataFrame, type Field } from '@grafana/data';
-import { sceneGraph, SceneQueryRunner, type CancelActivationHandler, type SceneObject } from '@grafana/scenes';
+import { sceneGraph, SceneQueryRunner, type CancelActivationHandler, type VizPanel } from '@grafana/scenes';
 import { parser } from '@prometheus-io/lezer-promql';
 
 import { processLabelMatcher } from 'extensions/links';
@@ -22,7 +22,7 @@ import { buildPrometheusQuery } from '../buildPrometheusQuery';
  * That way, we can keep queries simpler by default, and only apply the extreme values filtering
  * when it's necessary.
  */
-export function extremeValueFilterBehavior(panel: SceneObject): CancelActivationHandler | void {
+export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHandler | void {
   const [queryRunner] = sceneGraph.findDescendents(panel, SceneQueryRunner);
 
   if (!queryRunner) {
@@ -82,7 +82,7 @@ function isDataFrameAllNaN(frame: DataFrame): boolean {
 /**
  * Re-run the query with extreme value filtering enabled
  */
-function removeExtremeValues(queryRunner: SceneQueryRunner, panel: SceneObject) {
+function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel) {
   const queries = queryRunner.state.queries;
   if (!queries || queries.length === 0) {
     logger.warn('ExtremeValueFilterBehavior: No queries found in query runner');
@@ -117,6 +117,8 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: SceneObject) 
 
   panel.setState({
     $data: newQueryRunner,
+    _pluginLoadError:
+      'Panel data was re-fetched with a more complex query to handle extremely small values in the series',
   });
 
   newQueryRunner.runQueries();
