@@ -1,4 +1,4 @@
-import { LoadingState, type AdHocVariableFilter, type DataFrame } from '@grafana/data';
+import { LoadingState, type AdHocVariableFilter, type DataFrame, type Field } from '@grafana/data';
 import { sceneGraph, SceneQueryRunner, type CancelActivationHandler, type SceneObject } from '@grafana/scenes';
 import { parser } from '@prometheus-io/lezer-promql';
 
@@ -34,7 +34,12 @@ export function extremeValueFilterBehavior(panel: SceneObject): CancelActivation
   // If it is, remove the extreme values from the query.
   const queryRunnerSub = queryRunner.subscribeToState((state) => {
     if (state.data?.state === LoadingState.Done && state.data?.series) {
-      const series = state.data.series;
+      const { series } = state.data;
+
+      if (series.length === 0) {
+        return;
+      }
+
       if (isAllDataNaN(series)) {
         logger.info(
           'ExtremeValueFilterBehavior: Detected all NaN values, attempting to filter extreme values from query',
@@ -50,10 +55,15 @@ export function extremeValueFilterBehavior(panel: SceneObject): CancelActivation
 }
 
 /**
- * Checks if all data in the series contains only NaN values
+ * Checks if all data in the series contains only NaN values,
+ * short-circuiting if any frame contains non-NaN values.
  */
 function isAllDataNaN(series: DataFrame[]): boolean {
   return series.every((frame) => isDataFrameAllNaN(frame));
+}
+
+interface FieldWithEntities extends Field<any> {
+  entities?: Record<string, unknown>;
 }
 
 /**
@@ -62,11 +72,11 @@ function isAllDataNaN(series: DataFrame[]): boolean {
 function isDataFrameAllNaN(frame: DataFrame): boolean {
   const valuesField = frame.fields.find((field) => field.name === 'Value');
 
-  if (!valuesField) {
+  if (!valuesField || !('entities' in valuesField)) {
     return false;
   }
 
-  return valuesField.values.every((value: unknown) => Number.isNaN(value));
+  return Object.keys(valuesField.entities as FieldWithEntities)[0] === 'NaN';
 }
 
 /**
@@ -93,7 +103,7 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: SceneObject) 
     filterExtremeValues: true,
   });
 
-  logger.log('ExtremeValueFilterBehavior: Re-running query with extreme value filtering:', filteredQuery);
+  logger.info('ExtremeValueFilterBehavior: Re-running query with extreme value filtering:', filteredQuery);
 
   // Create a new query runner with the filtered query
   const newQueryRunner = queryRunner.clone({
