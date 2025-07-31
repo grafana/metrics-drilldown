@@ -53,28 +53,20 @@ export function extremeValueFilterBehavior(panel: SceneObject): CancelActivation
  * Checks if all data in the series contains only NaN values
  */
 function isAllDataNaN(series: DataFrame[]): boolean {
-  if (!series || series.length === 0) {
-    return false;
-  }
-  for (const frame of series) {
-    if (!isDataFrameAllNaN(frame)) {
-      return false;
-    }
-  }
-  return true;
+  return series.every((frame) => isDataFrameAllNaN(frame));
 }
 
 /**
- * Checks if all numeric fields in a DataFrame contain only NaN values
+ * Checks if all the values in the DataFrame are NaN
  */
 function isDataFrameAllNaN(frame: DataFrame): boolean {
-  for (const field of frame.fields) {
-    if (!field.values.some((value: unknown) => !Number.isNaN(value))) {
-      continue;
-    }
+  const valuesField = frame.fields.find((field) => field.name === 'Value');
+
+  if (!valuesField) {
     return false;
   }
-  return true;
+
+  return valuesField.values.every((value: unknown) => Number.isNaN(value));
 }
 
 /**
