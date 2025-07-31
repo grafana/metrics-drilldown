@@ -26,7 +26,7 @@ export function extremeValueFilterBehavior(sceneObject: SceneObject): CancelActi
   const [queryRunner] = sceneGraph.findDescendents(sceneObject, SceneQueryRunner);
 
   if (!queryRunner) {
-    logger.warn('ExtremeValueFilterBehavior: No query runner found in parent scene');
+    logger.warn('ExtremeValueFilterBehavior: No query runner found for viz panel');
     return;
   }
 
