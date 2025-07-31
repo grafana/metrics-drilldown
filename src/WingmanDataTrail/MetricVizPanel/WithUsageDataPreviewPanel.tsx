@@ -203,7 +203,7 @@ function UsageData({
         <>
           <Dropdown
             overlay={
-              <Menu>
+              <Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
                 {dashboardItems.map((item) => (
                   <Menu.Item key={item.value} label={item.label} />
                 ))}
