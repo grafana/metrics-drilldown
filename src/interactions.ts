@@ -147,9 +147,17 @@ type Interactions = {
   };
 };
 
+type OtherEvents = {
+  extreme_value_filter_behavior_triggered: {
+    expression: string;
+  };
+};
+
+type AllEvents = Interactions & OtherEvents;
+
 const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 
-export function reportExploreMetrics<E extends keyof Interactions, P extends Interactions[E]>(event: E, payload: P) {
+export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P) {
   reportInteraction(`${INTERACTION_NAME_PREFIX}${event}`, {
     ...payload,
     meta: {

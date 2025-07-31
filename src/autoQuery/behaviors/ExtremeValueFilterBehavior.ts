@@ -3,6 +3,7 @@ import { sceneGraph, SceneQueryRunner, type CancelActivationHandler, type VizPan
 import { parser } from '@prometheus-io/lezer-promql';
 
 import { processLabelMatcher } from 'extensions/links';
+import { reportExploreMetrics } from 'interactions';
 
 import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR } from '../../shared';
 import { logger } from '../../tracking/logger/logger';
@@ -45,6 +46,9 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
           'ExtremeValueFilterBehavior: Detected all NaN values, attempting to filter extreme values from query',
           sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr)
         );
+        reportExploreMetrics('extreme_value_filter_behavior_triggered', {
+          expression: sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr),
+        });
         removeExtremeValues(queryRunner, panel);
       }
     }
