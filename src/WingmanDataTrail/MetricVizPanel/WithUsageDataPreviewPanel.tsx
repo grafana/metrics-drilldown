@@ -7,7 +7,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Icon, Tooltip, useStyles2, type IconName } from '@grafana/ui';
+import { Button, Dropdown, Icon, Menu, Tooltip, useStyles2, type IconName } from '@grafana/ui';
 import React from 'react';
 
 import { logger } from 'tracking/logger/logger';
@@ -180,26 +180,56 @@ function UsageData({
 }: Readonly<UsageSectionProps>) {
   const styles = useStyles2(getStyles);
 
+  let dashboardItems: Array<{ label: string; value: string }> = [];
+
   if (usageDetails.usageType === 'dashboard-usage') {
     const { dashboards } = usageDetails;
-    const dashboardItems = Object.entries(dashboards).map(([name, count]) => ({
-      label: `${name} (${count})`,
-      value: name, // unique identifier for if we want to implement "click to navigate to dashboard" functionality
-    }));
+    dashboardItems = Object.entries(dashboards)
+      .map(([name, count]) => ({
+        label: `${name} (${count})`,
+        value: name, // identifier for if we want to implement "click to navigate to dashboard" functionality
+      }))
+      .sort((a, b) => {
+        // Extract count from label for sorting
+        const countA = parseInt(a.label.match(/\((\d+)\)/)?.[1] || '0', 10);
+        const countB = parseInt(b.label.match(/\((\d+)\)/)?.[1] || '0', 10);
+        return countB - countA; // Descending order
+      });
   }
 
   return (
     <div className={styles.usageContainer} data-testid="usage-data-panel">
-      <Tooltip
-        content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
-        placement="top"
-      >
-        <span className={styles.usageItem} data-testid={usageType}>
-          <Icon name={icon} /> {usageCount}
-        </span>
-      </Tooltip>
-      {/* tooltip allows you to have a link, has an interactive field */}
-      {/* TODO: look into tooltip vs dropdown */}
+      {usageDetails.usageType === 'dashboard-usage' ? (
+        <>
+          <Dropdown
+            overlay={
+              <Menu>
+                {dashboardItems.map((item) => (
+                  <Menu.Item key={item.value} label={item.label} />
+                ))}
+              </Menu>
+            }
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              tooltip={`Metric used in ${usageCount} dashboards. Click to view them.`}
+              className={`${styles.usageItem} ${styles.clickableUsageItem}`}
+            >
+              <Icon name={icon} style={{ marginRight: '4px' }} /> {usageCount}
+            </Button>
+          </Dropdown>
+        </>
+      ) : (
+        <Tooltip
+          content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
+          placement="top"
+        >
+          <span className={styles.usageItem} data-testid={usageType}>
+            <Icon name={icon} /> {usageCount}
+          </span>
+        </Tooltip>
+      )}
     </div>
   );
 }
@@ -223,6 +253,10 @@ function getStyles(theme: GrafanaTheme2) {
       gap: '4px',
       color: theme.colors.text.secondary,
       opacity: '65%',
+    }),
+    clickableUsageItem: css({
+      backgroundColor: 'transparent',
+      border: 'none',
     }),
   };
 }
