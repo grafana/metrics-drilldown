@@ -14,13 +14,14 @@ import { TooltipDisplayMode, useStyles2 } from '@grafana/ui';
 import { merge } from 'lodash';
 import React from 'react';
 
-import { SelectLabelAction } from 'Breakdown/LabelBreakdownScene';
+import { SelectLabelAction } from 'Breakdown/MetricLabelsList/SelectLabelAction';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
 import { addRefId } from './transformations/addRefId';
+import { addUnspecifiedLabel } from './transformations/addUnspecifiedLabel';
 import { SERIES_COUNT_STATS_NAME, sliceSeries } from './transformations/sliceSeries';
 
 interface LabelVizPanelState extends SceneObjectState {
@@ -87,17 +88,16 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
         ],
       }),
       // addRefId is required for setting the overrides below
-      transformations: [sliceSeries(0, MAX_SERIES_TO_RENDER), addRefId],
+      transformations: [sliceSeries(0, MAX_SERIES_TO_RENDER), addUnspecifiedLabel(label), addRefId],
     });
 
     const vizPanel = PanelBuilders.timeseries()
       .setTitle(label)
       .setUnit(unit)
       .setData(data)
-      // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList)
-      .setBehaviors([publishTimeseriesData()])
+      .setBehaviors([publishTimeseriesData()]) // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setHeaderActions([new SelectLabelAction({ labelName: label })])
+      .setHeaderActions([new SelectLabelAction({ label })])
       .setMenu(new PanelMenu({ labelName: label }))
       .setShowMenuAlways(true)
       .build();
@@ -132,7 +132,7 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
     const seriesCount = seriesCountStats ? seriesCountStats.value : series.length;
     const description =
       series.length < seriesCount
-        ? `Showing only ${series.length} series out of ${seriesCount} to keep the data easy to read. Click on "Select" on this panel to view a breakdown of all the "${label}" label's values.`
+        ? `Showing only ${series.length} series out of ${seriesCount} to keep the data easy to read. Click on "Select" on this panel to view a breakdown of all the label's values.`
         : '';
 
     return {
@@ -145,16 +145,12 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
   }
 
   getOverrides(series: DataFrame[]) {
-    const { label, startColorIndex } = this.state;
+    const { startColorIndex } = this.state;
 
     return series.map((s, i) => {
       return {
         matcher: { id: FieldMatcherID.byFrameRefID, options: s.refId },
         properties: [
-          {
-            id: 'displayName',
-            value: s.fields[1]?.labels?.[label] || `<unspecified ${label}>`,
-          },
           {
             id: 'color',
             value: { mode: 'fixed', fixedColor: getColorByIndex(startColorIndex + i) },

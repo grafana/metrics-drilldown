@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import { logger } from '../tracking/logger/logger';
+
 function ensureErrorObject(error: any, defaultMessage: string): Error {
   if (error instanceof Error) {
     return error;
@@ -13,6 +15,38 @@ function ensureErrorObject(error: any, defaultMessage: string): Error {
   return new Error(defaultMessage);
 }
 
+/**
+ * Determines if an error should be treated as an application-breaking error.
+ * Filters out known non-critical errors like browser extension errors and ResizeObserver warnings.
+ */
+function shouldTreatAsApplicationError(errorEvent: ErrorEvent): boolean {
+  // Check if error is from a browser extension
+  if (errorEvent.filename) {
+    const protocol = new URL(errorEvent.filename).protocol;
+
+    if (protocol.endsWith('extension:')) {
+      logger.error(new Error(`Browser extension error: ${errorEvent.message}`), {
+        filename: errorEvent.filename,
+        lineno: errorEvent.lineno?.toString(),
+        colno: errorEvent.colno?.toString(),
+      });
+      return false;
+    }
+  }
+
+  // Check for null error with message (like ResizeObserver warnings)
+  if (errorEvent.error === null && errorEvent.message) {
+    logger.error(new Error(`Non-critical error: ${errorEvent.message}`), {
+      filename: errorEvent.filename,
+      lineno: errorEvent.lineno?.toString(),
+      colno: errorEvent.colno?.toString(),
+    });
+    return false;
+  }
+
+  return true;
+}
+
 export function useCatchExceptions(): [Error | undefined, React.Dispatch<React.SetStateAction<Error | undefined>>] {
   const [error, setError] = useState<Error>();
 
@@ -20,6 +54,10 @@ export function useCatchExceptions(): [Error | undefined, React.Dispatch<React.S
   // so we have to set global handlers to catch these (e.g. error thrown from some click handlers)
   useEffect(() => {
     const onError = (errorEvent: ErrorEvent) => {
+      if (!shouldTreatAsApplicationError(errorEvent)) {
+        return;
+      }
+
       setError(ensureErrorObject(errorEvent.error, 'Uncaught exception!'));
     };
 

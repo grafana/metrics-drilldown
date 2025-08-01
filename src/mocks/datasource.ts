@@ -1,5 +1,6 @@
 import { PluginType, type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
 import { type DataSourceSrv } from '@grafana/runtime';
+import { type DataSourceRef } from '@grafana/schema';
 
 export const mockDataSource: DataSourceApi = {
   name: 'Prometheus',
@@ -78,18 +79,37 @@ export class MockDataSourceSrv implements DataSourceSrv {
 
   constructor(datasources: Record<string, Partial<DataSourceApi>>) {
     this.datasources = Object.entries(datasources).reduce((acc, [key, ds]) => {
-      acc[key] = createMockDataSourceApi(ds);
+      const mockDs = createMockDataSourceApi(ds);
+      // Store by UID if available, otherwise by key
+      const storageKey = ds.uid || key;
+      acc[storageKey] = mockDs;
       return acc;
     }, {} as Record<string, DataSourceApi>);
   }
 
-  async get(name?: string | null): Promise<DataSourceApi> {
-    if (!name) {
+  async get(ref?: DataSourceRef | string | null, scopedVars?: any): Promise<DataSourceApi> {
+    if (!ref) {
       return Object.values(this.datasources)[0];
     }
-    const ds = this.datasources[name];
+    
+    // Handle DataSourceRef objects
+    let uid = typeof ref === 'string' ? ref : ref.uid;
+    
+    // Handle template literals like '${ds}' with scoped variables
+    if (typeof uid === 'string' && uid.startsWith('${') && uid.endsWith('}') && scopedVars) {
+      if (scopedVars.__sceneObject && scopedVars.__sceneObject.value) {
+        // This is a scene interpolation - return the first datasource
+        return Object.values(this.datasources)[0];
+      }
+    }
+    
+    if (!uid) {
+      return Object.values(this.datasources)[0];
+    }
+    
+    const ds = this.datasources[uid];
     if (!ds) {
-      throw new Error(`Data source ${name} not found`);
+      throw new Error(`Data source ${uid} not found`);
     }
     return ds;
   }

@@ -12,11 +12,10 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsSorter } from './MetricsSorter/MetricsSorter';
+import { type CountsProvider } from './QuickSearch/CountsProvider/CountsProvider';
+import { MetricVariableCountsProvider } from './QuickSearch/CountsProvider/MetricVariableCountsProvider';
 import { QuickSearch } from './QuickSearch/QuickSearch';
 
 interface ListControlsState extends SceneObjectState {
@@ -40,10 +39,7 @@ export class ListControls extends EmbeddedScene {
             body: new QuickSearch({
               urlSearchParamName: 'search_txt',
               targetName: 'metric',
-              variableNames: {
-                nonFiltered: VAR_METRICS_VARIABLE,
-                filtered: VAR_FILTERED_METRICS_VARIABLE,
-              },
+              countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
             }),
           }),
           new SceneFlexItem({
@@ -52,7 +48,7 @@ export class ListControls extends EmbeddedScene {
           }),
           new SceneFlexItem({
             width: 'auto',
-            body: new LayoutSwitcher(),
+            body: new LayoutSwitcher({}),
           }),
         ],
       }),

@@ -1,11 +1,13 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
-import { type LabelBreakdownSortingOption as BreakdownSortByOption } from 'Breakdown/SortByScene';
+import { type ExposedComponentName } from 'exposedComponents/components';
 import { type ActionViewType } from 'MetricActionBar';
+import { type SortSeriesByOption } from 'services/sorting';
+import { type SnakeCase } from 'utils/utils.types';
+import { type LayoutType } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
-import { type BreakdownLayoutType } from './Breakdown/types';
 import { PLUGIN_ID } from './constants';
 import { GIT_COMMIT } from './version';
 
@@ -13,12 +15,11 @@ export type ViewName = 'metrics-reducer' | 'metric-details';
 
 type Interactions = {
   // User selected a label to view its breakdown.
-  label_selected: {
+  groupby_label_changed: {
     label: string;
-    cause: // By clicking the "select" button on that label's breakdown panel
-    | 'breakdown_panel'
-      // By clicking on the label selector at the top of the breakdown
-      | 'selector';
+  };
+  breakdown_panel_selected: {
+    label: string;
   };
   // User changed a label filter
   label_filter_changed: {
@@ -27,7 +28,7 @@ type Interactions = {
     cause: 'breakdown' | 'adhoc_filter';
   };
   // User changed the breakdown layout
-  breakdown_layout_changed: { layout: BreakdownLayoutType };
+  breakdown_layout_changed: { layout: LayoutType };
   // A metric exploration has started due to one of the following causes
   exploration_started: {
     cause: 'bookmark_clicked';
@@ -100,7 +101,7 @@ type Interactions = {
         // By clicking on the sort by component in the label breakdown
         from: 'label-breakdown';
         // The sort by option selected
-        sortBy: BreakdownSortByOption;
+        sortBy: SortSeriesByOption;
       };
   wasm_not_supported: {};
   native_histogram_examples_closed: {};
@@ -139,6 +140,10 @@ type Interactions = {
   };
   app_initialized: {
     view: ViewName;
+  };
+  // User took an action to view an exposed component
+  exposed_component_viewed: {
+    component: SnakeCase<ExposedComponentName>;
   };
 };
 

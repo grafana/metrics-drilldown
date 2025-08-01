@@ -22,12 +22,14 @@ import {
 } from '@grafana/scenes';
 import { lastValueFrom } from 'rxjs';
 
+import { logger } from 'tracking/logger/logger';
+
 import { ROUTES } from './constants';
-import { DataTrail } from './DataTrail';
+import { DataTrail, type DataTrailState } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { MetricScene } from './MetricScene';
-import { LOGS_METRIC, VAR_DATASOURCE_EXPR } from './shared';
+import { LOGS_METRIC, VAR_DATASOURCE_EXPR, VAR_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { getClosestScopesFacade } from './utils/utils.scopes';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
@@ -40,11 +42,12 @@ export function getTrailSettings(model: SceneObject): DataTrailSettings {
   return sceneGraph.getAncestor(model, DataTrail).state.settings;
 }
 
-export function newMetricsTrail(initialDS?: string): DataTrail {
+export function newMetricsTrail(state?: Partial<DataTrailState>): DataTrail {
   return new DataTrail({
-    initialDS,
-    $timeRange: new SceneTimeRange({ from: 'now-1h', to: 'now' }),
-    embedded: false,
+    initialDS: state?.initialDS,
+    $timeRange: state?.$timeRange ?? new SceneTimeRange({ from: 'now-1h', to: 'now' }),
+    embedded: state?.embedded ?? false,
+    ...state,
   });
 }
 
@@ -69,10 +72,10 @@ export function getMetricSceneFor(model: SceneObject): MetricScene {
   if (model.parent) {
     return getMetricSceneFor(model.parent);
   }
+  const error = new Error('Unable to find graph view for model');
+  logger.error(error, { model: model.toString(), message: 'Unable to find graph view for model' });
 
-  console.error('Unable to find graph view for', model);
-
-  throw new Error('Unable to find trail');
+  throw error;
 }
 
 export function getDataSource(trail: DataTrail) {
@@ -124,7 +127,7 @@ export type SceneTimeRangeState = SceneObjectState & {
 };
 
 export function getFilters(scene: SceneObject) {
-  const filters = sceneGraph.lookupVariable('filters', scene);
+  const filters = sceneGraph.lookupVariable(VAR_FILTERS, scene);
   if (isAdHocFiltersVariable(filters)) {
     return filters.state.filters;
   }
@@ -286,7 +289,7 @@ export function findObjectOfType<T extends SceneObject>(
   if (obj instanceof returnType) {
     return obj;
   } else if (obj !== null) {
-    console.warn(`invalid return type: ${returnType.toString()}`);
+    logger.warn(`invalid return type: ${returnType.toString()}`);
   }
 
   return null;

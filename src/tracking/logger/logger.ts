@@ -27,7 +27,8 @@ export class Logger {
   #callConsole(methodName: 'trace' | 'debug' | 'info' | 'log' | 'warn' | 'error', args: any[]) {
     // silence console in production
     if (this.#environment !== 'prod') {
-      console[methodName](...args); // eslint-disable-line no-console
+      // eslint-disable-next-line no-console, no-restricted-syntax
+      console[methodName](...args);
     }
   }
 

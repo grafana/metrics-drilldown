@@ -1,7 +1,7 @@
 import { AppEvents } from '@grafana/data';
 import { getAppEvents } from '@grafana/runtime';
 
-const logger = console;
+import { logger } from 'tracking/logger/logger';
 
 export function displayError(error: Error, msgs: string[]) {
   const context = msgs.reduce((acc, msg, i) => ({ ...acc, [`info${i + 1}`]: msg }), { handheldBy: 'displayError' });

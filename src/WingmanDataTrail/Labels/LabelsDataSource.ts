@@ -7,13 +7,12 @@ import {
   type TestDataSourceResponse,
 } from '@grafana/data';
 import { type PrometheusDatasource } from '@grafana/prometheus';
-import { getDataSourceSrv } from '@grafana/runtime';
-import { RuntimeDataSource, sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
+import { RuntimeDataSource, sceneGraph, type SceneObject } from '@grafana/scenes';
 
 import { MetricDatasourceHelper } from 'helpers/MetricDatasourceHelper';
-import { VAR_DATASOURCE, VAR_FILTERS } from 'shared';
+import { VAR_FILTERS } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
-import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
+import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { localeCompare } from '../helpers/localCompare';
 
@@ -50,7 +49,7 @@ export class LabelsDataSource extends RuntimeDataSource {
   async metricFindQuery(matcher: string, options: LegacyMetricFindQueryOptions): Promise<MetricFindValue[]> {
     const sceneObject = options.scopedVars?.__sceneObject?.valueOf() as SceneObject;
 
-    const ds = (await LabelsDataSource.getPrometheusDataSource(sceneObject)) as PrometheusDatasource;
+    const ds = await MetricDatasourceHelper.getPrometheusDataSourceForScene(sceneObject);
     if (!ds) {
       return [];
     }
@@ -72,19 +71,6 @@ export class LabelsDataSource extends RuntimeDataSource {
     return [{ value: NULL_GROUP_BY_VALUE, text: '(none)' }, ...labelOptions] as MetricFindValue[];
   }
 
-  private static async getPrometheusDataSource(sceneObject: SceneObject): Promise<PrometheusDatasource | undefined> {
-    try {
-      const dsVariable = sceneGraph.findByKey(sceneObject, VAR_DATASOURCE) as DataSourceVariable;
-      const uid = (dsVariable?.state.value as string) ?? '';
-      const ds = await getDataSourceSrv().get({ uid });
-
-      return ds as PrometheusDatasource;
-    } catch (error) {
-      displayError(error as Error, ['Error while getting the Prometheus data source!']);
-      return undefined;
-    }
-  }
-
   private async fetchLabels(ds: PrometheusDatasource, sceneObject: SceneObject, matcher: string) {
     // there is probably a more graceful way to implement this, but this is what the DS offers us.
     // if a DS does not support the labels match API, we need getTagKeys to handle the empty matcher
@@ -102,17 +88,16 @@ export class LabelsDataSource extends RuntimeDataSource {
       );
     }
 
-    const args = MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)
-      ? [sceneGraph.getTimeRange(sceneObject).state.value, matcher]
-      : [matcher];
-
-    // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelsWithMatch signature
-    const response = await ds.languageProvider.fetchLabelsWithMatch(...args);
+    const response = await MetricDatasourceHelper.fetchLabels({
+      ds,
+      timeRange: sceneGraph.getTimeRange(sceneObject).state.value,
+      matcher,
+    });
 
     return this.processLabelOptions(
-      Object.entries(response).map(([key, value]) => ({
-        value: key,
-        text: Array.isArray(value) ? value[0] : value || key,
+      response.map((label) => ({
+        value: label,
+        text: label,
       }))
     );
   }
@@ -144,18 +129,23 @@ export class LabelsDataSource extends RuntimeDataSource {
   }
 
   static async fetchLabelValues(labelName: string, sceneObject: SceneObject): Promise<string[]> {
-    const ds = await LabelsDataSource.getPrometheusDataSource(sceneObject);
+    const ds = await MetricDatasourceHelper.getPrometheusDataSourceForScene(sceneObject);
     if (!ds) {
       return [];
     }
 
-    const args = MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)
-      ? [sceneGraph.getTimeRange(sceneObject).state.value, labelName]
-      : [labelName];
-
     try {
-      // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelValues signature
-      return await ds.languageProvider.fetchLabelValues(...args);
+      return await MetricDatasourceHelper.fetchLabelValues({
+        ds,
+        labelName,
+        timeRange: sceneGraph.getTimeRange(sceneObject).state.value,
+      });
+      // const args = MetricDatasourceHelper.datasourceUsesTimeRangeInLanguageProviderMethods(ds)
+      //   ? [sceneGraph.getTimeRange(sceneObject).state.value, labelName]
+      //   : [labelName];
+
+      // // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelValues signature
+      // return await ds.languageProvider.fetchLabelValues(...args); // eslint-disable-line sonarjs/deprecation
     } catch (error) {
       displayWarning([
         `Error while retrieving label "${labelName}" values! Defaulting to an empty array.`,

@@ -13,9 +13,9 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { LayoutSwitcher } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
+import { type CountsProvider } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
+import { MetricVariableCountsProvider } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/MetricVariableCountsProvider';
 import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
-import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { PrefixFilterDropdown } from './PrefixFilterDropdown';
 
@@ -43,16 +43,13 @@ export class RelatedListControls extends EmbeddedScene {
             body: new QuickSearch({
               urlSearchParamName: 'gmd-relatedSearchText',
               targetName: 'related metric',
-              variableNames: {
-                nonFiltered: VAR_METRICS_VARIABLE,
-                filtered: VAR_FILTERED_METRICS_VARIABLE,
-              },
+              countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
               displayCounts: true,
             }),
           }),
           new SceneFlexItem({
             width: 'auto',
-            body: new LayoutSwitcher(),
+            body: new LayoutSwitcher({}),
           }),
         ],
       }),

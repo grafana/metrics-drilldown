@@ -31,7 +31,7 @@ To use Grafana Metrics Drilldown with Grafana Cloud, you need:
 To use Grafana Metrics Drilldown with Grafana open source or Grafana Enterprise, you need:
 
 - Your own Grafana instance running Grafana version 11.6 or later
-- A configured Prometheus-compatible metrics data source
+- A configured Prometheus-compatible metrics data source, with the scrape interval option set to match the scrape interval configured in your metrics system
 
 ## Access Grafana Metrics Drilldown
 

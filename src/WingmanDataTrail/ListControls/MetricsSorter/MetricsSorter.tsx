@@ -78,7 +78,7 @@ export function getRecentMetrics(): RecentMetric[] {
 
     return validMetrics;
   } catch (error) {
-    console.error('Failed to get recent metrics:', error);
+    logger.error(error as Error, {message: 'Failed to get recent metrics:'});
     return [];
   }
 }

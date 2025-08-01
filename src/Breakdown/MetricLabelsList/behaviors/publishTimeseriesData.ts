@@ -9,6 +9,12 @@ import { EventTimeseriesDataReceived } from '../events/EventTimeseriesDataReceiv
  */
 export function publishTimeseriesData() {
   return (vizPanel: VizPanel) => {
+    const data = vizPanel.state.$data?.state.data;
+
+    if (data?.state === LoadingState.Done) {
+      vizPanel.publishEvent(new EventTimeseriesDataReceived({ series: data.series }), true);
+    }
+
     (vizPanel.state.$data as SceneDataProvider).subscribeToState((newState, prevState) => {
       if (newState.data?.state === LoadingState.Done && newState.data?.series !== prevState.data?.series) {
         vizPanel.publishEvent(new EventTimeseriesDataReceived({ series: newState.data.series }), true);

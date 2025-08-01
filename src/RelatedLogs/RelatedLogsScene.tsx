@@ -1,5 +1,4 @@
 import { LoadingState } from '@grafana/data';
-import { config } from '@grafana/runtime';
 import {
   CustomVariable,
   PanelBuilders,
@@ -12,17 +11,19 @@ import {
   SceneVariableSet,
   VariableDependencyConfig,
   VariableValueSelectors,
+  type QueryRunnerState,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
   type SceneVariable,
 } from '@grafana/scenes';
-import { LinkButton, Stack } from '@grafana/ui';
+import { Spinner, Stack } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from '../interactions';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../shared';
 import { NoRelatedLogs } from './NoRelatedLogsFound';
+import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './OpenInLogsDrilldownButton';
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { isCustomVariable } from '../utils/utils.variables';
 
@@ -31,8 +32,10 @@ interface RelatedLogsSceneProps {
 }
 
 export interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
+  loading: boolean;
   controls: SceneObject[];
   body: SceneCSSGridLayout;
+  logsDrilldownLinkContext: LogsDrilldownLinkContext;
 }
 
 const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
@@ -43,6 +46,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
   constructor(props: RelatedLogsSceneProps) {
     super({
+      loading: false,
       controls: [],
       body: new SceneCSSGridLayout({
         templateColumns: '1fr',
@@ -55,18 +59,25 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
         ],
       }),
       orchestrator: props.orchestrator,
+      logsDrilldownLinkContext: {
+        targets: [],
+      },
     });
 
-    this.addActivationHandler(this._onActivate.bind(this));
+    this.addActivationHandler(() => {
+      this._onActivate();
+    });
   }
 
-  private _onActivate() {
+  private async _onActivate() {
     // Register handler for future changes to lokiDataSources
     this.state.orchestrator.addLokiDataSourcesChangeHandler(() => this.setupLogsPanel());
 
     // If data sources have already been loaded, we don't need to fetch them again
     if (!this.state.orchestrator.lokiDataSources.length) {
-      this.state.orchestrator.findAndCheckAllDatasources();
+      this.setState({ loading: true });
+      await this.state.orchestrator.findAndCheckAllDatasources();
+      this.setState({ loading: false });
     } else {
       this.setupLogsPanel();
     }
@@ -83,41 +94,43 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     this.state.orchestrator.relatedLogsCount = 0;
   }
 
-  private setupLogsPanel(): void {
-    if (!this.state.orchestrator.lokiDataSources.length) {
-      this.showNoLogsFound();
-      return;
-    }
-
-    // Clean up existing query runner if it exists
-    if (this._queryRunner) {
-      this._queryRunner.setState({ queries: [] });
-      this._queryRunner = undefined;
-    }
-
-    // Initialize query runner
+  private _buildQueryRunner(): void {
     this._queryRunner = new SceneQueryRunner({
       datasource: { uid: VAR_LOGS_DATASOURCE_EXPR },
       queries: [],
       key: RELATED_LOGS_QUERY_KEY,
     });
+    this._constructLogsDrilldownLinkContext(this._queryRunner.state);
 
     // Set up subscription to query results
     this._subs.add(
       this._queryRunner.subscribeToState((state) => {
-        // Only process completed query results
-        if (state.data?.state === LoadingState.Done) {
-          const totalRows = state.data.series
-            ? state.data.series.reduce((sum: number, frame) => sum + frame.length, 0)
-            : 0;
-
-          // Show NoRelatedLogs if no logs found
-          if (totalRows === 0 || !state.data.series?.length) {
-            this.showNoLogsFound();
-          }
+        if (state.data?.state !== LoadingState.Done) {
+          // Only process completed query results
+          return;
         }
+
+        const logLinesCount = this.state.orchestrator.countLogsLines(state);
+
+        if (logLinesCount === 0) {
+          // Show NoRelatedLogs if no logs found
+          this.showNoLogsFound();
+        }
+
+        this._constructLogsDrilldownLinkContext(state);
       })
     );
+  }
+
+  private setupLogsPanel(): void {
+    // Initialize query runner
+    this._buildQueryRunner();
+
+    // If no datasources can provide related logs given the current conditions, show the NoRelatedLogsScene
+    if (!this.state.orchestrator.lokiDataSources.length) {
+      this.showNoLogsFound();
+      return;
+    }
 
     // Set up UI for logs panel
     const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
@@ -145,6 +158,32 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
     // Update Loki query
     this.updateLokiQuery();
+  }
+
+  /**
+   * Construct the Logs Drilldown link context based on the query runner state
+   * @param state - The query runner state.
+   */
+  private _constructLogsDrilldownLinkContext(state: QueryRunnerState) {
+    const dsUid = (sceneGraph.lookupVariable(VAR_LOGS_DATASOURCE, this)?.getValue() ?? '') as string;
+    const queries = state.queries;
+    const targets: LogsDrilldownLinkContext['targets'] = [];
+
+    if (dsUid && queries.length) {
+      queries.forEach((query) => {
+        targets.push({
+          ...query,
+          datasource: {
+            uid: dsUid,
+            type: 'loki',
+          },
+        });
+      });
+    }
+
+    this.setState({
+      logsDrilldownLinkContext: { targets, timeRange: sceneGraph.getTimeRange(this).state },
+    });
   }
 
   /**
@@ -194,7 +233,11 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   });
 
   static readonly Component = ({ model }: SceneComponentProps<RelatedLogsScene>) => {
-    const { controls, body } = model.useState();
+    const { controls, body, logsDrilldownLinkContext, loading } = model.useState();
+
+    if (loading) {
+      return <Spinner />;
+    }
 
     return (
       <Stack gap={1} direction={'column'} grow={1}>
@@ -204,17 +247,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
               <control.Component key={control.state.key} model={control} />
             ))}
           </Stack>
-
-          <LinkButton
-            href={`${config.appSubUrl}/a/grafana-lokiexplore-app`} // We prefix with the appSubUrl for environments that don't host grafana at the root.
-            target="_blank"
-            tooltip="Navigate to the Logs Drilldown app"
-            variant="secondary"
-            size="sm"
-            onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_logs_drilldown' })}
-          >
-            Open Logs Drilldown
-          </LinkButton>
+          <OpenInLogsDrilldownButton context={logsDrilldownLinkContext} />
         </Stack>
         <body.Component model={body} />
       </Stack>
