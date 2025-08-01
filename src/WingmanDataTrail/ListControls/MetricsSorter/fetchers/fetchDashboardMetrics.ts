@@ -95,6 +95,25 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
   }
 }
 
+function updateMetricUsage(
+  metric: string,
+  dashboardName: string,
+  dashboardUid: string,
+  dashboardData: Record<string, MetricUsageDetails>
+): void {
+  if (!dashboardData[metric]) {
+    dashboardData[metric] = { usageType: 'dashboard-usage', count: 0, dashboards: {} };
+  }
+
+  dashboardData[metric].count++;
+  if (dashboardData[metric].usageType === 'dashboard-usage') {
+    dashboardData[metric].dashboards[dashboardName] = {
+      count: (dashboardData[metric].dashboards[dashboardName]?.count || 0) + 1,
+      uid: dashboardUid || 'unknown',
+    };
+  }
+}
+
 function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard | null>): MetricUsageMap {
   // Create a map to track metric names and their usage details
   const dashboardData: Record<string, MetricUsageDetails> = {};
@@ -118,17 +137,7 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard |
 
         // Count each metric occurrence
         for (const metric of metrics) {
-          if (!dashboardData[metric]) {
-            dashboardData[metric] = { usageType: 'dashboard-usage', count: 0, dashboards: {} };
-          }
-
-          dashboardData[metric].count++;
-          if (dashboardData[metric].usageType === 'dashboard-usage') {
-            dashboardData[metric].dashboards[dashboardName] = {
-              count: (dashboardData[metric].dashboards[dashboardName]?.count || 0) + 1,
-              uid: dashboard.uid || 'unknown',
-            };
-          }
+          updateMetricUsage(metric, dashboardName, dashboard.uid || 'unknown', dashboardData);
         }
       }
     }
