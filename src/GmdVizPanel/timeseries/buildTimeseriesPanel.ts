@@ -1,24 +1,60 @@
-import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
+import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
+import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
+import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
 import { trailDS } from 'shared';
-import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
+import { type GmdVizPanelState } from '../GmdVizPanel';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
-import { type LabelMatcher } from '../buildQueryExpression';
 
-type TimeseriesPanelOptions = {
-  metric: string;
-  matchers: LabelMatcher[];
-  fixedColor: string;
-};
+type TimeseriesPanelOptions = Pick<
+  GmdVizPanelState,
+  'metric' | 'matchers' | 'fixedColor' | 'headerActions' | 'groupBy'
+>;
 
-export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel {
-  const { metric, matchers, fixedColor } = options;
-  const queryParams = getTimeseriesQueryRunnerParams(metric, matchers);
+function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel {
+  const { metric, matchers, fixedColor, headerActions, groupBy } = options;
+  const queryParams = getTimeseriesQueryRunnerParams(metric, matchers, groupBy);
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
-  const queryRunner = new SceneQueryRunner({
+  const $data = new SceneDataTransformer({
+    $data: new SceneQueryRunner({
+      datasource: trailDS,
+      maxDataPoints: queryParams.maxDataPoints,
+      queries: [
+        {
+          refId: `${options.metric}-by-${groupBy}`,
+          expr: queryParams.query,
+          legendFormat: `{{${groupBy}}}`,
+          fromExploreMetrics: true,
+        },
+      ],
+    }),
+    transformations: [addUnspecifiedLabel(groupBy)],
+  });
+
+  return PanelBuilders.timeseries()
+    .setTitle(metric)
+    .setHeaderActions(headerActions({ metric }))
+    .setData($data)
+    .setUnit(unit)
+    .setColor(fixedColor ? { mode: 'fixed', fixedColor } : undefined)
+    .setOption('legend', { showLegend: true, placement: 'right' as LegendPlacement })
+    .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
+    .build();
+}
+
+export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel {
+  if (options.groupBy) {
+    return buildGroupByPanel(options as Required<TimeseriesPanelOptions>);
+  }
+
+  const { metric, matchers, fixedColor, headerActions, groupBy } = options;
+  const queryParams = getTimeseriesQueryRunnerParams(metric, matchers, groupBy);
+  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
+
+  const $data = new SceneQueryRunner({
     datasource: trailDS,
     maxDataPoints: queryParams.maxDataPoints,
     queries: [
@@ -31,13 +67,13 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   });
 
   return PanelBuilders.timeseries()
-    .setTitle(options.metric)
-    .setHeaderActions([new SelectAction({ metricName: options.metric })])
-    .setData(queryRunner)
+    .setTitle(metric)
+    .setHeaderActions(headerActions({ metric }))
+    .setData($data)
+    .setOption('legend', { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setUnit(unit)
-    .setColor({ mode: 'fixed', fixedColor })
+    .setColor(fixedColor ? { mode: 'fixed', fixedColor } : undefined)
     .setCustomFieldConfig('fillOpacity', 9)
-    .setCustomFieldConfig('pointSize', 1)
     .setDisplayName(queryParams.fnName)
     .build();
 }

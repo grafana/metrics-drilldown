@@ -2,10 +2,9 @@ import { type ValueMapping } from '@grafana/data';
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { MappingType, VisibilityMode } from '@grafana/schema';
 
-import { type LabelMatcher } from 'GmdVizPanel/buildQueryExpression';
 import { trailDS } from 'shared';
-import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
+import { type GmdVizPanelState } from '../GmdVizPanel';
 import { getStatushistoryQueryRunnerParams } from './getStatushistoryQueryRunnerParams';
 
 const mappings: ValueMapping[] = [
@@ -24,13 +23,10 @@ const mappings: ValueMapping[] = [
   },
 ];
 
-type StatusHistoryPanelOptions = {
-  metric: string;
-  matchers: LabelMatcher[];
-};
+type StatusHistoryPanelOptions = Pick<GmdVizPanelState, 'metric' | 'matchers' | 'headerActions'>;
 
 export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): VizPanel {
-  const { metric, matchers } = options;
+  const { metric, matchers, headerActions } = options;
   const queryParams = getStatushistoryQueryRunnerParams(metric, matchers);
   const unit = 'none';
 
@@ -39,7 +35,7 @@ export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): Viz
     maxDataPoints: queryParams.maxDataPoints,
     queries: [
       {
-        refId: options.metric,
+        refId: metric,
         expr: queryParams.query,
         fromExploreMetrics: true,
       },
@@ -49,7 +45,7 @@ export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): Viz
   return (
     PanelBuilders.statushistory()
       .setTitle(metric)
-      .setHeaderActions([new SelectAction({ metricName: metric })])
+      .setHeaderActions(headerActions({ metric }))
       .setData(queryRunner)
       .setUnit(unit)
       // Use value mappings for both color and text display

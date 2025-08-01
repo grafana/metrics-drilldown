@@ -11,7 +11,11 @@ type TimeseriesQueryParams = {
   maxDataPoints: number;
 };
 
-export function getTimeseriesQueryRunnerParams(metric: string, matchers: LabelMatcher[]): TimeseriesQueryParams {
+export function getTimeseriesQueryRunnerParams(
+  metric: string,
+  matchers: LabelMatcher[],
+  groupBy?: string
+): TimeseriesQueryParams {
   const expression = buildQueryExpression(metric, matchers);
   let expr = expressionToString(expression);
 
@@ -21,10 +25,10 @@ export function getTimeseriesQueryRunnerParams(metric: string, matchers: LabelMa
 
   if (isRateQuery) {
     expr = promql.rate({ expr, interval: '$__rate_interval' });
-    query = promql.sum({ expr });
+    query = promql.sum({ expr, by: groupBy ? [groupBy] : undefined });
     fnName = 'sum(rate)';
   } else {
-    query = promql.avg({ expr });
+    query = promql.avg({ expr, by: groupBy ? [groupBy] : undefined });
     fnName = 'avg';
   }
 

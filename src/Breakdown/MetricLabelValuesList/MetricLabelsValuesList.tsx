@@ -2,7 +2,6 @@ import { css } from '@emotion/css';
 import { DashboardCursorSync, LoadingState, type DataFrame, type GrafanaTheme2, type PanelData } from '@grafana/data';
 import {
   behaviors,
-  PanelBuilders,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
@@ -12,12 +11,10 @@ import {
   SceneQueryRunner,
   SceneReactObject,
   sceneUtils,
-  VizPanel,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { SortOrder } from '@grafana/schema';
-import { Field, Spinner, TooltipDisplayMode, useStyles2 } from '@grafana/ui';
+import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
@@ -25,6 +22,7 @@ import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
 import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -48,7 +46,7 @@ interface MetricLabelsValuesListState extends SceneObjectState {
   layoutSwitcher: LayoutSwitcher;
   quickSearch: QuickSearch;
   sortBySelector: SortBySelector;
-  body?: SceneByFrameRepeater | VizPanel;
+  body?: SceneByFrameRepeater | GmdVizPanel;
 }
 
 export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesListState> {
@@ -169,16 +167,15 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private buildSinglePanel() {
-    const { metric } = this.state;
-    const queryDef = getAutoQueriesForMetric(metric).breakdown;
-    const unit = queryDef.unit;
+    const { metric, label } = this.state;
 
-    return PanelBuilders.timeseries()
-      .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setOption('legend', { showLegend: true, placement: 'right' })
-      .setUnit(unit)
-      .setTitle(metric)
-      .build();
+    return new GmdVizPanel({
+      metric,
+      panelType: GmdVizPanel.PANEL_TYPE.TIMESERIES,
+      height: GmdVizPanel.PANEL_HEIGHT.XL,
+      headerActions: () => [],
+      groupBy: label,
+    });
   }
 
   private buildByFrameRepeater() {
@@ -277,7 +274,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
     return (
       <>
-        {body instanceof VizPanel && <MetricLabelValuesList.SingleMetricPanelComponent model={model} />}
+        {body instanceof GmdVizPanel && <MetricLabelValuesList.SingleMetricPanelComponent model={model} />}
         {body instanceof SceneByFrameRepeater && <MetricLabelValuesList.ByFrameRepeaterComponent model={model} />}
       </>
     );
@@ -289,7 +286,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
     return (
       <div data-testid="single-metric-panel">
-        <div className={styles.singlePanelContainer}>{body instanceof VizPanel && <body.Component model={body} />}</div>
+        <div className={styles.singlePanelContainer}>
+          {body instanceof GmdVizPanel && <body.Component model={body} />}
+        </div>
       </div>
     );
   };

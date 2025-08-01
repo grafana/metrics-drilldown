@@ -3,20 +3,15 @@ import { HeatmapColorMode } from '@grafana/schema/dist/esm/raw/composable/heatma
 
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
-import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
+import { type GmdVizPanelState } from '../GmdVizPanel';
 import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
-import { type LabelMatcher } from '../buildQueryExpression';
 
-type HeatmapPanelOptions = {
-  metric: string;
-  matchers: LabelMatcher[];
-  isNativeHistogram: boolean;
-};
+type HeatmapPanelOptions = Pick<GmdVizPanelState, 'metric' | 'matchers' | 'isNativeHistogram' | 'headerActions'>;
 
 export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
-  const { metric, matchers, isNativeHistogram } = options;
-  const queryParams = getHeatmapQueryRunnerParams(metric, matchers, isNativeHistogram);
+  const { metric, matchers, isNativeHistogram, headerActions } = options;
+  const queryParams = getHeatmapQueryRunnerParams(metric, matchers, Boolean(isNativeHistogram));
   const unit = getUnit(metric);
 
   const queryRunner = new SceneQueryRunner({
@@ -24,7 +19,7 @@ export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
     maxDataPoints: queryParams.maxDataPoints,
     queries: [
       {
-        refId: options.metric,
+        refId: metric,
         expr: queryParams.query,
         format: queryParams.format,
         fromExploreMetrics: true,
@@ -33,9 +28,9 @@ export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
   });
 
   return PanelBuilders.heatmap()
-    .setTitle(options.metric)
-    .setDescription(options.isNativeHistogram ? 'Native Histogram' : '')
-    .setHeaderActions([new SelectAction({ metricName: options.metric })])
+    .setTitle(metric)
+    .setDescription(isNativeHistogram ? 'Native Histogram' : '')
+    .setHeaderActions(headerActions({ metric }))
     .setData(queryRunner)
     .setUnit(unit)
     .setOption('calculate', false)
