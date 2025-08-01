@@ -102,7 +102,7 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard |
   const relevantDashboards = dashboardSearchResponse.filter(
     (dashboard) => dashboard && dashboard?.panels?.length
   ) as Array<Dashboard & { panels: NonNullable<Panel[]> }>;
-  // Note: For each dashboard, for each panel in that dashboard, for each query in that panel, what metrics does that query use
+  // For each dashboard, for each panel in that dashboard, for each query in that panel, what metrics does that query use
   for (const dashboard of relevantDashboards) {
     const dashboardName = dashboard.title || `Dashboard ${dashboard.uid}`;
     // Skip panels with non-Prometheus data sources
@@ -114,7 +114,7 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard |
       for (const target of panel.targets) {
         const expr = typeof target.expr === 'string' ? target.expr : '';
 
-        const metrics = extractMetricNames(expr); // Note: This is an array of metric names used in the query
+        const metrics = extractMetricNames(expr); // Array of metric names used in the query
 
         // Count each metric occurrence
         for (const metric of metrics) {

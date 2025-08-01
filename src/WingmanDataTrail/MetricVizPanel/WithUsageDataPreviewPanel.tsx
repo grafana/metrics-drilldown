@@ -185,7 +185,7 @@ function UsageData({
     const { dashboards } = usageDetails;
     dashboardItems = Object.entries(dashboards)
       .map(([name, dashboardInfo]) => ({
-        label: `${name} (${dashboardInfo.count})`,
+        label: `${name.length > 25 ? name.substring(0, 22) + '...' : name} (${dashboardInfo.count})`, // truncate long dashboard names while preserving the count
         value: `/d/${dashboardInfo.uid}`,
         count: dashboardInfo.count,
       }))
