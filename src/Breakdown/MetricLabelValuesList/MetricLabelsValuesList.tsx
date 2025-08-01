@@ -1,11 +1,11 @@
 import { css } from '@emotion/css';
 import { DashboardCursorSync, LoadingState, type DataFrame, type GrafanaTheme2, type PanelData } from '@grafana/data';
+import { utf8Support } from '@grafana/prometheus';
 import {
   behaviors,
   PanelBuilders,
   SceneCSSGridItem,
   SceneCSSGridLayout,
-  SceneDataNode,
   SceneDataTransformer,
   sceneGraph,
   SceneObjectBase,
@@ -14,6 +14,7 @@ import {
   sceneUtils,
   VizPanel,
   type SceneComponentProps,
+  type SceneDataQuery,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { SortOrder } from '@grafana/schema';
@@ -44,7 +45,7 @@ import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: string;
   label: string;
-  $data: SceneDataTransformer;
+  $data?: SceneDataTransformer;
   layoutSwitcher: LayoutSwitcher;
   quickSearch: QuickSearch;
   sortBySelector: SortBySelector;
@@ -63,14 +64,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       key: 'metric-label-values-list',
       metric,
       label,
-      $data: new SceneDataTransformer({
-        $data: new SceneQueryRunner({
-          datasource: trailDS,
-          maxDataPoints: MDP_METRIC_PREVIEW,
-          queries: getAutoQueriesForMetric(metric).breakdown.queries,
-        }),
-        transformations: [addUnspecifiedLabel(label)],
-      }),
+      $data: undefined,
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -168,10 +162,25 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     }
   }
 
+  private buildSingleDataProvider(queries?: SceneDataQuery[]) {
+    const { metric, label } = this.state;
+
+    return new SceneDataTransformer({
+      $data: new SceneQueryRunner({
+        datasource: trailDS,
+        maxDataPoints: MDP_METRIC_PREVIEW,
+        queries: queries || getAutoQueriesForMetric(metric).breakdown.queries,
+      }),
+      transformations: [addUnspecifiedLabel(label)],
+    });
+  }
+
   private buildSinglePanel() {
     const { metric } = this.state;
     const queryDef = getAutoQueriesForMetric(metric).breakdown;
     const unit = queryDef.unit;
+
+    this.setState({ $data: this.buildSingleDataProvider() });
 
     return PanelBuilders.timeseries()
       .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
@@ -181,10 +190,26 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       .build();
   }
 
+  private buildByFrameRepeaterDataProvider() {
+    const { metric, label } = this.state;
+
+    return new SceneDataTransformer({
+      $data: new SceneQueryRunner({
+        datasource: trailDS,
+        maxDataPoints: 2,
+        queries: getAutoQueriesForMetric(metric).breakdown.queries,
+      }),
+      transformations: [addUnspecifiedLabel(label)],
+    });
+  }
+
   private buildByFrameRepeater() {
     const { metric, label } = this.state;
     const queryDef = getAutoQueriesForMetric(metric).breakdown;
     const unit = queryDef.unit;
+    const [breakdownQuery] = queryDef.queries;
+
+    this.setState({ $data: this.buildByFrameRepeaterDataProvider() });
 
     return new SceneByFrameRepeater({
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
@@ -220,22 +245,27 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
           ),
         }),
       getLayoutChild: (data: PanelData, frame: DataFrame, frameIndex: number) => {
-        // hide frames that have less than 2 points
-        if (frame.length < 2) {
-          return null;
-        }
-
         const labelValue = getLabelValueFromDataFrame(frame);
         const panelKey = `panel-${metric}-${labelValue}`;
 
-        const canAddToFilters = !labelValue.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
-        const headerActions = canAddToFilters ? [new AddToFiltersGraphAction({ labelName: label, labelValue })] : [];
+        const hasLabelValue = !labelValue.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
+        const headerActions = hasLabelValue ? [new AddToFiltersGraphAction({ labelName: label, labelValue })] : [];
+
+        const queryExpr = breakdownQuery.expr
+          .replace('by(${groupby})', '')
+          .replace('${filters}', `${utf8Support(label)}="${hasLabelValue ? labelValue : ''}",\${filters}`);
+
+        const query = {
+          refId: `${label}-${labelValue}`,
+          expr: queryExpr,
+          fromExploreMetrics: true,
+        };
 
         // TODO: Use LabelVizPanel?
         const vizPanel = queryDef
           .vizBuilder()
           .setTitle(labelValue)
-          .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
+          .setData(this.buildSingleDataProvider([query]))
           .setBehaviors([publishTimeseriesData()]) // publishTimeseriesData is required for the syncYAxis behavior
           .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
           .setHeaderActions(headerActions)
