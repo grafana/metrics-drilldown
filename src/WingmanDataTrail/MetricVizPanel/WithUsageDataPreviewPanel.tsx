@@ -202,6 +202,7 @@ function UsageData({
       {usageDetails.usageType === 'dashboard-usage' ? (
         <>
           <Dropdown
+            placement="right-start"
             overlay={
               <Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
                 {dashboardItems.map((item) => (
