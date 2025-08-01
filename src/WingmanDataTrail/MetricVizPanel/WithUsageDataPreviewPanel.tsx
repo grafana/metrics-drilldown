@@ -180,21 +180,16 @@ function UsageData({
 }: Readonly<UsageSectionProps>) {
   const styles = useStyles2(getStyles);
 
-  let dashboardItems: Array<{ label: string; value: string }> = [];
-
+  let dashboardItems: Array<{ label: string; value: string; count: number }> = [];
   if (usageDetails.usageType === 'dashboard-usage') {
     const { dashboards } = usageDetails;
     dashboardItems = Object.entries(dashboards)
-      .map(([name, count]) => ({
-        label: `${name} (${count})`,
-        value: name, // identifier for if we want to implement "click to navigate to dashboard" functionality
+      .map(([name, dashboardInfo]) => ({
+        label: `${name} (${dashboardInfo.count})`,
+        value: `/d/${dashboardInfo.uid}`,
+        count: dashboardInfo.count,
       }))
-      .sort((a, b) => {
-        // Extract count from label for sorting
-        const countA = parseInt(a.label.match(/\((\d+)\)/)?.[1] || '0', 10);
-        const countB = parseInt(b.label.match(/\((\d+)\)/)?.[1] || '0', 10);
-        return countB - countA; // Descending order
-      });
+      .sort((a, b) => b.count - a.count);
   }
 
   return (
@@ -206,7 +201,7 @@ function UsageData({
             overlay={
               <Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
                 {dashboardItems.map((item) => (
-                  <Menu.Item key={item.value} label={item.label} />
+                  <Menu.Item key={item.value} label={item.label} onClick={() => window.open(item.value, '_blank')} />
                 ))}
               </Menu>
             }

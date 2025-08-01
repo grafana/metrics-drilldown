@@ -18,7 +18,7 @@ interface DashboardSearchItem {
 }
 
 export type MetricUsageDetails =
-  | { usageType: 'dashboard-usage'; count: number; dashboards: Record<string, number> } // e.g., {"Dashboard A": 2, "Dashboard B": 1}
+  | { usageType: 'dashboard-usage'; count: number; dashboards: Record<string, { count: number; uid: string }> } // e.g., {"Dashboard A": { count: 2, uid: "123" }}
   | { usageType: 'alerting-usage'; count: number }; // TODO: implement `alerts: Record<string, number>`
 
 type MetricUsageMap = Record<string, MetricUsageDetails>;
@@ -124,13 +124,14 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard |
 
           dashboardData[metric].count++;
           if (dashboardData[metric].usageType === 'dashboard-usage') {
-            dashboardData[metric].dashboards[dashboardName] =
-              (dashboardData[metric].dashboards[dashboardName] || 0) + 1;
+            dashboardData[metric].dashboards[dashboardName] = {
+              count: (dashboardData[metric].dashboards[dashboardName]?.count || 0) + 1,
+              uid: dashboard.uid || 'unknown',
+            };
           }
         }
       }
     }
   }
-
   return dashboardData;
 }
