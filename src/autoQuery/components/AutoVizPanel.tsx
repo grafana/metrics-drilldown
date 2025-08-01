@@ -14,6 +14,7 @@ import { MDP_METRIC_OVERVIEW, trailDS } from '../../shared';
 import { getMetricSceneFor, getTrailFor } from '../../utils';
 import { type AutoQueryDef } from '../types';
 import { AutoVizPanelQuerySelector } from './AutoVizPanelQuerySelector';
+import { BookmarkPanelAction } from './BookmarkPanelAction';
 
 export interface AutoVizPanelState extends SceneObjectState {
   panel?: VizPanel;
@@ -64,7 +65,10 @@ export class AutoVizPanel extends SceneObjectBase<AutoVizPanelState> {
         })
       )
       .setDescription(description)
-      .setHeaderActions([new AutoVizPanelQuerySelector({ queryDef: def, onChangeQuery: this.onChangeQuery })])
+      .setHeaderActions([
+        new AutoVizPanelQuerySelector({ queryDef: def, onChangeQuery: this.onChangeQuery }),
+        new BookmarkPanelAction(),
+      ])
       .setShowMenuAlways(true)
       .setMenu(new PanelMenu({ labelName: metric ?? this.state.metric }))
       .build();

@@ -8,7 +8,7 @@ import {
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
+import { Box, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { AutoVizPanel } from 'autoQuery/components/AutoVizPanel';
@@ -20,7 +20,6 @@ import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
 import { MetricSelectedEvent } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
-import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
@@ -91,7 +90,6 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
     const trail = getTrailFor(model);
-    const [isBookmarked, toggleBookmark] = useBookmarkState(trail);
     const { actionView } = metricScene.useState();
 
     return (
@@ -127,18 +125,6 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               onClick={model.openExploreLink}
             />
             <ShareTrailButton trail={trail} />
-            <ToolbarButton
-              variant={'canvas'}
-              icon={
-                isBookmarked ? (
-                  <Icon name={'favorite'} type={'mono'} size={'lg'} />
-                ) : (
-                  <Icon name={'star'} type={'default'} size={'lg'} />
-                )
-              }
-              tooltip={UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL}
-              onClick={toggleBookmark}
-            />
           </Stack>
         </div>
 
