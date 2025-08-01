@@ -63,6 +63,7 @@ export interface DataTrailState extends SceneObjectState {
   metric?: string;
   metricSearch?: string;
 
+  histogramsLoadP: Promise<void> | null;
   histogramsLoaded: boolean;
   nativeHistograms: string[];
   nativeHistogramMetric: string;
@@ -92,6 +93,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       dashboardMetrics: {},
       alertingMetrics: {},
       nativeHistograms: state.nativeHistograms ?? [],
+      histogramsLoadP: state.histogramsLoadP ?? null,
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
       trailActivated: state.trailActivated ?? false,
@@ -183,15 +185,22 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   // use this to initialize histograms in all scenes
   public async initializeHistograms() {
+    if (this.state.histogramsLoadP) {
+      return this.state.histogramsLoadP;
+    }
+
     if (!this.state.histogramsLoaded) {
       try {
-        await this.datasourceHelper.initializeHistograms();
+        const histogramsLoadP = this.datasourceHelper.initializeHistograms();
+        this.setState({ histogramsLoadP });
+        await histogramsLoadP;
       } catch (e) {
         displayWarning(['Error while initializing histograms!', (e as Error).toString()]);
       }
 
       this.setState({
         nativeHistograms: this.listNativeHistograms(),
+        histogramsLoadP: null,
         histogramsLoaded: true,
       });
     }

@@ -1,0 +1,222 @@
+import { css } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
+import {
+  SceneObjectBase,
+  type SceneComponentProps,
+  type SceneObjectState,
+  type VizPanel,
+  type VizPanelState,
+} from '@grafana/scenes';
+import { useStyles2 } from '@grafana/ui';
+import React from 'react';
+
+import { getTrailFor } from 'utils';
+import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
+
+import { type LabelMatcher } from './buildQueryExpression';
+import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
+import { isHistogramMetric } from './heatmap/isHistogramMetric';
+import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
+import { isUpDownMetric } from './statushistory/isUpDownMetric';
+import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
+
+enum PANEL_TYPE {
+  TIMESERIES = 'TIMESERIES',
+  HEATMAP = 'HEATMAP',
+  STATUSHISTORY = 'STATUSHISTORY',
+}
+
+enum PANEL_HEIGHT {
+  S = 'S',
+  M = 'M',
+  L = 'L',
+  XL = 'XL',
+}
+
+type HeaderActionsOptions = {
+  metric: string;
+};
+
+export interface GmdVizPanelState extends SceneObjectState {
+  metric: string;
+  matchers: LabelMatcher[];
+  heightInPixels: string;
+  headerActions: (headerActionsOptions: HeaderActionsOptions) => VizPanelState['headerActions'];
+  panelType?: PANEL_TYPE;
+  fixedColor?: string;
+  isNativeHistogram?: boolean;
+  groupBy?: string;
+  body?: VizPanel;
+}
+
+export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
+  public static readonly PANEL_TYPE = PANEL_TYPE;
+  public static readonly PANEL_HEIGHT = PANEL_HEIGHT;
+
+  public static readonly DEFAULT_HEADER_ACTIONS_BUILDER: GmdVizPanelState['headerActions'] = ({ metric }) => [
+    new SelectAction({ metricName: metric }),
+  ];
+
+  constructor({
+    metric,
+    matchers,
+    height,
+    headerActions,
+    panelType,
+    fixedColor,
+    groupBy,
+  }: {
+    metric: GmdVizPanelState['metric'];
+    matchers?: GmdVizPanelState['matchers'];
+    height?: PANEL_HEIGHT;
+    headerActions?: GmdVizPanelState['headerActions'];
+    panelType?: PANEL_TYPE;
+    fixedColor?: GmdVizPanelState['fixedColor'];
+    groupBy?: GmdVizPanelState['groupBy'];
+  }) {
+    super({
+      key: 'GmdVizPanel',
+      metric,
+      matchers: matchers || [],
+      heightInPixels: `${GmdVizPanel.getPanelHeightInPixels(height || PANEL_HEIGHT.M)}px`,
+      headerActions: headerActions || GmdVizPanel.DEFAULT_HEADER_ACTIONS_BUILDER,
+      panelType,
+      fixedColor,
+      groupBy,
+      isNativeHistogram: undefined,
+      body: undefined,
+    });
+
+    this.addActivationHandler(() => {
+      this.onActivate();
+    });
+  }
+
+  private static getPanelHeightInPixels(h: PANEL_HEIGHT): number {
+    switch (h) {
+      case PANEL_HEIGHT.S:
+        return 160;
+      case PANEL_HEIGHT.L:
+        return 260;
+      case PANEL_HEIGHT.XL:
+        return 300;
+      case PANEL_HEIGHT.M:
+      default:
+        return 220;
+    }
+  }
+
+  private async onActivate() {
+    const { metric, panelType } = this.state;
+
+    this.subscribeToStateChanges();
+
+    // isNativeHistogram() depends on an async process to load metrics metadata, so it's possibile that
+    // when landing on the page, the metadata is not yet loaded and the histogram metrics are not be rendered as heatmap panels.
+    // But we still want to render them ASAP and update them later when the metadata has arrived.
+    const trail = getTrailFor(this);
+    const isNativeHistogram = trail.isNativeHistogram(metric);
+
+    this.setState({
+      panelType: panelType || this.getDefaultPanelType(isNativeHistogram),
+      isNativeHistogram,
+    });
+
+    if (isNativeHistogram) {
+      return;
+    }
+
+    // force initialization
+    await trail.initializeHistograms();
+    const newIsNativeHistogram = trail.isNativeHistogram(metric);
+
+    if (newIsNativeHistogram) {
+      this.setState({
+        panelType: this.getDefaultPanelType(newIsNativeHistogram),
+        isNativeHistogram: newIsNativeHistogram,
+      });
+    }
+  }
+
+  private getDefaultPanelType(isNativeHistogram: boolean): PANEL_TYPE {
+    const { metric } = this.state;
+
+    if (isUpDownMetric(metric)) {
+      return PANEL_TYPE.STATUSHISTORY;
+    }
+
+    if (isNativeHistogram || isHistogramMetric(metric)) {
+      return PANEL_TYPE.HEATMAP;
+    }
+
+    return PANEL_TYPE.TIMESERIES;
+  }
+
+  private subscribeToStateChanges() {
+    this.subscribeToState((newState, prevState) => {
+      if (newState.isNativeHistogram === undefined || newState.panelType === undefined) {
+        return;
+      }
+
+      if (newState.isNativeHistogram !== prevState.isNativeHistogram || newState.panelType !== prevState.panelType) {
+        this.updateBody();
+      }
+    });
+  }
+
+  private updateBody() {
+    const { panelType, metric, matchers, fixedColor, isNativeHistogram, headerActions, groupBy } = this.state;
+
+    switch (panelType) {
+      case PANEL_TYPE.TIMESERIES:
+        this.setState({
+          body: buildTimeseriesPanel({ metric, matchers, fixedColor, headerActions, groupBy }),
+        });
+        return;
+
+      case PANEL_TYPE.HEATMAP:
+        this.setState({
+          body: buildHeatmapPanel({
+            metric,
+            matchers,
+            isNativeHistogram: isNativeHistogram as boolean,
+            headerActions,
+          }),
+        });
+        return;
+
+      case PANEL_TYPE.STATUSHISTORY:
+        this.setState({
+          body: buildStatushistoryPanel({ metric, matchers, headerActions }),
+        });
+        return;
+
+      default:
+        throw new TypeError(`Unsupported panel type "${panelType}"!`);
+    }
+  }
+
+  public changePanelType(newPanelType: PANEL_TYPE) {
+    this.setState({ panelType: newPanelType });
+  }
+
+  public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {
+    const { body, heightInPixels } = model.useState();
+    const styles = useStyles2(getStyles, heightInPixels);
+
+    return (
+      <div className={styles.container} data-testid="gmd-vizpanel">
+        {body && <body.Component model={body} />}
+      </div>
+    );
+  };
+}
+
+function getStyles(theme: GrafanaTheme2, heightInPixels: string) {
+  return {
+    container: css`
+      width: 100%;
+      height: ${heightInPixels};
+    `,
+  };
+}
