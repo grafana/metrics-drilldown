@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
@@ -17,11 +17,12 @@
     "server": "docker compose up --build",
     "sign": "npx --yes @grafana/sign-plugin@latest",
     "e2e:server": "docker compose up --build",
-    "e2e:ci": "docker compose --profile playwright up --build --attach playwright",
+    "e2e:ci": "docker compose --profile playwright up --build --attach playwright --exit-code-from playwright",
     "e2e:prepare": "npm exec playwright install chromium",
     "e2e": "playwright test -c ./e2e/config/playwright.config.local.ts",
     "e2e:watch": "npm run e2e -- --ui",
-    "e2e:codegen": "playwright codegen"
+    "e2e:codegen": "playwright codegen",
+    "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh"
   },
   "packageManager": "npm@10.9.2",
   "engines": {
@@ -30,21 +31,22 @@
   "dependencies": {
     "@bsull/augurs": "^0.9.0",
     "@emotion/css": "11.13.5",
-    "@grafana/data": "^12.0.0",
+    "@grafana/data": "^12.1.0",
     "@grafana/faro-web-sdk": "^1.17.2",
+    "@grafana/i18n": "^12.1.0-249189",
     "@grafana/lezer-logql": "^0.2.7",
-    "@grafana/prometheus": "^12.1.0-252095",
-    "@grafana/runtime": "^12.0.0",
-    "@grafana/scenes": "^6.10.2",
-    "@grafana/schema": "^12.0.0",
-    "@grafana/ui": "^12.0.0",
+    "@grafana/prometheus": "^12.1.0",
+    "@grafana/runtime": "^12.1.0",
+    "@grafana/scenes": "^6.27.2",
+    "@grafana/schema": "^12.1.0",
+    "@grafana/ui": "^12.1.0",
     "@lezer/common": "^1.2.3",
     "@prometheus-io/lezer-promql": "^0.305.0-rc.1",
     "p-limit": "^6.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "^6.30.0",
-    "rxjs": "7.8.1",
+    "rxjs": "7.8.2",
     "tsqtsq": "^1.0.10"
   },
   "devDependencies": {
@@ -73,6 +75,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-jsdoc": "^46.10.1",
+    "eslint-plugin-playwright": "^2.2.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-sonarjs": "^3.0.2",

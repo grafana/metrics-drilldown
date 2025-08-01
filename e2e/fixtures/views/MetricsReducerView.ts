@@ -31,10 +31,6 @@ export class MetricsReducerView extends DrilldownView {
     return super.goto(new URLSearchParams([...urlSearchParams, ...this.urlParams]));
   }
 
-  goBack() {
-    return this.page.goBack();
-  }
-
   /* Core UI assertions */
 
   async assertCoreUI() {
@@ -49,9 +45,7 @@ export class MetricsReducerView extends DrilldownView {
   async assertAdHocFilter(labelName: string, operator: string, labelValue: string) {
     const filter = this.getByRole('button', { name: `Edit filter with key ${labelName}` });
     await expect(filter).toBeVisible();
-
-    const filterText = await filter.textContent();
-    expect(filterText).toBe(`${labelName} ${operator} ${labelValue}`);
+    await expect(filter).toHaveText(`${labelName} ${operator} ${labelValue}`);
   }
 
   async clearAdHocFilter(labelName: string) {
@@ -129,6 +123,9 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+
+    // TODO: find a better way
+    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   /* Panels */
@@ -162,6 +159,9 @@ export class MetricsReducerView extends DrilldownView {
 
     const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
     expect(panelsCount).toBeGreaterThan(0);
+
+    // TODO: find a better way
+    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   async selectMetricsGroup(labelName: string, labelValue: string) {

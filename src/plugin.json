@@ -55,7 +55,12 @@
   "extensions": {
     "addedLinks": [
       {
-        "targets": ["grafana/dashboard/panel/menu", "grafana/explore/toolbar/action"],
+        "targets": [
+          "grafana/dashboard/panel/menu",
+          "grafana/explore/toolbar/action",
+          "grafana-assistant-app/navigateToDrilldown/v1",
+          "grafana/alerting/alertingrule/queryeditor"
+        ],
         "title": "Open in Grafana Metrics Drilldown",
         "description": "Open current query in the Grafana Metrics Drilldown view"
       },
@@ -71,6 +76,13 @@
       },
       {
         "id": "grafana-metricsdrilldown-app/open-in-logs-drilldown/v1"
+      }
+    ],
+    "exposedComponents": [
+      {
+        "id": "grafana-metricsdrilldown-app/label-breakdown-component/v1",
+        "title": "Label Breakdown",
+        "description": "A metrics label breakdown view from the Metrics Drilldown app."
       }
     ]
   }
