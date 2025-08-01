@@ -17,6 +17,12 @@ interface DashboardSearchItem {
   isStarred: boolean;
 }
 
+export type MetricUsageDetails =
+  | { usageType: 'dashboard-usage'; count: number; dashboards: Record<string, { count: number; uid: string }> } // e.g., {"Dashboard A": { count: 2, uid: "123" }}
+  | { usageType: 'alerting-usage'; count: number }; // TODO: implement `alerts: Record<string, number>`
+
+type MetricUsageMap = Record<string, MetricUsageDetails>;
+
 const usageRequestOptions: Partial<BackendSrvRequest> = {
   showSuccessAlert: false,
   showErrorAlert: false,
@@ -59,9 +65,9 @@ const getDashboardLimited = limitFunction(
 
 /**
  * Fetches metric usage data from dashboards
- * @returns A record mapping metric names to their occurrence count in dashboards
+ * @returns A record mapping metric names to their dashboard usage data
  */
-export async function fetchDashboardMetrics(): Promise<Record<string, number>> {
+export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsageDetails>> {
   try {
     const dashboards = await getBackendSrv().get<DashboardSearchItem[]>(
       '/api/search',
@@ -89,15 +95,35 @@ export async function fetchDashboardMetrics(): Promise<Record<string, number>> {
   }
 }
 
-function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard | null>): Record<string, number> {
-  // Create a map to count metric occurrences
-  const counts: Record<string, number> = {};
+function updateMetricUsage(
+  metric: string,
+  dashboardName: string,
+  dashboardUid: string,
+  dashboardData: Record<string, MetricUsageDetails>
+): void {
+  if (!dashboardData[metric]) {
+    dashboardData[metric] = { usageType: 'dashboard-usage', count: 0, dashboards: {} };
+  }
+
+  dashboardData[metric].count++;
+  if (dashboardData[metric].usageType === 'dashboard-usage') {
+    dashboardData[metric].dashboards[dashboardName] = {
+      count: (dashboardData[metric].dashboards[dashboardName]?.count || 0) + 1,
+      uid: dashboardUid || 'unknown',
+    };
+  }
+}
+
+function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard | null>): MetricUsageMap {
+  // Create a map to track metric names and their usage details
+  const dashboardData: Record<string, MetricUsageDetails> = {};
 
   const relevantDashboards = dashboardSearchResponse.filter(
     (dashboard) => dashboard && dashboard?.panels?.length
   ) as Array<Dashboard & { panels: NonNullable<Panel[]> }>;
-
+  // For each dashboard, for each panel in that dashboard, for each query in that panel, what metrics does that query use
   for (const dashboard of relevantDashboards) {
+    const dashboardName = dashboard.title || `Dashboard ${dashboard.uid}`;
     // Skip panels with non-Prometheus data sources
     const relevantPanels = dashboard.panels.filter(
       (panel) => isPrometheusDataSource(panel.datasource) && 'targets' in panel && panel.targets?.length
@@ -107,15 +133,14 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard |
       for (const target of panel.targets) {
         const expr = typeof target.expr === 'string' ? target.expr : '';
 
-        const metrics = extractMetricNames(expr);
+        const metrics = extractMetricNames(expr); // Array of metric names used in the query
 
         // Count each metric occurrence
         for (const metric of metrics) {
-          counts[metric] = (counts[metric] || 0) + 1;
+          updateMetricUsage(metric, dashboardName, dashboard.uid || 'unknown', dashboardData);
         }
       }
     }
   }
-
-  return counts;
+  return dashboardData;
 }

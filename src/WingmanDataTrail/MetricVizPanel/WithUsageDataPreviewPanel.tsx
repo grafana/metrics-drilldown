@@ -7,11 +7,12 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Icon, Tooltip, useStyles2, type IconName } from '@grafana/ui';
+import { Button, Dropdown, Icon, Menu, Tooltip, useStyles2, type IconName } from '@grafana/ui';
 import React from 'react';
 
 import { logger } from 'tracking/logger/logger';
 import { isCustomVariable } from 'utils/utils.variables';
+import { type MetricUsageDetails } from 'WingmanDataTrail/ListControls/MetricsSorter/fetchers/fetchDashboardMetrics';
 import {
   MetricsSorter,
   VAR_WINGMAN_SORT_BY,
@@ -34,6 +35,7 @@ type WithUsageDataPreviewPanelState = SceneObjectState & {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
   sortBy: SortBy;
+  metricUsageDetails: MetricUsageDetails;
 };
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
@@ -43,6 +45,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       sortBy: 'default',
       'alerting-usage': 0,
       'dashboard-usage': 0,
+      metricUsageDetails: { usageType: 'dashboard-usage', count: 0, dashboards: {} },
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
@@ -85,9 +88,10 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     switch (sortBy) {
       case 'dashboard-usage':
       case 'alerting-usage':
-        metricsSorter.getUsageForMetric(this.state.metric, sortBy).then((usage) => {
+        metricsSorter.getUsageDetailsForMetric(this.state.metric, sortBy).then((usage) => {
           this.setState({
-            [sortBy]: usage,
+            [sortBy]: usage.count,
+            metricUsageDetails: usage,
           });
         });
         if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW) {
@@ -108,6 +112,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       sortBy,
       'alerting-usage': metricUsedInAlertingRulesCount,
       'dashboard-usage': metricUsedInDashboardsCount,
+      metricUsageDetails,
     } = model.useState();
 
     if (!vizPanelInGridItem) {
@@ -129,12 +134,14 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
         singularUsageType: 'dashboard panel query',
         pluralUsageType: 'dashboard panel queries',
         icon: 'apps',
+        usageDetails: metricUsageDetails,
       },
       'alerting-usage': {
         usageCount: metricUsedInAlertingRulesCount,
         singularUsageType: 'alert rule',
         pluralUsageType: 'alert rules',
         icon: 'bell',
+        usageDetails: metricUsageDetails,
       },
     };
 
@@ -147,33 +154,78 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
           singularUsageType={usageDetails[sortBy].singularUsageType}
           pluralUsageType={usageDetails[sortBy].pluralUsageType}
           icon={usageDetails[sortBy].icon as IconName}
+          usageDetails={usageDetails[sortBy].usageDetails}
         />
       </div>
     );
   };
 }
-
+// TODO: pass full MetricUsageDetailsObject into UsageSectionProps?
 interface UsageSectionProps {
   usageType: MetricUsageType;
   usageCount: number;
   singularUsageType: string;
   pluralUsageType: string;
   icon: IconName;
+  usageDetails: MetricUsageDetails;
 }
 
-function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: Readonly<UsageSectionProps>) {
+function UsageData({
+  usageType,
+  usageCount,
+  singularUsageType,
+  pluralUsageType,
+  icon,
+  usageDetails,
+}: Readonly<UsageSectionProps>) {
   const styles = useStyles2(getStyles);
+
+  let dashboardItems: Array<{ label: string; value: string; count: number }> = [];
+  if (usageDetails.usageType === 'dashboard-usage') {
+    const { dashboards } = usageDetails;
+    dashboardItems = Object.entries(dashboards)
+      .map(([name, dashboardInfo]) => ({
+        label: `${name.length > 25 ? name.substring(0, 22) + '...' : name} (${dashboardInfo.count})`, // truncate long dashboard names while preserving the count
+        value: `/d/${dashboardInfo.uid}`,
+        count: dashboardInfo.count,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }
 
   return (
     <div className={styles.usageContainer} data-testid="usage-data-panel">
-      <Tooltip
-        content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
-        placement="top"
-      >
-        <span className={styles.usageItem} data-testid={usageType}>
-          <Icon name={icon} /> {usageCount}
-        </span>
-      </Tooltip>
+      {usageDetails.usageType === 'dashboard-usage' ? (
+        <>
+          <Dropdown
+            placement="right-start"
+            overlay={
+              <Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                {dashboardItems.map((item) => (
+                  <Menu.Item key={item.value} label={item.label} onClick={() => window.open(item.value, '_blank')} />
+                ))}
+              </Menu>
+            }
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              tooltip={`Metric used in ${usageCount} dashboards. Click to view them.`}
+              className={`${styles.usageItem} ${styles.clickableUsageItem}`}
+            >
+              <Icon name={icon} style={{ marginRight: '4px' }} /> {usageCount}
+            </Button>
+          </Dropdown>
+        </>
+      ) : (
+        <Tooltip
+          content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
+          placement="top"
+        >
+          <span className={styles.usageItem} data-testid={usageType}>
+            <Icon name={icon} /> {usageCount}
+          </span>
+        </Tooltip>
+      )}
     </div>
   );
 }
@@ -197,6 +249,10 @@ function getStyles(theme: GrafanaTheme2) {
       gap: '4px',
       color: theme.colors.text.secondary,
       opacity: '65%',
+    }),
+    clickableUsageItem: css({
+      backgroundColor: 'transparent',
+      border: 'none',
     }),
   };
 }
