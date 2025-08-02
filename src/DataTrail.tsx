@@ -32,7 +32,10 @@ import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
+import { DataTrailExploreAction } from './DataTrailExploreAction';
+import { DataTrailSelectMetricAction } from './DataTrailSelectMetricAction';
 import { DataTrailSettings } from './DataTrailSettings';
+import { DataTrailShareAction } from './DataTrailShareAction';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters } from './interactions';
 import { MetricScene } from './MetricScene';
@@ -83,6 +86,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       controls: state.controls ?? [
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
+        new DataTrailSelectMetricAction(),
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],
@@ -348,6 +352,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               <control.Component key={control.state.key} model={control} />
             ))}
             <div className={styles.settingsInfo}>
+              <DataTrailExploreAction trail={model} />
+              <DataTrailShareAction trail={model} />
               <settings.Component model={settings} />
               <pluginInfo.Component model={pluginInfo} />
             </div>
