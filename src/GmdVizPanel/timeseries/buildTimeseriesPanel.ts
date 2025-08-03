@@ -10,11 +10,11 @@ import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams
 
 type TimeseriesPanelOptions = Pick<
   GmdVizPanelState,
-  'metric' | 'matchers' | 'fixedColor' | 'headerActions' | 'groupBy'
+  'title' | 'metric' | 'matchers' | 'fixedColor' | 'headerActions' | 'groupBy'
 >;
 
 function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel {
-  const { metric, matchers, fixedColor, headerActions, groupBy } = options;
+  const { title, metric, matchers, fixedColor, headerActions, groupBy } = options;
   const queryParams = getTimeseriesQueryRunnerParams(metric, matchers, groupBy);
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
@@ -35,7 +35,7 @@ function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel 
   });
 
   return PanelBuilders.timeseries()
-    .setTitle(metric)
+    .setTitle(title)
     .setHeaderActions(headerActions({ metric }))
     .setData($data)
     .setUnit(unit)
@@ -50,7 +50,7 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     return buildGroupByPanel(options as Required<TimeseriesPanelOptions>);
   }
 
-  const { metric, matchers, fixedColor, headerActions, groupBy } = options;
+  const { title, metric, matchers, fixedColor, headerActions, groupBy } = options;
   const queryParams = getTimeseriesQueryRunnerParams(metric, matchers, groupBy);
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
@@ -67,7 +67,7 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   });
 
   return PanelBuilders.timeseries()
-    .setTitle(metric)
+    .setTitle(title)
     .setHeaderActions(headerActions({ metric }))
     .setData($data)
     .setOption('legend', { showLegend: true, placement: 'bottom' as LegendPlacement })

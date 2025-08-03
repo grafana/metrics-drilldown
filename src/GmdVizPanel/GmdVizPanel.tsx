@@ -39,6 +39,7 @@ type HeaderActionsOptions = {
 
 export interface GmdVizPanelState extends SceneObjectState {
   metric: string;
+  title: string;
   matchers: LabelMatcher[];
   heightInPixels: string;
   headerActions: (headerActionsOptions: HeaderActionsOptions) => VizPanelState['headerActions'];
@@ -52,7 +53,6 @@ export interface GmdVizPanelState extends SceneObjectState {
 export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   public static readonly PANEL_TYPE = PANEL_TYPE;
   public static readonly PANEL_HEIGHT = PANEL_HEIGHT;
-
   public static readonly DEFAULT_HEADER_ACTIONS_BUILDER: GmdVizPanelState['headerActions'] = ({ metric }) => [
     new SelectAction({ metricName: metric }),
   ];
@@ -64,6 +64,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     headerActions,
     panelType,
     fixedColor,
+    title,
     groupBy,
   }: {
     metric: GmdVizPanelState['metric'];
@@ -72,6 +73,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     headerActions?: GmdVizPanelState['headerActions'];
     panelType?: PANEL_TYPE;
     fixedColor?: GmdVizPanelState['fixedColor'];
+    title?: GmdVizPanelState['title'];
     groupBy?: GmdVizPanelState['groupBy'];
   }) {
     super({
@@ -82,6 +84,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       headerActions: headerActions || GmdVizPanel.DEFAULT_HEADER_ACTIONS_BUILDER,
       panelType,
       fixedColor,
+      title: title || metric,
       groupBy,
       isNativeHistogram: undefined,
       body: undefined,
@@ -165,18 +168,19 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private updateBody() {
-    const { panelType, metric, matchers, fixedColor, isNativeHistogram, headerActions, groupBy } = this.state;
+    const { panelType, title, metric, matchers, fixedColor, isNativeHistogram, headerActions, groupBy } = this.state;
 
     switch (panelType) {
       case PANEL_TYPE.TIMESERIES:
         this.setState({
-          body: buildTimeseriesPanel({ metric, matchers, fixedColor, headerActions, groupBy }),
+          body: buildTimeseriesPanel({ title, metric, matchers, fixedColor, headerActions, groupBy }),
         });
         return;
 
       case PANEL_TYPE.HEATMAP:
         this.setState({
           body: buildHeatmapPanel({
+            title,
             metric,
             matchers,
             isNativeHistogram: isNativeHistogram as boolean,
@@ -187,7 +191,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
       case PANEL_TYPE.STATUSHISTORY:
         this.setState({
-          body: buildStatushistoryPanel({ metric, matchers, headerActions }),
+          body: buildStatushistoryPanel({ title, metric, matchers, headerActions }),
         });
         return;
 

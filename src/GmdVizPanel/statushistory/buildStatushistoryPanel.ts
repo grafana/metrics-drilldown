@@ -23,10 +23,10 @@ const mappings: ValueMapping[] = [
   },
 ];
 
-type StatusHistoryPanelOptions = Pick<GmdVizPanelState, 'metric' | 'matchers' | 'headerActions'>;
+type StatusHistoryPanelOptions = Pick<GmdVizPanelState, 'title' | 'metric' | 'matchers' | 'headerActions'>;
 
 export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): VizPanel {
-  const { metric, matchers, headerActions } = options;
+  const { title, metric, matchers, headerActions } = options;
   const queryParams = getStatushistoryQueryRunnerParams(metric, matchers);
   const unit = 'none';
 
@@ -44,7 +44,7 @@ export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): Viz
 
   return (
     PanelBuilders.statushistory()
-      .setTitle(metric)
+      .setTitle(title)
       .setHeaderActions(headerActions({ metric }))
       .setData(queryRunner)
       .setUnit(unit)

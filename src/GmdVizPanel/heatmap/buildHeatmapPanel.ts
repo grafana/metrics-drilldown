@@ -7,10 +7,13 @@ import { trailDS } from 'shared';
 import { type GmdVizPanelState } from '../GmdVizPanel';
 import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 
-type HeatmapPanelOptions = Pick<GmdVizPanelState, 'metric' | 'matchers' | 'isNativeHistogram' | 'headerActions'>;
+type HeatmapPanelOptions = Pick<
+  GmdVizPanelState,
+  'title' | 'metric' | 'matchers' | 'isNativeHistogram' | 'headerActions'
+>;
 
 export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
-  const { metric, matchers, isNativeHistogram, headerActions } = options;
+  const { title, metric, matchers, isNativeHistogram, headerActions } = options;
   const queryParams = getHeatmapQueryRunnerParams(metric, matchers, Boolean(isNativeHistogram));
   const unit = getUnit(metric);
 
@@ -28,7 +31,7 @@ export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
   });
 
   return PanelBuilders.heatmap()
-    .setTitle(metric)
+    .setTitle(title)
     .setDescription(isNativeHistogram ? 'Native Histogram' : '')
     .setHeaderActions(headerActions({ metric }))
     .setData(queryRunner)
