@@ -18,6 +18,9 @@ const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
+export const ASSISTANT_TARGET_V0 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha';
+export const ASSISTANT_TARGET_V1 = 'grafana-assistant-app/navigateToDrilldown/v1';
+
 export const ADHOC_URL_DELIMITER = '|';
 
 export type PromQLLabelMatcher = {
@@ -33,11 +36,18 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
     category,
     icon,
     path: createAppUrl(ROUTES.Drilldown),
-    targets: [PluginExtensionPoints.DashboardPanelMenu, PluginExtensionPoints.ExploreToolbarAction],
+    targets: [
+      PluginExtensionPoints.DashboardPanelMenu,
+      PluginExtensionPoints.ExploreToolbarAction,
+      // for testing purposes, this will be the target for the alerting rule query editor once the PR in grafana is merged
+      // PluginExtensionPoints.AlertingRuleQueryEditor,
+      'grafana/alerting/alertingrule/queryeditor',
+      ASSISTANT_TARGET_V1,
+    ],
     configure: configureDrilldownLink,
   },
   {
-    targets: ['grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha'],
+    targets: [ASSISTANT_TARGET_V0],
     title: 'Navigate to metrics drilldown',
     description: 'Build a url path to the metrics drilldown',
     path: createAppUrl(ROUTES.Drilldown),
@@ -45,8 +55,9 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       if (typeof context === 'undefined') {
         return;
       }
-      
-      const { navigateToMetrics, datasource_uid, label_filters, metric, start, end } = (context as GrafanaAssistantMetricsDrilldownContext);
+
+      const { navigateToMetrics, datasource_uid, label_filters, metric, start, end } =
+        context as GrafanaAssistantMetricsDrilldownContext;
       // parse the labels to the PromQL format
       const parsedLabels = parseFiltersToLabelMatchers(label_filters);
       // create the PromURLObject for building params
@@ -72,14 +83,17 @@ export function configureDrilldownLink(context: object | undefined): { path: str
 
   const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
 
-  if (!queries?.length) {
+  if (!queries.length) {
     return;
   }
 
-  const { datasource, expr } = queries[0];
+  const { datasource, expr } = queries[0] as PromQuery;
 
-  if (!expr || datasource?.type !== 'prometheus') {
-    return;
+  // allow the user to navigate to the drilldown without a query (metrics reducer view)
+  if (!expr) {
+    return {
+      path: createAppUrl(ROUTES.Drilldown),
+    };
   }
 
   try {
@@ -98,13 +112,7 @@ export function configureDrilldownLink(context: object | undefined): { path: str
         ? (context.timeRange as { from: string; to: string })
         : undefined;
 
-    const promURLObject = createPromURLObject(
-      datasource.uid,
-      labels,
-      metric,
-      timeRange?.from,
-      timeRange?.to
-    );
+    const promURLObject = createPromURLObject(datasource?.uid, labels, metric, timeRange?.from, timeRange?.to);
 
     const params = buildNavigateToMetricsParams(promURLObject);
 
@@ -143,17 +151,17 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
       if (node.type.isError || node.name === '⚠') {
         hasErrors = true;
         const errorText = expr.slice(node.from, node.to);
-        const errorMsg = errorText 
+        const errorMsg = errorText
           ? `Parse error at position ${node.from}-${node.to}: "${errorText}"`
           : `Parse error at position ${node.from}`;
         errors.push(errorMsg);
       }
-      
+
       // Get the first metric name from any VectorSelector > Identifier
       if (!metric && node.name === 'Identifier' && node.node.parent?.type.name === 'VectorSelector') {
         metric = expr.slice(node.from, node.to);
       }
-      
+
       // Extract label matchers using helper function
       const labelData = processLabelMatcher(node, expr);
       if (labelData) {
@@ -175,7 +183,7 @@ function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null
   let labelName = '';
   let op = '';
   let value = '';
-  
+
   // Get children of UnquotedLabelMatcher
   for (let child = labelNode.firstChild; child; child = child.nextSibling) {
     if (child.type.name === 'LabelName') {
@@ -186,19 +194,23 @@ function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null
       value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
     }
   }
-  
-  if (labelName && op) { // Allow empty string values
+
+  if (labelName && op) {
+    // Allow empty string values
     return { label: labelName, op, value };
   }
   return null;
 }
 
 /**
- * Scenes adhoc variable filters requires a | delimiter 
+ * Scenes adhoc variable filters requires a | delimiter
  * between the label, operator, and value (see AdHocFiltersVariableUrlSyncHandler.ts in Scenes)
  */
 function filterToUrlParameter(filter: PromQLLabelMatcher): [UrlParameterType, string] {
-  return [UrlParameters.Filters, `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`] as [UrlParameterType, string];
+  return [
+    UrlParameters.Filters,
+    `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`,
+  ] as [UrlParameterType, string];
 }
 
 // Type for the metrics drilldown context from Grafana Assistant
@@ -239,7 +251,7 @@ export function buildNavigateToMetricsParams(promURLObject: PromURLObject): URLS
   const { metric, start, end, datasource_uid, label_filters } = promURLObject;
 
   const filters = label_filters ?? [];
-  
+
   // Use the structured context data to build parameters
   return appendUrlParameters([
     [UrlParameters.Metric, metric],
@@ -254,7 +266,7 @@ export function parseFiltersToLabelMatchers(label_filters?: string[]): PromQLLab
   if (!label_filters) {
     return [];
   }
-  
+
   return label_filters.map((filter) => {
     const matcher = parseMatcher(filter);
     return {
@@ -299,5 +311,6 @@ export function appendUrlParameters(
 type PromQuery = DataQuery & { expr: string };
 
 function isPromQuery(query: DataQuery): query is PromQuery {
-  return 'expr' in query;
+  const { datasource } = query;
+  return datasource?.type === 'prometheus';
 }
