@@ -173,7 +173,12 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
   private buildByFrameRepeater() {
     const { metric, label } = this.state;
-    const queryParams = getTimeseriesQueryRunnerParams(metric, [], label);
+    const queryParams = getTimeseriesQueryRunnerParams({
+      metric,
+      matchers: [],
+      groupBy: label,
+      queryResolution: GmdVizPanel.QUERY_RESOLUTION.MEDIUM,
+    });
     const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
     return new SceneByFrameRepeater({

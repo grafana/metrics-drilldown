@@ -8,9 +8,17 @@ import { trailDS } from 'shared';
 import { type GmdVizPanelState } from '../GmdVizPanel';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 
-type TimeseriesPanelOptions = Pick<
+export type TimeseriesPanelOptions = Pick<
   GmdVizPanelState,
-  'fixedColor' | 'groupBy' | 'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu'
+  | 'fixedColor'
+  | 'groupBy'
+  | 'title'
+  | 'description'
+  | 'metric'
+  | 'matchers'
+  | 'headerActions'
+  | 'menu'
+  | 'queryResolution'
 >;
 
 export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel {
@@ -18,8 +26,8 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     return buildGroupByPanel(options as Required<TimeseriesPanelOptions>);
   }
 
-  const { title, description, metric, matchers, fixedColor, headerActions, groupBy, menu } = options;
-  const queryParams = getTimeseriesQueryRunnerParams(metric, matchers, groupBy);
+  const { title, description, metric, matchers, fixedColor, headerActions, groupBy, menu, queryResolution } = options;
+  const queryParams = getTimeseriesQueryRunnerParams({ metric, matchers, groupBy, queryResolution });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const $data = new SceneQueryRunner({
@@ -35,8 +43,8 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
     .setShowMenuAlways(Boolean(menu))
     .setData($data)
-    .setOption('legend', { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setUnit(unit)
+    .setOption('legend', { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setColor(fixedColor ? { mode: 'fixed', fixedColor } : undefined)
     .setCustomFieldConfig('fillOpacity', 9)
     .setDisplayName(queryParams.fnName)
@@ -44,8 +52,8 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
 }
 
 function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel {
-  const { title, description, metric, matchers, fixedColor, headerActions, menu, groupBy } = options;
-  const queryParams = getTimeseriesQueryRunnerParams(metric, matchers, groupBy);
+  const { title, description, metric, matchers, fixedColor, headerActions, menu, groupBy, queryResolution } = options;
+  const queryParams = getTimeseriesQueryRunnerParams({ metric, matchers, groupBy, queryResolution });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const $data = new SceneDataTransformer({

@@ -35,6 +35,11 @@ enum PANEL_HEIGHT {
   XL = 'XL',
 }
 
+enum QUERY_RESOLUTION {
+  HIGH = 'HIGH',
+  MEDIUM = 'MEDIUM',
+}
+
 type HeaderActionsOptions = {
   metric: string;
 };
@@ -50,6 +55,7 @@ export interface GmdVizPanelState extends SceneObjectState {
   matchers: LabelMatcher[];
   heightInPixels: string;
   headerActions: (headerActionsOptions: HeaderActionsOptions) => VizPanelState['headerActions'];
+  queryResolution: QUERY_RESOLUTION;
   menu?: VizPanelState['menu'];
   panelType?: PANEL_TYPE;
   fixedColor?: string;
@@ -66,6 +72,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   public static readonly DEFAULT_HEADER_ACTIONS_BUILDER: GmdVizPanelState['headerActions'] = ({ metric }) => [
     new SelectAction({ metricName: metric }),
   ];
+  public static readonly QUERY_RESOLUTION = QUERY_RESOLUTION;
 
   constructor({
     metric,
@@ -78,6 +85,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     title,
     groupBy,
     description,
+    queryResolution,
   }: {
     metric: GmdVizPanelState['metric'];
     matchers?: GmdVizPanelState['matchers'];
@@ -89,6 +97,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     title?: GmdVizPanelState['title'];
     groupBy?: GmdVizPanelState['groupBy'];
     description?: GmdVizPanelState['description'];
+    queryResolution?: QUERY_RESOLUTION;
   }) {
     super({
       metric,
@@ -101,6 +110,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       title: title || metric,
       groupBy,
       description,
+      queryResolution: queryResolution || QUERY_RESOLUTION.MEDIUM,
       isNativeHistogram: undefined,
       body: undefined,
       variants: [],
@@ -190,11 +200,12 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       description,
       metric,
       matchers,
-      fixedColor,
-      isNativeHistogram,
       headerActions,
       menu,
+      queryResolution,
+      fixedColor,
       groupBy,
+      isNativeHistogram,
     } = this.state;
 
     switch (panelType) {
@@ -207,6 +218,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
             matchers,
             headerActions,
             menu,
+            queryResolution,
             // custom
             fixedColor,
             groupBy,
@@ -223,6 +235,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
             matchers,
             headerActions,
             menu,
+            queryResolution,
             // custom
             isNativeHistogram,
           }),
@@ -238,6 +251,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
             matchers,
             headerActions,
             menu,
+            queryResolution,
             // custom
             isNativeHistogram,
           }),
@@ -246,7 +260,15 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
       case PANEL_TYPE.STATUSHISTORY:
         this.setState({
-          body: buildStatushistoryPanel({ title, description, metric, matchers, headerActions, menu }),
+          body: buildStatushistoryPanel({
+            title,
+            description,
+            metric,
+            matchers,
+            headerActions,
+            menu,
+            queryResolution,
+          }),
         });
         return;
 

@@ -1,7 +1,12 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString, type LabelMatcher } from '../buildQueryExpression';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+
+import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
+import { type HeatmapPanelOptions } from './buildHeatmapPanel';
+
+type HeatmapQueryOptions = Pick<HeatmapPanelOptions, 'metric' | 'matchers' | 'isNativeHistogram' | 'queryResolution'>;
 
 type HeatmapQueryParams = {
   fnName: string;
@@ -9,11 +14,8 @@ type HeatmapQueryParams = {
   queries: SceneDataQuery[];
 };
 
-export function getHeatmapQueryRunnerParams(
-  metric: string,
-  matchers: LabelMatcher[],
-  isNativeHistogram: boolean
-): HeatmapQueryParams {
+export function getHeatmapQueryRunnerParams(options: HeatmapQueryOptions): HeatmapQueryParams {
+  const { metric, matchers, isNativeHistogram, queryResolution } = options;
   const expression = buildQueryExpression(metric, matchers);
   let expr = expressionToString(expression);
 
@@ -31,7 +33,7 @@ export function getHeatmapQueryRunnerParams(
 
   return {
     fnName,
-    maxDataPoints: 250,
+    maxDataPoints: queryResolution === GmdVizPanel.QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries: [
       {
         refId: metric,

@@ -75,6 +75,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             height: GmdVizPanel.PANEL_HEIGHT.XL,
             headerActions: () => [],
             menu: new PanelMenu({ labelName: metric }),
+            queryResolution: GmdVizPanel.QUERY_RESOLUTION.HIGH,
           }),
         }),
         new SceneFlexItem({

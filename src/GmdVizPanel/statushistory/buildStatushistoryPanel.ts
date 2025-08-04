@@ -23,14 +23,14 @@ const mappings: ValueMapping[] = [
   },
 ];
 
-type StatusHistoryPanelOptions = Pick<
+export type StatushistoryPanelOptions = Pick<
   GmdVizPanelState,
-  'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu'
+  'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu' | 'queryResolution'
 >;
 
-export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): VizPanel {
-  const { title, description, metric, matchers, headerActions, menu } = options;
-  const queryParams = getStatushistoryQueryRunnerParams(metric, matchers);
+export function buildStatushistoryPanel(options: StatushistoryPanelOptions): VizPanel {
+  const { title, description, metric, matchers, headerActions, menu, queryResolution } = options;
+  const queryParams = getStatushistoryQueryRunnerParams({ metric, matchers, queryResolution });
   const unit = 'none';
 
   const queryRunner = new SceneQueryRunner({

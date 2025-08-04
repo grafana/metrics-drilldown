@@ -1,7 +1,15 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString, type LabelMatcher } from 'GmdVizPanel/buildQueryExpression';
+import { buildQueryExpression, expressionToString } from 'GmdVizPanel/buildQueryExpression';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+
+import { type PercentilesPanelOptions } from './buildPercentilesPanel';
+
+type PercentilesQueryOptions = Pick<
+  PercentilesPanelOptions,
+  'metric' | 'matchers' | 'isNativeHistogram' | 'queryResolution'
+>;
 
 type PercentilesQueryParams = {
   fnName: string;
@@ -10,11 +18,8 @@ type PercentilesQueryParams = {
   queries: SceneDataQuery[];
 };
 
-export function getPercentilesQueryRunnerParams(
-  metric: string,
-  matchers: LabelMatcher[],
-  isNativeHistogram: boolean
-): PercentilesQueryParams {
+export function getPercentilesQueryRunnerParams(options: PercentilesQueryOptions): PercentilesQueryParams {
+  const { metric, matchers, isNativeHistogram, queryResolution } = options;
   const expression = buildQueryExpression(metric, matchers);
   let expr = expressionToString(expression);
 
@@ -41,7 +46,7 @@ export function getPercentilesQueryRunnerParams(
   return {
     fnName: isNativeHistogram ? 'histogram_quantile(rate)' : 'histogram_quantile(sum by (le) (rate))',
     isRateQuery: true,
-    maxDataPoints: 250,
+    maxDataPoints: queryResolution === GmdVizPanel.QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries,
   };
 }

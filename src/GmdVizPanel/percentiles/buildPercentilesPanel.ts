@@ -1,5 +1,5 @@
 import { PanelBuilders, SceneQueryRunner } from '@grafana/scenes';
-import { type LegendPlacement } from '@grafana/schema';
+import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { type GmdVizPanelState } from 'GmdVizPanel/GmdVizPanel';
@@ -7,14 +7,19 @@ import { trailDS } from 'shared';
 
 import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
 
-type PercentilesPanelOptions = Pick<
+export type PercentilesPanelOptions = Pick<
   GmdVizPanelState,
-  'isNativeHistogram' | 'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu'
+  'isNativeHistogram' | 'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu' | 'queryResolution'
 >;
 
 export function buildPercentilesPanel(options: PercentilesPanelOptions) {
-  const { title, description, metric, matchers, headerActions, menu, isNativeHistogram } = options;
-  const queryParams = getPercentilesQueryRunnerParams(metric, matchers, Boolean(isNativeHistogram));
+  const { title, description, metric, matchers, headerActions, menu, isNativeHistogram, queryResolution } = options;
+  const queryParams = getPercentilesQueryRunnerParams({
+    metric,
+    matchers,
+    isNativeHistogram: Boolean(isNativeHistogram),
+    queryResolution,
+  });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const $data = new SceneQueryRunner({
@@ -30,8 +35,9 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
     .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
     .setShowMenuAlways(Boolean(menu))
     .setData($data)
-    .setOption('legend', { showLegend: true, placement: 'right' as LegendPlacement })
     .setUnit(unit)
+    .setOption('legend', { showLegend: true, placement: 'right' as LegendPlacement })
+    .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
     .setCustomFieldConfig('fillOpacity', 9)
     .build();
 }

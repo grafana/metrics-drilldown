@@ -1,8 +1,13 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString, type LabelMatcher } from '../buildQueryExpression';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+
+import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
+import { type TimeseriesPanelOptions } from './buildTimeseriesPanel';
 import { isRateQuery as isRateQueryFn } from './isRateQuery';
+
+type TimeseriesQueryOptions = Pick<TimeseriesPanelOptions, 'metric' | 'matchers' | 'groupBy' | 'queryResolution'>;
 
 type TimeseriesQueryParams = {
   fnName: string;
@@ -11,11 +16,8 @@ type TimeseriesQueryParams = {
   queries: SceneDataQuery[];
 };
 
-export function getTimeseriesQueryRunnerParams(
-  metric: string,
-  matchers: LabelMatcher[],
-  groupBy?: string
-): TimeseriesQueryParams {
+export function getTimeseriesQueryRunnerParams(options: TimeseriesQueryOptions): TimeseriesQueryParams {
+  const { metric, matchers, groupBy, queryResolution } = options;
   const expression = buildQueryExpression(metric, matchers);
   let expr = expressionToString(expression);
 
@@ -35,7 +37,7 @@ export function getTimeseriesQueryRunnerParams(
   return {
     fnName,
     isRateQuery,
-    maxDataPoints: 250,
+    maxDataPoints: queryResolution === GmdVizPanel.QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries: [
       {
         refId: groupBy ? `${metric}-by-${groupBy}` : metric,
