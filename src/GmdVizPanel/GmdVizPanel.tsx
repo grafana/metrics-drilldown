@@ -46,11 +46,6 @@ type HeaderActionsOptions = {
   panelType: PANEL_TYPE;
 };
 
-type Variant = {
-  panelType: PANEL_TYPE;
-  params: Record<string, any>;
-};
-
 export interface GmdVizPanelState extends SceneObjectState {
   metric: string;
   title: string;
@@ -65,7 +60,6 @@ export interface GmdVizPanelState extends SceneObjectState {
   groupBy?: string;
   description?: string;
   body?: VizPanel;
-  variants: Variant[];
 }
 
 const DEFAULT_HEADER_ACTIONS_BUILDER: GmdVizPanelState['headerActions'] = ({ metric }) => [
@@ -112,7 +106,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       queryResolution: queryResolution || QUERY_RESOLUTION.MEDIUM,
       isNativeHistogram: undefined,
       body: undefined,
-      variants: [],
     });
 
     this.addActivationHandler(() => {
