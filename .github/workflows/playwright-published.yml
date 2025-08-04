@@ -81,6 +81,7 @@ jobs:
       report-path: e2e/test-reports/
       grafana-compose-file: docker-compose.yaml
       grafana-url: http://localhost:3001
+      skip-grafana-dev-image: true
     permissions:
       contents: read
       id-token: write
