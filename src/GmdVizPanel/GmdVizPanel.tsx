@@ -14,6 +14,7 @@ import { getTrailFor } from 'utils';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
 import { type LabelMatcher } from './buildQueryExpression';
+import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { isHistogramMetric } from './heatmap/isHistogramMetric';
 import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
@@ -21,27 +22,28 @@ import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel
 import { isUpDownMetric } from './statushistory/isUpDownMetric';
 import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
 
-enum PANEL_TYPE {
+export enum PANEL_TYPE {
   TIMESERIES = 'TIMESERIES',
   HEATMAP = 'HEATMAP',
   STATUSHISTORY = 'STATUSHISTORY',
   PERCENTILES = 'PERCENTILES',
 }
 
-enum PANEL_HEIGHT {
+export enum PANEL_HEIGHT {
   S = 'S',
   M = 'M',
   L = 'L',
   XL = 'XL',
 }
 
-enum QUERY_RESOLUTION {
+export enum QUERY_RESOLUTION {
   HIGH = 'HIGH',
   MEDIUM = 'MEDIUM',
 }
 
 type HeaderActionsOptions = {
   metric: string;
+  panelType: PANEL_TYPE;
 };
 
 type Variant = {
@@ -66,14 +68,11 @@ export interface GmdVizPanelState extends SceneObjectState {
   variants: Variant[];
 }
 
-export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
-  public static readonly PANEL_TYPE = PANEL_TYPE;
-  public static readonly PANEL_HEIGHT = PANEL_HEIGHT;
-  public static readonly DEFAULT_HEADER_ACTIONS_BUILDER: GmdVizPanelState['headerActions'] = ({ metric }) => [
-    new SelectAction({ metricName: metric }),
-  ];
-  public static readonly QUERY_RESOLUTION = QUERY_RESOLUTION;
+const DEFAULT_HEADER_ACTIONS_BUILDER: GmdVizPanelState['headerActions'] = ({ metric }) => [
+  new SelectAction({ metricName: metric }),
+];
 
+export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   constructor({
     metric,
     matchers,
@@ -103,7 +102,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       metric,
       matchers: matchers || [],
       heightInPixels: `${GmdVizPanel.getPanelHeightInPixels(height || PANEL_HEIGHT.M)}px`,
-      headerActions: headerActions || GmdVizPanel.DEFAULT_HEADER_ACTIONS_BUILDER,
+      headerActions: headerActions || DEFAULT_HEADER_ACTIONS_BUILDER,
       menu,
       panelType,
       fixedColor,
@@ -125,6 +124,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     const { metric, panelType } = this.state;
 
     this.subscribeToStateChanges();
+    this.subscribeToEvents();
 
     // isNativeHistogram() depends on an async process to load metrics metadata, so it's possibile that
     // when landing on the page, the metadata is not yet loaded and the histogram metrics are not be rendered as heatmap panels.
@@ -190,6 +190,13 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       if (newState.isNativeHistogram !== prevState.isNativeHistogram || newState.panelType !== prevState.panelType) {
         this.updateBody();
       }
+    });
+  }
+
+  private subscribeToEvents() {
+    this.subscribeToEvent(EventPanelTypeChanged, (event) => {
+      // the sub in subscribeToStateChanges() above will handle updating the body
+      this.setState({ panelType: event.payload.panelType });
     });
   }
 

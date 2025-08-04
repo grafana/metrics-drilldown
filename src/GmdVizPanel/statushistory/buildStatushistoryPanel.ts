@@ -4,7 +4,7 @@ import { MappingType, VisibilityMode } from '@grafana/schema';
 
 import { trailDS } from 'shared';
 
-import { type GmdVizPanelState } from '../GmdVizPanel';
+import { PANEL_TYPE, type GmdVizPanelState } from '../GmdVizPanel';
 import { getStatushistoryQueryRunnerParams } from './getStatushistoryQueryRunnerParams';
 
 const mappings: ValueMapping[] = [
@@ -43,7 +43,7 @@ export function buildStatushistoryPanel(options: StatushistoryPanelOptions): Viz
     PanelBuilders.statushistory()
       .setTitle(title)
       .setDescription(description)
-      .setHeaderActions(headerActions({ metric }))
+      .setHeaderActions(headerActions({ metric, panelType: PANEL_TYPE.STATUSHISTORY }))
       .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
       .setShowMenuAlways(Boolean(menu))
       .setData(queryRunner)

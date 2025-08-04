@@ -14,7 +14,8 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { GmdVizPanel, PANEL_HEIGHT, QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
+import { GmdVizPanelVariantSelector } from 'GmdVizPanel/GmdVizPanelVariantSelector';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
@@ -23,7 +24,7 @@ import { type DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 
-const MAIN_PANEL_MIN_HEIGHT = GmdVizPanel.getPanelHeightInPixels(GmdVizPanel.PANEL_HEIGHT.XL);
+const MAIN_PANEL_MIN_HEIGHT = GmdVizPanel.getPanelHeightInPixels(PANEL_HEIGHT.XL);
 const MAIN_PANEL_MAX_HEIGHT = '40%';
 export const TOPVIEW_KEY = 'topview';
 
@@ -72,10 +73,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           body: new GmdVizPanel({
             metric,
             description,
-            height: GmdVizPanel.PANEL_HEIGHT.XL,
-            headerActions: () => [],
+            height: PANEL_HEIGHT.XL,
+            headerActions: ({ panelType }) => [new GmdVizPanelVariantSelector({ metric, panelType })],
             menu: new PanelMenu({ labelName: metric }),
-            queryResolution: GmdVizPanel.QUERY_RESOLUTION.HIGH,
+            queryResolution: QUERY_RESOLUTION.HIGH,
           }),
         }),
         new SceneFlexItem({

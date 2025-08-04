@@ -23,7 +23,7 @@ import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { GmdVizPanel, PANEL_HEIGHT, PANEL_TYPE, QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
 import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/timeseries/getTimeseriesQueryRunnerParams';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { trailDS } from 'shared';
@@ -164,8 +164,8 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
     return new GmdVizPanel({
       metric,
-      panelType: GmdVizPanel.PANEL_TYPE.TIMESERIES,
-      height: GmdVizPanel.PANEL_HEIGHT.XL,
+      panelType: PANEL_TYPE.TIMESERIES,
+      height: PANEL_HEIGHT.XL,
       headerActions: () => [],
       groupBy: label,
     });
@@ -177,7 +177,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       metric,
       matchers: [],
       groupBy: label,
-      queryResolution: GmdVizPanel.QUERY_RESOLUTION.MEDIUM,
+      queryResolution: QUERY_RESOLUTION.MEDIUM,
     });
     const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 

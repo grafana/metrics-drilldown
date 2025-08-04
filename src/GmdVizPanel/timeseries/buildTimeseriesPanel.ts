@@ -5,7 +5,7 @@ import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
 import { trailDS } from 'shared';
 
-import { type GmdVizPanelState } from '../GmdVizPanel';
+import { PANEL_TYPE, type GmdVizPanelState } from '../GmdVizPanel';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 
 export type TimeseriesPanelOptions = Pick<
@@ -39,7 +39,7 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   return PanelBuilders.timeseries()
     .setTitle(title)
     .setDescription(description)
-    .setHeaderActions(headerActions({ metric }))
+    .setHeaderActions(headerActions({ metric, panelType: PANEL_TYPE.TIMESERIES }))
     .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
     .setShowMenuAlways(Boolean(menu))
     .setData($data)
@@ -68,7 +68,7 @@ function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel 
   return PanelBuilders.timeseries()
     .setTitle(title)
     .setDescription(description)
-    .setHeaderActions(headerActions({ metric }))
+    .setHeaderActions(headerActions({ metric, panelType: PANEL_TYPE.TIMESERIES }))
     .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
     .setShowMenuAlways(Boolean(menu))
     .setData($data)

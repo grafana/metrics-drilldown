@@ -1,7 +1,7 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
 
 import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
 import { type StatushistoryPanelOptions } from './buildStatushistoryPanel';
@@ -21,7 +21,7 @@ export function getStatushistoryQueryRunnerParams(options: StatushistoryQueryOpt
 
   return {
     fnName: 'min',
-    maxDataPoints: queryResolution === GmdVizPanel.QUERY_RESOLUTION.HIGH ? 200 : 100,
+    maxDataPoints: queryResolution === QUERY_RESOLUTION.HIGH ? 200 : 100,
     queries: [
       {
         refId: metric,

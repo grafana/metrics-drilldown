@@ -2,7 +2,7 @@ import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
 import { buildQueryExpression, expressionToString } from 'GmdVizPanel/buildQueryExpression';
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
 
 import { type PercentilesPanelOptions } from './buildPercentilesPanel';
 
@@ -46,7 +46,7 @@ export function getPercentilesQueryRunnerParams(options: PercentilesQueryOptions
   return {
     fnName: isNativeHistogram ? 'histogram_quantile(rate)' : 'histogram_quantile(sum by (le) (rate))',
     isRateQuery: true,
-    maxDataPoints: queryResolution === GmdVizPanel.QUERY_RESOLUTION.HIGH ? 500 : 250,
+    maxDataPoints: queryResolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries,
   };
 }

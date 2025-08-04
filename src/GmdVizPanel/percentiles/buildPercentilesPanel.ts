@@ -2,7 +2,7 @@ import { PanelBuilders, SceneQueryRunner } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
-import { type GmdVizPanelState } from 'GmdVizPanel/GmdVizPanel';
+import { PANEL_TYPE, type GmdVizPanelState } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
 
 import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
@@ -31,7 +31,7 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
   return PanelBuilders.timeseries()
     .setTitle(title)
     .setDescription(description)
-    .setHeaderActions(headerActions({ metric }))
+    .setHeaderActions(headerActions({ metric, panelType: PANEL_TYPE.PERCENTILES }))
     .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
     .setShowMenuAlways(Boolean(menu))
     .setData($data)
