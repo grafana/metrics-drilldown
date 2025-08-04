@@ -4,6 +4,7 @@ import {
   getExploreURL,
   sceneGraph,
   SceneObjectBase,
+  SceneQueryRunner,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
@@ -11,17 +12,17 @@ import {
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { AutoVizPanel } from 'autoQuery/components/AutoVizPanel';
 import { UI_TEXT } from 'constants/ui';
 import { createAppUrl } from 'extensions/links';
 import { reportExploreMetrics } from 'interactions';
-import { METRIC_AUTOVIZPANEL_KEY } from 'MetricGraphScene';
+import { TOPVIEW_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
 import { MetricSelectedEvent } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
+import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 
@@ -64,17 +65,16 @@ interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
   public getLinkToExplore = async () => {
-    const metricScene = sceneGraph.getAncestor(this, MetricScene);
-    const autoVizPanel = sceneGraph.findByKeyAndType(this, METRIC_AUTOVIZPANEL_KEY, AutoVizPanel);
-    const panelData =
-      typeof autoVizPanel.state.panel !== 'undefined'
-        ? sceneGraph.getData(autoVizPanel.state.panel).state.data
-        : undefined;
+    const topView = sceneGraph.findByKey(this, TOPVIEW_KEY);
+    const queryRunner = sceneGraph.findDescendents(topView, SceneQueryRunner)[0];
+    const panelData = queryRunner.state.data;
 
     if (!panelData) {
-      throw new Error('Cannot get link to explore, no panel data found');
+      displayWarning(['Cannot get link to Explore: no panel data found!']);
+      return;
     }
 
+    const metricScene = sceneGraph.getAncestor(this, MetricScene);
     return getExploreURL(panelData, metricScene, panelData.timeRange);
   };
 

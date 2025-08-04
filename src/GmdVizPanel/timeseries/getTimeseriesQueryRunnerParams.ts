@@ -1,4 +1,5 @@
-import { promql, type Expression } from 'tsqtsq';
+import { type SceneDataQuery } from '@grafana/scenes';
+import { promql } from 'tsqtsq';
 
 import { buildQueryExpression, expressionToString, type LabelMatcher } from '../buildQueryExpression';
 import { isRateQuery as isRateQueryFn } from './isRateQuery';
@@ -6,9 +7,8 @@ import { isRateQuery as isRateQueryFn } from './isRateQuery';
 type TimeseriesQueryParams = {
   fnName: string;
   isRateQuery: boolean;
-  expression: Expression;
-  query: string;
   maxDataPoints: number;
+  queries: SceneDataQuery[];
 };
 
 export function getTimeseriesQueryRunnerParams(
@@ -35,8 +35,14 @@ export function getTimeseriesQueryRunnerParams(
   return {
     fnName,
     isRateQuery,
-    expression,
-    query,
     maxDataPoints: 250,
+    queries: [
+      {
+        refId: groupBy ? `${metric}-by-${groupBy}` : metric,
+        expr: query,
+        legendFormat: groupBy ? `{{${groupBy}}}` : undefined,
+        fromExploreMetrics: true,
+      },
+    ],
   };
 }

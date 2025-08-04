@@ -32,6 +32,7 @@ export function buildQueryExpression(metric: string, matchers: LabelMatcher[] = 
   }
 
   // hack for Scenes to interpolate the VAR_FILTERS variable
+  // added last so that, if filters are empty, the query is still valid
   defaultSelectors.push({ label: VAR_FILTERS_EXPR, operator: MatchingOperator.equal, value: '__REMOVE__' });
 
   return new Expression({

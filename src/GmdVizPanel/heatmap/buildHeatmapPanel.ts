@@ -9,31 +9,26 @@ import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 
 type HeatmapPanelOptions = Pick<
   GmdVizPanelState,
-  'title' | 'metric' | 'matchers' | 'isNativeHistogram' | 'headerActions'
+  'isNativeHistogram' | 'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu'
 >;
 
 export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
-  const { title, metric, matchers, isNativeHistogram, headerActions } = options;
+  const { title, description, metric, matchers, isNativeHistogram, headerActions, menu } = options;
   const queryParams = getHeatmapQueryRunnerParams(metric, matchers, Boolean(isNativeHistogram));
   const unit = getUnit(metric);
 
   const queryRunner = new SceneQueryRunner({
     datasource: trailDS,
     maxDataPoints: queryParams.maxDataPoints,
-    queries: [
-      {
-        refId: metric,
-        expr: queryParams.query,
-        format: queryParams.format,
-        fromExploreMetrics: true,
-      },
-    ],
+    queries: queryParams.queries,
   });
 
   return PanelBuilders.heatmap()
     .setTitle(title)
-    .setDescription(isNativeHistogram ? 'Native Histogram' : '')
+    .setDescription(isNativeHistogram ? 'Native Histogram' : description)
     .setHeaderActions(headerActions({ metric }))
+    .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setShowMenuAlways(Boolean(menu))
     .setData(queryRunner)
     .setUnit(unit)
     .setOption('calculate', false)

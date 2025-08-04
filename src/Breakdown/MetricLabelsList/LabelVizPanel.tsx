@@ -15,6 +15,7 @@ import { merge } from 'lodash';
 import React from 'react';
 
 import { SelectLabelAction } from 'Breakdown/MetricLabelsList/SelectLabelAction';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -34,7 +35,7 @@ interface LabelVizPanelState extends SceneObjectState {
 }
 
 const MAX_SERIES_TO_RENDER = 20;
-export const LABELS_VIZ_PANEL_HEIGHT = '220px';
+export const LABELS_VIZ_PANEL_HEIGHT = `${GmdVizPanel.getPanelHeightInPixels(GmdVizPanel.PANEL_HEIGHT.M)}px`;
 
 export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
   constructor({

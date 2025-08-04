@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
@@ -6,6 +6,7 @@ import {
   SceneFlexItem,
   SceneFlexLayout,
   SceneObjectBase,
+  SceneReactObject,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
@@ -13,27 +14,74 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
+import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
 
-import { AutoVizPanel } from './autoQuery/components/AutoVizPanel';
 import { type DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 
-export const MAIN_PANEL_MIN_HEIGHT = 280;
-export const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const METRIC_AUTOVIZPANEL_KEY = 'metric-graph';
+const MAIN_PANEL_MIN_HEIGHT = GmdVizPanel.getPanelHeightInPixels(GmdVizPanel.PANEL_HEIGHT.XL);
+const MAIN_PANEL_MAX_HEIGHT = '40%';
+export const TOPVIEW_KEY = 'topview';
 
 export interface MetricGraphSceneState extends SceneObjectState {
+  metric: string;
   topView: SceneFlexLayout;
   selectedTab?: SceneObject;
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
-  public constructor(state: Partial<MetricGraphSceneState>) {
+  public constructor(state: { metric: MetricGraphSceneState['metric'] }) {
     super({
-      topView: state.topView ?? buildGraphTopView(),
-      ...state,
+      metric: state.metric,
+      topView: new SceneFlexLayout({
+        direction: 'column',
+        $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
+        children: [
+          // prevent height flicker when landing
+          new SceneFlexItem({
+            minHeight: MAIN_PANEL_MIN_HEIGHT,
+            maxHeight: MAIN_PANEL_MAX_HEIGHT,
+            body: new SceneReactObject({ reactNode: <div /> }),
+          }),
+        ],
+      }),
+      selectedTab: undefined,
+    });
+
+    this.addActivationHandler(() => {
+      this.onActivate();
+    });
+  }
+
+  private async onActivate() {
+    const { metric, topView } = this.state;
+    const trail = getTrailFor(this);
+    const metadata = await trail.getMetricMetadata(metric);
+    const description = getMetricDescription(metadata);
+
+    topView.setState({
+      children: [
+        new SceneFlexItem({
+          key: TOPVIEW_KEY,
+          minHeight: MAIN_PANEL_MIN_HEIGHT,
+          maxHeight: MAIN_PANEL_MAX_HEIGHT,
+          body: new GmdVizPanel({
+            metric,
+            description,
+            height: GmdVizPanel.PANEL_HEIGHT.XL,
+            headerActions: () => [],
+            menu: new PanelMenu({ labelName: metric }),
+          }),
+        }),
+        new SceneFlexItem({
+          ySizing: 'content',
+          body: new MetricActionBar({}),
+        }),
+      ],
     });
   }
 
@@ -46,7 +94,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
     return (
       <div className={styles.container}>
-        <div className={stickyMainGraph ? styles.sticky : styles.nonSticky} data-testid="top-view">
+        <div
+          className={stickyMainGraph ? cx(styles.topView, styles.sticky) : cx(styles.topView, styles.nonSticky)}
+          data-testid="top-view"
+        >
           <topView.Component model={topView} />
         </div>
         {selectedTab && (
@@ -67,6 +118,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       position: 'relative',
       flexGrow: 1,
     }),
+    topView: css({}),
     sticky: css({
       display: 'flex',
       flexDirection: 'row',
@@ -84,22 +136,4 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'row',
     }),
   };
-}
-
-function buildGraphTopView() {
-  return new SceneFlexLayout({
-    direction: 'column',
-    $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
-    children: [
-      new SceneFlexItem({
-        minHeight: MAIN_PANEL_MIN_HEIGHT,
-        maxHeight: MAIN_PANEL_MAX_HEIGHT,
-        body: new AutoVizPanel({ key: METRIC_AUTOVIZPANEL_KEY }),
-      }),
-      new SceneFlexItem({
-        ySizing: 'content',
-        body: new MetricActionBar({}),
-      }),
-    ],
-  });
 }

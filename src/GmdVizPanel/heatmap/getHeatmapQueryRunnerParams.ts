@@ -1,13 +1,12 @@
-import { promql, type Expression } from 'tsqtsq';
+import { type SceneDataQuery } from '@grafana/scenes';
+import { promql } from 'tsqtsq';
 
 import { buildQueryExpression, expressionToString, type LabelMatcher } from '../buildQueryExpression';
 
 type HeatmapQueryParams = {
   fnName: string;
-  expression: Expression;
-  query: string;
   maxDataPoints: number;
-  format: string;
+  queries: SceneDataQuery[];
 };
 
 export function getHeatmapQueryRunnerParams(
@@ -32,9 +31,14 @@ export function getHeatmapQueryRunnerParams(
 
   return {
     fnName,
-    expression,
-    query,
     maxDataPoints: 250,
-    format: 'heatmap',
+    queries: [
+      {
+        refId: metric,
+        expr: query,
+        format: 'heatmap',
+        fromExploreMetrics: true,
+      },
+    ],
   };
 }

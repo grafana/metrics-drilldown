@@ -23,29 +23,29 @@ const mappings: ValueMapping[] = [
   },
 ];
 
-type StatusHistoryPanelOptions = Pick<GmdVizPanelState, 'title' | 'metric' | 'matchers' | 'headerActions'>;
+type StatusHistoryPanelOptions = Pick<
+  GmdVizPanelState,
+  'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu'
+>;
 
 export function buildStatushistoryPanel(options: StatusHistoryPanelOptions): VizPanel {
-  const { title, metric, matchers, headerActions } = options;
+  const { title, description, metric, matchers, headerActions, menu } = options;
   const queryParams = getStatushistoryQueryRunnerParams(metric, matchers);
   const unit = 'none';
 
   const queryRunner = new SceneQueryRunner({
     datasource: trailDS,
     maxDataPoints: queryParams.maxDataPoints,
-    queries: [
-      {
-        refId: metric,
-        expr: queryParams.query,
-        fromExploreMetrics: true,
-      },
-    ],
+    queries: queryParams.queries,
   });
 
   return (
     PanelBuilders.statushistory()
       .setTitle(title)
+      .setDescription(description)
       .setHeaderActions(headerActions({ metric }))
+      .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
+      .setShowMenuAlways(Boolean(menu))
       .setData(queryRunner)
       .setUnit(unit)
       // Use value mappings for both color and text display

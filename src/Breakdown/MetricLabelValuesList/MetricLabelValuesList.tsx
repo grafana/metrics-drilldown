@@ -181,14 +181,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         $data: new SceneQueryRunner({
           datasource: trailDS,
           maxDataPoints: queryParams.maxDataPoints,
-          queries: [
-            {
-              refId: `${metric}-by-${label}`,
-              expr: queryParams.query,
-              legendFormat: `{{${label}}}`,
-              fromExploreMetrics: true,
-            },
-          ],
+          queries: queryParams.queries,
         }),
         transformations: [addUnspecifiedLabel(label)],
       }),

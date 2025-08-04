@@ -1,12 +1,12 @@
-import { promql, type Expression } from 'tsqtsq';
+import { type SceneDataQuery } from '@grafana/scenes';
+import { promql } from 'tsqtsq';
 
 import { buildQueryExpression, expressionToString, type LabelMatcher } from '../buildQueryExpression';
 
 type StatushistoryQueryParams = {
   fnName: string;
-  expression: Expression;
-  query: string;
   maxDataPoints: number;
+  queries: SceneDataQuery[];
 };
 
 export function getStatushistoryQueryRunnerParams(metric: string, matchers: LabelMatcher[]): StatushistoryQueryParams {
@@ -15,8 +15,13 @@ export function getStatushistoryQueryRunnerParams(metric: string, matchers: Labe
 
   return {
     fnName: 'min',
-    expression,
-    query,
     maxDataPoints: 100,
+    queries: [
+      {
+        refId: metric,
+        expr: query,
+        fromExploreMetrics: true,
+      },
+    ],
   };
 }
