@@ -34,27 +34,43 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
     return;
   }
 
+  // Prevent double-unsubscribing, by tracking if the subscription has been unsubscribed already.
+  // Without this, double-unsubscribing can happen due to the query runner being cloned and updated in `removeExtremeValues`.
+  let isUnsubscribed = false;
+
   // When the query runner's state changes, check if the data is all NaN.
   // If it is, remove the extreme values from the query.
   const queryRunnerSub = queryRunner.subscribeToState((state) => {
+    // Don't process if already unsubscribed
+    if (isUnsubscribed) {
+      return;
+    }
+
     if (state.data?.state === LoadingState.Done && state.data?.series) {
       const { series } = state.data;
 
-      if (series.length === 0) {
+      if (series.length === 0 || !isAllDataNaN(series)) {
         return;
       }
 
-      if (isAllDataNaN(series)) {
-        reportExploreMetrics('extreme_value_filter_behavior_triggered', {
-          expression: sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr),
-        });
-        removeExtremeValues(queryRunner, panel);
+      reportExploreMetrics('extreme_value_filter_behavior_triggered', {
+        expression: sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr),
+      });
+      const extremeValueRemoval = removeExtremeValues(queryRunner, panel);
+
+      if (!extremeValueRemoval.success) {
+        logger.warn('ExtremeValueFilterBehavior: Failed to remove extreme values:', extremeValueRemoval.issue);
       }
     }
   });
 
   // Return cleanup function
-  return () => queryRunnerSub.unsubscribe();
+  return () => {
+    if (!isUnsubscribed && queryRunnerSub) {
+      isUnsubscribed = true;
+      queryRunnerSub.unsubscribe();
+    }
+  };
 }
 
 /**
@@ -88,22 +104,25 @@ function isDataFrameAllNaN(frame: DataFrame): boolean {
   return valuesField.entities.NaN.length === frame.length;
 }
 
+interface RemoveExtremeValuesMeta {
+  success: boolean;
+  issue?: string;
+}
+
 /**
  * Re-run the query with extreme value filtering enabled
  */
-function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel) {
+function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel): RemoveExtremeValuesMeta {
   const queries = queryRunner.state.queries;
   if (!queries || queries.length === 0) {
-    logger.warn('ExtremeValueFilterBehavior: No queries found in query runner');
-    return;
+    return { success: false, issue: 'No queries found in query runner' };
   }
 
   // Parse the original query to extract the metric, filters, groupings, etc.
   const queryParts = parseQueryForRebuild(queries[0].expr, queryRunner);
 
   if (!queryParts) {
-    logger.warn('ExtremeValueFilterBehavior: Could not parse query for rebuilding');
-    return;
+    return { success: false, issue: 'Could not parse query for rebuilding' };
   }
 
   // Rebuild the query with extreme value filtering
@@ -128,6 +147,8 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel) {
   });
 
   newQueryRunner.runQueries();
+
+  return { success: true };
 }
 
 /**
