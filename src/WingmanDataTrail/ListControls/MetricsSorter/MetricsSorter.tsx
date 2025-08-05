@@ -148,9 +148,11 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   // Converts MetricUsageDetails format to simple counts (Record<string, number>) for backward compatibility with sorting logic
   public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
     return this.usageFetcher.getUsageMetrics(usageType).then((metrics) => {
-      return Object.fromEntries(
-        Object.entries(metrics).map(([metricName, metricUsage]) => [metricName, metricUsage.count])
-      );
+      const metricsToCounts: Record<string, number> = {};
+      for (const metric in metrics) {
+        metricsToCounts[metric] = metrics[metric].count;
+      }
+      return metricsToCounts;
     });
   }
 
