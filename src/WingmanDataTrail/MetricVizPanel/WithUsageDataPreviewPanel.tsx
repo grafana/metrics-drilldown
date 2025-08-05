@@ -184,8 +184,8 @@ function UsageData({
   if (usageDetails.usageType === 'dashboard-usage') {
     const { dashboards } = usageDetails;
     dashboardItems = Object.entries(dashboards)
-      .map(([name, dashboardInfo]) => ({
-        label: `${name.length > 25 ? name.substring(0, 22) + '...' : name} (${dashboardInfo.count})`, // truncate long dashboard names while preserving the count
+      .map(([label, dashboardInfo]) => ({
+        label,
         value: `/d/${dashboardInfo.uid}`,
         count: dashboardInfo.count,
       }))
@@ -199,7 +199,7 @@ function UsageData({
           <Dropdown
             placement="right-start"
             overlay={
-              <Menu style={{ maxWidth: '240px', maxHeight: '248px', overflowY: 'auto' }}>
+              <Menu style={{ maxWidth: '240px', maxHeight: '245px', overflowY: 'auto' }}>
                 {dashboardItems.map((item) => (
                   <Menu.Item
                     key={item.value}
@@ -271,6 +271,22 @@ function getStyles(theme: GrafanaTheme2) {
     clickableUsageItem: css({
       backgroundColor: 'transparent',
       border: 'none',
+    }),
+    menuItem: css({
+      color: theme.colors.text.primary,
+      textDecoration: 'none',
+      '&:hover': {
+        color: theme.colors.text.link,
+      },
+    }),
+    menuItemContent: css({
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      color: theme.colors.text.primary,
+      '&:hover': {
+        color: theme.colors.text.link,
+      },
     }),
   };
 }
