@@ -29,18 +29,13 @@ import { buildPrometheusQuery } from '../buildPrometheusQuery';
 export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHandler | void {
   const [queryRunner] = sceneGraph.findDescendents(panel, SceneQueryRunner);
 
-  if (!queryRunner) {
-    logger.warn('ExtremeValueFilterBehavior: No query runner found for viz panel');
-    return;
-  }
-
   // Prevent double-unsubscribing, by tracking if the subscription has been unsubscribed already.
   // Without this, double-unsubscribing can happen due to the query runner being cloned and updated in `removeExtremeValues`.
   let isUnsubscribed = false;
 
   // When the query runner's state changes, check if the data is all NaN.
   // If it is, remove the extreme values from the query.
-  const queryRunnerSub = queryRunner.subscribeToState((state) => {
+  const queryRunnerSub = queryRunner?.subscribeToState((state) => {
     // Don't process if already unsubscribed
     if (isUnsubscribed) {
       return;
@@ -226,15 +221,9 @@ export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunne
       nonRateQueryFunction: nonRateQueryFunction as any,
     };
   } catch (error) {
-    let errorObject: Error;
+    const errorObject = error instanceof Error ? error : new Error('ExtremeValueFilterBehavior: Error parsing query');
 
-    if (!(error instanceof Error)) {
-      errorObject = new Error('ExtremeValueFilterBehavior: Error parsing query');
-    } else {
-      errorObject = error;
-    }
-
-    logger.error(errorObject);
+    logger.error(errorObject, { query });
     return null;
   }
 }
