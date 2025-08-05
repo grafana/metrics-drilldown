@@ -141,10 +141,6 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     );
   }
 
-  public getUsageForMetric(metricName: string, usageType: MetricUsageType): Promise<number> {
-    return this.usageFetcher.getUsageForMetric(metricName, usageType);
-  }
-
   public getUsageDetailsForMetric(metricName: string, usageType: MetricUsageType): Promise<MetricUsageDetails> {
     return this.usageFetcher.getUsageDetailsForMetric(metricName, usageType);
   }
