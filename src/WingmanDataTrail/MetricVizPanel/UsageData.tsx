@@ -37,9 +37,9 @@ export function UsageData({
               <Menu style={{ maxWidth: '240px', maxHeight: '245px', overflowY: 'auto' }}>
                 {dashboardItems.map((item) => (
                   <Menu.Item
-                    key={item.value}
+                    key={item.id}
                     label=""
-                    url={item.value}
+                    url={item.url}
                     target="_blank"
                     className={styles.menuItem}
                     component={() => (

@@ -18,7 +18,11 @@ interface DashboardSearchItem {
 }
 
 export type MetricUsageDetails =
-  | { usageType: 'dashboard-usage'; count: number; dashboards: Record<string, { count: number; uid: string }> } // e.g., {"Dashboard A": { count: 2, uid: "123" }}
+  | {
+      usageType: 'dashboard-usage';
+      count: number;
+      dashboards: Record<string, { count: number; uid: string; url: string }>;
+    } // e.g., {"Dashboard A": { count: 2, uid: "123" }}
   | { usageType: 'alerting-usage'; count: number }; // TODO: implement `alerts: Record<string, number>`
 
 type MetricUsageMap = Record<string, MetricUsageDetails>;
@@ -28,10 +32,12 @@ const usageRequestOptions: Partial<BackendSrvRequest> = {
   showErrorAlert: false,
 } as const;
 
-const dashboardRequestMap = new Map<string, Promise<Dashboard | null>>();
+type DashboardWithUrl = Dashboard & { url: string };
+
+const dashboardRequestMap = new Map<string, Promise<DashboardWithUrl | null>>();
 
 const getDashboardLimited = limitFunction(
-  async (dashboardUid: string, dashboardRequestsFailedCount: number) => {
+  async (dashboardUid: string, url, dashboardRequestsFailedCount: number) => {
     let promise = dashboardRequestMap.get(dashboardUid);
 
     if (!promise) {
@@ -42,7 +48,7 @@ const getDashboardLimited = limitFunction(
           `grafana-metricsdrilldown-app-dashboard-metric-usage-${dashboardUid}`,
           usageRequestOptions
         )
-        .then(({ dashboard }) => dashboard)
+        .then(({ dashboard }) => ({ ...dashboard, url } as DashboardWithUrl))
         .catch((error) => {
           // Prevent excessive noise
           if (dashboardRequestsFailedCount <= 5) {
@@ -82,7 +88,7 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
     let dashboardRequestsFailedCount = 0;
 
     const metricCounts = await Promise.all(
-      dashboards.map(({ uid: dashboardUid }) => getDashboardLimited(dashboardUid, dashboardRequestsFailedCount))
+      dashboards.map(({ uid, url }) => getDashboardLimited(uid, url, dashboardRequestsFailedCount))
     ).then(parseDashboardSearchResponse);
 
     return metricCounts;
@@ -99,6 +105,7 @@ function updateMetricUsage(
   metric: string,
   dashboardName: string,
   dashboardUid: string,
+  dashboardUrl: string,
   dashboardData: Record<string, MetricUsageDetails>
 ): void {
   if (!dashboardData[metric]) {
@@ -110,17 +117,18 @@ function updateMetricUsage(
     dashboardData[metric].dashboards[dashboardName] = {
       count: (dashboardData[metric].dashboards[dashboardName]?.count || 0) + 1,
       uid: dashboardUid || 'unknown',
+      url: dashboardUrl,
     };
   }
 }
 
-function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard | null>): MetricUsageMap {
+function parseDashboardSearchResponse(dashboardSearchResponse: Array<DashboardWithUrl | null>): MetricUsageMap {
   // Create a map to track metric names and their usage details
   const dashboardData: Record<string, MetricUsageDetails> = {};
 
   const relevantDashboards = dashboardSearchResponse.filter(
     (dashboard) => dashboard && dashboard?.panels?.length
-  ) as Array<Dashboard & { panels: NonNullable<Panel[]> }>;
+  ) as Array<DashboardWithUrl & { panels: NonNullable<Panel[]> }>;
   // For each dashboard, for each panel in that dashboard, for each query in that panel, what metrics does that query use
   for (const dashboard of relevantDashboards) {
     const dashboardName = dashboard.title || `Dashboard ${dashboard.uid}`;
@@ -137,7 +145,7 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<Dashboard |
 
         // Count each metric occurrence
         for (const metric of metrics) {
-          updateMetricUsage(metric, dashboardName, dashboard.uid || 'unknown', dashboardData);
+          updateMetricUsage(metric, dashboardName, dashboard.uid || 'unknown', dashboard.url, dashboardData);
         }
       }
     }

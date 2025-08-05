@@ -35,7 +35,7 @@ export type WithUsageDataPreviewPanelState = SceneObjectState & {
   singularUsageType: string;
   pluralUsageType: string;
   icon: IconName;
-  dashboardItems: Array<{ label: string; value: string; count: number }>;
+  dashboardItems: Array<{ id: string; label: string; count: number; url: string }>;
 };
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
@@ -107,9 +107,10 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
           icon: 'apps',
           dashboardItems: Object.entries(dashboards)
             .map(([label, dashboardInfo]) => ({
+              id: dashboardInfo.uid,
               label,
-              value: `/d/${dashboardInfo.uid}`,
               count: dashboardInfo.count,
+              url: dashboardInfo.url,
             }))
             .sort((a, b) => b.count - a.count),
         });
