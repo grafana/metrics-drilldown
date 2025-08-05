@@ -10,13 +10,11 @@ import React from 'react';
 
 import { logger } from 'tracking/logger/logger';
 import { isCustomVariable } from 'utils/utils.variables';
-import { type MetricUsageDetails } from 'WingmanDataTrail/ListControls/MetricsSorter/fetchers/fetchDashboardMetrics';
 import {
   MetricsSorter,
   VAR_WINGMAN_SORT_BY,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
-import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricUsageFetcher';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import {
@@ -25,17 +23,19 @@ import {
   type MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
-import { UsageData, type UsageSectionProps } from './UsageData';
+import { UsageData } from './UsageData';
 
 type SortBy = Exclude<SortingOption, 'related'>;
 
-type WithUsageDataPreviewPanelState = SceneObjectState & {
-  [key in MetricUsageType]: number;
-} & {
+export type WithUsageDataPreviewPanelState = SceneObjectState & {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
   sortBy: SortBy;
-  metricUsageDetails: MetricUsageDetails;
+  usageCount: number;
+  singularUsageType: string;
+  pluralUsageType: string;
+  icon: IconName;
+  dashboardItems: Array<{ label: string; value: string; count: number }>;
 };
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
@@ -43,9 +43,11 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     super({
       ...state,
       sortBy: 'default',
-      'alerting-usage': 0,
-      'dashboard-usage': 0,
-      metricUsageDetails: { usageType: 'dashboard-usage', count: 0, dashboards: {} },
+      usageCount: 0,
+      singularUsageType: '',
+      pluralUsageType: '',
+      icon: '' as IconName,
+      dashboardItems: [],
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
@@ -79,83 +81,88 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     }
   }
 
-  private updateSortBy(metricsSorter: MetricsSorter, sortBy: SortBy) {
+  private async updateSortBy(metricsSorter: MetricsSorter, sortBy: SortBy) {
     this.setState({ sortBy });
+    this.updateLayout(sortBy);
 
-    const gridLayout = sceneGraph.getAncestor(this, SceneCSSGridLayout);
-    const currentGridLayoutHeight = gridLayout?.state.autoRows;
+    if (sortBy === 'default') {
+      return;
+    }
+
+    const usage = await metricsSorter.getUsageDetailsForMetric(this.state.metric, sortBy);
 
     switch (sortBy) {
       case 'dashboard-usage':
-      case 'alerting-usage':
-        metricsSorter.getUsageDetailsForMetric(this.state.metric, sortBy).then((usage) => {
-          this.setState({
-            [sortBy]: usage.count,
-            metricUsageDetails: usage,
-          });
+        // FIXME: we do this only to satisfy TS Lord
+        if (usage.usageType !== 'dashboard-usage') {
+          return;
+        }
+
+        const { dashboards } = usage;
+
+        this.setState({
+          usageCount: usage.count,
+          singularUsageType: 'dashboard panel query',
+          pluralUsageType: 'dashboard panel queries',
+          icon: 'apps',
+          dashboardItems: Object.entries(dashboards)
+            .map(([label, dashboardInfo]) => ({
+              label,
+              value: `/d/${dashboardInfo.uid}`,
+              count: dashboardInfo.count,
+            }))
+            .sort((a, b) => b.count - a.count),
         });
-        if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW) {
-          gridLayout.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW });
-        }
         break;
+
+      case 'alerting-usage':
+        this.setState({
+          usageCount: usage.count,
+          singularUsageType: 'alert rule',
+          pluralUsageType: 'alert rules',
+          icon: 'bell',
+        });
+        break;
+
       default:
-        if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT) {
-          gridLayout.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT });
-        }
         break;
     }
   }
 
+  private updateLayout(sortBy: WithUsageDataPreviewPanelState['sortBy']) {
+    const gridLayout = sceneGraph.getAncestor(this, SceneCSSGridLayout);
+    const currentGridLayoutHeight = gridLayout?.state.autoRows;
+
+    const expectedPanelHeight =
+      sortBy === 'default' ? METRICS_VIZ_PANEL_HEIGHT : METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW;
+
+    if (currentGridLayoutHeight !== expectedPanelHeight) {
+      gridLayout.setState({ autoRows: expectedPanelHeight });
+    }
+  }
+
   public static readonly Component = ({ model }: SceneComponentProps<WithUsageDataPreviewPanel>) => {
-    const {
-      vizPanelInGridItem,
-      sortBy,
-      'alerting-usage': metricUsedInAlertingRulesCount,
-      'dashboard-usage': metricUsedInDashboardsCount,
-      metricUsageDetails,
-    } = model.useState();
+    const { vizPanelInGridItem, sortBy, usageCount, singularUsageType, pluralUsageType, icon, dashboardItems } =
+      model.useState();
 
     if (!vizPanelInGridItem) {
       logger.log('no viz panel');
       return;
     }
 
-    if (sortBy === 'default') {
-      return (
-        <div data-testid="with-usage-data-preview-panel">
-          <vizPanelInGridItem.Component model={vizPanelInGridItem} />
-        </div>
-      );
-    }
-
-    const usageDetails: Record<MetricUsageType, Omit<UsageSectionProps, 'usageType'>> = {
-      'dashboard-usage': {
-        usageCount: metricUsedInDashboardsCount,
-        singularUsageType: 'dashboard panel query',
-        pluralUsageType: 'dashboard panel queries',
-        icon: 'apps',
-        usageDetails: metricUsageDetails,
-      },
-      'alerting-usage': {
-        usageCount: metricUsedInAlertingRulesCount,
-        singularUsageType: 'alert rule',
-        pluralUsageType: 'alert rules',
-        icon: 'bell',
-        usageDetails: metricUsageDetails,
-      },
-    };
-
     return (
       <div data-testid="with-usage-data-preview-panel">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
-        <UsageData
-          usageType={sortBy}
-          usageCount={usageDetails[sortBy].usageCount}
-          singularUsageType={usageDetails[sortBy].singularUsageType}
-          pluralUsageType={usageDetails[sortBy].pluralUsageType}
-          icon={usageDetails[sortBy].icon as IconName}
-          usageDetails={usageDetails[sortBy].usageDetails}
-        />
+        {sortBy !== 'default' && (
+          <UsageData
+            usageType={sortBy}
+            usageCount={usageCount}
+            singularUsageType={singularUsageType}
+            pluralUsageType={pluralUsageType}
+            icon={icon}
+            dashboardItems={dashboardItems}
+          />
+        )}
       </div>
     );
   };

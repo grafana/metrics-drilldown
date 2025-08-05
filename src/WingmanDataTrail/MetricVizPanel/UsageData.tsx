@@ -3,8 +3,9 @@ import { type GrafanaTheme2, type IconName } from '@grafana/data';
 import { Button, Dropdown, Icon, Menu, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type MetricUsageDetails } from 'WingmanDataTrail/ListControls/MetricsSorter/fetchers/fetchDashboardMetrics';
 import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricUsageFetcher';
+
+import { type WithUsageDataPreviewPanelState } from './WithUsageDataPreviewPanel';
 
 // TODO: pass full MetricUsageDetailsObject into UsageSectionProps?
 export interface UsageSectionProps {
@@ -13,7 +14,7 @@ export interface UsageSectionProps {
   singularUsageType: string;
   pluralUsageType: string;
   icon: IconName;
-  usageDetails: MetricUsageDetails;
+  dashboardItems: WithUsageDataPreviewPanelState['dashboardItems'];
 }
 
 export function UsageData({
@@ -22,25 +23,13 @@ export function UsageData({
   singularUsageType,
   pluralUsageType,
   icon,
-  usageDetails,
+  dashboardItems,
 }: Readonly<UsageSectionProps>) {
   const styles = useStyles2(getStyles);
 
-  let dashboardItems: Array<{ label: string; value: string; count: number }> = [];
-  if (usageDetails.usageType === 'dashboard-usage') {
-    const { dashboards } = usageDetails;
-    dashboardItems = Object.entries(dashboards)
-      .map(([label, dashboardInfo]) => ({
-        label,
-        value: `/d/${dashboardInfo.uid}`,
-        count: dashboardInfo.count,
-      }))
-      .sort((a, b) => b.count - a.count);
-  }
-
   return (
     <div className={styles.usageContainer} data-testid="usage-data-panel">
-      {usageDetails.usageType === 'dashboard-usage' ? (
+      {usageType === 'dashboard-usage' ? (
         <>
           <Dropdown
             placement="right-start"
