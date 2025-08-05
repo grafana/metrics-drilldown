@@ -210,7 +210,7 @@ function UsageData({
               variant="secondary"
               size="sm"
               tooltip={`Metric used in ${usageCount} dashboards. Click to view them.`}
-              className={`${styles.usageItem} ${styles.clickableUsageItem}`}
+              className={cx(styles.usageItem, styles.clickableUsageItem)}
             >
               <span data-testid={usageType}>
                 <Icon name={icon} style={{ marginRight: '4px' }} /> {usageCount}
