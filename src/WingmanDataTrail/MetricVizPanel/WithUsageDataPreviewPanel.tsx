@@ -199,9 +199,25 @@ function UsageData({
           <Dropdown
             placement="right-start"
             overlay={
-              <Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
+              <Menu style={{ maxWidth: '240px', maxHeight: '248px', overflowY: 'auto' }}>
                 {dashboardItems.map((item) => (
-                  <Menu.Item key={item.value} label={item.label} onClick={() => window.open(item.value, '_blank')} />
+                  <Menu.Item
+                    key={item.value}
+                    label=""
+                    url={item.value}
+                    target="_blank"
+                    className={styles.menuItem}
+                    component={() => (
+                      <Tooltip
+                        content={`Found ${item.count} ${item.count === 1 ? 'time' : 'times'} in ${item.label}`}
+                        placement="right"
+                      >
+                        <div className={styles.menuItemContent}>
+                          <Icon name="external-link-alt" /> {item.label} ({item.count})
+                        </div>
+                      </Tooltip>
+                    )}
+                  />
                 ))}
               </Menu>
             }
