@@ -77,7 +77,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
             reactNode: <InlineBanner severity="error" title="Error while loading labels!" error={error} />,
           }),
         getLayoutChild: (option, startColorIndex) => {
-          const queryRunnerParams = getTimeseriesQueryRunnerParams({
+          const { queries } = getTimeseriesQueryRunnerParams({
             metric,
             matchers: [],
             groupBy: option.value as string,
@@ -88,7 +88,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
             body: new LabelVizPanel({
               metric,
               label: option.value as string,
-              query: queryRunnerParams.queries[0].expr,
+              query: queries[0].expr,
               unit,
               startColorIndex,
             }),
