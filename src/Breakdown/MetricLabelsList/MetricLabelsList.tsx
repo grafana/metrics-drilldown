@@ -1,6 +1,5 @@
 import { css } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
-import { utf8Support } from '@grafana/prometheus';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -17,9 +16,12 @@ import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
-import { VAR_GROUP_BY, VAR_GROUP_BY_EXP } from 'shared';
+import { QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
+import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/timeseries/getTimeseriesQueryRunnerParams';
+import { isRateQuery } from 'GmdVizPanel/timeseries/isRateQuery';
+import { getPerSecondRateUnit, getUnit } from 'GmdVizPanel/units/getUnit';
+import { VAR_GROUP_BY } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
@@ -35,9 +37,7 @@ interface MetricLabelsListState extends SceneObjectState {
 
 export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   constructor({ metric }: { metric: MetricLabelsListState['metric'] }) {
-    const queryDef = getAutoQueriesForMetric(metric).breakdown;
-    const { expr } = queryDef.queries[0];
-    const unit = queryDef.unit;
+    const unit = isRateQuery(metric) ? getPerSecondRateUnit(metric) : getUnit(metric);
 
     super({
       key: 'metric-labels-list',
@@ -77,13 +77,18 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
             reactNode: <InlineBanner severity="error" title="Error while loading labels!" error={error} />,
           }),
         getLayoutChild: (option, startColorIndex) => {
-          const query = expr.replaceAll(VAR_GROUP_BY_EXP, utf8Support(String(option.value)));
+          const queryRunnerParams = getTimeseriesQueryRunnerParams({
+            metric,
+            matchers: [],
+            groupBy: option.value as string,
+            queryResolution: QUERY_RESOLUTION.MEDIUM,
+          });
 
           return new SceneCSSGridItem({
             body: new LabelVizPanel({
               metric,
               label: option.value as string,
-              query,
+              query: queryRunnerParams.queries[0].expr,
               unit,
               startColorIndex,
             }),
