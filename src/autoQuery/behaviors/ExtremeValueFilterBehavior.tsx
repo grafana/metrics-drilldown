@@ -1,6 +1,9 @@
-import { LoadingState, type AdHocVariableFilter, type DataFrame, type Field } from '@grafana/data';
+import { css } from '@emotion/css';
+import { LoadingState, type AdHocVariableFilter, type DataFrame, type Field, type GrafanaTheme2 } from '@grafana/data';
 import { sceneGraph, SceneQueryRunner, type CancelActivationHandler, type VizPanel } from '@grafana/scenes';
+import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
 import { parser } from '@prometheus-io/lezer-promql';
+import React from 'react';
 
 import { processLabelMatcher } from 'extensions/links';
 import { reportExploreMetrics } from 'interactions';
@@ -121,8 +124,7 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel) {
 
   panel.setState({
     $data: newQueryRunner,
-    _pluginLoadError:
-      'Panel data was re-fetched with a more complex query to handle extremely small values in the series',
+    titleItems: <VizPanelExtremeValuesWarning />,
   });
 
   newQueryRunner.runQueries();
@@ -234,3 +236,33 @@ function extractGroupings(node: any, expr: string): string[] {
 
   return groupings;
 }
+
+function VizPanelExtremeValuesWarning() {
+  const styles = useStyles2(getStyles);
+
+  return (
+    <div className={styles.extremeValuedisclaimer}>
+      <Tooltip content="Panel data was re-fetched with a more complex query to handle extremely small values in the series">
+        <span className={styles.warningMessage}>
+          <Icon name="exclamation-triangle" aria-hidden="true" />
+        </span>
+      </Tooltip>
+    </div>
+  );
+}
+
+const getStyles = (theme: GrafanaTheme2) => ({
+  extremeValuedisclaimer: css({
+    label: 'extreme-value-disclaimer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+  }),
+  warningMessage: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    color: theme.colors.warning.main,
+    fontSize: theme.typography.bodySmall.fontSize,
+  }),
+});
