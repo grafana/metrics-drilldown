@@ -42,10 +42,6 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
       }
 
       if (isAllDataNaN(series)) {
-        logger.info(
-          'ExtremeValueFilterBehavior: Detected all NaN values, attempting to filter extreme values from query',
-          sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr)
-        );
         reportExploreMetrics('extreme_value_filter_behavior_triggered', {
           expression: sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr),
         });
@@ -112,8 +108,6 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel) {
     ...queryParts,
     filterExtremeValues: true,
   });
-
-  logger.info('ExtremeValueFilterBehavior: Re-running query with extreme value filtering:', filteredQuery);
 
   // Create a new query runner with the filtered query
   const newQueryRunner = queryRunner.clone({
