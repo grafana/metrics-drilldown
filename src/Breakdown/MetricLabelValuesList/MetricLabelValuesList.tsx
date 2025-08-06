@@ -235,12 +235,13 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         const vizPanel = PanelBuilders.timeseries()
           .setTitle(labelValue)
           .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
+          .setUnit(unit)
           .setBehaviors([publishTimeseriesData()]) // publishTimeseriesData is required for the syncYAxis behavior
           .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
           .setHeaderActions(headerActions)
+          .setOption('legend', { showLegend: false })
           .setShowMenuAlways(true)
           .setMenu(new PanelMenu({ labelName: labelValue }))
-          .setUnit(unit)
           .build();
 
         vizPanel.setState({ key: `panel-${metric}-${labelValue}` });
