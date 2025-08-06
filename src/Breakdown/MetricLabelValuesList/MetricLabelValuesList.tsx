@@ -2,7 +2,6 @@ import { css } from '@emotion/css';
 import { DashboardCursorSync, LoadingState, type DataFrame, type GrafanaTheme2, type PanelData } from '@grafana/data';
 import {
   behaviors,
-  PanelBuilders,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
@@ -20,7 +19,6 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
-import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
 import { GmdVizPanel, PANEL_HEIGHT, PANEL_TYPE, QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
@@ -32,12 +30,12 @@ import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDat
 import { EventQuickSearchChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
-import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { LabelValuesCountsProvider } from './LabelValuesCountProvider';
+import { LABEL_VALUE_VIZ_PANEL_HEIGHT, LabelValueVizPanel } from './LabelValueVizPanel';
 import { SceneByFrameRepeater } from './SceneByFrameRepeater';
 import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 
@@ -202,7 +200,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         children: [],
         isLazy: true,
         templateColumns: GRID_TEMPLATE_COLUMNS,
-        autoRows: METRICS_VIZ_PANEL_HEIGHT,
+        autoRows: LABEL_VALUE_VIZ_PANEL_HEIGHT,
       }),
       getLayoutLoading: () =>
         new SceneReactObject({
@@ -232,19 +230,14 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         const canAddToFilters = !labelValue.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
         const headerActions = canAddToFilters ? [new AddToFiltersGraphAction({ labelName: label, labelValue })] : [];
 
-        const vizPanel = PanelBuilders.timeseries()
-          .setTitle(labelValue)
-          .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
-          .setUnit(unit)
-          .setBehaviors([publishTimeseriesData()]) // publishTimeseriesData is required for the syncYAxis behavior
-          .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
-          .setHeaderActions(headerActions)
-          .setOption('legend', { showLegend: false })
-          .setShowMenuAlways(true)
-          .setMenu(new PanelMenu({ labelName: labelValue }))
-          .build();
-
-        vizPanel.setState({ key: `panel-${metric}-${labelValue}` });
+        const vizPanel = new LabelValueVizPanel({
+          labelValue,
+          data: new SceneDataNode({ data: { ...data, series: [frame] } }),
+          unit,
+          fixedColor: getColorByIndex(frameIndex),
+          headerActions,
+          menu: new PanelMenu({ labelName: labelValue }),
+        });
 
         return new SceneCSSGridItem({ body: vizPanel });
       },
