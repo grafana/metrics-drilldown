@@ -6,17 +6,20 @@ import { QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
 import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
 import { type StatushistoryPanelOptions } from './buildStatushistoryPanel';
 
-type StatushistoryQueryOptions = Pick<StatushistoryPanelOptions, 'metric' | 'matchers' | 'queryResolution'>;
-
-type StatushistoryQueryParams = {
+type StatushistoryQueryRunnerParams = {
   fnName: string;
   maxDataPoints: number;
   queries: SceneDataQuery[];
 };
 
-export function getStatushistoryQueryRunnerParams(options: StatushistoryQueryOptions): StatushistoryQueryParams {
-  const { metric, matchers, queryResolution } = options;
-  const expression = buildQueryExpression(metric, matchers);
+type Options = Pick<StatushistoryPanelOptions, 'metric' | 'matchers' | 'queryResolution'> & {
+  addIgnoreUsageFilter: boolean;
+};
+
+export function getStatushistoryQueryRunnerParams(options: Options): StatushistoryQueryRunnerParams {
+  const { metric, matchers, queryResolution, addIgnoreUsageFilter } = options;
+
+  const expression = buildQueryExpression({ metric, matchers, addIgnoreUsageFilter });
   const query = promql.min({ expr: expressionToString(expression) });
 
   return {

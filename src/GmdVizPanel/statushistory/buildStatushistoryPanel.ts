@@ -30,7 +30,12 @@ export type StatushistoryPanelOptions = Pick<
 
 export function buildStatushistoryPanel(options: StatushistoryPanelOptions): VizPanel {
   const { title, description, metric, matchers, headerActions, menu, queryResolution } = options;
-  const queryParams = getStatushistoryQueryRunnerParams({ metric, matchers, queryResolution });
+  const queryParams = getStatushistoryQueryRunnerParams({
+    metric,
+    matchers,
+    queryResolution,
+    addIgnoreUsageFilter: true,
+  });
   const unit = 'none';
 
   const queryRunner = new SceneQueryRunner({

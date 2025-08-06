@@ -60,8 +60,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           if ('expr' in query && typeof query.expr === 'string' && query.expr.includes('__ignore_usage__')) {
             return {
               ...query,
-              // FIXME when filters are empty, there's a trailing comma
-              expr: query.expr.replace(/,?__ignore_usage__=""/, ''), // also remove leading comma if present
+              expr: query.expr.replace(/,?__ignore_usage__="",?/, ''), // also remove leading/trailing comma if present
             };
           }
 

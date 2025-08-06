@@ -176,6 +176,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       matchers: [],
       groupBy: label,
       queryResolution: QUERY_RESOLUTION.MEDIUM,
+      addIgnoreUsageFilter: true,
     });
     const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 

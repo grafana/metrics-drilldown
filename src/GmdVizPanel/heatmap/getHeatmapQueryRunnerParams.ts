@@ -6,17 +6,20 @@ import { QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
 import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
 import { type HeatmapPanelOptions } from './buildHeatmapPanel';
 
-type HeatmapQueryOptions = Pick<HeatmapPanelOptions, 'metric' | 'matchers' | 'isNativeHistogram' | 'queryResolution'>;
-
-type HeatmapQueryParams = {
+type HeatmapQueryRunnerParams = {
   fnName: string;
   maxDataPoints: number;
   queries: SceneDataQuery[];
 };
 
-export function getHeatmapQueryRunnerParams(options: HeatmapQueryOptions): HeatmapQueryParams {
-  const { metric, matchers, isNativeHistogram, queryResolution } = options;
-  const expression = buildQueryExpression(metric, matchers);
+type Options = Pick<HeatmapPanelOptions, 'metric' | 'matchers' | 'isNativeHistogram' | 'queryResolution'> & {
+  addIgnoreUsageFilter: boolean;
+};
+
+export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunnerParams {
+  const { metric, matchers, isNativeHistogram, queryResolution, addIgnoreUsageFilter } = options;
+
+  const expression = buildQueryExpression({ metric, matchers, addIgnoreUsageFilter });
   let expr = expressionToString(expression);
 
   let query;

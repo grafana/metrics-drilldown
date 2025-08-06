@@ -27,7 +27,13 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   }
 
   const { title, description, metric, matchers, fixedColor, headerActions, groupBy, menu, queryResolution } = options;
-  const queryParams = getTimeseriesQueryRunnerParams({ metric, matchers, groupBy, queryResolution });
+  const queryParams = getTimeseriesQueryRunnerParams({
+    metric,
+    matchers,
+    groupBy,
+    queryResolution,
+    addIgnoreUsageFilter: true,
+  });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const $data = new SceneQueryRunner({
@@ -53,7 +59,13 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
 
 function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel {
   const { title, description, metric, matchers, fixedColor, headerActions, menu, groupBy, queryResolution } = options;
-  const queryParams = getTimeseriesQueryRunnerParams({ metric, matchers, groupBy, queryResolution });
+  const queryParams = getTimeseriesQueryRunnerParams({
+    metric,
+    matchers,
+    groupBy,
+    queryResolution,
+    addIgnoreUsageFilter: true,
+  });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const $data = new SceneDataTransformer({

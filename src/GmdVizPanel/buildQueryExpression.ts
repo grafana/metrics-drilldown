@@ -14,15 +14,24 @@ export function expressionToString(expression: Expression) {
   return expression.toString().replaceAll('="__REMOVE__"', '');
 }
 
-export function buildQueryExpression(metric: string, matchers: LabelMatcher[] = []): Expression {
-  const defaultSelectors = [
-    { label: '__ignore_usage__', operator: MatchingOperator.equal, value: '' },
-    ...matchers.map((m) => ({
-      label: utf8Support(m.key),
-      operator: m.operator as MatchingOperator,
-      value: m.value,
-    })),
-  ];
+type Options = {
+  metric: string;
+  matchers: LabelMatcher[];
+  addIgnoreUsageFilter: boolean;
+};
+
+export function buildQueryExpression(options: Options): Expression {
+  const { metric, matchers, addIgnoreUsageFilter } = options;
+
+  const defaultSelectors = matchers.map((m) => ({
+    label: utf8Support(m.key),
+    operator: m.operator as MatchingOperator,
+    value: m.value,
+  }));
+
+  if (addIgnoreUsageFilter) {
+    defaultSelectors.push({ label: '__ignore_usage__', operator: MatchingOperator.equal, value: '' });
+  }
 
   const isUtf8Metric = !isValidLegacyName(metric);
   if (isUtf8Metric) {

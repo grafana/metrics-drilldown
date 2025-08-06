@@ -7,18 +7,21 @@ import { buildQueryExpression, expressionToString } from '../buildQueryExpressio
 import { type TimeseriesPanelOptions } from './buildTimeseriesPanel';
 import { isRateQuery as isRateQueryFn } from './isRateQuery';
 
-type TimeseriesQueryOptions = Pick<TimeseriesPanelOptions, 'metric' | 'matchers' | 'groupBy' | 'queryResolution'>;
-
-type TimeseriesQueryParams = {
+type TimeseriesQueryRunnerParams = {
   fnName: string;
   isRateQuery: boolean;
   maxDataPoints: number;
   queries: SceneDataQuery[];
 };
 
-export function getTimeseriesQueryRunnerParams(options: TimeseriesQueryOptions): TimeseriesQueryParams {
-  const { metric, matchers, groupBy, queryResolution } = options;
-  const expression = buildQueryExpression(metric, matchers);
+type Options = Pick<TimeseriesPanelOptions, 'metric' | 'matchers' | 'groupBy' | 'queryResolution'> & {
+  addIgnoreUsageFilter: boolean;
+};
+
+export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
+  const { metric, matchers, groupBy, queryResolution, addIgnoreUsageFilter } = options;
+
+  const expression = buildQueryExpression({ metric, matchers, addIgnoreUsageFilter });
   let expr = expressionToString(expression);
 
   let query;

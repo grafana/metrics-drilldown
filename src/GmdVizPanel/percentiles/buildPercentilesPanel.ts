@@ -19,6 +19,7 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
     matchers,
     isNativeHistogram: Boolean(isNativeHistogram),
     queryResolution,
+    addIgnoreUsageFilter: true,
   });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 

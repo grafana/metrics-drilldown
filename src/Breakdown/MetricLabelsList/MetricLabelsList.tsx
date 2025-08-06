@@ -82,6 +82,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
             matchers: [],
             groupBy: option.value as string,
             queryResolution: QUERY_RESOLUTION.MEDIUM,
+            addIgnoreUsageFilter: true,
           });
 
           return new SceneCSSGridItem({

@@ -19,6 +19,7 @@ export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
     matchers,
     isNativeHistogram: Boolean(isNativeHistogram),
     queryResolution,
+    addIgnoreUsageFilter: true,
   });
   const unit = getUnit(metric);
 

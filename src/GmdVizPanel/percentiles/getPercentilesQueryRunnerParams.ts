@@ -6,21 +6,21 @@ import { QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
 
 import { type PercentilesPanelOptions } from './buildPercentilesPanel';
 
-type PercentilesQueryOptions = Pick<
-  PercentilesPanelOptions,
-  'metric' | 'matchers' | 'isNativeHistogram' | 'queryResolution'
->;
-
-type PercentilesQueryParams = {
+type PercentilesQueryRunnerParams = {
   fnName: string;
   isRateQuery: boolean;
   maxDataPoints: number;
   queries: SceneDataQuery[];
 };
 
-export function getPercentilesQueryRunnerParams(options: PercentilesQueryOptions): PercentilesQueryParams {
-  const { metric, matchers, isNativeHistogram, queryResolution } = options;
-  const expression = buildQueryExpression(metric, matchers);
+type Options = Pick<PercentilesPanelOptions, 'metric' | 'matchers' | 'isNativeHistogram' | 'queryResolution'> & {
+  addIgnoreUsageFilter: boolean;
+};
+
+export function getPercentilesQueryRunnerParams(options: Options): PercentilesQueryRunnerParams {
+  const { metric, matchers, isNativeHistogram, queryResolution, addIgnoreUsageFilter } = options;
+
+  const expression = buildQueryExpression({ metric, matchers, addIgnoreUsageFilter });
   let expr = expressionToString(expression);
 
   if (isNativeHistogram) {
