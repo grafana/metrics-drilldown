@@ -44,7 +44,7 @@ export function UsageData({
                     className={styles.menuItem}
                     component={() => (
                       <Tooltip
-                        content={`Found ${item.count} ${item.count === 1 ? 'time' : 'times'} in ${item.label}`}
+                        content={`Used ${item.count} ${item.count === 1 ? 'time' : 'times'} in ${item.label}`}
                         placement="right"
                       >
                         <div className={styles.menuItemContent}>
