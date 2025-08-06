@@ -2,7 +2,10 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import { Expression, MatchingOperator, promql } from 'tsqtsq';
 
-export type NonRateQueryFunction = 'avg' | 'min' | 'max';
+const nonRateQueryFunctions = new Set(['avg', 'min', 'max'] as const);
+export type NonRateQueryFunction = typeof nonRateQueryFunctions extends Set<infer T> ? T : never;
+export const isNonRateQueryFunction = (value: string): value is NonRateQueryFunction =>
+  nonRateQueryFunctions.has(value as NonRateQueryFunction);
 export const DEFAULT_NON_RATE_QUERY_FUNCTION: NonRateQueryFunction = 'avg';
 
 export interface BuildPrometheusQueryParams {
@@ -12,6 +15,7 @@ export interface BuildPrometheusQueryParams {
   groupings?: string[];
   ignoreUsage?: boolean;
   nonRateQueryFunction?: NonRateQueryFunction;
+  filterExtremeValues?: boolean;
 }
 
 export function getPromqlFunction(
@@ -28,6 +32,7 @@ export function buildPrometheusQuery({
   groupings,
   ignoreUsage = false,
   nonRateQueryFunction = DEFAULT_NON_RATE_QUERY_FUNCTION,
+  filterExtremeValues = false,
 }: BuildPrometheusQueryParams): string {
   // Check if metric name contains UTF-8 characters
   const isUtf8Metric = !isValidLegacyName(metric);
@@ -55,6 +60,15 @@ export function buildPrometheusQuery({
   // but without extra quotes associated with an empty label value
   if (isUtf8Metric) {
     metricPartString = metricPartString.replace('="__REMOVE__"', '');
+  }
+
+  if (filterExtremeValues) {
+    // Create a filter expression that excludes extreme values
+    const extremeValueFilter = promql.and({
+      left: metricPartString,
+      right: `${metricPartString} > -Inf`,
+    });
+    metricPartString = extremeValueFilter;
   }
 
   // Add rate if needed
