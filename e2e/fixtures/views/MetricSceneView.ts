@@ -53,7 +53,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertMainViz(metricName: string) {
-    await expect(this.page.getByTestId('top-view').getByText(metricName)).toBeVisible();
+    await expect(this.page.getByTestId('top-view').getByRole('heading', { name: metricName })).toBeVisible();
 
     // we wait for some time to make sure that data is rendered
     // TODO: how to improve this and not rely on an arbitrary timeout?
