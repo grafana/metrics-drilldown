@@ -59,9 +59,9 @@ export function UsageData({
             <Button
               variant="secondary"
               size="sm"
-              tooltip={`Metric used in ${usageCount} ${
-                usageCount === 1 ? 'dashboard' : 'dashboards'
-              }. Click to view them.`}
+              tooltip={`Metric used ${usageCount} ${
+                usageCount === 1 ? 'time' : 'times'
+              } in dashboard queries. Click to view the dashboards.`}
               className={cx(styles.usageItem, styles.clickableUsageItem)}
             >
               <span data-testid={usageType}>
