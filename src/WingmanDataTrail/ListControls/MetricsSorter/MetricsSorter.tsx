@@ -14,6 +14,7 @@ import React from 'react';
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 import { EventSortByChanged } from './events/EventSortByChanged';
+import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
 import { logger } from '../../../tracking/logger/logger';
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
@@ -78,7 +79,7 @@ export function getRecentMetrics(): RecentMetric[] {
 
     return validMetrics;
   } catch (error) {
-    logger.error(error as Error, {message: 'Failed to get recent metrics:'});
+    logger.error(error as Error, { message: 'Failed to get recent metrics:' });
     return [];
   }
 }
@@ -140,12 +141,19 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     );
   }
 
-  public getUsageForMetric(metricName: string, usageType: MetricUsageType): Promise<number> {
-    return this.usageFetcher.getUsageForMetric(metricName, usageType);
+  public getUsageDetailsForMetric(metricName: string, usageType: MetricUsageType): Promise<MetricUsageDetails> {
+    return this.usageFetcher.getUsageDetailsForMetric(metricName, usageType);
   }
 
+  // Converts MetricUsageDetails format to simple counts (Record<string, number>) for backward compatibility with sorting logic
   public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
-    return this.usageFetcher.getUsageMetrics(usageType);
+    return this.usageFetcher.getUsageMetrics(usageType).then((metrics) => {
+      const metricsToCounts: Record<string, number> = {};
+      for (const metric in metrics) {
+        metricsToCounts[metric] = metrics[metric].count;
+      }
+      return metricsToCounts;
+    });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
