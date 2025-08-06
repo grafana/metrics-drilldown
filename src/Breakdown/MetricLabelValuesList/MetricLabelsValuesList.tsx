@@ -44,6 +44,7 @@ import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: string;
   label: string;
+  $data: SceneDataTransformer;
   layoutSwitcher: LayoutSwitcher;
   quickSearch: QuickSearch;
   sortBySelector: SortBySelector;
@@ -62,6 +63,14 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       key: 'metric-label-values-list',
       metric,
       label,
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: trailDS,
+          maxDataPoints: MDP_METRIC_PREVIEW,
+          queries: getAutoQueriesForMetric(metric).breakdown.queries,
+        }),
+        transformations: [addUnspecifiedLabel(label)],
+      }),
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -178,14 +187,6 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const unit = queryDef.unit;
 
     return new SceneByFrameRepeater({
-      $data: new SceneDataTransformer({
-        $data: new SceneQueryRunner({
-          datasource: trailDS,
-          maxDataPoints: MDP_METRIC_PREVIEW,
-          queries: getAutoQueriesForMetric(metric).breakdown.queries,
-        }),
-        transformations: [addUnspecifiedLabel(label)],
-      }),
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
       $behaviors: [
         syncYAxis(),
