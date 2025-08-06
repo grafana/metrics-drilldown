@@ -48,7 +48,10 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
       if (!extremeValueRemoval.success) {
         panel.setState({
           titleItems: (
-            <VizPanelExtremeValuesWarning warning="Extreme values detected, but could not re-run the query with extreme value filtering" />
+            <VizPanelExtremeValuesMessage
+              level="warning"
+              message="Extreme values detected, but could not re-run the query with extreme value filtering"
+            />
           ),
         });
         logger.warn('ExtremeValueFilterBehavior: Failed to remove extreme values:', extremeValueRemoval.issue);
@@ -141,7 +144,10 @@ function removeExtremeValues(
   panel.setState({
     $data: newQueryRunner,
     titleItems: (
-      <VizPanelExtremeValuesWarning warning="Panel data was re-fetched with a more complex query to handle extremely small values in the series" />
+      <VizPanelExtremeValuesMessage
+        level="info"
+        message="Panel data was re-fetched with a more complex query to handle extremely small values in the series"
+      />
     ),
   });
 
@@ -269,21 +275,26 @@ function extractGroupings(node: any, expr: string): string[] {
   return groupings;
 }
 
-function VizPanelExtremeValuesWarning({ warning }: { readonly warning: string }) {
-  const styles = useStyles2(getStyles);
+interface VizPanelExtremeValuesMessageProps {
+  message: string;
+  level: 'warning' | 'info';
+}
+
+function VizPanelExtremeValuesMessage({ message, level }: Readonly<VizPanelExtremeValuesMessageProps>) {
+  const styles = useStyles2(getStyles, level);
 
   return (
     <div className={styles.extremeValuedisclaimer}>
-      <Tooltip content={warning}>
+      <Tooltip content={message}>
         <span className={styles.warningMessage}>
-          <Icon name="exclamation-triangle" aria-hidden="true" />
+          <Icon name={level === 'warning' ? 'exclamation-triangle' : 'info-circle'} aria-hidden="true" />
         </span>
       </Tooltip>
     </div>
   );
 }
 
-const getStyles = (theme: GrafanaTheme2) => ({
+const getStyles = (theme: GrafanaTheme2, level: 'warning' | 'info') => ({
   extremeValuedisclaimer: css({
     label: 'extreme-value-disclaimer',
     display: 'flex',
@@ -294,7 +305,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(0.5),
-    color: theme.colors.warning.main,
+    color: level === 'warning' ? theme.colors.warning.main : theme.colors.text.secondary,
     fontSize: theme.typography.bodySmall.fontSize,
   }),
 });
