@@ -75,7 +75,7 @@ export class MetricDatasourceHelper {
     const loadMetadata =
       typeof ds.languageProvider.retrieveMetricsMetadata === 'function'
         ? () => Promise.resolve(ds.languageProvider.retrieveMetricsMetadata())
-        : () => (ds.languageProvider.loadMetricsMetadata() as unknown as Promise<void>).then(() => queryMetadata()); // eslint-disable-line sonarjs/deprecation
+        : () => (ds.languageProvider.loadMetricsMetadata?.() ?? Promise.resolve()).then(() => queryMetadata()); // eslint-disable-line sonarjs/deprecation
 
     let metadata = await queryMetadata();
 
@@ -259,7 +259,9 @@ export class MetricDatasourceHelper {
 
     if (MetricDatasourceHelper.dsUsesTimeRangeInLegacyLanguageProviderMethods(ds)) {
       // eslint-disable-next-line sonarjs/deprecation
-      return ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher).then((labels) => Object.keys(labels));
+      return (ds.languageProvider.fetchLabelsWithMatch?.(timeRange, matcher) ?? Promise.resolve({})).then((labels) =>
+        Object.keys(labels)
+      );
     }
 
     // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelsWithMatch signature
@@ -308,11 +310,11 @@ export class MetricDatasourceHelper {
       : ds.languageProvider.fetchLabelValues; // eslint-disable-line sonarjs/deprecation
 
     if (MetricDatasourceHelper.dsUsesTimeRangeInLegacyLanguageProviderMethods(ds)) {
-      return fetchLabelValuesWithOptionalMatcher(timeRange, labelName, matcher);
+      return fetchLabelValuesWithOptionalMatcher?.(timeRange, labelName, matcher) ?? Promise.resolve([]); // eslint-disable-line sonarjs/deprecation
     }
 
     // @ts-expect-error: Ignoring type error due to breaking change in fetchSeriesValuesWithMatch signature
-    return fetchLabelValuesWithOptionalMatcher(labelName, matcher);
+    return fetchLabelValuesWithOptionalMatcher?.(labelName, matcher) ?? Promise.resolve([]); // eslint-disable-line sonarjs/deprecation
   }
 
   public static async getPrometheusDataSourceForScene(
