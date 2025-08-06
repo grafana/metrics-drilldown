@@ -2,7 +2,10 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
 import { Expression, MatchingOperator, promql } from 'tsqtsq';
 
-export type NonRateQueryFunction = 'avg' | 'min' | 'max';
+const nonRateQueryFunctions = new Set(['avg', 'min', 'max'] as const);
+export type NonRateQueryFunction = typeof nonRateQueryFunctions extends Set<infer T> ? T : never;
+export const isNonRateQueryFunction = (value: string): value is NonRateQueryFunction =>
+  nonRateQueryFunctions.has(value as NonRateQueryFunction);
 export const DEFAULT_NON_RATE_QUERY_FUNCTION: NonRateQueryFunction = 'avg';
 
 export interface BuildPrometheusQueryParams {

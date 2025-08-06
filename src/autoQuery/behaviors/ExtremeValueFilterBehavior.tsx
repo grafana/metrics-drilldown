@@ -10,7 +10,7 @@ import { reportExploreMetrics } from 'interactions';
 
 import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR } from '../../shared';
 import { logger } from '../../tracking/logger/logger';
-import { buildPrometheusQuery } from '../buildPrometheusQuery';
+import { buildPrometheusQuery, isNonRateQueryFunction, type NonRateQueryFunction } from '../buildPrometheusQuery';
 
 /**
  * A stateless function that detects when all data in a query result is NaN
@@ -114,15 +114,15 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel): Re
   }
 
   // Parse the original query to extract the metric, filters, groupings, etc.
-  const queryParts = parseQueryForRebuild(queries[0].expr, queryRunner);
+  const queryParsing = parseQueryForRebuild(queries[0].expr, queryRunner);
 
-  if (!queryParts) {
-    return { success: false, issue: 'Could not parse query for rebuilding' };
+  if (!queryParsing.success) {
+    return { success: false, issue: queryParsing.error.message };
   }
 
   // Rebuild the query with extreme value filtering
   const filteredQuery = buildPrometheusQuery({
-    ...queryParts,
+    ...queryParsing.queryParts,
     filterExtremeValues: true,
   });
 
@@ -146,10 +146,20 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel): Re
   return { success: true };
 }
 
+interface QueryParts {
+  metric: string;
+  filters: AdHocVariableFilter[];
+  isRateQuery: boolean;
+  nonRateQueryFunction?: NonRateQueryFunction;
+  groupings?: string[];
+}
+
+type ParseQueryForRebuildResult = { success: true; queryParts: QueryParts } | { success: false; error: Error };
+
 /**
  * Parses a PromQL query to extract parameters for rebuilding with filtering
  */
-export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunner) {
+export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunner): ParseQueryForRebuildResult {
   try {
     let queryExpression = query;
     const hasTemplateVariables = query.includes(VAR_METRIC_EXPR) || query.includes(VAR_FILTERS_EXPR);
@@ -163,7 +173,7 @@ export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunne
     const labels: AdHocVariableFilter[] = [];
     let isRateQuery = false;
     let groupings: string[] | undefined;
-    let nonRateQueryFunction: string | undefined;
+    let nonRateQueryFunction: NonRateQueryFunction | undefined;
 
     // Use tree.iterate() for simpler traversal
     tree.iterate({
@@ -181,7 +191,7 @@ export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunne
 
           if (functionName === 'rate') {
             isRateQuery = true;
-          } else if (['avg', 'sum', 'min', 'max', 'count'].includes(functionName)) {
+          } else if (isNonRateQueryFunction(functionName)) {
             nonRateQueryFunction = functionName;
             isRateQuery = false;
           }
@@ -210,21 +220,24 @@ export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunne
     });
 
     if (!metric) {
-      return null;
+      return { success: false, error: new Error('ExtremeValueFilterBehavior: No metric found in query') };
     }
 
     return {
-      metric,
-      filters: labels,
-      isRateQuery,
-      groupings,
-      nonRateQueryFunction: nonRateQueryFunction as any,
+      success: true,
+      queryParts: {
+        metric,
+        filters: labels,
+        isRateQuery,
+        groupings,
+        nonRateQueryFunction,
+      },
     };
   } catch (error) {
-    const errorObject = error instanceof Error ? error : new Error('ExtremeValueFilterBehavior: Error parsing query');
-
-    logger.error(errorObject, { query });
-    return null;
+    return {
+      success: false,
+      error: error instanceof Error ? error : new Error('ExtremeValueFilterBehavior: Error parsing query'),
+    };
   }
 }
 
