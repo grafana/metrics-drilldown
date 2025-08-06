@@ -53,7 +53,6 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   private sortBy?: SortSeriesByOption;
 
   public constructor({
-    $data,
     $behaviors,
     body,
     getLayoutChild,
@@ -62,8 +61,8 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     getLayoutEmpty,
     initialPageSize,
     pageSizeIncrement,
+    $data,
   }: {
-    $data: SceneByFrameRepeaterState['$data'];
     $behaviors: SceneByFrameRepeaterState['$behaviors'];
     body: SceneByFrameRepeaterState['body'];
     getLayoutChild: SceneByFrameRepeaterState['getLayoutChild'];
@@ -72,6 +71,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     getLayoutEmpty?: SceneByFrameRepeaterState['getLayoutEmpty'];
     initialPageSize?: SceneByFrameRepeaterState['initialPageSize'];
     pageSizeIncrement?: SceneByFrameRepeaterState['pageSizeIncrement'];
+    $data?: SceneByFrameRepeaterState['$data'];
   }) {
     super({
       key: 'breakdown-by-frame-repeater',
