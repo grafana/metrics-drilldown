@@ -54,6 +54,11 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
       const extremeValueRemoval = removeExtremeValues(queryRunner, panel);
 
       if (!extremeValueRemoval.success) {
+        panel.setState({
+          titleItems: (
+            <VizPanelExtremeValuesWarning warning="Extreme values detected, but could not re-run the query with extreme value filtering" />
+          ),
+        });
         logger.warn('ExtremeValueFilterBehavior: Failed to remove extreme values:', extremeValueRemoval.issue);
       }
     }
@@ -99,10 +104,7 @@ function isDataFrameAllNaN(frame: DataFrame): boolean {
   return valuesField.entities.NaN.length === frame.length;
 }
 
-interface RemoveExtremeValuesMeta {
-  success: boolean;
-  issue?: string;
-}
+type RemoveExtremeValuesMeta = { success: true } | { success: false; issue: string };
 
 /**
  * Re-run the query with extreme value filtering enabled
@@ -117,7 +119,7 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel): Re
   const queryParsing = parseQueryForRebuild(queries[0].expr, queryRunner);
 
   if (!queryParsing.success) {
-    return { success: false, issue: queryParsing.error.message };
+    return { success: false, issue: queryParsing.issue };
   }
 
   // Rebuild the query with extreme value filtering
@@ -138,7 +140,9 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel): Re
 
   panel.setState({
     $data: newQueryRunner,
-    titleItems: <VizPanelExtremeValuesWarning />,
+    titleItems: (
+      <VizPanelExtremeValuesWarning warning="Panel data was re-fetched with a more complex query to handle extremely small values in the series" />
+    ),
   });
 
   newQueryRunner.runQueries();
@@ -154,20 +158,20 @@ interface QueryParts {
   groupings?: string[];
 }
 
-type ParseQueryForRebuildResult = { success: true; queryParts: QueryParts } | { success: false; error: Error };
+type ParseQueryForRebuildResult = { success: true; queryParts: QueryParts } | { success: false; issue: string };
 
 /**
  * Parses a PromQL query to extract parameters for rebuilding with filtering
  */
 export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunner): ParseQueryForRebuildResult {
+  let queryExpression = query;
+  const hasTemplateVariables = query.includes(VAR_METRIC_EXPR) || query.includes(VAR_FILTERS_EXPR);
+
+  if (hasTemplateVariables) {
+    queryExpression = sceneGraph.interpolate(queryRunner, query);
+  }
+
   try {
-    let queryExpression = query;
-    const hasTemplateVariables = query.includes(VAR_METRIC_EXPR) || query.includes(VAR_FILTERS_EXPR);
-
-    if (hasTemplateVariables) {
-      queryExpression = sceneGraph.interpolate(queryRunner, query);
-    }
-
     const tree = parser.parse(queryExpression);
     let metric = '';
     const labels: AdHocVariableFilter[] = [];
@@ -220,7 +224,10 @@ export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunne
     });
 
     if (!metric) {
-      return { success: false, error: new Error('ExtremeValueFilterBehavior: No metric found in query') };
+      return {
+        success: false,
+        issue: `Could not parse the metric name from the query: ${queryExpression}`,
+      };
     }
 
     return {
@@ -236,7 +243,9 @@ export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunne
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error : new Error('ExtremeValueFilterBehavior: Error parsing query'),
+      issue: `Unexpected error during query parsing to handle extreme values: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     };
   }
 }
@@ -260,12 +269,12 @@ function extractGroupings(node: any, expr: string): string[] {
   return groupings;
 }
 
-function VizPanelExtremeValuesWarning() {
+function VizPanelExtremeValuesWarning({ warning }: { readonly warning: string }) {
   const styles = useStyles2(getStyles);
 
   return (
     <div className={styles.extremeValuedisclaimer}>
-      <Tooltip content="Panel data was re-fetched with a more complex query to handle extremely small values in the series">
+      <Tooltip content={warning}>
         <span className={styles.warningMessage}>
           <Icon name="exclamation-triangle" aria-hidden="true" />
         </span>
