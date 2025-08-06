@@ -4,6 +4,7 @@ import { sceneGraph, SceneQueryRunner, type CancelActivationHandler, type VizPan
 import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
 import { parser } from '@prometheus-io/lezer-promql';
 import React from 'react';
+import { type Unsubscribable } from 'rxjs';
 
 import { processLabelMatcher } from 'extensions/links';
 import { reportExploreMetrics } from 'interactions';
@@ -29,18 +30,9 @@ import { buildPrometheusQuery, isNonRateQueryFunction, type NonRateQueryFunction
 export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHandler | void {
   const [queryRunner] = sceneGraph.findDescendents(panel, SceneQueryRunner);
 
-  // Prevent double-unsubscribing, by tracking if the subscription has been unsubscribed already.
-  // Without this, double-unsubscribing can happen due to the query runner being cloned and updated in `removeExtremeValues`.
-  let isUnsubscribed = false;
-
   // When the query runner's state changes, check if the data is all NaN.
   // If it is, remove the extreme values from the query.
   const queryRunnerSub = queryRunner?.subscribeToState((state) => {
-    // Don't process if already unsubscribed
-    if (isUnsubscribed) {
-      return;
-    }
-
     if (state.data?.state === LoadingState.Done && state.data?.series) {
       const { series } = state.data;
 
@@ -51,7 +43,7 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
       reportExploreMetrics('extreme_value_filter_behavior_triggered', {
         expression: sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr),
       });
-      const extremeValueRemoval = removeExtremeValues(queryRunner, panel);
+      const extremeValueRemoval = removeExtremeValues(queryRunner, panel, queryRunnerSub);
 
       if (!extremeValueRemoval.success) {
         panel.setState({
@@ -66,8 +58,7 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
 
   // Return cleanup function
   return () => {
-    if (!isUnsubscribed && queryRunnerSub) {
-      isUnsubscribed = true;
+    if (queryRunnerSub) {
       queryRunnerSub.unsubscribe();
     }
   };
@@ -109,7 +100,11 @@ type RemoveExtremeValuesMeta = { success: true } | { success: false; issue: stri
 /**
  * Re-run the query with extreme value filtering enabled
  */
-function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel): RemoveExtremeValuesMeta {
+function removeExtremeValues(
+  queryRunner: SceneQueryRunner,
+  panel: VizPanel,
+  queryRunnerSub: Unsubscribable
+): RemoveExtremeValuesMeta {
   const queries = queryRunner.state.queries;
   if (!queries || queries.length === 0) {
     return { success: false, issue: 'No queries found in query runner' };
@@ -127,6 +122,11 @@ function removeExtremeValues(queryRunner: SceneQueryRunner, panel: VizPanel): Re
     ...queryParsing.queryParts,
     filterExtremeValues: true,
   });
+
+  // Unsubscribe from the original query runner before replacing it
+  if (queryRunnerSub) {
+    queryRunnerSub.unsubscribe();
+  }
 
   // Create a new query runner with the filtered query
   const newQueryRunner = queryRunner.clone({
