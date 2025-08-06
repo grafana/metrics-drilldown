@@ -49,6 +49,7 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Sidebar', () => {
     test.describe('Prefix and suffix filters logic behavior', () => {
+      // eslint-disable-next-line playwright/expect-expect
       test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
         metricsReducerView,
         expectScreenshotInCurrentGrafanaVersion,
@@ -66,6 +67,7 @@ test.describe('Metrics reducer view', () => {
         );
       });
 
+      // eslint-disable-next-line playwright/expect-expect
       test('Between filter groups, selections use AND logic ((prefix.one OR prefix.two) AND (suffix.one OR suffix.two))', async ({
         metricsReducerView,
         expectScreenshotInCurrentGrafanaVersion,
