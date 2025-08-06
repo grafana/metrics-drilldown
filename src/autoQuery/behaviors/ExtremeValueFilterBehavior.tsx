@@ -305,7 +305,7 @@ const getStyles = (theme: GrafanaTheme2, level: 'warning' | 'info') => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(0.5),
-    color: level === 'warning' ? theme.colors.warning.main : theme.colors.text.secondary,
+    color: level === 'warning' ? theme.colors.warning.main : theme.colors.info.main,
     fontSize: theme.typography.bodySmall.fontSize,
   }),
 });
