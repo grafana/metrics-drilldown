@@ -29,7 +29,6 @@ import { SortBySelector } from './SortBySelector';
  * 3. Support for $behaviors, that is used to reset the y axis sync after filtering and/or sorting
  */
 interface SceneByFrameRepeaterState extends SceneObjectState {
-  $data?: SceneDataProvider;
   $behaviors: Array<SceneObject | SceneStatelessBehavior>;
   body: SceneLayout;
   getLayoutChild(data: PanelData, frame: DataFrame, frameIndex: number): SceneObject | null;
@@ -43,6 +42,7 @@ interface SceneByFrameRepeaterState extends SceneObjectState {
   errorLayout?: SceneObject;
   emptyLayout?: SceneObject;
   counts: CountsData;
+  $data?: SceneDataProvider;
 }
 
 const DEFAULT_INITIAL_PAGE_SIZE = 120;
@@ -53,7 +53,6 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   private sortBy?: SortSeriesByOption;
 
   public constructor({
-    $data,
     $behaviors,
     body,
     getLayoutChild,
@@ -62,8 +61,8 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     getLayoutEmpty,
     initialPageSize,
     pageSizeIncrement,
+    $data,
   }: {
-    $data: SceneByFrameRepeaterState['$data'];
     $behaviors: SceneByFrameRepeaterState['$behaviors'];
     body: SceneByFrameRepeaterState['body'];
     getLayoutChild: SceneByFrameRepeaterState['getLayoutChild'];
@@ -72,10 +71,10 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     getLayoutEmpty?: SceneByFrameRepeaterState['getLayoutEmpty'];
     initialPageSize?: SceneByFrameRepeaterState['initialPageSize'];
     pageSizeIncrement?: SceneByFrameRepeaterState['pageSizeIncrement'];
+    $data?: SceneByFrameRepeaterState['$data'];
   }) {
     super({
       key: 'breakdown-by-frame-repeater',
-      $data,
       $behaviors,
       body,
       getLayoutChild,
@@ -89,6 +88,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       errorLayout: undefined,
       emptyLayout: undefined,
       counts: { current: 0, total: 0 },
+      $data,
     });
 
     this.addActivationHandler(() => {
