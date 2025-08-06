@@ -14,7 +14,7 @@ import React from 'react';
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
-import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelsValuesList';
+import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 
 export interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
