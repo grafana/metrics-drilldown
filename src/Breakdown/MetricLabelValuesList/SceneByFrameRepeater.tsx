@@ -3,6 +3,7 @@ import {
   sceneGraph,
   SceneObjectBase,
   type SceneComponentProps,
+  type SceneDataProvider,
   type SceneLayout,
   type SceneObject,
   type SceneObjectState,
@@ -41,6 +42,7 @@ interface SceneByFrameRepeaterState extends SceneObjectState {
   errorLayout?: SceneObject;
   emptyLayout?: SceneObject;
   counts: CountsData;
+  $data?: SceneDataProvider;
 }
 
 const DEFAULT_INITIAL_PAGE_SIZE = 120;
@@ -59,6 +61,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     getLayoutEmpty,
     initialPageSize,
     pageSizeIncrement,
+    $data,
   }: {
     $behaviors: SceneByFrameRepeaterState['$behaviors'];
     body: SceneByFrameRepeaterState['body'];
@@ -68,6 +71,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     getLayoutEmpty?: SceneByFrameRepeaterState['getLayoutEmpty'];
     initialPageSize?: SceneByFrameRepeaterState['initialPageSize'];
     pageSizeIncrement?: SceneByFrameRepeaterState['pageSizeIncrement'];
+    $data?: SceneByFrameRepeaterState['$data'];
   }) {
     super({
       key: 'breakdown-by-frame-repeater',
@@ -84,6 +88,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       errorLayout: undefined,
       emptyLayout: undefined,
       counts: { current: 0, total: 0 },
+      $data,
     });
 
     this.addActivationHandler(() => {
