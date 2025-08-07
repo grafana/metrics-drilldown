@@ -29,7 +29,6 @@ import { SortBySelector } from './SortBySelector';
  * 3. Support for $behaviors, that is used to reset the y axis sync after filtering and/or sorting
  */
 interface SceneByFrameRepeaterState extends SceneObjectState {
-  $data?: SceneDataProvider;
   $behaviors: Array<SceneObject | SceneStatelessBehavior>;
   body: SceneLayout;
   getLayoutChild(data: PanelData, frame: DataFrame, frameIndex: number): SceneObject | null;
@@ -54,7 +53,6 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   private sortBy?: SortSeriesByOption;
 
   public constructor({
-    $data,
     $behaviors,
     body,
     getLayoutChild,
@@ -65,7 +63,6 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     pageSizeIncrement,
     $data,
   }: {
-    $data: SceneByFrameRepeaterState['$data'];
     $behaviors: SceneByFrameRepeaterState['$behaviors'];
     body: SceneByFrameRepeaterState['body'];
     getLayoutChild: SceneByFrameRepeaterState['getLayoutChild'];
@@ -78,7 +75,6 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   }) {
     super({
       key: 'breakdown-by-frame-repeater',
-      $data,
       $behaviors,
       body,
       getLayoutChild,
