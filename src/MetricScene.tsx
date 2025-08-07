@@ -1,6 +1,9 @@
 import { css } from '@emotion/css';
 import { config } from '@grafana/runtime';
 import {
+  behaviors,
+  SceneCSSGridItem,
+  SceneCSSGridLayout,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   SceneVariableSet,
@@ -10,11 +13,19 @@ import {
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
+import { DashboardCursorSync } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { GroupByVariable } from 'Breakdown/GroupByVariable';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
+import { getColorByIndex, getTrailFor } from 'utils';
+import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
+import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
+import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
+import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigureFunction';
+import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
@@ -31,6 +42,7 @@ export interface MetricSceneState extends SceneObjectState {
   actionView?: ActionViewType;
   queryDef?: AutoQueryDef;
   relatedLogsCount?: number;
+  drawer: SceneDrawer;
 }
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
@@ -45,13 +57,14 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     },
   });
 
-  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'autoQuery'>) {
+  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'autoQuery' | 'drawer'>) {
     const autoQuery = state.autoQuery ?? getAutoQueriesForMetric(state.metric, state.nativeHistogram);
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
       body: state.body ?? new MetricGraphScene({ metric: state.metric }),
       autoQuery,
       queryDef: state.queryDef ?? autoQuery.main,
+      drawer: new SceneDrawer({}),
       ...state,
     });
 
@@ -68,6 +81,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.setState({ relatedLogsCount: count });
     });
 
+    this.subscribeToEvents();
+  }
+
+  private subscribeToEvents() {
     if (config.featureToggles.enableScopesInMetricsExplore) {
       // Push the scopes change event to the tabs
       // The event is not propagated because the tabs are not part of the scene graph
@@ -77,6 +94,53 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         })
       );
     }
+
+    this._subs.add(
+      this.subscribeToEvent(EventConfigureFunction, (event) => {
+        this.openDrawer(event.payload.metricName);
+      })
+    );
+  }
+
+  private openDrawer(metricName: string) {
+    const trail = getTrailFor(this);
+
+    this.state.drawer.open({
+      title: 'Choose a new Prometheus function',
+      subTitle: metricName,
+      body: new SceneCSSGridLayout({
+        templateColumns: GRID_TEMPLATE_COLUMNS,
+        autoRows: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+        isLazy: true,
+        $behaviors: [
+          new behaviors.CursorSync({
+            key: 'metricCrosshairSync',
+            sync: DashboardCursorSync.Crosshair,
+          }),
+        ],
+        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map((option, colorIndex) => {
+          return new SceneCSSGridItem({
+            body: new MetricVizPanel({
+              title: option.label,
+              metricName,
+              color: getColorByIndex(colorIndex),
+              prometheusFunction: option.value,
+              height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
+              hideLegend: true,
+              highlight: colorIndex === 1,
+              isNativeHistogram: trail.isNativeHistogram(metricName),
+              headerActions: [
+                new ApplyAction({
+                  metricName,
+                  prometheusFunction: option.value,
+                  disabled: colorIndex === 1,
+                }),
+              ],
+            }),
+          });
+        }),
+      }),
+    });
   }
 
   getUrlState() {
@@ -110,13 +174,16 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   }
 
   static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
-    const { body } = model.useState();
+    const { body, drawer } = model.useState();
     const styles = useStyles2(getStyles);
 
     return (
-      <div className={styles.container} data-testid="metric-scene">
-        <body.Component model={body} />
-      </div>
+      <>
+        <div className={styles.container} data-testid="metric-scene">
+          <body.Component model={body} />
+        </div>
+        <drawer.Component model={drawer} />
+      </>
     );
   };
 

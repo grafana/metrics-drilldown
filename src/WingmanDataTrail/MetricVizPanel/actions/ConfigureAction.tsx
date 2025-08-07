@@ -41,7 +41,7 @@ export class ConfigureAction extends SceneObjectBase<ConfigureActionState> {
         fill="text"
         onClick={model.onClick}
         icon="cog"
-        tooltip="Configure the Prometheus function"
+        tooltip="Configure Prometheus function and panel type"
         tooltipPlacement="top"
       />
     );
