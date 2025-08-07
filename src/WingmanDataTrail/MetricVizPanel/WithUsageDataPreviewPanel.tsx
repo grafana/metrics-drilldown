@@ -1,5 +1,3 @@
-import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
 import {
   SceneCSSGridLayout,
   sceneGraph,
@@ -7,7 +5,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Icon, Tooltip, useStyles2, type IconName } from '@grafana/ui';
+import { type IconName } from '@grafana/ui';
 import React from 'react';
 
 import { logger } from 'tracking/logger/logger';
@@ -17,7 +15,6 @@ import {
   VAR_WINGMAN_SORT_BY,
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
-import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricUsageFetcher';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import {
@@ -26,14 +23,19 @@ import {
   type MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
+import { UsageData } from './UsageData';
+
 type SortBy = Exclude<SortingOption, 'related'>;
 
-type WithUsageDataPreviewPanelState = SceneObjectState & {
-  [key in MetricUsageType]: number;
-} & {
+export type WithUsageDataPreviewPanelState = SceneObjectState & {
   vizPanelInGridItem: MetricVizPanel;
   metric: string;
   sortBy: SortBy;
+  usageCount: number;
+  singularUsageType: string;
+  pluralUsageType: string;
+  icon: IconName;
+  dashboardItems: Array<{ id: string; label: string; count: number; url: string }>;
 };
 
 export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPreviewPanelState> {
@@ -41,8 +43,11 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     super({
       ...state,
       sortBy: 'default',
-      'alerting-usage': 0,
-      'dashboard-usage': 0,
+      usageCount: 0,
+      singularUsageType: '',
+      pluralUsageType: '',
+      icon: '' as IconName,
+      dashboardItems: [],
     });
 
     this.addActivationHandler(this._onActivate.bind(this));
@@ -76,127 +81,90 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     }
   }
 
-  private updateSortBy(metricsSorter: MetricsSorter, sortBy: SortBy) {
+  private async updateSortBy(metricsSorter: MetricsSorter, sortBy: SortBy) {
     this.setState({ sortBy });
+    this.updateLayout(sortBy);
 
-    const gridLayout = sceneGraph.getAncestor(this, SceneCSSGridLayout);
-    const currentGridLayoutHeight = gridLayout?.state.autoRows;
+    if (sortBy === 'default') {
+      return;
+    }
+
+    const usage = await metricsSorter.getUsageDetailsForMetric(this.state.metric, sortBy);
 
     switch (sortBy) {
       case 'dashboard-usage':
-      case 'alerting-usage':
-        metricsSorter.getUsageForMetric(this.state.metric, sortBy).then((usage) => {
-          this.setState({
-            [sortBy]: usage,
-          });
+        // FIXME: we do this only to satisfy TS Lord
+        if (usage.usageType !== 'dashboard-usage') {
+          return;
+        }
+
+        const { dashboards } = usage;
+
+        this.setState({
+          usageCount: usage.count,
+          singularUsageType: 'dashboard panel query',
+          pluralUsageType: 'dashboard panel queries',
+          icon: 'apps',
+          dashboardItems: Object.entries(dashboards)
+            .map(([label, dashboardInfo]) => ({
+              id: dashboardInfo.uid,
+              label,
+              count: dashboardInfo.count,
+              url: dashboardInfo.url,
+            }))
+            .sort((a, b) => b.count - a.count),
         });
-        if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW) {
-          gridLayout.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW });
-        }
         break;
+
+      case 'alerting-usage':
+        this.setState({
+          usageCount: usage.count,
+          singularUsageType: 'alert rule',
+          pluralUsageType: 'alert rules',
+          icon: 'bell',
+        });
+        break;
+
       default:
-        if (currentGridLayoutHeight !== METRICS_VIZ_PANEL_HEIGHT) {
-          gridLayout.setState({ autoRows: METRICS_VIZ_PANEL_HEIGHT });
-        }
         break;
     }
   }
 
+  private updateLayout(sortBy: WithUsageDataPreviewPanelState['sortBy']) {
+    const gridLayout = sceneGraph.getAncestor(this, SceneCSSGridLayout);
+    const currentGridLayoutHeight = gridLayout?.state.autoRows;
+
+    const expectedPanelHeight =
+      sortBy === 'default' ? METRICS_VIZ_PANEL_HEIGHT : METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW;
+
+    if (currentGridLayoutHeight !== expectedPanelHeight) {
+      gridLayout.setState({ autoRows: expectedPanelHeight });
+    }
+  }
+
   public static readonly Component = ({ model }: SceneComponentProps<WithUsageDataPreviewPanel>) => {
-    const {
-      vizPanelInGridItem,
-      sortBy,
-      'alerting-usage': metricUsedInAlertingRulesCount,
-      'dashboard-usage': metricUsedInDashboardsCount,
-    } = model.useState();
+    const { vizPanelInGridItem, sortBy, usageCount, singularUsageType, pluralUsageType, icon, dashboardItems } =
+      model.useState();
 
     if (!vizPanelInGridItem) {
       logger.log('no viz panel');
       return;
     }
 
-    if (sortBy === 'default') {
-      return (
-        <div data-testid="with-usage-data-preview-panel">
-          <vizPanelInGridItem.Component model={vizPanelInGridItem} />
-        </div>
-      );
-    }
-
-    const usageDetails: Record<MetricUsageType, Omit<UsageSectionProps, 'usageType'>> = {
-      'dashboard-usage': {
-        usageCount: metricUsedInDashboardsCount,
-        singularUsageType: 'dashboard panel query',
-        pluralUsageType: 'dashboard panel queries',
-        icon: 'apps',
-      },
-      'alerting-usage': {
-        usageCount: metricUsedInAlertingRulesCount,
-        singularUsageType: 'alert rule',
-        pluralUsageType: 'alert rules',
-        icon: 'bell',
-      },
-    };
-
     return (
       <div data-testid="with-usage-data-preview-panel">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
-        <UsageData
-          usageType={sortBy}
-          usageCount={usageDetails[sortBy].usageCount}
-          singularUsageType={usageDetails[sortBy].singularUsageType}
-          pluralUsageType={usageDetails[sortBy].pluralUsageType}
-          icon={usageDetails[sortBy].icon as IconName}
-        />
+        {sortBy !== 'default' && (
+          <UsageData
+            usageType={sortBy}
+            usageCount={usageCount}
+            singularUsageType={singularUsageType}
+            pluralUsageType={pluralUsageType}
+            icon={icon}
+            dashboardItems={dashboardItems}
+          />
+        )}
       </div>
     );
-  };
-}
-
-interface UsageSectionProps {
-  usageType: MetricUsageType;
-  usageCount: number;
-  singularUsageType: string;
-  pluralUsageType: string;
-  icon: IconName;
-}
-
-function UsageData({ usageType, usageCount, singularUsageType, pluralUsageType, icon }: Readonly<UsageSectionProps>) {
-  const styles = useStyles2(getStyles);
-
-  return (
-    <div className={styles.usageContainer} data-testid="usage-data-panel">
-      <Tooltip
-        content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
-        placement="top"
-      >
-        <span className={styles.usageItem} data-testid={usageType}>
-          <Icon name={icon} /> {usageCount}
-        </span>
-      </Tooltip>
-    </div>
-  );
-}
-
-function getStyles(theme: GrafanaTheme2) {
-  return {
-    usageContainer: css({
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'flex-start',
-      gap: '17px',
-      padding: '8px 12px',
-      border: `1px solid ${theme.colors.border.weak}`,
-      borderTopWidth: 0,
-      backgroundColor: theme.colors.background.primary,
-      alignItems: 'center',
-    }),
-    usageItem: css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
-      color: theme.colors.text.secondary,
-      opacity: '65%',
-    }),
   };
 }
