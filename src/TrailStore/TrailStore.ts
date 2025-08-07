@@ -2,9 +2,9 @@ import { urlUtil } from '@grafana/data';
 import { sceneUtils, type SceneObject, type SceneObjectRef, type SceneObjectUrlValues } from '@grafana/scenes';
 import { debounce, isEqual } from 'lodash';
 
+import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY, userPreferences } from '../userPreferences';
 import { createBookmarkSavedNotification } from './utils';
 import { DataTrail } from '../DataTrail';
-import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY } from '../shared';
 import { newMetricsTrail } from '../utils';
 
 const MAX_RECENT_TRAILS = 20;
@@ -45,8 +45,8 @@ export class TrailStore {
       const serializedRecent = this._recent
         .slice(0, MAX_RECENT_TRAILS)
         .map((trail) => this._serializeTrail(trail.resolve()));
-      localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify(serializedRecent));
-      localStorage.setItem(TRAIL_BOOKMARKS_KEY, JSON.stringify(this._bookmarks));
+      userPreferences.setItem(RECENT_TRAILS_KEY, serializedRecent);
+      userPreferences.setItem(TRAIL_BOOKMARKS_KEY, this._bookmarks);
       this._lastModified = Date.now();
     };
 
@@ -61,21 +61,16 @@ export class TrailStore {
 
   private _loadRecentTrailsFromStorage() {
     const list: Array<SceneObjectRef<DataTrail>> = [];
-    const storageItem = localStorage.getItem(RECENT_TRAILS_KEY);
-    if (storageItem) {
-      const serializedTrails: SerializedTrail[] = JSON.parse(storageItem);
-      for (const t of serializedTrails) {
-        const trail = this._deserializeTrail(t);
-        list.push(trail.getRef());
-      }
+    const serializedTrails: SerializedTrail[] = userPreferences.getItem(RECENT_TRAILS_KEY) || [];
+    for (const t of serializedTrails) {
+      const trail = this._deserializeTrail(t);
+      list.push(trail.getRef());
     }
     return list;
   }
 
   private _loadBookmarksFromStorage() {
-    const storageItem = localStorage.getItem(TRAIL_BOOKMARKS_KEY);
-
-    const list: Array<DataTrailBookmark | SerializedTrail> = storageItem ? JSON.parse(storageItem) : [];
+    const list: Array<DataTrailBookmark | SerializedTrail> = userPreferences.getItem(TRAIL_BOOKMARKS_KEY) || [];
 
     return list.map((item) => {
       if (isSerializedTrail(item)) {
