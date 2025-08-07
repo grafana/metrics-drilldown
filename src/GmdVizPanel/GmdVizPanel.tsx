@@ -119,7 +119,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.subscribeToStateChanges();
     this.subscribeToEvents();
 
-    // isNativeHistogram() depends on an async process to load metrics metadata, so it's possibile that
+    // isNativeHistogram() depends on an async process to load metrics metadata, so it's possible that
     // when landing on the page, the metadata is not yet loaded and the histogram metrics are not be rendered as heatmap panels.
     // But we still want to render them ASAP and update them later when the metadata has arrived.
     const trail = getTrailFor(this);
