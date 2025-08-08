@@ -412,7 +412,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
     }),
   ];
 
-  if (config.featureToggles.scopeFilters && config.featureToggles.enableScopesInMetricsExplore) {
+  if (isScopesSupported()) {
     variables.unshift(new ScopesVariable({ enable: true }));
   }
 
@@ -475,4 +475,14 @@ function updateAppControlsHeight() {
 
   const { height } = appControls.getBoundingClientRect();
   document.documentElement.style.setProperty('--app-controls-height', `${height}px`);
+}
+
+function isScopesSupported(): boolean {
+  return Boolean(
+    config.featureToggles.scopeFilters &&
+      config.featureToggles.enableScopesInMetricsExplore &&
+      // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
+      // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
+      !config.buildInfo.version.startsWith('11.')
+  );
 }
