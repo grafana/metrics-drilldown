@@ -19,6 +19,7 @@ import { GmdVizPanelVariantSelector } from 'GmdVizPanel/GmdVizPanelVariantSelect
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
+import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
 
 import { type DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
@@ -74,7 +75,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             metric,
             description,
             height: PANEL_HEIGHT.XL,
-            headerActions: ({ panelType }) => [new GmdVizPanelVariantSelector({ metric, panelType })],
+            headerActions: ({ panelType }) => [
+              new GmdVizPanelVariantSelector({ metric, panelType }),
+              new ConfigureAction({ metricName: metric }),
+            ],
             menu: new PanelMenu({ labelName: metric }),
             queryResolution: QUERY_RESOLUTION.HIGH,
           }),
