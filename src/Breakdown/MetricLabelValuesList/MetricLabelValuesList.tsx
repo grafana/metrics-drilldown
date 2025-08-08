@@ -22,7 +22,6 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
-import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
 import { PanelMenu } from 'Menu/PanelMenu';
@@ -38,6 +37,7 @@ import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { LabelValuesCountsProvider } from './LabelValuesCountProvider';
+import { LabelValueVizPanel } from './LabelValueVizPanel';
 import { SceneByFrameRepeater } from './SceneByFrameRepeater';
 import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 
@@ -226,25 +226,18 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         }
 
         const labelValue = getLabelValueFromDataFrame(frame);
-        const panelKey = `panel-${metric}-${labelValue}`;
 
         const canAddToFilters = !labelValue.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
         const headerActions = canAddToFilters ? [new AddToFiltersGraphAction({ labelName: label, labelValue })] : [];
 
-        // TODO: Use LabelVizPanel?
-        const vizPanel = queryDef
-          .vizBuilder()
-          .setTitle(labelValue)
-          .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
-          .setBehaviors([publishTimeseriesData()]) // publishTimeseriesData is required for the syncYAxis behavior
-          .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
-          .setHeaderActions(headerActions)
-          .setShowMenuAlways(true)
-          .setMenu(new PanelMenu({ labelName: labelValue }))
-          .setUnit(unit)
-          .build();
-
-        vizPanel.setState({ key: panelKey });
+        const vizPanel = new LabelValueVizPanel({
+          labelValue,
+          data: new SceneDataNode({ data: { ...data, series: [frame] } }),
+          unit,
+          fixedColor: getColorByIndex(frameIndex),
+          headerActions,
+          menu: new PanelMenu({ labelName: labelValue }),
+        });
 
         return new SceneCSSGridItem({ body: vizPanel });
       },
