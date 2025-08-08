@@ -392,10 +392,10 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
     new AdHocFiltersVariable({
       key: VAR_FILTERS,
       name: VAR_FILTERS,
+      label: 'Filters',
       addFilterButtonText: 'Add label',
       datasource: trailDS,
-      // default to use var filters and have otel off
-      hide: VariableHide.hideLabel,
+      hide: VariableHide.dontHide,
       layout: 'combobox',
       filters: initialFilters ?? [],
       baseFilters: getBaseFiltersForMetric(metric),
@@ -404,8 +404,8 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
       expressionBuilder: (filters: AdHocVariableFilter[]) => {
         // remove any filters that include __name__ key in the expression
         // to prevent the metric name from being set twice in the query and causing an error.
-        const filtersWithoutMetricName = filters.filter((filter) => filter.key !== '__name__');
-        return [...getBaseFiltersForMetric(metric), ...filtersWithoutMetricName]
+        return filters
+          .filter((filter) => filter.key !== '__name__')
           .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
           .join(',');
       },
