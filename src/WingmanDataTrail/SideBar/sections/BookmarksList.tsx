@@ -68,7 +68,7 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
 
     const onSelect = (index: number) => {
       reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
-      const trail = getTrailStore().getTrailForBookmark(bookmarks[index]);
+      const trail = getTrailStore().getTrailForBookmarkIndex(index);
       getTrailStore().setRecentTrail(trail);
       goToUrlForTrail(trail);
     };
