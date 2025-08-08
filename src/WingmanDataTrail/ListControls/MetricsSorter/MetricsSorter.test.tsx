@@ -1,29 +1,10 @@
 import { addRecentMetric, getRecentMetrics, sortMetricsWithRecentFirst } from './MetricsSorter';
+import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
+import { userPreferences } from '../../../UserPreferences/userPreferences';
 
 describe('MetricsSorter', () => {
   beforeEach(() => {
-    Object.defineProperty(window, 'localStorage', {
-      value: (() => {
-        let store: Record<string, string> = {};
-
-        return {
-          getItem: jest.fn((key: string): string | null => {
-            return store[key] || null;
-          }),
-          setItem: jest.fn((key: string, value: string): void => {
-            store[key] = value;
-          }),
-          clear: jest.fn((): void => {
-            store = {};
-          }),
-          removeItem: jest.fn((key: string): void => {
-            delete store[key];
-          }),
-          getAll: (): Record<string, string> => ({ ...store }),
-        };
-      })(),
-      writable: true,
-    });
+    userPreferences.clear();
   });
 
   describe('sortMetricsWithRecentFirst', () => {
@@ -40,7 +21,6 @@ describe('MetricsSorter', () => {
     });
 
     it('should sort alphabetically when no recent metrics', () => {
-      // Ensure localStorage is empty
       const metrics = ['b', 'c', 'a'];
       const result = sortMetricsWithRecentFirst(metrics);
 
@@ -60,9 +40,6 @@ describe('MetricsSorter', () => {
 
       // Recent metrics should come first in order of recency (most recent first)
       expect(result).toEqual(['c', 'a', 'b']);
-
-      // Verify localStorage was accessed
-      expect(window.localStorage.getItem).toHaveBeenCalled();
     });
 
     it('should only include recent metrics that exist in the input', () => {
@@ -124,7 +101,7 @@ describe('MetricsSorter', () => {
         { name: 'metric_a', timestamp: now - 1000 },
       ];
 
-      window.localStorage.setItem('metrics-drilldown-recent-metrics/v1', JSON.stringify(recentMetrics));
+      userPreferences.setItem(PREF_KEYS.RECENT_METRICS, recentMetrics);
 
       const result = getRecentMetrics();
 
@@ -137,9 +114,7 @@ describe('MetricsSorter', () => {
     it('should add a metric to the recent metrics list', () => {
       addRecentMetric('test_metric');
 
-      // Get the data from localStorage
-      const storedData = window.localStorage.getItem('metrics-drilldown-recent-metrics/v1');
-      const recentMetrics = JSON.parse(storedData || '[]');
+      const recentMetrics = userPreferences.getItem(PREF_KEYS.RECENT_METRICS) || [];
 
       // Should have added our metric
       expect(recentMetrics.length).toBe(1);
