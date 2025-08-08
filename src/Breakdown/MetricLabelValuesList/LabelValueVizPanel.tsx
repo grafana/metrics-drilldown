@@ -15,11 +15,8 @@ import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTime
 
 interface LabelValueVizPanelState extends SceneObjectState {
   labelValue: string;
-  data: SceneDataNode;
   unit: string;
   fixedColor: string;
-  headerActions: VizPanelState['headerActions'];
-  menu: PanelMenu;
   body: VizPanel;
 }
 
@@ -33,20 +30,17 @@ export class LabelValueVizPanel extends SceneObjectBase<LabelValueVizPanelState>
     menu,
   }: {
     labelValue: LabelValueVizPanelState['labelValue'];
-    data: LabelValueVizPanelState['data'];
+    data: SceneDataNode;
     unit: LabelValueVizPanelState['unit'];
     fixedColor: LabelValueVizPanelState['fixedColor'];
-    headerActions: LabelValueVizPanelState['headerActions'];
-    menu: LabelValueVizPanelState['menu'];
+    headerActions: VizPanelState['headerActions'];
+    menu: PanelMenu;
   }) {
     super({
       key: `label-value-viz-panel-${labelValue}`,
       labelValue,
-      data,
       unit,
       fixedColor,
-      headerActions,
-      menu,
       body: LabelValueVizPanel.buildVizPanel({
         labelValue,
         data,
@@ -67,11 +61,11 @@ export class LabelValueVizPanel extends SceneObjectBase<LabelValueVizPanelState>
     menu,
   }: {
     labelValue: LabelValueVizPanelState['labelValue'];
-    data: LabelValueVizPanelState['data'];
+    data: SceneDataNode;
     unit: LabelValueVizPanelState['unit'];
     fixedColor: LabelValueVizPanelState['fixedColor'];
-    headerActions: LabelValueVizPanelState['headerActions'];
-    menu: LabelValueVizPanelState['menu'];
+    headerActions: VizPanelState['headerActions'];
+    menu: PanelMenu;
   }) {
     return PanelBuilders.timeseries()
       .setTitle(labelValue)
