@@ -107,7 +107,7 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
   }
 
   private onActivate() {
-    const { body } = this.state;
+    const { body, label } = this.state;
 
     this._subs.add(
       (body.state.$data as SceneQueryRunner).subscribeToState((newState) => {
@@ -117,11 +117,15 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
 
         const { series } = newState.data;
 
-        if (series?.length) {
-          const config = this.getAllValuesConfig(series);
-
-          body.setState(merge({}, body.state, config));
+        if (!series?.length) {
+          return;
         }
+
+        const hasNoData = series.every((s) => !s.length);
+        const headerActions = hasNoData ? null : [new SelectLabelAction({ label })];
+        const config = this.getAllValuesConfig(series);
+
+        body.setState(merge({}, body.state, { headerActions }, config));
       })
     );
   }

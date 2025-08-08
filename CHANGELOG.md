@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.9
+
+See <https://github.com/grafana/metrics-drilldown/releases/tag/v1.0.9>
+
 ## v1.0.8
 
 See <https://github.com/grafana/metrics-drilldown/releases/tag/v1.0.8>
