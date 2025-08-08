@@ -9,6 +9,7 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
+import { GmdVizPanel, PANEL_HEIGHT } from 'GmdVizPanel/GmdVizPanel';
 import { type PanelMenu } from 'Menu/PanelMenu';
 
 import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTimeseriesData';
@@ -19,6 +20,8 @@ interface LabelValueVizPanelState extends SceneObjectState {
   fixedColor: string;
   body: VizPanel;
 }
+
+export const LABEL_VALUE_VIZ_PANEL_HEIGHT = `${GmdVizPanel.getPanelHeightInPixels(PANEL_HEIGHT.M)}px`;
 
 export class LabelValueVizPanel extends SceneObjectBase<LabelValueVizPanelState> {
   constructor({
