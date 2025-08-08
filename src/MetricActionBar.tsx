@@ -23,7 +23,6 @@ import { MetricSelectedEvent } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
 import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
-import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 
@@ -72,8 +71,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     const panelData = queryRunner.state.data;
 
     if (!panelData) {
-      displayWarning(['Cannot get link to Explore: no panel data found!']);
-      return;
+      throw new Error('Cannot get link to explore, no panel data found');
     }
 
     const metricScene = sceneGraph.getAncestor(this, MetricScene);
