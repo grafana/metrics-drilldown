@@ -6,7 +6,8 @@ import React from 'react';
 
 import { type SortSeriesByOption } from 'services/sorting';
 
-import { TRAIL_BREAKDOWN_SORT_KEY, userPreferences } from '../../userPreferences';
+import { PREF_KEYS } from '../../UserPreferences/pref-keys';
+import { userPreferences } from '../../UserPreferences/userPreferences';
 
 export interface SortBySelectorState extends SceneObjectState {
   target: 'fields' | 'labels';
@@ -34,7 +35,7 @@ export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
   ];
 
   constructor(state: Pick<SortBySelectorState, 'target'>) {
-    const sortBy = userPreferences.getItem(TRAIL_BREAKDOWN_SORT_KEY);
+    const sortBy = userPreferences.getItem(PREF_KEYS.BREAKDOWN_SORTBY);
 
     super({
       key: 'breakdown-sort-by',
@@ -47,7 +48,7 @@ export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
 
   private onChange = (option: ComboboxOption<SortSeriesByOption>) => {
     this.setState({ value: option });
-    userPreferences.setItem(TRAIL_BREAKDOWN_SORT_KEY, option.value);
+    userPreferences.setItem(PREF_KEYS.BREAKDOWN_SORTBY, option.value);
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<SortBySelector>) => {

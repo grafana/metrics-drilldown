@@ -5,7 +5,8 @@ import { VAR_DATASOURCE } from 'shared';
 import { logger } from 'tracking/logger/logger';
 import { isPrometheusDataSource } from 'utils/utils.datasource';
 
-import { DATASOURCE_KEY, userPreferences } from './userPreferences';
+import { PREF_KEYS } from './UserPreferences/pref-keys';
+import { userPreferences } from './UserPreferences/userPreferences';
 
 export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
   constructor({ initialDS }: { initialDS?: string }) {
@@ -30,7 +31,7 @@ export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
     this.subscribeToState((newState, prevState) => {
       if (newState.value && newState.value !== prevState.value) {
         // store the new value for future visits
-        userPreferences.setItem(DATASOURCE_KEY, newState.value as string);
+        userPreferences.setItem(PREF_KEYS.DATASOURCE, newState.value as string);
       }
     });
   }
@@ -39,7 +40,7 @@ export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
     const prometheusDataSources = Object.values(config.datasources).filter((ds) => isPrometheusDataSource(ds));
 
     const uidFromUrl = new URL(window.location.href).searchParams.get(`var-${VAR_DATASOURCE}`);
-    const uidFromLocalStorage = userPreferences.getItem(DATASOURCE_KEY);
+    const uidFromLocalStorage = userPreferences.getItem(PREF_KEYS.DATASOURCE);
 
     const currentDataSource =
       prometheusDataSources.find((ds) => ds.uid === uidFromUrl) ||
