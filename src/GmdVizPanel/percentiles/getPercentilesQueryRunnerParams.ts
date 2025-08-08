@@ -22,12 +22,15 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
 
   const expression = buildQueryExpression({ metric, matchers, addIgnoreUsageFilter });
   let expr = expressionToString(expression);
+  let fnName;
 
   if (isNativeHistogram) {
     expr = promql.rate({ expr, interval: '$__rate_interval' });
+    fnName = 'histogram_quantile(rate)';
   } else {
     expr = promql.rate({ expr, interval: '$__rate_interval' });
     expr = promql.sum({ expr, by: ['le'] });
+    fnName = 'histogram_quantile(sum by (le) (rate))';
   }
 
   const queries = [99, 90, 50].map((percentile) => {
@@ -44,7 +47,7 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
   });
 
   return {
-    fnName: isNativeHistogram ? 'histogram_quantile(rate)' : 'histogram_quantile(sum by (le) (rate))',
+    fnName,
     isRateQuery: true,
     maxDataPoints: queryResolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries,
