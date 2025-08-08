@@ -72,6 +72,8 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   },
 ];
 
+// TODO: Configure it to return root url for GMD
+// see https://github.com/grafana/metrics-drilldown/pull/569
 export function configureDrilldownLink(context: object | undefined): { path: string } | undefined {
   if (typeof context === 'undefined') {
     return;
