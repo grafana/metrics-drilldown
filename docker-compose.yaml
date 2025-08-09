@@ -21,7 +21,7 @@ services:
       - ../logs-drilldown/dist:/var/lib/grafana/plugins/grafana-lokiexplore-app
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
-      - 'host.docker.internal:host-gateway'
+      - 'host.docker.internal:172.17.0.1'
 
   grafana-scopes-gmd:
     container_name: 'grafana-scopes-gmd'
@@ -32,6 +32,9 @@ services:
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_SCOPES_PORT:-3002}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore
+    extra_hosts:
+      # This allows us to connect to other services running on the host machine.
+      - 'host.docker.internal:172.17.0.1'
 
   prometheus-gmd:
     container_name: 'prometheus-gmd'
@@ -64,5 +67,6 @@ services:
     profiles: [playwright]
     environment:
       GRAFANA_PORT: ${GRAFANA_PORT:-3001}
+      GRAFANA_SCOPES_PORT: ${GRAFANA_SCOPES_PORT:-3002}
       GRAFANA_IMAGE: ${GRAFANA_VERSION:-grafana-enterprise}
       GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.4}

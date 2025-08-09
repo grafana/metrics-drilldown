@@ -1,5 +1,7 @@
 import { UI_TEXT } from '../../src/constants/ui';
+import { getGrafanaUrl } from '../config/playwright.config.common';
 import { expect, test } from '../fixtures';
+import { setupScopesMocking } from '../fixtures/scopes-mock';
 import { type SortByOptionNames } from '../fixtures/views/MetricsReducerView';
 
 test.describe('Metrics reducer view', () => {
@@ -238,6 +240,22 @@ test.describe('Metrics reducer view', () => {
           expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
         }
       });
+    });
+  });
+
+  test.describe('Scopes', () => {
+    test.use({
+      // Use the Grafana instance with scopes enabled
+      baseURL: getGrafanaUrl({ withScopes: true }),
+    });
+
+    test('Scopes filters are applied', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
+      await setupScopesMocking(metricsReducerView.page.context());
+      await metricsReducerView.goto(new URLSearchParams({ scopes: 'test-scope' }));
+      await expectScreenshotInCurrentGrafanaVersion(
+        metricsReducerView.page,
+        'metrics-reducer-scopes-filters-applied.png'
+      );
     });
   });
 });
