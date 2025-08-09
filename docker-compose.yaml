@@ -21,7 +21,7 @@ services:
       - ../logs-drilldown/dist:/var/lib/grafana/plugins/grafana-lokiexplore-app
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
-      - 'host.docker.internal:host-gateway'
+      - 'host.docker.internal:172.17.0.1'
 
   grafana-scopes-gmd:
     container_name: 'grafana-scopes-gmd'
@@ -44,7 +44,7 @@ services:
     ports:
       - '9099:9090'
     extra_hosts:
-      - 'host.docker.internal:172.17.0.1'
+      - 'host.docker.internal:host-gateway'
     command: >
       --enable-feature=remote-write-receiver
       --enable-feature=exemplar-storage
