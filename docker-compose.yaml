@@ -32,6 +32,9 @@ services:
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_SCOPES_PORT:-3002}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore
+    extra_hosts:
+      # This allows us to connect to other services running on the host machine.
+      - 'host.docker.internal:host-gateway'
 
   prometheus-gmd:
     container_name: 'prometheus-gmd'
