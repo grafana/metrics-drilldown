@@ -247,7 +247,7 @@ test.describe('Metrics reducer view', () => {
 
   test.describe('Scopes', () => {
     test.use({
-      // Use the Grafana instance with scopes enabled
+      // Instead of our regular Grafana instance, we'll use the Grafana instance with scopes enabled
       baseURL: getGrafanaUrl({ withScopes: true }),
     });
 
