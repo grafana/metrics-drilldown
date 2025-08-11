@@ -278,7 +278,7 @@ test.describe('Metrics reducer view', () => {
           await route.fulfill({ json: testScope });
         }
       );
-      await metricsReducerView.goto(new URLSearchParams({ scopes: 'test-scope' }));
+      await metricsReducerView.goto(new URLSearchParams({ scopes: testScope.metadata.name }));
       await expectScreenshotInCurrentGrafanaVersion(
         metricsReducerView.page,
         'metrics-reducer-scopes-filters-applied.png'
