@@ -18,7 +18,7 @@ import { actionViews, actionViewsDefinitions, type ActionViewType } from 'Metric
 
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
-import { MAIN_PANEL_MAX_HEIGHT, MAIN_PANEL_MIN_HEIGHT, MetricGraphScene } from './MetricGraphScene';
+import { MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from './shared';
@@ -49,7 +49,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     const autoQuery = state.autoQuery ?? getAutoQueriesForMetric(state.metric, state.nativeHistogram);
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
-      body: state.body ?? new MetricGraphScene({}),
+      body: state.body ?? new MetricGraphScene({ metric: state.metric }),
       autoQuery,
       queryDef: state.queryDef ?? autoQuery.main,
       ...state,
@@ -101,13 +101,9 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     const actionViewDef = actionViewType ? actionViewsDefinitions.find((v) => v.value === actionViewType) : null;
 
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
-      // reduce max height for main panel to reduce height flicker
-      body.state.topView.state.children[0].setState({ maxHeight: MAIN_PANEL_MIN_HEIGHT });
       body.setState({ selectedTab: actionViewDef.getScene(this) });
       this.setState({ actionView: actionViewDef.value });
     } else {
-      // restore max height
-      body.state.topView.state.children[0].setState({ maxHeight: MAIN_PANEL_MAX_HEIGHT });
       body.setState({ selectedTab: undefined });
       this.setState({ actionView: undefined });
     }
