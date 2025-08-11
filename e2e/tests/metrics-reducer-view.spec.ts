@@ -1,7 +1,8 @@
+import { type Scope } from '@grafana/data';
+
 import { UI_TEXT } from '../../src/constants/ui';
 import { getGrafanaUrl } from '../config/playwright.config.common';
 import { expect, test } from '../fixtures';
-import { setupScopesMocking } from '../fixtures/scopes-mock';
 import { type SortByOptionNames } from '../fixtures/views/MetricsReducerView';
 
 test.describe('Metrics reducer view', () => {
@@ -251,7 +252,32 @@ test.describe('Metrics reducer view', () => {
     });
 
     test('Scopes filters are applied', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
-      await setupScopesMocking(metricsReducerView.page.context());
+      const testScope: Scope = {
+        metadata: {
+          name: 'test-scope',
+        },
+        spec: {
+          title: 'Test Scope',
+          type: 'app',
+          description: 'Test Scope',
+          category: 'test',
+          filters: [
+            {
+              key: 'method',
+              operator: 'equals',
+              value: 'GET',
+            },
+          ],
+        },
+      };
+
+      // Mock the scope API endpoint
+      await metricsReducerView.page.route(
+        `**/apis/scope.grafana.app/v0alpha1/namespaces/default/scopes/${testScope.metadata.name}`,
+        async (route) => {
+          await route.fulfill({ json: testScope });
+        }
+      );
       await metricsReducerView.goto(new URLSearchParams({ scopes: 'test-scope' }));
       await expectScreenshotInCurrentGrafanaVersion(
         metricsReducerView.page,
