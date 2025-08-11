@@ -23,7 +23,7 @@ services:
       # This allows us to connect to other services running on the host machine.
       # 172.17.0.1 is the default Docker bridge network gateway IP address
       # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
-      - 'host.docker.internal:host-gateway'
+      - 'host.docker.internal:172.17.0.1'
 
   grafana-scopes-gmd:
     container_name: 'grafana-scopes-gmd'
