@@ -1,6 +1,6 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 
-import { TrailStore, type UrlSerializedTrail } from './TrailStore';
+import { RECENT_TRAILS_KEY, TrailStore, type UrlSerializedTrail } from './TrailStore';
 import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
 import { PREF_KEYS } from '../UserPreferences/pref-keys';
 import { userPreferences } from '../UserPreferences/userPreferences';
@@ -106,7 +106,7 @@ describe('TrailStore', () => {
 
     beforeEach(() => {
       userPreferences.clear();
-      userPreferences.setItem(PREF_KEYS.RECENT_METRICS, [{ urlSerializedTrails }]);
+      userPreferences.setItem(RECENT_TRAILS_KEY, [{ urlSerializedTrails }]);
       store.load();
     });
 
@@ -304,7 +304,7 @@ describe('TrailStore', () => {
 
     beforeEach(() => {
       userPreferences.clear();
-      userPreferences.setItem(PREF_KEYS.RECENT_METRICS, [
+      userPreferences.setItem(RECENT_TRAILS_KEY, [
         {
           urlValues: {
             metric: 'other_metric',

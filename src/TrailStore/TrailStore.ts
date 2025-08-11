@@ -8,6 +8,7 @@ import { PREF_KEYS } from '../UserPreferences/pref-keys';
 import { userPreferences } from '../UserPreferences/userPreferences';
 import { newMetricsTrail } from '../utils';
 
+export const RECENT_TRAILS_KEY = 'grafana.trails.recent';
 const MAX_RECENT_TRAILS = 20;
 
 // Added when removing history to replace serialized trail history with only URL values
@@ -46,7 +47,7 @@ export class TrailStore {
       const serializedRecent = this._recent
         .slice(0, MAX_RECENT_TRAILS)
         .map((trail) => this._serializeTrail(trail.resolve()));
-      userPreferences.setItem(PREF_KEYS.RECENT_METRICS, serializedRecent);
+      userPreferences.setItem(RECENT_TRAILS_KEY, serializedRecent);
       userPreferences.setItem(PREF_KEYS.BOOKMARKS, this._bookmarks);
       this._lastModified = Date.now();
     };
@@ -62,7 +63,7 @@ export class TrailStore {
 
   private _loadRecentTrailsFromStorage() {
     const list: Array<SceneObjectRef<DataTrail>> = [];
-    const serializedTrails: SerializedTrail[] = userPreferences.getItem(PREF_KEYS.RECENT_METRICS) || [];
+    const serializedTrails: SerializedTrail[] = userPreferences.getItem(RECENT_TRAILS_KEY) || [];
     for (const t of serializedTrails) {
       const trail = this._deserializeTrail(t);
       list.push(trail.getRef());
