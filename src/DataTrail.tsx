@@ -404,10 +404,14 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         expressionBuilder: (filters: AdHocVariableFilter[]) => {
           // remove any filters that include __name__ key in the expression
           // to prevent the metric name from being set twice in the query and causing an error.
-          return filters
-            .filter((filter) => filter.key !== '__name__')
-            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
-            .join(',');
+          return (
+            filters
+              .filter((filter) => filter.key !== '__name__')
+              // FIXME: the replaceAll is a quick fix for https://github.com/grafana/metrics-drilldown/issues/621
+              // eslint-disable-next-line sonarjs/no-nested-template-literals
+              .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value.replaceAll('=', `\=`)}"`)
+              .join(',')
+          );
         },
       }),
     ],
