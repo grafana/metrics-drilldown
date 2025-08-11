@@ -237,15 +237,14 @@ export class MetricDatasourceHelper {
    */
   public static fetchLabels(params: FetchLabelsOptions): Promise<string[]> {
     const { timeRange, matcher } = params;
-    const ds = params.ds as PrometheusRuntimeDatasource;
+    const ds = params.ds;
 
     if (languageProviderVersionIs['12.1.0-plus'](ds)) {
       return ds.languageProvider.queryLabelKeys(timeRange, matcher);
     } else if (languageProviderVersionIs['12.0.0'](ds)) {
-      // eslint-disable-next-line sonarjs/deprecation
       return ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher).then((labels) => Object.keys(labels));
     } else if (languageProviderVersionIs['11.6.x'](ds)) {
-      return ds.languageProvider.fetchLabelsWithMatch(matcher).then((labels) => Object.keys(labels)); // eslint-disable-line sonarjs/deprecation
+      return ds.languageProvider.fetchLabelsWithMatch(matcher).then((labels) => Object.keys(labels));
     }
 
     throw new Error('Unsupported language provider version');
@@ -291,19 +290,19 @@ export class MetricDatasourceHelper {
     if (languageProviderVersionIs['12.0.0'](ds)) {
       // If a matcher isn't provided, use the simpler `fetchLabelValues` method.
       const fetchLabelValuesWithOptionalMatcher = matcher
-        ? ds.languageProvider.fetchSeriesValuesWithMatch // eslint-disable-line sonarjs/deprecation
-        : ds.languageProvider.fetchLabelValues; // eslint-disable-line sonarjs/deprecation
+        ? ds.languageProvider.fetchSeriesValuesWithMatch
+        : ds.languageProvider.fetchLabelValues;
 
-      return fetchLabelValuesWithOptionalMatcher(timeRange, labelName, matcher); // eslint-disable-line sonarjs/deprecation
+      return fetchLabelValuesWithOptionalMatcher(timeRange, labelName, matcher);
     }
 
     if (languageProviderVersionIs['11.6.x'](ds)) {
       // If a matcher isn't provided, use the simpler `fetchLabelValues` method.
       const fetchLabelValuesWithOptionalMatcher = matcher
-        ? ds.languageProvider.fetchSeriesValuesWithMatch // eslint-disable-line sonarjs/deprecation
-        : ds.languageProvider.fetchLabelValues; // eslint-disable-line sonarjs/deprecation
+        ? ds.languageProvider.fetchSeriesValuesWithMatch
+        : ds.languageProvider.fetchLabelValues;
 
-      return fetchLabelValuesWithOptionalMatcher(labelName, matcher); // eslint-disable-line sonarjs/deprecation
+      return fetchLabelValuesWithOptionalMatcher(labelName, matcher);
     }
 
     throw new Error('Unsupported language provider version');
@@ -326,13 +325,13 @@ export class MetricDatasourceHelper {
 }
 
 interface FetchLabelsOptions {
-  ds: PrometheusDatasource;
+  ds: PrometheusRuntimeDatasource;
   timeRange: TimeRange;
   matcher: string;
 }
 
 interface FetchLabelValuesOptions {
-  ds: PrometheusDatasource;
+  ds: PrometheusRuntimeDatasource;
   timeRange: TimeRange;
   labelName: string;
   matcher?: string;
@@ -372,7 +371,7 @@ function getQueryMetricsMetadata(ds: PrometheusRuntimeDatasource) {
   }
 
   if (languageProviderVersionIs['12.0.0'](ds) || languageProviderVersionIs['11.6.x'](ds)) {
-    return () => Promise.resolve(ds.languageProvider.metricsMetadata); // eslint-disable-line sonarjs/deprecation
+    return () => Promise.resolve(ds.languageProvider.metricsMetadata);
   }
 
   throw new Error('Unsupported language provider version');
@@ -387,7 +386,7 @@ function getLoadMetricsMetadata(
   }
 
   if (languageProviderVersionIs['12.0.0'](ds) || languageProviderVersionIs['11.6.x'](ds)) {
-    return () => (ds.languageProvider.loadMetricsMetadata?.() ?? Promise.resolve()).then(() => queryMetadata()); // eslint-disable-line sonarjs/deprecation
+    return () => (ds.languageProvider.loadMetricsMetadata?.() ?? Promise.resolve()).then(() => queryMetadata());
   }
 
   throw new Error('Unsupported language provider version');
