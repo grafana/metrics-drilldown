@@ -31,10 +31,6 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.quickSearch.enterText(searchText);
 
       await metricsReducerView.assertMetricsList();
-      // to make sure native histograms are rendered as they should
-      // FIXME in the app code
-      await metricsReducerView.appControls.clickOnRefresh();
-      await metricsReducerView.assertMetricsList();
 
       await expect(metricsReducerView.getMetricsList()).toHaveScreenshot('metric-list-with-all-types.png');
 
@@ -171,7 +167,12 @@ test.describe('Metrics reducer view', () => {
   });
 
   test.describe('Metrics sorting', () => {
-    test('Default sorting shows recent metrics first, then alphabetical', async ({ page, metricsReducerView }) => {
+    // eslint-disable-next-line playwright/expect-expect
+    test('Default sorting shows recent metrics first, then alphabetical', async ({
+      page,
+      metricsReducerView,
+      expectScreenshotInCurrentGrafanaVersion,
+    }) => {
       await metricsReducerView.assertSelectedSortBy('Default');
 
       // We'll select seven metrics, but only the 6 most recent metrics should be shown above the alphabetical list
@@ -194,7 +195,7 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.quickSearch.clear();
       await metricsReducerView.assertMetricsList();
 
-      await expect(page).toHaveScreenshot('metrics-reducer-default-sort.png', {
+      await expectScreenshotInCurrentGrafanaVersion(page, 'metrics-reducer-default-sort.png', {
         stylePath: './e2e/fixtures/css/hide-app-controls.css',
       });
     });

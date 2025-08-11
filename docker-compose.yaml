@@ -21,6 +21,8 @@ services:
       - ../logs-drilldown/dist:/var/lib/grafana/plugins/grafana-lokiexplore-app
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
+      # 172.17.0.1 is the default Docker bridge network gateway IP address
+      # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
       - 'host.docker.internal:172.17.0.1'
 
   grafana-scopes-gmd:
@@ -34,6 +36,8 @@ services:
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
+      # 172.17.0.1 is the default Docker bridge network gateway IP address
+      # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
       - 'host.docker.internal:172.17.0.1'
 
   prometheus-gmd:
@@ -43,8 +47,6 @@ services:
       context: .
     ports:
       - '9099:9090'
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
     command: >
       --enable-feature=remote-write-receiver
       --enable-feature=exemplar-storage
