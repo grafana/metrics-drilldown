@@ -32,6 +32,9 @@ services:
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_SCOPES_PORT:-3002}'
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore
+    extra_hosts:
+      # This allows us to connect to other services running on the host machine.
+      - 'host.docker.internal:172.17.0.1'
 
   prometheus-gmd:
     container_name: 'prometheus-gmd'
@@ -40,8 +43,6 @@ services:
       context: .
     ports:
       - '9099:9090'
-    extra_hosts:
-      - 'host.docker.internal:172.17.0.1'
     command: >
       --enable-feature=remote-write-receiver
       --enable-feature=exemplar-storage
