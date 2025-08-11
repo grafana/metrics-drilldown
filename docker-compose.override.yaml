@@ -1,0 +1,13 @@
+# Docker Compose override file for local development
+# This file adds extra_hosts configuration that's needed for local development
+# but causes issues in CI environments (GitHub Actions)
+# ("Error response from daemon: could not parse extra host IP invalid IP: ParseAddr("invalid IP"): unable to parse IP")
+services:
+  grafana-gmd:
+    extra_hosts:
+      # This allows us to connect to other services running on the host machine.
+      - 'host.docker.internal:host-gateway'
+
+  prometheus-gmd:
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
