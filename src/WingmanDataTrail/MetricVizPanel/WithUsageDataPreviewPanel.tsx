@@ -8,6 +8,7 @@ import {
 import { type IconName } from '@grafana/ui';
 import React from 'react';
 
+import { type GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { logger } from 'tracking/logger/logger';
 import { isCustomVariable } from 'utils/utils.variables';
 import {
@@ -20,7 +21,6 @@ import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables
 import {
   METRICS_VIZ_PANEL_HEIGHT,
   METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
-  type MetricVizPanel,
 } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { UsageData } from './UsageData';
@@ -28,7 +28,7 @@ import { UsageData } from './UsageData';
 type SortBy = Exclude<SortingOption, 'related'>;
 
 export type WithUsageDataPreviewPanelState = SceneObjectState & {
-  vizPanelInGridItem: MetricVizPanel;
+  vizPanelInGridItem: GmdVizPanel;
   metric: string;
   sortBy: SortBy;
   usageCount: number;
