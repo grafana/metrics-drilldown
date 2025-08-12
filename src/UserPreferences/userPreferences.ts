@@ -1,5 +1,4 @@
 import { reportExploreMetrics } from 'interactions';
-import { logger } from 'tracking/logger/logger';
 
 import pluginJson from '../plugin.json';
 import { PREF_KEYS } from './pref-keys';
@@ -69,9 +68,3 @@ class UserPreferences {
 }
 
 export const userPreferences = new UserPreferences(pluginJson.id);
-
-try {
-  userPreferences.migrate();
-} catch (error) {
-  logger.error(error as Error, { cause: 'User preferences migration' });
-}
