@@ -69,5 +69,6 @@ services:
     profiles: [playwright]
     environment:
       GRAFANA_PORT: ${GRAFANA_PORT:-3001}
+      GRAFANA_SCOPES_PORT: ${GRAFANA_SCOPES_PORT:-3002}
       GRAFANA_IMAGE: ${GRAFANA_VERSION:-grafana-enterprise}
       GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.4}
