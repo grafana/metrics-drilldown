@@ -14,7 +14,8 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { GroupByVariable } from 'Breakdown/GroupByVariable';
-import { ConfigurePrometheusFunctionForm } from 'ConfigurePrometheusFunctionForm';
+import { ConfigurePanelForm } from 'ConfigurePanelForm/ConfigurePanelForm';
+import { EventRestoreDefaultConfig } from 'ConfigurePanelForm/EventRestoreDefaultConfig';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
 import { getTrailFor } from 'utils';
 import { EventConfigurePanel } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigurePanel';
@@ -87,9 +88,16 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         })
       );
     }
+
     this._subs.add(
       this.subscribeToEvent(EventConfigurePanel, (event) => {
         this.openDrawer(event.payload.metric);
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventRestoreDefaultConfig, () => {
+        this.state.drawer.close();
       })
     );
   }
@@ -101,7 +109,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     this.state.drawer.open({
       title: 'Configure the Prometheus function',
       subTitle: `${metric} ${metadata ? ` (${metadata.type})` : ''}`, // eslint-disable-line sonarjs/no-nested-template-literals
-      body: new ConfigurePrometheusFunctionForm({ metric }),
+      body: new ConfigurePanelForm({ metric }),
     });
   }
 

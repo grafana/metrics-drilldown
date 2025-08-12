@@ -8,25 +8,30 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Button, ConfirmModal, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { reportExploreMetrics } from 'interactions';
 import { getTrailFor } from 'utils';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
 
-interface ConfigurePrometheusFunctionFormState extends SceneObjectState {
+import { EventRestoreDefaultConfig } from './EventRestoreDefaultConfig';
+
+interface ConfigurePanelFormState extends SceneObjectState {
   metric: string;
+  isModalOpen: boolean;
   body?: SceneCSSGridLayout;
 }
 
 export const PREVIEW_VIZ_PANEL_HEIGHT = PANEL_HEIGHT.S;
 
-export class ConfigurePrometheusFunctionForm extends SceneObjectBase<ConfigurePrometheusFunctionFormState> {
-  constructor({ metric }: { metric: ConfigurePrometheusFunctionFormState['metric'] }) {
+export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState> {
+  constructor({ metric }: { metric: ConfigurePanelFormState['metric'] }) {
     super({
       metric,
+      isModalOpen: false,
       body: undefined,
     });
 
@@ -67,16 +72,52 @@ export class ConfigurePrometheusFunctionForm extends SceneObjectBase<ConfigurePr
     this.setState({ body });
   }
 
-  public static readonly Component = ({ model }: SceneComponentProps<ConfigurePrometheusFunctionForm>) => {
-    const styles = useStyles2(getStyles);
-    const { body } = model.useState();
+  private onClickRestoreDefault = () => {
+    this.setState({ isModalOpen: true });
+  };
 
-    return <div className={styles.container}>{body && <body.Component model={body} />}</div>;
+  private confirmRestore = () => {
+    reportExploreMetrics('default_panel_config_restored', {});
+    this.closeModal();
+    this.publishEvent(new EventRestoreDefaultConfig({ metric: this.state.metric }), true);
+  };
+
+  private closeModal = () => {
+    this.setState({ isModalOpen: false });
+  };
+
+  public static readonly Component = ({ model }: SceneComponentProps<ConfigurePanelForm>) => {
+    const styles = useStyles2(getStyles);
+    const { body, isModalOpen } = model.useState();
+
+    return (
+      <div className={styles.container}>
+        <div className={styles.buttonContainer}>
+          <Button variant="secondary" size="sm" onClick={model.onClickRestoreDefault}>
+            Restore default configuration
+          </Button>
+        </div>
+        {body && <body.Component model={body} />}
+        <ConfirmModal
+          isOpen={isModalOpen}
+          title="Restore default configuration"
+          body="Are you sure you want to restore the default configuration?"
+          confirmText="Restore"
+          onConfirm={model.confirmRestore}
+          onDismiss={model.closeModal}
+        />
+      </div>
+    );
   };
 }
 
 function getStyles() {
   return {
     container: css``,
+    buttonContainer: css`
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    `,
   };
 }
