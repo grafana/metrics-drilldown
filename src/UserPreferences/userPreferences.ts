@@ -1,3 +1,4 @@
+import { reportExploreMetrics } from 'interactions';
 import { logger } from 'tracking/logger/logger';
 
 import pluginJson from '../plugin.json';
@@ -12,6 +13,8 @@ class UserPreferences {
 
   // TODO: temporary, let's wait for the new version to be in prod to remove it
   public migrate() {
+    let hasMigrations = false;
+
     const migrations = [
       { legacyKey: 'metricsDrilldownDataSource', newKey: PREF_KEYS.DATASOURCE },
       { legacyKey: 'metrics-drilldown-recent-metrics/v1', newKey: PREF_KEYS.RECENT_METRICS },
@@ -31,6 +34,12 @@ class UserPreferences {
 
       this.setItem(newKey, existingItem);
       localStorage.removeItem(legacyKey);
+
+      hasMigrations = true;
+    }
+
+    if (hasMigrations) {
+      reportExploreMetrics('user_preferences_migrated', {});
     }
   }
 
