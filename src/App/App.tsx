@@ -5,6 +5,8 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { initFaro } from 'tracking/faro/faro';
+import { logger } from 'tracking/logger/logger';
+import { userPreferences } from 'UserPreferences/userPreferences';
 
 import { ErrorView } from './ErrorView';
 import { Onboarding } from './Onboarding';
@@ -18,6 +20,12 @@ import { PluginPropsContext } from '../utils/utils.plugin';
 initFaro();
 
 const prometheusDatasources = Object.values(config.datasources).filter(isPrometheusDataSource);
+
+try {
+  userPreferences.migrate();
+} catch (error) {
+  logger.error(error as Error, { cause: 'User preferences migration' });
+}
 
 export default function App(props: Readonly<AppRootProps>) {
   const styles = useStyles2(getStyles);
