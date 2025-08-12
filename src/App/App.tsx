@@ -4,8 +4,8 @@ import { config } from '@grafana/runtime';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { logger } from 'mocks/loggerMock';
 import { initFaro } from 'tracking/faro/faro';
+import { logger } from 'tracking/logger/logger';
 import { userPreferences } from 'UserPreferences/userPreferences';
 
 import { ErrorView } from './ErrorView';
