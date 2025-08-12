@@ -145,6 +145,8 @@ type Interactions = {
   exposed_component_viewed: {
     component: SnakeCase<ExposedComponentName>;
   };
+  // App migrated some legacy user prefs (see src/UserPreferences/userPreferences.ts)
+  user_preferences_migrated: {};
   // User clicks on the "Configure panel" button on the panel
   configure_panel_clicked: {};
   // User applies a panel config

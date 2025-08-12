@@ -4,7 +4,20 @@ process.env.TZ = 'UTC';
 
 const baseConfig = require('./.config/jest.config'); // Jest configuration provided by Grafana scaffolding
 const { nodeModulesToTransform, grafanaESModules } = require('./.config/jest/utils');
-const esModules = [...grafanaESModules, '@bsull/augurs', 'monaco-promql', 'tsqtsq', 'p-limit', 'yocto-queue', 'marked', 'react-calendar', 'get-user-locale', 'memoize', 'mimic-function', '@wojtekmaj/date-utils'];
+const esModules = [
+  ...grafanaESModules,
+  '@bsull/augurs',
+  'monaco-promql',
+  'tsqtsq',
+  'p-limit',
+  'yocto-queue',
+  'marked',
+  'react-calendar',
+  'get-user-locale',
+  'memoize',
+  'mimic-function',
+  '@wojtekmaj/date-utils',
+];
 
 module.exports = {
   ...baseConfig,
@@ -14,6 +27,7 @@ module.exports = {
     '\\.svg$': '<rootDir>/src/mocks/svgMock.js',
     '^.+/logger/logger$': '<rootDir>/src/mocks/loggerMock.ts',
     '^.+/interactions$': '<rootDir>/src/mocks/interactionsMock.ts',
+    '^.+/userPreferences$': '<rootDir>/src/mocks/userPreferences.ts',
   },
   transform: {
     '^.+\\.(t|j)sx?$': [
