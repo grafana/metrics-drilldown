@@ -5,7 +5,11 @@ import {
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneObjectBase,
+  SceneRefreshPicker,
+  SceneTimePicker,
+  SceneTimeRange,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Button, ConfirmModal, useStyles2 } from '@grafana/ui';
@@ -23,7 +27,9 @@ import { EventRestorePanelConfig } from './EventRestorePanelConfig';
 
 interface ConfigurePanelFormState extends SceneObjectState {
   metric: string;
-  isModalOpen: boolean;
+  $timeRange: SceneTimeRange;
+  controls: SceneObject[];
+  isConfirmModalOpen: boolean;
   body?: SceneCSSGridLayout;
 }
 
@@ -33,7 +39,9 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   constructor({ metric }: { metric: ConfigurePanelFormState['metric'] }) {
     super({
       metric,
-      isModalOpen: false,
+      $timeRange: new SceneTimeRange({}),
+      controls: [new SceneTimePicker({}), new SceneRefreshPicker({})],
+      isConfirmModalOpen: false,
       body: undefined,
     });
 
@@ -75,7 +83,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   }
 
   private onClickRestoreDefault = () => {
-    this.setState({ isModalOpen: true });
+    this.setState({ isConfirmModalOpen: true });
   };
 
   private onClickConfirmRestoreDefault = () => {
@@ -85,7 +93,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   };
 
   private closeConfirmModal = () => {
-    this.setState({ isModalOpen: false });
+    this.setState({ isConfirmModalOpen: false });
   };
 
   private onClickCancel = () => {
@@ -99,14 +107,19 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
   public static readonly Component = ({ model }: SceneComponentProps<ConfigurePanelForm>) => {
     const styles = useStyles2(getStyles);
-    const { body, isModalOpen } = model.useState();
+    const { body, controls, isConfirmModalOpen } = model.useState();
 
     return (
       <div className={styles.container}>
-        <div className={styles.restoreButtonContainer}>
-          <Button variant="secondary" size="sm" onClick={model.onClickRestoreDefault}>
-            Restore default configuration
+        <div className={styles.controlsContainer}>
+          <Button variant="secondary" size="md" onClick={model.onClickRestoreDefault}>
+            Restore default config
           </Button>
+          <div className={styles.controls}>
+            {controls.map((control) => (
+              <control.Component key={control.state.key} model={control} />
+            ))}
+          </div>
         </div>
 
         {body && <body.Component model={body} />}
@@ -121,7 +134,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
         </div>
 
         <ConfirmModal
-          isOpen={isModalOpen}
+          isOpen={isConfirmModalOpen}
           title="Restore default configuration"
           body="Are you sure you want to restore the default configuration?"
           confirmText="Restore"
@@ -136,16 +149,20 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css``,
+    controlsContainer: css`
+      display: flex;
+      justify-content: flex-end;
+      gap: ${theme.spacing(1)};
+      margin-bottom: ${theme.spacing(2)};
+    `,
+    controls: css`
+      display: flex;
+    `,
     formButtonsContainer: css`
       display: flex;
       justify-content: center;
       gap: ${theme.spacing(2)};
       margin-top: ${theme.spacing(4)};
-    `,
-    restoreButtonContainer: css`
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 16px;
     `,
   };
 }
