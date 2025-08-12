@@ -4,6 +4,7 @@ import {
   behaviors,
   SceneCSSGridItem,
   SceneCSSGridLayout,
+  sceneGraph,
   SceneObjectBase,
   SceneRefreshPicker,
   SceneTimePicker,
@@ -15,6 +16,7 @@ import {
 import { Button, ConfirmModal, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { DataTrail } from 'DataTrail';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'interactions';
@@ -49,7 +51,10 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   }
 
   private onActivate() {
+    this.syncTimeRange();
+
     const { metric } = this.state;
+
     const trail = getTrailFor(this);
     const isNativeHistogram = trail.isNativeHistogram(metric);
 
@@ -80,6 +85,12 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     });
 
     this.setState({ body });
+  }
+
+  private syncTimeRange() {
+    const metricScene = sceneGraph.getAncestor(this, DataTrail);
+    const { from, to, timeZone, value } = sceneGraph.getTimeRange(metricScene).state;
+    sceneGraph.getTimeRange(this).setState({ from, to, timeZone, value });
   }
 
   private onClickRestoreDefault = () => {
