@@ -145,6 +145,8 @@ type Interactions = {
   exposed_component_viewed: {
     component: SnakeCase<ExposedComponentName>;
   };
+  // App migrated some legacy user prefs (see src/UserPreferences/userPreferences.ts)
+  user_preferences_migrated: {};
 };
 
 type OtherEvents = {
