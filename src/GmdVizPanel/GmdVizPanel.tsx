@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2, type ValueMapping } from '@grafana/data';
 import {
   SceneObjectBase,
   type SceneComponentProps,
@@ -16,6 +16,7 @@ import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectActi
 import { type LabelMatcher } from './buildQueryExpression';
 import {
   DEFAULT_HISTOGRAMS_PRESETS,
+  DEFAULT_STATUS_UP_DOWN_PRESETS,
   DEFAULT_TIMESERIES_PRESETS,
   type PanelConfigPreset,
 } from './config/config-presets';
@@ -25,6 +26,7 @@ import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { isHistogramMetric } from './heatmap/isHistogramMetric';
 import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
+import { buildStatPanel } from './stat/buildStatPanel';
 import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
 import { isUpDownMetric } from './statushistory/isUpDownMetric';
 import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
@@ -47,6 +49,7 @@ export type PanelConfig = {
   description?: string;
   menu?: VizPanelState['menu'];
   legend?: Partial<VizLegendOptions>;
+  mappings?: ValueMapping[];
 };
 
 export type PanelOptions = {
@@ -58,6 +61,7 @@ export type PanelOptions = {
   headerActions?: PanelConfig['headerActions'];
   menu?: PanelConfig['menu'];
   legend?: PanelConfig['legend'];
+  mappings?: PanelConfig['mappings'];
 };
 
 /* Query config */
@@ -251,6 +255,12 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         });
         return;
 
+      case 'stat':
+        this.setState({
+          body: buildStatPanel({ metric, panelConfig, queryConfig }),
+        });
+        return;
+
       default:
         throw new TypeError(`Unsupported panel type "${panelConfig.type}"!`);
     }
@@ -258,7 +268,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
   public static getConfigPresetsForMetric(metric: string, isNativeHistogram: boolean): PanelConfigPreset[] {
     if (isUpDownMetric(metric)) {
-      return [];
+      return Object.values(DEFAULT_STATUS_UP_DOWN_PRESETS);
     }
 
     if (isNativeHistogram || isHistogramMetric(metric)) {

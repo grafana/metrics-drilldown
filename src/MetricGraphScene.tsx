@@ -18,7 +18,6 @@ import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/GmdVizPanelVariantSelector';
-import { isUpDownMetric } from 'GmdVizPanel/statushistory/isUpDownMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
@@ -67,7 +66,6 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const trail = getTrailFor(this);
     const metadata = await trail.getMetricMetadata(metric);
     const description = getMetricDescription(metadata);
-    const isConfigureDisabled = isUpDownMetric(metric);
 
     topView.setState({
       children: [
@@ -82,7 +80,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               description,
               headerActions: ({ panelConfig }) => [
                 new GmdVizPanelVariantSelector({ metric, panelType: panelConfig.type }),
-                new ConfigurePanelAction({ metric, disabled: isConfigureDisabled }),
+                new ConfigurePanelAction({ metric }),
               ],
               menu: new PanelMenu({ labelName: metric }),
             },

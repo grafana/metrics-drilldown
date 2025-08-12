@@ -1,7 +1,7 @@
 import { type ValueMapping } from '@grafana/data';
 import { MappingType } from '@grafana/schema';
 
-export const valueMappings: ValueMapping[] = [
+export const UP_DOWN_VALUE_MAPPINGS: ValueMapping[] = [
   {
     type: MappingType.ValueToText,
     options: {

@@ -1,6 +1,9 @@
 import { type LegendPlacement } from '@grafana/schema';
 
 import { type PanelOptions, type QueryOptions } from 'GmdVizPanel/GmdVizPanel';
+import { UP_DOWN_VALUE_MAPPINGS } from 'GmdVizPanel/statushistory/value-mappings';
+
+import { QUERY_RESOLUTION } from './query-resolutions';
 
 export enum PANEL_PRESET {
   TIMESERIES_AVG = 'timeseries-avg',
@@ -10,8 +13,9 @@ export enum PANEL_PRESET {
   TIMESERIES_MIN_MAX = 'timeseries-min_max',
   HEATMAP = 'heatmap',
   PERCENTILES = 'percentiles',
+  STATUS_HISTORY = 'status-history',
+  STATUS_STAT = 'status-stat',
   // TODO
-  // STAT = 'stat',
   // AGE = 'age',
 }
 
@@ -107,6 +111,34 @@ export const DEFAULT_HISTOGRAMS_PRESETS: Record<string, PanelConfigPreset> = {
     },
     queryOptions: {
       queries: [{ fn: 'histogram_quantile', params: { percentiles: [99, 90, 50] } }],
+    },
+  },
+} as const;
+
+export const DEFAULT_STATUS_UP_DOWN_PRESETS: Record<string, PanelConfigPreset> = {
+  [PANEL_PRESET.STATUS_HISTORY]: {
+    id: String(PANEL_PRESET.STATUS_HISTORY),
+    name: 'Status History',
+    panelOptions: {
+      type: 'statushistory',
+      description: '',
+    },
+    queryOptions: {
+      resolution: QUERY_RESOLUTION.MEDIUM,
+      queries: [{ fn: 'min' }],
+    },
+  },
+  [PANEL_PRESET.STATUS_STAT]: {
+    id: String(PANEL_PRESET.STATUS_STAT),
+    name: 'Stat (latest)',
+    panelOptions: {
+      type: 'stat',
+      description: '',
+      mappings: UP_DOWN_VALUE_MAPPINGS,
+    },
+    queryOptions: {
+      resolution: QUERY_RESOLUTION.MEDIUM,
+      queries: [{ fn: 'min' }],
     },
   },
 } as const;
