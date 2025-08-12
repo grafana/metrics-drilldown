@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { DashboardCursorSync } from '@grafana/data';
+import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -17,7 +17,9 @@ import { reportExploreMetrics } from 'interactions';
 import { getTrailFor } from 'utils';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
 
-import { EventRestoreDefaultConfig } from './EventRestoreDefaultConfig';
+import { EventApplyPanelConfig } from './EventApplyPanelConfig';
+import { EventCancelConfigurePanel } from './EventCancelConfigurePanel';
+import { EventRestorePanelConfig } from './EventRestorePanelConfig';
 
 interface ConfigurePanelFormState extends SceneObjectState {
   metric: string;
@@ -76,14 +78,23 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     this.setState({ isModalOpen: true });
   };
 
-  private confirmRestore = () => {
+  private onClickConfirmRestoreDefault = () => {
     reportExploreMetrics('default_panel_config_restored', {});
-    this.closeModal();
-    this.publishEvent(new EventRestoreDefaultConfig({ metric: this.state.metric }), true);
+    this.closeConfirmModal();
+    this.publishEvent(new EventRestorePanelConfig({ metric: this.state.metric }), true);
   };
 
-  private closeModal = () => {
+  private closeConfirmModal = () => {
     this.setState({ isModalOpen: false });
+  };
+
+  private onClickCancel = () => {
+    this.publishEvent(new EventCancelConfigurePanel({ metric: this.state.metric }), true);
+  };
+
+  private onClickApplyConfig = () => {
+    reportExploreMetrics('panel_config_applied', {});
+    this.publishEvent(new EventApplyPanelConfig({ metric: this.state.metric }), true);
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<ConfigurePanelForm>) => {
@@ -92,29 +103,46 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
     return (
       <div className={styles.container}>
-        <div className={styles.buttonContainer}>
+        <div className={styles.restoreButtonContainer}>
           <Button variant="secondary" size="sm" onClick={model.onClickRestoreDefault}>
             Restore default configuration
           </Button>
         </div>
+
         {body && <body.Component model={body} />}
+
+        <div className={styles.formButtonsContainer}>
+          <Button variant="primary" size="md" onClick={model.onClickApplyConfig}>
+            Apply
+          </Button>
+          <Button variant="secondary" size="md" onClick={model.onClickCancel}>
+            Cancel
+          </Button>
+        </div>
+
         <ConfirmModal
           isOpen={isModalOpen}
           title="Restore default configuration"
           body="Are you sure you want to restore the default configuration?"
           confirmText="Restore"
-          onConfirm={model.confirmRestore}
-          onDismiss={model.closeModal}
+          onConfirm={model.onClickConfirmRestoreDefault}
+          onDismiss={model.closeConfirmModal}
         />
       </div>
     );
   };
 }
 
-function getStyles() {
+function getStyles(theme: GrafanaTheme2) {
   return {
     container: css``,
-    buttonContainer: css`
+    formButtonsContainer: css`
+      display: flex;
+      justify-content: center;
+      gap: ${theme.spacing(2)};
+      margin-top: ${theme.spacing(4)};
+    `,
+    restoreButtonContainer: css`
       display: flex;
       justify-content: flex-end;
       margin-bottom: 16px;

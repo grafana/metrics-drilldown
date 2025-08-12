@@ -147,6 +147,8 @@ type Interactions = {
   };
   // User clicks on the "Configure panel" button on the panel
   configure_panel_clicked: {};
+  // User applies a panel config
+  panel_config_applied: {};
   // User restores the default panel config
   default_panel_config_restored: {};
 };

@@ -15,7 +15,9 @@ import React from 'react';
 
 import { GroupByVariable } from 'Breakdown/GroupByVariable';
 import { ConfigurePanelForm } from 'ConfigurePanelForm/ConfigurePanelForm';
-import { EventRestoreDefaultConfig } from 'ConfigurePanelForm/EventRestoreDefaultConfig';
+import { EventApplyPanelConfig } from 'ConfigurePanelForm/EventApplyPanelConfig';
+import { EventCancelConfigurePanel } from 'ConfigurePanelForm/EventCancelConfigurePanel';
+import { EventRestorePanelConfig } from 'ConfigurePanelForm/EventRestorePanelConfig';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
 import { getTrailFor } from 'utils';
 import { EventConfigurePanel } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigurePanel';
@@ -96,7 +98,19 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     );
 
     this._subs.add(
-      this.subscribeToEvent(EventRestoreDefaultConfig, () => {
+      this.subscribeToEvent(EventCancelConfigurePanel, () => {
+        this.state.drawer.close();
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventApplyPanelConfig, () => {
+        this.state.drawer.close();
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventRestorePanelConfig, () => {
         this.state.drawer.close();
       })
     );
