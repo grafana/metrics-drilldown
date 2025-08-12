@@ -2,25 +2,22 @@ import { PanelBuilders, SceneQueryRunner } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
-import { PANEL_TYPE, type GmdVizPanelState } from 'GmdVizPanel/GmdVizPanel';
+import { type HistogramType, type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
+import { getColorByIndex } from 'utils';
 
 import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
 
-export type PercentilesPanelOptions = Pick<
-  GmdVizPanelState,
-  'isNativeHistogram' | 'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu' | 'queryResolution'
->;
+type PercentilesPanelOptions = {
+  metric: string;
+  histogramType: HistogramType;
+  panelConfig: PanelConfig;
+  queryConfig: QueryConfig;
+};
 
 export function buildPercentilesPanel(options: PercentilesPanelOptions) {
-  const { title, description, metric, matchers, headerActions, menu, isNativeHistogram, queryResolution } = options;
-  const queryParams = getPercentilesQueryRunnerParams({
-    metric,
-    matchers,
-    isNativeHistogram: Boolean(isNativeHistogram),
-    queryResolution,
-    addIgnoreUsageFilter: true,
-  });
+  const { metric, histogramType, panelConfig, queryConfig } = options;
+  const queryParams = getPercentilesQueryRunnerParams({ metric, histogramType, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const $data = new SceneQueryRunner({
@@ -29,16 +26,26 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
     queries: queryParams.queries,
   });
 
+  const startColorIndex = panelConfig.fixedColorIndex || 0;
+
   return PanelBuilders.timeseries()
-    .setTitle(title)
-    .setDescription(description)
-    .setHeaderActions(headerActions({ metric, panelType: PANEL_TYPE.PERCENTILES }))
-    .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
-    .setShowMenuAlways(Boolean(menu))
+    .setTitle(panelConfig.title)
+    .setDescription(panelConfig.description)
+    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
+    .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
-    .setOption('legend', { showLegend: true, placement: 'right' as LegendPlacement })
+    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'right' as LegendPlacement })
     .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
     .setCustomFieldConfig('fillOpacity', 9)
+    .setOverrides((b) => {
+      queryParams.queries.forEach((query, i) => {
+        b.matchFieldsByQuery(query.refId).overrideColor({
+          mode: 'fixed',
+          fixedColor: getColorByIndex(startColorIndex + i),
+        });
+      });
+    })
     .build();
 }

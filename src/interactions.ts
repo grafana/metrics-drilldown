@@ -145,6 +145,8 @@ type Interactions = {
   exposed_component_viewed: {
     component: SnakeCase<ExposedComponentName>;
   };
+  // User clicks on the "Configure panel" button on the panel
+  configure_panel_clicked: {};
 };
 
 type OtherEvents = {

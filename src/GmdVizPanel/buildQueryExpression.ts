@@ -16,14 +16,14 @@ export function expressionToString(expression: Expression) {
 
 type Options = {
   metric: string;
-  matchers: LabelMatcher[];
-  addIgnoreUsageFilter: boolean;
+  labelMatchers?: LabelMatcher[];
+  addIgnoreUsageFilter?: boolean;
 };
 
 export function buildQueryExpression(options: Options): Expression {
-  const { metric, matchers, addIgnoreUsageFilter } = options;
+  const { metric, labelMatchers = [], addIgnoreUsageFilter = true } = options;
 
-  const defaultSelectors = matchers.map((m) => ({
+  const defaultSelectors = labelMatchers.map((m) => ({
     label: utf8Support(m.key),
     operator: m.operator as MatchingOperator,
     value: m.value,

@@ -17,9 +17,9 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
-import { QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
+import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
+import { isRateQuery } from 'GmdVizPanel/isRateQuery';
 import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/timeseries/getTimeseriesQueryRunnerParams';
-import { isRateQuery } from 'GmdVizPanel/timeseries/isRateQuery';
 import { getPerSecondRateUnit, getUnit } from 'GmdVizPanel/units/getUnit';
 import { VAR_GROUP_BY } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
@@ -79,10 +79,12 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
         getLayoutChild: (option, startColorIndex) => {
           const { queries } = getTimeseriesQueryRunnerParams({
             metric,
-            matchers: [],
-            groupBy: option.value as string,
-            queryResolution: QUERY_RESOLUTION.MEDIUM,
-            addIgnoreUsageFilter: true,
+            queryConfig: {
+              resolution: QUERY_RESOLUTION.MEDIUM,
+              labelMatchers: [],
+              addIgnoreUsageFilter: true,
+              groupBy: option.value as string,
+            },
           });
 
           return new SceneCSSGridItem({

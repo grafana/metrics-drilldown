@@ -1,25 +1,28 @@
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
-import { HeatmapColorMode } from '@grafana/schema/dist/esm/raw/composable/heatmap/panelcfg/x/HeatmapPanelCfg_types.gen';
+import {
+  HeatmapColorMode,
+  type HeatmapLegend,
+} from '@grafana/schema/dist/esm/raw/composable/heatmap/panelcfg/x/HeatmapPanelCfg_types.gen';
 
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
-import { PANEL_TYPE, type GmdVizPanelState } from '../GmdVizPanel';
+import { type HistogramType, type PanelConfig, type QueryConfig } from '../GmdVizPanel';
 import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 
-export type HeatmapPanelOptions = Pick<
-  GmdVizPanelState,
-  'isNativeHistogram' | 'title' | 'description' | 'metric' | 'matchers' | 'headerActions' | 'menu' | 'queryResolution'
->;
+type HeatmapPanelOptions = {
+  metric: string;
+  histogramType: HistogramType;
+  panelConfig: PanelConfig;
+  queryConfig: QueryConfig;
+};
 
 export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
-  const { title, description, metric, matchers, isNativeHistogram, headerActions, menu, queryResolution } = options;
+  const { metric, histogramType, panelConfig, queryConfig } = options;
   const queryParams = getHeatmapQueryRunnerParams({
     metric,
-    matchers,
-    isNativeHistogram: Boolean(isNativeHistogram),
-    queryResolution,
-    addIgnoreUsageFilter: true,
+    isNativeHistogram: histogramType === 'native',
+    queryConfig,
   });
   const unit = getUnit(metric);
 
@@ -30,11 +33,11 @@ export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
   });
 
   return PanelBuilders.heatmap()
-    .setTitle(title)
-    .setDescription(isNativeHistogram ? 'Native Histogram' : description)
-    .setHeaderActions(headerActions({ metric, panelType: PANEL_TYPE.HEATMAP }))
-    .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
-    .setShowMenuAlways(Boolean(menu))
+    .setTitle(panelConfig.title)
+    .setDescription(panelConfig.description)
+    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
+    .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData(queryRunner)
     .setUnit(unit)
     .setOption('calculate', false)
@@ -45,5 +48,6 @@ export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
       steps: 32,
       reverse: false,
     })
+    .setOption('legend', panelConfig.legend as HeatmapLegend)
     .build();
 }

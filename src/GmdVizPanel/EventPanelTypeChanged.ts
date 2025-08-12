@@ -1,9 +1,9 @@
 import { BusEventWithPayload } from '@grafana/data';
 
-import { type PANEL_TYPE } from './GmdVizPanel';
+import { type PanelType } from './GmdVizPanel';
 
 export interface EventPanelTypeChangedPayload {
-  panelType: PANEL_TYPE;
+  panelType: PanelType;
 }
 
 export class EventPanelTypeChanged extends BusEventWithPayload<EventPanelTypeChangedPayload> {

@@ -4,36 +4,24 @@ import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/sc
 import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
 import { trailDS } from 'shared';
+import { getColorByIndex } from 'utils';
 
-import { PANEL_TYPE, type GmdVizPanelState } from '../GmdVizPanel';
+import { type PanelConfig, type QueryConfig } from '../GmdVizPanel';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 
-export type TimeseriesPanelOptions = Pick<
-  GmdVizPanelState,
-  | 'fixedColor'
-  | 'groupBy'
-  | 'title'
-  | 'description'
-  | 'metric'
-  | 'matchers'
-  | 'headerActions'
-  | 'menu'
-  | 'queryResolution'
->;
+type TimeseriesPanelOptions = {
+  metric: string;
+  panelConfig: PanelConfig;
+  queryConfig: QueryConfig;
+};
 
 export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel {
-  if (options.groupBy) {
+  if (options.queryConfig?.groupBy) {
     return buildGroupByPanel(options as Required<TimeseriesPanelOptions>);
   }
 
-  const { title, description, metric, matchers, fixedColor, headerActions, groupBy, menu, queryResolution } = options;
-  const queryParams = getTimeseriesQueryRunnerParams({
-    metric,
-    matchers,
-    groupBy,
-    queryResolution,
-    addIgnoreUsageFilter: true,
-  });
+  const { metric, panelConfig, queryConfig } = options;
+  const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const $data = new SceneQueryRunner({
@@ -42,30 +30,42 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     queries: queryParams.queries,
   });
 
-  return PanelBuilders.timeseries()
-    .setTitle(title)
-    .setDescription(description)
-    .setHeaderActions(headerActions({ metric, panelType: PANEL_TYPE.TIMESERIES }))
-    .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
-    .setShowMenuAlways(Boolean(menu))
+  const vizPanelBuilder = PanelBuilders.timeseries()
+    .setTitle(panelConfig.title)
+    .setDescription(panelConfig.description)
+    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
+    .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
     .setOption('legend', { showLegend: true, placement: 'bottom' as LegendPlacement })
-    .setColor(fixedColor ? { mode: 'fixed', fixedColor } : undefined)
-    .setCustomFieldConfig('fillOpacity', 9)
-    .setDisplayName(queryParams.fnName)
-    .build();
+    .setCustomFieldConfig('fillOpacity', 9);
+
+  if (queryParams.queries.length > 1) {
+    const startColorIndex = panelConfig.fixedColorIndex || 0;
+
+    vizPanelBuilder.setOverrides((b) => {
+      queryParams.queries.forEach((query, i) => {
+        b.matchFieldsByQuery(query.refId).overrideColor({
+          mode: 'fixed',
+          fixedColor: getColorByIndex(startColorIndex + i),
+        });
+      });
+    });
+  } else {
+    vizPanelBuilder.setColor(
+      panelConfig.fixedColorIndex
+        ? { mode: 'fixed', fixedColor: getColorByIndex(panelConfig.fixedColorIndex) }
+        : undefined
+    );
+  }
+
+  return vizPanelBuilder.build();
 }
 
 function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel {
-  const { title, description, metric, matchers, fixedColor, headerActions, menu, groupBy, queryResolution } = options;
-  const queryParams = getTimeseriesQueryRunnerParams({
-    metric,
-    matchers,
-    groupBy,
-    queryResolution,
-    addIgnoreUsageFilter: true,
-  });
+  const { metric, panelConfig, queryConfig } = options;
+  const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
   const $data = new SceneDataTransformer({
@@ -74,19 +74,18 @@ function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel 
       maxDataPoints: queryParams.maxDataPoints,
       queries: queryParams.queries,
     }),
-    transformations: [addUnspecifiedLabel(groupBy)],
+    transformations: [addUnspecifiedLabel(queryConfig.groupBy!)],
   });
 
   return PanelBuilders.timeseries()
-    .setTitle(title)
-    .setDescription(description)
-    .setHeaderActions(headerActions({ metric, panelType: PANEL_TYPE.TIMESERIES }))
-    .setMenu(menu?.clone()) // we clone because it's already stored in GmdVizPanel
-    .setShowMenuAlways(Boolean(menu))
+    .setTitle(panelConfig.title)
+    .setDescription(panelConfig.description)
+    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
+    .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
-    .setColor(fixedColor ? { mode: 'fixed', fixedColor } : undefined)
-    .setOption('legend', { showLegend: true, placement: 'right' as LegendPlacement })
+    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'right' as LegendPlacement })
     .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
     .build();
 }

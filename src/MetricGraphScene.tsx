@@ -14,18 +14,21 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { GmdVizPanel, PANEL_HEIGHT, QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
+import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
+import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/GmdVizPanelVariantSelector';
+import { isUpDownMetric } from 'GmdVizPanel/statushistory/isUpDownMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
-import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
+import { ConfigurePanelAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigurePanelAction';
 
 import { type DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 
-const MAIN_PANEL_MIN_HEIGHT = GmdVizPanel.getPanelHeightInPixels(PANEL_HEIGHT.XL);
+const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
 export const TOPVIEW_KEY = 'topview';
 
@@ -64,6 +67,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const trail = getTrailFor(this);
     const metadata = await trail.getMetricMetadata(metric);
     const description = getMetricDescription(metadata);
+    const isConfigureDisabled = isUpDownMetric(metric);
 
     topView.setState({
       children: [
@@ -73,14 +77,18 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           maxHeight: MAIN_PANEL_MAX_HEIGHT,
           body: new GmdVizPanel({
             metric,
-            description,
-            height: PANEL_HEIGHT.XL,
-            headerActions: ({ panelType }) => [
-              new GmdVizPanelVariantSelector({ metric, panelType }),
-              new ConfigureAction({ metricName: metric }),
-            ],
-            menu: new PanelMenu({ labelName: metric }),
-            queryResolution: QUERY_RESOLUTION.HIGH,
+            panelOptions: {
+              height: PANEL_HEIGHT.XL,
+              description,
+              headerActions: ({ panelConfig }) => [
+                new GmdVizPanelVariantSelector({ metric, panelType: panelConfig.type }),
+                new ConfigurePanelAction({ metric, disabled: isConfigureDisabled }),
+              ],
+              menu: new PanelMenu({ labelName: metric }),
+            },
+            queryOptions: {
+              resolution: QUERY_RESOLUTION.HIGH,
+            },
           }),
         }),
         new SceneFlexItem({

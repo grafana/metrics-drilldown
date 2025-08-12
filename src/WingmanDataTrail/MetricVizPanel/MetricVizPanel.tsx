@@ -16,7 +16,6 @@ import { buildPrometheusQuery, getPromqlFunction, type NonRateQueryFunction } fr
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
-import { type PrometheusFn } from './actions/ConfigureAction';
 import { SelectAction } from './actions/SelectAction';
 import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
 import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
@@ -32,7 +31,7 @@ interface MetricVizPanelProps {
   hideLegend?: boolean;
   highlight?: boolean;
   matchers?: string[];
-  prometheusFunction?: PrometheusFn;
+  prometheusFunction?: string;
   title?: string;
 }
 
@@ -57,7 +56,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     const { isRateQuery } = MetricVizPanel.determineQueryProperties(props.metricName, props.isNativeHistogram);
     const stateWithDefaults = {
       ...props,
-      prometheusFunction: props.prometheusFunction ?? (getPromqlFunction(isRateQuery) as PrometheusFn),
+      prometheusFunction: props.prometheusFunction ?? (getPromqlFunction(isRateQuery) as string),
       isNativeHistogram: props.isNativeHistogram,
       matchers: props.matchers || [],
       title: props.title || props.metricName,
@@ -194,7 +193,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
     metricName: string;
     matchers: string[];
     isHistogram: boolean;
-    prometheusFunction?: PrometheusFn;
+    prometheusFunction?: string;
     queryOptions?: Partial<SceneDataQuery>;
   }): SceneQueryRunner {
     const filters = matchers.map(parseMatcher);

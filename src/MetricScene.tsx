@@ -1,9 +1,6 @@
 import { css } from '@emotion/css';
 import { config } from '@grafana/runtime';
 import {
-  behaviors,
-  SceneCSSGridItem,
-  SceneCSSGridLayout,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   SceneVariableSet,
@@ -13,18 +10,14 @@ import {
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
-import { DashboardCursorSync } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { GroupByVariable } from 'Breakdown/GroupByVariable';
+import { ConfigurePrometheusFunctionForm } from 'ConfigurePrometheusFunctionForm';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
-import { getColorByIndex, getTrailFor } from 'utils';
-import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
-import { ApplyAction } from 'WingmanDataTrail/MetricVizPanel/actions/ApplyAction';
-import { ConfigureAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigureAction';
-import { EventConfigureFunction } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigureFunction';
-import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { getTrailFor } from 'utils';
+import { EventConfigurePanel } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigurePanel';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
@@ -94,52 +87,21 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         })
       );
     }
-
     this._subs.add(
-      this.subscribeToEvent(EventConfigureFunction, (event) => {
-        this.openDrawer(event.payload.metricName);
+      this.subscribeToEvent(EventConfigurePanel, (event) => {
+        this.openDrawer(event.payload.metric);
       })
     );
   }
 
-  private openDrawer(metricName: string) {
+  private async openDrawer(metric: string) {
     const trail = getTrailFor(this);
+    const metadata = await trail.getMetricMetadata(metric);
 
     this.state.drawer.open({
-      title: 'Choose a new Prometheus function',
-      subTitle: metricName,
-      body: new SceneCSSGridLayout({
-        templateColumns: GRID_TEMPLATE_COLUMNS,
-        autoRows: METRICS_VIZ_PANEL_HEIGHT_SMALL,
-        isLazy: true,
-        $behaviors: [
-          new behaviors.CursorSync({
-            key: 'metricCrosshairSync',
-            sync: DashboardCursorSync.Crosshair,
-          }),
-        ],
-        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map((option, colorIndex) => {
-          return new SceneCSSGridItem({
-            body: new MetricVizPanel({
-              title: option.label,
-              metricName,
-              color: getColorByIndex(colorIndex),
-              prometheusFunction: option.value,
-              height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
-              hideLegend: true,
-              highlight: colorIndex === 1,
-              isNativeHistogram: trail.isNativeHistogram(metricName),
-              headerActions: [
-                new ApplyAction({
-                  metricName,
-                  prometheusFunction: option.value,
-                  disabled: colorIndex === 1,
-                }),
-              ],
-            }),
-          });
-        }),
-      }),
+      title: 'Configure the Prometheus function',
+      subTitle: `${metric} ${metadata ? ` (${metadata.type})` : ''}`, // eslint-disable-line sonarjs/no-nested-template-literals
+      body: new ConfigurePrometheusFunctionForm({ metric }),
     });
   }
 

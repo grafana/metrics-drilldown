@@ -18,7 +18,6 @@ import React, { useState } from 'react';
 import { InlineBanner } from 'App/InlineBanner';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { VAR_FILTERS } from 'shared';
-import { getColorByIndex } from 'utils';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
@@ -100,8 +99,12 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             body: new WithUsageDataPreviewPanel({
               vizPanelInGridItem: new GmdVizPanel({
                 metric: option.value as string,
-                matchers: [{ key: labelName, operator: '=', value: labelValue }],
-                fixedColor: getColorByIndex(colorIndex),
+                panelOptions: {
+                  fixedColorIndex: colorIndex,
+                },
+                queryOptions: {
+                  labelMatchers: [{ key: labelName, operator: '=', value: labelValue }],
+                },
               }),
               metric: option.value as string,
             }),

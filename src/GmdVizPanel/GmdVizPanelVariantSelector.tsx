@@ -3,16 +3,16 @@ import { RadioButtonGroup } from '@grafana/ui';
 import React from 'react';
 
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
-import { PANEL_TYPE } from './GmdVizPanel';
+import { type PanelType } from './GmdVizPanel';
 
 interface GmdVizPanelVariantSelectorState extends SceneObjectState {
   metric: string;
-  panelType: PANEL_TYPE;
+  panelType: PanelType;
   options: Array<{
     label: string;
-    value: PANEL_TYPE;
+    value: PanelType;
   }>;
-  currentPanelType: PANEL_TYPE;
+  currentPanelType: PanelType;
 }
 
 export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVariantSelectorState> {
@@ -31,17 +31,17 @@ export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVaria
     });
   }
 
-  private static getOptions(metric: string, panelType: PANEL_TYPE) {
-    if ([PANEL_TYPE.HEATMAP, PANEL_TYPE.PERCENTILES].includes(panelType)) {
+  private static getOptions(metric: string, panelType: PanelType) {
+    if (['heatmap', 'percentiles'].includes(panelType)) {
       return [
-        { value: PANEL_TYPE.PERCENTILES, label: 'percentiles' },
-        { value: PANEL_TYPE.HEATMAP, label: 'heatmap' },
+        { value: 'percentiles' as PanelType, label: 'percentiles' },
+        { value: 'heatmap' as PanelType, label: 'heatmap' },
       ];
     }
     return [];
   }
 
-  private onChange = (newPanelType: PANEL_TYPE) => {
+  private onChange = (newPanelType: PanelType) => {
     this.publishEvent(new EventPanelTypeChanged({ panelType: newPanelType }), true);
   };
 
