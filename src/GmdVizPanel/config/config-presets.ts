@@ -75,7 +75,7 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
   },
   [PANEL_PRESET.TIMESERIES_MIN_MAX]: {
     id: String(PANEL_PRESET.TIMESERIES_MIN_MAX),
-    name: 'Min/Max',
+    name: 'Minimum and maximum',
     panelOptions: {
       type: 'timeseries',
       description:
@@ -106,7 +106,7 @@ export const DEFAULT_TIMESERIES_RATE_PRESETS: Record<string, PanelConfigPreset> 
 export const DEFAULT_TIMESERIES_AGE_PRESETS: Record<string, PanelConfigPreset> = {
   [PANEL_PRESET.TIMESERIES_AGE_TIME_MINUS_AVG]: {
     id: String(PANEL_PRESET.TIMESERIES_AGE_TIME_MINUS_AVG),
-    name: 'Age: time - avg(metric)',
+    name: 'Average age',
     panelOptions: {
       type: 'timeseries',
       description:
@@ -118,7 +118,7 @@ export const DEFAULT_TIMESERIES_AGE_PRESETS: Record<string, PanelConfigPreset> =
   },
   [PANEL_PRESET.TIMESERIES_AGE_TIME_MINUS_MIN_MAX]: {
     id: String(PANEL_PRESET.TIMESERIES_AGE_TIME_MINUS_MIN_MAX),
-    name: 'Age: time - minmax(metric)',
+    name: 'Minimum and maximum ages',
     panelOptions: {
       type: 'timeseries',
       description:

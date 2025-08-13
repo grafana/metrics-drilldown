@@ -31,7 +31,7 @@ import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { isHistogramMetric } from './heatmap/isHistogramMetric';
 import { isAgeMetric } from './isAgeMetric';
-import { isRateQuery } from './isRateQuery';
+import { isRateQuery as isRateQueryFn } from './isRateQuery';
 import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
 import { buildStatPanel } from './stat/buildStatPanel';
 import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
@@ -290,10 +290,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
 
     if (isAgeMetric(metric)) {
-      return [...Object.values(DEFAULT_TIMESERIES_PRESETS), ...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS)];
+      return [Object.values(DEFAULT_TIMESERIES_PRESETS)[0], ...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS)];
     }
 
-    if (isRateQuery(metric)) {
+    if (isRateQueryFn(metric)) {
       return Object.values(DEFAULT_TIMESERIES_RATE_PRESETS);
     }
 
