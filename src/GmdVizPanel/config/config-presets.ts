@@ -121,7 +121,8 @@ export const DEFAULT_STATUS_UP_DOWN_PRESETS: Record<string, PanelConfigPreset> =
     name: 'Status History',
     panelOptions: {
       type: 'statushistory',
-      description: '',
+      description:
+        'Displays binary status changes over time as colored bars (green=up, red=down). Perfect for monitoring service availability, health checks, or any binary state metrics. Shows patterns in uptime/downtime and helps identify recurring issues.',
     },
     queryOptions: {
       resolution: QUERY_RESOLUTION.MEDIUM,
@@ -133,7 +134,8 @@ export const DEFAULT_STATUS_UP_DOWN_PRESETS: Record<string, PanelConfigPreset> =
     name: 'Stat (latest)',
     panelOptions: {
       type: 'stat',
-      description: '',
+      description:
+        'Shows the current status as a single value display with color coding (green=up, red=down). Ideal for dashboards where you need an at-a-glance view of service health or binary state. Uses minimum value to ensure any "down" status is highlighted.',
       mappings: UP_DOWN_VALUE_MAPPINGS,
     },
     queryOptions: {
