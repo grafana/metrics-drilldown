@@ -18,10 +18,9 @@ import { omit } from 'lodash';
 import React from 'react';
 
 import { DataTrail } from 'DataTrail';
-import { type PanelConfigPreset } from 'GmdVizPanel/config/config-presets';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
+import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { reportExploreMetrics } from 'interactions';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userPreferences } from 'UserPreferences/userPreferences';
 import { getTrailFor } from 'utils';
@@ -116,8 +115,6 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   }
 
   private onSelectPreset = (presetId: string) => {
-    reportExploreMetrics('panel_config_selected', { presetId });
-
     for (const panel of sceneGraph.findDescendents(this, WithConfigPanelOptions)) {
       panel.setState({ isSelected: panel.state.presetId === presetId });
     }
@@ -166,8 +163,6 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
       return;
     }
 
-    reportExploreMetrics('default_panel_config_restored', {});
-
     this.publishEvent(
       new EventApplyPanelConfig({
         metric,
@@ -198,8 +193,6 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
       ]);
       return;
     }
-
-    reportExploreMetrics('panel_config_applied', {});
 
     const config = ConfigurePanelForm.getPanelConfigFromPreset(preset);
     this.publishEvent(new EventApplyPanelConfig({ metric, config }), true);

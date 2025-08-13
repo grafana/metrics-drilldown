@@ -1,13 +1,26 @@
 import { promql } from 'tsqtsq';
 
-import { type PrometheusFunction } from '../GmdVizPanel';
+export type PrometheusFunction =
+  // timeseries (rate and non-rate)
+  | 'avg'
+  | 'sum'
+  | 'stddev'
+  | 'quantile'
+  | 'min'
+  | 'max'
+  // histograms
+  | 'histogram_quantile'
+  // age
+  | 'time-avg(metric)'
+  | 'time-min(metric)'
+  | 'time-max(metric)';
+
+const CLASSIC_FUNCTIONS: PrometheusFunction[] = ['avg', 'sum', 'stddev', 'quantile', 'min', 'max'];
 
 type MapEntry = {
   name: PrometheusFunction;
   fn: (args: any) => string;
 };
-
-const CLASSIC_FUNCTIONS: PrometheusFunction[] = ['avg', 'sum', 'stddev', 'quantile', 'min', 'max'];
 
 export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
   ...CLASSIC_FUNCTIONS.map(

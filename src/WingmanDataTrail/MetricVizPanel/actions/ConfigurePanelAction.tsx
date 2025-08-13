@@ -3,13 +3,15 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from 'interactions';
+import { PREF_KEYS } from 'UserPreferences/pref-keys';
+import { userPreferences } from 'UserPreferences/userPreferences';
 
 import { EventConfigurePanel } from './EventConfigurePanel';
 
 interface ConfigurePanelActionState extends SceneObjectState {
   metric: string;
   disabled: boolean;
+  isAlreadyConfigured: boolean;
 }
 
 export class ConfigurePanelAction extends SceneObjectBase<ConfigurePanelActionState> {
@@ -20,31 +22,35 @@ export class ConfigurePanelAction extends SceneObjectBase<ConfigurePanelActionSt
     metric: ConfigurePanelActionState['metric'];
     disabled?: ConfigurePanelActionState['disabled'];
   }) {
+    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS) || {};
+
     super({
       metric,
       disabled: disabled !== undefined ? disabled : false,
+      isAlreadyConfigured: Boolean(userPrefs[metric]?.config),
     });
   }
 
   public onClick = () => {
-    reportExploreMetrics('configure_panel_clicked', {});
     this.publishEvent(new EventConfigurePanel({ metric: this.state.metric }), true);
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<ConfigurePanelAction>) => {
     const styles = useStyles2(getStyles);
-    const { disabled } = model.useState();
+    const { isAlreadyConfigured, disabled } = model.useState();
+
+    const label = isAlreadyConfigured ? 'Reconfigure panel' : 'Configure panel';
 
     return (
       <Button
         className={styles.selectButton}
-        aria-label="Configure panel"
+        aria-label={label}
         variant="secondary"
         size="sm"
         fill="text"
         onClick={model.onClick}
         icon="cog"
-        tooltip="Configure panel"
+        tooltip={label}
         tooltipPlacement="top"
         disabled={disabled}
       />

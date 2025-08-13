@@ -17,15 +17,16 @@ import { getTrailFor } from 'utils';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
 import { type LabelMatcher } from './buildQueryExpression';
+import { PANEL_HEIGHT } from './config/panel-heights';
+import { DEFAULT_TIMESERIES_AGE_PRESETS } from './config/presets/config-presets-ages';
+import { DEFAULT_HISTOGRAMS_PRESETS } from './config/presets/config-presets-histograms';
+import { DEFAULT_STATUS_UP_DOWN_PRESETS } from './config/presets/config-presets-status-updown';
 import {
-  DEFAULT_HISTOGRAMS_PRESETS,
-  DEFAULT_STATUS_UP_DOWN_PRESETS,
-  DEFAULT_TIMESERIES_AGE_PRESETS,
   DEFAULT_TIMESERIES_PRESETS,
   DEFAULT_TIMESERIES_RATE_PRESETS,
-  type PanelConfigPreset,
-} from './config/config-presets';
-import { PANEL_HEIGHT } from './config/panel-heights';
+} from './config/presets/config-presets-timeseries';
+import { type PanelConfigPreset } from './config/presets/types';
+import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
@@ -67,21 +68,6 @@ export type PanelOptions = {
 };
 
 /* Query config */
-
-export type PrometheusFunction =
-  // timeseries
-  | 'avg'
-  | 'sum'
-  | 'stddev'
-  | 'quantile'
-  | 'min'
-  | 'max'
-  // percentiles & heatmaps
-  | 'histogram_quantile'
-  // age
-  | 'time-avg(metric)'
-  | 'time-min(metric)'
-  | 'time-max(metric)';
 
 export type QueryDefs = Array<{
   fn: PrometheusFunction;

@@ -18,7 +18,9 @@ import { GroupByVariable } from 'Breakdown/GroupByVariable';
 import { ConfigurePanelForm } from 'ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'ConfigurePanelForm/EventCancelConfigurePanel';
+import { getMetricType } from 'GmdVizPanel/getMetricType';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { reportExploreMetrics } from 'interactions';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
 import { getTrailFor } from 'utils';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
@@ -95,7 +97,9 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
     this._subs.add(
       this.subscribeToEvent(EventConfigurePanel, (event) => {
-        this.openDrawer(event.payload.metric);
+        const { metric } = event.payload;
+        reportExploreMetrics('configure_panel_opened', { metricType: getMetricType(metric) });
+        this.openDrawer(metric);
       })
     );
 
@@ -107,9 +111,15 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
     this._subs.add(
       this.subscribeToEvent(EventApplyPanelConfig, (event) => {
-        const { config, restoreDefault } = event.payload;
-        const panel = sceneGraph.findDescendents(this, GmdVizPanel)[0];
+        const { metric, config, restoreDefault } = event.payload;
 
+        if (restoreDefault) {
+          reportExploreMetrics('default_panel_config_restored', { metricType: getMetricType(metric) });
+        } else {
+          reportExploreMetrics('panel_config_applied', { metricType: getMetricType(metric), configId: config.id });
+        }
+
+        const panel = sceneGraph.findDescendents(this, GmdVizPanel)[0];
         if (!panel) {
           throw new Error('Cannot find viz panel to update!');
         }
