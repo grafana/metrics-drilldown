@@ -20,18 +20,22 @@ import { DataTrail } from 'DataTrail';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'interactions';
+import { PREF_KEYS } from 'UserPreferences/pref-keys';
+import { userPreferences } from 'UserPreferences/userPreferences';
 import { getTrailFor } from 'utils';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
 
 import { EventApplyPanelConfig } from './EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from './EventCancelConfigurePanel';
 import { EventRestorePanelConfig } from './EventRestorePanelConfig';
+import { WithConfigPanelOptions } from './WithConfigPanelOptions';
 
 interface ConfigurePanelFormState extends SceneObjectState {
   metric: string;
   $timeRange: SceneTimeRange;
   controls: SceneObject[];
   isConfirmModalOpen: boolean;
+  selectedPresetId?: string;
   body?: SceneCSSGridLayout;
 }
 
@@ -44,6 +48,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
       $timeRange: new SceneTimeRange({}),
       controls: [new SceneTimePicker({}), new SceneRefreshPicker({})],
       isConfirmModalOpen: false,
+      selectedPresetId: undefined,
       body: undefined,
     });
 
@@ -52,15 +57,28 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
   private onActivate() {
     this.syncTimeRange();
+    this.buildBody();
+  }
 
+  private retrieveSelectedPreset() {
+    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS);
+    const userPrefForMetric = userPrefs && userPrefs[this.state.metric];
+    return userPrefForMetric ? userPrefForMetric.config : null;
+  }
+
+  private buildBody() {
     const { metric } = this.state;
-
     const trail = getTrailFor(this);
     const isNativeHistogram = trail.isNativeHistogram(metric);
+    const presets = GmdVizPanel.getConfigPresetsForMetric(metric, isNativeHistogram);
+    // if not found in the user preferences, we use the first preset
+    // it works because they are organized to always have the default one as the first element (see config-presets.ts)
+    const selectedPreset = this.retrieveSelectedPreset() || presets[0];
+    const selectedPresetId = selectedPreset.id;
 
     const body = new SceneCSSGridLayout({
       templateColumns: GRID_TEMPLATE_COLUMNS,
-      autoRows: PANEL_HEIGHT.M,
+      autoRows: PANEL_HEIGHT.M + 18, // see WithConfigPanelOptions
       isLazy: true,
       $behaviors: [
         new behaviors.CursorSync({
@@ -68,24 +86,39 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
           sync: DashboardCursorSync.Crosshair,
         }),
       ],
-      children: GmdVizPanel.getConfigPresetsForMetric(metric, isNativeHistogram).map((option, colorIndex) => {
+      children: presets.map((option, colorIndex) => {
         return new SceneCSSGridItem({
-          body: new GmdVizPanel({
-            metric,
-            panelOptions: {
-              ...option.panelOptions,
-              title: option.name,
-              fixedColorIndex: colorIndex,
-              headerActions: () => [],
-            },
-            queryOptions: option.queryOptions,
+          body: new WithConfigPanelOptions({
+            presetId: option.id,
+            isSelected: selectedPresetId === option.id,
+            onSelect: (presetId) => this.onSelectPreset(presetId),
+            body: new GmdVizPanel({
+              metric,
+              panelOptions: {
+                ...option.panelOptions,
+                title: option.name,
+                fixedColorIndex: colorIndex,
+                headerActions: () => [],
+              },
+              queryOptions: option.queryOptions,
+            }),
           }),
         });
       }),
     });
 
-    this.setState({ body });
+    this.setState({ body, selectedPresetId });
   }
+
+  private onSelectPreset = (presetId: string) => {
+    reportExploreMetrics('panel_config_selected', { presetId });
+
+    for (const panel of sceneGraph.findDescendents(this, WithConfigPanelOptions)) {
+      panel.setState({ isSelected: panel.state.presetId === presetId });
+    }
+
+    this.setState({ selectedPresetId: presetId });
+  };
 
   private syncTimeRange() {
     const metricScene = sceneGraph.getAncestor(this, DataTrail);
@@ -134,7 +167,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
         </div>
 
         <div className={styles.messageContainer}>
-          <p>Choose a Prometheus function that will be used by default to display the {metric} metric.</p>
+          <p>Select a Prometheus function that will be used by default to display the {metric} metric.</p>
         </div>
 
         {body && <body.Component model={body} />}

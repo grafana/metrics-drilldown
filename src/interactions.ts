@@ -153,6 +153,10 @@ type Interactions = {
   panel_config_applied: {};
   // User restores the default panel config
   default_panel_config_restored: {};
+  // User selects a panel config
+  panel_config_selected: {
+    presetId: string;
+  };
 };
 
 type OtherEvents = {
