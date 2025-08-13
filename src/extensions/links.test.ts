@@ -9,6 +9,23 @@ import {
 } from './links';
 import { PluginExtensionPanelContext, DataQuery } from '@grafana/data';
 
+// Mock templateSrv for variable interpolation tests
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  getTemplateSrv: jest.fn(() => ({
+    replace: jest.fn((query: string, scopedVars: any, interpolateQueryExpr?: any) => {
+      // Mock variable interpolation
+      if (query.includes('$job')) {
+        return query.replace('$job', 'grafana');
+      }
+      if (query.includes('${instance}')) {
+        return query.replace('${instance}', 'localhost:3000');
+      }
+      return query;
+    }),
+  })),
+}));
+
 // Prometheus query type for tests
 type PromQuery = DataQuery & { expr: string };
 
@@ -263,6 +280,36 @@ describe('configureDrilldownLink', () => {
 
       expect(result).toBeDefined();
       expect(result?.path).toContain('var-filters=path%7C%3D%7C%2Fapi%2Fv1%2Fusers%3Fid%3D123%26name%3Dtest');
+    });
+
+    test('should interpolate template variables in Prometheus query', () => {
+      const context = createMockContext({
+        targets: [
+          {
+            refId: 'A',
+            expr: 'up{job="$job",instance="${instance}"}',
+            datasource: { type: 'prometheus', uid: 'prom-uid' },
+          } as PromQuery,
+        ],
+        timeRange: {
+          from: '2023-01-01T00:00:00Z',
+          to: '2023-01-01T01:00:00Z',
+        },
+        scopedVars: {
+          job: { value: 'grafana', text: 'grafana' },
+          instance: { value: 'localhost:3000', text: 'localhost:3000' },
+        },
+      });
+
+      const result = configureDrilldownLink(context);
+
+      expect(result).toBeDefined();
+      expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
+      expect(result?.path).toContain('metric=up');
+      expect(result?.path).toContain('var-ds=prom-uid');
+      // Check that template variables were interpolated
+      expect(result?.path).toContain('var-filters=job%7C%3D%7Cgrafana');
+      expect(result?.path).toContain('var-filters=instance%7C%3D%7Clocalhost%3A3000');
     });
   });
 
