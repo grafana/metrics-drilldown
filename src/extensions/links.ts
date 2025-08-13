@@ -1,9 +1,12 @@
 // CAUTION: Imports in this file will contribute to the module.tsx bundle size
 import {
   PluginExtensionPoints,
+  type CustomVariableModel,
   type PluginExtensionAddedLinkConfig,
   type PluginExtensionPanelContext,
+  type QueryVariableModel,
 } from '@grafana/data';
+import { config, getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
 
@@ -29,7 +32,7 @@ export type PromQLLabelMatcher = {
   value: string;
 };
 
-export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
+export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPanelContext>> = [
   {
     title,
     description,
@@ -57,7 +60,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
       }
 
       const { navigateToMetrics, datasource_uid, label_filters, metric, start, end } =
-        context as GrafanaAssistantMetricsDrilldownContext;
+        context as unknown as GrafanaAssistantMetricsDrilldownContext;
       // parse the labels to the PromQL format
       const parsedLabels = parseFiltersToLabelMatchers(label_filters);
       // create the PromURLObject for building params
@@ -72,7 +75,7 @@ export const linkConfigs: PluginExtensionAddedLinkConfig[] = [
   },
 ];
 
-export function configureDrilldownLink(context: object | undefined): { path: string } | undefined {
+export function configureDrilldownLink<T extends PluginExtensionPanelContext>(context?: T) {
   if (typeof context === 'undefined') {
     return;
   }
@@ -81,13 +84,22 @@ export function configureDrilldownLink(context: object | undefined): { path: str
     return;
   }
 
-  const queries = (context as PluginExtensionPanelContext).targets.filter(isPromQuery);
+  const queries = context.targets.filter(isPromQuery);
 
   if (!queries.length) {
     return;
   }
 
-  const { datasource, expr } = queries[0] as PromQuery;
+  const prometheusQuery = queries[0] as PromQuery;
+
+  const templateSrv = getTemplateSrv();
+  const datasourceUid = templateSrv.replace(prometheusQuery?.datasource?.uid, context.scopedVars);
+
+  const expr = templateSrv.replace(prometheusQuery.expr, context.scopedVars, interpolateQueryExpr);
+  
+  if (!datasourceUid || !expr) {
+    return;
+  }
 
   // allow the user to navigate to the drilldown without a query (metrics reducer view)
   if (!expr) {
@@ -106,13 +118,13 @@ export function configureDrilldownLink(context: object | undefined): { path: str
     const timeRange =
       'timeRange' in context &&
       typeof context.timeRange === 'object' &&
-      context.timeRange !== null &&
+      context.timeRange != null &&
       'from' in context.timeRange &&
       'to' in context.timeRange
         ? (context.timeRange as { from: string; to: string })
         : undefined;
 
-    const promURLObject = createPromURLObject(datasource?.uid, labels, metric, timeRange?.from, timeRange?.to);
+    const promURLObject = createPromURLObject(datasourceUid, labels, metric, timeRange?.from, timeRange?.to);
 
     const params = buildNavigateToMetricsParams(promURLObject);
 
@@ -313,4 +325,70 @@ type PromQuery = DataQuery & { expr: string };
 function isPromQuery(query: DataQuery): query is PromQuery {
   const { datasource } = query;
   return datasource?.type === 'prometheus';
+}
+
+// Copied from interpolateQueryExpr in prometheus datasource, as we can't return a promise in the link extension config we can't fetch the datasource from the datasource srv, so we're forced to duplicate this method
+// eslint-disable-next-line sonarjs/function-return-type
+export function interpolateQueryExpr(value: string | string[] = [], variable: QueryVariableModel | CustomVariableModel): string | string[] {
+  // if no multi or include all do not regexEscape
+  if (!variable.multi && !variable.includeAll) {
+    return prometheusRegularEscape(value);
+  }
+
+  if (typeof value === 'string') {
+    return prometheusSpecialRegexEscape(value);
+  }
+
+  const escapedValues = value.map((val) => prometheusSpecialRegexEscape(val));
+
+  if (escapedValues.length === 1) {
+    return escapedValues[0];
+  }
+
+  return '(' + escapedValues.join('|') + ')';
+}
+
+// not exported from @grafana/prometheus, so we're forced to duplicate it here
+// eslint-disable-next-line sonarjs/function-return-type
+export function prometheusRegularEscape<T>(value: T) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  if (config.featureToggles.prometheusSpecialCharsInLabelValues) {
+    // if the string looks like a complete label matcher (e.g. 'job="grafana"' or 'job=~"grafana"'),
+    // don't escape the encapsulating quotes
+    if (/^\w+(=|!=|=~|!~)".*"$/.test(value)) {
+      return value;
+    }
+
+    return value
+      .replace(/\\/g, '\\\\') // escape backslashes
+      .replace(/"/g, '\\"'); // escape double quotes
+  }
+
+  // classic behavior
+  return value
+    .replace(/\\/g, '\\\\') // escape backslashes
+    .replace(/'/g, "\\\\'"); // escape single quotes
+}
+
+// not exported from @grafana/prometheus, so we're forced to duplicate it here
+// eslint-disable-next-line sonarjs/function-return-type
+export function prometheusSpecialRegexEscape<T>(value: T) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  if (config.featureToggles.prometheusSpecialCharsInLabelValues) {
+    return value
+      .replace(/\\/g, '\\\\\\\\') // escape backslashes
+      .replace(/"/g, '\\\\\\"') // escape double quotes
+      .replace(/[$^*{}\[\]\'+?.()|]/g, '\\\\$&'); // escape regex metacharacters
+  }
+
+  // classic behavior
+  return value
+    .replace(/\\/g, '\\\\\\\\') // escape backslashes
+    .replace(/[$^*{}\[\]+?.()|]/g, '\\\\$&'); // escape regex metacharacters
 }
