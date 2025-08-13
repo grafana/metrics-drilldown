@@ -95,18 +95,14 @@ export function configureDrilldownLink<T extends PluginExtensionPanelContext>(co
   const templateSrv = getTemplateSrv();
   const datasourceUid = templateSrv.replace(prometheusQuery?.datasource?.uid, context.scopedVars);
 
-  const expr = templateSrv.replace(prometheusQuery.expr, context.scopedVars, interpolateQueryExpr);
-  
-  if (!datasourceUid || !expr) {
-    return;
-  }
-
   // allow the user to navigate to the drilldown without a query (metrics reducer view)
-  if (!expr) {
+  if (!prometheusQuery.expr) {
     return {
       path: createAppUrl(ROUTES.Drilldown),
     };
   }
+
+  const expr = templateSrv.replace(prometheusQuery.expr, context.scopedVars, interpolateQueryExpr);
 
   try {
     const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);

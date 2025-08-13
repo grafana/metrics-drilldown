@@ -1,5 +1,31 @@
 import { type PluginExtensionPanelContext } from '@grafana/data';
 
+// Mock templateSrv - following logs-drilldown pattern
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  getTemplateSrv: () => ({
+    replace: jest.fn((a: string, ...rest: unknown[]) => {
+      if (a === '${ds}') {
+        return '123abc';
+      }
+      if (a === '${datasource}') {
+        return 'prometheus-prod';
+      }
+      
+      // Process all replacements in sequence
+      let result = a;
+      if (result.includes('$job')) {
+        result = result.replace('$job', 'grafana');
+      }
+      if (result.includes('${instance}')) {
+        result = result.replace('${instance}', 'localhost:3000');
+      }
+      
+      return result;
+    }),
+  }),
+}));
+
 import {
   buildNavigateToMetricsParams,
   configureDrilldownLink,
@@ -9,23 +35,6 @@ import {
   UrlParameters,
   type GrafanaAssistantMetricsDrilldownContext,
 } from './links';
-
-// Mock templateSrv for variable interpolation tests
-jest.mock('@grafana/runtime', () => ({
-  ...jest.requireActual('@grafana/runtime'),
-  getTemplateSrv: jest.fn(() => ({
-    replace: jest.fn((query: string) => {
-      // Mock variable interpolation
-      if (query.includes('$job')) {
-        return query.replace('$job', 'grafana');
-      }
-      if (query.includes('${instance}')) {
-        return query.replace('${instance}', 'localhost:3000');
-      }
-      return query;
-    }),
-  })),
-}));
 
 // Prometheus query type for tests
 type PromQuery = { refId: string; expr: string; datasource?: { type: string; uid: string } };
@@ -45,6 +54,11 @@ function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {})
     ...overrides,
   } as PluginExtensionPanelContext;
 }
+
+beforeEach(() => {
+  // Clear all mocks before each test
+  jest.clearAllMocks();
+});
 
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
@@ -311,6 +325,34 @@ describe('configureDrilldownLink', () => {
       // Check that template variables were interpolated
       expect(result?.path).toContain('var-filters=job%7C%3D%7Cgrafana');
       expect(result?.path).toContain('var-filters=instance%7C%3D%7Clocalhost%3A3000');
+    });
+
+    test('should interpolate datasource variable in datasource uid', () => {
+      const context = createMockContext({
+        targets: [
+          {
+            refId: 'A',
+            expr: 'up{job="prometheus"}',
+            datasource: { type: 'prometheus', uid: '${datasource}' },
+          } as PromQuery,
+        ],
+        timeRange: {
+          from: '2023-01-01T00:00:00Z',
+          to: '2023-01-01T01:00:00Z',
+        },
+        scopedVars: {
+          datasource: { value: 'prometheus-prod', text: 'Prometheus Production' },
+        },
+      });
+
+      const result = configureDrilldownLink(context);
+
+      expect(result).toBeDefined();
+      expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
+      expect(result?.path).toContain('metric=up');
+      // Check that datasource variable was interpolated
+      expect(result?.path).toContain('var-ds=prometheus-prod');
+      expect(result?.path).toContain('var-filters=job%7C%3D%7Cprometheus');
     });
   });
 
