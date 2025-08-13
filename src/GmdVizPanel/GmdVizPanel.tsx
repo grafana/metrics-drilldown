@@ -18,21 +18,12 @@ import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectActi
 
 import { type LabelMatcher } from './buildQueryExpression';
 import { PANEL_HEIGHT } from './config/panel-heights';
-import { DEFAULT_TIMESERIES_AGE_PRESETS } from './config/presets/config-presets-ages';
-import { DEFAULT_HISTOGRAMS_PRESETS } from './config/presets/config-presets-histograms';
-import { DEFAULT_STATUS_UP_DOWN_PRESETS } from './config/presets/config-presets-status-updown';
-import {
-  DEFAULT_TIMESERIES_PRESETS,
-  DEFAULT_TIMESERIES_RATE_PRESETS,
-} from './config/presets/config-presets-timeseries';
 import { type PanelConfigPreset } from './config/presets/types';
 import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { isHistogramMetric } from './heatmap/isHistogramMetric';
-import { isAgeMetric } from './isAgeMetric';
-import { isRateQuery as isRateQueryFn } from './isRateQuery';
 import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
 import { buildStatPanel } from './stat/buildStatPanel';
 import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
@@ -264,26 +255,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       default:
         throw new TypeError(`Unsupported panel type "${panelConfig.type}"!`);
     }
-  }
-
-  public static getConfigPresetsForMetric(metric: string, isNativeHistogram: boolean): PanelConfigPreset[] {
-    if (isUpDownMetric(metric)) {
-      return Object.values(DEFAULT_STATUS_UP_DOWN_PRESETS);
-    }
-
-    if (isNativeHistogram || isHistogramMetric(metric)) {
-      return Object.values(DEFAULT_HISTOGRAMS_PRESETS);
-    }
-
-    if (isAgeMetric(metric)) {
-      return [Object.values(DEFAULT_TIMESERIES_PRESETS)[0], ...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS)];
-    }
-
-    if (isRateQueryFn(metric)) {
-      return Object.values(DEFAULT_TIMESERIES_RATE_PRESETS);
-    }
-
-    return Object.values(DEFAULT_TIMESERIES_PRESETS);
   }
 
   public update(panelOptions: PanelOptions, queryOptions: QueryOptions) {

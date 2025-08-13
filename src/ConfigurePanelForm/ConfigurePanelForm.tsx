@@ -19,6 +19,7 @@ import React from 'react';
 
 import { DataTrail } from 'DataTrail';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
+import { getConfigPresetsForMetric } from 'GmdVizPanel/config/presets/getConfigPresetsForMetric';
 import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
@@ -74,7 +75,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     const { metric } = this.state;
     const trail = getTrailFor(this);
     const isNativeHistogram = trail.isNativeHistogram(metric);
-    const presets = GmdVizPanel.getConfigPresetsForMetric(metric, isNativeHistogram);
+    const presets = getConfigPresetsForMetric(metric, isNativeHistogram);
     // if not found in the user preferences, we use the first preset
     // it works because they are organized to always have the default one as the first element (see config-presets.ts)
     const selectedPresetId = (this.retrieveSelectedPreset() || presets[0]).id;
