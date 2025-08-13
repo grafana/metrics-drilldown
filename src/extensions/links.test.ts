@@ -7,6 +7,26 @@ import {
   UrlParameters,
   type GrafanaAssistantMetricsDrilldownContext,
 } from './links';
+import { PluginExtensionPanelContext, DataQuery } from '@grafana/data';
+
+// Prometheus query type for tests
+type PromQuery = DataQuery & { expr: string };
+
+// Mock factory for PluginExtensionPanelContext
+function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {}): PluginExtensionPanelContext {
+  return {
+    id: 'test-panel',
+    title: 'Test Panel',
+    pluginId: 'timeseries',
+    timeRange: { from: '2023-01-01T00:00:00Z', to: '2023-01-01T01:00:00Z' },
+    timeZone: 'UTC',
+    dashboard: { uid: 'test-dashboard' },
+    targets: [],
+    scopedVars: {},
+    replaceVariables: jest.fn(),
+    ...overrides,
+  } as PluginExtensionPanelContext;
+}
 
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
@@ -150,59 +170,51 @@ describe('configureDrilldownLink', () => {
     });
 
     test('should return undefined when plugin type is not timeseries', () => {
-      const context = {
-        pluginId: 'table',
-        targets: [],
-      };
+      const context = createMockContext({ pluginId: 'table' });
       const result = configureDrilldownLink(context);
       expect(result).toBeUndefined();
     });
 
     test('should return undefined when no queries exist', () => {
-      const context = {
-        pluginId: 'timeseries',
-        targets: [],
-      };
+      const context = createMockContext({ targets: [] });
       const result = configureDrilldownLink(context);
       expect(result).toBeUndefined();
     });
 
     test('should return undefined when targets have no datasource', () => {
-      const context = {
-        pluginId: 'timeseries',
+      const context = createMockContext({
         targets: [
-          { expr: undefined }, // no datasource
-          { refId: 'A' }, // no datasource
+          { refId: 'A', expr: 'up' } as PromQuery, // no datasource
+          { refId: 'B' }, // no datasource, no expr
         ],
-      };
+      });
       const result = configureDrilldownLink(context);
       expect(result).toBeUndefined();
     });
 
     test('should return drilldown path when query has no expression but has prometheus datasource', () => {
-      const context = {
-        pluginId: 'timeseries',
+      const context = createMockContext({
         targets: [
           {
+            refId: 'A',
             datasource: { type: 'prometheus', uid: 'prom-uid' },
           },
         ],
-      };
+      });
       const result = configureDrilldownLink(context);
       expect(result).toBeDefined();
       expect(result?.path).toBe('/a/grafana-metricsdrilldown-app/drilldown');
     });
 
     test('should return undefined when datasource is not prometheus', () => {
-      const context = {
-        pluginId: 'timeseries',
+      const context = createMockContext({
         targets: [
           {
-            expr: 'up',
+            refId: 'A',
             datasource: { type: 'influxdb', uid: 'influx-uid' },
           },
         ],
-      };
+      });
       const result = configureDrilldownLink(context);
       expect(result).toBeUndefined();
     });
@@ -210,19 +222,19 @@ describe('configureDrilldownLink', () => {
 
   describe('successful URL construction', () => {
     test('should construct URL with all components', () => {
-      const context = {
-        pluginId: 'timeseries',
+      const context = createMockContext({
         targets: [
           {
+            refId: 'A',
             expr: 'http_requests_total{method="GET",status="200"}',
             datasource: { type: 'prometheus', uid: 'prom-uid' },
-          },
+          } as PromQuery,
         ],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
           to: '2023-01-01T01:00:00Z',
         },
-      };
+      });
 
       const result = configureDrilldownLink(context);
 
@@ -237,15 +249,15 @@ describe('configureDrilldownLink', () => {
     });
 
     test('should construct URL with special characters in labels', () => {
-      const context = {
-        pluginId: 'timeseries',
+      const context = createMockContext({
         targets: [
           {
+            refId: 'A',
             expr: 'http_requests_total{path="/api/v1/users?id=123&name=test"}',
             datasource: { type: 'prometheus', uid: 'prom-uid' },
-          },
+          } as PromQuery,
         ],
-      };
+      });
 
       const result = configureDrilldownLink(context);
 
@@ -257,15 +269,15 @@ describe('configureDrilldownLink', () => {
   describe('error handling', () => {
     test('should return fallback URL when parsing fails', () => {
       // Test with a context that has a malformed query that might cause parsePromQLQuery to throw
-      const context = {
-        pluginId: 'timeseries',
+      const context = createMockContext({
         targets: [
           {
+            refId: 'A',
             expr: 'up{', // Malformed query that might cause parsing to fail
             datasource: { type: 'prometheus', uid: 'prom-uid' },
-          },
+          } as PromQuery,
         ],
-      };
+      });
 
       const result = configureDrilldownLink(context);
 
