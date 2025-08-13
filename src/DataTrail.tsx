@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { useChromeHeaderHeight } from '@grafana/runtime';
+import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   SceneControlsSpacer,
@@ -13,6 +13,7 @@ import {
   SceneTimePicker,
   SceneTimeRange,
   SceneVariableSet,
+  ScopesVariable,
   UrlSyncContextProvider,
   VariableDependencyConfig,
   VariableValueSelectors,
@@ -386,35 +387,42 @@ export function getTopSceneFor(metric?: string, nativeHistogram = false) {
 }
 
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
+  let variables: SceneVariable[] = [
+    new MetricsDrilldownDataSourceVariable({ initialDS }),
+    new AdHocFiltersVariable({
+      key: VAR_FILTERS,
+      name: VAR_FILTERS,
+      label: 'Filters',
+      addFilterButtonText: 'Add label',
+      datasource: trailDS,
+      hide: VariableHide.dontHide,
+      layout: 'combobox',
+      filters: initialFilters ?? [],
+      baseFilters: getBaseFiltersForMetric(metric),
+      applyMode: 'manual',
+      allowCustomValue: true,
+      expressionBuilder: (filters: AdHocVariableFilter[]) => {
+        // remove any filters that include __name__ key in the expression
+        // to prevent the metric name from being set twice in the query and causing an error.
+        // also escapes equal signs to prevent invalid queries
+        // TODO: proper escaping as Scene does in https://github.com/grafana/scenes/blob/main/packages/scenes/src/variables/utils.ts#L45-L67
+        return (
+          filters
+            .filter((filter) => filter.key !== '__name__')
+            // eslint-disable-next-line sonarjs/no-nested-template-literals
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value.replaceAll('=', `\=`)}"`)
+            .join(',')
+        );
+      },
+    }),
+  ];
+
+  if (isScopesSupported()) {
+    variables.unshift(new ScopesVariable({ enable: true }));
+  }
+
   return new SceneVariableSet({
-    variables: [
-      new MetricsDrilldownDataSourceVariable({ initialDS }),
-      new AdHocFiltersVariable({
-        key: VAR_FILTERS,
-        name: VAR_FILTERS,
-        label: 'Filters',
-        addFilterButtonText: 'Add label',
-        datasource: trailDS,
-        hide: VariableHide.dontHide,
-        layout: 'combobox',
-        filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
-        applyMode: 'manual',
-        allowCustomValue: true,
-        expressionBuilder: (filters: AdHocVariableFilter[]) => {
-          // remove any filters that include __name__ key in the expression
-          // to prevent the metric name from being set twice in the query and causing an error.
-          return (
-            filters
-              .filter((filter) => filter.key !== '__name__')
-              // FIXME: the replaceAll is a quick fix for https://github.com/grafana/metrics-drilldown/issues/621
-              // eslint-disable-next-line sonarjs/no-nested-template-literals
-              .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value.replaceAll('=', `\=`)}"`)
-              .join(',')
-          );
-        },
-      }),
-    ],
+    variables,
   });
 }
 
@@ -472,4 +480,14 @@ function updateAppControlsHeight() {
 
   const { height } = appControls.getBoundingClientRect();
   document.documentElement.style.setProperty('--app-controls-height', `${height}px`);
+}
+
+function isScopesSupported(): boolean {
+  return Boolean(
+    config.featureToggles.scopeFilters &&
+      config.featureToggles.enableScopesInMetricsExplore &&
+      // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
+      // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
+      !config.buildInfo.version.startsWith('11.')
+  );
 }
