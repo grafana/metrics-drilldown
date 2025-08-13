@@ -17,12 +17,14 @@ import { Button, ConfirmModal, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { DataTrail } from 'DataTrail';
+import { type PanelConfigPreset } from 'GmdVizPanel/config/config-presets';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'interactions';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userPreferences } from 'UserPreferences/userPreferences';
 import { getTrailFor } from 'utils';
+import { displayError, displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
 
 import { EventApplyPanelConfig } from './EventApplyPanelConfig';
@@ -35,6 +37,7 @@ interface ConfigurePanelFormState extends SceneObjectState {
   $timeRange: SceneTimeRange;
   controls: SceneObject[];
   isConfirmModalOpen: boolean;
+  presets: PanelConfigPreset[];
   selectedPresetId?: string;
   body?: SceneCSSGridLayout;
 }
@@ -48,6 +51,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
       $timeRange: new SceneTimeRange({}),
       controls: [new SceneTimePicker({}), new SceneRefreshPicker({})],
       isConfirmModalOpen: false,
+      presets: [],
       selectedPresetId: undefined,
       body: undefined,
     });
@@ -58,12 +62,13 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   private onActivate() {
     this.syncTimeRange();
     this.buildBody();
+    this.subscribeToEvents();
   }
 
-  private retrieveSelectedPreset() {
-    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS);
-    const userPrefForMetric = userPrefs && userPrefs[this.state.metric];
-    return userPrefForMetric ? userPrefForMetric.config : null;
+  private syncTimeRange() {
+    const metricScene = sceneGraph.getAncestor(this, DataTrail);
+    const { from, to, timeZone, value } = sceneGraph.getTimeRange(metricScene).state;
+    sceneGraph.getTimeRange(this).setState({ from, to, timeZone, value });
   }
 
   private buildBody() {
@@ -73,8 +78,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     const presets = GmdVizPanel.getConfigPresetsForMetric(metric, isNativeHistogram);
     // if not found in the user preferences, we use the first preset
     // it works because they are organized to always have the default one as the first element (see config-presets.ts)
-    const selectedPreset = this.retrieveSelectedPreset() || presets[0];
-    const selectedPresetId = selectedPreset.id;
+    const selectedPresetId = (this.retrieveSelectedPreset() || presets[0]).id;
 
     const body = new SceneCSSGridLayout({
       templateColumns: GRID_TEMPLATE_COLUMNS,
@@ -107,7 +111,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
       }),
     });
 
-    this.setState({ body, selectedPresetId });
+    this.setState({ presets, selectedPresetId, body });
   }
 
   private onSelectPreset = (presetId: string) => {
@@ -120,10 +124,38 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     this.setState({ selectedPresetId: presetId });
   };
 
-  private syncTimeRange() {
-    const metricScene = sceneGraph.getAncestor(this, DataTrail);
-    const { from, to, timeZone, value } = sceneGraph.getTimeRange(metricScene).state;
-    sceneGraph.getTimeRange(this).setState({ from, to, timeZone, value });
+  private subscribeToEvents() {
+    const { metric } = this.state;
+
+    this._subs.add(
+      this.subscribeToEvent(EventApplyPanelConfig, (event) => {
+        const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS) || {};
+        userPrefs[metric] = { ...userPrefs[metric], config: event.payload.config };
+        userPreferences.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
+
+        displaySuccess([`Configuration successfully applied for metric ${metric}!`]);
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventRestorePanelConfig, () => {
+        const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS);
+        const userPrefForMetric = userPrefs && userPrefs[metric];
+
+        if (userPrefForMetric) {
+          delete userPrefs[metric].config;
+          userPreferences.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
+        }
+
+        displaySuccess([`Default configuration successfully restored for metric ${metric}!`]);
+      })
+    );
+  }
+
+  private retrieveSelectedPreset() {
+    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS);
+    const userPrefForMetric = userPrefs && userPrefs[this.state.metric];
+    return userPrefForMetric ? userPrefForMetric.config : null;
   }
 
   private onClickRestoreDefault = () => {
@@ -145,8 +177,18 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   };
 
   private onClickApplyConfig = () => {
+    const { metric, presets, selectedPresetId } = this.state;
+    const config = presets.find((preset) => preset.id === selectedPresetId);
+
+    if (!config) {
+      displayError(new Error(`No config found for metric ${metric} and preset id="${selectedPresetId}"!`), [
+        'Cannot apply configuration.',
+      ]);
+      return;
+    }
+
     reportExploreMetrics('panel_config_applied', {});
-    this.publishEvent(new EventApplyPanelConfig({ metric: this.state.metric }), true);
+    this.publishEvent(new EventApplyPanelConfig({ metric, config: { ...config, name: undefined } }), true);
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<ConfigurePanelForm>) => {

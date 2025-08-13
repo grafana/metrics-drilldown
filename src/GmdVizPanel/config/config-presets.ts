@@ -21,7 +21,7 @@ export enum PANEL_PRESET {
 
 export type PanelConfigPreset = {
   id: string;
-  name: string;
+  name?: string;
   panelOptions: PanelOptions;
   queryOptions: QueryOptions;
 };
