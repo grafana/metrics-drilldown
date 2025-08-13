@@ -19,6 +19,7 @@ import {
   DEFAULT_STATUS_UP_DOWN_PRESETS,
   DEFAULT_TIMESERIES_AGE_PRESETS,
   DEFAULT_TIMESERIES_PRESETS,
+  DEFAULT_TIMESERIES_RATE_PRESETS,
   type PanelConfigPreset,
 } from './config/config-presets';
 import { PANEL_HEIGHT } from './config/panel-heights';
@@ -27,6 +28,7 @@ import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { isHistogramMetric } from './heatmap/isHistogramMetric';
 import { isAgeMetric } from './isAgeMetric';
+import { isRateQuery } from './isRateQuery';
 import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
 import { buildStatPanel } from './stat/buildStatPanel';
 import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
@@ -271,13 +273,15 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       return Object.values(DEFAULT_HISTOGRAMS_PRESETS);
     }
 
-    const timeseriesPresets = Object.values(DEFAULT_TIMESERIES_PRESETS);
-
     if (isAgeMetric(metric)) {
-      timeseriesPresets.push(...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS));
+      return [...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS), ...Object.values(DEFAULT_TIMESERIES_PRESETS)];
     }
 
-    return timeseriesPresets;
+    if (isRateQuery(metric)) {
+      return Object.values(DEFAULT_TIMESERIES_RATE_PRESETS);
+    }
+
+    return Object.values(DEFAULT_TIMESERIES_PRESETS);
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {
