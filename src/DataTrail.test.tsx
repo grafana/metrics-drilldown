@@ -116,6 +116,12 @@ describe('DataTrail', () => {
       filterVar.setState({ filters: [{ key: 'app', operator: '=~', value: '.*end' }] }); // matches app=frontend, app=backend, etc.
       expect(filterVar.getValue()).toBe('app=~".*end"');
     });
+
+    it('should escape any equal sign (=) present in label values', () => {
+      const filterVar = getFilterVar(trail);
+      filterVar.setState({ filters: [{ key: 'app', operator: '=~', value: 'start=4,end=2' }] });
+      expect(filterVar.getValue()).toBe(`app=~"start\=4,end\=2"`);
+    });
   });
 });
 
