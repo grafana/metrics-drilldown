@@ -119,7 +119,7 @@ This generates screenshots only for Grafana Enterprise v12.1.0.
 To generate screenshots for all supported Grafana versions:
 
 ```shell
-./scripts/e2e-gen-screenshots.sh
+./scripts/e2e-gen-all-screenshots.sh
 ```
 
 This script automatically generates screenshots for each version defined in the [e2e/config/grafana-versions-supported.ts](../e2e/config/grafana-versions-supported.ts).
@@ -147,7 +147,7 @@ Here's a typical workflow for adding screenshot tests:
 2. **Generate screenshots locally** using Docker:
 
    ```shell
-   ./scripts/e2e-gen-screenshots.sh "-g 'Simple and complex sidebars'"
+   ./scripts/e2e-gen-all-screenshots.sh "-g 'Simple and complex sidebars'"
    ```
 
 3. **Review generated screenshots** in the test snapshot directories
