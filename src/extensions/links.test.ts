@@ -1,3 +1,5 @@
+import { type PluginExtensionPanelContext } from '@grafana/data';
+
 import {
   buildNavigateToMetricsParams,
   configureDrilldownLink,
@@ -7,13 +9,12 @@ import {
   UrlParameters,
   type GrafanaAssistantMetricsDrilldownContext,
 } from './links';
-import { PluginExtensionPanelContext, DataQuery } from '@grafana/data';
 
 // Mock templateSrv for variable interpolation tests
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   getTemplateSrv: jest.fn(() => ({
-    replace: jest.fn((query: string, scopedVars: any, interpolateQueryExpr?: any) => {
+    replace: jest.fn((query: string) => {
       // Mock variable interpolation
       if (query.includes('$job')) {
         return query.replace('$job', 'grafana');
@@ -27,7 +28,7 @@ jest.mock('@grafana/runtime', () => ({
 }));
 
 // Prometheus query type for tests
-type PromQuery = DataQuery & { expr: string };
+type PromQuery = { refId: string; expr: string; datasource?: { type: string; uid: string } };
 
 // Mock factory for PluginExtensionPanelContext
 function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {}): PluginExtensionPanelContext {
@@ -182,7 +183,7 @@ describe('parsePromQLQuery - lezer parser tests', () => {
 describe('configureDrilldownLink', () => {
   describe('guard clauses', () => {
     test('should return undefined when context is undefined', () => {
-      const result = configureDrilldownLink(undefined);
+      const result = configureDrilldownLink();
       expect(result).toBeUndefined();
     });
 
