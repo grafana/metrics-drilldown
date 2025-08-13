@@ -8,8 +8,11 @@ import {
   type VizPanelState,
 } from '@grafana/scenes';
 import { useStyles2, type VizLegendOptions } from '@grafana/ui';
+import { isEqual } from 'lodash';
 import React from 'react';
 
+import { PREF_KEYS } from 'UserPreferences/pref-keys';
+import { userPreferences } from 'UserPreferences/userPreferences';
 import { getTrailFor } from 'utils';
 import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
@@ -119,12 +122,15 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     metric,
     panelOptions,
     queryOptions,
+    discardUserPrefs,
   }: {
     metric: GmdVizPanelState['metric'];
     panelOptions?: PanelOptions;
     queryOptions?: QueryOptions;
+    discardUserPrefs?: boolean;
   }) {
     const histogramType = isHistogramMetric(metric) ? 'classic' : 'none';
+    const preferredConfig = discardUserPrefs ? undefined : GmdVizPanel.retrievePreferredConfig(metric);
 
     super({
       metric,
@@ -137,12 +143,14 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         height: PANEL_HEIGHT.M,
         headerActions: ({ metric }) => [new SelectAction({ metricName: metric })],
         ...panelOptions,
+        ...preferredConfig?.panelOptions,
       },
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [],
         addIgnoreUsageFilter: true,
         ...queryOptions,
+        ...preferredConfig?.queryOptions,
       },
       body: undefined,
     });
@@ -150,6 +158,12 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.addActivationHandler(() => {
       this.onActivate(Boolean(panelOptions?.type));
     });
+  }
+
+  private static retrievePreferredConfig(metric: string): PanelConfigPreset | undefined {
+    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS);
+    const userPrefForMetric = userPrefs && userPrefs[metric];
+    return userPrefForMetric?.config;
   }
 
   private async onActivate(discardPanelTypeUpdates: boolean) {
@@ -202,7 +216,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.subscribeToState((newState, prevState) => {
       if (
         newState.histogramType !== prevState.histogramType ||
-        newState.panelConfig.type !== prevState.panelConfig.type
+        !isEqual(newState.panelConfig, prevState.panelConfig) ||
+        !isEqual(newState.queryConfig, prevState.queryConfig)
       ) {
         this.updateBody();
       }
@@ -282,6 +297,21 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
 
     return Object.values(DEFAULT_TIMESERIES_PRESETS);
+  }
+
+  public update(panelOptions: PanelOptions, queryOptions: QueryOptions) {
+    const { panelConfig, queryConfig } = this.state;
+
+    this.setState({
+      panelConfig: {
+        ...panelConfig,
+        ...panelOptions,
+      },
+      queryConfig: {
+        ...queryConfig,
+        ...queryOptions,
+      },
+    });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {

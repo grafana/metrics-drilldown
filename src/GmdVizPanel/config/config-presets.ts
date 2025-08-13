@@ -1,5 +1,3 @@
-import { type LegendPlacement } from '@grafana/schema';
-
 import { type PanelOptions, type QueryOptions } from 'GmdVizPanel/GmdVizPanel';
 import { UP_DOWN_VALUE_MAPPINGS } from 'GmdVizPanel/statushistory/value-mappings';
 
@@ -29,7 +27,7 @@ export type PanelConfigPreset = {
 export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
   [PANEL_PRESET.TIMESERIES_AVG]: {
     id: String(PANEL_PRESET.TIMESERIES_AVG),
-    name: 'Average',
+    name: 'Average (default)',
     panelOptions: {
       type: 'timeseries',
       description:
@@ -70,7 +68,6 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
       type: 'percentiles',
       description:
         'Displays 50th, 90th, and 99th percentiles to show value distribution. Excellent for SLA monitoring and understanding outlier behavior without being skewed by extreme values. Critical for performance analysis.',
-      legend: { showLegend: true, placement: 'bottom' as LegendPlacement },
     },
     queryOptions: {
       queries: [{ fn: 'quantile', params: { percentiles: [99, 90, 50] } }],
@@ -93,8 +90,14 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
 // the presets are arranged so the first one is always the default one
 // this is why we define the default rate presets and we don't use DEFAULT_TIMESERIES_PRESETS in GmdVizPanel.tsx
 export const DEFAULT_TIMESERIES_RATE_PRESETS: Record<string, PanelConfigPreset> = {
-  [PANEL_PRESET.TIMESERIES_SUM]: DEFAULT_TIMESERIES_PRESETS[PANEL_PRESET.TIMESERIES_SUM],
-  [PANEL_PRESET.TIMESERIES_AVG]: DEFAULT_TIMESERIES_PRESETS[PANEL_PRESET.TIMESERIES_AVG],
+  [PANEL_PRESET.TIMESERIES_SUM]: {
+    ...DEFAULT_TIMESERIES_PRESETS[PANEL_PRESET.TIMESERIES_SUM],
+    name: 'Sum (default)',
+  },
+  [PANEL_PRESET.TIMESERIES_AVG]: {
+    ...DEFAULT_TIMESERIES_PRESETS[PANEL_PRESET.TIMESERIES_AVG],
+    name: 'Average',
+  },
   [PANEL_PRESET.TIMESERIES_STDDEV]: DEFAULT_TIMESERIES_PRESETS[PANEL_PRESET.TIMESERIES_STDDEV],
   [PANEL_PRESET.TIMESERIES_PERCENTILES]: DEFAULT_TIMESERIES_PRESETS[PANEL_PRESET.TIMESERIES_PERCENTILES],
   [PANEL_PRESET.TIMESERIES_MIN_MAX]: DEFAULT_TIMESERIES_PRESETS[PANEL_PRESET.TIMESERIES_MIN_MAX],
@@ -130,7 +133,7 @@ export const DEFAULT_TIMESERIES_AGE_PRESETS: Record<string, PanelConfigPreset> =
 export const DEFAULT_HISTOGRAMS_PRESETS: Record<string, PanelConfigPreset> = {
   [PANEL_PRESET.HEATMAP]: {
     id: String(PANEL_PRESET.HEATMAP),
-    name: 'Heatmap',
+    name: 'Heatmap (default)',
     panelOptions: {
       type: 'heatmap',
       description:
@@ -155,7 +158,7 @@ export const DEFAULT_HISTOGRAMS_PRESETS: Record<string, PanelConfigPreset> = {
 export const DEFAULT_STATUS_UP_DOWN_PRESETS: Record<string, PanelConfigPreset> = {
   [PANEL_PRESET.STATUS_HISTORY]: {
     id: String(PANEL_PRESET.STATUS_HISTORY),
-    name: 'Status History',
+    name: 'Status History (default)',
     panelOptions: {
       type: 'statushistory',
       description:

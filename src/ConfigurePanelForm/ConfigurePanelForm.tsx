@@ -14,6 +14,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Button, ConfirmModal, useStyles2 } from '@grafana/ui';
+import { omit } from 'lodash';
 import React from 'react';
 
 import { DataTrail } from 'DataTrail';
@@ -24,12 +25,11 @@ import { reportExploreMetrics } from 'interactions';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userPreferences } from 'UserPreferences/userPreferences';
 import { getTrailFor } from 'utils';
-import { displayError, displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
+import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
 
 import { EventApplyPanelConfig } from './EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from './EventCancelConfigurePanel';
-import { EventRestorePanelConfig } from './EventRestorePanelConfig';
 import { WithConfigPanelOptions } from './WithConfigPanelOptions';
 
 interface ConfigurePanelFormState extends SceneObjectState {
@@ -105,6 +105,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
                 headerActions: () => [],
               },
               queryOptions: option.queryOptions,
+              discardUserPrefs: true,
             }),
           }),
         });
@@ -129,25 +130,17 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
     this._subs.add(
       this.subscribeToEvent(EventApplyPanelConfig, (event) => {
+        const { config, restoreDefault } = event.payload;
         const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS) || {};
-        userPrefs[metric] = { ...userPrefs[metric], config: event.payload.config };
-        userPreferences.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
+        const userPrefForMetric = userPrefs[metric];
 
-        displaySuccess([`Configuration successfully applied for metric ${metric}!`]);
-      })
-    );
-
-    this._subs.add(
-      this.subscribeToEvent(EventRestorePanelConfig, () => {
-        const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS);
-        const userPrefForMetric = userPrefs && userPrefs[metric];
-
-        if (userPrefForMetric) {
+        if (restoreDefault && userPrefForMetric) {
           delete userPrefs[metric].config;
-          userPreferences.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
+        } else {
+          userPrefs[metric] = { ...userPrefForMetric, config };
         }
 
-        displaySuccess([`Default configuration successfully restored for metric ${metric}!`]);
+        userPreferences.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
       })
     );
   }
@@ -163,9 +156,28 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   };
 
   private onClickConfirmRestoreDefault = () => {
+    const { metric, presets } = this.state;
+    const [defaultPreset] = presets;
+
+    if (!defaultPreset) {
+      displayError(new Error(`No default config found for metric ${metric}!`), [
+        'Cannot restore default configuration.',
+      ]);
+      return;
+    }
+
     reportExploreMetrics('default_panel_config_restored', {});
+
+    this.publishEvent(
+      new EventApplyPanelConfig({
+        metric,
+        config: ConfigurePanelForm.getPanelConfigFromPreset(defaultPreset),
+        restoreDefault: true,
+      }),
+      true
+    );
+
     this.closeConfirmModal();
-    this.publishEvent(new EventRestorePanelConfig({ metric: this.state.metric }), true);
   };
 
   private closeConfirmModal = () => {
@@ -178,9 +190,9 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
   private onClickApplyConfig = () => {
     const { metric, presets, selectedPresetId } = this.state;
-    const config = presets.find((preset) => preset.id === selectedPresetId);
+    const preset = presets.find((preset) => preset.id === selectedPresetId);
 
-    if (!config) {
+    if (!preset) {
       displayError(new Error(`No config found for metric ${metric} and preset id="${selectedPresetId}"!`), [
         'Cannot apply configuration.',
       ]);
@@ -188,8 +200,14 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     }
 
     reportExploreMetrics('panel_config_applied', {});
-    this.publishEvent(new EventApplyPanelConfig({ metric, config: { ...config, name: undefined } }), true);
+
+    const config = ConfigurePanelForm.getPanelConfigFromPreset(preset);
+    this.publishEvent(new EventApplyPanelConfig({ metric, config }), true);
   };
+
+  private static getPanelConfigFromPreset(preset: PanelConfigPreset) {
+    return omit(preset, ['name', 'panelOptions.description']) as PanelConfigPreset;
+  }
 
   public static readonly Component = ({ model }: SceneComponentProps<ConfigurePanelForm>) => {
     const styles = useStyles2(getStyles);

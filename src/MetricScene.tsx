@@ -1,6 +1,7 @@
 import { css } from '@emotion/css';
 import { config } from '@grafana/runtime';
 import {
+  sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   SceneVariableSet,
@@ -17,9 +18,10 @@ import { GroupByVariable } from 'Breakdown/GroupByVariable';
 import { ConfigurePanelForm } from 'ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'ConfigurePanelForm/EventCancelConfigurePanel';
-import { EventRestorePanelConfig } from 'ConfigurePanelForm/EventRestorePanelConfig';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
 import { getTrailFor } from 'utils';
+import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
 import { EventConfigurePanel } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigurePanel';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
@@ -104,13 +106,20 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     );
 
     this._subs.add(
-      this.subscribeToEvent(EventApplyPanelConfig, () => {
-        this.state.drawer.close();
-      })
-    );
+      this.subscribeToEvent(EventApplyPanelConfig, (event) => {
+        const { config, restoreDefault } = event.payload;
+        const panel = sceneGraph.findDescendents(this, GmdVizPanel)[0];
 
-    this._subs.add(
-      this.subscribeToEvent(EventRestorePanelConfig, () => {
+        if (!panel) {
+          throw new Error('Cannot find viz panel to update!');
+        }
+
+        panel.update(config.panelOptions, config.queryOptions);
+
+        displaySuccess([
+          `Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${event.payload.metric}!`,
+        ]);
+
         this.state.drawer.close();
       })
     );

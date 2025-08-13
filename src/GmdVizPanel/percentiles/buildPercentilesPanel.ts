@@ -1,5 +1,5 @@
 import { PanelBuilders, SceneQueryRunner } from '@grafana/scenes';
-import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
+import { SortOrder, TooltipDisplayMode } from '@grafana/schema';
 
 import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { type HistogramType, type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
@@ -36,7 +36,6 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
-    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'right' as LegendPlacement })
     .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
     .setCustomFieldConfig('fillOpacity', 9)
     .setOverrides((b) => {

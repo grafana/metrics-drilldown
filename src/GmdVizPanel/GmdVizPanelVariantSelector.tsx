@@ -7,38 +7,23 @@ import { type PanelType } from './GmdVizPanel';
 
 interface GmdVizPanelVariantSelectorState extends SceneObjectState {
   metric: string;
-  panelType: PanelType;
   options: Array<{
     label: string;
     value: PanelType;
   }>;
-  currentPanelType: PanelType;
+  currentPanelType?: PanelType;
 }
 
 export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVariantSelectorState> {
-  constructor({
-    metric,
-    panelType,
-  }: {
-    metric: GmdVizPanelVariantSelectorState['metric'];
-    panelType: GmdVizPanelVariantSelectorState['panelType'];
-  }) {
+  constructor({ metric }: { metric: GmdVizPanelVariantSelectorState['metric'] }) {
     super({
       metric,
-      panelType,
-      options: GmdVizPanelVariantSelector.getOptions(metric, panelType),
-      currentPanelType: panelType,
-    });
-  }
-
-  private static getOptions(metric: string, panelType: PanelType) {
-    if (['heatmap', 'percentiles'].includes(panelType)) {
-      return [
+      options: [
         { value: 'percentiles' as PanelType, label: 'percentiles' },
         { value: 'heatmap' as PanelType, label: 'heatmap' },
-      ];
-    }
-    return [];
+      ],
+      currentPanelType: undefined,
+    });
   }
 
   private onChange = (newPanelType: PanelType) => {

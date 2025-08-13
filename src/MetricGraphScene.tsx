@@ -18,6 +18,7 @@ import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/GmdVizPanelVariantSelector';
+import { isHistogramMetric } from 'GmdVizPanel/heatmap/isHistogramMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
@@ -66,6 +67,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const trail = getTrailFor(this);
     const metadata = await trail.getMetricMetadata(metric);
     const description = getMetricDescription(metadata);
+    const isHistogram = isHistogramMetric(metric) || trail.isNativeHistogram(metric);
+    const headerActions = isHistogram
+      ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
+      : () => [new ConfigurePanelAction({ metric })];
 
     topView.setState({
       children: [
@@ -78,10 +83,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             panelOptions: {
               height: PANEL_HEIGHT.XL,
               description,
-              headerActions: ({ panelConfig }) => [
-                new GmdVizPanelVariantSelector({ metric, panelType: panelConfig.type }),
-                new ConfigurePanelAction({ metric }),
-              ],
+              headerActions,
               menu: new PanelMenu({ labelName: metric }),
             },
             queryOptions: {
