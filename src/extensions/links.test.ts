@@ -4,7 +4,7 @@ import { type PluginExtensionPanelContext } from '@grafana/data';
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   getTemplateSrv: () => ({
-    replace: jest.fn((a: string, ...rest: unknown[]) => {
+    replace: jest.fn((a: string) => {
       if (a === '${ds}') {
         return '123abc';
       }
