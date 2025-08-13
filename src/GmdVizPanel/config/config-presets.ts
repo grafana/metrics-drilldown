@@ -96,7 +96,8 @@ export const DEFAULT_TIMESERIES_AGE_PRESETS: Record<string, PanelConfigPreset> =
     name: 'Age: time - avg(metric)',
     panelOptions: {
       type: 'timeseries',
-      description: '',
+      description:
+        'Suitable only for metrics that store unix timestamps (usually containing "timestamp_seconds" in their name) to calculate an age. Calculates the age by subtracting the average timestamp value from current time.',
     },
     queryOptions: {
       queries: [{ fn: 'time-avg(metric)' }],
@@ -107,7 +108,8 @@ export const DEFAULT_TIMESERIES_AGE_PRESETS: Record<string, PanelConfigPreset> =
     name: 'Age: avg(time - metric)',
     panelOptions: {
       type: 'timeseries',
-      description: '',
+      description:
+        'Suitable only for metrics that store unix timestamps (usually containing "timestamp_seconds" in their name) to calculate an age. Averages the age calculation across all timeseries.',
     },
     queryOptions: {
       queries: [{ fn: 'avg(time-metric)' }],

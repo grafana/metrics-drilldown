@@ -118,10 +118,10 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
   public static readonly Component = ({ model }: SceneComponentProps<ConfigurePanelForm>) => {
     const styles = useStyles2(getStyles);
-    const { body, controls, isConfirmModalOpen } = model.useState();
+    const { metric, body, controls, isConfirmModalOpen } = model.useState();
 
     return (
-      <div className={styles.container}>
+      <div>
         <div className={styles.controlsContainer}>
           <Button variant="secondary" size="md" onClick={model.onClickRestoreDefault}>
             Restore default config
@@ -131,6 +131,10 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
               <control.Component key={control.state.key} model={control} />
             ))}
           </div>
+        </div>
+
+        <div className={styles.messageContainer}>
+          <p>Choose a Prometheus function that will be used by default to display the {metric} metric.</p>
         </div>
 
         {body && <body.Component model={body} />}
@@ -159,12 +163,14 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css``,
     controlsContainer: css`
       display: flex;
       justify-content: flex-end;
       gap: ${theme.spacing(1)};
       margin-bottom: ${theme.spacing(2)};
+    `,
+    messageContainer: css`
+      margin: ${theme.spacing(2.5, 0, 1, 0)};
     `,
     controls: css`
       display: flex;
@@ -173,7 +179,7 @@ function getStyles(theme: GrafanaTheme2) {
       display: flex;
       justify-content: center;
       gap: ${theme.spacing(2)};
-      margin-top: ${theme.spacing(4)};
+      margin-top: ${theme.spacing(3)};
     `,
   };
 }
