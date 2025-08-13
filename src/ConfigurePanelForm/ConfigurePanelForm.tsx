@@ -98,6 +98,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
             onSelect: (presetId) => this.onSelectPreset(presetId),
             body: new GmdVizPanel({
               metric,
+              discardUserPrefs: true,
               panelOptions: {
                 ...option.panelOptions,
                 title: option.name,
@@ -105,7 +106,6 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
                 headerActions: () => [],
               },
               queryOptions: option.queryOptions,
-              discardUserPrefs: true,
             }),
           }),
         });

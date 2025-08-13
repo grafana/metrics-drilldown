@@ -164,6 +164,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
     return new GmdVizPanel({
       metric,
+      discardUserPrefs: true,
       panelOptions: {
         type: 'timeseries',
         height: PANEL_HEIGHT.XL,
