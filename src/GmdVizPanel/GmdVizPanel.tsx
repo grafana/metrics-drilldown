@@ -289,7 +289,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
 
     if (isAgeMetric(metric)) {
-      return [...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS), ...Object.values(DEFAULT_TIMESERIES_PRESETS)];
+      return [...Object.values(DEFAULT_TIMESERIES_PRESETS), ...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS)];
     }
 
     if (isRateQuery(metric)) {
