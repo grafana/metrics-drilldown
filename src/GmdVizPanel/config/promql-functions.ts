@@ -21,9 +21,9 @@ export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
     },
   ],
   [
-    'time-avg',
+    'time-avg(metric)',
     {
-      name: 'time-avg',
+      name: 'time-avg(metric)',
       fn: ({ expr }: { expr: string }) => `time()-avg(${expr})`,
     },
   ],

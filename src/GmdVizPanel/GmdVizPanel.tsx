@@ -17,6 +17,7 @@ import { type LabelMatcher } from './buildQueryExpression';
 import {
   DEFAULT_HISTOGRAMS_PRESETS,
   DEFAULT_STATUS_UP_DOWN_PRESETS,
+  DEFAULT_TIMESERIES_AGE_PRESETS,
   DEFAULT_TIMESERIES_PRESETS,
   type PanelConfigPreset,
 } from './config/config-presets';
@@ -25,6 +26,7 @@ import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { isHistogramMetric } from './heatmap/isHistogramMetric';
+import { isAgeMetric } from './isAgeMetric';
 import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
 import { buildStatPanel } from './stat/buildStatPanel';
 import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
@@ -35,16 +37,11 @@ import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
 
 export type PanelType = 'timeseries' | 'statushistory' | 'heatmap' | 'percentiles' | 'stat' | 'table';
 
-type HeaderActionsArgs = {
-  metric: string;
-  panelConfig: PanelConfig;
-};
-
 export type PanelConfig = {
   type: PanelType;
   title: string;
   height: PANEL_HEIGHT;
-  headerActions: (headerActionsArgs: HeaderActionsArgs) => VizPanelState['headerActions'];
+  headerActions: (headerActionsArgs: { metric: string; panelConfig: PanelConfig }) => VizPanelState['headerActions'];
   fixedColorIndex?: number;
   description?: string;
   menu?: VizPanelState['menu'];
@@ -77,7 +74,7 @@ export type PrometheusFunction =
   // percentiles & heatmaps
   | 'histogram_quantile'
   // age
-  | 'time-avg'
+  | 'time-avg(metric)'
   | 'avg(time-metric)';
 
 export type QueryDefs = Array<{
@@ -132,8 +129,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       histogramType,
       panelConfig: {
         // we want a panel type to get a chance to render the panel as soon as possible
-        // this is why we assume that it's not a native histogram, which seems reasonable statistically speaking
-        // see onActivate() for more
+        // we can't determine if it's a native histogram here because it's an sync process that will be done in onActivate()
         type: panelOptions?.type || GmdVizPanel.getPanelType(metric, histogramType),
         title: metric,
         height: PANEL_HEIGHT.M,
@@ -177,7 +173,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       return;
     }
 
-    // force initialization
+    // force initialization and update if needed
     await trail.initializeHistograms();
 
     if (trail.isNativeHistogram(metric)) {
@@ -275,7 +271,13 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       return Object.values(DEFAULT_HISTOGRAMS_PRESETS);
     }
 
-    return Object.values(DEFAULT_TIMESERIES_PRESETS);
+    const timeseriesPresets = Object.values(DEFAULT_TIMESERIES_PRESETS);
+
+    if (isAgeMetric(metric)) {
+      timeseriesPresets.push(...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS));
+    }
+
+    return timeseriesPresets;
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {
