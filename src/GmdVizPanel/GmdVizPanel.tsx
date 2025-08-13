@@ -80,7 +80,8 @@ export type PrometheusFunction =
   | 'histogram_quantile'
   // age
   | 'time-avg(metric)'
-  | 'avg(time-metric)';
+  | 'time-min(metric)'
+  | 'time-max(metric)';
 
 export type QueryDefs = Array<{
   fn: PrometheusFunction;

@@ -10,7 +10,7 @@ export enum PANEL_PRESET {
   TIMESERIES_PERCENTILES = 'timeseries-percentiles',
   TIMESERIES_MIN_MAX = 'timeseries-minmax',
   TIMESERIES_AGE_TIME_MINUS_AVG = 'timeseries-age-time-minus-avg',
-  TIMESERIES_AGE_AVG_TIME_MINUS_METRIC = 'timeseries-age-avg-time-minus-metric',
+  TIMESERIES_AGE_TIME_MINUS_MIN_MAX = 'timeseries-age-time-minus-min-max',
   HEATMAP = 'heatmap',
   PERCENTILES = 'percentiles',
   STATUS_HISTORY = 'status-history',
@@ -116,16 +116,16 @@ export const DEFAULT_TIMESERIES_AGE_PRESETS: Record<string, PanelConfigPreset> =
       queries: [{ fn: 'time-avg(metric)' }],
     },
   },
-  [PANEL_PRESET.TIMESERIES_AGE_AVG_TIME_MINUS_METRIC]: {
-    id: String(PANEL_PRESET.TIMESERIES_AGE_AVG_TIME_MINUS_METRIC),
-    name: 'Age: avg(time - metric)',
+  [PANEL_PRESET.TIMESERIES_AGE_TIME_MINUS_MIN_MAX]: {
+    id: String(PANEL_PRESET.TIMESERIES_AGE_TIME_MINUS_MIN_MAX),
+    name: 'Age: time - minmax(metric)',
     panelOptions: {
       type: 'timeseries',
       description:
-        'Suitable only for metrics that store unix timestamps (usually containing "timestamp_seconds" in their name) to calculate an age. Averages the age calculation across all timeseries.',
+        'Suitable only for metrics that store unix timestamps (usually containing "timestamp_seconds" in their name) to calculate an age. Calculates the age by subtracting the min and the max timestamp values from current time.',
     },
     queryOptions: {
-      queries: [{ fn: 'avg(time-metric)' }],
+      queries: [{ fn: 'time-min(metric)' }, { fn: 'time-max(metric)' }],
     },
   },
 } as const;

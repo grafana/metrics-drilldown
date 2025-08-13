@@ -28,10 +28,17 @@ export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
     },
   ],
   [
-    'avg(time-metric)',
+    'time-min(metric)',
     {
-      name: 'avg(time-metric)',
-      fn: ({ expr }: { expr: string }) => `avg(time()-${expr})`,
+      name: 'time-min(metric)',
+      fn: ({ expr }: { expr: string }) => `time()-min(${expr})`,
+    },
+  ],
+  [
+    'time-max(metric)',
+    {
+      name: 'time-max(metric)',
+      fn: ({ expr }: { expr: string }) => `time()-max(${expr})`,
     },
   ],
 ]);
