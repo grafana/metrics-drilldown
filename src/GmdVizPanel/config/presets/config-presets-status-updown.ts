@@ -17,7 +17,7 @@ export const DEFAULT_STATUS_UP_DOWN_PRESETS: Record<string, PanelConfigPreset> =
   },
   [CONFIG_PRESET.STATUS_STAT_UPDOWN]: {
     id: String(CONFIG_PRESET.STATUS_STAT_UPDOWN),
-    name: 'Stat (latest)',
+    name: 'Stat with latest value',
     panelOptions: {
       type: 'stat',
       description:
