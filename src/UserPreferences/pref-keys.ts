@@ -1,6 +1,7 @@
 export const PREF_KEYS = {
   DATASOURCE: 'datasource',
-  BOOKMARKS: 'bookmarks',
   RECENT_METRICS: 'recent-metrics',
+  BOOKMARKS: 'bookmarks',
+  METRIC_PREFS: 'metric-prefs',
   BREAKDOWN_SORTBY: 'breakdown.sortby',
 };

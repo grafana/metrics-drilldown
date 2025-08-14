@@ -17,7 +17,6 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
@@ -72,11 +71,13 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
+              metric: option.value as string,
               vizPanelInGridItem: new GmdVizPanel({
                 metric: option.value as string,
-                fixedColor: getColorByIndex(colorIndex),
+                panelOptions: {
+                  fixedColorIndex: colorIndex,
+                },
               }),
-              metric: option.value as string,
             }),
           });
         },

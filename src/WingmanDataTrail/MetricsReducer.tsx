@@ -1,10 +1,7 @@
 import { css } from '@emotion/css';
-import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
-  behaviors,
-  SceneCSSGridItem,
-  SceneCSSGridLayout,
   sceneGraph,
   SceneObjectBase,
   SceneVariableSet,
@@ -18,7 +15,6 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from 'interactions';
-import { getColorByIndex, getTrailFor } from 'utils';
 
 import { MetricSelectedEvent } from '../shared';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
@@ -36,7 +32,7 @@ import {
 } from './ListControls/MetricsSorter/MetricsSorter';
 import { EventQuickSearchChanged } from './ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './ListControls/QuickSearch/QuickSearch';
-import { GRID_TEMPLATE_COLUMNS, MetricsList } from './MetricsList/MetricsList';
+import { MetricsList } from './MetricsList/MetricsList';
 import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
@@ -44,12 +40,6 @@ import { FilteredMetricsVariable, VAR_FILTERED_METRICS_VARIABLE } from './Metric
 import { MetricsVariable } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
-import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
-import { ConfigureAction } from './MetricVizPanel/actions/ConfigureAction';
-import { EventApplyFunction } from './MetricVizPanel/actions/EventApplyFunction';
-import { EventConfigureFunction } from './MetricVizPanel/actions/EventConfigureFunction';
-import { METRICS_VIZ_PANEL_HEIGHT_SMALL, MetricVizPanel } from './MetricVizPanel/MetricVizPanel';
-import { SceneDrawer } from './SceneDrawer';
 import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { MetricsFilterSection } from './SideBar/sections/MetricsFilterSection/MetricsFilterSection';
 import { SideBar } from './SideBar/SideBar';
@@ -58,7 +48,6 @@ interface MetricsReducerState extends SceneObjectState {
   listControls: ListControls;
   sidebar: SideBar;
   body: SceneObjectBase;
-  drawer: SceneDrawer;
   enginesMap: Map<string, { filterEngine: MetricsVariableFilterEngine; sortEngine: MetricsVariableSortEngine }>;
 }
 
@@ -78,7 +67,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       listControls: new ListControls({}),
       sidebar: new SideBar({}),
       body: new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }) as unknown as SceneObjectBase,
-      drawer: new SceneDrawer({}),
       enginesMap: new Map(),
     });
 
@@ -110,18 +98,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
   private subscribeToEvents() {
     this.initVariablesFilteringAndSorting();
-
-    this._subs.add(
-      this.subscribeToEvent(EventConfigureFunction, (event) => {
-        this.openDrawer(event.payload.metricName);
-      })
-    );
-
-    this._subs.add(
-      this.subscribeToEvent(EventApplyFunction, () => {
-        this.state.drawer.close();
-      })
-    );
 
     this._subs.add(
       this.subscribeToEvent(MetricSelectedEvent, (event) => {
@@ -227,51 +203,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     );
   }
 
-  private openDrawer(metricName: string) {
-    const trail = getTrailFor(this);
-    this.state.drawer.open({
-      title: 'Choose a new Prometheus function',
-      subTitle: metricName,
-      body: new SceneCSSGridLayout({
-        templateColumns: GRID_TEMPLATE_COLUMNS,
-        autoRows: METRICS_VIZ_PANEL_HEIGHT_SMALL,
-        isLazy: true,
-        $behaviors: [
-          new behaviors.CursorSync({
-            key: 'metricCrosshairSync',
-            sync: DashboardCursorSync.Crosshair,
-          }),
-        ],
-        children: ConfigureAction.PROMETHEUS_FN_OPTIONS.map((option, colorIndex) => {
-          return new SceneCSSGridItem({
-            body: new MetricVizPanel({
-              title: option.label,
-              metricName,
-              color: getColorByIndex(colorIndex),
-              prometheusFunction: option.value,
-              height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
-              hideLegend: true,
-              highlight: colorIndex === 1,
-              isNativeHistogram: trail.isNativeHistogram(metricName),
-              headerActions: [
-                new ApplyAction({
-                  metricName,
-                  prometheusFunction: option.value,
-                  disabled: colorIndex === 1,
-                }),
-              ],
-            }),
-          });
-        }),
-      }),
-    });
-  }
-
   public static readonly Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
-    const { $variables, body, listControls, drawer, sidebar } = model.useState();
+    const { $variables, body, listControls, sidebar } = model.useState();
 
     return (
       <>
@@ -291,7 +227,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             <variable.Component key={variable.state.name} model={variable} />
           ))}
         </div>
-        <drawer.Component model={drawer} />
       </>
     );
   };
