@@ -82,7 +82,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
     const body = new SceneCSSGridLayout({
       templateColumns: GRID_TEMPLATE_COLUMNS,
-      autoRows: PANEL_HEIGHT.M + 18, // see WithConfigPanelOptions
+      autoRows: PANEL_HEIGHT.M + 46, // see css in WithConfigPanelOptions
       isLazy: true,
       $behaviors: [
         new behaviors.CursorSync({

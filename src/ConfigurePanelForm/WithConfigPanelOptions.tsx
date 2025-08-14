@@ -42,14 +42,20 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
     const { body, isSelected } = model.useState();
 
     return (
-      <Tooltip content={!isSelected ? 'Click to select this configuration' : 'Current configuration'}>
-        <div
-          className={cx(styles.container, isSelected && styles.selected)}
-          onClick={!isSelected ? model.onSelectPreset : undefined}
-        >
-          <body.Component model={body} />
+      <div
+        className={cx(styles.container, isSelected && styles.selected)}
+        onClick={!isSelected ? model.onSelectPreset : undefined}
+      >
+        <body.Component model={body} />
+        <div className={styles.radioContainer}>
+          <Tooltip
+            content={!isSelected ? 'Click to select this configuration' : 'Current configuration'}
+            placement="top"
+          >
+            <input type="radio" name="select-config" checked={isSelected} />
+          </Tooltip>
         </div>
-      </Tooltip>
+      </div>
     );
   };
 }
@@ -58,8 +64,9 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     container: css`
       display: flex;
-      gap: ${theme.spacing(1)};
-      align-items: middle;
+      flex-direction: column;
+      align-items: center;
+      gap: ${theme.spacing(1.25)};
       padding: ${theme.spacing(1, 1, 1.25, 1)};
       border: 1px solid transparent;
       cursor: pointer;
@@ -74,6 +81,10 @@ function getStyles(theme: GrafanaTheme2) {
         outline: 1px solid ${theme.colors.primary.main};
         outline-offset: 1px;
       }
+    `,
+    radioContainer: css`
+      display: flex;
+      align-items: center;
     `,
     selected: css`
       cursor: default;
