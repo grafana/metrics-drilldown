@@ -1,8 +1,8 @@
-import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { RadioButtonGroup } from '@grafana/ui';
 import React from 'react';
 
-import { type PanelType } from 'GmdVizPanel/GmdVizPanel';
+import { GmdVizPanel, type PanelType } from 'GmdVizPanel/GmdVizPanel';
 
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 
@@ -26,6 +26,26 @@ export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVaria
       ],
       currentPanelType: undefined,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    const vizPanel = sceneGraph.getAncestor(this, GmdVizPanel);
+
+    this.setState({
+      currentPanelType: vizPanel.state.panelConfig.type,
+    });
+
+    this._subs.add(
+      vizPanel.subscribeToState((newState, prevState) => {
+        if (newState.panelConfig.type !== prevState.panelConfig.type) {
+          this.setState({
+            currentPanelType: newState.panelConfig.type,
+          });
+        }
+      })
+    );
   }
 
   private onChange = (newPanelType: PanelType) => {
