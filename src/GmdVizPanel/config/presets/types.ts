@@ -10,8 +10,8 @@ export enum CONFIG_PRESET {
   TIMESERIES_AGE_TIME_MINUS_MIN_MAX = 'timeseries-age-time-minus-min-max',
   HEATMAP = 'heatmap',
   PERCENTILES = 'percentiles',
-  STATUS_HISTORY = 'status-history',
-  STATUS_STAT = 'status-stat',
+  STATUS_HISTORY_UPDOWN = 'status-history-updown',
+  STATUS_STAT_UPDOWN = 'status-stat-updown',
 }
 
 export type PanelConfigPreset = {

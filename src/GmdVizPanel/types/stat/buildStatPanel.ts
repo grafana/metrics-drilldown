@@ -5,6 +5,7 @@ import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
 import { getStatQueryRunnerParams } from './getStatQueryRunnerParams';
+import { UP_DOWN_VALUE_MAPPINGS } from '../statushistory/value-mappings';
 
 type StatushistoryPanelOptions = {
   metric: string;
@@ -32,6 +33,6 @@ export function buildStatPanel(options: StatushistoryPanelOptions): VizPanel {
     .setData(queryRunner)
     .setUnit(unit)
     .setColor({ mode: 'fixed', fixedColor: getColorByIndex(panelConfig.fixedColorIndex || 0) })
-    .setMappings(panelConfig?.mappings)
+    .setMappings(UP_DOWN_VALUE_MAPPINGS) // current support is only for up/down values
     .build();
 }
