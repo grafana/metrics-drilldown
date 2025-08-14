@@ -11,15 +11,13 @@ import { useStyles2, type VizLegendOptions } from '@grafana/ui';
 import { isEqual } from 'lodash';
 import React from 'react';
 
-import { PREF_KEYS } from 'UserPreferences/pref-keys';
-import { userPreferences } from 'UserPreferences/userPreferences';
 import { getTrailFor } from 'utils';
 
 import { type LabelMatcher } from './buildQueryExpression';
 import { EventPanelTypeChanged } from './components/EventPanelTypeChanged';
 import { SelectAction } from './components/SelectAction';
+import { getPreferredConfigForMetric } from './config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from './config/panel-heights';
-import { type PanelConfigPreset } from './config/presets/types';
 import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { isHistogramMetric } from './matchers/isHistogramMetric';
@@ -77,10 +75,7 @@ export type QueryOptions = {
   resolution?: QueryConfig['resolution'];
   labelMatchers?: QueryConfig['labelMatchers'];
   groupBy?: string;
-  queries?: Array<{
-    fn: PrometheusFunction;
-    params?: Record<string, any>;
-  }>;
+  queries?: QueryDefs;
 };
 
 /* GmdVizPanelState */
@@ -97,20 +92,23 @@ export interface GmdVizPanelState extends SceneObjectState {
 
 export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   constructor({
+    key,
     metric,
     panelOptions,
     queryOptions,
     discardUserPrefs,
   }: {
+    key?: string;
     metric: GmdVizPanelState['metric'];
     panelOptions?: PanelOptions;
     queryOptions?: QueryOptions;
     discardUserPrefs?: boolean;
   }) {
     const histogramType = isHistogramMetric(metric) ? 'classic' : 'none';
-    const preferredConfig = discardUserPrefs ? undefined : GmdVizPanel.retrievePreferredConfig(metric);
+    const prefConfig = discardUserPrefs ? undefined : getPreferredConfigForMetric(metric);
 
     super({
+      key,
       metric,
       histogramType,
       panelConfig: {
@@ -121,14 +119,14 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         height: PANEL_HEIGHT.M,
         headerActions: ({ metric }) => [new SelectAction({ metricName: metric })],
         ...panelOptions,
-        ...preferredConfig?.panelOptions,
+        ...prefConfig?.panelOptions,
       },
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [],
         addIgnoreUsageFilter: true,
         ...queryOptions,
-        ...preferredConfig?.queryOptions,
+        ...prefConfig?.queryOptions,
       },
       body: undefined,
     });
@@ -136,11 +134,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.addActivationHandler(() => {
       this.onActivate(Boolean(panelOptions?.type));
     });
-  }
-
-  private static retrievePreferredConfig(metric: string): PanelConfigPreset | undefined {
-    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS) || {};
-    return userPrefs[metric]?.config;
   }
 
   private async onActivate(discardPanelTypeUpdates: boolean) {

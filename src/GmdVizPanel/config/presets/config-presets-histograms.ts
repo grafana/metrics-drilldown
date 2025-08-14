@@ -17,7 +17,7 @@ export const DEFAULT_HISTOGRAMS_PRESETS: Record<string, PanelConfigPreset> = {
     panelOptions: {
       type: 'percentiles',
       description:
-        'Extracts specific percentile values (50th, 90th, 99th) from histogram data. Essential for SLA monitoring and performance analysis, showing how response times or other metrics behave for different user experience tiers.',
+        'Extracts specific percentile values from histogram data. Essential for SLA monitoring and performance analysis, showing how response times or other metrics behave for different user experience tiers.',
     },
     queryOptions: {
       queries: [{ fn: 'histogram_quantile', params: { percentiles: [99, 90, 50] } }],

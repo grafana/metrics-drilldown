@@ -43,7 +43,7 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
     panelOptions: {
       type: 'percentiles',
       description:
-        'Displays 50th, 90th, and 99th percentiles to show value distribution. Excellent for SLA monitoring and understanding outlier behavior without being skewed by extreme values. Critical for performance analysis.',
+        'Displays percentiles to show value distribution. Excellent for SLA monitoring and understanding outlier behavior without being skewed by extreme values. Critical for performance analysis.',
     },
     queryOptions: {
       queries: [{ fn: 'quantile', params: { percentiles: [99, 90, 50] } }],

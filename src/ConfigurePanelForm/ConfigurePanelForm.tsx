@@ -14,10 +14,11 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Button, ConfirmModal, useStyles2 } from '@grafana/ui';
-import { omit } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import React from 'react';
 
 import { DataTrail } from 'DataTrail';
+import { getPreferredConfigForMetric } from 'GmdVizPanel/config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { getConfigPresetsForMetric } from 'GmdVizPanel/config/presets/getConfigPresetsForMetric';
 import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
@@ -73,12 +74,16 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
   private buildBody() {
     const { metric } = this.state;
+
     const trail = getTrailFor(this);
     const isNativeHistogram = trail.isNativeHistogram(metric);
+
     const presets = getConfigPresetsForMetric(metric, isNativeHistogram);
+    const prefConfig = getPreferredConfigForMetric(metric);
+
     // if not found in the user preferences, we use the first preset
-    // it works because they are organized to always have the default one as the first element (see config-presets.ts)
-    const selectedPresetId = (this.retrieveSelectedPreset() || presets[0]).id;
+    // it always works because the presets are organized to always have the default one as the first element (see GmdVizPanel/config/presets)
+    const selectedPresetId = (prefConfig || presets[0]).id;
 
     const body = new SceneCSSGridLayout({
       templateColumns: GRID_TEMPLATE_COLUMNS,
@@ -97,8 +102,11 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
             isSelected: selectedPresetId === option.id,
             onSelect: (presetId) => this.onSelectPreset(presetId),
             body: new GmdVizPanel({
+              key: `panel-${option.id}`,
+              // we make sure that, if the user has previously configured some query parameters (like percentiles),
+              // they are applied here
+              discardUserPrefs: option.id !== prefConfig?.id,
               metric,
-              discardUserPrefs: true,
               panelOptions: {
                 ...option.panelOptions,
                 title: option.name,
@@ -143,12 +151,6 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     );
   }
 
-  private retrieveSelectedPreset() {
-    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS);
-    const userPrefForMetric = userPrefs && userPrefs[this.state.metric];
-    return userPrefForMetric ? userPrefForMetric.config : null;
-  }
-
   private onClickRestoreDefault = () => {
     this.setState({ isConfirmModalOpen: true });
   };
@@ -186,17 +188,29 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
   private onClickApplyConfig = () => {
     const { metric, presets, selectedPresetId } = this.state;
-    const preset = presets.find((preset) => preset.id === selectedPresetId);
 
-    if (!preset) {
-      displayError(new Error(`No config found for metric ${metric} and preset id="${selectedPresetId}"!`), [
-        'Cannot apply configuration.',
-      ]);
-      return;
+    const presetPanel = sceneGraph.findByKeyAndType(this, `panel-${selectedPresetId}`, GmdVizPanel);
+    if (!presetPanel) {
+      throw new Error(`Panel not found for preset id="${selectedPresetId}"!`);
     }
 
-    const config = ConfigurePanelForm.getPanelConfigFromPreset(preset);
-    this.publishEvent(new EventApplyPanelConfig({ metric, config }), true);
+    const preset = presets.find((preset) => preset.id === selectedPresetId);
+    if (!preset) {
+      throw new Error(`Preset with id="${selectedPresetId}" not found!`);
+    }
+
+    // we clone the preset to update its queries property to
+    // ensure that some customized parameters (like percentiles) are properly applied
+    const presetWithQueryParams: PanelConfigPreset = cloneDeep(preset);
+    presetWithQueryParams.queryOptions.queries = presetPanel.state.queryConfig.queries;
+
+    this.publishEvent(
+      new EventApplyPanelConfig({
+        metric,
+        config: ConfigurePanelForm.getPanelConfigFromPreset(presetWithQueryParams),
+      }),
+      true
+    );
   };
 
   private static getPanelConfigFromPreset(preset: PanelConfigPreset) {
