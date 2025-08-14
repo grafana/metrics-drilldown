@@ -1,10 +1,9 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
+import { buildQueryExpression, expressionToString } from 'GmdVizPanel/buildQueryExpression';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
-
-import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
 
 type StatushistoryQueryRunnerParams = {
   maxDataPoints: number;

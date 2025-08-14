@@ -1,11 +1,10 @@
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { VisibilityMode, type VizLegendOptions } from '@grafana/schema';
 
+import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
 
-import { type PanelConfig, type QueryConfig } from '../GmdVizPanel';
 import { getStatushistoryQueryRunnerParams } from './getStatushistoryQueryRunnerParams';
-import { UP_DOWN_VALUE_MAPPINGS } from './value-mappings';
 
 type StatushistoryPanelOptions = {
   metric: string;
@@ -35,7 +34,7 @@ export function buildStatushistoryPanel(options: StatushistoryPanelOptions): Viz
       .setUnit(unit)
       // Use value mappings for both color and text display
       .setColor({ mode: 'palette-classic' })
-      .setMappings(UP_DOWN_VALUE_MAPPINGS)
+      .setMappings(panelConfig.mappings)
       .setOption('showValue', VisibilityMode.Never)
       .setOption('legend', panelConfig.legend as VizLegendOptions)
       .setOption('perPage', 0) // hide pagination at the bottom of the panel

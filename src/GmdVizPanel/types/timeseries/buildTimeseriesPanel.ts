@@ -1,13 +1,13 @@
 import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
-import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
+import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
-import { type PanelConfig, type QueryConfig } from '../GmdVizPanel';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
+import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
 
 type TimeseriesPanelOptions = {
   metric: string;

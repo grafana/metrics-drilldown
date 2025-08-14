@@ -14,21 +14,21 @@ import React from 'react';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userPreferences } from 'UserPreferences/userPreferences';
 import { getTrailFor } from 'utils';
-import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
 import { type LabelMatcher } from './buildQueryExpression';
+import { EventPanelTypeChanged } from './components/EventPanelTypeChanged';
+import { SelectAction } from './components/SelectAction';
 import { PANEL_HEIGHT } from './config/panel-heights';
 import { type PanelConfigPreset } from './config/presets/types';
 import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
-import { EventPanelTypeChanged } from './EventPanelTypeChanged';
-import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
-import { isHistogramMetric } from './heatmap/isHistogramMetric';
-import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
-import { buildStatPanel } from './stat/buildStatPanel';
-import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
-import { isUpDownMetric } from './statushistory/isUpDownMetric';
-import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
+import { isHistogramMetric } from './matchers/isHistogramMetric';
+import { isUpDownMetric } from './matchers/isUpDownMetric';
+import { buildHeatmapPanel } from './types/heatmap/buildHeatmapPanel';
+import { buildPercentilesPanel } from './types/percentiles/buildPercentilesPanel';
+import { buildStatPanel } from './types/stat/buildStatPanel';
+import { buildStatushistoryPanel } from './types/statushistory/buildStatushistoryPanel';
+import { buildTimeseriesPanel } from './types/timeseries/buildTimeseriesPanel';
 
 /* Panel config */
 

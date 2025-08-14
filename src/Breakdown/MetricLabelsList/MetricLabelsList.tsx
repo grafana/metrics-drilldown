@@ -18,8 +18,7 @@ import React from 'react';
 import { InlineBanner } from 'App/InlineBanner';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
-import { isRateQuery } from 'GmdVizPanel/isRateQuery';
-import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/timeseries/getTimeseriesQueryRunnerParams';
+import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { getPerSecondRateUnit, getUnit } from 'GmdVizPanel/units/getUnit';
 import { VAR_GROUP_BY } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
@@ -28,6 +27,7 @@ import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeate
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { LABELS_VIZ_PANEL_HEIGHT, LabelVizPanel } from './LabelVizPanel';
+import { isCounterMetric } from '../../GmdVizPanel/matchers/isCounterMetric';
 
 interface MetricLabelsListState extends SceneObjectState {
   metric: string;
@@ -37,7 +37,7 @@ interface MetricLabelsListState extends SceneObjectState {
 
 export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   constructor({ metric }: { metric: MetricLabelsListState['metric'] }) {
-    const unit = isRateQuery(metric) ? getPerSecondRateUnit(metric) : getUnit(metric);
+    const unit = isCounterMetric(metric) ? getPerSecondRateUnit(metric) : getUnit(metric);
 
     super({
       key: 'metric-labels-list',

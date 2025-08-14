@@ -4,11 +4,11 @@ import {
   type HeatmapLegend,
 } from '@grafana/schema/dist/esm/raw/composable/heatmap/panelcfg/x/HeatmapPanelCfg_types.gen';
 
-import { getUnit } from 'autoQuery/units';
+import { type HistogramType, type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
 
-import { type HistogramType, type PanelConfig, type QueryConfig } from '../GmdVizPanel';
 import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
+import { getUnit } from '../../units/getUnit';
 
 type HeatmapPanelOptions = {
   metric: string;

@@ -1,9 +1,9 @@
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 
+import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
-import { type PanelConfig, type QueryConfig } from '../GmdVizPanel';
 import { getStatQueryRunnerParams } from './getStatQueryRunnerParams';
 
 type StatushistoryPanelOptions = {

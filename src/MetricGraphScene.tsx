@@ -14,15 +14,15 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { GmdVizPanelVariantSelector } from 'GmdVizPanel/GmdVizPanelVariantSelector';
-import { isHistogramMetric } from 'GmdVizPanel/heatmap/isHistogramMetric';
+import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
-import { ConfigurePanelAction } from 'WingmanDataTrail/MetricVizPanel/actions/ConfigurePanelAction';
 
 import { type DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
@@ -68,9 +68,6 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const metadata = await trail.getMetricMetadata(metric);
     const description = getMetricDescription(metadata);
     const isHistogram = isHistogramMetric(metric) || trail.isNativeHistogram(metric);
-    const headerActions = isHistogram
-      ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
-      : () => [new ConfigurePanelAction({ metric })];
 
     topView.setState({
       children: [
@@ -83,7 +80,9 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             panelOptions: {
               height: PANEL_HEIGHT.XL,
               description,
-              headerActions,
+              headerActions: isHistogram
+                ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
+                : () => [new ConfigurePanelAction({ metric })],
               menu: new PanelMenu({ labelName: metric }),
             },
             queryOptions: {

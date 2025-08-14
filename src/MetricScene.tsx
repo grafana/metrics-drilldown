@@ -18,13 +18,13 @@ import { GroupByVariable } from 'Breakdown/GroupByVariable';
 import { ConfigurePanelForm } from 'ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'ConfigurePanelForm/EventCancelConfigurePanel';
-import { getMetricType } from 'GmdVizPanel/getMetricType';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { reportExploreMetrics } from 'interactions';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
 import { getTrailFor } from 'utils';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
-import { EventConfigurePanel } from 'WingmanDataTrail/MetricVizPanel/actions/EventConfigurePanel';
+import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';

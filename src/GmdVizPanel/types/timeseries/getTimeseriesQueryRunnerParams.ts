@@ -1,12 +1,12 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
+import { buildQueryExpression, expressionToString } from 'GmdVizPanel/buildQueryExpression';
 import { PROMQL_FUNCTIONS } from 'GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'GmdVizPanel/GmdVizPanel';
 
-import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
-import { isRateQuery as isRateQueryFn } from '../isRateQuery';
+import { isCounterMetric } from '../../matchers/isCounterMetric';
 
 type TimeseriesQueryRunnerParams = {
   isRateQuery: boolean;
@@ -19,9 +19,9 @@ type Options = {
   queryConfig: QueryConfig;
 };
 
-export function getStatQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
+export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
   const { metric, queryConfig } = options;
-  const isRateQuery = isRateQueryFn(metric);
+  const isRateQuery = isCounterMetric(metric);
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -37,8 +37,34 @@ export function getStatQueryRunnerParams(options: Options): TimeseriesQueryRunne
   return {
     isRateQuery,
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
-    queries: buildQueriesWithPresetFunctions({ metric, queryConfig, isRateQuery, expr }),
+    queries: queryConfig.groupBy
+      ? buildGroupByQueries({ metric, queryConfig, isRateQuery, expr })
+      : buildQueriesWithPresetFunctions({ metric, queryConfig, isRateQuery, expr }),
   };
+}
+
+// if grouped by, we don't provide support for preset functions
+function buildGroupByQueries({
+  metric,
+  queryConfig,
+  isRateQuery,
+  expr,
+}: {
+  metric: string;
+  queryConfig: QueryConfig;
+  isRateQuery: boolean;
+  expr: string;
+}): SceneDataQuery[] {
+  return [
+    {
+      refId: `${metric}-by-${queryConfig.groupBy}`,
+      expr: isRateQuery
+        ? promql.sum({ expr, by: [queryConfig.groupBy!] })
+        : promql.avg({ expr, by: [queryConfig.groupBy!] }),
+      legendFormat: `{{${queryConfig.groupBy}}}`,
+      fromExploreMetrics: true,
+    },
+  ];
 }
 
 // here we support preset functions

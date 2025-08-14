@@ -2,8 +2,9 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { RadioButtonGroup } from '@grafana/ui';
 import React from 'react';
 
+import { type PanelType } from 'GmdVizPanel/GmdVizPanel';
+
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
-import { type PanelType } from './GmdVizPanel';
 
 interface GmdVizPanelVariantSelectorState extends SceneObjectState {
   metric: string;
@@ -14,6 +15,7 @@ interface GmdVizPanelVariantSelectorState extends SceneObjectState {
   currentPanelType?: PanelType;
 }
 
+// currently used only for histogram metrics
 export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVariantSelectorState> {
   constructor({ metric }: { metric: GmdVizPanelVariantSelectorState['metric'] }) {
     super({

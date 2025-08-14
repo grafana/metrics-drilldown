@@ -16,11 +16,11 @@ import { buildPrometheusQuery, getPromqlFunction, type NonRateQueryFunction } fr
 import { getUnit } from 'autoQuery/units';
 import { trailDS } from 'shared';
 
-import { SelectAction } from './actions/SelectAction';
 import { buildHeatmapPanel } from './panels/buildHeatmapPanel';
 import { buildStatusHistoryPanel } from './panels/buildStatusHistoryPanel';
 import { buildTimeseriesPanel } from './panels/buildTimeseriesPanel';
 import { parseMatcher } from './parseMatcher';
+import { SelectAction } from '../../GmdVizPanel/components/SelectAction';
 
 interface MetricVizPanelProps {
   metricName: string;

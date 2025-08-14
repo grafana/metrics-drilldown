@@ -2,7 +2,7 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
 import { type ExposedComponentName } from 'exposedComponents/components';
-import { type MetricType } from 'GmdVizPanel/getMetricType';
+import { type MetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { type ActionViewType } from 'MetricActionBar';
 import { type SortSeriesByOption } from 'services/sorting';
 import { type SnakeCase } from 'utils/utils.types';

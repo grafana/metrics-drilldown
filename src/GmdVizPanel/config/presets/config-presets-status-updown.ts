@@ -1,4 +1,4 @@
-import { UP_DOWN_VALUE_MAPPINGS } from 'GmdVizPanel/statushistory/value-mappings';
+import { UP_DOWN_VALUE_MAPPINGS } from 'GmdVizPanel/types/statushistory/value-mappings';
 
 import { QUERY_RESOLUTION } from '../query-resolutions';
 import { CONFIG_PRESET, type PanelConfigPreset } from './types';
@@ -11,6 +11,7 @@ export const DEFAULT_STATUS_UP_DOWN_PRESETS: Record<string, PanelConfigPreset> =
       type: 'statushistory',
       description:
         'Displays binary status changes over time as colored bars (green=up, red=down). Perfect for monitoring service availability, health checks, or any binary state metrics. Shows patterns in uptime/downtime and helps identify recurring issues.',
+      mappings: UP_DOWN_VALUE_MAPPINGS,
     },
     queryOptions: {
       resolution: QUERY_RESOLUTION.MEDIUM,

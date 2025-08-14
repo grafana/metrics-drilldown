@@ -1,7 +1,7 @@
-import { isHistogramMetric } from './heatmap/isHistogramMetric';
 import { isAgeMetric } from './isAgeMetric';
-import { isRateQuery } from './isRateQuery';
-import { isUpDownMetric } from './statushistory/isUpDownMetric';
+import { isCounterMetric } from './isCounterMetric';
+import { isHistogramMetric } from './isHistogramMetric';
+import { isUpDownMetric } from './isUpDownMetric';
 
 export type MetricType = 'status-updown' | 'histogram' | 'age' | 'counter' | 'gauge';
 
@@ -18,7 +18,7 @@ export function getMetricType(metric: string): MetricType {
     return 'age';
   }
 
-  if (isRateQuery(metric)) {
+  if (isCounterMetric(metric)) {
     return 'counter';
   }
 

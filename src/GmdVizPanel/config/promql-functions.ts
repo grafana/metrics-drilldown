@@ -24,12 +24,20 @@ type MapEntry = {
 
 export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
   ...CLASSIC_FUNCTIONS.map(
-    (name) => [name, { name, fn: (args: any) => (promql as any)[name](args) }] as [PrometheusFunction, MapEntry]
+    (name) =>
+      [
+        name,
+        {
+          name,
+          fn: (args: any) => (promql as any)[name](args),
+        },
+      ] as [PrometheusFunction, MapEntry]
   ),
   [
     'histogram_quantile',
     {
       name: 'histogram_quantile',
+      // histogram_quantile is not available in the tsqtsq library
       fn: ({ expr, parameter }: { expr: string; parameter: number }) => `histogram_quantile(${parameter},${expr})`,
     },
   ],

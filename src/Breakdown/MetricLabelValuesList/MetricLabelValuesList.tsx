@@ -24,7 +24,7 @@ import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/timeseries/getTimeseriesQueryRunnerParams';
+import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
