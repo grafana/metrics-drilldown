@@ -189,7 +189,7 @@ function getStyles(theme: GrafanaTheme2) {
     param: css`
       display: flex;
       align-items: center;
-      gap: ${theme.spacing(1)};
+      gap: ${theme.spacing(0.5)};
       margin-bottom: ${theme.spacing(0.5)};
       font-size: 12px;
       cursor: pointer;
