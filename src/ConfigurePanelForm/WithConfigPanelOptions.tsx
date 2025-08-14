@@ -110,35 +110,34 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
         className={cx(styles.container, isSelected && styles.selected)}
         onClick={!isSelected ? model.onClickPreset : undefined}
       >
-        <div className={cx(styles.vizAndRadio)}>
+        <div className={cx(styles.bodyAndParams)}>
           <body.Component model={body} />
 
-          <div className={styles.radioContainer}>
-            <Tooltip
-              content={!isSelected ? 'Click to select this configuration' : 'Current configuration'}
-              placement="top"
-            >
-              <input type="radio" name="select-config" checked={isSelected} />
-            </Tooltip>
-          </div>
+          {queryParams.show && (
+            <div className={styles.paramsContainer}>
+              {queryParams.options.map((o) => (
+                <label key={o.value} className={cx('param', styles.param)} htmlFor={`checkbox-${o.value}`}>
+                  <input
+                    id={`checkbox-${o.value}`}
+                    type="checkbox"
+                    value={o.value}
+                    checked={o.checked}
+                    onChange={model.onTogglePercentile}
+                  />
+                  <span>{o.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
-
-        {queryParams.show && (
-          <div className={styles.paramsContainer}>
-            {queryParams.options.map((o) => (
-              <label key={o.value} className={cx('param', styles.param)} htmlFor={`checkbox-${o.value}`}>
-                <input
-                  id={`checkbox-${o.value}`}
-                  type="checkbox"
-                  value={o.value}
-                  checked={o.checked}
-                  onChange={model.onTogglePercentile}
-                />
-                <span>{o.label}</span>
-              </label>
-            ))}
-          </div>
-        )}
+        <div className={styles.radioContainer}>
+          <Tooltip
+            content={!isSelected ? 'Click to select this configuration' : 'Current configuration'}
+            placement="top"
+          >
+            <input type="radio" name="select-config" checked={isSelected} />
+          </Tooltip>
+        </div>
       </div>
     );
   };
@@ -148,7 +147,8 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     container: css`
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
+      gap: ${theme.spacing(1)};
       padding: ${theme.spacing(1, 1, 1.25, 1)};
       border: 1px solid transparent;
       transition: all 0.2s ease-in-out;
@@ -168,23 +168,14 @@ function getStyles(theme: GrafanaTheme2) {
       border: 1px solid ${theme.colors.border.weak};
       border-color: ${theme.colors.primary.border};
     `,
-    vizAndRadio: css`
+    bodyAndParams: css`
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex-direction: row;
       gap: ${theme.spacing(1.25)};
       width: 100%;
     `,
-    radioContainer: css`
-      display: flex;
-      align-items: center;
-
-      & [type='radio'] {
-        cursor: pointer;
-      }
-    `,
     paramsContainer: css`
-      margin: ${theme.spacing(2, 0, 0, 1)};
+      margin-top: ${theme.spacing(1)};
     `,
     param: css`
       display: flex;
@@ -195,6 +186,15 @@ function getStyles(theme: GrafanaTheme2) {
       cursor: pointer;
 
       & [type='checkbox'] {
+        cursor: pointer;
+      }
+    `,
+    radioContainer: css`
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      & [type='radio'] {
         cursor: pointer;
       }
     `,
