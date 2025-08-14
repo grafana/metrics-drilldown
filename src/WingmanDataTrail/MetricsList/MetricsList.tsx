@@ -71,13 +71,13 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
+              metric: option.value as string,
               vizPanelInGridItem: new GmdVizPanel({
                 metric: option.value as string,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
                 },
               }),
-              metric: option.value as string,
             }),
           });
         },

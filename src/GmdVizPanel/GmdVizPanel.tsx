@@ -116,7 +116,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       panelConfig: {
         // we want a panel type to get a chance to render the panel as soon as possible
         // we can't determine if it's a native histogram here because it's an sync process that will be done in onActivate()
-        type: panelOptions?.type || GmdVizPanel.getPanelType(metric, histogramType),
+        type: panelOptions?.type || GmdVizPanel.getPanelTypeForMetric(metric, histogramType),
         title: metric,
         height: PANEL_HEIGHT.M,
         headerActions: ({ metric }) => [new SelectAction({ metricName: metric })],
@@ -139,9 +139,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private static retrievePreferredConfig(metric: string): PanelConfigPreset | undefined {
-    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS);
-    const userPrefForMetric = userPrefs && userPrefs[metric];
-    return userPrefForMetric?.config;
+    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS) || {};
+    return userPrefs[metric]?.config;
   }
 
   private async onActivate(discardPanelTypeUpdates: boolean) {
@@ -153,15 +152,13 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.subscribeToEvents();
 
     // isNativeHistogram() depends on an async process to load metrics metadata, so it's possible that
-    // when landing on the page, the metadata is not yet loaded and the histogram metrics are not be rendered as heatmap panels.
+    // when landing on the page, the metadata is not yet loaded and some native histogram metrics are not be rendered as heatmap panels.
     // But we still want to render them ASAP and update them later when the metadata has arrived.
     const trail = getTrailFor(this);
 
     if (trail.isNativeHistogram(metric)) {
       this.setState({
-        panelConfig: discardPanelTypeUpdates
-          ? panelConfig
-          : { ...panelConfig, type: GmdVizPanel.getPanelType(metric, 'native') },
+        panelConfig: discardPanelTypeUpdates ? panelConfig : { ...panelConfig, type: 'heatmap' },
         histogramType: 'native',
       });
       return;
@@ -172,21 +169,21 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     if (trail.isNativeHistogram(metric)) {
       this.setState({
-        panelConfig: discardPanelTypeUpdates
-          ? panelConfig
-          : { ...panelConfig, type: GmdVizPanel.getPanelType(metric, 'native') },
+        panelConfig: discardPanelTypeUpdates ? panelConfig : { ...panelConfig, type: 'heatmap' },
         histogramType: 'native',
       });
     }
   }
 
-  private static getPanelType(metric: string, histogramType: HistogramType): PanelType {
+  private static getPanelTypeForMetric(metric: string, histogramType: HistogramType): PanelType {
     if (isUpDownMetric(metric)) {
       return 'statushistory';
     }
+
     if (histogramType === 'classic' || histogramType === 'native') {
       return 'heatmap';
     }
+
     return 'timeseries';
   }
 

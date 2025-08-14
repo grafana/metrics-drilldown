@@ -42,7 +42,7 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
     const { body, isSelected } = model.useState();
 
     return (
-      <Tooltip content={!isSelected ? 'Click to select this configuration' : 'Selected configuration'}>
+      <Tooltip content={!isSelected ? 'Click to select this configuration' : 'Current configuration'}>
         <div
           className={cx(styles.container, isSelected && styles.selected)}
           onClick={!isSelected ? model.onSelectPreset : undefined}

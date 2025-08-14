@@ -24,11 +24,11 @@ import { reportExploreMetrics } from 'interactions';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
 import { getTrailFor } from 'utils';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
-import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
 import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
+import { EventConfigurePanel } from './GmdVizPanel/components/EventConfigurePanel';
 import { MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
