@@ -78,3 +78,75 @@ export function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher
   }
   return null;
 }
+
+/**
+ * Parses a PromQL query and extracts labels specifically from rate() function calls.
+ * This function ignores labels from other parts of the query like unless clauses or ALERTS.
+ *
+ * @param expr - The PromQL expression to parse
+ * @returns ParsedPromQLQuery with labels only from rate functions
+ */
+export function extractLabelsFromRateFunction(expr: string): ParsedPromQLQuery {
+  const tree = parser.parse(expr);
+  let metric = '';
+  const labels: PromQLLabelMatcher[] = [];
+  let hasErrors = false;
+  const errors: string[] = [];
+
+  // Track if we're currently inside a rate function
+  let insideRateFunction = false;
+
+  tree.iterate({
+    enter: (node) => {
+      // Check if this is an error node
+      if (node.type.isError || node.name === '⚠') {
+        hasErrors = true;
+        const errorText = expr.slice(node.from, node.to);
+        const errorMsg = errorText
+          ? `Parse error at position ${node.from}-${node.to}: "${errorText}"`
+          : `Parse error at position ${node.from}`;
+        errors.push(errorMsg);
+      }
+
+      // Check if we're entering a rate function by looking for the Rate node
+      if (node.name === 'Rate' || (node.name === 'FunctionIdentifier' && expr.slice(node.from, node.to) === 'rate')) {
+        insideRateFunction = true;
+      }
+
+      // Extract metric name from the first VectorSelector found in any rate function
+      if (
+        insideRateFunction &&
+        !metric &&
+        node.name === 'Identifier' &&
+        node.node.parent?.type.name === 'VectorSelector'
+      ) {
+        metric = expr.slice(node.from, node.to);
+      }
+
+      // Extract label matchers only when inside a rate function
+      if (insideRateFunction) {
+        const labelData = processLabelMatcher(node, expr);
+        if (labelData) {
+          // Check if this label combination already exists to avoid duplicates
+          const exists = labels.some(
+            (existingLabel) =>
+              existingLabel.label === labelData.label &&
+              existingLabel.op === labelData.op &&
+              existingLabel.value === labelData.value
+          );
+          if (!exists) {
+            labels.push(labelData);
+          }
+        }
+      }
+    },
+    leave: (node) => {
+      // Reset flag when leaving a rate function
+      if (node.name === 'FunctionCall') {
+        insideRateFunction = false;
+      }
+    },
+  });
+
+  return { metric, labels, hasErrors, errors };
+}

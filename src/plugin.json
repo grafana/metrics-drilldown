@@ -83,6 +83,11 @@
         "id": "grafana-metricsdrilldown-app/label-breakdown-component/v1",
         "title": "Label Breakdown",
         "description": "A metrics label breakdown view from the Metrics Drilldown app."
+      },
+      {
+        "id": "grafana-metricsdrilldown-app/embedded-metrics-reducer/v1",
+        "title": "Embedded Metrics Reducer",
+        "description": "A metrics reducer view from the Metrics Drilldown app."
       }
     ]
   }
