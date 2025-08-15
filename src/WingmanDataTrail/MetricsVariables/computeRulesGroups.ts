@@ -3,9 +3,10 @@ import { ruleGroupLabels } from './metricLabels';
 type MetricType = 'metrics' | 'rules';
 
 /**
- * Type guard that checks if a string follows Prometheus recording rule naming convention
- * Recording rules follow the pattern: level:metric:operations or level:metric
- * Where level, metric, and operations can contain underscores and alphanumeric characters
+ * Checks if a metric name follows Prometheus recording rule naming conventions.
+ *
+ * @remarks Recording rules follow the pattern: `level:metric:operations` or `level:metric`
+ * Where `level`, `metric`, and `operations` can contain underscores and alphanumeric characters.
  */
 export function isRecordingRule(value: string): boolean {
   // Matches patterns like:
