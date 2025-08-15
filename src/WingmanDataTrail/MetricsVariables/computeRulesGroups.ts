@@ -2,6 +2,21 @@ import { ruleGroupLabels } from './metricLabels';
 
 type MetricType = 'metrics' | 'rules';
 
+/**
+ * Type guard that checks if a string follows Prometheus recording rule naming convention
+ * Recording rules follow the pattern: level:metric:operations or level:metric
+ * Where level, metric, and operations can contain underscores and alphanumeric characters
+ */
+export function isRecordingRule(value: string): boolean {
+  // Matches patterns like:
+  // - instance_path:requests:rate5m
+  // - path:requests:rate5m
+  // - job:request_failures_per_requests:ratio_rate5m
+  // - apiserver_request:availability30d
+  // - asserts:container_memory
+  return /^\w+:\w+(?::\w+)?$/.test(value);
+}
+
 export function computeRulesGroups(options: Array<{ label: string; value: string }>) {
   const rulesMap = new Map<MetricType, string[]>([
     ['metrics', []],
@@ -10,7 +25,7 @@ export function computeRulesGroups(options: Array<{ label: string; value: string
 
   for (const option of options) {
     const { value } = option;
-    const key: MetricType = /:/i.test(value) ? 'rules' : 'metrics';
+    const key: MetricType = isRecordingRule(value) ? 'rules' : 'metrics';
 
     const values = rulesMap.get(key) ?? [];
     values.push(value);
