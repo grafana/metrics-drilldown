@@ -1,7 +1,8 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 
 import { RECENT_TRAILS_KEY, TrailStore, type UrlSerializedTrail } from './TrailStore';
-import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
+import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
+import { dataSourceStub } from '../stubs/dataSourceStub';
 import { PREF_KEYS } from '../UserPreferences/pref-keys';
 import { userPreferences } from '../UserPreferences/userPreferences';
 
@@ -37,7 +38,7 @@ describe('TrailStore', () => {
     getDataSourceSrvSpy.mockImplementation(() => {
       return {
         get: (ds: DataSourceWithBackend) => Promise.resolve(ds),
-        getList: () => [mockDataSource],
+        getList: () => [dataSourceStub],
         getInstanceSettings: () => ({
           id: 1,
           uid: 'ds',

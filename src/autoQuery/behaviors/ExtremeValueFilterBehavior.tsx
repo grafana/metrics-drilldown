@@ -6,11 +6,11 @@ import { parser } from '@prometheus-io/lezer-promql';
 import React from 'react';
 import { type Unsubscribable } from 'rxjs';
 
-import { processLabelMatcher } from 'extensions/links';
 import { reportExploreMetrics } from 'interactions';
 
 import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR } from '../../shared';
 import { logger } from '../../tracking/logger/logger';
+import { processLabelMatcher } from '../../utils/utils.promql';
 import { buildPrometheusQuery, isNonRateQueryFunction, type NonRateQueryFunction } from '../buildPrometheusQuery';
 
 /**

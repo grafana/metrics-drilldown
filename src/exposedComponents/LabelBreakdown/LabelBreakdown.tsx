@@ -1,5 +1,4 @@
-import { dateMath, type DataSourceApi } from '@grafana/data';
-import { SceneTimeRange } from '@grafana/scenes';
+import { type DataSourceApi } from '@grafana/data';
 import React, { useEffect, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
@@ -9,6 +8,7 @@ import { reportExploreMetrics } from 'interactions';
 import { newMetricsTrail } from 'utils';
 
 import { parsePromQLQuery } from '../../extensions/links';
+import { toSceneTimeRange } from '../../utils/utils.timerange';
 
 export interface LabelBreakdownProps {
   query: string;
@@ -17,20 +17,9 @@ export interface LabelBreakdownProps {
   dataSource: DataSourceApi;
 }
 
-function toSceneTime(time: string | number): string {
-  if (typeof time === 'string' && dateMath.isMathString(time)) {
-    // 'now', 'now-1h', etc.
-    return time;
-  }
-
-  return dateMath.toDateTime(new Date(time), { roundUp: false })!.toISOString();
-}
-
 const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
   const [error] = useCatchExceptions();
   const { metric, labels } = parsePromQLQuery(query);
-  const from = toSceneTime(initialStart);
-  const to = toSceneTime(initialEnd);
   const trail = newMetricsTrail({
     metric,
     initialDS: dataSource.uid,
@@ -39,7 +28,7 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
       operator: op,
       value,
     })),
-    $timeRange: new SceneTimeRange({ from, to }),
+    $timeRange: toSceneTimeRange(initialStart, initialEnd),
     embedded: true,
   });
 
