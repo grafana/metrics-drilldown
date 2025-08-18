@@ -404,10 +404,15 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
       expressionBuilder: (filters: AdHocVariableFilter[]) => {
         // remove any filters that include __name__ key in the expression
         // to prevent the metric name from being set twice in the query and causing an error.
-        return filters
-          .filter((filter) => filter.key !== '__name__')
-          .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
-          .join(',');
+        // also escapes equal signs to prevent invalid queries
+        // TODO: proper escaping as Scene does in https://github.com/grafana/scenes/blob/main/packages/scenes/src/variables/utils.ts#L45-L67
+        return (
+          filters
+            .filter((filter) => filter.key !== '__name__')
+            // eslint-disable-next-line sonarjs/no-nested-template-literals
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value.replaceAll('=', `\=`)}"`)
+            .join(',')
+        );
       },
     }),
   ];
