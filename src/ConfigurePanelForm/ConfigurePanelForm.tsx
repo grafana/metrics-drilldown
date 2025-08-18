@@ -43,8 +43,6 @@ interface ConfigurePanelFormState extends SceneObjectState {
   body?: SceneCSSGridLayout;
 }
 
-export const PREVIEW_VIZ_PANEL_HEIGHT = PANEL_HEIGHT.S;
-
 export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState> {
   constructor({ metric }: { metric: ConfigurePanelFormState['metric'] }) {
     super({

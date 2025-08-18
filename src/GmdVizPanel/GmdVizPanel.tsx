@@ -112,8 +112,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       histogramType,
       panelConfig: {
         // we want a panel type to get a chance to render the panel as soon as possible
-        // we can't determine if it's a native histogram here because it's an sync process that will be done in onActivate()
-        type: panelOptions?.type || GmdVizPanel.getPanelTypeForMetric(metric, histogramType),
+        // we can't determine if it's a native histogram here because it's an async process that will be done in onActivate()
+        type: panelOptions?.type || GmdVizPanel.getDefaultPanelTypeForMetric(metric, histogramType),
         title: metric,
         height: PANEL_HEIGHT.M,
         headerActions: ({ metric }) => [new SelectAction({ metricName: metric })],
@@ -167,7 +167,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
   }
 
-  private static getPanelTypeForMetric(metric: string, histogramType: HistogramType): PanelType {
+  private static getDefaultPanelTypeForMetric(metric: string, histogramType: HistogramType): PanelType {
     if (isUpDownMetric(metric)) {
       return 'statushistory';
     }
