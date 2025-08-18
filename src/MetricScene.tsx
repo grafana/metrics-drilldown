@@ -15,9 +15,9 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { GroupByVariable } from 'Breakdown/GroupByVariable';
-import { ConfigurePanelForm } from 'ConfigurePanelForm/ConfigurePanelForm';
-import { EventApplyPanelConfig } from 'ConfigurePanelForm/EventApplyPanelConfig';
-import { EventCancelConfigurePanel } from 'ConfigurePanelForm/EventCancelConfigurePanel';
+import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
+import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
+import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { reportExploreMetrics } from 'interactions';
