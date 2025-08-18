@@ -35,9 +35,7 @@ import {
   UrlParameters,
   type GrafanaAssistantMetricsDrilldownContext,
 } from './links';
-
-// Prometheus query type for tests
-type PromQuery = { refId: string; expr: string; datasource?: { type: string; uid: string } };
+import { type PromQuery } from '@grafana/prometheus';
 
 // Mock factory for PluginExtensionPanelContext
 function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {}): PluginExtensionPanelContext {
