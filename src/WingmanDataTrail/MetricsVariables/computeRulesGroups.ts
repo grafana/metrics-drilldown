@@ -5,8 +5,9 @@ type MetricType = 'metrics' | 'rules';
 /**
  * Checks if a metric name follows Prometheus recording rule naming conventions.
  *
- * @remarks Recording rules follow the pattern: `level:metric:operations` or `level:metric`
- * Where `level`, `metric`, and `operations` can contain underscores and alphanumeric characters.
+ * @remarks Recording rules follow the pattern: `level:metric:operations` or `level:metric`.
+ * The `level` component might be empty. Where `level`, `metric`, and `operations` can contain
+ * underscores and alphanumeric characters.
  */
 export function isRecordingRule(value: string): boolean {
   // Matches patterns like:
@@ -15,7 +16,8 @@ export function isRecordingRule(value: string): boolean {
   // - job:request_failures_per_requests:ratio_rate5m
   // - apiserver_request:availability30d
   // - asserts:container_memory
-  return /^\w+:\w+(?::\w+)?$/.test(value);
+  // - :requests:rate5m
+  return /^\w*:\w+(?::\w+)?$/.test(value);
 }
 
 export function computeRulesGroups(options: Array<{ label: string; value: string }>) {
