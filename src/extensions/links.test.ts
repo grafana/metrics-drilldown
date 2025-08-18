@@ -53,11 +53,6 @@ function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {})
   } as PluginExtensionPanelContext;
 }
 
-beforeEach(() => {
-  // Clear all mocks before each test
-  jest.clearAllMocks();
-});
-
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
     const result = parsePromQLQuery('http_requests_total');
