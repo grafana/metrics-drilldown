@@ -49,10 +49,10 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
   }
 
   private onActivate() {
-    this.handlePercentilesParams();
+    this.initPercentilesParams();
   }
 
-  private handlePercentilesParams() {
+  private initPercentilesParams() {
     const queryConfig = this.state.body.state.queryConfig;
 
     const percentiles = new Set(queryConfig.queries?.find((q) => q.params?.percentiles)?.params?.percentiles || []);
@@ -80,13 +80,18 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
     // update in situ, for simplicity (so we don't have to clone queryParams)
     option.checked = !option.checked;
 
+    const checkedOptions = queryParams.options.filter((o) => o.checked);
+    if (!checkedOptions.length) {
+      return; // prevent invalid config
+    }
+
     // we have to clone queryConfig so that the body state update below triggers
-    // a re-render of the body (see GmdVizPanel.subscribeToEvents())
+    // a re-render of the panel (see GmdVizPanel.subscribeToEvents())
     const newQueryConfig = cloneDeep(body.state.queryConfig);
 
     newQueryConfig.queries?.some((q) => {
       if (q.params?.percentiles) {
-        q.params.percentiles = queryParams.options.filter((o) => o.checked).map((o) => o.value);
+        q.params.percentiles = checkedOptions.map((o) => o.value);
         return true;
       }
       return false;

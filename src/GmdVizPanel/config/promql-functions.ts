@@ -1,21 +1,22 @@
 import { promql } from 'tsqtsq';
 
-export type PrometheusFunction =
+export const PROMETHEUS_FUNCTIONS = [
   // timeseries (rate and non-rate)
-  | 'avg'
-  | 'sum'
-  | 'stddev'
-  | 'quantile'
-  | 'min'
-  | 'max'
+  'avg',
+  'sum',
+  'stddev',
+  'quantile',
+  'min',
+  'max',
   // histograms
-  | 'histogram_quantile'
+  'histogram_quantile',
   // age
-  | 'time-avg(metric)'
-  | 'time-min(metric)'
-  | 'time-max(metric)';
+  'time-avg(metric)',
+  'time-min(metric)',
+  'time-max(metric)',
+];
 
-const CLASSIC_FUNCTIONS: PrometheusFunction[] = ['avg', 'sum', 'stddev', 'quantile', 'min', 'max'];
+export type PrometheusFunction = (typeof PROMETHEUS_FUNCTIONS)[number];
 
 type MapEntry = {
   name: PrometheusFunction;
@@ -23,7 +24,8 @@ type MapEntry = {
 };
 
 export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
-  ...CLASSIC_FUNCTIONS.map(
+  // methods exposed in the promql API
+  ...['avg', 'sum', 'stddev', 'quantile', 'min', 'max'].map(
     (name) =>
       [
         name,
@@ -33,6 +35,7 @@ export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
         },
       ] as [PrometheusFunction, MapEntry]
   ),
+  // custom functions that we define ourselves
   [
     'histogram_quantile',
     {

@@ -2,6 +2,7 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
 import { type ExposedComponentName } from 'exposedComponents/components';
+import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
 import { type MetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { type ActionViewType } from 'MetricActionBar';
 import { type SortSeriesByOption } from 'services/sorting';
@@ -154,6 +155,8 @@ type Interactions = {
   panel_config_applied: { metricType: MetricType; configId: string };
   // User restores the default panel config
   default_panel_config_restored: { metricType: MetricType };
+  // An invalid metric config has been found
+  invalid_metric_config: { metricConfig: PanelConfigPreset };
 };
 
 type OtherEvents = {

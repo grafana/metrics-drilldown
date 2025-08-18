@@ -22,6 +22,7 @@ import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { isHistogramMetric } from './matchers/isHistogramMetric';
 import { isUpDownMetric } from './matchers/isUpDownMetric';
+import { type PanelType } from './types/available-panel-types';
 import { buildHeatmapPanel } from './types/heatmap/buildHeatmapPanel';
 import { buildPercentilesPanel } from './types/percentiles/buildPercentilesPanel';
 import { buildStatPanel } from './types/stat/buildStatPanel';
@@ -29,8 +30,6 @@ import { buildStatushistoryPanel } from './types/statushistory/buildStatushistor
 import { buildTimeseriesPanel } from './types/timeseries/buildTimeseriesPanel';
 
 /* Panel config */
-
-export type PanelType = 'timeseries' | 'statushistory' | 'heatmap' | 'percentiles' | 'stat' | 'table';
 
 export type PanelConfig = {
   type: PanelType;

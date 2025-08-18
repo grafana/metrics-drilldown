@@ -2,7 +2,8 @@ import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObject
 import { RadioButtonGroup } from '@grafana/ui';
 import React from 'react';
 
-import { GmdVizPanel, type PanelType } from 'GmdVizPanel/GmdVizPanel';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
 
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 
