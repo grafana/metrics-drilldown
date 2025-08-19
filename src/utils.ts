@@ -175,7 +175,7 @@ export function limitAdhocProviders(
       const opts = {
         filters,
         scopes: getClosestScopesFacade()?.value,
-        queries: dataTrail.getQueries(),
+        queries: limitedFilterVariable.state.useQueriesAsFilterForOptions ? dataTrail.getQueries() : [],
       };
 
       // if there are too many queries it takes to much time to process the requests.
@@ -212,7 +212,7 @@ export function limitAdhocProviders(
         key: filter.key,
         filters,
         scopes: getClosestScopesFacade()?.value,
-        queries: dataTrail.getQueries(),
+        queries: limitedFilterVariable.state.useQueriesAsFilterForOptions ? dataTrail.getQueries() : [],
       };
 
       // if there are too many queries it takes to much time to process the requests.
