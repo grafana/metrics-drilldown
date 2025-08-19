@@ -249,7 +249,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
         <ConfirmModal
           isOpen={isConfirmModalOpen}
           title="Restore default configuration"
-          body="Are you sure you want to restore the default configuration?"
+          body={`Are you sure you want to restore the default configuration for the ${metric} metric?`}
           confirmText="Restore"
           onConfirm={model.onClickConfirmRestoreDefault}
           onDismiss={model.closeConfirmModal}
