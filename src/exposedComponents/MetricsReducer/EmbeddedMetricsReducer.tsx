@@ -24,6 +24,7 @@ export interface EmbeddedMetricsReducerProps {
 type LabelFetchStatus = 'idle' | 'loading' | 'done' | 'error';
 
 const EmbeddedMetricsReducer = ({ query, initialStart, initialEnd, dataSource }: EmbeddedMetricsReducerProps) => {
+  const [error] = useCatchExceptions();
   const { metric, labels: initialLabels } = parsePromQLQuery(query);
   const [labelFetchStatus, setLabelFetchStatus] = useState<LabelFetchStatus>('idle');
   const [labels, setLabels] = useState<PromQLLabelMatcher[]>([]);
@@ -76,6 +77,10 @@ const EmbeddedMetricsReducer = ({ query, initialStart, initialEnd, dataSource }:
     }
   }, [metric, dataSource, initialLabels, labelFetchStatus, setLabelFetchStatus]);
 
+  if (error) {
+    return <ErrorView error={error} />;
+  }
+
   if (labelFetchStatus === 'idle' || labelFetchStatus === 'loading') {
     return <LoadingPlaceholder text="Loading..." />;
   }
@@ -112,7 +117,6 @@ const setLabelsFromRecordingRule = async (
     const parsedQuery = extractLabelsFromRateFunction(recordingRule.query);
 
     if (parsedQuery.hasErrors) {
-      setLabelFetchStatus('error');
       throw new Error(`Recording rule ${metric} has errors: ${parsedQuery.errors.join(', ')}`);
     }
 
