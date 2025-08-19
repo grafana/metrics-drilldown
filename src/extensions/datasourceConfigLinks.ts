@@ -7,7 +7,6 @@ import {
 import { ROUTES } from '../constants';
 import { appendUrlParameters, createAppUrl, UrlParameters } from './links';
 
-const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 
 // List of Prometheus-compatible datasource types
 const PROMETHEUS_DATASOURCE_TYPES = ['prometheus', 'mimir', 'cortex', 'thanos'];
@@ -74,30 +73,29 @@ interface DataSourceConfigContext {
 export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
     title: 'Explore Metrics',
-    description: `Browse metrics in ${PRODUCT_NAME}`,
-    category: 'metrics-drilldown',
+    description: 'Browse metrics in Grafana Metrics Drilldown',
+    targets: [PluginExtensionPoints.DataSourceConfigActions],
     icon: 'chart-line',
+    category: 'metrics-drilldown',
     path: createAppUrl(ROUTES.Drilldown),
-    targets: [PluginExtensionPoints.DataSourceConfig],
     configure: (context: DataSourceConfigContext | undefined) => {
+      // Validate context and datasource
       if (!context?.dataSource?.type || !context?.dataSource?.uid) {
         return undefined;
       }
 
-      const { type: datasourceType, uid: datasourceUid } = context.dataSource;
-
       // Only show for Prometheus-compatible datasources
-      if (!isPrometheusCompatible(datasourceType)) {
+      if (!isPrometheusCompatible(context.dataSource.type)) {
         return undefined;
       }
 
-      // Return dynamic path with datasource UID and custom description
+      // Return dynamic path and description based on datasource type
       return {
-        path: createDatasourceUrl(datasourceUid),
-        description: getDescriptionForDatasource(datasourceType),
+        path: createDatasourceUrl(context.dataSource.uid),
+        description: getDescriptionForDatasource(context.dataSource.type),
       };
     },
-  },
+  }
 ];
 
 // Export for testing
