@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
@@ -16,8 +16,8 @@
     "lint:fix": "npm run lint -- --fix && prettier --write --list-different .",
     "server": "docker compose up --build",
     "sign": "npx --yes @grafana/sign-plugin@latest",
-    "e2e:server": "docker compose up --build",
-    "e2e:ci": "docker compose --profile playwright up --build --attach playwright --exit-code-from playwright",
+    "e2e:server": "COMPOSE_BAKE=true docker compose up --build",
+    "e2e:ci": "COMPOSE_BAKE=true docker compose --profile playwright up --build --attach playwright --exit-code-from playwright",
     "e2e:prepare": "npm exec playwright install chromium",
     "e2e": "playwright test -c ./e2e/config/playwright.config.local.ts",
     "e2e:watch": "npm run e2e -- --ui",

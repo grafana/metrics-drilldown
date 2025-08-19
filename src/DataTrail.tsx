@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { useChromeHeaderHeight } from '@grafana/runtime';
+import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   SceneControlsSpacer,
@@ -13,6 +13,7 @@ import {
   SceneTimePicker,
   SceneTimeRange,
   SceneVariableSet,
+  ScopesVariable,
   UrlSyncContextProvider,
   VariableDependencyConfig,
   VariableValueSelectors,
@@ -114,6 +115,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(MetricSelectedEvent, this._handleMetricSelectedEvent.bind(this));
 
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+
     if (isAdHocFiltersVariable(filtersVariable)) {
       this._subs.add(
         filtersVariable?.subscribeToState((newState, prevState) => {
@@ -122,6 +124,21 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           }
         })
       );
+
+      // we ensure that, in the MetricsReducer, the Ad Hoc filters will display all the label names and values and
+      // we ensure that, in the MetricScene, the queries in the Scene graph will be considered and used as a filter
+      // to fetch label names and values
+      filtersVariable?.setState({
+        useQueriesAsFilterForOptions: Boolean(this.state.metric),
+      });
+
+      this.subscribeToState((newState, prevState) => {
+        if (newState.metric !== prevState.metric) {
+          filtersVariable?.setState({
+            useQueriesAsFilterForOptions: Boolean(newState.metric),
+          });
+        }
+      });
     }
 
     // Save the current trail as a recent (if the browser closes or reloads) if user selects a metric OR applies filters to metric select view
@@ -386,31 +403,43 @@ export function getTopSceneFor(metric?: string, nativeHistogram = false) {
 }
 
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
-  return new SceneVariableSet({
-    variables: [
-      new MetricsDrilldownDataSourceVariable({ initialDS }),
-      new AdHocFiltersVariable({
-        key: VAR_FILTERS,
-        name: VAR_FILTERS,
-        label: 'Filters',
-        addFilterButtonText: 'Add label',
-        datasource: trailDS,
-        hide: VariableHide.dontHide,
-        layout: 'combobox',
-        filters: initialFilters ?? [],
-        baseFilters: getBaseFiltersForMetric(metric),
-        applyMode: 'manual',
-        allowCustomValue: true,
-        expressionBuilder: (filters: AdHocVariableFilter[]) => {
-          // remove any filters that include __name__ key in the expression
-          // to prevent the metric name from being set twice in the query and causing an error.
-          return filters
+  let variables: SceneVariable[] = [
+    new MetricsDrilldownDataSourceVariable({ initialDS }),
+    new AdHocFiltersVariable({
+      key: VAR_FILTERS,
+      name: VAR_FILTERS,
+      label: 'Filters',
+      addFilterButtonText: 'Add label',
+      datasource: trailDS,
+      hide: VariableHide.dontHide,
+      layout: 'combobox',
+      filters: initialFilters ?? [],
+      baseFilters: getBaseFiltersForMetric(metric),
+      applyMode: 'manual',
+      allowCustomValue: true,
+      useQueriesAsFilterForOptions: false,
+      expressionBuilder: (filters: AdHocVariableFilter[]) => {
+        // remove any filters that include __name__ key in the expression
+        // to prevent the metric name from being set twice in the query and causing an error.
+        // also escapes equal signs to prevent invalid queries
+        // TODO: proper escaping as Scene does in https://github.com/grafana/scenes/blob/main/packages/scenes/src/variables/utils.ts#L45-L67
+        return (
+          filters
             .filter((filter) => filter.key !== '__name__')
-            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
-            .join(',');
-        },
-      }),
-    ],
+            // eslint-disable-next-line sonarjs/no-nested-template-literals
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value.replaceAll('=', `\=`)}"`)
+            .join(',')
+        );
+      },
+    }),
+  ];
+
+  if (isScopesSupported()) {
+    variables.unshift(new ScopesVariable({ enable: true }));
+  }
+
+  return new SceneVariableSet({
+    variables,
   });
 }
 
@@ -468,4 +497,14 @@ function updateAppControlsHeight() {
 
   const { height } = appControls.getBoundingClientRect();
   document.documentElement.style.setProperty('--app-controls-height', `${height}px`);
+}
+
+function isScopesSupported(): boolean {
+  return Boolean(
+    config.featureToggles.scopeFilters &&
+      config.featureToggles.enableScopesInMetricsExplore &&
+      // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
+      // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
+      !config.buildInfo.version.startsWith('11.')
+  );
 }

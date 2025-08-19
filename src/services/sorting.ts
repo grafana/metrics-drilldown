@@ -43,12 +43,18 @@ const sortByFieldReducer = (series: DataFrame[], sortBy: string, direction: Sort
   const fieldReducer = fieldReducers.get(sortBy);
 
   const seriesCalcs = series.map((dataFrame) => {
-    const value =
-      fieldReducer.reduce?.(dataFrame.fields[1], true, true) ?? doStandardCalcs(dataFrame.fields[1], true, true);
+    const field = dataFrame.fields[1];
+    if (!field) {
+      return {
+        value: 0,
+        dataFrame,
+      };
+    }
 
+    const value = fieldReducer.reduce?.(field, true, true) ?? doStandardCalcs(field, true, true);
     return {
       value: value[sortBy] ?? 0,
-      dataFrame: dataFrame,
+      dataFrame,
     };
   });
 

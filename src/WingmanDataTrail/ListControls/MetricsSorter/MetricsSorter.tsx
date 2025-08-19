@@ -17,9 +17,10 @@ import { EventSortByChanged } from './events/EventSortByChanged';
 import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
 import { logger } from '../../../tracking/logger/logger';
+import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
+import { userPreferences } from '../../../UserPreferences/userPreferences';
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
 
-const RECENT_METRICS_STORAGE_KEY = 'metrics-drilldown-recent-metrics/v1';
 const MAX_RECENT_METRICS = 6;
 const RECENT_METRICS_EXPIRY_DAYS = 30;
 
@@ -43,7 +44,7 @@ export function addRecentMetric(metricName: string): void {
 
     // Keep only the most recent metrics
     const updatedMetrics = filteredMetrics.slice(0, MAX_RECENT_METRICS);
-    localStorage.setItem(RECENT_METRICS_STORAGE_KEY, JSON.stringify(updatedMetrics));
+    userPreferences.setItem(PREF_KEYS.RECENT_METRICS, updatedMetrics);
   } catch (error) {
     const errorObject = error instanceof Error ? error : new Error(String(error));
 
@@ -60,12 +61,11 @@ export function addRecentMetric(metricName: string): void {
  */
 export function getRecentMetrics(): RecentMetric[] {
   try {
-    const stored = localStorage.getItem(RECENT_METRICS_STORAGE_KEY);
-    if (!stored) {
+    const recentMetrics: RecentMetric[] = userPreferences.getItem(PREF_KEYS.RECENT_METRICS) || [];
+    if (!recentMetrics.length) {
       return [];
     }
 
-    const recentMetrics: RecentMetric[] = JSON.parse(stored);
     const now = Date.now();
     const thirtyDaysAgo = now - RECENT_METRICS_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
 
@@ -74,7 +74,7 @@ export function getRecentMetrics(): RecentMetric[] {
 
     // If any metrics were removed, update storage
     if (validMetrics.length !== recentMetrics.length) {
-      localStorage.setItem(RECENT_METRICS_STORAGE_KEY, JSON.stringify(validMetrics));
+      userPreferences.setItem(PREF_KEYS.RECENT_METRICS, validMetrics);
     }
 
     return validMetrics;
