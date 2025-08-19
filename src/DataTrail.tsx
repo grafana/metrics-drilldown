@@ -125,7 +125,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         })
       );
 
-      // we ensure that, in the MetricsReducer, the Ad Hoc filters will display all the label values and
+      // we ensure that, in the MetricsReducer, the Ad Hoc filters will display all the label names and values and
       // we ensure that, in the MetricScene, the queries in the Scene graph will be considered and used as a filter
       // to fetch label names and values
       filtersVariable?.setState({
