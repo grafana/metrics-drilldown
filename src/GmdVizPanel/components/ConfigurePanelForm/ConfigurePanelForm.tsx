@@ -277,7 +277,12 @@ function getStyles(theme: GrafanaTheme2) {
       display: flex;
       justify-content: center;
       gap: ${theme.spacing(2)};
-      margin-top: ${theme.spacing(3)};
+      margin-top: ${theme.spacing(1)};
+      position: sticky;
+      bottom: 0;
+      background: ${theme.colors.background.primary};
+      padding: ${theme.spacing(2, 0)};
+      border-top: 1px solid ${theme.colors.border.weak};
     `,
   };
 }
