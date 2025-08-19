@@ -8,12 +8,11 @@ import { useCatchExceptions } from 'App/useCatchExceptions';
 import { reportExploreMetrics } from 'interactions';
 import { logger } from 'tracking/logger/logger';
 import { newMetricsTrail } from 'utils';
-import { findRecordingRuleByName } from 'utils/utils.recording-rules';
-import { toSceneTimeRange } from 'utils/utils.timerange';
-import { isRecordingRule } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
 import { parsePromQLQuery } from '../../extensions/links';
 import { extractLabelsFromRateFunction, type PromQLLabelMatcher } from '../../utils/utils.promql';
+import { findRecordingRuleByName, isRecordingRule } from '../../utils/utils.recording-rules';
+import { toSceneTimeRange } from '../../utils/utils.timerange';
 
 export interface EmbeddedMetricsReducerProps {
   query: string;
