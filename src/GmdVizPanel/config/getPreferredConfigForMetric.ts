@@ -4,10 +4,10 @@ import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userPreferences } from 'UserPreferences/userPreferences';
 import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 
-import { CONFIG_PRESET, type PanelConfigPreset } from './presets/types';
+import { CONFIG_PRESETS, type PanelConfigPreset } from './presets/types';
 import { PROMQL_FUNCTIONS } from './promql-functions';
 
-const availableConfigPresetIds = new Set<string>(Object.values(CONFIG_PRESET));
+const availableConfigPresetIds = new Set<string>(Object.values(CONFIG_PRESETS));
 const availablePanelTypes = new Set<string>(AVAILABLE_PANEL_TYPES);
 
 export function getPreferredConfigForMetric(metric: string): PanelConfigPreset | undefined {

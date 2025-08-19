@@ -6,13 +6,14 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import { PERCENTILES_OPTIONS } from 'GmdVizPanel/config/percentiles-options';
+import { type ConfigPresetId } from 'GmdVizPanel/config/presets/types';
 import { type GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 
 interface WithConfigPanelOptionsState extends SceneObjectState {
-  presetId: string;
+  presetId: ConfigPresetId;
   body: GmdVizPanel;
   isSelected: boolean;
-  onSelect: (presetId: string) => void;
+  onSelect: (presetId: ConfigPresetId) => void;
   // currently, only percentiles are handheld by the app
   // in the future, if we add more parameters, this code will have to be more generic
   queryParams: {

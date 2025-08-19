@@ -1,8 +1,8 @@
-import { CONFIG_PRESET, type PanelConfigPreset } from './types';
+import { CONFIG_PRESETS, type ConfigPresetId, type PanelConfigPreset } from './types';
 
-export const DEFAULT_STATUS_UP_DOWN_PRESETS: Record<string, PanelConfigPreset> = {
-  [CONFIG_PRESET.STATUS_UPDOWN_HISTORY]: {
-    id: String(CONFIG_PRESET.STATUS_UPDOWN_HISTORY),
+export const DEFAULT_STATUS_UP_DOWN_PRESETS: Partial<Record<ConfigPresetId, PanelConfigPreset>> = {
+  [CONFIG_PRESETS.STATUS_UPDOWN_HISTORY]: {
+    id: CONFIG_PRESETS.STATUS_UPDOWN_HISTORY,
     name: 'Status History (default)',
     panelOptions: {
       type: 'statushistory',
@@ -13,8 +13,8 @@ export const DEFAULT_STATUS_UP_DOWN_PRESETS: Record<string, PanelConfigPreset> =
       queries: [{ fn: 'min' }],
     },
   },
-  [CONFIG_PRESET.STATUS_UPDOWN_STAT]: {
-    id: String(CONFIG_PRESET.STATUS_UPDOWN_STAT),
+  [CONFIG_PRESETS.STATUS_UPDOWN_STAT]: {
+    id: CONFIG_PRESETS.STATUS_UPDOWN_STAT,
     name: 'Stat with latest value',
     panelOptions: {
       type: 'stat',

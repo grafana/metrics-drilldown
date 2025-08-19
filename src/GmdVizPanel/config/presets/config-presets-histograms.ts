@@ -1,8 +1,8 @@
-import { CONFIG_PRESET, type PanelConfigPreset } from './types';
+import { CONFIG_PRESETS, type ConfigPresetId, type PanelConfigPreset } from './types';
 
-export const DEFAULT_HISTOGRAMS_PRESETS: Record<string, PanelConfigPreset> = {
-  [CONFIG_PRESET.HISTOGRAM_HEATMAP]: {
-    id: String(CONFIG_PRESET.HISTOGRAM_HEATMAP),
+export const DEFAULT_HISTOGRAMS_PRESETS: Partial<Record<ConfigPresetId, PanelConfigPreset>> = {
+  [CONFIG_PRESETS.HISTOGRAM_HEATMAP]: {
+    id: CONFIG_PRESETS.HISTOGRAM_HEATMAP,
     name: 'Heatmap (default)',
     panelOptions: {
       type: 'heatmap',
@@ -13,8 +13,8 @@ export const DEFAULT_HISTOGRAMS_PRESETS: Record<string, PanelConfigPreset> = {
       queries: [],
     },
   },
-  [CONFIG_PRESET.HISTOGRAM_PERCENTILES]: {
-    id: String(CONFIG_PRESET.HISTOGRAM_PERCENTILES),
+  [CONFIG_PRESETS.HISTOGRAM_PERCENTILES]: {
+    id: CONFIG_PRESETS.HISTOGRAM_PERCENTILES,
     name: 'Percentiles',
     panelOptions: {
       type: 'percentiles',

@@ -1,10 +1,10 @@
 import { AVAILABLE_PANEL_TYPES } from 'GmdVizPanel/types/available-panel-types';
 
 import { isValid } from '../getPreferredConfigForMetric';
-import { CONFIG_PRESET, type PanelConfigPreset } from '../presets/types';
+import { CONFIG_PRESETS, type PanelConfigPreset } from '../presets/types';
 
 const createValidConfig = (): PanelConfigPreset => ({
-  id: CONFIG_PRESET.TIMESERIES_AVG,
+  id: CONFIG_PRESETS.TIMESERIES_AVG,
   name: 'Test Config',
   panelOptions: {
     type: 'timeseries',
@@ -33,7 +33,7 @@ describe('isValid(metricConfig)', () => {
   });
 
   describe('id validation', () => {
-    it.each(Object.values(CONFIG_PRESET))('returns true for valid preset id: %s', (presetId) => {
+    it.each(Object.values(CONFIG_PRESETS))('returns true for valid preset id: %s', (presetId) => {
       const config = createValidConfig();
       config.id = presetId;
       expect(isValid(config)).toBe(true);
@@ -41,7 +41,7 @@ describe('isValid(metricConfig)', () => {
 
     it('returns false when id is not a valid CONFIG_PRESET value', () => {
       const config = createValidConfig();
-      config.id = 'invalid-preset-id';
+      (config.id as any) = 'invalid-preset-id';
       expect(isValid(config)).toBe(false);
     });
 

@@ -1,8 +1,8 @@
-import { CONFIG_PRESET, type PanelConfigPreset } from './types';
+import { CONFIG_PRESETS, type ConfigPresetId, type PanelConfigPreset } from './types';
 
-export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
-  [CONFIG_PRESET.TIMESERIES_AVG]: {
-    id: String(CONFIG_PRESET.TIMESERIES_AVG),
+export const DEFAULT_TIMESERIES_PRESETS: Partial<Record<ConfigPresetId, PanelConfigPreset>> = {
+  [CONFIG_PRESETS.TIMESERIES_AVG]: {
+    id: CONFIG_PRESETS.TIMESERIES_AVG,
     name: 'Average (default)',
     panelOptions: {
       type: 'timeseries',
@@ -13,8 +13,8 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
       queries: [{ fn: 'avg' }],
     },
   },
-  [CONFIG_PRESET.TIMESERIES_SUM]: {
-    id: String(CONFIG_PRESET.TIMESERIES_SUM),
+  [CONFIG_PRESETS.TIMESERIES_SUM]: {
+    id: CONFIG_PRESETS.TIMESERIES_SUM,
     name: 'Sum',
     panelOptions: {
       type: 'timeseries',
@@ -25,8 +25,8 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
       queries: [{ fn: 'sum' }],
     },
   },
-  [CONFIG_PRESET.TIMESERIES_STDDEV]: {
-    id: String(CONFIG_PRESET.TIMESERIES_STDDEV),
+  [CONFIG_PRESETS.TIMESERIES_STDDEV]: {
+    id: CONFIG_PRESETS.TIMESERIES_STDDEV,
     name: 'Standard deviation',
     panelOptions: {
       type: 'timeseries',
@@ -37,8 +37,8 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
       queries: [{ fn: 'stddev' }],
     },
   },
-  [CONFIG_PRESET.TIMESERIES_PERCENTILES]: {
-    id: String(CONFIG_PRESET.TIMESERIES_PERCENTILES),
+  [CONFIG_PRESETS.TIMESERIES_PERCENTILES]: {
+    id: CONFIG_PRESETS.TIMESERIES_PERCENTILES,
     name: 'Percentiles',
     panelOptions: {
       type: 'percentiles',
@@ -49,8 +49,8 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
       queries: [{ fn: 'quantile', params: { percentiles: [99, 90, 50] } }],
     },
   },
-  [CONFIG_PRESET.TIMESERIES_MIN_MAX]: {
-    id: String(CONFIG_PRESET.TIMESERIES_MIN_MAX),
+  [CONFIG_PRESETS.TIMESERIES_MIN_MAX]: {
+    id: CONFIG_PRESETS.TIMESERIES_MIN_MAX,
     name: 'Minimum and maximum',
     panelOptions: {
       type: 'timeseries',
@@ -65,16 +65,21 @@ export const DEFAULT_TIMESERIES_PRESETS: Record<string, PanelConfigPreset> = {
 
 // the presets are arranged so the first one is always the default one
 // this is why we define the default rate presets and we don't use DEFAULT_TIMESERIES_PRESETS in GmdVizPanel.tsx
-export const DEFAULT_TIMESERIES_RATE_PRESETS: Record<string, PanelConfigPreset> = {
-  [CONFIG_PRESET.TIMESERIES_SUM]: {
-    ...DEFAULT_TIMESERIES_PRESETS[CONFIG_PRESET.TIMESERIES_SUM],
+export const DEFAULT_TIMESERIES_RATE_PRESETS: Partial<Record<ConfigPresetId, PanelConfigPreset>> = {
+  [CONFIG_PRESETS.TIMESERIES_SUM]: {
+    ...DEFAULT_TIMESERIES_PRESETS[CONFIG_PRESETS.TIMESERIES_SUM],
     name: 'Sum (default)',
-  },
-  [CONFIG_PRESET.TIMESERIES_AVG]: {
-    ...DEFAULT_TIMESERIES_PRESETS[CONFIG_PRESET.TIMESERIES_AVG],
+    id: CONFIG_PRESETS.TIMESERIES_SUM,
+  } as PanelConfigPreset,
+  [CONFIG_PRESETS.TIMESERIES_AVG]: {
+    ...DEFAULT_TIMESERIES_PRESETS[CONFIG_PRESETS.TIMESERIES_AVG],
     name: 'Average',
-  },
-  [CONFIG_PRESET.TIMESERIES_STDDEV]: DEFAULT_TIMESERIES_PRESETS[CONFIG_PRESET.TIMESERIES_STDDEV],
-  [CONFIG_PRESET.TIMESERIES_PERCENTILES]: DEFAULT_TIMESERIES_PRESETS[CONFIG_PRESET.TIMESERIES_PERCENTILES],
-  [CONFIG_PRESET.TIMESERIES_MIN_MAX]: DEFAULT_TIMESERIES_PRESETS[CONFIG_PRESET.TIMESERIES_MIN_MAX],
+  } as PanelConfigPreset,
+  [CONFIG_PRESETS.TIMESERIES_STDDEV]: DEFAULT_TIMESERIES_PRESETS[CONFIG_PRESETS.TIMESERIES_STDDEV] as PanelConfigPreset,
+  [CONFIG_PRESETS.TIMESERIES_PERCENTILES]: DEFAULT_TIMESERIES_PRESETS[
+    CONFIG_PRESETS.TIMESERIES_PERCENTILES
+  ] as PanelConfigPreset,
+  [CONFIG_PRESETS.TIMESERIES_MIN_MAX]: DEFAULT_TIMESERIES_PRESETS[
+    CONFIG_PRESETS.TIMESERIES_MIN_MAX
+  ] as PanelConfigPreset,
 } as const;
