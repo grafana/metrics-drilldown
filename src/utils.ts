@@ -172,12 +172,10 @@ export function limitAdhocProviders(
       // we're passing the queries so we get the labels that adhere to the queries
       // we're also passing the scopes so we get the labels that adhere to the scopes filters
 
-      const queries = limitedFilterVariable.state.useQueriesAsFilterForOptions ? dataTrail.getQueries() : [];
-
       const opts = {
         filters,
         scopes: getClosestScopesFacade()?.value,
-        queries,
+        queries: limitedFilterVariable.state.useQueriesAsFilterForOptions ? dataTrail.getQueries() : [],
       };
 
       // if there are too many queries it takes to much time to process the requests.
@@ -210,13 +208,11 @@ export function limitAdhocProviders(
       // we're passing the queries so we get the label values that adhere to the queries
       // we're also passing the scopes so we get the label values that adhere to the scopes filters
 
-      const queries = limitedFilterVariable.state.useQueriesAsFilterForOptions ? dataTrail.getQueries() : [];
-
       const opts = {
         key: filter.key,
         filters,
         scopes: getClosestScopesFacade()?.value,
-        queries,
+        queries: limitedFilterVariable.state.useQueriesAsFilterForOptions ? dataTrail.getQueries() : [],
       };
 
       // if there are too many queries it takes to much time to process the requests.

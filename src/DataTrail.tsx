@@ -115,6 +115,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(MetricSelectedEvent, this._handleMetricSelectedEvent.bind(this));
 
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+
     if (isAdHocFiltersVariable(filtersVariable)) {
       this._subs.add(
         filtersVariable?.subscribeToState((newState, prevState) => {
@@ -123,6 +124,21 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           }
         })
       );
+
+      // we ensure that, in the MetricsReducer, the Ad Hoc filters will display all the label values and
+      // we ensure that, in the MetricScene, the queries in the Scene graph will be considered and used as a filter
+      // to fetch label names and values
+      filtersVariable?.setState({
+        useQueriesAsFilterForOptions: Boolean(this.state.metric),
+      });
+
+      this.subscribeToState((newState, prevState) => {
+        if (newState.metric !== prevState.metric) {
+          filtersVariable?.setState({
+            useQueriesAsFilterForOptions: Boolean(newState.metric),
+          });
+        }
+      });
     }
 
     // Save the current trail as a recent (if the browser closes or reloads) if user selects a metric OR applies filters to metric select view
@@ -401,6 +417,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
       baseFilters: getBaseFiltersForMetric(metric),
       applyMode: 'manual',
       allowCustomValue: true,
+      useQueriesAsFilterForOptions: false,
       expressionBuilder: (filters: AdHocVariableFilter[]) => {
         // remove any filters that include __name__ key in the expression
         // to prevent the metric name from being set twice in the query and causing an error.
