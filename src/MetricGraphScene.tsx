@@ -126,6 +126,28 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
       };
     }, [stickyMainGraph]); // Re-run when sticky setting changes
 
+    // Set CSS custom property for action bar height - always needed for search bar positioning
+    useEffect(() => {
+      // Update on mount
+      updateActionBarHeight();
+
+      // Use ResizeObserver to watch for height changes
+      const actionBar = document.querySelector('[data-testid="action-bar"]');
+
+      if (!actionBar) {
+        return;
+      }
+
+      const resizeObserver = new ResizeObserver(updateActionBarHeight);
+      resizeObserver.observe(actionBar);
+
+      return () => {
+        // Clean up
+        resizeObserver.disconnect();
+        document.documentElement.style.removeProperty('--action-bar-height');
+      };
+    }, []); // Empty dependency array - always run
+
     return (
       <div className={styles.container}>
         <div
@@ -199,4 +221,15 @@ function updateMainPanelHeight() {
 
   const { height } = mainPanel.getBoundingClientRect();
   document.documentElement.style.setProperty('--main-panel-height', `${height}px`);
+}
+
+function updateActionBarHeight() {
+  const actionBar = document.querySelector('[data-testid="action-bar"]');
+
+  if (!actionBar) {
+    return;
+  }
+
+  const { height } = actionBar.getBoundingClientRect();
+  document.documentElement.style.setProperty('--action-bar-height', `${height}px`);
 }
