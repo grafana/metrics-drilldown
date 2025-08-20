@@ -35,7 +35,7 @@ import {
   VAR_METRIC_WITH_LABEL_VALUE,
 } from './MetricsWithLabelValue/MetricsWithLabelValueVariable';
 
-export interface MetricsGroupByRowState extends SceneObjectState {
+interface MetricsGroupByRowState extends SceneObjectState {
   index: number;
   labelName: string;
   labelValue: string;

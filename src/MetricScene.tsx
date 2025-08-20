@@ -32,7 +32,7 @@ import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from './shared';
 
-export interface MetricSceneState extends SceneObjectState {
+interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
   nativeHistogram?: boolean;

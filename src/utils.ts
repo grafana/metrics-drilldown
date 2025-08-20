@@ -6,7 +6,6 @@ import {
   sceneUtils,
   type AdHocFiltersVariable,
   type SceneObject,
-  type SceneObjectState,
   type SceneVariable,
   type SceneVariableState,
 } from '@grafana/scenes';
@@ -67,12 +66,6 @@ export function getColorByIndex(index: number) {
   const visTheme = config.theme2.visualization;
   return visTheme.getColorByName(visTheme.palette[index % 8]);
 }
-
-export type SceneTimeRangeState = SceneObjectState & {
-  from: string;
-  to: string;
-  timeZone?: string;
-};
 
 // frontend hardening limit
 const MAX_ADHOC_VARIABLE_OPTIONS = 10000;
@@ -167,13 +160,6 @@ export function limitAdhocProviders(
     },
   });
 }
-
-export type SuggestionsResponse = {
-  data: string[];
-  status: 'success' | 'error';
-  error?: 'string';
-  warnings?: string[];
-};
 
 interface SceneType<T> extends Function {
   new (...args: never[]): T;

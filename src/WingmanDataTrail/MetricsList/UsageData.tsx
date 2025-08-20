@@ -7,7 +7,7 @@ import { type MetricUsageType } from 'WingmanDataTrail/ListControls/MetricsSorte
 
 import { type WithUsageDataPreviewPanelState } from './WithUsageDataPreviewPanel';
 
-export interface UsageSectionProps {
+interface UsageSectionProps {
   usageType: MetricUsageType;
   usageCount: number;
   singularUsageType: string;

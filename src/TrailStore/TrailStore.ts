@@ -12,19 +12,19 @@ export const RECENT_TRAILS_KEY = 'grafana.trails.recent';
 const MAX_RECENT_TRAILS = 20;
 
 // Added when removing history to replace serialized trail history with only URL values
-export interface UrlSerializedTrail {
+interface UrlSerializedTrail {
   urlValues: SceneObjectUrlValues;
 }
 
 // used in the migration for old history format
-export interface SerializedTrail {
+interface SerializedTrail {
   history: SerializedTrailHistory[];
   currentStep?: number; // Assume last step in history if not specified
   createdAt?: number;
 }
 
 // used in the migration for old history format
-export interface SerializedTrailHistory {
+interface SerializedTrailHistory {
   urlValues: SceneObjectUrlValues;
   description: string;
 }

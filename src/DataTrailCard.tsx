@@ -10,7 +10,7 @@ import { getTrailStore, type DataTrailBookmark } from './TrailStore/TrailStore';
 import { getMetricName } from './utils';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
-export type Props = {
+type Props = {
   trail?: DataTrail;
   bookmark?: DataTrailBookmark;
   onSelect: () => void;

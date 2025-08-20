@@ -31,7 +31,7 @@ interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;
 }
 
-export interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
+interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
   loading: boolean;
   controls: SceneObject[];
   body: SceneCSSGridLayout;

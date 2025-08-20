@@ -257,7 +257,7 @@ export const UrlParameters = {
   Filters: `var-filters`,
 } as const;
 
-export type UrlParameterType = (typeof UrlParameters)[keyof typeof UrlParameters];
+type UrlParameterType = (typeof UrlParameters)[keyof typeof UrlParameters];
 
 function appendUrlParameters(
   params: Array<[UrlParameterType, string | undefined]>,

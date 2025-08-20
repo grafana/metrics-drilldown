@@ -1,6 +1,6 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 
-import { RECENT_TRAILS_KEY, TrailStore, type UrlSerializedTrail } from './TrailStore';
+import { RECENT_TRAILS_KEY, TrailStore } from './TrailStore';
 import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
 import { dataSourceStub } from '../stubs/dataSourceStub';
 import { PREF_KEYS } from '../UserPreferences/pref-keys';
@@ -78,7 +78,7 @@ describe('TrailStore', () => {
   describe('Initialize store with one recent trail with final current step', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    const urlSerializedTrails: UrlSerializedTrail[] = [
+    const urlSerializedTrails = [
       {
         // this has no metric nor labels so it will be ignored
         urlValues: {

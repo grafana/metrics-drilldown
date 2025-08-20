@@ -32,7 +32,7 @@ const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
 export const TOPVIEW_KEY = 'topview';
 
-export interface MetricGraphSceneState extends SceneObjectState {
+interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
   selectedTab?: SceneObject;
