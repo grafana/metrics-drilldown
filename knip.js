@@ -1,6 +1,6 @@
 export default {
   entry: ['src/App/App.tsx'],
-  project: ['src/**/*.{js,ts}'],
+  project: ['src/**/*.{js,ts,tsx}'],
   ignore: ['src/mocks/**', 'src/stubs/**'],
   ignoreBinaries: ['knip'],
   ignoreDependencies: [
