@@ -140,6 +140,7 @@ type Interactions = {
   };
   app_initialized: {
     view: ViewName;
+    uel_epid: string;
   };
   // User took an action to view an exposed component
   exposed_component_viewed: {
