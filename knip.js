@@ -1,7 +1,8 @@
 export default {
-  entry: ['src/App/App.tsx'],
-  project: ['src/**/*.{js,ts,tsx}'],
-  ignore: ['src/test/**'],
+  // the exclamation mark suffix (!) indicates production file patterns
+  entry: ['src/App/App.tsx!'],
+  project: ['src/**/*.{js,ts,tsx}!'],
+  ignore: ['src/test/**'], // folder for unit testing mocks and stubs
   ignoreBinaries: ['knip'],
   ignoreDependencies: [
     // dependencies
