@@ -6,7 +6,7 @@ import { PROMQL_FUNCTIONS } from 'GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { type HistogramType, type QueryConfig, type QueryDefs } from 'GmdVizPanel/GmdVizPanel';
 
-import { isCounterMetric } from '../..//matchers/isCounterMetric';
+import { isCounterMetric as isCounterMetricFn } from '../..//matchers/isCounterMetric';
 
 type PercentilesQueryRunnerParams = {
   isRateQuery: boolean;
@@ -24,7 +24,7 @@ const DEFAULT_PERCENTILES = [99, 90, 50] as const;
 
 export function getPercentilesQueryRunnerParams(options: Options): PercentilesQueryRunnerParams {
   const { metric, histogramType, queryConfig } = options;
-  const isRateQuery = isCounterMetric(metric);
+  const isCounterMetric = isCounterMetricFn(metric);
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -36,7 +36,7 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
       ? buildNonHistogramQueries({
           metric,
           queryConfig,
-          isRateQuery,
+          isRateQuery: isCounterMetric,
           expr,
         })
       : buildHistogramQueries({
@@ -47,7 +47,7 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
         });
 
   return {
-    isRateQuery,
+    isRateQuery: histogramType !== 'none' ? true : isCounterMetric,
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries,
   };
