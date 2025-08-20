@@ -22,8 +22,10 @@ import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
-import { METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
+import {
+  VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+  WithUsageDataPreviewPanel,
+} from 'WingmanDataTrail/MetricsList/WithUsageDataPreviewPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 import { GroupsIcon } from 'WingmanDataTrail/SideBar/custom-icons/GroupsIcon';
@@ -70,7 +72,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+          autoRows: VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',

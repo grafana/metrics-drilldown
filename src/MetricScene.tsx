@@ -26,8 +26,6 @@ import { getTrailFor } from 'utils';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
-import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
-import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { EventConfigurePanel } from './GmdVizPanel/components/EventConfigurePanel';
 import { MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
@@ -37,10 +35,8 @@ import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type 
 export interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
-  autoQuery: AutoQueryInfo;
   nativeHistogram?: boolean;
   actionView?: ActionViewType;
-  queryDef?: AutoQueryDef;
   relatedLogsCount?: number;
   drawer: SceneDrawer;
 }
@@ -57,13 +53,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     },
   });
 
-  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'autoQuery' | 'drawer'>) {
-    const autoQuery = state.autoQuery ?? getAutoQueriesForMetric(state.metric, state.nativeHistogram);
+  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'drawer'>) {
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
       body: state.body ?? new MetricGraphScene({ metric: state.metric }),
-      autoQuery,
-      queryDef: state.queryDef ?? autoQuery.main,
       drawer: new SceneDrawer({}),
       ...state,
     });

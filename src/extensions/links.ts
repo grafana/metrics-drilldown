@@ -10,8 +10,7 @@ import { config, getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
 
-import { parseMatcher } from 'WingmanDataTrail/MetricVizPanel/parseMatcher';
-
+import { parseMatcher } from './parseMatcher';
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
 import { logger } from '../tracking/logger/logger';
 import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../utils/utils.promql';

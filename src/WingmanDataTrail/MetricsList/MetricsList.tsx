@@ -18,10 +18,10 @@ import React from 'react';
 import { InlineBanner } from 'App/InlineBanner';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
+
+import { VIZ_PANEL_HEIGHT, WithUsageDataPreviewPanel } from './WithUsageDataPreviewPanel';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 export const GRID_TEMPLATE_ROWS = '1fr';
@@ -44,7 +44,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT,
+          autoRows: VIZ_PANEL_HEIGHT,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
