@@ -1,6 +1,6 @@
 let localStore: Record<string, string> = {};
 
-export const userPreferences = {
+export const userStorage = {
   getItem: (key: string) => {
     return key in localStore ? JSON.parse(localStore[key]) : null;
   },

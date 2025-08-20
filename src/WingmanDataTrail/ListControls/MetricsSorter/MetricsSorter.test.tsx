@@ -1,10 +1,10 @@
 import { addRecentMetric, getRecentMetrics, sortMetricsWithRecentFirst } from './MetricsSorter';
 import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
-import { userPreferences } from '../../../UserPreferences/userPreferences';
+import { userStorage } from '../../../UserPreferences/userStorage';
 
 describe('MetricsSorter', () => {
   beforeEach(() => {
-    userPreferences.clear();
+    userStorage.clear();
   });
 
   describe('sortMetricsWithRecentFirst', () => {
@@ -101,7 +101,7 @@ describe('MetricsSorter', () => {
         { name: 'metric_a', timestamp: now - 1000 },
       ];
 
-      userPreferences.setItem(PREF_KEYS.RECENT_METRICS, recentMetrics);
+      userStorage.setItem(PREF_KEYS.RECENT_METRICS, recentMetrics);
 
       const result = getRecentMetrics();
 
@@ -114,7 +114,7 @@ describe('MetricsSorter', () => {
     it('should add a metric to the recent metrics list', () => {
       addRecentMetric('test_metric');
 
-      const recentMetrics = userPreferences.getItem(PREF_KEYS.RECENT_METRICS) || [];
+      const recentMetrics = userStorage.getItem(PREF_KEYS.RECENT_METRICS) || [];
 
       // Should have added our metric
       expect(recentMetrics.length).toBe(1);

@@ -24,7 +24,7 @@ import { getConfigPresetsForMetric } from 'GmdVizPanel/config/presets/getConfigP
 import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
-import { userPreferences } from 'UserPreferences/userPreferences';
+import { userStorage } from 'UserPreferences/userStorage';
 import { getTrailFor } from 'utils';
 import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
@@ -134,7 +134,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     this._subs.add(
       this.subscribeToEvent(EventApplyPanelConfig, (event) => {
         const { config, restoreDefault } = event.payload;
-        const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS) || {};
+        const userPrefs = userStorage.getItem(PREF_KEYS.METRIC_PREFS) || {};
         const userPrefForMetric = userPrefs[metric];
 
         if (restoreDefault && userPrefForMetric) {
@@ -143,7 +143,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
           userPrefs[metric] = { ...userPrefForMetric, config };
         }
 
-        userPreferences.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
+        userStorage.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
       })
     );
   }

@@ -3,7 +3,11 @@ import { reportExploreMetrics } from 'interactions';
 import pluginJson from '../plugin.json';
 import { PREF_KEYS } from './pref-keys';
 
-class UserPreferences {
+/**
+ * Just a wrapper class over window.localStorage
+ * In the future, we'd like to use Grafana's user storage API https://github.com/grafana/grafana/blob/main/packages/grafana-runtime/src/utils/userStorage.tsx
+ */
+class UserStorage {
   private service: string;
 
   constructor(service: string) {
@@ -67,4 +71,4 @@ class UserPreferences {
   }
 }
 
-export const userPreferences = new UserPreferences(pluginJson.id);
+export const userStorage = new UserStorage(pluginJson.id);

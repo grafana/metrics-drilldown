@@ -4,7 +4,7 @@ import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
-import { userPreferences } from 'UserPreferences/userPreferences';
+import { userStorage } from 'UserPreferences/userStorage';
 
 import { EventConfigurePanel } from './EventConfigurePanel';
 
@@ -22,7 +22,7 @@ export class ConfigurePanelAction extends SceneObjectBase<ConfigurePanelActionSt
     metric: ConfigurePanelActionState['metric'];
     disabled?: ConfigurePanelActionState['disabled'];
   }) {
-    const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS) || {};
+    const userPrefs = userStorage.getItem(PREF_KEYS.METRIC_PREFS) || {};
 
     super({
       metric,
