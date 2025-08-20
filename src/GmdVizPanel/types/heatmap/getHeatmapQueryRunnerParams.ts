@@ -38,7 +38,7 @@ export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunne
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries: [
       {
-        refId: metric,
+        refId: `${metric}-heatmap`,
         expr: query,
         format: 'heatmap',
         fromExploreMetrics: true,
