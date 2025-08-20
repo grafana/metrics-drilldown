@@ -25,10 +25,10 @@ module.exports = {
   transformIgnorePatterns: [nodeModulesToTransform(esModules)],
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
-    '\\.svg$': '<rootDir>/src/mocks/svgMock.js',
-    '^.+/logger/logger$': '<rootDir>/src/mocks/loggerMock.ts',
-    '^.+/interactions$': '<rootDir>/src/mocks/interactionsMock.ts',
-    '^.+/userPreferences$': '<rootDir>/src/mocks/userPreferences.ts',
+    '\\.svg$': '<rootDir>/src/test/mocks/svgMock.js',
+    '^.+/logger/logger$': '<rootDir>/src/test/mocks/loggerMock.ts',
+    '^.+/interactions$': '<rootDir>/src/test/mocks/interactionsMock.ts',
+    '^.+/userPreferences$': '<rootDir>/src/test/mocks/userPreferences.ts',
   },
   transform: {
     '^.+\\.(t|j)sx?$': [

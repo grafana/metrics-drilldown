@@ -1,8 +1,8 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 
 import { RECENT_TRAILS_KEY, TrailStore } from './TrailStore';
-import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
-import { dataSourceStub } from '../stubs/dataSourceStub';
+import { DataSourceType, MockDataSourceSrv } from '../test/mocks/datasource';
+import { dataSourceStub } from '../test/stubs/dataSourceStub';
 import { PREF_KEYS } from '../UserPreferences/pref-keys';
 import { userPreferences } from '../UserPreferences/userPreferences';
 
