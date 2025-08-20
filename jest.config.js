@@ -17,6 +17,7 @@ const esModules = [
   'memoize',
   'mimic-function',
   '@wojtekmaj/date-utils',
+  'leven',
 ];
 
 module.exports = {

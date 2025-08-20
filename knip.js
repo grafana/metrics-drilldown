@@ -2,6 +2,7 @@ export default {
   entry: ['src/App/App.tsx'],
   project: ['src/**/*.{js,ts}'],
   ignore: ['src/mocks/**', 'src/stubs/**'],
+  ignoreBinaries: ['knip'],
   ignoreDependencies: [
     // dependencies
     '@grafana/lezer-logql',
@@ -18,6 +19,7 @@ export default {
     'eslint-config-prettier',
     'eslint-plugin-deprecation',
     'eslint-plugin-jsdoc',
+    'eslint-plugin-playwright',
     'eslint-plugin-react',
     'eslint-plugin-react-hooks',
     'eslint-webpack-plugin',
