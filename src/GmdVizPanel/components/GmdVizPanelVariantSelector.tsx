@@ -4,6 +4,7 @@ import React from 'react';
 
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
+import { reportExploreMetrics } from 'interactions';
 
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 
@@ -50,6 +51,8 @@ export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVaria
   }
 
   private onChange = (newPanelType: PanelType) => {
+    reportExploreMetrics('histogram_panel_type_changed', { panelType: newPanelType });
+
     this.publishEvent(new EventPanelTypeChanged({ panelType: newPanelType }), true);
   };
 

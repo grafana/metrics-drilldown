@@ -4,6 +4,7 @@ import { config, reportInteraction } from '@grafana/runtime';
 import { type ExposedComponentName } from 'exposedComponents/components';
 import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
 import { type MetricType } from 'GmdVizPanel/matchers/getMetricType';
+import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
 import { type ActionViewType } from 'MetricActionBar';
 import { type SortSeriesByOption } from 'services/sorting';
 import { type SnakeCase } from 'utils/utils.types';
@@ -147,6 +148,8 @@ type Interactions = {
   exposed_component_viewed: {
     component: SnakeCase<ExposedComponentName>;
   };
+  // User changes the panel type for a histogram metric (e.g., from heatmap to percentiles)
+  histogram_panel_type_changed: { panelType: PanelType };
   // App migrated some legacy user prefs (see src/UserPreferences/userPreferences.ts)
   user_preferences_migrated: {};
   // User opens the "Configure panel"
