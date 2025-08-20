@@ -2,6 +2,7 @@ import { AVAILABLE_PANEL_TYPES } from 'GmdVizPanel/types/available-panel-types';
 
 import { isValid } from '../getPreferredConfigForMetric';
 import { CONFIG_PRESETS, type PanelConfigPreset } from '../presets/types';
+import { type PrometheusFunction } from '../promql-functions';
 
 const createValidConfig = (): PanelConfigPreset => ({
   id: CONFIG_PRESETS.TIMESERIES_AVG,
@@ -104,76 +105,79 @@ describe('isValid(metricConfig)', () => {
     });
   });
 
-  describe.each([['quantile'], ['histogram_quantile']])('percentiles validation for %s function', (fn) => {
-    it('returns false when params is missing', () => {
-      const config = createValidConfig();
-      config.queryOptions.queries = [{ fn }];
-      expect(isValid(config)).toBe(false);
-    });
+  describe.each<[PrometheusFunction]>([['quantile'], ['histogram_quantile']])(
+    'percentiles validation for %s function',
+    (fn) => {
+      it('returns false when params is missing', () => {
+        const config = createValidConfig();
+        config.queryOptions.queries = [{ fn }];
+        expect(isValid(config)).toBe(false);
+      });
 
-    it('returns true with valid params.percentiles array', () => {
-      const config = createValidConfig();
-      config.queryOptions.queries = [
-        {
-          fn,
-          params: {
-            percentiles: [99, 95, 90, 50],
+      it('returns true with valid params.percentiles array', () => {
+        const config = createValidConfig();
+        config.queryOptions.queries = [
+          {
+            fn,
+            params: {
+              percentiles: [99, 95, 90, 50],
+            },
           },
-        },
-      ];
-      expect(isValid(config)).toBe(true);
-    });
+        ];
+        expect(isValid(config)).toBe(true);
+      });
 
-    it('returns false for empty params.percentiles array', () => {
-      const config = createValidConfig();
-      config.queryOptions.queries = [
-        {
-          fn,
-          params: {
-            percentiles: [],
+      it('returns false for empty params.percentiles array', () => {
+        const config = createValidConfig();
+        config.queryOptions.queries = [
+          {
+            fn,
+            params: {
+              percentiles: [],
+            },
           },
-        },
-      ];
-      expect(isValid(config)).toBe(false);
-    });
+        ];
+        expect(isValid(config)).toBe(false);
+      });
 
-    it('returns false when params.percentiles is not an array', () => {
-      const config = createValidConfig();
-      config.queryOptions.queries = [
-        {
-          fn,
-          params: {
-            percentiles: 'not-an-array',
+      it('returns false when params.percentiles is not an array', () => {
+        const config = createValidConfig();
+        config.queryOptions.queries = [
+          {
+            fn,
+            params: {
+              percentiles: 'not-an-array',
+            },
           },
-        },
-      ];
-      expect(isValid(config)).toBe(false);
-    });
+        ];
+        expect(isValid(config)).toBe(false);
+      });
 
-    it('returns false when params.percentiles array contains non numbers', () => {
-      const config = createValidConfig();
-      config.queryOptions.queries = [
-        {
-          fn,
-          params: {
-            percentiles: [95, undefined, 50],
+      it('returns false when params.percentiles array contains non numbers', () => {
+        const config = createValidConfig();
+        config.queryOptions.queries = [
+          {
+            fn,
+            params: {
+              percentiles: [95, undefined, 50],
+            },
           },
-        },
-      ];
-      expect(isValid(config)).toBe(false);
-    });
+        ];
+        expect(isValid(config)).toBe(false);
+      });
 
-    it('returns false when params.percentiles array contains numbers < 1 or > 99', () => {
-      const config = createValidConfig();
-      config.queryOptions.queries = [
-        {
-          fn,
-          params: {
-            percentiles: [95, 0, 90],
+      it('returns false when params.percentiles array contains numbers < 1 or > 99', () => {
+        const config = createValidConfig();
+        config.queryOptions.queries = [
+          {
+            fn,
+            params: {
+              percentiles: [95, 0, 90],
+            },
           },
-        },
-      ];
-      expect(isValid(config)).toBe(false);
-    });
-  });
+        ];
+        expect(isValid(config)).toBe(false);
+      });
+    }
+  );
 });

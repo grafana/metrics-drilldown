@@ -21,7 +21,7 @@ import { PANEL_HEIGHT } from './config/panel-heights';
 import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { isHistogramMetric } from './matchers/isHistogramMetric';
-import { isUpDownMetric } from './matchers/isUpDownMetric';
+import { isStatusUpDownMetric } from './matchers/isStatusUpDownMetric';
 import { type PanelType } from './types/available-panel-types';
 import { buildHeatmapPanel } from './types/heatmap/buildHeatmapPanel';
 import { buildPercentilesPanel } from './types/percentiles/buildPercentilesPanel';
@@ -168,7 +168,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private static getDefaultPanelTypeForMetric(metric: string, histogramType: HistogramType): PanelType {
-    if (isUpDownMetric(metric)) {
+    if (isStatusUpDownMetric(metric)) {
       return 'statushistory';
     }
 

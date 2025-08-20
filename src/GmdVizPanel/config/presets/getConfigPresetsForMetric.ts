@@ -5,11 +5,11 @@ import { DEFAULT_TIMESERIES_PRESETS, DEFAULT_TIMESERIES_RATE_PRESETS } from './c
 import { type PanelConfigPreset } from './types';
 import { isCounterMetric } from '../..//matchers/isCounterMetric';
 import { isHistogramMetric } from '../..//matchers/isHistogramMetric';
-import { isUpDownMetric } from '../..//matchers/isUpDownMetric';
 import { isAgeMetric } from '../../matchers/isAgeMetric';
+import { isStatusUpDownMetric } from '../../matchers/isStatusUpDownMetric';
 
 export function getConfigPresetsForMetric(metric: string, isNativeHistogram: boolean): PanelConfigPreset[] {
-  if (isUpDownMetric(metric)) {
+  if (isStatusUpDownMetric(metric)) {
     return Object.values(DEFAULT_STATUS_UP_DOWN_PRESETS);
   }
 

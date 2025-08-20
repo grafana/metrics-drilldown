@@ -1,12 +1,12 @@
 import { isAgeMetric } from './isAgeMetric';
 import { isCounterMetric } from './isCounterMetric';
 import { isHistogramMetric } from './isHistogramMetric';
-import { isUpDownMetric } from './isUpDownMetric';
+import { isStatusUpDownMetric } from './isStatusUpDownMetric';
 
 export type MetricType = 'status-updown' | 'histogram' | 'age' | 'counter' | 'gauge';
 
 export function getMetricType(metric: string): MetricType {
-  if (isUpDownMetric(metric)) {
+  if (isStatusUpDownMetric(metric)) {
     return 'status-updown';
   }
 
