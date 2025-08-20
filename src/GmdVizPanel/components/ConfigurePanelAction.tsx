@@ -65,6 +65,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
     padding: 0;
   `,
   active: css`
-    color: ${theme.colors.primary.text};
+    color: ${theme.colors.text.maxContrast};
   `,
 });
