@@ -1,7 +1,7 @@
-const RATE_QUERY_SUFFIXES = new Set(['count', 'total', 'sum', 'bucket']);
+const COUNTER_METRIC_SUFFIXES = new Set(['count', 'total', 'sum']);
 
 export function isCounterMetric(metric: string) {
   const parts = metric.split('_');
   const suffix = parts.at(-1);
-  return suffix ? RATE_QUERY_SUFFIXES.has(suffix) : false;
+  return suffix ? COUNTER_METRIC_SUFFIXES.has(suffix) : false;
 }

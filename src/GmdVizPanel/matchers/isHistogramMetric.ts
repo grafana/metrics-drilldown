@@ -1,3 +1,1 @@
-export function isHistogramMetric(metric: string) {
-  return metric.endsWith('_bucket');
-}
+export const isHistogramMetric = (metric: string) => metric.endsWith('_bucket');
