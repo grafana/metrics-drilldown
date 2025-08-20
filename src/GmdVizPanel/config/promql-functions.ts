@@ -1,6 +1,6 @@
 import { promql } from 'tsqtsq';
 
-export const PROMETHEUS_FUNCTIONS = [
+const PROMETHEUS_FUNCTIONS = [
   // timeseries (rate and non-rate)
   'avg',
   'sum',

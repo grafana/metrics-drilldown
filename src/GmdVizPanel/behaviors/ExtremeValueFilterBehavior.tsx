@@ -169,7 +169,7 @@ type ParseQueryForRebuildResult = { success: true; queryParts: QueryParts } | { 
 /**
  * Parses a PromQL query to extract parameters for rebuilding with filtering
  */
-export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunner): ParseQueryForRebuildResult {
+function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunner): ParseQueryForRebuildResult {
   let queryExpression = query;
   const hasTemplateVariables = query.includes(VAR_METRIC_EXPR) || query.includes(VAR_FILTERS_EXPR);
 

@@ -99,7 +99,7 @@ export function DataTrailCard(props: Readonly<Props>) {
   );
 }
 
-export function getStyles(theme: GrafanaTheme2) {
+function getStyles(theme: GrafanaTheme2) {
   return {
     metricValue: css({
       display: 'inline',

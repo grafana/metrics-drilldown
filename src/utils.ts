@@ -1,15 +1,5 @@
-import {
-  scopeFilterOperatorMap,
-  urlUtil,
-  type AdHocVariableFilter,
-  type GetTagResponse,
-  type MetricFindValue,
-  type RawTimeRange,
-  type Scope,
-  type ScopeSpecFilter,
-} from '@grafana/data';
-import { getPrometheusTime } from '@grafana/prometheus';
-import { config, getBackendSrv, getDataSourceSrv, type FetchResponse } from '@grafana/runtime';
+import { urlUtil, type AdHocVariableFilter, type GetTagResponse, type MetricFindValue } from '@grafana/data';
+import { config } from '@grafana/runtime';
 import {
   sceneGraph,
   SceneTimeRange,
@@ -20,7 +10,6 @@ import {
   type SceneVariable,
   type SceneVariableState,
 } from '@grafana/scenes';
-import { lastValueFrom } from 'rxjs';
 
 import { logger } from 'tracking/logger/logger';
 
@@ -28,9 +17,7 @@ import { ROUTES } from './constants';
 import { DataTrail, type DataTrailState } from './DataTrail';
 import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { MetricScene } from './MetricScene';
-import { LOGS_METRIC, VAR_DATASOURCE_EXPR, VAR_FILTERS } from './shared';
-import { getTrailStore } from './TrailStore/TrailStore';
+import { LOGS_METRIC } from './shared';
 import { getClosestScopesFacade } from './utils/utils.scopes';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
@@ -56,34 +43,12 @@ export function getUrlForTrail(trail: DataTrail) {
   return urlUtil.renderUrl(ROUTES.Drilldown, params);
 }
 
-export function getCurrentPath(): Location['pathname'] {
+function getCurrentPath(): Location['pathname'] {
   return window.location.pathname;
 }
 
 export function currentPathIncludes(path: string) {
   return getCurrentPath().includes(path);
-}
-
-export function getMetricSceneFor(model: SceneObject): MetricScene {
-  if (model instanceof MetricScene) {
-    return model;
-  }
-
-  if (model.parent) {
-    return getMetricSceneFor(model.parent);
-  }
-  const error = new Error('Unable to find graph view for model');
-  logger.error(error, { model: model.toString(), message: 'Unable to find graph view for model' });
-
-  throw error;
-}
-
-export function getDataSource(trail: DataTrail) {
-  return sceneGraph.interpolate(trail, VAR_DATASOURCE_EXPR);
-}
-
-export function getDataSourceName(dataSourceUid: string) {
-  return getDataSourceSrv().getInstanceSettings(dataSourceUid)?.name || dataSourceUid;
 }
 
 export function getMetricName(metric?: string) {
@@ -98,23 +63,6 @@ export function getMetricName(metric?: string) {
   return metric;
 }
 
-export function getDatasourceForNewTrail(): string | undefined {
-  const prevTrail = getTrailStore().recent[0];
-  if (prevTrail) {
-    const prevDataSource = sceneGraph.interpolate(prevTrail.resolve(), VAR_DATASOURCE_EXPR);
-    if (prevDataSource.length > 0) {
-      return prevDataSource;
-    }
-  }
-  const promDatasources = getDataSourceSrv().getList({ type: 'prometheus' });
-  if (promDatasources.length > 0) {
-    const defaultDatasource = promDatasources.find((mds) => mds.isDefault);
-
-    return defaultDatasource?.uid ?? promDatasources[0].uid;
-  }
-  return undefined;
-}
-
 export function getColorByIndex(index: number) {
   const visTheme = config.theme2.visualization;
   return visTheme.getColorByName(visTheme.palette[index % 8]);
@@ -125,14 +73,6 @@ export type SceneTimeRangeState = SceneObjectState & {
   to: string;
   timeZone?: string;
 };
-
-export function getFilters(scene: SceneObject) {
-  const filters = sceneGraph.lookupVariable(VAR_FILTERS, scene);
-  if (isAdHocFiltersVariable(filters)) {
-    return filters.state.filters;
-  }
-  return null;
-}
 
 // frontend hardening limit
 const MAX_ADHOC_VARIABLE_OPTIONS = 10000;
@@ -234,47 +174,6 @@ export type SuggestionsResponse = {
   error?: 'string';
   warnings?: string[];
 };
-
-// Suggestions API is an API that receives adhoc filters, scopes and queries and returns the labels or label values that match the provided parameters
-// Under the hood it does exactly what the label and label values API where doing but the processing is done in the BE rather than in the FE
-export async function callSuggestionsApi(
-  dataSourceUid: string,
-  timeRange: RawTimeRange,
-  scopes: Scope[],
-  adHocVariableFilters: AdHocVariableFilter[],
-  labelName: string | undefined,
-  limit: number | undefined,
-  requestId: string
-): Promise<FetchResponse<SuggestionsResponse>> {
-  return await lastValueFrom(
-    getBackendSrv().fetch<SuggestionsResponse>({
-      url: `/api/datasources/uid/${dataSourceUid}/resources/suggestions`,
-      data: {
-        labelName,
-        queries: [],
-        scopes: scopes.reduce<ScopeSpecFilter[]>((acc, scope) => {
-          acc.push(...scope.spec.filters);
-
-          return acc;
-        }, []),
-        adhocFilters: adHocVariableFilters.map((filter) => ({
-          key: filter.key,
-          operator: scopeFilterOperatorMap[filter.operator],
-          value: filter.value,
-          values: filter.values,
-        })),
-        start: getPrometheusTime(timeRange.from, false).toString(),
-        end: getPrometheusTime(timeRange.to, true).toString(),
-        limit,
-      },
-      requestId,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-  );
-}
 
 interface SceneType<T> extends Function {
   new (...args: never[]): T;
