@@ -54,6 +54,7 @@ export class ConfigurePanelAction extends SceneObjectBase<ConfigurePanelActionSt
         tooltip={label}
         tooltipPlacement="top"
         disabled={disabled}
+        data-testid="configure-panel"
       />
     );
   };

@@ -88,7 +88,7 @@ export class MetricsReducerView extends DrilldownView {
 
   async selectSortByOption(optionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
-    await this.page.getByRole('option', { name: optionName }).locator('span').click();
+    await this.getByRole('option', { name: optionName }).locator('span').click();
   }
 
   /* Layout switcher */
@@ -182,5 +182,9 @@ export class MetricsReducerView extends DrilldownView {
 
   async clickCopyPanelUrl() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL).click();
+  }
+
+  async clickConfigurePanelButton(panelTitle: string) {
+    await this.getPanelByTitle(panelTitle).getByTestId('configure-panel').click();
   }
 }

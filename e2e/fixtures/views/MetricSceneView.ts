@@ -41,7 +41,7 @@ export class MetricSceneView extends DrilldownView {
     await this.appControls.assert(true);
 
     await this.assertMainViz(metricName);
-    await expect(this.page.getByTestId('action-bar')).toBeVisible();
+    await expect(this.getByTestId('action-bar')).toBeVisible();
 
     await this.assertTabs();
   }
@@ -49,21 +49,47 @@ export class MetricSceneView extends DrilldownView {
   /* Main vizualization */
 
   getMainViz() {
-    return this.page.getByTestId('top-view').locator('[data-viz-panel-key]');
+    return this.getByTestId('top-view').locator('[data-viz-panel-key]');
   }
 
   async assertMainViz(metricName: string) {
-    await expect(this.page.getByTestId('top-view').getByRole('heading', { name: metricName })).toBeVisible();
+    await expect(this.getByTestId('top-view').getByRole('heading', { name: metricName })).toBeVisible();
 
-    // we wait for some time to make sure that data is rendered
+    // we wait for some time to make sure that data is rendered, especially for native histograms
     // TODO: how to improve this and not rely on an arbitrary timeout?
-    await this.waitForTimeout(500);
+    await this.waitForTimeout(1000);
+  }
+
+  async clickConfigurePanelButton() {
+    await this.getMainViz().getByTestId('configure-panel').click();
+  }
+
+  getConfigureSlider() {
+    return this.getByRole('dialog', { name: /drawer title configure the prometheus function/i });
+  }
+
+  async selectAndApplyConfigPreset(presetName: string, presetParams: string[]) {
+    const configureSlider = this.getConfigureSlider();
+    await configureSlider.getByTitle(presetName).click(); // clicking anywhere inside the preset div works ;)
+
+    if (presetParams.length) {
+      // presetParams only holds the names of the percentiles to click on (check or uncheck)
+      for (const percentileName of presetParams) {
+        await configureSlider.getByLabel(percentileName).click();
+      }
+    }
+
+    await configureSlider.getByRole('button', { name: /apply/i }).click();
+
+    const succcessToast = this.getByTestId('data-testid Alert success');
+    await expect(succcessToast).toBeVisible();
+    await succcessToast.getByRole('button', { name: /close alert/i }).click();
   }
 
   /* Tabs */
 
   getTabsList() {
-    return this.page.getByRole('tablist');
+    return this.getByRole('tablist');
   }
 
   async assertTabs() {
@@ -81,7 +107,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getTabContent() {
-    return this.page.getByTestId('tab-content');
+    return this.getByTestId('tab-content');
   }
 
   /* Layout switcher */
@@ -122,7 +148,7 @@ export class MetricSceneView extends DrilldownView {
   /* Breakdown tab */
 
   getSingleBreakdownPanel() {
-    return this.page.getByTestId('single-metric-panel');
+    return this.getByTestId('single-metric-panel');
   }
 
   async assertDefaultBreadownListControls() {
@@ -132,7 +158,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getLabelDropdown() {
-    return this.page.getByTestId('breakdown-label-selector');
+    return this.getByTestId('breakdown-label-selector');
   }
 
   async assertLabelDropdown(optionLabel: string) {
@@ -141,7 +167,7 @@ export class MetricSceneView extends DrilldownView {
 
   async selectLabel(label: string) {
     await this.getLabelDropdown().locator('input').click();
-    await this.page.getByRole('option', { name: label }).click();
+    await this.getByRole('option', { name: label }).click();
   }
 
   async assertBreadownListControls({ label, sortBy }: { label: string; sortBy: string }) {
@@ -154,7 +180,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getSortByDropdown() {
-    return this.page.getByTestId('sort-by-select');
+    return this.getByTestId('sort-by-select');
   }
 
   async assertSelectedSortBy(expectedSortBy: string) {
@@ -163,7 +189,7 @@ export class MetricSceneView extends DrilldownView {
 
   async selectSortByOption(optionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
-    await this.page.getByRole('option', { name: optionName }).getByText(optionName).click();
+    await this.getByRole('option', { name: optionName }).getByText(optionName).click();
   }
 
   /* Related metrics tab */
@@ -178,7 +204,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getPrefixFilterDropdown() {
-    return this.page.getByTestId('prefix-filter-selector');
+    return this.getByTestId('prefix-filter-selector');
   }
 
   async assertPrefixFilterDropdown(optionLabel: string) {
@@ -187,6 +213,6 @@ export class MetricSceneView extends DrilldownView {
 
   async selectPrefixFilterOption(expectedOptionName: string) {
     await this.getPrefixFilterDropdown().locator('input').click();
-    await this.page.getByRole('option', { name: expectedOptionName }).click();
+    await this.getByRole('option', { name: expectedOptionName }).click();
   }
 }
