@@ -60,7 +60,7 @@ export class MetricSceneView extends DrilldownView {
     await this.waitForTimeout(1000);
   }
 
-  async clickConfigurePanelButton() {
+  async clickPanelConfigureButton() {
     await this.getMainViz().getByTestId('configure-panel').click();
   }
 

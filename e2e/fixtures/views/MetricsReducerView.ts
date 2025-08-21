@@ -125,8 +125,9 @@ export class MetricsReducerView extends DrilldownView {
 
     expect(await panelsLocator.count()).toBeGreaterThan(0);
 
+    // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, native histograms, ...)
     // TODO: find a better way
-    await this.waitForTimeout(2000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
+    await this.waitForTimeout(2000);
   }
 
   /* Panels */
@@ -184,7 +185,7 @@ export class MetricsReducerView extends DrilldownView {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL).click();
   }
 
-  async clickConfigurePanelButton(panelTitle: string) {
+  async clickPanelConfigureButton(panelTitle: string) {
     await this.getPanelByTitle(panelTitle).getByTestId('configure-panel').click();
   }
 }

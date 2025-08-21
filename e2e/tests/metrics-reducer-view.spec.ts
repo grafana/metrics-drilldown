@@ -77,7 +77,7 @@ test.describe('Metrics reducer view', () => {
           await metricSceneView.assertMainViz(metricName);
           await expect(metricSceneView.getMainViz()).toHaveScreenshot(`metric-scene-main-viz-${metricName}.png`);
 
-          await metricSceneView.clickConfigurePanelButton();
+          await metricSceneView.clickPanelConfigureButton();
           await expect(metricSceneView.getConfigureSlider()).toHaveScreenshot(
             `metric-scene-configure-slider-${category}-${metricName}.png`
           );
