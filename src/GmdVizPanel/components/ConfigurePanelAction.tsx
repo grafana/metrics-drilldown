@@ -40,7 +40,7 @@ export class ConfigurePanelAction extends SceneObjectBase<ConfigurePanelActionSt
     const styles = useStyles2(getStyles);
     const { isAlreadyConfigured, disabled } = model.useState();
 
-    const label = isAlreadyConfigured ? 'Reconfigure panel' : 'Configure panel';
+    const label = isAlreadyConfigured ? 'Reconfigure Prometheus function' : 'Configure Prometheus function';
 
     return (
       <Button

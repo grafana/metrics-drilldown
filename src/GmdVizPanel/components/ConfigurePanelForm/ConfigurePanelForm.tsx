@@ -277,7 +277,6 @@ function getStyles(theme: GrafanaTheme2) {
       display: flex;
       justify-content: center;
       gap: ${theme.spacing(2)};
-      margin-top: ${theme.spacing(1)};
       position: sticky;
       bottom: 0;
       background: ${theme.colors.background.primary};

@@ -63,7 +63,7 @@ export class MetricVizPanel extends SceneObjectBase<MetricVizPanelState> {
       height: props.height || METRICS_VIZ_PANEL_HEIGHT,
       hideLegend: Boolean(props.hideLegend),
       highlight: Boolean(props.highlight),
-      headerActions: [...(props.headerActions || [new SelectAction({ metricName: props.metricName })])],
+      headerActions: [...(props.headerActions || [new SelectAction({ metric: props.metricName })])],
     };
 
     super({

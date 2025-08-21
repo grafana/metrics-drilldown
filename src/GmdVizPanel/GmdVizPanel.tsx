@@ -116,7 +116,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         type: panelOptions?.type || GmdVizPanel.getDefaultPanelTypeForMetric(metric, histogramType),
         title: metric,
         height: PANEL_HEIGHT.M,
-        headerActions: ({ metric }) => [new SelectAction({ metricName: metric })],
+        headerActions: ({ metric }) => [new SelectAction({ metric })],
         ...panelOptions,
         ...prefConfig?.panelOptions,
       },

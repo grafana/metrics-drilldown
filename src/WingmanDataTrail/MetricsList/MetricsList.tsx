@@ -16,6 +16,8 @@ import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { SelectAction } from 'GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
@@ -69,13 +71,16 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
+          const metric = option.value as string;
+
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
               metric: option.value as string,
               vizPanelInGridItem: new GmdVizPanel({
-                metric: option.value as string,
+                metric,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
+                  headerActions: () => [new SelectAction({ metric }), new ConfigurePanelAction({ metric })],
                 },
               }),
             }),

@@ -28,14 +28,22 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
+import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
+import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
+import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
-import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
+import { displaySuccess, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { reportChangeInLabelFilters } from './interactions';
+import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
@@ -71,11 +79,27 @@ export interface DataTrailState extends SceneObjectState {
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
   urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
+
+  drawer: SceneDrawer;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
+  });
+
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_DATASOURCE],
+    onReferencedVariableValueChanged: async (variable: SceneVariable) => {
+      const { name } = variable.state;
+
+      if (name === VAR_DATASOURCE) {
+        this.datasourceHelper.reset();
+
+        // reset native histograms
+        this.resetNativeHistograms();
+      }
+    },
   });
 
   public constructor(state: Partial<DataTrailState>) {
@@ -98,13 +122,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
       trailActivated: state.trailActivated ?? false,
+      drawer: new SceneDrawer({}),
       ...state,
     });
 
-    this.addActivationHandler(this._onActivate.bind(this));
+    this.addActivationHandler(this.onActivate.bind(this));
   }
 
-  public _onActivate() {
+  private onActivate() {
+    this.subscribeToConfigEvents();
+
     this.setState({ trailActivated: true });
 
     if (!this.state.topScene) {
@@ -159,19 +186,57 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     };
   }
 
-  protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE],
-    onReferencedVariableValueChanged: async (variable: SceneVariable) => {
-      const { name } = variable.state;
+  private async subscribeToConfigEvents() {
+    this._subs.add(
+      this.subscribeToEvent(EventConfigurePanel, async (event) => {
+        const { metric } = event.payload;
 
-      if (name === VAR_DATASOURCE) {
-        this.datasourceHelper.reset();
+        reportExploreMetrics('configure_panel_opened', { metricType: getMetricType(metric) });
 
-        // reset native histograms
-        this.resetNativeHistograms();
-      }
-    },
-  });
+        const metadata = await this.getMetricMetadata(metric);
+
+        this.state.drawer.open({
+          title: 'Configure the Prometheus function',
+          subTitle: `${metric} ${metadata ? ` (${metadata.type})` : ''}`, // eslint-disable-line sonarjs/no-nested-template-literals
+          body: new ConfigurePanelForm({ metric }),
+        });
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventCancelConfigurePanel, () => {
+        this.state.drawer.close();
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventApplyPanelConfig, (event) => {
+        const { metric, config, restoreDefault } = event.payload;
+
+        if (restoreDefault) {
+          reportExploreMetrics('default_panel_config_restored', { metricType: getMetricType(metric) });
+        } else {
+          reportExploreMetrics('panel_config_applied', { metricType: getMetricType(metric), configId: config.id });
+        }
+
+        this.state.drawer.close();
+
+        const panelsToUpdate = sceneGraph.findAllObjects(
+          this.state.topScene || this,
+          (o) =>
+            o instanceof GmdVizPanel &&
+            o.state.metric === metric &&
+            Boolean(sceneGraph.findDescendents(o, ConfigurePanelAction).length === 1)
+        ) as GmdVizPanel[];
+
+        for (const panel of panelsToUpdate) {
+          panel.update(config.panelOptions, config.queryOptions);
+        }
+
+        displaySuccess([`Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${metric}!`]);
+      })
+    );
+  }
 
   /**
    * Assuming that the change in filter was already reported with a cause other than `'adhoc_filter'`,
@@ -327,7 +392,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, settings, pluginInfo, embedded } = model.useState();
+    const { controls, topScene, settings, pluginInfo, embedded, drawer } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
@@ -367,29 +432,32 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     }, [embedded, controls]);
 
     return (
-      <div className={styles.container}>
-        {controls && (
-          <div className={styles.controls} data-testid="app-controls">
-            {controls.map((control) => (
-              <control.Component key={control.state.key} model={control} />
-            ))}
-            <div className={styles.settingsInfo}>
-              <settings.Component model={settings} />
-              <pluginInfo.Component model={pluginInfo} />
+      <>
+        <div className={styles.container}>
+          {controls && (
+            <div className={styles.controls} data-testid="app-controls">
+              {controls.map((control) => (
+                <control.Component key={control.state.key} model={control} />
+              ))}
+              <div className={styles.settingsInfo}>
+                <settings.Component model={settings} />
+                <pluginInfo.Component model={pluginInfo} />
+              </div>
             </div>
-          </div>
-        )}
-        {topScene && (
-          <UrlSyncContextProvider
-            scene={topScene}
-            createBrowserHistorySteps={true}
-            updateUrlOnInit={true}
-            namespace={model.state.urlNamespace}
-          >
-            <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
-          </UrlSyncContextProvider>
-        )}
-      </div>
+          )}
+          {topScene && (
+            <UrlSyncContextProvider
+              scene={topScene}
+              createBrowserHistorySteps={true}
+              updateUrlOnInit={true}
+              namespace={model.state.urlNamespace}
+            >
+              <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
+            </UrlSyncContextProvider>
+          )}
+        </div>
+        <drawer.Component model={drawer} />
+      </>
     );
   };
 }
