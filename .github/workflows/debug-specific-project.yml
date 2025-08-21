@@ -24,9 +24,62 @@ jobs:
             console.log(`🔗 URL: https://github.com/orgs/${owner}/projects/${projectNumber}`);
             console.log("=" .repeat(60));
             
-            // Method 1: Try to get organization project by number
+            // First, let's see what projects we CAN access
+            console.log("\n📋 STEP 1: List all accessible organization projects");
             try {
-              console.log("\n📊 Trying to access organization project by number...");
+              const allProjectsQuery = `
+                query {
+                  organization(login: "${owner}") {
+                    projectsV2(first: 100) {
+                      nodes {
+                        id
+                        title
+                        number
+                        url
+                        public
+                        shortDescription
+                      }
+                    }
+                  }
+                }
+              `;
+              
+              const allProjectsResult = await github.graphql(allProjectsQuery);
+              const projects = allProjectsResult.organization?.projectsV2?.nodes || [];
+              
+              console.log(`Found ${projects.length} accessible projects:`);
+              projects.forEach((project, index) => {
+                console.log(`${index + 1}. #${project.number}: "${project.title}"`);
+                console.log(`   ID: ${project.id}`);
+                console.log(`   Public: ${project.public}`);
+                console.log(`   URL: ${project.url}`);
+                if (project.shortDescription) {
+                  console.log(`   Description: ${project.shortDescription}`);
+                }
+                console.log("");
+              });
+              
+              // Check if project 516 is in the list
+              const target516 = projects.find(p => p.number === projectNumber);
+              if (target516) {
+                console.log(`✅ Found target project #${projectNumber} in accessible list!`);
+                console.log(`   Name: "${target516.title}"`);
+                console.log(`   ID: ${target516.id}`);
+              } else {
+                console.log(`❌ Project #${projectNumber} not found in accessible projects`);
+                console.log("   This could mean:");
+                console.log("   1. The project is private and this workflow doesn't have access");
+                console.log("   2. The project number in the URL might be different");
+                console.log("   3. The project belongs to a different organization");
+              }
+              
+            } catch (error) {
+              console.log(`❌ Error listing projects: ${error.message}`);
+            }
+            
+            // Method 2: Try to get organization project by number
+            try {
+              console.log(`\n📊 STEP 2: Trying to access organization project #${projectNumber} directly...`);
               console.log("Note: This project is organization-level, not repository-specific");
               
               const projectByNumberQuery = `

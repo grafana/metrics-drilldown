@@ -17,6 +17,8 @@ jobs:
       contents: read
       issues: write
       repository-projects: write
+      # Note: Organization project access requires the workflow to be run 
+      # with elevated permissions or a custom GitHub App token
     steps:
       - name: Get Project and Field IDs
         id: get_ids
