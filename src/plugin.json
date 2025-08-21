@@ -68,6 +68,11 @@
         "targets": ["grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha"],
         "title": "Navigate to metrics drilldown",
         "description": "Build a url path to the metrics drilldown"
+      },
+      {
+        "targets": ["grafana/datasources/config/actions"],
+        "title": "Explore Metrics",
+        "description": "Browse metrics in Grafana Metrics Drilldown"
       }
     ],
     "extensionPoints": [
