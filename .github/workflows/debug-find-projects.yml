@@ -2,6 +2,9 @@ name: Debug - Find Project Names
 
 on:
   workflow_dispatch: # Manual trigger only
+  push:
+    branches: [ chore/set-start-date-gh-action ]
+    paths: [ '.github/workflows/debug-find-projects.yml' ]
 
 jobs:
   find_projects:
