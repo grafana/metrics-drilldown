@@ -1,0 +1,146 @@
+name: Debug - Check Specific Project 516
+
+on:
+  workflow_dispatch: # Manual trigger only
+  push:
+    branches: [ chore/set-start-date-gh-action ]
+    paths: [ '.github/workflows/debug-specific-project.yml' ]
+
+jobs:
+  check_project_516:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      repository-projects: write
+    steps:
+      - name: Check Project 516 Access
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const projectNumber = 516;
+            
+            console.log(`🔍 Checking access to Project #${projectNumber}`);
+            console.log(`🔗 URL: https://github.com/orgs/${owner}/projects/${projectNumber}`);
+            console.log("=" .repeat(60));
+            
+            // Method 1: Try to get organization project by number
+            try {
+              console.log("\n📊 Trying to access organization project by number...");
+              console.log("Note: This project is organization-level, not repository-specific");
+              
+              const projectByNumberQuery = `
+                query {
+                  organization(login: "${owner}") {
+                    projectV2(number: ${projectNumber}) {
+                      id
+                      title
+                      number
+                      url
+                      shortDescription
+                      public
+                      fields(first: 20) {
+                        nodes {
+                          ...on ProjectV2Field {
+                            id
+                            name
+                            dataType
+                          }
+                          ...on ProjectV2SingleSelectField {
+                            id
+                            name
+                            dataType
+                            options {
+                              id
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+              
+              const result = await github.graphql(projectByNumberQuery);
+              
+              if (result.organization?.projectV2) {
+                const project = result.organization.projectV2;
+                console.log("✅ SUCCESS! Project found:");
+                console.log(`   Name: "${project.title}"`);
+                console.log(`   ID: ${project.id}`);
+                console.log(`   Number: #${project.number}`);
+                console.log(`   Public: ${project.public}`);
+                console.log(`   URL: ${project.url}`);
+                if (project.shortDescription) {
+                  console.log(`   Description: ${project.shortDescription}`);
+                }
+                
+                console.log("\n📋 Available Fields:");
+                project.fields.nodes.forEach((field, index) => {
+                  console.log(`   ${index + 1}. "${field.name}" (${field.dataType})`);
+                  if (field.options) {
+                    console.log(`      Options: ${field.options.map(o => `"${o.name}"`).join(', ')}`);
+                  }
+                });
+                
+                // Look for the specific fields we need
+                const expectedStartDateField = project.fields.nodes.find(f => 
+                  f.name.toLowerCase().includes('expected') && f.name.toLowerCase().includes('start')
+                );
+                const statusField = project.fields.nodes.find(f => 
+                  f.name.toLowerCase().includes('status')
+                );
+                
+                console.log("\n🎯 TARGET FIELDS:");
+                if (expectedStartDateField) {
+                  console.log(`✅ Expected Start Date field found: "${expectedStartDateField.name}"`);
+                  console.log(`   ID: ${expectedStartDateField.id}`);
+                } else {
+                  console.log("❌ No 'Expected Start Date' field found");
+                  console.log("   Available date fields:");
+                  project.fields.nodes
+                    .filter(f => f.dataType === 'DATE')
+                    .forEach(f => console.log(`   - "${f.name}"`));
+                }
+                
+                if (statusField) {
+                  console.log(`✅ Status field found: "${statusField.name}"`);
+                  console.log(`   ID: ${statusField.id}`);
+                  if (statusField.options) {
+                    console.log(`   Status options: ${statusField.options.map(o => `"${o.name}"`).join(', ')}`);
+                    const inProgressOption = statusField.options.find(o => 
+                      o.name.toLowerCase().includes('progress') || o.name.toLowerCase().includes('doing')
+                    );
+                    if (inProgressOption) {
+                      console.log(`✅ "In Progress" option found: "${inProgressOption.name}" (ID: ${inProgressOption.id})`);
+                    } else {
+                      console.log("⚠️  No obvious 'In Progress' option found");
+                    }
+                  }
+                } else {
+                  console.log("❌ No 'Status' field found");
+                  console.log("   Available select fields:");
+                  project.fields.nodes
+                    .filter(f => f.dataType === 'SINGLE_SELECT')
+                    .forEach(f => console.log(`   - "${f.name}"`));
+                }
+                
+              } else {
+                console.log("❌ Project not found or not accessible");
+              }
+              
+            } catch (error) {
+              console.error("❌ Error accessing project:", error.message);
+              if (error.message.includes('Resource not accessible')) {
+                console.log("\n💡 This likely means:");
+                console.log("   1. The project is private and this workflow doesn't have access");
+                console.log("   2. The repository isn't linked to this project");
+                console.log("   3. Additional permissions are needed");
+              }
+            }
+            
+            console.log("\n" + "=".repeat(60));
+            console.log("🎯 NEXT STEPS:");
+            console.log("If the project was found above, copy the exact field names");
+            console.log("and update your main workflow configuration.");

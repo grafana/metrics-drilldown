@@ -24,34 +24,34 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            const projectName = "Metrics Drilldown"; 
+            const projectNumber = 516; // Your specific project number
             const expectedStartDateFieldName = "Expected Start Date";
             const statusFieldName = "Status";
             const inProgressStatusValue = "In Progress";
             
             console.log(`Processing event: ${context.eventName}`);
             console.log(`Event payload:`, JSON.stringify(context.payload, null, 2));
+            console.log(`Target project: #${projectNumber} (https://github.com/orgs/${owner}/projects/${projectNumber})`);
 
             const projectQuery = `
               query {
                 organization(login: "${owner}") {
-                  projectsV2(first: 100, query: "${projectName}") {
-                    nodes {
-                      id
-                      title
-                      fields(first: 100) {
-                        nodes {
-                          ...on ProjectV2Field {
+                  projectV2(number: ${projectNumber}) {
+                    id
+                    title
+                    number
+                    fields(first: 100) {
+                      nodes {
+                        ...on ProjectV2Field {
+                          id
+                          name
+                        }
+                        ...on ProjectV2SingleSelectField {
+                          id
+                          name
+                          options {
                             id
                             name
-                          }
-                          ...on ProjectV2SingleSelectField {
-                            id
-                            name
-                            options {
-                              id
-                              name
-                            }
                           }
                         }
                       }
@@ -62,12 +62,15 @@ jobs:
             `;
 
             const projectResult = await github.graphql(projectQuery);
-            const project = projectResult.organization.projectsV2.nodes.find(p => p.title === projectName);
+            const project = projectResult.organization.projectV2;
 
             if (!project) {
-              core.setFailed(`Project "${projectName}" not found.`);
+              core.setFailed(`Project #${projectNumber} not found or not accessible.`);
               return;
             }
+            
+            console.log(`✅ Found project: "${project.title}" (#${project.number})`);
+            console.log(`Project ID: ${project.id}`);
 
             const expectedStartDateField = project.fields.nodes.find(f => f.name === expectedStartDateFieldName);
             const statusField = project.fields.nodes.find(f => f.name === statusFieldName);
