@@ -14,7 +14,7 @@ const PROMETHEUS_FUNCTIONS = [
   'time-avg(metric)',
   'time-min(metric)',
   'time-max(metric)',
-];
+] as const;
 
 export type PrometheusFunction = (typeof PROMETHEUS_FUNCTIONS)[number];
 

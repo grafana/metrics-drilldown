@@ -5,7 +5,7 @@ import { Tooltip, useStyles2 } from '@grafana/ui';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { PERCENTILES_OPTIONS } from 'GmdVizPanel/config/percentiles-options';
+import { AVAILABLE_PERCENTILES_OPTIONS } from 'GmdVizPanel/config/percentiles-options';
 import { type ConfigPresetId } from 'GmdVizPanel/config/presets/types';
 import { type GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 
@@ -59,7 +59,9 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
     const percentiles = new Set(queryConfig.queries?.find((q) => q.params?.percentiles)?.params?.percentiles || []);
 
     const options =
-      percentiles.size > 0 ? PERCENTILES_OPTIONS.map((o) => ({ ...o, checked: percentiles.has(o.value) })) : [];
+      percentiles.size > 0
+        ? AVAILABLE_PERCENTILES_OPTIONS.map((o) => ({ ...o, checked: percentiles.has(o.value) }))
+        : [];
 
     this.setState({
       queryParams: {

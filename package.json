@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
@@ -56,7 +56,7 @@
     "@grafana/eslint-config": "^8.0.0",
     "@grafana/plugin-e2e": "^1.19.9",
     "@grafana/tsconfig": "^2.0.0",
-    "@playwright/test": "^1.54.0",
+    "@playwright/test": "^1.55.0",
     "@stylistic/eslint-plugin-ts": "^2.13.0",
     "@swc/core": "^1.11.24",
     "@swc/helpers": "^0.5.17",

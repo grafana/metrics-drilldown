@@ -1,7 +1,6 @@
 import { css } from '@emotion/css';
 import { config } from '@grafana/runtime';
 import {
-  sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   SceneVariableSet,
@@ -15,18 +14,8 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { GroupByVariable } from 'Breakdown/GroupByVariable';
-import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
-import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
-import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
-import { reportExploreMetrics } from 'interactions';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
-import { getTrailFor } from 'utils';
-import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
-import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
-import { EventConfigurePanel } from './GmdVizPanel/components/EventConfigurePanel';
 import { MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
@@ -38,7 +27,6 @@ interface MetricSceneState extends SceneObjectState {
   nativeHistogram?: boolean;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
-  drawer: SceneDrawer;
 }
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
@@ -53,11 +41,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     },
   });
 
-  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'drawer'>) {
+  public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
       body: state.body ?? new MetricGraphScene({ metric: state.metric }),
-      drawer: new SceneDrawer({}),
       ...state,
     });
 
@@ -87,56 +74,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         })
       );
     }
-
-    this._subs.add(
-      this.subscribeToEvent(EventConfigurePanel, (event) => {
-        const { metric } = event.payload;
-        reportExploreMetrics('configure_panel_opened', { metricType: getMetricType(metric) });
-        this.openDrawer(metric);
-      })
-    );
-
-    this._subs.add(
-      this.subscribeToEvent(EventCancelConfigurePanel, () => {
-        this.state.drawer.close();
-      })
-    );
-
-    this._subs.add(
-      this.subscribeToEvent(EventApplyPanelConfig, (event) => {
-        const { metric, config, restoreDefault } = event.payload;
-
-        if (restoreDefault) {
-          reportExploreMetrics('default_panel_config_restored', { metricType: getMetricType(metric) });
-        } else {
-          reportExploreMetrics('panel_config_applied', { metricType: getMetricType(metric), configId: config.id });
-        }
-
-        const panel = sceneGraph.findDescendents(this, GmdVizPanel)[0];
-        if (!panel) {
-          throw new Error('Cannot find viz panel to update!');
-        }
-
-        panel.update(config.panelOptions, config.queryOptions);
-
-        displaySuccess([
-          `Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${event.payload.metric}!`,
-        ]);
-
-        this.state.drawer.close();
-      })
-    );
-  }
-
-  private async openDrawer(metric: string) {
-    const trail = getTrailFor(this);
-    const metadata = await trail.getMetricMetadata(metric);
-
-    this.state.drawer.open({
-      title: 'Configure the Prometheus function',
-      subTitle: `${metric} ${metadata ? ` (${metadata.type})` : ''}`, // eslint-disable-line sonarjs/no-nested-template-literals
-      body: new ConfigurePanelForm({ metric }),
-    });
   }
 
   getUrlState() {
@@ -170,16 +107,13 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   }
 
   static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
-    const { body, drawer } = model.useState();
+    const { body } = model.useState();
     const styles = useStyles2(getStyles);
 
     return (
-      <>
-        <div className={styles.container} data-testid="metric-scene">
-          <body.Component model={body} />
-        </div>
-        <drawer.Component model={drawer} />
-      </>
+      <div className={styles.container} data-testid="metric-scene">
+        <body.Component model={body} />
+      </div>
     );
   };
 

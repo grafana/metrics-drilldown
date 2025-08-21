@@ -16,6 +16,8 @@ import { Button, CollapsableSection, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { SelectAction } from 'GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { VAR_FILTERS } from 'shared';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
@@ -97,18 +99,21 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
+          const metric = option.value as string;
+
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
+              metric,
               vizPanelInGridItem: new GmdVizPanel({
-                metric: option.value as string,
+                metric,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
+                  headerActions: () => [new SelectAction({ metric }), new ConfigurePanelAction({ metric })],
                 },
                 queryOptions: {
                   labelMatchers: [{ key: labelName, operator: '=', value: labelValue }],
                 },
               }),
-              metric: option.value as string,
             }),
           });
         },
