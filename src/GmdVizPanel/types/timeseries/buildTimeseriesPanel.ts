@@ -1,6 +1,7 @@
 import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
+import { extremeValueFilterBehavior } from 'autoQuery/behaviors/ExtremeValueFilterBehavior';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
 import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
@@ -39,7 +40,8 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     .setData($data)
     .setUnit(unit)
     .setOption('legend', { showLegend: true, placement: 'bottom' as LegendPlacement })
-    .setCustomFieldConfig('fillOpacity', 9);
+    .setCustomFieldConfig('fillOpacity', 9)
+    .setBehaviors([extremeValueFilterBehavior]);
 
   if (queryParams.queries.length > 1) {
     const startColorIndex = panelConfig.fixedColorIndex || 0;
