@@ -66,7 +66,6 @@ export interface DataTrailState extends SceneObjectState {
 
   histogramsLoadP: Promise<void> | null;
   histogramsLoaded: boolean;
-  nativeHistograms: string[];
   nativeHistogramMetric: string;
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
@@ -93,7 +92,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
       alertingMetrics: {},
-      nativeHistograms: state.nativeHistograms ?? [],
       histogramsLoadP: state.histogramsLoadP ?? null,
       histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
@@ -192,7 +190,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   private _addingFilterWithoutReportingInteraction = false;
   private datasourceHelper = new MetricDatasourceHelper(this);
 
-  public getMetricMetadata(metric?: string) {
+  public getMetricMetadata(metric: string) {
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
 
@@ -216,26 +214,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
 
       this.setState({
-        nativeHistograms: this.listNativeHistograms(),
         histogramsLoadP: null,
         histogramsLoaded: true,
       });
     }
   }
 
-  public listNativeHistograms() {
-    return this.datasourceHelper.listNativeHistograms() ?? [];
-  }
-
   private resetNativeHistograms() {
     this.setState({
       histogramsLoaded: false,
-      nativeHistograms: [],
     });
-  }
-
-  public getCurrentMetricMetadata() {
-    return this.getMetricMetadata(this.state.metric);
   }
 
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
