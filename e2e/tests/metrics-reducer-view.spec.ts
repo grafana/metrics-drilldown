@@ -53,20 +53,25 @@ test.describe('Metrics reducer view', () => {
       },
     ];
 
-    test('All panel types', async ({ metricsReducerView }) => {
+    // eslint-disable-next-line playwright/expect-expect
+    test('All panel types', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
       const searchText = TEST_DATA.flatMap(({ namesAndPresets }) =>
         namesAndPresets.map(([metricName]) => `^${metricName}$`)
       ).join(',');
       await metricsReducerView.quickSearch.enterText(searchText);
       await metricsReducerView.assertMetricsList();
 
-      await expect(metricsReducerView.getMetricsList()).toHaveScreenshot('metric-list-with-all-types.png');
+      await expectScreenshotInCurrentGrafanaVersion(
+        metricsReducerView.getMetricsList(),
+        'metric-list-with-all-types.png'
+      );
     });
 
     for (const { category, namesAndPresets } of TEST_DATA) {
       test(`Each metric type in its corresponding panel (${category})`, async ({
         metricsReducerView,
         metricSceneView,
+        expectScreenshotInCurrentGrafanaVersion,
       }) => {
         const searchText = namesAndPresets.map(([metricName]) => `^${metricName}$`).join(',');
         await metricsReducerView.quickSearch.enterText(searchText);
@@ -86,7 +91,8 @@ test.describe('Metrics reducer view', () => {
           await metricSceneView.goBack();
         }
 
-        await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
+        await expectScreenshotInCurrentGrafanaVersion(
+          metricsReducerView.getMetricsList(),
           `metric-list-after-configure-${category}.png`
         );
       });
