@@ -131,7 +131,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     });
 
     this.addActivationHandler(() => {
-      this.onActivate(Boolean(panelOptions?.type));
+      this.onActivate(Boolean(panelOptions?.type || prefConfig?.panelOptions.type));
     });
   }
 

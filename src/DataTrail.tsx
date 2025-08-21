@@ -164,6 +164,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           filtersVariable?.setState({
             useQueriesAsFilterForOptions: Boolean(newState.metric),
           });
+
+          // ensure that when using browser nav, we close the drawer
+          this.state.drawer.close();
         }
       });
     }
