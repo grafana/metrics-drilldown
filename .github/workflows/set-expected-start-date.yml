@@ -6,6 +6,9 @@ on:
   # Note: project_v2_item events are only available for GitHub Apps
   # For now, we'll rely on issue events and manual triggers
   workflow_dispatch: # Allow manual testing
+  push:
+    branches: [ chore/set-start-date-gh-action ]
+    paths: [ '.github/workflows/set-expected-start-date.yml' ] # Only trigger when this file changes
 
 jobs:
   set_start_date:
