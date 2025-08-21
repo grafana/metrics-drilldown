@@ -36,8 +36,8 @@ export class MetricDatasourceHelper {
 
   // Maps & Sets are efficient data structures compared to a classic JS objects
   private metricsMetadata: Map<string, PromMetricsMetadataItem> | undefined;
-  private classicHistograms = new Set<string>();
-  private nativeHistograms = new Set<string>();
+  private classicHistograms: Set<string> | undefined;
+  private nativeHistograms: Set<string> | undefined;
 
   constructor(trail: DataTrail) {
     this._trail = trail;
@@ -46,6 +46,8 @@ export class MetricDatasourceHelper {
   public reset() {
     this._datasource = undefined;
     this.metricsMetadata = undefined;
+    this.classicHistograms = undefined;
+    this.nativeHistograms = undefined;
   }
 
   private async getDatasource() {
@@ -100,19 +102,24 @@ export class MetricDatasourceHelper {
    */
   public async initializeHistograms() {
     const ds = await this.getDatasource();
-    if (!ds || this.classicHistograms.size > 0) {
+    if (!ds || this.classicHistograms) {
       return;
     }
 
-    const [allMetrics] = await Promise.all([ds.metricFindQuery('metrics(.+)'), this._ensureMetricsMetadata()]);
+    this.classicHistograms = new Set();
+    this.nativeHistograms = new Set();
 
-    this.classicHistograms = new Set(allMetrics.filter((m) => m.text.endsWith('_bucket')).map((m) => m.text));
+    const [allMetricsData] = await Promise.all([ds.metricFindQuery('metrics(.+)'), this._ensureMetricsMetadata()]);
 
-    allMetrics.forEach(({ text }) => {
+    for (const { text } of allMetricsData) {
+      if (text.endsWith('_bucket')) {
+        this.classicHistograms.add(text);
+      }
+
       if (this.isNativeHistogram(text)) {
         this.nativeHistograms.add(text);
       }
-    });
+    }
   }
 
   /**
@@ -140,6 +147,10 @@ export class MetricDatasourceHelper {
 
     if (isHistogramFromMetadata && isNotClassicFromName) {
       return true;
+    }
+
+    if (!this.classicHistograms) {
+      return false;
     }
 
     // check for comparison when there is overlap between native and classic histograms
