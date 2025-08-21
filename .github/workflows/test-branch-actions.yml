@@ -1,0 +1,26 @@
+name: Test Branch Actions
+
+on:
+  workflow_dispatch: # Manual trigger
+  push:
+    branches: [ chore/set-start-date-gh-action ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Action Visibility
+        run: |
+          echo "✅ GitHub Actions is working on this branch!"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Event: ${{ github.event_name }}"
+          
+      - name: Verify Project Configuration
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const projectName = "Metrics Drilldown";
+            console.log(`🎯 Target project: ${projectName}`);
+            console.log(`📝 Repository: ${context.repo.owner}/${context.repo.repo}`);
+            console.log(`🌿 Branch: ${context.ref}`);
+            console.log("✅ Basic GitHub API access working");
