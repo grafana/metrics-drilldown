@@ -185,6 +185,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       position: 'sticky',
       background: getAppBackgroundColor(theme, trail),
       zIndex: 10,
+      paddingBottom: theme.spacing(1),
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--main-panel-height, 0px) + var(--action-bar-height, 0px))`,
     }),
     searchStickyWithoutPanel: css({
@@ -192,6 +193,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       position: 'sticky',
       background: getAppBackgroundColor(theme, trail),
       zIndex: 10,
+      paddingBottom: theme.spacing(1),
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
     }),
   };
