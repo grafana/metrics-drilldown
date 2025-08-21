@@ -1,4 +1,5 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -39,11 +40,11 @@ export class ConfigurePanelAction extends SceneObjectBase<ConfigurePanelActionSt
     const styles = useStyles2(getStyles);
     const { isAlreadyConfigured, disabled } = model.useState();
 
-    const label = isAlreadyConfigured ? 'Reconfigure panel' : 'Configure panel';
+    const label = isAlreadyConfigured ? 'Reconfigure Prometheus function' : 'Configure Prometheus function';
 
     return (
       <Button
-        className={styles.selectButton}
+        className={cx(styles.selectButton, isAlreadyConfigured && styles.active)}
         aria-label={label}
         variant="secondary"
         size="sm"
@@ -53,14 +54,18 @@ export class ConfigurePanelAction extends SceneObjectBase<ConfigurePanelActionSt
         tooltip={label}
         tooltipPlacement="top"
         disabled={disabled}
+        data-testid="configure-panel"
       />
     );
   };
 }
 
-const getStyles = () => ({
+const getStyles = (theme: GrafanaTheme2) => ({
   selectButton: css`
     margin: 0;
     padding: 0;
+  `,
+  active: css`
+    color: ${theme.colors.text.maxContrast};
   `,
 });

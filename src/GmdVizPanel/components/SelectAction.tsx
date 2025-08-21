@@ -5,31 +5,31 @@ import React from 'react';
 import { MetricSelectedEvent } from 'shared';
 
 interface SelectActionState extends SceneObjectState {
-  metricName: string;
+  metric: string;
   variant: 'primary' | 'secondary';
   fill: 'solid' | 'outline' | 'text';
 }
 
 export class SelectAction extends SceneObjectBase<SelectActionState> {
   constructor({
-    metricName,
+    metric,
     variant,
     fill,
   }: {
-    metricName: SelectActionState['metricName'];
+    metric: SelectActionState['metric'];
     variant?: SelectActionState['variant'];
     fill?: SelectActionState['fill'];
   }) {
     super({
-      key: `select-action-${metricName}`,
-      metricName,
+      key: `select-action-${metric}`,
+      metric,
       variant: variant || 'primary',
       fill: fill || 'outline',
     });
   }
 
   public onClick = () => {
-    this.publishEvent(new MetricSelectedEvent(this.state.metricName), true);
+    this.publishEvent(new MetricSelectedEvent(this.state.metric), true);
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<SelectAction>) => {
@@ -41,7 +41,7 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
         fill={fill}
         size="sm"
         onClick={model.onClick}
-        data-testid={`select-action-${model.state.metricName}`}
+        data-testid={`select-action-${model.state.metric}`}
       >
         Select
       </Button>

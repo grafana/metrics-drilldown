@@ -70,12 +70,14 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     sceneGraph.getTimeRange(this).setState({ from, to, timeZone, value });
   }
 
-  private buildBody() {
+  private async buildBody() {
     const { metric } = this.state;
     const prefConfig = getPreferredConfigForMetric(metric);
 
     const trail = getTrailFor(this);
+    await trail.initializeHistograms(); // force initialization
     const isNativeHistogram = trail.isNativeHistogram(metric);
+
     const presets = getConfigPresetsForMetric(metric, isNativeHistogram);
 
     // if not found in the user preferences, we use the first preset
@@ -277,7 +279,6 @@ function getStyles(theme: GrafanaTheme2) {
       display: flex;
       justify-content: center;
       gap: ${theme.spacing(2)};
-      margin-top: ${theme.spacing(1)};
       position: sticky;
       bottom: 0;
       background: ${theme.colors.background.primary};
