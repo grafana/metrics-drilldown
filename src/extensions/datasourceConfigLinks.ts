@@ -72,10 +72,10 @@ interface DataSourceConfigContext {
 
 export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
-    title: 'Explore Metrics',
+    title: 'Open in Metrics Drilldown',
     description: 'Browse metrics in Grafana Metrics Drilldown',
     targets: [PluginExtensionPoints.DataSourceConfigActions],
-    icon: 'chart-line',
+    icon: 'drilldown',
     category: 'metrics-drilldown',
     path: createAppUrl(ROUTES.Drilldown),
     configure: (context: DataSourceConfigContext | undefined) => {

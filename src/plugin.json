@@ -71,7 +71,7 @@
       },
       {
         "targets": ["grafana/datasources/config/actions"],
-        "title": "Explore Metrics",
+        "title": "Open in Metrics Drilldown",
         "description": "Browse metrics in Grafana Metrics Drilldown"
       }
     ],
