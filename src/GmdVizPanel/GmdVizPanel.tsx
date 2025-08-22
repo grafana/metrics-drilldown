@@ -138,33 +138,20 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   private async onActivate(discardPanelTypeUpdates: boolean) {
     const { metric, panelConfig } = this.state;
 
+    const isNativeHistogram = await getTrailFor(this).isNativeHistogram(metric);
+    if (isNativeHistogram) {
+      this.setState({
+        histogramType: 'native',
+        panelConfig: discardPanelTypeUpdates
+          ? panelConfig
+          : { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
+      });
+    }
+
     this.updateBody();
 
     this.subscribeToStateChanges();
     this.subscribeToEvents();
-
-    // isNativeHistogram() depends on an async process to load metrics metadata, so it's possible that
-    // when landing on the page, the metadata is not yet loaded and some native histogram metrics are not be rendered as heatmap panels.
-    // But we still want to render them ASAP and update them later when the metadata has arrived.
-    const trail = getTrailFor(this);
-
-    if (trail.isNativeHistogram(metric)) {
-      this.setState({
-        panelConfig: discardPanelTypeUpdates ? panelConfig : { ...panelConfig, type: 'heatmap' },
-        histogramType: 'native',
-      });
-      return;
-    }
-
-    // force initialization and update if needed
-    await trail.initializeHistograms();
-
-    if (trail.isNativeHistogram(metric)) {
-      this.setState({
-        panelConfig: discardPanelTypeUpdates ? panelConfig : { ...panelConfig, type: 'heatmap' },
-        histogramType: 'native',
-      });
-    }
   }
 
   private static getDefaultPanelTypeForMetric(metric: string, histogramType: HistogramType): PanelType {

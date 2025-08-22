@@ -24,6 +24,7 @@ class MockDataSource implements DataSourceApi {
   id: number;
   uid: string;
   meta: any;
+  languageProvider: any;
 
   constructor(settings: Partial<DataSourceApi> = {}) {
     this.name = settings.name || 'Prometheus';
@@ -31,6 +32,12 @@ class MockDataSource implements DataSourceApi {
     this.id = settings.id || 1;
     this.uid = settings.uid || 'ds';
     this.meta = settings.meta || dataSourceStub.meta;
+    this.languageProvider = {
+      queryMetricsMetadata: () => [],
+      queryLabelKeys: () => [],
+      // eslint-disable-next-line no-unused-vars
+      fetchLabelValues: (_: any) => [],
+    };
   }
 
   query() {

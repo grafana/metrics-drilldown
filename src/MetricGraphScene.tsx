@@ -65,9 +65,9 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   private async onActivate() {
     const { metric, topView } = this.state;
     const trail = getTrailFor(this);
-    const metadata = await trail.getMetricMetadata(metric);
+    const metadata = await trail.getMetadataForMetric(metric);
     const description = getMetricDescription(metadata);
-    const isHistogram = isHistogramMetric(metric) || trail.isNativeHistogram(metric);
+    const isHistogram = isHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
 
     topView.setState({
       children: [
