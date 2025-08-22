@@ -33,10 +33,10 @@ class MockDataSource implements DataSourceApi {
     this.uid = settings.uid || 'ds';
     this.meta = settings.meta || dataSourceStub.meta;
     this.languageProvider = {
-      queryMetricsMetadata: () => [],
-      queryLabelKeys: () => [],
+      queryMetricsMetadata: jest.fn(async () => ({})),
+      queryLabelKeys: jest.fn(async () => []),
       // eslint-disable-next-line no-unused-vars
-      fetchLabelValues: (_: any) => [],
+      fetchLabelValues: jest.fn(async (_: any) => []),
     };
   }
 
