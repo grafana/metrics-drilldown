@@ -41,7 +41,6 @@ import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVa
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
 import { FilteredMetricsVariable, VAR_FILTERED_METRICS_VARIABLE } from './MetricsVariables/FilteredMetricsVariable';
-import { MetricsVariable } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
 import { ApplyAction } from './MetricVizPanel/actions/ApplyAction';
@@ -73,7 +72,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       $variables: new SceneVariableSet({
-        variables: [new MetricsVariable(), new FilteredMetricsVariable(), new LabelsVariable()],
+        variables: [new FilteredMetricsVariable(), new LabelsVariable()],
       }),
       listControls: new ListControls({}),
       sidebar: new SideBar({}),
@@ -227,8 +226,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     );
   }
 
-  private openDrawer(metricName: string) {
-    const trail = getTrailFor(this);
+  private async openDrawer(metricName: string) {
+    const isNativeHistogram = await getTrailFor(this).isNativeHistogram(metricName);
+
     this.state.drawer.open({
       title: 'Choose a new Prometheus function',
       subTitle: metricName,
@@ -252,7 +252,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
               height: METRICS_VIZ_PANEL_HEIGHT_SMALL,
               hideLegend: true,
               highlight: colorIndex === 1,
-              isNativeHistogram: trail.isNativeHistogram(metricName),
+              isNativeHistogram,
               headerActions: [
                 new ApplyAction({
                   metricName,

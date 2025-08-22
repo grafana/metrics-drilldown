@@ -15,6 +15,7 @@ import { merge } from 'lodash';
 import React from 'react';
 
 import { SelectLabelAction } from 'Breakdown/MetricLabelsList/SelectLabelAction';
+import { GmdVizPanel, PANEL_HEIGHT } from 'GmdVizPanel/GmdVizPanel';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -34,7 +35,7 @@ interface LabelVizPanelState extends SceneObjectState {
 }
 
 const MAX_SERIES_TO_RENDER = 20;
-export const LABELS_VIZ_PANEL_HEIGHT = '220px';
+export const LABELS_VIZ_PANEL_HEIGHT = `${GmdVizPanel.getPanelHeightInPixels(PANEL_HEIGHT.M)}px`;
 
 export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
   constructor({
@@ -106,7 +107,7 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
   }
 
   private onActivate() {
-    const { body } = this.state;
+    const { body, label } = this.state;
 
     this._subs.add(
       (body.state.$data as SceneQueryRunner).subscribeToState((newState) => {
@@ -116,11 +117,15 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
 
         const { series } = newState.data;
 
-        if (series?.length) {
-          const config = this.getAllValuesConfig(series);
-
-          body.setState(merge({}, body.state, config));
+        if (!series?.length) {
+          return;
         }
+
+        const hasNoData = series.every((s) => !s.length);
+        const headerActions = hasNoData ? null : [new SelectLabelAction({ label })];
+        const config = this.getAllValuesConfig(series);
+
+        body.setState(merge({}, body.state, { headerActions }, config));
       })
     );
   }

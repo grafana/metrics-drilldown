@@ -1,8 +1,10 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 
-import { DataSourceType, mockDataSource, MockDataSourceSrv } from '../mocks/datasource';
-import { RECENT_TRAILS_KEY, TRAIL_BOOKMARKS_KEY } from '../shared';
-import { TrailStore, type UrlSerializedTrail } from './TrailStore';
+import { RECENT_TRAILS_KEY, TrailStore, type UrlSerializedTrail } from './TrailStore';
+import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
+import { dataSourceStub } from '../stubs/dataSourceStub';
+import { PREF_KEYS } from '../UserPreferences/pref-keys';
+import { userPreferences } from '../UserPreferences/userPreferences';
 
 const getDataSourceSrvSpy = jest.fn();
 
@@ -36,7 +38,7 @@ describe('TrailStore', () => {
     getDataSourceSrvSpy.mockImplementation(() => {
       return {
         get: (ds: DataSourceWithBackend) => Promise.resolve(ds),
-        getList: () => [mockDataSource],
+        getList: () => [dataSourceStub],
         getInstanceSettings: () => ({
           id: 1,
           uid: 'ds',
@@ -48,15 +50,6 @@ describe('TrailStore', () => {
         }),
       };
     });
-
-    let localStore: Record<string, string> = {};
-
-    const localStorageMock = {
-      getItem: jest.fn((key) => (key in localStore ? localStore[key] : null)),
-      setItem: jest.fn(jest.fn((key, value) => (localStore[key] = value + ''))),
-      clear: jest.fn(() => (localStore = {})),
-    };
-    global.localStorage = localStorageMock as unknown as Storage;
 
     jest.useFakeTimers();
 
@@ -113,8 +106,8 @@ describe('TrailStore', () => {
     ];
 
     beforeEach(() => {
-      localStorage.clear();
-      localStorage.setItem(RECENT_TRAILS_KEY, JSON.stringify([{ urlSerializedTrails }]));
+      userPreferences.clear();
+      userPreferences.setItem(RECENT_TRAILS_KEY, [{ urlSerializedTrails }]);
       store.load();
     });
 
@@ -129,15 +122,12 @@ describe('TrailStore', () => {
 
   describe('Initialize store with one bookmark trail but no recent trails', () => {
     beforeEach(() => {
-      localStorage.clear();
-      localStorage.setItem(
-        TRAIL_BOOKMARKS_KEY,
-        JSON.stringify([
-          {
-            urlValues: URL_VALUES_BOOKMARK,
-          },
-        ])
-      );
+      userPreferences.clear();
+      userPreferences.setItem(PREF_KEYS.BOOKMARKS, [
+        {
+          urlValues: URL_VALUES_BOOKMARK,
+        },
+      ]);
       store.load();
     });
 
@@ -195,7 +185,7 @@ describe('TrailStore', () => {
       expect(store.bookmarks.length).toBe(0);
 
       jest.advanceTimersByTime(2000);
-      expect(localStorage.getItem(TRAIL_BOOKMARKS_KEY)).toBe('[]');
+      expect(userPreferences.getItem(PREF_KEYS.BOOKMARKS)).toStrictEqual([]);
     });
   });
 
@@ -203,43 +193,40 @@ describe('TrailStore', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     beforeEach(() => {
-      localStorage.clear();
-      localStorage.setItem(
-        TRAIL_BOOKMARKS_KEY,
-        JSON.stringify([
-          {
-            history: [
-              {
-                urlValues: {
-                  from: 'now-1h',
-                  to: 'now',
-                  timezone,
-                  'var-ds': 'cb3a3391-700f-4cc6-81be-a122488e93e6',
-                  'var-filters': [],
-                  refresh: '',
-                  nativeHistogramMetric: '',
-                },
-                type: 'start',
-                description: 'Test',
+      userPreferences.clear();
+      userPreferences.setItem(PREF_KEYS.BOOKMARKS, [
+        {
+          history: [
+            {
+              urlValues: {
+                from: 'now-1h',
+                to: 'now',
+                timezone,
+                'var-ds': 'cb3a3391-700f-4cc6-81be-a122488e93e6',
+                'var-filters': [],
+                refresh: '',
+                nativeHistogramMetric: '',
               },
-              {
-                urlValues: {
-                  metric: 'access_permissions_duration_count',
-                  from: 'now-1h',
-                  to: 'now',
-                  timezone,
-                  'var-ds': 'cb3a3391-700f-4cc6-81be-a122488e93e6',
-                  'var-filters': [],
-                  refresh: '',
-                  nativeHistogramMetric: '',
-                },
-                type: 'time',
-                description: 'Test',
+              type: 'start',
+              description: 'Test',
+            },
+            {
+              urlValues: {
+                metric: 'access_permissions_duration_count',
+                from: 'now-1h',
+                to: 'now',
+                timezone,
+                'var-ds': 'cb3a3391-700f-4cc6-81be-a122488e93e6',
+                'var-filters': [],
+                refresh: '',
+                nativeHistogramMetric: '',
               },
-            ],
-          },
-        ])
-      );
+              type: 'time',
+              description: 'Test',
+            },
+          ],
+        },
+      ]);
       store.load();
     });
 
@@ -256,52 +243,49 @@ describe('TrailStore', () => {
 
   describe('Initialize store with one legacy bookmark trail not bookmarked on final step', () => {
     beforeEach(() => {
-      localStorage.clear();
-      localStorage.setItem(
-        TRAIL_BOOKMARKS_KEY,
-        JSON.stringify([
-          {
-            history: [
-              {
-                urlValues: {
-                  from: 'now-1h',
-                  to: 'now',
-                  'var-ds': 'prom-mock',
-                  'var-filters': [],
-                  refresh: '',
-                  nativeHistogramMetric: '',
-                },
-                type: 'start',
+      userPreferences.clear();
+      userPreferences.setItem(PREF_KEYS.BOOKMARKS, [
+        {
+          history: [
+            {
+              urlValues: {
+                from: 'now-1h',
+                to: 'now',
+                'var-ds': 'prom-mock',
+                'var-filters': [],
+                refresh: '',
+                nativeHistogramMetric: '',
               },
-              {
-                urlValues: {
-                  metric: 'bookmarked_metric',
-                  from: 'now-1h',
-                  to: 'now',
-                  'var-ds': 'prom-mock',
-                  'var-filters': [],
-                  refresh: '',
-                  nativeHistogramMetric: '',
-                },
-                type: 'time',
+              type: 'start',
+            },
+            {
+              urlValues: {
+                metric: 'bookmarked_metric',
+                from: 'now-1h',
+                to: 'now',
+                'var-ds': 'prom-mock',
+                'var-filters': [],
+                refresh: '',
+                nativeHistogramMetric: '',
               },
-              {
-                urlValues: {
-                  metric: 'some_other_metric',
-                  from: 'now-1h',
-                  to: 'now',
-                  'var-ds': 'prom-mock',
-                  'var-filters': [],
-                  refresh: '',
-                  nativeHistogramMetric: '',
-                },
-                type: 'metric',
+              type: 'time',
+            },
+            {
+              urlValues: {
+                metric: 'some_other_metric',
+                from: 'now-1h',
+                to: 'now',
+                'var-ds': 'prom-mock',
+                'var-filters': [],
+                refresh: '',
+                nativeHistogramMetric: '',
               },
-            ],
-            currentStep: 1,
-          },
-        ])
-      );
+              type: 'metric',
+            },
+          ],
+          currentStep: 1,
+        },
+      ]);
       store.load();
     });
 
@@ -320,32 +304,26 @@ describe('TrailStore', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     beforeEach(() => {
-      localStorage.clear();
-      localStorage.setItem(
-        RECENT_TRAILS_KEY,
-        JSON.stringify([
-          {
-            urlValues: {
-              metric: 'other_metric',
-              nativeHistogramMetric: '',
-              from: 'now-1h',
-              to: 'now',
-              timezone,
-              'var-ds': 'prom-mock',
-              'var-filters': [],
-              refresh: '',
-            },
+      userPreferences.clear();
+      userPreferences.setItem(RECENT_TRAILS_KEY, [
+        {
+          urlValues: {
+            metric: 'other_metric',
+            nativeHistogramMetric: '',
+            from: 'now-1h',
+            to: 'now',
+            timezone,
+            'var-ds': 'prom-mock',
+            'var-filters': [],
+            refresh: '',
           },
-        ])
-      );
-      localStorage.setItem(
-        TRAIL_BOOKMARKS_KEY,
-        JSON.stringify([
-          {
-            urlValues: URL_VALUES_BOOKMARK,
-          },
-        ])
-      );
+        },
+      ]);
+      userPreferences.setItem(PREF_KEYS.BOOKMARKS, [
+        {
+          urlValues: URL_VALUES_BOOKMARK,
+        },
+      ]);
       store.load();
     });
 
@@ -399,7 +377,7 @@ describe('TrailStore', () => {
       expect(store.bookmarks.length).toBe(0);
 
       jest.advanceTimersByTime(2000);
-      expect(localStorage.getItem(TRAIL_BOOKMARKS_KEY)).toBe('[]');
+      expect(userPreferences.getItem(PREF_KEYS.BOOKMARKS)).toStrictEqual([]);
     });
   });
 });

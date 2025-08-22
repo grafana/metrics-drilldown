@@ -140,16 +140,27 @@ type Interactions = {
   };
   app_initialized: {
     view: ViewName;
+    uel_epid: string;
   };
   // User took an action to view an exposed component
   exposed_component_viewed: {
     component: SnakeCase<ExposedComponentName>;
   };
+  // App migrated some legacy user prefs (see src/UserPreferences/userPreferences.ts)
+  user_preferences_migrated: {};
 };
+
+type OtherEvents = {
+  extreme_value_filter_behavior_triggered: {
+    expression: string;
+  };
+};
+
+type AllEvents = Interactions & OtherEvents;
 
 const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 
-export function reportExploreMetrics<E extends keyof Interactions, P extends Interactions[E]>(event: E, payload: P) {
+export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P) {
   reportInteraction(`${INTERACTION_NAME_PREFIX}${event}`, {
     ...payload,
     meta: {

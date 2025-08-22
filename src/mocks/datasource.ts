@@ -1,42 +1,18 @@
-import { PluginType, type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
+import { type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
 import { type DataSourceSrv } from '@grafana/runtime';
 import { type DataSourceRef } from '@grafana/schema';
 
-export const mockDataSource: DataSourceApi = {
-  name: 'Prometheus',
-  type: 'prometheus',
-  id: 1,
-  uid: 'ds',
-  meta: {
-    id: 'prometheus',
-    name: 'Prometheus',
-    type: PluginType.datasource,
-    info: {
-      version: '',
-      logos: { small: '', large: '' },
-      updated: '',
-      author: { name: '' },
-      description: '',
-      links: [],
-      screenshots: [],
-    },
-    module: '',
-    baseUrl: '',
-  },
-  query: () => Promise.resolve({ data: [] }),
-  testDatasource: () => Promise.resolve({ status: 'success', message: 'Success' }),
-  getRef: () => ({ type: 'prometheus', uid: 'ds' }),
-};
+import { dataSourceStub } from '../stubs/dataSourceStub';
 
 export function createMockDataSource(settings: Partial<DataSourceInstanceSettings> = {}): DataSourceInstanceSettings {
   return {
-    id: settings.id || mockDataSource.id,
-    uid: settings.uid || mockDataSource.uid,
-    type: settings.type || mockDataSource.type,
-    name: settings.name || mockDataSource.name,
+    id: settings.id || dataSourceStub.id,
+    uid: settings.uid || dataSourceStub.uid,
+    type: settings.type || dataSourceStub.type,
+    name: settings.name || dataSourceStub.name,
     access: settings.access || 'proxy',
     readOnly: settings.readOnly || false,
-    meta: settings.meta || mockDataSource.meta,
+    meta: settings.meta || dataSourceStub.meta,
     jsonData: {},
     ...settings,
   };
@@ -48,13 +24,20 @@ class MockDataSource implements DataSourceApi {
   id: number;
   uid: string;
   meta: any;
+  languageProvider: any;
 
   constructor(settings: Partial<DataSourceApi> = {}) {
     this.name = settings.name || 'Prometheus';
     this.type = settings.type || 'prometheus';
     this.id = settings.id || 1;
     this.uid = settings.uid || 'ds';
-    this.meta = settings.meta || mockDataSource.meta;
+    this.meta = settings.meta || dataSourceStub.meta;
+    this.languageProvider = {
+      queryMetricsMetadata: jest.fn(async () => ({})),
+      queryLabelKeys: jest.fn(async () => []),
+      // eslint-disable-next-line no-unused-vars
+      fetchLabelValues: jest.fn(async (_: any) => []),
+    };
   }
 
   query() {
@@ -91,10 +74,10 @@ export class MockDataSourceSrv implements DataSourceSrv {
     if (!ref) {
       return Object.values(this.datasources)[0];
     }
-    
+
     // Handle DataSourceRef objects
     let uid = typeof ref === 'string' ? ref : ref.uid;
-    
+
     // Handle template literals like '${ds}' with scoped variables
     if (typeof uid === 'string' && uid.startsWith('${') && uid.endsWith('}') && scopedVars) {
       if (scopedVars.__sceneObject && scopedVars.__sceneObject.value) {
@@ -102,11 +85,11 @@ export class MockDataSourceSrv implements DataSourceSrv {
         return Object.values(this.datasources)[0];
       }
     }
-    
+
     if (!uid) {
       return Object.values(this.datasources)[0];
     }
-    
+
     const ds = this.datasources[uid];
     if (!ds) {
       throw new Error(`Data source ${uid} not found`);

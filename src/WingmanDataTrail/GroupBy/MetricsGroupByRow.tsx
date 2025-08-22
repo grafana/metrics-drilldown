@@ -16,17 +16,14 @@ import { Button, CollapsableSection, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { VAR_FILTERS } from 'shared';
-import { getColorByIndex, getTrailFor } from 'utils';
+import { getColorByIndex } from 'utils';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
-import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
-import {
-  METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
-  MetricVizPanel,
-} from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
+import { METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
@@ -99,17 +96,12 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
-          const trail = getTrailFor(this);
-          const isNativeHistogram = trail.isNativeHistogram(option.value as string);
-
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
-              vizPanelInGridItem: new MetricVizPanel({
-                metricName: option.value as string,
-                color: getColorByIndex(colorIndex),
-                matchers: [`${labelName}="${labelValue}"`],
-                headerActions: [new SelectAction({ metricName: option.value as string })],
-                isNativeHistogram,
+              vizPanelInGridItem: new GmdVizPanel({
+                metric: option.value as string,
+                matchers: [{ key: labelName, operator: '=', value: labelValue }],
+                fixedColor: getColorByIndex(colorIndex),
               }),
               metric: option.value as string,
             }),

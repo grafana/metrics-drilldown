@@ -14,11 +14,13 @@ import React from 'react';
 import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
 
 import { EventSortByChanged } from './events/EventSortByChanged';
+import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
 import { logger } from '../../../tracking/logger/logger';
+import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
+import { userPreferences } from '../../../UserPreferences/userPreferences';
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
 
-const RECENT_METRICS_STORAGE_KEY = 'metrics-drilldown-recent-metrics/v1';
 const MAX_RECENT_METRICS = 6;
 const RECENT_METRICS_EXPIRY_DAYS = 30;
 
@@ -42,7 +44,7 @@ export function addRecentMetric(metricName: string): void {
 
     // Keep only the most recent metrics
     const updatedMetrics = filteredMetrics.slice(0, MAX_RECENT_METRICS);
-    localStorage.setItem(RECENT_METRICS_STORAGE_KEY, JSON.stringify(updatedMetrics));
+    userPreferences.setItem(PREF_KEYS.RECENT_METRICS, updatedMetrics);
   } catch (error) {
     const errorObject = error instanceof Error ? error : new Error(String(error));
 
@@ -59,12 +61,11 @@ export function addRecentMetric(metricName: string): void {
  */
 export function getRecentMetrics(): RecentMetric[] {
   try {
-    const stored = localStorage.getItem(RECENT_METRICS_STORAGE_KEY);
-    if (!stored) {
+    const recentMetrics: RecentMetric[] = userPreferences.getItem(PREF_KEYS.RECENT_METRICS) || [];
+    if (!recentMetrics.length) {
       return [];
     }
 
-    const recentMetrics: RecentMetric[] = JSON.parse(stored);
     const now = Date.now();
     const thirtyDaysAgo = now - RECENT_METRICS_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
 
@@ -73,12 +74,12 @@ export function getRecentMetrics(): RecentMetric[] {
 
     // If any metrics were removed, update storage
     if (validMetrics.length !== recentMetrics.length) {
-      localStorage.setItem(RECENT_METRICS_STORAGE_KEY, JSON.stringify(validMetrics));
+      userPreferences.setItem(PREF_KEYS.RECENT_METRICS, validMetrics);
     }
 
     return validMetrics;
   } catch (error) {
-    logger.error(error as Error, {message: 'Failed to get recent metrics:'});
+    logger.error(error as Error, { message: 'Failed to get recent metrics:' });
     return [];
   }
 }
@@ -140,12 +141,19 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     );
   }
 
-  public getUsageForMetric(metricName: string, usageType: MetricUsageType): Promise<number> {
-    return this.usageFetcher.getUsageForMetric(metricName, usageType);
+  public getUsageDetailsForMetric(metricName: string, usageType: MetricUsageType): Promise<MetricUsageDetails> {
+    return this.usageFetcher.getUsageDetailsForMetric(metricName, usageType);
   }
 
+  // Converts MetricUsageDetails format to simple counts (Record<string, number>) for backward compatibility with sorting logic
   public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
-    return this.usageFetcher.getUsageMetrics(usageType);
+    return this.usageFetcher.getUsageMetrics(usageType).then((metrics) => {
+      const metricsToCounts: Record<string, number> = {};
+      for (const metric in metrics) {
+        metricsToCounts[metric] = metrics[metric].count;
+      }
+      return metricsToCounts;
+    });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {

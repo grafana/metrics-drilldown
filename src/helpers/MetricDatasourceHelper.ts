@@ -11,126 +11,99 @@ import {
   type PromQuery,
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
+import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
+import { type Unsubscribable } from 'rxjs';
 
-import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
+import { isHistogramMetric } from 'GmdVizPanel/heatmap/isHistogramMetric';
+import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
+import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
+import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../shared';
+import { languageProviderVersionIs } from '../types/language-provider/versionCheck';
 import { isPrometheusDataSource } from '../utils/utils.datasource';
 
+/**
+ * When we fetch the Prometheus data source with `@grafana/runtime`, its language provider
+ * could be one of multiple flavors that we need to support. We use this type to represent
+ * the Prometheus data source before we have checked the version of the language provider.
+ * The language provider version is then checked with the `languageProviderVersionIs` helper.
+ */
+export type PrometheusRuntimeDatasource = Omit<PrometheusDatasource, 'languageProvider'> & {
+  languageProvider: unknown;
+};
+
 export class MetricDatasourceHelper {
+  private trail: DataTrail;
+  private datasource?: PrometheusRuntimeDatasource;
+  private subs: Unsubscribable[];
+
+  // Maps & Sets are efficient data structures compared to a classic JS objects
+  private metricsMetadata: Map<string, PromMetricsMetadataItem> | undefined;
+  private metadataFetchP?: Promise<void>;
+  private classicHistograms: Set<string> | undefined;
+
   constructor(trail: DataTrail) {
-    this._trail = trail;
+    this.trail = trail;
+    this.subs = [];
   }
 
-  public reset() {
-    this._datasource = undefined;
-    this._metricsMetadata = undefined;
-    this._classicHistograms = {};
-    this._nativeHistograms = [];
+  private async getRuntimeDatasource(): Promise<PrometheusRuntimeDatasource | undefined> {
+    if (!this.datasource) {
+      const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this.trail } });
+      this.datasource = isPrometheusDataSource(ds) ? ds : undefined;
+    }
+    return this.datasource;
   }
 
-  private _trail: DataTrail;
-
-  private _datasource?: PrometheusDatasource;
-
-  private async getDatasource() {
-    if (this._datasource) {
-      return this._datasource;
+  public async init() {
+    for (const sub of this.subs) {
+      sub.unsubscribe();
     }
 
-    const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this._trail } });
-
-    if (isPrometheusDataSource(ds)) {
-      this._datasource = ds;
-    }
-
-    return this._datasource;
-  }
-
-  // store metadata in a more easily accessible form
-  _metricsMetadata?: PromMetricsMetadata;
-
-  private async _ensureMetricsMetadata(): Promise<void> {
-    if (this._metricsMetadata) {
-      return;
-    }
-
-    await this._getMetricsMetadata();
-  }
-
-  private async _getMetricsMetadata(): Promise<void> {
-    const ds = await this.getDatasource();
-
-    if (!ds) {
-      return;
-    }
-
-    const queryMetadata =
-      typeof ds.languageProvider.queryMetricsMetadata === 'function'
-        ? ds.languageProvider.queryMetricsMetadata
-        : () => Promise.resolve(ds.languageProvider.metricsMetadata); // eslint-disable-line sonarjs/deprecation
-
-    const loadMetadata =
-      typeof ds.languageProvider.retrieveMetricsMetadata === 'function'
-        ? () => Promise.resolve(ds.languageProvider.retrieveMetricsMetadata())
-        : () => (ds.languageProvider.loadMetricsMetadata() as unknown as Promise<void>).then(() => queryMetadata()); // eslint-disable-line sonarjs/deprecation
-
-    let metadata = await queryMetadata();
-
-    if (!metadata) {
-      metadata = await loadMetadata();
-    }
-
-    this._metricsMetadata = metadata;
-  }
-
-  public async getMetadataForMetric(metric?: string) {
-    if (!metric) {
-      return undefined;
-    }
-    await this._ensureMetricsMetadata();
-
-    return this._metricsMetadata?.[metric];
-  }
-
-  private _classicHistograms: Record<string, number> = {};
-  private _nativeHistograms: string[] = [];
-
-  public listNativeHistograms() {
-    return this._nativeHistograms;
-  }
-
-  /**
-   * Identify native histograms by 2 strategies.
-   * 1. querying classic histograms and all metrics,
-   * then comparing the results and build the collection of native histograms.
-   * 2. querying all metrics and checking if the metric is a histogram type and dies not have the bucket suffix.
-   *
-   * classic histogram = test_metric_bucket
-   * native histogram = test_metric
-   */
-  public async initializeHistograms() {
-    const ds = await this.getDatasource();
-    if (ds && Object.keys(this._classicHistograms).length === 0) {
-      const classicHistogramsCall = ds.metricFindQuery('metrics(.*_bucket)');
-      const allMetricsCall = ds.metricFindQuery('metrics(.+)');
-
-      const [classicHistograms, allMetrics] = await Promise.all([classicHistogramsCall, allMetricsCall]);
-
-      classicHistograms.forEach((m) => {
-        this._classicHistograms[m.text] = 1;
-      });
-
-      await this._ensureMetricsMetadata();
-
-      allMetrics.forEach((m) => {
-        if (this.isNativeHistogram(m.text)) {
-          // Build the collection of native histograms.
-          this.addNativeHistogram(m.text);
+    const metricsVariable = sceneGraph.findByKeyAndType(this.trail, VAR_METRICS_VARIABLE, MetricsVariable);
+    this.subs.push(
+      metricsVariable.subscribeToState((newState, prevState) => {
+        if (!areArraysEqual(newState.options, prevState.options)) {
+          this.initializeClassicHistograms(newState.options);
         }
-      });
+      })
+    );
+
+    const datasourceVariable = sceneGraph.findByKeyAndType(
+      this.trail,
+      VAR_DATASOURCE,
+      MetricsDrilldownDataSourceVariable
+    );
+    this.subs.push(
+      datasourceVariable.subscribeToState(async (newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          this.reset();
+        }
+      })
+    );
+
+    this.initializeClassicHistograms(metricsVariable.state.options);
+  }
+
+  private reset() {
+    this.datasource = undefined;
+    this.metricsMetadata = undefined;
+    this.metadataFetchP = undefined;
+    this.classicHistograms = undefined;
+  }
+
+  private initializeClassicHistograms(metricsVariableOptions: VariableValueOption[]) {
+    this.classicHistograms = new Set();
+
+    for (const metricData of metricsVariableOptions) {
+      const name = metricData.value as string;
+
+      if (name.endsWith('_bucket')) {
+        this.classicHistograms.add(name);
+      }
     }
   }
 
@@ -138,7 +111,7 @@ export class MetricDatasourceHelper {
    * Identify native histograms by 2 strategies.
    * 1. querying classic histograms and all metrics,
    * then comparing the results and build the collection of native histograms.
-   * 2. querying all metrics and checking if the metric is a histogram type and dies not have the bucket suffix.
+   * 2. querying all metrics and checking if the metric is a histogram type and does not have the bucket suffix.
    *
    * classic histogram = test_metric_bucket
    * native histogram = test_metric
@@ -146,29 +119,59 @@ export class MetricDatasourceHelper {
    * @param metric
    * @returns boolean
    */
-  public isNativeHistogram(metric: string): boolean {
-    if (!metric) {
+  public async isNativeHistogram(metric: string): Promise<boolean> {
+    const isClassicHistogram = isHistogramMetric(metric);
+    if (isClassicHistogram) {
       return false;
     }
 
-    // check when fully migrated, we only have metadata, and there are no more classic histograms
-    const metadata = this._metricsMetadata;
-    // suffix is not 'bucket' and type is histogram
-    const suffix: string = metric.split('_').pop() ?? '';
-    // the string is not equal to bucket
-    const notClassic = suffix !== 'bucket';
-    if (metadata?.[metric]?.type === 'histogram' && notClassic) {
+    // metric is not a classic histogram
+
+    if (this.classicHistograms?.has(`${metric}_bucket`)) {
       return true;
     }
 
-    // check for comparison when there is overlap between native and classic histograms
-    return this._classicHistograms[`${metric}_bucket`] > 0;
+    await this.ensureMetricsMetadata();
+
+    return this.metricsMetadata?.get(metric)?.type === 'histogram';
   }
 
-  private addNativeHistogram(metric: string) {
-    if (!this._nativeHistograms.includes(metric)) {
-      this._nativeHistograms.push(metric);
+  private async ensureMetricsMetadata(): Promise<void> {
+    if (!this.metadataFetchP) {
+      this.metadataFetchP = this.getMetricsMetadata();
     }
+
+    try {
+      await this.metadataFetchP;
+    } catch (error) {
+      displayWarning([
+        'Error while initializing histograms!',
+        (error as Error).toString(),
+        'Native histogram metrics might not be properly displayed.',
+      ]);
+    }
+  }
+
+  private async getMetricsMetadata(): Promise<void> {
+    const ds = await this.getRuntimeDatasource();
+    if (!ds) {
+      return;
+    }
+
+    const queryMetadata = getQueryMetricsMetadata(ds);
+    let metadata = await queryMetadata();
+
+    if (!metadata) {
+      const loadMetadata = getLoadMetricsMetadata(ds, queryMetadata);
+      metadata = await loadMetadata();
+    }
+
+    this.metricsMetadata = metadata ? new Map(Object.entries(metadata)) : undefined;
+  }
+
+  public async getMetadataForMetric(metric: string) {
+    await this.ensureMetricsMetadata();
+    return this.metricsMetadata?.get(metric);
   }
 
   /**
@@ -177,8 +180,7 @@ export class MetricDatasourceHelper {
    * @returns
    */
   public async getTagKeys(options: DataSourceGetTagKeysOptions<PromQuery>): Promise<MetricFindValue[]> {
-    const ds = await this.getDatasource();
-
+    const ds = await this.getRuntimeDatasource();
     if (!ds) {
       return [];
     }
@@ -193,8 +195,7 @@ export class MetricDatasourceHelper {
    * @returns
    */
   public async getTagValues(options: DataSourceGetTagValuesOptions<PromQuery>) {
-    const ds = await this.getDatasource();
-
+    const ds = await this.getRuntimeDatasource();
     if (!ds) {
       return [];
     }
@@ -202,25 +203,6 @@ export class MetricDatasourceHelper {
     options.key = unwrapQuotes(options.key);
     const keys = await ds.getTagValues(options);
     return keys;
-  }
-
-  /**
-   * Check if the datasource uses time range in language provider methods.
-   * @param ds
-   * @returns boolean
-   * @remarks
-   * This is a hack to check if the datasource uses time range in language provider methods.
-   * It will be removed when we upgrade the Grafana dependency to 12.0.0.
-   * For more details, see https://github.com/grafana/metrics-drilldown/issues/370.
-   */
-  public static dsUsesTimeRangeInLegacyLanguageProviderMethods(ds: PrometheusDatasource): boolean {
-    // This works because the `fetchLabelValues` method happens to have changed in a way that
-    // can be used as a heuristic to check if the runtime datasource uses the G12-style
-    // language provider methods introduced in https://github.com/grafana/grafana/pull/101889.
-    return (
-      // eslint-disable-next-line sonarjs/deprecation
-      typeof ds.languageProvider.fetchLabelValues === 'function' && ds.languageProvider.fetchLabelValues.length > 1
-    );
   }
 
   /**
@@ -251,19 +233,18 @@ export class MetricDatasourceHelper {
    * ```
    */
   public static fetchLabels(params: FetchLabelsOptions): Promise<string[]> {
-    const { ds, timeRange, matcher } = params;
+    const { timeRange, matcher } = params;
+    const ds = params.ds;
 
-    if (typeof ds.languageProvider.queryLabelKeys === 'function') {
+    if (languageProviderVersionIs['12.1.0-plus'](ds)) {
       return ds.languageProvider.queryLabelKeys(timeRange, matcher);
-    }
-
-    if (MetricDatasourceHelper.dsUsesTimeRangeInLegacyLanguageProviderMethods(ds)) {
-      // eslint-disable-next-line sonarjs/deprecation
+    } else if (languageProviderVersionIs['12.0.0'](ds)) {
       return ds.languageProvider.fetchLabelsWithMatch(timeRange, matcher).then((labels) => Object.keys(labels));
+    } else if (languageProviderVersionIs['11.6.x'](ds)) {
+      return ds.languageProvider.fetchLabelsWithMatch(matcher).then((labels) => Object.keys(labels));
     }
 
-    // @ts-expect-error: Ignoring type error due to breaking change in fetchLabelsWithMatch signature
-    return ds.languageProvider.fetchLabelsWithMatch(matcher).then((labels) => Object.keys(labels)); // eslint-disable-line sonarjs/deprecation
+    throw new Error('Unsupported language provider version');
   }
 
   /**
@@ -296,23 +277,32 @@ export class MetricDatasourceHelper {
    * ```
    */
   public static fetchLabelValues(params: FetchLabelValuesOptions) {
-    const { ds, labelName, timeRange, matcher } = params;
+    const { labelName, timeRange, matcher = '' } = params;
+    const ds = params.ds as PrometheusRuntimeDatasource;
 
-    if (typeof ds.languageProvider.queryLabelValues === 'function') {
+    if (languageProviderVersionIs['12.1.0-plus'](ds)) {
       return ds.languageProvider.queryLabelValues(timeRange, labelName, matcher);
     }
 
-    // If a matcher isn't provided, use the simpler `fetchLabelValues` method.
-    const fetchLabelValuesWithOptionalMatcher = matcher
-      ? ds.languageProvider.fetchSeriesValuesWithMatch // eslint-disable-line sonarjs/deprecation
-      : ds.languageProvider.fetchLabelValues; // eslint-disable-line sonarjs/deprecation
+    if (languageProviderVersionIs['12.0.0'](ds)) {
+      // If a matcher isn't provided, use the simpler `fetchLabelValues` method.
+      const fetchLabelValuesWithOptionalMatcher = matcher
+        ? ds.languageProvider.fetchSeriesValuesWithMatch
+        : ds.languageProvider.fetchLabelValues;
 
-    if (MetricDatasourceHelper.dsUsesTimeRangeInLegacyLanguageProviderMethods(ds)) {
       return fetchLabelValuesWithOptionalMatcher(timeRange, labelName, matcher);
     }
 
-    // @ts-expect-error: Ignoring type error due to breaking change in fetchSeriesValuesWithMatch signature
-    return fetchLabelValuesWithOptionalMatcher(labelName, matcher);
+    if (languageProviderVersionIs['11.6.x'](ds)) {
+      // If a matcher isn't provided, use the simpler `fetchLabelValues` method.
+      const fetchLabelValuesWithOptionalMatcher = matcher
+        ? ds.languageProvider.fetchSeriesValuesWithMatch
+        : ds.languageProvider.fetchLabelValues;
+
+      return fetchLabelValuesWithOptionalMatcher(labelName, matcher);
+    }
+
+    throw new Error('Unsupported language provider version');
   }
 
   public static async getPrometheusDataSourceForScene(
@@ -332,13 +322,13 @@ export class MetricDatasourceHelper {
 }
 
 interface FetchLabelsOptions {
-  ds: PrometheusDatasource;
+  ds: PrometheusRuntimeDatasource;
   timeRange: TimeRange;
   matcher: string;
 }
 
 interface FetchLabelValuesOptions {
-  ds: PrometheusDatasource;
+  ds: PrometheusRuntimeDatasource;
   timeRange: TimeRange;
   labelName: string;
   matcher?: string;
@@ -370,4 +360,31 @@ function unwrapQuotes(value: string): string {
 function isWrappedInQuotes(value: string): boolean {
   const wrappedInQuotes = /^".*"$/;
   return wrappedInQuotes.test(value);
+}
+
+function getQueryMetricsMetadata(ds: PrometheusRuntimeDatasource) {
+  if (languageProviderVersionIs['12.1.0-plus'](ds)) {
+    return ds.languageProvider.queryMetricsMetadata;
+  }
+
+  if (languageProviderVersionIs['12.0.0'](ds) || languageProviderVersionIs['11.6.x'](ds)) {
+    return () => Promise.resolve(ds.languageProvider.metricsMetadata);
+  }
+
+  throw new Error('Unsupported language provider version');
+}
+
+function getLoadMetricsMetadata(
+  ds: PrometheusRuntimeDatasource,
+  queryMetadata: () => Promise<PromMetricsMetadata | undefined>
+) {
+  if (languageProviderVersionIs['12.1.0-plus'](ds)) {
+    return ds.languageProvider.retrieveMetricsMetadata;
+  }
+
+  if (languageProviderVersionIs['12.0.0'](ds) || languageProviderVersionIs['11.6.x'](ds)) {
+    return () => (ds.languageProvider.loadMetricsMetadata?.() ?? Promise.resolve()).then(() => queryMetadata());
+  }
+
+  throw new Error('Unsupported language provider version');
 }

@@ -59,26 +59,75 @@ describe('limitAdhocProviders', () => {
     } as unknown as DataTrail;
   });
 
-  it('should limit the number of tag keys returned in the variable to 10000', async () => {
-    limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
+  describe('getTagKeysProvider', () => {
+    it('should limit the number of tag keys returned in the variable to 10000', async () => {
+      limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
 
-    const result = await filtersVariable.state!.getTagKeysProvider!(filtersVariable, null);
+      const result = await filtersVariable.state!.getTagKeysProvider!(filtersVariable, null);
 
-    expect(result.values).toHaveLength(10000);
-    expect(result.replace).toBe(true);
+      expect(result.values).toHaveLength(10000);
+      expect(result.replace).toBe(true);
+    });
+
+    it.each([
+      [true, ['query1', 'query2']],
+      [false, []],
+    ])(
+      'should respect the AdHocFiltersVariable "useQueriesAsFilterForOptions" option (%s)',
+      async (useQueriesAsFilterForOptions, expectedQueries) => {
+        (dataTrail.getQueries as jest.Mock).mockReturnValue(['query1', 'query2']);
+        filtersVariable.setState({ useQueriesAsFilterForOptions });
+
+        limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
+
+        await filtersVariable.state!.getTagKeysProvider!(filtersVariable, null);
+
+        expect(datasourceHelper.getTagKeys).toHaveBeenCalledWith({
+          filters: [],
+          scopes: [],
+          queries: expectedQueries,
+        });
+      }
+    );
   });
 
-  it('should limit the number of tag values returned in the variable to 10000', async () => {
-    limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
-
-    const result = await filtersVariable.state!.getTagValuesProvider!(filtersVariable, {
+  describe('getTagValuesProvider', () => {
+    const filter = {
       key: 'testKey',
       operator: '=',
       value: 'testValue',
+    } as const;
+
+    it('should limit the number of tag values returned in the variable to 10000', async () => {
+      limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
+
+      const result = await filtersVariable.state!.getTagValuesProvider!(filtersVariable, filter);
+
+      expect(result.values).toHaveLength(10000);
+      expect(result.replace).toBe(true);
     });
 
-    expect(result.values).toHaveLength(10000);
-    expect(result.replace).toBe(true);
+    it.each([
+      [true, ['query1', 'query2']],
+      [false, []],
+    ])(
+      'should respect the AdHocFiltersVariable "useQueriesAsFilterForOptions" option (%s)',
+      async (useQueriesAsFilterForOptions, expectedQueries) => {
+        (dataTrail.getQueries as jest.Mock).mockReturnValue(['query1', 'query2']);
+        filtersVariable.setState({ useQueriesAsFilterForOptions });
+
+        limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
+
+        await filtersVariable.state!.getTagValuesProvider!(filtersVariable, filter);
+
+        expect(datasourceHelper.getTagValues).toHaveBeenCalledWith({
+          key: filter.key,
+          filters: [],
+          scopes: [],
+          queries: expectedQueries,
+        });
+      }
+    );
   });
 });
 

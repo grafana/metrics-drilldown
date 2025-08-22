@@ -15,13 +15,20 @@ const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
  */
 loadDotEnv({ path: resolve(process.cwd(), '.env') });
 
-export function getGrafanaUrl() {
+interface GetGrafanaUrlOptions {
+  withScopes?: boolean;
+}
+
+export function getGrafanaUrl(options: GetGrafanaUrlOptions = {}) {
   if (process.env.GRAFANA_URL) {
     return process.env.GRAFANA_URL;
   }
 
   const grafanaPort = process.env.GRAFANA_PORT || 3001;
-  return `http://localhost:${grafanaPort}`;
+  const grafanaScopesPort = process.env.GRAFANA_SCOPES_PORT || 3002;
+  const port = options.withScopes ? grafanaScopesPort : grafanaPort;
+
+  return `http://localhost:${port}`;
 }
 
 function getGrafanaUser(): User {

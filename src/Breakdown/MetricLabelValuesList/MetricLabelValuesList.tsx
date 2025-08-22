@@ -2,7 +2,6 @@ import { css } from '@emotion/css';
 import { DashboardCursorSync, LoadingState, type DataFrame, type GrafanaTheme2, type PanelData } from '@grafana/data';
 import {
   behaviors,
-  PanelBuilders,
   SceneCSSGridItem,
   SceneCSSGridLayout,
   SceneDataNode,
@@ -12,43 +11,41 @@ import {
   SceneQueryRunner,
   SceneReactObject,
   sceneUtils,
-  VizPanel,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { SortOrder } from '@grafana/schema';
-import { Field, Spinner, TooltipDisplayMode, useStyles2 } from '@grafana/ui';
+import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { getAutoQueriesForMetric } from 'autoQuery/getAutoQueriesForMetric';
-import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
+import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
+import { GmdVizPanel, PANEL_HEIGHT, PANEL_TYPE, QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
+import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/timeseries/getTimeseriesQueryRunnerParams';
 import { PanelMenu } from 'Menu/PanelMenu';
-import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
+import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { EventQuickSearchChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
-import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { LabelValuesCountsProvider } from './LabelValuesCountProvider';
+import { LABEL_VALUE_VIZ_PANEL_HEIGHT, LabelValueVizPanel } from './LabelValueVizPanel';
 import { SceneByFrameRepeater } from './SceneByFrameRepeater';
 import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: string;
   label: string;
-  $data: SceneDataTransformer;
   layoutSwitcher: LayoutSwitcher;
   quickSearch: QuickSearch;
   sortBySelector: SortBySelector;
-  body?: SceneByFrameRepeater | VizPanel;
+  body?: SceneByFrameRepeater | GmdVizPanel;
 }
 
 export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesListState> {
@@ -63,14 +60,6 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       key: 'metric-label-values-list',
       metric,
       label,
-      $data: new SceneDataTransformer({
-        $data: new SceneQueryRunner({
-          datasource: trailDS,
-          maxDataPoints: MDP_METRIC_PREVIEW,
-          queries: getAutoQueriesForMetric(metric).breakdown.queries,
-        }),
-        transformations: [addUnspecifiedLabel(label)],
-      }),
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -169,24 +158,37 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private buildSinglePanel() {
-    const { metric } = this.state;
-    const queryDef = getAutoQueriesForMetric(metric).breakdown;
-    const unit = queryDef.unit;
+    const { metric, label } = this.state;
 
-    return PanelBuilders.timeseries()
-      .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
-      .setOption('legend', { showLegend: true, placement: 'right' })
-      .setUnit(unit)
-      .setTitle(metric)
-      .build();
+    return new GmdVizPanel({
+      metric,
+      panelType: PANEL_TYPE.TIMESERIES,
+      height: PANEL_HEIGHT.XL,
+      headerActions: () => [],
+      groupBy: label,
+    });
   }
 
   private buildByFrameRepeater() {
     const { metric, label } = this.state;
-    const queryDef = getAutoQueriesForMetric(metric).breakdown;
-    const unit = queryDef.unit;
+    const queryParams = getTimeseriesQueryRunnerParams({
+      metric,
+      matchers: [],
+      groupBy: label,
+      queryResolution: QUERY_RESOLUTION.MEDIUM,
+      addIgnoreUsageFilter: true,
+    });
+    const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
     return new SceneByFrameRepeater({
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: trailDS,
+          maxDataPoints: queryParams.maxDataPoints,
+          queries: queryParams.queries,
+        }),
+        transformations: [addUnspecifiedLabel(label)],
+      }),
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
       $behaviors: [
         syncYAxis(),
@@ -199,7 +201,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         children: [],
         isLazy: true,
         templateColumns: GRID_TEMPLATE_COLUMNS,
-        autoRows: METRICS_VIZ_PANEL_HEIGHT,
+        autoRows: LABEL_VALUE_VIZ_PANEL_HEIGHT,
       }),
       getLayoutLoading: () =>
         new SceneReactObject({
@@ -226,25 +228,17 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         }
 
         const labelValue = getLabelValueFromDataFrame(frame);
-        const panelKey = `panel-${metric}-${labelValue}`;
-
         const canAddToFilters = !labelValue.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
         const headerActions = canAddToFilters ? [new AddToFiltersGraphAction({ labelName: label, labelValue })] : [];
 
-        // TODO: Use LabelVizPanel?
-        const vizPanel = queryDef
-          .vizBuilder()
-          .setTitle(labelValue)
-          .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
-          .setBehaviors([publishTimeseriesData()]) // publishTimeseriesData is required for the syncYAxis behavior
-          .setColor({ mode: 'fixed', fixedColor: getColorByIndex(frameIndex) })
-          .setHeaderActions(headerActions)
-          .setShowMenuAlways(true)
-          .setMenu(new PanelMenu({ labelName: labelValue }))
-          .setUnit(unit)
-          .build();
-
-        vizPanel.setState({ key: panelKey });
+        const vizPanel = new LabelValueVizPanel({
+          labelValue,
+          data: new SceneDataNode({ data: { ...data, series: [frame] } }),
+          unit,
+          fixedColor: getColorByIndex(frameIndex),
+          headerActions,
+          menu: new PanelMenu({ labelName: labelValue }),
+        });
 
         return new SceneCSSGridItem({ body: vizPanel });
       },
@@ -277,7 +271,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
     return (
       <>
-        {body instanceof VizPanel && <MetricLabelValuesList.SingleMetricPanelComponent model={model} />}
+        {body instanceof GmdVizPanel && <MetricLabelValuesList.SingleMetricPanelComponent model={model} />}
         {body instanceof SceneByFrameRepeater && <MetricLabelValuesList.ByFrameRepeaterComponent model={model} />}
       </>
     );
@@ -289,7 +283,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
     return (
       <div data-testid="single-metric-panel">
-        <div className={styles.singlePanelContainer}>{body instanceof VizPanel && <body.Component model={body} />}</div>
+        <div className={styles.singlePanelContainer}>
+          {body instanceof GmdVizPanel && <body.Component model={body} />}
+        </div>
       </div>
     );
   };
