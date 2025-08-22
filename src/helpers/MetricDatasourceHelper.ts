@@ -15,7 +15,7 @@ import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableVal
 import { type Unsubscribable } from 'rxjs';
 
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
-import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
+import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
@@ -144,7 +144,16 @@ export class MetricDatasourceHelper {
     if (!this.metadataFetchP) {
       this.metadataFetchP = this.getMetricsMetadata();
     }
-    await this.metadataFetchP;
+
+    try {
+      await this.metadataFetchP;
+    } catch (error) {
+      displayWarning([
+        'Error while initializing histograms!',
+        (error as Error).toString(),
+        'Native histogram metrics might not be properly displayed.',
+      ]);
+    }
   }
 
   private async getMetricsMetadata(): Promise<void> {
