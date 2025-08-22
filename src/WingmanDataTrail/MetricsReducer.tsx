@@ -37,7 +37,6 @@ import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVa
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
 import { FilteredMetricsVariable, VAR_FILTERED_METRICS_VARIABLE } from './MetricsVariables/FilteredMetricsVariable';
-import { MetricsVariable } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
 import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
@@ -62,7 +61,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       $variables: new SceneVariableSet({
-        variables: [new MetricsVariable(), new FilteredMetricsVariable(), new LabelsVariable()],
+        variables: [new FilteredMetricsVariable(), new LabelsVariable()],
       }),
       listControls: new ListControls({}),
       sidebar: new SideBar({}),

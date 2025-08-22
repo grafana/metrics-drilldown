@@ -21,7 +21,6 @@ import {
   FilteredMetricsVariable,
   VAR_FILTERED_METRICS_VARIABLE,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import {
   MetricsVariableFilterEngine,
   type MetricFilters,
@@ -42,7 +41,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
     super({
       metric,
       $variables: new SceneVariableSet({
-        variables: [new MetricsVariable(), new FilteredMetricsVariable()],
+        variables: [new FilteredMetricsVariable()],
       }),
       key: 'RelatedMetricsScene',
       body: new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }),

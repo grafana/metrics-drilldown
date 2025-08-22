@@ -15,7 +15,6 @@ import {
   SceneVariableSet,
   ScopesVariable,
   UrlSyncContextProvider,
-  VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
   type SceneObject,
@@ -37,15 +36,16 @@ import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
-import { displaySuccess, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
+import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
-import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
+import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
 import { limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
@@ -71,9 +71,6 @@ export interface DataTrailState extends SceneObjectState {
   // Synced with url
   metric?: string;
   metricSearch?: string;
-
-  histogramsLoadP: Promise<void> | null;
-  histogramsLoaded: boolean;
   nativeHistogramMetric: string;
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
@@ -83,23 +80,50 @@ export interface DataTrailState extends SceneObjectState {
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
+  private _addingFilterWithoutReportingInteraction = false;
+  private datasourceHelper = new MetricDatasourceHelper(this);
+
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
   });
 
-  protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE],
-    onReferencedVariableValueChanged: async (variable: SceneVariable) => {
-      const { name } = variable.state;
+  getUrlState(): SceneObjectUrlValues {
+    const { metric, metricSearch, nativeHistogramMetric } = this.state;
+    return {
+      metric,
+      metricSearch,
+      // store the native histogram knowledge in url for the metric scene
+      nativeHistogramMetric,
+    };
+  }
 
-      if (name === VAR_DATASOURCE) {
-        this.datasourceHelper.reset();
+  updateFromUrl(values: SceneObjectUrlValues) {
+    const stateUpdate: Partial<DataTrailState> = {};
 
-        // reset native histograms
-        this.resetNativeHistograms();
+    if (typeof values.metric === 'string') {
+      if (this.state.metric !== values.metric) {
+        // if we have a metric and we have stored in the url that it is a native histogram
+        // we can pass that info into the metric scene to generate the appropriate queries
+        let nativeHistogramMetric = false;
+        if (values.nativeHistogramMetric === '1') {
+          nativeHistogramMetric = true;
+        }
+
+        Object.assign(stateUpdate, this.getSceneUpdatesForNewMetricValue(values.metric, nativeHistogramMetric));
       }
-    },
-  });
+    } else if (values.metric == null && !this.state.embedded) {
+      stateUpdate.metric = undefined;
+      stateUpdate.topScene = new MetricsReducer();
+    }
+
+    if (typeof values.metricSearch === 'string') {
+      stateUpdate.metricSearch = values.metricSearch;
+    } else if (values.metric == null) {
+      stateUpdate.metricSearch = undefined;
+    }
+
+    this.setState(stateUpdate);
+  }
 
   public constructor(state: Partial<DataTrailState>) {
     super({
@@ -116,8 +140,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
       alertingMetrics: {},
-      histogramsLoadP: state.histogramsLoadP ?? null,
-      histogramsLoaded: state.histogramsLoaded ?? false,
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
       trailActivated: state.trailActivated ?? false,
       drawer: new SceneDrawer({}),
@@ -128,6 +150,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private onActivate() {
+    this.datasourceHelper.init();
+
     this.subscribeToConfigEvents();
 
     this.setState({ trailActivated: true });
@@ -194,7 +218,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
         reportExploreMetrics('configure_panel_opened', { metricType: getMetricType(metric) });
 
-        const metadata = await this.getMetricMetadata(metric);
+        const metadata = await this.getMetadataForMetric(metric);
 
         this.state.drawer.open({
           title: 'Configure the Prometheus function',
@@ -255,57 +279,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this._addingFilterWithoutReportingInteraction = false;
   }
 
-  private _addingFilterWithoutReportingInteraction = false;
-  private datasourceHelper = new MetricDatasourceHelper(this);
-
-  public getMetricMetadata(metric: string) {
+  public getMetadataForMetric(metric: string) {
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
 
-  public isNativeHistogram(metric: string) {
+  public async isNativeHistogram(metric: string) {
     return this.datasourceHelper.isNativeHistogram(metric);
-  }
-
-  // use this to initialize histograms in all scenes
-  public async initializeHistograms() {
-    if (this.state.histogramsLoadP) {
-      return this.state.histogramsLoadP;
-    }
-
-    if (!this.state.histogramsLoaded) {
-      try {
-        const histogramsLoadP = this.datasourceHelper.initializeHistograms();
-        this.setState({ histogramsLoadP });
-        await histogramsLoadP;
-      } catch (e) {
-        displayWarning(['Error while initializing histograms!', (e as Error).toString()]);
-      }
-
-      this.setState({
-        histogramsLoadP: null,
-        histogramsLoaded: true,
-      });
-    }
-  }
-
-  private resetNativeHistograms() {
-    this.setState({
-      histogramsLoaded: false,
-    });
   }
 
   private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
     const metric = evt.payload ?? '';
-
-    // from the metric preview panel we have the info loaded to determine that a metric is a native histogram
-    let nativeHistogramMetric = false;
-    if (this.isNativeHistogram(metric)) {
-      nativeHistogramMetric = true;
-    }
-
-    this._urlSync.performBrowserHistoryAction(() => {
-      this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
-    });
 
     // Add metric to adhoc filters baseFilter
     const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
@@ -314,6 +297,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         baseFilters: getBaseFiltersForMetric(evt.payload),
       });
     }
+
+    const nativeHistogramMetric = await this.isNativeHistogram(metric);
+
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+    });
   }
 
   private getSceneUpdatesForNewMetricValue(metric: string | undefined, nativeHistogramMetric?: boolean) {
@@ -326,44 +315,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
 
     return stateUpdate;
-  }
-
-  getUrlState(): SceneObjectUrlValues {
-    const { metric, metricSearch, nativeHistogramMetric } = this.state;
-    return {
-      metric,
-      metricSearch,
-      // store the native histogram knowledge in url for the metric scene
-      nativeHistogramMetric,
-    };
-  }
-
-  updateFromUrl(values: SceneObjectUrlValues) {
-    const stateUpdate: Partial<DataTrailState> = {};
-
-    if (typeof values.metric === 'string') {
-      if (this.state.metric !== values.metric) {
-        // if we have a metric and we have stored in the url that it is a native histogram
-        // we can pass that info into the metric scene to generate the appropriate queries
-        let nativeHistogramMetric = false;
-        if (values.nativeHistogramMetric === '1') {
-          nativeHistogramMetric = true;
-        }
-
-        Object.assign(stateUpdate, this.getSceneUpdatesForNewMetricValue(values.metric, nativeHistogramMetric));
-      }
-    } else if (values.metric == null && !this.state.embedded) {
-      stateUpdate.metric = undefined;
-      stateUpdate.topScene = new MetricsReducer();
-    }
-
-    if (typeof values.metricSearch === 'string') {
-      stateUpdate.metricSearch = values.metricSearch;
-    } else if (values.metric == null) {
-      stateUpdate.metricSearch = undefined;
-    }
-
-    this.setState(stateUpdate);
   }
 
   public getQueries(): PromQuery[] {
@@ -388,11 +339,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
     const styles = useStyles2(getStyles, headerHeight, model);
-
-    // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
-    useEffect(() => {
-      model.initializeHistograms();
-    }, [model]);
 
     useEffect(() => {
       const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
@@ -464,6 +410,7 @@ export function getTopSceneFor(metric?: string, nativeHistogram = false) {
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   let variables: SceneVariable[] = [
     new MetricsDrilldownDataSourceVariable({ initialDS }),
+    new MetricsVariable(),
     new AdHocFiltersVariable({
       key: VAR_FILTERS,
       name: VAR_FILTERS,
