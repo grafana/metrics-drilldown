@@ -11,9 +11,13 @@ import {
   type PromQuery,
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
+import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
+import { type Unsubscribable } from 'rxjs';
 
+import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
+import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../shared';
@@ -31,93 +35,74 @@ export type PrometheusRuntimeDatasource = Omit<PrometheusDatasource, 'languagePr
 };
 
 export class MetricDatasourceHelper {
-  private _trail: DataTrail;
-  private _datasource?: PrometheusRuntimeDatasource;
+  private trail: DataTrail;
+  private datasource?: PrometheusRuntimeDatasource;
+  private subs: Unsubscribable[];
 
   // Maps & Sets are efficient data structures compared to a classic JS objects
   private metricsMetadata: Map<string, PromMetricsMetadataItem> | undefined;
+  private metadataFetchP?: Promise<void>;
   private classicHistograms: Set<string> | undefined;
-  private nativeHistograms: Set<string> | undefined;
 
   constructor(trail: DataTrail) {
-    this._trail = trail;
+    this.trail = trail;
+    this.subs = [];
   }
 
-  public reset() {
-    this._datasource = undefined;
+  private async getRuntimeDatasource(): Promise<PrometheusRuntimeDatasource | undefined> {
+    if (!this.datasource) {
+      const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this.trail } });
+      this.datasource = isPrometheusDataSource(ds) ? ds : undefined;
+    }
+    return this.datasource;
+  }
+
+  public async init() {
+    for (const sub of this.subs) {
+      sub.unsubscribe();
+    }
+
+    const metricsVariable = sceneGraph.findByKeyAndType(this.trail, VAR_METRICS_VARIABLE, MetricsVariable);
+    this.subs.push(
+      metricsVariable.subscribeToState((newState, prevState) => {
+        if (!areArraysEqual(newState.options, prevState.options)) {
+          this.initializeClassicHistograms(newState.options);
+        }
+      })
+    );
+
+    const datasourceVariable = sceneGraph.findByKeyAndType(
+      this.trail,
+      VAR_DATASOURCE,
+      MetricsDrilldownDataSourceVariable
+    );
+    this.subs.push(
+      datasourceVariable.subscribeToState(async (newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          this.reset();
+        }
+      })
+    );
+
+    this.initializeClassicHistograms(metricsVariable.state.options);
+    await this.ensureMetricsMetadata();
+  }
+
+  private reset() {
+    this.datasource = undefined;
     this.metricsMetadata = undefined;
+    this.metadataFetchP = undefined;
     this.classicHistograms = undefined;
-    this.nativeHistograms = undefined;
   }
 
-  private async getDatasource() {
-    if (this._datasource) {
-      return this._datasource;
-    }
-
-    const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this._trail } });
-    if (isPrometheusDataSource(ds)) {
-      this._datasource = ds;
-    }
-
-    return this._datasource;
-  }
-
-  private async _ensureMetricsMetadata(): Promise<void> {
-    if (!this.metricsMetadata) {
-      await this._getMetricsMetadata();
-    }
-  }
-
-  private async _getMetricsMetadata(): Promise<void> {
-    const ds = await this.getDatasource();
-    if (!ds) {
-      return;
-    }
-
-    const queryMetadata = getQueryMetricsMetadata(ds);
-    let metadata = await queryMetadata();
-
-    if (!metadata) {
-      const loadMetadata = getLoadMetricsMetadata(ds, queryMetadata);
-      metadata = await loadMetadata();
-    }
-
-    this.metricsMetadata = metadata ? new Map(Object.entries(metadata)) : undefined;
-  }
-
-  public async getMetadataForMetric(metric: string) {
-    await this._ensureMetricsMetadata();
-    return this.metricsMetadata?.get(metric);
-  }
-
-  /**
-   * Identify native histograms by 2 strategies.
-   * 1. querying classic histograms and all metrics,
-   * then comparing the results and build the collection of native histograms.
-   * 2. querying all metrics and checking if the metric is a histogram type and dies not have the bucket suffix.
-   *
-   * classic histogram = test_metric_bucket
-   * native histogram = test_metric
-   */
-  public async initializeHistograms() {
-    const ds = await this.getDatasource();
-    if (!ds || this.classicHistograms) {
-      return;
-    }
-
+  private initializeClassicHistograms(metricsVariableOptions: VariableValueOption[]) {
     this.classicHistograms = new Set();
-    this.nativeHistograms = new Set();
 
-    const [allMetricsData] = await Promise.all([ds.metricFindQuery('metrics(.+)'), this._ensureMetricsMetadata()]);
+    for (const metricData of metricsVariableOptions) {
+      const name = metricData.value as string;
 
-    for (const { text } of allMetricsData) {
-      if (text.endsWith('_bucket')) {
-        this.classicHistograms.add(text);
-      }
-
-      if (this.isNativeHistogram(text)) {
-        this.nativeHistograms.add(text);
+      if (name.endsWith('_bucket')) {
+        this.classicHistograms.add(name);
       }
     }
   }
@@ -134,10 +119,8 @@ export class MetricDatasourceHelper {
    * @param metric
    * @returns boolean
    */
-  public isNativeHistogram(metric: string): boolean {
-    if (!metric) {
-      return false;
-    }
+  public async isNativeHistogram(metric: string): Promise<boolean> {
+    await this.ensureMetricsMetadata();
 
     const metricType = this.metricsMetadata?.get(metric)?.type;
     const isHistogramFromMetadata = metricType === 'histogram';
@@ -157,14 +140,42 @@ export class MetricDatasourceHelper {
     return this.classicHistograms.has(`${metric}_bucket`);
   }
 
+  private async ensureMetricsMetadata(): Promise<void> {
+    if (!this.metadataFetchP) {
+      this.metadataFetchP = this.getMetricsMetadata();
+    }
+    await this.metadataFetchP;
+  }
+
+  private async getMetricsMetadata(): Promise<void> {
+    const ds = await this.getRuntimeDatasource();
+    if (!ds) {
+      return;
+    }
+
+    const queryMetadata = getQueryMetricsMetadata(ds);
+    let metadata = await queryMetadata();
+
+    if (!metadata) {
+      const loadMetadata = getLoadMetricsMetadata(ds, queryMetadata);
+      metadata = await loadMetadata();
+    }
+
+    this.metricsMetadata = metadata ? new Map(Object.entries(metadata)) : undefined;
+  }
+
+  public async getMetadataForMetric(metric: string) {
+    await this.ensureMetricsMetadata();
+    return this.metricsMetadata?.get(metric);
+  }
+
   /**
    * Used for additional filtering for adhoc vars labels in Metrics Drilldown.
    * @param options
    * @returns
    */
   public async getTagKeys(options: DataSourceGetTagKeysOptions<PromQuery>): Promise<MetricFindValue[]> {
-    const ds = await this.getDatasource();
-
+    const ds = await this.getRuntimeDatasource();
     if (!ds) {
       return [];
     }
@@ -179,8 +190,7 @@ export class MetricDatasourceHelper {
    * @returns
    */
   public async getTagValues(options: DataSourceGetTagValuesOptions<PromQuery>) {
-    const ds = await this.getDatasource();
-
+    const ds = await this.getRuntimeDatasource();
     if (!ds) {
       return [];
     }
