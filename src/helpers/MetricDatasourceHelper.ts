@@ -85,7 +85,6 @@ export class MetricDatasourceHelper {
     );
 
     this.initializeClassicHistograms(metricsVariable.state.options);
-    await this.ensureMetricsMetadata();
   }
 
   private reset() {
