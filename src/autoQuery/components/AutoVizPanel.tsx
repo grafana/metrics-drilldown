@@ -52,7 +52,7 @@ export class AutoVizPanel extends SceneObjectBase<AutoVizPanelState> {
 
   private async getVizPanelFor(def: AutoQueryDef, metric?: string) {
     const trail = getTrailFor(this);
-    const metadata = await trail.getMetricMetadata(metric);
+    const metadata = await trail.getMetadataForMetric(metric!);
     const description = getMetricDescription(metadata);
 
     return def

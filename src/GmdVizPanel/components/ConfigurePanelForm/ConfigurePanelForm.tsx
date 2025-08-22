@@ -73,11 +73,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   private async buildBody() {
     const { metric } = this.state;
     const prefConfig = getPreferredConfigForMetric(metric);
-
-    const trail = getTrailFor(this);
-    await trail.initializeHistograms(); // force initialization
-    const isNativeHistogram = trail.isNativeHistogram(metric);
-
+    const isNativeHistogram = await getTrailFor(this).isNativeHistogram(metric);
     const presets = getConfigPresetsForMetric(metric, isNativeHistogram);
 
     // if not found in the user preferences, we use the first preset
