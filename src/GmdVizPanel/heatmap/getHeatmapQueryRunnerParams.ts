@@ -26,8 +26,9 @@ export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunne
   let fnName;
 
   if (isNativeHistogram) {
-    query = promql.rate({ expr, interval: '$__rate_interval' });
-    fnName = 'rate';
+    expr = promql.rate({ expr, interval: '$__rate_interval' });
+    query = promql.sum({ expr });
+    fnName = 'sum(rate)';
   } else {
     expr = promql.rate({ expr, interval: '$__rate_interval' });
     query = promql.sum({ expr, by: ['le'] });

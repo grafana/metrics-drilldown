@@ -26,7 +26,8 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
 
   if (isNativeHistogram) {
     expr = promql.rate({ expr, interval: '$__rate_interval' });
-    fnName = 'histogram_quantile(rate)';
+    expr = promql.sum({ expr });
+    fnName = 'histogram_quantile(sum(rate))';
   } else {
     expr = promql.rate({ expr, interval: '$__rate_interval' });
     expr = promql.sum({ expr, by: ['le'] });
