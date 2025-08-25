@@ -21,8 +21,10 @@ import { InlineBanner } from 'App/InlineBanner';
 import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
-import { GmdVizPanel, PANEL_HEIGHT, PANEL_TYPE, QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
-import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/timeseries/getTimeseriesQueryRunnerParams';
+import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
+import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
@@ -162,10 +164,15 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
     return new GmdVizPanel({
       metric,
-      panelType: PANEL_TYPE.TIMESERIES,
-      height: PANEL_HEIGHT.XL,
-      headerActions: () => [],
-      groupBy: label,
+      discardUserPrefs: true,
+      panelOptions: {
+        type: 'timeseries',
+        height: PANEL_HEIGHT.XL,
+        headerActions: () => [],
+      },
+      queryOptions: {
+        groupBy: label,
+      },
     });
   }
 
@@ -173,10 +180,12 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const { metric, label } = this.state;
     const queryParams = getTimeseriesQueryRunnerParams({
       metric,
-      matchers: [],
-      groupBy: label,
-      queryResolution: QUERY_RESOLUTION.MEDIUM,
-      addIgnoreUsageFilter: true,
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: true,
+        groupBy: label,
+      },
     });
     const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 

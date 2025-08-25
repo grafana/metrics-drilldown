@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2, type ValueMapping } from '@grafana/data';
 import {
   SceneObjectBase,
   type SceneComponentProps,
@@ -7,161 +7,172 @@ import {
   type VizPanel,
   type VizPanelState,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { useStyles2, type VizLegendOptions } from '@grafana/ui';
+import { isEqual } from 'lodash';
 import React from 'react';
 
 import { getTrailFor } from 'utils';
-import { SelectAction } from 'WingmanDataTrail/MetricVizPanel/actions/SelectAction';
 
 import { type LabelMatcher } from './buildQueryExpression';
-import { EventPanelTypeChanged } from './EventPanelTypeChanged';
-import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
-import { isHistogramMetric } from './heatmap/isHistogramMetric';
-import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
-import { buildStatushistoryPanel } from './statushistory/buildStatushistoryPanel';
-import { isUpDownMetric } from './statushistory/isUpDownMetric';
-import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
+import { EventPanelTypeChanged } from './components/EventPanelTypeChanged';
+import { SelectAction } from './components/SelectAction';
+import { getPreferredConfigForMetric } from './config/getPreferredConfigForMetric';
+import { PANEL_HEIGHT } from './config/panel-heights';
+import { type PrometheusFunction } from './config/promql-functions';
+import { QUERY_RESOLUTION } from './config/query-resolutions';
+import { isHistogramMetric } from './matchers/isHistogramMetric';
+import { isStatusUpDownMetric } from './matchers/isStatusUpDownMetric';
+import { type PanelType } from './types/available-panel-types';
+import { buildHeatmapPanel } from './types/heatmap/buildHeatmapPanel';
+import { buildPercentilesPanel } from './types/percentiles/buildPercentilesPanel';
+import { buildStatPanel } from './types/stat/buildStatPanel';
+import { buildStatushistoryPanel } from './types/statushistory/buildStatushistoryPanel';
+import { buildTimeseriesPanel } from './types/timeseries/buildTimeseriesPanel';
 
-export enum PANEL_TYPE {
-  TIMESERIES = 'TIMESERIES',
-  HEATMAP = 'HEATMAP',
-  STATUSHISTORY = 'STATUSHISTORY',
-  PERCENTILES = 'PERCENTILES',
-}
+/* Panel config */
 
-export enum PANEL_HEIGHT {
-  S = 'S',
-  M = 'M',
-  L = 'L',
-  XL = 'XL',
-}
-
-export enum QUERY_RESOLUTION {
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-}
-
-type HeaderActionsOptions = {
-  metric: string;
-  panelType: PANEL_TYPE;
+export type PanelConfig = {
+  type: PanelType;
+  title: string;
+  height: PANEL_HEIGHT;
+  headerActions: (headerActionsArgs: { metric: string; panelConfig: PanelConfig }) => VizPanelState['headerActions'];
+  fixedColorIndex?: number;
+  description?: string;
+  menu?: VizPanelState['menu'];
+  legend?: Partial<VizLegendOptions>;
+  mappings?: ValueMapping[];
 };
+
+export type PanelOptions = {
+  type?: PanelConfig['type'];
+  height?: PanelConfig['height'];
+  fixedColorIndex?: PanelConfig['fixedColorIndex'];
+  title?: PanelConfig['title'];
+  description?: PanelConfig['description'];
+  headerActions?: PanelConfig['headerActions'];
+  menu?: PanelConfig['menu'];
+  legend?: PanelConfig['legend'];
+  mappings?: PanelConfig['mappings'];
+};
+
+/* Query config */
+
+export type QueryDefs = Array<{
+  fn: PrometheusFunction;
+  params?: Record<string, any>;
+}>;
+
+export type QueryConfig = {
+  resolution: QUERY_RESOLUTION;
+  labelMatchers: LabelMatcher[];
+  addIgnoreUsageFilter: boolean;
+  groupBy?: string;
+  queries?: QueryDefs;
+};
+
+export type QueryOptions = {
+  resolution?: QueryConfig['resolution'];
+  labelMatchers?: QueryConfig['labelMatchers'];
+  groupBy?: string;
+  queries?: QueryDefs;
+};
+
+/* GmdVizPanelState */
+
+export type HistogramType = 'native' | 'classic' | 'none';
 
 export interface GmdVizPanelState extends SceneObjectState {
   metric: string;
-  title: string;
-  matchers: LabelMatcher[];
-  heightInPixels: string;
-  headerActions: (headerActionsOptions: HeaderActionsOptions) => VizPanelState['headerActions'];
-  queryResolution: QUERY_RESOLUTION;
-  menu?: VizPanelState['menu'];
-  panelType?: PANEL_TYPE;
-  fixedColor?: string;
-  isNativeHistogram?: boolean;
-  groupBy?: string;
-  description?: string;
+  histogramType: HistogramType;
+  panelConfig: PanelConfig;
+  queryConfig: QueryConfig;
   body?: VizPanel;
 }
 
-const DEFAULT_HEADER_ACTIONS_BUILDER: GmdVizPanelState['headerActions'] = ({ metric }) => [
-  new SelectAction({ metricName: metric }),
-];
-
 export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   constructor({
+    key,
     metric,
-    matchers,
-    height,
-    headerActions,
-    menu,
-    panelType,
-    fixedColor,
-    title,
-    groupBy,
-    description,
-    queryResolution,
+    panelOptions,
+    queryOptions,
+    discardUserPrefs,
   }: {
+    key?: string;
     metric: GmdVizPanelState['metric'];
-    matchers?: GmdVizPanelState['matchers'];
-    height?: PANEL_HEIGHT;
-    headerActions?: GmdVizPanelState['headerActions'];
-    menu?: GmdVizPanelState['menu'];
-    panelType?: PANEL_TYPE;
-    fixedColor?: GmdVizPanelState['fixedColor'];
-    title?: GmdVizPanelState['title'];
-    groupBy?: GmdVizPanelState['groupBy'];
-    description?: GmdVizPanelState['description'];
-    queryResolution?: QUERY_RESOLUTION;
+    panelOptions?: PanelOptions;
+    queryOptions?: QueryOptions;
+    discardUserPrefs?: boolean;
   }) {
+    const histogramType = isHistogramMetric(metric) ? 'classic' : 'none';
+    const prefConfig = discardUserPrefs ? undefined : getPreferredConfigForMetric(metric);
+
     super({
+      key,
       metric,
-      matchers: matchers || [],
-      heightInPixels: `${GmdVizPanel.getPanelHeightInPixels(height || PANEL_HEIGHT.M)}px`,
-      headerActions: headerActions || DEFAULT_HEADER_ACTIONS_BUILDER,
-      menu,
-      panelType,
-      fixedColor,
-      title: title || metric,
-      groupBy,
-      description,
-      queryResolution: queryResolution || QUERY_RESOLUTION.MEDIUM,
-      isNativeHistogram: undefined,
+      histogramType,
+      panelConfig: {
+        // we want a panel type to get a chance to render the panel as soon as possible
+        // we can't determine if it's a native histogram here because it's an async process that will be done in onActivate()
+        type: panelOptions?.type || GmdVizPanel.getDefaultPanelTypeForMetric(metric, histogramType),
+        title: metric,
+        height: PANEL_HEIGHT.M,
+        headerActions: ({ metric }) => [new SelectAction({ metric })],
+        ...panelOptions,
+        ...prefConfig?.panelOptions,
+      },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: true,
+        ...queryOptions,
+        ...prefConfig?.queryOptions,
+      },
       body: undefined,
     });
 
     this.addActivationHandler(() => {
-      this.onActivate();
+      this.onActivate(Boolean(panelOptions?.type || prefConfig?.panelOptions.type));
     });
   }
 
-  private async onActivate() {
-    const { metric, panelType } = this.state;
+  private async onActivate(discardPanelTypeUpdates: boolean) {
+    const { metric, panelConfig } = this.state;
+
+    const isNativeHistogram = await getTrailFor(this).isNativeHistogram(metric);
+    if (isNativeHistogram) {
+      this.setState({
+        histogramType: 'native',
+        panelConfig: discardPanelTypeUpdates
+          ? panelConfig
+          : { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
+      });
+    }
+
+    this.updateBody();
 
     this.subscribeToStateChanges();
     this.subscribeToEvents();
-
-    const isNativeHistogram = await getTrailFor(this).isNativeHistogram(metric);
-
-    this.setState({
-      panelType: panelType || this.getDefaultPanelType(isNativeHistogram),
-      isNativeHistogram,
-    });
   }
 
-  private getDefaultPanelType(isNativeHistogram: boolean): PANEL_TYPE {
-    const { metric } = this.state;
-
-    if (isUpDownMetric(metric)) {
-      return PANEL_TYPE.STATUSHISTORY;
+  private static getDefaultPanelTypeForMetric(metric: string, histogramType: HistogramType): PanelType {
+    if (isStatusUpDownMetric(metric)) {
+      return 'statushistory';
     }
 
-    if (isNativeHistogram || isHistogramMetric(metric)) {
-      return PANEL_TYPE.HEATMAP;
+    if (histogramType === 'classic' || histogramType === 'native') {
+      return 'heatmap';
     }
 
-    return PANEL_TYPE.TIMESERIES;
-  }
-
-  public static getPanelHeightInPixels(h: PANEL_HEIGHT): number {
-    switch (h) {
-      case PANEL_HEIGHT.S:
-        return 160;
-      case PANEL_HEIGHT.L:
-        return 260;
-      case PANEL_HEIGHT.XL:
-        return 280;
-      case PANEL_HEIGHT.M:
-      default:
-        return 220;
-    }
+    return 'timeseries';
   }
 
   private subscribeToStateChanges() {
     this.subscribeToState((newState, prevState) => {
-      if (newState.isNativeHistogram === undefined || newState.panelType === undefined) {
-        return;
-      }
-
-      if (newState.isNativeHistogram !== prevState.isNativeHistogram || newState.panelType !== prevState.panelType) {
+      if (
+        newState.histogramType !== prevState.histogramType ||
+        !isEqual(newState.panelConfig, prevState.panelConfig) ||
+        !isEqual(newState.queryConfig, prevState.queryConfig)
+      ) {
         this.updateBody();
       }
     });
@@ -169,102 +180,77 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
   private subscribeToEvents() {
     this.subscribeToEvent(EventPanelTypeChanged, (event) => {
-      // the sub in subscribeToStateChanges() above will handle updating the body
-      this.setState({ panelType: event.payload.panelType });
+      this.setState({
+        panelConfig: {
+          ...this.state.panelConfig,
+          type: event.payload.panelType,
+        },
+      });
     });
   }
 
   private updateBody() {
-    const {
-      panelType,
-      title,
-      description,
-      metric,
-      matchers,
-      headerActions,
-      menu,
-      queryResolution,
-      fixedColor,
-      groupBy,
-      isNativeHistogram,
-    } = this.state;
+    const { metric, panelConfig, queryConfig, histogramType } = this.state;
 
-    switch (panelType) {
-      case PANEL_TYPE.TIMESERIES:
+    switch (panelConfig.type) {
+      case 'timeseries':
         this.setState({
-          body: buildTimeseriesPanel({
-            title,
-            description,
-            metric,
-            matchers,
-            headerActions,
-            menu,
-            queryResolution,
-            // custom
-            fixedColor,
-            groupBy,
-          }),
+          body: buildTimeseriesPanel({ metric, panelConfig, queryConfig }),
         });
         return;
 
-      case PANEL_TYPE.HEATMAP:
+      case 'heatmap':
         this.setState({
-          body: buildHeatmapPanel({
-            title,
-            description,
-            metric,
-            matchers,
-            headerActions,
-            menu,
-            queryResolution,
-            // custom
-            isNativeHistogram,
-          }),
+          body: buildHeatmapPanel({ metric, histogramType, panelConfig, queryConfig }),
         });
         return;
 
-      case PANEL_TYPE.PERCENTILES:
+      case 'percentiles':
         this.setState({
           body: buildPercentilesPanel({
-            title,
-            description,
             metric,
-            matchers,
-            headerActions,
-            menu,
-            queryResolution,
-            // custom
-            isNativeHistogram,
+            histogramType,
+            panelConfig,
+            queryConfig,
           }),
         });
         return;
 
-      case PANEL_TYPE.STATUSHISTORY:
+      case 'statushistory':
         this.setState({
-          body: buildStatushistoryPanel({
-            title,
-            description,
-            metric,
-            matchers,
-            headerActions,
-            menu,
-            queryResolution,
-          }),
+          body: buildStatushistoryPanel({ metric, panelConfig, queryConfig }),
+        });
+        return;
+
+      case 'stat':
+        this.setState({
+          body: buildStatPanel({ metric, panelConfig, queryConfig }),
         });
         return;
 
       default:
-        throw new TypeError(`Unsupported panel type "${panelType}"!`);
+        throw new TypeError(`Unsupported panel type "${panelConfig.type}"!`);
     }
   }
 
-  public changePanelType(newPanelType: PANEL_TYPE) {
-    this.setState({ panelType: newPanelType });
+  public update(panelOptions: PanelOptions, queryOptions: QueryOptions) {
+    const { panelConfig, queryConfig } = this.state;
+
+    this.setState({
+      panelConfig: {
+        ...panelConfig,
+        ...panelOptions,
+      },
+      queryConfig: {
+        ...queryConfig,
+        ...queryOptions,
+      },
+    });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {
-    const { body, heightInPixels } = model.useState();
-    const styles = useStyles2(getStyles, heightInPixels);
+    const { body, panelConfig } = model.useState();
+    const styles = useStyles2(getStyles, panelConfig.height);
 
     return (
       <div className={styles.container} data-testid="gmd-vizpanel">
@@ -274,11 +260,11 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, heightInPixels: string) {
+function getStyles(theme: GrafanaTheme2, height: PANEL_HEIGHT) {
   return {
     container: css`
       width: 100%;
-      height: ${heightInPixels};
+      height: ${height}px;
     `,
   };
 }

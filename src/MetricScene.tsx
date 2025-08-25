@@ -52,6 +52,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       body: state.body ?? new MetricGraphScene({ metric: state.metric }),
       autoQuery,
       queryDef: state.queryDef ?? autoQuery.main,
+
       ...state,
     });
 
@@ -68,6 +69,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.setState({ relatedLogsCount: count });
     });
 
+    this.subscribeToEvents();
+  }
+
+  private subscribeToEvents() {
     if (config.featureToggles.enableScopesInMetricsExplore) {
       // Push the scopes change event to the tabs
       // The event is not propagated because the tabs are not part of the scene graph
