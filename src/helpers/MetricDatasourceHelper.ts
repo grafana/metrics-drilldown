@@ -14,7 +14,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
 import { type Unsubscribable } from 'rxjs';
 
-import { isHistogramMetric } from 'GmdVizPanel/heatmap/isHistogramMetric';
+import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
@@ -125,15 +125,12 @@ export class MetricDatasourceHelper {
       return false;
     }
 
-    // metric is not a classic histogram
-
     if (this.classicHistograms?.has(`${metric}_bucket`)) {
       return true;
     }
 
-    await this.ensureMetricsMetadata();
-
-    return this.metricsMetadata?.get(metric)?.type === 'histogram';
+    const metadata = await this.getMetadataForMetric(metric);
+    return metadata?.type === 'histogram';
   }
 
   private async ensureMetricsMetadata(): Promise<void> {

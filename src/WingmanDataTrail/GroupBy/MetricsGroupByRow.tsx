@@ -16,9 +16,10 @@ import { Button, CollapsableSection, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { SelectAction } from 'GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { VAR_FILTERS } from 'shared';
-import { getColorByIndex } from 'utils';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
@@ -96,14 +97,21 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
+          const metric = option.value as string;
+
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
+              metric,
               vizPanelInGridItem: new GmdVizPanel({
-                metric: option.value as string,
-                matchers: [{ key: labelName, operator: '=', value: labelValue }],
-                fixedColor: getColorByIndex(colorIndex),
+                metric,
+                panelOptions: {
+                  fixedColorIndex: colorIndex,
+                  headerActions: () => [new SelectAction({ metric }), new ConfigurePanelAction({ metric })],
+                },
+                queryOptions: {
+                  labelMatchers: [{ key: labelName, operator: '=', value: labelValue }],
+                },
               }),
-              metric: option.value as string,
             }),
           });
         },
