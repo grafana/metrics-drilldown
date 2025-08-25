@@ -69,14 +69,14 @@ function buildHistogramQueries({
     : [{ fn: 'histogram_quantile', params: { percentiles: DEFAULT_PERCENTILES } }];
 
   const queries: SceneDataQuery[] = [];
-  const newExpr = promql.sum({
-    expr: promql.rate({ expr }),
-    by: isNativeHistogram ? [] : ['le'],
-  });
+
+  const newExpr = isNativeHistogram
+    ? promql.sum({ expr: promql.rate({ expr }) })
+    : promql.sum({ expr: promql.rate({ expr }), by: ['le'] });
 
   for (const { fn, params } of queryDefs) {
     const entry = PROMQL_FUNCTIONS.get(fn)!;
-    const fnName = `${entry.name}(rate)`;
+    const fnName = entry.name;
     const percentiles = params?.percentiles || DEFAULT_PERCENTILES;
 
     for (const percentile of percentiles) {

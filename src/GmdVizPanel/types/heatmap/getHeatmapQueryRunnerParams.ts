@@ -26,13 +26,9 @@ export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunne
 
   const expr = promql.rate({
     expr: expressionToString(expression),
-    interval: '$__rate_interval',
   });
 
-  const query = promql.sum({
-    expr,
-    by: isNativeHistogram ? [] : ['le'],
-  });
+  const query = isNativeHistogram ? promql.sum({ expr }) : promql.sum({ expr, by: ['le'] });
 
   return {
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
