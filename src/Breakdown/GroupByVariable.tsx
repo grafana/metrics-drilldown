@@ -29,6 +29,11 @@ export class GroupByVariable extends QueryVariable {
     this.subscribeToState((newState, prevState) => {
       if (newState.value && newState.value !== prevState.value) {
         reportExploreMetrics('groupby_label_changed', { label: String(newState.value) });
+        return;
+      }
+
+      if (newState.options !== prevState.options && newState.options.find((o) => o.value === 'le')) {
+        this.setState({ options: newState.options.filter((o) => o.value !== 'le') });
       }
     });
 
