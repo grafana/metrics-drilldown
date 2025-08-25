@@ -14,6 +14,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
 import { type Unsubscribable } from 'rxjs';
 
+import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
@@ -110,7 +111,7 @@ export class MetricDatasourceHelper {
    * Identify native histograms by 2 strategies.
    * 1. querying classic histograms and all metrics,
    * then comparing the results and build the collection of native histograms.
-   * 2. querying all metrics and checking if the metric is a histogram type and dies not have the bucket suffix.
+   * 2. querying all metrics and checking if the metric is a histogram type and does not have the bucket suffix.
    *
    * classic histogram = test_metric_bucket
    * native histogram = test_metric
@@ -119,24 +120,17 @@ export class MetricDatasourceHelper {
    * @returns boolean
    */
   public async isNativeHistogram(metric: string): Promise<boolean> {
-    await this.ensureMetricsMetadata();
-
-    const metricType = this.metricsMetadata?.get(metric)?.type;
-    const isHistogramFromMetadata = metricType === 'histogram';
-
-    const metricSuffix = metric.split('_').pop();
-    const isNotClassicFromName = metricSuffix !== 'bucket';
-
-    if (isHistogramFromMetadata && isNotClassicFromName) {
-      return true;
-    }
-
-    if (!this.classicHistograms) {
+    const isClassicHistogram = isHistogramMetric(metric);
+    if (isClassicHistogram) {
       return false;
     }
 
-    // check for comparison when there is overlap between native and classic histograms
-    return this.classicHistograms.has(`${metric}_bucket`);
+    if (this.classicHistograms?.has(`${metric}_bucket`)) {
+      return true;
+    }
+
+    const metadata = await this.getMetadataForMetric(metric);
+    return metadata?.type === 'histogram';
   }
 
   private async ensureMetricsMetadata(): Promise<void> {
