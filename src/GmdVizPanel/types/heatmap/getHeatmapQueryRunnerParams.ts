@@ -24,15 +24,15 @@ export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunne
     addIgnoreUsageFilter: queryConfig.addIgnoreUsageFilter,
   });
 
-  let expr = expressionToString(expression);
-  let query;
+  const expr = promql.rate({
+    expr: expressionToString(expression),
+    interval: '$__rate_interval',
+  });
 
-  if (isNativeHistogram) {
-    query = promql.rate({ expr, interval: '$__rate_interval' });
-  } else {
-    expr = promql.rate({ expr, interval: '$__rate_interval' });
-    query = promql.sum({ expr, by: ['le'] });
-  }
+  const query = promql.sum({
+    expr,
+    by: isNativeHistogram ? [] : ['le'],
+  });
 
   return {
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
