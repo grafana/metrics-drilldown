@@ -5,7 +5,7 @@ import { debounce, isEqual } from 'lodash';
 import { createBookmarkSavedNotification } from './utils';
 import { DataTrail } from '../DataTrail';
 import { PREF_KEYS } from '../UserPreferences/pref-keys';
-import { userPreferences } from '../UserPreferences/userPreferences';
+import { userStorage } from '../UserPreferences/userStorage';
 import { newMetricsTrail } from '../utils';
 
 export const RECENT_TRAILS_KEY = 'grafana.trails.recent';
@@ -47,8 +47,8 @@ export class TrailStore {
       const serializedRecent = this._recent
         .slice(0, MAX_RECENT_TRAILS)
         .map((trail) => this._serializeTrail(trail.resolve()));
-      userPreferences.setItem(RECENT_TRAILS_KEY, serializedRecent);
-      userPreferences.setItem(PREF_KEYS.BOOKMARKS, this._bookmarks);
+      userStorage.setItem(RECENT_TRAILS_KEY, serializedRecent);
+      userStorage.setItem(PREF_KEYS.BOOKMARKS, this._bookmarks);
       this._lastModified = Date.now();
     };
 
@@ -63,7 +63,7 @@ export class TrailStore {
 
   private _loadRecentTrailsFromStorage() {
     const list: Array<SceneObjectRef<DataTrail>> = [];
-    const serializedTrails: SerializedTrail[] = userPreferences.getItem(RECENT_TRAILS_KEY) || [];
+    const serializedTrails: SerializedTrail[] = userStorage.getItem(RECENT_TRAILS_KEY) || [];
     for (const t of serializedTrails) {
       const trail = this._deserializeTrail(t);
       list.push(trail.getRef());
@@ -72,7 +72,7 @@ export class TrailStore {
   }
 
   private _loadBookmarksFromStorage() {
-    const list: Array<DataTrailBookmark | SerializedTrail> = userPreferences.getItem(PREF_KEYS.BOOKMARKS) || [];
+    const list: Array<DataTrailBookmark | SerializedTrail> = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
 
     return list.map((item) => {
       if (isSerializedTrail(item)) {

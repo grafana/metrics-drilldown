@@ -151,7 +151,7 @@ type Interactions = {
   };
   // User changes the panel type for a histogram metric (e.g., from heatmap to percentiles)
   histogram_panel_type_changed: { panelType: PanelType };
-  // App migrated some legacy user prefs (see src/UserPreferences/userPreferences.ts)
+  // App migrated some legacy user prefs (see src/UserPreferences/userStorage.ts)
   user_preferences_migrated: {};
   // User opens the "Configure panel"
   configure_panel_opened: { metricType: MetricType };

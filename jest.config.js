@@ -28,7 +28,7 @@ module.exports = {
     '\\.svg$': '<rootDir>/src/test/mocks/svgMock.js',
     '^.+/logger/logger$': '<rootDir>/src/test/mocks/loggerMock.ts',
     '^.+/interactions$': '<rootDir>/src/test/mocks/interactionsMock.ts',
-    '^.+/userPreferences$': '<rootDir>/src/test/mocks/userPreferences.ts',
+    '^.+/userStorage$': '<rootDir>/src/test/mocks/userStorage.ts',
   },
   transform: {
     '^.+\\.(t|j)sx?$': [

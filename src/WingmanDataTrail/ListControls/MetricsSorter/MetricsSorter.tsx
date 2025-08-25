@@ -18,7 +18,7 @@ import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
 import { logger } from '../../../tracking/logger/logger';
 import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
-import { userPreferences } from '../../../UserPreferences/userPreferences';
+import { userStorage } from '../../../UserPreferences/userStorage';
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
 
 const MAX_RECENT_METRICS = 6;
@@ -44,7 +44,7 @@ export function addRecentMetric(metricName: string): void {
 
     // Keep only the most recent metrics
     const updatedMetrics = filteredMetrics.slice(0, MAX_RECENT_METRICS);
-    userPreferences.setItem(PREF_KEYS.RECENT_METRICS, updatedMetrics);
+    userStorage.setItem(PREF_KEYS.RECENT_METRICS, updatedMetrics);
   } catch (error) {
     const errorObject = error instanceof Error ? error : new Error(String(error));
 
@@ -61,7 +61,7 @@ export function addRecentMetric(metricName: string): void {
  */
 export function getRecentMetrics(): RecentMetric[] {
   try {
-    const recentMetrics: RecentMetric[] = userPreferences.getItem(PREF_KEYS.RECENT_METRICS) || [];
+    const recentMetrics: RecentMetric[] = userStorage.getItem(PREF_KEYS.RECENT_METRICS) || [];
     if (!recentMetrics.length) {
       return [];
     }
@@ -74,7 +74,7 @@ export function getRecentMetrics(): RecentMetric[] {
 
     // If any metrics were removed, update storage
     if (validMetrics.length !== recentMetrics.length) {
-      userPreferences.setItem(PREF_KEYS.RECENT_METRICS, validMetrics);
+      userStorage.setItem(PREF_KEYS.RECENT_METRICS, validMetrics);
     }
 
     return validMetrics;
