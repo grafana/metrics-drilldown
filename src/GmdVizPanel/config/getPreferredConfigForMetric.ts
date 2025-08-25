@@ -1,7 +1,7 @@
 import { AVAILABLE_PANEL_TYPES } from 'GmdVizPanel/types/available-panel-types';
 import { reportExploreMetrics } from 'interactions';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
-import { userPreferences } from 'UserPreferences/userPreferences';
+import { userStorage } from 'UserPreferences/userStorage';
 import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { CONFIG_PRESETS, type PanelConfigPreset } from './presets/types';
@@ -11,7 +11,7 @@ const availableConfigPresetIds = new Set<string>(Object.values(CONFIG_PRESETS));
 const availablePanelTypes = new Set<string>(AVAILABLE_PANEL_TYPES);
 
 export function getPreferredConfigForMetric(metric: string): PanelConfigPreset | undefined {
-  const userPrefs = userPreferences.getItem(PREF_KEYS.METRIC_PREFS) || {};
+  const userPrefs = userStorage.getItem(PREF_KEYS.METRIC_PREFS) || {};
   const metricConfig = userPrefs[metric]?.config;
 
   if (!metricConfig) {
@@ -22,7 +22,7 @@ export function getPreferredConfigForMetric(metric: string): PanelConfigPreset |
     reportExploreMetrics('invalid_metric_config', { metricConfig });
 
     delete userPrefs[metric]?.config;
-    userPreferences.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
+    userStorage.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
 
     displayWarning([
       `Invalid configuration found for metric ${metric}!`,
