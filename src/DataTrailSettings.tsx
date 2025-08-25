@@ -8,7 +8,7 @@ import { reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { getTrailFor } from './utils';
 
-export interface DataTrailSettingsState extends SceneObjectState {
+interface DataTrailSettingsState extends SceneObjectState {
   stickyMainGraph?: boolean;
   isOpen?: boolean;
 }

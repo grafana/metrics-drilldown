@@ -7,8 +7,3 @@ export const ROUTES = {
   Trail: 'trail',
   Drilldown: 'drilldown',
 };
-
-export const DATASOURCE_REF = {
-  uid: 'gdev-testdata',
-  type: 'testdata',
-};

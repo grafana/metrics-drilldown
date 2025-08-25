@@ -399,7 +399,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
-export function getTopSceneFor(metric?: string, nativeHistogram = false) {
+function getTopSceneFor(metric?: string, nativeHistogram = false) {
   if (metric) {
     return new MetricScene({ metric, nativeHistogram });
   } else {

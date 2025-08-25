@@ -2,7 +2,7 @@ import { BusEventWithPayload } from '@grafana/data';
 
 import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
 
-export interface EventApplyPanelConfigPayload {
+interface EventApplyPanelConfigPayload {
   metric: string;
   config: PanelConfigPreset;
   restoreDefault?: boolean;

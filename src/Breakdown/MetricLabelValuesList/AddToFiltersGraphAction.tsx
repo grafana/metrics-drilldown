@@ -7,7 +7,7 @@ import { VAR_FILTERS } from 'shared';
 import { getTrailFor } from 'utils';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
-export interface AddToFiltersGraphActionState extends SceneObjectState {
+interface AddToFiltersGraphActionState extends SceneObjectState {
   labelName: string;
   labelValue: string;
 }

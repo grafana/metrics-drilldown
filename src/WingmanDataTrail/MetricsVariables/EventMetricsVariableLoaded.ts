@@ -1,7 +1,7 @@
 import { BusEventWithPayload } from '@grafana/data';
 import { type VariableValueOption } from '@grafana/scenes';
 
-export interface EventMetricsVariableLoadedPayload {
+interface EventMetricsVariableLoadedPayload {
   key: string;
   options: VariableValueOption[];
 }

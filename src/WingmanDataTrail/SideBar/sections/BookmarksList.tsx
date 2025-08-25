@@ -30,7 +30,7 @@ function goToUrlForTrail(trail: any) {
   navigationEvents.emit(trail);
 }
 
-export interface BookmarksListState extends SideBarSectionState {}
+interface BookmarksListState extends SideBarSectionState {}
 
 export class BookmarksList extends SceneObjectBase<BookmarksListState> {
   constructor({

@@ -10,7 +10,7 @@ import { getTrailStore, type DataTrailBookmark } from './TrailStore/TrailStore';
 import { getMetricName } from './utils';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
-export type Props = {
+type Props = {
   trail?: DataTrail;
   bookmark?: DataTrailBookmark;
   onSelect: () => void;
@@ -99,7 +99,7 @@ export function DataTrailCard(props: Readonly<Props>) {
   );
 }
 
-export function getStyles(theme: GrafanaTheme2) {
+function getStyles(theme: GrafanaTheme2) {
   return {
     metricValue: css({
       display: 'inline',

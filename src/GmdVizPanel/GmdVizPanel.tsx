@@ -81,7 +81,7 @@ export type QueryOptions = {
 
 export type HistogramType = 'native' | 'classic' | 'none';
 
-export interface GmdVizPanelState extends SceneObjectState {
+interface GmdVizPanelState extends SceneObjectState {
   metric: string;
   histogramType: HistogramType;
   panelConfig: PanelConfig;

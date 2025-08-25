@@ -17,7 +17,7 @@ import React from 'react';
 import { SelectLabelAction } from 'Breakdown/MetricLabelsList/SelectLabelAction';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { PanelMenu } from 'Menu/PanelMenu';
-import { MDP_METRIC_PREVIEW, trailDS } from 'shared';
+import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
@@ -78,7 +78,7 @@ export class LabelVizPanel extends SceneObjectBase<LabelVizPanelState> {
     const data = new SceneDataTransformer({
       $data: new SceneQueryRunner({
         datasource: trailDS,
-        maxDataPoints: MDP_METRIC_PREVIEW,
+        maxDataPoints: 250,
         queries: [
           {
             refId: `${metric}-by-${label}`,

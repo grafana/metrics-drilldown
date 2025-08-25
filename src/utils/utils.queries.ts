@@ -22,6 +22,6 @@ export function isSceneQueryRunner(input: SceneObject | null | undefined): input
   return typeof input !== 'undefined' && input !== null && 'state' in input && 'runQueries' in input;
 }
 
-export function isSceneDataTransformer(input: SceneObject | null | undefined): input is SceneDataTransformer {
+function isSceneDataTransformer(input: SceneObject | null | undefined): input is SceneDataTransformer {
   return typeof input !== 'undefined' && input !== null && 'state' in input && 'transformations' in input.state;
 }

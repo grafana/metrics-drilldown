@@ -105,7 +105,7 @@ class Parser {
   }
 }
 
-export interface Node {
+interface Node {
   groups: Map<string, Node>;
   values: string[];
   descendants: number;

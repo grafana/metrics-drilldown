@@ -1,8 +1,8 @@
 import { PanelBuilders, SceneQueryRunner } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode } from '@grafana/schema';
 
-import { getPerSecondRateUnit, getUnit } from 'autoQuery/units';
 import { type HistogramType, type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
+import { getPerSecondRateUnit, getUnit } from 'GmdVizPanel/units/getUnit';
 import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 

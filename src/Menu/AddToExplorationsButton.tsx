@@ -22,7 +22,7 @@ export const investigationsPluginId = 'grafana-investigations-app';
 export const extensionPointId = `${pluginJson.id}/investigation/v1`;
 export const addToExplorationsButtonLabel = 'add panel to exploration';
 
-export interface AddToExplorationButtonState extends SceneObjectState {
+interface AddToExplorationButtonState extends SceneObjectState {
   frame?: DataFrame;
   dsUid?: string;
   labelName?: string;

@@ -36,7 +36,7 @@ interface SideBarState extends SceneObjectState {
   sectionValues: Map<string, string[]>;
 }
 
-export const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix'] as const;
+const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix'] as const;
 type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 
 export class SideBar extends SceneObjectBase<SideBarState> {

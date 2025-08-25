@@ -9,7 +9,7 @@ type MetricType = 'metrics' | 'rules';
  * The `level` component might be empty. Where `level` and `operations` can contain
  * underscores and alphanumeric characters. The `metric` part can contain any character, but can't be empty.
  */
-export function isRecordingRule(value: string): boolean {
+function isRecordingRule(value: string): boolean {
   // Matches patterns like:
   // - instance_path:requests:rate5m
   // - path:requests:rate5m

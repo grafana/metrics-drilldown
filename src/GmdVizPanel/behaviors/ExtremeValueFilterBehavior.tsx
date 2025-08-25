@@ -8,10 +8,10 @@ import { type Unsubscribable } from 'rxjs';
 
 import { reportExploreMetrics } from 'interactions';
 
+import { buildPrometheusQuery, isNonRateQueryFunction, type NonRateQueryFunction } from './buildPrometheusQuery';
 import { VAR_FILTERS_EXPR, VAR_METRIC_EXPR } from '../../shared';
 import { logger } from '../../tracking/logger/logger';
 import { processLabelMatcher } from '../../utils/utils.promql';
-import { buildPrometheusQuery, isNonRateQueryFunction, type NonRateQueryFunction } from '../buildPrometheusQuery';
 
 /**
  * A stateless function that detects when all data in a query result is NaN
@@ -169,7 +169,7 @@ type ParseQueryForRebuildResult = { success: true; queryParts: QueryParts } | { 
 /**
  * Parses a PromQL query to extract parameters for rebuilding with filtering
  */
-export function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunner): ParseQueryForRebuildResult {
+function parseQueryForRebuild(query: string, queryRunner: SceneQueryRunner): ParseQueryForRebuildResult {
   let queryExpression = query;
   const hasTemplateVariables = query.includes(VAR_METRIC_EXPR) || query.includes(VAR_FILTERS_EXPR);
 

@@ -1,6 +1,6 @@
 import { BusEventWithPayload } from '@grafana/data';
 
-export interface EventMetricsVariableDeactivatedPayload {
+interface EventMetricsVariableDeactivatedPayload {
   key: string;
 }
 

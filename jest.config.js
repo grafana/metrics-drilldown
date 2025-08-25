@@ -17,6 +17,7 @@ const esModules = [
   'memoize',
   'mimic-function',
   '@wojtekmaj/date-utils',
+  'leven',
 ];
 
 module.exports = {
@@ -24,10 +25,10 @@ module.exports = {
   transformIgnorePatterns: [nodeModulesToTransform(esModules)],
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
-    '\\.svg$': '<rootDir>/src/mocks/svgMock.js',
-    '^.+/logger/logger$': '<rootDir>/src/mocks/loggerMock.ts',
-    '^.+/interactions$': '<rootDir>/src/mocks/interactionsMock.ts',
-    '^.+/userStorage$': '<rootDir>/src/mocks/userStorage.ts',
+    '\\.svg$': '<rootDir>/src/test/mocks/svgMock.js',
+    '^.+/logger/logger$': '<rootDir>/src/test/mocks/loggerMock.ts',
+    '^.+/interactions$': '<rootDir>/src/test/mocks/interactionsMock.ts',
+    '^.+/userStorage$': '<rootDir>/src/test/mocks/userStorage.ts',
   },
   transform: {
     '^.+\\.(t|j)sx?$': [

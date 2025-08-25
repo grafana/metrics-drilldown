@@ -2,7 +2,7 @@ import { BusEventWithPayload } from '@grafana/data';
 
 import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
 
-export interface EventPanelTypeChangedPayload {
+interface EventPanelTypeChangedPayload {
   panelType: PanelType;
 }
 

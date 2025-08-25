@@ -1,8 +1,8 @@
 import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
-import { extremeValueFilterBehavior } from 'autoQuery/behaviors/ExtremeValueFilterBehavior';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
+import { extremeValueFilterBehavior } from 'GmdVizPanel/behaviors/ExtremeValueFilterBehavior';
 import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';

@@ -2,7 +2,7 @@ import { BusEventWithPayload } from '@grafana/data';
 
 import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
-export interface EventFiltersChangedPayload {
+interface EventFiltersChangedPayload {
   type: keyof MetricFilters;
   filters: string[];
 }

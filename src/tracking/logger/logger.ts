@@ -17,7 +17,7 @@ export type ErrorContext = Record<string, string>;
  * Used throughout the application for consistent logging and error reporting.
  */
 
-export class Logger {
+class Logger {
   #environment: Environment | null;
 
   constructor() {

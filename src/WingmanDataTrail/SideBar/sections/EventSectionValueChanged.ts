@@ -1,6 +1,6 @@
 import { BusEventWithPayload } from '@grafana/data';
 
-export interface EventSectionValueChangedPayload {
+interface EventSectionValueChangedPayload {
   key: string;
   values: string[];
 }
