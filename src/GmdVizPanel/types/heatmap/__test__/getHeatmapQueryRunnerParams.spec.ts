@@ -18,7 +18,7 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
     expect(result.queries).toStrictEqual([
       {
         refId: 'grafana_database_all_migrations_duration_seconds-heatmap',
-        expr: 'rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters}}[$__rate_interval])',
+        expr: 'sum(rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters}}[$__rate_interval]))',
         format: 'heatmap',
         fromExploreMetrics: true,
       },
