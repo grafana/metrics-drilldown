@@ -1,5 +1,6 @@
 import { RESPONSIVE_CONSTANTS } from './constants';
-import { VisibleRadioOptionsResult } from '../types';
+
+import type { VisibleRadioOptionsResult } from '../types';
 
 /**
  * Calculates which radio button options can fit within the available width
