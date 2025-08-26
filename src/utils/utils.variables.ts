@@ -1,16 +1,11 @@
 import {
   type AdHocFiltersVariable,
-  type ConstantVariable,
   type CustomVariable,
   type QueryVariable,
   type SceneVariable,
 } from '@grafana/scenes';
 
 type MaybeVariable = SceneVariable | null | undefined;
-
-export function isConstantVariable(variable: MaybeVariable): variable is ConstantVariable {
-  return variable !== null && variable?.state.type === 'constant';
-}
 
 export function isAdHocFiltersVariable(variable: MaybeVariable): variable is AdHocFiltersVariable {
   return variable !== null && variable?.state.type === 'adhoc';

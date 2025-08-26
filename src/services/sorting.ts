@@ -16,7 +16,7 @@ import { reportExploreMetrics } from '../interactions';
 import { getLabelValueFromDataFrame } from './levels';
 
 export type SortSeriesByOption = 'alphabetical' | 'alphabetical-reversed' | 'outliers' | ReducerID.stdDev;
-export type SortSeriesDirection = 'asc' | 'desc';
+type SortSeriesDirection = 'asc' | 'desc';
 
 // Alphabetical sort
 const sortAlphabetical = (series: DataFrame[], direction: SortSeriesDirection = 'asc') => {

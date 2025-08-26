@@ -3,12 +3,13 @@ import { setPluginLinksHook } from '@grafana/runtime';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { mockPluginLinkExtension } from 'test/mocks/plugin';
+
 import {
   AddToExplorationButton,
   addToExplorationsButtonLabel,
   investigationsPluginId,
 } from './AddToExplorationsButton';
-import { mockPluginLinkExtension } from '../mocks/plugin';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),

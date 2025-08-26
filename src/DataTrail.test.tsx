@@ -6,8 +6,8 @@ import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene';
-import { DataSourceType, MockDataSourceSrv } from './mocks/datasource';
 import { MetricSelectedEvent, VAR_FILTERS } from './shared';
+import { DataSourceType, MockDataSourceSrv } from './test/mocks/datasource';
 import { activateFullSceneTree } from './utils/utils.testing';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 

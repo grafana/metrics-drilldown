@@ -2,11 +2,11 @@
 import { setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
-import { DataSourceType, MockDataSourceSrv } from 'mocks/datasource';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { DataTrail } from '../DataTrail';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper';
+import { DataSourceType, MockDataSourceSrv } from '../test/mocks/datasource';
 
 async function setup() {
   const dataSourceSrv = new MockDataSourceSrv({

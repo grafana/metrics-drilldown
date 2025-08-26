@@ -6,7 +6,7 @@ const nonRateQueryFunctions = new Set(['avg', 'min', 'max'] as const);
 export type NonRateQueryFunction = typeof nonRateQueryFunctions extends Set<infer T> ? T : never;
 export const isNonRateQueryFunction = (value: string): value is NonRateQueryFunction =>
   nonRateQueryFunctions.has(value as NonRateQueryFunction);
-export const DEFAULT_NON_RATE_QUERY_FUNCTION: NonRateQueryFunction = 'avg';
+const DEFAULT_NON_RATE_QUERY_FUNCTION: NonRateQueryFunction = 'avg';
 
 export interface BuildPrometheusQueryParams {
   metric: string;
@@ -18,7 +18,7 @@ export interface BuildPrometheusQueryParams {
   filterExtremeValues?: boolean;
 }
 
-export function getPromqlFunction(
+function getPromqlFunction(
   isRateQuery: boolean,
   nonRateQueryFunction: NonRateQueryFunction = DEFAULT_NON_RATE_QUERY_FUNCTION
 ): NonRateQueryFunction | 'sum' {

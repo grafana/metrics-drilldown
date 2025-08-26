@@ -89,11 +89,11 @@ interface MetricsSorterState extends SceneObjectState {
   inputControls: SceneObject;
 }
 
-export const sortByOptions: VariableValueOption[] = [
+const sortByOptions: VariableValueOption[] = [
   { label: 'Default', value: 'default' },
   { label: 'Dashboard Usage', value: 'dashboard-usage' },
   { label: 'Alerting Usage', value: 'alerting-usage' },
-];
+] as const;
 
 export const VAR_WINGMAN_SORT_BY = 'metrics-reducer-sort-by';
 
@@ -193,7 +193,7 @@ export function sortMetricsByCount(metrics: string[], counts: Record<string, num
  * @param metrics Array of metric names
  * @returns Sorted array of metric names in alphabetical order
  */
-export function sortMetricsAlphabetically(metrics: string[]): string[] {
+function sortMetricsAlphabetically(metrics: string[]): string[] {
   return [...metrics].sort((a, b) => localeCompare(a, b));
 }
 

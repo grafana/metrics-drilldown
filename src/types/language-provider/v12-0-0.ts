@@ -11,7 +11,7 @@ import { type BackendSrvRequest } from '@grafana/runtime';
 import { type PrometheusRuntimeDatasource } from '../../helpers/MetricDatasourceHelper';
 import { type PromQLLabelMatcher } from '../../utils/utils.promql';
 
-export interface PromQlLanguageProviderTwelveDotZero extends LanguageProvider {
+interface PromQlLanguageProviderTwelveDotZero extends LanguageProvider {
   histogramMetrics: string[];
   metrics: string[];
   metricsMetadata?: PromMetricsMetadata;

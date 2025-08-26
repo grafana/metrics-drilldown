@@ -1,9 +1,8 @@
-import { AdHocFiltersVariable, SceneObjectRef } from '@grafana/scenes';
+import { AdHocFiltersVariable } from '@grafana/scenes';
 
-import { DataTrail } from './DataTrail';
+import { type DataTrail } from './DataTrail';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { getTrailStore } from './TrailStore/TrailStore';
-import { getDatasourceForNewTrail, limitAdhocProviders } from './utils';
+import { limitAdhocProviders } from './utils';
 
 jest.mock('./TrailStore/TrailStore', () => ({
   getTrailStore: jest.fn(),
@@ -128,44 +127,5 @@ describe('limitAdhocProviders', () => {
         });
       }
     );
-  });
-});
-
-describe('getDatasourceForNewTrail', () => {
-  beforeEach(() => {
-    (getTrailStore as jest.Mock).mockImplementation(() => ({
-      bookmarks: [],
-      recent: [],
-    }));
-    getListSpy.mockReturnValue([
-      { uid: 'prom1', isDefault: true },
-      { uid: 'prom2', isDefault: false },
-    ]);
-  });
-
-  it('should return the most recent exploration data source', () => {
-    const trail = new DataTrail({ key: '1', metric: 'select me', initialDS: 'prom2' });
-    const trailWithResolveMethod = new SceneObjectRef(trail);
-    (getTrailStore as jest.Mock).mockImplementation(() => ({
-      bookmarks: [],
-      recent: [trailWithResolveMethod],
-    }));
-    const result = getDatasourceForNewTrail();
-    expect(result).toBe('prom2');
-  });
-
-  it('should return the default Prometheus data source if no previous exploration exists', () => {
-    const result = getDatasourceForNewTrail();
-    expect(result).toBe('prom1');
-  });
-
-  it('should return the most recently added Prom data source if no default exists and no recent exploration', () => {
-    getListSpy.mockReturnValue([
-      { uid: 'newProm', isDefault: false },
-      { uid: 'prom1', isDefault: false },
-      { uid: 'prom2', isDefault: false },
-    ]);
-    const result = getDatasourceForNewTrail();
-    expect(result).toBe('newProm');
   });
 });

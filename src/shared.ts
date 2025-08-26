@@ -2,15 +2,13 @@ import { BusEventBase, BusEventWithPayload } from '@grafana/data';
 import { ConstantVariable } from '@grafana/scenes';
 import { VariableHide } from '@grafana/schema';
 
-export const TRAILS_ROUTE = '/explore/metrics/trail';
 export const HOME_ROUTE = '/explore/metrics';
 
 export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
-export const VAR_METRIC = 'metric';
+const VAR_METRIC = 'metric';
 export const VAR_METRIC_EXPR = '${metric}';
 export const VAR_GROUP_BY = 'groupby';
-export const VAR_GROUP_BY_EXP = '${groupby}';
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
 export const VAR_LOGS_DATASOURCE = 'logsDs';
@@ -18,12 +16,8 @@ export const VAR_LOGS_DATASOURCE_EXPR = '${logsDs}';
 export const VAR_OTHER_METRIC_FILTERS = 'other_metric_filters';
 
 export const LOGS_METRIC = '$__logs__';
-export const KEY_SQR_METRIC_VIZ_QUERY = 'sqr-metric-viz-query';
 
 export const trailDS = { uid: VAR_DATASOURCE_EXPR };
-
-export const MDP_METRIC_PREVIEW = 250;
-export const MDP_METRIC_OVERVIEW = 500;
 
 export type MakeOptional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 

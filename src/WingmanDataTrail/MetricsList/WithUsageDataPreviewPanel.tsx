@@ -18,12 +18,11 @@ import {
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import {
-  METRICS_VIZ_PANEL_HEIGHT,
-  METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
-} from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
 
 import { UsageData } from './UsageData';
+
+export const VIZ_PANEL_HEIGHT = '220px';
+export const VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW = '260px';
 
 type SortBy = Exclude<SortingOption, 'related'>;
 
@@ -134,8 +133,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     const gridLayout = sceneGraph.getAncestor(this, SceneCSSGridLayout);
     const currentGridLayoutHeight = gridLayout?.state.autoRows;
 
-    const expectedPanelHeight =
-      sortBy === 'default' ? METRICS_VIZ_PANEL_HEIGHT : METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW;
+    const expectedPanelHeight = sortBy === 'default' ? VIZ_PANEL_HEIGHT : VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW;
 
     if (currentGridLayoutHeight !== expectedPanelHeight) {
       gridLayout.setState({ autoRows: expectedPanelHeight });
