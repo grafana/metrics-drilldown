@@ -8,7 +8,7 @@ export const isNonRateQueryFunction = (value: string): value is NonRateQueryFunc
   nonRateQueryFunctions.has(value as NonRateQueryFunction);
 const DEFAULT_NON_RATE_QUERY_FUNCTION: NonRateQueryFunction = 'avg';
 
-interface BuildPrometheusQueryParams {
+export interface BuildPrometheusQueryParams {
   metric: string;
   filters: AdHocVariableFilter[];
   isRateQuery: boolean;
