@@ -85,5 +85,12 @@
         "description": "A metrics label breakdown view from the Metrics Drilldown app."
       }
     ]
-  }
+  },
+  "featureToggles": [
+    {
+      "name": "responsiveBreakdownSelector",
+      "description": "Enable responsive dual-interface for breakdown selector",
+      "stage": "alpha"
+    }
+  ]
 }
