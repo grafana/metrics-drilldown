@@ -1,28 +1,37 @@
 import { css } from '@emotion/css';
-import React, { useMemo } from 'react';
 
-import type { GrafanaTheme2, AdHocFilter } from '@grafana/data';
+import type { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import {
   sceneGraph,
   SceneObjectBase,
   type QueryVariable,
   type SceneComponentProps,
 } from '@grafana/scenes';
-import { Button, Field, RadioButtonGroup, Select, useStyles2 } from '@grafana/ui';
+import { Button, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
+import React, { memo, useCallback, useMemo } from 'react';
 
-import { reportExploreMetrics } from '../../../interactions';
-import { ALL_VARIABLE_VALUE } from '../../../services/variables';
-import { VAR_FILTERS, VAR_GROUP_BY } from '../../../shared';
-import { isAdHocFiltersVariable, isQueryVariable } from '../../../utils/utils.variables';
+import { reportExploreMetrics } from '../../interactions';
+import { ALL_VARIABLE_VALUE } from '../../services/variables';
+import { VAR_FILTERS, VAR_GROUP_BY } from '../../shared';
+import { logger } from '../../tracking/logger/logger';
+import { isAdHocFiltersVariable, isQueryVariable } from '../../utils/utils.variables';
+
+import { useLabelFiltering } from './hooks/useLabelFiltering';
 import { useResizeObserver } from './hooks/useResizeObserver';
 import { useTextMeasurement } from './hooks/useTextMeasurement';
-import { useLabelFiltering } from './hooks/useLabelFiltering';
+
 import type { ResponsiveGroupBySelectorState } from './types';
 import { DEFAULT_FONT_SIZE } from './utils/constants';
 import { prioritizeLabels } from './utils/labelPriority';
 import { calculateVisibleRadioOptions } from './utils/widthCalculations';
 
 export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBySelectorState> {
+  // Memoized variable references to avoid repeated lookups
+  private _groupByVariable?: QueryVariable;
+  private _filtersVariable?: any;
+  private _lastVariableCheck = 0;
+  private readonly VARIABLE_CACHE_TTL = 1000; // 1 second cache
+
   constructor() {
     super({
       availableWidth: 0,
@@ -34,56 +43,64 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
   }
 
   public getGroupByVariable(): QueryVariable {
-    const groupByVariable = sceneGraph.lookupVariable(VAR_GROUP_BY, this)!;
-    if (!isQueryVariable(groupByVariable)) {
-      throw new Error('Group by variable not found');
+    const now = Date.now();
+    if (!this._groupByVariable || (now - this._lastVariableCheck) > this.VARIABLE_CACHE_TTL) {
+      const groupByVariable = sceneGraph.lookupVariable(VAR_GROUP_BY, this)!;
+      if (!isQueryVariable(groupByVariable)) {
+        throw new Error('Group by variable not found');
+      }
+      this._groupByVariable = groupByVariable;
+      this._lastVariableCheck = now;
     }
-    return groupByVariable;
+    return this._groupByVariable;
   }
 
-  private getCurrentFilters(): AdHocFilter[] {
-    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    if (isAdHocFiltersVariable(filtersVariable)) {
-      return filtersVariable.state.filters;
+  private getCurrentFilters(): AdHocVariableFilter[] {
+    const now = Date.now();
+    if (!this._filtersVariable || (now - this._lastVariableCheck) > this.VARIABLE_CACHE_TTL) {
+      this._filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+      this._lastVariableCheck = now;
+    }
+    
+    if (isAdHocFiltersVariable(this._filtersVariable)) {
+      return this._filtersVariable.state.filters;
     }
     return [];
   }
 
   public onRadioChange = (value: string) => {
-    reportExploreMetrics('breakdown_radio_selected', {
+    const startTime = performance.now();
+    
+    reportExploreMetrics('groupby_label_changed', {
       label: value,
-      availableWidth: this.state.availableWidth,
-      totalOptions: this.state.allLabels.length,
     });
 
     const groupByVariable = this.getGroupByVariable();
     groupByVariable.changeValueTo(value);
-  };
-
-  public onDropdownChange = (selected: { value: string } | null) => {
-    const value = selected?.value ?? ALL_VARIABLE_VALUE;
-
-    reportExploreMetrics('breakdown_dropdown_selected', {
-      label: value,
-      availableWidth: this.state.availableWidth,
-      totalOptions: this.state.allLabels.length,
-    });
-
-    const groupByVariable = this.getGroupByVariable();
-    groupByVariable.changeValueTo(value);
+    
+    const endTime = performance.now();
+    if (endTime - startTime > 16) { // More than one frame
+      logger.warn('ResponsiveGroupBySelector: Radio change took', endTime - startTime, 'ms');
+    }
   };
 
   public onSelectAll = () => {
-    reportExploreMetrics('breakdown_all_selected', {
-      availableWidth: this.state.availableWidth,
-      totalOptions: this.state.allLabels.length,
+    const startTime = performance.now();
+    
+    reportExploreMetrics('groupby_label_changed', {
+      label: 'all',
     });
 
     const groupByVariable = this.getGroupByVariable();
     groupByVariable.changeValueTo(ALL_VARIABLE_VALUE);
+    
+    const endTime = performance.now();
+    if (endTime - startTime > 16) {
+      logger.warn('ResponsiveGroupBySelector: Select all took', endTime - startTime, 'ms');
+    }
   };
 
-  public static readonly Component = ({ model }: SceneComponentProps<ResponsiveGroupBySelector>) => {
+  public static readonly Component = memo(function ResponsiveGroupBySelectorComponent({ model }: SceneComponentProps<ResponsiveGroupBySelector>) {
     const { fontSize } = model.useState();
     const styles = useStyles2(getStyles);
     const { containerRef, availableWidth } = useResizeObserver();
@@ -94,19 +111,47 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
     const currentFilters = model.getCurrentFilters();
 
     // Convert options to string array and get current selection
-    const allLabels = useMemo(() => options.map(opt => opt.value as string), [options]);
-    const selectedLabel = value === ALL_VARIABLE_VALUE ? null : (value as string);
+    const allLabels = useMemo(() => {
+      const startTime = performance.now();
+      const result = options.map(opt => opt.value as string);
+      const endTime = performance.now();
+      if (endTime - startTime > 5) {
+        logger.warn('ResponsiveGroupBySelector: allLabels calculation took', endTime - startTime, 'ms');
+      }
+      return result;
+    }, [options]);
+    
+    const selectedLabel = useMemo(() => {
+      return value === ALL_VARIABLE_VALUE ? null : (value as string);
+    }, [value]);
 
     // Filter labels based on current state
     const filteredLabels = useLabelFiltering(allLabels, currentFilters, selectedLabel);
+    
+    // Prioritize labels and calculate visibility with performance monitoring
+    const prioritizationResult = useMemo(() => {
+      const startTime = performance.now();
+      const result = prioritizeLabels(filteredLabels);
+      const endTime = performance.now();
+      if (endTime - startTime > 5) {
+        logger.warn('ResponsiveGroupBySelector: prioritizeLabels took', endTime - startTime, 'ms');
+      }
+      return result;
+    }, [filteredLabels]);
 
-    // Prioritize labels and calculate visibility
-    const { commonLabels, otherLabels } = prioritizeLabels(filteredLabels);
-    const { visibleLabels, hiddenLabels } = calculateVisibleRadioOptions(
-      commonLabels,
-      availableWidth,
-      measureText
-    );
+    const { commonLabels, otherLabels } = prioritizationResult;
+    
+    const visibilityResult = useMemo(() => {
+      const startTime = performance.now();
+      const result = calculateVisibleRadioOptions(commonLabels, availableWidth, measureText);
+      const endTime = performance.now();
+      if (endTime - startTime > 10) {
+        logger.warn('ResponsiveGroupBySelector: calculateVisibleRadioOptions took', endTime - startTime, 'ms');
+      }
+      return result;
+    }, [commonLabels, availableWidth, measureText]);
+
+    const { visibleLabels, hiddenLabels } = visibilityResult;
 
     // Prepare dropdown options
     const dropdownOptions = useMemo(() => {
@@ -116,8 +161,14 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
       }));
     }, [hiddenLabels, otherLabels]);
 
-    // Determine if selected label is in dropdown
-    const isSelectedInDropdown = selectedLabel && !visibleLabels.includes(selectedLabel);
+    // Memoized event handlers
+    const handleRadioChange = useCallback((value: string) => {
+      model.onRadioChange(value);
+    }, [model]);
+
+    const handleSelectAll = useCallback(() => {
+      model.onSelectAll();
+    }, [model]);
 
     return (
       <Field label="Group by">
@@ -128,30 +179,27 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
               size="sm"
               options={visibleLabels.map(label => ({ label, value: label }))}
               value={selectedLabel && visibleLabels.includes(selectedLabel) ? selectedLabel : undefined}
-              onChange={model.onRadioChange}
+              onChange={handleRadioChange}
               className={styles.radioGroup}
             />
           )}
 
-          {/* Dropdown for Other/Hidden Labels */}
+          {/* Placeholder for dropdown - will be enhanced in future iterations */}
           {dropdownOptions.length > 0 && (
-            <Select
-              value={isSelectedInDropdown ? selectedLabel : null}
-              placeholder="Other labels"
-              options={dropdownOptions}
-              onChange={model.onDropdownChange}
+            <Button
+              variant="secondary"
+              size="sm"
               className={styles.dropdown}
-              isClearable
-              virtualized
-              maxMenuHeight={300}
-            />
+            >
+              Other labels ({dropdownOptions.length})
+            </Button>
           )}
 
           {/* "All Labels" Option */}
           <Button
             variant={selectedLabel === null ? "primary" : "secondary"}
             size="sm"
-            onClick={model.onSelectAll}
+            onClick={handleSelectAll}
             className={styles.allButton}
           >
             All Labels
@@ -159,7 +207,7 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
         </div>
       </Field>
     );
-  };
+  });
 }
 
 function getStyles(theme: GrafanaTheme2) {

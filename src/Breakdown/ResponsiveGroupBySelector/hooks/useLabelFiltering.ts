@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { AdHocFilter } from '@grafana/data';
+import type { AdHocVariableFilter } from '@grafana/data';
 
 /**
  * Hook for filtering labels based on current application state
@@ -11,7 +11,7 @@ import type { AdHocFilter } from '@grafana/data';
  */
 export function useLabelFiltering(
   allLabels: string[],
-  currentFilters: AdHocFilter[],
+  currentFilters: AdHocVariableFilter[],
   selectedLabel: string | null
 ) {
   return useMemo(() => {
