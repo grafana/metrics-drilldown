@@ -16,17 +16,9 @@ export function useLabelFiltering(
 ) {
   return useMemo(() => {
     return allLabels.filter(label => {
-      // Remove already filtered labels (with = or != operators)
-      if (currentFilters.some(f => f.key === label && (f.operator === '=' || f.operator === '!='))) {
-        return false;
-      }
-
-      // Remove currently selected label from options
-      if (label === selectedLabel) {
-        return false;
-      }
-
-      return true;
+      // Remove already filtered labels (with = or != operators) and currently selected label
+      return !(currentFilters.some(f => f.key === label && (f.operator === '=' || f.operator === '!=')) || 
+               label === selectedLabel);
     });
   }, [allLabels, currentFilters, selectedLabel]);
 }

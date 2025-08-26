@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
 import { measureText } from '@grafana/ui';
+import { useCallback } from 'react';
 
 /**
  * Hook for measuring text width using Grafana's measureText utility

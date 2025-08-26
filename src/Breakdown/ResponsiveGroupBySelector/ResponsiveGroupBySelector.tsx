@@ -1,6 +1,4 @@
 import { css } from '@emotion/css';
-
-import type { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -13,17 +11,17 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { reportExploreMetrics } from '../../interactions';
 import { ALL_VARIABLE_VALUE } from '../../services/variables';
 import { VAR_FILTERS, VAR_GROUP_BY } from '../../shared';
-import { logger } from '../../tracking/logger/logger';
-import { isAdHocFiltersVariable, isQueryVariable } from '../../utils/utils.variables';
-
 import { useLabelFiltering } from './hooks/useLabelFiltering';
 import { useResizeObserver } from './hooks/useResizeObserver';
 import { useTextMeasurement } from './hooks/useTextMeasurement';
-
-import type { ResponsiveGroupBySelectorState } from './types';
 import { DEFAULT_FONT_SIZE } from './utils/constants';
 import { prioritizeLabels } from './utils/labelPriority';
 import { calculateVisibleRadioOptions } from './utils/widthCalculations';
+import { logger } from '../../tracking/logger/logger';
+import { isAdHocFiltersVariable, isQueryVariable } from '../../utils/utils.variables';
+
+import type { ResponsiveGroupBySelectorState } from './types';
+import type { AdHocVariableFilter, GrafanaTheme2 } from '@grafana/data';
 
 export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBySelectorState> {
   // Memoized variable references to avoid repeated lookups
@@ -61,7 +59,7 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
       this._filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
       this._lastVariableCheck = now;
     }
-    
+
     if (isAdHocFiltersVariable(this._filtersVariable)) {
       return this._filtersVariable.state.filters;
     }
@@ -70,14 +68,14 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
 
   public onRadioChange = (value: string) => {
     const startTime = performance.now();
-    
+
     reportExploreMetrics('groupby_label_changed', {
       label: value,
     });
 
     const groupByVariable = this.getGroupByVariable();
     groupByVariable.changeValueTo(value);
-    
+
     const endTime = performance.now();
     if (endTime - startTime > 16) { // More than one frame
       logger.warn('ResponsiveGroupBySelector: Radio change took', endTime - startTime, 'ms');
@@ -86,14 +84,14 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
 
   public onSelectAll = () => {
     const startTime = performance.now();
-    
+
     reportExploreMetrics('groupby_label_changed', {
       label: 'all',
     });
 
     const groupByVariable = this.getGroupByVariable();
     groupByVariable.changeValueTo(ALL_VARIABLE_VALUE);
-    
+
     const endTime = performance.now();
     if (endTime - startTime > 16) {
       logger.warn('ResponsiveGroupBySelector: Select all took', endTime - startTime, 'ms');
@@ -120,14 +118,14 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
       }
       return result;
     }, [options]);
-    
+
     const selectedLabel = useMemo(() => {
       return value === ALL_VARIABLE_VALUE ? null : (value as string);
     }, [value]);
 
     // Filter labels based on current state
     const filteredLabels = useLabelFiltering(allLabels, currentFilters, selectedLabel);
-    
+
     // Prioritize labels and calculate visibility with performance monitoring
     const prioritizationResult = useMemo(() => {
       const startTime = performance.now();
@@ -140,7 +138,7 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
     }, [filteredLabels]);
 
     const { commonLabels, otherLabels } = prioritizationResult;
-    
+
     const visibilityResult = useMemo(() => {
       const startTime = performance.now();
       const result = calculateVisibleRadioOptions(commonLabels, availableWidth, measureText);
