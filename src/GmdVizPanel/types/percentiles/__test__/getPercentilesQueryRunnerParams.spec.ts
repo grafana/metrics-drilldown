@@ -20,13 +20,13 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
     expect(result.queries).toStrictEqual([
       {
         refId: 'go_goroutines-p99-quantile',
-        expr: 'quantile(0.99, go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters}})',
+        expr: 'quantile(0.99, go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters:raw}})',
         legendFormat: '99th Percentile',
         fromExploreMetrics: true,
       },
       {
         refId: 'go_goroutines-p90-quantile',
-        expr: 'quantile(0.9, go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters}})',
+        expr: 'quantile(0.9, go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters:raw}})',
         legendFormat: '90th Percentile',
         fromExploreMetrics: true,
       },
@@ -50,13 +50,13 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
     expect(result.queries).toStrictEqual([
       {
         refId: 'go_gc_heap_frees_bytes_total-p99-quantile(rate)',
-        expr: 'quantile(0.99, rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters}}[$__rate_interval]))',
+        expr: 'quantile(0.99, rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
         legendFormat: '99th Percentile',
         fromExploreMetrics: true,
       },
       {
         refId: 'go_gc_heap_frees_bytes_total-p50-quantile(rate)',
-        expr: 'quantile(0.5, rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters}}[$__rate_interval]))',
+        expr: 'quantile(0.5, rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
         legendFormat: '50th Percentile',
         fromExploreMetrics: true,
       },
@@ -80,7 +80,7 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
     expect(result.queries).toStrictEqual([
       {
         refId: 'grafana_database_all_migrations_duration_seconds-p50-histogram_quantile',
-        expr: 'histogram_quantile(0.5,sum(rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters}}[$__rate_interval])))',
+        expr: 'histogram_quantile(0.5,sum(rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters:raw}}[$__rate_interval])))',
         legendFormat: '50th Percentile',
         fromExploreMetrics: true,
       },
@@ -104,7 +104,7 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
     expect(result.queries).toStrictEqual([
       {
         refId: 'go_gc_heap_allocs_by_size_bytes_bucket-p75-histogram_quantile',
-        expr: 'histogram_quantile(0.75,sum by (le) (rate(go_gc_heap_allocs_by_size_bytes_bucket{success="true", __ignore_usage__="", ${filters}}[$__rate_interval])))',
+        expr: 'histogram_quantile(0.75,sum by (le) (rate(go_gc_heap_allocs_by_size_bytes_bucket{success="true", __ignore_usage__="", ${filters:raw}}[$__rate_interval])))',
         legendFormat: '75th Percentile',
         fromExploreMetrics: true,
       },
