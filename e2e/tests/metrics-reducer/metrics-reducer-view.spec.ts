@@ -1,9 +1,9 @@
 import { type Scope } from '@grafana/data';
 
-import { UI_TEXT } from '../../src/constants/ui';
-import { getGrafanaUrl } from '../config/playwright.config.common';
-import { expect, test } from '../fixtures';
-import { type SortByOptionNames } from '../fixtures/views/MetricsReducerView';
+import { UI_TEXT } from '../../../src/constants/ui';
+import { getGrafanaUrl } from '../../config/playwright.config.common';
+import { expect, test } from '../../fixtures';
+import { type SortByOptionNames } from '../../fixtures/views/MetricsReducerView';
 
 test.describe('Metrics reducer view', () => {
   test.beforeEach(async ({ metricsReducerView }) => {
@@ -13,90 +13,6 @@ test.describe('Metrics reducer view', () => {
   // eslint-disable-next-line playwright/expect-expect
   test('Core UI elements', async ({ metricsReducerView }) => {
     await metricsReducerView.assertCoreUI();
-  });
-
-  test.describe('Panel types', () => {
-    const TEST_DATA: Array<{
-      category: string;
-      namesAndPresets: Array<[string, string, string[]]>;
-    }> = [
-      {
-        category: 'gauges and counters',
-        namesAndPresets: [
-          // gauge with no unit
-          ['go_goroutines', 'Standard deviation', []],
-          // gauge with "bytes" unit
-          ['go_memstats_heap_inuse_bytes', 'Minimum and maximum', []],
-          // counter / click on P99 and P90 => click on P99, P90 and P75 => P75 and P50 are selected
-          ['prometheus_http_requests_total', 'Percentiles', ['P99', 'P90', 'P75']],
-        ],
-      },
-      {
-        category: 'histograms',
-        namesAndPresets: [
-          // native histogram / click on P99 => P90 and P50 are selected
-          ['grafana_database_all_migrations_duration_seconds', 'Percentiles', ['P99']],
-          // non-native histogram / click on P99 and P90 => P50 is selected
-          ['http_server_duration_milliseconds_bucket', 'Percentiles', ['P99', 'P90']],
-        ],
-      },
-      {
-        category: 'others',
-        namesAndPresets: [
-          // age
-          ['grafana_alerting_ticker_last_consumed_tick_timestamp_seconds', 'Average age', []],
-          // info
-          ['pyroscope_build_info', 'Sum', []],
-          // status up/down
-          ['up', 'Stat with latest value', []],
-        ],
-      },
-    ];
-
-    // eslint-disable-next-line playwright/expect-expect
-    test('All panel types', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
-      const searchText = TEST_DATA.flatMap(({ namesAndPresets }) =>
-        namesAndPresets.map(([metricName]) => `^${metricName}$`)
-      ).join(',');
-      await metricsReducerView.quickSearch.enterText(searchText);
-      await metricsReducerView.assertMetricsList();
-
-      await expectScreenshotInCurrentGrafanaVersion(
-        metricsReducerView.getMetricsList(),
-        'metric-list-with-all-types.png'
-      );
-    });
-
-    for (const { category, namesAndPresets } of TEST_DATA) {
-      test(`Each metric type in its corresponding panel (${category})`, async ({
-        metricsReducerView,
-        metricSceneView,
-        expectScreenshotInCurrentGrafanaVersion,
-      }) => {
-        const searchText = namesAndPresets.map(([metricName]) => `^${metricName}$`).join(',');
-        await metricsReducerView.quickSearch.enterText(searchText);
-
-        for (const [metricName, presetName, presetParams] of namesAndPresets) {
-          await metricsReducerView.selectMetricPanel(metricName);
-
-          await metricSceneView.assertMainViz(metricName);
-          await expect(metricSceneView.getMainViz()).toHaveScreenshot(`metric-scene-main-viz-${metricName}.png`);
-
-          await metricSceneView.clickPanelConfigureButton();
-          await expect(metricSceneView.getConfigureSlider()).toHaveScreenshot(
-            `metric-scene-configure-slider-${category}-${metricName}.png`
-          );
-          await metricSceneView.selectAndApplyConfigPreset(presetName, presetParams);
-
-          await metricSceneView.goBack();
-        }
-
-        await expectScreenshotInCurrentGrafanaVersion(
-          metricsReducerView.getMetricsList(),
-          `metric-list-after-configure-${category}.png`
-        );
-      });
-    }
   });
 
   test.describe('Sidebar', () => {

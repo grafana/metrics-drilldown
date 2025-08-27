@@ -1,8 +1,9 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type ValueMapping } from '@grafana/data';
+import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } from '@grafana/data';
 import {
   SceneObjectBase,
   type SceneComponentProps,
+  type SceneDataProvider,
   type SceneObjectState,
   type VizPanel,
   type VizPanelState,
@@ -167,6 +168,29 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private subscribeToStateChanges() {
+    const { histogramType, body, panelConfig } = this.state;
+
+    // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
+    // we give another chance to display it properly by looking into the data frame type received
+    if (histogramType === 'none') {
+      const bodySub = (body?.state.$data as SceneDataProvider)?.subscribeToState((newState) => {
+        if (newState.data?.state !== LoadingState.Done) {
+          return;
+        }
+
+        const dataFrameType = newState.data.series[0]?.meta?.type;
+        if (!dataFrameType) {
+          return;
+        }
+
+        if (dataFrameType === DataFrameType.HeatmapCells) {
+          this.setState({ panelConfig: { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' } });
+        }
+
+        bodySub.unsubscribe();
+      });
+    }
+
     this.subscribeToState((newState, prevState) => {
       if (
         newState.histogramType !== prevState.histogramType ||

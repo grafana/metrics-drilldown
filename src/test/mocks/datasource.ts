@@ -37,6 +37,7 @@ class MockDataSource implements DataSourceApi {
       queryLabelKeys: jest.fn(async () => []),
       // eslint-disable-next-line no-unused-vars
       fetchLabelValues: jest.fn(async (_: any) => []),
+      request: jest.fn(async () => ({})),
     };
   }
 

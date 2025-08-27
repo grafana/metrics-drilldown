@@ -23,7 +23,7 @@ async function setup() {
   const metricsVariable = sceneGraph.findByKeyAndType(trail, VAR_METRICS_VARIABLE, MetricsVariable);
   const metricDatasourceHelper = new MetricDatasourceHelper(trail);
 
-  await metricDatasourceHelper.init();
+  metricDatasourceHelper.init();
 
   return {
     metricsVariable,
@@ -46,8 +46,8 @@ describe('MetricDatasourceHelper', () => {
       test('returns true if the type in its metadata is "histogram"', async () => {
         const { runtimeDatasource, metricDatasourceHelper } = await setup();
 
-        runtimeDatasource.languageProvider.queryMetricsMetadata.mockResolvedValue({
-          native_histogram: { type: 'histogram' },
+        runtimeDatasource.languageProvider.request.mockResolvedValue({
+          native_histogram: [{ type: 'histogram' }],
         });
 
         const result = await metricDatasourceHelper.isNativeHistogram('native_histogram');
