@@ -17,7 +17,7 @@ export function useLabelFiltering(
   return useMemo(() => {
     return allLabels.filter(label => {
       // Remove already filtered labels (with = or != operators) and currently selected label
-      return !(currentFilters.some(f => f.key === label && (f.operator === '=' || f.operator === '!=')) || 
+      return !(currentFilters.some(f => f.key === label && (f.operator === '=' || f.operator === '!=')) ||
                label === selectedLabel);
     });
   }, [allLabels, currentFilters, selectedLabel]);
