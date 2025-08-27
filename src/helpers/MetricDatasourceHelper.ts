@@ -338,7 +338,11 @@ export class MetricDatasourceHelper {
       return;
     }
 
-    const response = await (ds.languageProvider as any).request('/api/v1/status/buildinfo');
+    // request is part of the base Prometheus language provider interface so we shouldn't have to worry about versioning here
+    const response = await (ds.languageProvider as PrometheusDatasource['languageProvider']).request(
+      '/api/v1/status/buildinfo'
+    );
+
     if (response.buildDate) {
       response.buildDate = response.buildDate.replace(/(\d{4})(\d{2})(\d{2})(.+)/, '$1-$2-$3');
     }
