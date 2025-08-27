@@ -15,7 +15,7 @@ import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
-import { isResponsiveBreakdownEnabled, ResponsiveGroupBySelector } from './ResponsiveGroupBySelector';
+import { ResponsiveGroupBySelector } from './ResponsiveGroupBySelector';
 
 export interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
@@ -72,11 +72,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     });
   }
 
-  private useResponsiveSelector(): boolean {
-    // Feature flag for responsive breakdown selector
-    return isResponsiveBreakdownEnabled();
-  }
-
   public getResponsiveSelector(): ResponsiveGroupBySelector {
     const { responsiveSelector } = this.state;
     if (!responsiveSelector) {
@@ -89,7 +84,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
-    const useResponsive = model.useResponsiveSelector();
+    const useResponsive = true;
 
     return (
       <div className={styles.container}>

@@ -5,7 +5,7 @@ import {
   type QueryVariable,
   type SceneComponentProps,
 } from '@grafana/scenes';
-import { Button, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
+import { Button, Combobox, Field, RadioButtonGroup, useStyles2, type ComboboxOption } from '@grafana/ui';
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { reportExploreMetrics } from '../../interactions';
@@ -82,6 +82,23 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
     }
   };
 
+  public onDropdownChange = (option: ComboboxOption | null) => {
+    const startTime = performance.now();
+    const value = option?.value ?? ALL_VARIABLE_VALUE;
+
+    reportExploreMetrics('groupby_label_changed', {
+      label: value,
+    });
+
+    const groupByVariable = this.getGroupByVariable();
+    groupByVariable.changeValueTo(value);
+
+    const endTime = performance.now();
+    if (endTime - startTime > 16) {
+      logger.warn('ResponsiveGroupBySelector: Dropdown change took', endTime - startTime, 'ms');
+    }
+  };
+
   public onSelectAll = () => {
     const startTime = performance.now();
 
@@ -151,7 +168,7 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
 
     const { visibleLabels, hiddenLabels } = visibilityResult;
 
-    // Prepare dropdown options
+    // Prepare dropdown options for Combobox
     const dropdownOptions = useMemo(() => {
       return [...hiddenLabels, ...otherLabels].map(label => ({
         label,
@@ -159,9 +176,21 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
       }));
     }, [hiddenLabels, otherLabels]);
 
+    // Determine current dropdown value
+    const dropdownValue = useMemo(() => {
+      if (selectedLabel && !visibleLabels.includes(selectedLabel)) {
+        return selectedLabel;
+      }
+      return null;
+    }, [selectedLabel, visibleLabels]);
+
     // Memoized event handlers
     const handleRadioChange = useCallback((value: string) => {
       model.onRadioChange(value);
+    }, [model]);
+
+    const handleDropdownChange = useCallback((option: ComboboxOption | null) => {
+      model.onDropdownChange(option);
     }, [model]);
 
     const handleSelectAll = useCallback(() => {
@@ -182,15 +211,17 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
             />
           )}
 
-          {/* Placeholder for dropdown - will be enhanced in future iterations */}
+          {/* Dropdown for Other/Hidden Labels */}
           {dropdownOptions.length > 0 && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className={styles.dropdown}
-            >
-              Other labels ({dropdownOptions.length})
-            </Button>
+            <div className={styles.dropdown}>
+              <Combobox
+                value={dropdownValue}
+                onChange={handleDropdownChange}
+                options={dropdownOptions}
+                placeholder="Other labels"
+                isClearable
+              />
+            </div>
           )}
 
           {/* "All Labels" Option */}
@@ -228,11 +259,11 @@ function getStyles(theme: GrafanaTheme2) {
       },
     }),
     dropdown: css({
-      minWidth: theme.spacing(22),
-      maxWidth: theme.spacing(30),
+      minWidth: theme.spacing(18),
+      maxWidth: theme.spacing(25),
 
       [theme.breakpoints.down('sm')]: {
-        minWidth: theme.spacing(16),
+        minWidth: theme.spacing(14),
       },
     }),
     allButton: css({
