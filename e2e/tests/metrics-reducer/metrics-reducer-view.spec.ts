@@ -141,6 +141,7 @@ test.describe('Metrics reducer view', () => {
     test('Default sorting shows recent metrics first, then alphabetical', async ({
       page,
       metricsReducerView,
+      metricSceneView,
       expectScreenshotInCurrentGrafanaVersion,
     }) => {
       await metricsReducerView.assertSelectedSortBy('Default');
@@ -159,7 +160,8 @@ test.describe('Metrics reducer view', () => {
       for (const metric of metricsToSelect) {
         await metricsReducerView.quickSearch.enterText(metric);
         await metricsReducerView.selectMetricPanel(metric);
-        await page.goBack();
+        await metricSceneView.assertMainViz(metric);
+        await metricSceneView.goBack();
       }
 
       await metricsReducerView.quickSearch.clear();
