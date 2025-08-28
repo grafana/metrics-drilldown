@@ -1,5 +1,5 @@
 import { PanelBuilders, SceneQueryRunner } from '@grafana/scenes';
-import { SortOrder, TooltipDisplayMode } from '@grafana/schema';
+import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { type HistogramType, type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { getPerSecondRateUnit, getUnit } from 'GmdVizPanel/units/getUnit';
@@ -20,11 +20,13 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
   const queryParams = getPercentilesQueryRunnerParams({ metric, histogramType, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
-  const $data = new SceneQueryRunner({
-    datasource: trailDS,
-    maxDataPoints: queryParams.maxDataPoints,
-    queries: queryParams.queries,
-  });
+  const $data =
+    queryConfig.data ||
+    new SceneQueryRunner({
+      datasource: trailDS,
+      maxDataPoints: queryParams.maxDataPoints,
+      queries: queryParams.queries,
+    });
 
   const startColorIndex = panelConfig.fixedColorIndex || 0;
 
@@ -32,10 +34,11 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
     .setTitle(panelConfig.title)
     .setDescription(panelConfig.description)
     .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
-    .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
+    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
     .setCustomFieldConfig('fillOpacity', 9)
     .setOverrides((b) => {

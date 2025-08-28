@@ -1,5 +1,5 @@
 import { LoadingState } from '@grafana/data';
-import { type SceneDataProvider, type VizPanel } from '@grafana/scenes';
+import { SceneDataTransformer, sceneGraph, type SceneDataProvider, type VizPanel } from '@grafana/scenes';
 
 import { EventTimeseriesDataReceived } from '../events/EventTimeseriesDataReceived';
 
@@ -9,15 +9,35 @@ import { EventTimeseriesDataReceived } from '../events/EventTimeseriesDataReceiv
  */
 export function publishTimeseriesData() {
   return (vizPanel: VizPanel) => {
-    const data = vizPanel.state.$data?.state.data;
+    let $data = sceneGraph.getData(vizPanel);
+    if ($data instanceof SceneDataTransformer) {
+      $data = $data.state.$data as SceneDataProvider;
+    }
+    const { data } = $data.state;
 
-    if (data?.state === LoadingState.Done) {
-      vizPanel.publishEvent(new EventTimeseriesDataReceived({ series: data.series }), true);
+    if (data?.state === LoadingState.Done && data.series?.length) {
+      vizPanel.publishEvent(
+        new EventTimeseriesDataReceived({
+          panelKey: vizPanel.state.key as string,
+          series: data.series,
+        }),
+        true
+      );
     }
 
-    (vizPanel.state.$data as SceneDataProvider).subscribeToState((newState, prevState) => {
-      if (newState.data?.state === LoadingState.Done && newState.data?.series !== prevState.data?.series) {
-        vizPanel.publishEvent(new EventTimeseriesDataReceived({ series: newState.data.series }), true);
+    ($data as SceneDataProvider).subscribeToState((newState, prevState) => {
+      if (
+        newState.data?.state === LoadingState.Done &&
+        newState.data.series?.length &&
+        newState.data?.series !== prevState.data?.series
+      ) {
+        vizPanel.publishEvent(
+          new EventTimeseriesDataReceived({
+            panelKey: vizPanel.state.key as string,
+            series: newState.data.series,
+          }),
+          true
+        );
       }
     });
   };
