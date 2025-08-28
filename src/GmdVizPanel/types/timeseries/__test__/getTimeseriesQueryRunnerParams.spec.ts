@@ -19,7 +19,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       expect(result.queries).toStrictEqual([
         {
           refId: 'go_goroutines-avg',
-          expr: 'avg(go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters}})',
+          expr: 'avg(go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters:raw}})',
           legendFormat: 'avg',
           fromExploreMetrics: true,
         },
@@ -41,7 +41,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       expect(result.queries).toStrictEqual([
         {
           refId: 'go_gc_heap_frees_bytes_total-sum(rate)',
-          expr: 'sum(rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters}}[$__rate_interval]))',
+          expr: 'sum(rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
           legendFormat: 'sum(rate)',
           fromExploreMetrics: true,
         },
@@ -66,7 +66,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       expect(result.queries).toStrictEqual([
         {
           refId: 'go_goroutines-by-job',
-          expr: 'avg by (job) (go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters}})',
+          expr: 'avg by (job) (go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters:raw}})',
           legendFormat: '{{job}}',
           fromExploreMetrics: true,
         },
@@ -89,7 +89,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       expect(result.queries).toStrictEqual([
         {
           refId: 'go_gc_heap_frees_bytes_total-by-instance',
-          expr: 'sum by (instance) (rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters}}[$__rate_interval]))',
+          expr: 'sum by (instance) (rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
           legendFormat: '{{instance}}',
           fromExploreMetrics: true,
         },

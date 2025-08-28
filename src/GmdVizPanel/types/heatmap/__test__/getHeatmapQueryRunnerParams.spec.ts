@@ -18,7 +18,7 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
     expect(result.queries).toStrictEqual([
       {
         refId: 'grafana_database_all_migrations_duration_seconds-heatmap',
-        expr: 'sum(rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters}}[$__rate_interval]))',
+        expr: 'sum(rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
         format: 'heatmap',
         fromExploreMetrics: true,
       },
@@ -40,7 +40,7 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
     expect(result.queries).toStrictEqual([
       {
         refId: 'go_gc_heap_allocs_by_size_bytes_bucket-heatmap',
-        expr: 'sum by (le) (rate(go_gc_heap_allocs_by_size_bytes_bucket{success="true", __ignore_usage__="", ${filters}}[$__rate_interval]))',
+        expr: 'sum by (le) (rate(go_gc_heap_allocs_by_size_bytes_bucket{success="true", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
         format: 'heatmap',
         fromExploreMetrics: true,
       },
