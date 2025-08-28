@@ -5,7 +5,7 @@ import {
   type QueryVariable,
   type SceneComponentProps,
 } from '@grafana/scenes';
-import { Button, Combobox, Field, RadioButtonGroup, useStyles2, type ComboboxOption } from '@grafana/ui';
+import { Combobox, Field, RadioButtonGroup, useStyles2, type ComboboxOption } from '@grafana/ui';
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { reportExploreMetrics } from '../../interactions';
@@ -99,22 +99,6 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
     }
   };
 
-  public onSelectAll = () => {
-    const startTime = performance.now();
-
-    reportExploreMetrics('groupby_label_changed', {
-      label: 'all',
-    });
-
-    const groupByVariable = this.getGroupByVariable();
-    groupByVariable.changeValueTo(ALL_VARIABLE_VALUE);
-
-    const endTime = performance.now();
-    if (endTime - startTime > 16) {
-      logger.warn('ResponsiveGroupBySelector: Select all took', endTime - startTime, 'ms');
-    }
-  };
-
   public static readonly Component = memo(function ResponsiveGroupBySelectorComponent({ model }: SceneComponentProps<ResponsiveGroupBySelector>) {
     const { fontSize } = model.useState();
     const styles = useStyles2(getStyles);
@@ -168,6 +152,13 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
 
     const { visibleLabels, hiddenLabels } = visibilityResult;
 
+    // Prepare radio button options with "All Labels" as first option
+    const radioOptions = useMemo(() => {
+      const allLabelsOption = { label: 'All Labels', value: ALL_VARIABLE_VALUE };
+      const labelOptions = visibleLabels.map(label => ({ label, value: label }));
+      return [allLabelsOption, ...labelOptions];
+    }, [visibleLabels]);
+
     // Prepare dropdown options for Combobox
     const dropdownOptions = useMemo(() => {
       return [...hiddenLabels, ...otherLabels].map(label => ({
@@ -193,23 +184,17 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
       model.onDropdownChange(option);
     }, [model]);
 
-    const handleSelectAll = useCallback(() => {
-      model.onSelectAll();
-    }, [model]);
-
     return (
       <Field label="Group by">
         <div ref={containerRef} className={styles.container}>
-          {/* Radio Buttons for Common/Visible Labels */}
-          {visibleLabels.length > 0 && (
-            <RadioButtonGroup
-              size="sm"
-              options={visibleLabels.map(label => ({ label, value: label }))}
-              value={selectedLabel && visibleLabels.includes(selectedLabel) ? selectedLabel : undefined}
-              onChange={handleRadioChange}
-              className={styles.radioGroup}
-            />
-          )}
+          {/* Radio Buttons including "All Labels" and Common/Visible Labels */}
+          <RadioButtonGroup
+            size="md"
+            options={radioOptions}
+            value={selectedLabel || ALL_VARIABLE_VALUE}
+            onChange={handleRadioChange}
+            fullWidth={false}
+          />
 
           {/* Dropdown for Other/Hidden Labels */}
           {dropdownOptions.length > 0 && (
@@ -223,16 +208,6 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
               />
             </div>
           )}
-
-          {/* "All Labels" Option */}
-          <Button
-            variant={selectedLabel === null ? "primary" : "secondary"}
-            size="sm"
-            onClick={handleSelectAll}
-            className={styles.allButton}
-          >
-            All Labels
-          </Button>
         </div>
       </Field>
     );
@@ -248,16 +223,6 @@ function getStyles(theme: GrafanaTheme2) {
       flexWrap: 'wrap',
       minHeight: theme.spacing(4),
     }),
-    radioGroup: css({
-      display: 'flex',
-      gap: theme.spacing(0.5),
-      flexWrap: 'nowrap',
-
-      // Responsive behavior
-      [theme.breakpoints.down('md')]: {
-        gap: theme.spacing(0.25),
-      },
-    }),
     dropdown: css({
       minWidth: theme.spacing(18),
       maxWidth: theme.spacing(25),
@@ -265,9 +230,6 @@ function getStyles(theme: GrafanaTheme2) {
       [theme.breakpoints.down('sm')]: {
         minWidth: theme.spacing(14),
       },
-    }),
-    allButton: css({
-      whiteSpace: 'nowrap',
     }),
   };
 }
