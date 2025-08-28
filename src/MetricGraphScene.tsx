@@ -52,6 +52,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             maxHeight: MAIN_PANEL_MAX_HEIGHT,
             body: new SceneReactObject({ reactNode: <div /> }),
           }),
+          new SceneFlexItem({
+            ySizing: 'content',
+            body: new MetricActionBar({}),
+          }),
         ],
       }),
       selectedTab: undefined,

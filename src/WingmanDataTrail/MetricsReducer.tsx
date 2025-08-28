@@ -46,7 +46,7 @@ import { SideBar } from './SideBar/SideBar';
 interface MetricsReducerState extends SceneObjectState {
   listControls: ListControls;
   sidebar: SideBar;
-  body: SceneObjectBase;
+  body?: SceneObjectBase;
   enginesMap: Map<string, { filterEngine: MetricsVariableFilterEngine; sortEngine: MetricsVariableSortEngine }>;
 }
 
@@ -65,7 +65,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       }),
       listControls: new ListControls({}),
       sidebar: new SideBar({}),
-      body: new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }) as unknown as SceneObjectBase,
+      body: undefined,
       enginesMap: new Map(),
     });
 
@@ -87,6 +87,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const hasGroupByValue = Boolean(groupByValue && groupByValue !== NULL_GROUP_BY_VALUE);
 
     sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch).toggleCountsDisplay(!hasGroupByValue);
+
+    if (
+      (hasGroupByValue && this.state.body instanceof MetricsGroupByList) ||
+      (!hasGroupByValue && this.state.body instanceof MetricsList)
+    ) {
+      return;
+    }
 
     this.setState({
       body: hasGroupByValue
@@ -217,9 +224,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           <div className={styles.sidebar} data-testid="sidebar">
             <sidebar.Component model={sidebar} />
           </div>
-          <div className={styles.list}>
-            <body.Component model={body} />
-          </div>
+          <div className={styles.list}>{body && <body.Component model={body} />}</div>
         </div>
         <div className={styles.variables}>
           {$variables?.state.variables.map((variable) => (
