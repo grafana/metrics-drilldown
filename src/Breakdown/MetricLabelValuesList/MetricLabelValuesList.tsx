@@ -245,7 +245,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
             fixedColorIndex: frameIndex,
             headerActions: () => headerActions,
             menu: () => new PanelMenu({ labelName: labelValue }),
-            behaviors: [publishTimeseriesData()],
+            behaviors: [publishTimeseriesData()], // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
             legend: { showLegend: false },
           },
           queryOptions: {
