@@ -151,7 +151,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     this.updateBody();
 
-    this.subscribeToStateChanges();
+    this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
   }
 
@@ -167,12 +167,12 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     return 'timeseries';
   }
 
-  private subscribeToStateChanges() {
+  private subscribeToStateChanges(discardPanelTypeUpdates: boolean) {
     const { histogramType, body, panelConfig } = this.state;
 
     // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
     // we give another chance to display it properly by looking into the data frame type received
-    if (histogramType === 'none') {
+    if (!discardPanelTypeUpdates && histogramType === 'none') {
       const bodySub = (body?.state.$data as SceneDataProvider)?.subscribeToState((newState) => {
         if (newState.data?.state !== LoadingState.Done) {
           return;
