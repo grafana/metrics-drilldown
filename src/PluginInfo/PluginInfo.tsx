@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 
 import { type DataTrail } from 'DataTrail';
 import { type PrometheusBuildInfo } from 'helpers/MetricDatasourceHelper';
+import { logger } from 'tracking/logger/logger';
 
 import { PluginLogo } from './PluginLogo';
 import { GIT_COMMIT } from '../version';
@@ -46,7 +47,11 @@ function InfoMenu({ model }: Readonly<PluginInfoProps>) {
     model
       .getPrometheusBuildInfo()
       .then((info) => setPromBuildInfo(info))
-      .catch(() => setPromBuildInfo(undefined));
+      .catch((e) => {
+        logger.warn('Error while fetching Prometheus build info!');
+        logger.warn(e);
+        setPromBuildInfo(undefined);
+      });
   }, [model]);
 
   return (
@@ -117,18 +122,12 @@ function InfoMenu({ model }: Readonly<PluginInfoProps>) {
         <Menu.Item
           className={styles.promBuildInfo}
           // eslint-disable-next-line sonarjs/no-nested-template-literals
-          label={`${promBuildInfo.application ? promBuildInfo.application : 'Prometheus'} v${promBuildInfo.version} ${
+          label={`${promBuildInfo.application || '?'} ${promBuildInfo.version} ${
             promBuildInfo.buildDate ? `(${promBuildInfo.buildDate})` : ''
           }`}
           icon="gf-prometheus"
           onClick={() =>
-            window.open(
-              `https://github.com/${
-                promBuildInfo.application === 'Grafana Mimir' ? 'grafana/mimir' : 'prometheus/prometheus'
-              }/commit/${promBuildInfo.revision}`,
-              '_blank',
-              'noopener,noreferrer'
-            )
+            window.open(`${promBuildInfo.repository}/commit/${promBuildInfo.revision}`, '_blank', 'noopener,noreferrer')
           }
         />
       )}

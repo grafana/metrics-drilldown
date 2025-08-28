@@ -343,9 +343,15 @@ export class MetricDatasourceHelper {
       '/api/v1/status/buildinfo'
     );
 
+    if (!response.application) {
+      response.application = 'Prometheus';
+      response.repository = 'https://github.com/prometheus/prometheus'; // fix typo in response ;)
+    }
+
     if (response.buildDate) {
       response.buildDate = response.buildDate.replace(/(\d{4})(\d{2})(\d{2})(.+)/, '$1-$2-$3');
     }
+
     return response;
   }
 }
@@ -353,8 +359,10 @@ export class MetricDatasourceHelper {
 export type PrometheusBuildInfo = {
   application?: string;
   version: string;
+  buildDate?: string;
+  branch?: string;
+  repository: string;
   revision: string;
-  buildDate: string;
 };
 
 interface FetchLabelsOptions {
