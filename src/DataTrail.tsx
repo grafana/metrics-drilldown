@@ -433,7 +433,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           filters
             .filter((filter) => filter.key !== '__name__')
             // eslint-disable-next-line sonarjs/no-nested-template-literals
-            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value.replaceAll('=', `\=`)}"`)
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',')
         );
       },

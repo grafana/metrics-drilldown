@@ -38,9 +38,9 @@ describe('buildQueryExpression(options)', () => {
             "value": "__REMOVE__",
           },
         ],
-        "\${filters}" => [
+        "\${filters:raw}" => [
           {
-            "label": "\${filters}",
+            "label": "\${filters:raw}",
             "operator": "=",
             "value": "__REMOVE__",
           },

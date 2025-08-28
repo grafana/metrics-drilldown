@@ -17,7 +17,7 @@ test('getStatushistoryQueryRunnerParams(options)', () => {
   expect(result.queries).toStrictEqual([
     {
       refId: 'memcached_up-status',
-      expr: 'min(memcached_up{cluster="prod", __ignore_usage__="", ${filters}})',
+      expr: 'min(memcached_up{cluster="prod", __ignore_usage__="", ${filters:raw}})',
       legendFormat: 'status',
       fromExploreMetrics: true,
     },
