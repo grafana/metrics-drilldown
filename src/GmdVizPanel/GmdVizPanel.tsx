@@ -1,8 +1,10 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type ValueMapping } from '@grafana/data';
+import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } from '@grafana/data';
 import {
   SceneObjectBase,
   type SceneComponentProps,
+  type SceneDataNode,
+  type SceneDataProvider,
   type SceneObjectState,
   type VizPanel,
   type VizPanelState,
@@ -31,16 +33,19 @@ import { buildTimeseriesPanel } from './types/timeseries/buildTimeseriesPanel';
 
 /* Panel config */
 
+type HeaderActionAndMenuArgs = { metric: string; panelConfig: PanelConfig };
+
 export type PanelConfig = {
   type: PanelType;
   title: string;
   height: PANEL_HEIGHT;
-  headerActions: (headerActionsArgs: { metric: string; panelConfig: PanelConfig }) => VizPanelState['headerActions'];
+  headerActions: (headerActionsArgs: HeaderActionAndMenuArgs) => VizPanelState['headerActions'];
   fixedColorIndex?: number;
   description?: string;
-  menu?: VizPanelState['menu'];
+  menu?: (menuArgs: HeaderActionAndMenuArgs) => VizPanelState['menu'];
   legend?: Partial<VizLegendOptions>;
   mappings?: ValueMapping[];
+  behaviors?: VizPanelState['$behaviors'];
 };
 
 export type PanelOptions = {
@@ -53,6 +58,7 @@ export type PanelOptions = {
   menu?: PanelConfig['menu'];
   legend?: PanelConfig['legend'];
   mappings?: PanelConfig['mappings'];
+  behaviors?: PanelConfig['behaviors'];
 };
 
 /* Query config */
@@ -68,6 +74,7 @@ export type QueryConfig = {
   addIgnoreUsageFilter: boolean;
   groupBy?: string;
   queries?: QueryDefs;
+  data?: SceneDataNode;
 };
 
 export type QueryOptions = {
@@ -75,6 +82,7 @@ export type QueryOptions = {
   labelMatchers?: QueryConfig['labelMatchers'];
   groupBy?: string;
   queries?: QueryDefs;
+  data?: QueryConfig['data'];
 };
 
 /* GmdVizPanelState */
@@ -150,7 +158,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     this.updateBody();
 
-    this.subscribeToStateChanges();
+    this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
   }
 
@@ -166,7 +174,30 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     return 'timeseries';
   }
 
-  private subscribeToStateChanges() {
+  private subscribeToStateChanges(discardPanelTypeUpdates: boolean) {
+    const { histogramType, body, panelConfig } = this.state;
+
+    // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
+    // we give another chance to display it properly by looking into the data frame type received
+    if (!discardPanelTypeUpdates && histogramType === 'none') {
+      const bodySub = (body?.state.$data as SceneDataProvider)?.subscribeToState((newState) => {
+        if (newState.data?.state !== LoadingState.Done) {
+          return;
+        }
+
+        const dataFrameType = newState.data.series[0]?.meta?.type;
+        if (!dataFrameType) {
+          return;
+        }
+
+        if (dataFrameType === DataFrameType.HeatmapCells) {
+          this.setState({ panelConfig: { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' } });
+        }
+
+        bodySub.unsubscribe();
+      });
+    }
+
     this.subscribeToState((newState, prevState) => {
       if (
         newState.histogramType !== prevState.histogramType ||

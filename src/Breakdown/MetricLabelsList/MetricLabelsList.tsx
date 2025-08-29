@@ -17,17 +17,18 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
+import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
-import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
-import { getPerSecondRateUnit, getUnit } from 'GmdVizPanel/units/getUnit';
+import { buildTimeseriesPanel } from 'GmdVizPanel/types/timeseries/buildTimeseriesPanel';
+import { PanelMenu } from 'Menu/PanelMenu';
 import { VAR_GROUP_BY } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
-import { LABELS_VIZ_PANEL_HEIGHT, LabelVizPanel } from './LabelVizPanel';
-import { isCounterMetric } from '../../GmdVizPanel/matchers/isCounterMetric';
+import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
+import { SelectLabelAction } from './SelectLabelAction';
 
 interface MetricLabelsListState extends SceneObjectState {
   metric: string;
@@ -37,8 +38,6 @@ interface MetricLabelsListState extends SceneObjectState {
 
 export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   constructor({ metric }: { metric: MetricLabelsListState['metric'] }) {
-    const unit = isCounterMetric(metric) ? getPerSecondRateUnit(metric) : getUnit(metric);
-
     super({
       key: 'metric-labels-list',
       metric,
@@ -51,7 +50,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: LABELS_VIZ_PANEL_HEIGHT,
+          autoRows: PANEL_HEIGHT.M,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -76,24 +75,28 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
           new SceneReactObject({
             reactNode: <InlineBanner severity="error" title="Error while loading labels!" error={error} />,
           }),
-        getLayoutChild: (option, startColorIndex) => {
-          const { queries } = getTimeseriesQueryRunnerParams({
-            metric,
-            queryConfig: {
-              resolution: QUERY_RESOLUTION.MEDIUM,
-              labelMatchers: [],
-              addIgnoreUsageFilter: true,
-              groupBy: option.value as string,
-            },
-          });
+        getLayoutChild: (option, labelIndex) => {
+          const label = option.value as string;
 
           return new SceneCSSGridItem({
-            body: new LabelVizPanel({
+            body: buildTimeseriesPanel({
               metric,
-              label: option.value as string,
-              query: queries[0].expr,
-              unit,
-              startColorIndex,
+              panelConfig: {
+                type: 'timeseries',
+                height: PANEL_HEIGHT.M,
+                title: label,
+                fixedColorIndex: labelIndex,
+                behaviors: [publishTimeseriesData()], // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
+                headerActions: () => [new SelectLabelAction({ label })],
+                menu: () => new PanelMenu({ labelName: label }),
+                legend: { placement: 'bottom' },
+              },
+              queryConfig: {
+                resolution: QUERY_RESOLUTION.MEDIUM,
+                groupBy: label,
+                labelMatchers: [],
+                addIgnoreUsageFilter: true,
+              },
             }),
           });
         },

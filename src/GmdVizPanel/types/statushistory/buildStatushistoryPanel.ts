@@ -1,5 +1,5 @@
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
-import { VisibilityMode, type VizLegendOptions } from '@grafana/schema';
+import { VisibilityMode, type LegendPlacement } from '@grafana/schema';
 
 import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
@@ -18,25 +18,27 @@ export function buildStatushistoryPanel(options: StatushistoryPanelOptions): Viz
   const queryParams = getStatushistoryQueryRunnerParams({ metric, queryConfig });
   const unit = 'none';
 
-  const queryRunner = new SceneQueryRunner({
-    datasource: trailDS,
-    maxDataPoints: queryParams.maxDataPoints,
-    queries: queryParams.queries,
-  });
+  const queryRunner =
+    queryConfig.data ||
+    new SceneQueryRunner({
+      datasource: trailDS,
+      maxDataPoints: queryParams.maxDataPoints,
+      queries: queryParams.queries,
+    });
 
   return (
     PanelBuilders.statushistory()
       .setTitle(panelConfig.title)
       .setDescription(panelConfig.description)
       .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
-      .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+      .setMenu(panelConfig.menu?.({ metric, panelConfig }))
       .setShowMenuAlways(Boolean(panelConfig.menu))
       .setData(queryRunner)
       .setUnit(unit)
       // Use value mappings for both color and text display
       .setColor({ mode: 'palette-classic' })
       .setOption('showValue', VisibilityMode.Never)
-      .setOption('legend', panelConfig.legend as VizLegendOptions)
+      .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
       .setOption('perPage', 0) // hide pagination at the bottom of the panel
       .setMappings(UP_DOWN_VALUE_MAPPINGS) // current support is only for up/down values
       .build()

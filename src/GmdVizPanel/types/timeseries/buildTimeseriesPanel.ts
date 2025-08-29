@@ -1,12 +1,15 @@
 import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
+import { addRefId } from 'Breakdown/MetricLabelsList/transformations/addRefId';
 import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
+import { sliceSeries } from 'Breakdown/MetricLabelsList/transformations/sliceSeries';
 import { extremeValueFilterBehavior } from 'GmdVizPanel/behaviors/ExtremeValueFilterBehavior';
 import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
+import { addCardinalityInfo } from './addCardinalityInfo';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
 
@@ -17,7 +20,7 @@ type TimeseriesPanelOptions = {
 };
 
 export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel {
-  if (options.queryConfig?.groupBy) {
+  if (options.queryConfig.groupBy) {
     return buildGroupByPanel(options as Required<TimeseriesPanelOptions>);
   }
 
@@ -25,23 +28,25 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
-  const $data = new SceneQueryRunner({
-    datasource: trailDS,
-    maxDataPoints: queryParams.maxDataPoints,
-    queries: queryParams.queries,
-  });
+  const $data =
+    queryConfig.data ||
+    new SceneQueryRunner({
+      datasource: trailDS,
+      maxDataPoints: queryParams.maxDataPoints,
+      queries: queryParams.queries,
+    });
 
   const vizPanelBuilder = PanelBuilders.timeseries()
     .setTitle(panelConfig.title)
     .setDescription(panelConfig.description)
     .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
-    .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
-    .setOption('legend', { showLegend: true, placement: 'bottom' as LegendPlacement })
+    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setCustomFieldConfig('fillOpacity', 9)
-    .setBehaviors([extremeValueFilterBehavior]);
+    .setBehaviors([extremeValueFilterBehavior, ...(panelConfig.behaviors || [])]);
 
   if (queryParams.queries.length > 1) {
     const startColorIndex = panelConfig.fixedColorIndex || 0;
@@ -65,6 +70,8 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   return vizPanelBuilder.build();
 }
 
+const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
+
 function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel {
   const { metric, panelConfig, queryConfig } = options;
   const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
@@ -76,18 +83,39 @@ function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel 
       maxDataPoints: queryParams.maxDataPoints,
       queries: queryParams.queries,
     }),
-    transformations: [addUnspecifiedLabel(queryConfig.groupBy!)],
+    transformations: [
+      sliceSeries(0, MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY),
+      addUnspecifiedLabel(queryConfig.groupBy!),
+      addRefId,
+    ],
   });
 
-  return PanelBuilders.timeseries()
+  const { refId } = queryParams.queries[0];
+  const startColorIndex = panelConfig.fixedColorIndex || 0;
+
+  const vizPanel = PanelBuilders.timeseries()
     .setTitle(panelConfig.title)
     .setDescription(panelConfig.description)
     .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
-    .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
     .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'right' as LegendPlacement })
     .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
+    .setOverrides((b) => {
+      for (let i = 0; i < MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY; i++) {
+        b.matchFieldsByQuery(`${refId}-${i}`).overrideColor({
+          mode: 'fixed',
+          fixedColor: getColorByIndex(startColorIndex + i),
+        });
+      }
+    })
+    .setBehaviors([
+      addCardinalityInfo(panelConfig.title, MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY),
+      ...(panelConfig.behaviors || []),
+    ])
     .build();
+
+  return vizPanel;
 }

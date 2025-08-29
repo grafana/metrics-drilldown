@@ -3,6 +3,7 @@ import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene';
@@ -12,16 +13,15 @@ import { activateFullSceneTree } from './utils/utils.testing';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 describe('DataTrail', () => {
-  beforeAll(() => {
-    setDataSourceSrv(
-      new MockDataSourceSrv({
-        prom: {
-          name: 'Prometheus',
-          type: DataSourceType.Prometheus,
-          uid: 'ds',
-        },
-      })
-    );
+  beforeAll(async () => {
+    const dataSourceSrv = new MockDataSourceSrv({
+      prom: {
+        name: 'Prometheus',
+        type: DataSourceType.Prometheus,
+        uid: 'ds',
+      },
+    });
+    setDataSourceSrv(dataSourceSrv);
   });
 
   describe('Given starting non-embedded trail with url sync and no url state', () => {
@@ -40,6 +40,10 @@ describe('DataTrail', () => {
 
     describe('And metric is selected', () => {
       beforeEach(() => {
+        // ensure metric_bucket is cached as a classic histogram by MetricDatasourceHelper
+        const metricsVariable = sceneGraph.findByKeyAndType(trail, VAR_METRICS_VARIABLE, MetricsVariable);
+        metricsVariable.setState({ options: [{ value: 'metric_bucket', label: 'metric_bucket' }] });
+
         trail.publishEvent(new MetricSelectedEvent('metric_bucket'));
       });
 
