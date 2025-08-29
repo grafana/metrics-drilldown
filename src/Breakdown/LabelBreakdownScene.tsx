@@ -15,10 +15,12 @@ import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
+import { ResponsiveGroupBySelector } from './ResponsiveGroupBySelector';
 
 interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
   body?: MetricLabelsList | MetricLabelValuesList;
+  responsiveSelector?: ResponsiveGroupBySelector;
 }
 
 export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneState> {
@@ -26,6 +28,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     super({
       metric,
       body: undefined,
+      responsiveSelector: new ResponsiveGroupBySelector(),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -69,17 +72,30 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     });
   }
 
+  public getResponsiveSelector(): ResponsiveGroupBySelector {
+    const { responsiveSelector } = this.state;
+    if (!responsiveSelector) {
+      throw new Error('ResponsiveGroupBySelector not initialized');
+    }
+    return responsiveSelector;
+  }
+
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
+    const useResponsive = false;
 
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <Field label="By label">
-            <groupByVariable.Component model={groupByVariable} />
-          </Field>
+          {useResponsive ? (
+            <ResponsiveGroupBySelector.Component model={model.getResponsiveSelector()} />
+          ) : (
+            <Field label="By label">
+              <groupByVariable.Component model={groupByVariable} />
+            </Field>
+          )}
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
         </div>
@@ -105,9 +121,18 @@ function getStyles(theme: GrafanaTheme2) {
       flexGrow: 0,
       display: 'flex',
       gap: theme.spacing(2),
-      height: '70px',
-      justifyContent: 'space-between',
+      minHeight: '70px',
+      padding: theme.spacing(1),
       alignItems: 'end',
+      flexWrap: 'wrap',
+
+      // Responsive stacking
+      [theme.breakpoints.down('lg')]: {
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        gap: theme.spacing(1),
+        minHeight: 'auto',
+      },
     }),
     searchField: css({
       flexGrow: 1,
