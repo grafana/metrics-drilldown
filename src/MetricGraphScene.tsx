@@ -12,7 +12,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
@@ -36,6 +36,7 @@ interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
   selectedTab?: SceneObject;
+  actionBar: SceneObject;
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
@@ -59,6 +60,15 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         ],
       }),
       selectedTab: undefined,
+      actionBar: new SceneFlexLayout({
+        direction: 'column',
+        children: [
+          new SceneFlexItem({
+            ySizing: 'content',
+            body: new MetricActionBar({}),
+          }),
+        ],
+      }),
     });
 
     this.addActivationHandler(() => {
@@ -94,28 +104,78 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             },
           }),
         }),
-        new SceneFlexItem({
-          ySizing: 'content',
-          body: new MetricActionBar({}),
-        }),
       ],
     });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {
-    const { topView, selectedTab } = model.useState();
+    const { topView, selectedTab, actionBar } = model.useState();
     const { stickyMainGraph } = getTrailSettings(model).useState();
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
 
+    // Set CSS custom property for main panel height when sticky
+    useEffect(() => {
+      if (!stickyMainGraph) {
+        return; // Only need to track height when main panel is sticky
+      }
+
+      // Update on mount
+      updateMainPanelHeight();
+
+      // Use ResizeObserver to watch for height changes
+      const mainPanel = document.querySelector('[data-testid="top-view"]');
+
+      if (!mainPanel) {
+        return;
+      }
+
+      const resizeObserver = new ResizeObserver(updateMainPanelHeight);
+      resizeObserver.observe(mainPanel);
+
+      return () => {
+        // Clean up
+        resizeObserver.disconnect();
+        document.documentElement.style.removeProperty('--main-panel-height');
+      };
+    }, [stickyMainGraph]); // Re-run when sticky setting changes
+
+    // Set CSS custom property for action bar height - always needed for search bar positioning
+    useEffect(() => {
+      // Update on mount
+      updateActionBarHeight();
+
+      // Use ResizeObserver to watch for height changes
+      const actionBar = document.querySelector('[data-testid="action-bar"]');
+
+      if (!actionBar) {
+        return;
+      }
+
+      const resizeObserver = new ResizeObserver(updateActionBarHeight);
+      resizeObserver.observe(actionBar);
+
+      return () => {
+        // Clean up
+        resizeObserver.disconnect();
+        document.documentElement.style.removeProperty('--action-bar-height');
+      };
+    }, []); // Empty dependency array - always run
+
     return (
       <div className={styles.container}>
         <div
-          className={stickyMainGraph ? cx(styles.topView, styles.sticky) : cx(styles.topView, styles.nonSticky)}
+          className={stickyMainGraph ? cx(styles.topView, styles.stickyTop) : cx(styles.topView, styles.nonSticky)}
           data-testid="top-view"
         >
           <topView.Component model={topView} />
+        </div>
+        <div
+          className={stickyMainGraph ? cx(styles.topView, styles.stickyBottom) : cx(styles.topView, styles.stickyTop)}
+          data-testid="action-bar"
+        >
+          <actionBar.Component model={actionBar} />
         </div>
         {selectedTab && (
           <div data-testid="tab-content">
@@ -136,7 +196,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexGrow: 1,
     }),
     topView: css({}),
-    sticky: css({
+    stickyTop: css({
       display: 'flex',
       flexDirection: 'row',
       background: getAppBackgroundColor(theme, trail),
@@ -148,9 +208,43 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       // This ensures the main graph sticks below the app-controls in embedded mode
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px)`,
     }),
+    stickyBottom: css({
+      display: 'flex',
+      flexDirection: 'row',
+      background: getAppBackgroundColor(theme, trail),
+      position: 'sticky',
+      paddingTop: theme.spacing(1),
+      marginTop: `-${theme.spacing(1)}`,
+      zIndex: 10,
+      // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
+      // This ensures the main graph sticks below the app-controls in embedded mode
+      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--main-panel-height, 0px))`,
+    }),
     nonSticky: css({
       display: 'flex',
       flexDirection: 'row',
     }),
   };
+}
+
+function updateMainPanelHeight() {
+  const mainPanel = document.querySelector('[data-testid="top-view"]');
+
+  if (!mainPanel) {
+    return;
+  }
+
+  const { height } = mainPanel.getBoundingClientRect();
+  document.documentElement.style.setProperty('--main-panel-height', `${height}px`);
+}
+
+function updateActionBarHeight() {
+  const actionBar = document.querySelector('[data-testid="action-bar"]');
+
+  if (!actionBar) {
+    return;
+  }
+
+  const { height } = actionBar.getBoundingClientRect();
+  document.documentElement.style.setProperty('--action-bar-height', `${height}px`);
 }
