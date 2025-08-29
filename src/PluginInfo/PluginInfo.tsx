@@ -2,7 +2,11 @@ import { css } from '@emotion/css';
 import { usePluginContext, type GrafanaTheme2 } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { Button, Dropdown, Menu, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { type DataTrail } from 'DataTrail';
+import { type PrometheusBuildInfo } from 'helpers/MetricDatasourceHelper';
+import { logger } from 'tracking/logger/logger';
 
 import { PluginLogo } from './PluginLogo';
 import { GIT_COMMIT } from '../version';
@@ -32,9 +36,23 @@ function InfoMenuHeader() {
   );
 }
 
-function InfoMenu() {
+function InfoMenu({ model }: Readonly<PluginInfoProps>) {
+  const styles = useStyles2(getStyles);
+
   const isDev = pluginCommitSha === 'dev';
   const shortCommitSha = isDev ? pluginCommitSha : pluginCommitSha.slice(0, 8);
+
+  const [promBuildInfo, setPromBuildInfo] = useState<PrometheusBuildInfo>();
+  useEffect(() => {
+    model
+      .getPrometheusBuildInfo()
+      .then((info) => setPromBuildInfo(info))
+      .catch((e) => {
+        logger.warn('Error while fetching Prometheus build info!');
+        logger.warn(e);
+        setPromBuildInfo(undefined);
+      });
+  }, [model]);
 
   return (
     <Menu header={<InfoMenuHeader />}>
@@ -100,13 +118,28 @@ function InfoMenu() {
           )
         }
       />
+      {promBuildInfo && (
+        <Menu.Item
+          className={styles.promBuildInfo}
+          // eslint-disable-next-line sonarjs/no-nested-template-literals
+          label={`${promBuildInfo.application || '?'} ${promBuildInfo.version} ${
+            promBuildInfo.buildDate ? `(${promBuildInfo.buildDate})` : ''
+          }`}
+          icon="gf-prometheus"
+          onClick={() =>
+            window.open(`${promBuildInfo.repository}/commit/${promBuildInfo.revision}`, '_blank', 'noopener,noreferrer')
+          }
+        />
+      )}
     </Menu>
   );
 }
 
-export function PluginInfo() {
+type PluginInfoProps = { model: DataTrail };
+
+export function PluginInfo({ model }: Readonly<PluginInfoProps>) {
   return (
-    <Dropdown overlay={() => <InfoMenu />} placement="bottom-end">
+    <Dropdown overlay={() => <InfoMenu model={model} />} placement="bottom-end">
       <Button
         icon="info-circle"
         variant="secondary"
@@ -145,5 +178,10 @@ const getStyles = (theme: GrafanaTheme2) => ({
   subTitle: css`
     color: ${theme.colors.text.secondary};
     font-size: ${theme.typography.bodySmall.fontSize};
+  `,
+  promBuildInfo: css`
+    & svg {
+      color: #e5502a;
+    }
   `,
 });

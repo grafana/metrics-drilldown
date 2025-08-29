@@ -1,4 +1,4 @@
-import { type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
+import { VariableSupportType, type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
 import { type DataSourceSrv } from '@grafana/runtime';
 import { type DataSourceRef } from '@grafana/schema';
 
@@ -25,6 +25,7 @@ class MockDataSource implements DataSourceApi {
   uid: string;
   meta: any;
   languageProvider: any;
+  variables: any;
 
   constructor(settings: Partial<DataSourceApi> = {}) {
     this.name = settings.name || 'Prometheus';
@@ -37,6 +38,10 @@ class MockDataSource implements DataSourceApi {
       queryLabelKeys: jest.fn(async () => []),
       // eslint-disable-next-line no-unused-vars
       fetchLabelValues: jest.fn(async (_: any) => []),
+      request: jest.fn(async () => ({})),
+    };
+    this.variables = {
+      getType: () => VariableSupportType.Datasource,
     };
   }
 

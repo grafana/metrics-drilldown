@@ -1,7 +1,7 @@
 import { type DataFrame } from '@grafana/data';
 import { map, type Observable } from 'rxjs';
 
-export const SERIES_COUNT_STATS_NAME = 'seriesCount';
+const SERIES_COUNT_STATS_NAME = 'seriesCount';
 
 export const sliceSeries = (start: number, end: number) => () => (source: Observable<DataFrame[]>) =>
   source.pipe(
