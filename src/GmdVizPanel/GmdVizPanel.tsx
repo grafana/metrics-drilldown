@@ -3,6 +3,7 @@ import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } fr
 import {
   SceneObjectBase,
   type SceneComponentProps,
+  type SceneDataNode,
   type SceneDataProvider,
   type SceneObjectState,
   type VizPanel,
@@ -32,16 +33,19 @@ import { buildTimeseriesPanel } from './types/timeseries/buildTimeseriesPanel';
 
 /* Panel config */
 
+type HeaderActionAndMenuArgs = { metric: string; panelConfig: PanelConfig };
+
 export type PanelConfig = {
   type: PanelType;
   title: string;
   height: PANEL_HEIGHT;
-  headerActions: (headerActionsArgs: { metric: string; panelConfig: PanelConfig }) => VizPanelState['headerActions'];
+  headerActions: (headerActionsArgs: HeaderActionAndMenuArgs) => VizPanelState['headerActions'];
   fixedColorIndex?: number;
   description?: string;
-  menu?: VizPanelState['menu'];
+  menu?: (menuArgs: HeaderActionAndMenuArgs) => VizPanelState['menu'];
   legend?: Partial<VizLegendOptions>;
   mappings?: ValueMapping[];
+  behaviors?: VizPanelState['$behaviors'];
 };
 
 export type PanelOptions = {
@@ -54,6 +58,7 @@ export type PanelOptions = {
   menu?: PanelConfig['menu'];
   legend?: PanelConfig['legend'];
   mappings?: PanelConfig['mappings'];
+  behaviors?: PanelConfig['behaviors'];
 };
 
 /* Query config */
@@ -69,6 +74,7 @@ export type QueryConfig = {
   addIgnoreUsageFilter: boolean;
   groupBy?: string;
   queries?: QueryDefs;
+  data?: SceneDataNode;
 };
 
 export type QueryOptions = {
@@ -76,6 +82,7 @@ export type QueryOptions = {
   labelMatchers?: QueryConfig['labelMatchers'];
   groupBy?: string;
   queries?: QueryDefs;
+  data?: QueryConfig['data'];
 };
 
 /* GmdVizPanelState */

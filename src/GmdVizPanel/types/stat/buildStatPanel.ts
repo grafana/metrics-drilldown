@@ -18,17 +18,19 @@ export function buildStatPanel(options: StatushistoryPanelOptions): VizPanel {
   const queryParams = getStatQueryRunnerParams({ metric, queryConfig });
   const unit = 'none';
 
-  const queryRunner = new SceneQueryRunner({
-    datasource: trailDS,
-    maxDataPoints: queryParams.maxDataPoints,
-    queries: queryParams.queries,
-  });
+  const queryRunner =
+    queryConfig.data ||
+    new SceneQueryRunner({
+      datasource: trailDS,
+      maxDataPoints: queryParams.maxDataPoints,
+      queries: queryParams.queries,
+    });
 
   return PanelBuilders.stat()
     .setTitle(panelConfig.title)
     .setDescription(panelConfig.description)
     .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
-    .setMenu(panelConfig.menu?.clone()) // we clone because it's already stored in GmdVizPanel
+    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData(queryRunner)
     .setUnit(unit)
