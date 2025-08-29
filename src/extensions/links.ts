@@ -7,6 +7,7 @@ import {
   type QueryVariableModel,
 } from '@grafana/data';
 import { config, getTemplateSrv } from '@grafana/runtime';
+import { sceneUtils } from '@grafana/scenes';
 import { type DataQuery } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
 
@@ -175,7 +176,7 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
 function filterToUrlParameter(filter: PromQLLabelMatcher): [UrlParameterType, string] {
   return [
     UrlParameters.Filters,
-    `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`,
+    `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${sceneUtils.escapeURLDelimiters(filter.value)}`,
   ] as [UrlParameterType, string];
 }
 
