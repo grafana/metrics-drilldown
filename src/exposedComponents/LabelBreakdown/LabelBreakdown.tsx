@@ -17,9 +17,9 @@ export interface LabelBreakdownProps {
   dataSource: DataSourceApi;
 }
 
-const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
+const LabelBreakdown = async ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
   const [error] = useCatchExceptions();
-  const { metric, labels } = parsePromQLQuery(query);
+  const { metric, labels } = await parsePromQLQuery(query);
   const trail = newMetricsTrail({
     metric,
     initialDS: dataSource.uid,
