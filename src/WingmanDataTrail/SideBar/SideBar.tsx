@@ -27,6 +27,7 @@ import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';
+import { HGFeatureToggles, isFeatureToggleEnabled } from '../../utils/utils.feature-toggles';
 
 type Section = MetricsFilterSection | LabelsBrowser | BookmarksList | Settings;
 
@@ -121,6 +122,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         this.setState({ sectionValues: newSectionValues });
       })
     );
+
+    // Open the sidebar to the prefix filters section if the "Default Open Sidebar" experiment is enabled
+    if (!this.state.visibleSection?.state.key && isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)) {
+      this.setActiveSection('filters-prefix');
+    }
 
     return () => {
       cleanupOtherMetricsVar();
