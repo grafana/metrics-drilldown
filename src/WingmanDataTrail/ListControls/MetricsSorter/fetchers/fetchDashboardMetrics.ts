@@ -89,7 +89,7 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
 
     const metricCounts = await Promise.all(
       dashboards.map(({ uid, url }) => getDashboardLimited(uid, url, dashboardRequestsFailedCount))
-    ).then(parseDashboardSearchResponse);
+    ).then(async (response) => await parseDashboardSearchResponse(response));
 
     return metricCounts;
   } catch (err) {
@@ -122,7 +122,7 @@ function updateMetricUsage(
   }
 }
 
-function parseDashboardSearchResponse(dashboardSearchResponse: Array<DashboardWithUrl | null>): MetricUsageMap {
+async function parseDashboardSearchResponse(dashboardSearchResponse: Array<DashboardWithUrl | null>): Promise<MetricUsageMap> {
   // Create a map to track metric names and their usage details
   const dashboardData: Record<string, MetricUsageDetails> = {};
 
@@ -138,16 +138,17 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<DashboardWi
     ) as Array<Panel & { targets: NonNullable<Panel['targets']> }>;
 
     for (const panel of relevantPanels) {
-      for (const target of panel.targets) {
+      const targetPromises = panel.targets.map(async (target) => {
         const expr = typeof target.expr === 'string' ? target.expr : '';
-
-        const metrics = extractMetricNames(expr); // Array of metric names used in the query
-
+        const metrics = await extractMetricNames(expr); // Array of metric names used in the query
+        
         // Count each metric occurrence
         for (const metric of metrics) {
           updateMetricUsage(metric, dashboardName, dashboard.uid || 'unknown', dashboard.url, dashboardData);
         }
-      }
+      });
+      
+      await Promise.all(targetPromises);
     }
   }
   return dashboardData;
