@@ -7,7 +7,7 @@ import type { AdHocVariableFilter } from '@grafana/data';
  * @param allLabels - All available labels from the variable
  * @param currentFilters - Current ad-hoc filters applied
  * @param selectedLabel - Currently selected label for grouping
- * @returns Filtered array of labels excluding already filtered and selected labels
+ * @returns Filtered array of labels excluding already filtered labels (selected label remains visible)
  */
 export function useLabelFiltering(
   allLabels: string[],
@@ -16,9 +16,9 @@ export function useLabelFiltering(
 ) {
   return useMemo(() => {
     return allLabels.filter(label => {
-      // Remove already filtered labels (with = or != operators) and currently selected label
-      return !(currentFilters.some(f => f.key === label && (f.operator === '=' || f.operator === '!=')) ||
-               label === selectedLabel);
+      // Remove already filtered labels (with = or != operators)
+      // Keep the selected label visible so it shows as selected in the UI
+      return !currentFilters.some(f => f.key === label && (f.operator === '=' || f.operator === '!='));
     });
   }, [allLabels, currentFilters, selectedLabel]);
 }
