@@ -16,8 +16,11 @@ export function useLabelFiltering(
 ) {
   return useMemo(() => {
     return allLabels.filter(label => {
-      // Remove already filtered labels (with = or != operators)
       // Keep the selected label visible so it shows as selected in the UI
+      if (label === selectedLabel) {
+        return true;
+      }
+      // Remove already filtered labels (with = or != operators)
       return !currentFilters.some(f => f.key === label && (f.operator === '=' || f.operator === '!='));
     });
   }, [allLabels, currentFilters, selectedLabel]);
