@@ -84,7 +84,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
-    const useResponsive = false;
+    const useResponsive = true;
 
     return (
       <div className={styles.container}>
