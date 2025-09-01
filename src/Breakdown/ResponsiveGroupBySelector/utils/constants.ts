@@ -1,10 +1,10 @@
 // Responsive constants for calculating radio button visibility
 export const RESPONSIVE_CONSTANTS = {
-  additionalWidthPerItem: 32,      // Reduced from 40 - padding/margins per radio button
-  widthOfDropdown: 140,            // Reduced from 180 - reserved space for dropdown
-  minContainerWidth: 250,          // Reduced from 300 - minimum width before hiding all radios
+  additionalWidthPerItem: 32,      // padding/margins per radio button
+  widthOfDropdown: 140,            // reserved space for dropdown
+  minContainerWidth: 250,          // minimum width before hiding all radios
   radioButtonPadding: 16,          // Internal button padding
-  allButtonWidth: 80,              // Reduced from 100 - width reserved for "All Labels" button
+  allButtonWidth: 80,              // width reserved for "All Labels" button
 };
 
 // Common labels that should be prioritized for radio button display
