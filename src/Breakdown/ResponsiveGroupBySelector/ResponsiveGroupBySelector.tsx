@@ -154,7 +154,7 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
 
     // Prepare radio button options with "All Labels" as first option
     const radioOptions = useMemo(() => {
-      const allLabelsOption = { label: 'All Labels', value: ALL_VARIABLE_VALUE };
+      const allLabelsOption = { label: 'All', value: ALL_VARIABLE_VALUE };
       const labelOptions = visibleLabels.map(label => ({ label, value: label }));
       return [allLabelsOption, ...labelOptions];
     }, [visibleLabels]);

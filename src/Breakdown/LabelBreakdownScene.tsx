@@ -90,7 +90,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       <div className={styles.container}>
         <div className={styles.controls}>
           {useResponsive ? (
-            <ResponsiveGroupBySelector.Component model={model.getResponsiveSelector()} />
+            <div className={styles.responsiveGroupByWrapper}>
+              <ResponsiveGroupBySelector.Component model={model.getResponsiveSelector()} />
+            </div>
           ) : (
             <Field label="By label">
               <groupByVariable.Component model={groupByVariable} />
@@ -136,6 +138,22 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     searchField: css({
       flexGrow: 1,
+    }),
+    responsiveGroupByWrapper: css({
+      // On large screens, give ResponsiveGroupBySelector a fixed flex-basis
+      // to prevent layout shifts when other components appear/disappear
+      [theme.breakpoints.up('lg')]: {
+        flexBasis: '400px', // Fixed width for stable calculations
+        flexShrink: 0,      // Prevent shrinking
+        flexGrow: 0,        // Prevent growing
+      },
+
+      // On smaller screens, allow normal flex behavior
+      [theme.breakpoints.down('lg')]: {
+        flexBasis: 'auto',
+        flexShrink: 1,
+        flexGrow: 0,
+      },
     }),
   };
 }
