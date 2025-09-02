@@ -109,15 +109,14 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     }, [trail]);
 
     const toggleBookmark = () => {
-      if (!currentKey) {
-        return;
-      }
-
       reportExploreMetrics('bookmark_changed', { action: isBookmarked ? 'toggled_off' : 'toggled_on' });
 
       if (!isBookmarked) {
         addBookmark();
-      } else {
+        return;
+      }
+
+      if (currentKey) {
         removeBookmark(currentKey);
       }
     };
