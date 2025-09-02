@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { dateTimeFormat, type GrafanaTheme2 } from '@grafana/data';
+import { type SceneObjectUrlValues } from '@grafana/scenes';
 import { Card, IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -17,6 +18,16 @@ const truncateValue = (key: string, value: string, maxLength: number) => {
   return value;
 };
 
+const getFiltersFromUrl = (urlValues: SceneObjectUrlValues) => {
+  // the filters are always represented as an array of strings in urlValues
+  // e.g. ['job|=|prometheus', 'branch|=|HEAD']
+  const filtersFromUrl = urlValues[`var-${VAR_FILTERS}`] as string[];
+  if (!filtersFromUrl.length) {
+    return [];
+  }
+  return filtersFromUrl.map((f) => f.split('|'));
+};
+
 type BookmarkListItemProps = {
   bookmark: Bookmark;
   onSelect: () => void;
@@ -26,17 +37,17 @@ type BookmarkListItemProps = {
 };
 
 export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
-  const { onSelect, onDelete, bookmark } = props;
   const styles = useStyles2(getStyles);
+  const { onSelect, onDelete, bookmark } = props;
 
   const { createdAt, urlValues } = bookmark;
   const metric = (urlValues.metric as string) || '?';
-  const filtersFromUrl = urlValues[`var-${VAR_FILTERS}`] || '';
-  const filters = Array.isArray(filtersFromUrl) ? filtersFromUrl.map((f) => f.split('|')) : filtersFromUrl.split('|');
+  const filters = getFiltersFromUrl(urlValues);
 
   const heading = truncateValue('', getMetricName(metric), 27);
   const cardHeightClassName = `${props.compactHeight && filters.length > 0 ? styles.cardTall : ''}`;
   const cardClassName = `${styles.card} ${props.wide ? styles.cardWide : ''} ${cardHeightClassName}`;
+
   return (
     <article data-testid={`data-trail-card ${metric}`}>
       <Card onClick={onSelect} className={cardClassName}>

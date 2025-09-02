@@ -293,6 +293,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
 
       if (urlValues) {
+        // make sure we reset the filters when navigating from a bookmark where urlsValues['var_vilters']: []
+        // it seems relevant to do it here and not anywhere else in the code base
+        if (!urlValues[`var-${VAR_FILTERS}`]?.length) {
+          urlValues[`var-${VAR_FILTERS}`] = [''];
+        }
+
         const urlState = urlUtil.renderUrl('', urlValues);
         sceneUtils.syncStateFromSearchParams(this, new URLSearchParams(urlState));
       }

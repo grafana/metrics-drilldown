@@ -6,8 +6,8 @@ function filterUrlValues(urlValues: SceneObjectUrlValues) {
   delete urlValues.metricSearch;
   delete urlValues.refresh;
 
-  if (typeof urlValues['var-filters'] !== 'string') {
-    urlValues['var-filters'] = urlValues['var-filters']?.filter(Boolean);
+  if (Array.isArray(urlValues['var-filters'])) {
+    urlValues['var-filters'] = urlValues['var-filters'].filter(Boolean);
   }
 
   return urlValues;
