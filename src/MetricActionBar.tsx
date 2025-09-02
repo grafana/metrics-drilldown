@@ -152,7 +152,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
                 tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
                 onClick={() => {
                   reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
-                  trail.publishEvent(new MetricSelectedEvent(undefined));
+                  trail.publishEvent(new MetricSelectedEvent({}));
                 }}
               >
                 Select new metric

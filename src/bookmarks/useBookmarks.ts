@@ -1,9 +1,8 @@
-import { urlUtil } from '@grafana/data';
 import { sceneGraph, sceneUtils, type SceneObject, type SceneObjectUrlValues } from '@grafana/scenes';
 import { useEffect, useMemo, useState } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
-import { VAR_DATASOURCE } from 'shared';
+import { MetricSelectedEvent, VAR_DATASOURCE } from 'shared';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userStorage } from 'UserPreferences/userStorage';
 import { getTrailFor } from 'utils';
@@ -14,7 +13,7 @@ import { notifyBookmarkCreated } from './notifyBookmarkCreated';
 
 export type Bookmark = {
   key: string;
-  urlValues: SceneObjectUrlValues;
+  urlValues: SceneObjectUrlValues & { metric: string };
   createdAt: number;
 };
 
@@ -47,7 +46,7 @@ export function useBookmarks(sceneObject: SceneObject) {
 
   const addBookmark = () => {
     const newBookmark = {
-      urlValues: sceneUtils.getUrlState(trail),
+      urlValues: sceneUtils.getUrlState(trail) as Bookmark['urlValues'],
       createdAt: Date.now(),
     };
 
@@ -75,8 +74,13 @@ export function useBookmarks(sceneObject: SceneObject) {
       return;
     }
 
-    const urlState = urlUtil.renderUrl('', bookmark.urlValues);
-    sceneUtils.syncStateFromSearchParams(trail, new URLSearchParams(urlState));
+    trail.publishEvent(
+      new MetricSelectedEvent({
+        metric: bookmark.urlValues.metric,
+        urlValues: bookmark.urlValues,
+      }),
+      true
+    );
   };
 
   return { bookmarks, addBookmark, removeBookmark, gotoBookmark };

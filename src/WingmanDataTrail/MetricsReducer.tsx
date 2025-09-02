@@ -16,7 +16,6 @@ import React from 'react';
 
 import { reportExploreMetrics } from 'interactions';
 
-import { MetricSelectedEvent } from '../shared';
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
 import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
@@ -24,12 +23,7 @@ import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
 import { ListControls } from './ListControls/ListControls';
 import { EventSortByChanged } from './ListControls/MetricsSorter/events/EventSortByChanged';
-import {
-  addRecentMetric,
-  MetricsSorter,
-  VAR_WINGMAN_SORT_BY,
-  type SortingOption,
-} from './ListControls/MetricsSorter/MetricsSorter';
+import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './ListControls/MetricsSorter/MetricsSorter';
 import { EventQuickSearchChanged } from './ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './ListControls/QuickSearch/QuickSearch';
 import { MetricsList } from './MetricsList/MetricsList';
@@ -104,14 +98,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
   private subscribeToEvents() {
     this.initVariablesFilteringAndSorting();
-
-    this._subs.add(
-      this.subscribeToEvent(MetricSelectedEvent, (event) => {
-        if (event.payload !== undefined) {
-          addRecentMetric(event.payload);
-        }
-      })
-    );
   }
 
   /**

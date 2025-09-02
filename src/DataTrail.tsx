@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
+import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
@@ -11,6 +11,7 @@ import {
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
+  sceneUtils,
   SceneVariableSet,
   ScopesVariable,
   UrlSyncContextProvider,
@@ -36,6 +37,7 @@ import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
+import { addRecentMetric } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
@@ -270,14 +272,18 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.isNativeHistogram(metric);
   }
 
-  private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
-    const metric = evt.payload ?? '';
+  private async _handleMetricSelectedEvent(event: MetricSelectedEvent) {
+    const { metric, urlValues } = event.payload;
+
+    if (metric) {
+      addRecentMetric(metric);
+    }
 
     // Add metric to adhoc filters baseFilter
     const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (isAdHocFiltersVariable(filterVar)) {
       filterVar.setState({
-        baseFilters: getBaseFiltersForMetric(evt.payload),
+        baseFilters: getBaseFiltersForMetric(metric),
       });
     }
 
@@ -285,6 +291,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     this._urlSync.performBrowserHistoryAction(() => {
       this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+
+      if (urlValues) {
+        const urlState = urlUtil.renderUrl('', urlValues);
+        sceneUtils.syncStateFromSearchParams(this, new URLSearchParams(urlState));
+      }
     });
   }
 
