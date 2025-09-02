@@ -3,14 +3,14 @@ import { sceneGraph } from '@grafana/scenes';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
 import { ALL_VARIABLE_VALUE } from '../services/variables';
 import { VAR_GROUP_BY } from '../shared';
-import { activateFullSceneTree } from '../utils/utils.testing';
 import { LabelBreakdownScene } from './LabelBreakdownScene';
+import { activateFullSceneTree } from '../utils/utils.testing';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 import { ResponsiveGroupBySelector } from './ResponsiveGroupBySelector';
+import { DataSourceType, MockDataSourceSrv } from '../test/mocks/datasource';
 
 // Mock dependencies
 jest.mock('@grafana/ui', () => ({
