@@ -25,7 +25,7 @@ test.describe('Responsive Breakdown Selector', () => {
       expect(radioButtonCount).toBeGreaterThanOrEqual(1);
 
       // Take screenshot of the responsive selector at desktop size
-      await expect(page.locator('[data-testid="panels-list"]').first()).toHaveScreenshot(
+      await expect(page.getByTestId('responsive-group-by-selector')).toHaveScreenshot(
         'responsive-selector-desktop.png'
       );
     });
@@ -71,7 +71,7 @@ test.describe('Responsive Breakdown Selector', () => {
       expect(radioButtonCount).toBeGreaterThanOrEqual(1);
 
       // Take screenshot at tablet size
-      await expect(page.locator('[data-testid="panels-list"]').first()).toHaveScreenshot(
+      await expect(page.getByTestId('responsive-group-by-selector')).toHaveScreenshot(
         'responsive-selector-tablet.png'
       );
     });
@@ -104,7 +104,7 @@ test.describe('Responsive Breakdown Selector', () => {
       expect(radioButtonCount).toBeGreaterThanOrEqual(1);
 
       // Take screenshot at mobile size
-      await expect(page.locator('[data-testid="panels-list"]').first()).toHaveScreenshot(
+      await expect(page.getByTestId('responsive-group-by-selector')).toHaveScreenshot(
         'responsive-selector-mobile.png'
       );
     });

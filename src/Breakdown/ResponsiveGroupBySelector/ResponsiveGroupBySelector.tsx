@@ -185,7 +185,7 @@ export class ResponsiveGroupBySelector extends SceneObjectBase<ResponsiveGroupBy
     }, [model]);
 
     return (
-      <Field label="Group by">
+      <Field label="Group by" data-testid="responsive-group-by-selector">
         <div ref={containerRef} className={styles.container}>
           {/* Radio Buttons including "All Labels" and Common/Visible Labels */}
           <RadioButtonGroup
