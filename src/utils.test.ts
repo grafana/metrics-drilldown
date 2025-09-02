@@ -4,10 +4,6 @@ import { type DataTrail } from './DataTrail';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { limitAdhocProviders } from './utils';
 
-jest.mock('./TrailStore/TrailStore', () => ({
-  getTrailStore: jest.fn(),
-}));
-
 const getListSpy = jest.fn();
 const fetchSpy = jest.fn();
 

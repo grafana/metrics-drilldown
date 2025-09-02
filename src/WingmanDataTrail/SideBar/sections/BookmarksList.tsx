@@ -2,33 +2,14 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React, { useState } from 'react';
+import React from 'react';
+
+import { useBookmarks } from 'bookmarks/useBookmarks';
 
 import { SectionTitle } from './SectionTitle';
 import { type SideBarSectionState } from './types';
 import { DataTrailCard } from '../../../DataTrailCard';
 import { reportExploreMetrics } from '../../../interactions';
-import { getBookmarkKey, getTrailStore } from '../../../TrailStore/TrailStore';
-
-// Create a simple event-based system to avoid circular dependencies
-export const navigationEvents = {
-  listeners: new Set<(trail: any) => void>(),
-  emit: function (trail: any) {
-    this.listeners.forEach((listener) => listener(trail));
-  },
-  subscribe: function (listener: (trail: any) => void) {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-      return undefined; // Explicitly return void
-    };
-  },
-};
-
-// Simple function to navigate to a trail without using MetricsContext
-function goToUrlForTrail(trail: any) {
-  navigationEvents.emit(trail);
-}
 
 interface BookmarksListState extends SideBarSectionState {}
 
@@ -54,29 +35,21 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
       disabled: disabled ?? false,
       active: false,
     });
-
-    this.addActivationHandler(this.onActivate.bind(this));
   }
-
-  private onActivate() {}
 
   public static readonly Component = ({ model }: SceneComponentProps<BookmarksList>) => {
     const styles = useStyles2(getStyles);
     const { title, description } = model.useState();
-    const { bookmarks } = getTrailStore();
-    const [, setLastDelete] = useState(Date.now());
+    const { bookmarks, gotoBookmark, removeBookmark } = useBookmarks(model);
 
-    const onSelect = (index: number) => {
+    const onSelect = (bookmarkKey: string) => {
       reportExploreMetrics('exploration_started', { cause: 'bookmark_clicked' });
-      const trail = getTrailStore().getTrailForBookmarkIndex(index);
-      getTrailStore().setRecentTrail(trail);
-      goToUrlForTrail(trail);
+      gotoBookmark(bookmarkKey);
     };
 
-    const onDelete = (index: number) => {
+    const onDelete = (bookmarkKey: string) => {
       reportExploreMetrics('bookmark_changed', { action: 'deleted' });
-      getTrailStore().removeBookmark(index);
-      setLastDelete(Date.now()); // trigger re-render
+      removeBookmark(bookmarkKey);
     };
 
     return (
@@ -84,19 +57,22 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
         <SectionTitle title={title} description={description} data-testid="bookmarks-list-sidebar" />
         {bookmarks.length > 0 ? (
           <div className={styles.bookmarksList}>
-            {bookmarks.map((bookmark, index) => (
+            {bookmarks.map((bookmark) => (
               <DataTrailCard
-                key={getBookmarkKey(bookmark)}
+                key={bookmark.key}
                 bookmark={bookmark}
-                onSelect={() => onSelect(index)}
-                onDelete={() => onDelete(index)}
+                onSelect={() => onSelect(bookmark.key)}
+                onDelete={() => onDelete(bookmark.key)}
                 wide={true}
                 compactHeight={true}
               />
             ))}
           </div>
         ) : (
-          <div className={styles.emptyState}>No bookmarks yet</div>
+          <div className={styles.emptyState}>
+            <div>No bookmarks yet for the</div>
+            <div>current data source.</div>
+          </div>
         )}
       </div>
     );
@@ -120,7 +96,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     emptyState: css({
       display: 'flex',
-      justifyContent: 'center',
+      flexDirection: 'column',
       alignItems: 'center',
       height: '100px',
       color: theme.colors.text.secondary,

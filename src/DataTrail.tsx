@@ -45,7 +45,6 @@ import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
-import { getTrailStore } from './TrailStore/TrailStore';
 import { limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getAppBackgroundColor } from './utils/utils.styles';
@@ -189,23 +188,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         }
       });
     }
-
-    // Save the current trail as a recent (if the browser closes or reloads) if user selects a metric OR applies filters to metric select view
-    const saveRecentTrail = () => {
-      const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-      const hasFilters = isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.filters.length > 0;
-      if (this.state.metric || hasFilters) {
-        getTrailStore().setRecentTrail(this);
-      }
-    };
-    window.addEventListener('unload', saveRecentTrail);
-
-    return () => {
-      if (!this.state.embedded) {
-        saveRecentTrail();
-      }
-      window.removeEventListener('unload', saveRecentTrail);
-    };
   }
 
   private async subscribeToConfigEvents() {
