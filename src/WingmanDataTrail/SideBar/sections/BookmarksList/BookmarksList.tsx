@@ -6,10 +6,10 @@ import React from 'react';
 
 import { useBookmarks } from 'bookmarks/useBookmarks';
 
-import { SectionTitle } from './SectionTitle';
-import { type SideBarSectionState } from './types';
-import { DataTrailCard } from '../../../DataTrailCard';
-import { reportExploreMetrics } from '../../../interactions';
+import { BookmarkListItem } from './BookmarkListItem';
+import { reportExploreMetrics } from '../../../../interactions';
+import { SectionTitle } from '../SectionTitle';
+import { type SideBarSectionState } from '../types';
 
 interface BookmarksListState extends SideBarSectionState {}
 
@@ -58,7 +58,7 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
         {bookmarks.length > 0 ? (
           <div className={styles.bookmarksList}>
             {bookmarks.map((bookmark) => (
-              <DataTrailCard
+              <BookmarkListItem
                 key={bookmark.key}
                 bookmark={bookmark}
                 onSelect={() => onSelect(bookmark.key)}

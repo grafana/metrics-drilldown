@@ -6,15 +6,7 @@ import React from 'react';
 import { type Bookmark } from 'bookmarks/useBookmarks';
 import { VAR_FILTERS } from 'shared';
 
-import { getMetricName } from './utils';
-
-type Props = {
-  bookmark: Bookmark;
-  onSelect: () => void;
-  onDelete: () => void;
-  wide?: boolean;
-  compactHeight?: boolean;
-};
+import { getMetricName } from '../../../../utils';
 
 // Helper function to truncate the value for a single key:value pair
 const truncateValue = (key: string, value: string, maxLength: number) => {
@@ -25,7 +17,15 @@ const truncateValue = (key: string, value: string, maxLength: number) => {
   return value;
 };
 
-export function DataTrailCard(props: Readonly<Props>) {
+type BookmarkListItemProps = {
+  bookmark: Bookmark;
+  onSelect: () => void;
+  onDelete: () => void;
+  wide?: boolean;
+  compactHeight?: boolean;
+};
+
+export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
   const { onSelect, onDelete, bookmark } = props;
   const styles = useStyles2(getStyles);
 
