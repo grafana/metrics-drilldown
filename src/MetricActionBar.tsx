@@ -12,6 +12,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
+import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { genBookmarkKey } from 'bookmarks/genBookmarkKey';
@@ -94,17 +95,24 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 
   private useBookmarkState = (trail: DataTrail) => {
     const { bookmarks, addBookmark, removeBookmark } = useBookmarks(this);
-    const [currentKey, setCurrentKey] = useState(genBookmarkKey(sceneUtils.getUrlState(trail)));
+    const [currentKey, setCurrentKey] = useState<string>();
     const isBookmarked = useMemo(() => bookmarks.some((b) => b.key === currentKey), [bookmarks, currentKey]);
 
     useEffect(() => {
-      const sub = trail.subscribeToEvent(SceneObjectStateChangedEvent, () => {
-        setCurrentKey(genBookmarkKey(sceneUtils.getUrlState(trail)));
-      });
+      const sub = trail.subscribeToEvent(
+        SceneObjectStateChangedEvent,
+        // debounce to prevent generating a lot of keys for nothing
+        debounce(() => setCurrentKey(genBookmarkKey(sceneUtils.getUrlState(trail))), 100)
+      );
+
       return () => sub.unsubscribe();
     }, [trail]);
 
     const toggleBookmark = () => {
+      if (!currentKey) {
+        return;
+      }
+
       reportExploreMetrics('bookmark_changed', { action: isBookmarked ? 'toggled_off' : 'toggled_on' });
 
       if (!isBookmarked) {
