@@ -256,12 +256,8 @@ describe('calculateVisibleRadioOptions', () => {
       calculateVisibleRadioOptions(labels, availableWidth, mockMeasureText);
 
       // Should not call measureText for labels after the width limit is exceeded
-      if (mockMeasureText.mock.calls.length > 0) {
-        expect(mockMeasureText).not.toHaveBeenCalledWith('not_processed');
-      }
-
-      // Always have an assertion to satisfy linting
       expect(mockMeasureText).toHaveBeenCalled();
+      expect(mockMeasureText).not.toHaveBeenCalledWith('not_processed');
     });
   });
 });
