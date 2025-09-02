@@ -9,7 +9,7 @@ import type { LabelPriorityResult } from '../types';
  */
 export function prioritizeLabels(allLabels: string[]): LabelPriorityResult {
   const commonLabels = COMMON_LABELS.filter(label => allLabels.includes(label));
-  const otherLabels = allLabels.filter(label => !COMMON_LABELS.includes(label));
+  const otherLabels = allLabels.filter(label => !(COMMON_LABELS as readonly string[]).includes(label));
 
   return {
     // Include common labels first, then top 5 other labels

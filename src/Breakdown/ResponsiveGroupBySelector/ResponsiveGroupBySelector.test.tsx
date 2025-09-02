@@ -80,8 +80,8 @@ describe('ResponsiveGroupBySelector', () => {
 
     // Mock group by variable
     mockGroupByVariable = {
-      type: 'query',
       state: {
+        type: 'query',
         options: [
           { label: 'instance', value: 'instance' },
           { label: 'job', value: 'job' },
@@ -97,8 +97,8 @@ describe('ResponsiveGroupBySelector', () => {
 
     // Mock filters variable
     mockFiltersVariable = {
-      type: 'adhoc',
       state: {
+        type: 'adhoc',
         filters: [],
       },
     };
@@ -314,13 +314,9 @@ describe('ResponsiveGroupBySelector', () => {
     });
 
     it('should throw error when group by variable is wrong type', () => {
-      // Mock the utils.variables function to return false for wrong type
-      const { isQueryVariable } = require('../../utils/utils.variables');
-      isQueryVariable.mockReturnValueOnce(false);
-
       mockLookupVariable.mockImplementation((name: string) => {
         if (name === VAR_GROUP_BY) {
-          return { type: 'wrong-type' }; // Simulate wrong variable type
+          return { state: { type: 'wrong-type' } }; // Simulate wrong variable type
         }
         return mockFiltersVariable;
       });

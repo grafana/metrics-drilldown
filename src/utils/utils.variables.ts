@@ -8,13 +8,13 @@ import {
 type MaybeVariable = SceneVariable | null | undefined;
 
 export function isAdHocFiltersVariable(variable: MaybeVariable): variable is AdHocFiltersVariable {
-  return variable !== null && variable?.state.type === 'adhoc';
+  return variable !== null && variable !== undefined && variable?.state?.type === 'adhoc';
 }
 
 export function isCustomVariable(variable: MaybeVariable): variable is CustomVariable {
-  return variable !== null && variable?.state.type === 'custom';
+  return variable !== null && variable !== undefined && variable?.state?.type === 'custom';
 }
 
 export function isQueryVariable(variable: MaybeVariable): variable is QueryVariable {
-  return variable !== null && variable?.state.type === 'query';
+  return variable !== null && variable !== undefined && variable?.state?.type === 'query';
 }
