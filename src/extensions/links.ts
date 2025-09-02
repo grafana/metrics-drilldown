@@ -175,7 +175,7 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
 function filterToUrlParameter(filter: PromQLLabelMatcher): [UrlParameterType, string] {
   return [
     UrlParameters.Filters,
-    `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`,
+    `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${escapeUrlPipeDelimiters(filter.value)}`,
   ] as [UrlParameterType, string];
 }
 
@@ -348,4 +348,14 @@ function prometheusSpecialRegexEscape<T>(value: T) {
   return value
     .replace(/\\/g, '\\\\\\\\') // escape backslashes
     .replace(/[$^*{}\[\]+?.()|]/g, '\\\\$&'); // escape regex metacharacters
+}
+
+// Need to export this function from scenes because importing scenesUtils is increasing the bundle entry point size by 522.51kB
+export function escapeUrlPipeDelimiters(value: string | undefined): string {
+  if (value == null) {
+    return '';
+  }
+
+  // Replace the pipe due to using it as a filter separator
+  return /\|/g[Symbol.replace](value, '__gfp__');
 }
