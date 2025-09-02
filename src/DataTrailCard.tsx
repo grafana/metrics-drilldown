@@ -38,7 +38,7 @@ export function DataTrailCard(props: Readonly<Props>) {
   const cardHeightClassName = `${props.compactHeight && filters.length > 0 ? styles.cardTall : ''}`;
   const cardClassName = `${styles.card} ${props.wide ? styles.cardWide : ''} ${cardHeightClassName}`;
   return (
-    <article data-testid={`data-trail-card ${heading}`}>
+    <article data-testid={`data-trail-card ${metric}`}>
       <Card onClick={onSelect} className={cardClassName}>
         <Card.Heading>
           <div className={styles.metricValue}>{heading}</div>
@@ -62,7 +62,6 @@ export function DataTrailCard(props: Readonly<Props>) {
               tooltip="Remove bookmark"
               tooltipPlacement="top"
               onClick={onDelete}
-              data-testid="deleteButton"
             />
           </Card.SecondaryActions>
         </div>
