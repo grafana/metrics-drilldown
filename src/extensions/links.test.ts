@@ -458,4 +458,28 @@ describe('buildNavigateToMetricsParams', () => {
     expect(result.get(UrlParameters.DatasourceId)).toBe('test-datasource-uid');
     expect(result.getAll(UrlParameters.Filters)).toEqual([]);
   });
+
+  test('should escape pipe characters in filter values', () => {
+    const context: GrafanaAssistantMetricsDrilldownContext = {
+      navigateToMetrics: true,
+      datasource_uid: 'test-datasource-uid',
+      metric: 'test_metric',
+      label_filters: ['job=~integrations/(node_exporter|unix)'],
+    };
+
+    const parsedLabels = parseFiltersToLabelMatchers(context.label_filters);
+    const promURLObject = createPromURLObject(
+      context.datasource_uid,
+      parsedLabels,
+      context.metric
+    );
+
+    const result = buildNavigateToMetricsParams(promURLObject);
+    const urlString = result.toString();
+
+    // Verify that pipe characters are escaped to __gfp__ in the URL
+    expect(urlString).toContain('integrations%2F%28node_exporter__gfp__unix%29');
+    // Verify the original pipe character is not present
+    expect(urlString).not.toContain('integrations%2F%28node_exporter%7Cunix%29');
+  });
 });

@@ -16,20 +16,16 @@ import React from 'react';
 import { GroupByVariable } from 'Breakdown/GroupByVariable';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
 
-import { getAutoQueriesForMetric } from './autoQuery/getAutoQueriesForMetric';
-import { type AutoQueryDef, type AutoQueryInfo } from './autoQuery/types';
 import { MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from './shared';
 
-export interface MetricSceneState extends SceneObjectState {
+interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
-  autoQuery: AutoQueryInfo;
   nativeHistogram?: boolean;
   actionView?: ActionViewType;
-  queryDef?: AutoQueryDef;
   relatedLogsCount?: number;
 }
 
@@ -45,13 +41,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     },
   });
 
-  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'autoQuery'>) {
-    const autoQuery = state.autoQuery ?? getAutoQueriesForMetric(state.metric, state.nativeHistogram);
+  public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
       body: state.body ?? new MetricGraphScene({ metric: state.metric }),
-      autoQuery,
-      queryDef: state.queryDef ?? autoQuery.main,
       ...state,
     });
 
@@ -68,6 +61,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.setState({ relatedLogsCount: count });
     });
 
+    this.subscribeToEvents();
+  }
+
+  private subscribeToEvents() {
     if (config.featureToggles.enableScopesInMetricsExplore) {
       // Push the scopes change event to the tabs
       // The event is not propagated because the tabs are not part of the scene graph

@@ -6,7 +6,7 @@ import React from 'react';
 
 import { initFaro } from 'tracking/faro/faro';
 import { logger } from 'tracking/logger/logger';
-import { userPreferences } from 'UserPreferences/userPreferences';
+import { userStorage } from 'UserPreferences/userStorage';
 
 import { ErrorView } from './ErrorView';
 import { Onboarding } from './Onboarding';
@@ -22,7 +22,7 @@ initFaro();
 const prometheusDatasources = Object.values(config.datasources).filter(isPrometheusDataSource);
 
 try {
-  userPreferences.migrate();
+  userStorage.migrate();
 } catch (error) {
   logger.error(error as Error, { cause: 'User preferences migration' });
 }

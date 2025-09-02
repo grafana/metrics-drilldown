@@ -1,10 +1,10 @@
 import { setDataSourceSrv, type DataSourceWithBackend } from '@grafana/runtime';
 
-import { RECENT_TRAILS_KEY, TrailStore, type UrlSerializedTrail } from './TrailStore';
-import { DataSourceType, MockDataSourceSrv } from '../mocks/datasource';
-import { dataSourceStub } from '../stubs/dataSourceStub';
+import { RECENT_TRAILS_KEY, TrailStore } from './TrailStore';
+import { DataSourceType, MockDataSourceSrv } from '../test/mocks/datasource';
+import { dataSourceStub } from '../test/stubs/dataSourceStub';
 import { PREF_KEYS } from '../UserPreferences/pref-keys';
-import { userPreferences } from '../UserPreferences/userPreferences';
+import { userStorage } from '../UserPreferences/userStorage';
 
 const getDataSourceSrvSpy = jest.fn();
 
@@ -78,7 +78,7 @@ describe('TrailStore', () => {
   describe('Initialize store with one recent trail with final current step', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    const urlSerializedTrails: UrlSerializedTrail[] = [
+    const urlSerializedTrails = [
       {
         // this has no metric nor labels so it will be ignored
         urlValues: {
@@ -106,8 +106,8 @@ describe('TrailStore', () => {
     ];
 
     beforeEach(() => {
-      userPreferences.clear();
-      userPreferences.setItem(RECENT_TRAILS_KEY, [{ urlSerializedTrails }]);
+      userStorage.clear();
+      userStorage.setItem(RECENT_TRAILS_KEY, [{ urlSerializedTrails }]);
       store.load();
     });
 
@@ -122,8 +122,8 @@ describe('TrailStore', () => {
 
   describe('Initialize store with one bookmark trail but no recent trails', () => {
     beforeEach(() => {
-      userPreferences.clear();
-      userPreferences.setItem(PREF_KEYS.BOOKMARKS, [
+      userStorage.clear();
+      userStorage.setItem(PREF_KEYS.BOOKMARKS, [
         {
           urlValues: URL_VALUES_BOOKMARK,
         },
@@ -185,7 +185,7 @@ describe('TrailStore', () => {
       expect(store.bookmarks.length).toBe(0);
 
       jest.advanceTimersByTime(2000);
-      expect(userPreferences.getItem(PREF_KEYS.BOOKMARKS)).toStrictEqual([]);
+      expect(userStorage.getItem(PREF_KEYS.BOOKMARKS)).toStrictEqual([]);
     });
   });
 
@@ -193,8 +193,8 @@ describe('TrailStore', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     beforeEach(() => {
-      userPreferences.clear();
-      userPreferences.setItem(PREF_KEYS.BOOKMARKS, [
+      userStorage.clear();
+      userStorage.setItem(PREF_KEYS.BOOKMARKS, [
         {
           history: [
             {
@@ -243,8 +243,8 @@ describe('TrailStore', () => {
 
   describe('Initialize store with one legacy bookmark trail not bookmarked on final step', () => {
     beforeEach(() => {
-      userPreferences.clear();
-      userPreferences.setItem(PREF_KEYS.BOOKMARKS, [
+      userStorage.clear();
+      userStorage.setItem(PREF_KEYS.BOOKMARKS, [
         {
           history: [
             {
@@ -304,8 +304,8 @@ describe('TrailStore', () => {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     beforeEach(() => {
-      userPreferences.clear();
-      userPreferences.setItem(RECENT_TRAILS_KEY, [
+      userStorage.clear();
+      userStorage.setItem(RECENT_TRAILS_KEY, [
         {
           urlValues: {
             metric: 'other_metric',
@@ -319,7 +319,7 @@ describe('TrailStore', () => {
           },
         },
       ]);
-      userPreferences.setItem(PREF_KEYS.BOOKMARKS, [
+      userStorage.setItem(PREF_KEYS.BOOKMARKS, [
         {
           urlValues: URL_VALUES_BOOKMARK,
         },
@@ -377,7 +377,7 @@ describe('TrailStore', () => {
       expect(store.bookmarks.length).toBe(0);
 
       jest.advanceTimersByTime(2000);
-      expect(userPreferences.getItem(PREF_KEYS.BOOKMARKS)).toStrictEqual([]);
+      expect(userStorage.getItem(PREF_KEYS.BOOKMARKS)).toStrictEqual([]);
     });
   });
 });

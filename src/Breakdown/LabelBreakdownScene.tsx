@@ -17,7 +17,7 @@ import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 import { ResponsiveGroupBySelector } from './ResponsiveGroupBySelector';
 
-export interface LabelBreakdownSceneState extends SceneObjectState {
+interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
   body?: MetricLabelsList | MetricLabelValuesList;
   responsiveSelector?: ResponsiveGroupBySelector;

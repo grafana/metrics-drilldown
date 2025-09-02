@@ -8,7 +8,6 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
-  SceneReactObject,
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
@@ -27,14 +26,23 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
+import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
+import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
+import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
+import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { reportChangeInLabelFilters } from './interactions';
+import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
 import { getTrailStore } from './TrailStore/TrailStore';
@@ -48,7 +56,6 @@ export interface DataTrailState extends SceneObjectState {
   embedded?: boolean;
   controls: SceneObject[];
   settings: DataTrailSettings;
-  pluginInfo: SceneReactObject;
   createdAt: number;
 
   // wingman
@@ -66,6 +73,8 @@ export interface DataTrailState extends SceneObjectState {
 
   trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
   urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
+
+  drawer: SceneDrawer;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -125,12 +134,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneRefreshPicker({}),
       ],
       settings: state.settings ?? new DataTrailSettings({}),
-      pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
       alertingMetrics: {},
       nativeHistogramMetric: state.nativeHistogramMetric ?? '',
       trailActivated: state.trailActivated ?? false,
+      drawer: new SceneDrawer({}),
       ...state,
     });
 
@@ -139,6 +148,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   private onActivate() {
     this.datasourceHelper.init();
+
+    this.subscribeToConfigEvents();
 
     this.setState({ trailActivated: true });
 
@@ -172,6 +183,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           filtersVariable?.setState({
             useQueriesAsFilterForOptions: Boolean(newState.metric),
           });
+
+          // ensure that when using browser nav, we close the drawer
+          this.state.drawer.close();
         }
       });
     }
@@ -194,6 +208,58 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     };
   }
 
+  private async subscribeToConfigEvents() {
+    this._subs.add(
+      this.subscribeToEvent(EventConfigurePanel, async (event) => {
+        const { metric } = event.payload;
+
+        reportExploreMetrics('configure_panel_opened', { metricType: getMetricType(metric) });
+
+        const metadata = await this.getMetadataForMetric(metric);
+
+        this.state.drawer.open({
+          title: 'Configure the Prometheus function',
+          subTitle: `${metric} ${metadata ? ` (${metadata.type})` : ''}`, // eslint-disable-line sonarjs/no-nested-template-literals
+          body: new ConfigurePanelForm({ metric }),
+        });
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventCancelConfigurePanel, () => {
+        this.state.drawer.close();
+      })
+    );
+
+    this._subs.add(
+      this.subscribeToEvent(EventApplyPanelConfig, (event) => {
+        const { metric, config, restoreDefault } = event.payload;
+
+        if (restoreDefault) {
+          reportExploreMetrics('default_panel_config_restored', { metricType: getMetricType(metric) });
+        } else {
+          reportExploreMetrics('panel_config_applied', { metricType: getMetricType(metric), configId: config.id });
+        }
+
+        this.state.drawer.close();
+
+        const panelsToUpdate = sceneGraph.findAllObjects(
+          this.state.topScene || this,
+          (o) =>
+            o instanceof GmdVizPanel &&
+            o.state.metric === metric &&
+            Boolean(sceneGraph.findDescendents(o, ConfigurePanelAction).length === 1)
+        ) as GmdVizPanel[];
+
+        for (const panel of panelsToUpdate) {
+          panel.update(config.panelOptions, config.queryOptions);
+        }
+
+        displaySuccess([`Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${metric}!`]);
+      })
+    );
+  }
+
   /**
    * Assuming that the change in filter was already reported with a cause other than `'adhoc_filter'`,
    * this will modify the adhoc filter variable and prevent the automatic reporting which would
@@ -210,7 +276,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this._addingFilterWithoutReportingInteraction = false;
   }
 
-  public getMetricMetadata(metric: string) {
+  public getPrometheusBuildInfo() {
+    return this.datasourceHelper.getPrometheusBuildInfo();
+  }
+
+  public getMetadataForMetric(metric: string) {
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
 
@@ -229,7 +299,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       });
     }
 
-    const nativeHistogramMetric = await this.isNativeHistogram(metric);
+    const nativeHistogramMetric = metric ? await this.isNativeHistogram(metric) : false;
 
     this._urlSync.performBrowserHistoryAction(() => {
       this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
@@ -265,7 +335,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, settings, pluginInfo, embedded } = model.useState();
+    const { controls, topScene, settings, embedded, drawer } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
@@ -300,34 +370,37 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     }, [embedded, controls]);
 
     return (
-      <div className={styles.container}>
-        {controls && (
-          <div className={styles.controls} data-testid="app-controls">
-            {controls.map((control) => (
-              <control.Component key={control.state.key} model={control} />
-            ))}
-            <div className={styles.settingsInfo}>
-              <settings.Component model={settings} />
-              <pluginInfo.Component model={pluginInfo} />
+      <>
+        <div className={styles.container}>
+          {controls && (
+            <div className={styles.controls} data-testid="app-controls">
+              {controls.map((control) => (
+                <control.Component key={control.state.key} model={control} />
+              ))}
+              <div className={styles.settingsInfo}>
+                <settings.Component model={settings} />
+                <PluginInfo model={model} />
+              </div>
             </div>
-          </div>
-        )}
-        {topScene && (
-          <UrlSyncContextProvider
-            scene={topScene}
-            createBrowserHistorySteps={true}
-            updateUrlOnInit={true}
-            namespace={model.state.urlNamespace}
-          >
-            <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
-          </UrlSyncContextProvider>
-        )}
-      </div>
+          )}
+          {topScene && (
+            <UrlSyncContextProvider
+              scene={topScene}
+              createBrowserHistorySteps={true}
+              updateUrlOnInit={true}
+              namespace={model.state.urlNamespace}
+            >
+              <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
+            </UrlSyncContextProvider>
+          )}
+        </div>
+        <drawer.Component model={drawer} />
+      </>
     );
   };
 }
 
-export function getTopSceneFor(metric?: string, nativeHistogram = false) {
+function getTopSceneFor(metric?: string, nativeHistogram = false) {
   if (metric) {
     return new MetricScene({ metric, nativeHistogram });
   } else {
@@ -361,7 +434,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           filters
             .filter((filter) => filter.key !== '__name__')
             // eslint-disable-next-line sonarjs/no-nested-template-literals
-            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value.replaceAll('=', `\=`)}"`)
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',')
         );
       },

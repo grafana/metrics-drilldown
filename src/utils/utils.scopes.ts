@@ -1,7 +1,7 @@
 import { type Scope } from '@grafana/data';
 import { SceneObjectBase, type SceneObjectState } from '@grafana/scenes';
 
-export function getSelectedScopes(): Scope[] {
+function getSelectedScopes(): Scope[] {
   return [];
 }
 
@@ -59,8 +59,4 @@ export class ScopesFacade extends SceneObjectBase<ScopesFacadeState> {
   public get value() {
     return getSelectedScopes();
   }
-}
-
-export function ScopesSelector(): null {
-  return null;
 }
