@@ -137,15 +137,16 @@ test.describe('Responsive Breakdown Selector', () => {
 
       // Resize to tablet
       await page.setViewportSize({ width: 768, height: 600 });
-      // Wait for resize to complete
-      await page.waitForTimeout(300);
+      // Wait for responsive selector to be visible after resize
+      await expect(page.getByTestId('responsive-group-by-selector')).toBeVisible();
 
       // Should still have radio buttons but possibly fewer
       await expect(page.getByRole('radio', { name: 'All' })).toBeVisible();
 
       // Resize to mobile
       await page.setViewportSize({ width: 480, height: 600 });
-      await page.waitForTimeout(300);
+      // Wait for responsive selector to be visible after resize
+      await expect(page.getByTestId('responsive-group-by-selector')).toBeVisible();
 
       // Should still have at least "All" button
       await expect(page.getByRole('radio', { name: 'All' })).toBeVisible();
@@ -207,8 +208,8 @@ test.describe('Responsive Breakdown Selector', () => {
 
       for (const viewport of viewports) {
         await page.setViewportSize(viewport);
-        // Brief wait for responsive changes to complete
-        await page.waitForTimeout(100);
+        // Wait for responsive selector to be visible after each resize
+        await expect(page.getByTestId('responsive-group-by-selector')).toBeVisible();
       }
 
       // Should still be functional after rapid changes
@@ -225,7 +226,8 @@ test.describe('Responsive Breakdown Selector', () => {
 
       // Set extremely narrow viewport
       await page.setViewportSize({ width: 200, height: 600 });
-      await page.waitForTimeout(300);
+      // Wait for responsive selector to be visible after resize
+      await expect(page.getByTestId('responsive-group-by-selector')).toBeVisible();
 
       // Should still show at least the "All" button
       await expect(page.getByRole('radio', { name: 'All' })).toBeVisible();
@@ -245,7 +247,8 @@ test.describe('Responsive Breakdown Selector', () => {
 
       // Set very wide viewport
       await page.setViewportSize({ width: 1920, height: 1080 });
-      await page.waitForTimeout(300);
+      // Wait for responsive selector to be visible after resize
+      await expect(page.getByTestId('responsive-group-by-selector')).toBeVisible();
 
       // Should always show the "All" button
       await expect(page.getByRole('radio', { name: 'All' })).toBeVisible();

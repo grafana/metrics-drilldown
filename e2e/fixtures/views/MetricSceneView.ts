@@ -158,16 +158,48 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getLabelDropdown() {
-    return this.getByTestId('breakdown-label-selector');
+    return this.getByTestId('responsive-group-by-selector');
   }
 
   async assertLabelDropdown(optionLabel: string) {
-    await expect(this.getLabelDropdown().getByText(optionLabel).first()).toBeVisible();
+    // For the new responsive component, the label could be either a radio button or in the dropdown
+    const radioButton = this.getLabelDropdown().getByRole('radio', { name: optionLabel });
+    const isRadioVisible = await radioButton.isVisible().catch(() => false);
+
+    if (isRadioVisible) {
+      await expect(radioButton).toBeVisible();
+    } else {
+      // If not visible as radio, check if it's available in the dropdown by clicking it
+      const combobox = this.getLabelDropdown().locator('[role="combobox"]');
+      const isComboboxVisible = await combobox.isVisible().catch(() => false);
+
+      if (isComboboxVisible) {
+        // The label should be available as an option in the dropdown
+        await combobox.click();
+        await expect(this.getByRole('option', { name: optionLabel })).toBeVisible();
+        // Close the dropdown after checking
+        await combobox.press('Escape');
+      } else {
+        // If neither radio nor dropdown is available, the test should fail with a helpful message
+        throw new Error(`Label "${optionLabel}" is not available as either a radio button or dropdown option`);
+      }
+    }
   }
 
   async selectLabel(label: string) {
-    await this.getLabelDropdown().locator('input').click();
-    await this.getByRole('option', { name: label }).click();
+    // First try to find the label as a radio button (for common labels)
+    const radioButton = this.getLabelDropdown().getByRole('radio', { name: label });
+    const isRadioVisible = await radioButton.isVisible().catch(() => false);
+
+    if (isRadioVisible) {
+      // Click the radio button directly
+      await radioButton.click();
+    } else {
+      // If not visible as radio, it should be in the dropdown (combobox)
+      const combobox = this.getLabelDropdown().locator('[role="combobox"]');
+      await combobox.click();
+      await this.getByRole('option', { name: label }).click();
+    }
   }
 
   async assertBreadownListControls({ label, sortBy }: { label: string; sortBy: string }) {
