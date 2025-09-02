@@ -43,6 +43,29 @@ jest.mock('../../tracking/logger/logger', () => ({
 const mockMeasureText = measureText as jest.MockedFunction<typeof measureText>;
 const mockLookupVariable = sceneGraph.lookupVariable as jest.MockedFunction<typeof sceneGraph.lookupVariable>;
 
+// Helper function to create ResizeObserver mock with specified width
+const createMockResizeObserver = (width: number) => {
+  let storedCallback: ((entries: any[]) => void) | null = null;
+
+  const mockObserve = jest.fn().mockImplementation(() => {
+    // Simulate container with specified width
+    if (storedCallback) {
+      storedCallback([{ target: { clientWidth: width } }]);
+    }
+  });
+
+  const mockResizeObserver = jest.fn().mockImplementation((callback) => {
+    storedCallback = callback;
+    return {
+      observe: mockObserve,
+      unobserve: jest.fn(),
+      disconnect: jest.fn(),
+    };
+  });
+
+  return mockResizeObserver;
+};
+
 describe('ResponsiveGroupBySelector', () => {
   let mockGroupByVariable: any;
   let mockFiltersVariable: any;
@@ -104,15 +127,7 @@ describe('ResponsiveGroupBySelector', () => {
   describe('Component rendering', () => {
     it('should render radio buttons for common labels', () => {
       // Mock ResizeObserver
-      const mockResizeObserver = jest.fn().mockImplementation((callback) => ({
-        observe: jest.fn().mockImplementation(() => {
-          // Simulate container with sufficient width
-          callback([{ target: { clientWidth: 800 } }]);
-        }),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-      }));
-      global.ResizeObserver = mockResizeObserver;
+      global.ResizeObserver = createMockResizeObserver(800);
 
       render(<ResponsiveGroupBySelector.Component model={selector} />);
 
@@ -125,14 +140,7 @@ describe('ResponsiveGroupBySelector', () => {
 
     it('should show dropdown when there are hidden labels', () => {
       // Mock ResizeObserver with narrow width
-      const mockResizeObserver = jest.fn().mockImplementation((callback) => ({
-        observe: jest.fn().mockImplementation(() => {
-          callback([{ target: { clientWidth: 200 } }]);
-        }),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-      }));
-      global.ResizeObserver = mockResizeObserver;
+      global.ResizeObserver = createMockResizeObserver(200);
 
       render(<ResponsiveGroupBySelector.Component model={selector} />);
 
@@ -141,14 +149,7 @@ describe('ResponsiveGroupBySelector', () => {
     });
 
     it('should hide all radio buttons when container is too small', () => {
-      const mockResizeObserver = jest.fn().mockImplementation((callback) => ({
-        observe: jest.fn().mockImplementation(() => {
-          callback([{ target: { clientWidth: 100 } }]);
-        }),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-      }));
-      global.ResizeObserver = mockResizeObserver;
+      global.ResizeObserver = createMockResizeObserver(100);
 
       render(<ResponsiveGroupBySelector.Component model={selector} />);
 
@@ -160,14 +161,7 @@ describe('ResponsiveGroupBySelector', () => {
 
   describe('User interactions', () => {
     beforeEach(() => {
-      const mockResizeObserver = jest.fn().mockImplementation((callback) => ({
-        observe: jest.fn().mockImplementation(() => {
-          callback([{ target: { clientWidth: 800 } }]);
-        }),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-      }));
-      global.ResizeObserver = mockResizeObserver;
+      global.ResizeObserver = createMockResizeObserver(800);
     });
 
     it('should handle radio button selection', async () => {
@@ -194,14 +188,7 @@ describe('ResponsiveGroupBySelector', () => {
 
     it('should handle dropdown selection', async () => {
       // Mock narrow width to force dropdown usage
-      const mockResizeObserver = jest.fn().mockImplementation((callback) => ({
-        observe: jest.fn().mockImplementation(() => {
-          callback([{ target: { clientWidth: 200 } }]);
-        }),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-      }));
-      global.ResizeObserver = mockResizeObserver;
+      global.ResizeObserver = createMockResizeObserver(200);
 
       render(<ResponsiveGroupBySelector.Component model={selector} />);
 
@@ -222,14 +209,7 @@ describe('ResponsiveGroupBySelector', () => {
         { key: 'instance', operator: '=', value: 'localhost' }
       ];
 
-      const mockResizeObserver = jest.fn().mockImplementation((callback) => ({
-        observe: jest.fn().mockImplementation(() => {
-          callback([{ target: { clientWidth: 800 } }]);
-        }),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-      }));
-      global.ResizeObserver = mockResizeObserver;
+      global.ResizeObserver = createMockResizeObserver(800);
 
       render(<ResponsiveGroupBySelector.Component model={selector} />);
 
@@ -251,14 +231,7 @@ describe('ResponsiveGroupBySelector', () => {
         { key: 'instance', operator: '=', value: 'localhost' }
       ];
 
-      const mockResizeObserver = jest.fn().mockImplementation((callback) => ({
-        observe: jest.fn().mockImplementation(() => {
-          callback([{ target: { clientWidth: 800 } }]);
-        }),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-      }));
-      global.ResizeObserver = mockResizeObserver;
+      global.ResizeObserver = createMockResizeObserver(800);
 
       render(<ResponsiveGroupBySelector.Component model={selector} />);
 
@@ -281,14 +254,7 @@ describe('ResponsiveGroupBySelector', () => {
         return { width: 100 } as TextMetrics;
       });
 
-      const mockResizeObserver = jest.fn().mockImplementation((callback) => ({
-        observe: jest.fn().mockImplementation(() => {
-          callback([{ target: { clientWidth: 800 } }]);
-        }),
-        unobserve: jest.fn(),
-        disconnect: jest.fn(),
-      }));
-      global.ResizeObserver = mockResizeObserver;
+      global.ResizeObserver = createMockResizeObserver(800);
 
       render(<ResponsiveGroupBySelector.Component model={selector} />);
 
