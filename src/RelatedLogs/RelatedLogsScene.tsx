@@ -52,7 +52,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       body: new SceneFlexLayout({
         direction: 'column',
         height: '100%',
-        minHeight: 550,
+        minHeight: 500,
         children: [
           new SceneFlexItem({
             key: LOGS_PANEL_CONTAINER_KEY,
