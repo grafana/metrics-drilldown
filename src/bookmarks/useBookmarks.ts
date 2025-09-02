@@ -28,6 +28,7 @@ export function useBookmarks(sceneObject: SceneObject) {
     const bookmarks: Record<string, Bookmark> = {};
 
     for (const b of bookmarksFromStorage) {
+      // to store the min amount of data, we don't store the key in user storage, we compute it on-the-fly here, when it's retrieved
       const key = genBookmarkKey(b.urlValues);
       bookmarks[key] = { ...b, key };
     }
@@ -49,8 +50,9 @@ export function useBookmarks(sceneObject: SceneObject) {
       urlValues: sceneUtils.getUrlState(trail) as Bookmark['urlValues'],
       createdAt: Date.now(),
     };
+    const bookmarksForStorage = Object.values(allBookmarks).map((b) => ({ ...b, key: undefined }));
 
-    userStorage.setItem(PREF_KEYS.BOOKMARKS, [...Object.values(allBookmarks), newBookmark]);
+    userStorage.setItem(PREF_KEYS.BOOKMARKS, [...bookmarksForStorage, newBookmark]);
 
     const newKey = genBookmarkKey(newBookmark.urlValues);
     setAllBookmarks({ ...allBookmarks, [newKey]: { ...newBookmark, key: newKey } });
@@ -60,8 +62,9 @@ export function useBookmarks(sceneObject: SceneObject) {
 
   const removeBookmark = (bookmarkKey: string) => {
     delete allBookmarks[bookmarkKey];
+    const bookmarksForStorage = Object.values(allBookmarks).map((b) => ({ ...b, key: undefined }));
 
-    userStorage.setItem(PREF_KEYS.BOOKMARKS, Object.values(allBookmarks));
+    userStorage.setItem(PREF_KEYS.BOOKMARKS, bookmarksForStorage);
 
     setAllBookmarks({ ...allBookmarks });
   };
