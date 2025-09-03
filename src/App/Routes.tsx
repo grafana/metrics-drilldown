@@ -1,8 +1,8 @@
-import React, { lazy, useContext } from 'react';
+import React, { lazy } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { ROUTES } from '../constants';
-import { MetricsContext } from './useTrail';
+import { useMetricsAppContext } from './MetricsAppContext';
 
 export const Wingman = lazy(() => import('../pages/TrailWingman'));
 
@@ -13,7 +13,7 @@ const TrailRedirect = () => {
 };
 
 export const AppRoutes = () => {
-  const { trail } = useContext(MetricsContext);
+  const { trail } = useMetricsAppContext();
 
   return (
     <Routes>

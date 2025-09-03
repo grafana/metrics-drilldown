@@ -21,7 +21,7 @@ import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
 import { reportExploreMetrics } from '../../interactions';
-import { BookmarksList } from './sections/BookmarksList';
+import { BookmarksList } from './sections/BookmarksList/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';

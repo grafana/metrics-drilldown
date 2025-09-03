@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
+import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
@@ -11,6 +11,7 @@ import {
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
+  sceneUtils,
   SceneVariableSet,
   ScopesVariable,
   UrlSyncContextProvider,
@@ -36,6 +37,7 @@ import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
+import { addRecentMetric } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
@@ -45,7 +47,6 @@ import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
 import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
-import { getTrailStore } from './TrailStore/TrailStore';
 import { limitAdhocProviders } from './utils';
 import { isSceneQueryRunner } from './utils/utils.queries';
 import { getAppBackgroundColor } from './utils/utils.styles';
@@ -189,23 +190,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         }
       });
     }
-
-    // Save the current trail as a recent (if the browser closes or reloads) if user selects a metric OR applies filters to metric select view
-    const saveRecentTrail = () => {
-      const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-      const hasFilters = isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.filters.length > 0;
-      if (this.state.metric || hasFilters) {
-        getTrailStore().setRecentTrail(this);
-      }
-    };
-    window.addEventListener('unload', saveRecentTrail);
-
-    return () => {
-      if (!this.state.embedded) {
-        saveRecentTrail();
-      }
-      window.removeEventListener('unload', saveRecentTrail);
-    };
   }
 
   private async subscribeToConfigEvents() {
@@ -288,14 +272,18 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.isNativeHistogram(metric);
   }
 
-  private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
-    const metric = evt.payload ?? '';
+  private async _handleMetricSelectedEvent(event: MetricSelectedEvent) {
+    const { metric, urlValues } = event.payload;
+
+    if (metric) {
+      addRecentMetric(metric);
+    }
 
     // Add metric to adhoc filters baseFilter
     const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (isAdHocFiltersVariable(filterVar)) {
       filterVar.setState({
-        baseFilters: getBaseFiltersForMetric(evt.payload),
+        baseFilters: getBaseFiltersForMetric(metric),
       });
     }
 
@@ -303,6 +291,17 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     this._urlSync.performBrowserHistoryAction(() => {
       this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
+
+      if (urlValues) {
+        // make sure we reset the filters when navigating from a bookmark where urlsValues['var_vilters']: []
+        // it seems relevant to do it here and not anywhere else in the code base
+        if (!urlValues[`var-${VAR_FILTERS}`]?.length) {
+          urlValues[`var-${VAR_FILTERS}`] = [''];
+        }
+
+        const urlState = urlUtil.renderUrl('', urlValues);
+        sceneUtils.syncStateFromSearchParams(this, new URLSearchParams(urlState));
+      }
     });
   }
 

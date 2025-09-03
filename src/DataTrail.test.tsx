@@ -44,7 +44,7 @@ describe('DataTrail', () => {
         const metricsVariable = sceneGraph.findByKeyAndType(trail, VAR_METRICS_VARIABLE, MetricsVariable);
         metricsVariable.setState({ options: [{ value: 'metric_bucket', label: 'metric_bucket' }] });
 
-        trail.publishEvent(new MetricSelectedEvent('metric_bucket'));
+        trail.publishEvent(new MetricSelectedEvent({ metric: 'metric_bucket' }));
       });
 
       it('should switch scene to MetricScene', () => {
