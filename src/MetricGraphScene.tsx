@@ -105,7 +105,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
                 : () => [new ConfigurePanelAction({ metric })],
               menu: () => new PanelMenu({ labelName: metric }),
-              behaviors: queryConfig ? [addCardinalityInfo({ description: null })] : [],
+              behaviors: groupBy ? [addCardinalityInfo({ description: null })] : [],
             },
             queryOptions: queryConfig || {
               resolution: QUERY_RESOLUTION.HIGH,
@@ -147,6 +147,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
       topViewPanel.setState({
         ...topViewPanel.state,
+        panelConfig: {
+          ...topViewPanel.state.panelConfig,
+          behaviors: groupBy ? [addCardinalityInfo({ description: null })] : [],
+        },
         queryConfig: {
           ...topViewPanel.state.queryConfig,
           ...newQueryConfig,
