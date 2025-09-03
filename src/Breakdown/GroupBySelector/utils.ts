@@ -1,14 +1,15 @@
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 import { measureText } from '@grafana/ui';
+
 import {
-  FilterConfig,
-  FilterContext,
-  FilteringRulesConfig,
-  ProcessedAttribute,
-  AttributePrefixConfig,
-  SearchConfig,
-  DomainConfig,
-  DomainType,
+  type AttributePrefixConfig,
+  type DomainConfig,
+  type DomainType,
+  type FilterConfig,
+  type FilterContext,
+  type FilteringRulesConfig,
+  type ProcessedAttribute,
+  type SearchConfig,
 } from './types';
 
 /**
@@ -248,27 +249,31 @@ export const createDefaultGroupBySelectorConfig = (domain: DomainType): Partial<
 
     case 'metrics':
       return {
-        attributePrefixes: {
-          metric: 'metric.',
-          resource: 'resource.',
-        },
+        attributePrefixes: {},
         filteringRules: {
           excludeFilteredFromRadio: true,
+          // Custom filter to exclude histogram bucket labels like GroupByVariable does
+          customAttributeFilter: (attribute: string) => {
+            return attribute !== 'le';
+          }
         },
-        ignoredAttributes: ['__name__', 'timestamp'],
+        ignoredAttributes: ['__name__', 'timestamp', 'le'],
         layoutConfig: {
           additionalWidthPerItem: 40,
-          widthOfOtherAttributes: 180,
-          enableResponsiveRadioButtons: true,
+          widthOfOtherAttributes: 200,
+          maxSelectWidth: 200,
+          enableResponsiveRadioButtons: false, // Metrics typically use dropdown only
         },
         searchConfig: {
           enabled: true,
-          maxOptions: 1000,
+          maxOptions: 100, // Reasonable limit for metrics labels
           caseSensitive: false,
           searchFields: ['label', 'value'],
         },
         virtualizationConfig: {
           enabled: true,
+          itemHeight: 32,
+          maxHeight: 300,
         },
       };
 

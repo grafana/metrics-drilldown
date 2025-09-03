@@ -1,58 +1,29 @@
-import { SceneObject } from '@grafana/scenes';
-import { AttributesBreakdownScene } from '../TracesByService/Tabs/Breakdown/AttributesBreakdownScene';
-import { AttributesComparisonScene } from '../TracesByService/Tabs/Comparison/AttributesComparisonScene';
-import { getFiltersVariable, getMetricVariable, getTraceExplorationScene } from '../../../utils/utils';
-import { GroupBySelectorProps, createDefaultGroupBySelectorConfig } from './';
+import { type SceneObject } from '@grafana/scenes';
+
+import { createDefaultGroupBySelectorConfig, type GroupBySelectorProps } from './';
 
 /**
  * Legacy model type for backward compatibility
+ * Note: This is a placeholder - specific implementations should define their own legacy model types
  */
-export type LegacyModel = AttributesBreakdownScene | AttributesComparisonScene;
+export type LegacyModel = SceneObject;
 
 /**
  * Creates adapter configuration for GroupBySelector from legacy scene models
  * This allows gradual migration from the old component to the new one
+ * Note: This is a generic adapter - specific implementations should create their own adapters
  */
 export const createGroupBySelectorAdapter = (
   model: LegacyModel
 ): Partial<GroupBySelectorProps> => {
-  try {
-    // Extract state from scene graph
-    const traceExploration = getTraceExplorationScene(model);
-    const filtersVariable = getFiltersVariable(model);
-    const metricVariable = getMetricVariable(model);
+  console.warn('Using generic adapter - consider creating a domain-specific adapter');
 
-    // Get state values
-    const { initialGroupBy } = traceExploration.useState();
-    const { filters } = filtersVariable.useState();
-    const { value: metric } = metricVariable.useState();
-
-    // Convert filters to the new format
-    const convertedFilters = filters.map((filter) => ({
-      key: filter.key,
-      operator: filter.operator,
-      value: filter.value,
-    }));
-
-    // Get traces domain defaults
-    const tracesDefaults = createDefaultGroupBySelectorConfig('traces');
-
-    return {
-      filters: convertedFilters,
-      currentMetric: metric as string,
-      initialGroupBy,
-      ...tracesDefaults,
-    };
-  } catch (error) {
-    console.warn('Failed to create GroupBySelector adapter configuration:', error);
-
-    // Return safe defaults if extraction fails
-    const tracesDefaults = createDefaultGroupBySelectorConfig('traces');
-    return {
-      filters: [],
-      ...tracesDefaults,
-    };
-  }
+  // Return safe defaults
+  const defaultConfig = createDefaultGroupBySelectorConfig('custom');
+  return {
+    filters: [],
+    ...defaultConfig,
+  };
 };
 
 /**
@@ -102,19 +73,17 @@ export const createGroupBySelectorPropsWithAdapter = ({
  * Utility to check if a scene object is a supported legacy model
  */
 export const isLegacyModel = (model: SceneObject): model is LegacyModel => {
-  return model instanceof AttributesBreakdownScene || model instanceof AttributesComparisonScene;
+  // Generic check - specific implementations should override this
+  return model != null;
 };
 
 /**
- * Type guard for AttributesBreakdownScene
+ * Placeholder type guards - specific implementations should define their own
  */
-export const isAttributesBreakdownScene = (model: SceneObject): model is AttributesBreakdownScene => {
-  return model instanceof AttributesBreakdownScene;
+export const isAttributesBreakdownScene = (model: SceneObject): boolean => {
+  return false; // Not available in this context
 };
 
-/**
- * Type guard for AttributesComparisonScene
- */
-export const isAttributesComparisonScene = (model: SceneObject): model is AttributesComparisonScene => {
-  return model instanceof AttributesComparisonScene;
+export const isAttributesComparisonScene = (model: SceneObject): boolean => {
+  return false; // Not available in this context
 };

@@ -1,9 +1,10 @@
+import { type SelectableValue } from '@grafana/data';
 import React, { useState } from 'react';
-import { SelectableValue } from '@grafana/data';
+
 import {
-  GroupBySelector,
   createDefaultGroupBySelectorConfig,
-  FilterConfig,
+  GroupBySelector,
+  type FilterConfig,
 } from './';
 
 /**

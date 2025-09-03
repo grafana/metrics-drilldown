@@ -1,56 +1,57 @@
 import { css } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
+import { Combobox, Field, RadioButtonGroup, useStyles2, useTheme2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { GrafanaTheme2 } from '@grafana/data';
-import { Combobox, RadioButtonGroup, useStyles2, useTheme2, Field } from '@grafana/ui';
 
 import {
-  GroupBySelectorProps,
-  FilterContext,
-  DomainConfig,
+  type DomainConfig,
+  type FilterContext,
+  type GroupBySelectorProps,
 } from './types';
 import {
-  processRadioAttributes,
+  createDefaultGroupBySelectorConfig,
   filteredOptions,
   getModifiedSelectOptions,
-  createDefaultGroupBySelectorConfig,
   mergeConfigurations,
+  processRadioAttributes,
 } from './utils';
 
 const DEFAULT_ADDITIONAL_WIDTH_PER_ITEM = 40;
 const DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES = 180;
 const DEFAULT_ALL_OPTION = 'All';
 
-export function GroupBySelector({
-  // Core props
-  options,
-  radioAttributes,
-  value,
-  onChange,
-  showAll = false,
+export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
+  const {
+    // Core props
+    options,
+    radioAttributes,
+    value,
+    onChange,
+    showAll = false,
 
-  // State data
-  filters = [],
-  currentMetric,
-  initialGroupBy,
+    // State data
+    filters = [],
+    currentMetric,
+    initialGroupBy,
 
-  // Display configuration
-  attributePrefixes = {},
-  fieldLabel = 'Group by',
-  selectPlaceholder = 'Other attributes',
+    // Display configuration
+    attributePrefixes = {},
+    fieldLabel = 'Group by',
+    selectPlaceholder = 'Other attributes',
 
-  // Filtering rules
-  filteringRules = {},
-  ignoredAttributes = [],
+    // Filtering rules
+    filteringRules = {},
+    ignoredAttributes = [],
 
-  // Layout and sizing
-  layoutConfig = {},
+    // Layout and sizing
+    layoutConfig = {},
 
-  // Advanced options
-  searchConfig = {},
-  virtualizationConfig = {},
-}: GroupBySelectorProps) {
+    // Advanced options
+    searchConfig = {},
+    virtualizationConfig = {},
+  } = props;
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
   const { fontSize } = theme.typography;

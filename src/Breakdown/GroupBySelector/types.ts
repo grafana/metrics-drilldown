@@ -1,4 +1,4 @@
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 
 /**
  * Configuration for a single filter
@@ -108,57 +108,57 @@ export interface ProcessedAttribute {
 export interface GroupBySelectorProps {
   // Core Selection Interface
   /** Available attribute options for selection */
-  options: Array<SelectableValue<string>>;
+  readonly options: Array<SelectableValue<string>>;
 
   /** Attributes to show as radio buttons */
-  radioAttributes: string[];
+  readonly radioAttributes: string[];
 
   /** Currently selected attribute */
-  value?: string;
+  readonly value?: string;
 
   /** Selection change handler */
-  onChange: (label: string, ignore?: boolean) => void;
+  readonly onChange: (label: string, ignore?: boolean) => void;
 
   /** Whether to show "All" option */
-  showAll?: boolean;
+  readonly showAll?: boolean;
 
   // State Data (previously from scene graph)
   /** Active filters for exclusion logic */
-  filters?: FilterConfig[];
+  readonly filters?: FilterConfig[];
 
   /** Current metric for conditional filtering */
-  currentMetric?: string;
+  readonly currentMetric?: string;
 
   /** Initial selection value */
-  initialGroupBy?: string;
+  readonly initialGroupBy?: string;
 
   // Display Configuration
   /** Attribute prefix configuration for label display */
-  attributePrefixes?: AttributePrefixConfig;
+  readonly attributePrefixes?: AttributePrefixConfig;
 
   /** Field label text */
-  fieldLabel?: string;
+  readonly fieldLabel?: string;
 
   /** Select placeholder text */
-  selectPlaceholder?: string;
+  readonly selectPlaceholder?: string;
 
   // Filtering Rules Configuration
   /** Attribute filtering rules */
-  filteringRules?: FilteringRulesConfig;
+  readonly filteringRules?: FilteringRulesConfig;
 
   /** Attributes to exclude from options */
-  ignoredAttributes?: string[];
+  readonly ignoredAttributes?: string[];
 
   // Layout and Sizing
   /** Layout and sizing configuration */
-  layoutConfig?: LayoutConfig;
+  readonly layoutConfig?: LayoutConfig;
 
   // Advanced Options
   /** Search functionality configuration */
-  searchConfig?: SearchConfig;
+  readonly searchConfig?: SearchConfig;
 
   /** Virtualization settings */
-  virtualizationConfig?: VirtualizationConfig;
+  readonly virtualizationConfig?: VirtualizationConfig;
 }
 
 /**

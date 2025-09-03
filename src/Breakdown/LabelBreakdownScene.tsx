@@ -8,11 +8,13 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Field, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
-import { isQueryVariable } from '../utils/utils.variables';
+import { GroupBySelector } from './GroupBySelector';
+import { RefreshMetricsEvent, VAR_FILTERS, VAR_GROUP_BY } from '../shared';
+import { createGroupBySelectorPropsForMetrics } from './GroupBySelector/metrics-adapter';
+import { isAdHocFiltersVariable, isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 
@@ -74,12 +76,21 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
+    // Get filters variable for integration with the new component
+    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
+
+    // Create props for the new GroupBySelector using the metrics adapter
+    const selectorProps = createGroupBySelectorPropsForMetrics({
+      groupByVariable,
+      filtersVariable: isAdHocFiltersVariable(filtersVariable) ? filtersVariable : undefined,
+      showAll: true,
+      fieldLabel: "By label"
+    });
+
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <Field label="By label">
-            <groupByVariable.Component model={groupByVariable} />
-          </Field>
+          <GroupBySelector {...selectorProps} />
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
         </div>

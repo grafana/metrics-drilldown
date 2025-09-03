@@ -1,34 +1,34 @@
 export { GroupBySelector } from './GroupBySelector';
 export type {
-  GroupBySelectorProps,
-  FilterConfig,
   AttributePrefixConfig,
-  FilterContext,
-  FilteringRulesConfig,
-  LayoutConfig,
-  SearchConfig,
-  VirtualizationConfig,
-  ProcessedAttribute,
   DomainConfig,
   DomainType,
+  FilterConfig,
+  FilterContext,
+  FilteringRulesConfig,
+  GroupBySelectorProps,
+  LayoutConfig,
+  ProcessedAttribute,
+  SearchConfig,
+  VirtualizationConfig,
 } from './types';
 export {
   createAttributeFilter,
-  processRadioAttributes,
-  removeAttributePrefixes,
+  createDefaultGroupBySelectorConfig,
   filteredOptions,
   getModifiedSelectOptions,
-  createDefaultGroupBySelectorConfig,
   mergeConfigurations,
+  processRadioAttributes,
+  removeAttributePrefixes,
 } from './utils';
 export {
   createGroupBySelectorAdapter,
   createGroupBySelectorPropsWithAdapter,
-  isLegacyModel,
   isAttributesBreakdownScene,
   isAttributesComparisonScene,
+  isLegacyModel,
 } from './adapter';
 export type {
-  LegacyModel,
   GroupBySelectorAdapterProps,
+  LegacyModel,
 } from './adapter';

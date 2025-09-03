@@ -1,5 +1,5 @@
+import { type DomainConfig, type DomainType } from './types';
 import { createDefaultGroupBySelectorConfig, mergeConfigurations } from './utils';
-import { DomainType, DomainConfig } from './types';
 
 describe('Domain Configuration Tests', () => {
   describe('createDefaultGroupBySelectorConfig', () => {
@@ -110,18 +110,24 @@ describe('Domain Configuration Tests', () => {
       });
 
       it('should have metrics-specific attribute prefixes', () => {
-        expect(metricsConfig.attributePrefixes).toEqual({
-          metric: 'metric.',
-          resource: 'resource.',
-        });
+        expect(metricsConfig.attributePrefixes).toEqual({});
       });
 
       it('should have metrics-specific ignored attributes', () => {
-        expect(metricsConfig.ignoredAttributes).toEqual(['__name__', 'timestamp']);
+        expect(metricsConfig.ignoredAttributes).toEqual(['__name__', 'timestamp', 'le']);
       });
 
       it('should have basic filtering rules', () => {
         expect(metricsConfig.filteringRules?.excludeFilteredFromRadio).toBe(true);
+        expect(metricsConfig.filteringRules?.customAttributeFilter).toBeDefined();
+
+        // Test the custom filter excludes 'le' labels
+        const customFilter = metricsConfig.filteringRules?.customAttributeFilter;
+        expect(customFilter).toBeDefined();
+
+        // Since we know the filter is defined, we can safely assert on it
+        expect(customFilter!('le', {} as any)).toBe(false);
+        expect(customFilter!('instance', {} as any)).toBe(true);
       });
     });
 
@@ -273,36 +279,65 @@ describe('Domain Configuration Tests', () => {
 
       domains.forEach(domain => {
         const config = createDefaultGroupBySelectorConfig(domain);
-
-        requiredKeys.forEach(key => {
+        // Check all required keys exist on the config
+        for (const key of requiredKeys) {
           expect(config).toHaveProperty(key);
-        });
+        }
       });
     });
 
-    it('should have consistent layout configurations', () => {
+    it('should have consistent additionalWidthPerItem across domains', () => {
       const domains: DomainType[] = ['traces', 'logs', 'metrics', 'custom'];
-
       domains.forEach(domain => {
         const config = createDefaultGroupBySelectorConfig(domain);
-
         expect(config.layoutConfig?.additionalWidthPerItem).toBe(40);
-        expect(config.layoutConfig?.widthOfOtherAttributes).toBe(180);
-        expect(config.layoutConfig?.enableResponsiveRadioButtons).toBe(true);
       });
     });
 
-    it('should have consistent search configurations', () => {
-      const domains: DomainType[] = ['traces', 'logs', 'metrics', 'custom'];
+    it('should have appropriate widthOfOtherAttributes for each domain', () => {
+      const tracesConfig = createDefaultGroupBySelectorConfig('traces');
+      const logsConfig = createDefaultGroupBySelectorConfig('logs');
+      const metricsConfig = createDefaultGroupBySelectorConfig('metrics');
+      const customConfig = createDefaultGroupBySelectorConfig('custom');
 
+      expect(tracesConfig.layoutConfig?.widthOfOtherAttributes).toBe(180);
+      expect(logsConfig.layoutConfig?.widthOfOtherAttributes).toBe(180);
+      expect(metricsConfig.layoutConfig?.widthOfOtherAttributes).toBe(200); // Metrics specific
+      expect(customConfig.layoutConfig?.widthOfOtherAttributes).toBe(180);
+    });
+
+    it('should have appropriate responsive radio button settings', () => {
+      const tracesConfig = createDefaultGroupBySelectorConfig('traces');
+      const logsConfig = createDefaultGroupBySelectorConfig('logs');
+      const metricsConfig = createDefaultGroupBySelectorConfig('metrics');
+      const customConfig = createDefaultGroupBySelectorConfig('custom');
+
+      expect(tracesConfig.layoutConfig?.enableResponsiveRadioButtons).toBe(true);
+      expect(logsConfig.layoutConfig?.enableResponsiveRadioButtons).toBe(true);
+      expect(metricsConfig.layoutConfig?.enableResponsiveRadioButtons).toBe(false); // Metrics specific
+      expect(customConfig.layoutConfig?.enableResponsiveRadioButtons).toBe(true);
+    });
+
+    it('should have search enabled across all domains', () => {
+      const domains: DomainType[] = ['traces', 'logs', 'metrics', 'custom'];
       domains.forEach(domain => {
         const config = createDefaultGroupBySelectorConfig(domain);
-
         expect(config.searchConfig?.enabled).toBe(true);
-        expect(config.searchConfig?.maxOptions).toBe(1000);
         expect(config.searchConfig?.caseSensitive).toBe(false);
         expect(config.searchConfig?.searchFields).toEqual(['label', 'value']);
       });
+    });
+
+    it('should have appropriate maxOptions for each domain', () => {
+      const tracesConfig = createDefaultGroupBySelectorConfig('traces');
+      const logsConfig = createDefaultGroupBySelectorConfig('logs');
+      const metricsConfig = createDefaultGroupBySelectorConfig('metrics');
+      const customConfig = createDefaultGroupBySelectorConfig('custom');
+
+      expect(tracesConfig.searchConfig?.maxOptions).toBe(1000);
+      expect(logsConfig.searchConfig?.maxOptions).toBe(1000);
+      expect(metricsConfig.searchConfig?.maxOptions).toBe(100); // Metrics specific - smaller limit
+      expect(customConfig.searchConfig?.maxOptions).toBe(1000);
     });
 
     it('should have consistent virtualization configurations', () => {
