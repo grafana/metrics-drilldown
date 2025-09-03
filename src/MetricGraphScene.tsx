@@ -15,8 +15,6 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { addRefId } from 'Breakdown/MetricLabelsList/transformations/addRefId';
-import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
@@ -24,6 +22,8 @@ import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { getPanelTypeForMetric } from 'GmdVizPanel/matchers/getPanelTypeForMetric';
 import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
+import { addRefId } from 'GmdVizPanel/types/timeseries/transformations/addRefId';
+import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
@@ -36,7 +36,7 @@ import { getAppBackgroundColor } from './utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const TOPVIEW_PANEL = 'topview-panel';
+export const TOPVIEW_PANEL_KEY = 'topview-panel';
 
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
@@ -92,7 +92,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           minHeight: MAIN_PANEL_MIN_HEIGHT,
           maxHeight: MAIN_PANEL_MAX_HEIGHT,
           body: new GmdVizPanel({
-            key: TOPVIEW_PANEL,
+            key: TOPVIEW_PANEL_KEY,
             metric,
             panelOptions: {
               height: PANEL_HEIGHT.XL,
@@ -138,7 +138,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     }
 
     try {
-      const topViewPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL, GmdVizPanel);
+      const topViewPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL_KEY, GmdVizPanel);
 
       topViewPanel.setState({
         ...topViewPanel.state,

@@ -22,7 +22,7 @@ import { type DataTrail } from 'DataTrail';
 import { createAppUrl } from 'extensions/links';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'interactions';
-import { TOPVIEW_PANEL } from 'MetricGraphScene';
+import { TOPVIEW_PANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
 import { MetricSelectedEvent } from 'shared';
@@ -70,7 +70,7 @@ interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
   public getLinkToExplore = async () => {
-    const vizPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL, GmdVizPanel);
+    const vizPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL_KEY, GmdVizPanel);
     const queryRunner = sceneGraph.findDescendents(vizPanel, SceneQueryRunner)[0];
     const panelData = queryRunner.state.data;
 

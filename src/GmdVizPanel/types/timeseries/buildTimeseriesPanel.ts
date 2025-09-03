@@ -1,15 +1,14 @@
 import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
-import { addRefId } from 'Breakdown/MetricLabelsList/transformations/addRefId';
-import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
-import { sliceSeries } from 'Breakdown/MetricLabelsList/transformations/sliceSeries';
 import { extremeValueFilterBehavior } from 'GmdVizPanel/behaviors/ExtremeValueFilterBehavior';
 import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
+import { addRefId } from 'GmdVizPanel/types/timeseries/transformations/addRefId';
+import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
+import { sliceSeries } from 'GmdVizPanel/types/timeseries/transformations/sliceSeries';
 import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
-import { addCardinalityInfo } from './addCardinalityInfo';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
 
@@ -70,7 +69,7 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   return vizPanelBuilder.build();
 }
 
-const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
+export const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
 
 function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel {
   const { metric, panelConfig, queryConfig } = options;
@@ -111,10 +110,7 @@ function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel 
         });
       }
     })
-    .setBehaviors([
-      addCardinalityInfo(panelConfig.title, MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY),
-      ...(panelConfig.behaviors || []),
-    ])
+    .setBehaviors(panelConfig.behaviors)
     .build();
 
   return vizPanel;
