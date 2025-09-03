@@ -1,9 +1,15 @@
 import { css } from '@emotion/css';
-import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } from '@grafana/data';
+import {
+  DataFrameType,
+  LoadingState,
+  type DataTransformerConfig,
+  type GrafanaTheme2,
+  type ValueMapping,
+} from '@grafana/data';
 import {
   SceneObjectBase,
+  type CustomTransformerDefinition,
   type SceneComponentProps,
-  type SceneDataNode,
   type SceneDataProvider,
   type SceneObjectState,
   type VizPanel,
@@ -74,7 +80,8 @@ export type QueryConfig = {
   addIgnoreUsageFilter: boolean;
   groupBy?: string;
   queries?: QueryDefs;
-  data?: SceneDataNode;
+  data?: SceneDataProvider;
+  transformations?: Array<DataTransformerConfig | CustomTransformerDefinition>;
 };
 
 export type QueryOptions = {
@@ -83,6 +90,7 @@ export type QueryOptions = {
   groupBy?: string;
   queries?: QueryDefs;
   data?: QueryConfig['data'];
+  transformations?: QueryConfig['transformations'];
 };
 
 /* GmdVizPanelState */

@@ -15,11 +15,14 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { addRefId } from 'Breakdown/MetricLabelsList/transformations/addRefId';
+import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getPanelTypeForMetric } from 'GmdVizPanel/matchers/getPanelTypeForMetric';
 import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
@@ -99,9 +102,8 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 : () => [new ConfigurePanelAction({ metric })],
               menu: () => new PanelMenu({ labelName: metric }),
             },
-            queryOptions: {
+            queryOptions: (await this.getQueryConfig(groupBy)) || {
               resolution: QUERY_RESOLUTION.HIGH,
-              groupBy,
             },
           }),
         }),
@@ -113,15 +115,37 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     });
   }
 
-  public toggleGroupBy(label: string) {
+  private async getQueryConfig(groupBy?: string) {
+    // only timeseries panels support queryConfig.groupBy
+    const panelType = await getPanelTypeForMetric(this, this.state.metric);
+    if (panelType !== 'timeseries') {
+      return null;
+    }
+
+    return {
+      resolution: QUERY_RESOLUTION.HIGH,
+      groupBy,
+      // when grouped by, we don't slice the series received (which happens by default in buildTimeseriesPanel.ts)
+      transformations: groupBy ? [addUnspecifiedLabel(groupBy), addRefId] : undefined,
+    };
+  }
+
+  public async toggleGroupBy(label: string) {
     const groupBy = label !== ALL_VARIABLE_VALUE ? label : undefined;
+    const newQueryConfig = await this.getQueryConfig(groupBy);
+    if (!newQueryConfig) {
+      return;
+    }
 
     try {
       const topViewPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL, GmdVizPanel);
 
       topViewPanel.setState({
         ...topViewPanel.state,
-        queryConfig: { ...topViewPanel.state.queryConfig, groupBy },
+        queryConfig: {
+          ...topViewPanel.state.queryConfig,
+          ...newQueryConfig,
+        },
       });
     } catch {}
   }

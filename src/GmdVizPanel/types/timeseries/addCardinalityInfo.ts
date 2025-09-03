@@ -1,9 +1,24 @@
 import { LoadingState } from '@grafana/data';
-import { sceneGraph, SceneQueryRunner, type CancelActivationHandler, type VizPanel } from '@grafana/scenes';
+import {
+  SceneDataTransformer,
+  sceneGraph,
+  SceneQueryRunner,
+  type CancelActivationHandler,
+  type VizPanel,
+} from '@grafana/scenes';
 
 export const addCardinalityInfo =
   (originalTitle: string, maxSeriesToRender: number) =>
   (panel: VizPanel): CancelActivationHandler | void => {
+    const [sceneDataTransformer] = sceneGraph.findDescendents(panel, SceneDataTransformer);
+    if (sceneDataTransformer) {
+      const { transformations } = sceneDataTransformer.state;
+      // add the behaviour only if we slice the series received
+      if (!transformations.find((t) => (t as Function).name === 'sliceSeries')) {
+        return;
+      }
+    }
+
     const [queryRunner] = sceneGraph.findDescendents(panel, SceneQueryRunner);
     if (!queryRunner) {
       return;

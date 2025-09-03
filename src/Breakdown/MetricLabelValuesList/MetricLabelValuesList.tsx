@@ -56,6 +56,16 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     metric: MetricLabelsValuesListState['metric'];
     label: MetricLabelsValuesListState['label'];
   }) {
+    const queryParams = getTimeseriesQueryRunnerParams({
+      metric,
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: true,
+        groupBy: label,
+      },
+    });
+
     super({
       key: 'metric-label-values-list',
       metric,
@@ -76,6 +86,14 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       }),
       sortBySelector: new SortBySelector({ target: 'labels' }),
       body: undefined,
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: trailDS,
+          maxDataPoints: queryParams.maxDataPoints,
+          queries: queryParams.queries,
+        }),
+        transformations: [addUnspecifiedLabel(label)],
+      }),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -170,30 +188,15 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       },
       queryOptions: {
         groupBy: label,
+        data: sceneGraph.getData(this),
       },
     });
   }
 
   private buildByFrameRepeater() {
     const { metric, label } = this.state;
-    const queryParams = getTimeseriesQueryRunnerParams({
-      metric,
-      queryConfig: {
-        resolution: QUERY_RESOLUTION.MEDIUM,
-        labelMatchers: [],
-        addIgnoreUsageFilter: true,
-        groupBy: label,
-      },
-    });
+
     return new SceneByFrameRepeater({
-      $data: new SceneDataTransformer({
-        $data: new SceneQueryRunner({
-          datasource: trailDS,
-          maxDataPoints: queryParams.maxDataPoints,
-          queries: queryParams.queries,
-        }),
-        transformations: [addUnspecifiedLabel(label)],
-      }),
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
       $behaviors: [
         syncYAxis(),
