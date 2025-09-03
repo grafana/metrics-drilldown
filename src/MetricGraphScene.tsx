@@ -5,6 +5,7 @@ import {
   behaviors,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObjectBase,
   SceneReactObject,
   type SceneComponentProps,
@@ -23,14 +24,16 @@ import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
+import { ALL_VARIABLE_VALUE } from 'services/variables';
+import { VAR_GROUP_BY } from 'shared';
 
-import { type DataTrail } from './DataTrail';
+import { DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const TOPVIEW_KEY = 'topview';
+export const TOPVIEW_PANEL = 'topview-panel';
 
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
@@ -73,13 +76,20 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const description = getMetricDescription(metadata);
     const isHistogram = isHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
 
+    // We get the "group by" parameter directly for the URL... This is not ideal but, given the structure of MetricScene,
+    // it's possible that the GroupByVariable is not rendered. This happens for instance when the "Related metrics" tab is selected.
+    const { urlNamespace } = sceneGraph.getAncestor(this, DataTrail).state;
+    const groupByParamName = urlNamespace ? `${urlNamespace}var-${VAR_GROUP_BY}` : `var-${VAR_GROUP_BY}`; // support namespace if the app is embedded (in Asserts for example)
+    const groupByFromUrl = new URL(window.location.href).searchParams.get(groupByParamName);
+    const groupBy = groupByFromUrl !== ALL_VARIABLE_VALUE ? (groupByFromUrl as string) : undefined;
+
     topView.setState({
       children: [
         new SceneFlexItem({
-          key: TOPVIEW_KEY,
           minHeight: MAIN_PANEL_MIN_HEIGHT,
           maxHeight: MAIN_PANEL_MAX_HEIGHT,
           body: new GmdVizPanel({
+            key: TOPVIEW_PANEL,
             metric,
             panelOptions: {
               height: PANEL_HEIGHT.XL,
@@ -91,6 +101,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             },
             queryOptions: {
               resolution: QUERY_RESOLUTION.HIGH,
+              groupBy,
             },
           }),
         }),
@@ -99,6 +110,19 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           body: new MetricActionBar({}),
         }),
       ],
+    });
+  }
+
+  public toggleGroupBy(label: string) {
+    const groupBy = label !== ALL_VARIABLE_VALUE ? label : undefined;
+    const topViewPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL, GmdVizPanel);
+
+    topViewPanel.setState({
+      ...topViewPanel.state,
+      queryConfig: {
+        ...topViewPanel.state.queryConfig,
+        groupBy,
+      },
     });
   }
 
