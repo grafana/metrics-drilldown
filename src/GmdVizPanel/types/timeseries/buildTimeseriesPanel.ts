@@ -86,7 +86,7 @@ function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel 
     transformations: [
       sliceSeries(0, MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY),
       addUnspecifiedLabel(queryConfig.groupBy!),
-      addRefId,
+      addRefId, // for overriding colors below
     ],
   });
 

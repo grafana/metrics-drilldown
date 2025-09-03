@@ -3,7 +3,6 @@ import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } fr
 import {
   SceneObjectBase,
   type SceneComponentProps,
-  type SceneDataNode,
   type SceneDataProvider,
   type SceneObjectState,
   type VizPanel,
@@ -74,7 +73,7 @@ export type QueryConfig = {
   addIgnoreUsageFilter: boolean;
   groupBy?: string;
   queries?: QueryDefs;
-  data?: SceneDataNode;
+  data?: SceneDataProvider;
 };
 
 export type QueryOptions = {
