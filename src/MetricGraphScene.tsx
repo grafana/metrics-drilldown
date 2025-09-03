@@ -30,7 +30,7 @@ import { getAppBackgroundColor } from './utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const TOPVIEW_PANEL_KEY = 'topwview-panel';
+export const TOPVIEW_PANEL_KEY = 'topview-panel';
 
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
