@@ -18,5 +18,13 @@ export function sliceSeries(start: number, end: number) {
       )
     );
 
+  // adding a name property so that panel behaviours can inspect the active transformations (e.g. see addCardinalityInfo)
+  Object.defineProperty(sliceSeries, '__gmd_name___', {
+    value: 'sliceSeries',
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  });
+
   return sliceSeries;
 }

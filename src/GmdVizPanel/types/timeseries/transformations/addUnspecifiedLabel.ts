@@ -2,7 +2,6 @@ import { type DataFrame } from '@grafana/data';
 import { map, type Observable } from 'rxjs';
 
 export const addUnspecifiedLabel = (label: string) => {
-  // naming so that panel behaviours can inspect the active transformations (e.g. see addCardinalityInfo)
   const addUnspecifiedLabel = () => (source: Observable<DataFrame[]>) =>
     source.pipe(
       map((data: DataFrame[]) => {
@@ -20,6 +19,14 @@ export const addUnspecifiedLabel = (label: string) => {
         });
       })
     );
+
+  // adding a name property so that panel behaviours can inspect the active transformations (e.g. see addCardinalityInfo)
+  Object.defineProperty(addUnspecifiedLabel, '__gmd_name___', {
+    value: 'addUnspecifiedLabel',
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  });
 
   return addUnspecifiedLabel;
 };
