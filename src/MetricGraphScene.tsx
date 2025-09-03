@@ -118,7 +118,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           <topView.Component model={topView} />
         </div>
         {selectedTab && (
-          <div data-testid="tab-content">
+          <div data-testid="tab-content" className={styles.tabContent}>
             <selectedTab.Component model={selectedTab} />
           </div>
         )}
@@ -134,6 +134,9 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'column',
       position: 'relative',
       flexGrow: 1,
+    }),
+    tabContent: css({
+      height: '100%',
     }),
     topView: css({}),
     sticky: css({
