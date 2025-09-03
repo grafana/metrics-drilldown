@@ -9,11 +9,11 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import { GroupBySelector } from './GroupBySelector';
+import { reportExploreMetrics } from '../interactions';
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_GROUP_BY } from '../shared';
-import { createGroupBySelectorPropsForMetrics } from './GroupBySelector/metrics-adapter';
+import { createDefaultGroupBySelectorConfig, GroupBySelector } from './GroupBySelector';
 import { isAdHocFiltersVariable, isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
@@ -76,21 +76,82 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
-    // Get filters variable for integration with the new component
+    // Extract state manually from scene graph (Phase 2: Direct Migration)
+    const { options, value } = groupByVariable.useState();
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
 
-    // Create props for the new GroupBySelector using the metrics adapter
-    const selectorProps = createGroupBySelectorPropsForMetrics({
-      groupByVariable,
-      filtersVariable: isAdHocFiltersVariable(filtersVariable) ? filtersVariable : undefined,
-      showAll: true,
-      fieldLabel: "By label"
-    });
+    // Memoize filters conversion for performance
+    const filters = useMemo(() =>
+      isAdHocFiltersVariable(filtersVariable)
+        ? filtersVariable.state.filters.map((f: any) => ({
+            key: f.key,
+            operator: f.operator,
+            value: f.value
+          }))
+        : [],
+      [filtersVariable]
+    );
+
+    // Memoize metrics domain configuration (static, but good practice)
+    const metricsConfig = useMemo(() => createDefaultGroupBySelectorConfig('metrics'), []);
+
+    // Memoize onChange handler to prevent unnecessary re-renders
+    const handleChange = useCallback((selectedValue: string, ignore?: boolean) => {
+      groupByVariable.changeValueTo(selectedValue);
+
+      // Maintain analytics reporting like the original GroupByVariable
+      if (selectedValue && !ignore) {
+        reportExploreMetrics('groupby_label_changed', { label: selectedValue });
+      }
+    }, [groupByVariable]);
+
+    // Memoize filtering rules to prevent recreation on every render
+    const filteringRules = useMemo(() => ({
+      ...metricsConfig.filteringRules,
+      // Filter out histogram bucket labels like the original GroupByVariable
+      customAttributeFilter: (attribute: string) => attribute !== 'le'
+    }), [metricsConfig.filteringRules]);
+
+    // Memoize layout config
+    const layoutConfig = useMemo(() => ({
+      ...metricsConfig.layoutConfig,
+      maxSelectWidth: 200,
+      enableResponsiveRadioButtons: false, // Metrics use dropdown only
+    }), [metricsConfig.layoutConfig]);
+
+    // Memoize search config
+    const searchConfig = useMemo(() => ({
+      ...metricsConfig.searchConfig,
+      enabled: true,
+      maxOptions: 100,
+    }), [metricsConfig.searchConfig]);
 
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <GroupBySelector {...selectorProps} />
+          <GroupBySelector
+            // Core selection interface
+            options={options as Array<{ label?: string; value: string }>}
+            radioAttributes={[]} // Metrics domain uses dropdown only
+            value={value as string}
+            onChange={handleChange}
+            showAll={true}
+
+            // State data extracted manually
+            filters={filters}
+            currentMetric={undefined} // Could be enhanced to extract current metric
+            initialGroupBy={undefined} // Could be enhanced if needed
+
+            // Display configuration
+            fieldLabel="By label"
+            selectPlaceholder="Select label..."
+
+            // Apply metrics domain defaults with memoized overrides
+            {...metricsConfig}
+            filteringRules={filteringRules}
+            layoutConfig={layoutConfig}
+            searchConfig={searchConfig}
+          />
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
         </div>

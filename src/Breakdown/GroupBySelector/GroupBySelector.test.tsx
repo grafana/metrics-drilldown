@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import React from 'react';
+import React, { createElement } from 'react';
 
 import { GroupBySelector } from './GroupBySelector';
 import { createDefaultGroupBySelectorConfig } from './utils';
@@ -18,19 +18,19 @@ jest.mock('@react-aria/utils', () => ({
 // Mock measureText before importing @grafana/ui
 jest.mock('@grafana/ui', () => ({
   Combobox: jest.fn(({ children, placeholder, ...props }) =>
-    React.createElement('div', {
+    createElement('div', {
       'data-testid': 'combobox',
       placeholder,
       ...props
     }, children)
   ),
   RadioButtonGroup: jest.fn(({ options, value, onChange }) =>
-    React.createElement('div', { 'data-testid': 'radio-group' },
+    createElement('div', { 'data-testid': 'radio-group' },
       options.map((option: any, index: number) =>
-        React.createElement('div', {
+        createElement('div', {
           key: index,
         }, [
-          React.createElement('input', {
+          createElement('input', {
             key: `input-${index}`,
             type: 'radio',
             value: option.value,
@@ -38,7 +38,7 @@ jest.mock('@grafana/ui', () => ({
             onChange: () => onChange(option.value),
             'aria-label': option.label
           }),
-          React.createElement('span', {
+          createElement('span', {
             key: `label-${index}`,
           }, option.label)
         ])
@@ -46,8 +46,8 @@ jest.mock('@grafana/ui', () => ({
     )
   ),
   Field: jest.fn(({ label, children }) =>
-    React.createElement('div', { 'data-testid': 'field' },
-      React.createElement('label', null, label),
+    createElement('div', { 'data-testid': 'field' },
+      createElement('label', null, label),
       children
     )
   ),
