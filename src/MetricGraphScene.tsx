@@ -115,15 +115,15 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
   public toggleGroupBy(label: string) {
     const groupBy = label !== ALL_VARIABLE_VALUE ? label : undefined;
-    const topViewPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL, GmdVizPanel);
 
-    topViewPanel.setState({
-      ...topViewPanel.state,
-      queryConfig: {
-        ...topViewPanel.state.queryConfig,
-        groupBy,
-      },
-    });
+    try {
+      const topViewPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL, GmdVizPanel);
+
+      topViewPanel.setState({
+        ...topViewPanel.state,
+        queryConfig: { ...topViewPanel.state.queryConfig, groupBy },
+      });
+    } catch {}
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {
