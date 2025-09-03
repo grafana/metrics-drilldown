@@ -14,7 +14,7 @@ const DEFAULT_CTA_TEXT_IN_DESCRIPTION = `Click on "Select" on this panel to view
 type Options = {
   description?: {
     ctaText?: string;
-  };
+  } | null;
 };
 
 export const addCardinalityInfo =
@@ -41,7 +41,7 @@ export const addCardinalityInfo =
         title: `${originalTitle} (${series.length})`,
       };
 
-      if (series.length > MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY) {
+      if (options.description && series.length > MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY) {
         stateUpdate.description = `Showing only ${MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY} series out of ${series.length} to keep the data easy to read.`;
         stateUpdate.description +=
           typeof options.description?.ctaText === 'string'

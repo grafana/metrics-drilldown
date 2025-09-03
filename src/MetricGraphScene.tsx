@@ -22,6 +22,7 @@ import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { getPanelTypeForMetric } from 'GmdVizPanel/matchers/getPanelTypeForMetric';
 import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
+import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { addRefId } from 'GmdVizPanel/types/timeseries/transformations/addRefId';
 import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
@@ -86,6 +87,8 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const groupByFromUrl = new URL(window.location.href).searchParams.get(groupByParamName);
     const groupBy = groupByFromUrl !== ALL_VARIABLE_VALUE ? (groupByFromUrl as string) : undefined;
 
+    const queryConfig = await this.getQueryConfig(groupBy);
+
     topView.setState({
       children: [
         new SceneFlexItem({
@@ -95,14 +98,16 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             key: TOPVIEW_PANEL_KEY,
             metric,
             panelOptions: {
+              title: groupBy ? `${metric}, grouped by ${groupBy}` : metric,
               height: PANEL_HEIGHT.XL,
               description,
               headerActions: isHistogram
                 ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
                 : () => [new ConfigurePanelAction({ metric })],
               menu: () => new PanelMenu({ labelName: metric }),
+              behaviors: queryConfig ? [addCardinalityInfo({ description: null })] : [],
             },
-            queryOptions: (await this.getQueryConfig(groupBy)) || {
+            queryOptions: queryConfig || {
               resolution: QUERY_RESOLUTION.HIGH,
             },
           }),
