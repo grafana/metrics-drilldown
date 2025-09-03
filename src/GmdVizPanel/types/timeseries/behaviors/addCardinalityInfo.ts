@@ -41,7 +41,7 @@ export const addCardinalityInfo =
         title: `${originalTitle} (${series.length})`,
       };
 
-      if (options.description && series.length > MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY) {
+      if (options.description !== null && series.length > MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY) {
         stateUpdate.description = `Showing only ${MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY} series out of ${series.length} to keep the data easy to read.`;
         stateUpdate.description +=
           typeof options.description?.ctaText === 'string'
