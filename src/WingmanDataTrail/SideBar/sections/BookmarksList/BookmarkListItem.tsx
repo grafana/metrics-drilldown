@@ -1,23 +1,13 @@
 import { css } from '@emotion/css';
 import { dateTimeFormat, type GrafanaTheme2 } from '@grafana/data';
-import { sceneGraph } from '@grafana/scenes';
+import { type SceneObjectUrlValues } from '@grafana/scenes';
 import { Card, IconButton, useStyles2 } from '@grafana/ui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { type DataTrail } from './DataTrail';
-import { VAR_FILTERS } from './shared';
-import { getTrailStore, type DataTrailBookmark } from './TrailStore/TrailStore';
-import { getMetricName } from './utils';
-import { isAdHocFiltersVariable } from './utils/utils.variables';
+import { type Bookmark } from 'bookmarks/useBookmarks';
+import { VAR_FILTERS } from 'shared';
 
-type Props = {
-  trail?: DataTrail;
-  bookmark?: DataTrailBookmark;
-  onSelect: () => void;
-  onDelete?: () => void;
-  wide?: boolean;
-  compactHeight?: boolean;
-};
+import { getMetricName } from '../../../../utils';
 
 // Helper function to truncate the value for a single key:value pair
 const truncateValue = (key: string, value: string, maxLength: number) => {
@@ -28,67 +18,63 @@ const truncateValue = (key: string, value: string, maxLength: number) => {
   return value;
 };
 
-export function DataTrailCard(props: Readonly<Props>) {
-  const { onSelect, onDelete, bookmark } = props;
-  const styles = useStyles2(getStyles);
-
-  const values = useMemo(() => {
-    let trail = props.trail || (bookmark && getTrailStore().getTrailForBookmark(bookmark));
-
-    if (!trail) {
-      return null;
-    }
-
-    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, trail)!;
-    if (!isAdHocFiltersVariable(filtersVariable)) {
-      return null;
-    }
-
-    const createdAt = bookmark?.createdAt || trail.state.createdAt;
-
-    return {
-      filters: filtersVariable.state.filters,
-      metric: trail.state.metric,
-      createdAt,
-    };
-  }, [props.trail, bookmark]);
-
-  if (!values) {
-    return null;
+const getFiltersFromUrl = (urlValues: SceneObjectUrlValues) => {
+  // the filters are always represented as an array of strings in urlValues
+  // e.g. ['job|=|prometheus', 'branch|=|HEAD']
+  const filtersFromUrl = urlValues[`var-${VAR_FILTERS}`] as string[];
+  if (!filtersFromUrl.length) {
+    return [];
   }
+  return filtersFromUrl.map((f) => f.split('|'));
+};
 
-  const { filters, metric, createdAt } = values;
+type BookmarkListItemProps = {
+  bookmark: Bookmark;
+  onSelect: () => void;
+  onDelete: () => void;
+  wide?: boolean;
+  compactHeight?: boolean;
+};
+
+export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
+  const styles = useStyles2(getStyles);
+  const { onSelect, onDelete, bookmark } = props;
+
+  const { createdAt, urlValues } = bookmark;
+  const metric = (urlValues.metric as string) || '?';
+  const filters = getFiltersFromUrl(urlValues);
 
   const heading = truncateValue('', getMetricName(metric), 27);
   const cardHeightClassName = `${props.compactHeight && filters.length > 0 ? styles.cardTall : ''}`;
   const cardClassName = `${styles.card} ${props.wide ? styles.cardWide : ''} ${cardHeightClassName}`;
+
   return (
-    <article data-testid={`data-trail-card ${heading}`}>
+    <article data-testid={`data-trail-card ${metric}`}>
       <Card onClick={onSelect} className={cardClassName}>
         <Card.Heading>
           <div className={styles.metricValue}>{heading}</div>
         </Card.Heading>
         <Card.Meta className={styles.meta}>
-          {filters.map((f) => (
-            <span key={f.key}>
-              <div className={styles.secondaryFont}>{f.key}: </div>
-              <div className={styles.primaryFont}>{truncateValue(f.key, f.value, 44)}</div>
-            </span>
+          {filters.map(([key, operator, value], i) => (
+            <div key={i} className={styles.filter}>
+              <span className={styles.secondaryFont}>
+                {key} {operator}
+              </span>
+              <span className={styles.primaryFont}> {truncateValue(key, value, 44)}</span>
+            </div>
           ))}
         </Card.Meta>
         <div className={styles.deleteButton}>
-          {onDelete && (
-            <Card.SecondaryActions>
-              <IconButton
-                key="delete"
-                name="trash-alt"
-                className={styles.secondary}
-                tooltip="Remove bookmark"
-                onClick={onDelete}
-                data-testid="deleteButton"
-              />
-            </Card.SecondaryActions>
-          )}
+          <Card.SecondaryActions>
+            <IconButton
+              key="delete"
+              name="trash-alt"
+              className={styles.secondary}
+              tooltip="Remove bookmark"
+              tooltipPlacement="top"
+              onClick={onDelete}
+            />
+          </Card.SecondaryActions>
         </div>
       </Card>
       <div className={styles.date}>
@@ -145,6 +131,11 @@ function getStyles(theme: GrafanaTheme2) {
       color: theme.colors.text.secondary,
       whiteSpace: 'nowrap',
     }),
+    filter: css({
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    }),
     primaryFont: css({
       display: 'inline',
       color: theme.colors.text.primary,
@@ -162,8 +153,8 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     deleteButton: css({
       position: 'absolute',
-      bottom: theme.spacing(1),
-      right: theme.spacing(1),
+      bottom: theme.spacing(1.5),
+      right: theme.spacing(0.5),
     }),
   };
 }

@@ -29,7 +29,7 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
   }
 
   public onClick = () => {
-    this.publishEvent(new MetricSelectedEvent(this.state.metric), true);
+    this.publishEvent(new MetricSelectedEvent({ metric: this.state.metric }), true);
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<SelectAction>) => {
