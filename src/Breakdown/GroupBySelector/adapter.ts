@@ -1,4 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 import { type SceneObject } from '@grafana/scenes';
+
+import { logger } from '../../tracking/logger/logger';
 
 import { createDefaultGroupBySelectorConfig, type GroupBySelectorProps } from './';
 
@@ -6,7 +10,9 @@ import { createDefaultGroupBySelectorConfig, type GroupBySelectorProps } from '.
  * Legacy model type for backward compatibility
  * Note: This is a placeholder - specific implementations should define their own legacy model types
  */
-export type LegacyModel = SceneObject;
+export interface LegacyModel extends SceneObject {
+  onChange?: (label: string, ignore?: boolean) => void;
+}
 
 /**
  * Creates adapter configuration for GroupBySelector from legacy scene models
@@ -16,7 +22,7 @@ export type LegacyModel = SceneObject;
 export const createGroupBySelectorAdapter = (
   model: LegacyModel
 ): Partial<GroupBySelectorProps> => {
-  console.warn('Using generic adapter - consider creating a domain-specific adapter');
+  logger.warn('Using generic adapter - consider creating a domain-specific adapter');
 
   // Return safe defaults
   const defaultConfig = createDefaultGroupBySelectorConfig('custom');
@@ -58,7 +64,7 @@ export const createGroupBySelectorPropsWithAdapter = ({
     options,
     radioAttributes,
     value,
-    onChange: model.onChange.bind(model),
+    onChange: model.onChange ? model.onChange.bind(model) : () => {},
     showAll,
 
     // Adapter configuration
@@ -80,10 +86,14 @@ export const isLegacyModel = (model: SceneObject): model is LegacyModel => {
 /**
  * Placeholder type guards - specific implementations should define their own
  */
-export const isAttributesBreakdownScene = (model: SceneObject): boolean => {
+export const isAttributesBreakdownScene = (
+  model: SceneObject
+): boolean => {
   return false; // Not available in this context
 };
 
-export const isAttributesComparisonScene = (model: SceneObject): boolean => {
+export const isAttributesComparisonScene = (
+  model: SceneObject
+): boolean => {
   return false; // Not available in this context
 };

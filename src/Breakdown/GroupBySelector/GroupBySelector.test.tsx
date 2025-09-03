@@ -17,7 +17,7 @@ jest.mock('@react-aria/utils', () => ({
 
 // Mock measureText before importing @grafana/ui
 jest.mock('@grafana/ui', () => ({
-  Combobox: jest.fn(({ children, isClearable, options, onChange, value, placeholder, ...props }) =>
+  Combobox: jest.fn(({ children, placeholder, ...props }) =>
     React.createElement('div', {
       'data-testid': 'combobox',
       placeholder,

@@ -1,6 +1,7 @@
 import { type SelectableValue } from '@grafana/data';
 import React, { useState } from 'react';
 
+import { logger } from '../../tracking/logger/logger';
 import {
   createDefaultGroupBySelectorConfig,
   GroupBySelector,
@@ -38,7 +39,7 @@ export const GroupBySelectorExample: React.FC = () => {
   ];
 
   const handleAttributeChange = (attribute: string, ignore?: boolean) => {
-    console.log('Attribute changed:', attribute, 'ignore:', ignore);
+    logger.log('Attribute changed:', attribute, 'ignore:', ignore);
     setSelectedAttribute(attribute);
   };
 

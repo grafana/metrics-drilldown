@@ -3,6 +3,7 @@ import { sceneGraph, type QueryVariable } from '@grafana/scenes';
 
 import { reportExploreMetrics } from '../../interactions';
 import { VAR_FILTERS } from '../../shared';
+import { logger } from '../../tracking/logger/logger';
 import { isAdHocFiltersVariable } from '../../utils/utils.variables';
 
 import { createDefaultGroupBySelectorConfig, type FilterConfig, type GroupBySelectorProps } from './';
@@ -34,7 +35,7 @@ export const createGroupBySelectorPropsForMetrics = ({
   fieldLabel = "By label",
   selectPlaceholder = "Select label..."
 }: MetricsGroupBySelectorConfig): GroupBySelectorProps => {
-  const { options, value, loading } = groupByVariable.useState();
+  const { options, value } = groupByVariable.useState();
 
   // Convert filters to the new format if available
   const filters: FilterConfig[] = filtersVariable && isAdHocFiltersVariable(filtersVariable)
@@ -136,12 +137,12 @@ export const isQueryVariable = (variable: any): variable is QueryVariable => {
  */
 export const validateMetricsAdapterConfig = (config: MetricsGroupBySelectorConfig): boolean => {
   if (!config.groupByVariable) {
-    console.warn('MetricsAdapter: groupByVariable is required');
+    logger.warn('MetricsAdapter: groupByVariable is required');
     return false;
   }
 
   if (!isQueryVariable(config.groupByVariable)) {
-    console.warn('MetricsAdapter: groupByVariable must be a QueryVariable instance');
+    logger.warn('MetricsAdapter: groupByVariable must be a QueryVariable instance');
     return false;
   }
 
