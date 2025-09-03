@@ -149,6 +149,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         ...topViewPanel.state,
         panelConfig: {
           ...topViewPanel.state.panelConfig,
+          title: groupBy ? `${this.state.metric}, grouped by ${groupBy}` : this.state.metric,
           behaviors: groupBy ? [addCardinalityInfo({ description: null })] : [],
         },
         queryConfig: {
