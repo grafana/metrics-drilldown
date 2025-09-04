@@ -26,7 +26,7 @@ export async function getPanelTypeForMetric(metric: string, dataTrail: DataTrail
 }
 
 /**
- * A sync version to use when performance is important
+ * A sync version to use when we already know the histogram type and performance is important
  */
 export function getPanelTypeForMetricSync(metric: string, histogramType: HistogramType): PanelType {
   if (isStatusUpDownMetric(metric)) {
