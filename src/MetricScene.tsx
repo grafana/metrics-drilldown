@@ -24,7 +24,6 @@ import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type 
 interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
-  nativeHistogram?: boolean;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
 }

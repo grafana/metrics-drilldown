@@ -1,13 +1,24 @@
-import { AdHocFiltersVariable } from '@grafana/scenes';
+import { AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 
 import { type DataTrail } from './DataTrail';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { limitAdhocProviders } from './utils';
 
+jest.mock('@grafana/scenes', () => ({
+  ...jest.requireActual('@grafana/scenes'),
+  sceneGraph: {
+    findAllObjects: () => [
+      { state: { queries: [{ expr: 'test-query1' }] } },
+      { state: { queries: [{ expr: 'test-query2' }] } },
+    ],
+    interpolate: (sceneObject: SceneObject, expr: string) => expr,
+  },
+}));
+
+// Mock the entire @grafana/runtime module
 const getListSpy = jest.fn();
 const fetchSpy = jest.fn();
 
-// Mock the entire @grafana/runtime module
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   getDataSourceSrv: () => ({
@@ -65,12 +76,11 @@ describe('limitAdhocProviders', () => {
     });
 
     it.each([
-      [true, ['query1', 'query2']],
+      [true, [{ expr: 'test-query1' }, { expr: 'test-query2' }]],
       [false, []],
     ])(
       'should respect the AdHocFiltersVariable "useQueriesAsFilterForOptions" option (%s)',
       async (useQueriesAsFilterForOptions, expectedQueries) => {
-        (dataTrail.getQueries as jest.Mock).mockReturnValue(['query1', 'query2']);
         filtersVariable.setState({ useQueriesAsFilterForOptions });
 
         limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
@@ -103,12 +113,11 @@ describe('limitAdhocProviders', () => {
     });
 
     it.each([
-      [true, ['query1', 'query2']],
+      [true, [{ expr: 'test-query1' }, { expr: 'test-query2' }]],
       [false, []],
     ])(
       'should respect the AdHocFiltersVariable "useQueriesAsFilterForOptions" option (%s)',
       async (useQueriesAsFilterForOptions, expectedQueries) => {
-        (dataTrail.getQueries as jest.Mock).mockReturnValue(['query1', 'query2']);
         filtersVariable.setState({ useQueriesAsFilterForOptions });
 
         limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
