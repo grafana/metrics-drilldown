@@ -112,14 +112,8 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       const availableCommonLabels = commonPrometheusLabels.filter(label =>
         options.some(option => option.value === label)
       );
-
-      // Debug logging to understand what's happening
-      console.log('Debug - Available options:', options.map(o => o.value));
-      console.log('Debug - Common labels found in options:', availableCommonLabels);
-      console.log('Debug - Active filters:', filters);
-
       return availableCommonLabels;
-    }, [commonPrometheusLabels, options, filters]);
+    }, [commonPrometheusLabels, options]);
 
     // Memoize metrics domain configuration (static, but good practice)
     const metricsConfig = useMemo(() => createDefaultGroupBySelectorConfig('metrics'), []);
@@ -140,7 +134,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       // Filter out histogram bucket labels like the original GroupByVariable
       customAttributeFilter: (attribute: string) => {
         const shouldShow = attribute !== 'le';
-        console.log(`Debug - Custom filter for '${attribute}':`, shouldShow);
         return shouldShow;
       },
       // Disable excludeFilteredFromRadio for metrics to always show radio buttons
@@ -162,11 +155,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       enabled: true,
       maxOptions: 100,
     }), [metricsConfig.searchConfig]);
-
-    // Debug final radio attributes being passed to component
-    console.log('Debug - Final radioAttributes passed to GroupBySelector:', radioAttributes);
-    console.log('Debug - Filters being applied:', filters);
-    console.log('Debug - FilteringRules config:', filteringRules);
 
     return (
       <div className={styles.container}>
