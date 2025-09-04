@@ -92,6 +92,35 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       [filtersVariable]
     );
 
+    // Define common Prometheus metric labels for radio buttons
+    // Ordered by importance - most common labels first
+    const commonPrometheusLabels = useMemo(() => [
+      'instance',         // Most common - server/pod identifier
+      'job',              // Most common - Prometheus job name
+      'service',          // Very common - service name
+      'method',           // Common for HTTP metrics
+      'status_code',      // Common for HTTP metrics
+      'code',             // Alternative to status_code
+      'handler',          // Common for HTTP handlers
+      '__name__',         // Metric name (less common as radio)
+      'exported_job',     // Exported job name
+      'exported_instance' // Exported instance name
+    ], []);
+
+        // Filter radio attributes to only include labels that exist in the current options
+    const radioAttributes = useMemo(() => {
+      const availableCommonLabels = commonPrometheusLabels.filter(label =>
+        options.some(option => option.value === label)
+      );
+
+      // Debug logging to understand what's happening
+      console.log('Debug - Available options:', options.map(o => o.value));
+      console.log('Debug - Common labels found in options:', availableCommonLabels);
+      console.log('Debug - Active filters:', filters);
+
+      return availableCommonLabels;
+    }, [commonPrometheusLabels, options, filters]);
+
     // Memoize metrics domain configuration (static, but good practice)
     const metricsConfig = useMemo(() => createDefaultGroupBySelectorConfig('metrics'), []);
 
@@ -109,14 +138,22 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const filteringRules = useMemo(() => ({
       ...metricsConfig.filteringRules,
       // Filter out histogram bucket labels like the original GroupByVariable
-      customAttributeFilter: (attribute: string) => attribute !== 'le'
+      customAttributeFilter: (attribute: string) => {
+        const shouldShow = attribute !== 'le';
+        console.log(`Debug - Custom filter for '${attribute}':`, shouldShow);
+        return shouldShow;
+      },
+      // Disable excludeFilteredFromRadio for metrics to always show radio buttons
+      excludeFilteredFromRadio: false
     }), [metricsConfig.filteringRules]);
 
     // Memoize layout config
     const layoutConfig = useMemo(() => ({
       ...metricsConfig.layoutConfig,
       maxSelectWidth: 200,
-      enableResponsiveRadioButtons: false, // Metrics use dropdown only
+      enableResponsiveRadioButtons: true, // Enable responsive radio buttons for common labels
+      additionalWidthPerItem: 60, // Increase width per item to ensure radio buttons fit
+      widthOfOtherAttributes: 180, // Reduce dropdown width to make room for radio buttons
     }), [metricsConfig.layoutConfig]);
 
     // Memoize search config
@@ -126,13 +163,18 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       maxOptions: 100,
     }), [metricsConfig.searchConfig]);
 
+    // Debug final radio attributes being passed to component
+    console.log('Debug - Final radioAttributes passed to GroupBySelector:', radioAttributes);
+    console.log('Debug - Filters being applied:', filters);
+    console.log('Debug - FilteringRules config:', filteringRules);
+
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
           <GroupBySelector
             // Core selection interface
             options={options as Array<{ label?: string; value: string }>}
-            radioAttributes={[]} // Metrics domain uses dropdown only
+            radioAttributes={radioAttributes} // Common Prometheus labels as radio buttons
             value={value as string}
             onChange={handleChange}
             showAll={true}

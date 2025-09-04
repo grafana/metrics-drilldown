@@ -262,7 +262,7 @@ export const createDefaultGroupBySelectorConfig = (domain: DomainType): Partial<
           additionalWidthPerItem: 40,
           widthOfOtherAttributes: 200,
           maxSelectWidth: 200,
-          enableResponsiveRadioButtons: false, // Metrics typically use dropdown only
+          enableResponsiveRadioButtons: true, // Enable responsive radio buttons for common labels
         },
         searchConfig: {
           enabled: true,

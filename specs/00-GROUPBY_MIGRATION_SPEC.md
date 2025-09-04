@@ -805,6 +805,65 @@ LabelBreakdownScene
 
 Phase 2 represents the optimal implementation of the `@GroupBySelector` migration, providing maximum performance while maintaining complete backward compatibility with the original `GroupByVariable` behavior.
 
+### **Enhancement: Radio Attributes for Common Labels**
+
+**Added in Phase 2**: Dynamic radio button support for common Prometheus labels
+
+```typescript
+// Define common Prometheus metric labels for radio buttons
+const commonPrometheusLabels = useMemo(() => [
+  'instance',      // Server/pod instance identifier
+  'job',           // Prometheus job name
+  'service',       // Service name
+  '__name__',      // Metric name
+  'method',        // HTTP method
+  'status_code',   // HTTP status code
+  'handler',       // Request handler
+  'code',          // Response code
+  'exported_job',  // Exported job name
+  'exported_instance' // Exported instance name
+], []);
+
+// Filter radio attributes to only include labels that exist in current options
+const radioAttributes = useMemo(() =>
+  commonPrometheusLabels.filter(label =>
+    options.some(option => option.value === label)
+  ),
+  [commonPrometheusLabels, options]
+);
+```
+
+**Benefits**:
+- **Smart Radio Buttons**: Only shows radio buttons for labels that actually exist in the current metric
+- **Common Labels First**: Prioritizes frequently used Prometheus labels
+- **Responsive Design**: Radio buttons hide/show based on available width
+- **Performance Optimized**: Memoized computation prevents unnecessary recalculations
+
+**User Experience**:
+- **Quick Access**: Common labels like `instance` and `job` available as radio buttons
+- **Fallback**: Less common labels available in dropdown
+- **Adaptive**: Interface adapts to available metric labels
+
+### **Example Usage Scenarios**
+
+#### **HTTP Metrics** (`http_requests_total`)
+For metrics with labels: `{instance="localhost:8080", job="webapp", method="GET", status_code="200", handler="/api/users"}`
+
+**Radio Buttons Displayed**: `instance`, `job`, `method`, `status_code`, `handler`
+**Dropdown Contains**: Any additional custom labels
+
+#### **System Metrics** (`cpu_usage`)
+For metrics with labels: `{instance="server-1", job="node-exporter", exported_instance="10.0.1.5"}`
+
+**Radio Buttons Displayed**: `instance`, `job`, `exported_instance`
+**Dropdown Contains**: Any additional labels
+
+#### **Custom Application Metrics**
+For metrics with only custom labels: `{custom_label="value", app_version="1.2.3"}`
+
+**Radio Buttons Displayed**: None (no common labels found)
+**Dropdown Contains**: All available labels (`custom_label`, `app_version`)
+
 ## Testing Strategy
 
 ### Unit Testing
