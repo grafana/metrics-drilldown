@@ -2,7 +2,6 @@ import { LoadingState } from '@grafana/data';
 import {
   CustomVariable,
   PanelBuilders,
-  SceneCSSGridItem,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
@@ -86,7 +85,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private showNoLogsFound() {
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
     logsPanelContainer.setState({
       body: new SceneReactObject({ component: NoRelatedLogs }),
     });
@@ -144,7 +143,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
         .setOption('showControls', true)
         // See https://github.com/grafana/logs-drilldown/blob/5225d621bbf24756559a15ce68d71437be8ca83e/src/services/store.ts#L243
         .setOption('controlsStorageKey', 'grafana.explore.logs')
-        .setData(this._queryRunner).build(),
+        .setData(this._queryRunner)
+        .build(),
     });
 
     // Set up variables for datasource selection
