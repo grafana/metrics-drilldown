@@ -140,10 +140,16 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   }, [options, radioOptions, config.searchConfig]);
 
   // Get modified select options
-  const modifiedSelectOptions = useMemo(() =>
-    getModifiedSelectOptions(otherAttrOptions, config.ignoredAttributes, config.attributePrefixes),
-    [otherAttrOptions, config.ignoredAttributes, config.attributePrefixes]
-  );
+  const modifiedSelectOptions = useMemo(() => {
+    const baseOptions = getModifiedSelectOptions(otherAttrOptions, config.ignoredAttributes, config.attributePrefixes);
+
+    // Add "All" option to dropdown if showAll is true and no radio buttons are shown
+    if (showAll && radioOptions.length === 0) {
+      return [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...baseOptions];
+    }
+
+    return baseOptions;
+  }, [otherAttrOptions, config.ignoredAttributes, config.attributePrefixes, showAll, radioOptions.length]);
 
   // Determine default value
   const defaultValue = initialGroupBy ?? radioOptions[0]?.value ?? modifiedSelectOptions[0]?.value;
