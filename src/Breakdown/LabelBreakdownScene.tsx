@@ -159,6 +159,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
+          <div className={styles.groupBySelector}>
           <GroupBySelector
             // Core selection interface
             options={options as Array<{ label?: string; value: string }>}
@@ -182,9 +183,11 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
             layoutConfig={layoutConfig}
             searchConfig={searchConfig}
           />
+          </div>
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
-        </div>
+
+          </div>
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}
@@ -212,6 +215,9 @@ function getStyles(theme: GrafanaTheme2) {
       alignItems: 'end',
     }),
     searchField: css({
+      flexGrow: 1,
+    }),
+    groupBySelector: css({
       flexGrow: 1,
     }),
   };
