@@ -77,7 +77,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const groupByVariable = model.getVariable();
 
     // Extract state manually from scene graph (Phase 2: Direct Migration)
-    const { options, value } = groupByVariable.useState();
+    const { options, value: rawValue } = groupByVariable.useState();
+    // Map the variable's all value to "All" for the component
+    const value = groupByVariable.hasAllValue() ? 'All' : rawValue;
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
 
     // Memoize filters conversion for performance
@@ -120,7 +122,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
     // Memoize onChange handler to prevent unnecessary re-renders
     const handleChange = useCallback((selectedValue: string, ignore?: boolean) => {
-      groupByVariable.changeValueTo(selectedValue);
+      // Map "All" to the variable's all value
+      const variableValue = selectedValue === 'All' ? '$__all' : selectedValue;
+      groupByVariable.changeValueTo(variableValue);
 
       // Maintain analytics reporting like the original GroupByVariable
       if (selectedValue && !ignore) {
@@ -159,7 +163,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <div className={styles.groupBySelector}>
+          <div className={styles.groupBySelector} data-testid="breakdown-label-selector">
           <GroupBySelector
             // Core selection interface
             options={options as Array<{ label?: string; value: string }>}

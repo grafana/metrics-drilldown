@@ -152,11 +152,11 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   }, [otherAttrOptions, config.ignoredAttributes, config.attributePrefixes, showAll, radioOptions.length]);
 
   // Determine default value
-  const defaultValue = initialGroupBy ?? radioOptions[0]?.value ?? modifiedSelectOptions[0]?.value;
+  const defaultValue = initialGroupBy ?? (showAll ? DEFAULT_ALL_OPTION : radioOptions[0]?.value ?? modifiedSelectOptions[0]?.value);
 
   // Auto-update logic
   useEffect(() => {
-    if (defaultValue && !showAll && allowAutoUpdate) {
+    if (defaultValue && allowAutoUpdate && !value) {
       onChange(defaultValue, true);
       setAllowAutoUpdate(false);
     }
