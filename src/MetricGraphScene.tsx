@@ -87,7 +87,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const groupByFromUrl = new URL(window.location.href).searchParams.get(groupByParamName);
     const groupBy = groupByFromUrl !== ALL_VARIABLE_VALUE ? (groupByFromUrl as string) : undefined;
 
-    const queryConfig = await this.getQueryConfig(groupBy);
+    const queryOptions = this.getQueryOptions(groupBy);
 
     topView.setState({
       children: [
@@ -107,9 +107,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               menu: () => new PanelMenu({ labelName: metric }),
               behaviors: groupBy ? [addCardinalityInfo({ description: null })] : [],
             },
-            queryOptions: queryConfig || {
-              resolution: QUERY_RESOLUTION.HIGH,
-            },
+            queryOptions,
           }),
         }),
         new SceneFlexItem({
@@ -120,27 +118,38 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     });
   }
 
-  private async getQueryConfig(groupBy?: string) {
-    // only timeseries panels support queryConfig.groupBy
-    const panelType = await getPanelTypeForMetric(this, this.state.metric);
-    if (panelType !== 'timeseries') {
-      return null;
-    }
-
-    return {
-      resolution: QUERY_RESOLUTION.HIGH,
-      groupBy,
-      // when grouped by, we don't slice the series received (which happens by default in buildTimeseriesPanel.ts)
-      transformations: groupBy ? [addUnspecifiedLabel(groupBy), addRefId] : undefined,
-    };
+  private getQueryOptions(groupBy?: string) {
+    return groupBy
+      ? {
+          resolution: QUERY_RESOLUTION.HIGH,
+          groupBy,
+          // when grouped by, we don't slice the series received (which happens by default in buildTimeseriesPanel.ts)
+          transformations: groupBy ? [addUnspecifiedLabel(groupBy), addRefId] : undefined,
+        }
+      : {
+          resolution: QUERY_RESOLUTION.HIGH,
+          groupBy,
+        };
   }
 
   public async toggleGroupBy(label: string) {
-    const groupBy = label !== ALL_VARIABLE_VALUE ? label : undefined;
-    const newQueryConfig = await this.getQueryConfig(groupBy);
-    if (!newQueryConfig) {
+    // only timeseries panels support queryConfig.groupBy
+    const panelType = await getPanelTypeForMetric(this, this.state.metric);
+    if (panelType !== 'timeseries') {
       return;
     }
+
+    const groupBy = label !== ALL_VARIABLE_VALUE ? label : undefined;
+
+    const panelOptions = groupBy
+      ? {
+          title: `${this.state.metric}, grouped by ${groupBy}`,
+          behaviors: [addCardinalityInfo({ description: null })],
+        }
+      : {
+          title: this.state.metric,
+          behaviors: [],
+        };
 
     try {
       const topViewPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL_KEY, GmdVizPanel);
@@ -149,12 +158,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         ...topViewPanel.state,
         panelConfig: {
           ...topViewPanel.state.panelConfig,
-          title: groupBy ? `${this.state.metric}, grouped by ${groupBy}` : this.state.metric,
-          behaviors: groupBy ? [addCardinalityInfo({ description: null })] : [],
+          ...panelOptions,
         },
         queryConfig: {
           ...topViewPanel.state.queryConfig,
-          ...newQueryConfig,
+          ...this.getQueryOptions(groupBy),
         },
       });
     } catch {}
