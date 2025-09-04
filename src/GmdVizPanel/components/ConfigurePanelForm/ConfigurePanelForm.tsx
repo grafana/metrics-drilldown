@@ -73,8 +73,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   private async buildBody() {
     const { metric } = this.state;
     const prefConfig = getPreferredConfigForMetric(metric);
-    const isNativeHistogram = await getTrailFor(this).isNativeHistogram(metric);
-    const presets = getConfigPresetsForMetric(metric, isNativeHistogram);
+    const presets = await getConfigPresetsForMetric(metric, getTrailFor(this));
 
     // if not found in the user preferences, we use the first preset
     // it always works because the presets are organized to always have the default one as the first element (see GmdVizPanel/config/presets)

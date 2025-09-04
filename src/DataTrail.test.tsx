@@ -1,6 +1,8 @@
 /* eslint-disable sonarjs/no-nested-functions */
-import { locationService, setDataSourceSrv } from '@grafana/runtime';
+import { dateTime, LoadingState } from '@grafana/data';
+import { locationService, setDataSourceSrv, setRunRequest } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
+import { of } from 'rxjs';
 
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
@@ -12,6 +14,14 @@ import { DataSourceType, MockDataSourceSrv } from './test/mocks/datasource';
 import { activateFullSceneTree } from './utils/utils.testing';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
+function getFilterVar(trail: DataTrail) {
+  const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
+  if (isAdHocFiltersVariable(variable)) {
+    return variable;
+  }
+  throw new Error('getFilterVar failed');
+}
+
 describe('DataTrail', () => {
   beforeAll(async () => {
     const dataSourceSrv = new MockDataSourceSrv({
@@ -22,6 +32,17 @@ describe('DataTrail', () => {
       },
     });
     setDataSourceSrv(dataSourceSrv);
+    setRunRequest(() =>
+      of({
+        state: LoadingState.Done,
+        series: [],
+        timeRange: {
+          from: dateTime(),
+          to: dateTime(),
+          raw: { from: '', to: '' },
+        },
+      })
+    );
   });
 
   describe('Given starting non-embedded trail with url sync and no url state', () => {
@@ -128,11 +149,3 @@ describe('DataTrail', () => {
     });
   });
 });
-
-function getFilterVar(trail: DataTrail) {
-  const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
-  if (isAdHocFiltersVariable(variable)) {
-    return variable;
-  }
-  throw new Error('getFilterVar failed');
-}
