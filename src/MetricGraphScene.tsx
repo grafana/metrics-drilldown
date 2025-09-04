@@ -5,6 +5,7 @@ import {
   behaviors,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObjectBase,
   SceneReactObject,
   type SceneComponentProps,
@@ -19,12 +20,18 @@ import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVa
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getPanelTypeForMetric } from 'GmdVizPanel/matchers/getPanelTypeForMetric';
 import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
+import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
+import { addRefId } from 'GmdVizPanel/types/timeseries/transformations/addRefId';
+import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
+import { ALL_VARIABLE_VALUE } from 'services/variables';
+import { VAR_GROUP_BY } from 'shared';
 
-import { type DataTrail } from './DataTrail';
+import { DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 
@@ -73,6 +80,15 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const description = getMetricDescription(metadata);
     const isHistogram = isClassicHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
 
+    // We get the "group by" parameter directly for the URL... This is not ideal but, given the structure of MetricScene,
+    // it's possible that the GroupByVariable is not rendered. This happens for instance when the "Related metrics" tab is selected.
+    const { urlNamespace } = sceneGraph.getAncestor(this, DataTrail).state;
+    const groupByParamName = urlNamespace ? `${urlNamespace}var-${VAR_GROUP_BY}` : `var-${VAR_GROUP_BY}`; // support namespace if the app is embedded (in Asserts for example)
+    const groupByFromUrl = new URL(window.location.href).searchParams.get(groupByParamName);
+    const groupBy = groupByFromUrl !== ALL_VARIABLE_VALUE ? (groupByFromUrl as string) : undefined;
+
+    const queryOptions = this.getQueryOptions(groupBy);
+
     topView.setState({
       children: [
         new SceneFlexItem({
@@ -82,16 +98,16 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             key: TOPVIEW_PANEL_KEY,
             metric,
             panelOptions: {
+              title: groupBy ? `${metric}, grouped by ${groupBy}` : metric,
               height: PANEL_HEIGHT.XL,
               description,
               headerActions: isHistogram
                 ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
                 : () => [new ConfigurePanelAction({ metric })],
               menu: () => new PanelMenu({ labelName: metric }),
+              behaviors: groupBy ? [addCardinalityInfo({ description: null })] : [],
             },
-            queryOptions: {
-              resolution: QUERY_RESOLUTION.HIGH,
-            },
+            queryOptions,
           }),
         }),
         new SceneFlexItem({
@@ -100,6 +116,56 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         }),
       ],
     });
+  }
+
+  private getQueryOptions(groupBy?: string) {
+    return groupBy
+      ? {
+          resolution: QUERY_RESOLUTION.HIGH,
+          groupBy,
+          // when grouped by, we don't slice the series received (which happens by default in buildTimeseriesPanel.ts)
+          transformations: groupBy ? [addUnspecifiedLabel(groupBy), addRefId] : undefined,
+        }
+      : {
+          resolution: QUERY_RESOLUTION.HIGH,
+          groupBy,
+        };
+  }
+
+  public async toggleGroupBy(label: string) {
+    // only timeseries panels support queryConfig.groupBy
+    const panelType = await getPanelTypeForMetric(this.state.metric, getTrailFor(this));
+    if (panelType !== 'timeseries') {
+      return;
+    }
+
+    const groupBy = label !== ALL_VARIABLE_VALUE ? label : undefined;
+
+    const panelOptions = groupBy
+      ? {
+          title: `${this.state.metric}, grouped by ${groupBy}`,
+          behaviors: [addCardinalityInfo({ description: null })],
+        }
+      : {
+          title: this.state.metric,
+          behaviors: [],
+        };
+
+    try {
+      const topViewPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL_KEY, GmdVizPanel);
+
+      topViewPanel.setState({
+        ...topViewPanel.state,
+        panelConfig: {
+          ...topViewPanel.state.panelConfig,
+          ...panelOptions,
+        },
+        queryConfig: {
+          ...topViewPanel.state.queryConfig,
+          ...this.getQueryOptions(groupBy),
+        },
+      });
+    } catch {}
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {

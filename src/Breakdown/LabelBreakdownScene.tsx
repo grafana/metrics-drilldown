@@ -11,6 +11,8 @@ import {
 import { Field, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricGraphScene } from 'MetricGraphScene';
+
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
@@ -33,10 +35,12 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
   private onActivate() {
     const groupByVariable = this.getVariable();
+    const metricGraphScene = sceneGraph.getAncestor(this, MetricGraphScene);
 
     groupByVariable.subscribeToState((newState, oldState) => {
       if (newState.value !== oldState.value) {
         this.updateBody(groupByVariable);
+        metricGraphScene.toggleGroupBy(newState.value as string);
       }
     });
 
@@ -52,7 +56,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   }
 
   private getVariable(): QueryVariable {
-    const groupByVariable = sceneGraph.lookupVariable(VAR_GROUP_BY, this)!;
+    const groupByVariable = sceneGraph.lookupVariable(VAR_GROUP_BY, this);
     if (!isQueryVariable(groupByVariable)) {
       throw new Error('Group by variable not found');
     }
