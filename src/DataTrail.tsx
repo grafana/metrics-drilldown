@@ -32,7 +32,7 @@ import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm
 import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
+import { getMetricType, getMetricTypeSync } from 'GmdVizPanel/matchers/getMetricType';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
@@ -178,13 +178,17 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(EventConfigurePanel, async (event) => {
       const { metric } = event.payload;
 
-      reportExploreMetrics('configure_panel_opened', { metricType: getMetricType(metric) });
+      getMetricType(metric, this)
+        .catch(() => getMetricTypeSync(metric))
+        .then((metricType) => {
+          reportExploreMetrics('configure_panel_opened', { metricType });
+        });
 
-      const metadata = await this.getMetadataForMetric(metric);
+      const metricType = await getMetricType(metric, this);
 
       this.state.drawer.open({
         title: 'Configure the Prometheus function',
-        subTitle: `${metric} ${metadata ? ` (${metadata.type})` : ''}`, // eslint-disable-line sonarjs/no-nested-template-literals
+        subTitle: `${metric} (${metricType})`,
         body: new ConfigurePanelForm({ metric }),
       });
     });
@@ -193,14 +197,18 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.state.drawer.close();
     });
 
-    this.subscribeToEvent(EventApplyPanelConfig, (event) => {
+    this.subscribeToEvent(EventApplyPanelConfig, async (event) => {
       const { metric, config, restoreDefault } = event.payload;
 
-      if (restoreDefault) {
-        reportExploreMetrics('default_panel_config_restored', { metricType: getMetricType(metric) });
-      } else {
-        reportExploreMetrics('panel_config_applied', { metricType: getMetricType(metric), configId: config.id });
-      }
+      getMetricType(metric, this)
+        .catch(() => getMetricTypeSync(metric))
+        .then((metricType) => {
+          if (restoreDefault) {
+            reportExploreMetrics('default_panel_config_restored', { metricType });
+          } else {
+            reportExploreMetrics('panel_config_applied', { metricType, configId: config.id });
+          }
+        });
 
       this.state.drawer.close();
 

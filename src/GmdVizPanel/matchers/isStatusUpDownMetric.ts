@@ -1,1 +1,3 @@
-export const isStatusUpDownMetric = (metric: string): boolean => metric === 'up' || metric.endsWith('_up');
+const STATUS_UPDOWN_METRIC_REGEX = /_up$/;
+
+export const isStatusUpDownMetric = (metric: string) => metric === 'up' || STATUS_UPDOWN_METRIC_REGEX.test(metric);

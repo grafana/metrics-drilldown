@@ -19,7 +19,7 @@ import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVa
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
+import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
@@ -71,7 +71,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const trail = getTrailFor(this);
     const metadata = await trail.getMetadataForMetric(metric);
     const description = getMetricDescription(metadata);
-    const isHistogram = isHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
+    const isHistogram = isClassicHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
 
     topView.setState({
       children: [
