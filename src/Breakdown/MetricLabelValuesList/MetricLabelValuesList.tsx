@@ -86,7 +86,6 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         displayCounts: true,
       }),
       sortBySelector: new SortBySelector({ target: 'labels' }),
-      body: undefined,
       $data: new SceneDataTransformer({
         $data: new SceneQueryRunner({
           datasource: trailDS,
@@ -95,6 +94,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         }),
         transformations: [addUnspecifiedLabel(label)],
       }),
+      body: undefined,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
