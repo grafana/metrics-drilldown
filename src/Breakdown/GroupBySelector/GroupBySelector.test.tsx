@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React, { createElement } from 'react';
 
 import { GroupBySelector } from './GroupBySelector';
@@ -18,7 +18,7 @@ jest.mock('@react-aria/utils', () => ({
 // Don't mock utils - use the real functions but ensure measureText is mocked
 
 jest.mock('@grafana/ui', () => ({
-  Combobox: jest.fn(({ placeholder, value, options, onChange, isClearable, ...props }) =>
+  Combobox: jest.fn(({ placeholder, value, options, onChange, ...props }) =>
     createElement('div', {
       'data-testid': 'combobox',
       ...props
