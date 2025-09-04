@@ -21,7 +21,7 @@ import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { getPanelTypeForMetric } from 'GmdVizPanel/matchers/getPanelTypeForMetric';
-import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
+import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
 import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { addRefId } from 'GmdVizPanel/types/timeseries/transformations/addRefId';
 import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
@@ -78,7 +78,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const trail = getTrailFor(this);
     const metadata = await trail.getMetadataForMetric(metric);
     const description = getMetricDescription(metadata);
-    const isHistogram = isHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
+    const isHistogram = isClassicHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
 
     // We get the "group by" parameter directly for the URL... This is not ideal but, given the structure of MetricScene,
     // it's possible that the GroupByVariable is not rendered. This happens for instance when the "Related metrics" tab is selected.
@@ -134,7 +134,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
   public async toggleGroupBy(label: string) {
     // only timeseries panels support queryConfig.groupBy
-    const panelType = await getPanelTypeForMetric(this, this.state.metric);
+    const panelType = await getPanelTypeForMetric(this.state.metric, getTrailFor(this));
     if (panelType !== 'timeseries') {
       return;
     }

@@ -1,30 +1,39 @@
-import { type SceneObject } from '@grafana/scenes';
-
-import { getPreferredConfigForMetric } from 'GmdVizPanel/config/getPreferredConfigForMetric';
+import { type DataTrail } from 'DataTrail';
+import { type HistogramType } from 'GmdVizPanel/GmdVizPanel';
 import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
-import { getTrailFor } from 'utils';
 
-import { isHistogramMetric } from './isHistogramMetric';
+import { getMetricType } from './getMetricType';
 import { isStatusUpDownMetric } from './isStatusUpDownMetric';
 
-export const getPanelTypeForMetric = async (sceneObject: SceneObject, metric: string): Promise<PanelType> => {
-  const prefConfig = getPreferredConfigForMetric(metric);
-  if (prefConfig?.panelOptions.type) {
-    return prefConfig.panelOptions.type;
-  }
+/**
+ * These are functions that receive a metric name to determine in which panel type they should be displayed.
+ * Note that they don't consider user preferences stored in user storage.
+ */
+export async function getPanelTypeForMetric(metric: string, dataTrail: DataTrail): Promise<PanelType> {
+  const metricType = await getMetricType(metric, dataTrail);
 
-  if (isStatusUpDownMetric(metric)) {
-    return 'statushistory';
-  }
+  switch (metricType) {
+    case 'classic-histogram':
+    case 'native-histogram':
+      return 'heatmap';
 
-  if (isHistogramMetric(metric)) {
+    case 'status-updown':
+      return 'statushistory';
+
+    case 'counter':
+    case 'age':
+    default:
+      return 'timeseries';
+  }
+}
+
+/**
+ * A sync version to use when we already know the histogram type and performance is important
+ */
+export function getPanelTypeForMetricSync(metric: string, histogramType: HistogramType): PanelType {
+  if (histogramType === 'classic' || histogramType === 'native') {
     return 'heatmap';
   }
 
-  const isNativeHistogram = await getTrailFor(sceneObject).isNativeHistogram(metric);
-  if (isNativeHistogram) {
-    return 'heatmap';
-  }
-
-  return 'timeseries';
-};
+  return isStatusUpDownMetric(metric) ? 'statushistory' : 'timeseries';
+}
