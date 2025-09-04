@@ -116,22 +116,34 @@ test.describe('Metrics reducer view', () => {
     });
 
     test.describe('Bookmarks', () => {
-      test('New bookmarks appear in the sidebar', async ({ metricsReducerView }) => {
+      test('Creating, going to and removing bookmarks', async ({ metricsReducerView, metricSceneView }) => {
         const METRIC_NAME = 'deprecated_flags_inuse_total';
+
+        // select a metric and go to the metric scene
         await metricsReducerView.selectMetricPanel(METRIC_NAME);
 
-        // create bookmark
-        await metricsReducerView.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL).click();
-        await expect(metricsReducerView.getByText('Bookmark created')).toBeVisible();
+        // create bookmark and back to metrics reducer
+        await metricSceneView.getByRole('button', { name: UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL }).click();
+        await expect(metricSceneView.getByText('Bookmark created')).toBeVisible();
+        await metricSceneView.goBack();
 
-        await metricsReducerView.goBack();
-
+        // open bookmarks and assertion
         await metricsReducerView.sidebar.toggleButton('Bookmarks');
+        let bookmarkCard = metricsReducerView.getByTestId(`data-trail-card ${METRIC_NAME}`);
+        await expect(bookmarkCard).toBeVisible();
 
-        // TODO: use specific data-testid with the full metric name to simplify this assertion
-        // Only consider the first 20 characters, to account for truncation of long meric names
-        const possiblyTruncatedMetricName = new RegExp(`^${METRIC_NAME.substring(0, 20)}`);
-        await expect(metricsReducerView.getByRole('button', { name: possiblyTruncatedMetricName })).toBeVisible();
+        // select bookmark, assertion in the metric scene and back
+        await bookmarkCard.click();
+        await metricSceneView.assertCoreUI(METRIC_NAME);
+        await metricSceneView.goBack();
+
+        // remove bookmark
+        await metricsReducerView.sidebar.toggleButton('Bookmarks');
+        bookmarkCard = metricsReducerView.getByTestId(`data-trail-card ${METRIC_NAME}`);
+        await bookmarkCard.getByRole('button', { name: 'Remove bookmark' }).click();
+        await expect(bookmarkCard).toBeHidden();
+
+        await expect(metricsReducerView.getByText('No bookmarks yet for thecurrent data source.')).toBeVisible();
       });
     });
   });

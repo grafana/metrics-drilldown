@@ -30,7 +30,7 @@ import { getAppBackgroundColor } from './utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const TOPVIEW_KEY = 'topview';
+export const TOPVIEW_PANEL_KEY = 'topview-panel';
 
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
@@ -76,10 +76,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     topView.setState({
       children: [
         new SceneFlexItem({
-          key: TOPVIEW_KEY,
           minHeight: MAIN_PANEL_MIN_HEIGHT,
           maxHeight: MAIN_PANEL_MAX_HEIGHT,
           body: new GmdVizPanel({
+            key: TOPVIEW_PANEL_KEY,
             metric,
             panelOptions: {
               height: PANEL_HEIGHT.XL,
@@ -118,7 +118,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           <topView.Component model={topView} />
         </div>
         {selectedTab && (
-          <div data-testid="tab-content">
+          <div data-testid="tab-content" className={styles.tabContent}>
             <selectedTab.Component model={selectedTab} />
           </div>
         )}
@@ -134,6 +134,9 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'column',
       position: 'relative',
       flexGrow: 1,
+    }),
+    tabContent: css({
+      height: '100%',
     }),
     topView: css({}),
     sticky: css({
