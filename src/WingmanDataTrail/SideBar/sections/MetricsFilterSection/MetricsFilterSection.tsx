@@ -12,18 +12,12 @@ import {
 import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
-import { logger } from 'tracking/logger/logger';
-import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { ruleGroupLabels, type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/metricLabels';
 import {
   VAR_METRICS_VARIABLE,
   type MetricOptions,
   type MetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import {
-  MetricsVariableFilterEngine,
-  type MetricFilters,
-} from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
 import { reportExploreMetrics } from '../../../../interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';

@@ -1,9 +1,9 @@
 import { VariableHide, VariableRefresh, VariableSort } from '@grafana/data';
-import { QueryVariable, sceneGraph, type SceneObjectState, type AdHocFiltersVariable } from '@grafana/scenes';
+import { QueryVariable, sceneGraph, type AdHocFiltersVariable, type SceneObjectState } from '@grafana/scenes';
 
-import { trailDS, VAR_FILTERS } from 'shared';
-import { SearchableMetricsDataSource } from 'WingmanDataTrail/ListControls/QuickSearch/SearchableMetricsDataSource';
+import { VAR_FILTERS } from 'shared';
 import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
+import { SearchableMetricsDataSource } from 'WingmanDataTrail/ListControls/QuickSearch/SearchableMetricsDataSource';
 
 export const VAR_METRICS_VARIABLE = 'metrics-wingman';
 
@@ -16,7 +16,7 @@ interface MetricsVariableState extends SceneObjectState {
 }
 
 export class MetricsVariable extends QueryVariable {
-  private currentSearchText: string = '';
+  private currentSearchText = '';
 
   constructor(state?: MetricsVariableState) {
     super({

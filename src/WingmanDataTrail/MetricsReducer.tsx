@@ -21,12 +21,12 @@ import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
-import { SearchableMetricsDataSource } from './ListControls/QuickSearch/SearchableMetricsDataSource';
 import { ListControls } from './ListControls/ListControls';
 import { EventSortByChanged } from './ListControls/MetricsSorter/events/EventSortByChanged';
 import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './ListControls/MetricsSorter/MetricsSorter';
 import { EventQuickSearchChanged } from './ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './ListControls/QuickSearch/QuickSearch';
+import { SearchableMetricsDataSource } from './ListControls/QuickSearch/SearchableMetricsDataSource';
 import { MetricsList } from './MetricsList/MetricsList';
 import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
@@ -134,7 +134,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       })
     );
 
-    const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
     const filterSections = sceneGraph.findAllObjects(
       this,
       (o) => o instanceof MetricsFilterSection

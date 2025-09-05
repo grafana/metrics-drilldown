@@ -1,4 +1,4 @@
-import { getBackendSrv, getDataSourceSrv, type BackendSrvRequest } from '@grafana/runtime';
+import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import { sceneGraph, type SceneObject } from '@grafana/scenes';
 
 import { VAR_DATASOURCE } from 'shared';
@@ -34,7 +34,7 @@ export class TrueTotalService {
     try {
       // Get datasource UID
       const dsVariable = sceneGraph.findByKey(sceneObject, VAR_DATASOURCE);
-      const dsUid = dsVariable?.state.value as string;
+      const dsUid = (dsVariable?.state as any)?.value as string;
       
       if (!dsUid) {
         logger.warn('TrueTotalService: No datasource UID found');
@@ -80,7 +80,7 @@ export class TrueTotalService {
       return totalCount;
 
     } catch (error) {
-      logger.error('TrueTotalService: Failed to fetch true total count', error);
+      logger.error(error as Error, ['TrueTotalService: Failed to fetch true total count']);
       return 0;
     }
   }
@@ -135,11 +135,11 @@ export class TrueTotalService {
         
         // Simple parsing for common cases
         if (duration.endsWith('h')) {
-          const hours = parseInt(duration);
+          const hours = parseInt(duration, 10);
           return Math.floor((now - hours * 60 * 60 * 1000) / 1000);
         }
         if (duration.endsWith('d')) {
-          const days = parseInt(duration);
+          const days = parseInt(duration, 10);
           return Math.floor((now - days * 24 * 60 * 60 * 1000) / 1000);
         }
       }
@@ -148,7 +148,7 @@ export class TrueTotalService {
       try {
         return Math.floor(new Date(time).getTime() / 1000);
       } catch {
-        // Fallback to current time
+        // Fallback to current time if date parsing fails
         return Math.floor(Date.now() / 1000);
       }
     }

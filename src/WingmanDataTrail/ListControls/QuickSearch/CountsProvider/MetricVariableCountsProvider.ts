@@ -1,15 +1,14 @@
 import { sceneGraph, type MultiValueVariable } from '@grafana/scenes';
 
-import { VAR_DATASOURCE } from 'shared';
 import { TrueTotalService } from 'services/TrueTotalService';
-import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
+import { VAR_DATASOURCE } from 'shared';
 import { VAR_CLIENT_FILTERED_METRICS } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
 
 import { CountsProvider } from './CountsProvider';
 
 export class MetricVariableCountsProvider extends CountsProvider {
-  private trueTotalCount: number = 0;
+  private trueTotalCount = 0;
 
   constructor() {
     super({ key: 'MetricVariableCountsProvider' });
