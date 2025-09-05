@@ -80,7 +80,7 @@ export class TrueTotalService {
       return totalCount;
 
     } catch (error) {
-      logger.error(error as Error, ['TrueTotalService: Failed to fetch true total count']);
+      logger.error(error as Error, { context: 'TrueTotalService: Failed to fetch true total count' });
       return 0;
     }
   }
@@ -104,53 +104,12 @@ export class TrueTotalService {
   }
 
   /**
-   * Convert Grafana time format to Unix timestamp
-   * @param time - Grafana time value (could be string, DateTime, or number)
-   * @returns Unix timestamp in seconds
+   * Convert Grafana time to Unix timestamp in seconds
    */
   private static convertTimeToUnixTimestamp(time: any): number {
-    // Handle different time format types that Grafana uses
-    
-    // If it's already a number (Unix timestamp), convert to seconds if needed
-    if (typeof time === 'number') {
-      // If it looks like milliseconds (> year 2000 in seconds), convert to seconds
-      return time > 946684800 ? Math.floor(time / 1000) : time;
-    }
-    
-    // If it's a DateTime object with valueOf method
+    // Grafana time objects have valueOf() method that returns milliseconds
     if (time && typeof time.valueOf === 'function') {
       return Math.floor(time.valueOf() / 1000);
-    }
-    
-    // If it's a string
-    if (typeof time === 'string') {
-      if (time === 'now') {
-        return Math.floor(Date.now() / 1000);
-      }
-      
-      // Handle relative times like "now-1h"
-      if (time.startsWith('now-')) {
-        const now = Date.now();
-        const duration = time.substring(4); // Remove "now-"
-        
-        // Simple parsing for common cases
-        if (duration.endsWith('h')) {
-          const hours = parseInt(duration, 10);
-          return Math.floor((now - hours * 60 * 60 * 1000) / 1000);
-        }
-        if (duration.endsWith('d')) {
-          const days = parseInt(duration, 10);
-          return Math.floor((now - days * 24 * 60 * 60 * 1000) / 1000);
-        }
-      }
-      
-      // Try to parse as ISO date
-      try {
-        return Math.floor(new Date(time).getTime() / 1000);
-      } catch {
-        // Fallback to current time if date parsing fails
-        return Math.floor(Date.now() / 1000);
-      }
     }
     
     // Fallback to current time
