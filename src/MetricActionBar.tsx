@@ -11,7 +11,7 @@ import {
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
+import { Box, Icon, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -19,14 +19,13 @@ import { genBookmarkKey } from 'bookmarks/genBookmarkKey';
 import { useBookmarks } from 'bookmarks/useBookmarks';
 import { UI_TEXT } from 'constants/ui';
 import { type DataTrail } from 'DataTrail';
-import { createAppUrl } from 'extensions/links';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'interactions';
 import { TOPVIEW_PANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
 import { ShareTrailButton } from 'ShareTrailButton';
-import { getTrailFor, getUrlForTrail } from 'utils';
+import { getTrailFor } from 'utils';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 
@@ -133,17 +132,6 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
       <Box paddingY={1} data-testid="action-bar">
         <div className={styles.actions}>
           <Stack gap={1}>
-            {trail.state.embedded && (
-              <LinkButton
-                href={createAppUrl(getUrlForTrail(trail))}
-                variant={'secondary'}
-                icon="arrow-right"
-                tooltip="Open in Metrics Drilldown"
-                onClick={() => reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' })}
-              >
-                Metrics Drilldown
-              </LinkButton>
-            )}
             <ToolbarButton
               variant={'canvas'}
               icon="compass"

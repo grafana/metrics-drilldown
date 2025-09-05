@@ -1,12 +1,13 @@
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { ToolbarButton } from '@grafana/ui';
+import { LinkButton, ToolbarButton } from '@grafana/ui';
 import React from 'react';
 
 import { UI_TEXT } from '../constants/ui';
+import { createAppUrl } from '../extensions/links';
 import { reportExploreMetrics } from '../interactions';
 import { MetricScene } from '../MetricScene';
 import { MetricSelectedEvent } from '../shared';
-import { getTrailFor } from '../utils';
+import { getTrailFor, getUrlForTrail } from '../utils';
 
 interface SelectNewMetricButtonState extends SceneObjectState {}
 
@@ -27,15 +28,30 @@ export class SelectNewMetricButton extends SceneObjectBase<SelectNewMetricButton
     const trail = getTrailFor(model);
     const { topScene, embedded } = trail.useState();
 
-    // Only show the button when:
-    // 1. A metric is selected (topScene is MetricScene)
-    // 2. Not in embedded mode
-    const isButtonVisible = topScene instanceof MetricScene && !embedded;
+    // Only show the button when a metric is selected (topScene is MetricScene)
+    const isButtonVisible = topScene instanceof MetricScene;
 
     if (!isButtonVisible) {
       return null;
     }
 
+    // In embedded mode, show "Metrics Drilldown" button to open full app
+    if (embedded) {
+      return (
+        <LinkButton
+          href={createAppUrl(getUrlForTrail(trail))}
+          variant={'secondary'}
+          icon="arrow-right"
+          tooltip="Open in Metrics Drilldown"
+          onClick={() => reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' })}
+          data-testid="open-metrics-drilldown-button"
+        >
+          Metrics Drilldown
+        </LinkButton>
+      );
+    }
+
+    // In non-embedded mode, show "Select new metric" button
     return (
       <ToolbarButton
         variant={'canvas'}
