@@ -33,6 +33,7 @@ import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVaria
 import { FilteredMetricsVariable, VAR_FILTERED_METRICS_VARIABLE } from './MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
+import { MetricsVariable, SearchableMetricsVariable, VAR_METRICS_VARIABLE } from './MetricsVariables/MetricsVariable';
 import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { MetricsFilterSection } from './SideBar/sections/MetricsFilterSection/MetricsFilterSection';
 import { SideBar } from './SideBar/SideBar';
@@ -163,8 +164,17 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventQuickSearchChanged, (event) => {
         const { searchText } = event.payload;
 
+        // Use server-side search by updating the searchable metrics variable
+        const searchableMetricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable) as SearchableMetricsVariable;
+        if (searchableMetricsVariable && 'updateSearchQuery' in searchableMetricsVariable) {
+          // This will trigger a new Prometheus API call with the search filter
+          searchableMetricsVariable.updateSearchQuery(searchText);
+        }
+
+        // Keep client-side filtering for backward compatibility and additional filtering
         for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
-          filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
+          // Clear name filters since we're doing server-side search now
+          filterEngine.applyFilters({ names: [] });
           sortEngine.sort(sortByVariable.state.value as SortingOption);
         }
       })
