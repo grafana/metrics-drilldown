@@ -188,6 +188,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
             onChange={onChange}
           />
         )}
+        {modifiedSelectOptions.length > 0 && (
         <Combobox
           value={value && modifiedSelectOptions.some((x) => x.value === value) ? value : null}
           placeholder={selectPlaceholder}
@@ -196,8 +197,9 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
             const newSelected = (selected?.value as string) ?? defaultOnChangeValue;
             onChange(newSelected);
           }}
-          isClearable
-        />
+            isClearable
+          />
+        )}
       </div>
     </Field>
   );
