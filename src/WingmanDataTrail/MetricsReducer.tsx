@@ -21,6 +21,7 @@ import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
+import { SearchableMetricsDataSource } from './ListControls/QuickSearch/SearchableMetricsDataSource';
 import { ListControls } from './ListControls/ListControls';
 import { EventSortByChanged } from './ListControls/MetricsSorter/events/EventSortByChanged';
 import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './ListControls/MetricsSorter/MetricsSorter';
@@ -31,9 +32,9 @@ import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVa
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
 import { FilteredMetricsVariable, VAR_FILTERED_METRICS_VARIABLE } from './MetricsVariables/FilteredMetricsVariable';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
-import { MetricsVariable, SearchableMetricsVariable, VAR_METRICS_VARIABLE } from './MetricsVariables/MetricsVariable';
 import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { MetricsFilterSection } from './SideBar/sections/MetricsFilterSection/MetricsFilterSection';
 import { SideBar } from './SideBar/SideBar';
@@ -64,7 +65,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       enginesMap: new Map(),
     });
 
-    registerRuntimeDataSources([new LabelsDataSource(), new MetricsWithLabelValueDataSource()]);
+    registerRuntimeDataSources([
+      new LabelsDataSource(), 
+      new MetricsWithLabelValueDataSource(),
+      new SearchableMetricsDataSource()
+    ]);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
@@ -164,16 +169,16 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventQuickSearchChanged, (event) => {
         const { searchText } = event.payload;
 
-        // Use server-side search by updating the searchable metrics variable
-        const searchableMetricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable) as SearchableMetricsVariable;
-        if (searchableMetricsVariable && 'updateSearchQuery' in searchableMetricsVariable) {
-          // This will trigger a new Prometheus API call with the search filter
-          searchableMetricsVariable.updateSearchQuery(searchText);
+        // Directly access the MetricsVariable and call its update method
+        // This avoids event forwarding loops
+        const metricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable);
+        if (metricsVariable && 'updateSearchState' in metricsVariable) {
+          (metricsVariable as any).updateSearchState(searchText);
         }
 
-        // Keep client-side filtering for backward compatibility and additional filtering
+        // Handle client-side filtering for other engines
         for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
-          // Clear name filters since we're doing server-side search now
+          // Clear name filters since MetricsVariable handles server-side search
           filterEngine.applyFilters({ names: [] });
           sortEngine.sort(sortByVariable.state.value as SortingOption);
         }

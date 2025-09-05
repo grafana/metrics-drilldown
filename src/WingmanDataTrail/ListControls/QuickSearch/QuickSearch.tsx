@@ -1,20 +1,18 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
-  sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   VariableDependencyConfig,
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
-import { Icon, IconButton, Input, Spinner, Tag, Tooltip, useStyles2 } from '@grafana/ui';
+import { IconButton, Input, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce } from 'lodash';
 import React, { type KeyboardEvent } from 'react';
 
 import { reportExploreMetrics } from 'interactions';
 import { VAR_DATASOURCE } from 'shared';
-import { MetricsVariable, SearchableMetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
@@ -25,7 +23,6 @@ interface QuickSearchState extends SceneObjectState {
   countsProvider: CountsProvider;
   displayCounts: boolean;
   value: string;
-  isSearching: boolean; // New loading state for server-side search
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
@@ -70,25 +67,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       countsProvider,
       displayCounts: Boolean(displayCounts),
       value: '',
-      isSearching: false, // Initialize loading state
     });
-
-    this.addActivationHandler(this.onActivate.bind(this));
-  }
-
-  private onActivate() {
-    // Subscribe to searchable metrics variable loading state
-    const searchableMetricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable) as SearchableMetricsVariable;
-    if (searchableMetricsVariable) {
-      this._subs.add(
-        searchableMetricsVariable.subscribeToState((newState, prevState) => {
-          // Update loading state based on variable loading state
-          if (newState.loading !== prevState.loading) {
-            this.setState({ isSearching: newState.loading });
-          }
-        })
-      );
-    }
   }
 
   public toggleCountsDisplay(displayCounts: boolean) {
@@ -96,12 +75,8 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   }
 
   private notifyValueChange = debounce((value: string) => {
-    // Set loading state when starting server-side search
-    if (value.trim()) {
-      this.setState({ isSearching: true });
-    }
     this.publishEvent(new EventQuickSearchChanged({ searchText: value }), true);
-  }, 500); // Increased debounce for server-side calls to reduce API load
+  }, 250);
 
   private updateValue(value: string) {
     const wasEmpty = this.state.value === '';
@@ -159,7 +134,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   static readonly Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
-    const { targetName, value, countsProvider, isSearching } = model.useState();
+    const { targetName, value, countsProvider } = model.useState();
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
 
     return (
@@ -168,7 +143,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         onChange={model.onChange}
         onKeyDown={model.onKeyDown}
         placeholder={`Quick search ${targetName}s`}
-        prefix={isSearching ? <Spinner size="sm" /> : <Icon name="search" />}
+        prefix={<i className="fa fa-search" />}
         suffix={
           <>
             <countsProvider.Component model={countsProvider} />

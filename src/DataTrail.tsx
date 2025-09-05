@@ -48,7 +48,7 @@ import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
 import { limitAdhocProviders } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
-import { OriginalMetricsVariable, SearchableMetricsVariable } from './WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { MetricsVariable } from './WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -352,8 +352,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   let variables: SceneVariable[] = [
     new MetricsDrilldownDataSourceVariable({ initialDS }),
-    new SearchableMetricsVariable(), // Server-side searchable metrics
-    new OriginalMetricsVariable(),   // Preserves original total count
+    new MetricsVariable(),
     new AdHocFiltersVariable({
       key: VAR_FILTERS,
       name: VAR_FILTERS,
