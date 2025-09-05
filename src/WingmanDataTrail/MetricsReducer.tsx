@@ -26,11 +26,13 @@ import { EventSortByChanged } from './ListControls/MetricsSorter/events/EventSor
 import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './ListControls/MetricsSorter/MetricsSorter';
 import { EventQuickSearchChanged } from './ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './ListControls/QuickSearch/QuickSearch';
+import { SearchableMetricsDataSource } from './ListControls/QuickSearch/SearchableMetricsDataSource';
 import { MetricsList } from './MetricsList/MetricsList';
 import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
-import { FilteredMetricsVariable, VAR_FILTERED_METRICS_VARIABLE } from './MetricsVariables/FilteredMetricsVariable';
+import { ClientSideFilteredMetricsVariable, VAR_CLIENT_FILTERED_METRICS } from './MetricsVariables/FilteredMetricsVariable';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
 import { EventFiltersChanged } from './SideBar/sections/MetricsFilterSection/EventFiltersChanged';
@@ -55,7 +57,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       $variables: new SceneVariableSet({
-        variables: [new FilteredMetricsVariable(), new LabelsVariable()],
+        variables: [new ClientSideFilteredMetricsVariable(), new LabelsVariable()],
       }),
       listControls: new ListControls({}),
       sidebar: new SideBar({}),
@@ -63,7 +65,11 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       enginesMap: new Map(),
     });
 
-    registerRuntimeDataSources([new LabelsDataSource(), new MetricsWithLabelValueDataSource()]);
+    registerRuntimeDataSources([
+      new LabelsDataSource(), 
+      new MetricsWithLabelValueDataSource(),
+      new SearchableMetricsDataSource()
+    ]);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
@@ -92,7 +98,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this.setState({
       body: hasGroupByValue
         ? (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase)
-        : (new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }) as unknown as SceneObjectBase),
+        : (new MetricsList({ variableName: VAR_CLIENT_FILTERED_METRICS }) as unknown as SceneObjectBase),
     });
   }
 
@@ -128,7 +134,6 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       })
     );
 
-    const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
     const filterSections = sceneGraph.findAllObjects(
       this,
       (o) => o instanceof MetricsFilterSection
@@ -144,15 +149,19 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
         filterEngine.setInitOptions(options);
 
-        const filters: Partial<MetricFilters> = {
-          names: quickSearch.state.value ? [quickSearch.state.value] : [],
-        };
+        // Apply sidebar filters to client-side filtered variable only
+        if (key === VAR_CLIENT_FILTERED_METRICS) {
+          const filters: Partial<MetricFilters> = {
+            names: [], // Search filtering handled server-side
+          };
 
-        for (const filterSection of filterSections) {
-          filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
+          // Apply current sidebar filter selections
+          for (const filterSection of filterSections) {
+            filters[filterSection.state.type as keyof MetricFilters] = filterSection.state.selectedGroups.map((g) => g.value);
+          }
+
+          filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
         }
-
-        filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
         sortEngine.sort(sortByVariable.state.value as SortingOption);
       })
     );
@@ -163,8 +172,16 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventQuickSearchChanged, (event) => {
         const { searchText } = event.payload;
 
+        // Directly access the MetricsVariable and call its update method
+        // This avoids event forwarding loops
+        const metricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable);
+        if (metricsVariable && 'updateSearchState' in metricsVariable) {
+          (metricsVariable as any).updateSearchState(searchText);
+        }
+
+        // Apply sidebar filters to server-side search results
         for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
-          filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
+          filterEngine.applyFilters({ names: [] }); // Clear search filters (handled server-side)
           sortEngine.sort(sortByVariable.state.value as SortingOption);
         }
       })
@@ -174,6 +191,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventFiltersChanged, (event) => {
         const { type, filters } = event.payload;
 
+        // Apply sidebar filters when they change
         for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
           filterEngine.applyFilters({ [type]: filters });
           sortEngine.sort(sortByVariable.state.value as SortingOption);

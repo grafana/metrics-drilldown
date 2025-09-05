@@ -17,10 +17,7 @@ import { MetricsList } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { EventMetricsVariableActivated } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableLoaded';
-import {
-  FilteredMetricsVariable,
-  VAR_FILTERED_METRICS_VARIABLE,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { ClientSideFilteredMetricsVariable, VAR_CLIENT_FILTERED_METRICS } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import {
   MetricsVariableFilterEngine,
   type MetricFilters,
@@ -41,10 +38,10 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
     super({
       metric,
       $variables: new SceneVariableSet({
-        variables: [new FilteredMetricsVariable()],
+        variables: [new ClientSideFilteredMetricsVariable()],
       }),
       key: 'RelatedMetricsScene',
-      body: new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }),
+      body: new MetricsList({ variableName: VAR_CLIENT_FILTERED_METRICS }),
       listControls: new RelatedListControls({}),
     });
 

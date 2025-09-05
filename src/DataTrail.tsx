@@ -38,7 +38,6 @@ import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
 import { addRecentMetric } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { DataTrailSettings } from './DataTrailSettings';
@@ -49,6 +48,7 @@ import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
 import { limitAdhocProviders } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
+import { MetricsVariable } from './WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
