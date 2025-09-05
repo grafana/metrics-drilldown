@@ -1,11 +1,9 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
-  getExploreURL,
   sceneGraph,
   SceneObjectBase,
   SceneObjectStateChangedEvent,
-  SceneQueryRunner,
   sceneUtils,
   type SceneComponentProps,
   type SceneObject,
@@ -19,9 +17,7 @@ import { genBookmarkKey } from 'bookmarks/genBookmarkKey';
 import { useBookmarks } from 'bookmarks/useBookmarks';
 import { UI_TEXT } from 'constants/ui';
 import { type DataTrail } from 'DataTrail';
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'interactions';
-import { TOPVIEW_PANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
 import { ShareTrailButton } from 'ShareTrailButton';
@@ -67,28 +63,6 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
 interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
-  public getLinkToExplore = async () => {
-    const vizPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL_KEY, GmdVizPanel);
-    const queryRunner = sceneGraph.findDescendents(vizPanel, SceneQueryRunner)[0];
-    const panelData = queryRunner.state.data;
-
-    if (!panelData) {
-      throw new Error('Cannot get link to explore, no panel data found');
-    }
-
-    const metricScene = sceneGraph.getAncestor(this, MetricScene);
-    return getExploreURL(panelData, metricScene, panelData.timeRange);
-  };
-
-  public openExploreLink = async () => {
-    reportExploreMetrics('selected_metric_action_clicked', { action: 'open_in_explore' });
-
-    this.getLinkToExplore().then((link) => {
-      // We use window.open instead of a Link or <a> because we want to compute the explore link when clicking,
-      // if we precompute it we have to keep track of a lot of dependencies
-      window.open(link, '_blank');
-    });
-  };
 
   private useBookmarkState = (trail: DataTrail) => {
     const { bookmarks, addBookmark, removeBookmark } = useBookmarks(this);
@@ -132,12 +106,6 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
       <Box paddingY={1} data-testid="action-bar">
         <div className={styles.actions}>
           <Stack gap={1}>
-            <ToolbarButton
-              variant={'canvas'}
-              icon="compass"
-              tooltip={UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL}
-              onClick={model.openExploreLink}
-            />
             <ShareTrailButton trail={trail} />
             <ToolbarButton
               variant={'canvas'}
