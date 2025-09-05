@@ -162,11 +162,34 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertLabelDropdown(optionLabel: string) {
+    // Check if it's selected as a radio button
+    const radioOption = this.getLabelDropdown().getByRole('radio', { name: optionLabel });
+    if (await radioOption.isVisible()) {
+      await expect(radioOption).toBeChecked();
+      return;
+    }
+
+    // Check if it's selected in the combobox
+    const combobox = this.getLabelDropdown().getByRole('combobox');
+    if (await combobox.isVisible()) {
+      await expect(combobox).toHaveValue(optionLabel);
+      return;
+    }
+
+    // Fallback to text search
     await expect(this.getLabelDropdown().getByText(optionLabel).first()).toBeVisible();
   }
 
   async selectLabel(label: string) {
-    await this.getLabelDropdown().locator('input').click();
+    // First try to click on a radio button if it exists for this label
+    const radioOption = this.getLabelDropdown().getByRole('radio', { name: label });
+    if (await radioOption.isVisible()) {
+      await radioOption.click();
+      return;
+    }
+
+    // If not a radio button, use the combobox
+    await this.getLabelDropdown().getByRole('combobox').click();
     await this.getByRole('option', { name: label }).click();
   }
 

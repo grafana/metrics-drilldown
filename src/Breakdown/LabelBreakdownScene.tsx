@@ -8,11 +8,13 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Field, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import { useStyles2 } from '@grafana/ui';
+import React, { useCallback, useMemo } from 'react';
 
-import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
-import { isQueryVariable } from '../utils/utils.variables';
+import { reportExploreMetrics } from '../interactions';
+import { RefreshMetricsEvent, VAR_FILTERS, VAR_GROUP_BY } from '../shared';
+import { createDefaultGroupBySelectorConfig, GroupBySelector } from './GroupBySelector';
+import { isAdHocFiltersVariable, isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 
@@ -74,15 +76,122 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
+    // Extract state manually from scene graph (Phase 2: Direct Migration)
+    const { options, value: rawValue } = groupByVariable.useState();
+    // Map the variable's all value to "All" for the component
+    const value = groupByVariable.hasAllValue() ? 'All' : rawValue;
+    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
+
+    // Memoize filters conversion for performance
+    const filters = useMemo(() =>
+      isAdHocFiltersVariable(filtersVariable)
+        ? filtersVariable.state.filters.map((f: any) => ({
+            key: f.key,
+            operator: f.operator,
+            value: f.value
+          }))
+        : [],
+      [filtersVariable]
+    );
+
+    // Define common Prometheus metric labels for radio buttons
+    // Ordered by importance - most common labels first
+    const commonPrometheusLabels = useMemo(() => [
+      'instance',         // Most common - server/pod identifier
+      'job',              // Most common - Prometheus job name
+      'service',          // Very common - service name
+      'method',           // Common for HTTP metrics
+      'status_code',      // Common for HTTP metrics
+      'code',             // Alternative to status_code
+      'handler',          // Common for HTTP handlers
+      '__name__',         // Metric name (less common as radio)
+      'exported_job',     // Exported job name
+      'exported_instance' // Exported instance name
+    ], []);
+
+        // Filter radio attributes to only include labels that exist in the current options
+    const radioAttributes = useMemo(() => {
+      const availableCommonLabels = commonPrometheusLabels.filter(label =>
+        options.some(option => option.value === label)
+      );
+      return availableCommonLabels;
+    }, [commonPrometheusLabels, options]);
+
+    // Memoize metrics domain configuration (static, but good practice)
+    const metricsConfig = useMemo(() => createDefaultGroupBySelectorConfig(), []);
+
+    // Memoize onChange handler to prevent unnecessary re-renders
+    const handleChange = useCallback((selectedValue: string, ignore?: boolean) => {
+      // Map "All" to the variable's all value
+      const variableValue = selectedValue === 'All' ? '$__all' : selectedValue;
+      groupByVariable.changeValueTo(variableValue);
+
+      // Maintain analytics reporting like the original GroupByVariable
+      if (selectedValue && !ignore) {
+        reportExploreMetrics('groupby_label_changed', { label: selectedValue });
+      }
+    }, [groupByVariable]);
+
+    // Memoize filtering rules to prevent recreation on every render
+    const filteringRules = useMemo(() => ({
+      ...metricsConfig.filteringRules,
+      // Filter out histogram bucket labels like the original GroupByVariable
+      customAttributeFilter: (attribute: string) => {
+        const shouldShow = attribute !== 'le';
+        return shouldShow;
+      },
+      // Disable excludeFilteredFromRadio for metrics to always show radio buttons
+      excludeFilteredFromRadio: false
+    }), [metricsConfig.filteringRules]);
+
+    // Memoize layout config
+    const layoutConfig = useMemo(() => ({
+      ...metricsConfig.layoutConfig,
+      maxSelectWidth: 200,
+      enableResponsiveRadioButtons: true, // Enable responsive radio buttons for common labels
+      additionalWidthPerItem: 60, // Increase width per item to ensure radio buttons fit
+      widthOfOtherAttributes: 180, // Reduce dropdown width to make room for radio buttons
+    }), [metricsConfig.layoutConfig]);
+
+    // Memoize search config
+    const searchConfig = useMemo(() => ({
+      ...metricsConfig.searchConfig,
+      enabled: true,
+      maxOptions: 100,
+    }), [metricsConfig.searchConfig]);
+
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <Field label="By label">
-            <groupByVariable.Component model={groupByVariable} />
-          </Field>
+          <div className={styles.groupBySelector} data-testid="breakdown-label-selector">
+          <GroupBySelector
+            // Core selection interface
+            options={options as Array<{ label?: string; value: string }>}
+            radioAttributes={radioAttributes} // Common Prometheus labels as radio buttons
+            value={value as string}
+            onChange={handleChange}
+            showAll={true}
+
+            // State data extracted manually
+            filters={filters}
+            currentMetric={undefined} // Could be enhanced to extract current metric
+            initialGroupBy={undefined} // Could be enhanced if needed
+
+            // Display configuration
+            fieldLabel="By label"
+            selectPlaceholder="Select label..."
+
+            // Apply metrics domain defaults with memoized overrides
+            {...metricsConfig}
+            filteringRules={filteringRules}
+            layoutConfig={layoutConfig}
+            searchConfig={searchConfig}
+          />
+          </div>
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
-        </div>
+
+          </div>
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}
@@ -110,6 +219,9 @@ function getStyles(theme: GrafanaTheme2) {
       alignItems: 'end',
     }),
     searchField: css({
+      flexGrow: 1,
+    }),
+    groupBySelector: css({
       flexGrow: 1,
     }),
   };
