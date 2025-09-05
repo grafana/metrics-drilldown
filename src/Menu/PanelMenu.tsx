@@ -103,40 +103,45 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
         const bookmarksFromStorage = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
         const isBookmarked = bookmarksFromStorage.some((b: any) => genBookmarkKey(b.urlValues) === currentKey);
 
-        items.push({
-          text: 'Copy URL',
-          iconClassName: 'copy',
-          onClick: () => {
-            if (navigator.clipboard) {
-              reportExploreMetrics('selected_metric_action_clicked', { action: 'share_url' });
-              const appUrl = config.appUrl.endsWith('/') ? config.appUrl.slice(0, -1) : config.appUrl;
-              const url = `${appUrl}${PLUGIN_BASE_URL}/${getUrlForTrail(trail)}`;
-              navigator.clipboard.writeText(url);
-            }
+        items.push(
+          {
+            text: 'Actions',
+            type: 'group',
           },
-        });
-
-        items.push({
-          text: isBookmarked ? 'Remove bookmark' : 'Add bookmark',
-          iconClassName: isBookmarked ? 'favorite' : 'star',
-          onClick: () => {
-            if (isBookmarked) {
-              // Remove bookmark
-              reportExploreMetrics('bookmark_changed', { action: 'toggled_off' });
-              const updatedBookmarks = bookmarksFromStorage.filter((b: any) => genBookmarkKey(b.urlValues) !== currentKey);
-              userStorage.setItem(PREF_KEYS.BOOKMARKS, updatedBookmarks);
-            } else {
-              // Add bookmark
-              reportExploreMetrics('bookmark_changed', { action: 'toggled_on' });
-              const newBookmark = {
-                urlValues: currentUrlState,
-                createdAt: Date.now(),
-              };
-              userStorage.setItem(PREF_KEYS.BOOKMARKS, [...bookmarksFromStorage, newBookmark]);
-              notifyBookmarkCreated();
-            }
+          {
+            text: 'Copy URL',
+            iconClassName: 'copy',
+            onClick: () => {
+              if (navigator.clipboard) {
+                reportExploreMetrics('selected_metric_action_clicked', { action: 'share_url' });
+                const appUrl = config.appUrl.endsWith('/') ? config.appUrl.slice(0, -1) : config.appUrl;
+                const url = `${appUrl}${PLUGIN_BASE_URL}/${getUrlForTrail(trail)}`;
+                navigator.clipboard.writeText(url);
+              }
+            },
           },
-        });
+          {
+            text: isBookmarked ? 'Remove bookmark' : 'Add bookmark',
+            iconClassName: isBookmarked ? 'favorite' : 'star',
+            onClick: () => {
+              if (isBookmarked) {
+                // Remove bookmark
+                reportExploreMetrics('bookmark_changed', { action: 'toggled_off' });
+                const updatedBookmarks = bookmarksFromStorage.filter((b: any) => genBookmarkKey(b.urlValues) !== currentKey);
+                userStorage.setItem(PREF_KEYS.BOOKMARKS, updatedBookmarks);
+              } else {
+                // Add bookmark
+                reportExploreMetrics('bookmark_changed', { action: 'toggled_on' });
+                const newBookmark = {
+                  urlValues: currentUrlState,
+                  createdAt: Date.now(),
+                };
+                userStorage.setItem(PREF_KEYS.BOOKMARKS, [...bookmarksFromStorage, newBookmark]);
+                notifyBookmarkCreated();
+              }
+            },
+          }
+        );
       }
 
       this.setState({
