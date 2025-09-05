@@ -4,7 +4,6 @@ import { measureText } from '@grafana/ui';
 import {
   type AttributePrefixConfig,
   type DomainConfig,
-  type DomainType,
   type FilterConfig,
   type FilterContext,
   type FilteringRulesConfig,
@@ -172,133 +171,37 @@ export const getModifiedSelectOptions = (
 };
 
 /**
- * Creates default configuration for different domains
+ * Creates default configuration for GroupBySelector optimized for metrics
  */
-export const createDefaultGroupBySelectorConfig = (domain: DomainType): Partial<DomainConfig> => {
-  switch (domain) {
-    case 'traces':
-      return {
-        attributePrefixes: {
-          span: 'span.',
-          resource: 'resource.',
-          event: 'event.',
-        },
-        filteringRules: {
-          excludeFilteredFromRadio: true,
-          excludeAttributesForMetrics: {
-            'rate': ['status'],
-            'errors': ['status'],
-          },
-          excludeAttributesForFilters: {
-            'nestedSetParent': ['rootName', 'rootServiceName'],
-          },
-        },
-        ignoredAttributes: [
-          'duration',
-          'event:name',
-          'nestedSetLeft',
-          'nestedSetParent',
-          'nestedSetRight',
-          'span:duration',
-          'span:id',
-          'trace:duration',
-          'trace:id',
-          'traceDuration',
-        ],
-        layoutConfig: {
-          additionalWidthPerItem: 40,
-          widthOfOtherAttributes: 180,
-          enableResponsiveRadioButtons: true,
-        },
-        searchConfig: {
-          enabled: true,
-          maxOptions: 1000,
-          caseSensitive: false,
-          searchFields: ['label', 'value'],
-        },
-        virtualizationConfig: {
-          enabled: true,
-        },
-      };
-
-    case 'logs':
-      return {
-        attributePrefixes: {
-          log: 'log.',
-          resource: 'resource.',
-        },
-        filteringRules: {
-          excludeFilteredFromRadio: true,
-        },
-        ignoredAttributes: ['timestamp', 'log:id'],
-        layoutConfig: {
-          additionalWidthPerItem: 40,
-          widthOfOtherAttributes: 180,
-          enableResponsiveRadioButtons: true,
-        },
-        searchConfig: {
-          enabled: true,
-          maxOptions: 1000,
-          caseSensitive: false,
-          searchFields: ['label', 'value'],
-        },
-        virtualizationConfig: {
-          enabled: true,
-        },
-      };
-
-    case 'metrics':
-      return {
-        attributePrefixes: {},
-        filteringRules: {
-          excludeFilteredFromRadio: true,
-          // Custom filter to exclude histogram bucket labels like GroupByVariable does
-          customAttributeFilter: (attribute: string) => {
-            return attribute !== 'le';
-          }
-        },
-        ignoredAttributes: ['__name__', 'timestamp', 'le'],
-        layoutConfig: {
-          additionalWidthPerItem: 40,
-          widthOfOtherAttributes: 200,
-          maxSelectWidth: 200,
-          enableResponsiveRadioButtons: true, // Enable responsive radio buttons for common labels
-        },
-        searchConfig: {
-          enabled: true,
-          maxOptions: 100, // Reasonable limit for metrics labels
-          caseSensitive: false,
-          searchFields: ['label', 'value'],
-        },
-        virtualizationConfig: {
-          enabled: true,
-          itemHeight: 32,
-          maxHeight: 300,
-        },
-      };
-
-    case 'custom':
-    default:
-      return {
-        attributePrefixes: {},
-        filteringRules: {},
-        ignoredAttributes: [],
-        layoutConfig: {
-          additionalWidthPerItem: 40,
-          widthOfOtherAttributes: 180,
-          enableResponsiveRadioButtons: true,
-        },
-        searchConfig: {
-          enabled: true,
-          maxOptions: 1000,
-          caseSensitive: false,
-          searchFields: ['label', 'value'],
-        },
-        virtualizationConfig: {
-          enabled: true,
-        },
-      };
-  }
+export const createDefaultGroupBySelectorConfig = (): Partial<DomainConfig> => {
+  return {
+    attributePrefixes: {},
+    filteringRules: {
+      excludeFilteredFromRadio: true,
+      // Custom filter to exclude histogram bucket labels like GroupByVariable does
+      customAttributeFilter: (attribute: string) => {
+        return attribute !== 'le';
+      }
+    },
+    ignoredAttributes: ['__name__', 'timestamp', 'le'],
+    layoutConfig: {
+      additionalWidthPerItem: 40,
+      widthOfOtherAttributes: 200,
+      maxSelectWidth: 200,
+      enableResponsiveRadioButtons: true, // Enable responsive radio buttons for common labels
+    },
+    searchConfig: {
+      enabled: true,
+      maxOptions: 100, // Reasonable limit for metrics labels
+      caseSensitive: false,
+      searchFields: ['label', 'value'],
+    },
+    virtualizationConfig: {
+      enabled: true,
+      itemHeight: 32,
+      maxHeight: 300,
+    },
+  };
 };
 
 /**

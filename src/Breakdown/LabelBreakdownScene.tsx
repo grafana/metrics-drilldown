@@ -118,7 +118,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     }, [commonPrometheusLabels, options]);
 
     // Memoize metrics domain configuration (static, but good practice)
-    const metricsConfig = useMemo(() => createDefaultGroupBySelectorConfig('metrics'), []);
+    const metricsConfig = useMemo(() => createDefaultGroupBySelectorConfig(), []);
 
     // Memoize onChange handler to prevent unnecessary re-renders
     const handleChange = useCallback((selectedValue: string, ignore?: boolean) => {

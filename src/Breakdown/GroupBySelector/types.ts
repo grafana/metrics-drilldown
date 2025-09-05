@@ -162,12 +162,7 @@ export interface GroupBySelectorProps {
 }
 
 /**
- * Domain-specific configuration type
- */
-export type DomainType = 'traces' | 'logs' | 'metrics' | 'custom';
-
-/**
- * Default configuration for different domains
+ * Configuration interface for GroupBySelector
  */
 export interface DomainConfig {
   attributePrefixes: AttributePrefixConfig;

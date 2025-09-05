@@ -2,7 +2,6 @@ export { GroupBySelector } from './GroupBySelector';
 export type {
   AttributePrefixConfig,
   DomainConfig,
-  DomainType,
   FilterConfig,
   FilterContext,
   FilteringRulesConfig,

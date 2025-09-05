@@ -132,17 +132,18 @@ describe('GroupBySelector', () => {
     expect(container).toBeInTheDocument();
   });
 
-  it('applies traces domain configuration', () => {
-    const tracesConfig = createDefaultGroupBySelectorConfig('traces');
+  it('applies metrics domain configuration', () => {
+    const metricsConfig = createDefaultGroupBySelectorConfig();
+    const mockContext = { filters: [], availableOptions: [] };
 
-    expect(tracesConfig.attributePrefixes).toEqual({
-      span: 'span.',
-      resource: 'resource.',
-      event: 'event.',
-    });
-
-    expect(tracesConfig.filteringRules?.excludeFilteredFromRadio).toBe(true);
-    expect(tracesConfig.ignoredAttributes).toContain('duration');
+    expect(metricsConfig.attributePrefixes).toEqual({});
+    expect(metricsConfig.filteringRules?.excludeFilteredFromRadio).toBe(true);
+    expect(metricsConfig.filteringRules?.customAttributeFilter?.('le', mockContext)).toBe(false);
+    expect(metricsConfig.filteringRules?.customAttributeFilter?.('instance', mockContext)).toBe(true);
+    expect(metricsConfig.ignoredAttributes).toContain('__name__');
+    expect(metricsConfig.ignoredAttributes).toContain('timestamp');
+    expect(metricsConfig.ignoredAttributes).toContain('le');
+    expect(metricsConfig.searchConfig?.maxOptions).toBe(100);
   });
 
   it('handles onChange callback', async () => {
