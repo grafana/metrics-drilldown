@@ -41,6 +41,7 @@ import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
+import { SelectNewMetricButton } from './controls/SelectNewMetricButton';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
@@ -98,6 +99,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       controls: state.controls ?? [
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
+        new SelectNewMetricButton(),
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],

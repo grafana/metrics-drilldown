@@ -25,7 +25,6 @@ import { reportExploreMetrics } from 'interactions';
 import { TOPVIEW_PANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
-import { MetricSelectedEvent } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
 import { getTrailFor, getUrlForTrail } from 'utils';
 
@@ -134,7 +133,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
       <Box paddingY={1} data-testid="action-bar">
         <div className={styles.actions}>
           <Stack gap={1}>
-            {trail.state.embedded ? (
+            {trail.state.embedded && (
               <LinkButton
                 href={createAppUrl(getUrlForTrail(trail))}
                 variant={'secondary'}
@@ -144,17 +143,6 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               >
                 Metrics Drilldown
               </LinkButton>
-            ) : (
-              <ToolbarButton
-                variant={'canvas'}
-                tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
-                onClick={() => {
-                  reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
-                  trail.publishEvent(new MetricSelectedEvent({}));
-                }}
-              >
-                Select new metric
-              </ToolbarButton>
             )}
             <ToolbarButton
               variant={'canvas'}
