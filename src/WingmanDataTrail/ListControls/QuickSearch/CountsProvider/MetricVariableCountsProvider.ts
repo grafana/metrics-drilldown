@@ -59,8 +59,9 @@ export class MetricVariableCountsProvider extends CountsProvider {
     try {
       this.trueTotalCount = await TrueTotalService.getTrueTotalCount(this);
       this.updateCounts();
-    } catch {
-      // Fallback to current count if true total fails to load
+    } catch (error) {
+      // Log error and fallback to showing current count as total
+      console.warn('MetricVariableCountsProvider: Failed to load true total count:', error);
       this.trueTotalCount = 0;
     }
   }
