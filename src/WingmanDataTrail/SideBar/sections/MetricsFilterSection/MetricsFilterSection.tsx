@@ -18,6 +18,7 @@ import {
   type MetricOptions,
   type MetricsVariable,
 } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { type MetricFilters } from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
 
 import { reportExploreMetrics } from '../../../../interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
@@ -172,7 +173,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.setState({ selectedGroups, active: selectedGroups.length > 0 });
 
     this.publishEvent(
-      new EventFiltersChanged({ type: this.state.type, filters: selectedGroups.map((g) => g.value) }),
+      new EventFiltersChanged({ type: this.state.type as keyof MetricFilters, filters: selectedGroups.map((g) => g.value) }),
       true
     );
 

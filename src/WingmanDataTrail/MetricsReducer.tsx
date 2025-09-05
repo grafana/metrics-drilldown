@@ -157,7 +157,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
           // Apply current sidebar filter selections
           for (const filterSection of filterSections) {
-            filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
+            filters[filterSection.state.type as keyof MetricFilters] = filterSection.state.selectedGroups.map((g) => g.value);
           }
 
           filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });

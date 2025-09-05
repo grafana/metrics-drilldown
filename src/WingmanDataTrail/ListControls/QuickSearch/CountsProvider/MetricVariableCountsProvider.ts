@@ -25,7 +25,7 @@ export class MetricVariableCountsProvider extends CountsProvider {
     // Subscribe to datasource changes to refresh true total
     this._subs.add(
       sceneGraph.findByKey(this, VAR_DATASOURCE)?.subscribeToState((newState, prevState) => {
-        if (newState.value !== prevState.value) {
+        if ((newState as any).value !== (prevState as any).value) {
           // Datasource changed - get new true total
           this.loadTrueTotalCount();
         }
