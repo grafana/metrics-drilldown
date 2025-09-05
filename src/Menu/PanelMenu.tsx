@@ -4,6 +4,7 @@ import {
   getExploreURL,
   sceneGraph,
   SceneObjectBase,
+  sceneUtils,
   VizPanel,
   VizPanelMenu,
   type SceneComponentProps,
@@ -15,6 +16,13 @@ import { firstValueFrom } from 'rxjs';
 
 import { logger } from 'tracking/logger/logger';
 
+import { genBookmarkKey } from '../bookmarks/genBookmarkKey';
+import { notifyBookmarkCreated } from '../bookmarks/notifyBookmarkCreated';
+import { PLUGIN_BASE_URL } from '../constants';
+import { reportExploreMetrics } from '../interactions';
+import { PREF_KEYS } from '../UserPreferences/pref-keys';
+import { userStorage } from '../UserPreferences/userStorage';
+import { getTrailFor, getUrlForTrail } from '../utils';
 import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
 import { getQueryRunnerFor } from '../utils/utils.queries';
 
@@ -68,6 +76,11 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
         });
       } catch {}
 
+      // Check if this is the main metric graph panel
+      // The main panel is created with labelName matching the metric in MetricGraphScene
+      const trail = getTrailFor(this);
+      const isMainGraphPanel = this.state.labelName === trail.state.metric;
+
       // Navigation options (all panels)
       const items: PanelMenuItem[] = [
         {
@@ -81,6 +94,50 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           shortcut: 'p x',
         },
       ];
+
+      // Only add Copy URL and Bookmark to the main metric graph panel
+      if (isMainGraphPanel) {
+        // Get bookmark state without hooks - simplified version without datasource filtering
+        const currentUrlState = sceneUtils.getUrlState(trail);
+        const currentKey = genBookmarkKey(currentUrlState);
+        const bookmarksFromStorage = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
+        const isBookmarked = bookmarksFromStorage.some((b: any) => genBookmarkKey(b.urlValues) === currentKey);
+
+        items.push({
+          text: 'Copy URL',
+          iconClassName: 'copy',
+          onClick: () => {
+            if (navigator.clipboard) {
+              reportExploreMetrics('selected_metric_action_clicked', { action: 'share_url' });
+              const appUrl = config.appUrl.endsWith('/') ? config.appUrl.slice(0, -1) : config.appUrl;
+              const url = `${appUrl}${PLUGIN_BASE_URL}/${getUrlForTrail(trail)}`;
+              navigator.clipboard.writeText(url);
+            }
+          },
+        });
+
+        items.push({
+          text: isBookmarked ? 'Remove bookmark' : 'Add bookmark',
+          iconClassName: isBookmarked ? 'favorite' : 'star',
+          onClick: () => {
+            if (isBookmarked) {
+              // Remove bookmark
+              reportExploreMetrics('bookmark_changed', { action: 'toggled_off' });
+              const updatedBookmarks = bookmarksFromStorage.filter((b: any) => genBookmarkKey(b.urlValues) !== currentKey);
+              userStorage.setItem(PREF_KEYS.BOOKMARKS, updatedBookmarks);
+            } else {
+              // Add bookmark
+              reportExploreMetrics('bookmark_changed', { action: 'toggled_on' });
+              const newBookmark = {
+                urlValues: currentUrlState,
+                createdAt: Date.now(),
+              };
+              userStorage.setItem(PREF_KEYS.BOOKMARKS, [...bookmarksFromStorage, newBookmark]);
+              notifyBookmarkCreated();
+            }
+          },
+        });
+      }
 
       this.setState({
         body: new VizPanelMenu({

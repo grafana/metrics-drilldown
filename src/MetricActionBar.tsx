@@ -3,25 +3,16 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import {
   sceneGraph,
   SceneObjectBase,
-  SceneObjectStateChangedEvent,
-  sceneUtils,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Box, Icon, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
-import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Stack, Tab, TabsBar, Tooltip, useStyles2 } from '@grafana/ui';
+import React from 'react';
 
-import { genBookmarkKey } from 'bookmarks/genBookmarkKey';
-import { useBookmarks } from 'bookmarks/useBookmarks';
-import { UI_TEXT } from 'constants/ui';
-import { type DataTrail } from 'DataTrail';
 import { reportExploreMetrics } from 'interactions';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
-import { ShareTrailButton } from 'ShareTrailButton';
-import { getTrailFor } from 'utils';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 
@@ -64,61 +55,17 @@ interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 
-  private useBookmarkState = (trail: DataTrail) => {
-    const { bookmarks, addBookmark, removeBookmark } = useBookmarks(this);
-    const [currentKey, setCurrentKey] = useState<string>();
-    const isBookmarked = useMemo(() => bookmarks.some((b) => b.key === currentKey), [bookmarks, currentKey]);
-
-    useEffect(() => {
-      const sub = trail.subscribeToEvent(
-        SceneObjectStateChangedEvent,
-        // debounce to prevent generating a lot of keys for nothing
-        debounce(() => setCurrentKey(genBookmarkKey(sceneUtils.getUrlState(trail))), 100)
-      );
-
-      return () => sub.unsubscribe();
-    }, [trail]);
-
-    const toggleBookmark = () => {
-      reportExploreMetrics('bookmark_changed', { action: isBookmarked ? 'toggled_off' : 'toggled_on' });
-
-      if (!isBookmarked) {
-        addBookmark();
-        return;
-      }
-
-      if (currentKey) {
-        removeBookmark(currentKey);
-      }
-    };
-
-    return { isBookmarked, toggleBookmark };
-  };
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
-    const trail = getTrailFor(model);
-    const { isBookmarked, toggleBookmark } = model.useBookmarkState(trail);
     const { actionView } = metricScene.useState();
 
     return (
       <Box paddingY={1} data-testid="action-bar">
         <div className={styles.actions}>
           <Stack gap={1}>
-            <ShareTrailButton trail={trail} />
-            <ToolbarButton
-              variant={'canvas'}
-              icon={
-                isBookmarked ? (
-                  <Icon name={'favorite'} type={'mono'} size={'lg'} />
-                ) : (
-                  <Icon name={'star'} type={'default'} size={'lg'} />
-                )
-              }
-              tooltip={UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL}
-              onClick={toggleBookmark}
-            />
+            {/* Action buttons moved to panel menu */}
           </Stack>
         </div>
 
