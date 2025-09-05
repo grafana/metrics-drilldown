@@ -21,14 +21,3 @@ export {
   processRadioAttributes,
   removeAttributePrefixes,
 } from './utils';
-export {
-  createGroupBySelectorAdapter,
-  createGroupBySelectorPropsWithAdapter,
-  isAttributesBreakdownScene,
-  isAttributesComparisonScene,
-  isLegacyModel,
-} from './adapter';
-export type {
-  GroupBySelectorAdapterProps,
-  LegacyModel,
-} from './adapter';
