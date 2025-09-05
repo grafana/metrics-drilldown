@@ -1,16 +1,23 @@
 import { CustomVariable, sceneGraph } from '@grafana/scenes';
 
+import { EventMetricsVariableLoaded } from './EventMetricsVariableLoaded';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from './MetricsVariable';
 import { withLifecycleEvents } from './withLifecycleEvents';
 
-export const VAR_FILTERED_METRICS_VARIABLE = 'filtered-metrics-wingman';
+export const VAR_CLIENT_FILTERED_METRICS = 'client-filtered-metrics-wingman';
+// Backward compatibility alias
+export const VAR_FILTERED_METRICS_VARIABLE = VAR_CLIENT_FILTERED_METRICS;
 
-export class FilteredMetricsVariable extends CustomVariable {
+/**
+ * Applies client-side sidebar filters (rules, prefixes, suffixes) to server-side search results.
+ * Syncs with MetricsVariable and applies additional filtering for sidebar filter selections.
+ */
+export class ClientSideFilteredMetricsVariable extends CustomVariable {
   constructor() {
     super({
-      key: VAR_FILTERED_METRICS_VARIABLE,
-      name: VAR_FILTERED_METRICS_VARIABLE,
-      label: 'Filtered Metrics',
+      key: VAR_CLIENT_FILTERED_METRICS,
+      name: VAR_CLIENT_FILTERED_METRICS,
+      label: 'Client-Side Filtered Metrics',
       loading: false,
       error: null,
       options: [],
@@ -22,7 +29,7 @@ export class FilteredMetricsVariable extends CustomVariable {
     this.addActivationHandler(this.onActivate.bind(this));
 
     // required for filtering and sorting
-    return withLifecycleEvents<FilteredMetricsVariable>(this);
+    return withLifecycleEvents<ClientSideFilteredMetricsVariable>(this);
   }
 
   private onActivate() {
@@ -38,7 +45,19 @@ export class FilteredMetricsVariable extends CustomVariable {
           error: newState.error,
           options: newState.options,
         });
+
+        // When new server data arrives, trigger reapplication of client-side filters
+        if (!newState.loading && newState.options.length > 0) {
+          this.publishEvent(new EventMetricsVariableLoaded({ 
+            key: this.state.key!, 
+            options: newState.options 
+          }), true);
+        }
       })
     );
+
   }
 }
+
+// Export alias for backward compatibility
+export const FilteredMetricsVariable = ClientSideFilteredMetricsVariable;

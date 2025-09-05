@@ -17,7 +17,7 @@ import {
   type SortingOption,
 } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import { VAR_FILTERED_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { VAR_CLIENT_FILTERED_METRICS } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 
 import { UsageData } from './UsageData';
 
@@ -61,7 +61,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
       return;
     }
 
-    const filteredMetricsEngine = metricsReducer.state.enginesMap.get(VAR_FILTERED_METRICS_VARIABLE);
+    const filteredMetricsEngine = metricsReducer.state.enginesMap.get(VAR_CLIENT_FILTERED_METRICS);
     if (!filteredMetricsEngine) {
       return;
     }

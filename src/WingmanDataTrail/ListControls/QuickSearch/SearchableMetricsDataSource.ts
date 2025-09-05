@@ -49,18 +49,23 @@ export class SearchableMetricsDataSource extends RuntimeDataSource {
     const timeRange = sceneGraph.getTimeRange(sceneObject).state.value;
     let metricsList: string[] = [];
 
-    // Parse the search pattern from query (format: "searchPattern")
+    // Parse the search pattern from query (format: "searchPattern" or "all-metrics")
     const removeRules = query.includes('removeRules');
-    const searchPattern = removeRules ? query.replace('removeRules', '') : query;
+    let searchPattern = removeRules ? query.replace('removeRules', '') : query;
+    
+    // Handle special "all-metrics" query as no search pattern
+    if (searchPattern === 'all-metrics') {
+      searchPattern = '';
+    }
 
-    // Build matcher for Prometheus API - this is the key part!
+    // Build matcher for Prometheus API with search pattern and adhoc filters
     const matcher = this.buildPrometheusMatcherWithSearch(searchPattern, sceneObject);
 
-    // Use the MetricDatasourceHelper which correctly calls the Prometheus API
+    // Fetch metrics using Prometheus API with match[] parameter
     metricsList = await MetricDatasourceHelper.fetchLabelValues({
       ds,
       labelName: '__name__',
-      matcher, // This becomes the match[] parameter
+      matcher,
       timeRange,
     });
 
@@ -87,21 +92,28 @@ export class SearchableMetricsDataSource extends RuntimeDataSource {
     const filtersExpr = sceneGraph.interpolate(sceneObject, '${filters}', {});
     
     if (!searchPattern || !searchPattern.trim()) {
-      // No search - return the filters expression wrapped in braces (same as original MetricsVariable)
+      // No search pattern - use adhoc filters or empty matcher for all metrics
+      // When both search and filters are empty, use empty string to get all metrics
       return filtersExpr ? `{${filtersExpr}}` : '';
     }
 
-    // Escape regex special characters
-    const escapedPattern = searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Has search pattern - escape and create name filter
+    const escapedPattern = this.escapeRegex(searchPattern.trim());
     const nameFilter = `__name__=~".*${escapedPattern}.*"`;
 
     if (!filtersExpr || filtersExpr.trim() === '') {
-      // Only search pattern, no existing filters - wrap in braces
+      // Only search pattern, no adhoc filters
       return `{${nameFilter}}`;
     }
 
-    // Combine search pattern with existing filters - wrap in braces
-    // This creates: {__name__=~"pattern",existing_filters}
+    // Combine search pattern with existing adhoc filters
     return `{${nameFilter},${filtersExpr}}`;
+  }
+
+  /**
+   * Escape regex special characters in search text
+   */
+  private escapeRegex(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 }

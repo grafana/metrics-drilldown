@@ -31,7 +31,7 @@ import { MetricsList } from './MetricsList/MetricsList';
 import { EventMetricsVariableActivated } from './MetricsVariables/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './MetricsVariables/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './MetricsVariables/EventMetricsVariableLoaded';
-import { FilteredMetricsVariable, VAR_FILTERED_METRICS_VARIABLE } from './MetricsVariables/FilteredMetricsVariable';
+import { ClientSideFilteredMetricsVariable, VAR_CLIENT_FILTERED_METRICS } from './MetricsVariables/FilteredMetricsVariable';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from './MetricsVariables/MetricsVariable';
 import { MetricsVariableFilterEngine, type MetricFilters } from './MetricsVariables/MetricsVariableFilterEngine';
 import { MetricsVariableSortEngine } from './MetricsVariables/MetricsVariableSortEngine';
@@ -57,7 +57,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       $variables: new SceneVariableSet({
-        variables: [new FilteredMetricsVariable(), new LabelsVariable()],
+        variables: [new ClientSideFilteredMetricsVariable(), new LabelsVariable()],
       }),
       listControls: new ListControls({}),
       sidebar: new SideBar({}),
@@ -98,7 +98,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this.setState({
       body: hasGroupByValue
         ? (new MetricsGroupByList({ labelName: groupByValue }) as unknown as SceneObjectBase)
-        : (new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }) as unknown as SceneObjectBase),
+        : (new MetricsList({ variableName: VAR_CLIENT_FILTERED_METRICS }) as unknown as SceneObjectBase),
     });
   }
 
@@ -150,15 +150,19 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
         filterEngine.setInitOptions(options);
 
-        const filters: Partial<MetricFilters> = {
-          names: quickSearch.state.value ? [quickSearch.state.value] : [],
-        };
+        // Apply sidebar filters to client-side filtered variable only
+        if (key === VAR_CLIENT_FILTERED_METRICS) {
+          const filters: Partial<MetricFilters> = {
+            names: [], // Search filtering handled server-side
+          };
 
-        for (const filterSection of filterSections) {
-          filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
+          // Apply current sidebar filter selections
+          for (const filterSection of filterSections) {
+            filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
+          }
+
+          filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
         }
-
-        filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
         sortEngine.sort(sortByVariable.state.value as SortingOption);
       })
     );
@@ -176,10 +180,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
           (metricsVariable as any).updateSearchState(searchText);
         }
 
-        // Handle client-side filtering for other engines
+        // Apply sidebar filters to server-side search results
         for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
-          // Clear name filters since MetricsVariable handles server-side search
-          filterEngine.applyFilters({ names: [] });
+          filterEngine.applyFilters({ names: [] }); // Clear search filters (handled server-side)
           sortEngine.sort(sortByVariable.state.value as SortingOption);
         }
       })
@@ -189,6 +192,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       this.subscribeToEvent(EventFiltersChanged, (event) => {
         const { type, filters } = event.payload;
 
+        // Apply sidebar filters when they change
         for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
           filterEngine.applyFilters({ [type]: filters });
           sortEngine.sort(sortByVariable.state.value as SortingOption);

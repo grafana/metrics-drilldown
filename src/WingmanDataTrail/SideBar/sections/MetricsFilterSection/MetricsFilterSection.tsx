@@ -14,10 +14,6 @@ import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
 import { logger } from 'tracking/logger/logger';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
 import { ruleGroupLabels, type RuleGroupLabel } from 'WingmanDataTrail/MetricsVariables/metricLabels';
 import {
   VAR_METRICS_VARIABLE,
@@ -50,7 +46,7 @@ export interface MetricsFilterSectionState extends SideBarSectionState {
 
 export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_METRICS_VARIABLE, VAR_FILTERED_METRICS_VARIABLE],
+    variableNames: [VAR_METRICS_VARIABLE],
     onReferencedVariableValueChanged: (variable) => {
       const { name, options } = (variable as MultiValueVariable).state;
 
@@ -59,9 +55,8 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
         return;
       }
 
-      if (name === VAR_FILTERED_METRICS_VARIABLE) {
-        this.updateCounts();
-      }
+      // Update counts when metrics variable changes
+      this.updateCounts();
     },
   });
 
@@ -132,10 +127,11 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
   private onActivate() {
     const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
-    const filteredMetricsVariable = sceneGraph.lookupVariable(
-      VAR_FILTERED_METRICS_VARIABLE,
-      this
-    ) as FilteredMetricsVariable;
+    
+    if (!metricsVariable) {
+      this.setState({ loading: false, active: false, disabled: true });
+      return;
+    }
 
     this.updateLists(metricsVariable.state.options as MetricOptions);
     this.updateCounts();
@@ -143,7 +139,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     const { selectedGroups } = this.state;
 
     this.setState({
-      loading: filteredMetricsVariable.state.loading,
+      loading: metricsVariable.state.loading,
       active: selectedGroups.length > 0,
     });
   }
@@ -156,32 +152,15 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
   }
 
   private updateCounts() {
-    const { groups, computeGroups, type } = this.state;
+    const { groups, computeGroups } = this.state;
 
-    // Access the original unfiltered options
+    // Get current metrics from the server-side variable
     const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
-    const originalOptions = metricsVariable.state.options as MetricOptions;
+    const currentOptions = metricsVariable.state.options as MetricOptions;
 
-    const metricsReducer = sceneGraph.getAncestor(this, MetricsReducer);
-    const filterEngine = metricsReducer.state.enginesMap.get(VAR_FILTERED_METRICS_VARIABLE)?.filterEngine;
-
-    if (!filterEngine) {
-      logger.warn('MetricsFilterSection: No filter engine found');
-      return;
-    }
-
-    // Create a copy of current filters excluding the current filter type
-    const filtersWithoutCurrentType = { ...filterEngine.getFilters(), [type]: [] };
-
-    // Get options filtered by everything except the current filter type
-    const optionsForCounting = MetricsVariableFilterEngine.getFilteredOptions(
-      originalOptions,
-      filtersWithoutCurrentType
-    );
-
-    // Calculate counts based on these options
+    // Compute counts based on current server-side results
     const newGroups = new Map<string, number>(
-      computeGroups(optionsForCounting).map((option) => [option.label, option.count])
+      computeGroups(currentOptions).map((option) => [option.label, option.count])
     );
 
     const newGroupsWithCount = groups.map((group) => ({
