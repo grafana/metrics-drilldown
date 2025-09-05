@@ -1,5 +1,3 @@
-import { parser } from '@prometheus-io/lezer-promql';
-
 export interface PromQLLabelMatcher {
   label: string;
   op: string;
@@ -18,7 +16,8 @@ export interface ParsedPromQLQuery {
  * @param {string} promqlExpression - The PromQL expression to parse
  * @returns {string[]} An array of unique metric names found in the expression
  */
-export function extractMetricNames(promqlExpression: string): string[] {
+export async function extractMetricNames(promqlExpression: string): Promise<string[]> {
+  const { parser } = await import('@prometheus-io/lezer-promql');
   const tree = parser.parse(promqlExpression);
   const metricNames = new Set<string>();
   const cursor = tree.cursor();
