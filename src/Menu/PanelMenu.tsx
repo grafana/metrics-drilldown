@@ -20,7 +20,7 @@ import { getTrailFor } from '../utils';
 import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
 import { BookmarkAction } from './actions/BookmarkAction';
 import { CopyUrlAction } from './actions/CopyUrlAction';
-import { getQueryRunnerFor } from '../utils/utils.queries';
+import { ExploreAction } from './actions/ExploreAction';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
@@ -42,36 +42,6 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
   constructor(state: Partial<PanelMenuState>) {
     super({ ...state, addExplorationsLink: state.addExplorationsLink ?? true });
     this.addActivationHandler(() => {
-      let exploreUrl: Promise<string | undefined> | undefined;
-      try {
-        const viz = sceneGraph.getAncestor(this, VizPanel);
-        const panelData = sceneGraph.getData(viz).state.data;
-        if (!panelData) {
-          throw new Error('Cannot get link to explore, no panel data found');
-        }
-        const queryRunner = getQueryRunnerFor(viz);
-        const queries = queryRunner?.state.queries ?? [];
-        queries.forEach((query) => {
-          // removing legendFormat to get verbose legend in Explore
-          delete query.legendFormat;
-        });
-        // 'this' scene object contain the variable for the metric name which is correctly interpolated into the explore url
-        // when used in the metric select scene case,
-        // this will get the explore url with interpolated variables and include the labels __ignore_usage__, this is a known issue
-        // in the metric scene we do not get use the __ignore_usage__ labels in the explore url
-        exploreUrl = getExploreURL(panelData, this, panelData.timeRange, (query) => {
-          // remove __ignore_usage__="" from the query
-          if ('expr' in query && typeof query.expr === 'string' && query.expr.includes('__ignore_usage__')) {
-            return {
-              ...query,
-              expr: query.expr.replace(/,?__ignore_usage__="",?/, ''), // also remove leading/trailing comma if present
-            };
-          }
-
-          return query;
-        });
-      } catch {}
-
       // Check if this is the main metric graph panel
       // The main panel is created with labelName matching the metric in MetricGraphScene
       const trail = getTrailFor(this);
@@ -83,12 +53,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           text: 'Navigation',
           type: 'group',
         },
-        {
-          text: 'Explore',
-          iconClassName: 'compass',
-          onClick: () => exploreUrl?.then((url) => url && window.open(url, '_blank')),
-          shortcut: 'p x',
-        },
+        ExploreAction.create(this),
       ];
 
       // Only add Copy URL and Bookmark to the main metric graph panel
