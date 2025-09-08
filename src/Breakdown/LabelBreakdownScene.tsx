@@ -9,7 +9,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import { reportExploreMetrics } from '../interactions';
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_GROUP_BY } from '../shared';
@@ -81,21 +81,18 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const value = groupByVariable.hasAllValue() ? 'All' : rawValue;
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
 
-    // Memoize filters conversion for performance
-    const filters = useMemo(() =>
-      isAdHocFiltersVariable(filtersVariable)
-        ? filtersVariable.state.filters.map((f: any) => ({
-            key: f.key,
-            operator: f.operator,
-            value: f.value
-          }))
-        : [],
-      [filtersVariable]
-    );
+    // Convert filters for the component
+    const filters = isAdHocFiltersVariable(filtersVariable)
+      ? filtersVariable.state.filters.map((f: any) => ({
+          key: f.key,
+          operator: f.operator,
+          value: f.value
+        }))
+      : [];
 
     // Define common Prometheus metric labels for radio buttons
     // Ordered by importance - most common labels first
-    const commonPrometheusLabels = useMemo(() => [
+    const commonPrometheusLabels = [
       'instance',         // Most common - server/pod identifier
       'job',              // Most common - Prometheus job name
       'service',          // Very common - service name
@@ -106,18 +103,15 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       '__name__',         // Metric name (less common as radio)
       'exported_job',     // Exported job name
       'exported_instance' // Exported instance name
-    ], []);
+    ];
 
-        // Filter radio attributes to only include labels that exist in the current options
-    const radioAttributes = useMemo(() => {
-      const availableCommonLabels = commonPrometheusLabels.filter(label =>
-        options.some(option => option.value === label)
-      );
-      return availableCommonLabels;
-    }, [commonPrometheusLabels, options]);
+    // Filter radio attributes to only include labels that exist in the current options
+    const radioAttributes = commonPrometheusLabels.filter(label =>
+      options.some(option => option.value === label)
+    );
 
-    // Memoize metrics domain configuration (static, but good practice)
-    const metricsConfig = useMemo(() => createDefaultGroupBySelectorConfig(), []);
+    // Get metrics domain configuration
+    const metricsConfig = createDefaultGroupBySelectorConfig();
 
     // Memoize onChange handler to prevent unnecessary re-renders
     const handleChange = useCallback((selectedValue: string, ignore?: boolean) => {
@@ -131,8 +125,8 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       }
     }, [groupByVariable]);
 
-    // Memoize filtering rules to prevent recreation on every render
-    const filteringRules = useMemo(() => ({
+    // Configure filtering rules
+    const filteringRules = {
       ...metricsConfig.filteringRules,
       // Filter out histogram bucket labels like the original GroupByVariable
       customAttributeFilter: (attribute: string) => {
@@ -141,23 +135,23 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       },
       // Disable excludeFilteredFromRadio for metrics to always show radio buttons
       excludeFilteredFromRadio: false
-    }), [metricsConfig.filteringRules]);
+    };
 
-    // Memoize layout config
-    const layoutConfig = useMemo(() => ({
+    // Configure layout
+    const layoutConfig = {
       ...metricsConfig.layoutConfig,
       maxSelectWidth: 200,
       enableResponsiveRadioButtons: true, // Enable responsive radio buttons for common labels
       additionalWidthPerItem: 60, // Increase width per item to ensure radio buttons fit
       widthOfOtherAttributes: 180, // Reduce dropdown width to make room for radio buttons
-    }), [metricsConfig.layoutConfig]);
+    };
 
-    // Memoize search config
-    const searchConfig = useMemo(() => ({
+    // Configure search
+    const searchConfig = {
       ...metricsConfig.searchConfig,
       enabled: true,
       maxOptions: 100,
-    }), [metricsConfig.searchConfig]);
+    };
 
     return (
       <div className={styles.container}>
