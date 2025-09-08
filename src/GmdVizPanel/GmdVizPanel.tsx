@@ -183,6 +183,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
         bodySub.unsubscribe();
       });
+
+      this._subs.add(bodySub);
     }
 
     this.subscribeToState((newState, prevState) => {

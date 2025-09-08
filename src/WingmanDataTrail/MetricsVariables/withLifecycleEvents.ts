@@ -34,13 +34,14 @@ export function withLifecycleEvents<T extends MultiValueVariable>(variable: T): 
       variable.publishEvent(new EventMetricsVariableLoaded({ key, options: variable.state.options }), true);
     }
 
-    variable.subscribeToState((newState: MultiValueVariableState, prevState: MultiValueVariableState) => {
+    const sub = variable.subscribeToState((newState: MultiValueVariableState, prevState: MultiValueVariableState) => {
       if (!newState.loading && prevState.loading) {
         variable.publishEvent(new EventMetricsVariableLoaded({ key, options: newState.options }), true);
       }
     });
 
     return () => {
+      sub.unsubscribe();
       variable.publishEvent(new EventMetricsVariableDeactivated({ key }), true);
     };
   });

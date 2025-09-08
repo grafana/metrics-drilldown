@@ -128,21 +128,19 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
   private subscribeToEvents() {
     const { metric } = this.state;
 
-    this._subs.add(
-      this.subscribeToEvent(EventApplyPanelConfig, (event) => {
-        const { config, restoreDefault } = event.payload;
-        const userPrefs = userStorage.getItem(PREF_KEYS.METRIC_PREFS) || {};
-        const userPrefForMetric = userPrefs[metric];
+    this.subscribeToEvent(EventApplyPanelConfig, (event) => {
+      const { config, restoreDefault } = event.payload;
+      const userPrefs = userStorage.getItem(PREF_KEYS.METRIC_PREFS) || {};
+      const userPrefForMetric = userPrefs[metric];
 
-        if (restoreDefault && userPrefForMetric) {
-          delete userPrefs[metric].config;
-        } else {
-          userPrefs[metric] = { ...userPrefForMetric, config };
-        }
+      if (restoreDefault && userPrefForMetric) {
+        delete userPrefs[metric].config;
+      } else {
+        userPrefs[metric] = { ...userPrefForMetric, config };
+      }
 
-        userStorage.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
-      })
-    );
+      userStorage.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
+    });
   }
 
   private onClickRestoreDefault = () => {

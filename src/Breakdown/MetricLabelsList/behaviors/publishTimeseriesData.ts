@@ -25,7 +25,7 @@ export function publishTimeseriesData() {
       );
     }
 
-    ($data as SceneDataProvider).subscribeToState((newState, prevState) => {
+    const sub = ($data as SceneDataProvider).subscribeToState((newState, prevState) => {
       if (
         newState.data?.state === LoadingState.Done &&
         newState.data.series?.length &&
@@ -40,5 +40,9 @@ export function publishTimeseriesData() {
         );
       }
     });
+
+    return () => {
+      sub.unsubscribe();
+    };
   };
 }
