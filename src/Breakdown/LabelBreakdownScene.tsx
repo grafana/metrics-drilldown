@@ -76,7 +76,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
-    // Extract state manually from scene graph (Phase 2: Direct Migration)
     const { options, value: rawValue } = groupByVariable.useState();
     // Map the variable's all value to "All" for the component
     const value = groupByVariable.hasAllValue() ? 'All' : rawValue;
