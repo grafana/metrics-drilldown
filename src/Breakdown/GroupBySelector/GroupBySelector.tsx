@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { Combobox, Field, RadioButtonGroup, useStyles2, useTheme2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 
 import {
@@ -63,17 +63,14 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
 
   // Merge configurations with defaults
   const domainDefaults = createDefaultGroupBySelectorConfig();
-  const config: DomainConfig = useMemo(() =>
-    mergeConfigurations(domainDefaults, {
-      attributePrefixes,
-      filteringRules,
-      ignoredAttributes,
-      layoutConfig,
-      searchConfig,
-      virtualizationConfig,
-    }),
-    [attributePrefixes, filteringRules, ignoredAttributes, layoutConfig, searchConfig, virtualizationConfig, domainDefaults]
-  );
+  const config: DomainConfig = mergeConfigurations(domainDefaults, {
+    attributePrefixes,
+    filteringRules,
+    ignoredAttributes,
+    layoutConfig,
+    searchConfig,
+    virtualizationConfig,
+  });
 
   // Resize observer for responsive radio buttons
   useResizeObserver({
@@ -87,69 +84,47 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   });
 
   // Create filter context
-  const filterContext: FilterContext = useMemo(() => ({
+  const filterContext: FilterContext = {
     filters,
     currentMetric,
     availableOptions: options,
-  }), [filters, currentMetric, options]);
+  };
 
   // Process radio attributes
-  const radioOptions = useMemo(() => {
-    if (!config.layoutConfig.enableResponsiveRadioButtons) {
-      return radioAttributes.map((attribute) => ({
+  const radioOptions = !config.layoutConfig.enableResponsiveRadioButtons
+    ? radioAttributes.map((attribute) => ({
         label: config.attributePrefixes.span?.length
           ? attribute.replace(config.attributePrefixes.span, '')
           : attribute.replace(config.attributePrefixes.resource || '', ''),
         text: attribute,
         value: attribute,
-      }));
-    }
-
-    return processRadioAttributes(
-      radioAttributes,
-      options,
-      filters,
-      config.filteringRules,
-      filterContext,
-      config.attributePrefixes,
-      fontSize,
-      availableWidth,
-      config.layoutConfig.additionalWidthPerItem || DEFAULT_ADDITIONAL_WIDTH_PER_ITEM,
-      config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES
-    );
-  }, [
-    radioAttributes,
-    options,
-    filters,
-    config.filteringRules,
-    config.attributePrefixes,
-    filterContext,
-    fontSize,
-    availableWidth,
-    config.layoutConfig.additionalWidthPerItem,
-    config.layoutConfig.widthOfOtherAttributes,
-    config.layoutConfig.enableResponsiveRadioButtons,
-  ]);
+      }))
+    : processRadioAttributes(
+        radioAttributes,
+        options,
+        filters,
+        config.filteringRules,
+        filterContext,
+        config.attributePrefixes,
+        fontSize,
+        availableWidth,
+        config.layoutConfig.additionalWidthPerItem || DEFAULT_ADDITIONAL_WIDTH_PER_ITEM,
+        config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES
+      );
 
   // Process other attributes (those not in radio buttons)
-  const otherAttrOptions = useMemo(() => {
-    const optionsNotInRadio = options.filter(
-      (option) => !radioOptions.find((ro) => ro.value === option.value?.toString())
-    );
-    return filteredOptions(optionsNotInRadio, '', config.searchConfig);
-  }, [options, radioOptions, config.searchConfig]);
+  const optionsNotInRadio = options.filter(
+    (option) => !radioOptions.find((ro) => ro.value === option.value?.toString())
+  );
+  const otherAttrOptions = filteredOptions(optionsNotInRadio, '', config.searchConfig);
 
   // Get modified select options
-  const modifiedSelectOptions = useMemo(() => {
-    const baseOptions = getModifiedSelectOptions(otherAttrOptions, config.ignoredAttributes, config.attributePrefixes);
+  const baseOptions = getModifiedSelectOptions(otherAttrOptions, config.ignoredAttributes, config.attributePrefixes);
 
-    // Add "All" option to dropdown if showAll is true and no radio buttons are shown
-    if (showAll && radioOptions.length === 0) {
-      return [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...baseOptions];
-    }
-
-    return baseOptions;
-  }, [otherAttrOptions, config.ignoredAttributes, config.attributePrefixes, showAll, radioOptions.length]);
+  // Add "All" option to dropdown if showAll is true and no radio buttons are shown
+  const modifiedSelectOptions = showAll && radioOptions.length === 0
+    ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...baseOptions]
+    : baseOptions;
 
   // Determine default value
   const defaultValue = initialGroupBy ?? (showAll ? DEFAULT_ALL_OPTION : radioOptions[0]?.value ?? modifiedSelectOptions[0]?.value);
