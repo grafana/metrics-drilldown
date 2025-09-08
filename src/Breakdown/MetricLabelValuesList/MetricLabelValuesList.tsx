@@ -184,6 +184,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       discardUserPrefs: true,
       panelOptions: {
         type: 'timeseries',
+        title: `${metric}, grouped by ${label}`,
         height: PANEL_HEIGHT.XL,
         headerActions: () => [],
         behaviors: [addCardinalityInfo({ description: { ctaText: '' } })],

@@ -82,7 +82,7 @@ function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel 
       maxDataPoints: queryParams.maxDataPoints,
       queries: queryParams.queries,
     }),
-    transformations: [
+    transformations: queryConfig.transformations || [
       sliceSeries(0, MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY),
       addUnspecifiedLabel(queryConfig.groupBy!),
       addRefId, // for overriding colors below
