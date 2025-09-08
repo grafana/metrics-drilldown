@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { Combobox, Field, RadioButtonGroup, useStyles2, useTheme2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 
 import {
@@ -57,9 +57,10 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   const { fontSize } = theme.typography;
 
   // Internal state
-  const [allowAutoUpdate, setAllowAutoUpdate] = useState<boolean>(true);
   const [availableWidth, setAvailableWidth] = useState<number>(0);
   const controlsContainer = useRef<HTMLDivElement>(null);
+  const previousRadioAttributesRef = useRef<string[]>([]);
+  const hasInitializedRef = useRef<boolean>(false);
 
   // Merge configurations with defaults
   const domainDefaults = createDefaultGroupBySelectorConfig();
@@ -129,25 +130,50 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   // Determine default value
   const defaultValue = initialGroupBy ?? (showAll ? DEFAULT_ALL_OPTION : radioOptions[0]?.value ?? modifiedSelectOptions[0]?.value);
 
-  // Auto-update logic
-  useEffect(() => {
-    if (defaultValue && allowAutoUpdate && !value) {
-      onChange(defaultValue, true);
-      setAllowAutoUpdate(false);
+  // Check if radio attributes have changed (to trigger re-initialization)
+  const radioAttributesChanged = useMemo(() => {
+    const current = radioAttributes.join(',');
+    const previous = previousRadioAttributesRef.current.join(',');
+    if (current !== previous) {
+      previousRadioAttributesRef.current = [...radioAttributes];
+      return true;
     }
-  }, [value, defaultValue, showAll, onChange, allowAutoUpdate]);
-
-  useEffect(() => {
-    if (radioAttributes.length > 0) {
-      setAllowAutoUpdate(true);
-    }
+    return false;
   }, [radioAttributes]);
 
-  useEffect(() => {
-    if (filters.some((f) => f.key === value)) {
-      setAllowAutoUpdate(true);
-    }
+  // Check if current value exists in filters (indicates it might be stale)
+  const valueExistsInFilters = useMemo(() => {
+    return filters.some((f) => f.key === value);
   }, [filters, value]);
+
+  // Determine if we should auto-update (derived state instead of useEffect)
+  const shouldAutoUpdate = useMemo(() => {
+    // Don't auto-update if we already have a valid value and haven't detected changes
+    if (value && !radioAttributesChanged && !valueExistsInFilters) {
+      return false;
+    }
+
+    // Auto-update if we don't have a value, or if conditions suggest we should
+    return !value || radioAttributesChanged || valueExistsInFilters;
+  }, [value, radioAttributesChanged, valueExistsInFilters]);
+
+  // Handle the auto-update logic in render (instead of useEffect)
+  const effectiveValue = useMemo(() => {
+    if (defaultValue && shouldAutoUpdate && !hasInitializedRef.current) {
+      // Mark as initialized to prevent repeated auto-updates
+      hasInitializedRef.current = true;
+      // Trigger the onChange in the next render cycle
+      setTimeout(() => onChange(defaultValue, true), 0);
+      return defaultValue;
+    }
+
+    // Reset initialization flag when radio attributes change
+    if (radioAttributesChanged) {
+      hasInitializedRef.current = false;
+    }
+
+    return value;
+  }, [value, defaultValue, shouldAutoUpdate, radioAttributesChanged, onChange]);
 
   // Show All option
   const showAllOption = showAll ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }] : [];
@@ -159,13 +185,13 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
         {radioOptions.length > 0 && (
           <RadioButtonGroup
             options={[...showAllOption, ...radioOptions]}
-            value={value}
+            value={effectiveValue}
             onChange={onChange}
           />
         )}
         {modifiedSelectOptions.length > 0 && (
         <Combobox
-          value={value && modifiedSelectOptions.some((x) => x.value === value) ? value : null}
+          value={effectiveValue && modifiedSelectOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
           placeholder={selectPlaceholder}
           options={modifiedSelectOptions.filter(opt => opt.value !== undefined) as Array<{label?: string, value: string}>}
           onChange={(selected) => {
