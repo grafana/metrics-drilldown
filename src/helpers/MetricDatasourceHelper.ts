@@ -14,7 +14,7 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
 import { type Unsubscribable } from 'rxjs';
 
-import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
+import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
@@ -105,7 +105,7 @@ export class MetricDatasourceHelper {
     for (const metricData of metricsVariableOptions) {
       const name = metricData.value as string;
 
-      if (isHistogramMetric(name)) {
+      if (isClassicHistogramMetric(name)) {
         this.cache.classicHistograms.add(name);
       }
     }

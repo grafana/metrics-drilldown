@@ -19,7 +19,7 @@ import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVa
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
+import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
@@ -30,7 +30,7 @@ import { getAppBackgroundColor } from './utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const TOPVIEW_KEY = 'topview';
+export const TOPVIEW_PANEL_KEY = 'topview-panel';
 
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
@@ -71,15 +71,15 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const trail = getTrailFor(this);
     const metadata = await trail.getMetadataForMetric(metric);
     const description = getMetricDescription(metadata);
-    const isHistogram = isHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
+    const isHistogram = isClassicHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
 
     topView.setState({
       children: [
         new SceneFlexItem({
-          key: TOPVIEW_KEY,
           minHeight: MAIN_PANEL_MIN_HEIGHT,
           maxHeight: MAIN_PANEL_MAX_HEIGHT,
           body: new GmdVizPanel({
+            key: TOPVIEW_PANEL_KEY,
             metric,
             panelOptions: {
               height: PANEL_HEIGHT.XL,
@@ -118,7 +118,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           <topView.Component model={topView} />
         </div>
         {selectedTab && (
-          <div data-testid="tab-content">
+          <div data-testid="tab-content" className={styles.tabContent}>
             <selectedTab.Component model={selectedTab} />
           </div>
         )}
@@ -134,6 +134,9 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'column',
       position: 'relative',
       flexGrow: 1,
+    }),
+    tabContent: css({
+      height: '100%',
     }),
     topView: css({}),
     sticky: css({

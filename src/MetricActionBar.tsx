@@ -4,24 +4,29 @@ import {
   getExploreURL,
   sceneGraph,
   SceneObjectBase,
+  SceneObjectStateChangedEvent,
   SceneQueryRunner,
+  sceneUtils,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import { debounce } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import { genBookmarkKey } from 'bookmarks/genBookmarkKey';
+import { useBookmarks } from 'bookmarks/useBookmarks';
 import { UI_TEXT } from 'constants/ui';
+import { type DataTrail } from 'DataTrail';
 import { createAppUrl } from 'extensions/links';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'interactions';
-import { TOPVIEW_KEY } from 'MetricGraphScene';
+import { TOPVIEW_PANEL_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
 import { MetricSelectedEvent } from 'shared';
 import { ShareTrailButton } from 'ShareTrailButton';
-import { useBookmarkState } from 'TrailStore/useBookmarkState';
 import { getTrailFor, getUrlForTrail } from 'utils';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
@@ -65,8 +70,7 @@ interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
   public getLinkToExplore = async () => {
-    const topView = sceneGraph.findByKey(this, TOPVIEW_KEY);
-    const vizPanel = sceneGraph.findDescendents(topView, GmdVizPanel)[0];
+    const vizPanel = sceneGraph.findByKeyAndType(this, TOPVIEW_PANEL_KEY, GmdVizPanel);
     const queryRunner = sceneGraph.findDescendents(vizPanel, SceneQueryRunner)[0];
     const panelData = queryRunner.state.data;
 
@@ -80,6 +84,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 
   public openExploreLink = async () => {
     reportExploreMetrics('selected_metric_action_clicked', { action: 'open_in_explore' });
+
     this.getLinkToExplore().then((link) => {
       // We use window.open instead of a Link or <a> because we want to compute the explore link when clicking,
       // if we precompute it we have to keep track of a lot of dependencies
@@ -87,11 +92,42 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     });
   };
 
+  private useBookmarkState = (trail: DataTrail) => {
+    const { bookmarks, addBookmark, removeBookmark } = useBookmarks(this);
+    const [currentKey, setCurrentKey] = useState<string>();
+    const isBookmarked = useMemo(() => bookmarks.some((b) => b.key === currentKey), [bookmarks, currentKey]);
+
+    useEffect(() => {
+      const sub = trail.subscribeToEvent(
+        SceneObjectStateChangedEvent,
+        // debounce to prevent generating a lot of keys for nothing
+        debounce(() => setCurrentKey(genBookmarkKey(sceneUtils.getUrlState(trail))), 100)
+      );
+
+      return () => sub.unsubscribe();
+    }, [trail]);
+
+    const toggleBookmark = () => {
+      reportExploreMetrics('bookmark_changed', { action: isBookmarked ? 'toggled_off' : 'toggled_on' });
+
+      if (!isBookmarked) {
+        addBookmark();
+        return;
+      }
+
+      if (currentKey) {
+        removeBookmark(currentKey);
+      }
+    };
+
+    return { isBookmarked, toggleBookmark };
+  };
+
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
     const trail = getTrailFor(model);
-    const [isBookmarked, toggleBookmark] = useBookmarkState(trail);
+    const { isBookmarked, toggleBookmark } = model.useBookmarkState(trail);
     const { actionView } = metricScene.useState();
 
     return (
@@ -114,7 +150,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
                 tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
                 onClick={() => {
                   reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
-                  trail.publishEvent(new MetricSelectedEvent(undefined));
+                  trail.publishEvent(new MetricSelectedEvent({}));
                 }}
               >
                 Select new metric

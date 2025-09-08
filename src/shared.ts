@@ -1,5 +1,5 @@
 import { BusEventBase, BusEventWithPayload } from '@grafana/data';
-import { ConstantVariable } from '@grafana/scenes';
+import { ConstantVariable, type SceneObjectUrlValues } from '@grafana/scenes';
 import { VariableHide } from '@grafana/schema';
 
 export const HOME_ROUTE = '/explore/metrics';
@@ -31,7 +31,12 @@ export function getVariablesWithMetricConstant(metric: string) {
   ];
 }
 
-export class MetricSelectedEvent extends BusEventWithPayload<string | undefined> {
+type MetricSelectedEventPayload = {
+  metric?: string;
+  urlValues?: SceneObjectUrlValues;
+};
+
+export class MetricSelectedEvent extends BusEventWithPayload<MetricSelectedEventPayload> {
   public static readonly type = 'metric-selected-event';
 }
 

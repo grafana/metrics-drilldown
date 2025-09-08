@@ -19,6 +19,7 @@ import { InlineBanner } from 'App/InlineBanner';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
+import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { buildTimeseriesPanel } from 'GmdVizPanel/types/timeseries/buildTimeseriesPanel';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { VAR_GROUP_BY } from 'shared';
@@ -86,7 +87,11 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
                 height: PANEL_HEIGHT.M,
                 title: label,
                 fixedColorIndex: labelIndex,
-                behaviors: [publishTimeseriesData()], // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
+                behaviors: [
+                  // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
+                  publishTimeseriesData(),
+                  addCardinalityInfo(),
+                ],
                 headerActions: () => [new SelectLabelAction({ label })],
                 menu: () => new PanelMenu({ labelName: label }),
                 legend: { placement: 'bottom' },
