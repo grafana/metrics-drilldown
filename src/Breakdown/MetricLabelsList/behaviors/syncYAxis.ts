@@ -53,16 +53,22 @@ export function syncYAxis() {
 
     // new data coming...
     const dataReceivedSub = vizPanelsParent.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
-      const [newMax, newMin] = findNewMaxMin(event.payload.series || [], max, min);
+      const { panelKey, series } = event.payload;
+      const [newMax, newMin] = findNewMaxMin(series, max, min);
 
-      if (
-        newMax !== newMin &&
-        newMax !== Number.NEGATIVE_INFINITY &&
-        newMin !== Number.POSITIVE_INFINITY &&
-        (newMax !== max || newMin !== min)
-      ) {
-        [max, min] = [newMax, newMin];
-        updateTimeseriesAxis(vizPanelsParent, newMax, newMin);
+      // discard if no min/max have been determined or if they are the same (e.g. info metrics with a value of 1)
+      if (newMax !== newMin && newMax !== Number.NEGATIVE_INFINITY && newMin !== Number.POSITIVE_INFINITY) {
+        // new min or max?
+        if (newMax !== max || newMin !== min) {
+          [max, min] = [newMax, newMin];
+          // update all panels in the Scene
+          updateTimeseriesAxis(vizPanelsParent, newMax, newMin);
+        } else {
+          // update the new panel only
+          updateTimeseriesAxis(vizPanelsParent, max, min, [
+            sceneGraph.findByKeyAndType(vizPanelsParent, panelKey, VizPanel),
+          ]);
+        }
       }
     });
 

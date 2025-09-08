@@ -11,9 +11,14 @@ import {
   type PromQuery,
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
+import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
+import { type Unsubscribable } from 'rxjs';
 
-import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
+import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
+import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
+import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
+import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../shared';
@@ -31,46 +36,137 @@ export type PrometheusRuntimeDatasource = Omit<PrometheusDatasource, 'languagePr
 };
 
 export class MetricDatasourceHelper {
-  private _trail: DataTrail;
-  private _datasource?: PrometheusRuntimeDatasource;
-
-  // Maps & Sets are efficient data structures compared to a classic JS objects
-  private metricsMetadata: Map<string, PromMetricsMetadataItem> | undefined;
-  private classicHistograms: Set<string> | undefined;
-  private nativeHistograms: Set<string> | undefined;
+  private trail: DataTrail;
+  private datasource?: PrometheusRuntimeDatasource;
+  private cache = {
+    metadata: new Map<string, PromMetricsMetadataItem>(),
+    classicHistograms: new Set<string>(),
+  };
+  private subs: Unsubscribable[] = [];
 
   constructor(trail: DataTrail) {
-    this._trail = trail;
+    this.trail = trail;
   }
 
-  public reset() {
-    this._datasource = undefined;
-    this.metricsMetadata = undefined;
-    this.classicHistograms = undefined;
-    this.nativeHistograms = undefined;
+  private async getRuntimeDatasource(): Promise<PrometheusRuntimeDatasource | undefined> {
+    if (!this.datasource) {
+      const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this.trail } });
+      this.datasource = isPrometheusDataSource(ds) ? ds : undefined;
+    }
+    return this.datasource;
   }
 
-  private async getDatasource() {
-    if (this._datasource) {
-      return this._datasource;
+  public init() {
+    this.reset();
+
+    for (const sub of this.subs) {
+      sub.unsubscribe();
     }
 
-    const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this._trail } });
-    if (isPrometheusDataSource(ds)) {
-      this._datasource = ds;
-    }
+    this.subs = [];
 
-    return this._datasource;
+    const metricsVariable = sceneGraph.findByKeyAndType(this.trail, VAR_METRICS_VARIABLE, MetricsVariable);
+    this.subs.push(
+      metricsVariable.subscribeToState((newState, prevState) => {
+        if (!areArraysEqual(newState.options, prevState.options)) {
+          this.onNewMetrics(newState.options);
+        }
+      })
+    );
+
+    const datasourceVariable = sceneGraph.findByKeyAndType(
+      this.trail,
+      VAR_DATASOURCE,
+      MetricsDrilldownDataSourceVariable
+    );
+    this.subs.push(
+      datasourceVariable.subscribeToState(async (newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          this.reset();
+        }
+      })
+    );
+
+    this.onNewMetrics(metricsVariable.state.options);
   }
 
-  private async _ensureMetricsMetadata(): Promise<void> {
-    if (!this.metricsMetadata) {
-      await this._getMetricsMetadata();
+  private reset() {
+    this.datasource = undefined;
+
+    this.cache = {
+      metadata: new Map(),
+      classicHistograms: new Set(),
+    };
+
+    this.fetchMetricsMetadata().catch(() => {});
+  }
+
+  private onNewMetrics(metricsVariableOptions: VariableValueOption[]) {
+    for (const metricData of metricsVariableOptions) {
+      const name = metricData.value as string;
+
+      if (isClassicHistogramMetric(name)) {
+        this.cache.classicHistograms.add(name);
+      }
     }
   }
 
-  private async _getMetricsMetadata(): Promise<void> {
-    const ds = await this.getDatasource();
+  /**
+   * Identify native histograms by 2 strategies.
+   * 1. querying classic histograms and all metrics,
+   * then comparing the results and build the collection of native histograms.
+   * 2. querying all metrics and checking if the metric is a histogram type and does not have the bucket suffix.
+   *
+   * classic histogram = test_metric_bucket
+   * native histogram = test_metric
+   */
+  public async isNativeHistogram(metric: string): Promise<boolean> {
+    if (this.cache.classicHistograms.has(metric)) {
+      return false;
+    }
+
+    // Prometheus creates a classic histogram metric, which is useful when the metadata is not available
+    // TODO: add reference for future review
+    if (this.cache.classicHistograms.has(`${metric}_bucket`)) {
+      return true;
+    }
+
+    try {
+      const metadata = await this.getMetadataForMetric(metric);
+      return metadata?.type === 'histogram';
+    } catch (error) {
+      displayWarning([`Error while fetching ${metric} metadata!`, (error as Error).toString()]);
+      return false;
+    }
+  }
+
+  /**
+   * We fetch all the metadata at once in init() but it can lead to inconsistencies in the UI because
+   * it usually takes a couple of Prometheus scrape intervals to have all the metadata available.
+   * Additionally, fetching them separately and caching them once we have a result gives another chance to Prometheus while the user navigates across the app.
+   */
+  public async getMetadataForMetric(metric: string): Promise<PromMetricsMetadataItem | undefined> {
+    if (this.cache.metadata.has(metric)) {
+      return this.cache.metadata.get(metric)!;
+    }
+
+    const ds = await this.getRuntimeDatasource();
+    if (!ds) {
+      return;
+    }
+
+    const response = await (ds.languageProvider as any).request(`/api/v1/metadata?metric=${metric}`);
+    const metadata = response[metric]?.[0];
+
+    if (metadata) {
+      this.cache.metadata.set(metric, metadata);
+    }
+
+    return metadata;
+  }
+
+  private async fetchMetricsMetadata() {
+    const ds = await this.getRuntimeDatasource();
     if (!ds) {
       return;
     }
@@ -83,78 +179,11 @@ export class MetricDatasourceHelper {
       metadata = await loadMetadata();
     }
 
-    this.metricsMetadata = metadata ? new Map(Object.entries(metadata)) : undefined;
-  }
-
-  public async getMetadataForMetric(metric: string) {
-    await this._ensureMetricsMetadata();
-    return this.metricsMetadata?.get(metric);
-  }
-
-  /**
-   * Identify native histograms by 2 strategies.
-   * 1. querying classic histograms and all metrics,
-   * then comparing the results and build the collection of native histograms.
-   * 2. querying all metrics and checking if the metric is a histogram type and dies not have the bucket suffix.
-   *
-   * classic histogram = test_metric_bucket
-   * native histogram = test_metric
-   */
-  public async initializeHistograms() {
-    const ds = await this.getDatasource();
-    if (!ds || this.classicHistograms) {
-      return;
-    }
-
-    this.classicHistograms = new Set();
-    this.nativeHistograms = new Set();
-
-    const [allMetricsData] = await Promise.all([ds.metricFindQuery('metrics(.+)'), this._ensureMetricsMetadata()]);
-
-    for (const { text } of allMetricsData) {
-      if (text.endsWith('_bucket')) {
-        this.classicHistograms.add(text);
-      }
-
-      if (this.isNativeHistogram(text)) {
-        this.nativeHistograms.add(text);
+    if (metadata) {
+      for (const [metric, metricMetadata] of Object.entries(metadata)) {
+        this.cache.metadata.set(metric, metricMetadata);
       }
     }
-  }
-
-  /**
-   * Identify native histograms by 2 strategies.
-   * 1. querying classic histograms and all metrics,
-   * then comparing the results and build the collection of native histograms.
-   * 2. querying all metrics and checking if the metric is a histogram type and dies not have the bucket suffix.
-   *
-   * classic histogram = test_metric_bucket
-   * native histogram = test_metric
-   *
-   * @param metric
-   * @returns boolean
-   */
-  public isNativeHistogram(metric: string): boolean {
-    if (!metric) {
-      return false;
-    }
-
-    const metricType = this.metricsMetadata?.get(metric)?.type;
-    const isHistogramFromMetadata = metricType === 'histogram';
-
-    const metricSuffix = metric.split('_').pop();
-    const isNotClassicFromName = metricSuffix !== 'bucket';
-
-    if (isHistogramFromMetadata && isNotClassicFromName) {
-      return true;
-    }
-
-    if (!this.classicHistograms) {
-      return false;
-    }
-
-    // check for comparison when there is overlap between native and classic histograms
-    return this.classicHistograms.has(`${metric}_bucket`);
   }
 
   /**
@@ -163,8 +192,7 @@ export class MetricDatasourceHelper {
    * @returns
    */
   public async getTagKeys(options: DataSourceGetTagKeysOptions<PromQuery>): Promise<MetricFindValue[]> {
-    const ds = await this.getDatasource();
-
+    const ds = await this.getRuntimeDatasource();
     if (!ds) {
       return [];
     }
@@ -179,8 +207,7 @@ export class MetricDatasourceHelper {
    * @returns
    */
   public async getTagValues(options: DataSourceGetTagValuesOptions<PromQuery>) {
-    const ds = await this.getDatasource();
-
+    const ds = await this.getRuntimeDatasource();
     if (!ds) {
       return [];
     }
@@ -304,7 +331,39 @@ export class MetricDatasourceHelper {
       return undefined;
     }
   }
+
+  public async getPrometheusBuildInfo(): Promise<PrometheusBuildInfo | undefined> {
+    const ds = await this.getRuntimeDatasource();
+    if (!ds) {
+      return;
+    }
+
+    // request is part of the base Prometheus language provider interface so we shouldn't have to worry about versioning here
+    const response = await (ds.languageProvider as PrometheusDatasource['languageProvider']).request(
+      '/api/v1/status/buildinfo'
+    );
+
+    if (!response.application) {
+      response.application = 'Prometheus';
+      response.repository = 'https://github.com/prometheus/prometheus'; // fix typo in response ;)
+    }
+
+    if (response.buildDate) {
+      response.buildDate = response.buildDate.replace(/(\d{4})(\d{2})(\d{2})(.+)/, '$1-$2-$3');
+    }
+
+    return response;
+  }
 }
+
+export type PrometheusBuildInfo = {
+  application?: string;
+  version: string;
+  buildDate?: string;
+  branch?: string;
+  repository: string;
+  revision: string;
+};
 
 interface FetchLabelsOptions {
   ds: PrometheusRuntimeDatasource;

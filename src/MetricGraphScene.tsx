@@ -14,8 +14,12 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { GmdVizPanel, PANEL_HEIGHT, QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
-import { GmdVizPanelVariantSelector } from 'GmdVizPanel/GmdVizPanelVariantSelector';
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
+import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
+import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
@@ -24,11 +28,11 @@ import { type DataTrail } from './DataTrail';
 import { getTrailFor, getTrailSettings } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 
-const MAIN_PANEL_MIN_HEIGHT = GmdVizPanel.getPanelHeightInPixels(PANEL_HEIGHT.XL);
+const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const TOPVIEW_KEY = 'topview';
+export const TOPVIEW_PANEL_KEY = 'topview-panel';
 
-export interface MetricGraphSceneState extends SceneObjectState {
+interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
   selectedTab?: SceneObject;
@@ -48,6 +52,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             maxHeight: MAIN_PANEL_MAX_HEIGHT,
             body: new SceneReactObject({ reactNode: <div /> }),
           }),
+          new SceneFlexItem({
+            ySizing: 'content',
+            body: new MetricActionBar({}),
+          }),
         ],
       }),
       selectedTab: undefined,
@@ -61,22 +69,29 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   private async onActivate() {
     const { metric, topView } = this.state;
     const trail = getTrailFor(this);
-    const metadata = await trail.getMetricMetadata(metric);
+    const metadata = await trail.getMetadataForMetric(metric);
     const description = getMetricDescription(metadata);
+    const isHistogram = isClassicHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
 
     topView.setState({
       children: [
         new SceneFlexItem({
-          key: TOPVIEW_KEY,
           minHeight: MAIN_PANEL_MIN_HEIGHT,
           maxHeight: MAIN_PANEL_MAX_HEIGHT,
           body: new GmdVizPanel({
+            key: TOPVIEW_PANEL_KEY,
             metric,
-            description,
-            height: PANEL_HEIGHT.XL,
-            headerActions: ({ panelType }) => [new GmdVizPanelVariantSelector({ metric, panelType })],
-            menu: new PanelMenu({ labelName: metric }),
-            queryResolution: QUERY_RESOLUTION.HIGH,
+            panelOptions: {
+              height: PANEL_HEIGHT.XL,
+              description,
+              headerActions: isHistogram
+                ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
+                : () => [new ConfigurePanelAction({ metric })],
+              menu: () => new PanelMenu({ labelName: metric }),
+            },
+            queryOptions: {
+              resolution: QUERY_RESOLUTION.HIGH,
+            },
           }),
         }),
         new SceneFlexItem({
@@ -103,7 +118,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           <topView.Component model={topView} />
         </div>
         {selectedTab && (
-          <div data-testid="tab-content">
+          <div data-testid="tab-content" className={styles.tabContent}>
             <selectedTab.Component model={selectedTab} />
           </div>
         )}
@@ -119,6 +134,9 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'column',
       position: 'relative',
       flexGrow: 1,
+    }),
+    tabContent: css({
+      height: '100%',
     }),
     topView: css({}),
     sticky: css({

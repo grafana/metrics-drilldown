@@ -1,18 +1,24 @@
-import { AdHocFiltersVariable, SceneObjectRef } from '@grafana/scenes';
+import { AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 
-import { DataTrail } from './DataTrail';
+import { type DataTrail } from './DataTrail';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { getTrailStore } from './TrailStore/TrailStore';
-import { getDatasourceForNewTrail, limitAdhocProviders } from './utils';
+import { limitAdhocProviders } from './utils';
 
-jest.mock('./TrailStore/TrailStore', () => ({
-  getTrailStore: jest.fn(),
+jest.mock('@grafana/scenes', () => ({
+  ...jest.requireActual('@grafana/scenes'),
+  sceneGraph: {
+    findAllObjects: () => [
+      { state: { queries: [{ expr: 'test-query1' }] } },
+      { state: { queries: [{ expr: 'test-query2' }] } },
+    ],
+    interpolate: (sceneObject: SceneObject, expr: string) => expr,
+  },
 }));
 
+// Mock the entire @grafana/runtime module
 const getListSpy = jest.fn();
 const fetchSpy = jest.fn();
 
-// Mock the entire @grafana/runtime module
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   getDataSourceSrv: () => ({
@@ -70,12 +76,11 @@ describe('limitAdhocProviders', () => {
     });
 
     it.each([
-      [true, ['query1', 'query2']],
+      [true, [{ expr: 'test-query1' }, { expr: 'test-query2' }]],
       [false, []],
     ])(
       'should respect the AdHocFiltersVariable "useQueriesAsFilterForOptions" option (%s)',
       async (useQueriesAsFilterForOptions, expectedQueries) => {
-        (dataTrail.getQueries as jest.Mock).mockReturnValue(['query1', 'query2']);
         filtersVariable.setState({ useQueriesAsFilterForOptions });
 
         limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
@@ -108,12 +113,11 @@ describe('limitAdhocProviders', () => {
     });
 
     it.each([
-      [true, ['query1', 'query2']],
+      [true, [{ expr: 'test-query1' }, { expr: 'test-query2' }]],
       [false, []],
     ])(
       'should respect the AdHocFiltersVariable "useQueriesAsFilterForOptions" option (%s)',
       async (useQueriesAsFilterForOptions, expectedQueries) => {
-        (dataTrail.getQueries as jest.Mock).mockReturnValue(['query1', 'query2']);
         filtersVariable.setState({ useQueriesAsFilterForOptions });
 
         limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
@@ -128,44 +132,5 @@ describe('limitAdhocProviders', () => {
         });
       }
     );
-  });
-});
-
-describe('getDatasourceForNewTrail', () => {
-  beforeEach(() => {
-    (getTrailStore as jest.Mock).mockImplementation(() => ({
-      bookmarks: [],
-      recent: [],
-    }));
-    getListSpy.mockReturnValue([
-      { uid: 'prom1', isDefault: true },
-      { uid: 'prom2', isDefault: false },
-    ]);
-  });
-
-  it('should return the most recent exploration data source', () => {
-    const trail = new DataTrail({ key: '1', metric: 'select me', initialDS: 'prom2' });
-    const trailWithResolveMethod = new SceneObjectRef(trail);
-    (getTrailStore as jest.Mock).mockImplementation(() => ({
-      bookmarks: [],
-      recent: [trailWithResolveMethod],
-    }));
-    const result = getDatasourceForNewTrail();
-    expect(result).toBe('prom2');
-  });
-
-  it('should return the default Prometheus data source if no previous exploration exists', () => {
-    const result = getDatasourceForNewTrail();
-    expect(result).toBe('prom1');
-  });
-
-  it('should return the most recently added Prom data source if no default exists and no recent exploration', () => {
-    getListSpy.mockReturnValue([
-      { uid: 'newProm', isDefault: false },
-      { uid: 'prom1', isDefault: false },
-      { uid: 'prom2', isDefault: false },
-    ]);
-    const result = getDatasourceForNewTrail();
-    expect(result).toBe('newProm');
   });
 });

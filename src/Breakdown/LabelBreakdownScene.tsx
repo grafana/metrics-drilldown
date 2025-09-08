@@ -16,7 +16,7 @@ import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 
-export interface LabelBreakdownSceneState extends SceneObjectState {
+interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
   body?: MetricLabelsList | MetricLabelValuesList;
 }
