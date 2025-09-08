@@ -216,6 +216,11 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     groupBySelector: css({
       flexGrow: 1,
+      // This is to prevent flickering of radio and select fields between
+      // ~1100px and ~1200px
+      '@media (min-width: 1080px)': {
+        minWidth: 380,
+      },
     }),
   };
 }
