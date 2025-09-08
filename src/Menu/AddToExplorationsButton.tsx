@@ -55,12 +55,10 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
   }
 
   private _onActivate = () => {
-    this._subs.add(
-      this.subscribeToState(() => {
-        this.getQueries();
-        this.getContext();
-      })
-    );
+    this.subscribeToState(() => {
+      this.getQueries();
+      this.getContext();
+    });
 
     const datasourceUid = sceneGraph.interpolate(this, VAR_DATASOURCE_EXPR);
     this.setState({ dsUid: datasourceUid });

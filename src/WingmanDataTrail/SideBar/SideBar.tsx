@@ -112,15 +112,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   private onActivate() {
     const cleanupOtherMetricsVar = this.initOtherMetricsVar();
 
-    this._subs.add(
-      this.subscribeToEvent(EventSectionValueChanged, (event) => {
-        const { key, values } = event.payload;
-        const { sectionValues } = this.state;
-        const newSectionValues = new Map(sectionValues).set(key, values);
-        this.setOtherMetricFilters(newSectionValues);
-        this.setState({ sectionValues: newSectionValues });
-      })
-    );
+    this.subscribeToEvent(EventSectionValueChanged, (event) => {
+      const { key, values } = event.payload;
+      const { sectionValues } = this.state;
+      const newSectionValues = new Map(sectionValues).set(key, values);
+      this.setOtherMetricFilters(newSectionValues);
+      this.setState({ sectionValues: newSectionValues });
+    });
 
     return () => {
       cleanupOtherMetricsVar();
