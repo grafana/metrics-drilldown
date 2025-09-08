@@ -157,29 +157,29 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       <div className={styles.container}>
         <div className={styles.controls}>
           <div className={styles.groupBySelector} data-testid="breakdown-label-selector">
-          <GroupBySelector
-            // Core selection interface
-            options={options as Array<{ label?: string; value: string }>}
-            radioAttributes={radioAttributes} // Common Prometheus labels as radio buttons
-            value={value as string}
-            onChange={handleChange}
-            showAll={true}
+            <GroupBySelector
+              // Core selection interface
+              options={options as Array<{ label?: string; value: string }>}
+              radioAttributes={radioAttributes} // Common Prometheus labels as radio buttons
+              value={value as string}
+              onChange={handleChange}
+              showAll={true}
 
-            // State data extracted manually
-            filters={filters}
-            currentMetric={undefined} // Could be enhanced to extract current metric
-            initialGroupBy={undefined} // Could be enhanced if needed
+              // State data extracted manually
+              filters={filters}
+              currentMetric={undefined} // Could be enhanced to extract current metric
+              initialGroupBy={undefined} // Could be enhanced if needed
 
-            // Display configuration
-            fieldLabel="By label"
-            selectPlaceholder="Select label..."
+              // Display configuration
+              fieldLabel="By label"
+              selectPlaceholder="Select label..."
 
-            // Apply metrics domain defaults with memoized overrides
-            {...metricsConfig}
-            filteringRules={filteringRules}
-            layoutConfig={layoutConfig}
-            searchConfig={searchConfig}
-          />
+              // Apply metrics domain defaults with memoized overrides
+              {...metricsConfig}
+              filteringRules={filteringRules}
+              layoutConfig={layoutConfig}
+              searchConfig={searchConfig}
+            />
           </div>
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
