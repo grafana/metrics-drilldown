@@ -86,8 +86,8 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
       return;
     }
 
-    const sub = gmdVizPanel.subscribeToState(async (newState) => {
-      if (newState.histogramType === 'native') {
+    const sub = gmdVizPanel.subscribeToState(async (newState, prevState) => {
+      if (prevState.histogramType !== 'native' && newState.histogramType === 'native') {
         sub.unsubscribe();
 
         const metadata = await getTrailFor(this).getMetadataForMetric(metric);
