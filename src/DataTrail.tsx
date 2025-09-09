@@ -5,7 +5,6 @@ import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   SceneControlsSpacer,
-  SceneDataNode,
   sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
