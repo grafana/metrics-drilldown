@@ -120,16 +120,23 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   private subscribeToEvents() {
+    const actionsLookup = new Map<string, SceneObject[]>();
+
     this.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
       const { panelKey, series } = event.payload;
+      const vizPanel = sceneGraph.findByKeyAndType(this, panelKey, VizPanel);
 
       if (series.length === 1) {
-        const vizPanel = sceneGraph.findByKeyAndType(this, panelKey, VizPanel);
-        const existingHeaderActions = (vizPanel.state.headerActions as SceneObject[]) || [];
+        if (!actionsLookup.has(panelKey)) {
+          actionsLookup.set(panelKey, (vizPanel.state.headerActions as SceneObject[]) || []);
+        }
 
-        vizPanel.setState({
-          headerActions: existingHeaderActions.filter((a) => !(a instanceof SelectLabelAction)),
-        });
+        vizPanel.setState({ headerActions: [] });
+        return;
+      }
+
+      if (actionsLookup.has(panelKey)) {
+        vizPanel.setState({ headerActions: actionsLookup.get(panelKey) });
       }
     });
   }
