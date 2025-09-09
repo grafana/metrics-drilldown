@@ -227,17 +227,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       }
 
       for (const panel of panelsToUpdate) {
-        // we have to wipe any static data node just for the case of MetricLabelValuesList.buildByFrameRepeater()
-        // where data is reused instead of issuing a new query
-        const queryOptions =
-          panel.state.queryConfig.data instanceof SceneDataNode
-            ? {
-                ...config.queryOptions,
-                data: undefined,
-              }
-            : config.queryOptions;
-
-        panel.update(config.panelOptions, queryOptions);
+        panel.update(config.panelOptions, config.queryOptions);
       }
 
       displaySuccess([`Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${metric}!`]);
