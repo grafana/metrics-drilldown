@@ -27,6 +27,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
+import { EventResetSyncYAxis } from 'Breakdown/MetricLabelsList/events/EventResetSyncYAxis';
 import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
@@ -216,6 +217,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         this.state.topScene || this,
         (o) => o instanceof GmdVizPanel && o.state.metric === metric && !o.state.queryConfig.groupBy
       ) as GmdVizPanel[];
+
+      const objectsWithSyncYAxisBehavior = sceneGraph.findAllObjects(this.state.topScene || this, (o) =>
+        Boolean(o.state.$behaviors?.some((b) => (b as any).__name__ === 'syncYAxis'))
+      );
+
+      for (const objectWithSyncYAxisBehavior of objectsWithSyncYAxisBehavior) {
+        objectWithSyncYAxisBehavior.publishEvent(new EventResetSyncYAxis({}), true);
+      }
 
       for (const panel of panelsToUpdate) {
         // we have to wipe any static data node just for the case of MetricLabelValuesList.buildByFrameRepeater()
