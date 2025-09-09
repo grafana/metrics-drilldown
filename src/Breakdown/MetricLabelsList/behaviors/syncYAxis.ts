@@ -125,3 +125,14 @@ function updateTimeseriesAxis(vizPanelsParent: SceneObject, max: number, min: nu
     });
   }
 }
+
+export function resetYAxisSync(sceneObject: SceneObject) {
+  const objectsWithBehavior = sceneGraph.findAllObjects(
+    sceneObject,
+    (o) => Boolean(o.state.$behaviors?.some((b) => (b as any).__name__ === 'syncYAxis')) // see above
+  );
+
+  for (const o of objectsWithBehavior) {
+    o.publishEvent(new EventResetSyncYAxis({}), true);
+  }
+}
