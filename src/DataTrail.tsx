@@ -26,6 +26,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
