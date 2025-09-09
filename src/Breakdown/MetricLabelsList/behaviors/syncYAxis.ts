@@ -12,7 +12,7 @@ import { EventResetSyncYAxis } from '../events/EventResetSyncYAxis';
  * When new data arrives, it calculates the global min/max values and updates all children panels to use the same scale.
  */
 export function syncYAxis() {
-  return (vizPanelsParent: SceneObject<SceneObjectState>) => {
+  const syncYAxis = (vizPanelsParent: SceneObject<SceneObjectState>) => {
     let max = Number.NEGATIVE_INFINITY;
     let min = Number.POSITIVE_INFINITY;
 
@@ -79,6 +79,18 @@ export function syncYAxis() {
       timeRangeSub.unsubscribe();
     };
   };
+
+  // we add an internal name to be able to detect which Scene objects have the behavior associated
+  // this is useful for a use case where we need to reset the behaviour in the Breakdown tab, after the user config is
+  // applied to all the panels present in the tab (check when the EventApplyPanelConfig event is received in DataTrail.tsx)
+  Object.defineProperty(syncYAxis, '__name__', {
+    value: 'syncYAxis',
+    configurable: false,
+    enumerable: true,
+    writable: false,
+  });
+
+  return syncYAxis;
 }
 
 function findNewMaxMin(series: DataFrame[], max: number, min: number) {
@@ -111,5 +123,16 @@ function updateTimeseriesAxis(vizPanelsParent: SceneObject, max: number, min: nu
     t.setState({
       fieldConfig: merge(cloneDeep(t.state.fieldConfig), { defaults: { min, max } }),
     });
+  }
+}
+
+export function resetYAxisSync(sceneObject: SceneObject) {
+  const objectsWithBehavior = sceneGraph.findAllObjects(
+    sceneObject,
+    (o) => Boolean(o.state.$behaviors?.some((b) => (b as any).__name__ === 'syncYAxis')) // see above
+  );
+
+  for (const o of objectsWithBehavior) {
+    o.publishEvent(new EventResetSyncYAxis({}), true);
   }
 }
