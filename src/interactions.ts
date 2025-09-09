@@ -163,6 +163,8 @@ type Interactions = {
   default_panel_config_restored: { metricType: MetricType };
   // An invalid metric config has been found
   invalid_metric_config: { metricConfig: PanelConfigPreset };
+  // the user has clicked on the "Give feedback" button in the app header
+  give_feedback_clicked: {};
 };
 
 type OtherEvents = {
