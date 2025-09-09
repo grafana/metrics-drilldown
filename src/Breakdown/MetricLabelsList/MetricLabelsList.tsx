@@ -8,8 +8,10 @@ import {
   SceneObjectBase,
   SceneReactObject,
   sceneUtils,
+  VizPanel,
   type MultiValueVariable,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Field, Spinner, useStyles2 } from '@grafana/ui';
@@ -29,6 +31,7 @@ import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeate
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
+import { EventTimeseriesDataReceived } from './events/EventTimeseriesDataReceived';
 import { SelectLabelAction } from './SelectLabelAction';
 
 interface MetricLabelsListState extends SceneObjectState {
@@ -113,6 +116,22 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
   private onActivate() {
     this.subscribeToLayoutChange();
+    this.subscribeToEvents();
+  }
+
+  private subscribeToEvents() {
+    this.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
+      const { panelKey, series } = event.payload;
+
+      if (series.length === 1) {
+        const vizPanel = sceneGraph.findByKeyAndType(this, panelKey, VizPanel);
+        const existingHeaderActions = (vizPanel.state.headerActions as SceneObject[]) || [];
+
+        vizPanel.setState({
+          headerActions: existingHeaderActions.filter((a) => !(a instanceof SelectLabelAction)),
+        });
+      }
+    });
   }
 
   private subscribeToLayoutChange() {
