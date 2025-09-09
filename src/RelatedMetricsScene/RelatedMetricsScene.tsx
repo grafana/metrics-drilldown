@@ -74,68 +74,58 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
       { filterEngine: MetricsVariableFilterEngine; sortEngine: MetricsVariableSortEngine }
     >();
 
-    this._subs.add(
-      this.subscribeToEvent(EventMetricsVariableActivated, (event) => {
-        // register engines
-        const { key } = event.payload;
-        const filteredMetricsVariable = sceneGraph.findByKey(this, key) as QueryVariable;
+    this.subscribeToEvent(EventMetricsVariableActivated, (event) => {
+      // register engines
+      const { key } = event.payload;
+      const filteredMetricsVariable = sceneGraph.findByKey(this, key) as QueryVariable;
 
-        enginesMap.set(key, {
-          filterEngine: new MetricsVariableFilterEngine(filteredMetricsVariable),
-          sortEngine: new MetricsVariableSortEngine(filteredMetricsVariable),
-        });
-      })
-    );
+      enginesMap.set(key, {
+        filterEngine: new MetricsVariableFilterEngine(filteredMetricsVariable),
+        sortEngine: new MetricsVariableSortEngine(filteredMetricsVariable),
+      });
+    });
 
-    this._subs.add(
-      this.subscribeToEvent(EventMetricsVariableDeactivated, (event) => {
-        // unregister engines
-        enginesMap.delete(event.payload.key);
-      })
-    );
+    this.subscribeToEvent(EventMetricsVariableDeactivated, (event) => {
+      // unregister engines
+      enginesMap.delete(event.payload.key);
+    });
 
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
 
-    this._subs.add(
-      this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
-        // filter  on initial load
-        const { key, options } = event.payload;
-        const { filterEngine, sortEngine } = enginesMap.get(key)!;
+    this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
+      // filter  on initial load
+      const { key, options } = event.payload;
+      const { filterEngine, sortEngine } = enginesMap.get(key)!;
 
-        filterEngine.setInitOptions(options);
+      filterEngine.setInitOptions(options);
 
-        const filters: Partial<MetricFilters> = {
-          names: quickSearch.state.value ? [quickSearch.state.value] : [],
-        };
+      const filters: Partial<MetricFilters> = {
+        names: quickSearch.state.value ? [quickSearch.state.value] : [],
+      };
 
-        filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
-        sortEngine.sort('related', { metric });
-      })
-    );
+      filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
+      sortEngine.sort('related', { metric });
+    });
 
     /* Filters */
 
-    this._subs.add(
-      this.subscribeToEvent(EventQuickSearchChanged, (event) => {
-        const { searchText } = event.payload;
+    this.subscribeToEvent(EventQuickSearchChanged, (event) => {
+      const { searchText } = event.payload;
 
-        for (const [, { filterEngine, sortEngine }] of enginesMap) {
-          filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
-          sortEngine.sort('related', { metric });
-        }
-      })
-    );
+      for (const [, { filterEngine, sortEngine }] of enginesMap) {
+        filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
+        sortEngine.sort('related', { metric });
+      }
+    });
 
-    this._subs.add(
-      this.subscribeToEvent(EventFiltersChanged, (event) => {
-        const { type, filters } = event.payload;
+    this.subscribeToEvent(EventFiltersChanged, (event) => {
+      const { type, filters } = event.payload;
 
-        for (const [, { filterEngine, sortEngine }] of enginesMap) {
-          filterEngine.applyFilters({ [type]: filters });
-          sortEngine.sort('related', { metric });
-        }
-      })
-    );
+      for (const [, { filterEngine, sortEngine }] of enginesMap) {
+        filterEngine.applyFilters({ [type]: filters });
+        sortEngine.sort('related', { metric });
+      }
+    });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<RelatedMetricsScene>) => {
