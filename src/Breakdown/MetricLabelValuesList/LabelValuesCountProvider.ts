@@ -11,11 +11,13 @@ export class LabelValuesCountsProvider extends CountsProvider {
     this.addActivationHandler(() => {
       const byFrameRepeater = sceneGraph.findByKeyAndType(this, 'breakdown-by-frame-repeater', SceneByFrameRepeater);
 
-      byFrameRepeater.subscribeToState((newState, prevState) => {
-        if (newState.counts !== prevState.counts) {
-          this.setState({ counts: newState.counts });
-        }
-      });
+      this._subs.add(
+        byFrameRepeater.subscribeToState((newState, prevState) => {
+          if (newState.counts !== prevState.counts) {
+            this.setState({ counts: newState.counts });
+          }
+        })
+      );
     });
   }
 }
