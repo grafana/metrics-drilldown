@@ -5,6 +5,7 @@ import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   SceneControlsSpacer,
+  SceneDataNode,
   sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
@@ -26,7 +27,6 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
-import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
@@ -214,14 +214,21 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
       const panelsToUpdate = sceneGraph.findAllObjects(
         this.state.topScene || this,
-        (o) =>
-          o instanceof GmdVizPanel &&
-          o.state.metric === metric &&
-          Boolean(sceneGraph.findDescendents(o, ConfigurePanelAction).length === 1)
+        (o) => o instanceof GmdVizPanel && o.state.metric === metric && !o.state.queryConfig.groupBy
       ) as GmdVizPanel[];
 
       for (const panel of panelsToUpdate) {
-        panel.update(config.panelOptions, config.queryOptions);
+        // we have to wipe any static data node just for the case of MetricLabelValuesList.buildByFrameRepeater()
+        // where data is reused instead of issuing a new query
+        const queryOptions =
+          panel.state.queryConfig.data instanceof SceneDataNode
+            ? {
+                ...config.queryOptions,
+                data: undefined,
+              }
+            : config.queryOptions;
+
+        panel.update(config.panelOptions, queryOptions);
       }
 
       displaySuccess([`Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${metric}!`]);
