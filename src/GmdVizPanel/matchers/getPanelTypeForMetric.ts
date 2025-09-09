@@ -2,7 +2,7 @@ import { type DataTrail } from 'DataTrail';
 import { type HistogramType } from 'GmdVizPanel/GmdVizPanel';
 import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
 
-import { isClassicHistogramMetric } from './isClassicHistogramMetric';
+import { getMetricType } from './getMetricType';
 import { isStatusUpDownMetric } from './isStatusUpDownMetric';
 
 /**
@@ -10,32 +10,30 @@ import { isStatusUpDownMetric } from './isStatusUpDownMetric';
  * Note that they don't consider user preferences stored in user storage.
  */
 export async function getPanelTypeForMetric(metric: string, dataTrail: DataTrail): Promise<PanelType> {
-  if (isStatusUpDownMetric(metric)) {
-    return 'statushistory';
-  }
+  const metricType = await getMetricType(metric, dataTrail);
 
-  if (isClassicHistogramMetric(metric)) {
-    return 'heatmap';
-  }
+  switch (metricType) {
+    case 'classic-histogram':
+    case 'native-histogram':
+      return 'heatmap';
 
-  if (await dataTrail.isNativeHistogram(metric)) {
-    return 'heatmap';
-  }
+    case 'status-updown':
+      return 'statushistory';
 
-  return 'timeseries';
+    case 'counter':
+    case 'age':
+    default:
+      return 'timeseries';
+  }
 }
 
 /**
  * A sync version to use when we already know the histogram type and performance is important
  */
 export function getPanelTypeForMetricSync(metric: string, histogramType: HistogramType): PanelType {
-  if (isStatusUpDownMetric(metric)) {
-    return 'statushistory';
-  }
-
   if (histogramType === 'classic' || histogramType === 'native') {
     return 'heatmap';
   }
 
-  return 'timeseries';
+  return isStatusUpDownMetric(metric) ? 'statushistory' : 'timeseries';
 }
