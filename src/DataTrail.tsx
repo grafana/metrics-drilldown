@@ -26,13 +26,12 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
-import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { getMetricType, getMetricTypeSync } from 'GmdVizPanel/matchers/getMetricType';
+import { getMetricType, getMetricTypeSync, type MetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
@@ -179,7 +178,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       const { metric } = event.payload;
 
       getMetricType(metric, this)
-        .catch(() => getMetricTypeSync(metric))
+        .catch(() => getMetricTypeSync(metric) as MetricType)
         .then((metricType) => {
           reportExploreMetrics('configure_panel_opened', { metricType });
         });
@@ -201,7 +200,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       const { metric, config, restoreDefault } = event.payload;
 
       getMetricType(metric, this)
-        .catch(() => getMetricTypeSync(metric))
+        .catch(() => getMetricTypeSync(metric) as MetricType)
         .then((metricType) => {
           if (restoreDefault) {
             reportExploreMetrics('default_panel_config_restored', { metricType });
