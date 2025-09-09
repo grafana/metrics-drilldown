@@ -4,7 +4,6 @@ import {
   behaviors,
   SceneCSSGridItem,
   SceneCSSGridLayout,
-  SceneDataNode,
   SceneDataTransformer,
   sceneGraph,
   SceneObjectBase,
@@ -20,11 +19,13 @@ import React from 'react';
 import { InlineBanner } from 'App/InlineBanner';
 import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
-import { addUnspecifiedLabel } from 'Breakdown/MetricLabelsList/transformations/addUnspecifiedLabel';
+import { getPreferredConfigForMetric } from 'GmdVizPanel/config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
+import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { trailDS } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
@@ -56,6 +57,16 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     metric: MetricLabelsValuesListState['metric'];
     label: MetricLabelsValuesListState['label'];
   }) {
+    const queryParams = getTimeseriesQueryRunnerParams({
+      metric,
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: true,
+        groupBy: label,
+      },
+    });
+
     super({
       key: 'metric-label-values-list',
       metric,
@@ -75,6 +86,14 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         displayCounts: true,
       }),
       sortBySelector: new SortBySelector({ target: 'labels' }),
+      $data: new SceneDataTransformer({
+        $data: new SceneQueryRunner({
+          datasource: trailDS,
+          maxDataPoints: queryParams.maxDataPoints,
+          queries: queryParams.queries,
+        }),
+        transformations: [addUnspecifiedLabel(label)],
+      }),
       body: undefined,
     });
 
@@ -167,33 +186,20 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         type: 'timeseries',
         height: PANEL_HEIGHT.XL,
         headerActions: () => [],
+        behaviors: [addCardinalityInfo({ description: { ctaText: '' } })],
       },
       queryOptions: {
         groupBy: label,
+        data: sceneGraph.getData(this),
       },
     });
   }
 
   private buildByFrameRepeater() {
     const { metric, label } = this.state;
-    const queryParams = getTimeseriesQueryRunnerParams({
-      metric,
-      queryConfig: {
-        resolution: QUERY_RESOLUTION.MEDIUM,
-        labelMatchers: [],
-        addIgnoreUsageFilter: true,
-        groupBy: label,
-      },
-    });
+    const prefMetricConfig = getPreferredConfigForMetric(metric);
+
     return new SceneByFrameRepeater({
-      $data: new SceneDataTransformer({
-        $data: new SceneQueryRunner({
-          datasource: trailDS,
-          maxDataPoints: queryParams.maxDataPoints,
-          queries: queryParams.queries,
-        }),
-        transformations: [addUnspecifiedLabel(label)],
-      }),
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
       $behaviors: [
         syncYAxis(),
@@ -234,27 +240,27 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
         const labelValue = getLabelValueFromDataFrame(frame);
         const canAddToFilters = !labelValue.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
-        const headerActions = canAddToFilters ? [new AddToFiltersGraphAction({ labelName: label, labelValue })] : [];
 
         const vizPanel = new GmdVizPanel({
           metric,
           discardUserPrefs: true,
           panelOptions: {
-            type: 'timeseries',
+            ...prefMetricConfig?.panelOptions,
             title: labelValue,
             fixedColorIndex: frameIndex,
-            headerActions: () => headerActions,
+            description: '',
+            headerActions: canAddToFilters
+              ? () => [new AddToFiltersGraphAction({ labelName: label, labelValue })]
+              : () => [],
             menu: () => new PanelMenu({ labelName: labelValue }),
-            behaviors: [publishTimeseriesData()], // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
-            legend: { showLegend: false },
+            // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList)
+            // no worries to add it for all panel types here as it will check if the panel is a timeseries
+            // and if the data frame received is a timeseries before acting
+            behaviors: [publishTimeseriesData()],
           },
           queryOptions: {
-            data: new SceneDataNode({
-              data: {
-                ...data,
-                series: [{ ...frame, refId: `${frame.refId}-${frameIndex}}` }],
-              },
-            }),
+            ...prefMetricConfig?.queryOptions,
+            labelMatchers: [{ key: label, operator: '=', value: labelValue }],
           },
         });
 

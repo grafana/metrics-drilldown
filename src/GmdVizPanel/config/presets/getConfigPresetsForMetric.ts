@@ -1,29 +1,30 @@
+import { type DataTrail } from 'DataTrail';
+import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
+
 import { DEFAULT_TIMESERIES_AGE_PRESETS } from './config-presets-ages';
 import { DEFAULT_HISTOGRAMS_PRESETS } from './config-presets-histograms';
 import { DEFAULT_STATUS_UP_DOWN_PRESETS } from './config-presets-status-updown';
 import { DEFAULT_TIMESERIES_PRESETS, DEFAULT_TIMESERIES_RATE_PRESETS } from './config-presets-timeseries';
 import { type PanelConfigPreset } from './types';
-import { isCounterMetric } from '../..//matchers/isCounterMetric';
-import { isHistogramMetric } from '../..//matchers/isHistogramMetric';
-import { isAgeMetric } from '../../matchers/isAgeMetric';
-import { isStatusUpDownMetric } from '../../matchers/isStatusUpDownMetric';
 
-export function getConfigPresetsForMetric(metric: string, isNativeHistogram: boolean): PanelConfigPreset[] {
-  if (isStatusUpDownMetric(metric)) {
-    return Object.values(DEFAULT_STATUS_UP_DOWN_PRESETS);
+export async function getConfigPresetsForMetric(metric: string, dataTrail: DataTrail): Promise<PanelConfigPreset[]> {
+  const metricType = await getMetricType(metric, dataTrail);
+
+  switch (metricType) {
+    case 'counter':
+      return Object.values(DEFAULT_TIMESERIES_RATE_PRESETS);
+
+    case 'classic-histogram':
+    case 'native-histogram':
+      return Object.values(DEFAULT_HISTOGRAMS_PRESETS);
+
+    case 'age':
+      return [Object.values(DEFAULT_TIMESERIES_PRESETS)[0], ...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS)];
+
+    case 'status-updown':
+      return Object.values(DEFAULT_STATUS_UP_DOWN_PRESETS);
+
+    default:
+      return Object.values(DEFAULT_TIMESERIES_PRESETS);
   }
-
-  if (isNativeHistogram || isHistogramMetric(metric)) {
-    return Object.values(DEFAULT_HISTOGRAMS_PRESETS);
-  }
-
-  if (isAgeMetric(metric)) {
-    return [Object.values(DEFAULT_TIMESERIES_PRESETS)[0], ...Object.values(DEFAULT_TIMESERIES_AGE_PRESETS)];
-  }
-
-  if (isCounterMetric(metric)) {
-    return Object.values(DEFAULT_TIMESERIES_RATE_PRESETS);
-  }
-
-  return Object.values(DEFAULT_TIMESERIES_PRESETS);
 }

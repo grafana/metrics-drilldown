@@ -21,7 +21,7 @@ import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
 import { reportExploreMetrics } from '../../interactions';
-import { BookmarksList } from './sections/BookmarksList';
+import { BookmarksList } from './sections/BookmarksList/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
@@ -112,15 +112,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   private onActivate() {
     const cleanupOtherMetricsVar = this.initOtherMetricsVar();
 
-    this._subs.add(
-      this.subscribeToEvent(EventSectionValueChanged, (event) => {
-        const { key, values } = event.payload;
-        const { sectionValues } = this.state;
-        const newSectionValues = new Map(sectionValues).set(key, values);
-        this.setOtherMetricFilters(newSectionValues);
-        this.setState({ sectionValues: newSectionValues });
-      })
-    );
+    this.subscribeToEvent(EventSectionValueChanged, (event) => {
+      const { key, values } = event.payload;
+      const { sectionValues } = this.state;
+      const newSectionValues = new Map(sectionValues).set(key, values);
+      this.setOtherMetricFilters(newSectionValues);
+      this.setState({ sectionValues: newSectionValues });
+    });
 
     return () => {
       cleanupOtherMetricsVar();

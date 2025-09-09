@@ -5,8 +5,8 @@ import {
   behaviors,
   SceneFlexItem,
   SceneFlexLayout,
+  sceneGraph,
   SceneObjectBase,
-  SceneReactObject,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
@@ -19,7 +19,7 @@ import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVa
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { isHistogramMetric } from 'GmdVizPanel/matchers/isHistogramMetric';
+import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
 import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
 import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
@@ -30,7 +30,7 @@ import { getAppBackgroundColor } from './utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const TOPVIEW_KEY = 'topview';
+export const TOPVIEW_PANEL_KEY = 'topview-panel';
 
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
@@ -39,18 +39,30 @@ interface MetricGraphSceneState extends SceneObjectState {
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
-  public constructor(state: { metric: MetricGraphSceneState['metric'] }) {
+  public constructor({ metric }: { metric: MetricGraphSceneState['metric'] }) {
     super({
-      metric: state.metric,
+      metric,
       topView: new SceneFlexLayout({
         direction: 'column',
         $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
         children: [
-          // prevent height flicker when landing
           new SceneFlexItem({
             minHeight: MAIN_PANEL_MIN_HEIGHT,
             maxHeight: MAIN_PANEL_MAX_HEIGHT,
-            body: new SceneReactObject({ reactNode: <div /> }),
+            body: new GmdVizPanel({
+              key: TOPVIEW_PANEL_KEY,
+              metric,
+              panelOptions: {
+                height: PANEL_HEIGHT.XL,
+                headerActions: isClassicHistogramMetric(metric)
+                  ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
+                  : () => [new ConfigurePanelAction({ metric })],
+                menu: () => new PanelMenu({ labelName: metric }),
+              },
+              queryOptions: {
+                resolution: QUERY_RESOLUTION.HIGH,
+              },
+            }),
           }),
           new SceneFlexItem({
             ySizing: 'content',
@@ -67,39 +79,30 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   }
 
   private async onActivate() {
-    const { metric, topView } = this.state;
-    const trail = getTrailFor(this);
-    const metadata = await trail.getMetadataForMetric(metric);
-    const description = getMetricDescription(metadata);
-    const isHistogram = isHistogramMetric(metric) || (await trail.isNativeHistogram(metric));
+    const { metric } = this.state;
+    const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
 
-    topView.setState({
-      children: [
-        new SceneFlexItem({
-          key: TOPVIEW_KEY,
-          minHeight: MAIN_PANEL_MIN_HEIGHT,
-          maxHeight: MAIN_PANEL_MAX_HEIGHT,
-          body: new GmdVizPanel({
-            metric,
-            panelOptions: {
-              height: PANEL_HEIGHT.XL,
-              description,
-              headerActions: isHistogram
-                ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
-                : () => [new ConfigurePanelAction({ metric })],
-              menu: () => new PanelMenu({ labelName: metric }),
-            },
-            queryOptions: {
-              resolution: QUERY_RESOLUTION.HIGH,
-            },
-          }),
-        }),
-        new SceneFlexItem({
-          ySizing: 'content',
-          body: new MetricActionBar({}),
-        }),
-      ],
+    if (gmdVizPanel.state.histogramType === 'classic') {
+      return;
+    }
+
+    const sub = gmdVizPanel.subscribeToState(async (newState, prevState) => {
+      if (prevState.histogramType !== 'native' && newState.histogramType === 'native') {
+        sub.unsubscribe();
+
+        const metadata = await getTrailFor(this).getMetadataForMetric(metric);
+
+        gmdVizPanel.update(
+          {
+            description: getMetricDescription(metadata),
+            headerActions: () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })],
+          },
+          {}
+        );
+      }
     });
+
+    this._subs.add(sub);
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {
@@ -118,7 +121,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           <topView.Component model={topView} />
         </div>
         {selectedTab && (
-          <div data-testid="tab-content">
+          <div data-testid="tab-content" className={styles.tabContent}>
             <selectedTab.Component model={selectedTab} />
           </div>
         )}
@@ -134,6 +137,9 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'column',
       position: 'relative',
       flexGrow: 1,
+    }),
+    tabContent: css({
+      height: '100%',
     }),
     topView: css({}),
     sticky: css({

@@ -1,4 +1,5 @@
 import { urlUtil, type AdHocVariableFilter, type GetTagResponse, type MetricFindValue } from '@grafana/data';
+import { type PromQuery } from '@grafana/prometheus';
 import { config } from '@grafana/runtime';
 import {
   sceneGraph,
@@ -6,11 +7,13 @@ import {
   sceneUtils,
   type AdHocFiltersVariable,
   type SceneObject,
+  type SceneQueryRunner,
   type SceneVariable,
   type SceneVariableState,
 } from '@grafana/scenes';
 
 import { logger } from 'tracking/logger/logger';
+import { isSceneQueryRunner } from 'utils/utils.queries';
 
 import { ROUTES } from './constants';
 import { DataTrail, type DataTrailState } from './DataTrail';
@@ -33,6 +36,7 @@ export function newMetricsTrail(state?: Partial<DataTrailState>): DataTrail {
     initialDS: state?.initialDS,
     $timeRange: state?.$timeRange ?? new SceneTimeRange({ from: 'now-1h', to: 'now' }),
     embedded: state?.embedded ?? false,
+    urlNamespace: state?.embedded ? 'gmd' : undefined,
     ...state,
   });
 }
@@ -65,6 +69,13 @@ export function getMetricName(metric?: string) {
 export function getColorByIndex(index: number) {
   const visTheme = config.theme2.visualization;
   return visTheme.getColorByName(visTheme.palette[index % 8]);
+}
+
+export function getQueries(sceneObject: SceneObject): PromQuery[] {
+  const allQueryRunners = sceneGraph.findAllObjects(sceneObject, isSceneQueryRunner) as SceneQueryRunner[];
+  return allQueryRunners.flatMap((sqr) =>
+    sqr.state.queries.map((q) => ({ ...q, expr: sceneGraph.interpolate(sqr, q.expr) }))
+  );
 }
 
 // frontend hardening limit
@@ -108,7 +119,7 @@ export function limitAdhocProviders(
       const opts = {
         filters,
         scopes: getClosestScopesFacade()?.value,
-        queries: limitedFilterVariable.state.useQueriesAsFilterForOptions ? dataTrail.getQueries() : [],
+        queries: limitedFilterVariable.state.useQueriesAsFilterForOptions ? getQueries(dataTrail) : [],
       };
 
       // if there are too many queries it takes to much time to process the requests.
@@ -145,7 +156,7 @@ export function limitAdhocProviders(
         key: filter.key,
         filters,
         scopes: getClosestScopesFacade()?.value,
-        queries: limitedFilterVariable.state.useQueriesAsFilterForOptions ? dataTrail.getQueries() : [],
+        queries: limitedFilterVariable.state.useQueriesAsFilterForOptions ? getQueries(dataTrail) : [],
       };
 
       // if there are too many queries it takes to much time to process the requests.
