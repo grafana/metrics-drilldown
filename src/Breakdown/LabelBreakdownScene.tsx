@@ -43,11 +43,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     });
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
-      this._subs.add(
-        this.subscribeToEvent(RefreshMetricsEvent, () => {
-          this.updateBody(groupByVariable);
-        })
-      );
+      this.subscribeToEvent(RefreshMetricsEvent, () => {
+        this.updateBody(groupByVariable);
+      });
     }
 
     this.updateBody(groupByVariable);

@@ -86,6 +86,10 @@ export class MetricSceneView extends DrilldownView {
     await succcessToast.getByRole('button', { name: /close alert/i }).click();
   }
 
+  async clickOnSelectNewMetric() {
+    await this.getByRole('button', { name: /Remove existing metric and choose a new metric/i }).click();
+  }
+
   /* Tabs */
 
   getTabsList() {
@@ -142,7 +146,7 @@ export class MetricSceneView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
 
     // TODO: find a better way
-    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
+    await this.waitForTimeout(2000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   /* Breakdown tab */

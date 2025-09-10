@@ -26,13 +26,13 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
-import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { resetYAxisSync } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { getMetricType, getMetricTypeSync } from 'GmdVizPanel/matchers/getMetricType';
+import { getMetricType, getMetricTypeSync, type MetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
@@ -179,7 +179,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       const { metric } = event.payload;
 
       getMetricType(metric, this)
-        .catch(() => getMetricTypeSync(metric))
+        .catch(() => getMetricTypeSync(metric) as MetricType)
         .then((metricType) => {
           reportExploreMetrics('configure_panel_opened', { metricType });
         });
@@ -201,7 +201,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       const { metric, config, restoreDefault } = event.payload;
 
       getMetricType(metric, this)
-        .catch(() => getMetricTypeSync(metric))
+        .catch(() => getMetricTypeSync(metric) as MetricType)
         .then((metricType) => {
           if (restoreDefault) {
             reportExploreMetrics('default_panel_config_restored', { metricType });
@@ -212,12 +212,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
       this.state.drawer.close();
 
+      // because the Prometheus function used to display the metric is going to be updated, the range of
+      // values for syncing the axis will certainly change (e.g. switching from sum to avg)
+      // so we reset it before updating all the panels
+      resetYAxisSync(this.state.topScene || this);
+
       const panelsToUpdate = sceneGraph.findAllObjects(
         this.state.topScene || this,
-        (o) =>
-          o instanceof GmdVizPanel &&
-          o.state.metric === metric &&
-          Boolean(sceneGraph.findDescendents(o, ConfigurePanelAction).length === 1)
+        (o) => o instanceof GmdVizPanel && o.state.metric === metric && !o.state.queryConfig.groupBy
       ) as GmdVizPanel[];
 
       for (const panel of panelsToUpdate) {

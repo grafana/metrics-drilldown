@@ -4,4 +4,5 @@ export const PREF_KEYS = {
   BOOKMARKS: 'bookmarks',
   METRIC_PREFS: 'metric-prefs',
   BREAKDOWN_SORTBY: 'breakdown.sortby',
+  SIDEBAR_SECTION: 'sidebar.section',
 };

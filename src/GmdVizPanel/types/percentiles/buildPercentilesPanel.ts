@@ -49,5 +49,6 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
         });
       });
     })
+    .setBehaviors(panelConfig.behaviors || [])
     .build();
 }

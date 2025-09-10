@@ -178,11 +178,16 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         }
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
-          this.setState({ panelConfig: { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' } });
+          this.setState({
+            histogramType: 'native',
+            panelConfig: { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
+          });
         }
 
         bodySub.unsubscribe();
       });
+
+      this._subs.add(bodySub);
     }
 
     this.subscribeToState((newState, prevState) => {
