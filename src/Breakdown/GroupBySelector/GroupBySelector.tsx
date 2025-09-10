@@ -113,22 +113,36 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
         config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES
       );
 
-  // Process other attributes (those not in radio buttons)
+  // Limit radio options to max 4 items
+  const MAX_RADIO_OPTIONS = 4;
+  const limitedRadioOptions = radioOptions.slice(0, MAX_RADIO_OPTIONS);
+  const excessRadioOptions = radioOptions.slice(MAX_RADIO_OPTIONS);
+
+  // Process other attributes (those not in limited radio buttons)
   const optionsNotInRadio = options.filter(
-    (option) => !radioOptions.find((ro) => ro.value === option.value?.toString())
+    (option) => !limitedRadioOptions.find((ro) => ro.value === option.value?.toString())
   );
   const otherAttrOptions = filteredOptions(optionsNotInRadio, '', config.searchConfig);
 
   // Get modified select options
   const baseOptions = getModifiedSelectOptions(otherAttrOptions, config.ignoredAttributes, config.attributePrefixes);
 
+  // Add excess radio options to the combobox
+  const excessRadioOptionsForCombobox = excessRadioOptions.map(option => ({
+    label: option.label,
+    value: option.value
+  }));
+
+  // Combine excess radio options with other options
+  const combinedComboboxOptions = [...excessRadioOptionsForCombobox, ...baseOptions];
+
   // Add "All" option to dropdown if showAll is true and no radio buttons are shown
-  const modifiedSelectOptions = showAll && radioOptions.length === 0
-    ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...baseOptions]
-    : baseOptions;
+  const modifiedSelectOptions = showAll && limitedRadioOptions.length === 0
+    ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...combinedComboboxOptions]
+    : combinedComboboxOptions;
 
   // Determine default value
-  const defaultValue = initialGroupBy ?? (showAll ? DEFAULT_ALL_OPTION : radioOptions[0]?.value ?? modifiedSelectOptions[0]?.value);
+  const defaultValue = initialGroupBy ?? (showAll ? DEFAULT_ALL_OPTION : limitedRadioOptions[0]?.value ?? modifiedSelectOptions[0]?.value);
 
   // Check if radio attributes have changed (to trigger re-initialization)
   const radioAttributesChanged = useMemo(() => {
@@ -182,9 +196,9 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   return (
     <Field label={fieldLabel}>
       <div ref={controlsContainer} className={styles.container}>
-        {radioOptions.length > 0 && (
+        {limitedRadioOptions.length > 0 && (
           <RadioButtonGroup
-            options={[...showAllOption, ...radioOptions]}
+            options={[...showAllOption, ...limitedRadioOptions]}
             value={effectiveValue}
             onChange={onChange}
           />
