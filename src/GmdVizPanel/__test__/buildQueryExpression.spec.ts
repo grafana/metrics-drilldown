@@ -1,70 +1,92 @@
-import { Expression, MatchingOperator } from 'tsqtsq';
+import { MatchingOperator } from 'tsqtsq';
 
-import { VAR_FILTERS_EXPR } from 'shared';
-
-import { buildQueryExpression, expressionToString } from '../buildQueryExpression';
+import { buildQueryExpression } from '../buildQueryExpression';
 
 describe('buildQueryExpression(options)', () => {
-  test('returns the expected expression', () => {
-    const options = {
-      metric: '🔥go_goroutines',
-      labelMatchers: [{ key: 'instance', operator: '=', value: 'us-east:5000' }],
+  test.each([
+    ['non-utf8', 'go_goroutines', 'go_goroutines{${filters:raw}}'],
+    ['utf8', '🔥go_goroutines', '🔥go_goroutines{"🔥go_goroutines", ${filters:raw}}'],
+  ])('supports %s metric names', (_, metric, expected) => {
+    const expression = buildQueryExpression({
+      metric,
+      labelMatchers: [],
+      addIgnoreUsageFilter: false,
+      addExtremeValuesFiltering: false,
+    });
+
+    expect(expression).toBe(expected);
+  });
+
+  test.each([
+    ['non-utf8', 'go_goroutines', 'go_goroutines{cluster="test", instance!="us-east:5000", ${filters:raw}}'],
+    [
+      'utf8',
+      '🔥go_goroutines',
+      '🔥go_goroutines{cluster="test", instance!="us-east:5000", "🔥go_goroutines", ${filters:raw}}',
+    ],
+  ])('supports labels (%s)', (_, metric, expected) => {
+    const expression = buildQueryExpression({
+      metric,
+      labelMatchers: [
+        { key: 'cluster', operator: MatchingOperator.equal, value: 'test' },
+        { key: 'instance', operator: MatchingOperator.notEqual, value: 'us-east:5000' },
+      ],
+      addIgnoreUsageFilter: false,
+      addExtremeValuesFiltering: false,
+    });
+
+    expect(expression).toBe(expected);
+  });
+
+  test.each([
+    [
+      'non-utf8',
+      'go_goroutines',
+      'go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", ${filters:raw}}',
+    ],
+    [
+      'utf8',
+      '🔥go_goroutines',
+      '🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}}',
+    ],
+  ])('supports ignore usage filter (%s)', (_, metric, expected) => {
+    const expression = buildQueryExpression({
+      metric,
+      labelMatchers: [
+        { key: 'cluster', operator: MatchingOperator.equal, value: 'test' },
+        { key: 'instance', operator: MatchingOperator.notEqual, value: 'us-east:5000' },
+      ],
       addIgnoreUsageFilter: true,
-    };
+      addExtremeValuesFiltering: false,
+    });
 
-    const expression = buildQueryExpression(options);
-
-    expect(expression.metric).toBe('🔥go_goroutines');
-    expect(expression.selectors).toMatchInlineSnapshot(`
-      Map {
-        "instance" => [
-          {
-            "label": "instance",
-            "operator": "=",
-            "value": "us-east:5000",
-          },
-        ],
-        "__ignore_usage__" => [
-          {
-            "label": "__ignore_usage__",
-            "operator": "=",
-            "value": "",
-          },
-        ],
-        ""🔥go_goroutines"" => [
-          {
-            "label": ""🔥go_goroutines"",
-            "operator": "=",
-            "value": "__REMOVE__",
-          },
-        ],
-        "\${filters:raw}" => [
-          {
-            "label": "\${filters:raw}",
-            "operator": "=",
-            "value": "__REMOVE__",
-          },
-        ],
-      }
-    `);
+    expect(expression).toBe(expected);
   });
 });
 
-describe('expressionToString(expression)', () => {
-  test('returns the correct string', () => {
-    const expression = new Expression({
-      metric: 'go_goroutines',
-      values: {},
-      defaultOperator: MatchingOperator.equal,
-      defaultSelectors: [
-        { label: 'instance', operator: MatchingOperator.equal, value: 'us-east:5000' },
-        { label: '__ignore_usage__', operator: MatchingOperator.equal, value: '' },
-        { label: VAR_FILTERS_EXPR, operator: MatchingOperator.equal, value: '__REMOVE__' },
+describe('extreme value filtering', () => {
+  test.each([
+    [
+      'non-utf8',
+      'go_goroutines',
+      'go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", ${filters:raw}} and go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", ${filters:raw}} > -Inf',
+    ],
+    [
+      'utf8',
+      '🔥go_goroutines',
+      '🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} and 🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} > -Inf',
+    ],
+  ])('supports extreme value filtering  (%s)', (_, metric, expected) => {
+    const expression = buildQueryExpression({
+      metric,
+      labelMatchers: [
+        { key: 'cluster', operator: MatchingOperator.equal, value: 'test' },
+        { key: 'instance', operator: MatchingOperator.notEqual, value: 'us-east:5000' },
       ],
+      addIgnoreUsageFilter: true,
+      addExtremeValuesFiltering: true,
     });
 
-    expect(expressionToString(expression)).toBe(
-      'go_goroutines{instance="us-east:5000", __ignore_usage__="", ${filters}}'
-    );
+    expect(expression).toBe(expected);
   });
 });

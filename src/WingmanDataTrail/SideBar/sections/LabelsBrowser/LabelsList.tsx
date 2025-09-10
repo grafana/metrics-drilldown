@@ -8,11 +8,11 @@ import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 type LabelsListProps = {
   labels: Array<SelectableValue<string>>;
   selectedLabel: string;
-  onClickLabel: (label: string) => void;
-  onClickClearSelection: () => void;
+  onSelectLabel: (label: string) => void;
+  onClearSelection: () => void;
 };
 
-export function LabelsList({ labels, selectedLabel, onClickLabel, onClickClearSelection }: Readonly<LabelsListProps>) {
+export function LabelsList({ labels, selectedLabel, onSelectLabel, onClearSelection }: Readonly<LabelsListProps>) {
   const styles = useStyles2(getStyles);
 
   return (
@@ -24,7 +24,7 @@ export function LabelsList({ labels, selectedLabel, onClickLabel, onClickClearSe
         <Button
           variant="secondary"
           fill="text"
-          onClick={onClickClearSelection}
+          onClick={onClearSelection}
           disabled={selectedLabel === NULL_GROUP_BY_VALUE}
         >
           clear
@@ -37,7 +37,7 @@ export function LabelsList({ labels, selectedLabel, onClickLabel, onClickClearSe
         <div className={styles.list} data-testid="labels-list">
           {/* TODO: use a custom one to have option labels with ellipsis and title/tooltip when hovering
       now we're customizing too much the component CSS */}
-          <RadioButtonList name="labels-list" options={labels} onChange={onClickLabel} value={selectedLabel} />
+          <RadioButtonList name="labels-list" options={labels} onChange={onSelectLabel} value={selectedLabel} />
         </div>
       )}
     </>
