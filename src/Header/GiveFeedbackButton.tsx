@@ -5,7 +5,7 @@ import React from 'react';
 
 import { reportExploreMetrics } from 'interactions';
 
-export const FEEDBACK_FORM_URL = ''; // TODO
+export const FEEDBACK_FORM_URL = 'https://grafana.qualtrics.com/jfe/form/SV_9FXX8XzCNe7G1g2';
 
 function trackUsage() {
   reportExploreMetrics('give_feedback_clicked', {});
