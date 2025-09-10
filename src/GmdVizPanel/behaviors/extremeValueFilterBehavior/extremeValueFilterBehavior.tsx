@@ -66,7 +66,6 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
     // discard the behaviour if non-timeseries data is received
     const dataFrameType = newState.data.series[0].meta?.type;
     if (dataFrameType && !dataFrameType.startsWith('timeseries')) {
-      queryRunnerSub.unsubscribe();
       return;
     }
 
@@ -74,9 +73,6 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
     if (!isAllDataNaN(newState.data.series)) {
       return;
     }
-
-    // act only once
-    queryRunnerSub.unsubscribe();
 
     // rebuild query with extreme values filtering
     const queryParams = getTimeseriesQueryRunnerParams({
