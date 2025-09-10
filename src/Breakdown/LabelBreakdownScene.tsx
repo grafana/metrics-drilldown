@@ -181,8 +181,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
           </div>
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
-
-          </div>
+        </div>
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}
@@ -214,8 +213,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     groupBySelector: css({
       flexGrow: 1,
-      // This is to prevent flickering of radio and select fields between
-      // ~1100px and ~1200px
       '@media (min-width: 1080px)': {
         minWidth: 380,
       },
