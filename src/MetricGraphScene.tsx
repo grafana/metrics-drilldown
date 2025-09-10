@@ -187,7 +187,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       background: getAppBackgroundColor(theme, trail),
       position: 'sticky',
       paddingTop: theme.spacing(1),
-      marginTop: `-${theme.spacing(1)}`,
       zIndex: 10,
       // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
       // This ensures the main graph sticks below the app-controls in embedded mode
@@ -199,7 +198,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       background: getAppBackgroundColor(theme, trail),
       position: 'sticky',
       paddingTop: theme.spacing(1),
-      marginTop: `-${theme.spacing(1)}`,
       zIndex: 10,
       // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
       // This ensures the main graph sticks below the app-controls in embedded mode
