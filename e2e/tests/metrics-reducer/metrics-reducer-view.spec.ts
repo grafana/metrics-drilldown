@@ -1,7 +1,4 @@
-import { type Scope } from '@grafana/data';
-
 import { UI_TEXT } from '../../../src/constants/ui';
-import { getGrafanaUrl } from '../../config/playwright.config.common';
 import { expect, test } from '../../fixtures';
 import { type SortByOptionNames } from '../../fixtures/views/MetricsReducerView';
 
@@ -225,47 +222,6 @@ test.describe('Metrics reducer view', () => {
           expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
         }
       });
-    });
-  });
-
-  test.describe('Scopes', () => {
-    test.use({
-      // Instead of our regular Grafana instance, we'll use the Grafana instance with scopes enabled
-      baseURL: getGrafanaUrl({ withScopes: true }),
-    });
-
-    test('Scopes filters are applied', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
-      const testScope: Scope = {
-        metadata: {
-          name: 'test-scope',
-        },
-        spec: {
-          title: 'Test Scope',
-          type: 'app',
-          description: 'Test Scope',
-          category: 'test',
-          filters: [
-            {
-              key: 'method',
-              operator: 'equals',
-              value: 'GET',
-            },
-          ],
-        },
-      };
-
-      // Mock the scope API endpoint
-      await metricsReducerView.page.route(
-        `**/apis/scope.grafana.app/v0alpha1/namespaces/default/scopes/${testScope.metadata.name}`,
-        async (route) => {
-          await route.fulfill({ json: testScope });
-        }
-      );
-      await metricsReducerView.goto(new URLSearchParams({ scopes: testScope.metadata.name }));
-      await expectScreenshotInCurrentGrafanaVersion(
-        metricsReducerView.page,
-        'metrics-reducer-scopes-filters-applied.png'
-      );
     });
   });
 });

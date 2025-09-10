@@ -19,6 +19,10 @@ interface GetGrafanaUrlOptions {
   withScopes?: boolean;
 }
 
+export function getGrafanaVersion() {
+  return process.env.GRAFANA_VERSION;
+}
+
 export function getGrafanaUrl(options: GetGrafanaUrlOptions = {}) {
   if (process.env.GRAFANA_URL) {
     return process.env.GRAFANA_URL;
