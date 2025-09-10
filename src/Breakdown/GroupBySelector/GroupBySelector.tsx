@@ -192,28 +192,33 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   // Show All option
   const showAllOption = showAll ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }] : [];
   const defaultOnChangeValue = showAll ? DEFAULT_ALL_OPTION : '';
+  const isAllSelected = value && value === DEFAULT_ALL_OPTION;
 
   return (
     <Field label={fieldLabel}>
       <div ref={controlsContainer} className={styles.container}>
         {limitedRadioOptions.length > 0 && (
-          <RadioButtonGroup
-            options={[...showAllOption, ...limitedRadioOptions]}
-            value={effectiveValue}
-            onChange={onChange}
-          />
+            <RadioButtonGroup
+              className={!isAllSelected ? styles.radioButtonGroup : ''}
+              options={[...showAllOption, ...limitedRadioOptions]}
+              value={effectiveValue}
+              onChange={onChange}
+              fullWidth={true}
+            />
         )}
         {modifiedSelectOptions.length > 0 && (
-        <Combobox
-          value={effectiveValue && modifiedSelectOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
-          placeholder={selectPlaceholder}
-          options={modifiedSelectOptions.filter(opt => opt.value !== undefined) as Array<{label?: string, value: string}>}
-          onChange={(selected) => {
-            const newSelected = (selected?.value as string) ?? defaultOnChangeValue;
-            onChange(newSelected);
-          }}
-            isClearable
-          />
+          <div className={!isAllSelected ? styles.comboboxContainer : ''}>
+            <Combobox
+              value={effectiveValue && modifiedSelectOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
+              placeholder={selectPlaceholder}
+              options={modifiedSelectOptions.filter(opt => opt.value !== undefined) as Array<{label?: string, value: string}>}
+              onChange={(selected) => {
+                const newSelected = (selected?.value as string) ?? defaultOnChangeValue;
+                onChange(newSelected);
+              }}
+              isClearable
+            />
+          </div>
         )}
       </div>
     </Field>
@@ -228,6 +233,18 @@ function getStyles(theme: GrafanaTheme2) {
     container: css({
       display: 'flex',
       gap: theme.spacing(1),
+      width: '100%',
+      alignItems: 'flex-start',
+    }),
+    radioButtonGroup: css({
+      flexGrow: 1,
+    }),
+    comboboxContainer: css({
+      flex: '1 1 auto',
+      minWidth: 0,
+      '& > div': {
+        width: '100%',
+      },
     }),
   };
 }
