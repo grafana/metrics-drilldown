@@ -36,6 +36,7 @@ export function newMetricsTrail(state?: Partial<DataTrailState>): DataTrail {
     initialDS: state?.initialDS,
     $timeRange: state?.$timeRange ?? new SceneTimeRange({ from: 'now-1h', to: 'now' }),
     embedded: state?.embedded ?? false,
+    urlNamespace: state?.embedded ? 'gmd' : undefined,
     ...state,
   });
 }
