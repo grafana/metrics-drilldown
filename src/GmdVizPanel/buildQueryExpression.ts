@@ -1,5 +1,5 @@
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
-import { Expression, MatchingOperator } from 'tsqtsq';
+import { Expression, MatchingOperator, promql } from 'tsqtsq';
 
 import { VAR_FILTERS } from 'shared';
 
@@ -9,7 +9,7 @@ export type LabelMatcher = {
   value: string;
 };
 
-export function expressionToString(expression: Expression) {
+function expressionToString(expression: Expression) {
   // see hacks in buildQueryExpression() below
   return expression.toString().replaceAll('="__REMOVE__"', '');
 }
@@ -18,10 +18,11 @@ type Options = {
   metric: string;
   labelMatchers?: LabelMatcher[];
   addIgnoreUsageFilter?: boolean;
+  addExtremeValuesFiltering?: boolean;
 };
 
-export function buildQueryExpression(options: Options): Expression {
-  const { metric, labelMatchers = [], addIgnoreUsageFilter = true } = options;
+export function buildQueryExpression(options: Options): string {
+  const { metric, labelMatchers = [], addIgnoreUsageFilter = true, addExtremeValuesFiltering = false } = options;
 
   const defaultSelectors = labelMatchers.map((m) => ({
     label: utf8Support(m.key),
@@ -45,10 +46,21 @@ export function buildQueryExpression(options: Options): Expression {
   // and we're using :raw for variables containing special characters (like equal signs etc.)
   defaultSelectors.push({ label: `\${${VAR_FILTERS}:raw}`, operator: MatchingOperator.equal, value: '__REMOVE__' });
 
-  return new Expression({
+  const expression = new Expression({
     metric,
     values: {},
     defaultOperator: MatchingOperator.equal,
     defaultSelectors,
   });
+
+  const expressionString = expressionToString(expression);
+
+  if (addExtremeValuesFiltering) {
+    return promql.and({
+      left: expressionString,
+      right: `${expressionString} > -Inf`,
+    });
+  }
+
+  return expressionString;
 }
