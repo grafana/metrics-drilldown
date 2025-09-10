@@ -1,13 +1,14 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString } from 'GmdVizPanel/buildQueryExpression';
+import { buildQueryExpression } from 'GmdVizPanel/buildQueryExpression';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 
 type StatushistoryQueryRunnerParams = {
   maxDataPoints: number;
   queries: SceneDataQuery[];
+  expression: string;
 };
 
 type Options = {
@@ -21,8 +22,10 @@ export function getStatushistoryQueryRunnerParams(options: Options): Statushisto
     metric,
     labelMatchers: queryConfig.labelMatchers,
     addIgnoreUsageFilter: queryConfig.addIgnoreUsageFilter,
+    addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
-  const query = promql.min({ expr: expressionToString(expression) });
+
+  const query = promql.min({ expr: expression });
 
   return {
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 200 : 100,
@@ -34,5 +37,6 @@ export function getStatushistoryQueryRunnerParams(options: Options): Statushisto
         fromExploreMetrics: true,
       },
     ],
+    expression,
   };
 }

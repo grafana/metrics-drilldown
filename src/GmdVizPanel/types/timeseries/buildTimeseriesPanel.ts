@@ -1,7 +1,7 @@
 import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
-import { extremeValueFilterBehavior } from 'GmdVizPanel/behaviors/ExtremeValueFilterBehavior';
+import { extremeValueFilterBehavior } from 'GmdVizPanel/behaviors/extremeValueFilterBehavior/extremeValueFilterBehavior';
 import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 import { addRefId } from 'GmdVizPanel/types/timeseries/transformations/addRefId';
 import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
