@@ -199,7 +199,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
       <div ref={controlsContainer} className={styles.container}>
         {limitedRadioOptions.length > 0 && (
             <RadioButtonGroup
-              className={!isAllSelected ? styles.radioButtonGroup : ''}
+              className={!isAllSelected ? styles.hasValueSelected : ''}
               options={[...showAllOption, ...limitedRadioOptions]}
               value={effectiveValue}
               onChange={onChange}
@@ -207,7 +207,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
             />
         )}
         {modifiedSelectOptions.length > 0 && (
-          <div className={!isAllSelected ? styles.comboboxContainer : ''}>
+          <div className={!isAllSelected ? styles.hasValueSelected : ''}>
             <Combobox
               value={effectiveValue && modifiedSelectOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
               placeholder={selectPlaceholder}
@@ -236,15 +236,8 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       alignItems: 'flex-start',
     }),
-    radioButtonGroup: css({
+    hasValueSelected: css({
       flexGrow: 1,
-    }),
-    comboboxContainer: css({
-      flex: '1 1 auto',
-      minWidth: 0,
-      '& > div': {
-        width: '100%',
-      },
     }),
   };
 }
