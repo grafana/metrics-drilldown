@@ -12,7 +12,6 @@ type StatQueryRunnerParams = {
   isRateQuery: boolean;
   maxDataPoints: number;
   queries: SceneDataQuery[];
-  expression: string;
 };
 
 type Options = {
@@ -36,7 +35,6 @@ export function getStatQueryRunnerParams(options: Options): StatQueryRunnerParam
     isRateQuery,
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries: buildQueriesWithPresetFunctions({ metric, queryConfig, isRateQuery, expr }),
-    expression,
   };
 }
 

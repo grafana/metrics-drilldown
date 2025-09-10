@@ -8,7 +8,6 @@ import { type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 type StatushistoryQueryRunnerParams = {
   maxDataPoints: number;
   queries: SceneDataQuery[];
-  expression: string;
 };
 
 type Options = {
@@ -37,6 +36,5 @@ export function getStatushistoryQueryRunnerParams(options: Options): Statushisto
         fromExploreMetrics: true,
       },
     ],
-    expression,
   };
 }

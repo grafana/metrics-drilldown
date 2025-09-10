@@ -12,7 +12,6 @@ type PercentilesQueryRunnerParams = {
   isRateQuery: boolean;
   maxDataPoints: number;
   queries: SceneDataQuery[];
-  expression: string;
 };
 
 type Options = {
@@ -52,7 +51,6 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
     isRateQuery: histogramType !== 'none' ? true : isCounterMetric,
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries,
-    expression,
   };
 }
 

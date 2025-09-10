@@ -12,7 +12,6 @@ type TimeseriesQueryRunnerParams = {
   isRateQuery: boolean;
   maxDataPoints: number;
   queries: SceneDataQuery[];
-  expression: string;
 };
 
 type Options = {
@@ -38,7 +37,6 @@ export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQuer
     queries: queryConfig.groupBy
       ? buildGroupByQueries({ metric, queryConfig, isRateQuery, expr })
       : buildQueriesWithPresetFunctions({ metric, queryConfig, isRateQuery, expr }),
-    expression,
   };
 }
 

@@ -8,7 +8,6 @@ import { type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 type HeatmapQueryRunnerParams = {
   maxDataPoints: number;
   queries: SceneDataQuery[];
-  expression: string;
 };
 
 type Options = {
@@ -40,6 +39,5 @@ export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunne
         fromExploreMetrics: true,
       },
     ],
-    expression,
   };
 }
