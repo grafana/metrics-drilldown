@@ -5,6 +5,7 @@ import { PLUGIN_BASE_URL } from '../../constants';
 import { type DataTrail } from '../../DataTrail';
 import { reportExploreMetrics } from '../../interactions';
 import { getUrlForTrail } from '../../utils';
+import { displaySuccess } from '../../WingmanDataTrail/helpers/displayStatus';
 
 export class CopyUrlAction {
   static create(trail: DataTrail): PanelMenuItem {
@@ -17,6 +18,7 @@ export class CopyUrlAction {
           const appUrl = config.appUrl.endsWith('/') ? config.appUrl.slice(0, -1) : config.appUrl;
           const url = `${appUrl}${PLUGIN_BASE_URL}/${getUrlForTrail(trail)}`;
           navigator.clipboard.writeText(url);
+          displaySuccess(['URL copied to clipboard']);
         }
       },
     };
