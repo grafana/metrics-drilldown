@@ -84,34 +84,48 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     },
   });
 
-  // Create filter context
-  const filterContext: FilterContext = {
-    filters,
-    currentMetric,
-    availableOptions: options,
-  };
+  // Process radio attributes (memoized for expensive calculations)
+  const radioOptions = useMemo(() => {
+    // Create filter context inside useMemo to avoid dependency issues
+    const filterContext: FilterContext = {
+      filters,
+      currentMetric,
+      availableOptions: options,
+    };
 
-  // Process radio attributes
-  const radioOptions = !config.layoutConfig.enableResponsiveRadioButtons
-    ? radioAttributes.map((attribute) => ({
-        label: config.attributePrefixes.span?.length
-          ? attribute.replace(config.attributePrefixes.span, '')
-          : attribute.replace(config.attributePrefixes.resource || '', ''),
-        text: attribute,
-        value: attribute,
-      }))
-    : processRadioAttributes(
-        radioAttributes,
-        options,
-        filters,
-        config.filteringRules,
-        filterContext,
-        config.attributePrefixes,
-        fontSize,
-        availableWidth,
-        config.layoutConfig.additionalWidthPerItem || DEFAULT_ADDITIONAL_WIDTH_PER_ITEM,
-        config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES
-      );
+    return !config.layoutConfig.enableResponsiveRadioButtons
+      ? radioAttributes.map((attribute) => ({
+          label: config.attributePrefixes.span?.length
+            ? attribute.replace(config.attributePrefixes.span, '')
+            : attribute.replace(config.attributePrefixes.resource || '', ''),
+          text: attribute,
+          value: attribute,
+        }))
+      : processRadioAttributes(
+          radioAttributes,
+          options,
+          filters,
+          config.filteringRules,
+          filterContext,
+          config.attributePrefixes,
+          fontSize,
+          availableWidth,
+          config.layoutConfig.additionalWidthPerItem || DEFAULT_ADDITIONAL_WIDTH_PER_ITEM,
+          config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES
+        );
+  }, [
+    config.layoutConfig.enableResponsiveRadioButtons,
+    radioAttributes,
+    config.attributePrefixes,
+    options,
+    filters,
+    config.filteringRules,
+    currentMetric,
+    fontSize,
+    availableWidth,
+    config.layoutConfig.additionalWidthPerItem,
+    config.layoutConfig.widthOfOtherAttributes,
+  ]);
 
   // Show all radio options - no artificial limit or special treatment of labels
   const limitedRadioOptions = radioOptions;
@@ -133,50 +147,34 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   // Determine default value
   const defaultValue = initialGroupBy ?? (showAll ? DEFAULT_ALL_OPTION : limitedRadioOptions[0]?.value ?? modifiedSelectOptions[0]?.value);
 
-  // Check if radio attributes have changed (to trigger re-initialization)
-  const radioAttributesChanged = useMemo(() => {
-    const current = radioAttributes.join(',');
-    const previous = previousRadioAttributesRef.current.join(',');
-    if (current !== previous) {
-      previousRadioAttributesRef.current = [...radioAttributes];
-      return true;
-    }
-    return false;
-  }, [radioAttributes]);
+  // Check if radio attributes have changed (no memoization, no side effects)
+  const current = radioAttributes.join(',');
+  const previous = previousRadioAttributesRef.current.join(',');
+  const radioAttributesChanged = current !== previous;
+  if (radioAttributesChanged) {
+    previousRadioAttributesRef.current = [...radioAttributes];
+  }
 
-  // Check if current value exists in filters (indicates it might be stale)
-  const valueExistsInFilters = useMemo(() => {
-    return filters.some((f) => f.key === value);
-  }, [filters, value]);
+  // Check if current value exists in filters (simple operation, no memoization needed)
+  const valueExistsInFilters = filters.some((f) => f.key === value);
 
-  // Determine if we should auto-update (derived state instead of useEffect)
-  const shouldAutoUpdate = useMemo(() => {
-    // Don't auto-update if we already have a valid value and haven't detected changes
-    if (value && !radioAttributesChanged && !valueExistsInFilters) {
-      return false;
-    }
+  // Determine if we should auto-update
+  const shouldAutoUpdate = !value || radioAttributesChanged || valueExistsInFilters;
 
-    // Auto-update if we don't have a value, or if conditions suggest we should
-    return !value || radioAttributesChanged || valueExistsInFilters;
-  }, [value, radioAttributesChanged, valueExistsInFilters]);
+  // Handle the auto-update logic (no side effects in useMemo)
+  let effectiveValue = value;
+  if (defaultValue && shouldAutoUpdate && !hasInitializedRef.current) {
+    // Mark as initialized to prevent repeated auto-updates
+    hasInitializedRef.current = true;
+    // Trigger the onChange in the next render cycle
+    setTimeout(() => onChange(defaultValue, true), 0);
+    effectiveValue = defaultValue;
+  }
 
-  // Handle the auto-update logic in render (instead of useEffect)
-  const effectiveValue = useMemo(() => {
-    if (defaultValue && shouldAutoUpdate && !hasInitializedRef.current) {
-      // Mark as initialized to prevent repeated auto-updates
-      hasInitializedRef.current = true;
-      // Trigger the onChange in the next render cycle
-      setTimeout(() => onChange(defaultValue, true), 0);
-      return defaultValue;
-    }
-
-    // Reset initialization flag when radio attributes change
-    if (radioAttributesChanged) {
-      hasInitializedRef.current = false;
-    }
-
-    return value;
-  }, [value, defaultValue, shouldAutoUpdate, radioAttributesChanged, onChange]);
+  // Reset initialization flag when radio attributes change
+  if (radioAttributesChanged) {
+    hasInitializedRef.current = false;
+  }
 
   // Show All option
   const showAllOption = showAll ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }] : [];
