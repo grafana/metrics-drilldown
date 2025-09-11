@@ -71,6 +71,14 @@ export const processRadioAttributes = (
   let accumulatedWidth = 0;
   const reservedWidth = config.widthOfOtherAttributes;
 
+  // If requested, include the width of the implicit "All" radio in budgeting
+  if (config.includeAllOptionInWidth) {
+    const allLabel = config.allOptionLabel ?? 'All';
+    const allTextWidth = measureText(allLabel, config.fontSize).width;
+    const allRequiredWidth = allTextWidth + config.additionalWidthPerItem;
+    accumulatedWidth += allRequiredWidth;
+  }
+
   return radioAttributes
     .filter(attribute =>
       optionValues.has(attribute) && attributeFilter(attribute)

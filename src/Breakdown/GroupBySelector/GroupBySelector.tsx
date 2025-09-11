@@ -109,9 +109,11 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
             availableWidth,
             additionalWidthPerItem: config.layoutConfig.additionalWidthPerItem || DEFAULT_ADDITIONAL_WIDTH_PER_ITEM,
             widthOfOtherAttributes: config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES,
+            includeAllOptionInWidth: showAll,
+            allOptionLabel: DEFAULT_ALL_OPTION,
           }
         );
-  }, [radioAttributes, config.attributePrefixes, options, filters, config.filteringRules, currentMetric, fontSize, availableWidth, config.layoutConfig.additionalWidthPerItem, config.layoutConfig.widthOfOtherAttributes]);
+  }, [radioAttributes, config.attributePrefixes, options, filters, config.filteringRules, currentMetric, fontSize, availableWidth, config.layoutConfig.additionalWidthPerItem, config.layoutConfig.widthOfOtherAttributes, showAll]);
 
   // Show all radio options - no artificial limit or special treatment of labels
   const limitedRadioOptions = radioOptions;

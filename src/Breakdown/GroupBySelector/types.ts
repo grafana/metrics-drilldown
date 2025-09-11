@@ -105,6 +105,10 @@ export interface RadioProcessingConfig {
   availableWidth: number;
   additionalWidthPerItem: number;
   widthOfOtherAttributes: number;
+  /** Optional label for an implicit "All" radio to include in width budgeting */
+  allOptionLabel?: string;
+  /** When true, include the width of the "All" radio in width calculations */
+  includeAllOptionInWidth?: boolean;
 }
 
 /**
