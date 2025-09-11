@@ -5,6 +5,7 @@ import pluginJson from '../../src/plugin.json';
 import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { MetricSceneView } from './views/MetricSceneView';
 import { MetricsReducerView } from './views/MetricsReducerView';
+import { getGrafanaVersion } from '../config/playwright.config.common';
 
 type AppTestFixture = {
   appConfigPage: AppConfigPage;
@@ -24,13 +25,13 @@ export const test = base.extend<AppTestFixture>({
     });
     await use(configPage);
   },
-  expectScreenshotInCurrentGrafanaVersion: async ({ page }, use) => {
+  expectScreenshotInCurrentGrafanaVersion: async ({}, use) => {
     const expectToHaveScreenshot: AppTestFixture['expectScreenshotInCurrentGrafanaVersion'] = async (
       locator,
       fileName,
       options
     ) => {
-      const grafanaVersion = await page.evaluate(() => window.grafanaBootData.settings['buildInfo']['version']);
+      const grafanaVersion = getGrafanaVersion();
       if (!grafanaVersion) {
         throw new Error('Cannot determine Grafana version, which is required for screenshot testing!');
       }

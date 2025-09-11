@@ -8,8 +8,10 @@ import {
   SceneObjectBase,
   SceneReactObject,
   sceneUtils,
+  VizPanel,
   type MultiValueVariable,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Field, Spinner, useStyles2 } from '@grafana/ui';
@@ -29,6 +31,7 @@ import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeate
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
+import { EventTimeseriesDataReceived } from './events/EventTimeseriesDataReceived';
 import { SelectLabelAction } from './SelectLabelAction';
 
 interface MetricLabelsListState extends SceneObjectState {
@@ -113,6 +116,29 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
   private onActivate() {
     this.subscribeToLayoutChange();
+    this.subscribeToEvents();
+  }
+
+  private subscribeToEvents() {
+    const actionsLookup = new Map<string, SceneObject[]>();
+
+    this.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
+      const { panelKey, series } = event.payload;
+      const vizPanel = sceneGraph.findByKeyAndType(this, panelKey, VizPanel);
+
+      if (series.length === 1) {
+        if (!actionsLookup.has(panelKey)) {
+          actionsLookup.set(panelKey, (vizPanel.state.headerActions as SceneObject[]) || []);
+        }
+
+        vizPanel.setState({ headerActions: [] });
+        return;
+      }
+
+      if (actionsLookup.has(panelKey)) {
+        vizPanel.setState({ headerActions: actionsLookup.get(panelKey) });
+      }
+    });
   }
 
   private subscribeToLayoutChange() {
