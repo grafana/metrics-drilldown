@@ -54,12 +54,6 @@ export interface LayoutConfig {
 
   /** Width reserved for the select dropdown */
   widthOfOtherAttributes?: number;
-
-  /** Maximum width for the select component */
-  maxSelectWidth?: number;
-
-  /** Enable responsive radio button visibility based on available width */
-  enableResponsiveRadioButtons?: boolean;
 }
 
 /**

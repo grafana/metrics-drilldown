@@ -88,7 +88,6 @@ describe('GroupBySelector', () => {
     ],
     radioAttributes: ['resource.service.name', 'name'],
     onChange: jest.fn(),
-    layoutConfig: { enableResponsiveRadioButtons: false },
   };
 
   beforeEach(() => {

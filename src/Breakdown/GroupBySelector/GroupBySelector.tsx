@@ -2,6 +2,7 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { Combobox, Field, RadioButtonGroup, useStyles2, useTheme2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
+import { debounce } from 'lodash';
 import React, { useMemo, useRef, useState } from 'react';
 
 
@@ -74,14 +75,18 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   });
 
   // Resize observer for responsive radio buttons
+  // add a small debounce to the onResize
   useResizeObserver({
     ref: controlsContainer,
-    onResize: () => {
+    onResize: debounce(() => {
       const element = controlsContainer.current;
-      if (element && config.layoutConfig.enableResponsiveRadioButtons) {
-        setAvailableWidth(element.clientWidth);
-      }
-    },
+      if (element) {
+          // requestAnimationFrame to avoid excessive re-renders
+          requestAnimationFrame(() => {
+            setAvailableWidth(element.clientWidth);
+          });
+        }
+    }, 100),
   });
 
   // Process radio attributes (memoized for expensive calculations)
@@ -93,15 +98,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
       availableOptions: options,
     };
 
-    return !config.layoutConfig.enableResponsiveRadioButtons
-      ? radioAttributes.map((attribute) => ({
-          label: config.attributePrefixes.span?.length
-            ? attribute.replace(config.attributePrefixes.span, '')
-            : attribute.replace(config.attributePrefixes.resource || '', ''),
-          text: attribute,
-          value: attribute,
-        }))
-      : processRadioAttributes(
+    return processRadioAttributes(
           radioAttributes,
           options,
           config.filteringRules,
@@ -114,19 +111,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
             widthOfOtherAttributes: config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES,
           }
         );
-  }, [
-    config.layoutConfig.enableResponsiveRadioButtons,
-    radioAttributes,
-    config.attributePrefixes,
-    options,
-    filters,
-    config.filteringRules,
-    currentMetric,
-    fontSize,
-    availableWidth,
-    config.layoutConfig.additionalWidthPerItem,
-    config.layoutConfig.widthOfOtherAttributes,
-  ]);
+  }, [radioAttributes, config.attributePrefixes, options, filters, config.filteringRules, currentMetric, fontSize, availableWidth, config.layoutConfig.additionalWidthPerItem, config.layoutConfig.widthOfOtherAttributes]);
 
   // Show all radio options - no artificial limit or special treatment of labels
   const limitedRadioOptions = radioOptions;
@@ -180,22 +165,19 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   // Show All option
   const showAllOption = showAll ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }] : [];
   const defaultOnChangeValue = showAll ? DEFAULT_ALL_OPTION : '';
-  const isAllSelected = value && value === DEFAULT_ALL_OPTION;
 
   return (
     <Field label={fieldLabel}>
       <div ref={controlsContainer} className={styles.container}>
         {limitedRadioOptions.length > 0 && (
             <RadioButtonGroup
-              className={!isAllSelected ? styles.hasValueSelected : ''}
               options={[...showAllOption, ...limitedRadioOptions]}
               value={effectiveValue}
               onChange={onChange}
-              fullWidth={true}
             />
         )}
         {modifiedSelectOptions.length > 0 && (
-          <div className={!isAllSelected ? styles.hasValueSelected : ''}>
+          <div className={styles.selectContainer}>
             <Combobox
               value={effectiveValue && modifiedSelectOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
               placeholder={selectPlaceholder}
@@ -205,7 +187,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
                 onChange(newSelected);
               }}
               isClearable
-            />
+              />
           </div>
         )}
       </div>
@@ -224,8 +206,8 @@ function getStyles(theme: GrafanaTheme2) {
       width: '100%',
       alignItems: 'flex-start',
     }),
-    hasValueSelected: css({
-      flexGrow: 1,
+    selectContainer: css({
+      minWidth: 100,
     }),
   };
 }

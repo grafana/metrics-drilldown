@@ -177,8 +177,6 @@ export const createDefaultGroupBySelectorConfig = (): Partial<DomainConfig> => {
     layoutConfig: {
       additionalWidthPerItem: 40,
       widthOfOtherAttributes: 200,
-      maxSelectWidth: 200,
-      enableResponsiveRadioButtons: true, // Enable responsive radio buttons for common labels
     },
     searchConfig: {
       enabled: true,

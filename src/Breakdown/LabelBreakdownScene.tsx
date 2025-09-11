@@ -128,10 +128,8 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     // Configure layout
     const layoutConfig = {
       ...metricsConfig.layoutConfig,
-      maxSelectWidth: 200,
-      enableResponsiveRadioButtons: true, // Enable responsive radio buttons for common labels
       additionalWidthPerItem: 40, // Increase width per item to ensure radio buttons fit
-      widthOfOtherAttributes: 140, // Reduce dropdown width to make room for radio buttons
+      widthOfOtherAttributes: 100, // Reduce dropdown width to make room for radio buttons
     };
 
     // Configure search
@@ -198,19 +196,12 @@ function getStyles(theme: GrafanaTheme2) {
       justifyContent: 'space-between',
       alignItems: 'end',
       overflowX: 'auto',
-      '@media (min-width: 768px)': {
-        height: '70px',
-      },
     }),
     searchField: css({
       flexGrow: 1,
     }),
     groupBySelector: css({
       flexGrow: 1,
-      '@media (min-width: 1080px)': {
-        minWidth: 250,
-        maxWidth: 380,
-      },
     }),
   };
 }
