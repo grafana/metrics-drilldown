@@ -1,6 +1,7 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, sceneUtils, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { genBookmarkKey } from '../../bookmarks/genBookmarkKey';
@@ -12,6 +13,7 @@ import { getTrailFor } from '../../utils';
 
 interface BookmarkHeaderActionState extends SceneObjectState {
   metric: string;
+  isBookmarked: boolean;
 }
 
 export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionState> {
@@ -22,6 +24,13 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
   }) {
     super({
       metric,
+      isBookmarked: false,
+    });
+
+    // Update bookmark state when component activates
+    this.addActivationHandler(() => {
+      const actualBookmarkState = this.isCurrentStateBookmarked();
+      this.setState({ isBookmarked: actualBookmarkState });
     });
   }
 
@@ -60,26 +69,31 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
       notifyBookmarkCreated();
     }
     
-    // Force re-render to update the icon
-    this.forceRender();
+    // Update state to trigger re-render
+    this.setState({ isBookmarked: !isCurrentlyBookmarked });
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<BookmarkHeaderAction>) => {
     const styles = useStyles2(getStyles);
-    const isBookmarked = model.isCurrentStateBookmarked();
+    const { isBookmarked } = model.useState();
 
     const label = isBookmarked ? 'Remove bookmark' : 'Add bookmark';
-    const icon = isBookmarked ? 'favorite' : 'star';
 
     return (
       <Button
-        className={styles.bookmarkButton}
+        className={cx(styles.bookmarkButton, isBookmarked && styles.active)}
         aria-label={label}
         variant="secondary"
         size="sm"
         fill="text"
         onClick={model.onClick}
-        icon={icon}
+        icon={
+          isBookmarked ? (
+            <Icon name={'favorite'} type={'mono'} size={'lg'} />
+          ) : (
+            <Icon name={'star'} type={'default'} size={'lg'} />
+          )
+        }
         tooltip={label}
         tooltipPlacement="top"
         data-testid="bookmark-header-action"
@@ -88,9 +102,13 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
   };
 }
 
-const getStyles = () => ({
+const getStyles = (theme: GrafanaTheme2) => ({
   bookmarkButton: css`
     margin: 0;
     padding: 0;
+    margin-left: ${theme.spacing(1)};
+  `,
+  active: css`
+    color: ${theme.colors.text.maxContrast};
   `,
 });
