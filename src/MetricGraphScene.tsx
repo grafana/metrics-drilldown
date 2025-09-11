@@ -58,7 +58,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 headerActions: isClassicHistogramMetric(metric)
                   ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })]
                   : () => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
-                menu: () => new PanelMenu({ key: TOPVIEW_PANEL_KEY }),
+                menu: () => new PanelMenu({ key: 'TOPWVIEW_PANEL_MENU_KEY' }),
               },
               queryOptions: {
                 resolution: QUERY_RESOLUTION.HIGH,

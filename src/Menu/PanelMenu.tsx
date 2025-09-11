@@ -12,7 +12,6 @@ import { firstValueFrom } from 'rxjs';
 
 import { logger } from 'tracking/logger/logger';
 
-import { TOPVIEW_PANEL_MENU_KEY } from '../MetricGraphScene';
 import { getTrailFor } from '../utils';
 import { CopyUrlAction } from './actions/CopyUrlAction';
 import { ExploreAction } from './actions/ExploreAction';
@@ -39,7 +38,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
     super({ ...state, addExplorationsLink: state.addExplorationsLink ?? true });
     this.addActivationHandler(() => {
       // Check if this is the main metric graph panel by key
-      const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
+      const isMainGraphPanel = this.state.key === 'TOPWVIEW_PANEL_MENU_KEY';
 
       // Navigation options (all panels)
       const items: PanelMenuItem[] = [
