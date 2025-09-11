@@ -40,28 +40,6 @@ export class MetricsReducerView extends DrilldownView {
     await this.assertMetricsList();
   }
 
-  /* Ad Hoc filters */
-
-  async assertAdHocFilter(labelName: string, operator: string, labelValue: string) {
-    const filter = this.getByRole('button', { name: `Edit filter with key ${labelName}` });
-    await expect(filter).toBeVisible();
-    await expect(filter).toHaveText(`${labelName} ${operator} ${labelValue}`);
-  }
-
-  async clearAdHocFilter(labelName: string) {
-    await this.getByRole('button', { name: `Remove filter with key ${labelName}` }).click();
-    await this.getByTestId('metrics-drilldown-app').click(); // prevents the dropdown to appear
-  }
-
-  async setAdHocFilter(labelName: string, operator: string, labelValue: string) {
-    await this.getByRole('combobox', { name: 'Filter by label values' }).click();
-    await this.getByRole('option', { name: labelName }).click();
-    await this.page.keyboard.type(operator);
-    await this.page.keyboard.press('Enter');
-    await this.page.keyboard.type(labelValue);
-    await this.page.keyboard.press('Enter');
-  }
-
   /* List controls */
 
   getListControls() {
