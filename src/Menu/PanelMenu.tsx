@@ -36,7 +36,10 @@ interface PanelMenuState extends SceneObjectState {
 export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPanelMenu, SceneObject {
   constructor(state: Partial<PanelMenuState>) {
     super({ ...state, addExplorationsLink: state.addExplorationsLink ?? true });
-    this.addActivationHandler(() => {
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
       // Check if this is the main metric graph panel by key
       const isMainGraphPanel = this.state.key === 'TOPWVIEW_PANEL_MENU_KEY';
 
@@ -84,7 +87,6 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
       if (this.state.addExplorationsLink) {
         this.state.explorationsButton?.activate();
       }
-    });
   }
 
   addItem(item: PanelMenuItem): void {
