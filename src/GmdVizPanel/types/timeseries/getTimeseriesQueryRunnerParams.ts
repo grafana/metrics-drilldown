@@ -1,7 +1,7 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString } from 'GmdVizPanel/buildQueryExpression';
+import { buildQueryExpression } from 'GmdVizPanel/buildQueryExpression';
 import { PROMQL_FUNCTIONS } from 'GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'GmdVizPanel/GmdVizPanel';
@@ -26,13 +26,10 @@ export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQuer
     metric,
     labelMatchers: queryConfig.labelMatchers,
     addIgnoreUsageFilter: queryConfig.addIgnoreUsageFilter,
+    addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
 
-  let expr = expressionToString(expression);
-
-  if (isRateQuery) {
-    expr = promql.rate({ expr, interval: '$__rate_interval' });
-  }
+  const expr = isRateQuery ? promql.rate({ expr: expression, interval: '$__rate_interval' }) : expression;
 
   return {
     isRateQuery,

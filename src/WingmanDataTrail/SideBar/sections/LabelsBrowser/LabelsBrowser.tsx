@@ -75,12 +75,12 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [label] : [] }), true);
   }
 
-  private onClickLabel = (label: string) => {
+  private onSelectLabel = (label: string) => {
     reportExploreMetrics('sidebar_group_by_label_filter_applied', { label });
     this.selectLabel(label);
   };
 
-  private onClickClearSelection = () => {
+  private onClearSelection = () => {
     this.selectLabel(NULL_GROUP_BY_VALUE);
   };
 
@@ -166,8 +166,8 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
           <LabelsList
             labels={labelsList}
             selectedLabel={selectedLabel}
-            onClickLabel={model.onClickLabel}
-            onClickClearSelection={model.onClickClearSelection}
+            onSelectLabel={model.onSelectLabel}
+            onClearSelection={model.onClearSelection}
           />
         )}
       </div>
