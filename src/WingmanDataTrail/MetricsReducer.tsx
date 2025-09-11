@@ -82,9 +82,14 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
     sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch).toggleCountsDisplay(!hasGroupByValue);
 
+    if (!hasGroupByValue && this.state.body instanceof MetricsList) {
+      return;
+    }
+
     if (
-      (hasGroupByValue && this.state.body instanceof MetricsGroupByList) ||
-      (!hasGroupByValue && this.state.body instanceof MetricsList)
+      hasGroupByValue &&
+      this.state.body instanceof MetricsGroupByList &&
+      this.state.body.state.labelName === groupByValue
     ) {
       return;
     }
@@ -108,25 +113,21 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
    * For example, check the `FilteredMetricsVariable` class.
    */
   private initVariablesFilteringAndSorting() {
-    this._subs.add(
-      this.subscribeToEvent(EventMetricsVariableActivated, (event) => {
-        // register engines
-        const { key } = event.payload;
-        const filteredMetricsVariable = sceneGraph.findByKey(this, key) as QueryVariable;
+    this.subscribeToEvent(EventMetricsVariableActivated, (event) => {
+      // register engines
+      const { key } = event.payload;
+      const filteredMetricsVariable = sceneGraph.findByKey(this, key) as QueryVariable;
 
-        this.state.enginesMap.set(key, {
-          filterEngine: new MetricsVariableFilterEngine(filteredMetricsVariable),
-          sortEngine: new MetricsVariableSortEngine(filteredMetricsVariable),
-        });
-      })
-    );
+      this.state.enginesMap.set(key, {
+        filterEngine: new MetricsVariableFilterEngine(filteredMetricsVariable),
+        sortEngine: new MetricsVariableSortEngine(filteredMetricsVariable),
+      });
+    });
 
-    this._subs.add(
-      this.subscribeToEvent(EventMetricsVariableDeactivated, (event) => {
-        // unregister engines
-        this.state.enginesMap.delete(event.payload.key);
-      })
-    );
+    this.subscribeToEvent(EventMetricsVariableDeactivated, (event) => {
+      // unregister engines
+      this.state.enginesMap.delete(event.payload.key);
+    });
 
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
     const filterSections = sceneGraph.findAllObjects(
@@ -136,63 +137,55 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
     const sortByVariable = metricsSorter.state.$variables.getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
 
-    this._subs.add(
-      this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
-        // filter and sort on initial load
-        const { key, options } = event.payload;
-        const { filterEngine, sortEngine } = this.state.enginesMap.get(key)!;
+    this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
+      // filter and sort on initial load
+      const { key, options } = event.payload;
+      const { filterEngine, sortEngine } = this.state.enginesMap.get(key)!;
 
-        filterEngine.setInitOptions(options);
+      filterEngine.setInitOptions(options);
 
-        const filters: Partial<MetricFilters> = {
-          names: quickSearch.state.value ? [quickSearch.state.value] : [],
-        };
+      const filters: Partial<MetricFilters> = {
+        names: quickSearch.state.value ? [quickSearch.state.value] : [],
+      };
 
-        for (const filterSection of filterSections) {
-          filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
-        }
+      for (const filterSection of filterSections) {
+        filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
+      }
 
-        filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
-        sortEngine.sort(sortByVariable.state.value as SortingOption);
-      })
-    );
+      filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
+      sortEngine.sort(sortByVariable.state.value as SortingOption);
+    });
 
     /* Filters */
 
-    this._subs.add(
-      this.subscribeToEvent(EventQuickSearchChanged, (event) => {
-        const { searchText } = event.payload;
+    this.subscribeToEvent(EventQuickSearchChanged, (event) => {
+      const { searchText } = event.payload;
 
-        for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
-          filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
-          sortEngine.sort(sortByVariable.state.value as SortingOption);
-        }
-      })
-    );
+      for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
+        filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
+        sortEngine.sort(sortByVariable.state.value as SortingOption);
+      }
+    });
 
-    this._subs.add(
-      this.subscribeToEvent(EventFiltersChanged, (event) => {
-        const { type, filters } = event.payload;
+    this.subscribeToEvent(EventFiltersChanged, (event) => {
+      const { type, filters } = event.payload;
 
-        for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
-          filterEngine.applyFilters({ [type]: filters });
-          sortEngine.sort(sortByVariable.state.value as SortingOption);
-        }
-      })
-    );
+      for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
+        filterEngine.applyFilters({ [type]: filters });
+        sortEngine.sort(sortByVariable.state.value as SortingOption);
+      }
+    });
 
     /* Sorting */
 
-    this._subs.add(
-      this.subscribeToEvent(EventSortByChanged, (event) => {
-        const { sortBy } = event.payload;
-        reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
+    this.subscribeToEvent(EventSortByChanged, (event) => {
+      const { sortBy } = event.payload;
+      reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
 
-        for (const [, { sortEngine }] of this.state.enginesMap) {
-          sortEngine.sort(sortBy);
-        }
-      })
-    );
+      for (const [, { sortEngine }] of this.state.enginesMap) {
+        sortEngine.sort(sortBy);
+      }
+    });
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsReducer>) => {

@@ -12,6 +12,8 @@ import { type LayoutType } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 import { PLUGIN_ID } from './constants';
+import { getFaro } from './tracking/faro/faro';
+import { HGFeatureToggles, isFeatureToggleEnabled } from './utils/utils.feature-toggles';
 import { GIT_COMMIT } from './version';
 
 export type ViewName = 'metrics-reducer' | 'metric-details';
@@ -163,6 +165,8 @@ type Interactions = {
   default_panel_config_restored: { metricType: MetricType };
   // An invalid metric config has been found
   invalid_metric_config: { metricConfig: PanelConfigPreset };
+  // the user has clicked on the "Give feedback" button in the app header
+  give_feedback_clicked: {};
 };
 
 type OtherEvents = {
@@ -184,6 +188,15 @@ export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEve
       appVersion: GIT_COMMIT,
     },
   });
+
+  // Extra event tracking with Faro for "Default Open Sidebar" experiment
+  if (event.includes('sidebar')) {
+    getFaro()?.api.pushEvent(event, {
+      // Convert all payload values to strings
+      ...Object.fromEntries(Object.entries(payload).map(([key, value]) => [key, String(value)])),
+      defaultOpenSidebar: String(isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)),
+    });
+  }
 }
 
 /**
