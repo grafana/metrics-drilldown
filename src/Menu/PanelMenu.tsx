@@ -1,11 +1,7 @@
 import { type DataFrame, type PanelMenuItem, type PluginExtensionLink } from '@grafana/data';
 import { config, getObservablePluginLinks } from '@grafana/runtime';
 import {
-  getExploreURL,
-  sceneGraph,
   SceneObjectBase,
-  sceneUtils,
-  VizPanel,
   VizPanelMenu,
   type SceneComponentProps,
   type SceneObject,
@@ -16,11 +12,11 @@ import { firstValueFrom } from 'rxjs';
 
 import { logger } from 'tracking/logger/logger';
 
+import { TOPVIEW_PANEL_MENU_KEY } from '../MetricGraphScene';
 import { getTrailFor } from '../utils';
-import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
-import { BookmarkAction } from './actions/BookmarkAction';
 import { CopyUrlAction } from './actions/CopyUrlAction';
 import { ExploreAction } from './actions/ExploreAction';
+import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible
@@ -42,10 +38,8 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
   constructor(state: Partial<PanelMenuState>) {
     super({ ...state, addExplorationsLink: state.addExplorationsLink ?? true });
     this.addActivationHandler(() => {
-      // Check if this is the main metric graph panel
-      // The main panel is created with labelName matching the metric in MetricGraphScene
-      const trail = getTrailFor(this);
-      const isMainGraphPanel = this.state.labelName === trail.state.metric;
+      // Check if this is the main metric graph panel by key
+      const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
 
       // Navigation options (all panels)
       const items: PanelMenuItem[] = [
@@ -56,15 +50,15 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
         ExploreAction.create(this),
       ];
 
-      // Only add Copy URL and Bookmark to the main metric graph panel
+      // Only add Copy URL to the main metric graph panel
       if (isMainGraphPanel) {
+        const trail = getTrailFor(this);
         items.push(
           {
             text: 'Actions',
             type: 'group',
           },
-          CopyUrlAction.create(trail),
-          BookmarkAction.create(trail)
+          CopyUrlAction.create(trail)
         );
       }
 
