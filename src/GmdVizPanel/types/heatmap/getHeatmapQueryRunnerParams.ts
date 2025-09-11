@@ -1,7 +1,7 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString } from 'GmdVizPanel/buildQueryExpression';
+import { buildQueryExpression } from 'GmdVizPanel/buildQueryExpression';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
 
@@ -22,13 +22,12 @@ export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunne
     metric,
     labelMatchers: queryConfig.labelMatchers,
     addIgnoreUsageFilter: queryConfig.addIgnoreUsageFilter,
+    addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
 
-  const expr = promql.rate({
-    expr: expressionToString(expression),
-  });
-
-  const query = isNativeHistogram ? promql.sum({ expr }) : promql.sum({ expr, by: ['le'] });
+  const query = isNativeHistogram
+    ? promql.sum({ expr: promql.rate({ expr: expression }) })
+    : promql.sum({ expr: promql.rate({ expr: expression }), by: ['le'] });
 
   return {
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,

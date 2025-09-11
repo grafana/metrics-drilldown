@@ -82,9 +82,14 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
     sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch).toggleCountsDisplay(!hasGroupByValue);
 
+    if (!hasGroupByValue && this.state.body instanceof MetricsList) {
+      return;
+    }
+
     if (
-      (hasGroupByValue && this.state.body instanceof MetricsGroupByList) ||
-      (!hasGroupByValue && this.state.body instanceof MetricsList)
+      hasGroupByValue &&
+      this.state.body instanceof MetricsGroupByList &&
+      this.state.body.state.labelName === groupByValue
     ) {
       return;
     }
