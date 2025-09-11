@@ -113,10 +113,8 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
         config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES
       );
 
-  // Limit radio options to max 4 items
-  const MAX_RADIO_OPTIONS = 4;
-  const limitedRadioOptions = radioOptions.slice(0, MAX_RADIO_OPTIONS);
-  const excessRadioOptions = radioOptions.slice(MAX_RADIO_OPTIONS);
+  // Show all radio options - no artificial limit or special treatment of labels
+  const limitedRadioOptions = radioOptions;
 
   // Process other attributes (those not in limited radio buttons)
   const optionsNotInRadio = options.filter(
@@ -127,19 +125,10 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   // Get modified select options
   const baseOptions = getModifiedSelectOptions(otherAttrOptions, config.ignoredAttributes, config.attributePrefixes);
 
-  // Add excess radio options to the combobox
-  const excessRadioOptionsForCombobox = excessRadioOptions.map(option => ({
-    label: option.label,
-    value: option.value
-  }));
-
-  // Combine excess radio options with other options
-  const combinedComboboxOptions = [...excessRadioOptionsForCombobox, ...baseOptions];
-
   // Add "All" option to dropdown if showAll is true and no radio buttons are shown
   const modifiedSelectOptions = showAll && limitedRadioOptions.length === 0
-    ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...combinedComboboxOptions]
-    : combinedComboboxOptions;
+    ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...baseOptions]
+    : baseOptions;
 
   // Determine default value
   const defaultValue = initialGroupBy ?? (showAll ? DEFAULT_ALL_OPTION : limitedRadioOptions[0]?.value ?? modifiedSelectOptions[0]?.value);

@@ -88,25 +88,15 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
         }))
       : [];
 
-    // Define common Prometheus metric labels for radio buttons
-    // Ordered by importance - most common labels first
-    const commonPrometheusLabels = [
-      'instance',         // Most common - server/pod identifier
-      'job',              // Most common - Prometheus job name
-      'service',          // Very common - service name
-      'method',           // Common for HTTP metrics
-      'status_code',      // Common for HTTP metrics
-      'code',             // Alternative to status_code
-      'handler',          // Common for HTTP handlers
-      '__name__',         // Metric name (less common as radio)
-      'exported_job',     // Exported job name
-      'exported_instance' // Exported instance name
-    ];
+    // If there are 4 or fewer total options (including "All"), show all labels as radio buttons
+    // Otherwise, use the dropdown
+    const totalOptions = options.length + 1; // +1 for "All" option
+    const shouldShowAllAsRadio = totalOptions <= 4;
 
-    // Filter radio attributes to only include labels that exist in the current options
-    const radioAttributes = commonPrometheusLabels.filter(label =>
-      options.some(option => option.value === label)
-    );
+    // Get all available labels (excluding "All" which will be handled separately)
+    const radioAttributes = shouldShowAllAsRadio
+      ? options.map(option => option.value as string).filter(value => value !== '$__all')
+      : [];
 
     // Get metrics domain configuration
     const metricsConfig = createDefaultGroupBySelectorConfig();
