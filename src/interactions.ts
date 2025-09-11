@@ -2,6 +2,9 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
 import { type ExposedComponentName } from 'exposedComponents/components';
+import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
+import { type MetricType } from 'GmdVizPanel/matchers/getMetricType';
+import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
 import { type ActionViewType } from 'MetricActionBar';
 import { type SortSeriesByOption } from 'services/sorting';
 import { type SnakeCase } from 'utils/utils.types';
@@ -9,6 +12,8 @@ import { type LayoutType } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 import { PLUGIN_ID } from './constants';
+import { getFaro } from './tracking/faro/faro';
+import { HGFeatureToggles, isFeatureToggleEnabled } from './utils/utils.feature-toggles';
 import { GIT_COMMIT } from './version';
 
 export type ViewName = 'metrics-reducer' | 'metric-details';
@@ -140,13 +145,28 @@ type Interactions = {
   };
   app_initialized: {
     view: ViewName;
+    uel_epid: string;
   };
   // User took an action to view an exposed component
   exposed_component_viewed: {
     component: SnakeCase<ExposedComponentName>;
   };
-  // App migrated some legacy user prefs (see src/UserPreferences/userPreferences.ts)
+  // User selects a different layout (grid/rows/single)
+  layout_changed: { layout: LayoutType };
+  // User changes the panel type for a histogram metric (e.g., from heatmap to percentiles)
+  histogram_panel_type_changed: { panelType: PanelType };
+  // App migrated some legacy user prefs (see src/UserPreferences/userStorage.ts)
   user_preferences_migrated: {};
+  // User opens the "Configure panel"
+  configure_panel_opened: { metricType: MetricType };
+  // User applies a panel config
+  panel_config_applied: { metricType: MetricType; configId: string };
+  // User restores the default panel config
+  default_panel_config_restored: { metricType: MetricType };
+  // An invalid metric config has been found
+  invalid_metric_config: { metricConfig: PanelConfigPreset };
+  // the user has clicked on the "Give feedback" button in the app header
+  give_feedback_clicked: {};
 };
 
 type OtherEvents = {
@@ -168,6 +188,15 @@ export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEve
       appVersion: GIT_COMMIT,
     },
   });
+
+  // Extra event tracking with Faro for "Default Open Sidebar" experiment
+  if (event.includes('sidebar')) {
+    getFaro()?.api.pushEvent(event, {
+      // Convert all payload values to strings
+      ...Object.fromEntries(Object.entries(payload).map(([key, value]) => [key, String(value)])),
+      defaultOpenSidebar: String(isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)),
+    });
+  }
 }
 
 /**

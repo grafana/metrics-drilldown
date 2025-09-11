@@ -36,18 +36,16 @@ export class LabelsVariable extends QueryVariable {
   }
 
   onActivate() {
-    this._subs.add(
-      this.subscribeToState((newState, prevState) => {
-        if (newState.query !== prevState.query) {
-          // preserve the value from the URL search param when landing
-          if (prevState.query) {
-            this.setState({ value: NULL_GROUP_BY_VALUE });
-          }
-
-          this.refreshOptions();
+    this.subscribeToState((newState, prevState) => {
+      if (newState.query !== prevState.query) {
+        // preserve the value from the URL search param when landing
+        if (prevState.query) {
+          this.setState({ value: NULL_GROUP_BY_VALUE });
         }
-      })
-    );
+
+        this.refreshOptions();
+      }
+    });
 
     this._subs.add(
       sceneGraph.findByKeyAndType(this, VAR_DATASOURCE, DataSourceVariable).subscribeToState((newState, prevState) => {

@@ -16,7 +16,7 @@ import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 
-export interface LabelBreakdownSceneState extends SceneObjectState {
+interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
   body?: MetricLabelsList | MetricLabelValuesList;
 }
@@ -41,11 +41,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     });
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
-      this._subs.add(
-        this.subscribeToEvent(RefreshMetricsEvent, () => {
-          this.updateBody(groupByVariable);
-        })
-      );
+      this.subscribeToEvent(RefreshMetricsEvent, () => {
+        this.updateBody(groupByVariable);
+      });
     }
 
     this.updateBody(groupByVariable);

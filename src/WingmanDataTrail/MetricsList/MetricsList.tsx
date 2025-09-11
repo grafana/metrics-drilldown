@@ -16,13 +16,14 @@ import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { SelectAction } from 'GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { getColorByIndex } from 'utils';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import { METRICS_VIZ_PANEL_HEIGHT } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
+
+import { VIZ_PANEL_HEIGHT, WithUsageDataPreviewPanel } from './WithUsageDataPreviewPanel';
 
 export const GRID_TEMPLATE_COLUMNS = 'repeat(auto-fit, minmax(400px, 1fr))';
 export const GRID_TEMPLATE_ROWS = '1fr';
@@ -45,7 +46,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT,
+          autoRows: VIZ_PANEL_HEIGHT,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -70,13 +71,18 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
+          const metric = option.value as string;
+
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
-              vizPanelInGridItem: new GmdVizPanel({
-                metric: option.value as string,
-                fixedColor: getColorByIndex(colorIndex),
-              }),
               metric: option.value as string,
+              vizPanelInGridItem: new GmdVizPanel({
+                metric,
+                panelOptions: {
+                  fixedColorIndex: colorIndex,
+                  headerActions: () => [new SelectAction({ metric }), new ConfigurePanelAction({ metric })],
+                },
+              }),
             }),
           });
         },

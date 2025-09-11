@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.10",
+  "version": "1.0.13",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
@@ -22,7 +22,8 @@
     "e2e": "playwright test -c ./e2e/config/playwright.config.local.ts",
     "e2e:watch": "npm run e2e -- --ui",
     "e2e:codegen": "playwright codegen",
-    "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh"
+    "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh",
+    "knip": "npx knip --config knip.js"
   },
   "packageManager": "npm@10.9.2",
   "engines": {
@@ -32,7 +33,7 @@
     "@bsull/augurs": "^0.9.0",
     "@emotion/css": "11.13.5",
     "@grafana/data": "^12.1.0",
-    "@grafana/faro-web-sdk": "^1.17.2",
+    "@grafana/faro-web-sdk": "^2.0.0-beta-2",
     "@grafana/i18n": "^12.1.0-249189",
     "@grafana/lezer-logql": "^0.2.7",
     "@grafana/prometheus": "^12.1.0",
@@ -42,9 +43,11 @@
     "@grafana/ui": "^12.1.0",
     "@lezer/common": "^1.2.3",
     "@prometheus-io/lezer-promql": "^0.305.0-rc.1",
+    "leven": "^4.0.0",
     "p-limit": "^6.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-inlinesvg": "^4.2.0",
     "react-router-dom": "^6.30.0",
     "rxjs": "7.8.2",
     "tsqtsq": "^1.1.0"
@@ -53,7 +56,7 @@
     "@grafana/eslint-config": "^8.0.0",
     "@grafana/plugin-e2e": "^1.19.9",
     "@grafana/tsconfig": "^2.0.0",
-    "@playwright/test": "^1.54.0",
+    "@playwright/test": "^1.55.0",
     "@stylistic/eslint-plugin-ts": "^2.13.0",
     "@swc/core": "^1.11.24",
     "@swc/helpers": "^0.5.17",

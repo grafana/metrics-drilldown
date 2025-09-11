@@ -7,7 +7,7 @@ import React from 'react';
 import { SectionTitle } from './SectionTitle';
 import { type SideBarSectionState } from './types';
 
-export interface SettingsState extends SideBarSectionState {}
+interface SettingsState extends SideBarSectionState {}
 
 export class Settings extends SceneObjectBase<SettingsState> {
   constructor({

@@ -40,28 +40,6 @@ export class MetricsReducerView extends DrilldownView {
     await this.assertMetricsList();
   }
 
-  /* Ad Hoc filters */
-
-  async assertAdHocFilter(labelName: string, operator: string, labelValue: string) {
-    const filter = this.getByRole('button', { name: `Edit filter with key ${labelName}` });
-    await expect(filter).toBeVisible();
-    await expect(filter).toHaveText(`${labelName} ${operator} ${labelValue}`);
-  }
-
-  async clearAdHocFilter(labelName: string) {
-    await this.getByRole('button', { name: `Remove filter with key ${labelName}` }).click();
-    await this.getByTestId('metrics-drilldown-app').click(); // prevents the dropdown to appear
-  }
-
-  async setAdHocFilter(labelName: string, operator: string, labelValue: string) {
-    await this.getByRole('combobox', { name: 'Filter by label values' }).click();
-    await this.getByRole('option', { name: labelName }).click();
-    await this.page.keyboard.type(operator);
-    await this.page.keyboard.press('Enter');
-    await this.page.keyboard.type(labelValue);
-    await this.page.keyboard.press('Enter');
-  }
-
   /* List controls */
 
   getListControls() {
@@ -88,7 +66,7 @@ export class MetricsReducerView extends DrilldownView {
 
   async selectSortByOption(optionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
-    await this.page.getByRole('option', { name: optionName }).locator('span').click();
+    await this.getByRole('option', { name: optionName }).locator('span').click();
   }
 
   /* Layout switcher */
@@ -125,8 +103,9 @@ export class MetricsReducerView extends DrilldownView {
 
     expect(await panelsLocator.count()).toBeGreaterThan(0);
 
+    // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, native histograms, ...)
     // TODO: find a better way
-    await this.waitForTimeout(2000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
+    await this.waitForTimeout(2000);
   }
 
   /* Panels */
@@ -162,7 +141,7 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
 
     // TODO: find a better way
-    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
+    await this.waitForTimeout(2000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   async selectMetricsGroup(labelName: string, labelValue: string) {
@@ -182,5 +161,9 @@ export class MetricsReducerView extends DrilldownView {
 
   async clickCopyPanelUrl() {
     await this.getByLabel(UI_TEXT.METRIC_SELECT_SCENE.COPY_URL_LABEL).click();
+  }
+
+  async clickPanelConfigureButton(panelTitle: string) {
+    await this.getPanelByTitle(panelTitle).getByTestId('configure-panel').click();
   }
 }

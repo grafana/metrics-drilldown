@@ -2,8 +2,8 @@ import { LoadingState } from '@grafana/data';
 import {
   CustomVariable,
   PanelBuilders,
-  SceneCSSGridItem,
-  SceneCSSGridLayout,
+  SceneFlexItem,
+  SceneFlexLayout,
   sceneGraph,
   SceneObjectBase,
   SceneQueryRunner,
@@ -31,10 +31,10 @@ interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;
 }
 
-export interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
+interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
   loading: boolean;
   controls: SceneObject[];
-  body: SceneCSSGridLayout;
+  body: SceneFlexLayout;
   logsDrilldownLinkContext: LogsDrilldownLinkContext;
 }
 
@@ -48,11 +48,12 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     super({
       loading: false,
       controls: [],
-      body: new SceneCSSGridLayout({
-        templateColumns: '1fr',
-        autoRows: 'minmax(300px, 1fr)',
+      body: new SceneFlexLayout({
+        direction: 'column',
+        height: '100%',
+        minHeight: 500,
         children: [
-          new SceneCSSGridItem({
+          new SceneFlexItem({
             key: LOGS_PANEL_CONTAINER_KEY,
             body: undefined,
           }),
@@ -84,7 +85,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private showNoLogsFound() {
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
     logsPanelContainer.setState({
       body: new SceneReactObject({ component: NoRelatedLogs }),
     });
@@ -133,9 +134,17 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     }
 
     // Set up UI for logs panel
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneCSSGridItem);
+    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
     logsPanelContainer.setState({
-      body: PanelBuilders.logs().setTitle('Logs').setData(this._queryRunner).build(),
+      body: PanelBuilders.logs()
+        .setTitle('Logs')
+        .setOption('showLogContextToggle', true)
+        .setOption('showTime', true)
+        .setOption('showControls', true)
+        // See https://github.com/grafana/logs-drilldown/blob/5225d621bbf24756559a15ce68d71437be8ca83e/src/services/store.ts#L243
+        .setOption('controlsStorageKey', 'grafana.explore.logs')
+        .setData(this._queryRunner)
+        .build(),
     });
 
     // Set up variables for datasource selection
@@ -240,7 +249,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     }
 
     return (
-      <Stack gap={1} direction={'column'} grow={1}>
+      <Stack gap={1} direction={'column'} grow={1} height="100%">
         <Stack gap={1} direction={'row'} justifyContent={'space-between'} alignItems={'start'}>
           <Stack gap={1}>
             {controls?.map((control) => (

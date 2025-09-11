@@ -22,7 +22,7 @@ export const investigationsPluginId = 'grafana-investigations-app';
 export const extensionPointId = `${pluginJson.id}/investigation/v1`;
 export const addToExplorationsButtonLabel = 'add panel to exploration';
 
-export interface AddToExplorationButtonState extends SceneObjectState {
+interface AddToExplorationButtonState extends SceneObjectState {
   frame?: DataFrame;
   dsUid?: string;
   labelName?: string;
@@ -55,12 +55,10 @@ export class AddToExplorationButton extends SceneObjectBase<AddToExplorationButt
   }
 
   private _onActivate = () => {
-    this._subs.add(
-      this.subscribeToState(() => {
-        this.getQueries();
-        this.getContext();
-      })
-    );
+    this.subscribeToState(() => {
+      this.getQueries();
+      this.getContext();
+    });
 
     const datasourceUid = sceneGraph.interpolate(this, VAR_DATASOURCE_EXPR);
     this.setState({ dsUid: datasourceUid });

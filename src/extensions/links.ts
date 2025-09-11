@@ -10,10 +10,10 @@ import { config, getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
 import { parser } from '@prometheus-io/lezer-promql';
 
-import { parseMatcher } from 'WingmanDataTrail/MetricVizPanel/parseMatcher';
-
+import { parseMatcher } from './parseMatcher';
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
 import { logger } from '../tracking/logger/logger';
+import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../utils/utils.promql';
 
 const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
@@ -21,16 +21,10 @@ const description = `Open current query in the ${PRODUCT_NAME} view`;
 const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
-export const ASSISTANT_TARGET_V0 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha';
-export const ASSISTANT_TARGET_V1 = 'grafana-assistant-app/navigateToDrilldown/v1';
+const ASSISTANT_TARGET_V0 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha';
+const ASSISTANT_TARGET_V1 = 'grafana-assistant-app/navigateToDrilldown/v1';
 
-export const ADHOC_URL_DELIMITER = '|';
-
-export type PromQLLabelMatcher = {
-  label: string;
-  op: string;
-  value: string;
-};
+const ADHOC_URL_DELIMITER = '|';
 
 export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPanelContext>> = [
   {
@@ -138,13 +132,6 @@ export function configureDrilldownLink<T extends PluginExtensionPanelContext>(co
   }
 }
 
-export interface ParsedPromQLQuery {
-  metric: string;
-  labels: PromQLLabelMatcher[];
-  hasErrors: boolean;
-  errors: string[];
-}
-
 export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
   const tree = parser.parse(expr);
   let metric = '';
@@ -181,35 +168,6 @@ export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
   return { metric, labels, hasErrors, errors };
 }
 
-// Helper function to process label matcher nodes
-export function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher | null {
-  if (node.name !== 'UnquotedLabelMatcher') {
-    return null;
-  }
-
-  const labelNode = node.node;
-  let labelName = '';
-  let op = '';
-  let value = '';
-
-  // Get children of UnquotedLabelMatcher
-  for (let child = labelNode.firstChild; child; child = child.nextSibling) {
-    if (child.type.name === 'LabelName') {
-      labelName = expr.slice(child.from, child.to);
-    } else if (child.type.name === 'MatchOp') {
-      op = expr.slice(child.from, child.to);
-    } else if (child.type.name === 'StringLiteral') {
-      value = expr.slice(child.from + 1, child.to - 1); // Remove quotes
-    }
-  }
-
-  if (labelName && op) {
-    // Allow empty string values
-    return { label: labelName, op, value };
-  }
-  return null;
-}
-
 /**
  * Scenes adhoc variable filters requires a | delimiter
  * between the label, operator, and value (see AdHocFiltersVariableUrlSyncHandler.ts in Scenes)
@@ -217,7 +175,7 @@ export function processLabelMatcher(node: any, expr: string): PromQLLabelMatcher
 function filterToUrlParameter(filter: PromQLLabelMatcher): [UrlParameterType, string] {
   return [
     UrlParameters.Filters,
-    `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${filter.value}`,
+    `${filter.label}${ADHOC_URL_DELIMITER}${filter.op}${ADHOC_URL_DELIMITER}${escapeUrlPipeDelimiters(filter.value)}`,
   ] as [UrlParameterType, string];
 }
 
@@ -299,9 +257,9 @@ export const UrlParameters = {
   Filters: `var-filters`,
 } as const;
 
-export type UrlParameterType = (typeof UrlParameters)[keyof typeof UrlParameters];
+type UrlParameterType = (typeof UrlParameters)[keyof typeof UrlParameters];
 
-export function appendUrlParameters(
+function appendUrlParameters(
   params: Array<[UrlParameterType, string | undefined]>,
   initialParams?: URLSearchParams
 ): URLSearchParams {
@@ -325,7 +283,10 @@ function isPromQuery(query: DataQuery): query is PromQuery {
 
 // Copied from interpolateQueryExpr in prometheus datasource, as we can't return a promise in the link extension config we can't fetch the datasource from the datasource srv, so we're forced to duplicate this method
 // eslint-disable-next-line sonarjs/function-return-type
-export function interpolateQueryExpr(value: string | string[] = [], variable: QueryVariableModel | CustomVariableModel): string | string[] {
+function interpolateQueryExpr(
+  value: string | string[] = [],
+  variable: QueryVariableModel | CustomVariableModel
+): string | string[] {
   // if no multi or include all do not regexEscape
   if (!variable.multi && !variable.includeAll) {
     return prometheusRegularEscape(value);
@@ -346,7 +307,7 @@ export function interpolateQueryExpr(value: string | string[] = [], variable: Qu
 
 // not exported from @grafana/prometheus, so we're forced to duplicate it here
 // eslint-disable-next-line sonarjs/function-return-type
-export function prometheusRegularEscape<T>(value: T) {
+function prometheusRegularEscape<T>(value: T) {
   if (typeof value !== 'string') {
     return value;
   }
@@ -371,7 +332,7 @@ export function prometheusRegularEscape<T>(value: T) {
 
 // not exported from @grafana/prometheus, so we're forced to duplicate it here
 // eslint-disable-next-line sonarjs/function-return-type
-export function prometheusSpecialRegexEscape<T>(value: T) {
+function prometheusSpecialRegexEscape<T>(value: T) {
   if (typeof value !== 'string') {
     return value;
   }
@@ -387,4 +348,14 @@ export function prometheusSpecialRegexEscape<T>(value: T) {
   return value
     .replace(/\\/g, '\\\\\\\\') // escape backslashes
     .replace(/[$^*{}\[\]+?.()|]/g, '\\\\$&'); // escape regex metacharacters
+}
+
+// Need to export this function from scenes because importing scenesUtils is increasing the bundle entry point size by 522.51kB
+export function escapeUrlPipeDelimiters(value: string | undefined): string {
+  if (value == null) {
+    return '';
+  }
+
+  // Replace the pipe due to using it as a filter separator
+  return /\|/g[Symbol.replace](value, '__gfp__');
 }

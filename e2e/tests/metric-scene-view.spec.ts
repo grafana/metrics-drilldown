@@ -108,7 +108,7 @@ test.describe('Metric Scene view', () => {
       });
     });
 
-    test.describe('Related metric tab', () => {
+    test.describe('Related metrics tab', () => {
       test.beforeEach(async ({ metricSceneView }) => {
         await metricSceneView.selectTab('Related metrics');
       });
@@ -135,6 +135,16 @@ test.describe('Metric Scene view', () => {
             ],
           }
         );
+      });
+    });
+
+    test.describe('Related logs tab', () => {
+      test.beforeEach(async ({ metricSceneView }) => {
+        await metricSceneView.selectTab('Related logs');
+      });
+
+      test('No related logs found', async ({ metricSceneView }) => {
+        await expect(metricSceneView.getTabContent().getByText('No related logs found')).toBeVisible();
       });
     });
   });

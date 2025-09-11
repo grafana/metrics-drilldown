@@ -8,8 +8,10 @@ import {
   SceneObjectBase,
   SceneReactObject,
   sceneUtils,
+  VizPanel,
   type MultiValueVariable,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Field, Spinner, useStyles2 } from '@grafana/ui';
@@ -17,17 +19,20 @@ import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
 import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
-import { QUERY_RESOLUTION } from 'GmdVizPanel/GmdVizPanel';
-import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/timeseries/getTimeseriesQueryRunnerParams';
-import { isRateQuery } from 'GmdVizPanel/timeseries/isRateQuery';
-import { getPerSecondRateUnit, getUnit } from 'GmdVizPanel/units/getUnit';
+import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
+import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
+import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
+import { buildTimeseriesPanel } from 'GmdVizPanel/types/timeseries/buildTimeseriesPanel';
+import { PanelMenu } from 'Menu/PanelMenu';
 import { VAR_GROUP_BY } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
-import { LABELS_VIZ_PANEL_HEIGHT, LabelVizPanel } from './LabelVizPanel';
+import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
+import { EventTimeseriesDataReceived } from './events/EventTimeseriesDataReceived';
+import { SelectLabelAction } from './SelectLabelAction';
 
 interface MetricLabelsListState extends SceneObjectState {
   metric: string;
@@ -37,8 +42,6 @@ interface MetricLabelsListState extends SceneObjectState {
 
 export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   constructor({ metric }: { metric: MetricLabelsListState['metric'] }) {
-    const unit = isRateQuery(metric) ? getPerSecondRateUnit(metric) : getUnit(metric);
-
     super({
       key: 'metric-labels-list',
       metric,
@@ -51,7 +54,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: LABELS_VIZ_PANEL_HEIGHT,
+          autoRows: PANEL_HEIGHT.M,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -76,22 +79,32 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
           new SceneReactObject({
             reactNode: <InlineBanner severity="error" title="Error while loading labels!" error={error} />,
           }),
-        getLayoutChild: (option, startColorIndex) => {
-          const { queries } = getTimeseriesQueryRunnerParams({
-            metric,
-            matchers: [],
-            groupBy: option.value as string,
-            queryResolution: QUERY_RESOLUTION.MEDIUM,
-            addIgnoreUsageFilter: true,
-          });
+        getLayoutChild: (option, labelIndex) => {
+          const label = option.value as string;
 
           return new SceneCSSGridItem({
-            body: new LabelVizPanel({
+            body: buildTimeseriesPanel({
               metric,
-              label: option.value as string,
-              query: queries[0].expr,
-              unit,
-              startColorIndex,
+              panelConfig: {
+                type: 'timeseries',
+                height: PANEL_HEIGHT.M,
+                title: label,
+                fixedColorIndex: labelIndex,
+                behaviors: [
+                  // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
+                  publishTimeseriesData(),
+                  addCardinalityInfo(),
+                ],
+                headerActions: () => [new SelectLabelAction({ label })],
+                menu: () => new PanelMenu({ labelName: label }),
+                legend: { placement: 'bottom' },
+              },
+              queryConfig: {
+                resolution: QUERY_RESOLUTION.MEDIUM,
+                groupBy: label,
+                labelMatchers: [],
+                addIgnoreUsageFilter: true,
+              },
             }),
           });
         },
@@ -103,6 +116,29 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
   private onActivate() {
     this.subscribeToLayoutChange();
+    this.subscribeToEvents();
+  }
+
+  private subscribeToEvents() {
+    const actionsLookup = new Map<string, SceneObject[]>();
+
+    this.subscribeToEvent(EventTimeseriesDataReceived, (event) => {
+      const { panelKey, series } = event.payload;
+      const vizPanel = sceneGraph.findByKeyAndType(this, panelKey, VizPanel);
+
+      if (series.length === 1) {
+        if (!actionsLookup.has(panelKey)) {
+          actionsLookup.set(panelKey, (vizPanel.state.headerActions as SceneObject[]) || []);
+        }
+
+        vizPanel.setState({ headerActions: [] });
+        return;
+      }
+
+      if (actionsLookup.has(panelKey)) {
+        vizPanel.setState({ headerActions: actionsLookup.get(panelKey) });
+      }
+    });
   }
 
   private subscribeToLayoutChange() {

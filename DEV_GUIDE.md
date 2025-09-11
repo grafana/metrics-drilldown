@@ -168,7 +168,7 @@ const variables = new SceneVariableSet({
 **Event Definition**: Typed events for component communication
 
 ```typescript
-export interface EventFiltersChangedPayload {
+interface EventFiltersChangedPayload {
   type: FilterType;
   filters: string[];
 }

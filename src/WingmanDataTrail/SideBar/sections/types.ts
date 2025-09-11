@@ -1,5 +1,5 @@
 import { type IconName } from '@grafana/data';
-import { type SceneComponent, type SceneObjectBase, type SceneObjectState } from '@grafana/scenes';
+import { type SceneObjectState } from '@grafana/scenes';
 
 export interface SideBarSectionState extends SceneObjectState {
   key: string;
@@ -8,8 +8,4 @@ export interface SideBarSectionState extends SceneObjectState {
   icon: IconName | string;
   disabled: boolean;
   active: boolean;
-}
-
-export interface SideBarSection extends SceneObjectBase<SideBarSectionState> {
-  Component: SceneComponent<SideBarSection>;
 }
