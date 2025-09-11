@@ -1,13 +1,9 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { type SceneObject, type SceneObjectState, type SceneReactObject } from '@grafana/scenes';
-
-import { type DataTrailSettings } from './DataTrailSettings';
-
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
   controls: SceneObject[];
-  settings: DataTrailSettings;
   pluginInfo: SceneReactObject;
   createdAt: number;
 

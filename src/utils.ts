@@ -26,7 +26,6 @@ import { logger } from 'tracking/logger/logger';
 
 import { ROUTES } from './constants';
 import { DataTrail, type DataTrailState } from './DataTrail';
-import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { MetricScene } from './MetricScene';
 import { LOGS_METRIC, VAR_DATASOURCE_EXPR, VAR_FILTERS } from './shared';
@@ -36,10 +35,6 @@ import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 export function getTrailFor(model: SceneObject): DataTrail {
   return sceneGraph.getAncestor(model, DataTrail);
-}
-
-export function getTrailSettings(model: SceneObject): DataTrailSettings {
-  return sceneGraph.getAncestor(model, DataTrail).state.settings;
 }
 
 export function newMetricsTrail(state?: Partial<DataTrailState>): DataTrail {

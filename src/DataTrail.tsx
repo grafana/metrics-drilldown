@@ -33,7 +33,6 @@ import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 
-import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters } from './interactions';
 import { MetricScene } from './MetricScene';
@@ -48,7 +47,6 @@ export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
   controls: SceneObject[];
-  settings: DataTrailSettings;
   pluginInfo: SceneReactObject;
   createdAt: number;
 
@@ -88,7 +86,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],
-      settings: state.settings ?? new DataTrailSettings({}),
       pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
@@ -311,7 +308,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, settings, pluginInfo, embedded } = model.useState();
+    const { controls, topScene, pluginInfo, embedded } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
@@ -358,7 +355,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               <control.Component key={control.state.key} model={control} />
             ))}
             <div className={styles.settingsInfo}>
-              <settings.Component model={settings} />
               <pluginInfo.Component model={pluginInfo} />
             </div>
           </div>
