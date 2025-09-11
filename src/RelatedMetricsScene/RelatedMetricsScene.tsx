@@ -31,7 +31,7 @@ import {
 import { MetricsVariableSortEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableSortEngine';
 import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 
-import { getTrailFor, getTrailSettings } from '../utils';
+import { getTrailFor } from '../utils';
 import { RelatedListControls } from './RelatedListControls';
 import { getAppBackgroundColor } from '../utils/utils.styles';
 
@@ -144,7 +144,6 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<RelatedMetricsScene>) => {
-    const { stickyMainGraph } = getTrailSettings(model).useState();
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
@@ -152,7 +151,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
 
     return (
       <>
-        <div className={stickyMainGraph ? styles.searchStickyWithPanel : styles.searchStickyWithoutPanel}>
+        <div className={styles.searchSticky}>
           <listControls.Component model={listControls} />
         </div>
         <div className={styles.body}>
@@ -174,21 +173,10 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
   return {
     body: css({}),
     list: css({}),
-    listControls: css({
-      margin: theme.spacing(1, 0, 1.5, 0),
-    }),
     variables: css({
       display: 'none',
     }),
-    searchStickyWithPanel: css({
-      margin: theme.spacing(1, 0, 1.5, 0),
-      position: 'sticky',
-      background: getAppBackgroundColor(theme, trail),
-      zIndex: 10,
-      paddingBottom: theme.spacing(1),
-      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--main-panel-height, 0px) + var(--action-bar-height, 0px))`,
-    }),
-    searchStickyWithoutPanel: css({
+    searchSticky: css({
       margin: theme.spacing(1, 0, 1.5, 0),
       position: 'sticky',
       background: getAppBackgroundColor(theme, trail),
