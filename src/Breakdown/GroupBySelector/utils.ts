@@ -4,10 +4,10 @@ import { measureText } from '@grafana/ui';
 import {
   type AttributePrefixConfig,
   type DomainConfig,
-  type FilterConfig,
   type FilterContext,
   type FilteringRulesConfig,
   type ProcessedAttribute,
+  type RadioProcessingConfig,
   type SearchConfig,
 } from './types';
 
@@ -56,48 +56,38 @@ export const createAttributeFilter = (
 
 /**
  * Processes radio attributes based on available options, filters, and rules
+ * Simplified version using config object approach
  */
 export const processRadioAttributes = (
   radioAttributes: string[],
   options: Array<SelectableValue<string>>,
-  filters: FilterConfig[],
   rules: FilteringRulesConfig,
   context: FilterContext,
-  attributePrefixes: AttributePrefixConfig,
-  fontSize: number,
-  availableWidth: number,
-  additionalWidthPerItem: number,
-  widthOfOtherAttributes: number
+  config: RadioProcessingConfig
 ): ProcessedAttribute[] => {
   const attributeFilter = createAttributeFilter(rules, context);
-  let radioOptionsWidth = 0;
+  const optionValues = new Set(options.map(opt => opt.value));
+
+  let accumulatedWidth = 0;
+  const reservedWidth = config.widthOfOtherAttributes;
 
   return radioAttributes
-    .filter((attribute) => {
-      // Check if attribute exists in options
-      const existsInOptions = options.some((option) => option.value === attribute);
-      if (!existsInOptions) {
-        return false;
-      }
-
-      // Apply filtering rules
-      return attributeFilter(attribute);
-    })
-    .map((attribute) => ({
-      label: removeAttributePrefixes(attribute, attributePrefixes),
+    .filter(attribute =>
+      optionValues.has(attribute) && attributeFilter(attribute)
+    )
+    .map(attribute => ({
+      label: removeAttributePrefixes(attribute, config.attributePrefixes),
       text: attribute,
       value: attribute,
     }))
-    .filter((option) => {
-      // Calculate width and filter based on available space
-      const text = option.label || option.text || '';
-      const textWidth = measureText(text, fontSize).width;
+    .filter(option => {
+      const textWidth = measureText(option.label, config.fontSize).width;
+      const requiredWidth = textWidth + config.additionalWidthPerItem;
 
-      if (radioOptionsWidth + textWidth + additionalWidthPerItem + widthOfOtherAttributes < availableWidth) {
-        radioOptionsWidth += textWidth + additionalWidthPerItem;
+      if (accumulatedWidth + requiredWidth + reservedWidth <= config.availableWidth) {
+        accumulatedWidth += requiredWidth;
         return true;
       }
-
       return false;
     });
 };

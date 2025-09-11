@@ -104,14 +104,15 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
       : processRadioAttributes(
           radioAttributes,
           options,
-          filters,
           config.filteringRules,
           filterContext,
-          config.attributePrefixes,
-          fontSize,
-          availableWidth,
-          config.layoutConfig.additionalWidthPerItem || DEFAULT_ADDITIONAL_WIDTH_PER_ITEM,
-          config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES
+          {
+            attributePrefixes: config.attributePrefixes,
+            fontSize,
+            availableWidth,
+            additionalWidthPerItem: config.layoutConfig.additionalWidthPerItem || DEFAULT_ADDITIONAL_WIDTH_PER_ITEM,
+            widthOfOtherAttributes: config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES,
+          }
         );
   }, [
     config.layoutConfig.enableResponsiveRadioButtons,

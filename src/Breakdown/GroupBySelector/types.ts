@@ -103,6 +103,17 @@ export interface ProcessedAttribute {
 }
 
 /**
+ * Configuration for radio attribute processing
+ */
+export interface RadioProcessingConfig {
+  attributePrefixes: AttributePrefixConfig;
+  fontSize: number;
+  availableWidth: number;
+  additionalWidthPerItem: number;
+  widthOfOtherAttributes: number;
+}
+
+/**
  * Main props interface for GroupBySelector
  */
 export interface GroupBySelectorProps {
