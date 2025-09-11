@@ -71,6 +71,7 @@ export type QueryConfig = {
   resolution: QUERY_RESOLUTION;
   labelMatchers: LabelMatcher[];
   addIgnoreUsageFilter: boolean;
+  addExtremeValuesFiltering?: boolean;
   groupBy?: string;
   queries?: QueryDefs;
   data?: SceneDataProvider;

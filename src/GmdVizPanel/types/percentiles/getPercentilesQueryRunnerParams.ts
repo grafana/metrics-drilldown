@@ -1,7 +1,7 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
-import { buildQueryExpression, expressionToString } from 'GmdVizPanel/buildQueryExpression';
+import { buildQueryExpression } from 'GmdVizPanel/buildQueryExpression';
 import { PROMQL_FUNCTIONS } from 'GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { type HistogramType, type QueryConfig, type QueryDefs } from 'GmdVizPanel/GmdVizPanel';
@@ -29,21 +29,22 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
     metric,
     labelMatchers: queryConfig.labelMatchers,
     addIgnoreUsageFilter: queryConfig.addIgnoreUsageFilter,
+    addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
-  const expr = expressionToString(expression);
+
   const queries =
     histogramType === 'none'
       ? buildNonHistogramQueries({
           metric,
           queryConfig,
           isRateQuery: isCounterMetric,
-          expr,
+          expr: expression,
         })
       : buildHistogramQueries({
           metric,
           isNativeHistogram: histogramType === 'native',
           queryConfig,
-          expr,
+          expr: expression,
         });
 
   return {
