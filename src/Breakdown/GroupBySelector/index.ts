@@ -14,11 +14,11 @@ export type {
 export {
   createAttributeFilter,
   createDefaultGroupBySelectorConfig,
+  deriveRadioAttributesFromOptions,
   filteredOptions,
   getModifiedSelectOptions,
   mergeConfigurations,
   processRadioAttributes,
   removeAttributePrefixes,
-  deriveRadioAttributesFromOptions,
 } from './utils';
 export { VariableBackedGroupBySelector } from './VariableAdapter';
