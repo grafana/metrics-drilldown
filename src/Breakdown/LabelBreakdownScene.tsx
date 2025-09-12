@@ -205,7 +205,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     selectedValue: css({
       // prevent flickering on wider screens
-      '@media (min-width: 1080px)': {
+      '@media (min-width: 500px)': {
         width: '380px',
       },
     }),
