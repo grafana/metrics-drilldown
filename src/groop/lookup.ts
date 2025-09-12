@@ -29,16 +29,19 @@ function _lookupNode(node: Node, level: number, prefix: string): Node | null {
   return null;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 function lookup(node: Node, prefix: string): Node | null {
   const groups = new Map<string, Node>();
   const values: string[] = [];
   let descendants = 0;
+
   for (const [nodePrefix, group] of node.groups.entries()) {
     if (nodePrefix.startsWith(prefix)) {
       groups.set(nodePrefix, group);
       descendants += group.descendants;
       continue;
     }
+
     if (prefix.startsWith(nodePrefix)) {
       const subGroup = lookup(group, prefix);
       if (subGroup) {
@@ -47,16 +50,19 @@ function lookup(node: Node, prefix: string): Node | null {
       }
     }
   }
+
   for (const v of node.values) {
     if (v.startsWith(prefix)) {
       values.push(v);
       descendants += 1;
     }
   }
+
   if (groups.size === 0 && values.length === 0) {
     // nothing partially matching - so just return null
     return null;
   }
+
   return { groups, values, descendants };
 }
 
