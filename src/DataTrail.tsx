@@ -25,6 +25,11 @@ import {
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
+import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
+import { addRecentMetric } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
+import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { resetYAxisSync } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
@@ -36,11 +41,6 @@ import { getMetricType, getMetricTypeSync, type MetricType } from 'GmdVizPanel/m
 import { GiveFeedbackButton } from 'Header/GiveFeedbackButton';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
-import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
-import { addRecentMetric } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
-import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
