@@ -68,8 +68,6 @@ describe('getPerSecondRateUnit', () => {
     expect(getPerSecondRateUnit('seconds')).toBe('none');
   });
 
-  it('should return the default rate unit if the metric part is undefined', () => {});
-
   it('should return the default rate unit if the metric part is an empty string', () => {
     expect(getPerSecondRateUnit('')).toBe(DEFAULT_RATE_UNIT);
   });

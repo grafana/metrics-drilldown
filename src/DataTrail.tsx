@@ -33,6 +33,7 @@ import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanel
 import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { getMetricType, getMetricTypeSync, type MetricType } from 'GmdVizPanel/matchers/getMetricType';
+import { GiveFeedbackButton } from 'Header/GiveFeedbackButton';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
@@ -325,6 +326,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         <div className={styles.container}>
           {controls && (
             <div className={styles.controls} data-testid="app-controls">
+              <GiveFeedbackButton />
               {controls.map((control) => (
                 <control.Component key={control.state.key} model={control} />
               ))}
