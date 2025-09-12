@@ -277,10 +277,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.disableReportFiltersInteraction = false;
   }
 
-  public async getPrometheusBuildInfo() {
-    return this.datasourceHelper.getPrometheusBuildInfo();
-  }
-
   public async getMetadataForMetric(metric: string) {
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
@@ -288,6 +284,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   public async isNativeHistogram(metric: string) {
     return this.datasourceHelper.isNativeHistogram(metric);
   }
+
+  getPrometheusBuildInfo = async () => {
+    return this.datasourceHelper.getPrometheusBuildInfo();
+  };
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const { controls, topScene, embedded, drawer } = model.useState();
@@ -328,7 +328,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                 <control.Component key={control.state.key} model={control} />
               ))}
               <div className={styles.settingsInfo}>
-                <PluginInfo model={model} />
+                <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
               </div>
             </div>
           )}

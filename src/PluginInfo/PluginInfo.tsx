@@ -4,7 +4,6 @@ import { config } from '@grafana/runtime';
 import { Button, Dropdown, Menu, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useState } from 'react';
 
-import { type DataTrail } from 'DataTrail';
 import { type PrometheusBuildInfo } from 'helpers/MetricDatasourceHelper';
 import { logger } from 'tracking/logger/logger';
 
@@ -36,7 +35,7 @@ function InfoMenuHeader() {
   );
 }
 
-function InfoMenu({ model }: Readonly<PluginInfoProps>) {
+function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
   const styles = useStyles2(getStyles);
 
   const isDev = pluginCommitSha === 'dev';
@@ -44,15 +43,14 @@ function InfoMenu({ model }: Readonly<PluginInfoProps>) {
 
   const [promBuildInfo, setPromBuildInfo] = useState<PrometheusBuildInfo>();
   useEffect(() => {
-    model
-      .getPrometheusBuildInfo()
+    getPrometheusBuildInfo()
       .then((info) => setPromBuildInfo(info))
       .catch((e) => {
         logger.warn('Error while fetching Prometheus build info!');
         logger.warn(e);
         setPromBuildInfo(undefined);
       });
-  }, [model]);
+  }, [getPrometheusBuildInfo]);
 
   return (
     <Menu header={<InfoMenuHeader />}>
@@ -135,11 +133,11 @@ function InfoMenu({ model }: Readonly<PluginInfoProps>) {
   );
 }
 
-type PluginInfoProps = { model: DataTrail };
+type PluginInfoProps = { getPrometheusBuildInfo: () => Promise<PrometheusBuildInfo | undefined> };
 
-export function PluginInfo({ model }: Readonly<PluginInfoProps>) {
+export function PluginInfo({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
   return (
-    <Dropdown overlay={() => <InfoMenu model={model} />} placement="bottom-end">
+    <Dropdown overlay={() => <InfoMenu getPrometheusBuildInfo={getPrometheusBuildInfo} />} placement="bottom-end">
       <Button
         icon="info-circle"
         variant="secondary"
