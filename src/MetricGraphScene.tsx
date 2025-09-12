@@ -12,7 +12,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
@@ -25,7 +25,7 @@ import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
 
 import { type DataTrail } from './DataTrail';
-import { getTrailFor, getTrailSettings } from './utils';
+import { getTrailFor } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
@@ -36,6 +36,7 @@ interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
   selectedTab?: SceneObject;
+  actionBar: SceneObject;
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
@@ -64,13 +65,18 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               },
             }),
           }),
+        ],
+      }),
+      selectedTab: undefined,
+      actionBar: new SceneFlexLayout({
+        direction: 'column',
+        children: [
           new SceneFlexItem({
             ySizing: 'content',
             body: new MetricActionBar({}),
           }),
         ],
       }),
-      selectedTab: undefined,
     });
 
     this.addActivationHandler(() => {
@@ -106,19 +112,40 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {
-    const { topView, selectedTab } = model.useState();
-    const { stickyMainGraph } = getTrailSettings(model).useState();
+    const { topView, selectedTab, actionBar } = model.useState();
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
 
+    // Set CSS custom property for action bar height - always needed for search bar positioning
+    useEffect(() => {
+      // Update on mount
+      updateActionBarHeight();
+
+      // Use ResizeObserver to watch for height changes
+      const actionBar = document.querySelector('[data-testid="action-bar"]');
+
+      if (!actionBar) {
+        return;
+      }
+
+      const resizeObserver = new ResizeObserver(updateActionBarHeight);
+      resizeObserver.observe(actionBar);
+
+      return () => {
+        // Clean up
+        resizeObserver.disconnect();
+        document.documentElement.style.removeProperty('--action-bar-height');
+      };
+    }, []); // Empty dependency array - always run
+
     return (
       <div className={styles.container}>
-        <div
-          className={stickyMainGraph ? cx(styles.topView, styles.sticky) : cx(styles.topView, styles.nonSticky)}
-          data-testid="top-view"
-        >
+        <div className={cx(styles.topView, styles.nonSticky)} data-testid="top-view">
           <topView.Component model={topView} />
+        </div>
+        <div className={cx(styles.topView, styles.stickyTop)} data-testid="action-bar">
+          <actionBar.Component model={actionBar} />
         </div>
         {selectedTab && (
           <div data-testid="tab-content" className={styles.tabContent}>
@@ -142,13 +169,12 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       height: '100%',
     }),
     topView: css({}),
-    sticky: css({
+    stickyTop: css({
       display: 'flex',
       flexDirection: 'row',
       background: getAppBackgroundColor(theme, trail),
       position: 'sticky',
       paddingTop: theme.spacing(1),
-      marginTop: `-${theme.spacing(1)}`,
       zIndex: 10,
       // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
       // This ensures the main graph sticks below the app-controls in embedded mode
@@ -159,4 +185,15 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'row',
     }),
   };
+}
+
+function updateActionBarHeight() {
+  const actionBar = document.querySelector('[data-testid="action-bar"]');
+
+  if (!actionBar) {
+    return;
+  }
+
+  const { height } = actionBar.getBoundingClientRect();
+  document.documentElement.style.setProperty('--action-bar-height', `${height}px`);
 }

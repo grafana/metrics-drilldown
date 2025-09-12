@@ -42,7 +42,6 @@ import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
-import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
@@ -55,7 +54,6 @@ export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
   controls: SceneObject[];
-  settings: DataTrailSettings;
   createdAt: number;
 
   // wingman
@@ -102,7 +100,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],
-      settings: state.settings ?? new DataTrailSettings({}),
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
       alertingMetrics: {},
@@ -280,10 +277,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.disableReportFiltersInteraction = false;
   }
 
-  public async getPrometheusBuildInfo() {
-    return this.datasourceHelper.getPrometheusBuildInfo();
-  }
-
   public async getMetadataForMetric(metric: string) {
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
@@ -292,8 +285,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.isNativeHistogram(metric);
   }
 
+  getPrometheusBuildInfo = async () => {
+    return this.datasourceHelper.getPrometheusBuildInfo();
+  };
+
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, settings, embedded, drawer } = model.useState();
+    const { controls, topScene, embedded, drawer } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
@@ -331,8 +328,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                 <control.Component key={control.state.key} model={control} />
               ))}
               <div className={styles.settingsInfo}>
-                <settings.Component model={settings} />
-                <PluginInfo model={model} />
+                <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
               </div>
             </div>
           )}
