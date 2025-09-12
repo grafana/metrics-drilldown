@@ -92,15 +92,12 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const totalOptions = options.length + 1; // +1 for "All" option
     const shouldShowAllAsRadio = totalOptions <= 4;
 
-    // Get all available labels (excluding "All" which will be handled separately)
     const radioAttributes = shouldShowAllAsRadio
       ? options.map(option => option.value as string).filter(value => value !== '$__all')
       : [];
 
-    // Get metrics domain configuration
     const metricsConfig = createDefaultGroupBySelectorConfig();
 
-    // Memoize onChange handler to prevent unnecessary re-renders
     const handleChange = useCallback((selectedValue: string, ignore?: boolean) => {
       // Map "All" to the variable's all value
       const variableValue = selectedValue === 'All' ? '$__all' : selectedValue;
@@ -108,7 +105,6 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       groupByVariable.changeValueTo(variableValue, undefined, !ignore);
     }, [groupByVariable]);
 
-    // Configure filtering rules
     const filteringRules = {
       ...metricsConfig.filteringRules,
       // Filter out histogram bucket labels like the original GroupByVariable
@@ -120,14 +116,12 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       excludeFilteredFromRadio: false
     };
 
-    // Configure layout
     const layoutConfig = {
       ...metricsConfig.layoutConfig,
       additionalWidthPerItem: 40, // Increase width per item to ensure radio buttons fit
       widthOfOtherAttributes: 100, // Reduce dropdown width to make room for radio buttons
     };
 
-    // Configure search
     const searchConfig = {
       ...metricsConfig.searchConfig,
       enabled: true,
