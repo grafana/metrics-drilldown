@@ -8,10 +8,11 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Field, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
+import { VariableBackedGroupBySelector } from './GroupBySelector';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
@@ -72,12 +73,23 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
+    const layoutConfig = {
+      additionalWidthPerItem: 40,
+      widthOfOtherAttributes: 100,
+    };
+
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <Field label="By label">
-            <groupByVariable.Component model={groupByVariable} />
-          </Field>
+          <div className={`${styles.groupBySelector} ${groupByVariable.state.options.length <= 3 ? styles.selectedValue : ''}`} data-testid="breakdown-label-selector">
+            <VariableBackedGroupBySelector
+              variable={groupByVariable}
+              fieldLabel="By label"
+              selectPlaceholder="More labels..."
+              filteringRules={{ excludeFilteredFromRadio: false }}
+              layoutConfig={layoutConfig}
+            />
+          </div>
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
         </div>
@@ -103,12 +115,22 @@ function getStyles(theme: GrafanaTheme2) {
       flexGrow: 0,
       display: 'flex',
       gap: theme.spacing(2),
-      height: '70px',
+      height: '77px',
       justifyContent: 'space-between',
       alignItems: 'end',
+      overflowX: 'auto',
     }),
     searchField: css({
       flexGrow: 1,
+    }),
+    groupBySelector: css({
+      flexGrow: 1,
+    }),
+    selectedValue: css({
+      // prevent flickering on wider screens
+      '@media (min-width: 500px)': {
+        width: '380px',
+      },
     }),
   };
 }
