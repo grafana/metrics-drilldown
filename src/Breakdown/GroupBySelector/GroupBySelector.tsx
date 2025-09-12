@@ -179,8 +179,9 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
             />
         )}
         {modifiedSelectOptions.length > 0 && (
-          <div className={styles.selectContainer}>
+          <div className={styles.selectContainer} id="group-by-selector">
             <Combobox
+              id="group-by-selector"
               value={effectiveValue && modifiedSelectOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
               placeholder={selectPlaceholder}
               options={modifiedSelectOptions.filter(opt => opt.value !== undefined) as Array<{label?: string, value: string}>}

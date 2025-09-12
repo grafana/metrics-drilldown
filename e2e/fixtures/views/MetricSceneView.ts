@@ -174,7 +174,7 @@ export class MetricSceneView extends DrilldownView {
     }
 
     // Check if it's selected in the combobox
-    const combobox = this.getLabelDropdown().getByRole('combobox');
+    const combobox = this.getLabelDropdown().getByRole('combobox', { name: "group-by-selector" });
     if (await combobox.isVisible()) {
       await expect(combobox).toHaveValue(optionLabel);
       return;
