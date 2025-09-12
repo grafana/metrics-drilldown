@@ -11,7 +11,6 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useCallback } from 'react';
 
-import { reportExploreMetrics } from '../interactions';
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_GROUP_BY } from '../shared';
 import { createDefaultGroupBySelectorConfig, GroupBySelector } from './GroupBySelector';
 import { isAdHocFiltersVariable, isQueryVariable } from '../utils/utils.variables';
@@ -105,12 +104,8 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const handleChange = useCallback((selectedValue: string, ignore?: boolean) => {
       // Map "All" to the variable's all value
       const variableValue = selectedValue === 'All' ? '$__all' : selectedValue;
-      groupByVariable.changeValueTo(variableValue);
-
-      // Maintain analytics reporting like the original GroupByVariable
-      if (selectedValue && !ignore) {
-        reportExploreMetrics('groupby_label_changed', { label: selectedValue });
-      }
+      // Pass isUserAction=true only for real user interactions so URL/history updates
+      groupByVariable.changeValueTo(variableValue, undefined, !ignore);
     }, [groupByVariable]);
 
     // Configure filtering rules
@@ -142,7 +137,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <div className={`styles.groupBySelector ${options.length <= 3 ? styles.selectedValue : ''}`} data-testid="breakdown-label-selector">
+          <div className={`${styles.groupBySelector} ${options.length <= 3 ? styles.selectedValue : ''}`} data-testid="breakdown-label-selector">
             <GroupBySelector
               // Core selection interface
               options={options as Array<{ label?: string; value: string }>}
