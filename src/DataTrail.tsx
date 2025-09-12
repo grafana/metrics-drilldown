@@ -100,7 +100,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       controls: state.controls ?? [
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
-        new SelectNewMetricButton(),
         new SceneTimePicker({}),
         new SceneRefreshPicker({}),
       ],
@@ -127,9 +126,21 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   private updateStateForNewMetric(metric?: string) {
     if (!this.state.topScene || metric !== this.state.metric) {
+      // Update controls based on whether a metric is selected
+      const baseControls = [
+        new VariableValueSelectors({ layout: 'vertical' }),
+        new SceneControlsSpacer(),
+      ];
+      
+      // Only add SelectNewMetricButton when a metric is selected
+      const controls = metric 
+        ? [...baseControls, new SelectNewMetricButton(), new SceneTimePicker({}), new SceneRefreshPicker({})]
+        : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
+
       this.setState({
         metric,
         topScene: metric ? new MetricScene({ metric }) : new MetricsReducer(),
+        controls,
       });
     }
   }

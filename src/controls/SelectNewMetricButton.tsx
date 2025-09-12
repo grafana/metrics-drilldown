@@ -5,7 +5,6 @@ import React from 'react';
 import { UI_TEXT } from '../constants/ui';
 import { createAppUrl } from '../extensions/links';
 import { reportExploreMetrics } from '../interactions';
-import { MetricScene } from '../MetricScene';
 import { MetricSelectedEvent } from '../shared';
 import { getTrailFor, getUrlForTrail } from '../utils';
 
@@ -26,14 +25,7 @@ export class SelectNewMetricButton extends SceneObjectBase<SelectNewMetricButton
 
   static readonly Component = ({ model }: SceneComponentProps<SelectNewMetricButton>) => {
     const trail = getTrailFor(model);
-    const { topScene, embedded } = trail.useState();
-
-    // Only show the button when a metric is selected (topScene is MetricScene)
-    const isButtonVisible = topScene instanceof MetricScene;
-
-    if (!isButtonVisible) {
-      return null;
-    }
+    const { embedded } = trail.useState();
 
     // In embedded mode, show "Metrics Drilldown" button to open full app
     if (embedded) {
