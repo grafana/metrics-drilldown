@@ -158,7 +158,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
               // Display configuration
               fieldLabel="By label"
-              selectPlaceholder="Select label..."
+              selectPlaceholder="More labels..."
 
               // Apply metrics domain defaults with memoized overrides
               {...metricsConfig}
