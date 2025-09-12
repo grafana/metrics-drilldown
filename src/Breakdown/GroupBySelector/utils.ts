@@ -23,35 +23,27 @@ export const createAttributeFilter = (
     return rules.customAttributeFilter(attribute, context);
   }
 
-  // Check if attribute is in active filters and should be excluded from radio buttons
-  if (rules.excludeFilteredFromRadio) {
-    const hasEqualOrNotEqualFilter = context.filters.some(
+  // Compute exclusion flags and return a single boolean
+  const excludedByActiveFilter =
+    rules.excludeFilteredFromRadio &&
+    context.filters.some(
       (f) => f.key === attribute && (f.operator === '=' || f.operator === '!=')
     );
-    if (hasEqualOrNotEqualFilter) {
-      return false;
-    }
-  }
 
-  // Check metric-based exclusions
-  if (rules.excludeAttributesForMetrics && context.currentMetric) {
-    const excludedForMetric = rules.excludeAttributesForMetrics[context.currentMetric] || [];
-    if (excludedForMetric.includes(attribute)) {
-      return false;
-    }
-  }
+  const excludedByMetric = Boolean(
+    rules.excludeAttributesForMetrics &&
+      context.currentMetric &&
+      (rules.excludeAttributesForMetrics[context.currentMetric] || []).includes(attribute)
+  );
 
-  // Check filter-based exclusions
-  if (rules.excludeAttributesForFilters) {
-    for (const filter of context.filters) {
-      const excludedForFilter = rules.excludeAttributesForFilters[filter.key] || [];
-      if (excludedForFilter.includes(attribute)) {
-        return false;
-      }
-    }
-  }
+  const excludedByOtherFilters = Boolean(
+    rules.excludeAttributesForFilters &&
+      context.filters.some(
+        (filter) => (rules.excludeAttributesForFilters?.[filter.key] || []).includes(attribute)
+      )
+  );
 
-  return true;
+  return !(excludedByActiveFilter || excludedByMetric || excludedByOtherFilters);
 };
 
 /**
