@@ -9,6 +9,8 @@ import { ALL_VARIABLE_VALUE } from 'services/variables';
 import { trailDS, VAR_FILTERS, VAR_GROUP_BY, VAR_METRIC_EXPR } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
+import { VariableBackedGroupBySelector } from './GroupBySelector';
+
 export class GroupByVariable extends QueryVariable {
   constructor() {
     super({
@@ -58,7 +60,7 @@ export class GroupByVariable extends QueryVariable {
 
     return (
       <div className={styles.select} data-testid="breakdown-label-selector">
-        <QueryVariable.Component model={model} />
+        <VariableBackedGroupBySelector variable={model as unknown as QueryVariable} fieldLabel="Group by" />
       </div>
     );
   };
