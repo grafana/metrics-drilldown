@@ -81,7 +81,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <div className={`${styles.groupBySelector} ${groupByVariable.state.options.length <= 3 ? styles.selectedValue : ''}`} data-testid="breakdown-label-selector">
+          <div className={styles.groupBySelector}>
             <VariableBackedGroupBySelector
               variable={groupByVariable}
               fieldLabel="By label"
@@ -125,12 +125,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     groupBySelector: css({
       flexGrow: 1,
-    }),
-    selectedValue: css({
-      // prevent flickering on wider screens
-      '@media (min-width: 500px)': {
-        width: '380px',
-      },
     }),
   };
 }

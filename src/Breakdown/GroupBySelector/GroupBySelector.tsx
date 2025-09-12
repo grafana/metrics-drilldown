@@ -74,14 +74,11 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     virtualizationConfig,
   });
 
-  // Resize observer for responsive radio buttons
-  // add a small debounce to the onResize
   useResizeObserver({
     ref: controlsContainer,
     onResize: debounce(() => {
       const element = controlsContainer.current;
       if (element) {
-          // requestAnimationFrame to avoid excessive re-renders
           requestAnimationFrame(() => {
             setAvailableWidth(element.clientWidth);
           });
@@ -173,6 +170,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
       <div ref={controlsContainer} className={styles.container}>
         {limitedRadioOptions.length > 0 && (
             <RadioButtonGroup
+              data-testid="group-by-selector-radio-group"
               options={[...showAllOption, ...limitedRadioOptions]}
               value={effectiveValue}
               onChange={onChange}
@@ -200,9 +198,6 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    select: css({
-      maxWidth: theme.spacing(22),
-    }),
     container: css({
       display: 'flex',
       gap: theme.spacing(1),
