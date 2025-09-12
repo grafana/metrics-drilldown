@@ -59,7 +59,7 @@ export class GroupByVariable extends QueryVariable {
     const styles = useStyles2(getStyles);
 
     return (
-      <div className={styles.select} data-testid="breakdown-label-selector">
+      <div className={styles.select}>
         <VariableBackedGroupBySelector variable={model as unknown as QueryVariable} fieldLabel="Group by" />
       </div>
     );

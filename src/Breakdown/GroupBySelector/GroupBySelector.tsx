@@ -169,7 +169,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   const defaultOnChangeValue = showAll ? DEFAULT_ALL_OPTION : '';
 
   return (
-    <Field label={fieldLabel}>
+    <Field label={fieldLabel} data-testid="breakdown-label-selector">
       <div ref={controlsContainer} className={styles.container}>
         {limitedRadioOptions.length > 0 && (
             <RadioButtonGroup
