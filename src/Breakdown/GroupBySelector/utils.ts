@@ -169,6 +169,23 @@ export const getModifiedSelectOptions = (
 };
 
 /**
+ * Derive radio attributes directly from options with a threshold heuristic.
+ * Includes an implicit "All" option in the threshold calculation and excludes $__all.
+ */
+export const deriveRadioAttributesFromOptions = (
+  options: Array<{ value?: string }>,
+  threshold = 4
+): string[] => {
+  const totalOptions = options.length + 1; // include implicit "All"
+  if (totalOptions > threshold) {
+    return [];
+  }
+  return options
+    .map((o) => o.value as string)
+    .filter((v): v is string => Boolean(v) && v !== '$__all');
+};
+
+/**
  * Creates default configuration for GroupBySelector optimized for metrics
  */
 export const createDefaultGroupBySelectorConfig = (): Partial<DomainConfig> => {

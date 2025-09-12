@@ -19,4 +19,6 @@ export {
   mergeConfigurations,
   processRadioAttributes,
   removeAttributePrefixes,
+  deriveRadioAttributesFromOptions,
 } from './utils';
+export { VariableBackedGroupBySelector } from './VariableAdapter';
