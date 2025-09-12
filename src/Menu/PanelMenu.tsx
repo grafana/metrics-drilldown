@@ -29,52 +29,50 @@ interface PanelMenuState extends SceneObjectState {
 export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPanelMenu, SceneObject {
   constructor(state: Partial<PanelMenuState>) {
     super({ ...state, addExplorationsLink: state.addExplorationsLink ?? true });
-    this.addActivationHandler(this.onActivate.bind(this));
-  }
+    this.addActivationHandler(() => {
+      // Check if this is the main metric graph panel by key
+      const isMainGraphPanel = this.state.key === 'TOPWVIEW_PANEL_MENU_KEY';
 
-  private onActivate() {
-    // Check if this is the main metric graph panel by key
-    const isMainGraphPanel = this.state.key === 'TOPWVIEW_PANEL_MENU_KEY';
-
-    // Navigation options (all panels)
-    const items: PanelMenuItem[] = [
-      {
-        text: 'Navigation',
-        type: 'group',
-      },
-      ExploreAction.create(this),
-    ];
-
-    // Only add Copy URL to the main metric graph panel
-    if (isMainGraphPanel) {
-      const trail = getTrailFor(this);
-      items.push(
+      // Navigation options (all panels)
+      const items: PanelMenuItem[] = [
         {
-          text: 'Actions',
+          text: 'Navigation',
           type: 'group',
         },
-        CopyUrlAction.create(trail)
-      );
-    }
+        ExploreAction.create(this),
+      ];
 
-    // Add investigation items if enabled (async)
-    if (this.state.addExplorationsLink) {
-      InvestigationAction.create(
-        this,
-        this.state.labelName,
-        this.state.fieldName,
-        this.state.frame
-      ).then((investigationItems) => {
-        if (investigationItems.length > 0) {
-          this.state.body?.setItems([...items, ...investigationItems]);
-        }
+      // Only add Copy URL to the main metric graph panel
+      if (isMainGraphPanel) {
+        const trail = getTrailFor(this);
+        items.push(
+          {
+            text: 'Actions',
+            type: 'group',
+          },
+          CopyUrlAction.create(trail)
+        );
+      }
+
+      // Add investigation items if enabled (async)
+      if (this.state.addExplorationsLink) {
+        InvestigationAction.create(
+          this,
+          this.state.labelName,
+          this.state.fieldName,
+          this.state.frame
+        ).then((investigationItems) => {
+          if (investigationItems.length > 0) {
+            this.state.body?.setItems([...items, ...investigationItems]);
+          }
+        });
+      }
+
+      this.setState({
+        body: new VizPanelMenu({
+          items,
+        }),
       });
-    }
-
-    this.setState({
-      body: new VizPanelMenu({
-        items,
-      }),
     });
   }
 
