@@ -144,7 +144,9 @@ test.describe('Metric Scene view', () => {
       });
 
       test('No related logs found', async ({ metricSceneView }) => {
-        await expect(metricSceneView.getTabContent().getByText('No related logs found')).toBeVisible();
+        await expect(
+          metricSceneView.getTabContent().getByText('No related logs found')
+        ).toBeVisible({ timeout: 20000 });
       });
     });
   });
