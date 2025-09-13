@@ -42,6 +42,7 @@ import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
+import { SelectNewMetricButton } from './controls/SelectNewMetricButton';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
@@ -125,9 +126,21 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   private updateStateForNewMetric(metric?: string) {
     if (!this.state.topScene || metric !== this.state.metric) {
+      // Update controls based on whether a metric is selected
+      const baseControls = [
+        new VariableValueSelectors({ layout: 'vertical' }),
+        new SceneControlsSpacer(),
+      ];
+      
+      // Only add SelectNewMetricButton when a metric is selected
+      const controls = metric 
+        ? [...baseControls, new SelectNewMetricButton(), new SceneTimePicker({}), new SceneRefreshPicker({})]
+        : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
+
       this.setState({
         metric,
         topScene: metric ? new MetricScene({ metric }) : new MetricsReducer(),
+        controls,
       });
     }
   }

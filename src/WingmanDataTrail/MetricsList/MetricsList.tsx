@@ -80,7 +80,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
                 metric,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
-                  headerActions: () => [new SelectAction({ metric }), new ConfigurePanelAction({ metric })],
+                  headerActions: () => [new ConfigurePanelAction({ metric }), new SelectAction({ metric })],
                 },
               }),
             }),
