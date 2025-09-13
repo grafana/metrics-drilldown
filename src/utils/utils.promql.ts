@@ -1,3 +1,4 @@
+import { type TreeCursor } from '@lezer/common';
 export interface PromQLLabelMatcher {
   label: string;
   op: string;
@@ -23,23 +24,15 @@ export async function extractMetricNames(promqlExpression: string): Promise<stri
   const cursor = tree.cursor();
 
   do {
-    // have we found a VectorSelector?
-    if (!cursor.type.is('VectorSelector')) {
-      continue;
-    }
-
-    // does it have a first child?
-    if (!cursor.firstChild()) {
+    // have we found a VectorSelector? does it have a first child?
+    if (!cursor.type.is('VectorSelector') || !cursor.firstChild()) {
       continue;
     }
 
     do {
-      // ...let's look for any Identifier node
+      // if so, let's look for any Identifier node
       if (cursor.type.is('Identifier')) {
-        const metricName = promqlExpression.slice(cursor.from, cursor.to);
-        if (metricName) {
-          metricNames.add(metricName);
-        }
+        processIdentifier(promqlExpression, cursor, metricNames);
       }
     } while (cursor.nextSibling());
 
@@ -47,6 +40,13 @@ export async function extractMetricNames(promqlExpression: string): Promise<stri
   } while (cursor.next());
 
   return Array.from(metricNames);
+}
+
+function processIdentifier(promqlExpression: string, cursor: TreeCursor, metricNames: Set<string>) {
+  const metricName = promqlExpression.slice(cursor.from, cursor.to);
+  if (metricName) {
+    metricNames.add(metricName);
+  }
 }
 
 // Helper function to process label matcher nodes
