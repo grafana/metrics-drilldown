@@ -13,7 +13,7 @@ import {
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
