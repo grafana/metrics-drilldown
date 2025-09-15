@@ -12,7 +12,8 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React, { useEffect } from 'react';
+import { useResizeObserver } from '@react-aria/utils';
+import React, { useEffect, useRef } from 'react';
 
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
@@ -116,35 +117,26 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
+    const controlsContainer = useRef<HTMLDivElement>(null);
 
-    // Set CSS custom property for action bar height - always needed for search bar positioning
-    useEffect(() => {
-      // Update on mount
-      updateActionBarHeight();
-
-      // Use ResizeObserver to watch for height changes
-      const actionBar = document.querySelector('[data-testid="action-bar"]');
-
-      if (!actionBar) {
-        return;
-      }
-
-      const resizeObserver = new ResizeObserver(updateActionBarHeight);
-      resizeObserver.observe(actionBar);
-
-      return () => {
-        // Clean up
-        resizeObserver.disconnect();
-        document.documentElement.style.removeProperty('--action-bar-height');
-      };
-    }, []); // Empty dependency array - always run
+    useResizeObserver({
+      ref: controlsContainer,
+      onResize: () => {
+        const element = controlsContainer.current;
+        if (element) {
+          requestAnimationFrame(() => {
+            updateActionBarHeight();
+          });
+        }
+      },
+    });
 
     return (
       <div className={styles.container}>
         <div className={cx(styles.topView, styles.nonSticky)} data-testid="top-view">
           <topView.Component model={topView} />
         </div>
-        <div className={cx(styles.topView, styles.stickyTop)} data-testid="action-bar">
+        <div className={cx(styles.topView, styles.stickyTop)} id="action-bar-container" ref={controlsContainer}>
           <actionBar.Component model={actionBar} />
         </div>
         {selectedTab && (
