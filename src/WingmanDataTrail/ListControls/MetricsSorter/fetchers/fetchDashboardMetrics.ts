@@ -101,6 +101,37 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
   }
 }
 
+function getDashboardsWithPanels(
+  dashboardSearchResponse: Array<DashboardWithUrl | null>
+): Array<DashboardWithUrl & { panels: NonNullable<Panel[]> }> {
+  return dashboardSearchResponse.filter((dashboard) => dashboard && dashboard?.panels?.length) as Array<
+    DashboardWithUrl & { panels: NonNullable<Panel[]> }
+  >;
+}
+
+function getPanelsWithTargets(panels: Panel[]): Array<Panel & { targets: NonNullable<Panel['targets']> }> {
+  return panels.filter(
+    (panel) => isPrometheusDataSource(panel.datasource) && 'targets' in panel && panel.targets?.length
+  ) as Array<Panel & { targets: NonNullable<Panel['targets']> }>;
+}
+
+function processTargetsForMetrics(
+  targets: NonNullable<Panel['targets']>,
+  dashboardName: string,
+  dashboardUid: string,
+  dashboardUrl: string,
+  dashboardData: Record<string, MetricUsageDetails>
+): void {
+  for (const target of targets) {
+    const expr = typeof target.expr === 'string' ? target.expr : '';
+    const metrics = extractMetricNames(expr);
+
+    for (const metric of metrics) {
+      updateMetricUsage(metric, dashboardName, dashboardUid, dashboardUrl, dashboardData);
+    }
+  }
+}
+
 function updateMetricUsage(
   metric: string,
   dashboardName: string,
@@ -126,29 +157,17 @@ function parseDashboardSearchResponse(dashboardSearchResponse: Array<DashboardWi
   // Create a map to track metric names and their usage details
   const dashboardData: Record<string, MetricUsageDetails> = {};
 
-  const relevantDashboards = dashboardSearchResponse.filter(
-    (dashboard) => dashboard && dashboard?.panels?.length
-  ) as Array<DashboardWithUrl & { panels: NonNullable<Panel[]> }>;
-  // For each dashboard, for each panel in that dashboard, for each query in that panel, what metrics does that query use
-  for (const dashboard of relevantDashboards) {
-    const dashboardName = dashboard.title || `Dashboard ${dashboard.uid}`;
-    // Skip panels with non-Prometheus data sources
-    const relevantPanels = dashboard.panels.filter(
-      (panel) => isPrometheusDataSource(panel.datasource) && 'targets' in panel && panel.targets?.length
-    ) as Array<Panel & { targets: NonNullable<Panel['targets']> }>;
-
-    for (const panel of relevantPanels) {
-      for (const target of panel.targets) {
-        const expr = typeof target.expr === 'string' ? target.expr : '';
-
-        const metrics = extractMetricNames(expr); // Array of metric names used in the query
-
-        // Count each metric occurrence
-        for (const metric of metrics) {
-          updateMetricUsage(metric, dashboardName, dashboard.uid || 'unknown', dashboard.url, dashboardData);
-        }
-      }
+  for (const dashboard of getDashboardsWithPanels(dashboardSearchResponse)) {
+    for (const panel of getPanelsWithTargets(dashboard.panels)) {
+      processTargetsForMetrics(
+        panel.targets,
+        dashboard.title || `Dashboard ${dashboard.uid}`,
+        dashboard.uid || 'unknown',
+        dashboard.url,
+        dashboardData
+      );
     }
   }
+
   return dashboardData;
 }
