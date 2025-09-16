@@ -9,7 +9,6 @@ import { getTrailFor } from 'utils';
 import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { genBookmarkKey } from './genBookmarkKey';
-import { notifyBookmarkCreated } from './notifyBookmarkCreated';
 
 export type Bookmark = {
   key: string;

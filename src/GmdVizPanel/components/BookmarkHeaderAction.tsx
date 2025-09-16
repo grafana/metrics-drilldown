@@ -7,7 +7,6 @@ import React from 'react';
 import { type BookmarkFromStorage } from 'bookmarks/useBookmarks';
 
 import { genBookmarkKey } from '../../bookmarks/genBookmarkKey';
-import { notifyBookmarkCreated } from '../../bookmarks/notifyBookmarkCreated';
 import { reportExploreMetrics } from '../../interactions';
 import { PREF_KEYS } from '../../UserPreferences/pref-keys';
 import { userStorage } from '../../UserPreferences/userStorage';
