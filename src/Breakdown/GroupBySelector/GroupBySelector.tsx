@@ -3,8 +3,92 @@ import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { Combobox, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useRef } from 'react';
 
-import { type GroupBySelectorProps } from './types';
-import { filteredOptions, getModifiedSelectOptions, removeAttributePrefixes } from './utils';
+// Types
+export interface AttributePrefixConfig {
+  span?: string;
+  resource?: string;
+  event?: string;
+  [key: string]: string | undefined;
+}
+
+export interface SearchConfig {
+  enabled?: boolean;
+  maxOptions?: number;
+  caseSensitive?: boolean;
+  searchFields?: Array<'label' | 'value'>;
+}
+
+export interface GroupBySelectorProps {
+  options: Array<SelectableValue<string>>;
+  value?: string;
+  onChange: (label: string, ignore?: boolean) => void;
+  showAll?: boolean;
+  attributePrefixes?: AttributePrefixConfig;
+  fieldLabel?: string;
+  selectPlaceholder?: string;
+  ignoredAttributes?: string[];
+  searchConfig?: SearchConfig;
+}
+
+// Utility functions
+export const removeAttributePrefixes = (
+  attribute: string,
+  prefixes: AttributePrefixConfig
+): string => {
+  for (const [, prefix] of Object.entries(prefixes)) {
+    if (prefix && attribute.startsWith(prefix)) {
+      return attribute.replace(prefix, '');
+    }
+  }
+  return attribute;
+};
+
+export const filteredOptions = (
+  options: Array<SelectableValue<string>>,
+  query: string,
+  searchConfig: SearchConfig
+): Array<SelectableValue<string>> => {
+  if (options.length === 0) {
+    return [];
+  }
+
+  if (query.length === 0) {
+    return options.slice(0, searchConfig.maxOptions || 1000);
+  }
+
+  const searchQuery = searchConfig.caseSensitive ? query : query.toLowerCase();
+  const searchFields = searchConfig.searchFields || ['label', 'value'];
+
+  return options
+    .filter((option) => {
+      return searchFields.some((field) => {
+        const fieldValue = option[field];
+        if (fieldValue && fieldValue.length > 0) {
+          const searchText = searchConfig.caseSensitive
+            ? fieldValue.toString()
+            : fieldValue.toString().toLowerCase();
+          return searchText.includes(searchQuery);
+        }
+        return false;
+      });
+    })
+    .slice(0, searchConfig.maxOptions || 1000);
+};
+
+export const getModifiedSelectOptions = (
+  options: Array<SelectableValue<string>>,
+  ignoredAttributes: string[],
+  attributePrefixes: AttributePrefixConfig
+): Array<SelectableValue<string>> => {
+  return options
+    .filter((option) => !ignoredAttributes.includes(option.value?.toString() || ''))
+    .map((option) => ({
+      label: option.label
+        ? removeAttributePrefixes(option.label, attributePrefixes)
+        : undefined,
+      value: option.value,
+    }));
+};
 
 const DEFAULT_ALL_OPTION = 'All';
 

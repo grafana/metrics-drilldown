@@ -1,12 +1,12 @@
-export { GroupBySelector } from './GroupBySelector';
+export {
+  filteredOptions,
+  getModifiedSelectOptions,
+  GroupBySelector,
+  removeAttributePrefixes,
+} from './GroupBySelector';
 export type {
   AttributePrefixConfig,
   GroupBySelectorProps,
   SearchConfig,
-} from './types';
-export {
-  filteredOptions,
-  getModifiedSelectOptions,
-  removeAttributePrefixes,
-} from './utils';
+} from './GroupBySelector';
 export { VariableBackedGroupBySelector } from './VariableAdapter';

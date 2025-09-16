@@ -1,10 +1,8 @@
 import { sceneGraph, type QueryVariable } from '@grafana/scenes';
 import React, { useCallback } from 'react';
 
-import { GroupBySelector } from './GroupBySelector';
+import { GroupBySelector, type GroupBySelectorProps } from './GroupBySelector';
 import { VAR_FILTERS } from '../../shared';
-
-import type { GroupBySelectorProps } from './types';
 
 
 type VariableBackedGroupBySelectorProps = {
