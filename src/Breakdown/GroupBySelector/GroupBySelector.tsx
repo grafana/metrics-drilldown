@@ -92,7 +92,7 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     return (options || []).filter((opt) => opt.value && opt.value !== '$__all') as Array<SelectableValue<string>>;
   }, [options]);
 
-  if (selectableOptions.length <= 4) {
+  if (selectableOptions.length + (showAll ? 1 : 0) <= 4) {
     const radioOptions = selectableOptions.map((opt) => ({
       label: removeAttributePrefixes(opt.label ?? (opt.value as string), attributePrefixes),
       value: opt.value as string,
