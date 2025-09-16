@@ -125,7 +125,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         const element = controlsContainer.current;
         if (element) {
           requestAnimationFrame(() => {
-            updateActionBarHeight();
+            updateActionBarHeight(controlsContainer);
           });
         }
       },
@@ -179,8 +179,8 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
   };
 }
 
-function updateActionBarHeight() {
-  const actionBar = document.querySelector('[data-testid="action-bar"]');
+function updateActionBarHeight(controlsContainer: React.RefObject<HTMLDivElement>) {
+  const actionBar = controlsContainer.current;
 
   if (!actionBar) {
     return;
