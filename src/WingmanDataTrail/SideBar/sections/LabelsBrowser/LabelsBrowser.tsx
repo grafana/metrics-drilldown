@@ -59,7 +59,10 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       labelsVariable.subscribeToState((newState) => {
         const active = Boolean(newState.value && newState.value !== NULL_GROUP_BY_VALUE);
         this.setState({ active });
-        this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [newState.value as string] : [] }), true);
+        this.publishEvent(
+          new EventSectionValueChanged({ key: this.state.key, values: active ? [newState.value as string] : [] }),
+          true
+        );
       })
     );
   }
@@ -71,8 +74,6 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     const active = Boolean(label && label !== NULL_GROUP_BY_VALUE);
 
     this.setState({ active });
-
-    this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [label] : [] }), true);
   }
 
   private onSelectLabel = (label: string) => {

@@ -28,14 +28,10 @@ import {
   VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
   WithUsageDataPreviewPanel,
 } from 'WingmanDataTrail/MetricsList/WithUsageDataPreviewPanel';
+import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 import { GroupsIcon } from 'WingmanDataTrail/SideBar/custom-icons/GroupsIcon';
-
-import {
-  MetricsWithLabelValueVariable,
-  VAR_METRIC_WITH_LABEL_VALUE,
-} from './MetricsWithLabelValue/MetricsWithLabelValueVariable';
 
 interface MetricsGroupByRowState extends SceneObjectState {
   index: number;
@@ -58,17 +54,26 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     labelValue: MetricsGroupByRowState['labelValue'];
     labelCardinality: MetricsGroupByRowState['labelCardinality'];
   }) {
+    const variableName = `var-metrics-${labelName}-${labelValue}`;
+
     super({
       index,
       labelName,
       labelValue,
       labelCardinality,
-      key: `${labelName || ''}-${labelValue || ''}`,
+      key: `${labelName}-${labelValue}`,
       $variables: new SceneVariableSet({
-        variables: [new MetricsWithLabelValueVariable({ labelName, labelValue })],
+        variables: [
+          new MetricsVariable({
+            key: variableName,
+            name: variableName,
+            labelMatcher: { key: labelName, operator: '=', value: labelValue },
+            addLifeCycleEvents: true,
+          }),
+        ],
       }),
       body: new SceneByVariableRepeater({
-        variableName: VAR_METRIC_WITH_LABEL_VALUE,
+        variableName: variableName,
         initialPageSize: 3,
         body: new SceneCSSGridLayout({
           children: [],
@@ -150,7 +155,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
     const { index, labelName, labelValue, labelCardinality, $variables, body } = model.useState();
 
-    const variable = $variables.state.variables[0] as MetricsWithLabelValueVariable;
+    const variable = $variables.state.variables[0] as MetricsVariable;
     const { loading, error } = variable.useState();
 
     const batchSizes = body.useSizes();
