@@ -56,8 +56,6 @@ export function useBookmarks(sceneObject: SceneObject) {
 
     const newKey = genBookmarkKey(newBookmark.urlValues);
     setAllBookmarks({ ...allBookmarks, [newKey]: { ...newBookmark, key: newKey } });
-
-    notifyBookmarkCreated();
   };
 
   const removeBookmark = (bookmarkKey: string) => {

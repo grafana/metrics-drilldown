@@ -67,7 +67,6 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
         createdAt: Date.now(),
       };
       userStorage.setItem(PREF_KEYS.BOOKMARKS, [...bookmarksFromStorage, newBookmark]);
-      notifyBookmarkCreated();
     }
     
     // Update state to trigger re-render
