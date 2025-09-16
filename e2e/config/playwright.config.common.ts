@@ -9,6 +9,9 @@ import type { PluginOptions, User } from '@grafana/plugin-e2e';
 
 const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
 
+// Matching fallback version from docker-compose-base
+const DEFAULT_GRAFANA_VERSION = '11.6.5';
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -20,7 +23,7 @@ interface GetGrafanaUrlOptions {
 }
 
 export function getGrafanaVersion() {
-  return process.env.GRAFANA_VERSION;
+  return process.env.GRAFANA_VERSION || DEFAULT_GRAFANA_VERSION;
 }
 
 export function getGrafanaUrl(options: GetGrafanaUrlOptions = {}) {
