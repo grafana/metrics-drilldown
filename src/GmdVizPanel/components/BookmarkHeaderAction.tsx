@@ -10,6 +10,7 @@ import { reportExploreMetrics } from '../../interactions';
 import { PREF_KEYS } from '../../UserPreferences/pref-keys';
 import { userStorage } from '../../UserPreferences/userStorage';
 import { getTrailFor } from '../../utils';
+import { BookmarkFromStorage } from 'bookmarks/useBookmarks';
 
 interface BookmarkHeaderActionState extends SceneObjectState {
   metric: string;
@@ -40,7 +41,7 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
       const currentUrlState = sceneUtils.getUrlState(trail);
       const currentKey = genBookmarkKey(currentUrlState);
       const bookmarksFromStorage = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
-      return bookmarksFromStorage.some((b: any) => genBookmarkKey(b.urlValues) === currentKey);
+      return bookmarksFromStorage.some((b: BookmarkFromStorage) => genBookmarkKey(b.urlValues) === currentKey);
     } catch {
       return false;
     }
@@ -51,12 +52,12 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
     const currentUrlState = sceneUtils.getUrlState(trail);
     const currentKey = genBookmarkKey(currentUrlState);
     const bookmarksFromStorage = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
-    const isCurrentlyBookmarked = bookmarksFromStorage.some((b: any) => genBookmarkKey(b.urlValues) === currentKey);
+    const isCurrentlyBookmarked = bookmarksFromStorage.some((b: BookmarkFromStorage) => genBookmarkKey(b.urlValues) === currentKey);
 
     if (isCurrentlyBookmarked) {
       // Remove bookmark
       reportExploreMetrics('bookmark_changed', { action: 'toggled_off' });
-      const updatedBookmarks = bookmarksFromStorage.filter((b: any) => genBookmarkKey(b.urlValues) !== currentKey);
+      const updatedBookmarks = bookmarksFromStorage.filter((b: BookmarkFromStorage) => genBookmarkKey(b.urlValues) !== currentKey);
       userStorage.setItem(PREF_KEYS.BOOKMARKS, updatedBookmarks);
     } else {
       // Add bookmark

@@ -17,7 +17,7 @@ export type Bookmark = {
   createdAt: number;
 };
 
-type BookmarkFromStorage = Omit<Bookmark, 'key'>;
+export type BookmarkFromStorage = Omit<Bookmark, 'key'>;
 
 export function useBookmarks(sceneObject: SceneObject) {
   const [allBookmarks, setAllBookmarks] = useState<Record<string, Bookmark>>({});
