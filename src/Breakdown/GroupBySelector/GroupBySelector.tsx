@@ -3,21 +3,18 @@ import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { Combobox, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useRef } from 'react';
 
-// Types
-export interface AttributePrefixConfig {
+interface AttributePrefixConfig {
   span?: string;
   resource?: string;
   event?: string;
   [key: string]: string | undefined;
 }
-
-export interface SearchConfig {
+interface SearchConfig {
   enabled?: boolean;
   maxOptions?: number;
   caseSensitive?: boolean;
   searchFields?: Array<'label' | 'value'>;
 }
-
 export interface GroupBySelectorProps {
   options: Array<SelectableValue<string>>;
   value?: string;
@@ -30,8 +27,7 @@ export interface GroupBySelectorProps {
   searchConfig?: SearchConfig;
 }
 
-// Utility functions
-export const removeAttributePrefixes = (
+const removeAttributePrefixes = (
   attribute: string,
   prefixes: AttributePrefixConfig
 ): string => {
@@ -43,7 +39,7 @@ export const removeAttributePrefixes = (
   return attribute;
 };
 
-export const filteredOptions = (
+const filteredOptions = (
   options: Array<SelectableValue<string>>,
   query: string,
   searchConfig: SearchConfig
@@ -75,7 +71,7 @@ export const filteredOptions = (
     .slice(0, searchConfig.maxOptions || 1000);
 };
 
-export const getModifiedSelectOptions = (
+const getModifiedSelectOptions = (
   options: Array<SelectableValue<string>>,
   ignoredAttributes: string[],
   attributePrefixes: AttributePrefixConfig
