@@ -49,11 +49,10 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
   }
 
   public onClick = () => {
-    const trail = getTrailFor(this);
-    const currentUrlState = sceneUtils.getUrlState(trail);
+    const currentUrlState = sceneUtils.getUrlState(getTrailFor(this));
     const currentKey = genBookmarkKey(currentUrlState);
     const bookmarksFromStorage = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
-    const isCurrentlyBookmarked = bookmarksFromStorage.some((b: BookmarkFromStorage) => genBookmarkKey(b.urlValues) === currentKey);
+    const isCurrentlyBookmarked = this.state.isBookmarked;
 
     if (isCurrentlyBookmarked) {
       // Remove bookmark
