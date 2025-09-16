@@ -1,194 +1,156 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
-import { Combobox, Field, RadioButtonGroup, useStyles2, useTheme2 } from '@grafana/ui';
-import { useResizeObserver } from '@react-aria/utils';
-import { debounce } from 'lodash';
-import React, { useMemo, useRef, useState } from 'react';
+import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { Combobox, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
+import React, { useMemo, useRef } from 'react';
 
+import { type GroupBySelectorProps } from './types';
+import { filteredOptions, getModifiedSelectOptions, removeAttributePrefixes } from './utils';
 
-import {
-  type DomainConfig,
-  type FilterContext,
-  type GroupBySelectorProps,
-} from './types';
-import {
-  createDefaultGroupBySelectorConfig,
-  filteredOptions,
-  getModifiedSelectOptions,
-  mergeConfigurations,
-  processRadioAttributes,
-} from './utils';
-
-const DEFAULT_ADDITIONAL_WIDTH_PER_ITEM = 40;
-const DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES = 180;
 const DEFAULT_ALL_OPTION = 'All';
 
+function getDefaultForRadios(radioOptions: Array<{ value: string }>, showAll: boolean): string | undefined {
+  if (showAll) {
+    return DEFAULT_ALL_OPTION;
+  }
+  return radioOptions[0]?.value ?? undefined;
+}
+
+function getDefaultForCombobox(
+  comboboxOptions: Array<SelectableValue<string>>,
+  showAll: boolean
+): string | undefined {
+  if (showAll) {
+    return DEFAULT_ALL_OPTION;
+  }
+  return comboboxOptions[0]?.value as string | undefined;
+}
+
+function buildKeyForRadios(radioOptions: Array<{ value: string }>): string {
+  return `radios:${radioOptions.map((o) => o.value).join('|')}`;
+}
+
+function buildKeyForCombobox(comboboxOptions: Array<SelectableValue<string>>): string {
+  return `combo:${comboboxOptions.map((o) => o.value).join('|')}`;
+}
+
+function isValueInRadios(value: string | undefined, radioOptions: Array<{ value: string }>): boolean {
+  return Boolean(value) && radioOptions.some((o) => o.value === value);
+}
+
+function isValueInCombobox(
+  value: string | undefined,
+  comboboxOptions: Array<SelectableValue<string>>
+): boolean {
+  return Boolean(value) && comboboxOptions.some((o) => o.value === value);
+}
+
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   const {
     // Core props
     options,
-    radioAttributes,
     value,
     onChange,
     showAll = false,
-
-    // State data
-    filters = [],
-    currentMetric,
-    initialGroupBy,
 
     // Display configuration
     attributePrefixes = {},
     fieldLabel = 'Group by',
     selectPlaceholder = 'Other attributes',
 
-    // Filtering rules
-    filteringRules = {},
+    // Option processing
     ignoredAttributes = [],
-
-    // Layout and sizing
-    layoutConfig = {},
-
-    // Advanced options
     searchConfig = {},
-    virtualizationConfig = {},
   } = props;
   const styles = useStyles2(getStyles);
-  const theme = useTheme2();
-  const { fontSize } = theme.typography;
-
-  // Internal state
-  const [availableWidth, setAvailableWidth] = useState<number>(0);
-  const controlsContainer = useRef<HTMLDivElement>(null);
-  const previousRadioAttributesRef = useRef<string[]>([]);
+  const previousOptionsRef = useRef<string>('');
   const hasInitializedRef = useRef<boolean>(false);
+  const selectableOptions = useMemo(() => {
+    return (options || []).filter((opt) => opt.value && opt.value !== '$__all') as Array<SelectableValue<string>>;
+  }, [options]);
 
-  // Merge configurations with defaults
-  const domainDefaults = createDefaultGroupBySelectorConfig();
-  const config: DomainConfig = mergeConfigurations(domainDefaults, {
-    attributePrefixes,
-    filteringRules,
-    ignoredAttributes,
-    layoutConfig,
-    searchConfig,
-    virtualizationConfig,
-  });
+  if (selectableOptions.length <= 4) {
+    const radioOptions = selectableOptions.map((opt) => ({
+      label: removeAttributePrefixes(opt.label ?? (opt.value as string), attributePrefixes),
+      value: opt.value as string,
+    }));
 
-  useResizeObserver({
-    ref: controlsContainer,
-    onResize: debounce(() => {
-      const element = controlsContainer.current;
-      if (element) {
-          requestAnimationFrame(() => {
-            setAvailableWidth(element.clientWidth);
-          });
-        }
-    }, 100),
-  });
+    const defaultValue = getDefaultForRadios(radioOptions, showAll);
+    let effectiveValue = value;
+    const currentOptionsKey = buildKeyForRadios(radioOptions);
+    const optionsChanged = currentOptionsKey !== previousOptionsRef.current;
+    if (optionsChanged) {
+      previousOptionsRef.current = currentOptionsKey;
+      hasInitializedRef.current = false;
+    }
+    const isValueAvailable = isValueInRadios(value, radioOptions);
+    const shouldAutoUpdate = (!value || !isValueAvailable) && !hasInitializedRef.current && defaultValue;
+    if (shouldAutoUpdate && defaultValue) {
+      hasInitializedRef.current = true;
+      setTimeout(() => onChange(defaultValue, true), 0);
+      effectiveValue = defaultValue;
+    }
 
-  // Process radio attributes (memoized for expensive calculations)
-  const radioOptions = useMemo(() => {
-    // Create filter context inside useMemo to avoid dependency issues
-    const filterContext: FilterContext = {
-      filters,
-      currentMetric,
-      availableOptions: options,
-    };
-
-    return processRadioAttributes(
-          radioAttributes,
-          options,
-          config.filteringRules,
-          filterContext,
-          {
-            attributePrefixes: config.attributePrefixes,
-            fontSize,
-            availableWidth,
-            additionalWidthPerItem: config.layoutConfig.additionalWidthPerItem || DEFAULT_ADDITIONAL_WIDTH_PER_ITEM,
-            widthOfOtherAttributes: config.layoutConfig.widthOfOtherAttributes || DEFAULT_WIDTH_OF_OTHER_ATTRIBUTES,
-            includeAllOptionInWidth: showAll,
-            allOptionLabel: DEFAULT_ALL_OPTION,
-          }
-        );
-  }, [radioAttributes, config.attributePrefixes, options, filters, config.filteringRules, currentMetric, fontSize, availableWidth, config.layoutConfig.additionalWidthPerItem, config.layoutConfig.widthOfOtherAttributes, showAll]);
-
-  // Show all radio options - no artificial limit or special treatment of labels
-  const limitedRadioOptions = radioOptions;
-
-  // Process other attributes (those not in limited radio buttons)
-  const optionsNotInRadio = options.filter(
-    (option) => !limitedRadioOptions.find((ro) => ro.value === option.value?.toString())
-  );
-  const otherAttrOptions = filteredOptions(optionsNotInRadio, '', config.searchConfig);
-
-  // Get modified select options
-  const baseOptions = getModifiedSelectOptions(otherAttrOptions, config.ignoredAttributes, config.attributePrefixes);
-
-  // Add "All" option to dropdown if showAll is true and no radio buttons are shown
-  const modifiedSelectOptions = showAll && limitedRadioOptions.length === 0
-    ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...baseOptions]
-    : baseOptions;
-
-  // Determine default value
-  const defaultValue = initialGroupBy ?? (showAll ? DEFAULT_ALL_OPTION : limitedRadioOptions[0]?.value ?? modifiedSelectOptions[0]?.value);
-
-  // Check if radio attributes have changed (no memoization, no side effects)
-  const current = radioAttributes.join(',');
-  const previous = previousRadioAttributesRef.current.join(',');
-  const radioAttributesChanged = current !== previous;
-  if (radioAttributesChanged) {
-    previousRadioAttributesRef.current = [...radioAttributes];
+    return (
+      <Field label={fieldLabel} data-testid="breakdown-label-selector">
+        <div className={styles.container}>
+          <RadioButtonGroup
+            data-testid="group-by-selector-radio-group"
+            options={[
+              ...(showAll ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }] : []),
+              ...radioOptions,
+            ]}
+            value={effectiveValue}
+            onChange={onChange}
+          />
+        </div>
+      </Field>
+    );
   }
 
-  // Check if current value exists in filters (simple operation, no memoization needed)
-  const valueExistsInFilters = filters.some((f) => f.key === value);
+  const baseOptions = getModifiedSelectOptions(
+    filteredOptions(selectableOptions, '', searchConfig),
+    ignoredAttributes,
+    attributePrefixes
+  );
+  const comboboxOptions = showAll
+    ? ([{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...baseOptions] as Array<SelectableValue<string>>)
+    : baseOptions;
 
-  // Determine if we should auto-update
-  const shouldAutoUpdate = !value || radioAttributesChanged || valueExistsInFilters;
-
-  // Handle the auto-update logic (no side effects in useMemo)
+  const defaultValue = getDefaultForCombobox(comboboxOptions, showAll);
   let effectiveValue = value;
-  if (defaultValue && shouldAutoUpdate && !hasInitializedRef.current) {
-    // Mark as initialized to prevent repeated auto-updates
+  const currentOptionsKey = buildKeyForCombobox(comboboxOptions);
+  const optionsChanged = currentOptionsKey !== previousOptionsRef.current;
+  if (optionsChanged) {
+    previousOptionsRef.current = currentOptionsKey;
+    hasInitializedRef.current = false;
+  }
+  const isValueAvailable = isValueInCombobox(value, comboboxOptions);
+  const shouldAutoUpdate = (!value || !isValueAvailable) && !hasInitializedRef.current && defaultValue;
+  if (shouldAutoUpdate && defaultValue) {
     hasInitializedRef.current = true;
-    // Trigger the onChange in the next render cycle
     setTimeout(() => onChange(defaultValue, true), 0);
     effectiveValue = defaultValue;
   }
 
-  // Reset initialization flag when radio attributes change
-  if (radioAttributesChanged) {
-    hasInitializedRef.current = false;
-  }
-
-  // Show All option
-  const showAllOption = showAll ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }] : [];
   const defaultOnChangeValue = showAll ? DEFAULT_ALL_OPTION : '';
 
   return (
     <Field label={fieldLabel} data-testid="breakdown-label-selector">
-      <div ref={controlsContainer} className={styles.container}>
-        {limitedRadioOptions.length > 0 && (
-            <RadioButtonGroup
-              data-testid="group-by-selector-radio-group"
-              options={[...showAllOption, ...limitedRadioOptions]}
-              value={effectiveValue}
-              onChange={onChange}
-            />
-        )}
-        {modifiedSelectOptions.length > 0 && (
+      <div className={styles.container}>
+        {comboboxOptions.length > 0 && (
           <div className={styles.selectContainer} id="group-by-selector">
             <Combobox
               id="group-by-selector"
-              value={effectiveValue && modifiedSelectOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
+              value={effectiveValue && comboboxOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
               placeholder={selectPlaceholder}
-              options={modifiedSelectOptions.filter(opt => opt.value !== undefined) as Array<{label?: string, value: string}>}
+              options={comboboxOptions.filter((opt) => opt.value !== undefined) as Array<{ label?: string; value: string }>}
               onChange={(selected) => {
                 const newSelected = (selected?.value as string) ?? defaultOnChangeValue;
                 onChange(newSelected);
               }}
               isClearable
-              />
+            />
           </div>
         )}
       </div>

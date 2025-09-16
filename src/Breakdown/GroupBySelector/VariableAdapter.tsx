@@ -2,9 +2,8 @@ import { sceneGraph, type QueryVariable } from '@grafana/scenes';
 import React, { useCallback } from 'react';
 
 import { GroupBySelector } from './GroupBySelector';
-import { deriveRadioAttributesFromOptions } from './utils';
 import { VAR_FILTERS } from '../../shared';
-import { isAdHocFiltersVariable } from '../../utils/utils.variables';
+// import { isAdHocFiltersVariable } from '../../utils/utils.variables';
 
 import type { GroupBySelectorProps } from './types';
 
@@ -17,12 +16,8 @@ export function VariableBackedGroupBySelector({ variable, ...props }: VariableBa
   const { options, value: rawValue } = variable.useState();
   const value = variable.hasAllValue() ? 'All' : (rawValue as string);
 
-  const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, variable);
-  const filters = isAdHocFiltersVariable(filtersVariable)
-    ? filtersVariable.state.filters.map((f: any) => ({ key: f.key, operator: f.operator, value: f.value }))
-    : [];
-
-  const radioAttributes = deriveRadioAttributesFromOptions(options as Array<{ value?: string }>, 4);
+  // Keep lookup to preserve side-effects if any; filters are no longer needed here
+  sceneGraph.lookupVariable(VAR_FILTERS, variable);
 
   const onChange = useCallback(
     (selected: string, ignore?: boolean) => {
@@ -36,10 +31,8 @@ export function VariableBackedGroupBySelector({ variable, ...props }: VariableBa
   return (
     <GroupBySelector
       options={options as Array<{ label?: string; value: string }>}
-      radioAttributes={radioAttributes}
       value={value}
       onChange={onChange}
-      filters={filters}
       showAll
       {...props}
     />

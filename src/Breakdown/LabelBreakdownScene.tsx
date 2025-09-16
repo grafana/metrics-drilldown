@@ -73,23 +73,14 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
-    const layoutConfig = {
-      additionalWidthPerItem: 40,
-      widthOfOtherAttributes: 100,
-    };
-
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <div className={styles.groupBySelector}>
-            <VariableBackedGroupBySelector
-              variable={groupByVariable}
-              fieldLabel="By label"
-              selectPlaceholder="More labels..."
-              filteringRules={{ excludeFilteredFromRadio: false }}
-              layoutConfig={layoutConfig}
-            />
-          </div>
+          <VariableBackedGroupBySelector
+            variable={groupByVariable}
+            fieldLabel="By label"
+            selectPlaceholder="More labels..."
+          />
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
         </div>
@@ -121,9 +112,6 @@ function getStyles(theme: GrafanaTheme2) {
       overflowX: 'auto',
     }),
     searchField: css({
-      flexGrow: 1,
-    }),
-    groupBySelector: css({
       flexGrow: 1,
     }),
   };
