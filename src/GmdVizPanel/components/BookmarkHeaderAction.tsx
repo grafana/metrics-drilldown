@@ -4,13 +4,14 @@ import { SceneObjectBase, sceneUtils, type SceneComponentProps, type SceneObject
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { type BookmarkFromStorage } from 'bookmarks/useBookmarks';
+
 import { genBookmarkKey } from '../../bookmarks/genBookmarkKey';
 import { notifyBookmarkCreated } from '../../bookmarks/notifyBookmarkCreated';
 import { reportExploreMetrics } from '../../interactions';
 import { PREF_KEYS } from '../../UserPreferences/pref-keys';
 import { userStorage } from '../../UserPreferences/userStorage';
 import { getTrailFor } from '../../utils';
-import { BookmarkFromStorage } from 'bookmarks/useBookmarks';
 
 interface BookmarkHeaderActionState extends SceneObjectState {
   metric: string;
