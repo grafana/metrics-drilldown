@@ -3,7 +3,6 @@ import React, { useCallback } from 'react';
 
 import { GroupBySelector } from './GroupBySelector';
 import { VAR_FILTERS } from '../../shared';
-// import { isAdHocFiltersVariable } from '../../utils/utils.variables';
 
 import type { GroupBySelectorProps } from './types';
 

@@ -2,11 +2,6 @@ import { type SelectableValue } from '@grafana/data';
 
 import { type AttributePrefixConfig, type SearchConfig } from './types';
 
-// (removed createAttributeFilter and processRadioAttributes; no width-based logic)
-
-/**
- * Removes attribute prefixes from labels for display
- */
 export const removeAttributePrefixes = (
   attribute: string,
   prefixes: AttributePrefixConfig
@@ -19,9 +14,6 @@ export const removeAttributePrefixes = (
   return attribute;
 };
 
-/**
- * Filters options based on search query
- */
 export const filteredOptions = (
   options: Array<SelectableValue<string>>,
   query: string,
@@ -54,9 +46,6 @@ export const filteredOptions = (
     .slice(0, searchConfig.maxOptions || 1000);
 };
 
-/**
- * Processes select options by removing ignored attributes and applying prefixes
- */
 export const getModifiedSelectOptions = (
   options: Array<SelectableValue<string>>,
   ignoredAttributes: string[],
@@ -71,9 +60,3 @@ export const getModifiedSelectOptions = (
       value: option.value,
     }));
 };
-
-// (removed deriveRadioAttributesFromOptions; radios are decided internally)
-
-// (removed createDefaultGroupBySelectorConfig)
-
-// (removed mergeConfigurations)
