@@ -44,7 +44,30 @@ function isValueInCombobox(
   return Boolean(value) && comboboxOptions.some((o) => o.value === value);
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
+function computeEffectiveValue(
+  optionsKey: string,
+  isValueAvailable: boolean,
+  defaultValue: string | undefined,
+  currentValue: string | undefined,
+  previousOptionsRef: React.MutableRefObject<string>,
+  hasInitializedRef: React.MutableRefObject<boolean>,
+  onChange: (value: string, skipObserver?: boolean) => void
+): string | undefined {
+  let effectiveValue = currentValue;
+  const optionsChanged = optionsKey !== previousOptionsRef.current;
+  if (optionsChanged) {
+    previousOptionsRef.current = optionsKey;
+    hasInitializedRef.current = false;
+  }
+  const shouldAutoUpdate = (!currentValue || !isValueAvailable) && !hasInitializedRef.current && defaultValue;
+  if (shouldAutoUpdate && defaultValue) {
+    hasInitializedRef.current = true;
+    setTimeout(() => onChange(defaultValue, true), 0);
+    effectiveValue = defaultValue;
+  }
+  return effectiveValue;
+}
+
 export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   const {
     // Core props
@@ -76,20 +99,17 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     }));
 
     const defaultValue = getDefaultForRadios(radioOptions, showAll);
-    let effectiveValue = value;
     const currentOptionsKey = buildKeyForRadios(radioOptions);
-    const optionsChanged = currentOptionsKey !== previousOptionsRef.current;
-    if (optionsChanged) {
-      previousOptionsRef.current = currentOptionsKey;
-      hasInitializedRef.current = false;
-    }
     const isValueAvailable = isValueInRadios(value, radioOptions);
-    const shouldAutoUpdate = (!value || !isValueAvailable) && !hasInitializedRef.current && defaultValue;
-    if (shouldAutoUpdate && defaultValue) {
-      hasInitializedRef.current = true;
-      setTimeout(() => onChange(defaultValue, true), 0);
-      effectiveValue = defaultValue;
-    }
+    const effectiveValue = computeEffectiveValue(
+      currentOptionsKey,
+      isValueAvailable,
+      defaultValue,
+      value,
+      previousOptionsRef,
+      hasInitializedRef,
+      onChange
+    );
 
     return (
       <Field label={fieldLabel} data-testid="breakdown-label-selector">
@@ -118,20 +138,17 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     : baseOptions;
 
   const defaultValue = getDefaultForCombobox(comboboxOptions, showAll);
-  let effectiveValue = value;
   const currentOptionsKey = buildKeyForCombobox(comboboxOptions);
-  const optionsChanged = currentOptionsKey !== previousOptionsRef.current;
-  if (optionsChanged) {
-    previousOptionsRef.current = currentOptionsKey;
-    hasInitializedRef.current = false;
-  }
   const isValueAvailable = isValueInCombobox(value, comboboxOptions);
-  const shouldAutoUpdate = (!value || !isValueAvailable) && !hasInitializedRef.current && defaultValue;
-  if (shouldAutoUpdate && defaultValue) {
-    hasInitializedRef.current = true;
-    setTimeout(() => onChange(defaultValue, true), 0);
-    effectiveValue = defaultValue;
-  }
+  const effectiveValue = computeEffectiveValue(
+    currentOptionsKey,
+    isValueAvailable,
+    defaultValue,
+    value,
+    previousOptionsRef,
+    hasInitializedRef,
+    onChange
+  );
 
   const defaultOnChangeValue = showAll ? DEFAULT_ALL_OPTION : '';
 
