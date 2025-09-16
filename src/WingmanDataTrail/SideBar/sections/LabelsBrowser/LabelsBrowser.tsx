@@ -56,9 +56,18 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
     // Subscribe to variable changes to update active state when the variable is changed externally
     this._subs.add(
-      labelsVariable.subscribeToState((newState) => {
+      labelsVariable.subscribeToState((newState, prevState) => {
+        if (newState.value === prevState.value) {
+          return;
+        }
+
         const active = Boolean(newState.value && newState.value !== NULL_GROUP_BY_VALUE);
+        if (active === this.state.active) {
+          return;
+        }
+
         this.setState({ active });
+
         this.publishEvent(
           new EventSectionValueChanged({ key: this.state.key, values: active ? [newState.value as string] : [] }),
           true
