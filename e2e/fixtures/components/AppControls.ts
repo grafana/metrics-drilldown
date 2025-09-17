@@ -94,10 +94,6 @@ export class AppControls {
 
   /* Settings/plugin info */
 
-  getSettingsButton() {
-    return this.get().getByTestId('settings-button');
-  }
-
   getPluginInfoButton() {
     return this.get().getByTestId('plugin-info-button');
   }
