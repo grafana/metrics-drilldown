@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 import { Combobox, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useMemo } from 'react';
 
@@ -57,7 +57,6 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
 
   const styles = useStyles2(getStyles);
 
-  // Single memoized options processing
   const processedOptions = useMemo(() => {
     const filtered = options
       .filter((opt) => opt.value && opt.value !== '$__all' && !ignoredAttributes.includes(opt.value))
@@ -69,7 +68,6 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     return showAll ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...filtered] : filtered;
   }, [options, showAll, ignoredAttributes, attributePrefixes]);
 
-  // Single default value calculation
   const defaultValue = processedOptions[0]?.value;
   const effectiveValue = value || defaultValue;
 
@@ -84,42 +82,34 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
 
   return (
     <Field label={fieldLabel} data-testid="breakdown-label-selector">
-      <div className={styles.container}>
-        {useRadios ? (
-          <RadioButtonGroup
-            data-testid="group-by-selector-radio-group"
+      {useRadios ? (
+        <RadioButtonGroup
+          data-testid="group-by-selector-radio-group"
+          options={processedOptions}
+          value={effectiveValue}
+          onChange={onChange}
+        />
+      ) : (
+        <div className={styles.selectContainer} id="group-by-selector">
+          <Combobox
+            id="group-by-selector"
+            value={effectiveValue && processedOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
+            placeholder={selectPlaceholder}
             options={processedOptions}
-            value={effectiveValue}
-            onChange={onChange}
+            onChange={(selected) => {
+              const newSelected = selected?.value || defaultValue || '';
+              onChange(newSelected);
+            }}
+            isClearable
           />
-        ) : (
-          <div className={styles.selectContainer} id="group-by-selector">
-            <Combobox
-              id="group-by-selector"
-              value={effectiveValue && processedOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
-              placeholder={selectPlaceholder}
-              options={processedOptions}
-              onChange={(selected) => {
-                const newSelected = selected?.value || defaultValue || '';
-                onChange(newSelected);
-              }}
-              isClearable
-            />
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </Field>
   );
 }
 
-function getStyles(theme: GrafanaTheme2) {
+function getStyles() {
   return {
-    container: css({
-      display: 'flex',
-      gap: theme.spacing(1),
-      width: '100%',
-      alignItems: 'flex-start',
-    }),
     selectContainer: css({
       minWidth: 100,
     }),
