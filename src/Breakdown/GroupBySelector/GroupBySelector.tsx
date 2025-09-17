@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { Combobox, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 interface AttributePrefixConfig {
   span?: string;
@@ -125,27 +125,12 @@ function isValueInCombobox(
 }
 
 function computeEffectiveValue(
-  optionsKey: string,
-  isValueAvailable: boolean,
-  defaultValue: string | undefined,
   currentValue: string | undefined,
-  previousOptionsRef: React.MutableRefObject<string>,
-  hasInitializedRef: React.MutableRefObject<boolean>,
-  onChange: (value: string, skipObserver?: boolean) => void
+  isValueAvailable: boolean,
+  defaultValue: string | undefined
 ): string | undefined {
-  let effectiveValue = currentValue;
-  const optionsChanged = optionsKey !== previousOptionsRef.current;
-  if (optionsChanged) {
-    previousOptionsRef.current = optionsKey;
-    hasInitializedRef.current = false;
-  }
-  const shouldAutoUpdate = (!currentValue || !isValueAvailable) && !hasInitializedRef.current && defaultValue;
-  if (shouldAutoUpdate && defaultValue) {
-    hasInitializedRef.current = true;
-    setTimeout(() => onChange(defaultValue, true), 0);
-    effectiveValue = defaultValue;
-  }
-  return effectiveValue;
+  // Just return the effective value without side effects
+  return currentValue || (isValueAvailable ? currentValue : defaultValue);
 }
 
 export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
@@ -172,6 +157,64 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     return (options || []).filter((opt) => opt.value && opt.value !== '$__all') as Array<SelectableValue<string>>;
   }, [options]);
 
+  // Auto-selection effect for radio buttons
+  useEffect(() => {
+    if (selectableOptions.length + (showAll ? 1 : 0) <= 4) {
+      const radioOptions = selectableOptions.map((opt) => ({
+        label: removeAttributePrefixes(opt.label ?? (opt.value as string), attributePrefixes),
+        value: opt.value as string,
+      }));
+
+      const currentOptionsKey = buildKeyForRadios(radioOptions);
+      const optionsChanged = currentOptionsKey !== previousOptionsRef.current;
+
+      if (optionsChanged) {
+        previousOptionsRef.current = currentOptionsKey;
+        hasInitializedRef.current = false;
+      }
+
+      const defaultValue = getDefaultForRadios(radioOptions, showAll);
+      const isValueAvailable = isValueInRadios(value, radioOptions);
+      const shouldAutoUpdate = (!value || !isValueAvailable) && !hasInitializedRef.current && defaultValue;
+
+      if (shouldAutoUpdate && defaultValue) {
+        hasInitializedRef.current = true;
+        onChange(defaultValue, true);
+      }
+    }
+  }, [selectableOptions, showAll, attributePrefixes, value, onChange]);
+
+  // Auto-selection effect for combobox
+  useEffect(() => {
+    if (selectableOptions.length + (showAll ? 1 : 0) > 4) {
+      const baseOptions = getModifiedSelectOptions(
+        filteredOptions(selectableOptions, '', searchConfig),
+        ignoredAttributes,
+        attributePrefixes
+      );
+      const comboboxOptions = showAll
+        ? ([{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...baseOptions] as Array<SelectableValue<string>>)
+        : baseOptions;
+
+      const currentOptionsKey = buildKeyForCombobox(comboboxOptions);
+      const optionsChanged = currentOptionsKey !== previousOptionsRef.current;
+
+      if (optionsChanged) {
+        previousOptionsRef.current = currentOptionsKey;
+        hasInitializedRef.current = false;
+      }
+
+      const defaultValue = getDefaultForCombobox(comboboxOptions, showAll);
+      const isValueAvailable = isValueInCombobox(value, comboboxOptions);
+      const shouldAutoUpdate = (!value || !isValueAvailable) && !hasInitializedRef.current && defaultValue;
+
+      if (shouldAutoUpdate && defaultValue) {
+        hasInitializedRef.current = true;
+        onChange(defaultValue, true);
+      }
+    }
+  }, [selectableOptions, showAll, searchConfig, ignoredAttributes, attributePrefixes, value, onChange]);
+
   if (selectableOptions.length + (showAll ? 1 : 0) <= 4) {
     const radioOptions = selectableOptions.map((opt) => ({
       label: removeAttributePrefixes(opt.label ?? (opt.value as string), attributePrefixes),
@@ -179,17 +222,8 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     }));
 
     const defaultValue = getDefaultForRadios(radioOptions, showAll);
-    const currentOptionsKey = buildKeyForRadios(radioOptions);
     const isValueAvailable = isValueInRadios(value, radioOptions);
-    const effectiveValue = computeEffectiveValue(
-      currentOptionsKey,
-      isValueAvailable,
-      defaultValue,
-      value,
-      previousOptionsRef,
-      hasInitializedRef,
-      onChange
-    );
+    const effectiveValue = computeEffectiveValue(value, isValueAvailable, defaultValue);
 
     return (
       <Field label={fieldLabel} data-testid="breakdown-label-selector">
@@ -218,17 +252,8 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
     : baseOptions;
 
   const defaultValue = getDefaultForCombobox(comboboxOptions, showAll);
-  const currentOptionsKey = buildKeyForCombobox(comboboxOptions);
   const isValueAvailable = isValueInCombobox(value, comboboxOptions);
-  const effectiveValue = computeEffectiveValue(
-    currentOptionsKey,
-    isValueAvailable,
-    defaultValue,
-    value,
-    previousOptionsRef,
-    hasInitializedRef,
-    onChange
-  );
+  const effectiveValue = computeEffectiveValue(value, isValueAvailable, defaultValue);
 
   const defaultOnChangeValue = showAll ? DEFAULT_ALL_OPTION : '';
 
