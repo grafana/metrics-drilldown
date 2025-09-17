@@ -25,7 +25,7 @@ services:
       # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
       - 'host.docker.internal:172.17.0.1'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -46,7 +46,7 @@ services:
       # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
       - 'host.docker.internal:172.17.0.1'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -83,11 +83,9 @@ services:
       grafana-scopes-gmd:
         condition: service_healthy
       grafana-gmd:
-        condition: service_started
+        condition: service_healthy
       prometheus-gmd:
         condition: service_started
     environment:
       GRAFANA_PORT: ${GRAFANA_PORT:-3001}
       GRAFANA_SCOPES_PORT: ${GRAFANA_SCOPES_PORT:-3002}
-      GRAFANA_IMAGE: ${GRAFANA_IMAGE:-grafana-enterprise}
-      GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.5}
