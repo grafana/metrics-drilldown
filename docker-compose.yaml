@@ -25,11 +25,11 @@ services:
       # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
       - 'host.docker.internal:172.17.0.1'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 10s
-      timeout: 5s
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      interval: 3s
+      timeout: 1s
       retries: 10
-      start_period: 30s
+      start_period: 5s
 
   grafana-scopes-gmd:
     container_name: 'grafana-scopes-gmd'
@@ -46,11 +46,11 @@ services:
       # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
       - 'host.docker.internal:172.17.0.1'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 10s
-      timeout: 5s
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      interval: 3s
+      timeout: 1s
       retries: 10
-      start_period: 30s
+      start_period: 5s
 
   prometheus-gmd:
     container_name: 'prometheus-gmd'
@@ -79,15 +79,18 @@ services:
       - ./src:/app/src
     command: ${PLAYWRIGHT_ARGS:-}
     profiles: [playwright]
+    # this is only for local testing, in our CI pipeline, our shared plugin actions wait for Grafana to start before launching Playwright
     depends_on:
       grafana-scopes-gmd:
         condition: service_healthy
       grafana-gmd:
-        condition: service_started
+        condition: service_healthy
       prometheus-gmd:
         condition: service_started
     environment:
-      GRAFANA_PORT: ${GRAFANA_PORT:-3001}
-      GRAFANA_SCOPES_PORT: ${GRAFANA_SCOPES_PORT:-3002}
-      GRAFANA_IMAGE: ${GRAFANA_IMAGE:-grafana-enterprise}
+      # required for screenshot testing across Grafana versions
       GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.5}
+      # required for testing Scopes functionality (see the grafana-scopes-gmd service above)
+      GRAFANA_SCOPES_PORT: ${GRAFANA_SCOPES_PORT:-3002}
+      # see the grafana-gmd service above
+      GRAFANA_PORT: ${GRAFANA_PORT:-3001}
