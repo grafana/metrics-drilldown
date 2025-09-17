@@ -1,13 +1,5 @@
 import { type PluginExtensionPanelContext } from '@grafana/data';
-
-// Mock templateSrv - simplified to just track calls
-const mockReplace = jest.fn();
-jest.mock('@grafana/runtime', () => ({
-  ...jest.requireActual('@grafana/runtime'),
-  getTemplateSrv: () => ({
-    replace: mockReplace,
-  }),
-}));
+import { type PromQuery } from '@grafana/prometheus';
 
 import {
   buildNavigateToMetricsParams,
@@ -18,7 +10,15 @@ import {
   UrlParameters,
   type GrafanaAssistantMetricsDrilldownContext,
 } from './links';
-import { type PromQuery } from '@grafana/prometheus';
+
+// Mock templateSrv - simplified to just track calls
+const mockReplace = jest.fn();
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  getTemplateSrv: () => ({
+    replace: mockReplace,
+  }),
+}));
 
 // Mock factory for PluginExtensionPanelContext
 function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {}): PluginExtensionPanelContext {
