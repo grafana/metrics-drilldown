@@ -4,9 +4,9 @@ import {
   type PluginExtensionAddedLinkConfig,
   type PluginExtensionPanelContext,
 } from '@grafana/data';
+import { interpolateQueryExpr } from '@grafana/prometheus';
 import { getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
-import { interpolateQueryExpr } from '@grafana/prometheus';
 import { parser } from '@prometheus-io/lezer-promql';
 
 import { parseMatcher } from './parseMatcher';
