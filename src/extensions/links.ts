@@ -279,3 +279,13 @@ function isPromQuery(query: DataQuery): query is PromQuery {
   const { datasource } = query;
   return datasource?.type === 'prometheus';
 }
+
+// Need to export this function from scenes because importing scenesUtils is increasing the bundle entry point size by 522.51kB
+export function escapeUrlPipeDelimiters(value: string | undefined): string {
+  if (value == null) {
+    return '';
+  }
+
+  // Replace the pipe due to using it as a filter separator
+  return /\|/g[Symbol.replace](value, '__gfp__');
+}
