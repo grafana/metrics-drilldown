@@ -121,7 +121,6 @@ test.describe('Metrics reducer view', () => {
 
         // create bookmark and back to metrics reducer
         await metricSceneView.getByRole('button', { name: UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL }).click();
-        await expect(metricSceneView.getByText('Bookmark created')).toBeVisible();
         await metricSceneView.goBack();
 
         // open bookmarks and assertion

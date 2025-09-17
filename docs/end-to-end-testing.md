@@ -23,6 +23,15 @@ npm i
 npm run e2e:prepare
 ```
 
+Make sure your `.env` file in the root folder contains these environment variables:
+
+- `GRAFANA_IMAGE`
+- `GRAFANA_VERSION`
+- `GRAFANA_PORT`
+- `GRAFANA_SCOPES_PORT`
+
+An easy way to do this is to open [env.example](../.env.example) and save it as `.env`.
+
 ### Each time you want to develop a new test
 
 In one terminal window, build the app (with the code watcher):

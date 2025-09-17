@@ -9,7 +9,6 @@ import { getTrailFor } from 'utils';
 import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { genBookmarkKey } from './genBookmarkKey';
-import { notifyBookmarkCreated } from './notifyBookmarkCreated';
 
 export type Bookmark = {
   key: string;
@@ -17,7 +16,7 @@ export type Bookmark = {
   createdAt: number;
 };
 
-type BookmarkFromStorage = Omit<Bookmark, 'key'>;
+export type BookmarkFromStorage = Omit<Bookmark, 'key'>;
 
 export function useBookmarks(sceneObject: SceneObject) {
   const [allBookmarks, setAllBookmarks] = useState<Record<string, Bookmark>>({});
@@ -56,8 +55,6 @@ export function useBookmarks(sceneObject: SceneObject) {
 
     const newKey = genBookmarkKey(newBookmark.urlValues);
     setAllBookmarks({ ...allBookmarks, [newKey]: { ...newBookmark, key: newKey } });
-
-    notifyBookmarkCreated();
   };
 
   const removeBookmark = (bookmarkKey: string) => {

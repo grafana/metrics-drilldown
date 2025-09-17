@@ -9,9 +9,6 @@ import type { PluginOptions, User } from '@grafana/plugin-e2e';
 
 const pluginE2eAuth = `${dirname(require.resolve('@grafana/plugin-e2e'))}/auth`;
 
-// Matching fallback version from docker-compose-base
-const DEFAULT_GRAFANA_VERSION = '11.6.5';
-
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -23,18 +20,11 @@ interface GetGrafanaUrlOptions {
 }
 
 export function getGrafanaVersion() {
-  return process.env.GRAFANA_VERSION || DEFAULT_GRAFANA_VERSION;
+  return process.env.GRAFANA_VERSION;
 }
 
 export function getGrafanaUrl(options: GetGrafanaUrlOptions = {}) {
-  if (process.env.GRAFANA_URL) {
-    return process.env.GRAFANA_URL;
-  }
-
-  const grafanaPort = process.env.GRAFANA_PORT || 3001;
-  const grafanaScopesPort = process.env.GRAFANA_SCOPES_PORT || 3002;
-  const port = options.withScopes ? grafanaScopesPort : grafanaPort;
-
+  const port = options.withScopes ? process.env.GRAFANA_SCOPES_PORT : process.env.GRAFANA_PORT;
   return `http://localhost:${port}`;
 }
 
@@ -56,14 +46,6 @@ type CustomEnvConfig = {
 
 export function config(config: CustomEnvConfig) {
   return defineConfig<PluginOptions>({
-    webServer: {
-      command: 'sleep infinity',
-      url: getGrafanaUrl(),
-      timeout: 30 * 1000,
-      reuseExistingServer: true,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
     reporter: config.reporter,
     expect: {
       timeout: Number(config.expectTimeout) > 0 ? config.expectTimeout : 5000,

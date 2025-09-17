@@ -15,6 +15,7 @@ import { useStyles2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
 import React, { useRef } from 'react';
 
+import { BookmarkHeaderAction } from 'GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
@@ -32,7 +33,7 @@ import { getAppBackgroundColor } from './utils/utils.styles';
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
 export const TOPVIEW_PANEL_KEY = 'topview-panel';
-
+export const TOPVIEW_PANEL_MENU_KEY = 'topview-panel-menu';
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
@@ -57,9 +58,9 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               panelOptions: {
                 height: PANEL_HEIGHT.XL,
                 headerActions: isClassicHistogramMetric(metric)
-                  ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
-                  : () => [new ConfigurePanelAction({ metric })],
-                menu: () => new PanelMenu({ labelName: metric }),
+                  ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })]
+                  : () => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
+                menu: () => new PanelMenu({ labelName: metric, key: TOPVIEW_PANEL_MENU_KEY }),
               },
               queryOptions: {
                 resolution: QUERY_RESOLUTION.HIGH,
@@ -102,7 +103,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         gmdVizPanel.update(
           {
             description: getMetricDescription(metadata),
-            headerActions: () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })],
+            headerActions: () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
           },
           {}
         );
