@@ -13,13 +13,11 @@ export function VariableBackedGroupBySelector({ variable, ...props }: VariableBa
   const { options, value: rawValue } = variable.useState();
   const value = variable.hasAllValue() ? 'All' : (rawValue as string);
 
-  // Keep lookup to preserve side-effects if any; filters are no longer needed here
   sceneGraph.lookupVariable(VAR_FILTERS, variable);
 
   const onChange = useCallback(
     (selected: string, ignore?: boolean) => {
       const next = selected === 'All' ? '$__all' : selected;
-      // Pass isUserAction=true only for real user interactions so URL/history updates
       variable.changeValueTo(next, undefined, !ignore);
     },
     [variable]
