@@ -174,7 +174,7 @@ export class MetricSceneView extends DrilldownView {
     }
 
     // Check if it's selected in the combobox
-    const combobox = this.getLabelDropdown().getByRole('combobox', { name: "group-by-selector" });
+    const combobox = this.getLabelDropdown().getByRole('combobox');
     if (await combobox.isVisible()) {
       await expect(combobox).toHaveValue(optionLabel);
       return;
@@ -185,15 +185,25 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async selectLabel(label: string) {
+    // Wait for the label dropdown to be visible first
+    await expect(this.getLabelDropdown()).toBeVisible();
+
     // First try to click on a radio button if it exists for this label
     const radioOption = this.getLabelDropdown().getByRole('radio', { name: label });
-    if (await radioOption.isVisible()) {
-      await radioOption.click();
-      return;
+    try {
+      if (await radioOption.isVisible({ timeout: 2000 })) {
+        await radioOption.click();
+        return;
+      }
+    } catch {
+      // Radio button not found or not visible, continue to combobox
     }
 
     // If not a radio button, use the combobox
-    await this.getLabelDropdown().getByRole('combobox').click();
+    // Wait for the combobox to be available and visible
+    const combobox = this.getLabelDropdown().getByRole('combobox');
+    await expect(combobox).toBeVisible({ timeout: 10000 });
+    await combobox.click();
     await this.getByRole('option', { name: label }).click();
   }
 
