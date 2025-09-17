@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
-import { VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
-import { utf8Support, type PromQuery } from '@grafana/prometheus';
+import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
+import { utf8Support } from '@grafana/prometheus';
 import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
@@ -8,39 +8,47 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
-  SceneReactObject,
   SceneRefreshPicker,
   SceneTimePicker,
   SceneTimeRange,
+  sceneUtils,
   SceneVariableSet,
   ScopesVariable,
   UrlSyncContextProvider,
-  VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
   type SceneObjectUrlValues,
   type SceneObjectWithUrlSync,
-  type SceneQueryRunner,
   type SceneVariable,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
+import { resetYAxisSync } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
+import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
+import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
+import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
+import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
+import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { getMetricType, getMetricTypeSync, type MetricType } from 'GmdVizPanel/matchers/getMetricType';
+import { GiveFeedbackButton } from 'Header/GiveFeedbackButton';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
-import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
+import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
+import { addRecentMetric } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
+import { SelectNewMetricButton } from './controls/SelectNewMetricButton';
 import { DataTrailSettings } from './DataTrailSettings';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { reportChangeInLabelFilters } from './interactions';
+import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
 import { MetricScene } from './MetricScene';
-import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from './shared';
-import { getTrailStore } from './TrailStore/TrailStore';
+import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
 import { limitAdhocProviders } from './utils';
-import { isSceneQueryRunner } from './utils/utils.queries';
 import { getAppBackgroundColor } from './utils/utils.styles';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
@@ -49,7 +57,6 @@ export interface DataTrailState extends SceneObjectState {
   embedded?: boolean;
   controls: SceneObject[];
   settings: DataTrailSettings;
-  pluginInfo: SceneReactObject;
   createdAt: number;
 
   // wingman
@@ -62,21 +69,29 @@ export interface DataTrailState extends SceneObjectState {
 
   // Synced with url
   metric?: string;
-  metricSearch?: string;
 
-  histogramsLoadP: Promise<void> | null;
-  histogramsLoaded: boolean;
-  nativeHistograms: string[];
-  nativeHistogramMetric: string;
-
-  trailActivated: boolean; // this indicates that the trail has been updated by metric or filter selected
   urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
+
+  drawer: SceneDrawer;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
+  private disableReportFiltersInteraction = false;
+  private datasourceHelper = new MetricDatasourceHelper(this);
+
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'metricSearch', 'nativeHistogramMetric'],
+    keys: ['metric'],
   });
+
+  getUrlState(): SceneObjectUrlValues {
+    return {
+      metric: this.state.metric,
+    };
+  }
+
+  updateFromUrl(values: SceneObjectUrlValues) {
+    this.updateStateForNewMetric((values.metric as string) || undefined);
+  }
 
   public constructor(state: Partial<DataTrailState>) {
     super({
@@ -89,78 +104,183 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         new SceneRefreshPicker({}),
       ],
       settings: state.settings ?? new DataTrailSettings({}),
-      pluginInfo: new SceneReactObject({ component: PluginInfo }),
       createdAt: state.createdAt ?? new Date().getTime(),
       dashboardMetrics: {},
       alertingMetrics: {},
-      nativeHistograms: state.nativeHistograms ?? [],
-      histogramsLoadP: state.histogramsLoadP ?? null,
-      histogramsLoaded: state.histogramsLoaded ?? false,
-      nativeHistogramMetric: state.nativeHistogramMetric ?? '',
-      trailActivated: state.trailActivated ?? false,
+      drawer: new SceneDrawer({}),
       ...state,
     });
 
-    this.addActivationHandler(this._onActivate.bind(this));
+    this.addActivationHandler(this.onActivate.bind(this));
   }
 
-  public _onActivate() {
-    this.setState({ trailActivated: true });
+  private onActivate() {
+    this.datasourceHelper.init();
 
-    if (!this.state.topScene) {
-      this.setState({ topScene: getTopSceneFor(this.state.metric) });
+    this.updateStateForNewMetric(this.state.metric);
+    this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
+
+    this.initFilters();
+    this.initConfigPrometheusFunction();
+  }
+
+  private updateStateForNewMetric(metric?: string) {
+    if (!this.state.topScene || metric !== this.state.metric) {
+      // Update controls based on whether a metric is selected
+      const baseControls = [
+        new VariableValueSelectors({ layout: 'vertical' }),
+        new SceneControlsSpacer(),
+      ];
+      
+      // Only add SelectNewMetricButton when a metric is selected
+      const controls = metric 
+        ? [...baseControls, new SelectNewMetricButton(), new SceneTimePicker({}), new SceneRefreshPicker({})]
+        : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
+
+      this.setState({
+        metric,
+        topScene: metric ? new MetricScene({ metric }) : new MetricsReducer(),
+        controls,
+      });
     }
+  }
 
-    // Some scene elements publish this
-    this.subscribeToEvent(MetricSelectedEvent, this._handleMetricSelectedEvent.bind(this));
-
+  private initFilters() {
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    if (isAdHocFiltersVariable(filtersVariable)) {
-      this._subs.add(
-        filtersVariable?.subscribeToState((newState, prevState) => {
-          if (!this._addingFilterWithoutReportingInteraction) {
-            reportChangeInLabelFilters(newState.filters, prevState.filters);
-          }
-        })
-      );
+    if (!isAdHocFiltersVariable(filtersVariable)) {
+      return;
     }
 
-    // Save the current trail as a recent (if the browser closes or reloads) if user selects a metric OR applies filters to metric select view
-    const saveRecentTrail = () => {
-      const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-      const hasFilters = isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.filters.length > 0;
-      if (this.state.metric || hasFilters) {
-        getTrailStore().setRecentTrail(this);
-      }
-    };
-    window.addEventListener('unload', saveRecentTrail);
+    limitAdhocProviders(this, filtersVariable, this.datasourceHelper);
 
-    return () => {
-      if (!this.state.embedded) {
-        saveRecentTrail();
+    // we ensure that, in the MetricsReducer, the Ad Hoc filters will display all the label names and values and
+    // we ensure that, in the MetricScene, the queries in the Scene graph will be considered and used as a filter
+    // to fetch label names and values
+    filtersVariable?.setState({
+      useQueriesAsFilterForOptions: Boolean(this.state.metric),
+    });
+
+    this.subscribeToState((newState, prevState) => {
+      if (newState.metric !== prevState.metric) {
+        const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+
+        if (isAdHocFiltersVariable(filtersVariable)) {
+          filtersVariable.setState({
+            useQueriesAsFilterForOptions: Boolean(newState.metric),
+          });
+        }
       }
-      window.removeEventListener('unload', saveRecentTrail);
-    };
+    });
+
+    this._subs.add(
+      filtersVariable?.subscribeToState((newState, prevState) => {
+        if (!this.disableReportFiltersInteraction && newState.filters !== prevState.filters) {
+          reportChangeInLabelFilters(newState.filters, prevState.filters);
+        }
+      })
+    );
   }
 
-  protected _variableDependency = new VariableDependencyConfig(this, {
-    variableNames: [VAR_DATASOURCE],
-    onReferencedVariableValueChanged: async (variable: SceneVariable) => {
-      const { name } = variable.state;
-
-      if (name === VAR_DATASOURCE) {
-        this.datasourceHelper.reset();
-
-        // reset native histograms
-        this.resetNativeHistograms();
+  private initConfigPrometheusFunction() {
+    this.subscribeToState((newState, prevState) => {
+      if (newState.metric !== prevState.metric) {
+        // ensures that the drawer is closed when using browser nav buttons
+        this.state.drawer.close();
       }
-    },
-  });
+    });
+
+    this.subscribeToEvent(EventConfigurePanel, async (event) => {
+      const { metric } = event.payload;
+
+      getMetricType(metric, this)
+        .catch(() => getMetricTypeSync(metric) as MetricType)
+        .then((metricType) => {
+          reportExploreMetrics('configure_panel_opened', { metricType });
+        });
+
+      const metricType = await getMetricType(metric, this);
+
+      this.state.drawer.open({
+        title: 'Configure the Prometheus function',
+        subTitle: `${metric} (${metricType})`,
+        body: new ConfigurePanelForm({ metric }),
+      });
+    });
+
+    this.subscribeToEvent(EventCancelConfigurePanel, () => {
+      this.state.drawer.close();
+    });
+
+    this.subscribeToEvent(EventApplyPanelConfig, async (event) => {
+      const { metric, config, restoreDefault } = event.payload;
+
+      getMetricType(metric, this)
+        .catch(() => getMetricTypeSync(metric) as MetricType)
+        .then((metricType) => {
+          if (restoreDefault) {
+            reportExploreMetrics('default_panel_config_restored', { metricType });
+          } else {
+            reportExploreMetrics('panel_config_applied', { metricType, configId: config.id });
+          }
+        });
+
+      this.state.drawer.close();
+
+      // because the Prometheus function used to display the metric is going to be updated, the range of
+      // values for syncing the axis will certainly change (e.g. switching from sum to avg)
+      // so we reset it before updating all the panels
+      resetYAxisSync(this.state.topScene || this);
+
+      const panelsToUpdate = sceneGraph.findAllObjects(
+        this.state.topScene || this,
+        (o) => o instanceof GmdVizPanel && o.state.metric === metric && !o.state.queryConfig.groupBy
+      ) as GmdVizPanel[];
+
+      for (const panel of panelsToUpdate) {
+        panel.update(config.panelOptions, config.queryOptions);
+      }
+
+      displaySuccess([`Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${metric}!`]);
+    });
+  }
+
+  private async handleMetricSelectedEvent(event: MetricSelectedEvent) {
+    const { metric, urlValues } = event.payload;
+
+    if (metric) {
+      addRecentMetric(metric);
+    }
+
+    // Add metric to adhoc filters baseFilter
+    const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
+    if (isAdHocFiltersVariable(filterVar)) {
+      filterVar.setState({
+        baseFilters: getBaseFiltersForMetric(metric),
+      });
+    }
+
+    this._urlSync.performBrowserHistoryAction(() => {
+      this.updateStateForNewMetric(metric);
+
+      if (urlValues) {
+        // make sure we reset the filters when navigating from a bookmark where urlsValues['var_vilters']: []
+        // it seems relevant to do it here and not anywhere else in the code base
+        if (!urlValues[`var-${VAR_FILTERS}`]?.length) {
+          urlValues[`var-${VAR_FILTERS}`] = [''];
+        }
+
+        const urlState = urlUtil.renderUrl('', urlValues);
+        sceneUtils.syncStateFromSearchParams(this, new URLSearchParams(urlState));
+      }
+    });
+  }
 
   /**
    * Assuming that the change in filter was already reported with a cause other than `'adhoc_filter'`,
    * this will modify the adhoc filter variable and prevent the automatic reporting which would
    * normally occur through the call to `reportChangeInLabelFilters`.
+   *
+   * See AddToFiltersGraphAction.tsx
    */
   public addFilterWithoutReportingInteraction(filter: AdHocVariableFilter) {
     const variable = sceneGraph.lookupVariable(VAR_FILTERS, this);
@@ -168,165 +288,29 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       return;
     }
 
-    this._addingFilterWithoutReportingInteraction = true;
+    this.disableReportFiltersInteraction = true;
     variable.setState({ filters: [...variable.state.filters, filter] });
-    this._addingFilterWithoutReportingInteraction = false;
+    this.disableReportFiltersInteraction = false;
   }
 
-  private _addingFilterWithoutReportingInteraction = false;
-  private datasourceHelper = new MetricDatasourceHelper(this);
+  public async getPrometheusBuildInfo() {
+    return this.datasourceHelper.getPrometheusBuildInfo();
+  }
 
-  public getMetricMetadata(metric?: string) {
+  public async getMetadataForMetric(metric: string) {
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
 
-  public isNativeHistogram(metric: string) {
+  public async isNativeHistogram(metric: string) {
     return this.datasourceHelper.isNativeHistogram(metric);
   }
 
-  // use this to initialize histograms in all scenes
-  public async initializeHistograms() {
-    if (this.state.histogramsLoadP) {
-      return this.state.histogramsLoadP;
-    }
-
-    if (!this.state.histogramsLoaded) {
-      try {
-        const histogramsLoadP = this.datasourceHelper.initializeHistograms();
-        this.setState({ histogramsLoadP });
-        await histogramsLoadP;
-      } catch (e) {
-        displayWarning(['Error while initializing histograms!', (e as Error).toString()]);
-      }
-
-      this.setState({
-        nativeHistograms: this.listNativeHistograms(),
-        histogramsLoadP: null,
-        histogramsLoaded: true,
-      });
-    }
-  }
-
-  public listNativeHistograms() {
-    return this.datasourceHelper.listNativeHistograms() ?? [];
-  }
-
-  private resetNativeHistograms() {
-    this.setState({
-      histogramsLoaded: false,
-      nativeHistograms: [],
-    });
-  }
-
-  public getCurrentMetricMetadata() {
-    return this.getMetricMetadata(this.state.metric);
-  }
-
-  private async _handleMetricSelectedEvent(evt: MetricSelectedEvent) {
-    const metric = evt.payload ?? '';
-
-    // from the metric preview panel we have the info loaded to determine that a metric is a native histogram
-    let nativeHistogramMetric = false;
-    if (this.isNativeHistogram(metric)) {
-      nativeHistogramMetric = true;
-    }
-
-    this._urlSync.performBrowserHistoryAction(() => {
-      this.setState(this.getSceneUpdatesForNewMetricValue(metric, nativeHistogramMetric));
-    });
-
-    // Add metric to adhoc filters baseFilter
-    const filterVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    if (isAdHocFiltersVariable(filterVar)) {
-      filterVar.setState({
-        baseFilters: getBaseFiltersForMetric(evt.payload),
-      });
-    }
-  }
-
-  private getSceneUpdatesForNewMetricValue(metric: string | undefined, nativeHistogramMetric?: boolean) {
-    const stateUpdate: Partial<DataTrailState> = {};
-    stateUpdate.metric = metric;
-    // refactoring opportunity? Or do we pass metric knowledge all the way down?
-    // must pass this native histogram prometheus knowledge deep into
-    // the topscene set on the trail > MetricScene > getAutoQueriesForMetric() > createHistogramMetricQueryDefs();
-    stateUpdate.nativeHistogramMetric = nativeHistogramMetric ? '1' : '';
-    stateUpdate.topScene = getTopSceneFor(metric, nativeHistogramMetric);
-
-    return stateUpdate;
-  }
-
-  getUrlState(): SceneObjectUrlValues {
-    const { metric, metricSearch, nativeHistogramMetric } = this.state;
-    return {
-      metric,
-      metricSearch,
-      // store the native histogram knowledge in url for the metric scene
-      nativeHistogramMetric,
-    };
-  }
-
-  updateFromUrl(values: SceneObjectUrlValues) {
-    const stateUpdate: Partial<DataTrailState> = {};
-
-    if (typeof values.metric === 'string') {
-      if (this.state.metric !== values.metric) {
-        // if we have a metric and we have stored in the url that it is a native histogram
-        // we can pass that info into the metric scene to generate the appropriate queries
-        let nativeHistogramMetric = false;
-        if (values.nativeHistogramMetric === '1') {
-          nativeHistogramMetric = true;
-        }
-
-        Object.assign(stateUpdate, this.getSceneUpdatesForNewMetricValue(values.metric, nativeHistogramMetric));
-      }
-    } else if (values.metric == null && !this.state.embedded) {
-      stateUpdate.metric = undefined;
-      stateUpdate.topScene = new MetricsReducer();
-    }
-
-    if (typeof values.metricSearch === 'string') {
-      stateUpdate.metricSearch = values.metricSearch;
-    } else if (values.metric == null) {
-      stateUpdate.metricSearch = undefined;
-    }
-
-    this.setState(stateUpdate);
-  }
-
-  public getQueries(): PromQuery[] {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const sqrs = sceneGraph.findAllObjects(this, (b) => isSceneQueryRunner(b)) as SceneQueryRunner[];
-
-    return sqrs.reduce<PromQuery[]>((acc, sqr) => {
-      acc.push(
-        ...sqr.state.queries.map((q) => ({
-          ...q,
-          expr: sceneGraph.interpolate(sqr, q.expr),
-        }))
-      );
-
-      return acc;
-    }, []);
-  }
-
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, settings, pluginInfo, embedded } = model.useState();
+    const { controls, topScene, settings, embedded, drawer } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
     const styles = useStyles2(getStyles, headerHeight, model);
-
-    // need to initialize this here and not on activate because it requires the data source helper to be fully initialized first
-    useEffect(() => {
-      model.initializeHistograms();
-    }, [model]);
-
-    useEffect(() => {
-      const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, model);
-      const datasourceHelper = model.datasourceHelper;
-      limitAdhocProviders(model, filtersVariable, datasourceHelper);
-    }, [model]);
 
     // Set CSS custom property for app-controls height in embedded mode
     useEffect(() => {
@@ -351,44 +335,41 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     }, [embedded, controls]);
 
     return (
-      <div className={styles.container}>
-        {controls && (
-          <div className={styles.controls} data-testid="app-controls">
-            {controls.map((control) => (
-              <control.Component key={control.state.key} model={control} />
-            ))}
-            <div className={styles.settingsInfo}>
-              <settings.Component model={settings} />
-              <pluginInfo.Component model={pluginInfo} />
+      <>
+        <div className={styles.container}>
+          {controls && (
+            <div className={styles.controls} data-testid="app-controls">
+              <GiveFeedbackButton />
+              {controls.map((control) => (
+                <control.Component key={control.state.key} model={control} />
+              ))}
+              <div className={styles.settingsInfo}>
+                <settings.Component model={settings} />
+                <PluginInfo model={model} />
+              </div>
             </div>
-          </div>
-        )}
-        {topScene && (
-          <UrlSyncContextProvider
-            scene={topScene}
-            createBrowserHistorySteps={true}
-            updateUrlOnInit={true}
-            namespace={model.state.urlNamespace}
-          >
-            <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
-          </UrlSyncContextProvider>
-        )}
-      </div>
+          )}
+          {topScene && (
+            <UrlSyncContextProvider
+              scene={topScene}
+              createBrowserHistorySteps={true}
+              updateUrlOnInit={true}
+              namespace={model.state.urlNamespace}
+            >
+              <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
+            </UrlSyncContextProvider>
+          )}
+        </div>
+        <drawer.Component model={drawer} />
+      </>
     );
   };
-}
-
-export function getTopSceneFor(metric?: string, nativeHistogram = false) {
-  if (metric) {
-    return new MetricScene({ metric, nativeHistogram });
-  } else {
-    return new MetricsReducer();
-  }
 }
 
 function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
   let variables: SceneVariable[] = [
     new MetricsDrilldownDataSourceVariable({ initialDS }),
+    new MetricsVariable(),
     new AdHocFiltersVariable({
       key: VAR_FILTERS,
       name: VAR_FILTERS,
@@ -401,6 +382,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
       baseFilters: getBaseFiltersForMetric(metric),
       applyMode: 'manual',
       allowCustomValue: true,
+      useQueriesAsFilterForOptions: false,
       expressionBuilder: (filters: AdHocVariableFilter[]) => {
         // remove any filters that include __name__ key in the expression
         // to prevent the metric name from being set twice in the query and causing an error.
@@ -410,7 +392,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
           filters
             .filter((filter) => filter.key !== '__name__')
             // eslint-disable-next-line sonarjs/no-nested-template-literals
-            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value.replaceAll('=', `\=`)}"`)
+            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',')
         );
       },

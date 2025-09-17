@@ -4,12 +4,11 @@ export const DEFAULT_RATE_UNIT = 'cps'; // Count per second
 // Unit constants
 export const UNIT_BYTES = 'bytes';
 export const UNIT_SECONDS = 'seconds';
-export const UNIT_PERCENT = 'percent';
-export const UNIT_COUNT = 'count';
+const UNIT_PERCENT = 'percent';
+const UNIT_COUNT = 'count';
 
 // Rate unit constants
 export const RATE_BYTES_PER_SECOND = 'Bps';
-export const RATE_BITS_PER_SECOND = 'bps';
 
 const UNIT_MAP: Record<string, string> = {
   [UNIT_BYTES]: UNIT_BYTES,

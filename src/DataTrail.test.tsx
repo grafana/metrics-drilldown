@@ -1,24 +1,45 @@
 /* eslint-disable sonarjs/no-nested-functions */
-import { locationService, setDataSourceSrv } from '@grafana/runtime';
+import { dateTime, LoadingState } from '@grafana/data';
+import { locationService, setDataSourceSrv, setRunRequest } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
+import { of } from 'rxjs';
 
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene';
-import { DataSourceType, MockDataSourceSrv } from './mocks/datasource';
 import { MetricSelectedEvent, VAR_FILTERS } from './shared';
+import { DataSourceType, MockDataSourceSrv } from './test/mocks/datasource';
 import { activateFullSceneTree } from './utils/utils.testing';
 import { isAdHocFiltersVariable } from './utils/utils.variables';
 
+function getFilterVar(trail: DataTrail) {
+  const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
+  if (isAdHocFiltersVariable(variable)) {
+    return variable;
+  }
+  throw new Error('getFilterVar failed');
+}
+
 describe('DataTrail', () => {
-  beforeAll(() => {
-    setDataSourceSrv(
-      new MockDataSourceSrv({
-        prom: {
-          name: 'Prometheus',
-          type: DataSourceType.Prometheus,
-          uid: 'ds',
+  beforeAll(async () => {
+    const dataSourceSrv = new MockDataSourceSrv({
+      prom: {
+        name: 'Prometheus',
+        type: DataSourceType.Prometheus,
+        uid: 'ds',
+      },
+    });
+    setDataSourceSrv(dataSourceSrv);
+    setRunRequest(() =>
+      of({
+        state: LoadingState.Done,
+        series: [],
+        timeRange: {
+          from: dateTime(),
+          to: dateTime(),
+          raw: { from: '', to: '' },
         },
       })
     );
@@ -40,7 +61,11 @@ describe('DataTrail', () => {
 
     describe('And metric is selected', () => {
       beforeEach(() => {
-        trail.publishEvent(new MetricSelectedEvent('metric_bucket'));
+        // ensure metric_bucket is cached as a classic histogram by MetricDatasourceHelper
+        const metricsVariable = sceneGraph.findByKeyAndType(trail, VAR_METRICS_VARIABLE, MetricsVariable);
+        metricsVariable.setState({ options: [{ value: 'metric_bucket', label: 'metric_bucket' }] });
+
+        trail.publishEvent(new MetricSelectedEvent({ metric: 'metric_bucket' }));
       });
 
       it('should switch scene to MetricScene', () => {
@@ -124,11 +149,3 @@ describe('DataTrail', () => {
     });
   });
 });
-
-function getFilterVar(trail: DataTrail) {
-  const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
-  if (isAdHocFiltersVariable(variable)) {
-    return variable;
-  }
-  throw new Error('getFilterVar failed');
-}

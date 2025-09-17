@@ -47,6 +47,10 @@ export class DrilldownView {
     return this.page.goBack();
   }
 
+  reload() {
+    return this.page.reload();
+  }
+
   locator(selector: string, options?: Record<string, unknown>) {
     return this.page.locator(selector, options);
   }

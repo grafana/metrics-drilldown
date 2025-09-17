@@ -1,7 +1,7 @@
 import { isValidLegacyName, utf8Support } from '@grafana/prometheus';
-import { Expression, MatchingOperator } from 'tsqtsq';
+import { Expression, MatchingOperator, promql } from 'tsqtsq';
 
-import { VAR_FILTERS_EXPR } from 'shared';
+import { VAR_FILTERS } from 'shared';
 
 export type LabelMatcher = {
   key: string;
@@ -9,21 +9,22 @@ export type LabelMatcher = {
   value: string;
 };
 
-export function expressionToString(expression: Expression) {
+function expressionToString(expression: Expression) {
   // see hacks in buildQueryExpression() below
   return expression.toString().replaceAll('="__REMOVE__"', '');
 }
 
 type Options = {
   metric: string;
-  matchers: LabelMatcher[];
-  addIgnoreUsageFilter: boolean;
+  labelMatchers?: LabelMatcher[];
+  addIgnoreUsageFilter?: boolean;
+  addExtremeValuesFiltering?: boolean;
 };
 
-export function buildQueryExpression(options: Options): Expression {
-  const { metric, matchers, addIgnoreUsageFilter } = options;
+export function buildQueryExpression(options: Options): string {
+  const { metric, labelMatchers = [], addIgnoreUsageFilter = true, addExtremeValuesFiltering = false } = options;
 
-  const defaultSelectors = matchers.map((m) => ({
+  const defaultSelectors = labelMatchers.map((m) => ({
     label: utf8Support(m.key),
     operator: m.operator as MatchingOperator,
     value: m.value,
@@ -42,12 +43,24 @@ export function buildQueryExpression(options: Options): Expression {
 
   // hack for Scenes to interpolate the VAR_FILTERS variable
   // added last so that, if filters are empty, the query is still valid
-  defaultSelectors.push({ label: VAR_FILTERS_EXPR, operator: MatchingOperator.equal, value: '__REMOVE__' });
+  // and we're using :raw for variables containing special characters (like equal signs etc.)
+  defaultSelectors.push({ label: `\${${VAR_FILTERS}:raw}`, operator: MatchingOperator.equal, value: '__REMOVE__' });
 
-  return new Expression({
+  const expression = new Expression({
     metric,
     values: {},
     defaultOperator: MatchingOperator.equal,
     defaultSelectors,
   });
+
+  const expressionString = expressionToString(expression);
+
+  if (addExtremeValuesFiltering) {
+    return promql.and({
+      left: expressionString,
+      right: `${expressionString} > -Inf`,
+    });
+  }
+
+  return expressionString;
 }

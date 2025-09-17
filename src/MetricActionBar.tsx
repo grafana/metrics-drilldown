@@ -1,28 +1,18 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
-  getExploreURL,
   sceneGraph,
   SceneObjectBase,
-  SceneQueryRunner,
   type SceneComponentProps,
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Box, Icon, LinkButton, Stack, Tab, TabsBar, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
+import { Box, Stack, Tab, TabsBar, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { UI_TEXT } from 'constants/ui';
-import { createAppUrl } from 'extensions/links';
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'interactions';
-import { TOPVIEW_KEY } from 'MetricGraphScene';
 import { MetricScene } from 'MetricScene';
 import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
-import { MetricSelectedEvent } from 'shared';
-import { ShareTrailButton } from 'ShareTrailButton';
-import { useBookmarkState } from 'TrailStore/useBookmarkState';
-import { getTrailFor, getUrlForTrail } from 'utils';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 
@@ -64,81 +54,18 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
 interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
-  public getLinkToExplore = async () => {
-    const topView = sceneGraph.findByKey(this, TOPVIEW_KEY);
-    const vizPanel = sceneGraph.findDescendents(topView, GmdVizPanel)[0];
-    const queryRunner = sceneGraph.findDescendents(vizPanel, SceneQueryRunner)[0];
-    const panelData = queryRunner.state.data;
 
-    if (!panelData) {
-      throw new Error('Cannot get link to explore, no panel data found');
-    }
-
-    const metricScene = sceneGraph.getAncestor(this, MetricScene);
-    return getExploreURL(panelData, metricScene, panelData.timeRange);
-  };
-
-  public openExploreLink = async () => {
-    reportExploreMetrics('selected_metric_action_clicked', { action: 'open_in_explore' });
-    this.getLinkToExplore().then((link) => {
-      // We use window.open instead of a Link or <a> because we want to compute the explore link when clicking,
-      // if we precompute it we have to keep track of a lot of dependencies
-      window.open(link, '_blank');
-    });
-  };
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
-    const trail = getTrailFor(model);
-    const [isBookmarked, toggleBookmark] = useBookmarkState(trail);
     const { actionView } = metricScene.useState();
 
     return (
       <Box paddingY={1} data-testid="action-bar">
         <div className={styles.actions}>
           <Stack gap={1}>
-            {trail.state.embedded ? (
-              <LinkButton
-                href={createAppUrl(getUrlForTrail(trail))}
-                variant={'secondary'}
-                icon="arrow-right"
-                tooltip="Open in Metrics Drilldown"
-                onClick={() => reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' })}
-              >
-                Metrics Drilldown
-              </LinkButton>
-            ) : (
-              <ToolbarButton
-                variant={'canvas'}
-                tooltip={UI_TEXT.METRIC_SELECT_SCENE.SELECT_NEW_METRIC_TOOLTIP}
-                onClick={() => {
-                  reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
-                  trail.publishEvent(new MetricSelectedEvent(undefined));
-                }}
-              >
-                Select new metric
-              </ToolbarButton>
-            )}
-            <ToolbarButton
-              variant={'canvas'}
-              icon="compass"
-              tooltip={UI_TEXT.METRIC_SELECT_SCENE.OPEN_EXPLORE_LABEL}
-              onClick={model.openExploreLink}
-            />
-            <ShareTrailButton trail={trail} />
-            <ToolbarButton
-              variant={'canvas'}
-              icon={
-                isBookmarked ? (
-                  <Icon name={'favorite'} type={'mono'} size={'lg'} />
-                ) : (
-                  <Icon name={'star'} type={'default'} size={'lg'} />
-                )
-              }
-              tooltip={UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL}
-              onClick={toggleBookmark}
-            />
+            {/* Action buttons moved to panel menu */}
           </Stack>
         </div>
 

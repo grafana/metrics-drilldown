@@ -8,10 +8,10 @@ import {
 import { type PrometheusDatasource, type PromMetricsMetadata, type PromQuery } from '@grafana/prometheus';
 import { type BackendSrvRequest } from '@grafana/runtime';
 
-import { type PromQLLabelMatcher } from 'extensions/links';
-import { type PrometheusRuntimeDatasource } from 'helpers/MetricDatasourceHelper';
+import { type PrometheusRuntimeDatasource } from '../../helpers/MetricDatasourceHelper';
+import { type PromQLLabelMatcher } from '../../utils/utils.promql';
 
-export interface PromQlLanguageProviderElevenDotSix extends LanguageProvider {
+interface PromQlLanguageProviderElevenDotSix extends LanguageProvider {
   histogramMetrics: string[];
   timeRange: TimeRange;
   metrics: string[];

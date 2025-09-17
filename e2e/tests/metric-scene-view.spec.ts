@@ -71,25 +71,33 @@ test.describe('Metric Scene view', () => {
         });
 
         test.describe('Sort by', () => {
-          test('Displays panels sorted by the selected criteria', async ({ metricSceneView }) => {
+          test('Reversed alphabetical order [Z-A]', async ({ metricSceneView }) => {
             await metricSceneView.assertPanelsList();
-
-            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
-              'metric-scene-breakdown-label-sort-outlying-panels-list.png'
-            );
-
             await metricSceneView.selectSortByOption('Name [Z-A]');
             await metricSceneView.assertPanelsList();
 
             await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
               'metric-scene-breakdown-label-sort-alpha-z-a-panels-list.png'
             );
+          });
 
+          test('Alphabetical order [A-Z]', async ({ metricSceneView }) => {
+            await metricSceneView.assertPanelsList();
             await metricSceneView.selectSortByOption('Name [A-Z]');
             await metricSceneView.assertPanelsList();
 
             await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
               'metric-scene-breakdown-label-sort-alpha-a-z-panels-list.png'
+            );
+          });
+
+          test('Outlying series', async ({ metricSceneView }) => {
+            await metricSceneView.assertPanelsList();
+            await metricSceneView.selectSortByOption('Outlying series');
+            await metricSceneView.assertPanelsList();
+
+            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
+              'metric-scene-breakdown-label-sort-outlying-panels-list.png'
             );
           });
         });
@@ -108,7 +116,7 @@ test.describe('Metric Scene view', () => {
       });
     });
 
-    test.describe('Related metric tab', () => {
+    test.describe('Related metrics tab', () => {
       test.beforeEach(async ({ metricSceneView }) => {
         await metricSceneView.selectTab('Related metrics');
       });
@@ -135,6 +143,16 @@ test.describe('Metric Scene view', () => {
             ],
           }
         );
+      });
+    });
+
+    test.describe('Related logs tab', () => {
+      test.beforeEach(async ({ metricSceneView }) => {
+        await metricSceneView.selectTab('Related logs');
+      });
+
+      test('No related logs found', async ({ metricSceneView }) => {
+        await expect(metricSceneView.getTabContent().getByText('No related logs found')).toBeVisible();
       });
     });
   });

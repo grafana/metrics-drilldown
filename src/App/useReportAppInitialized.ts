@@ -9,11 +9,13 @@ export function useReportAppInitialized() {
     if (!initRef.current) {
       initRef.current = true;
 
-      const view: ViewName = new URL(window.location.href).searchParams.get('metric')
+      const url = new URL(window.location.href);
+      const view: ViewName = url.searchParams.get('metric')
         ? 'metric-details'
         : 'metrics-reducer';
+      const uel_epid = url.searchParams.get('uel_epid') ?? '';
 
-      reportExploreMetrics('app_initialized', { view });
+      reportExploreMetrics('app_initialized', { view, uel_epid });
     }
   }, []);
 }

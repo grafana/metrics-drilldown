@@ -16,25 +16,24 @@ import { Button, CollapsableSection, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
+import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
+import { SelectAction } from 'GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { VAR_FILTERS } from 'shared';
-import { getColorByIndex } from 'utils';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from 'WingmanDataTrail/Labels/LabelsVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
-import { METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW } from 'WingmanDataTrail/MetricVizPanel/MetricVizPanel';
-import { WithUsageDataPreviewPanel } from 'WingmanDataTrail/MetricVizPanel/WithUsageDataPreviewPanel';
+import {
+  VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+  WithUsageDataPreviewPanel,
+} from 'WingmanDataTrail/MetricsList/WithUsageDataPreviewPanel';
+import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 import { GroupsIcon } from 'WingmanDataTrail/SideBar/custom-icons/GroupsIcon';
 
-import {
-  MetricsWithLabelValueVariable,
-  VAR_METRIC_WITH_LABEL_VALUE,
-} from './MetricsWithLabelValue/MetricsWithLabelValueVariable';
-
-export interface MetricsGroupByRowState extends SceneObjectState {
+interface MetricsGroupByRowState extends SceneObjectState {
   index: number;
   labelName: string;
   labelValue: string;
@@ -55,23 +54,32 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     labelValue: MetricsGroupByRowState['labelValue'];
     labelCardinality: MetricsGroupByRowState['labelCardinality'];
   }) {
+    const variableName = `var-metrics-${labelName}-${labelValue}`;
+
     super({
       index,
       labelName,
       labelValue,
       labelCardinality,
-      key: `${labelName || ''}-${labelValue || ''}`,
+      key: `${labelName}-${labelValue}`,
       $variables: new SceneVariableSet({
-        variables: [new MetricsWithLabelValueVariable({ labelName, labelValue })],
+        variables: [
+          new MetricsVariable({
+            key: variableName,
+            name: variableName,
+            labelMatcher: { key: labelName, operator: '=', value: labelValue },
+            addLifeCycleEvents: true,
+          }),
+        ],
       }),
       body: new SceneByVariableRepeater({
-        variableName: VAR_METRIC_WITH_LABEL_VALUE,
+        variableName: variableName,
         initialPageSize: 3,
         body: new SceneCSSGridLayout({
           children: [],
           isLazy: true,
           templateColumns: GRID_TEMPLATE_COLUMNS,
-          autoRows: METRICS_VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
+          autoRows: VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW,
           $behaviors: [
             new behaviors.CursorSync({
               key: 'metricCrosshairSync',
@@ -96,14 +104,21 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
+          const metric = option.value as string;
+
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
+              metric,
               vizPanelInGridItem: new GmdVizPanel({
-                metric: option.value as string,
-                matchers: [{ key: labelName, operator: '=', value: labelValue }],
-                fixedColor: getColorByIndex(colorIndex),
+                metric,
+                panelOptions: {
+                  fixedColorIndex: colorIndex,
+                  headerActions: () => [new SelectAction({ metric }), new ConfigurePanelAction({ metric })],
+                },
+                queryOptions: {
+                  labelMatchers: [{ key: labelName, operator: '=', value: labelValue }],
+                },
               }),
-              metric: option.value as string,
             }),
           });
         },
@@ -140,7 +155,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
 
     const { index, labelName, labelValue, labelCardinality, $variables, body } = model.useState();
 
-    const variable = $variables.state.variables[0] as MetricsWithLabelValueVariable;
+    const variable = $variables.state.variables[0] as MetricsVariable;
     const { loading, error } = variable.useState();
 
     const batchSizes = body.useSizes();

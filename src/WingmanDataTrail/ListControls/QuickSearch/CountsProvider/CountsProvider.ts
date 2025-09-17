@@ -5,7 +5,7 @@ export type CountsData = {
   total: number;
 };
 
-export interface CountsProviderState extends SceneObjectState {
+interface CountsProviderState extends SceneObjectState {
   counts: CountsData;
 }
 

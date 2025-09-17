@@ -56,10 +56,22 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
 
     // Subscribe to variable changes to update active state when the variable is changed externally
     this._subs.add(
-      labelsVariable.subscribeToState((newState) => {
+      labelsVariable.subscribeToState((newState, prevState) => {
+        if (newState.value === prevState.value) {
+          return;
+        }
+
         const active = Boolean(newState.value && newState.value !== NULL_GROUP_BY_VALUE);
+        if (active === this.state.active) {
+          return;
+        }
+
         this.setState({ active });
-        this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [newState.value as string] : [] }), true);
+
+        this.publishEvent(
+          new EventSectionValueChanged({ key: this.state.key, values: active ? [newState.value as string] : [] }),
+          true
+        );
       })
     );
   }
@@ -71,16 +83,14 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
     const active = Boolean(label && label !== NULL_GROUP_BY_VALUE);
 
     this.setState({ active });
-
-    this.publishEvent(new EventSectionValueChanged({ key: this.state.key, values: active ? [label] : [] }), true);
   }
 
-  private onClickLabel = (label: string) => {
+  private onSelectLabel = (label: string) => {
     reportExploreMetrics('sidebar_group_by_label_filter_applied', { label });
     this.selectLabel(label);
   };
 
-  private onClickClearSelection = () => {
+  private onClearSelection = () => {
     this.selectLabel(NULL_GROUP_BY_VALUE);
   };
 
@@ -166,8 +176,8 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
           <LabelsList
             labels={labelsList}
             selectedLabel={selectedLabel}
-            onClickLabel={model.onClickLabel}
-            onClickClearSelection={model.onClickClearSelection}
+            onSelectLabel={model.onSelectLabel}
+            onClearSelection={model.onClearSelection}
           />
         )}
       </div>

@@ -12,6 +12,8 @@ import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_OTHER_METRIC_FILTERS } from 'shared';
+import { PREF_KEYS } from 'UserPreferences/pref-keys';
+import { userStorage } from 'UserPreferences/userStorage';
 import { getTrailFor } from 'utils';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 import { NULL_GROUP_BY_VALUE } from 'WingmanDataTrail/Labels/LabelsDataSource';
@@ -21,12 +23,13 @@ import { computeMetricSuffixGroups } from 'WingmanDataTrail/MetricsVariables/com
 import { computeRulesGroups } from 'WingmanDataTrail/MetricsVariables/computeRulesGroups';
 
 import { reportExploreMetrics } from '../../interactions';
-import { BookmarksList } from './sections/BookmarksList';
+import { BookmarksList } from './sections/BookmarksList/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';
+import { HGFeatureToggles, isFeatureToggleEnabled } from '../../utils/utils.feature-toggles';
 
 type Section = MetricsFilterSection | LabelsBrowser | BookmarksList | Settings;
 
@@ -36,7 +39,7 @@ interface SideBarState extends SceneObjectState {
   sectionValues: Map<string, string[]>;
 }
 
-export const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix'] as const;
+const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix'] as const;
 type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -112,15 +115,18 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   private onActivate() {
     const cleanupOtherMetricsVar = this.initOtherMetricsVar();
 
-    this._subs.add(
-      this.subscribeToEvent(EventSectionValueChanged, (event) => {
-        const { key, values } = event.payload;
-        const { sectionValues } = this.state;
-        const newSectionValues = new Map(sectionValues).set(key, values);
-        this.setOtherMetricFilters(newSectionValues);
-        this.setState({ sectionValues: newSectionValues });
-      })
-    );
+    this.subscribeToEvent(EventSectionValueChanged, (event) => {
+      const { key, values } = event.payload;
+      const { sectionValues } = this.state;
+      const newSectionValues = new Map(sectionValues).set(key, values);
+      this.setOtherMetricFilters(newSectionValues);
+      this.setState({ sectionValues: newSectionValues });
+    });
+
+    // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
+    if (!this.state.visibleSection?.state.key && isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)) {
+      this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+    }
 
     return () => {
       cleanupOtherMetricsVar();
@@ -228,6 +234,9 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       this.setState({ visibleSection: null });
       return;
     }
+
+    // Keep track of the section that the user has most recently selected
+    userStorage.setItem(PREF_KEYS.SIDEBAR_SECTION, sectionKey);
 
     // Report opening the sidebar with the selected section
     reportExploreMetrics('metrics_sidebar_toggled', {
