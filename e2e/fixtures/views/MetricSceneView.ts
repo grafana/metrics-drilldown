@@ -38,7 +38,7 @@ export class MetricSceneView extends DrilldownView {
   /* Core UI assertions */
 
   async assertCoreUI(metricName: string) {
-    await this.appControls.assert(true);
+    await this.appControls.assert();
 
     await this.assertMainViz(metricName);
     await expect(this.getByTestId('action-bar')).toBeVisible();
