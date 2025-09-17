@@ -87,5 +87,9 @@ services:
       prometheus-gmd:
         condition: service_started
     environment:
-      GRAFANA_PORT: ${GRAFANA_PORT:-3001}
+      # required for screenshot testing across Grafana versions
+      GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.5}
+      # required for testing Scopes functionality (see the grafana-scopes-gmd service above)
       GRAFANA_SCOPES_PORT: ${GRAFANA_SCOPES_PORT:-3002}
+      # see the grafana-gmd service above
+      GRAFANA_PORT: ${GRAFANA_PORT:-3001}
