@@ -72,6 +72,7 @@ test.describe('Metric Scene view', () => {
 
         test.describe('Sort by', () => {
           test('Reversed alphabetical order [Z-A]', async ({ metricSceneView }) => {
+            await metricSceneView.assertPanelsList();
             await metricSceneView.selectSortByOption('Name [Z-A]');
             await metricSceneView.assertPanelsList();
 
@@ -81,6 +82,7 @@ test.describe('Metric Scene view', () => {
           });
 
           test('Alphabetical order [A-Z]', async ({ metricSceneView }) => {
+            await metricSceneView.assertPanelsList();
             await metricSceneView.selectSortByOption('Name [A-Z]');
             await metricSceneView.assertPanelsList();
 
@@ -90,6 +92,7 @@ test.describe('Metric Scene view', () => {
           });
 
           test('Outlying series', async ({ metricSceneView }) => {
+            await metricSceneView.assertPanelsList();
             await metricSceneView.selectSortByOption('Outlying series');
             await metricSceneView.assertPanelsList();
 
