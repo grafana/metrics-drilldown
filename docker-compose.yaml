@@ -24,6 +24,12 @@ services:
       # 172.17.0.1 is the default Docker bridge network gateway IP address
       # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
       - 'host.docker.internal:172.17.0.1'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   grafana-scopes-gmd:
     container_name: 'grafana-scopes-gmd'
@@ -39,6 +45,12 @@ services:
       # 172.17.0.1 is the default Docker bridge network gateway IP address
       # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
       - 'host.docker.internal:172.17.0.1'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   prometheus-gmd:
     container_name: 'prometheus-gmd'
@@ -67,6 +79,13 @@ services:
       - ./src:/app/src
     command: ${PLAYWRIGHT_ARGS:-}
     profiles: [playwright]
+    depends_on:
+      grafana-scopes-gmd:
+        condition: service_healthy
+      grafana-gmd:
+        condition: service_started
+      prometheus-gmd:
+        condition: service_started
     environment:
       GRAFANA_PORT: ${GRAFANA_PORT:-3001}
       GRAFANA_SCOPES_PORT: ${GRAFANA_SCOPES_PORT:-3002}
