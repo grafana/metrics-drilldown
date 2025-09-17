@@ -13,7 +13,7 @@ export class AppControls {
     return this.locator;
   }
 
-  async assert(assertSettings = false) {
+  async assert() {
     await expect(this.get()).toBeVisible();
 
     // left
@@ -22,10 +22,6 @@ export class AppControls {
 
     // right
     await expect(this.getTimePickerButton()).toBeVisible();
-
-    if (assertSettings) {
-      await expect(this.getSettingsButton()).toBeVisible();
-    }
 
     await expect(this.getRefreshPicker()).toBeVisible();
     await expect(this.getPluginInfoButton()).toBeVisible();

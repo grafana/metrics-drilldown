@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -11,6 +12,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { type DataTrail } from 'DataTrail';
 import { EventQuickSearchChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 import { MetricsList } from 'WingmanDataTrail/MetricsList/MetricsList';
@@ -28,7 +30,9 @@ import {
 import { MetricsVariableSortEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableSortEngine';
 import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 
+import { getTrailFor } from '../utils';
 import { RelatedListControls } from './RelatedListControls';
+import { getAppBackgroundColor } from '../utils/utils.styles';
 
 interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;
@@ -129,12 +133,14 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<RelatedMetricsScene>) => {
-    const styles = useStyles2(getStyles);
+    const chromeHeaderHeight = useChromeHeaderHeight();
+    const trail = getTrailFor(model);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
     const { $variables, body, listControls } = model.useState();
 
     return (
       <>
-        <div className={styles.listControls}>
+        <div className={styles.searchSticky}>
           <listControls.Component model={listControls} />
         </div>
         <div className={styles.body}>
@@ -152,15 +158,20 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   };
 }
 
-function getStyles(theme: GrafanaTheme2) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
   return {
     body: css({}),
     list: css({}),
-    listControls: css({
-      margin: theme.spacing(1, 0, 1.5, 0),
-    }),
     variables: css({
       display: 'none',
+    }),
+    searchSticky: css({
+      margin: theme.spacing(1, 0, 1.5, 0),
+      position: 'sticky',
+      background: getAppBackgroundColor(theme, trail),
+      zIndex: 10,
+      paddingBottom: theme.spacing(1),
+      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
     }),
   };
 }
