@@ -17,7 +17,6 @@ import React from 'react';
 import { reportExploreMetrics } from 'interactions';
 
 import { MetricsGroupByList } from './GroupBy/MetricsGroupByList';
-import { MetricsWithLabelValueDataSource } from './GroupBy/MetricsWithLabelValue/MetricsWithLabelValueDataSource';
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './Labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './Labels/LabelsVariable';
@@ -63,7 +62,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       enginesMap: new Map(),
     });
 
-    registerRuntimeDataSources([new LabelsDataSource(), new MetricsWithLabelValueDataSource()]);
+    registerRuntimeDataSources([new LabelsDataSource()]);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }

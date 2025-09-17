@@ -1,27 +1,32 @@
 import { VariableHide, VariableRefresh, VariableSort } from '@grafana/data';
 import { QueryVariable, type SceneObjectState } from '@grafana/scenes';
 
+import { type LabelMatcher } from 'GmdVizPanel/buildQueryExpression';
 import { trailDS, VAR_FILTERS } from 'shared';
+
+import { withLifecycleEvents } from './withLifecycleEvents';
 
 export const VAR_METRICS_VARIABLE = 'metrics-wingman';
 
 export type MetricOptions = Array<{ label: string; value: string }>;
 
 interface MetricsVariableState extends SceneObjectState {
-  key: string;
+  key?: string;
   name?: string;
-  label?: string;
+  labelMatcher?: LabelMatcher;
+  addLifeCycleEvents?: boolean;
 }
 
 export class MetricsVariable extends QueryVariable {
-  constructor(state?: MetricsVariableState) {
+  constructor({ key, name, labelMatcher, addLifeCycleEvents }: MetricsVariableState = {}) {
     super({
-      key: VAR_METRICS_VARIABLE,
-      name: VAR_METRICS_VARIABLE,
+      key: key || VAR_METRICS_VARIABLE,
+      name: name || VAR_METRICS_VARIABLE,
       label: 'Metrics',
-      ...state,
       datasource: trailDS,
-      query: `label_values({$${VAR_FILTERS}}, __name__)`,
+      query: labelMatcher
+        ? `label_values({${labelMatcher.key}${labelMatcher.operator}"${labelMatcher.value}",$${VAR_FILTERS}}, __name__)`
+        : `label_values({$${VAR_FILTERS}}, __name__)`,
       includeAll: true,
       value: '$__all',
       skipUrlSync: true,
@@ -29,5 +34,10 @@ export class MetricsVariable extends QueryVariable {
       sort: VariableSort.alphabeticalAsc,
       hide: VariableHide.hideVariable,
     });
+
+    if (addLifeCycleEvents) {
+      // required for filtering and sorting
+      return withLifecycleEvents<MetricsVariable>(this);
+    }
   }
 }
