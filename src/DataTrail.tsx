@@ -302,7 +302,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.getPrometheusBuildInfo();
   }
 
-  public async fetchRecentMetrics({ interval, extraFilter }: { interval?: string; extraFilter?: string } = {}) {
+  public async fetchRecentMetrics({ interval, extraFilter }: { interval: string; extraFilter?: string }) {
     return this.datasourceHelper.fetchRecentMetrics({ interval, extraFilter });
   }
 

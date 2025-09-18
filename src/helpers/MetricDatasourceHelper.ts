@@ -186,15 +186,15 @@ export class MetricDatasourceHelper {
     }
   }
 
-  public async fetchRecentMetrics({ interval, extraFilter }: { interval?: string; extraFilter?: string } = {}) {
+  public async fetchRecentMetrics({ interval, extraFilter }: { interval: string; extraFilter?: string }) {
     const ds = await this.getRuntimeDatasource();
     if (!ds) {
       return [];
     }
 
-    const filters = extraFilter
-      ? `__name__!="",${extraFilter},${sceneGraph.interpolate(this.trail, VAR_FILTERS_EXPR)}`
-      : `__name__!="",${sceneGraph.interpolate(this.trail, VAR_FILTERS_EXPR)}`;
+    const filters = ['__name__!=""', extraFilter, sceneGraph.interpolate(this.trail, VAR_FILTERS_EXPR)]
+      .filter(Boolean)
+      .join(',');
 
     const query = `group by (__name__) ({${filters}}) unless (group by (__name__) ({${filters}} offset ${interval}))`;
 
@@ -204,7 +204,7 @@ export class MetricDatasourceHelper {
 
     if (!Array.isArray(response?.result)) {
       throw new Error(
-        `The query to load recent metrics returned too many results or timed out. Try a shorter time interval and/or add label filters to narrow the search.`
+        `The query to search for recent metrics timed out or failed. Try a shorter time interval and/or add label filters to narrow the search.`
       );
     }
 

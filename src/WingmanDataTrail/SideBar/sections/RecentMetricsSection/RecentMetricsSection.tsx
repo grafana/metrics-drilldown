@@ -1,6 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import {
+  DataSourceVariable,
   sceneGraph,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
@@ -11,6 +12,7 @@ import { RadioButtonList, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from 'interactions';
+import { VAR_DATASOURCE } from 'shared';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 
@@ -97,6 +99,14 @@ export class RecentMetricsSection extends SceneObjectBase<RecentMetricsSectionSt
         true
       );
     });
+
+    this._subs.add(
+      sceneGraph.findByKeyAndType(this, VAR_DATASOURCE, DataSourceVariable).subscribeToState((newState, prevState) => {
+        if (newState.value !== prevState.value) {
+          this.update('all');
+        }
+      })
+    );
   }
 
   private update(interval: string) {

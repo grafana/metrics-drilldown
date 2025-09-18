@@ -1,14 +1,8 @@
 import { VariableHide, VariableRefresh, VariableSort } from '@grafana/data';
-import {
-  AdHocFiltersVariable,
-  DataSourceVariable,
-  QueryVariable,
-  sceneGraph,
-  type SceneObjectState,
-} from '@grafana/scenes';
+import { AdHocFiltersVariable, QueryVariable, sceneGraph, type SceneObjectState } from '@grafana/scenes';
 
 import { type LabelMatcher } from 'GmdVizPanel/buildQueryExpression';
-import { trailDS, VAR_DATASOURCE, VAR_FILTERS } from 'shared';
+import { trailDS, VAR_FILTERS } from 'shared';
 import { getTrailFor } from 'utils';
 
 import { withLifecycleEvents } from './withLifecycleEvents';
@@ -54,14 +48,6 @@ export class MetricsVariable extends QueryVariable {
 
   private onActivate() {
     this.toggleRecentMetrics();
-
-    this._subs.add(
-      sceneGraph.findByKeyAndType(this, VAR_DATASOURCE, DataSourceVariable).subscribeToState((newState, prevState) => {
-        if (!this.state.query && newState.value !== prevState.value) {
-          this.toggleRecentMetrics();
-        }
-      })
-    );
 
     this._subs.add(
       sceneGraph.findByKeyAndType(this, VAR_FILTERS, AdHocFiltersVariable).subscribeToState((newState, prevState) => {
