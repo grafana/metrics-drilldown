@@ -8,7 +8,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Field, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
@@ -75,9 +75,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <Field label="By label">
-            <groupByVariable.Component model={groupByVariable} />
-          </Field>
+          <groupByVariable.Component model={groupByVariable} />
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
         </div>
@@ -97,15 +95,15 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       minHeight: '100%',
       flexDirection: 'column',
-      paddingTop: theme.spacing(1),
     }),
     controls: css({
       flexGrow: 0,
       display: 'flex',
-      gap: theme.spacing(2),
-      height: '70px',
+      gap: theme.spacing(1),
+      height: '77px',
       justifyContent: 'space-between',
       alignItems: 'end',
+      overflowX: 'auto',
     }),
     searchField: css({
       flexGrow: 1,
