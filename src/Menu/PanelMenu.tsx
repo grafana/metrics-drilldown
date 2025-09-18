@@ -8,12 +8,13 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
+import { TOPVIEW_PANEL_MENU_KEY } from 'MetricGraphScene';
+
 import { getTrailFor } from '../utils';
 import { CopyUrlAction } from './actions/CopyUrlAction';
 import { ExploreAction } from './actions/ExploreAction';
 import { type AddToExplorationButton } from './actions/investigation/AddToExplorationsButton';
 import { InvestigationAction } from './actions/investigation/InvestigationAction';
-import { TOPVIEW_PANEL_MENU_KEY } from 'MetricGraphScene';
 
 interface PanelMenuState extends SceneObjectState {
   body?: VizPanelMenu;
