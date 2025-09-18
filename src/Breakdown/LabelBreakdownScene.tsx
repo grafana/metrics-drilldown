@@ -12,7 +12,6 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
-import { VariableBackedGroupBySelector } from './GroupBySelector';
 import { isQueryVariable } from '../utils/utils.variables';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
@@ -76,11 +75,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.controls}>
-          <VariableBackedGroupBySelector
-            variable={groupByVariable}
-            fieldLabel="By label"
-            selectPlaceholder="More labels..."
-          />
+          <groupByVariable.Component model={groupByVariable} />
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
         </div>
@@ -105,7 +100,7 @@ function getStyles(theme: GrafanaTheme2) {
     controls: css({
       flexGrow: 0,
       display: 'flex',
-      gap: theme.spacing(2),
+      gap: theme.spacing(1),
       height: '77px',
       justifyContent: 'space-between',
       alignItems: 'end',

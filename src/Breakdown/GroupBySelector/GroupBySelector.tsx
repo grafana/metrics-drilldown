@@ -1,117 +1,58 @@
-import { css } from '@emotion/css';
-import { type SelectableValue } from '@grafana/data';
-import { Combobox, Field, RadioButtonGroup, useStyles2 } from '@grafana/ui';
-import React, { useEffect, useMemo } from 'react';
+import { Combobox, RadioButtonGroup } from '@grafana/ui';
+import React, { useMemo } from 'react';
 
-interface AttributePrefixConfig {
-  span?: string;
-  resource?: string;
-  event?: string;
-  [key: string]: string | undefined;
-}
+import { noOp } from 'utils';
 
-interface SearchConfig {
-  enabled?: boolean;
-  maxOptions?: number;
-  caseSensitive?: boolean;
-  searchFields?: Array<'label' | 'value'>;
-}
+export type GroupByOptions = Array<{ label: string; value: string }>;
 
-export interface GroupBySelectorProps {
-  options: Array<SelectableValue<string>>;
-  value?: string;
+interface GroupBySelectorProps {
+  options: GroupByOptions;
+  value: string;
   onChange: (label: string, ignore?: boolean) => void;
-  showAll?: boolean;
-  attributePrefixes?: AttributePrefixConfig;
-  fieldLabel?: string;
-  selectPlaceholder?: string;
-  ignoredAttributes?: string[];
-  searchConfig?: SearchConfig;
+  loading?: boolean;
 }
 
-const DEFAULT_ALL_OPTION = 'All';
-
-const removeAttributePrefixes = (
-  attribute: string,
-  prefixes: AttributePrefixConfig
-): string => {
-  for (const [, prefix] of Object.entries(prefixes)) {
-    if (prefix && attribute.startsWith(prefix)) {
-      return attribute.replace(prefix, '');
-    }
-  }
-  return attribute;
+export const DEFAULT_ALL_OPTION = {
+  label: 'All',
+  value: '$__all',
 };
 
+const MAX_RADIOGROUP_OPTIONS = 4;
+const COMBOBOX_PLACEHOLDER = 'Select a label to group by';
+
 export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
-  const {
-    options = [],
-    value,
-    onChange,
-    showAll = false,
-    attributePrefixes = {},
-    fieldLabel = 'Group by',
-    selectPlaceholder = 'Other attributes',
-    ignoredAttributes = [],
-  } = props;
+  const { loading, options, value, onChange } = props;
+  const processedOptions = useMemo(() => [DEFAULT_ALL_OPTION, ...options], [options]);
 
-  const styles = useStyles2(getStyles);
+  if (loading) {
+    // prevent layout changes after loading
+    return <Combobox options={[]} placeholder={COMBOBOX_PLACEHOLDER} onChange={noOp} />;
+  }
 
-  const processedOptions = useMemo(() => {
-    const filtered = options
-      .filter((opt) => opt.value && opt.value !== '$__all' && !ignoredAttributes.includes(opt.value))
-      .map((opt) => ({
-        label: removeAttributePrefixes(opt.label ?? (opt.value as string), attributePrefixes),
-        value: opt.value as string,
-      }));
+  // as per Grafana Design System guidelines (https://grafana.com/developers/saga/components/radio-button-group/#when-to-use)
+  const useRadios = processedOptions.length <= MAX_RADIOGROUP_OPTIONS;
 
-    return showAll ? [{ label: DEFAULT_ALL_OPTION, value: DEFAULT_ALL_OPTION }, ...filtered] : filtered;
-  }, [options, showAll, ignoredAttributes, attributePrefixes]);
-
-  const defaultValue = processedOptions[0]?.value;
-  const effectiveValue = value || defaultValue;
-
-  // Auto-select default on mount or when options change
-  useEffect(() => {
-    if (!value && defaultValue) {
-      onChange(defaultValue, true);
-    }
-  }, [defaultValue, value, onChange]);
-
-  const useRadios = processedOptions.length <= 4;
+  if (useRadios) {
+    return (
+      <RadioButtonGroup
+        data-testid="group-by-selector-radio-group"
+        options={processedOptions}
+        value={value}
+        onChange={onChange}
+      />
+    );
+  }
 
   return (
-    <Field label={fieldLabel} data-testid="breakdown-label-selector">
-      {useRadios ? (
-        <RadioButtonGroup
-          data-testid="group-by-selector-radio-group"
-          options={processedOptions}
-          value={effectiveValue}
-          onChange={onChange}
-        />
-      ) : (
-        <div className={styles.selectContainer} id="group-by-selector">
-          <Combobox
-            id="group-by-selector"
-            value={effectiveValue && processedOptions.some((x) => x.value === effectiveValue) ? effectiveValue : null}
-            placeholder={selectPlaceholder}
-            options={processedOptions}
-            onChange={(selected) => {
-              const newSelected = selected?.value || defaultValue || '';
-              onChange(newSelected);
-            }}
-            isClearable
-          />
-        </div>
-      )}
-    </Field>
+    <Combobox
+      id="group-by-selector"
+      options={processedOptions}
+      value={value}
+      placeholder={COMBOBOX_PLACEHOLDER}
+      onChange={(option) => {
+        onChange(option ? option.value : DEFAULT_ALL_OPTION.value);
+      }}
+      isClearable
+    />
   );
-}
-
-function getStyles() {
-  return {
-    selectContainer: css({
-      minWidth: 100,
-    }),
-  };
 }

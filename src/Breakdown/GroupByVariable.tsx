@@ -1,15 +1,13 @@
-import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
 import { QueryVariable, sceneGraph, type MultiValueVariable, type SceneComponentProps } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
-import React from 'react';
+import { Field } from '@grafana/ui';
+import React, { useCallback } from 'react';
 
 import { reportExploreMetrics } from 'interactions';
 import { ALL_VARIABLE_VALUE } from 'services/variables';
 import { trailDS, VAR_FILTERS, VAR_GROUP_BY, VAR_METRIC_EXPR } from 'shared';
 import { isAdHocFiltersVariable } from 'utils/utils.variables';
 
-import { VariableBackedGroupBySelector } from './GroupBySelector';
+import { GroupBySelector, type GroupByOptions } from './GroupBySelector/GroupBySelector';
 
 export class GroupByVariable extends QueryVariable {
   constructor() {
@@ -56,23 +54,25 @@ export class GroupByVariable extends QueryVariable {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
-    const styles = useStyles2(getStyles);
+    const { options, value, loading } = model.useState();
+
+    const onChange = useCallback(
+      (selected: string, ignore?: boolean) => {
+        const next = selected === 'All' ? '$__all' : selected;
+        model.changeValueTo(next, undefined, !ignore);
+      },
+      [model]
+    );
 
     return (
-      <div className={styles.select}>
-        <VariableBackedGroupBySelector variable={model as unknown as QueryVariable} fieldLabel="Group by" />
-      </div>
+      <Field label="By label" data-testid="breakdown-label-selector">
+        <GroupBySelector
+          options={options as GroupByOptions}
+          value={value as string}
+          onChange={onChange}
+          loading={loading}
+        />
+      </Field>
     );
-  };
-}
-
-function getStyles(theme: GrafanaTheme2) {
-  return {
-    select: css`
-      width: ${theme.spacing(16)};
-      & > div {
-        width: 100%;
-      }
-    `,
   };
 }
