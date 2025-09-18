@@ -60,62 +60,57 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     const { actionView } = metricScene.useState();
 
     return (
-      <div className={styles.container}>
-        <Box paddingY={1} data-testid="action-bar">
-          <div className={styles.actions}>
-            <Stack gap={1}>{/* Action buttons moved to panel menu */}</Stack>
-          </div>
+      <Box paddingY={1} data-testid="action-bar" width="100%">
+        <div className={styles.actions}>
+          <Stack gap={1}>{/* Action buttons moved to panel menu */}</Stack>
+        </div>
 
-          <TabsBar className={styles.customTabsBar}>
-            {actionViewsDefinitions.map((tab, index) => {
-              const label = tab.displayName;
-              const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
-              const isActive = actionView === tab.value;
+        <TabsBar className={styles.customTabsBar}>
+          {actionViewsDefinitions.map((tab, index) => {
+            const label = tab.displayName;
+            const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
+            const isActive = actionView === tab.value;
 
-              const tabRender = (
-                <Tab
-                  key={index}
-                  label={label}
-                  counter={counter}
-                  active={isActive}
-                  onChangeTab={() => {
-                    if (isActive) {
-                      return;
-                    }
+            const tabRender = (
+              <Tab
+                key={index}
+                label={label}
+                counter={counter}
+                active={isActive}
+                onChangeTab={() => {
+                  if (isActive) {
+                    return;
+                  }
 
-                    reportExploreMetrics('metric_action_view_changed', {
-                      view: tab.value,
-                      related_logs_count: metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()
-                        ? counter
-                        : undefined,
-                    });
+                  reportExploreMetrics('metric_action_view_changed', {
+                    view: tab.value,
+                    related_logs_count: metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()
+                      ? counter
+                      : undefined,
+                  });
 
-                    metricScene.setActionView(tab.value);
-                  }}
-                />
+                  metricScene.setActionView(tab.value);
+                }}
+              />
+            );
+
+            if (tab.description) {
+              return (
+                <Tooltip key={index} content={tab.description} placement="top" theme="info">
+                  {tabRender}
+                </Tooltip>
               );
-
-              if (tab.description) {
-                return (
-                  <Tooltip key={index} content={tab.description} placement="top" theme="info">
-                    {tabRender}
-                  </Tooltip>
-                );
-              }
-              return tabRender;
-            })}
-          </TabsBar>
-        </Box>
-      </div>
+            }
+            return tabRender;
+          })}
+        </TabsBar>
+      </Box>
     );
   };
 }
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css({
-      width: '100%',
-    }),
     actions: css({
       [theme.breakpoints.up(theme.breakpoints.values.md)]: {
         position: 'absolute',
