@@ -95,7 +95,6 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       minHeight: '100%',
       flexDirection: 'column',
-      paddingTop: theme.spacing(1),
     }),
     controls: css({
       flexGrow: 0,

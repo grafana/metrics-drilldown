@@ -1,4 +1,5 @@
-import { Combobox, RadioButtonGroup } from '@grafana/ui';
+import { css } from '@emotion/css';
+import { Combobox, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 import React, { useMemo } from 'react';
 
 import { noOp } from 'utils';
@@ -21,6 +22,7 @@ const MAX_RADIOGROUP_OPTIONS = 4;
 const COMBOBOX_PLACEHOLDER = 'Select a label to group by';
 
 export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
+  const styles = useStyles2(getStyles);
   const { loading, options, value, onChange } = props;
   const processedOptions = useMemo(() => [DEFAULT_ALL_OPTION, ...options], [options]);
 
@@ -44,15 +46,25 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
   }
 
   return (
-    <Combobox
-      id="group-by-selector"
-      options={processedOptions}
-      value={value}
-      placeholder={COMBOBOX_PLACEHOLDER}
-      onChange={(option) => {
-        onChange(option ? option.value : DEFAULT_ALL_OPTION.value);
-      }}
-      isClearable
-    />
+    <div className={styles.combobox}>
+      <Combobox
+        data-testid="group-by-selector-combobox"
+        options={processedOptions}
+        value={value}
+        placeholder={COMBOBOX_PLACEHOLDER}
+        onChange={(option) => {
+          onChange(option ? option.value : DEFAULT_ALL_OPTION.value);
+        }}
+        isClearable
+      />
+    </div>
   );
+}
+
+function getStyles() {
+  return {
+    combobox: css({
+      marginLeft: '4px',
+    }),
+  };
 }
