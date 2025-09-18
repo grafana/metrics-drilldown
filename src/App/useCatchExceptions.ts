@@ -6,12 +6,23 @@ function ensureErrorObject(error: any, defaultMessage: string): Error {
   if (error instanceof Error) {
     return error;
   }
+
   if (typeof error === 'string') {
     return new Error(error);
   }
+
   if (typeof error.message === 'string') {
-    return new Error(error.message);
+    const infos = [];
+    if (error.statusText) {
+      infos.push(error.statusText);
+    }
+    if (error.status) {
+      infos.push(`HTTP ${error.status}`);
+    }
+    const message = infos.length ? `${error.message} (${infos.join(' - ')})` : error.message;
+    return new Error(message);
   }
+
   return new Error(defaultMessage);
 }
 
