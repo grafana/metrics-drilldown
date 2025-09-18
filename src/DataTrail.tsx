@@ -39,7 +39,7 @@ import { PluginInfo } from 'PluginInfo/PluginInfo';
 import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
 import { addRecentMetric } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { SelectNewMetricButton } from './controls/SelectNewMetricButton';
@@ -243,6 +243,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     if (metric) {
       addRecentMetric(metric);
+    } else {
+      // make sure we display all the proper metrics when coming back from the MetricScene (see RelatedMetricsScene.tsx, side bar sections in SideBar.tsx and RecentMetricsSection.tsx)
+      sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable).toggleRecentMetrics();
     }
 
     // Add metric to adhoc filters baseFilter
@@ -295,9 +298,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.isNativeHistogram(metric);
   }
 
-  getPrometheusBuildInfo = async () => {
+  public async getPrometheusBuildInfo() {
     return this.datasourceHelper.getPrometheusBuildInfo();
-  };
+  }
+
+  public async fetchRecentMetrics({ interval, extraFilter }: { interval?: string; extraFilter?: string } = {}) {
+    return this.datasourceHelper.fetchRecentMetrics({ interval, extraFilter });
+  }
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const { controls, topScene, embedded, drawer } = model.useState();
