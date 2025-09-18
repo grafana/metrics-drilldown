@@ -2,27 +2,20 @@ import { useEffect, useState } from 'react';
 
 import { logger } from '../tracking/logger/logger';
 
-function ensureErrorObject(error: any, defaultMessage: string): Error {
+export function ensureErrorObject(error: any, defaultMessage: string): Error {
   if (error instanceof Error) {
     return error;
   }
-
   if (typeof error === 'string') {
     return new Error(error);
   }
-
   if (typeof error.message === 'string') {
-    const infos = [];
-    if (error.statusText) {
-      infos.push(error.statusText);
+    const e = new Error(error.message);
+    for (const prop of Object.getOwnPropertyNames(error)) {
+      (e as any)[prop] = error[prop];
     }
-    if (error.status) {
-      infos.push(`HTTP ${error.status}`);
-    }
-    const message = infos.length ? `${error.message} (${infos.join(' - ')})` : error.message;
-    return new Error(message);
+    return e;
   }
-
   return new Error(defaultMessage);
 }
 
