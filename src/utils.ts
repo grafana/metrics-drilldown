@@ -185,3 +185,5 @@ export function findObjectOfType<T extends SceneObject>(
 
   return null;
 }
+
+export function noOp() {}
