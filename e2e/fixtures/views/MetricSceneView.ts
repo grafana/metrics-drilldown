@@ -68,6 +68,40 @@ export class MetricSceneView extends DrilldownView {
     return this.getByRole('dialog', { name: /drawer title configure the prometheus function/i });
   }
 
+  /* Panel menu */
+
+  async openMainPanelMenu() {
+    const panel = this.getMainViz();
+
+    // Hover the panel to ensure header actions are visible
+    await panel.hover();
+
+    // Try a set of robust selectors for the menu trigger scoped to the panel
+    const candidates = [
+      panel.getByRole('button', { name: /menu/i }),
+      panel.getByRole('button', { name: /more/i }),
+      panel.getByRole('button', { name: /options/i }),
+      panel.locator('button[aria-haspopup="menu"]'),
+      panel.locator('button[aria-label]'),
+    ];
+
+    for (const candidate of candidates) {
+      if (await candidate.first().isVisible()) {
+        await candidate.first().click();
+        // Wait for any menuitem to appear to confirm the menu is open
+        await expect(this.getByRole('menuitem').first()).toBeVisible();
+        return;
+      }
+    }
+
+    throw new Error('Could not find the panel menu trigger within the main viz panel');
+  }
+
+  async assertMainPanelMenuItems() {
+    await expect(this.getByRole('menuitem', { name: 'Explore' })).toBeVisible();
+    await expect(this.getByRole('menuitem', { name: 'Copy URL' })).toBeVisible();
+  }
+
   async selectAndApplyConfigPreset(presetName: string, presetParams: string[]) {
     const configureSlider = this.getConfigureSlider();
     await configureSlider.getByTitle(presetName).click(); // clicking anywhere inside the preset div works ;)
