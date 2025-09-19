@@ -23,6 +23,7 @@ import {
   FilteredMetricsVariable,
   VAR_FILTERED_METRICS_VARIABLE,
 } from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
 import {
   MetricsVariableFilterEngine,
   type MetricFilters,
@@ -56,6 +57,9 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   }
 
   private onActivate() {
+    // make sure we display all the available metrics (see DataTrail.tsx, side bar sections in SideBar.tsx and RecentMetricsSection.tsx)
+    sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable).fetchAllMetrics();
+
     this.subscribeToEvents();
   }
 

@@ -143,6 +143,8 @@ type Interactions = {
   sidebar_group_by_label_filter_applied: {
     label: string;
   };
+  sidebar_recent_filter_section_clicked: {};
+  sidebar_recent_filter_selected: { interval: string };
   app_initialized: {
     view: ViewName;
     uel_epid: string;

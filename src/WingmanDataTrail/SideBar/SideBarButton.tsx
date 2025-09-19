@@ -73,6 +73,9 @@ function getStyles(theme: GrafanaTheme2) {
         color: theme.colors.text.maxContrast,
         background: 'transparent',
       },
+      '&.disabled': {
+        opacity: 0.5,
+      },
       '&.disabled:hover': {
         color: theme.colors.text.secondary,
       },
