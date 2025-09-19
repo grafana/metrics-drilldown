@@ -61,7 +61,7 @@ export class RelatedListControls extends EmbeddedScene {
     const { body } = model.useState();
 
     return (
-      <div className={styles.headerWrapper} data-testid="related-list-controls">
+      <div className={styles.controls} data-testid="related-list-controls">
         <body.Component model={body} />
       </div>
     );
@@ -70,7 +70,7 @@ export class RelatedListControls extends EmbeddedScene {
 
 function getStyles() {
   return {
-    headerWrapper: css({
+    controls: css({
       display: 'flex',
       alignItems: 'center',
       '& > div': {

@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { config } from '@grafana/runtime';
+import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -10,6 +10,10 @@ import {
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
+
+import { type DataTrail } from 'DataTrail';
+import { getTrailFor } from 'utils';
+import { getAppBackgroundColor } from 'utils/utils.styles';
 
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
 import { isQueryVariable } from '../utils/utils.variables';
@@ -68,13 +72,15 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
-    const styles = useStyles2(getStyles);
+    const chromeHeaderHeight = useChromeHeaderHeight();
+    const trail = getTrailFor(model);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
     return (
       <div className={styles.container}>
-        <div className={styles.controls}>
+        <div className={styles.stickyControls} data-testid="breakdown-controls">
           <groupByVariable.Component model={groupByVariable} />
           {body instanceof MetricLabelsList && <body.Controls model={body} />}
           {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
@@ -88,7 +94,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   };
 }
 
-function getStyles(theme: GrafanaTheme2) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
   return {
     container: css({
       flexGrow: 1,
@@ -96,14 +102,18 @@ function getStyles(theme: GrafanaTheme2) {
       minHeight: '100%',
       flexDirection: 'column',
     }),
-    controls: css({
-      flexGrow: 0,
+    stickyControls: css({
       display: 'flex',
-      gap: theme.spacing(1),
-      height: '77px',
       justifyContent: 'space-between',
       alignItems: 'end',
-      overflowX: 'auto',
+      gap: theme.spacing(1),
+      margin: theme.spacing(1, 0, 1.5, 0),
+      position: 'sticky',
+      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
+      zIndex: 10,
+      background: getAppBackgroundColor(theme, trail),
+      paddingBottom: theme.spacing(1),
+      height: '60px', // prevent small jumps when switching from group by "All" to a label
     }),
     searchField: css({
       flexGrow: 1,

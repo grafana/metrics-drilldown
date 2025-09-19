@@ -143,10 +143,8 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
         <div className={styles.searchSticky}>
           <listControls.Component model={listControls} />
         </div>
-        <div className={styles.body}>
-          <div className={styles.list} data-testid="panels-list">
-            <body.Component model={body} />
-          </div>
+        <div data-testid="panels-list">
+          <body.Component model={body} />
         </div>
         <div className={styles.variables}>
           {$variables?.state.variables.map((variable) => (
@@ -160,8 +158,6 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
 
 function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
   return {
-    body: css({}),
-    list: css({}),
     variables: css({
       display: 'none',
     }),
