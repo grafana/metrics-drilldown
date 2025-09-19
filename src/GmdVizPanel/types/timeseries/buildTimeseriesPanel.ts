@@ -3,11 +3,13 @@ import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/sc
 
 import { extremeValueFilterBehavior } from 'GmdVizPanel/behaviors/extremeValueFilterBehavior/extremeValueFilterBehavior';
 import { type PanelConfig, type QueryConfig } from 'GmdVizPanel/GmdVizPanel';
+import { getIsCounterFromMetadata } from 'GmdVizPanel/matchers/isCounterFromMetadata';
 import { addRefId } from 'GmdVizPanel/types/timeseries/transformations/addRefId';
 import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { sliceSeries } from 'GmdVizPanel/types/timeseries/transformations/sliceSeries';
 import { trailDS } from 'shared';
-import { getColorByIndex } from 'utils';
+import { getColorByIndex , getTrailFor } from 'utils';
+import { isSceneQueryRunner } from 'utils/utils.queries';
 
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
@@ -24,6 +26,7 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   }
 
   const { metric, panelConfig, queryConfig } = options;
+  // Build immediately using heuristic so UI renders quickly.
   const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
@@ -66,7 +69,33 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     );
   }
 
-  return vizPanelBuilder.build();
+  const vizPanel = vizPanelBuilder.build();
+
+  // Use Scenes lifecycle: run after this panel is activated/attached.
+  vizPanel.addActivationHandler(() => {
+    (async () => {
+      const dataTrail = getTrailFor(vizPanel as unknown as any);
+      const isCounter = await getIsCounterFromMetadata(metric, dataTrail);
+      if (typeof isCounter !== 'boolean') {
+        return; // inconclusive; keep heuristic
+      }
+
+      if (isCounter !== queryParams.isRateQuery) {
+        const corrected = getTimeseriesQueryRunnerParams({ metric, queryConfig, isRateQueryOverride: isCounter });
+        // Prefer the panel's direct SceneQueryRunner; if it's wrapped, bail (group-by path handles separately).
+        const provider = vizPanel.state.$data as unknown as SceneQueryRunner;
+        if (provider && isSceneQueryRunner(provider)) {
+          provider.setState({
+            maxDataPoints: corrected.maxDataPoints,
+            queries: corrected.queries,
+          });
+          provider.runQueries();
+        }
+      }
+    })().catch(() => {});
+  });
+
+  return vizPanel;
 }
 
 export const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
