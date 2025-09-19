@@ -57,6 +57,7 @@ export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
 
     return (
       <Field
+        className={styles.field}
         data-testid="sort-by-select"
         htmlFor="sort-by-criteria"
         label={
@@ -90,6 +91,9 @@ function getStyles(theme: GrafanaTheme2) {
     sortByTooltip: css({
       display: 'flex',
       gap: theme.spacing(1),
+    }),
+    field: css({
+      marginBottom: 0,
     }),
   };
 }

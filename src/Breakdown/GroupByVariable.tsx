@@ -1,5 +1,6 @@
+import { css } from '@emotion/css';
 import { QueryVariable, sceneGraph, type MultiValueVariable, type SceneComponentProps } from '@grafana/scenes';
-import { Field } from '@grafana/ui';
+import { Field, useStyles2 } from '@grafana/ui';
 import React, { useCallback } from 'react';
 
 import { reportExploreMetrics } from 'interactions';
@@ -54,6 +55,7 @@ export class GroupByVariable extends QueryVariable {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MultiValueVariable>) => {
+    const styles = useStyles2(getStyles);
     const { options, value, loading } = model.useState();
 
     const onChange = useCallback(
@@ -65,7 +67,7 @@ export class GroupByVariable extends QueryVariable {
     );
 
     return (
-      <Field label="By label" data-testid="breakdown-label-selector">
+      <Field label="By label" data-testid="breakdown-label-selector" className={styles.field}>
         <GroupBySelector
           options={options as GroupByOptions}
           value={value as string}
@@ -74,5 +76,13 @@ export class GroupByVariable extends QueryVariable {
         />
       </Field>
     );
+  };
+}
+
+function getStyles() {
+  return {
+    field: css({
+      marginBottom: 0,
+    }),
   };
 }
