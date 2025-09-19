@@ -152,8 +152,9 @@ test.describe('Metric Scene view', () => {
         await metricSceneView.assertMainViz(METRIC_NAME);
 
         await metricSceneView.openMainPanelMenu();
-        await metricSceneView.assertMainPanelMenuItems();
-        // add screenshot here
+        
+        await expect(metricSceneView.getByRole('menuitem', { name: 'Explore' })).toBeVisible();
+        await expect(metricSceneView.getByRole('menuitem', { name: 'Copy URL' })).toBeVisible();
       });
     })
 

@@ -97,11 +97,6 @@ export class MetricSceneView extends DrilldownView {
     throw new Error('Could not find the panel menu trigger within the main viz panel');
   }
 
-  async assertMainPanelMenuItems() {
-    await expect(this.getByRole('menuitem', { name: 'Explore' })).toBeVisible();
-    await expect(this.getByRole('menuitem', { name: 'Copy URL' })).toBeVisible();
-  }
-
   async selectAndApplyConfigPreset(presetName: string, presetParams: string[]) {
     const configureSlider = this.getConfigureSlider();
     await configureSlider.getByTitle(presetName).click(); // clicking anywhere inside the preset div works ;)
