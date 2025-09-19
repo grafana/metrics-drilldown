@@ -164,10 +164,10 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
     searchSticky: css({
       margin: theme.spacing(1, 0, 1.5, 0),
       position: 'sticky',
-      background: getAppBackgroundColor(theme, trail),
-      zIndex: 10,
-      paddingBottom: theme.spacing(1),
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
+      zIndex: 10,
+      background: getAppBackgroundColor(theme, trail),
+      paddingBottom: theme.spacing(1),
     }),
   };
 }
