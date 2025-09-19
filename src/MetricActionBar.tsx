@@ -54,19 +54,15 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
 interface MetricActionBarState extends SceneObjectState {}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
-
-
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
     const { actionView } = metricScene.useState();
 
     return (
-      <Box paddingY={1} data-testid="action-bar">
+      <Box paddingY={1} data-testid="action-bar" width="100%">
         <div className={styles.actions}>
-          <Stack gap={1}>
-            {/* Action buttons moved to panel menu */}
-          </Stack>
+          <Stack gap={1}>{/* Action buttons moved to panel menu */}</Stack>
         </div>
 
         <TabsBar className={styles.customTabsBar}>
