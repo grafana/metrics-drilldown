@@ -146,6 +146,17 @@ test.describe('Metric Scene view', () => {
       });
     });
 
+    test.describe('Metrics graph panel menu items', () => {
+      test('Shows Explore and Copy URL in main panel menu', async ({ metricSceneView }) => {
+        await metricSceneView.goto(URL_SEARCH_PARAMS_WITH_METRIC_NAME);
+        await metricSceneView.assertMainViz(METRIC_NAME);
+
+        await metricSceneView.openMainPanelMenu();
+        await metricSceneView.assertMainPanelMenuItems();
+        // add screenshot here
+      });
+    })
+
     test.describe('Related logs tab', () => {
       test.beforeEach(async ({ metricSceneView }) => {
         await metricSceneView.selectTab('Related logs');
