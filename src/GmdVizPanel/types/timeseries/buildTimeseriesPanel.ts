@@ -10,6 +10,8 @@ import { trailDS } from 'shared';
 import { getColorByIndex } from 'utils';
 
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
+import { getTrailFor } from 'utils';
+import { getIsCounterFromMetadata } from 'GmdVizPanel/matchers/isCounterFromMetadata';
 import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
 
 type TimeseriesPanelOptions = {
@@ -24,6 +26,7 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   }
 
   const { metric, panelConfig, queryConfig } = options;
+  // Build immediately using heuristic so UI renders quickly.
   const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
 
@@ -46,6 +49,27 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setCustomFieldConfig('fillOpacity', 9)
     .setBehaviors([extremeValueFilterBehavior, ...(panelConfig.behaviors || [])]);
+
+  // After first render, verify heuristic with Prometheus metadata and, if needed,
+  // rebuild the data query using isRateQueryOverride.
+  // Only flips rate <-> raw for timeseries; other panel types handle their own logic.
+  void (async () => {
+    const dataTrail = getTrailFor(vizPanelBuilder as unknown as any);
+    const isCounter = await getIsCounterFromMetadata(metric, dataTrail);
+    if (typeof isCounter !== 'boolean') {
+      return; // inconclusive; keep heuristic
+    }
+
+    if (isCounter !== queryParams.isRateQuery) {
+      const corrected = getTimeseriesQueryRunnerParams({ metric, queryConfig, isRateQueryOverride: isCounter });
+      ($data as any).setState({
+        maxDataPoints: corrected.maxDataPoints,
+        queries: corrected.queries,
+      });
+      const correctedUnit = corrected.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
+      vizPanelBuilder.setUnit(correctedUnit);
+    }
+  })();
 
   if (queryParams.queries.length > 1) {
     const startColorIndex = panelConfig.fixedColorIndex || 0;
