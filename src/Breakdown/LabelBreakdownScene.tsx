@@ -81,9 +81,11 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return (
       <div className={styles.container}>
         <div className={styles.stickyControls} data-testid="breakdown-controls">
-          <groupByVariable.Component model={groupByVariable} />
-          {body instanceof MetricLabelsList && <body.Controls model={body} />}
-          {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+          <div className={styles.controls}>
+            <groupByVariable.Component model={groupByVariable} />
+            {body instanceof MetricLabelsList && <body.Controls model={body} />}
+            {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+          </div>
         </div>
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
@@ -103,17 +105,20 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'column',
     }),
     stickyControls: css({
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'end',
-      gap: theme.spacing(1),
       margin: theme.spacing(1, 0, 1.5, 0),
       position: 'sticky',
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
       zIndex: 10,
       background: getAppBackgroundColor(theme, trail),
       paddingBottom: theme.spacing(1),
-      height: '60px', // prevent small jumps when switching from group by "All" to a label
+    }),
+    controls: css({
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'end',
+      flexWrap: 'wrap',
+      gap: theme.spacing(1),
     }),
     searchField: css({
       flexGrow: 1,

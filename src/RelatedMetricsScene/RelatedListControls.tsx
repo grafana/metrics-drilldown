@@ -72,15 +72,7 @@ function getStyles() {
   return {
     controls: css({
       display: 'flex',
-      alignItems: 'center',
-      '& > div': {
-        display: 'flex',
-        alignItems: 'center',
-        '& > div': {
-          display: 'flex',
-          alignItems: 'center',
-        },
-      },
+      alignItems: 'end',
     }),
   };
 }
