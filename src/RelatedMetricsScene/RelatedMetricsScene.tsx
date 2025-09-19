@@ -143,10 +143,8 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
         <div className={styles.searchSticky}>
           <listControls.Component model={listControls} />
         </div>
-        <div className={styles.body}>
-          <div className={styles.list} data-testid="panels-list">
-            <body.Component model={body} />
-          </div>
+        <div data-testid="panels-list">
+          <body.Component model={body} />
         </div>
         <div className={styles.variables}>
           {$variables?.state.variables.map((variable) => (
@@ -160,18 +158,16 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
 
 function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
   return {
-    body: css({}),
-    list: css({}),
     variables: css({
       display: 'none',
     }),
     searchSticky: css({
       margin: theme.spacing(1, 0, 1.5, 0),
       position: 'sticky',
-      background: getAppBackgroundColor(theme, trail),
-      zIndex: 10,
-      paddingBottom: theme.spacing(1),
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
+      zIndex: 10,
+      background: getAppBackgroundColor(theme, trail),
+      paddingBottom: theme.spacing(1),
     }),
   };
 }
