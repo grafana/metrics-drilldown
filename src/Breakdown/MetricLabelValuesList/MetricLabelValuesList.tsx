@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { DashboardCursorSync, LoadingState, type DataFrame, type GrafanaTheme2, type PanelData } from '@grafana/data';
 import {
   behaviors,
@@ -277,13 +277,13 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       <>
         {body instanceof SceneByFrameRepeater && (
           <>
-            <Field className={styles.quickSearchField} label="Search">
+            <Field className={cx(styles.field, styles.quickSearchField)} label="Search">
               <quickSearch.Component model={quickSearch} />
             </Field>
             <sortBySelector.Component model={sortBySelector} />
           </>
         )}
-        <Field label="View">
+        <Field label="View" className={styles.field}>
           <layoutSwitcher.Component model={layoutSwitcher} />
         </Field>
       </>
@@ -369,6 +369,9 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     quickSearchField: css({
       flexGrow: 1,
+    }),
+    field: css({
+      marginBottom: 0,
     }),
   };
 }
