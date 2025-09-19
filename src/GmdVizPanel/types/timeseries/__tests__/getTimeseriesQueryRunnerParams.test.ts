@@ -96,4 +96,30 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       ]);
     });
   });
+
+  describe('override behavior', () => {
+    test('respects isRateQueryOverride=false for counter-looking metric', () => {
+      // _sum suffix would normally trigger rate(); override forces raw
+      const result = getTimeseriesQueryRunnerParams({
+        metric: 'http_requests_sum',
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.HIGH,
+          labelMatchers: [{ key: 'instance', operator: '=', value: 'us-east:5000' }],
+          addIgnoreUsageFilter: true,
+        },
+        isRateQueryOverride: false,
+      });
+
+      expect(result.isRateQuery).toBe(false);
+      expect(result.maxDataPoints).toBe(500);
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'http_requests_sum-avg',
+          expr: 'avg(http_requests_sum{instance="us-east:5000", __ignore_usage__="", ${filters:raw}})',
+          legendFormat: 'avg',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+  });
 });
