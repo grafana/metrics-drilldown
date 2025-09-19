@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { logger } from '../tracking/logger/logger';
 
-function ensureErrorObject(error: any, defaultMessage: string): Error {
+export function ensureErrorObject(error: any, defaultMessage: string): Error {
   if (error instanceof Error) {
     return error;
   }
@@ -10,7 +10,11 @@ function ensureErrorObject(error: any, defaultMessage: string): Error {
     return new Error(error);
   }
   if (typeof error.message === 'string') {
-    return new Error(error.message);
+    const e = new Error(error.message);
+    for (const prop of Object.getOwnPropertyNames(error)) {
+      (e as any)[prop] = error[prop];
+    }
+    return e;
   }
   return new Error(defaultMessage);
 }

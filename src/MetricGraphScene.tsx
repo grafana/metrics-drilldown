@@ -38,7 +38,7 @@ interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
   selectedTab?: SceneObject;
-  actionBar: SceneObject;
+  actionBar: MetricActionBar;
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
@@ -58,7 +58,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               panelOptions: {
                 height: PANEL_HEIGHT.XL,
                 headerActions: isClassicHistogramMetric(metric)
-                  ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })]
+                  ? () => [
+                      new GmdVizPanelVariantSelector({ metric }),
+                      new ConfigurePanelAction({ metric }),
+                      new BookmarkHeaderAction({ metric }),
+                    ]
                   : () => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
                 menu: () => new PanelMenu({ labelName: metric, key: TOPVIEW_PANEL_MENU_KEY }),
               },
@@ -70,15 +74,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         ],
       }),
       selectedTab: undefined,
-      actionBar: new SceneFlexLayout({
-        direction: 'column',
-        children: [
-          new SceneFlexItem({
-            ySizing: 'content',
-            body: new MetricActionBar({}),
-          }),
-        ],
-      }),
+      actionBar: new MetricActionBar({}),
     });
 
     this.addActivationHandler(() => {
@@ -103,7 +99,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         gmdVizPanel.update(
           {
             description: getMetricDescription(metadata),
-            headerActions: () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
+            headerActions: () => [
+              new GmdVizPanelVariantSelector({ metric }),
+              new ConfigurePanelAction({ metric }),
+              new BookmarkHeaderAction({ metric }),
+            ],
           },
           {}
         );
