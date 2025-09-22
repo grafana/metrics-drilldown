@@ -1,12 +1,11 @@
 // CAUTION: Imports in this file will contribute to the module.tsx bundle size
 import {
   PluginExtensionPoints,
-  type CustomVariableModel,
   type PluginExtensionAddedLinkConfig,
   type PluginExtensionPanelContext,
-  type QueryVariableModel,
 } from '@grafana/data';
-import { config, getTemplateSrv } from '@grafana/runtime';
+import { interpolateQueryExpr } from '@grafana/prometheus';
+import { getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
 
 import { parseMatcher } from './parseMatcher';
@@ -114,7 +113,7 @@ export async function buildDrilldownUrlAsync<T extends PluginExtensionPanelConte
   const prometheusQuery = queries[0] as PromQuery;
 
   const templateSrv = getTemplateSrv();
-  const datasourceUid = templateSrv.replace(prometheusQuery?.datasource?.uid, context.scopedVars);
+  const datasourceUid = templateSrv.replace(prometheusQuery.datasource?.uid, context.scopedVars);
 
   // allow the user to navigate to the drilldown without a query (metrics reducer view)
   if (!prometheusQuery.expr) {
@@ -325,75 +324,6 @@ type PromQuery = DataQuery & { expr: string };
 function isPromQuery(query: DataQuery): query is PromQuery {
   const { datasource } = query;
   return datasource?.type === 'prometheus';
-}
-
-// Copied from interpolateQueryExpr in prometheus datasource, as we can't return a promise in the link extension config we can't fetch the datasource from the datasource srv, so we're forced to duplicate this method
-// eslint-disable-next-line sonarjs/function-return-type
-function interpolateQueryExpr(
-  value: string | string[] = [],
-  variable: QueryVariableModel | CustomVariableModel
-): string | string[] {
-  // if no multi or include all do not regexEscape
-  if (!variable.multi && !variable.includeAll) {
-    return prometheusRegularEscape(value);
-  }
-
-  if (typeof value === 'string') {
-    return prometheusSpecialRegexEscape(value);
-  }
-
-  const escapedValues = value.map((val) => prometheusSpecialRegexEscape(val));
-
-  if (escapedValues.length === 1) {
-    return escapedValues[0];
-  }
-
-  return '(' + escapedValues.join('|') + ')';
-}
-
-// not exported from @grafana/prometheus, so we're forced to duplicate it here
-// eslint-disable-next-line sonarjs/function-return-type
-function prometheusRegularEscape<T>(value: T) {
-  if (typeof value !== 'string') {
-    return value;
-  }
-
-  if (config.featureToggles.prometheusSpecialCharsInLabelValues) {
-    // if the string looks like a complete label matcher (e.g. 'job="grafana"' or 'job=~"grafana"'),
-    // don't escape the encapsulating quotes
-    if (/^\w+(=|!=|=~|!~)".*"$/.test(value)) {
-      return value;
-    }
-
-    return value
-      .replace(/\\/g, '\\\\') // escape backslashes
-      .replace(/"/g, '\\"'); // escape double quotes
-  }
-
-  // classic behavior
-  return value
-    .replace(/\\/g, '\\\\') // escape backslashes
-    .replace(/'/g, "\\\\'"); // escape single quotes
-}
-
-// not exported from @grafana/prometheus, so we're forced to duplicate it here
-// eslint-disable-next-line sonarjs/function-return-type
-function prometheusSpecialRegexEscape<T>(value: T) {
-  if (typeof value !== 'string') {
-    return value;
-  }
-
-  if (config.featureToggles.prometheusSpecialCharsInLabelValues) {
-    return value
-      .replace(/\\/g, '\\\\\\\\') // escape backslashes
-      .replace(/"/g, '\\\\\\"') // escape double quotes
-      .replace(/[$^*{}\[\]\'+?.()|]/g, '\\\\$&'); // escape regex metacharacters
-  }
-
-  // classic behavior
-  return value
-    .replace(/\\/g, '\\\\\\\\') // escape backslashes
-    .replace(/[$^*{}\[\]+?.()|]/g, '\\\\$&'); // escape regex metacharacters
 }
 
 // Need to export this function from scenes because importing scenesUtils is increasing the bundle entry point size by 522.51kB
