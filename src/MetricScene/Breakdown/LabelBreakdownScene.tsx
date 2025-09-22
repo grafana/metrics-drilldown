@@ -15,10 +15,10 @@ import { type DataTrail } from 'DataTrail';
 import { getTrailFor } from 'utils';
 import { getAppBackgroundColor } from 'utils/utils.styles';
 
-import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
-import { isQueryVariable } from '../utils/utils.variables';
+import { RefreshMetricsEvent, VAR_GROUP_BY } from '../../shared';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
+import { isQueryVariable } from '../../utils/utils.variables';
 
 interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;

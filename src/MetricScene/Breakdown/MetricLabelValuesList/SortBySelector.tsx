@@ -6,8 +6,8 @@ import React from 'react';
 
 import { type SortSeriesByOption } from 'services/sorting';
 
-import { PREF_KEYS } from '../../UserPreferences/pref-keys';
-import { userStorage } from '../../UserPreferences/userStorage';
+import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
+import { userStorage } from '../../../UserPreferences/userStorage';
 
 export interface SortBySelectorState extends SceneObjectState {
   target: 'fields' | 'labels';

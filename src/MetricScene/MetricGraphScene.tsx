@@ -22,18 +22,19 @@ import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
-import { getMetricDescription } from 'helpers/MetricDatasourceHelper';
-import { PanelMenu } from 'Menu/PanelMenu';
-import { MetricActionBar } from 'MetricActionBar';
 
-import { type DataTrail } from './DataTrail';
-import { getTrailFor } from './utils';
-import { getAppBackgroundColor } from './utils/utils.styles';
+import { MetricActionBar } from './MetricActionBar';
+import { type DataTrail } from '../DataTrail';
+import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
+import { getTrailFor } from '../utils';
+import { PanelMenu } from './PanelMenu/PanelMenu';
+import { getAppBackgroundColor } from '../utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
-export const TOPVIEW_PANEL_KEY = 'topview-panel';
+
 export const TOPVIEW_PANEL_MENU_KEY = 'topview-panel-menu';
+
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
@@ -53,7 +54,6 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             minHeight: MAIN_PANEL_MIN_HEIGHT,
             maxHeight: MAIN_PANEL_MAX_HEIGHT,
             body: new GmdVizPanel({
-              key: TOPVIEW_PANEL_KEY,
               metric,
               panelOptions: {
                 height: PANEL_HEIGHT.XL,

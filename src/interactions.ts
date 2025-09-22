@@ -5,13 +5,13 @@ import { type ExposedComponentName } from 'exposedComponents/components';
 import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
 import { type MetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
-import { type ActionViewType } from 'MetricActionBar';
 import { type SortSeriesByOption } from 'services/sorting';
 import { type SnakeCase } from 'utils/utils.types';
 import { type LayoutType } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { type SortingOption as MetricsReducerSortByOption } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
 
 import { PLUGIN_ID } from './constants';
+import { type ActionViewType } from './MetricScene/MetricActionBar';
 import { getFaro } from './tracking/faro/faro';
 import { HGFeatureToggles, isFeatureToggleEnabled } from './utils/utils.feature-toggles';
 import { GIT_COMMIT } from './version';

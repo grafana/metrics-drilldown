@@ -13,13 +13,12 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { GroupByVariable } from 'Breakdown/GroupByVariable';
-import { actionViews, actionViewsDefinitions, type ActionViewType } from 'MetricActionBar';
-
+import { GroupByVariable } from './Breakdown/GroupByVariable';
+import { actionViews, actionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
+import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from '../shared';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
-import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from './shared';
 
 interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;

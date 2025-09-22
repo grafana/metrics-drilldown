@@ -2,7 +2,7 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { sceneGraph, type AdHocFiltersVariable } from '@grafana/scenes';
 
 import { createLabelsCrossReferenceConnector } from './labelsCrossReference';
-import { type RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
+import { type RelatedLogsScene } from '../../MetricScene/RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared';
 
 const getListSpy = jest.fn();

@@ -26,7 +26,6 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
-import { resetYAxisSync } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
@@ -45,7 +44,8 @@ import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 import { SelectNewMetricButton } from './controls/SelectNewMetricButton';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
-import { MetricScene } from './MetricScene';
+import { resetYAxisSync } from './MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
+import { MetricScene } from './MetricScene/MetricScene';
 import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
 import { limitAdhocProviders } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';

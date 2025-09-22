@@ -11,14 +11,14 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
-import { EventForceSyncYAxis } from 'Breakdown/MetricLabelsList/events/EventForceSyncYAxis';
-import { EventResetSyncYAxis } from 'Breakdown/MetricLabelsList/events/EventResetSyncYAxis';
 import { sortSeries, type SortSeriesByOption } from 'services/sorting';
 import { type CountsData } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
 import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
 
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { SortBySelector } from './SortBySelector';
+import { EventForceSyncYAxis } from '../MetricLabelsList/events/EventForceSyncYAxis';
+import { EventResetSyncYAxis } from '../MetricLabelsList/events/EventResetSyncYAxis';
 
 /**
  * Same idea as in our custom SceneByVariableRepeater.tsx, we create a Scene object with more capabilities than the official Scene object.
