@@ -1,6 +1,6 @@
 import { sceneGraph } from '@grafana/scenes';
 
-import { CountsProvider } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
+import { CountsProvider } from 'MetricsReducer/list-controls/QuickSearch/CountsProvider/CountsProvider';
 
 import { SceneByFrameRepeater } from './SceneByFrameRepeater';
 

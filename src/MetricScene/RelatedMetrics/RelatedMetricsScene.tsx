@@ -13,22 +13,22 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type DataTrail } from 'DataTrail';
-import { EventQuickSearchChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventQuickSearchChanged';
-import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
-import { MetricsList } from 'WingmanDataTrail/MetricsList/MetricsList';
-import { EventMetricsVariableActivated } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableActivated';
-import { EventMetricsVariableDeactivated } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableDeactivated';
-import { EventMetricsVariableLoaded } from 'WingmanDataTrail/MetricsVariables/EventMetricsVariableLoaded';
+import { EventQuickSearchChanged } from 'MetricsReducer/list-controls/QuickSearch/EventQuickSearchChanged';
+import { QuickSearch } from 'MetricsReducer/list-controls/QuickSearch/QuickSearch';
+import { EventMetricsVariableActivated } from 'MetricsReducer/metrics-variables/events/EventMetricsVariableActivated';
+import { EventMetricsVariableDeactivated } from 'MetricsReducer/metrics-variables/events/EventMetricsVariableDeactivated';
+import { EventMetricsVariableLoaded } from 'MetricsReducer/metrics-variables/events/EventMetricsVariableLoaded';
 import {
   FilteredMetricsVariable,
   VAR_FILTERED_METRICS_VARIABLE,
-} from 'WingmanDataTrail/MetricsVariables/FilteredMetricsVariable';
+} from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
 import {
   MetricsVariableFilterEngine,
   type MetricFilters,
-} from 'WingmanDataTrail/MetricsVariables/MetricsVariableFilterEngine';
-import { MetricsVariableSortEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableSortEngine';
-import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
+} from 'MetricsReducer/metrics-variables/MetricsVariableFilterEngine';
+import { MetricsVariableSortEngine } from 'MetricsReducer/metrics-variables/MetricsVariableSortEngine';
+import { MetricsList } from 'MetricsReducer/MetricsList/MetricsList';
+import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 
 import { RelatedListControls } from './RelatedListControls';
 import { getTrailFor } from '../../utils';

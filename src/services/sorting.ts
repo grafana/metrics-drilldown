@@ -9,8 +9,8 @@ import {
 } from '@grafana/data';
 import { memoize } from 'lodash';
 
-import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
-import { localeCompare } from 'WingmanDataTrail/helpers/localCompare';
+import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
+import { localeCompare } from 'MetricsReducer/helpers/localCompare';
 
 import { reportExploreMetrics } from '../interactions';
 import { getLabelValueFromDataFrame } from './levels';

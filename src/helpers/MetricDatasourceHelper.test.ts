@@ -2,7 +2,7 @@
 import { setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
-import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 
 import { DataTrail } from '../DataTrail';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper';

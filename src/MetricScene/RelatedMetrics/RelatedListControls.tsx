@@ -12,10 +12,10 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { LayoutSwitcher } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import { type CountsProvider } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/CountsProvider';
-import { MetricVariableCountsProvider } from 'WingmanDataTrail/ListControls/QuickSearch/CountsProvider/MetricVariableCountsProvider';
-import { QuickSearch } from 'WingmanDataTrail/ListControls/QuickSearch/QuickSearch';
+import { LayoutSwitcher } from 'MetricsReducer/list-controls/LayoutSwitcher';
+import { type CountsProvider } from 'MetricsReducer/list-controls/QuickSearch/CountsProvider/CountsProvider';
+import { MetricVariableCountsProvider } from 'MetricsReducer/list-controls/QuickSearch/CountsProvider/MetricVariableCountsProvider';
+import { QuickSearch } from 'MetricsReducer/list-controls/QuickSearch/QuickSearch';
 
 import { PrefixFilterDropdown } from './PrefixFilterDropdown';
 

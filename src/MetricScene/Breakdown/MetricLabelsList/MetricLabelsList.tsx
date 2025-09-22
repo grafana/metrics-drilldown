@@ -22,11 +22,11 @@ import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { buildTimeseriesPanel } from 'GmdVizPanel/types/timeseries/buildTimeseriesPanel';
+import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
+import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
+import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
+import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'MetricsReducer/MetricsList/MetricsList';
 import { VAR_GROUP_BY } from 'shared';
-import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
-import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
-import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
-import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
 import { syncYAxis } from './behaviors/syncYAxis';

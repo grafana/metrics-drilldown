@@ -23,11 +23,11 @@ import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { getConfigPresetsForMetric } from 'GmdVizPanel/config/presets/getConfigPresetsForMetric';
 import { type PanelConfigPreset } from 'GmdVizPanel/config/presets/types';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
+import { displayError } from 'MetricsReducer/helpers/displayStatus';
+import { GRID_TEMPLATE_COLUMNS } from 'MetricsReducer/MetricsList/MetricsList';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userStorage } from 'UserPreferences/userStorage';
 import { getTrailFor } from 'utils';
-import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
-import { GRID_TEMPLATE_COLUMNS } from 'WingmanDataTrail/MetricsList/MetricsList';
 
 import { EventApplyPanelConfig } from './EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from './EventCancelConfigurePanel';
