@@ -68,6 +68,22 @@ export class MetricSceneView extends DrilldownView {
     return this.getByRole('dialog', { name: /drawer title configure the prometheus function/i });
   }
 
+  /* Panel menu */
+
+  async openMainPanelMenu() {
+    const panel = this.getMainViz();
+    await panel.hover();
+    await panel.getByRole('button', { name: /menu/i }).click();
+    await expect(this.getByTestId('panel-menu')).toBeVisible();
+  }
+
+  async assertMainPanelMenu(menuItems: string[]) {
+    await this.openMainPanelMenu();
+    for (const name of menuItems) {
+      await expect(this.getByRole('menuitem', { name })).toBeVisible();
+    }
+  }
+
   async selectAndApplyConfigPreset(presetName: string, presetParams: string[]) {
     const configureSlider = this.getConfigureSlider();
     await configureSlider.getByTitle(presetName).click(); // clicking anywhere inside the preset div works ;)
