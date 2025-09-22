@@ -6,8 +6,8 @@ import React from 'react';
 import { reportExploreMetrics } from 'interactions';
 
 // TODO: review on the 25th of September 2025 (see https://github.com/grafana/metrics-drilldown/issues/579)
-// export const FEEDBACK_FORM_URL_QUALTRICS = 'https://grafana.qualtrics.com/jfe/form/SV_9FXX8XzCNe7G1g2';
-export const FEEDBACK_FORM_URL_GOOGLE = 'https://forms.gle/dKHDM4GDXVYPny3L6';
+// const FEEDBACK_FORM_URL_QUALTRICS = 'https://grafana.qualtrics.com/jfe/form/SV_9FXX8XzCNe7G1g2';
+const FEEDBACK_FORM_URL_GOOGLE = 'https://forms.gle/dKHDM4GDXVYPny3L6';
 
 function trackUsage() {
   reportExploreMetrics('give_feedback_clicked', {});
