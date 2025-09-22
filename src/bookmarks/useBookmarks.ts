@@ -2,11 +2,11 @@ import { sceneGraph, sceneUtils, type SceneObject, type SceneObjectUrlValues } f
 import { useEffect, useMemo, useState } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
+import { displayError } from 'MetricsReducer/helpers/displayStatus';
 import { MetricSelectedEvent, VAR_DATASOURCE } from 'shared';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userStorage } from 'UserPreferences/userStorage';
 import { getTrailFor } from 'utils';
-import { displayError } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { genBookmarkKey } from './genBookmarkKey';
 

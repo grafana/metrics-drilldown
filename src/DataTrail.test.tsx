@@ -4,8 +4,8 @@ import { locationService, setDataSourceSrv, setRunRequest } from '@grafana/runti
 import { sceneGraph } from '@grafana/scenes';
 import { of } from 'rxjs';
 
-import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
+import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from './MetricScene/MetricScene';

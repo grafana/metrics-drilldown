@@ -13,10 +13,10 @@ import {
 import { Combobox, Icon, InlineField, InlineLabel, Tooltip, useStyles2, type ComboboxOption } from '@grafana/ui';
 import React from 'react';
 
-import { computeMetricPrefixGroups } from 'WingmanDataTrail/MetricsVariables/computeMetricPrefixGroups';
-import { VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import { getMultiVariableValues } from 'WingmanDataTrail/SceneByVariableRepeater/SceneByVariableRepeater';
-import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
+import { getMultiVariableValues } from 'MetricsReducer/components/SceneByVariableRepeater';
+import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
+import { VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
+import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 
 interface PrefixFilterDropdownState extends SceneObjectState {
   loading: boolean;

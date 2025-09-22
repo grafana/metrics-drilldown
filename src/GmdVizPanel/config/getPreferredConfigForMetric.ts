@@ -1,8 +1,8 @@
 import { AVAILABLE_PANEL_TYPES } from 'GmdVizPanel/types/available-panel-types';
 import { reportExploreMetrics } from 'interactions';
+import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';
 import { userStorage } from 'UserPreferences/userStorage';
-import { displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
 
 import { CONFIG_PRESETS, type PanelConfigPreset } from './presets/types';
 import { PROMQL_FUNCTIONS } from './promql-functions';

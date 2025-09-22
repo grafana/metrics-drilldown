@@ -16,9 +16,9 @@ import { type Unsubscribable } from 'rxjs';
 
 import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
-import { displayError, displayWarning } from 'WingmanDataTrail/helpers/displayStatus';
-import { areArraysEqual } from 'WingmanDataTrail/MetricsVariables/helpers/areArraysEqual';
-import { MetricsVariable, VAR_METRICS_VARIABLE } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
+import { displayError, displayWarning } from 'MetricsReducer/helpers/displayStatus';
+import { areArraysEqual } from 'MetricsReducer/metrics-variables/helpers/areArraysEqual';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 
 import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../shared';

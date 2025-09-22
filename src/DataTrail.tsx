@@ -34,12 +34,12 @@ import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { getMetricType, getMetricTypeSync, type MetricType } from 'GmdVizPanel/matchers/getMetricType';
 import { GiveFeedbackButton } from 'Header/GiveFeedbackButton';
 import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
+import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
+import { displaySuccess } from 'MetricsReducer/helpers/displayStatus';
+import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
+import { MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
+import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { PluginInfo } from 'PluginInfo/PluginInfo';
-import { displaySuccess } from 'WingmanDataTrail/helpers/displayStatus';
-import { addRecentMetric } from 'WingmanDataTrail/ListControls/MetricsSorter/MetricsSorter';
-import { MetricsReducer } from 'WingmanDataTrail/MetricsReducer';
-import { MetricsVariable } from 'WingmanDataTrail/MetricsVariables/MetricsVariable';
-import { SceneDrawer } from 'WingmanDataTrail/SceneDrawer';
 
 import { SelectNewMetricButton } from './controls/SelectNewMetricButton';
 import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
