@@ -1,6 +1,7 @@
 import { AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 
-import { type DataTrail } from './DataTrail';
+import { type DataTrail } from 'AppDataTrail/DataTrail';
+
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { limitAdhocProviders } from './utils';
 

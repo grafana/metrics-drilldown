@@ -8,8 +8,8 @@ import { initFaro } from 'tracking/faro/faro';
 import { logger } from 'tracking/logger/logger';
 import { userStorage } from 'UserPreferences/userStorage';
 
+import { AppContext, defaultTrail } from './AppContext';
 import { ErrorView } from './ErrorView';
-import { defaultTrail, MetricsAppContext } from './MetricsAppContext';
 import { Onboarding } from './Onboarding';
 import { AppRoutes } from './Routes';
 import { useCatchExceptions } from './useCatchExceptions';
@@ -48,9 +48,9 @@ export default function App(props: Readonly<AppRootProps>) {
   return (
     <div className={styles.appContainer} data-testid="metrics-drilldown-app">
       <PluginPropsContext.Provider value={props}>
-        <MetricsAppContext.Provider value={{ trail: defaultTrail }}>
+        <AppContext.Provider value={{ trail: defaultTrail }}>
           <AppRoutes />
-        </MetricsAppContext.Provider>
+        </AppContext.Provider>
       </PluginPropsContext.Provider>
     </div>
   );

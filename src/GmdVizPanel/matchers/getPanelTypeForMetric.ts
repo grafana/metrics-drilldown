@@ -1,4 +1,4 @@
-import { type DataTrail } from 'DataTrail';
+import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { type HistogramType } from 'GmdVizPanel/GmdVizPanel';
 import { type PanelType } from 'GmdVizPanel/types/available-panel-types';
 

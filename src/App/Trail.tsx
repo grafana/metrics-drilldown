@@ -1,7 +1,7 @@
 import { UrlSyncContextProvider } from '@grafana/scenes';
 import React from 'react';
 
-import type { DataTrail } from 'DataTrail';
+import { type DataTrail } from 'AppDataTrail/DataTrail';
 
 type TrailProps = {
   trail: DataTrail;

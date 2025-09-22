@@ -2,9 +2,9 @@
 import { setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 
+import { DataTrail } from 'AppDataTrail/DataTrail';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 
-import { DataTrail } from '../DataTrail';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper';
 import { DataSourceType, MockDataSourceSrv } from '../test/mocks/datasource';
 

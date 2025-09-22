@@ -26,30 +26,30 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
+import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { ConfigurePanelForm } from 'GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { getMetricType, getMetricTypeSync, type MetricType } from 'GmdVizPanel/matchers/getMetricType';
-import { GiveFeedbackButton } from 'Header/GiveFeedbackButton';
-import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
 import { displaySuccess } from 'MetricsReducer/helpers/displayStatus';
 import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
-import { PluginInfo } from 'PluginInfo/PluginInfo';
 
-import { SelectNewMetricButton } from './controls/SelectNewMetricButton';
-import { MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
-import { reportChangeInLabelFilters, reportExploreMetrics } from './interactions';
-import { resetYAxisSync } from './MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
-import { MetricScene } from './MetricScene/MetricScene';
-import { MetricSelectedEvent, trailDS, VAR_FILTERS } from './shared';
-import { limitAdhocProviders } from './utils';
-import { getAppBackgroundColor } from './utils/utils.styles';
-import { isAdHocFiltersVariable } from './utils/utils.variables';
+import { PluginInfo } from './header/PluginInfo/PluginInfo';
+import { SelectNewMetricButton } from './header/SelectNewMetricButton';
+import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
+import { MetricDatasourceHelper } from '../helpers/MetricDatasourceHelper';
+import { reportChangeInLabelFilters, reportExploreMetrics } from '../interactions';
+import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
+import { MetricScene } from '../MetricScene/MetricScene';
+import { MetricSelectedEvent, trailDS, VAR_FILTERS } from '../shared';
+import { limitAdhocProviders } from '../utils';
+import { getAppBackgroundColor } from '../utils/utils.styles';
+import { isAdHocFiltersVariable } from '../utils/utils.variables';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;

@@ -6,9 +6,9 @@ import React, { useEffect, useState } from 'react';
 
 import { type PrometheusBuildInfo } from 'helpers/MetricDatasourceHelper';
 import { logger } from 'tracking/logger/logger';
+import { GIT_COMMIT } from 'version';
 
 import { PluginLogo } from './PluginLogo';
-import { GIT_COMMIT } from '../version';
 
 const pluginCommitSha: string = GIT_COMMIT;
 const pluginCommitURL = `https://github.com/grafana/metrics-drilldown/commit/${pluginCommitSha}`;

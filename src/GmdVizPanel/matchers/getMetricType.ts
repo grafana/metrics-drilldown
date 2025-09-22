@@ -1,4 +1,4 @@
-import { type DataTrail } from 'DataTrail';
+import { type DataTrail } from 'AppDataTrail/DataTrail';
 
 import { isAgeMetric } from './isAgeMetric';
 import { isClassicHistogramMetric } from './isClassicHistogramMetric';
