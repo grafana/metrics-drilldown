@@ -12,13 +12,13 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { getTrailFor } from 'utils';
-import { getAppBackgroundColor } from 'utils/utils.styles';
+import { getTrailFor } from 'shared/utils/utils';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
-import { RefreshMetricsEvent, VAR_GROUP_BY } from '../../shared';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
-import { isQueryVariable } from '../../utils/utils.variables';
+import { RefreshMetricsEvent, VAR_GROUP_BY } from '../../shared/shared';
+import { isQueryVariable } from '../../shared/utils/utils.variables';
 
 interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;

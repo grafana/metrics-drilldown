@@ -1,4 +1,4 @@
-import { UI_TEXT } from '../../../src/constants/ui';
+import { UI_TEXT } from '../../../src/shared/constants/ui';
 import { expect, test } from '../../fixtures';
 import { type SortByOptionNames } from '../../fixtures/views/MetricsReducerView';
 

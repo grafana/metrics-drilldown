@@ -5,7 +5,7 @@ import { type MetricsLogsConnector } from '../../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../../Integrations/logs/labelsCrossReference';
 import { createLokiRecordingRulesConnector } from '../../Integrations/logs/lokiRecordingRules';
 import pluginJson from '../../plugin.json';
-import { getDataSourceFetcher, type DataSource } from '../../utils/utils.datasource';
+import { getDataSourceFetcher, type DataSource } from '../../shared/utils/utils.datasource';
 import { type MetricScene } from '../MetricScene';
 
 /**

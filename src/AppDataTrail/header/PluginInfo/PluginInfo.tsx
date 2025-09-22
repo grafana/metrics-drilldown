@@ -4,8 +4,8 @@ import { config } from '@grafana/runtime';
 import { Button, Dropdown, Menu, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useState } from 'react';
 
-import { type PrometheusBuildInfo } from 'helpers/MetricDatasourceHelper';
-import { logger } from 'tracking/logger/logger';
+import { type PrometheusBuildInfo } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import { logger } from 'shared/logger/logger';
 import { GIT_COMMIT } from 'version';
 
 import { PluginLogo } from './PluginLogo';

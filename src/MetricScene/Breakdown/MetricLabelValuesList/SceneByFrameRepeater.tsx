@@ -13,7 +13,7 @@ import React from 'react';
 
 import { type CountsData } from 'MetricsReducer/list-controls/QuickSearch/CountsProvider/CountsProvider';
 import { QuickSearch } from 'MetricsReducer/list-controls/QuickSearch/QuickSearch';
-import { sortSeries, type SortSeriesByOption } from 'services/sorting';
+import { sortSeries, type SortSeriesByOption } from 'shared/services/sorting';
 
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { SortBySelector } from './SortBySelector';

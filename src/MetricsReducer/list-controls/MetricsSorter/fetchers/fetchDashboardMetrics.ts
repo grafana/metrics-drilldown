@@ -2,9 +2,10 @@ import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import { type Dashboard, type Panel } from '@grafana/schema';
 import { limitFunction } from 'p-limit';
 
-import { logger } from '../../../../tracking/logger/logger';
-import { isPrometheusDataSource } from '../../../../utils/utils.datasource';
-import { extractMetricNames } from '../../../../utils/utils.promql';
+import { logger } from 'shared/logger/logger';
+
+import { isPrometheusDataSource } from '../../../../shared/utils/utils.datasource';
+import { extractMetricNames } from '../../../../shared/utils/utils.promql';
 
 interface DashboardSearchItem {
   id: number;

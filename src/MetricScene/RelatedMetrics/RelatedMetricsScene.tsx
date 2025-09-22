@@ -31,8 +31,8 @@ import { MetricsList } from 'MetricsReducer/MetricsList/MetricsList';
 import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 
 import { RelatedListControls } from './RelatedListControls';
-import { getTrailFor } from '../../utils';
-import { getAppBackgroundColor } from '../../utils/utils.styles';
+import { getTrailFor } from '../../shared/utils/utils';
+import { getAppBackgroundColor } from '../../shared/utils/utils.styles';
 
 interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;

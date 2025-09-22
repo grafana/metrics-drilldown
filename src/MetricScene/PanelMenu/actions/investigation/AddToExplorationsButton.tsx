@@ -12,11 +12,11 @@ import { IconButton } from '@grafana/ui';
 import React from 'react';
 
 import MimirLogo from 'img/logo.svg';
-import { findObjectOfType } from 'utils';
+import { findObjectOfType } from 'shared/utils/utils';
 
 import pluginJson from '../../../../plugin.json';
-import { VAR_DATASOURCE_EXPR } from '../../../../shared';
-import { isSceneQueryRunner } from '../../../../utils/utils.queries';
+import { VAR_DATASOURCE_EXPR } from '../../../../shared/shared';
+import { isSceneQueryRunner } from '../../../../shared/utils/utils.queries';
 
 export const investigationsPluginId = 'grafana-investigations-app';
 export const extensionPointId = `${pluginJson.id}/investigation/v1`;

@@ -23,9 +23,9 @@ import React from 'react';
 import { NoRelatedLogs } from './NoRelatedLogsFound';
 import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './OpenInLogsDrilldownButton';
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
-import { reportExploreMetrics } from '../../interactions';
-import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared';
-import { isCustomVariable } from '../../utils/utils.variables';
+import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared/shared';
+import { reportExploreMetrics } from '../../shared/tracking/interactions';
+import { isCustomVariable } from '../../shared/utils/utils.variables';
 
 interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;

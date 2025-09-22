@@ -15,9 +15,6 @@ import {
 import { Button, CollapsableSection, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
-import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
-import { SelectAction } from 'GmdVizPanel/components/SelectAction';
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
@@ -27,7 +24,10 @@ import {
   WithUsageDataPreviewPanel,
 } from 'MetricsReducer/MetricsList/WithUsageDataPreviewPanel';
 import { GroupsIcon } from 'MetricsReducer/SideBar/custom-icons/GroupsIcon';
-import { VAR_FILTERS } from 'shared';
+import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
+import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
+import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { VAR_FILTERS } from 'shared/shared';
 
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from '..//MetricsList/MetricsList';
 import { InlineBanner } from '../../App/InlineBanner';

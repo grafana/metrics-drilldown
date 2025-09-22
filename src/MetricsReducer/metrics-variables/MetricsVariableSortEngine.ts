@@ -8,7 +8,7 @@ import {
   type SortingOption,
 } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { type MetricUsageType } from 'MetricsReducer/list-controls/MetricsSorter/MetricUsageFetcher';
-import { logger } from 'tracking/logger/logger';
+import { logger } from 'shared/logger/logger';
 
 import { areArraysEqual } from './helpers/areArraysEqual';
 

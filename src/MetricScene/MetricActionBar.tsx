@@ -10,7 +10,7 @@ import {
 import { Box, Stack, Tab, TabsBar, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from 'interactions';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 import { MetricScene } from './MetricScene';

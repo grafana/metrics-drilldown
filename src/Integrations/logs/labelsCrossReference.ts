@@ -3,10 +3,10 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type SceneObject } from '@grafana/scenes';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { VAR_FILTERS } from '../../shared';
-import { getTrailFor } from '../../utils';
-import { getDataSourceFetcher } from '../../utils/utils.datasource';
-import { isAdHocFiltersVariable } from '../../utils/utils.variables';
+import { VAR_FILTERS } from '../../shared/shared';
+import { getTrailFor } from '../../shared/utils/utils';
+import { getDataSourceFetcher } from '../../shared/utils/utils.datasource';
+import { isAdHocFiltersVariable } from '../../shared/utils/utils.variables';
 
 const knownLabelNameDiscrepancies = {
   job: 'service_name', // `service.name` is `job` in Mimir and `service_name` in Loki

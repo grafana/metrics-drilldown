@@ -4,10 +4,10 @@ import React, { lazy, Suspense } from 'react';
 
 import { exposedComponentConfigs } from 'exposedComponents/components';
 import { linkConfigs } from 'extensions/links';
-import { logger } from 'tracking/logger/logger';
+import { logger } from 'shared/logger/logger';
 
 const LazyApp = lazy(async () => {
-  const { wasmSupported } = await import('./services/sorting');
+  const { wasmSupported } = await import('./shared/services/sorting');
   const { default: initOutlier } = await import('@bsull/augurs/outlier');
 
   if (wasmSupported()) {

@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { Combobox, RadioButtonGroup, useStyles2 } from '@grafana/ui';
 import React, { useMemo } from 'react';
 
-import { noOp } from 'utils';
+import { noOp } from 'shared/utils/utils';
 
 export type GroupByOptions = Array<{ label: string; value: string }>;
 

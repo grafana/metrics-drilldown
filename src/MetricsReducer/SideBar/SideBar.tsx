@@ -16,20 +16,20 @@ import { VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/LabelsVariable';
 import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'MetricsReducer/metrics-variables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'MetricsReducer/metrics-variables/computeRulesGroups';
-import { VAR_OTHER_METRIC_FILTERS } from 'shared';
-import { PREF_KEYS } from 'UserPreferences/pref-keys';
-import { userStorage } from 'UserPreferences/userStorage';
-import { getTrailFor } from 'utils';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { VAR_OTHER_METRIC_FILTERS } from 'shared/shared';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
+import { getTrailFor } from 'shared/utils/utils';
+import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
-import { reportExploreMetrics } from '../../interactions';
 import { BookmarksList } from './sections/BookmarksList/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';
-import { HGFeatureToggles, isFeatureToggleEnabled } from '../../utils/utils.feature-toggles';
+import { reportExploreMetrics } from '../../shared/tracking/interactions';
+import { HGFeatureToggles, isFeatureToggleEnabled } from '../../shared/utils/utils.feature-toggles';
 
 type Section = MetricsFilterSection | LabelsBrowser | BookmarksList | Settings;
 

@@ -2,10 +2,10 @@ import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObject
 import { Button } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_GROUP_BY } from 'shared';
-import { isQueryVariable } from 'utils/utils.variables';
+import { VAR_GROUP_BY } from 'shared/shared';
+import { isQueryVariable } from 'shared/utils/utils.variables';
 
-import { reportExploreMetrics } from '../../../interactions';
+import { reportExploreMetrics } from '../../../shared/tracking/interactions';
 
 interface SelectLabelActionState extends SceneObjectState {
   label: string;

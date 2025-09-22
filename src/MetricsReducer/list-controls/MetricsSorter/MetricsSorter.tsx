@@ -12,13 +12,13 @@ import {
 import React from 'react';
 
 import { localeCompare } from 'MetricsReducer/helpers/localCompare';
+import { logger } from 'shared/logger/logger';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
 
 import { EventSortByChanged } from './events/EventSortByChanged';
 import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
-import { logger } from '../../../tracking/logger/logger';
-import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
-import { userStorage } from '../../../UserPreferences/userStorage';
 export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
 
 const MAX_RECENT_METRICS = 6;

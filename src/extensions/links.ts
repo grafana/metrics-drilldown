@@ -8,10 +8,12 @@ import { interpolateQueryExpr } from '@grafana/prometheus';
 import { getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
 
+import { PLUGIN_BASE_URL } from 'shared/constants/plugin';
+import { ROUTES } from 'shared/constants/routes';
+import { logger } from 'shared/logger/logger';
+
 import { parseMatcher } from './parseMatcher';
-import { PLUGIN_BASE_URL, ROUTES } from '../constants';
-import { logger } from '../tracking/logger/logger';
-import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../utils/utils.promql';
+import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../shared/utils/utils.promql';
 
 const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
@@ -95,7 +97,9 @@ export function configureDrilldownLinkForAsync<T extends PluginExtensionPanelCon
 }
 
 // Async URL building function that uses lazy-loaded lezer parser
-export async function buildDrilldownUrlAsync<T extends PluginExtensionPanelContext>(context?: T): Promise<string | null> {
+export async function buildDrilldownUrlAsync<T extends PluginExtensionPanelContext>(
+  context?: T
+): Promise<string | null> {
   if (typeof context === 'undefined') {
     return null;
   }
