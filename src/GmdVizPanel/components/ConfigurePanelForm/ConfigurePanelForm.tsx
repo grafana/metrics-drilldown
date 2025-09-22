@@ -17,7 +17,7 @@ import { Button, ConfirmModal, useStyles2 } from '@grafana/ui';
 import { cloneDeep, omit } from 'lodash';
 import React from 'react';
 
-import { DataTrail } from 'DataTrail';
+import { DataTrail } from 'AppDataTrail/DataTrail';
 import { getPreferredConfigForMetric } from 'GmdVizPanel/config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { getConfigPresetsForMetric } from 'GmdVizPanel/config/presets/getConfigPresetsForMetric';

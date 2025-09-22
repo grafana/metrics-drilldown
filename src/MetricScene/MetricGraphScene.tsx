@@ -15,6 +15,7 @@ import { useStyles2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
 import React, { useRef } from 'react';
 
+import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { BookmarkHeaderAction } from 'GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
@@ -24,7 +25,6 @@ import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
 
 import { MetricActionBar } from './MetricActionBar';
-import { type DataTrail } from '../DataTrail';
 import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
 import { getTrailFor } from '../utils';
 import { PanelMenu } from './PanelMenu/PanelMenu';

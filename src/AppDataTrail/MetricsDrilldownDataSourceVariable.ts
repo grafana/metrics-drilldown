@@ -5,8 +5,8 @@ import { VAR_DATASOURCE } from 'shared';
 import { logger } from 'tracking/logger/logger';
 import { isPrometheusDataSource } from 'utils/utils.datasource';
 
-import { PREF_KEYS } from './UserPreferences/pref-keys';
-import { userStorage } from './UserPreferences/userStorage';
+import { PREF_KEYS } from '../UserPreferences/pref-keys';
+import { userStorage } from '../UserPreferences/userStorage';
 
 export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
   constructor({ initialDS }: { initialDS?: string }) {

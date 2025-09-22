@@ -8,11 +8,11 @@ import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-va
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 
 import { DataTrail } from './DataTrail';
-import { MetricScene } from './MetricScene/MetricScene';
-import { MetricSelectedEvent, VAR_FILTERS } from './shared';
-import { DataSourceType, MockDataSourceSrv } from './test/mocks/datasource';
-import { activateFullSceneTree } from './utils/utils.testing';
-import { isAdHocFiltersVariable } from './utils/utils.variables';
+import { MetricScene } from '../MetricScene/MetricScene';
+import { MetricSelectedEvent, VAR_FILTERS } from '../shared';
+import { DataSourceType, MockDataSourceSrv } from '../test/mocks/datasource';
+import { activateFullSceneTree } from '../utils/utils.testing';
+import { isAdHocFiltersVariable } from '../utils/utils.variables';
 
 function getFilterVar(trail: DataTrail) {
   const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);

@@ -1,7 +1,7 @@
 import { sceneGraph, sceneUtils, type SceneObject, type SceneObjectUrlValues } from '@grafana/scenes';
 import { useEffect, useMemo, useState } from 'react';
 
-import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
+import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { displayError } from 'MetricsReducer/helpers/displayStatus';
 import { MetricSelectedEvent, VAR_DATASOURCE } from 'shared';
 import { PREF_KEYS } from 'UserPreferences/pref-keys';

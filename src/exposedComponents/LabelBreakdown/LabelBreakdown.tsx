@@ -2,7 +2,7 @@ import { type DataSourceApi } from '@grafana/data';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
-import { Wingman } from 'App/Routes';
+import { Trail } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
 import { reportExploreMetrics } from 'interactions';
 import { newMetricsTrail } from 'utils';
@@ -52,7 +52,7 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
 
   return (
     <div data-testid="metrics-drilldown-embedded-label-breakdown">
-      {error ? <ErrorView error={error} /> : <Wingman trail={trail} />}
+      {error ? <ErrorView error={error} /> : <Trail trail={trail} />}
     </div>
   );
 };

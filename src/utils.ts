@@ -12,11 +12,11 @@ import {
   type SceneVariableState,
 } from '@grafana/scenes';
 
+import { DataTrail, type DataTrailState } from 'AppDataTrail/DataTrail';
 import { logger } from 'tracking/logger/logger';
 import { isSceneQueryRunner } from 'utils/utils.queries';
 
 import { ROUTES } from './constants';
-import { DataTrail, type DataTrailState } from './DataTrail';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { LOGS_METRIC } from './shared';
 import { getClosestScopesFacade } from './utils/utils.scopes';

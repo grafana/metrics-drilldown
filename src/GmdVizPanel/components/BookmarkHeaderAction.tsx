@@ -18,11 +18,7 @@ interface BookmarkHeaderActionState extends SceneObjectState {
 }
 
 export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionState> {
-  constructor({
-    metric,
-  }: {
-    metric: BookmarkHeaderActionState['metric'];
-  }) {
+  constructor({ metric }: { metric: BookmarkHeaderActionState['metric'] }) {
     super({
       metric,
       isBookmarked: false,
@@ -56,7 +52,9 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
     if (isCurrentlyBookmarked) {
       // Remove bookmark
       reportExploreMetrics('bookmark_changed', { action: 'toggled_off' });
-      const updatedBookmarks = bookmarksFromStorage.filter((b: BookmarkFromStorage) => genBookmarkKey(b.urlValues) !== currentKey);
+      const updatedBookmarks = bookmarksFromStorage.filter(
+        (b: BookmarkFromStorage) => genBookmarkKey(b.urlValues) !== currentKey
+      );
       userStorage.setItem(PREF_KEYS.BOOKMARKS, updatedBookmarks);
     } else {
       // Add bookmark
@@ -67,7 +65,7 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
       };
       userStorage.setItem(PREF_KEYS.BOOKMARKS, [...bookmarksFromStorage, newBookmark]);
     }
-    
+
     // Update state to trigger re-render
     this.setState({ isBookmarked: !isCurrentlyBookmarked });
   };

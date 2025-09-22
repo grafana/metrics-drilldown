@@ -14,13 +14,13 @@ import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
 import { type Unsubscribable } from 'rxjs';
 
+import { type DataTrail } from 'AppDataTrail/DataTrail';
+import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
-import { MetricsDrilldownDataSourceVariable } from 'MetricsDrilldownDataSourceVariable';
 import { displayError, displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { areArraysEqual } from 'MetricsReducer/metrics-variables/helpers/areArraysEqual';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 
-import { type DataTrail } from '../DataTrail';
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../shared';
 import { languageProviderVersionIs } from '../types/language-provider/versionCheck';
 import { isPrometheusDataSource } from '../utils/utils.datasource';

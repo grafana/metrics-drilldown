@@ -1,8 +1,9 @@
 import { type PanelMenuItem } from '@grafana/data';
 import { config } from '@grafana/runtime';
 
+import { type DataTrail } from 'AppDataTrail/DataTrail';
+
 import { PLUGIN_BASE_URL } from '../../../constants';
-import { type DataTrail } from '../../../DataTrail';
 import { reportExploreMetrics } from '../../../interactions';
 import { displaySuccess } from '../../../MetricsReducer/helpers/displayStatus';
 import { getUrlForTrail } from '../../../utils';

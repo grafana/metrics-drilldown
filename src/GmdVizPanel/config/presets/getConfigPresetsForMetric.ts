@@ -1,4 +1,4 @@
-import { type DataTrail } from 'DataTrail';
+import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { getMetricType } from 'GmdVizPanel/matchers/getMetricType';
 
 import { DEFAULT_TIMESERIES_AGE_PRESETS } from './config-presets-ages';

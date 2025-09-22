@@ -11,7 +11,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type DataTrail } from 'DataTrail';
+import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { getTrailFor } from 'utils';
 import { getAppBackgroundColor } from 'utils/utils.styles';
 

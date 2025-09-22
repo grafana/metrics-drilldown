@@ -1,6 +1,6 @@
 import { type GrafanaTheme2 } from '@grafana/data';
 
-import { type DataTrail } from 'DataTrail';
+import { type DataTrail } from 'AppDataTrail/DataTrail';
 
 export function getAppBackgroundColor(theme: GrafanaTheme2, trail?: DataTrail): string {
   // If DataTrail is in embedded mode, always use primary background

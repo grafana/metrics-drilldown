@@ -12,7 +12,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type DataTrail } from 'DataTrail';
+import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { EventQuickSearchChanged } from 'MetricsReducer/list-controls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'MetricsReducer/list-controls/QuickSearch/QuickSearch';
 import { EventMetricsVariableActivated } from 'MetricsReducer/metrics-variables/events/EventMetricsVariableActivated';
