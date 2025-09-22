@@ -64,7 +64,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                       new BookmarkHeaderAction({ metric }),
                     ]
                   : () => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
-                menu: () => new PanelMenu({ labelName: metric, key: TOPVIEW_PANEL_MENU_KEY }),
+                menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
               },
               queryOptions: {
                 resolution: QUERY_RESOLUTION.HIGH,

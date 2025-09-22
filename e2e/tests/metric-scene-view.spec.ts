@@ -10,6 +10,20 @@ test.describe('Metric Scene view', () => {
     await metricSceneView.assertDefaultBreadownListControls();
 
     await expect(metricSceneView.getMainViz()).toHaveScreenshot('metric-scene-main-viz.png');
+
+    await metricSceneView.assertMainPanelMenu(['Explore', 'Copy URL']); // after screenshot to prevent the menu from appearing in it
+  });
+
+  test.describe('Main viz', () => {
+    test('Shows "Explore" and "Copy URL" items in main panel menu', async ({ metricSceneView }) => {
+      await metricSceneView.goto(URL_SEARCH_PARAMS_WITH_METRIC_NAME);
+      await metricSceneView.assertMainViz(METRIC_NAME);
+
+      await metricSceneView.openMainPanelMenu();
+
+      await expect(metricSceneView.getByRole('menuitem', { name: 'Explore' })).toBeVisible();
+      await expect(metricSceneView.getByRole('menuitem', { name: 'Copy URL' })).toBeVisible();
+    });
   });
 
   test.describe('Histogram metrics', () => {
