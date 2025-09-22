@@ -89,7 +89,7 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
 
     const metricCounts = await Promise.all(
       dashboards.map(({ uid, url }) => getDashboardLimited(uid, url, dashboardRequestsFailedCount))
-    ).then(parseDashboardSearchResponse);
+    ).then(async (response) => await parseDashboardSearchResponse(response));
 
     return metricCounts;
   } catch (err) {
@@ -115,16 +115,16 @@ function getPanelsWithTargets(panels: Panel[]): Array<Panel & { targets: NonNull
   ) as Array<Panel & { targets: NonNullable<Panel['targets']> }>;
 }
 
-function processTargetsForMetrics(
+async function processTargetsForMetrics(
   targets: NonNullable<Panel['targets']>,
   dashboardName: string,
   dashboardUid: string,
   dashboardUrl: string,
   dashboardData: Record<string, MetricUsageDetails>
-): void {
+): Promise<void> {
   for (const target of targets) {
     const expr = typeof target.expr === 'string' ? target.expr : '';
-    const metrics = extractMetricNames(expr);
+    const metrics = await extractMetricNames(expr);
 
     for (const metric of metrics) {
       updateMetricUsage(metric, dashboardName, dashboardUid, dashboardUrl, dashboardData);
@@ -153,13 +153,13 @@ function updateMetricUsage(
   }
 }
 
-function parseDashboardSearchResponse(dashboardSearchResponse: Array<DashboardWithUrl | null>): MetricUsageMap {
+async function parseDashboardSearchResponse(dashboardSearchResponse: Array<DashboardWithUrl | null>): Promise<MetricUsageMap> {
   // Create a map to track metric names and their usage details
   const dashboardData: Record<string, MetricUsageDetails> = {};
 
   for (const dashboard of getDashboardsWithPanels(dashboardSearchResponse)) {
     for (const panel of getPanelsWithTargets(dashboard.panels)) {
-      processTargetsForMetrics(
+      await processTargetsForMetrics(
         panel.targets,
         dashboard.title || `Dashboard ${dashboard.uid}`,
         dashboard.uid || 'unknown',
