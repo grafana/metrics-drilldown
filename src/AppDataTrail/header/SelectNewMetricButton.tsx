@@ -2,11 +2,11 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { LinkButton, ToolbarButton } from '@grafana/ui';
 import React from 'react';
 
-import { UI_TEXT } from '../constants/ui';
-import { createAppUrl } from '../extensions/links';
-import { reportExploreMetrics } from '../interactions';
-import { MetricSelectedEvent } from '../shared';
-import { getTrailFor, getUrlForTrail } from '../utils';
+import { UI_TEXT } from '../../constants/ui';
+import { createAppUrl } from '../../extensions/links';
+import { reportExploreMetrics } from '../../interactions';
+import { MetricSelectedEvent } from '../../shared';
+import { getTrailFor, getUrlForTrail } from '../../utils';
 
 interface SelectNewMetricButtonState extends SceneObjectState {}
 

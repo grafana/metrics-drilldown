@@ -40,8 +40,8 @@ import { MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariabl
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 
 import { PluginInfo } from './header/PluginInfo/PluginInfo';
+import { SelectNewMetricButton } from './header/SelectNewMetricButton';
 import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
-import { SelectNewMetricButton } from './SelectNewMetricButton';
 import { MetricDatasourceHelper } from '../helpers/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../interactions';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
