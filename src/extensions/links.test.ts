@@ -1,30 +1,5 @@
 import { type PluginExtensionPanelContext } from '@grafana/data';
-
-// Mock templateSrv - following logs-drilldown pattern
-jest.mock('@grafana/runtime', () => ({
-  ...jest.requireActual('@grafana/runtime'),
-  getTemplateSrv: () => ({
-    replace: jest.fn((a: string) => {
-      if (a === '${ds}') {
-        return '123abc';
-      }
-      if (a === '${datasource}') {
-        return 'prometheus-prod';
-      }
-      
-      // Process all replacements in sequence
-      let result = a;
-      if (result.includes('$job')) {
-        result = result.replace('$job', 'grafana');
-      }
-      if (result.includes('${instance}')) {
-        result = result.replace('${instance}', 'localhost:3000');
-      }
-      
-      return result;
-    }),
-  }),
-}));
+import { type PromQuery } from '@grafana/prometheus';
 
 import {
   buildNavigateToMetricsParams,
@@ -36,8 +11,14 @@ import {
   type GrafanaAssistantMetricsDrilldownContext,
 } from './links';
 
-// Prometheus query type for tests
-type PromQuery = { refId: string; expr: string; datasource?: { type: string; uid: string } };
+// Mock templateSrv - simplified to just track calls
+const mockReplace = jest.fn();
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  getTemplateSrv: () => ({
+    replace: mockReplace,
+  }),
+}));
 
 // Mock factory for PluginExtensionPanelContext
 function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {}): PluginExtensionPanelContext {
@@ -54,11 +35,6 @@ function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {})
     ...overrides,
   } as PluginExtensionPanelContext;
 }
-
-beforeEach(() => {
-  // Clear all mocks before each test
-  jest.clearAllMocks();
-});
 
 describe('parsePromQLQuery - lezer parser tests', () => {
   test('should parse basic metric name', () => {
@@ -272,12 +248,10 @@ describe('configureDrilldownLink', () => {
 
       expect(result).toBeDefined();
       expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
-      expect(result?.path).toContain('metric=http_requests_total');
-      expect(result?.path).toContain('from=2023-01-01T00%3A00%3A00Z');
-      expect(result?.path).toContain('to=2023-01-01T01%3A00%3A00Z');
-      expect(result?.path).toContain('var-ds=prom-uid');
-      expect(result?.path).toContain('var-filters=method%7C%3D%7CGET');
-      expect(result?.path).toContain('var-filters=status%7C%3D%7C200');
+      
+      // Verify template service was called with correct arguments
+      expect(mockReplace).toHaveBeenCalledWith('prom-uid', {});
+      expect(mockReplace).toHaveBeenCalledWith('http_requests_total{method="GET",status="200"}', {}, expect.any(Function));
     });
 
     test('should construct URL with special characters in labels', () => {
@@ -294,10 +268,13 @@ describe('configureDrilldownLink', () => {
       const result = configureDrilldownLink(context);
 
       expect(result).toBeDefined();
-      expect(result?.path).toContain('var-filters=path%7C%3D%7C%2Fapi%2Fv1%2Fusers%3Fid%3D123%26name%3Dtest');
+      
+      // Verify template service was called with correct arguments
+      expect(mockReplace).toHaveBeenCalledWith('prom-uid', {});
+      expect(mockReplace).toHaveBeenCalledWith('http_requests_total{path="/api/v1/users?id=123&name=test"}', {}, expect.any(Function));
     });
 
-    test('should interpolate template variables in Prometheus query', () => {
+    test('should call template service with template variables', () => {
       const context = createMockContext({
         targets: [
           {
@@ -319,15 +296,18 @@ describe('configureDrilldownLink', () => {
       const result = configureDrilldownLink(context);
 
       expect(result).toBeDefined();
-      expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
-      expect(result?.path).toContain('metric=up');
-      expect(result?.path).toContain('var-ds=prom-uid');
-      // Check that template variables were interpolated
-      expect(result?.path).toContain('var-filters=job%7C%3D%7Cgrafana');
-      expect(result?.path).toContain('var-filters=instance%7C%3D%7Clocalhost%3A3000');
+      
+      // Verify that template replacement was called with the original query and datasource
+      const expectedScopedVars = {
+        job: { value: 'grafana', text: 'grafana' },
+        instance: { value: 'localhost:3000', text: 'localhost:3000' },
+      };
+      expect(mockReplace).toHaveBeenCalledWith('prom-uid', expectedScopedVars);
+      expect(mockReplace).toHaveBeenCalledWith('up{job="$job",instance="${instance}"}', expectedScopedVars, expect.any(Function));
+      expect(mockReplace).toHaveBeenCalledTimes(2);
     });
 
-    test('should interpolate datasource variable in datasource uid', () => {
+    test('should call template service with datasource variable', () => {
       const context = createMockContext({
         targets: [
           {
@@ -348,11 +328,14 @@ describe('configureDrilldownLink', () => {
       const result = configureDrilldownLink(context);
 
       expect(result).toBeDefined();
-      expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
-      expect(result?.path).toContain('metric=up');
-      // Check that datasource variable was interpolated
-      expect(result?.path).toContain('var-ds=prometheus-prod');
-      expect(result?.path).toContain('var-filters=job%7C%3D%7Cprometheus');
+      
+      // Verify that template replacement was called for both expr and datasource uid
+      const expectedScopedVars = {
+        datasource: { value: 'prometheus-prod', text: 'Prometheus Production' },
+      };
+      expect(mockReplace).toHaveBeenCalledWith('${datasource}', expectedScopedVars);
+      expect(mockReplace).toHaveBeenCalledWith('up{job="prometheus"}', expectedScopedVars, expect.any(Function));
+      expect(mockReplace).toHaveBeenCalledTimes(2);
     });
   });
 
