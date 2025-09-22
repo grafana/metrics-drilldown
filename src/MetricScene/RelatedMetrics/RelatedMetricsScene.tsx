@@ -30,9 +30,9 @@ import {
 import { MetricsVariableSortEngine } from 'WingmanDataTrail/MetricsVariables/MetricsVariableSortEngine';
 import { EventFiltersChanged } from 'WingmanDataTrail/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 
-import { getTrailFor } from '../utils';
 import { RelatedListControls } from './RelatedListControls';
-import { getAppBackgroundColor } from '../utils/utils.styles';
+import { getTrailFor } from '../../utils';
+import { getAppBackgroundColor } from '../../utils/utils.styles';
 
 interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;

@@ -18,12 +18,10 @@ import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
 import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { buildTimeseriesPanel } from 'GmdVizPanel/types/timeseries/buildTimeseriesPanel';
-import { PanelMenu } from 'Menu/PanelMenu';
 import { VAR_GROUP_BY } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'WingmanDataTrail/MetricsList/MetricsList';
@@ -31,8 +29,10 @@ import { SceneByVariableRepeater } from 'WingmanDataTrail/SceneByVariableRepeate
 import { ShowMoreButton } from 'WingmanDataTrail/ShowMoreButton';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
+import { syncYAxis } from './behaviors/syncYAxis';
 import { EventTimeseriesDataReceived } from './events/EventTimeseriesDataReceived';
 import { SelectLabelAction } from './SelectLabelAction';
+import { PanelMenu } from '../../PanelMenu/PanelMenu';
 
 interface MetricLabelsListState extends SceneObjectState {
   metric: string;

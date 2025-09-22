@@ -20,12 +20,12 @@ import {
 import { Spinner, Stack } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from '../interactions';
-import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../shared';
 import { NoRelatedLogs } from './NoRelatedLogsFound';
 import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './OpenInLogsDrilldownButton';
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
-import { isCustomVariable } from '../utils/utils.variables';
+import { reportExploreMetrics } from '../../interactions';
+import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared';
+import { isCustomVariable } from '../../utils/utils.variables';
 
 interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;

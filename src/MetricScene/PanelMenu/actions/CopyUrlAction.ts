@@ -1,11 +1,11 @@
 import { type PanelMenuItem } from '@grafana/data';
 import { config } from '@grafana/runtime';
 
-import { PLUGIN_BASE_URL } from '../../constants';
-import { type DataTrail } from '../../DataTrail';
-import { reportExploreMetrics } from '../../interactions';
-import { getUrlForTrail } from '../../utils';
-import { displaySuccess } from '../../WingmanDataTrail/helpers/displayStatus';
+import { PLUGIN_BASE_URL } from '../../../constants';
+import { type DataTrail } from '../../../DataTrail';
+import { reportExploreMetrics } from '../../../interactions';
+import { getUrlForTrail } from '../../../utils';
+import { displaySuccess } from '../../../WingmanDataTrail/helpers/displayStatus';
 
 export class CopyUrlAction {
   static create(trail: DataTrail): PanelMenuItem {

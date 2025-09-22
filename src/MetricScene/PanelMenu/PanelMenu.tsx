@@ -2,9 +2,8 @@ import { type DataFrame, type PanelMenuItem } from '@grafana/data';
 import { SceneObjectBase, VizPanelMenu, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import React from 'react';
 
-import { TOPVIEW_PANEL_MENU_KEY } from 'MetricGraphScene';
-
-import { getTrailFor } from '../utils';
+import { getTrailFor } from '../../utils';
+import { TOPVIEW_PANEL_MENU_KEY } from '../MetricGraphScene';
 import { CopyUrlAction } from './actions/CopyUrlAction';
 import { ExploreAction } from './actions/ExploreAction';
 import { type AddToExplorationButton } from './actions/investigation/AddToExplorationsButton';

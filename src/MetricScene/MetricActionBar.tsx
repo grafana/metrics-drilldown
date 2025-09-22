@@ -11,10 +11,10 @@ import { Box, Stack, Tab, TabsBar, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from 'interactions';
-import { MetricScene } from 'MetricScene';
-import { RelatedMetricsScene } from 'RelatedMetricsScene/RelatedMetricsScene';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
+import { MetricScene } from './MetricScene';
+import { RelatedMetricsScene } from './RelatedMetrics/RelatedMetricsScene';
 
 export const actionViews = {
   breakdown: 'breakdown',

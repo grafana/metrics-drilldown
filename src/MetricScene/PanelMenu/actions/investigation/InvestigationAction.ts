@@ -3,7 +3,7 @@ import { config, getObservablePluginLinks } from '@grafana/runtime';
 import { firstValueFrom } from 'rxjs';
 
 import { AddToExplorationButton, extensionPointId } from './AddToExplorationsButton';
-import { logger } from '../../../tracking/logger/logger';
+import { logger } from '../../../../tracking/logger/logger';
 
 const ADD_TO_INVESTIGATION_MENU_TEXT = 'Add to investigation';
 const ADD_TO_INVESTIGATION_MENU_DIVIDER_TEXT = 'investigations_divider'; // Text won't be visible

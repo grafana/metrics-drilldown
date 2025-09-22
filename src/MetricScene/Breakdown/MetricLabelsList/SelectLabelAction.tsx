@@ -5,7 +5,7 @@ import React from 'react';
 import { VAR_GROUP_BY } from 'shared';
 import { isQueryVariable } from 'utils/utils.variables';
 
-import { reportExploreMetrics } from '../../interactions';
+import { reportExploreMetrics } from '../../../interactions';
 
 interface SelectLabelActionState extends SceneObjectState {
   label: string;

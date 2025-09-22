@@ -16,9 +16,6 @@ import {
 import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { InlineBanner } from 'App/InlineBanner';
-import { publishTimeseriesData } from 'Breakdown/MetricLabelsList/behaviors/publishTimeseriesData';
-import { syncYAxis } from 'Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { getPreferredConfigForMetric } from 'GmdVizPanel/config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
@@ -26,7 +23,6 @@ import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { getTimeseriesQueryRunnerParams } from 'GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { addUnspecifiedLabel } from 'GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
-import { PanelMenu } from 'Menu/PanelMenu';
 import { trailDS } from 'shared';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'WingmanDataTrail/ListControls/LayoutSwitcher';
 import { EventQuickSearchChanged } from 'WingmanDataTrail/ListControls/QuickSearch/EventQuickSearchChanged';
@@ -39,6 +35,10 @@ import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
 import { LabelValuesCountsProvider } from './LabelValuesCountProvider';
 import { SceneByFrameRepeater } from './SceneByFrameRepeater';
 import { SortBySelector, type SortBySelectorState } from './SortBySelector';
+import { InlineBanner } from '../../../App/InlineBanner';
+import { PanelMenu } from '../../PanelMenu/PanelMenu';
+import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTimeseriesData';
+import { syncYAxis } from '../MetricLabelsList/behaviors/syncYAxis';
 
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: string;

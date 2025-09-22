@@ -2,10 +2,9 @@ import { type DataFrame } from '@grafana/data';
 import { sceneGraph, VizPanel, type SceneObject, type SceneObjectState } from '@grafana/scenes';
 import { cloneDeep, merge } from 'lodash';
 
-import { EventTimeseriesDataReceived } from 'Breakdown/MetricLabelsList/events/EventTimeseriesDataReceived';
-
 import { EventForceSyncYAxis } from '../events/EventForceSyncYAxis';
 import { EventResetSyncYAxis } from '../events/EventResetSyncYAxis';
+import { EventTimeseriesDataReceived } from '../events/EventTimeseriesDataReceived';
 
 /**
  * Synchronizes the Y-axis ranges across children timeseries panels by listening to data updates from publishTimeseriesData.

@@ -1,6 +1,6 @@
 import { sceneGraph, SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
 
-import { sortRelatedMetrics } from 'RelatedMetricsScene/sortRelatedMetrics';
+import { sortRelatedMetrics } from 'MetricScene/RelatedMetrics/sortRelatedMetrics';
 import { logger } from 'tracking/logger/logger';
 import {
   MetricsSorter,
