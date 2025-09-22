@@ -1,6 +1,7 @@
 import { css } from '@emotion/css';
 import { config } from '@grafana/runtime';
 import {
+  ConstantVariable,
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
   SceneVariableSet,
@@ -10,13 +11,14 @@ import {
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
+import { VariableHide } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
-import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from '../shared/shared';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 
@@ -122,7 +124,14 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
 function getVariableSet(metric: string) {
   return new SceneVariableSet({
-    variables: [...getVariablesWithMetricConstant(metric), new GroupByVariable()],
+    variables: [
+      new ConstantVariable({
+        name: VAR_METRIC,
+        value: metric,
+        hide: VariableHide.hideVariable,
+      }),
+      new GroupByVariable(),
+    ],
   });
 }
 
