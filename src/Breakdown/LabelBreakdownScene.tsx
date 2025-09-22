@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { config } from '@grafana/runtime';
+import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -8,8 +8,12 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Field, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
+
+import { type DataTrail } from 'DataTrail';
+import { getTrailFor } from 'utils';
+import { getAppBackgroundColor } from 'utils/utils.styles';
 
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../shared';
 import { isQueryVariable } from '../utils/utils.variables';
@@ -68,18 +72,20 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
-    const styles = useStyles2(getStyles);
+    const chromeHeaderHeight = useChromeHeaderHeight();
+    const trail = getTrailFor(model);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
     return (
       <div className={styles.container}>
-        <div className={styles.controls}>
-          <Field label="By label">
+        <div className={styles.stickyControls} data-testid="breakdown-controls">
+          <div className={styles.controls}>
             <groupByVariable.Component model={groupByVariable} />
-          </Field>
-          {body instanceof MetricLabelsList && <body.Controls model={body} />}
-          {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+            {body instanceof MetricLabelsList && <body.Controls model={body} />}
+            {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+          </div>
         </div>
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
@@ -90,22 +96,29 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   };
 }
 
-function getStyles(theme: GrafanaTheme2) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
   return {
     container: css({
       flexGrow: 1,
       display: 'flex',
       minHeight: '100%',
       flexDirection: 'column',
-      paddingTop: theme.spacing(1),
+    }),
+    stickyControls: css({
+      margin: theme.spacing(1, 0, 1.5, 0),
+      position: 'sticky',
+      top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
+      zIndex: 10,
+      background: getAppBackgroundColor(theme, trail),
+      paddingBottom: theme.spacing(1),
     }),
     controls: css({
-      flexGrow: 0,
       display: 'flex',
-      gap: theme.spacing(2),
-      height: '70px',
+      flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'end',
+      flexWrap: 'wrap',
+      gap: theme.spacing(1),
     }),
     searchField: css({
       flexGrow: 1,

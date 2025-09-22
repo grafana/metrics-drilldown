@@ -163,9 +163,11 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   public Controls({ model }: { model: MetricLabelsList }) {
+    const styles = useStyles2(getStyles); // eslint-disable-line react-hooks/rules-of-hooks
     const { layoutSwitcher } = model.useState();
+
     return (
-      <Field label="View">
+      <Field label="View" className={styles.field}>
         <layoutSwitcher.Component model={layoutSwitcher} />
       </Field>
     );
@@ -204,6 +206,9 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({ width: '100%' }),
+    field: css({
+      marginBottom: 0,
+    }),
     footer: css({
       display: 'flex',
       justifyContent: 'center',

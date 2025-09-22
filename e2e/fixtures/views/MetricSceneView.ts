@@ -38,7 +38,7 @@ export class MetricSceneView extends DrilldownView {
   /* Core UI assertions */
 
   async assertCoreUI(metricName: string) {
-    await this.appControls.assert(true);
+    await this.appControls.assert();
 
     await this.assertMainViz(metricName);
     await expect(this.getByTestId('action-bar')).toBeVisible();
@@ -156,26 +156,56 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertDefaultBreadownListControls() {
-    await this.assertLabelDropdown('All');
+    await this.assertLabelSelector('All');
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
   }
 
-  getLabelDropdown() {
+  getLabelSelectorContainer() {
     return this.getByTestId('breakdown-label-selector');
   }
 
-  async assertLabelDropdown(optionLabel: string) {
-    await expect(this.getLabelDropdown().getByText(optionLabel).first()).toBeVisible();
+  async assertLabelSelector(label: string) {
+    // Check if it's selected as a radio button
+    const radioGroup = this.getLabelSelectorContainer().getByRole('radiogroup');
+    if (await radioGroup.isVisible()) {
+      const radioOption = radioGroup.getByRole('radio', { name: label });
+      await expect(radioOption).toBeChecked();
+      return;
+    }
+
+    // Check if it's selected in the combobox
+    const combobox = this.getLabelSelectorContainer().getByRole('combobox');
+    if (await combobox.isVisible()) {
+      await expect(combobox).toHaveValue(label);
+      return;
+    }
+
+    throw new Error('Label selector not found in DOM!');
   }
 
   async selectLabel(label: string) {
-    await this.getLabelDropdown().locator('input').click();
-    await this.getByRole('option', { name: label }).click();
+    // Check it's a radio button
+    const radioGroup = this.getLabelSelectorContainer().getByRole('radiogroup');
+    if (await radioGroup.isVisible()) {
+      const radioOption = radioGroup.getByRole('radio', { name: label });
+      await radioOption.click();
+      return;
+    }
+
+    // If not a radio button, use the combobox
+    const combobox = this.getLabelSelectorContainer().getByRole('combobox');
+    if (await combobox.isVisible()) {
+      await combobox.click();
+      await this.getByRole('option', { name: label }).click();
+      return;
+    }
+
+    throw new Error('Label selector not found in DOM!');
   }
 
   async assertBreadownListControls({ label, sortBy }: { label: string; sortBy: string }) {
-    await this.assertLabelDropdown(label);
+    await this.assertLabelSelector(label);
     await expect(this.quickSearchLabelValues.get()).toBeVisible();
     await expect(this.getSortByDropdown()).toBeVisible();
     await this.assertSelectedSortBy(sortBy);

@@ -12,8 +12,10 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import React from 'react';
+import { useResizeObserver } from '@react-aria/utils';
+import React, { useRef } from 'react';
 
+import { BookmarkHeaderAction } from 'GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
@@ -25,17 +27,18 @@ import { PanelMenu } from 'Menu/PanelMenu';
 import { MetricActionBar } from 'MetricActionBar';
 
 import { type DataTrail } from './DataTrail';
-import { getTrailFor, getTrailSettings } from './utils';
+import { getTrailFor } from './utils';
 import { getAppBackgroundColor } from './utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
 export const TOPVIEW_PANEL_KEY = 'topview-panel';
-
+export const TOPVIEW_PANEL_MENU_KEY = 'topview-panel-menu';
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
   selectedTab?: SceneObject;
+  actionBar: MetricActionBar;
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
@@ -55,22 +58,23 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               panelOptions: {
                 height: PANEL_HEIGHT.XL,
                 headerActions: isClassicHistogramMetric(metric)
-                  ? () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })]
-                  : () => [new ConfigurePanelAction({ metric })],
-                menu: () => new PanelMenu({ labelName: metric }),
+                  ? () => [
+                      new GmdVizPanelVariantSelector({ metric }),
+                      new ConfigurePanelAction({ metric }),
+                      new BookmarkHeaderAction({ metric }),
+                    ]
+                  : () => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
+                menu: () => new PanelMenu({ labelName: metric, key: TOPVIEW_PANEL_MENU_KEY }),
               },
               queryOptions: {
                 resolution: QUERY_RESOLUTION.HIGH,
               },
             }),
           }),
-          new SceneFlexItem({
-            ySizing: 'content',
-            body: new MetricActionBar({}),
-          }),
         ],
       }),
       selectedTab: undefined,
+      actionBar: new MetricActionBar({}),
     });
 
     this.addActivationHandler(() => {
@@ -95,7 +99,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         gmdVizPanel.update(
           {
             description: getMetricDescription(metadata),
-            headerActions: () => [new GmdVizPanelVariantSelector({ metric }), new ConfigurePanelAction({ metric })],
+            headerActions: () => [
+              new GmdVizPanelVariantSelector({ metric }),
+              new ConfigurePanelAction({ metric }),
+              new BookmarkHeaderAction({ metric }),
+            ],
           },
           {}
         );
@@ -106,19 +114,31 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricGraphScene>) => {
-    const { topView, selectedTab } = model.useState();
-    const { stickyMainGraph } = getTrailSettings(model).useState();
+    const { topView, selectedTab, actionBar } = model.useState();
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
+    const controlsContainer = useRef<HTMLDivElement>(null);
+
+    useResizeObserver({
+      ref: controlsContainer,
+      onResize: () => {
+        const element = controlsContainer.current;
+        if (element) {
+          requestAnimationFrame(() => {
+            updateActionBarHeight(controlsContainer);
+          });
+        }
+      },
+    });
 
     return (
       <div className={styles.container}>
-        <div
-          className={stickyMainGraph ? cx(styles.topView, styles.sticky) : cx(styles.topView, styles.nonSticky)}
-          data-testid="top-view"
-        >
+        <div className={cx(styles.topView, styles.nonSticky)} data-testid="top-view">
           <topView.Component model={topView} />
+        </div>
+        <div className={cx(styles.topView, styles.stickyTop)} id="action-bar-container" ref={controlsContainer}>
+          <actionBar.Component model={actionBar} />
         </div>
         {selectedTab && (
           <div data-testid="tab-content" className={styles.tabContent}>
@@ -142,13 +162,12 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       height: '100%',
     }),
     topView: css({}),
-    sticky: css({
+    stickyTop: css({
       display: 'flex',
       flexDirection: 'row',
       background: getAppBackgroundColor(theme, trail),
       position: 'sticky',
       paddingTop: theme.spacing(1),
-      marginTop: `-${theme.spacing(1)}`,
       zIndex: 10,
       // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
       // This ensures the main graph sticks below the app-controls in embedded mode
@@ -159,4 +178,15 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       flexDirection: 'row',
     }),
   };
+}
+
+function updateActionBarHeight(controlsContainer: React.RefObject<HTMLDivElement>) {
+  const actionBar = controlsContainer.current;
+
+  if (!actionBar) {
+    return;
+  }
+
+  const { height } = actionBar.getBoundingClientRect();
+  document.documentElement.style.setProperty('--action-bar-height', `${height}px`);
 }

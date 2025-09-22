@@ -17,7 +17,6 @@ import { isSceneQueryRunner } from 'utils/utils.queries';
 
 import { ROUTES } from './constants';
 import { DataTrail, type DataTrailState } from './DataTrail';
-import { type DataTrailSettings } from './DataTrailSettings';
 import { type MetricDatasourceHelper } from './helpers/MetricDatasourceHelper';
 import { LOGS_METRIC } from './shared';
 import { getClosestScopesFacade } from './utils/utils.scopes';
@@ -25,10 +24,6 @@ import { isAdHocFiltersVariable } from './utils/utils.variables';
 
 export function getTrailFor(model: SceneObject): DataTrail {
   return sceneGraph.getAncestor(model, DataTrail);
-}
-
-export function getTrailSettings(model: SceneObject): DataTrailSettings {
-  return sceneGraph.getAncestor(model, DataTrail).state.settings;
 }
 
 export function newMetricsTrail(state?: Partial<DataTrailState>): DataTrail {
@@ -190,3 +185,5 @@ export function findObjectOfType<T extends SceneObject>(
 
   return null;
 }
+
+export function noOp() {}
