@@ -72,29 +72,16 @@ export class MetricSceneView extends DrilldownView {
 
   async openMainPanelMenu() {
     const panel = this.getMainViz();
-
-    // Hover the panel to ensure header actions are visible
     await panel.hover();
+    await panel.getByRole('button', { name: /menu/i }).click();
+    await expect(this.getByTestId('panel-menu')).toBeVisible();
+  }
 
-    // Try a set of robust selectors for the menu trigger scoped to the panel
-    const candidates = [
-      panel.getByRole('button', { name: /menu/i }),
-      panel.getByRole('button', { name: /more/i }),
-      panel.getByRole('button', { name: /options/i }),
-      panel.locator('button[aria-haspopup="menu"]'),
-      panel.locator('button[aria-label]'),
-    ];
-
-    for (const candidate of candidates) {
-      if (await candidate.first().isVisible()) {
-        await candidate.first().click();
-        // Wait for any menuitem to appear to confirm the menu is open
-        await expect(this.getByRole('menuitem').first()).toBeVisible();
-        return;
-      }
+  async assertMainPanelMenu(menuItems: string[]) {
+    await this.openMainPanelMenu();
+    for (const name of menuItems) {
+      await expect(this.getByRole('menuitem', { name })).toBeVisible();
     }
-
-    throw new Error('Could not find the panel menu trigger within the main viz panel');
   }
 
   async selectAndApplyConfigPreset(presetName: string, presetParams: string[]) {
