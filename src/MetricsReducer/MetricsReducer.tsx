@@ -14,7 +14,7 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from 'interactions';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './labels/LabelsDataSource';

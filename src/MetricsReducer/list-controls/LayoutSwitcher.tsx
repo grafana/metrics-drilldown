@@ -8,7 +8,7 @@ import {
 import { RadioButtonGroup } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from 'interactions';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 export enum LayoutType {
   GRID = 'grid',

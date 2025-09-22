@@ -11,7 +11,7 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
-import { logger } from 'tracking/logger/logger';
+import { logger } from 'shared/logger/logger';
 
 /**
  * This component has been borrowd from Scenes v5,41,1, which is the version Metrics Drilldown currently use.

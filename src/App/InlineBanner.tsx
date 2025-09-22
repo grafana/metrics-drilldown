@@ -2,7 +2,7 @@ import { Alert, type AlertVariant } from '@grafana/ui';
 import React from 'react';
 
 import { ensureErrorObject } from './useCatchExceptions';
-import { logger, type ErrorContext } from '../tracking/logger/logger';
+import { logger, type ErrorContext } from '../shared/logger/logger';
 
 type InlineBannerProps = {
   severity: AlertVariant;

@@ -18,15 +18,15 @@ import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
-import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
-import { addCardinalityInfo } from 'GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
-import { buildTimeseriesPanel } from 'GmdVizPanel/types/timeseries/buildTimeseriesPanel';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'MetricsReducer/MetricsList/MetricsList';
-import { VAR_GROUP_BY } from 'shared';
+import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
+import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
+import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
+import { buildTimeseriesPanel } from 'shared/GmdVizPanel/types/timeseries/buildTimeseriesPanel';
+import { VAR_GROUP_BY } from 'shared/shared';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
 import { syncYAxis } from './behaviors/syncYAxis';

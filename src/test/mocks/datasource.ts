@@ -1,8 +1,32 @@
-import { VariableSupportType, type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
+import { PluginType, VariableSupportType, type DataSourceApi, type DataSourceInstanceSettings } from '@grafana/data';
 import { type DataSourceSrv } from '@grafana/runtime';
 import { type DataSourceRef } from '@grafana/schema';
 
-import { dataSourceStub } from '../stubs/dataSourceStub';
+export const dataSourceStub: DataSourceApi = {
+  name: 'Prometheus',
+  type: 'prometheus',
+  id: 1,
+  uid: 'ds',
+  meta: {
+    id: 'prometheus',
+    name: 'Prometheus',
+    type: PluginType.datasource,
+    info: {
+      version: '',
+      logos: { small: '', large: '' },
+      updated: '',
+      author: { name: '' },
+      description: '',
+      links: [],
+      screenshots: [],
+    },
+    module: '',
+    baseUrl: '',
+  },
+  query: () => Promise.resolve({ data: [] }),
+  testDatasource: () => Promise.resolve({ status: 'success', message: 'Success' }),
+  getRef: () => ({ type: 'prometheus', uid: 'ds' }),
+};
 
 export function createMockDataSource(settings: Partial<DataSourceInstanceSettings> = {}): DataSourceInstanceSettings {
   return {

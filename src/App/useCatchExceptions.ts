@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { logger } from '../tracking/logger/logger';
+import { logger } from '../shared/logger/logger';
 
 export function ensureErrorObject(error: any, defaultMessage: string): Error {
   if (error instanceof Error) {

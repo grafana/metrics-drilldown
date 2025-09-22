@@ -3,7 +3,7 @@ import { type SceneDataQuery, type SceneTimeRangeState } from '@grafana/scenes';
 import { LinkButton } from '@grafana/ui';
 import React, { useMemo } from 'react';
 
-import { reportExploreMetrics } from '../../interactions';
+import { reportExploreMetrics } from '../../shared/tracking/interactions';
 
 const extensionPointId = 'grafana-metricsdrilldown-app/open-in-logs-drilldown/v1';
 

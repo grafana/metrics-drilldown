@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { newMetricsTrail } from 'utils';
+import { newMetricsTrail } from 'shared/utils/utils';
 
 interface AppContextState {
   trail: DataTrail;

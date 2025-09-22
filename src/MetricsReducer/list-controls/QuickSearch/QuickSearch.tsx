@@ -11,8 +11,8 @@ import { IconButton, Input, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce } from 'lodash';
 import React, { type KeyboardEvent } from 'react';
 
-import { reportExploreMetrics } from 'interactions';
-import { VAR_DATASOURCE } from 'shared';
+import { VAR_DATASOURCE } from 'shared/shared';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';

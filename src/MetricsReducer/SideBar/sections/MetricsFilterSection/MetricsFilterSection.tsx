@@ -30,9 +30,9 @@ import {
   RULE_GROUP_LABELS,
   type RuleGroupLabel,
 } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/rule-group-labels';
-import { logger } from 'tracking/logger/logger';
+import { logger } from 'shared/logger/logger';
 
-import { reportExploreMetrics } from '../../../../interactions';
+import { reportExploreMetrics } from '../../../../shared/tracking/interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';

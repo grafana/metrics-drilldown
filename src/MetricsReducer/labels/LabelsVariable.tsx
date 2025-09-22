@@ -11,7 +11,7 @@ import {
 import { Label, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared';
+import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared/shared';
 
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './LabelsDataSource';
 

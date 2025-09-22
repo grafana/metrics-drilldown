@@ -3,12 +3,13 @@ import { QueryVariable, sceneGraph, type MultiValueVariable, type SceneComponent
 import { Field, useStyles2 } from '@grafana/ui';
 import React, { useCallback } from 'react';
 
-import { reportExploreMetrics } from 'interactions';
-import { ALL_VARIABLE_VALUE } from 'services/variables';
-import { trailDS, VAR_FILTERS, VAR_GROUP_BY, VAR_METRIC_EXPR } from 'shared';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { trailDS, VAR_FILTERS, VAR_GROUP_BY, VAR_METRIC_EXPR } from 'shared/shared';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
 import { GroupBySelector, type GroupByOptions } from './GroupBySelector/GroupBySelector';
+
+const ALL_VARIABLE_VALUE = '$__all';
 
 export class GroupByVariable extends QueryVariable {
   constructor() {

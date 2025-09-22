@@ -16,7 +16,7 @@ import React from 'react';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { actionViews, actionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
-import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from '../shared';
+import { getVariablesWithMetricConstant, RefreshMetricsEvent, VAR_FILTERS, type MakeOptional } from '../shared/shared';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 

@@ -4,10 +4,9 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Combobox, Field, IconButton, useStyles2, type ComboboxOption } from '@grafana/ui';
 import React from 'react';
 
-import { type SortSeriesByOption } from 'services/sorting';
-
-import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
-import { userStorage } from '../../../UserPreferences/userStorage';
+import { type SortSeriesByOption } from 'shared/services/sorting';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
 
 export interface SortBySelectorState extends SceneObjectState {
   target: 'fields' | 'labels';

@@ -8,7 +8,6 @@ import {
 import { type IconName } from '@grafana/ui';
 import React from 'react';
 
-import { type GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import {
   MetricsSorter,
   VAR_WINGMAN_SORT_BY,
@@ -16,8 +15,9 @@ import {
 } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
-import { logger } from 'tracking/logger/logger';
-import { isCustomVariable } from 'utils/utils.variables';
+import { type GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { logger } from 'shared/logger/logger';
+import { isCustomVariable } from 'shared/utils/utils.variables';
 
 import { UsageData } from './UsageData';
 

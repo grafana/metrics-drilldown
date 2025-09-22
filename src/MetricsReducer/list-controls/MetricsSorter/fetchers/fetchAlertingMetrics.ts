@@ -1,7 +1,8 @@
 import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 
-import { logger } from '../../../../tracking/logger/logger';
-import { extractMetricNames } from '../../../../utils/utils.promql';
+import { logger } from 'shared/logger/logger';
+
+import { extractMetricNames } from '../../../../shared/utils/utils.promql';
 
 import type { MetricUsageDetails } from './fetchDashboardMetrics';
 interface AlertingRule {

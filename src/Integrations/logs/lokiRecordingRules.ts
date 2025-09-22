@@ -5,8 +5,8 @@ import { type SyntaxNode } from '@lezer/common';
 import { lastValueFrom } from 'rxjs';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
-import { logger } from '../../tracking/logger/logger';
-import { getDataSourceFetcher } from '../../utils/utils.datasource';
+import { logger } from '../../shared/logger/logger';
+import { getDataSourceFetcher } from '../../shared/utils/utils.datasource';
 
 export interface RecordingRuleGroup {
   name: string;

@@ -16,12 +16,12 @@ import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
-import { SelectAction } from 'GmdVizPanel/components/SelectAction';
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
+import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
+import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
+import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 
 import { VIZ_PANEL_HEIGHT, WithUsageDataPreviewPanel } from './WithUsageDataPreviewPanel';
 

@@ -9,9 +9,9 @@ import {
 import { type PrometheusDatasource } from '@grafana/prometheus';
 import { RuntimeDataSource, sceneGraph, type SceneObject } from '@grafana/scenes';
 
-import { MetricDatasourceHelper } from 'helpers/MetricDatasourceHelper';
-import { VAR_FILTERS } from 'shared';
-import { isAdHocFiltersVariable } from 'utils/utils.variables';
+import { MetricDatasourceHelper } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import { VAR_FILTERS } from 'shared/shared';
+import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
 import { displayWarning } from '../helpers/displayStatus';
 import { localeCompare } from '../helpers/localCompare';

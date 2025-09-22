@@ -2,8 +2,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from
 import { Button } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from 'interactions';
-import { getTrailFor } from 'utils';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { getTrailFor } from 'shared/utils/utils';
 
 interface AddToFiltersGraphActionState extends SceneObjectState {
   labelName: string;

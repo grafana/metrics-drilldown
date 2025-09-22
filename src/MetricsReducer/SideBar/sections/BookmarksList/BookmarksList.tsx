@@ -4,10 +4,10 @@ import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { useBookmarks } from 'bookmarks/useBookmarks';
+import { useBookmarks } from 'shared/bookmarks/useBookmarks';
 
 import { BookmarkListItem } from './BookmarkListItem';
-import { reportExploreMetrics } from '../../../../interactions';
+import { reportExploreMetrics } from '../../../../shared/tracking/interactions';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 

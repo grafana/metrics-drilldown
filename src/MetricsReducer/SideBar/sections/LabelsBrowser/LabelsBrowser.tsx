@@ -7,7 +7,7 @@ import React, { useMemo, useState } from 'react';
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
 import { type LabelsVariable } from 'MetricsReducer/labels/LabelsVariable';
 
-import { reportExploreMetrics } from '../../../../interactions';
+import { reportExploreMetrics } from '../../../../shared/tracking/interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';

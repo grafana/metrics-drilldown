@@ -1,7 +1,8 @@
 import React, { lazy } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
-import { ROUTES } from '../constants';
+import { ROUTES } from 'shared/constants/routes';
+
 import { useMetricsAppContext } from './AppContext';
 
 export const Trail = lazy(() => import('./Trail'));

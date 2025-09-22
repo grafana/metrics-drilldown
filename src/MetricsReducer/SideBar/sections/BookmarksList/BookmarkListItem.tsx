@@ -4,10 +4,10 @@ import { type SceneObjectUrlValues } from '@grafana/scenes';
 import { Card, IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type Bookmark } from 'bookmarks/useBookmarks';
-import { VAR_FILTERS } from 'shared';
+import { type Bookmark } from 'shared/bookmarks/useBookmarks';
+import { VAR_FILTERS } from 'shared/shared';
 
-import { getMetricName } from '../../../../utils';
+import { getMetricName } from '../../../../shared/utils/utils';
 
 // Helper function to truncate the value for a single key:value pair
 const truncateValue = (key: string, value: string, maxLength: number) => {

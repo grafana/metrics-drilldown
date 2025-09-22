@@ -1,8 +1,8 @@
 import { VariableHide, VariableRefresh, VariableSort } from '@grafana/data';
 import { QueryVariable, type SceneObjectState } from '@grafana/scenes';
 
-import { type LabelMatcher } from 'GmdVizPanel/buildQueryExpression';
-import { trailDS, VAR_FILTERS } from 'shared';
+import { type LabelMatcher } from 'shared/GmdVizPanel/buildQueryExpression';
+import { trailDS, VAR_FILTERS } from 'shared/shared';
 
 import { withLifecycleEvents } from './withLifecycleEvents';
 

@@ -1,7 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 
 import { DrilldownView } from './DrilldownView';
-import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
+import { PLUGIN_BASE_URL } from '../../../src/shared/constants/plugin';
+import { ROUTES } from '../../../src/shared/constants/routes';
 import { AppControls } from '../components/AppControls';
 import { QuickSearchInput } from '../components/QuickSearchInput';
 

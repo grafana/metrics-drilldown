@@ -1,12 +1,11 @@
 import { config } from '@grafana/runtime';
 import { DataSourceVariable } from '@grafana/scenes';
 
-import { VAR_DATASOURCE } from 'shared';
-import { logger } from 'tracking/logger/logger';
-import { isPrometheusDataSource } from 'utils/utils.datasource';
-
-import { PREF_KEYS } from '../UserPreferences/pref-keys';
-import { userStorage } from '../UserPreferences/userStorage';
+import { logger } from 'shared/logger/logger';
+import { VAR_DATASOURCE } from 'shared/shared';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
+import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
 export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
   constructor({ initialDS }: { initialDS?: string }) {

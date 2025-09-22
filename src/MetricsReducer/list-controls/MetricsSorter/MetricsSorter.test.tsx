@@ -1,6 +1,7 @@
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
+
 import { addRecentMetric, getRecentMetrics, sortMetricsWithRecentFirst } from './MetricsSorter';
-import { PREF_KEYS } from '../../../UserPreferences/pref-keys';
-import { userStorage } from '../../../UserPreferences/userStorage';
 
 describe('MetricsSorter', () => {
   beforeEach(() => {

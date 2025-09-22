@@ -4,12 +4,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ErrorView } from 'App/ErrorView';
 import { Trail } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
-import { reportExploreMetrics } from 'interactions';
-import { newMetricsTrail } from 'utils';
-import { type ParsedPromQLQuery } from 'utils/utils.promql';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { newMetricsTrail } from 'shared/utils/utils';
+import { type ParsedPromQLQuery } from 'shared/utils/utils.promql';
 
 import { parsePromQLQuery } from '../../extensions/links';
-import { toSceneTimeRange } from '../../utils/utils.timerange';
+import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
 export interface LabelBreakdownProps {
   query: string;

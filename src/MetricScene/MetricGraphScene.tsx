@@ -16,19 +16,19 @@ import { useResizeObserver } from '@react-aria/utils';
 import React, { useRef } from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { BookmarkHeaderAction } from 'GmdVizPanel/components/BookmarkHeaderAction';
-import { ConfigurePanelAction } from 'GmdVizPanel/components/ConfigurePanelAction';
-import { GmdVizPanelVariantSelector } from 'GmdVizPanel/components/GmdVizPanelVariantSelector';
-import { PANEL_HEIGHT } from 'GmdVizPanel/config/panel-heights';
-import { QUERY_RESOLUTION } from 'GmdVizPanel/config/query-resolutions';
-import { GmdVizPanel } from 'GmdVizPanel/GmdVizPanel';
-import { isClassicHistogramMetric } from 'GmdVizPanel/matchers/isClassicHistogramMetric';
+import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
+import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
+import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
+import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
+import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
+import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 
 import { MetricActionBar } from './MetricActionBar';
-import { getMetricDescription } from '../helpers/MetricDatasourceHelper';
-import { getTrailFor } from '../utils';
 import { PanelMenu } from './PanelMenu/PanelMenu';
-import { getAppBackgroundColor } from '../utils/utils.styles';
+import { getMetricDescription } from '../AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import { getTrailFor } from '../shared/utils/utils';
+import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
