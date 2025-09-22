@@ -13,7 +13,7 @@ interface GroupBySelectorProps {
   loading?: boolean;
 }
 
-export const DEFAULT_ALL_OPTION = {
+const DEFAULT_ALL_OPTION = {
   label: 'All',
   value: '$__all',
 };

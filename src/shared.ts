@@ -2,8 +2,6 @@ import { BusEventBase, BusEventWithPayload } from '@grafana/data';
 import { ConstantVariable, type SceneObjectUrlValues } from '@grafana/scenes';
 import { VariableHide } from '@grafana/schema';
 
-export const HOME_ROUTE = '/explore/metrics';
-
 export const VAR_FILTERS = 'filters';
 export const VAR_FILTERS_EXPR = '${filters}';
 const VAR_METRIC = 'metric';

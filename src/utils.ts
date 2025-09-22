@@ -41,14 +41,6 @@ export function getUrlForTrail(trail: DataTrail) {
   return urlUtil.renderUrl(ROUTES.Drilldown, params);
 }
 
-function getCurrentPath(): Location['pathname'] {
-  return window.location.pathname;
-}
-
-export function currentPathIncludes(path: string) {
-  return getCurrentPath().includes(path);
-}
-
 export function getMetricName(metric?: string) {
   if (!metric) {
     return 'All metrics';
@@ -66,7 +58,7 @@ export function getColorByIndex(index: number) {
   return visTheme.getColorByName(visTheme.palette[index % 8]);
 }
 
-export function getQueries(sceneObject: SceneObject): PromQuery[] {
+function getQueries(sceneObject: SceneObject): PromQuery[] {
   const allQueryRunners = sceneGraph.findAllObjects(sceneObject, isSceneQueryRunner) as SceneQueryRunner[];
   return allQueryRunners.flatMap((sqr) =>
     sqr.state.queries.map((q) => ({ ...q, expr: sceneGraph.interpolate(sqr, q.expr) }))
