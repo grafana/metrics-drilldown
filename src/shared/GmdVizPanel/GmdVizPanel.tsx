@@ -1,7 +1,9 @@
 import { css } from '@emotion/css';
 import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } from '@grafana/data';
 import {
+  sceneGraph,
   SceneObjectBase,
+  SceneQueryRunner,
   type SceneComponentProps,
   type SceneDataProvider,
   type SceneObjectState,
@@ -9,7 +11,7 @@ import {
   type VizPanelState,
 } from '@grafana/scenes';
 import { useStyles2, type VizLegendOptions } from '@grafana/ui';
-import { isEqual } from 'lodash';
+import { isEqual, omitBy } from 'lodash';
 import React from 'react';
 
 import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
@@ -22,18 +24,14 @@ import { getPreferredConfigForMetric } from './config/getPreferredConfigForMetri
 import { PANEL_HEIGHT } from './config/panel-heights';
 import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
-import { getMetricTypeSync, type MetricType } from './matchers/getMetricType';
+import { getMetricTypeSync, type Metric, type MetricType } from './matchers/getMetricType';
 import { getPanelTypeForMetricSync } from './matchers/getPanelTypeForMetric';
 import { type PanelType } from './types/available-panel-types';
-import { buildHeatmapPanel } from './types/heatmap/buildHeatmapPanel';
-import { buildPercentilesPanel } from './types/percentiles/buildPercentilesPanel';
-import { buildStatPanel } from './types/stat/buildStatPanel';
-import { buildStatushistoryPanel } from './types/statushistory/buildStatushistoryPanel';
-import { buildTimeseriesPanel } from './types/timeseries/buildTimeseriesPanel';
+import { panelBuilder } from './types/panelBuilder';
 
 /* Panel config */
 
-type HeaderActionAndMenuArgs = { metric: string; panelConfig: PanelConfig };
+type HeaderActionAndMenuArgs = { metric: Metric; panelConfig: PanelConfig };
 
 export type PanelConfig = {
   type: PanelType;
@@ -125,7 +123,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         type: panelOptions?.type || getPanelTypeForMetricSync(metric),
         title: metric,
         height: PANEL_HEIGHT.M,
-        headerActions: ({ metric }) => [new SelectAction({ metric })],
+        headerActions: ({ metric }) => [new SelectAction({ metric: metric.name })],
         ...panelOptions,
         ...prefConfig?.panelOptions,
       },
@@ -145,7 +143,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private async onActivate(discardPanelTypeUpdates: boolean) {
-    this.updateBody();
+    this.buildVizPanel();
 
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
@@ -168,9 +166,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       panelConfigUpdate.description = getMetricDescription(metadata);
     }
 
-    // native histogram
+    // we found a native histogram
     if (metadata.type === 'histogram') {
       stateUpdate.metricType = 'native-histogram';
+      // prio: metadata description > description passed to the constructor > hardcoded description
       panelConfigUpdate.description ??= panelConfig.description ?? 'Native Histogram';
 
       if (!discardPanelTypeUpdates) {
@@ -178,7 +177,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       }
     }
 
-    // gauge that the app mis-identified as counter (see https://github.com/grafana/metrics-drilldown/issues/698)
+    // we found a gauge metric that was previously identified as a counter (see https://github.com/grafana/metrics-drilldown/issues/698)
     if (metadata.type === 'gauge' && metricType === 'counter') {
       stateUpdate.metricType = 'gauge';
     }
@@ -202,7 +201,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
           return;
         }
 
-        const dataFrameType = newState.data.series[0]?.meta?.type;
+        const dataFrameType = newState.data.series?.[0]?.meta?.type;
         if (!dataFrameType) {
           return;
         }
@@ -220,11 +219,22 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
 
     this.subscribeToState((newState, prevState) => {
-      if (
-        !isEqual(newState.panelConfig, prevState.panelConfig) ||
-        !isEqual(newState.queryConfig, prevState.queryConfig)
-      ) {
-        this.updateBody();
+      if (newState.panelConfig.type !== prevState.panelConfig.type) {
+        this.buildVizPanel(); // rebuild the whole panel
+        return;
+      }
+
+      if (!isEqual(newState.panelConfig, prevState.panelConfig)) {
+        const diff = omitBy(
+          newState.panelConfig,
+          (value, key) => value === prevState.panelConfig[key as keyof typeof prevState.panelConfig]
+        );
+        this.updatePanel(diff); // update only panel options
+        return;
+      }
+
+      if (newState.metricType !== prevState.metricType || !isEqual(newState.queryConfig, prevState.queryConfig)) {
+        this.updatePanelQuery(); // only update query
       }
     });
   }
@@ -240,48 +250,66 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     });
   }
 
-  private updateBody() {
+  private buildVizPanel() {
     const { metric: name, metricType, panelConfig, queryConfig } = this.state;
-    const metric = { name, type: metricType };
 
-    switch (panelConfig.type) {
-      case 'timeseries':
-        this.setState({
-          body: buildTimeseriesPanel({ metric, panelConfig, queryConfig }),
-        });
-        return;
+    this.setState({
+      body: panelBuilder.buildVizPanel({
+        metric: { name, type: metricType },
+        panelConfig,
+        queryConfig,
+      }),
+    });
+  }
 
-      case 'heatmap':
-        this.setState({
-          body: buildHeatmapPanel({ metric, panelConfig, queryConfig }),
-        });
-        return;
-
-      case 'percentiles':
-        this.setState({
-          body: buildPercentilesPanel({
-            metric,
-            panelConfig,
-            queryConfig,
-          }),
-        });
-        return;
-
-      case 'statushistory':
-        this.setState({
-          body: buildStatushistoryPanel({ metric, panelConfig, queryConfig }),
-        });
-        return;
-
-      case 'stat':
-        this.setState({
-          body: buildStatPanel({ metric, panelConfig, queryConfig }),
-        });
-        return;
-
-      default:
-        throw new TypeError(`Unsupported panel type "${panelConfig.type}"!`);
+  private updatePanel(update: Partial<PanelOptions>) {
+    const { metric: name, metricType, body, panelConfig } = this.state;
+    if (!body) {
+      return;
     }
+
+    const metric = {
+      name,
+      type: metricType,
+    };
+
+    // we support only a subset of options that work for the current app
+    // in the future, if we want to add more support, check each buildXYZPanel functions
+    if (update.description) {
+      body.setState({ description: update.description });
+    }
+
+    if (update.headerActions) {
+      body.setState({ headerActions: update.headerActions({ metric, panelConfig }) });
+    }
+
+    if (update.menu) {
+      body.setState({ headerActions: update.menu({ metric, panelConfig }) });
+    }
+  }
+
+  private updatePanelQuery() {
+    const { body, metric, metricType, panelConfig, queryConfig } = this.state;
+    if (!body) {
+      return;
+    }
+
+    const [queryRunner] = sceneGraph.findDescendents(body, SceneQueryRunner);
+    if (!queryRunner) {
+      return;
+    }
+
+    const queryRunnerParams = panelBuilder.getQueryRunnerParams({
+      panelType: panelConfig.type,
+      metric: { name: metric, type: metricType },
+      queryConfig,
+    });
+
+    queryRunner.setState({
+      queries: queryRunnerParams.queries,
+    });
+
+    queryRunner.runQueries(); // Scenes will cancel any running query
   }
 
   public update(panelOptions: PanelOptions, queryOptions: QueryOptions) {

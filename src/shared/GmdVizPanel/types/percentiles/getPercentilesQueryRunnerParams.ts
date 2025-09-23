@@ -7,20 +7,11 @@ import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
-type PercentilesQueryRunnerParams = {
-  isRateQuery: boolean;
-  maxDataPoints: number;
-  queries: SceneDataQuery[];
-};
-
-type Options = {
-  metric: Metric;
-  queryConfig: QueryConfig;
-};
+import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
 const DEFAULT_PERCENTILES = [99, 90, 50] as const;
 
-export function getPercentilesQueryRunnerParams(options: Options): PercentilesQueryRunnerParams {
+export function getPercentilesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
   const { metric, queryConfig } = options;
   const expression = buildQueryExpression({
     metric,

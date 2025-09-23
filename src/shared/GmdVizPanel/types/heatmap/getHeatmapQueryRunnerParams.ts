@@ -1,22 +1,11 @@
-import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
-import { type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
-import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
-type HeatmapQueryRunnerParams = {
-  maxDataPoints: number;
-  queries: SceneDataQuery[];
-};
+import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
-type Options = {
-  metric: Metric;
-  queryConfig: QueryConfig;
-};
-
-export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunnerParams {
+export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
   const { metric, queryConfig } = options;
   const expression = buildQueryExpression({
     metric,
