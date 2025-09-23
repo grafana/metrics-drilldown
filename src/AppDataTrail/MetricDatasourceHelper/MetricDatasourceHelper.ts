@@ -22,8 +22,8 @@ import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-va
 import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
-import { languageProviderVersionIs } from './types/language-provider/versionCheck';
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../../shared/shared';
+import { languageProviderVersionIs } from './types/language-provider/versionCheck';
 
 /**
  * When we fetch the Prometheus data source with `@grafana/runtime`, its language provider
@@ -112,35 +112,6 @@ export class MetricDatasourceHelper {
   }
 
   /**
-   * Identify native histograms by 2 strategies.
-   * 1. querying classic histograms and all metrics,
-   * then comparing the results and build the collection of native histograms.
-   * 2. querying all metrics and checking if the metric is a histogram type and does not have the bucket suffix.
-   *
-   * classic histogram = test_metric_bucket
-   * native histogram = test_metric
-   */
-  public async isNativeHistogram(metric: string): Promise<boolean> {
-    if (this.cache.classicHistograms.has(metric)) {
-      return false;
-    }
-
-    // Prometheus creates a classic histogram metric, which is useful when the metadata is not available
-    // TODO: add reference for future review
-    if (this.cache.classicHistograms.has(`${metric}_bucket`)) {
-      return true;
-    }
-
-    try {
-      const metadata = await this.getMetadataForMetric(metric);
-      return metadata?.type === 'histogram';
-    } catch (error) {
-      displayWarning([`Error while fetching ${metric} metadata!`, (error as Error).toString()]);
-      return false;
-    }
-  }
-
-  /**
    * We fetch all the metadata at once in init() but it can lead to inconsistencies in the UI because
    * it usually takes a couple of Prometheus scrape intervals to have all the metadata available.
    * Additionally, fetching them separately and caching them once we have a result gives another chance to Prometheus while the user navigates across the app.
@@ -155,8 +126,14 @@ export class MetricDatasourceHelper {
       return;
     }
 
-    const response = await (ds.languageProvider as any).request(`/api/v1/metadata?metric=${metric}`);
-    const metadata = response[metric]?.[0];
+    let metadata = undefined;
+
+    try {
+      const response = await (ds.languageProvider as any).request(`/api/v1/metadata?metric=${metric}`);
+      metadata = response[metric]?.[0];
+    } catch (error) {
+      displayWarning([`Error while fetching ${metric} metadata!`, (error as Error).toString()]);
+    }
 
     if (metadata) {
       this.cache.metadata.set(metric, metadata);

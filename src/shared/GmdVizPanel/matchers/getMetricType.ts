@@ -13,11 +13,19 @@ export type Metric = {
 };
 
 export async function getMetricType(metric: string, dataTrail: DataTrail): Promise<MetricType> {
-  let metricType = getMetricTypeSync(metric);
+  const metricType = getMetricTypeSync(metric);
 
   if (metricType === 'gauge') {
-    if (await dataTrail.isNativeHistogram(metric)) {
-      metricType = 'native-histogram';
+    const metadata = await dataTrail.getMetadataForMetric(metric);
+    if (metadata?.type === 'histogram') {
+      return 'native-histogram';
+    }
+  }
+
+  if (metricType === 'counter') {
+    const metadata = await dataTrail.getMetadataForMetric(metric);
+    if (metadata?.type === 'gauge') {
+      return 'gauge';
     }
   }
 

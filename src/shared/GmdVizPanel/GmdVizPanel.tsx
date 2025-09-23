@@ -12,6 +12,7 @@ import { useStyles2, type VizLegendOptions } from '@grafana/ui';
 import { isEqual } from 'lodash';
 import React from 'react';
 
+import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { getTrailFor } from 'shared/utils/utils';
 
 import { type LabelMatcher } from './buildQueryExpression';
@@ -41,6 +42,7 @@ export type PanelConfig = {
   headerActions: (headerActionsArgs: HeaderActionAndMenuArgs) => VizPanelState['headerActions'];
   fixedColorIndex?: number;
   description?: string;
+  addMetadataDescription?: boolean;
   menu?: (menuArgs: HeaderActionAndMenuArgs) => VizPanelState['menu'];
   legend?: Partial<VizLegendOptions>;
   mappings?: ValueMapping[];
@@ -53,6 +55,7 @@ export type PanelOptions = {
   fixedColorIndex?: PanelConfig['fixedColorIndex'];
   title?: PanelConfig['title'];
   description?: PanelConfig['description'];
+  addMetadataDescription?: PanelConfig['addMetadataDescription'];
   headerActions?: PanelConfig['headerActions'];
   menu?: PanelConfig['menu'];
   legend?: PanelConfig['legend'];
@@ -142,24 +145,48 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private async onActivate(discardPanelTypeUpdates: boolean) {
-    const { metric, panelConfig } = this.state;
-
     this.updateBody();
 
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
+
+    this.checkMetricMetadata(discardPanelTypeUpdates);
+  }
+
+  private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
+    const { metric, metricType, panelConfig } = this.state;
 
     const metadata = await getTrailFor(this).getMetadataForMetric(metric);
     if (!metadata?.type) {
       return;
     }
 
+    const stateUpdate: Partial<GmdVizPanelState> = {};
+    const panelConfigUpdate: Partial<GmdVizPanelState['panelConfig']> = {};
+
+    if (metadata && panelConfig.addMetadataDescription) {
+      panelConfigUpdate.description = getMetricDescription(metadata);
+    }
+
+    // native histogram
     if (metadata.type === 'histogram') {
+      stateUpdate.metricType = 'native-histogram';
+      panelConfigUpdate.description ??= panelConfig.description ?? 'Native Histogram';
+
+      if (!discardPanelTypeUpdates) {
+        panelConfigUpdate.type = 'heatmap';
+      }
+    }
+
+    // gauge that the app mis-identified as counter (see https://github.com/grafana/metrics-drilldown/issues/698)
+    if (metadata.type === 'gauge' && metricType === 'counter') {
+      stateUpdate.metricType = 'gauge';
+    }
+
+    if (Object.keys(stateUpdate).length || Object.keys(panelConfigUpdate).length) {
       this.setState({
-        metricType: 'native-histogram',
-        panelConfig: discardPanelTypeUpdates
-          ? panelConfig
-          : { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
+        ...stateUpdate,
+        panelConfig: { ...panelConfig, ...panelConfigUpdate },
       });
     }
   }

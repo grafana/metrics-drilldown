@@ -26,7 +26,6 @@ import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicH
 
 import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';
-import { getMetricDescription } from '../AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { getTrailFor } from '../shared/utils/utils';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
@@ -65,6 +64,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                     ]
                   : () => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
+                addMetadataDescription: true,
               },
               queryOptions: {
                 resolution: QUERY_RESOLUTION.HIGH,
@@ -95,11 +95,8 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
       if (metricType !== 'native-histogram' && newState.metricType === 'native-histogram') {
         sub.unsubscribe();
 
-        const metadata = await getTrailFor(this).getMetadataForMetric(metric);
-
         gmdVizPanel.update(
           {
-            description: getMetricDescription(metadata),
             headerActions: () => [
               new GmdVizPanelVariantSelector({ metric }),
               new ConfigurePanelAction({ metric }),

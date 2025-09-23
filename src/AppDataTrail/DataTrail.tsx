@@ -291,10 +291,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
 
-  public async isNativeHistogram(metric: string) {
-    return this.datasourceHelper.isNativeHistogram(metric);
-  }
-
   getPrometheusBuildInfo = async () => {
     return this.datasourceHelper.getPrometheusBuildInfo();
   };
