@@ -24,11 +24,10 @@ import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsRed
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'MetricsReducer/MetricsList/MetricsList';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
-import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { buildTimeseriesPanel } from 'shared/GmdVizPanel/types/timeseries/buildTimeseriesPanel';
 import { VAR_GROUP_BY } from 'shared/shared';
-import { getTrailFor } from 'shared/utils/utils';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
 import { syncYAxis } from './behaviors/syncYAxis';
@@ -37,9 +36,9 @@ import { SelectLabelAction } from './SelectLabelAction';
 import { PanelMenu } from '../../PanelMenu/PanelMenu';
 
 interface MetricLabelsListState extends SceneObjectState {
-  metric: string;
+  metric: Metric;
   layoutSwitcher: LayoutSwitcher;
-  body?: SceneByVariableRepeater;
+  body: SceneByVariableRepeater;
 }
 
 export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
@@ -48,29 +47,6 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
       key: 'metric-labels-list',
       metric,
       layoutSwitcher: new LayoutSwitcher({}),
-      body: undefined,
-    });
-
-    this.addActivationHandler(() => {
-      this.onActivate();
-    });
-  }
-
-  private async onActivate() {
-    await this.buildBody();
-
-    this.subscribeToLayoutChange();
-    this.subscribeToEvents();
-  }
-
-  private async buildBody() {
-    const metricName = this.state.metric;
-    const metric = {
-      name: this.state.metric,
-      type: await getMetricType(metricName, getTrailFor(this)),
-    };
-
-    this.setState({
       body: new SceneByVariableRepeater({
         variableName: VAR_GROUP_BY,
         initialPageSize: 60,
@@ -135,6 +111,13 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
         },
       }),
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    this.subscribeToLayoutChange();
+    this.subscribeToEvents();
   }
 
   private subscribeToEvents() {
