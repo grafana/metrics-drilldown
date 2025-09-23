@@ -1,4 +1,11 @@
-import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
+import {
+  PanelBuilders,
+  SceneDataTransformer,
+  sceneGraph,
+  SceneQueryRunner,
+  type VizPanel,
+  type VizPanelState,
+} from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { extremeValueFilterBehavior } from 'shared/GmdVizPanel/behaviors/extremeValueFilterBehavior/extremeValueFilterBehavior';
@@ -48,7 +55,13 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
     .setCustomFieldConfig('fillOpacity', 9)
     .setBehaviors([extremeValueFilterBehavior, ...(panelConfig.behaviors || [])]);
 
-  if (queryParams.queries.length > 1) {
+  if (queryParams.queries.length === 1) {
+    vizPanelBuilder.setColor(
+      panelConfig.fixedColorIndex
+        ? { mode: 'fixed', fixedColor: getColorByIndex(panelConfig.fixedColorIndex) }
+        : undefined
+    );
+  } else {
     const startColorIndex = panelConfig.fixedColorIndex || 0;
 
     vizPanelBuilder.setOverrides((b) => {
@@ -59,15 +72,55 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
         });
       });
     });
-  } else {
-    vizPanelBuilder.setColor(
-      panelConfig.fixedColorIndex
-        ? { mode: 'fixed', fixedColor: getColorByIndex(panelConfig.fixedColorIndex) }
-        : undefined
-    );
   }
 
-  return vizPanelBuilder.build();
+  const vizPanel = vizPanelBuilder.build();
+
+  updateColorsWhenQueriesChange(vizPanel, panelConfig);
+
+  return vizPanel;
+}
+
+// Works hand in hand with GmdVizPanel.updatePanelQuery()
+export function updateColorsWhenQueriesChange(vizPanel: VizPanel, panelConfig: PanelConfig) {
+  const [queryRunner] = sceneGraph.findDescendents(vizPanel, SceneQueryRunner);
+  if (!queryRunner) {
+    return;
+  }
+
+  vizPanel.addActivationHandler(() => {
+    const sub = queryRunner.subscribeToState((newState, prevState) => {
+      if (newState.queries !== prevState.queries) {
+        const fieldConfig: VizPanelState['fieldConfig'] = {
+          ...vizPanel.state.fieldConfig,
+        };
+
+        const startColorIndex = panelConfig.fixedColorIndex || 0;
+
+        fieldConfig.defaults.color = undefined;
+        fieldConfig.overrides = newState.queries.map((q, i) => {
+          return {
+            matcher: {
+              id: 'byFrameRefID',
+              options: q.refId,
+            },
+            properties: [
+              {
+                id: 'color',
+                value: { mode: 'fixed', fixedColor: getColorByIndex(startColorIndex + i) },
+              },
+            ],
+          };
+        });
+
+        vizPanel.setState({ fieldConfig });
+      }
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  });
 }
 
 export const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;

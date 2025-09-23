@@ -8,6 +8,7 @@ import { trailDS } from 'shared/shared';
 import { getColorByIndex } from 'shared/utils/utils';
 
 import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
+import { updateColorsWhenQueriesChange } from '../timeseries/buildTimeseriesPanel';
 
 type PercentilesPanelOptions = {
   metric: Metric;
@@ -30,7 +31,7 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
 
   const startColorIndex = panelConfig.fixedColorIndex || 0;
 
-  return PanelBuilders.timeseries()
+  const vizPanel = PanelBuilders.timeseries()
     .setTitle(panelConfig.title)
     .setDescription(panelConfig.description)
     .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
@@ -51,4 +52,8 @@ export function buildPercentilesPanel(options: PercentilesPanelOptions) {
     })
     .setBehaviors(panelConfig.behaviors || [])
     .build();
+
+  updateColorsWhenQueriesChange(vizPanel, panelConfig);
+
+  return vizPanel;
 }
