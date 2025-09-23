@@ -230,7 +230,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
           (value, key) => value === prevState.panelConfig[key as keyof typeof prevState.panelConfig]
         );
         this.updatePanel(diff); // update only panel options
-        return;
       }
 
       if (newState.metricType !== prevState.metricType || !isEqual(newState.queryConfig, prevState.queryConfig)) {
