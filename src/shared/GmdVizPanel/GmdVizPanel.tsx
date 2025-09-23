@@ -21,8 +21,8 @@ import { getPreferredConfigForMetric } from './config/getPreferredConfigForMetri
 import { PANEL_HEIGHT } from './config/panel-heights';
 import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
+import { getMetricTypeSync, type MetricType } from './matchers/getMetricType';
 import { getPanelTypeForMetricSync } from './matchers/getPanelTypeForMetric';
-import { isClassicHistogramMetric } from './matchers/isClassicHistogramMetric';
 import { type PanelType } from './types/available-panel-types';
 import { buildHeatmapPanel } from './types/heatmap/buildHeatmapPanel';
 import { buildPercentilesPanel } from './types/percentiles/buildPercentilesPanel';
@@ -87,11 +87,9 @@ export type QueryOptions = {
 
 /* GmdVizPanelState */
 
-export type HistogramType = 'native' | 'classic' | 'none';
-
 interface GmdVizPanelState extends SceneObjectState {
   metric: string;
-  histogramType: HistogramType;
+  metricType: MetricType;
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;
   body?: VizPanel;
@@ -111,17 +109,17 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     queryOptions?: QueryOptions;
     discardUserPrefs?: boolean;
   }) {
-    const histogramType = isClassicHistogramMetric(metric) ? 'classic' : 'none';
+    // we want a metric and panel type now to be able to render the panel as soon as possible after activation
+    // so we use sync/fast heuristsics before using a 100% correct async method in onActivate() (fetching the metric metadata)
+    const metricType = getMetricTypeSync(metric) as MetricType;
     const prefConfig = discardUserPrefs ? undefined : getPreferredConfigForMetric(metric);
 
     super({
       key,
       metric,
-      histogramType,
+      metricType,
       panelConfig: {
-        // we want a panel type to be able to render the panel as soon as possible after activation
-        // so we don't determine if the metric is a native histogram here because it's an async process that will be done in onActivate()
-        type: panelOptions?.type || getPanelTypeForMetricSync(metric, histogramType),
+        type: panelOptions?.type || getPanelTypeForMetricSync(metric),
         title: metric,
         height: PANEL_HEIGHT.M,
         headerActions: ({ metric }) => [new SelectAction({ metric })],
@@ -151,10 +149,14 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
 
-    const isNativeHistogram = await getTrailFor(this).isNativeHistogram(metric);
-    if (isNativeHistogram) {
+    const metadata = await getTrailFor(this).getMetadataForMetric(metric);
+    if (!metadata?.type) {
+      return;
+    }
+
+    if (metadata.type === 'histogram') {
       this.setState({
-        histogramType: 'native',
+        metricType: 'native-histogram',
         panelConfig: discardPanelTypeUpdates
           ? panelConfig
           : { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
@@ -163,11 +165,11 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private subscribeToStateChanges(discardPanelTypeUpdates: boolean) {
-    const { histogramType, body, panelConfig } = this.state;
+    const { metricType, body, panelConfig } = this.state;
 
     // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
     // we give another chance to display it properly by looking into the data frame type received
-    if (!discardPanelTypeUpdates && histogramType === 'none') {
+    if (!discardPanelTypeUpdates && !['classic-histogram', 'native-histogram'].includes(metricType)) {
       const bodySub = (body?.state.$data as SceneDataProvider)?.subscribeToState((newState) => {
         if (newState.data?.state !== LoadingState.Done) {
           return;
@@ -180,7 +182,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
           this.setState({
-            histogramType: 'native',
             panelConfig: { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
           });
         }
@@ -193,7 +194,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     this.subscribeToState((newState, prevState) => {
       if (
-        newState.histogramType !== prevState.histogramType ||
         !isEqual(newState.panelConfig, prevState.panelConfig) ||
         !isEqual(newState.queryConfig, prevState.queryConfig)
       ) {
@@ -214,7 +214,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private updateBody() {
-    const { metric, panelConfig, queryConfig, histogramType } = this.state;
+    const { metric: name, metricType, panelConfig, queryConfig } = this.state;
+    const metric = { name, type: metricType };
 
     switch (panelConfig.type) {
       case 'timeseries':
@@ -225,7 +226,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
       case 'heatmap':
         this.setState({
-          body: buildHeatmapPanel({ metric, histogramType, panelConfig, queryConfig }),
+          body: buildHeatmapPanel({ metric, panelConfig, queryConfig }),
         });
         return;
 
@@ -233,7 +234,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         this.setState({
           body: buildPercentilesPanel({
             metric,
-            histogramType,
             panelConfig,
             queryConfig,
           }),

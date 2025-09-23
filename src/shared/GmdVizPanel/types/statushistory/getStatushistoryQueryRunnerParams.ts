@@ -4,6 +4,7 @@ import { promql } from 'tsqtsq';
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
 type StatushistoryQueryRunnerParams = {
   maxDataPoints: number;
@@ -11,7 +12,7 @@ type StatushistoryQueryRunnerParams = {
 };
 
 type Options = {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
 };
 
@@ -30,7 +31,7 @@ export function getStatushistoryQueryRunnerParams(options: Options): Statushisto
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 200 : 100,
     queries: [
       {
-        refId: `${metric}-status`,
+        refId: `${metric.name}-status`,
         expr: query,
         legendFormat: 'status',
         fromExploreMetrics: true,

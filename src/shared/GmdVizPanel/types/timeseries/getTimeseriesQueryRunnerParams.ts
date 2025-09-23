@@ -5,8 +5,7 @@ import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
-
-import { isCounterMetric } from '../../matchers/isCounterMetric';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
 type TimeseriesQueryRunnerParams = {
   isRateQuery: boolean;
@@ -15,13 +14,13 @@ type TimeseriesQueryRunnerParams = {
 };
 
 type Options = {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
 };
 
 export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
   const { metric, queryConfig } = options;
-  const isRateQuery = isCounterMetric(metric);
+  const isRateQuery = metric.type === 'counter';
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -47,14 +46,14 @@ function buildGroupByQueries({
   isRateQuery,
   expr,
 }: {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
   isRateQuery: boolean;
   expr: string;
 }): SceneDataQuery[] {
   return [
     {
-      refId: `${metric}-by-${queryConfig.groupBy}`,
+      refId: `${metric.name}-by-${queryConfig.groupBy}`,
       expr: isRateQuery
         ? promql.sum({ expr, by: [queryConfig.groupBy!] })
         : promql.avg({ expr, by: [queryConfig.groupBy!] }),
@@ -71,7 +70,7 @@ function buildQueriesWithPresetFunctions({
   isRateQuery,
   expr,
 }: {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
   isRateQuery: boolean;
   expr: string;
@@ -86,7 +85,7 @@ function buildQueriesWithPresetFunctions({
     const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
 
     queries.push({
-      refId: `${metric}-${fnName}`,
+      refId: `${metric.name}-${fnName}`,
       expr: query,
       legendFormat: fnName,
       fromExploreMetrics: true,

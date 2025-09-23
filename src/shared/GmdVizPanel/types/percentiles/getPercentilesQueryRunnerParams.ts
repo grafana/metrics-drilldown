@@ -4,9 +4,8 @@ import { promql } from 'tsqtsq';
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
-import { type HistogramType, type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
-
-import { isCounterMetric as isCounterMetricFn } from '../..//matchers/isCounterMetric';
+import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
 type PercentilesQueryRunnerParams = {
   isRateQuery: boolean;
@@ -15,16 +14,14 @@ type PercentilesQueryRunnerParams = {
 };
 
 type Options = {
-  metric: string;
-  histogramType: HistogramType;
+  metric: Metric;
   queryConfig: QueryConfig;
 };
 
 const DEFAULT_PERCENTILES = [99, 90, 50] as const;
 
 export function getPercentilesQueryRunnerParams(options: Options): PercentilesQueryRunnerParams {
-  const { metric, histogramType, queryConfig } = options;
-  const isCounterMetric = isCounterMetricFn(metric);
+  const { metric, queryConfig } = options;
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -32,23 +29,14 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
     addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
 
-  const queries =
-    histogramType === 'none'
-      ? buildNonHistogramQueries({
-          metric,
-          queryConfig,
-          isRateQuery: isCounterMetric,
-          expr: expression,
-        })
-      : buildHistogramQueries({
-          metric,
-          isNativeHistogram: histogramType === 'native',
-          queryConfig,
-          expr: expression,
-        });
+  const isHistogramMetric = ['classic-histogram', 'native-histogram'].includes(metric.type);
+
+  const queries = !isHistogramMetric
+    ? buildNonHistogramQueries({ metric, queryConfig, expr: expression })
+    : buildHistogramQueries({ metric, queryConfig, expr: expression });
 
   return {
-    isRateQuery: histogramType !== 'none' ? true : isCounterMetric,
+    isRateQuery: isHistogramMetric ? true : metric.type === 'counter',
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries,
   };
@@ -56,12 +44,10 @@ export function getPercentilesQueryRunnerParams(options: Options): PercentilesQu
 
 function buildHistogramQueries({
   metric,
-  isNativeHistogram,
   queryConfig,
   expr,
 }: {
-  metric: string;
-  isNativeHistogram: boolean;
+  metric: Metric;
   queryConfig: QueryConfig;
   expr: string;
 }): SceneDataQuery[] {
@@ -71,9 +57,10 @@ function buildHistogramQueries({
 
   const queries: SceneDataQuery[] = [];
 
-  const newExpr = isNativeHistogram
-    ? promql.sum({ expr: promql.rate({ expr }) })
-    : promql.sum({ expr: promql.rate({ expr }), by: ['le'] });
+  const newExpr =
+    metric.type === 'native-histogram'
+      ? promql.sum({ expr: promql.rate({ expr }) })
+      : promql.sum({ expr: promql.rate({ expr }), by: ['le'] });
 
   for (const { fn, params } of queryDefs) {
     const entry = PROMQL_FUNCTIONS.get(fn)!;
@@ -85,7 +72,7 @@ function buildHistogramQueries({
       const query = entry.fn({ expr: newExpr, parameter });
 
       queries.push({
-        refId: `${metric}-p${percentile}-${fnName}`,
+        refId: `${metric.name}-p${percentile}-${fnName}`,
         expr: query,
         legendFormat: `${percentile}th Percentile`,
         fromExploreMetrics: true,
@@ -99,14 +86,13 @@ function buildHistogramQueries({
 function buildNonHistogramQueries({
   metric,
   queryConfig,
-  isRateQuery,
   expr,
 }: {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
-  isRateQuery: boolean;
   expr: string;
 }): SceneDataQuery[] {
+  const isRateQuery = metric.type === 'counter';
   const queryDefs: QueryDefs = queryConfig.queries?.length
     ? queryConfig.queries
     : [{ fn: 'quantile', params: { percentiles: [99, 90, 50] } }];
@@ -123,7 +109,7 @@ function buildNonHistogramQueries({
       const query = entry.fn({ expr: newExpr, parameter });
 
       queries.push({
-        refId: `${metric}-p${percentile}-${fnName}`,
+        refId: `${metric.name}-p${percentile}-${fnName}`,
         expr: query,
         legendFormat: `${percentile}th Percentile`,
         fromExploreMetrics: true,

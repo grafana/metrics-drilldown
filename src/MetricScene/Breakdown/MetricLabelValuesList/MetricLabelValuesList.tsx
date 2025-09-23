@@ -25,10 +25,12 @@ import { getPreferredConfigForMetric } from 'shared/GmdVizPanel/config/getPrefer
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { addUnspecifiedLabel } from 'shared/GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { trailDS } from 'shared/shared';
+import { getTrailFor } from 'shared/utils/utils';
 
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
@@ -57,16 +59,6 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     metric: MetricLabelsValuesListState['metric'];
     label: MetricLabelsValuesListState['label'];
   }) {
-    const queryParams = getTimeseriesQueryRunnerParams({
-      metric,
-      queryConfig: {
-        resolution: QUERY_RESOLUTION.MEDIUM,
-        labelMatchers: [],
-        addIgnoreUsageFilter: true,
-        groupBy: label,
-      },
-    });
-
     super({
       key: 'metric-label-values-list',
       metric,
@@ -86,6 +78,35 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         displayCounts: true,
       }),
       sortBySelector: new SortBySelector({ target: 'labels' }),
+      $data: undefined,
+      body: undefined,
+    });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    this.buildDataProvider();
+    this.subscribeToLayoutChange();
+  }
+
+  private async buildDataProvider() {
+    const { metric: metricName, label } = this.state;
+
+    const queryParams = getTimeseriesQueryRunnerParams({
+      metric: {
+        name: metricName,
+        type: await getMetricType(metricName, getTrailFor(this)),
+      },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: true,
+        groupBy: label,
+      },
+    });
+
+    this.setState({
       $data: new SceneDataTransformer({
         $data: new SceneQueryRunner({
           datasource: trailDS,
@@ -94,14 +115,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         }),
         transformations: [addUnspecifiedLabel(label)],
       }),
-      body: undefined,
     });
-
-    this.addActivationHandler(this.onActivate.bind(this));
-  }
-
-  private onActivate() {
-    this.subscribeToLayoutChange();
   }
 
   private subscribeToQuickSearchChange() {

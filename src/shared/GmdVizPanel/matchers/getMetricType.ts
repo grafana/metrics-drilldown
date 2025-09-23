@@ -7,6 +7,11 @@ import { isStatusUpDownMetric } from './isStatusUpDownMetric';
 
 export type MetricType = 'status-updown' | 'classic-histogram' | 'native-histogram' | 'age' | 'counter' | 'gauge';
 
+export type Metric = {
+  name: string;
+  type: MetricType;
+};
+
 export async function getMetricType(metric: string, dataTrail: DataTrail): Promise<MetricType> {
   let metricType = getMetricTypeSync(metric);
 
@@ -20,7 +25,7 @@ export async function getMetricType(metric: string, dataTrail: DataTrail): Promi
 }
 
 /**
- * A sync version to use when performance is important or when the metadata for determing native histograms is missing
+ * A sync version to use when performance is more important than correctness. If not, use the async version above.
  */
 export function getMetricTypeSync(metric: string): Omit<MetricType, 'native-histogram'> {
   if (isCounterMetric(metric)) {

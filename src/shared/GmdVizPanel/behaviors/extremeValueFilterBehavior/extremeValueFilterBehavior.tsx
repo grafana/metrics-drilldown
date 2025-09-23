@@ -43,7 +43,7 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
     return;
   }
 
-  const { metric, queryConfig } = sceneGraph.getAncestor(panel, GmdVizPanel).state;
+  const { metric, metricType, queryConfig } = sceneGraph.getAncestor(panel, GmdVizPanel).state;
 
   // ... and only for non-counter metrics, because counter metrics translate to rate queries (see getTimeseriesQueryRunnerParams.ts)
   // and this the behavior does not support it
@@ -76,7 +76,7 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
 
     // rebuild query with extreme values filtering
     const queryParams = getTimeseriesQueryRunnerParams({
-      metric,
+      metric: { name: metric, type: metricType },
       queryConfig: { ...queryConfig, addExtremeValuesFiltering: true },
     });
 

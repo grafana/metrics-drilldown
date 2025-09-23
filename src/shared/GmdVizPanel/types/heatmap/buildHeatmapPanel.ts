@@ -4,27 +4,26 @@ import {
   type HeatmapLegend,
 } from '@grafana/schema/dist/esm/raw/composable/heatmap/panelcfg/x/HeatmapPanelCfg_types.gen';
 
-import { type HistogramType, type PanelConfig, type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type PanelConfig, type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { trailDS } from 'shared/shared';
 
 import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 import { getUnit } from '../../units/getUnit';
 
 type HeatmapPanelOptions = {
-  metric: string;
-  histogramType: HistogramType;
+  metric: Metric;
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;
 };
 
 export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
-  const { metric, histogramType, panelConfig, queryConfig } = options;
+  const { metric, panelConfig, queryConfig } = options;
   const queryParams = getHeatmapQueryRunnerParams({
     metric,
-    isNativeHistogram: histogramType === 'native',
     queryConfig,
   });
-  const unit = getUnit(metric);
+  const unit = getUnit(metric.name);
 
   const queryRunner =
     queryConfig.data ||
@@ -37,8 +36,8 @@ export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
   return PanelBuilders.heatmap()
     .setTitle(panelConfig.title)
     .setDescription(panelConfig.description)
-    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
-    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
+    .setHeaderActions(panelConfig.headerActions({ metric: metric.name, panelConfig }))
+    .setMenu(panelConfig.menu?.({ metric: metric.name, panelConfig }))
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData(queryRunner)
     .setUnit(unit)

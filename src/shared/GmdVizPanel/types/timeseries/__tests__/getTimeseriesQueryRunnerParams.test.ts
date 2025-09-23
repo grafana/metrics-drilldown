@@ -6,7 +6,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
   describe('without group by label', () => {
     test('handles gauge metrics', () => {
       const result = getTimeseriesQueryRunnerParams({
-        metric: 'go_goroutines',
+        metric: { name: 'go_goroutines', type: 'gauge' },
         queryConfig: {
           resolution: QUERY_RESOLUTION.HIGH,
           labelMatchers: [{ key: 'instance', operator: '=', value: 'us-east:5000' }],
@@ -28,7 +28,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
 
     test('handles counter metrics', () => {
       const result = getTimeseriesQueryRunnerParams({
-        metric: 'go_gc_heap_frees_bytes_total',
+        metric: { name: 'go_gc_heap_frees_bytes_total', type: 'counter' },
         queryConfig: {
           resolution: QUERY_RESOLUTION.MEDIUM,
           labelMatchers: [{ key: 'job', operator: '!=', value: 'prometheus' }],
@@ -52,7 +52,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
   describe('with group by label', () => {
     test('handles gauge metrics', () => {
       const result = getTimeseriesQueryRunnerParams({
-        metric: 'go_goroutines',
+        metric: { name: 'go_goroutines', type: 'gauge' },
         queryConfig: {
           resolution: QUERY_RESOLUTION.HIGH,
           labelMatchers: [{ key: 'instance', operator: '=', value: 'us-east:5000' }],
@@ -75,7 +75,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
 
     test('handles counter metrics', () => {
       const result = getTimeseriesQueryRunnerParams({
-        metric: 'go_gc_heap_frees_bytes_total',
+        metric: { name: 'go_gc_heap_frees_bytes_total', type: 'counter' },
         queryConfig: {
           resolution: QUERY_RESOLUTION.MEDIUM,
           labelMatchers: [{ key: 'job', operator: '!=', value: 'prometheus' }],

@@ -85,13 +85,14 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   private async onActivate() {
     const { metric } = this.state;
     const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
+    const { metricType } = gmdVizPanel.state;
 
-    if (gmdVizPanel.state.histogramType === 'classic') {
+    if (metricType === 'classic-histogram') {
       return;
     }
 
-    const sub = gmdVizPanel.subscribeToState(async (newState, prevState) => {
-      if (prevState.histogramType !== 'native' && newState.histogramType === 'native') {
+    const sub = gmdVizPanel.subscribeToState(async (newState) => {
+      if (metricType !== 'native-histogram' && newState.metricType === 'native-histogram') {
         sub.unsubscribe();
 
         const metadata = await getTrailFor(this).getMetadataForMetric(metric);
