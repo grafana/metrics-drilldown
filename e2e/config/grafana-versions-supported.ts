@@ -10,4 +10,5 @@ export const GRAFANA_VERSIONS_SUPPORTED = [
   { image: 'grafana-enterprise', version: '11.6.6' },
   { image: 'grafana-enterprise', version: '12.0.5' },
   { image: 'grafana-enterprise', version: '12.1.2' },
+  { image: 'grafana-enterprise', version: '12.2.0' },
 ];
