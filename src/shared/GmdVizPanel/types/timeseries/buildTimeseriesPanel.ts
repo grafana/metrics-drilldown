@@ -74,23 +74,26 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   // Use Scenes lifecycle: run after this panel is activated/attached.
   vizPanel.addActivationHandler(() => {
     (async () => {
-      const dataTrail = getTrailFor(vizPanel as unknown as any);
+      const dataTrail = getTrailFor(vizPanel);
       const isCounter = await getIsCounterFromMetadata(metric, dataTrail);
+      
       if (typeof isCounter !== 'boolean') {
         return; // inconclusive; keep heuristic
       }
-
-      if (isCounter !== queryParams.isRateQuery) {
-        const corrected = getTimeseriesQueryRunnerParams({ metric, queryConfig, isRateQueryOverride: isCounter });
-        // Prefer the panel's direct SceneQueryRunner; if it's wrapped, bail (group-by path handles separately).
-        const provider = vizPanel.state.$data as unknown as SceneQueryRunner;
-        if (provider && isSceneQueryRunner(provider)) {
-          provider.setState({
-            maxDataPoints: corrected.maxDataPoints,
-            queries: corrected.queries,
-          });
-          provider.runQueries();
-        }
+      
+      if (isCounter === queryParams.isRateQuery) {
+        return; // no need to correct
+      }
+      
+      const corrected = getTimeseriesQueryRunnerParams({ metric, queryConfig, isRateQueryOverride: isCounter });
+      // Prefer the panel's direct SceneQueryRunner; if it's wrapped, bail (group-by path handles separately).
+      const provider = vizPanel.state.$data as unknown as SceneQueryRunner;
+      if (provider && isSceneQueryRunner(provider)) {
+        provider.setState({
+          maxDataPoints: corrected.maxDataPoints,
+          queries: corrected.queries,
+        });
+        provider.runQueries();
       }
     })().catch(() => {});
   });
