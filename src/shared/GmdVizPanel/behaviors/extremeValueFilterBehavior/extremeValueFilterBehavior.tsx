@@ -5,7 +5,6 @@ import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
-import { isCounterMetric } from 'shared/GmdVizPanel/matchers/isCounterMetric';
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
@@ -47,7 +46,7 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
 
   // ... and only for non-counter metrics, because counter metrics translate to rate queries (see getTimeseriesQueryRunnerParams.ts)
   // and this the behavior does not support it
-  if (isCounterMetric(metric)) {
+  if (metricType === 'counter') {
     return;
   }
 
