@@ -7,19 +7,9 @@ import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 
 import { isCounterMetric } from '../../matchers/isCounterMetric';
+import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
-type TimeseriesQueryRunnerParams = {
-  isRateQuery: boolean;
-  maxDataPoints: number;
-  queries: SceneDataQuery[];
-};
-
-type Options = {
-  metric: string;
-  queryConfig: QueryConfig;
-};
-
-export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
+export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
   const { metric, queryConfig } = options;
   const isRateQuery = isCounterMetric(metric);
   const expression = buildQueryExpression({

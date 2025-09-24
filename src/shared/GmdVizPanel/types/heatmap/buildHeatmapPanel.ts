@@ -4,20 +4,13 @@ import {
   type HeatmapLegend,
 } from '@grafana/schema/dist/esm/raw/composable/heatmap/panelcfg/x/HeatmapPanelCfg_types.gen';
 
-import { type HistogramType, type PanelConfig, type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared/shared';
 
-import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 import { getUnit } from '../../units/getUnit';
+import { type BuildVizPanelOptions } from '../panelBuilder';
+import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 
-type HeatmapPanelOptions = {
-  metric: string;
-  histogramType: HistogramType;
-  panelConfig: PanelConfig;
-  queryConfig: QueryConfig;
-};
-
-export function buildHeatmapPanel(options: HeatmapPanelOptions): VizPanel {
+export function buildHeatmapPanel(options: BuildVizPanelOptions): VizPanel {
   const { metric, histogramType, panelConfig, queryConfig } = options;
   const queryParams = getHeatmapQueryRunnerParams({
     metric,

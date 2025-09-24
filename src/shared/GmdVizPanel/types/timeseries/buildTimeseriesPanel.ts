@@ -2,25 +2,19 @@ import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } 
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { extremeValueFilterBehavior } from 'shared/GmdVizPanel/behaviors/extremeValueFilterBehavior/extremeValueFilterBehavior';
-import { type PanelConfig, type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared/shared';
 import { getColorByIndex } from 'shared/utils/utils';
 
+import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
+import { type BuildVizPanelOptions } from '../panelBuilder';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 import { addRefId } from './transformations/addRefId';
 import { addUnspecifiedLabel } from './transformations/addUnspecifiedLabel';
 import { sliceSeries } from './transformations/sliceSeries';
-import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
 
-type TimeseriesPanelOptions = {
-  metric: string;
-  panelConfig: PanelConfig;
-  queryConfig: QueryConfig;
-};
-
-export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel {
+export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
   if (options.queryConfig.groupBy) {
-    return buildGroupByPanel(options as Required<TimeseriesPanelOptions>);
+    return buildGroupByPanel(options as Required<BuildVizPanelOptions>);
   }
 
   const { metric, panelConfig, queryConfig } = options;
@@ -71,7 +65,7 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
 
 export const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
 
-function buildGroupByPanel(options: Required<TimeseriesPanelOptions>): VizPanel {
+function buildGroupByPanel(options: Required<BuildVizPanelOptions>): VizPanel {
   const { metric, panelConfig, queryConfig } = options;
   const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);

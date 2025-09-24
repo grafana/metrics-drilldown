@@ -24,11 +24,7 @@ import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { getPanelTypeForMetricSync } from './matchers/getPanelTypeForMetric';
 import { isClassicHistogramMetric } from './matchers/isClassicHistogramMetric';
 import { type PanelType } from './types/available-panel-types';
-import { buildHeatmapPanel } from './types/heatmap/buildHeatmapPanel';
-import { buildPercentilesPanel } from './types/percentiles/buildPercentilesPanel';
-import { buildStatPanel } from './types/stat/buildStatPanel';
-import { buildStatushistoryPanel } from './types/statushistory/buildStatushistoryPanel';
-import { buildTimeseriesPanel } from './types/timeseries/buildTimeseriesPanel';
+import { panelBuilder } from './types/panelBuilder';
 
 /* Panel config */
 
@@ -146,7 +142,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   private async onActivate(discardPanelTypeUpdates: boolean) {
     const { metric, panelConfig } = this.state;
 
-    this.updateBody();
+    this.buildVizPanel();
 
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
@@ -197,7 +193,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         !isEqual(newState.panelConfig, prevState.panelConfig) ||
         !isEqual(newState.queryConfig, prevState.queryConfig)
       ) {
-        this.updateBody();
+        this.buildVizPanel();
       }
     });
   }
@@ -213,48 +209,16 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     });
   }
 
-  private updateBody() {
-    const { metric, panelConfig, queryConfig, histogramType } = this.state;
+  private buildVizPanel() {
+    const { metric, panelConfig, queryConfig } = this.state;
 
-    switch (panelConfig.type) {
-      case 'timeseries':
-        this.setState({
-          body: buildTimeseriesPanel({ metric, panelConfig, queryConfig }),
-        });
-        return;
-
-      case 'heatmap':
-        this.setState({
-          body: buildHeatmapPanel({ metric, histogramType, panelConfig, queryConfig }),
-        });
-        return;
-
-      case 'percentiles':
-        this.setState({
-          body: buildPercentilesPanel({
-            metric,
-            histogramType,
-            panelConfig,
-            queryConfig,
-          }),
-        });
-        return;
-
-      case 'statushistory':
-        this.setState({
-          body: buildStatushistoryPanel({ metric, panelConfig, queryConfig }),
-        });
-        return;
-
-      case 'stat':
-        this.setState({
-          body: buildStatPanel({ metric, panelConfig, queryConfig }),
-        });
-        return;
-
-      default:
-        throw new TypeError(`Unsupported panel type "${panelConfig.type}"!`);
-    }
+    this.setState({
+      body: panelBuilder.buildVizPanel({
+        metric,
+        panelConfig,
+        queryConfig,
+      }),
+    });
   }
 
   public update(panelOptions: PanelOptions, queryOptions: QueryOptions) {
