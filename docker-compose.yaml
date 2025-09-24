@@ -29,7 +29,7 @@ services:
       interval: 3s
       timeout: 1s
       retries: 10
-      start_period: 5s
+      start_period: 15s
 
   grafana-scopes-gmd:
     container_name: 'grafana-scopes-gmd'
@@ -50,7 +50,7 @@ services:
       interval: 3s
       timeout: 1s
       retries: 10
-      start_period: 5s
+      start_period: 15s
 
   prometheus-gmd:
     container_name: 'prometheus-gmd'
@@ -66,6 +66,14 @@ services:
       --config.file=/etc/prometheus/prometheus.yml
       --storage.tsdb.path=/prometheus/data
       --storage.tsdb.retention.time=42y
+    healthcheck:
+      # healthy only when metrics metadata is returned
+      # it's important because the app heavily relies on them to determine how metrics are rendered in the UI (see GmdVizPanel.tsx)
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:9090/api/v1/targets/metadata | grep -Fq ''"data":[{''']
+      interval: 3s
+      timeout: 1s
+      retries: 10
+      start_period: 15s
 
   # e2e testing
   playwright:
@@ -86,7 +94,7 @@ services:
       grafana-gmd:
         condition: service_healthy
       prometheus-gmd:
-        condition: service_started
+        condition: service_healthy
     environment:
       # required for screenshot testing across Grafana versions
       GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.5}
