@@ -11,15 +11,12 @@ import {
   type PromQuery,
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
+import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 import { type Unsubscribable } from 'rxjs';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { displayError, displayWarning } from 'MetricsReducer/helpers/displayStatus';
-import { areArraysEqual } from 'MetricsReducer/metrics-variables/helpers/areArraysEqual';
-import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
-import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../../shared/shared';
@@ -40,7 +37,6 @@ export class MetricDatasourceHelper {
   private datasource?: PrometheusRuntimeDatasource;
   private cache = {
     metadata: new Map<string, PromMetricsMetadataItem>(),
-    classicHistograms: new Set<string>(),
   };
   private subs: Unsubscribable[] = [];
 
@@ -65,20 +61,12 @@ export class MetricDatasourceHelper {
 
     this.subs = [];
 
-    const metricsVariable = sceneGraph.findByKeyAndType(this.trail, VAR_METRICS_VARIABLE, MetricsVariable);
-    this.subs.push(
-      metricsVariable.subscribeToState((newState, prevState) => {
-        if (!areArraysEqual(newState.options, prevState.options)) {
-          this.onNewMetrics(newState.options);
-        }
-      })
-    );
-
     const datasourceVariable = sceneGraph.findByKeyAndType(
       this.trail,
       VAR_DATASOURCE,
       MetricsDrilldownDataSourceVariable
     );
+
     this.subs.push(
       datasourceVariable.subscribeToState(async (newState, prevState) => {
         if (newState.value !== prevState.value) {
@@ -86,8 +74,6 @@ export class MetricDatasourceHelper {
         }
       })
     );
-
-    this.onNewMetrics(metricsVariable.state.options);
   }
 
   private reset() {
@@ -95,20 +81,9 @@ export class MetricDatasourceHelper {
 
     this.cache = {
       metadata: new Map(),
-      classicHistograms: new Set(),
     };
 
     this.fetchMetricsMetadata().catch(() => {});
-  }
-
-  private onNewMetrics(metricsVariableOptions: VariableValueOption[]) {
-    for (const metricData of metricsVariableOptions) {
-      const name = metricData.value as string;
-
-      if (isClassicHistogramMetric(name)) {
-        this.cache.classicHistograms.add(name);
-      }
-    }
   }
 
   /**
