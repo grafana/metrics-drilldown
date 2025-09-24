@@ -4,8 +4,8 @@ import {
   type PluginExtensionAddedLinkConfig,
 } from '@grafana/data';
 
-import { ROUTES } from '../constants';
 import { appendUrlParameters, createAppUrl, UrlParameters } from './links';
+import { ROUTES } from '../shared/constants/routes';
 
 
 // List of Prometheus-compatible datasource types

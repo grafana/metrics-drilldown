@@ -1,4 +1,3 @@
-import { ROUTES } from '../constants';
 import {
   createDatasourceUrl,
   datasourceConfigLinkConfigs,
@@ -7,6 +6,7 @@ import {
   isPrometheusCompatible,
   PROMETHEUS_DATASOURCE_TYPES
 } from './datasourceConfigLinks';
+import { ROUTES } from '../shared/constants/routes';
 
 describe('DataSource Configuration Extensions', () => {
   describe('isPrometheusCompatible', () => {
