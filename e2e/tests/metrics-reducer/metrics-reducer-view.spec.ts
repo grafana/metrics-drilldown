@@ -85,7 +85,7 @@ test.describe('Metrics reducer view', () => {
 
           await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
             'metrics-reducer-group-by-label-after-select.png',
-            { threshold: 0.1 } // account for typography differences
+            { threshold: 0.02 } // account for typography differences
           );
         });
 
