@@ -23,7 +23,7 @@ import { getPreferredConfigForMetric } from './config/getPreferredConfigForMetri
 import { PANEL_HEIGHT } from './config/panel-heights';
 import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
-import { getMetricTypeSync, type Metric, type MetricType } from './matchers/getMetricType';
+import { getMetricType, getMetricTypeSync, type Metric, type MetricType } from './matchers/getMetricType';
 import { getPanelTypeForMetricSync } from './matchers/getPanelTypeForMetric';
 import { type PanelType } from './types/available-panel-types';
 import { panelBuilder } from './types/panelBuilder';
@@ -151,8 +151,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
     const { metric, metricType, panelConfig } = this.state;
 
-    const metadata = await getTrailFor(this).getMetadataForMetric(metric);
-    if (!metadata?.type) {
+    const metricTypeFromMetadata = await getMetricType(metric, getTrailFor(this));
+    if (metricType === metricTypeFromMetadata) {
       return;
     }
 
@@ -160,7 +160,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     const panelConfigUpdate: Partial<GmdVizPanelState['panelConfig']> = {};
 
     // we found a native histogram
-    if (metadata.type === 'histogram') {
+    if (metricTypeFromMetadata === 'native-histogram') {
       stateUpdate.metricType = 'native-histogram';
       panelConfigUpdate.description = panelConfig.description ?? 'Native Histogram';
 
@@ -170,7 +170,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
 
     // we found a gauge metric that was previously identified as a counter (see https://github.com/grafana/metrics-drilldown/issues/698)
-    if (metadata.type === 'gauge' && metricType === 'counter') {
+    if (metricTypeFromMetadata === 'gauge' && metricType === 'counter') {
       stateUpdate.metricType = 'gauge';
     }
 
