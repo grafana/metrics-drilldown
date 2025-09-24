@@ -173,6 +173,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     if (metricTypeFromMetadata === 'gauge' && metricType === 'counter') {
       stateUpdate.metricType = 'gauge';
     }
+    // or the opposite
+    if (metricTypeFromMetadata === 'counter' && metricType === 'gauge') {
+      stateUpdate.metricType = 'counter';
+    }
 
     if (Object.keys(stateUpdate).length || Object.keys(panelConfigUpdate).length) {
       this.setState({

@@ -20,6 +20,9 @@ export async function getMetricType(metric: string, dataTrail: DataTrail): Promi
     if (metadata?.type === 'histogram') {
       return 'native-histogram';
     }
+    if (metadata?.type === 'counter') {
+      return 'counter';
+    }
   }
 
   if (metricType === 'counter') {
