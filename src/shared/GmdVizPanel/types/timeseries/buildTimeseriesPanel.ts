@@ -83,7 +83,7 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
 
 /**
  * This function acts when the number of queries of the query runner changes and adjust the color overrides.
- * This ensures the panel renders multiple timeseries correctly whenenver the Prometheus function configuration changes (number of percentiles, ...).
+ * This ensures the panel renders multiple timeseries correctly whenever the Prometheus function configuration changes (number of percentiles, ...).
  * See GmdVizPanel.updateQuery()
  */
 export function updateColorsWhenQueriesChange(vizPanel: VizPanel, panelConfig: PanelConfig) {
