@@ -70,7 +70,7 @@
         "description": "Build a url path to the metrics drilldown"
       },
       {
-        "targets": ["grafana/datasources/config/actions"],
+        "targets": ["grafana/datasources/config/actions", "grafana/datasources/config/status"],
         "title": "Open in Metrics Drilldown",
         "description": "Browse metrics in Grafana Metrics Drilldown"
       }
