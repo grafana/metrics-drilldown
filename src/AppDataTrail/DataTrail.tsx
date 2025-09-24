@@ -37,12 +37,7 @@ import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePa
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
-import { getMetricType, getMetricTypeSync, type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 
-import { PluginInfo } from './header/PluginInfo/PluginInfo';
-import { SelectNewMetricButton } from './header/SelectNewMetricButton';
-import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
-import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricSelectedEvent, trailDS, VAR_FILTERS } from '../shared/shared';
@@ -50,6 +45,10 @@ import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/trac
 import { limitAdhocProviders } from '../shared/utils/utils';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
+import { PluginInfo } from './header/PluginInfo/PluginInfo';
+import { SelectNewMetricButton } from './header/SelectNewMetricButton';
+import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
+import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -186,17 +185,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(EventConfigurePanel, async (event) => {
       const { metric } = event.payload;
 
-      getMetricType(metric, this)
-        .catch(() => getMetricTypeSync(metric) as MetricType)
-        .then((metricType) => {
-          reportExploreMetrics('configure_panel_opened', { metricType });
-        });
-
-      const metricType = await getMetricType(metric, this);
+      reportExploreMetrics('configure_panel_opened', { metricType: metric.type });
 
       this.state.drawer.open({
         title: 'Configure the Prometheus function',
-        subTitle: `${metric} (${metricType})`,
+        subTitle: `${metric.name} (${metric.type})`,
         body: new ConfigurePanelForm({ metric }),
       });
     });
@@ -208,15 +201,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(EventApplyPanelConfig, async (event) => {
       const { metric, config, restoreDefault } = event.payload;
 
-      getMetricType(metric, this)
-        .catch(() => getMetricTypeSync(metric) as MetricType)
-        .then((metricType) => {
-          if (restoreDefault) {
-            reportExploreMetrics('default_panel_config_restored', { metricType });
-          } else {
-            reportExploreMetrics('panel_config_applied', { metricType, configId: config.id });
-          }
-        });
+      if (restoreDefault) {
+        reportExploreMetrics('default_panel_config_restored', { metricType: metric.type });
+      } else {
+        reportExploreMetrics('panel_config_applied', { metricType: metric.type, configId: config.id });
+      }
 
       this.state.drawer.close();
 
@@ -227,7 +216,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
       const panelsToUpdate = sceneGraph.findAllObjects(
         this.state.topScene || this,
-        (o) => o instanceof GmdVizPanel && o.state.metric === metric && !o.state.queryConfig.groupBy
+        (o) => o instanceof GmdVizPanel && o.state.metric === metric.name && !o.state.queryConfig.groupBy
       ) as GmdVizPanel[];
 
       for (const panel of panelsToUpdate) {
