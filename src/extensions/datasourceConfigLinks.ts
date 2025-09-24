@@ -13,31 +13,6 @@ function isPrometheusCompatible(datasourceType?: string): boolean {
   return datasourceType ? PROMETHEUS_DATASOURCE_TYPES.includes(datasourceType) : false;
 }
 
-function getDescriptionForDatasource(datasourceType: string): string {
-  const capabilities = getDatasourceCapabilities(datasourceType);
-
-  let description = 'Browse metrics without writing PromQL queries';
-
-  if (capabilities.includes('native_histograms')) {
-    description += '. Includes native histogram support';
-  }
-  if (capabilities.includes('exemplars')) {
-    description += '. View trace exemplars';
-  }
-
-  return description;
-}
-
-function getDatasourceCapabilities(datasourceType: string): string[] {
-  const capabilities: Record<string, string[]> = {
-    prometheus: ['native_histograms', 'exemplars', 'recording_rules'],
-    mimir: ['native_histograms', 'exemplars', 'recording_rules', 'multi_tenancy'],
-    cortex: ['exemplars', 'recording_rules'],
-    thanos: ['exemplars', 'recording_rules', 'downsampling'],
-  };
-  return capabilities[datasourceType] || [];
-}
-
 export function createDatasourceUrl(datasourceUid: string, route: string = ROUTES.Drilldown): string {
   const params = appendUrlParameters([
     [UrlParameters.DatasourceId, datasourceUid],
@@ -73,8 +48,7 @@ export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
 
       // Return dynamic path and description based on datasource type
       return {
-        path: createDatasourceUrl(context.dataSource.uid),
-        description: getDescriptionForDatasource(context.dataSource.type)
+        path: createDatasourceUrl(context.dataSource.uid)
       };
     },
   }
@@ -82,8 +56,6 @@ export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
 
 // Export for testing
 export {
-  getDatasourceCapabilities,
-  getDescriptionForDatasource,
   isPrometheusCompatible,
   PROMETHEUS_DATASOURCE_TYPES
 };

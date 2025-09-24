@@ -1,8 +1,6 @@
 import {
   createDatasourceUrl,
   datasourceConfigLinkConfigs,
-  getDatasourceCapabilities,
-  getDescriptionForDatasource,
   isPrometheusCompatible,
   PROMETHEUS_DATASOURCE_TYPES
 } from './datasourceConfigLinks';
@@ -27,61 +25,6 @@ describe('DataSource Configuration Extensions', () => {
     it('should return false for undefined or empty values', () => {
       expect(isPrometheusCompatible()).toBe(false);
       expect(isPrometheusCompatible('')).toBe(false);
-    });
-  });
-
-  describe('getDatasourceCapabilities', () => {
-    it('should return correct capabilities for prometheus', () => {
-      const capabilities = getDatasourceCapabilities('prometheus');
-      expect(capabilities).toEqual(['native_histograms', 'exemplars', 'recording_rules']);
-    });
-
-    it('should return correct capabilities for mimir', () => {
-      const capabilities = getDatasourceCapabilities('mimir');
-      expect(capabilities).toEqual(['native_histograms', 'exemplars', 'recording_rules', 'multi_tenancy']);
-    });
-
-    it('should return correct capabilities for cortex', () => {
-      const capabilities = getDatasourceCapabilities('cortex');
-      expect(capabilities).toEqual(['exemplars', 'recording_rules']);
-    });
-
-    it('should return correct capabilities for thanos', () => {
-      const capabilities = getDatasourceCapabilities('thanos');
-      expect(capabilities).toEqual(['exemplars', 'recording_rules', 'downsampling']);
-    });
-
-    it('should return empty array for unknown datasource types', () => {
-      const capabilities = getDatasourceCapabilities('unknown');
-      expect(capabilities).toEqual([]);
-    });
-  });
-
-  describe('getDescriptionForDatasource', () => {
-    it('should return basic description for cortex with exemplars', () => {
-      const description = getDescriptionForDatasource('cortex');
-      expect(description).toBe('Browse metrics without writing PromQL queries. View trace exemplars');
-    });
-
-    it('should include native histogram support for prometheus', () => {
-      const description = getDescriptionForDatasource('prometheus');
-      expect(description).toContain('Browse metrics without writing PromQL queries');
-      expect(description).toContain('Includes native histogram support');
-      expect(description).toContain('View trace exemplars');
-    });
-
-    it('should include native histogram support for mimir', () => {
-      const description = getDescriptionForDatasource('mimir');
-      expect(description).toContain('Browse metrics without writing PromQL queries');
-      expect(description).toContain('Includes native histogram support');
-      expect(description).toContain('View trace exemplars');
-    });
-
-    it('should include exemplars for thanos', () => {
-      const description = getDescriptionForDatasource('thanos');
-      expect(description).toContain('Browse metrics without writing PromQL queries');
-      expect(description).toContain('View trace exemplars');
-      expect(description).not.toContain('native histogram');
     });
   });
 
