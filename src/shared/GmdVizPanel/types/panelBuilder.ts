@@ -20,12 +20,6 @@ type BuildVizPanelOptions = {
   queryConfig: QueryConfig;
 };
 
-type GetAllQueryRunnerParamsOptions = {
-  panelType: PanelType;
-  metric: Metric;
-  queryConfig: QueryConfig;
-};
-
 export type GetQueryRunnerParamsOptions = {
   metric: Metric;
   queryConfig: QueryConfig;
@@ -80,25 +74,20 @@ export const PANEL_TYPE_TO_BUILDERS_LOOKUP = new Map<PanelType, Builders>([
   ],
 ]);
 
+function getBuildersForPanelType(panelType: PanelType): Builders {
+  const buildersForPanelType = PANEL_TYPE_TO_BUILDERS_LOOKUP.get(panelType);
+  if (!buildersForPanelType) {
+    throw new TypeError(`Unsupported panel type "${panelType}"!`);
+  }
+  return buildersForPanelType;
+}
+
 export const panelBuilder = {
   buildVizPanel(options: BuildVizPanelOptions) {
-    const buildersForPanelType = PANEL_TYPE_TO_BUILDERS_LOOKUP.get(options.panelConfig.type);
-
-    if (!buildersForPanelType) {
-      throw new TypeError(`Unsupported panel type "${options.panelConfig.type}"!`);
-    }
-
-    return buildersForPanelType.buildVizPanel(options);
+    return getBuildersForPanelType(options.panelConfig.type).buildVizPanel(options);
   },
-  getQueryRunnerParams(options: GetAllQueryRunnerParamsOptions) {
+  getQueryRunnerParams(options: GetQueryRunnerParamsOptions & { panelType: PanelType }) {
     const { metric, queryConfig, panelType } = options;
-
-    const buildersForPanelType = PANEL_TYPE_TO_BUILDERS_LOOKUP.get(panelType);
-
-    if (!buildersForPanelType) {
-      throw new TypeError(`Unsupported panel type "${panelType}"!`);
-    }
-
-    return buildersForPanelType.getQueryRunnerParams({ metric, queryConfig });
+    return getBuildersForPanelType(panelType).getQueryRunnerParams({ metric, queryConfig });
   },
 };
