@@ -9,17 +9,16 @@ import { ROUTES } from '../shared/constants/routes';
 describe('DataSource Configuration Extensions', () => {
   describe('isPrometheusCompatible', () => {
     it('should return true for Prometheus datasource types', () => {
-      expect(isPrometheusCompatible('prometheus')).toBe(true);
-      expect(isPrometheusCompatible('mimir')).toBe(true);
-      expect(isPrometheusCompatible('cortex')).toBe(true);
-      expect(isPrometheusCompatible('thanos')).toBe(true);
+      PROMETHEUS_DATASOURCE_TYPES.forEach(type => {
+        expect(isPrometheusCompatible(type)).toBe(true);
+      });
     });
 
     it('should return false for non-Prometheus datasource types', () => {
-      expect(isPrometheusCompatible('influxdb')).toBe(false);
-      expect(isPrometheusCompatible('elasticsearch')).toBe(false);
-      expect(isPrometheusCompatible('mysql')).toBe(false);
-      expect(isPrometheusCompatible('postgres')).toBe(false);
+      const nonPrometheusTypes = ['influxdb', 'elasticsearch', 'mysql', 'postgres'];
+      nonPrometheusTypes.forEach(type => {
+        expect(isPrometheusCompatible(type)).toBe(false);
+      });
     });
 
     it('should return false for undefined or empty values', () => {
