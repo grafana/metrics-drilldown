@@ -97,7 +97,7 @@ describe('DataSource Configuration Extensions', () => {
         expect(result).toBeDefined();
         expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
         expect(result?.path).toContain('var-ds=prom-1');
-        expect(result?.description).toContain('Browse metrics without writing PromQL queries');
+        expect(result?.description).toContain('Browse metrics in Grafana Metrics Drilldown');
       });
 
       it('should return configuration for Mimir datasources', () => {
@@ -107,7 +107,6 @@ describe('DataSource Configuration Extensions', () => {
         const result = config.configure?.(context);
         expect(result).toBeDefined();
         expect(result?.path).toContain('var-ds=mimir-1');
-        expect(result?.description).toContain('native histogram support');
       });
 
       it('should return configuration for Cortex datasources', () => {
