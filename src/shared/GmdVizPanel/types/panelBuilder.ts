@@ -23,8 +23,7 @@ export type BuildVizPanelOptions = {
 export type GetQueryRunnerParamsOptions = {
   metric: string;
   queryConfig: QueryConfig;
-  isNativeHistogram?: boolean; // heatmap
-  histogramType?: HistogramType; //  percentiles
+  histogramType?: HistogramType; //  heatmap & percentiles
 };
 
 export type QueryRunnerParams = {

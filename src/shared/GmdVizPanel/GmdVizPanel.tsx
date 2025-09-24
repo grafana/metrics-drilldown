@@ -210,13 +210,14 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private buildVizPanel() {
-    const { metric, panelConfig, queryConfig } = this.state;
+    const { metric, panelConfig, queryConfig, histogramType } = this.state;
 
     this.setState({
       body: panelBuilder.buildVizPanel({
         metric,
         panelConfig,
         queryConfig,
+        histogramType,
       }),
     });
   }

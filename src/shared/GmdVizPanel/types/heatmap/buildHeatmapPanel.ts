@@ -14,8 +14,8 @@ export function buildHeatmapPanel(options: BuildVizPanelOptions): VizPanel {
   const { metric, histogramType, panelConfig, queryConfig } = options;
   const queryParams = getHeatmapQueryRunnerParams({
     metric,
-    isNativeHistogram: histogramType === 'native',
     queryConfig,
+    histogramType,
   });
   const unit = getUnit(metric);
 
