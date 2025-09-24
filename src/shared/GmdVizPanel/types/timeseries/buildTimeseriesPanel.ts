@@ -81,7 +81,11 @@ export function buildTimeseriesPanel(options: TimeseriesPanelOptions): VizPanel 
   return vizPanel;
 }
 
-// Works hand in hand with GmdVizPanel.updatePanelQuery()
+/**
+ * This function acts when the number of queries of the query runner changes and adjust the color overrides.
+ * This ensures the panel renders multiple timeseries correctly whenenver the Prometheus function configuration changes (number of percentiles, ...).
+ * See GmdVizPanel.updateQuery()
+ */
 export function updateColorsWhenQueriesChange(vizPanel: VizPanel, panelConfig: PanelConfig) {
   const [queryRunner] = sceneGraph.findDescendents(vizPanel, SceneQueryRunner);
   if (!queryRunner) {

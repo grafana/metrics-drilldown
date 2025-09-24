@@ -229,11 +229,11 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
           newState.panelConfig,
           (value, key) => value === prevState.panelConfig[key as keyof typeof prevState.panelConfig]
         );
-        this.updatePanel(diff); // update only panel options
+        this.updatePanelOptions(diff); // update only the panel options that have changed
       }
 
       if (newState.metricType !== prevState.metricType || !isEqual(newState.queryConfig, prevState.queryConfig)) {
-        this.updatePanelQuery(); // only update query
+        this.updatePanelQueries(); // update only the panel queries
       }
     });
   }
@@ -261,7 +261,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     });
   }
 
-  private updatePanel(update: Partial<PanelOptions>) {
+  private updatePanelOptions(update: Partial<PanelOptions>) {
     const { metric: name, metricType, body, panelConfig } = this.state;
     if (!body) {
       return;
@@ -287,7 +287,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
   }
 
-  private updatePanelQuery() {
+  private updatePanelQueries() {
     const { body, metric, metricType, panelConfig, queryConfig } = this.state;
     if (!body) {
       return;

@@ -24,6 +24,7 @@ export async function getMetricType(metric: string, dataTrail: DataTrail): Promi
 
   if (metricType === 'counter') {
     const metadata = await dataTrail.getMetadataForMetric(metric);
+    // we found a gauge metric that was previously identified as a counter (see https://github.com/grafana/metrics-drilldown/issues/698)
     if (metadata?.type === 'gauge') {
       return 'gauge';
     }
