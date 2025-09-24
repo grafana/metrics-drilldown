@@ -17,15 +17,11 @@ type TimeseriesQueryRunnerParams = {
 type Options = {
   metric: string;
   queryConfig: QueryConfig;
-  // When provided, overrides the name-based heuristic for applying rate().
-  // This lets callers flip rate vs raw after an async metadata check.
-  isRateQueryOverride?: boolean;
 };
 
 export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
-  const { metric, queryConfig, isRateQueryOverride } = options;
-  // Prefer explicit override when available; otherwise fall back to heuristic.
-  const isRateQuery = typeof isRateQueryOverride === 'boolean' ? isRateQueryOverride : isCounterMetric(metric);
+  const { metric, queryConfig } = options;
+  const isRateQuery = isCounterMetric(metric);
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
