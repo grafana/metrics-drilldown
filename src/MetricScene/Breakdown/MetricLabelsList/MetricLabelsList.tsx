@@ -174,26 +174,10 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricLabelsList>) => {
-    const { body } = model.useState();
-    if (!body) {
-      return null;
-    }
-    return (
-      <MetricLabelsList.RepeaterComponent
-        body={body}
-        variable={sceneGraph.lookupVariable(VAR_GROUP_BY, model) as MultiValueVariable}
-      />
-    );
-  };
-
-  private static RepeaterComponent = ({
-    body,
-    variable,
-  }: {
-    body: SceneByVariableRepeater;
-    variable: MultiValueVariable;
-  }) => {
     const styles = useStyles2(getStyles);
+    const { body } = model.useState();
+
+    const variable = sceneGraph.lookupVariable(VAR_GROUP_BY, model) as MultiValueVariable;
     const { loading, error } = variable.useState();
 
     const batchSizes = body.useSizes();
