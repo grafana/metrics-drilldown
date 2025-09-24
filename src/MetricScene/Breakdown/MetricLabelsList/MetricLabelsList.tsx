@@ -147,7 +147,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
     const onChangeState = (newState: LayoutSwitcherState, prevState?: LayoutSwitcherState) => {
       if (newState.layout !== prevState?.layout) {
-        (this.state.body?.state.body as SceneCSSGridLayout).setState({
+        (this.state.body.state.body as SceneCSSGridLayout).setState({
           templateColumns: newState.layout === LayoutType.ROWS ? GRID_TEMPLATE_ROWS : GRID_TEMPLATE_COLUMNS,
         });
       }
