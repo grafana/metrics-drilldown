@@ -29,7 +29,7 @@ services:
       interval: 3s
       timeout: 1s
       retries: 10
-      start_period: 5s
+      start_period: 15s
 
   grafana-scopes-gmd:
     container_name: 'grafana-scopes-gmd'
@@ -50,7 +50,7 @@ services:
       interval: 3s
       timeout: 1s
       retries: 10
-      start_period: 5s
+      start_period: 15s
 
   prometheus-gmd:
     container_name: 'prometheus-gmd'
