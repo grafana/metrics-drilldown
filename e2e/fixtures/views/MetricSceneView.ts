@@ -1,7 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 
 import { DrilldownView } from './DrilldownView';
-import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
+import { PLUGIN_BASE_URL } from '../../../src/shared/constants/plugin';
+import { ROUTES } from '../../../src/shared/constants/routes';
 import { AppControls } from '../components/AppControls';
 import { QuickSearchInput } from '../components/QuickSearchInput';
 
@@ -38,7 +39,7 @@ export class MetricSceneView extends DrilldownView {
   /* Core UI assertions */
 
   async assertCoreUI(metricName: string) {
-    await this.appControls.assert(true);
+    await this.appControls.assert();
 
     await this.assertMainViz(metricName);
     await expect(this.getByTestId('action-bar')).toBeVisible();
@@ -68,6 +69,22 @@ export class MetricSceneView extends DrilldownView {
     return this.getByRole('dialog', { name: /drawer title configure the prometheus function/i });
   }
 
+  /* Panel menu */
+
+  async openMainPanelMenu() {
+    const panel = this.getMainViz();
+    await panel.hover();
+    await panel.getByRole('button', { name: /menu/i }).click();
+    await expect(this.getByTestId('panel-menu')).toBeVisible();
+  }
+
+  async assertMainPanelMenu(menuItems: string[]) {
+    await this.openMainPanelMenu();
+    for (const name of menuItems) {
+      await expect(this.getByRole('menuitem', { name })).toBeVisible();
+    }
+  }
+
   async selectAndApplyConfigPreset(presetName: string, presetParams: string[]) {
     const configureSlider = this.getConfigureSlider();
     await configureSlider.getByTitle(presetName).click(); // clicking anywhere inside the preset div works ;)
@@ -84,6 +101,10 @@ export class MetricSceneView extends DrilldownView {
     const succcessToast = this.getByTestId('data-testid Alert success');
     await expect(succcessToast).toBeVisible();
     await succcessToast.getByRole('button', { name: /close alert/i }).click();
+  }
+
+  async clickOnSelectNewMetric() {
+    await this.getByRole('button', { name: /Remove existing metric and choose a new metric/i }).click();
   }
 
   /* Tabs */
@@ -142,7 +163,7 @@ export class MetricSceneView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
 
     // TODO: find a better way
-    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
+    await this.waitForTimeout(2000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   /* Breakdown tab */
@@ -152,26 +173,56 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertDefaultBreadownListControls() {
-    await this.assertLabelDropdown('All');
+    await this.assertLabelSelector('All');
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
   }
 
-  getLabelDropdown() {
+  getLabelSelectorContainer() {
     return this.getByTestId('breakdown-label-selector');
   }
 
-  async assertLabelDropdown(optionLabel: string) {
-    await expect(this.getLabelDropdown().getByText(optionLabel).first()).toBeVisible();
+  async assertLabelSelector(label: string) {
+    // Check if it's selected as a radio button
+    const radioGroup = this.getLabelSelectorContainer().getByRole('radiogroup');
+    if (await radioGroup.isVisible()) {
+      const radioOption = radioGroup.getByRole('radio', { name: label });
+      await expect(radioOption).toBeChecked();
+      return;
+    }
+
+    // Check if it's selected in the combobox
+    const combobox = this.getLabelSelectorContainer().getByRole('combobox');
+    if (await combobox.isVisible()) {
+      await expect(combobox).toHaveValue(label);
+      return;
+    }
+
+    throw new Error('Label selector not found in DOM!');
   }
 
   async selectLabel(label: string) {
-    await this.getLabelDropdown().locator('input').click();
-    await this.getByRole('option', { name: label }).click();
+    // Check it's a radio button
+    const radioGroup = this.getLabelSelectorContainer().getByRole('radiogroup');
+    if (await radioGroup.isVisible()) {
+      const radioOption = radioGroup.getByRole('radio', { name: label });
+      await radioOption.click();
+      return;
+    }
+
+    // If not a radio button, use the combobox
+    const combobox = this.getLabelSelectorContainer().getByRole('combobox');
+    if (await combobox.isVisible()) {
+      await combobox.click();
+      await this.getByRole('option', { name: label }).click();
+      return;
+    }
+
+    throw new Error('Label selector not found in DOM!');
   }
 
   async assertBreadownListControls({ label, sortBy }: { label: string; sortBy: string }) {
-    await this.assertLabelDropdown(label);
+    await this.assertLabelSelector(label);
     await expect(this.quickSearchLabelValues.get()).toBeVisible();
     await expect(this.getSortByDropdown()).toBeVisible();
     await this.assertSelectedSortBy(sortBy);

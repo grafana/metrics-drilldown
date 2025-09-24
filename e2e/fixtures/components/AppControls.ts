@@ -13,19 +13,15 @@ export class AppControls {
     return this.locator;
   }
 
-  async assert(assertSettings = false) {
+  async assert() {
     await expect(this.get()).toBeVisible();
 
     // left
     await expect(this.getDataSourceDropdown()).toBeVisible();
-    await expect(this.getAdHocFilters()).toBeVisible();
+    await expect(this.getAdHocFiltersInput()).toBeVisible();
 
     // right
     await expect(this.getTimePickerButton()).toBeVisible();
-
-    if (assertSettings) {
-      await expect(this.getSettingsButton()).toBeVisible();
-    }
 
     await expect(this.getRefreshPicker()).toBeVisible();
     await expect(this.getPluginInfoButton()).toBeVisible();
@@ -44,25 +40,33 @@ export class AppControls {
 
   /* Ad Hoc filters */
 
-  getAdHocFilters() {
-    return this.get().getByPlaceholder('Filter by label values');
+  getAdHocFiltersInput() {
+    return this.get().getByRole('combobox', { name: 'Filter by label values' });
   }
 
-  async setAdHocFilter(label: string, operator: string, value: string) {
-    await this.getAdHocFilters().click();
+  async addAdHocFilter(labelName: string, operator: string, labelValue: string) {
+    await this.getAdHocFiltersInput().click();
 
-    for (const text of [label, operator, value]) {
-      await this.keyboard.type(text);
-      await this.keyboard.press('Enter');
-    }
+    await this.page.getByRole('option', { name: labelName }).click();
+
+    await this.keyboard.type(operator);
+    await this.keyboard.press('Enter');
+
+    await this.keyboard.type(labelValue);
+    await this.keyboard.press('Enter');
   }
 
-  async assertAdHocFilters(expectedFilters: string[]) {
-    const appControls = this.page.getByTestId('app-controls');
+  async assertAdHocFilter(labelName: string, operator: string, labelValue: string) {
+    const filter = this.get().getByRole('button', { name: `Edit filter with key ${labelName}` });
+    await expect(filter).toBeVisible();
+    await expect(filter).toHaveText(`${labelName} ${operator} ${labelValue}`);
+  }
 
-    for (const expectedFilter of expectedFilters) {
-      await expect(appControls.getByText(expectedFilter)).toBeVisible();
-    }
+  async clearAdHocFilter(labelName: string) {
+    await this.get()
+      .getByRole('button', { name: `Remove filter with key ${labelName}` })
+      .click();
+    await this.page.getByTestId('metrics-drilldown-app').click(); // prevents the dropdown to appear
   }
 
   /* Time picker/refresh */
@@ -89,10 +93,6 @@ export class AppControls {
   }
 
   /* Settings/plugin info */
-
-  getSettingsButton() {
-    return this.get().getByTestId('settings-button');
-  }
 
   getPluginInfoButton() {
     return this.get().getByTestId('plugin-info-button');

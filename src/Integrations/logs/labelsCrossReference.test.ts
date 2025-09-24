@@ -2,8 +2,8 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { sceneGraph, type AdHocFiltersVariable } from '@grafana/scenes';
 
 import { createLabelsCrossReferenceConnector } from './labelsCrossReference';
-import { type RelatedLogsScene } from '../../RelatedLogs/RelatedLogsScene';
-import { VAR_FILTERS } from '../../shared';
+import { type RelatedLogsScene } from '../../MetricScene/RelatedLogs/RelatedLogsScene';
+import { VAR_FILTERS } from '../../shared/shared';
 
 const getListSpy = jest.fn();
 const getSpy = jest.fn();
@@ -22,8 +22,8 @@ jest.mock('@grafana/runtime', () => ({
   }),
 }));
 
-jest.mock('../../utils', () => {
-  const actualModule = jest.requireActual('../../utils');
+jest.mock('../../shared/utils/utils', () => {
+  const actualModule = jest.requireActual('../../shared/utils/utils');
   return {
     ...actualModule,
     getTrailFor: jest.fn(actualModule.getTrailFor),

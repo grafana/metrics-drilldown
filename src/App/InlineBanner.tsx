@@ -1,7 +1,8 @@
 import { Alert, type AlertVariant } from '@grafana/ui';
 import React from 'react';
 
-import { logger, type ErrorContext } from '../tracking/logger/logger';
+import { ensureErrorObject } from './useCatchExceptions';
+import { logger, type ErrorContext } from '../shared/logger/logger';
 
 type InlineBannerProps = {
   severity: AlertVariant;
@@ -12,11 +13,24 @@ type InlineBannerProps = {
   children?: React.ReactNode;
 };
 
+// adds HTTP status, if available
+function formatErrorMessage(error: any) {
+  const message = error.message || error.toString();
+  const infos = [];
+  if (error.statusText) {
+    infos.push(error.statusText);
+  }
+  if (error.status) {
+    infos.push(`HTTP ${error.status}`);
+  }
+  return infos.length ? `${message} (${infos.join(' - ')})` : message;
+}
+
 export function InlineBanner({ severity, title, message, error, errorContext, children }: Readonly<InlineBannerProps>) {
   let errorObject;
 
   if (error) {
-    errorObject = typeof error === 'string' ? new Error(error) : error;
+    errorObject = ensureErrorObject(error, 'Unknown error!');
 
     logger.error(errorObject, {
       ...(errorObject.cause || {}),
@@ -29,7 +43,7 @@ export function InlineBanner({ severity, title, message, error, errorContext, ch
     <Alert title={title} severity={severity}>
       {errorObject && (
         <>
-          {errorObject.message || errorObject.toString()}
+          {formatErrorMessage(errorObject)}
           <br />
         </>
       )}

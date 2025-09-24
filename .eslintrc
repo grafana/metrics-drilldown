@@ -47,7 +47,9 @@
         "fixStyle": "inline-type-imports"
       }
     ],
+    "jest/expect-expect": ["error"],
     "no-unused-vars": ["error"],
+    "sonarjs/cognitive-complexity": ["error", 11],
     "sonarjs/todo-tag": ["warn"],
     "sonarjs/fixme-tag": ["warn"],
     "sonarjs/prefer-regexp-exec": ["off"]

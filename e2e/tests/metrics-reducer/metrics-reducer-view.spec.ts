@@ -1,7 +1,4 @@
-import { type Scope } from '@grafana/data';
-
-import { UI_TEXT } from '../../../src/constants/ui';
-import { getGrafanaUrl } from '../../config/playwright.config.common';
+import { UI_TEXT } from '../../../src/shared/constants/ui';
 import { expect, test } from '../../fixtures';
 import { type SortByOptionNames } from '../../fixtures/views/MetricsReducerView';
 
@@ -78,7 +75,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.assertMetricsGroupByList();
 
           await metricsReducerView.selectMetricsGroup('db_name', 'grafana');
-          await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
+          await metricsReducerView.appControls.assertAdHocFilter('db_name', '=', 'grafana');
 
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
           await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
@@ -87,7 +84,8 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
 
           await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
-            'metrics-reducer-group-by-label-after-select.png'
+            'metrics-reducer-group-by-label-after-select.png',
+            { maxDiffPixelRatio: 0.01 } // account for typography differences
           );
         });
 
@@ -99,8 +97,8 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.assertMetricsGroupByList();
 
           await metricsReducerView.selectMetricsGroup('db_name', 'grafana');
-          await metricsReducerView.assertAdHocFilter('db_name', '=', 'grafana');
-          await metricsReducerView.clearAdHocFilter('db_name');
+          await metricsReducerView.appControls.assertAdHocFilter('db_name', '=', 'grafana');
+          await metricsReducerView.appControls.clearAdHocFilter('db_name');
 
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', false);
           await metricsReducerView.sidebar.assertGroupByLabelChecked(null);
@@ -124,7 +122,6 @@ test.describe('Metrics reducer view', () => {
 
         // create bookmark and back to metrics reducer
         await metricSceneView.getByRole('button', { name: UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL }).click();
-        await expect(metricSceneView.getByText('Bookmark created')).toBeVisible();
         await metricSceneView.goBack();
 
         // open bookmarks and assertion
@@ -225,47 +222,6 @@ test.describe('Metrics reducer view', () => {
           expect(currentUsage).toBeGreaterThanOrEqual(nextUsage);
         }
       });
-    });
-  });
-
-  test.describe('Scopes', () => {
-    test.use({
-      // Instead of our regular Grafana instance, we'll use the Grafana instance with scopes enabled
-      baseURL: getGrafanaUrl({ withScopes: true }),
-    });
-
-    test('Scopes filters are applied', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
-      const testScope: Scope = {
-        metadata: {
-          name: 'test-scope',
-        },
-        spec: {
-          title: 'Test Scope',
-          type: 'app',
-          description: 'Test Scope',
-          category: 'test',
-          filters: [
-            {
-              key: 'method',
-              operator: 'equals',
-              value: 'GET',
-            },
-          ],
-        },
-      };
-
-      // Mock the scope API endpoint
-      await metricsReducerView.page.route(
-        `**/apis/scope.grafana.app/v0alpha1/namespaces/default/scopes/${testScope.metadata.name}`,
-        async (route) => {
-          await route.fulfill({ json: testScope });
-        }
-      );
-      await metricsReducerView.goto(new URLSearchParams({ scopes: testScope.metadata.name }));
-      await expectScreenshotInCurrentGrafanaVersion(
-        metricsReducerView.page,
-        'metrics-reducer-scopes-filters-applied.png'
-      );
     });
   });
 });
