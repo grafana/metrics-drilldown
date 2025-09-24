@@ -16,6 +16,7 @@ import { useResizeObserver } from '@react-aria/utils';
 import React, { useRef } from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
+import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
@@ -64,7 +65,6 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                     ]
                   : () => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({ metric })],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
-                addMetadataDescription: true,
               },
               queryOptions: {
                 resolution: QUERY_RESOLUTION.HIGH,
@@ -84,8 +84,14 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
   private async onActivate() {
     const { metric } = this.state;
+    const metadata = await getTrailFor(this).getMetadataForMetric(metric);
+
     const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
     const { metricType } = gmdVizPanel.state;
+
+    if (metadata) {
+      gmdVizPanel.update({ description: getMetricDescription(metadata) }, {});
+    }
 
     if (metricType === 'classic-histogram') {
       return;

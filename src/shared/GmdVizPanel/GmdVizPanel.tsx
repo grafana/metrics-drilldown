@@ -14,7 +14,6 @@ import { useStyles2, type VizLegendOptions } from '@grafana/ui';
 import { isEqual, omitBy } from 'lodash';
 import React from 'react';
 
-import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { getTrailFor } from 'shared/utils/utils';
 
 import { type LabelMatcher } from './buildQueryExpression';
@@ -40,7 +39,6 @@ export type PanelConfig = {
   headerActions: (headerActionsArgs: HeaderActionAndMenuArgs) => VizPanelState['headerActions'];
   fixedColorIndex?: number;
   description?: string;
-  addMetadataDescription?: boolean;
   menu?: (menuArgs: HeaderActionAndMenuArgs) => VizPanelState['menu'];
   legend?: Partial<VizLegendOptions>;
   mappings?: ValueMapping[];
@@ -53,7 +51,6 @@ export type PanelOptions = {
   fixedColorIndex?: PanelConfig['fixedColorIndex'];
   title?: PanelConfig['title'];
   description?: PanelConfig['description'];
-  addMetadataDescription?: PanelConfig['addMetadataDescription'];
   headerActions?: PanelConfig['headerActions'];
   menu?: PanelConfig['menu'];
   legend?: PanelConfig['legend'];
@@ -162,15 +159,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     const stateUpdate: Partial<GmdVizPanelState> = {};
     const panelConfigUpdate: Partial<GmdVizPanelState['panelConfig']> = {};
 
-    if (metadata && panelConfig.addMetadataDescription) {
-      panelConfigUpdate.description = getMetricDescription(metadata);
-    }
-
     // we found a native histogram
     if (metadata.type === 'histogram') {
       stateUpdate.metricType = 'native-histogram';
-      // prio: metadata description > description passed to the constructor > hardcoded description
-      panelConfigUpdate.description ??= panelConfig.description ?? 'Native Histogram';
+      panelConfigUpdate.description = panelConfig.description ?? 'Native Histogram';
 
       if (!discardPanelTypeUpdates) {
         panelConfigUpdate.type = 'heatmap';
