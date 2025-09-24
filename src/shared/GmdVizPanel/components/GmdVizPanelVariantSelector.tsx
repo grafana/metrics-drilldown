@@ -9,7 +9,6 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { EventPanelTypeChanged } from './EventPanelTypeChanged';
 
 interface GmdVizPanelVariantSelectorState extends SceneObjectState {
-  metric: string;
   options: Array<{
     label: string;
     value: PanelType;
@@ -19,9 +18,8 @@ interface GmdVizPanelVariantSelectorState extends SceneObjectState {
 
 // currently used only for histogram metrics
 export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVariantSelectorState> {
-  constructor({ metric }: { metric: GmdVizPanelVariantSelectorState['metric'] }) {
+  constructor() {
     super({
-      metric,
       options: [
         { value: 'percentiles' as PanelType, label: 'percentiles' },
         { value: 'heatmap' as PanelType, label: 'heatmap' },
