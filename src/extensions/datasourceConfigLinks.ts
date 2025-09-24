@@ -81,9 +81,7 @@ export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
     configure: (context: DataSourceConfigContext | undefined) => {
       // Validate context and datasource
       if (!context?.dataSource?.type || !context?.dataSource?.uid) {
-        return {
-          path: createAppUrl(ROUTES.Drilldown)
-        };
+        return undefined;
       }
 
       // Only show for Prometheus-compatible datasources
@@ -93,7 +91,8 @@ export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
 
       // Return dynamic path and description based on datasource type
       return {
-        path: createDatasourceUrl(context.dataSource.uid)
+        path: createDatasourceUrl(context.dataSource.uid),
+        description: getDescriptionForDatasource(context.dataSource.type)
       };
     },
   }
