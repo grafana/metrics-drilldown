@@ -84,7 +84,8 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
 
           await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
-            'metrics-reducer-group-by-label-after-select.png'
+            'metrics-reducer-group-by-label-after-select.png',
+            { maxDiffPixelRatio: 0.01 } // account for typography differences
           );
         });
 
