@@ -3,12 +3,7 @@ import { PluginExtensionPoints, type PluginExtensionAddedLinkConfig } from '@gra
 
 import { appendUrlParameters, createAppUrl, UrlParameters } from './links';
 import { ROUTES } from '../shared/constants/routes';
-
-export const PROMETHEUS_DATASOURCE_TYPES = ['prometheus', 'grafana-amazonprometheus-datasource'];
-
-export function isPrometheusCompatible(datasourceType?: string): boolean {
-  return datasourceType ? PROMETHEUS_DATASOURCE_TYPES.includes(datasourceType) : false;
-}
+import { isPrometheusDataSource } from '../shared/utils/utils.datasource';
 
 export function createDatasourceUrl(datasourceUid: string, route: string = ROUTES.Drilldown): string {
   const params = appendUrlParameters([[UrlParameters.DatasourceId, datasourceUid]]);
@@ -40,7 +35,7 @@ export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
       }
 
       // Only show for Prometheus-compatible datasources
-      if (!isPrometheusCompatible(context.dataSource.type)) {
+      if (!isPrometheusDataSource(context.dataSource)) {
         return undefined; // Hide the extension for non-compatible datasources
       }
 

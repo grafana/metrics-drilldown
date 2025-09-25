@@ -1,33 +1,7 @@
-import {
-  createDatasourceUrl,
-  datasourceConfigLinkConfigs,
-  EXTENSION_DESCRIPTION,
-  isPrometheusCompatible,
-  PROMETHEUS_DATASOURCE_TYPES,
-} from './datasourceConfigLinks';
+import { createDatasourceUrl, datasourceConfigLinkConfigs, EXTENSION_DESCRIPTION } from './datasourceConfigLinks';
 import { ROUTES } from '../shared/constants/routes';
 
 describe('DataSource Configuration Extensions', () => {
-  describe('isPrometheusCompatible', () => {
-    it('should return true for Prometheus datasource types', () => {
-      PROMETHEUS_DATASOURCE_TYPES.forEach((type) => {
-        expect(isPrometheusCompatible(type)).toBe(true);
-      });
-    });
-
-    it('should return false for non-Prometheus datasource types', () => {
-      const nonPrometheusTypes = ['influxdb', 'elasticsearch', 'mysql', 'postgres'];
-      nonPrometheusTypes.forEach((type) => {
-        expect(isPrometheusCompatible(type)).toBe(false);
-      });
-    });
-
-    it('should return false for undefined or empty values', () => {
-      expect(isPrometheusCompatible()).toBe(false);
-      expect(isPrometheusCompatible('')).toBe(false);
-    });
-  });
-
   describe('createDatasourceUrl', () => {
     it('should create URL with datasource UID for drilldown route', () => {
       const url = createDatasourceUrl('test-datasource-uid');
