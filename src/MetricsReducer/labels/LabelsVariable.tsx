@@ -11,6 +11,7 @@ import {
 import { Label, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { localeCompare } from 'MetricsReducer/helpers/localCompare';
 import { VAR_DATASOURCE, VAR_FILTERS, VAR_FILTERS_EXPR } from 'shared/shared';
 
 import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './LabelsDataSource';
@@ -20,6 +21,7 @@ export const VAR_WINGMAN_GROUP_BY = 'labelsWingman';
 export class LabelsVariable extends QueryVariable {
   constructor() {
     super({
+      key: VAR_WINGMAN_GROUP_BY,
       name: VAR_WINGMAN_GROUP_BY,
       label: 'Group by label',
       placeholder: 'Group by label...',
@@ -38,12 +40,24 @@ export class LabelsVariable extends QueryVariable {
   onActivate() {
     this.subscribeToState((newState, prevState) => {
       if (newState.query !== prevState.query) {
-        // preserve the value from the URL search param when landing
-        if (prevState.query) {
-          this.setState({ value: NULL_GROUP_BY_VALUE });
-        }
+        // store the current value in a static option so we can preserve it in the UI even if new options don't contain it
+        this.setState({
+          staticOptions: [{ value: newState.value as string, label: newState.value as string }],
+        });
 
         this.refreshOptions();
+      }
+
+      if (newState.options !== prevState.options) {
+        const { value } = this.state;
+
+        if (newState.options.some((o) => o.value === value)) {
+          this.setState({
+            staticOptions: [],
+            // eslint-disable-next-line sonarjs/no-misleading-array-reverse
+            options: newState.options.sort((a, b) => localeCompare(a.label, b.label)),
+          });
+        }
       }
     });
 

@@ -29,6 +29,9 @@ import React, { useEffect } from 'react';
 import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
 import { displaySuccess } from 'MetricsReducer/helpers/displayStatus';
+import { registerRuntimeDataSources } from 'MetricsReducer/helpers/registerRuntimeDataSources';
+import { LabelsDataSource } from 'MetricsReducer/labels/LabelsDataSource';
+import { LabelsVariable } from 'MetricsReducer/labels/LabelsVariable';
 import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
@@ -112,6 +115,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private onActivate() {
+    registerRuntimeDataSources([new LabelsDataSource()]);
+
     this.datasourceHelper.init();
 
     this.updateStateForNewMetric(this.state.metric);
@@ -390,6 +395,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
         );
       },
     }),
+    new LabelsVariable(),
   ];
 
   if (isScopesSupported()) {

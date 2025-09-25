@@ -16,9 +16,8 @@ import React from 'react';
 
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
-import { registerRuntimeDataSources } from './helpers/registerRuntimeDataSources';
-import { LabelsDataSource, NULL_GROUP_BY_VALUE } from './labels/LabelsDataSource';
-import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from './labels/LabelsVariable';
+import { NULL_GROUP_BY_VALUE } from './labels/LabelsDataSource';
+import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './labels/LabelsVariable';
 import { ListControls } from './list-controls/ListControls';
 import { EventSortByChanged } from './list-controls/MetricsSorter/events/EventSortByChanged';
 import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './list-controls/MetricsSorter/MetricsSorter';
@@ -54,15 +53,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
   public constructor() {
     super({
       $variables: new SceneVariableSet({
-        variables: [new FilteredMetricsVariable(), new LabelsVariable()],
+        variables: [new FilteredMetricsVariable()],
       }),
       listControls: new ListControls({}),
       sidebar: new SideBar({}),
       body: undefined,
       enginesMap: new Map(),
     });
-
-    registerRuntimeDataSources([new LabelsDataSource()]);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
