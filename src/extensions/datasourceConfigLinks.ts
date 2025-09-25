@@ -1,24 +1,20 @@
 // CAUTION: Imports in this file will contribute to the module.tsx bundle size
-import {
-  PluginExtensionPoints,
-  type PluginExtensionAddedLinkConfig,
-} from '@grafana/data';
+import { PluginExtensionPoints, type PluginExtensionAddedLinkConfig } from '@grafana/data';
 
 import { appendUrlParameters, createAppUrl, UrlParameters } from './links';
 import { ROUTES } from '../shared/constants/routes';
 
-const PROMETHEUS_DATASOURCE_TYPES = ['prometheus', 'mimir', 'cortex', 'thanos'];
+export const PROMETHEUS_DATASOURCE_TYPES = ['prometheus', 'grafana-amazonprometheus-datasource'];
 
-function isPrometheusCompatible(datasourceType?: string): boolean {
+export function isPrometheusCompatible(datasourceType?: string): boolean {
   return datasourceType ? PROMETHEUS_DATASOURCE_TYPES.includes(datasourceType) : false;
 }
 
 export function createDatasourceUrl(datasourceUid: string, route: string = ROUTES.Drilldown): string {
-  const params = appendUrlParameters([
-    [UrlParameters.DatasourceId, datasourceUid],
-  ]);
+  const params = appendUrlParameters([[UrlParameters.DatasourceId, datasourceUid]]);
   return createAppUrl(route, params);
 }
+
 interface DataSourceConfigContext {
   dataSource?: {
     type: string;
@@ -48,14 +44,8 @@ export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
 
       // Return dynamic path and description based on datasource type
       return {
-        path: createDatasourceUrl(context.dataSource.uid)
+        path: createDatasourceUrl(context.dataSource.uid),
       };
     },
-  }
+  },
 ];
-
-// Export for testing
-export {
-  isPrometheusCompatible,
-  PROMETHEUS_DATASOURCE_TYPES
-};
