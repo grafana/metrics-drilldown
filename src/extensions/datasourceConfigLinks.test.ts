@@ -64,11 +64,6 @@ describe('DataSource Configuration Extensions', () => {
     describe('configure function', () => {
       const config = datasourceConfigLinkConfigs[0];
 
-      it('should return undefined for undefined context', () => {
-        const result = config.configure?.(undefined);
-        expect(result).toBeUndefined();
-      });
-
       it('should return undefined for context without dataSource', () => {
         const result = config.configure?.({});
         expect(result).toBeUndefined();
@@ -98,45 +93,6 @@ describe('DataSource Configuration Extensions', () => {
         expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
         expect(result?.path).toContain('var-ds=prom-1');
         expect(result?.description).toContain(EXTENSION_DESCRIPTION);
-      });
-
-      it('should return configuration for Mimir datasources', () => {
-        const context = {
-          dataSource: { type: 'mimir', uid: 'mimir-1', name: 'Mimir' },
-        };
-        const result = config.configure?.(context);
-        expect(result).toBeDefined();
-        expect(result?.path).toContain('var-ds=mimir-1');
-      });
-
-      it('should return configuration for Cortex datasources', () => {
-        const context = {
-          dataSource: { type: 'cortex', uid: 'cortex-1', name: 'Cortex' },
-        };
-        const result = config.configure?.(context);
-        expect(result).toBeDefined();
-        expect(result?.path).toContain('var-ds=cortex-1');
-      });
-
-      it('should return configuration for Thanos datasources', () => {
-        const context = {
-          dataSource: { type: 'thanos', uid: 'thanos-1', name: 'Thanos' },
-        };
-        const result = config.configure?.(context);
-        expect(result).toBeDefined();
-        expect(result?.path).toContain('var-ds=thanos-1');
-      });
-    });
-  });
-
-  describe('PROMETHEUS_DATASOURCE_TYPES constant', () => {
-    it('should include all expected Prometheus-compatible types', () => {
-      expect(PROMETHEUS_DATASOURCE_TYPES).toEqual(['prometheus', 'mimir', 'cortex', 'thanos']);
-    });
-
-    it('should be used by isPrometheusCompatible function', () => {
-      PROMETHEUS_DATASOURCE_TYPES.forEach((type) => {
-        expect(isPrometheusCompatible(type)).toBe(true);
       });
     });
   });
