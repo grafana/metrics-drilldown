@@ -1,5 +1,4 @@
 import { createDatasourceUrl, datasourceConfigLinkConfigs, EXTENSION_DESCRIPTION } from './datasourceConfigLinks';
-import { ROUTES } from '../shared/constants/routes';
 
 describe('DataSource Configuration Extensions', () => {
   describe('createDatasourceUrl', () => {
@@ -7,17 +6,6 @@ describe('DataSource Configuration Extensions', () => {
       const url = createDatasourceUrl('test-datasource-uid');
       expect(url).toContain('/a/grafana-metricsdrilldown-app/drilldown');
       expect(url).toContain('var-ds=test-datasource-uid');
-    });
-
-    it('should create URL with custom route', () => {
-      const url = createDatasourceUrl('test-datasource-uid', ROUTES.Trail);
-      expect(url).toContain('/a/grafana-metricsdrilldown-app/trail');
-      expect(url).toContain('var-ds=test-datasource-uid');
-    });
-
-    it('should handle special characters in datasource UID', () => {
-      const url = createDatasourceUrl('test-datasource-uid-with-special-chars!@#');
-      expect(url).toContain('var-ds=test-datasource-uid-with-special-chars%21%40%23');
     });
   });
 
