@@ -23,10 +23,12 @@ interface DataSourceConfigContext {
   };
 }
 
+export const EXTENSION_DESCRIPTION = `Browse metrics in Grafana Metrics Drilldown`;
+
 export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
     title: 'Open in Metrics Drilldown',
-    description: 'Browse metrics in Grafana Metrics Drilldown',
+    description: EXTENSION_DESCRIPTION,
     targets: [PluginExtensionPoints.DataSourceConfigActions, PluginExtensionPoints.DataSourceConfigStatus],
     icon: 'drilldown',
     category: 'metrics-drilldown',
@@ -45,6 +47,7 @@ export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
       // Return dynamic path and description based on datasource type
       return {
         path: createDatasourceUrl(context.dataSource.uid),
+        description: EXTENSION_DESCRIPTION,
       };
     },
   },

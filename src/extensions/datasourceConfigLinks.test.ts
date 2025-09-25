@@ -1,22 +1,23 @@
 import {
   createDatasourceUrl,
   datasourceConfigLinkConfigs,
+  EXTENSION_DESCRIPTION,
   isPrometheusCompatible,
-  PROMETHEUS_DATASOURCE_TYPES
+  PROMETHEUS_DATASOURCE_TYPES,
 } from './datasourceConfigLinks';
 import { ROUTES } from '../shared/constants/routes';
 
 describe('DataSource Configuration Extensions', () => {
   describe('isPrometheusCompatible', () => {
     it('should return true for Prometheus datasource types', () => {
-      PROMETHEUS_DATASOURCE_TYPES.forEach(type => {
+      PROMETHEUS_DATASOURCE_TYPES.forEach((type) => {
         expect(isPrometheusCompatible(type)).toBe(true);
       });
     });
 
     it('should return false for non-Prometheus datasource types', () => {
       const nonPrometheusTypes = ['influxdb', 'elasticsearch', 'mysql', 'postgres'];
-      nonPrometheusTypes.forEach(type => {
+      nonPrometheusTypes.forEach((type) => {
         expect(isPrometheusCompatible(type)).toBe(false);
       });
     });
@@ -75,14 +76,14 @@ describe('DataSource Configuration Extensions', () => {
 
       it('should return undefined for context with incomplete dataSource', () => {
         const result = config.configure?.({
-          dataSource: { type: 'prometheus' }
+          dataSource: { type: 'prometheus' },
         });
         expect(result).toBeUndefined();
       });
 
       it('should return undefined for non-Prometheus datasources', () => {
         const context = {
-          dataSource: { type: 'influxdb', uid: 'influx-1', name: 'InfluxDB' }
+          dataSource: { type: 'influxdb', uid: 'influx-1', name: 'InfluxDB' },
         };
         const result = config.configure?.(context);
         expect(result).toBeUndefined();
@@ -90,18 +91,18 @@ describe('DataSource Configuration Extensions', () => {
 
       it('should return configuration for Prometheus datasources', () => {
         const context = {
-          dataSource: { type: 'prometheus', uid: 'prom-1', name: 'Prometheus' }
+          dataSource: { type: 'prometheus', uid: 'prom-1', name: 'Prometheus' },
         };
         const result = config.configure?.(context);
         expect(result).toBeDefined();
         expect(result?.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
         expect(result?.path).toContain('var-ds=prom-1');
-        expect(result?.description).toContain('Browse metrics in Grafana Metrics Drilldown');
+        expect(result?.description).toContain(EXTENSION_DESCRIPTION);
       });
 
       it('should return configuration for Mimir datasources', () => {
         const context = {
-          dataSource: { type: 'mimir', uid: 'mimir-1', name: 'Mimir' }
+          dataSource: { type: 'mimir', uid: 'mimir-1', name: 'Mimir' },
         };
         const result = config.configure?.(context);
         expect(result).toBeDefined();
@@ -110,7 +111,7 @@ describe('DataSource Configuration Extensions', () => {
 
       it('should return configuration for Cortex datasources', () => {
         const context = {
-          dataSource: { type: 'cortex', uid: 'cortex-1', name: 'Cortex' }
+          dataSource: { type: 'cortex', uid: 'cortex-1', name: 'Cortex' },
         };
         const result = config.configure?.(context);
         expect(result).toBeDefined();
@@ -119,7 +120,7 @@ describe('DataSource Configuration Extensions', () => {
 
       it('should return configuration for Thanos datasources', () => {
         const context = {
-          dataSource: { type: 'thanos', uid: 'thanos-1', name: 'Thanos' }
+          dataSource: { type: 'thanos', uid: 'thanos-1', name: 'Thanos' },
         };
         const result = config.configure?.(context);
         expect(result).toBeDefined();
@@ -134,7 +135,7 @@ describe('DataSource Configuration Extensions', () => {
     });
 
     it('should be used by isPrometheusCompatible function', () => {
-      PROMETHEUS_DATASOURCE_TYPES.forEach(type => {
+      PROMETHEUS_DATASOURCE_TYPES.forEach((type) => {
         expect(isPrometheusCompatible(type)).toBe(true);
       });
     });
