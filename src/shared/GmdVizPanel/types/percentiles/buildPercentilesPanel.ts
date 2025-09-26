@@ -1,21 +1,14 @@
 import { PanelBuilders, SceneQueryRunner } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
-import { type HistogramType, type PanelConfig, type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getPerSecondRateUnit, getUnit } from 'shared/GmdVizPanel/units/getUnit';
 import { trailDS } from 'shared/shared';
 import { getColorByIndex } from 'shared/utils/utils';
 
+import { type BuildVizPanelOptions } from '../panelBuilder';
 import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
 
-type PercentilesPanelOptions = {
-  metric: string;
-  histogramType: HistogramType;
-  panelConfig: PanelConfig;
-  queryConfig: QueryConfig;
-};
-
-export function buildPercentilesPanel(options: PercentilesPanelOptions) {
+export function buildPercentilesPanel(options: BuildVizPanelOptions) {
   const { metric, histogramType, panelConfig, queryConfig } = options;
   const queryParams = getPercentilesQueryRunnerParams({ metric, histogramType, queryConfig });
   const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
