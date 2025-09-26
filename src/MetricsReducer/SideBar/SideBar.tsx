@@ -262,19 +262,16 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           {sections.map((section) => {
             const { key, title, icon: iconOrText, disabled, active } = section.state;
             const visible = visibleSection?.state.key === key;
+            let isActive;
+            let tooltip;
 
-            const isActive =
-              key === 'groupby-labels'
-                ? Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE)
-                : active;
-
-            const tooltip =
-              key === 'groupby-labels'
-                ? `${title}: ${labelsVariableValue}`
-                : // eslint-disable-next-line sonarjs/no-nested-conditional
-                sectionValues.get(key)?.length
-                ? `${title}: ${sectionValues.get(key)?.join(', ')}`
-                : title;
+            if (key === 'groupby-labels') {
+              isActive = Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE);
+              tooltip = `${title}: ${labelsVariableValue}`;
+            } else {
+              isActive = active;
+              tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
+            }
 
             return (
               <div
