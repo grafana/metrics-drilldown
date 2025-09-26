@@ -8,7 +8,6 @@ import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
 import { type LabelsVariable } from 'MetricsReducer/labels/LabelsVariable';
 
 import { reportExploreMetrics } from '../../../../shared/tracking/interactions';
-import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { LabelsList } from './LabelsList';
@@ -44,36 +43,6 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
       disabled: disabled ?? false,
       active: active ?? false,
     });
-
-    this.addActivationHandler(this.onActivate.bind(this));
-  }
-
-  private onActivate() {
-    const labelsVariable = sceneGraph.lookupVariable(this.state.variableName, this) as LabelsVariable;
-    const labelValue = labelsVariable.state.value;
-
-    this.setState({ active: Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE) });
-
-    // Subscribe to variable changes to update active state when the variable is changed externally
-    this._subs.add(
-      labelsVariable.subscribeToState((newState, prevState) => {
-        if (newState.value === prevState.value) {
-          return;
-        }
-
-        const active = Boolean(newState.value && newState.value !== NULL_GROUP_BY_VALUE);
-        if (active === this.state.active) {
-          return;
-        }
-
-        this.setState({ active });
-
-        this.publishEvent(
-          new EventSectionValueChanged({ key: this.state.key, values: active ? [newState.value as string] : [] }),
-          true
-        );
-      })
-    );
   }
 
   private selectLabel(label: string) {

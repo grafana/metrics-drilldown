@@ -15,15 +15,14 @@ import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableVal
 import { type Unsubscribable } from 'rxjs';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { displayError, displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { areArraysEqual } from 'MetricsReducer/metrics-variables/helpers/areArraysEqual';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
-import { languageProviderVersionIs } from './types/language-provider/versionCheck';
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR, VAR_FILTERS_EXPR } from '../../shared/shared';
+import { languageProviderVersionIs } from './types/language-provider/versionCheck';
 
 /**
  * When we fetch the Prometheus data source with `@grafana/runtime`, its language provider
@@ -36,6 +35,7 @@ export type PrometheusRuntimeDatasource = Omit<PrometheusDatasource, 'languagePr
 };
 
 export class MetricDatasourceHelper {
+  private initialized = false;
   private trail: DataTrail;
   private datasource?: PrometheusRuntimeDatasource;
   private cache = {
@@ -57,6 +57,7 @@ export class MetricDatasourceHelper {
   }
 
   public init() {
+    this.initialized = true;
     this.reset();
 
     for (const sub of this.subs) {
@@ -74,23 +75,20 @@ export class MetricDatasourceHelper {
       })
     );
 
-    const datasourceVariable = sceneGraph.findByKeyAndType(
-      this.trail,
-      VAR_DATASOURCE,
-      MetricsDrilldownDataSourceVariable
-    );
-    this.subs.push(
-      datasourceVariable.subscribeToState(async (newState, prevState) => {
-        if (newState.value !== prevState.value) {
-          this.reset();
-        }
-      })
-    );
-
     this.onNewMetrics(metricsVariable.state.options);
   }
 
-  private reset() {
+  public reset() {
+    // Prevents duplicate metadata fetching during DataTrail initialization.
+    // This method is called twice when landing on a DataTrail:
+    // 1. During activation via init() -> reset()
+    // 2. After activation via onReferencedVariableValueChanged() (called automatically)
+    // The early return prevents the second call from clearing the cache and refetching
+    // metadata that was already loaded during the first call.
+    if (!this.initialized) {
+      return;
+    }
+
     this.datasource = undefined;
 
     this.cache = {
