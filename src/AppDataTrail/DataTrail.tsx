@@ -81,7 +81,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_DATASOURCE],
     onReferencedVariableValueChanged: () => {
-      this.datasourceHelper.init();
+      this.datasourceHelper.reset();
     },
   });
 

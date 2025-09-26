@@ -76,7 +76,7 @@ export class MetricDatasourceHelper {
     this.onNewMetrics(metricsVariable.state.options);
   }
 
-  private reset() {
+  public reset() {
     this.datasource = undefined;
 
     this.cache = {
