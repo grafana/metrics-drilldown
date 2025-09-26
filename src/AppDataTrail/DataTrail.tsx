@@ -30,7 +30,7 @@ import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
 import { displaySuccess } from 'MetricsReducer/helpers/displayStatus';
 import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
-import { MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
+import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
@@ -41,11 +41,11 @@ import { getMetricType, getMetricTypeSync, type MetricType } from 'shared/GmdViz
 
 import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
-import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
 import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricSelectedEvent, trailDS, VAR_FILTERS } from '../shared/shared';
+import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
 import { limitAdhocProviders } from '../shared/utils/utils';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
@@ -243,6 +243,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     if (metric) {
       addRecentMetric(metric);
+    } else {
+      // make sure we display all the proper metrics when coming back from the MetricScene (see RelatedMetricsScene.tsx, side bar sections in SideBar.tsx and RecentMetricsSection.tsx)
+      sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable).toggleRecentMetrics();
     }
 
     // Add metric to adhoc filters baseFilter
@@ -295,9 +298,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.isNativeHistogram(metric);
   }
 
-  getPrometheusBuildInfo = async () => {
+  public async getPrometheusBuildInfo() {
     return this.datasourceHelper.getPrometheusBuildInfo();
-  };
+  }
+
+  public async fetchRecentMetrics({ interval, extraFilter }: { interval: string; extraFilter?: string }) {
+    return this.datasourceHelper.fetchRecentMetrics({ interval, extraFilter });
+  }
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const { controls, topScene, embedded, drawer } = model.useState();

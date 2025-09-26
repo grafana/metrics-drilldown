@@ -23,7 +23,7 @@ import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicH
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
 import { languageProviderVersionIs } from './types/language-provider/versionCheck';
-import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../../shared/shared';
+import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR, VAR_FILTERS_EXPR } from '../../shared/shared';
 
 /**
  * When we fetch the Prometheus data source with `@grafana/runtime`, its language provider
@@ -184,6 +184,31 @@ export class MetricDatasourceHelper {
         this.cache.metadata.set(metric, metricMetadata);
       }
     }
+  }
+
+  public async fetchRecentMetrics({ interval, extraFilter }: { interval: string; extraFilter?: string }) {
+    const ds = await this.getRuntimeDatasource();
+    if (!ds) {
+      return [];
+    }
+
+    const filters = ['__name__!=""', extraFilter, sceneGraph.interpolate(this.trail, VAR_FILTERS_EXPR)]
+      .filter(Boolean)
+      .join(',');
+
+    const query = `group by (__name__) ({${filters}}) unless (group by (__name__) ({${filters}} offset ${interval}))`;
+
+    const response = (await (ds.languageProvider as any).request(`/api/v1/query?query=${query}`)) as {
+      result: Array<{ metric: { __name__: string } }>;
+    };
+
+    if (!Array.isArray(response?.result)) {
+      throw new Error(
+        `The query to search for recent metrics timed out or failed. Try a shorter time interval and/or add label filters to narrow the search.`
+      );
+    }
+
+    return response.result.map(({ metric }) => metric.__name__);
   }
 
   /**

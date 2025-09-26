@@ -67,9 +67,6 @@ function getStyles(theme: GrafanaTheme2) {
       margin: 0,
       padding: theme.spacing(0, 1, 1, 1),
       overflowY: 'auto',
-      '& .css-1n4u71h-Label': {
-        fontSize: '14px !important',
-      },
       '&::-webkit-scrollbar': {
         '-webkit-appearance': 'none',
         width: '7px',
