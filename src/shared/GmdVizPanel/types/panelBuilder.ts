@@ -14,7 +14,7 @@ import { getStatushistoryQueryRunnerParams } from './statushistory/getStatushist
 import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
 import { getTimeseriesQueryRunnerParams } from './timeseries/getTimeseriesQueryRunnerParams';
 
-type BuildVizPanelOptions = {
+export type BuildVizPanelOptions = {
   metric: Metric;
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;

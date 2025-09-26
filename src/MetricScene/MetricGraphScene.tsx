@@ -59,11 +59,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 height: PANEL_HEIGHT.XL,
                 headerActions: isClassicHistogramMetric(metric)
                   ? ({ metric }) => [
-                      new GmdVizPanelVariantSelector({}),
+                      new GmdVizPanelVariantSelector(),
                       new ConfigurePanelAction({ metric }),
-                      new BookmarkHeaderAction({}),
+                      new BookmarkHeaderAction(),
                     ]
-                  : ({ metric }) => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction({})],
+                  : ({ metric }) => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction()],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
               },
               queryOptions: {
@@ -104,9 +104,9 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         gmdVizPanel.update(
           {
             headerActions: () => [
-              new GmdVizPanelVariantSelector({}),
+              new GmdVizPanelVariantSelector(),
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
-              new BookmarkHeaderAction({}),
+              new BookmarkHeaderAction(),
             ],
           },
           {}

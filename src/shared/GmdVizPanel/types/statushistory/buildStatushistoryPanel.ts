@@ -1,20 +1,13 @@
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { VisibilityMode, type LegendPlacement } from '@grafana/schema';
 
-import { type PanelConfig, type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
-import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { trailDS } from 'shared/shared';
 
+import { type BuildVizPanelOptions } from '../panelBuilder';
 import { getStatushistoryQueryRunnerParams } from './getStatushistoryQueryRunnerParams';
 import { UP_DOWN_VALUE_MAPPINGS } from './value-mappings';
 
-type StatushistoryPanelOptions = {
-  metric: Metric;
-  panelConfig: PanelConfig;
-  queryConfig: QueryConfig;
-};
-
-export function buildStatushistoryPanel(options: StatushistoryPanelOptions): VizPanel {
+export function buildStatushistoryPanel(options: BuildVizPanelOptions): VizPanel {
   const { metric, panelConfig, queryConfig } = options;
   const queryParams = getStatushistoryQueryRunnerParams({ metric, queryConfig });
   const unit = 'none';

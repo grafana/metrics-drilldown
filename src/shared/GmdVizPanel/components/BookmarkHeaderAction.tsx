@@ -16,9 +16,8 @@ interface BookmarkHeaderActionState extends SceneObjectState {
 }
 
 export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionState> {
-  constructor(state: Record<string, any>) {
+  constructor() {
     super({
-      ...state,
       isBookmarked: false,
     });
 

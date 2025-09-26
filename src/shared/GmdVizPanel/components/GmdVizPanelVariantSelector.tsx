@@ -18,9 +18,8 @@ interface GmdVizPanelVariantSelectorState extends SceneObjectState {
 
 // currently used only for histogram metrics
 export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVariantSelectorState> {
-  constructor(state: Record<string, any>) {
+  constructor() {
     super({
-      ...state,
       options: [
         { value: 'percentiles' as PanelType, label: 'percentiles' },
         { value: 'heatmap' as PanelType, label: 'heatmap' },
