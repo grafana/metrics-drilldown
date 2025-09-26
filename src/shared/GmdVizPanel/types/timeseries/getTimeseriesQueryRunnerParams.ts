@@ -7,11 +7,26 @@ import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 
 import { isCounterMetric } from '../../matchers/isCounterMetric';
-import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
-export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
-  const { metric, queryConfig } = options;
-  const isRateQuery = isCounterMetric(metric);
+type TimeseriesQueryRunnerParams = {
+  isRateQuery: boolean;
+  maxDataPoints: number;
+  queries: SceneDataQuery[];
+};
+
+type Options = {
+  metric: string;
+  queryConfig: QueryConfig;
+  // When provided, overrides the name-based heuristic for applying rate().
+  // This lets callers flip rate vs raw after an async metadata check.
+  isRateQueryOverride?: boolean;
+};
+
+export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
+  const { metric, queryConfig, isRateQueryOverride } = options;
+  // Prefer explicit override when available; otherwise fall back to heuristic.
+  const isRateQuery = typeof isRateQueryOverride === 'boolean' ? isRateQueryOverride : isCounterMetric(metric);
+
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
