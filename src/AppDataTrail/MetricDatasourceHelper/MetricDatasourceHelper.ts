@@ -35,6 +35,7 @@ export type PrometheusRuntimeDatasource = Omit<PrometheusDatasource, 'languagePr
 };
 
 export class MetricDatasourceHelper {
+  private initialized = false;
   private trail: DataTrail;
   private datasource?: PrometheusRuntimeDatasource;
   private cache = {
@@ -56,6 +57,7 @@ export class MetricDatasourceHelper {
   }
 
   public init() {
+    this.initialized = true;
     this.reset();
 
     for (const sub of this.subs) {
@@ -77,6 +79,14 @@ export class MetricDatasourceHelper {
   }
 
   public reset() {
+    // prevents fetching the metadata twice when landing because reset() is called from DataTrail:
+    // - during activation and
+    // - after activation, by onReferencedVariableValueChanged, which seems to always be called automatically regardless there's a user action or not
+    // we could rely solely on onReferencedVariableValueChanged to call init(), but there's a doubt if it'll  always called automatically
+    if (!this.initialized) {
+      return;
+    }
+
     this.datasource = undefined;
 
     this.cache = {
