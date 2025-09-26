@@ -15,6 +15,7 @@ import {
   SceneVariableSet,
   ScopesVariable,
   UrlSyncContextProvider,
+  VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
   type SceneObject,
@@ -45,7 +46,7 @@ import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourc
 import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
-import { MetricSelectedEvent, trailDS, VAR_FILTERS } from '../shared/shared';
+import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
 import { limitAdhocProviders } from '../shared/utils/utils';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
@@ -76,6 +77,13 @@ export interface DataTrailState extends SceneObjectState {
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   private disableReportFiltersInteraction = false;
   private datasourceHelper = new MetricDatasourceHelper(this);
+
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_DATASOURCE],
+    onReferencedVariableValueChanged: () => {
+      this.datasourceHelper.init();
+    },
+  });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: ['metric'],

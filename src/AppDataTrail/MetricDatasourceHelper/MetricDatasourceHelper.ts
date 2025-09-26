@@ -11,19 +11,14 @@ import {
   type PromQuery,
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
-import { sceneGraph, type DataSourceVariable, type SceneObject, type VariableValueOption } from '@grafana/scenes';
-import { type Unsubscribable } from 'rxjs';
+import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { displayError, displayWarning } from 'MetricsReducer/helpers/displayStatus';
-import { areArraysEqual } from 'MetricsReducer/metrics-variables/helpers/areArraysEqual';
-import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
-import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
-import { languageProviderVersionIs } from './types/language-provider/versionCheck';
 import { VAR_DATASOURCE, VAR_DATASOURCE_EXPR } from '../../shared/shared';
+import { languageProviderVersionIs } from './types/language-provider/versionCheck';
 
 /**
  * When we fetch the Prometheus data source with `@grafana/runtime`, its language provider
@@ -42,7 +37,6 @@ export class MetricDatasourceHelper {
     metadata: new Map<string, PromMetricsMetadataItem>(),
     classicHistograms: new Set<string>(),
   };
-  private subs: Unsubscribable[] = [];
 
   constructor(trail: DataTrail) {
     this.trail = trail;
@@ -57,40 +51,6 @@ export class MetricDatasourceHelper {
   }
 
   public init() {
-    this.reset();
-
-    for (const sub of this.subs) {
-      sub.unsubscribe();
-    }
-
-    this.subs = [];
-
-    const metricsVariable = sceneGraph.findByKeyAndType(this.trail, VAR_METRICS_VARIABLE, MetricsVariable);
-    this.subs.push(
-      metricsVariable.subscribeToState((newState, prevState) => {
-        if (!areArraysEqual(newState.options, prevState.options)) {
-          this.onNewMetrics(newState.options);
-        }
-      })
-    );
-
-    const datasourceVariable = sceneGraph.findByKeyAndType(
-      this.trail,
-      VAR_DATASOURCE,
-      MetricsDrilldownDataSourceVariable
-    );
-    this.subs.push(
-      datasourceVariable.subscribeToState(async (newState, prevState) => {
-        if (newState.value !== prevState.value) {
-          this.reset();
-        }
-      })
-    );
-
-    this.onNewMetrics(metricsVariable.state.options);
-  }
-
-  private reset() {
     this.datasource = undefined;
 
     this.cache = {
@@ -99,16 +59,6 @@ export class MetricDatasourceHelper {
     };
 
     this.fetchMetricsMetadata().catch(() => {});
-  }
-
-  private onNewMetrics(metricsVariableOptions: VariableValueOption[]) {
-    for (const metricData of metricsVariableOptions) {
-      const name = metricData.value as string;
-
-      if (isClassicHistogramMetric(name)) {
-        this.cache.classicHistograms.add(name);
-      }
-    }
   }
 
   /**
