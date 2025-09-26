@@ -120,9 +120,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private onActivate() {
-    // we delay the call to init() because onReferencedVariableValueChanged() above seems to always call reset when landing
-    // we could rely solely on onReferencedVariableValueChanged to call init(), but there's a doubt if it'll  always called automatically
-    // see also MetricDatasourceHelper.reset()
+    // Delays init() to ensure proper initialization order and avoid race conditions.
+    // The variable dependency handler (onReferencedVariableValueChanged) calls reset()
+    // when landing, but we're uncertain whether it will always be called automatically
+    // in all scenarios. Using setTimeout ensures init() runs after variable changes
+    // are processed.
     setTimeout(() => {
       this.datasourceHelper.init();
     }, 0);

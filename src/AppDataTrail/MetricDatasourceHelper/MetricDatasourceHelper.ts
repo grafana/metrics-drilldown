@@ -79,10 +79,12 @@ export class MetricDatasourceHelper {
   }
 
   public reset() {
-    // prevents fetching the metadata twice when landing because reset() is called from DataTrail:
-    // - during activation and
-    // - after activation, by onReferencedVariableValueChanged, which seems to always be called automatically regardless there's a user action or not
-    // we could rely solely on onReferencedVariableValueChanged to call init(), but there's a doubt if it'll  always called automatically
+    // Prevents duplicate metadata fetching during DataTrail initialization.
+    // This method is called twice when landing on a DataTrail:
+    // 1. During activation via init() -> reset()
+    // 2. After activation via onReferencedVariableValueChanged() (called automatically)
+    // The early return prevents the second call from clearing the cache and refetching
+    // metadata that was already loaded during the first call.
     if (!this.initialized) {
       return;
     }
