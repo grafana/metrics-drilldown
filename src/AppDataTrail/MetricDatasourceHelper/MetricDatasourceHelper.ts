@@ -12,7 +12,6 @@ import {
 } from '@grafana/prometheus';
 import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
-import { type Unsubscribable } from 'rxjs';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { displayError, displayWarning } from 'MetricsReducer/helpers/displayStatus';
@@ -38,7 +37,6 @@ export class MetricDatasourceHelper {
   private cache = {
     metadata: new Map<string, PromMetricsMetadataItem>(),
   };
-  private subs: Unsubscribable[] = [];
 
   constructor(trail: DataTrail) {
     this.trail = trail;
