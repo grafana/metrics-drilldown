@@ -7,7 +7,7 @@ import { getColorByIndex } from 'shared/utils/utils';
 
 import { type BuildVizPanelOptions } from '../panelBuilder';
 import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
-import { updateColorsWhenQueriesChange } from '../timeseries/buildTimeseriesPanel';
+import { updateColorsWhenQueriesChange } from '../timeseries/behaviors/updateColorsWhenQueriesChange';
 
 export function buildPercentilesPanel(options: BuildVizPanelOptions) {
   const { metric, panelConfig, queryConfig } = options;
@@ -24,7 +24,7 @@ export function buildPercentilesPanel(options: BuildVizPanelOptions) {
 
   const startColorIndex = panelConfig.fixedColorIndex || 0;
 
-  const vizPanel = PanelBuilders.timeseries()
+  return PanelBuilders.timeseries()
     .setTitle(panelConfig.title)
     .setDescription(panelConfig.description)
     .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
@@ -43,10 +43,6 @@ export function buildPercentilesPanel(options: BuildVizPanelOptions) {
         });
       });
     })
-    .setBehaviors(panelConfig.behaviors || [])
+    .setBehaviors([updateColorsWhenQueriesChange(startColorIndex), ...(panelConfig.behaviors || [])])
     .build();
-
-  updateColorsWhenQueriesChange(vizPanel, panelConfig);
-
-  return vizPanel;
 }

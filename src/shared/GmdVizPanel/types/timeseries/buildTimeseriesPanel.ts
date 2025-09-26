@@ -1,20 +1,13 @@
-import {
-  PanelBuilders,
-  SceneDataTransformer,
-  sceneGraph,
-  SceneQueryRunner,
-  type VizPanel,
-  type VizPanelState,
-} from '@grafana/scenes';
+import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { extremeValueFilterBehavior } from 'shared/GmdVizPanel/behaviors/extremeValueFilterBehavior/extremeValueFilterBehavior';
-import { type PanelConfig } from 'shared/GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared/shared';
 import { getColorByIndex } from 'shared/utils/utils';
 
 import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
 import { type BuildVizPanelOptions } from '../panelBuilder';
+import { updateColorsWhenQueriesChange } from './behaviors/updateColorsWhenQueriesChange';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 import { addRefId } from './transformations/addRefId';
 import { addUnspecifiedLabel } from './transformations/addUnspecifiedLabel';
@@ -47,7 +40,11 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
     .setUnit(unit)
     .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setCustomFieldConfig('fillOpacity', 9)
-    .setBehaviors([extremeValueFilterBehavior, ...(panelConfig.behaviors || [])]);
+    .setBehaviors([
+      extremeValueFilterBehavior,
+      updateColorsWhenQueriesChange(panelConfig.fixedColorIndex),
+      ...(panelConfig.behaviors || []),
+    ]);
 
   if (queryParams.queries.length === 1) {
     vizPanelBuilder.setColor(
@@ -68,57 +65,7 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
     });
   }
 
-  const vizPanel = vizPanelBuilder.build();
-
-  updateColorsWhenQueriesChange(vizPanel, panelConfig);
-
-  return vizPanel;
-}
-
-/**
- * This function acts when the number of queries of the query runner changes and adjust the color overrides.
- * This ensures the panel renders multiple timeseries correctly whenever the Prometheus function configuration changes (number of percentiles, ...).
- * See GmdVizPanel.updateQuery()
- */
-export function updateColorsWhenQueriesChange(vizPanel: VizPanel, panelConfig: PanelConfig) {
-  const [queryRunner] = sceneGraph.findDescendents(vizPanel, SceneQueryRunner);
-  if (!queryRunner) {
-    return;
-  }
-
-  vizPanel.addActivationHandler(() => {
-    const sub = queryRunner.subscribeToState((newState, prevState) => {
-      if (newState.queries !== prevState.queries) {
-        const fieldConfig: VizPanelState['fieldConfig'] = {
-          ...vizPanel.state.fieldConfig,
-        };
-
-        const startColorIndex = panelConfig.fixedColorIndex || 0;
-
-        fieldConfig.defaults.color = undefined;
-        fieldConfig.overrides = newState.queries.map((q, i) => {
-          return {
-            matcher: {
-              id: 'byFrameRefID',
-              options: q.refId,
-            },
-            properties: [
-              {
-                id: 'color',
-                value: { mode: 'fixed', fixedColor: getColorByIndex(startColorIndex + i) },
-              },
-            ],
-          };
-        });
-
-        vizPanel.setState({ fieldConfig });
-      }
-    });
-
-    return () => {
-      sub.unsubscribe();
-    };
-  });
+  return vizPanelBuilder.build();
 }
 
 export const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
