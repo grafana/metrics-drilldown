@@ -308,7 +308,7 @@ export const UrlParameters = {
 
 type UrlParameterType = (typeof UrlParameters)[keyof typeof UrlParameters];
 
-function appendUrlParameters(
+export function appendUrlParameters(
   params: Array<[UrlParameterType, string | undefined]>,
   initialParams?: URLSearchParams
 ): URLSearchParams {

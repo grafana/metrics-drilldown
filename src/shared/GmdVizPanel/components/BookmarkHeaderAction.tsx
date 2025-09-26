@@ -12,14 +12,12 @@ import { userStorage } from 'shared/user-preferences/userStorage';
 import { getTrailFor } from 'shared/utils/utils';
 
 interface BookmarkHeaderActionState extends SceneObjectState {
-  metric: string;
   isBookmarked: boolean;
 }
 
 export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionState> {
-  constructor({ metric }: { metric: BookmarkHeaderActionState['metric'] }) {
+  constructor() {
     super({
-      metric,
       isBookmarked: false,
     });
 

@@ -1,23 +1,12 @@
-import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
-import { type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
 
-type HeatmapQueryRunnerParams = {
-  maxDataPoints: number;
-  queries: SceneDataQuery[];
-};
+import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
-type Options = {
-  metric: string;
-  isNativeHistogram: boolean;
-  queryConfig: QueryConfig;
-};
-
-export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunnerParams {
-  const { metric, isNativeHistogram, queryConfig } = options;
+export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
+  const { metric, histogramType, queryConfig } = options;
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -25,9 +14,10 @@ export function getHeatmapQueryRunnerParams(options: Options): HeatmapQueryRunne
     addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
 
-  const query = isNativeHistogram
-    ? promql.sum({ expr: promql.rate({ expr: expression }) })
-    : promql.sum({ expr: promql.rate({ expr: expression }), by: ['le'] });
+  const query =
+    histogramType === 'native'
+      ? promql.sum({ expr: promql.rate({ expr: expression }) })
+      : promql.sum({ expr: promql.rate({ expr: expression }), by: ['le'] });
 
   return {
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
