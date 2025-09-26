@@ -223,7 +223,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         panel.update(config.panelOptions, config.queryOptions);
       }
 
-      displaySuccess([`Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${metric}!`]);
+      displaySuccess([
+        `Configuration successfully ${restoreDefault ? 'restored' : 'applied'} for metric ${metric.name}!`,
+      ]);
     });
   }
 

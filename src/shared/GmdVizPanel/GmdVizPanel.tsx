@@ -109,6 +109,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }) {
     // we want a metric and panel type now to be able to render the panel as soon as possible after activation
     // so we use sync/fast heuristsics before using a 100% correct async method in onActivate() (fetching the metric metadata)
+    // note: when the metric type changes after fetching the metadata, the correct type is cached and is available in getMetricTypeSync()
     const metricType = getMetricTypeSync(metric) as MetricType;
     const prefConfig = discardUserPrefs ? undefined : getPreferredConfigForMetric(metric);
 
@@ -229,7 +230,12 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       }
 
       if (newState.metricType !== prevState.metricType || !isEqual(newState.queryConfig, prevState.queryConfig)) {
-        this.updatePanelQueries(); // update only the panel queries
+        this.updatePanelQueries(); // update the panel queries
+        // update the header actions and the menu because they have received the wrong type during the 1st render
+        this.updatePanelOptions({
+          headerActions: newState.panelConfig.headerActions,
+          menu: newState.panelConfig.menu,
+        });
       }
     });
   }
@@ -279,7 +285,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
 
     if (update.menu) {
-      body.setState({ headerActions: update.menu({ metric, panelConfig }) });
+      body.setState({ menu: update.menu({ metric, panelConfig }) });
     }
   }
 
