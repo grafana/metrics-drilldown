@@ -12,7 +12,7 @@ import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
-import { VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/LabelsVariable';
+import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/LabelsVariable';
 import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'MetricsReducer/metrics-variables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'MetricsReducer/metrics-variables/computeRulesGroups';
@@ -85,7 +85,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title: 'Group by labels',
           description: 'Group metrics by their label values',
           icon: 'groups',
-          active: sectionValues.has('groupby-labels'),
         }),
         new BookmarksList({
           key: 'bookmarks',
@@ -212,12 +211,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       sectionValues.set(filterKey, filterValueFromUrl ? filterValueFromUrl.split(',').map((v) => v.trim()) : []);
     }
 
-    const labelValue = urlSearchParams.get(`var-${VAR_WINGMAN_GROUP_BY}`);
-    const isLabelsBrowserActive = Boolean(labelValue && labelValue !== NULL_GROUP_BY_VALUE);
-    if (isLabelsBrowserActive) {
-      sectionValues.set('groupby-labels', [labelValue!]);
-    }
-
     return sectionValues;
   }
 
@@ -259,24 +252,43 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const styles = useStyles2(getStyles);
     const { sections, visibleSection, sectionValues } = model.useState();
 
+    const labelsVariableValue = sceneGraph
+      .findByKeyAndType(model, VAR_WINGMAN_GROUP_BY, LabelsVariable)
+      .useState().value;
+
     return (
       <div className={styles.container}>
         <div className={styles.buttonsBar} data-testid="sidebar-buttons">
           {sections.map((section) => {
             const { key, title, icon: iconOrText, disabled, active } = section.state;
             const visible = visibleSection?.state.key === key;
-            const tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
+            let isActive;
+            let tooltip;
+
+            if (key === 'groupby-labels') {
+              isActive = Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE);
+              tooltip = `${title}: ${labelsVariableValue}`;
+            } else {
+              isActive = active;
+              tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
+            }
 
             return (
               <div
                 key={key}
-                className={cx(styles.buttonContainer, visible && 'visible', active && 'active', disabled && 'disabled')}
+                className={cx(
+                  styles.buttonContainer,
+                  visible && 'visible',
+                  isActive && 'active',
+                  disabled && 'disabled'
+                )}
               >
                 <SideBarButton
+                  key={key}
                   ariaLabel={title}
                   disabled={disabled}
                   visible={visible}
-                  active={active}
+                  active={isActive}
                   tooltip={tooltip}
                   onClick={() => model.setActiveSection(key)}
                   iconOrText={iconOrText}
