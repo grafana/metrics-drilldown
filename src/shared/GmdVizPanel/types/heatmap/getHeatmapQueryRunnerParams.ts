@@ -6,7 +6,7 @@ import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
 export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
-  const { metric, histogramType, queryConfig } = options;
+  const { metric, queryConfig } = options;
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -15,7 +15,7 @@ export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions
   });
 
   const query =
-    histogramType === 'native'
+    metric.type === 'native-histogram'
       ? promql.sum({ expr: promql.rate({ expr: expression }) })
       : promql.sum({ expr: promql.rate({ expr: expression }), by: ['le'] });
 
@@ -23,7 +23,7 @@ export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries: [
       {
-        refId: `${metric}-heatmap`,
+        refId: `${metric.name}-heatmap`,
         expr: query,
         format: 'heatmap',
         fromExploreMetrics: true,

@@ -12,6 +12,7 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
+import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
@@ -61,8 +62,13 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return groupByVariable;
   }
 
-  private updateBody(groupByVariable: QueryVariable) {
-    const { metric } = this.state;
+  private async updateBody(groupByVariable: QueryVariable) {
+    const { metric: name } = this.state;
+
+    const metric = {
+      name,
+      type: await getMetricType(name, getTrailFor(this)),
+    };
 
     this.setState({
       body: groupByVariable.hasAllValue()

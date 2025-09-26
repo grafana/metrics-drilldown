@@ -20,7 +20,7 @@ export function getStatushistoryQueryRunnerParams(options: GetQueryRunnerParamsO
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 200 : 100,
     queries: [
       {
-        refId: `${metric}-status`,
+        refId: `${metric.name}-status`,
         expr: query,
         legendFormat: 'status',
         fromExploreMetrics: true,

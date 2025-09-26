@@ -6,18 +6,17 @@ import {
 
 import { trailDS } from 'shared/shared';
 
+import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 import { getUnit } from '../../units/getUnit';
 import { type BuildVizPanelOptions } from '../panelBuilder';
-import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 
 export function buildHeatmapPanel(options: BuildVizPanelOptions): VizPanel {
-  const { metric, histogramType, panelConfig, queryConfig } = options;
+  const { metric, panelConfig, queryConfig } = options;
   const queryParams = getHeatmapQueryRunnerParams({
     metric,
     queryConfig,
-    histogramType,
   });
-  const unit = getUnit(metric);
+  const unit = getUnit(metric.name);
 
   const queryRunner =
     queryConfig.data ||

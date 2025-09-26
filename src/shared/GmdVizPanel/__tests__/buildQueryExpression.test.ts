@@ -6,9 +6,9 @@ describe('buildQueryExpression(options)', () => {
   test.each([
     ['non-utf8', 'go_goroutines', 'go_goroutines{${filters:raw}}'],
     ['utf8', '🔥go_goroutines', '🔥go_goroutines{"🔥go_goroutines", ${filters:raw}}'],
-  ])('supports %s metric names', (_, metric, expected) => {
+  ])('supports %s metric names', (_, name, expected) => {
     const expression = buildQueryExpression({
-      metric,
+      metric: { name, type: 'gauge' },
       labelMatchers: [],
       addIgnoreUsageFilter: false,
       addExtremeValuesFiltering: false,
@@ -24,9 +24,9 @@ describe('buildQueryExpression(options)', () => {
       '🔥go_goroutines',
       '🔥go_goroutines{cluster="test", instance!="us-east:5000", "🔥go_goroutines", ${filters:raw}}',
     ],
-  ])('supports labels (%s)', (_, metric, expected) => {
+  ])('supports labels (%s)', (_, name, expected) => {
     const expression = buildQueryExpression({
-      metric,
+      metric: { name, type: 'gauge' },
       labelMatchers: [
         { key: 'cluster', operator: MatchingOperator.equal, value: 'test' },
         { key: 'instance', operator: MatchingOperator.notEqual, value: 'us-east:5000' },
@@ -49,9 +49,9 @@ describe('buildQueryExpression(options)', () => {
       '🔥go_goroutines',
       '🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}}',
     ],
-  ])('supports ignore usage filter (%s)', (_, metric, expected) => {
+  ])('supports ignore usage filter (%s)', (_, name, expected) => {
     const expression = buildQueryExpression({
-      metric,
+      metric: { name, type: 'gauge' },
       labelMatchers: [
         { key: 'cluster', operator: MatchingOperator.equal, value: 'test' },
         { key: 'instance', operator: MatchingOperator.notEqual, value: 'us-east:5000' },
@@ -76,9 +76,9 @@ describe('extreme value filtering', () => {
       '🔥go_goroutines',
       '🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} and 🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} > -Inf',
     ],
-  ])('supports extreme value filtering  (%s)', (_, metric, expected) => {
+  ])('supports extreme value filtering  (%s)', (_, name, expected) => {
     const expression = buildQueryExpression({
-      metric,
+      metric: { name, type: 'gauge' },
       labelMatchers: [
         { key: 'cluster', operator: MatchingOperator.equal, value: 'test' },
         { key: 'instance', operator: MatchingOperator.notEqual, value: 'us-east:5000' },

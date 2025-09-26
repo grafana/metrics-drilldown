@@ -5,8 +5,7 @@ import { getPercentilesQueryRunnerParams } from '../getPercentilesQueryRunnerPar
 describe('getPercentilesQueryRunnerParams(options)', () => {
   test('handles gauge metrics', () => {
     const result = getPercentilesQueryRunnerParams({
-      metric: 'go_goroutines',
-      histogramType: 'none',
+      metric: { name: 'go_goroutines', type: 'gauge' },
       queryConfig: {
         resolution: QUERY_RESOLUTION.HIGH,
         labelMatchers: [{ key: 'instance', operator: '=', value: 'us-east:5000' }],
@@ -35,8 +34,7 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
 
   test('handles counter metrics', () => {
     const result = getPercentilesQueryRunnerParams({
-      metric: 'go_gc_heap_frees_bytes_total',
-      histogramType: 'none',
+      metric: { name: 'go_gc_heap_frees_bytes_total', type: 'counter' },
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [{ key: 'job', operator: '!=', value: 'prometheus' }],
@@ -65,8 +63,7 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
 
   test('handles native histogram metrics', () => {
     const result = getPercentilesQueryRunnerParams({
-      metric: 'grafana_database_all_migrations_duration_seconds',
-      histogramType: 'native',
+      metric: { name: 'grafana_database_all_migrations_duration_seconds', type: 'native-histogram' },
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],
@@ -89,8 +86,7 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
 
   test('handles non-native ("classic") histogram metrics', () => {
     const result = getPercentilesQueryRunnerParams({
-      metric: 'go_gc_heap_allocs_by_size_bytes_bucket',
-      histogramType: 'classic',
+      metric: { name: 'go_gc_heap_allocs_by_size_bytes_bucket', type: 'classic-histogram' },
       queryConfig: {
         resolution: QUERY_RESOLUTION.HIGH,
         labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],

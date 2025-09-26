@@ -105,16 +105,17 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
-          const metric = option.value as string;
-
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
-              metric,
+              metric: option.value as string,
               vizPanelInGridItem: new GmdVizPanel({
-                metric,
+                metric: option.value as string,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
-                  headerActions: () => [new SelectAction({ metric }), new ConfigurePanelAction({ metric })],
+                  headerActions: ({ metric }) => [
+                    new SelectAction({ metric: metric.name }),
+                    new ConfigurePanelAction({ metric }),
+                  ],
                 },
                 queryOptions: {
                   labelMatchers: [{ key: labelName, operator: '=', value: labelValue }],

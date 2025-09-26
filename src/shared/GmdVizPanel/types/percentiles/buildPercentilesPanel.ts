@@ -7,11 +7,12 @@ import { getColorByIndex } from 'shared/utils/utils';
 
 import { type BuildVizPanelOptions } from '../panelBuilder';
 import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
+import { updateColorsWhenQueriesChange } from '../timeseries/behaviors/updateColorsWhenQueriesChange';
 
 export function buildPercentilesPanel(options: BuildVizPanelOptions) {
-  const { metric, histogramType, panelConfig, queryConfig } = options;
-  const queryParams = getPercentilesQueryRunnerParams({ metric, histogramType, queryConfig });
-  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
+  const { metric, panelConfig, queryConfig } = options;
+  const queryParams = getPercentilesQueryRunnerParams({ metric, queryConfig });
+  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric.name) : getUnit(metric.name);
 
   const $data =
     queryConfig.data ||
@@ -42,6 +43,6 @@ export function buildPercentilesPanel(options: BuildVizPanelOptions) {
         });
       });
     })
-    .setBehaviors(panelConfig.behaviors || [])
+    .setBehaviors([updateColorsWhenQueriesChange(startColorIndex), ...(panelConfig.behaviors || [])])
     .build();
 }

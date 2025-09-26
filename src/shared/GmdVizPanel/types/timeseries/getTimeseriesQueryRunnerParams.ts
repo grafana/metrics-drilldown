@@ -5,28 +5,13 @@ import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
-import { isCounterMetric } from '../../matchers/isCounterMetric';
+import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
-type TimeseriesQueryRunnerParams = {
-  isRateQuery: boolean;
-  maxDataPoints: number;
-  queries: SceneDataQuery[];
-};
-
-type Options = {
-  metric: string;
-  queryConfig: QueryConfig;
-  // When provided, overrides the name-based heuristic for applying rate().
-  // This lets callers flip rate vs raw after an async metadata check.
-  isRateQueryOverride?: boolean;
-};
-
-export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
-  const { metric, queryConfig, isRateQueryOverride } = options;
-  // Prefer explicit override when available; otherwise fall back to heuristic.
-  const isRateQuery = typeof isRateQueryOverride === 'boolean' ? isRateQueryOverride : isCounterMetric(metric);
-
+export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
+  const { metric, queryConfig } = options;
+  const isRateQuery = metric.type === 'counter';
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -52,14 +37,14 @@ function buildGroupByQueries({
   isRateQuery,
   expr,
 }: {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
   isRateQuery: boolean;
   expr: string;
 }): SceneDataQuery[] {
   return [
     {
-      refId: `${metric}-by-${queryConfig.groupBy}`,
+      refId: `${metric.name}-by-${queryConfig.groupBy}`,
       expr: isRateQuery
         ? promql.sum({ expr, by: [queryConfig.groupBy!] })
         : promql.avg({ expr, by: [queryConfig.groupBy!] }),
@@ -76,7 +61,7 @@ function buildQueriesWithPresetFunctions({
   isRateQuery,
   expr,
 }: {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
   isRateQuery: boolean;
   expr: string;
@@ -91,7 +76,7 @@ function buildQueriesWithPresetFunctions({
     const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
 
     queries.push({
-      refId: `${metric}-${fnName}`,
+      refId: `${metric.name}-${fnName}`,
       expr: query,
       legendFormat: fnName,
       fromExploreMetrics: true,

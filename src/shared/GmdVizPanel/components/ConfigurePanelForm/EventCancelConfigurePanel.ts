@@ -1,7 +1,9 @@
 import { BusEventWithPayload } from '@grafana/data';
 
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
+
 interface EventCancelConfigurePanelPayload {
-  metric: string;
+  metric: Metric;
 }
 
 export class EventCancelConfigurePanel extends BusEventWithPayload<EventCancelConfigurePanelPayload> {

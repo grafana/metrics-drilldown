@@ -1,7 +1,9 @@
 import { css } from '@emotion/css';
 import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } from '@grafana/data';
 import {
+  sceneGraph,
   SceneObjectBase,
+  SceneQueryRunner,
   type SceneComponentProps,
   type SceneDataProvider,
   type SceneObjectState,
@@ -9,7 +11,7 @@ import {
   type VizPanelState,
 } from '@grafana/scenes';
 import { useStyles2, type VizLegendOptions } from '@grafana/ui';
-import { isEqual } from 'lodash';
+import { isEqual, omitBy } from 'lodash';
 import React from 'react';
 
 import { getTrailFor } from 'shared/utils/utils';
@@ -21,14 +23,14 @@ import { getPreferredConfigForMetric } from './config/getPreferredConfigForMetri
 import { PANEL_HEIGHT } from './config/panel-heights';
 import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
+import { getMetricType, getMetricTypeSync, type Metric, type MetricType } from './matchers/getMetricType';
 import { getPanelTypeForMetricSync } from './matchers/getPanelTypeForMetric';
-import { isClassicHistogramMetric } from './matchers/isClassicHistogramMetric';
 import { type PanelType } from './types/available-panel-types';
 import { panelBuilder } from './types/panelBuilder';
 
 /* Panel config */
 
-type HeaderActionAndMenuArgs = { metric: string; panelConfig: PanelConfig };
+type HeaderActionAndMenuArgs = { metric: Metric; panelConfig: PanelConfig };
 
 export type PanelConfig = {
   type: PanelType;
@@ -83,11 +85,9 @@ export type QueryOptions = {
 
 /* GmdVizPanelState */
 
-export type HistogramType = 'native' | 'classic' | 'none';
-
 interface GmdVizPanelState extends SceneObjectState {
   metric: string;
-  histogramType: HistogramType;
+  metricType: MetricType;
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;
   body?: VizPanel;
@@ -107,20 +107,21 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     queryOptions?: QueryOptions;
     discardUserPrefs?: boolean;
   }) {
-    const histogramType = isClassicHistogramMetric(metric) ? 'classic' : 'none';
+    // we want a metric and panel type now to be able to render the panel as soon as possible after activation
+    // so we use sync/fast heuristsics before using a 100% correct async method in onActivate() (fetching the metric metadata)
+    // note: when the metric type changes after fetching the metadata, the correct type is cached and is available in getMetricTypeSync()
+    const metricType = getMetricTypeSync(metric) as MetricType;
     const prefConfig = discardUserPrefs ? undefined : getPreferredConfigForMetric(metric);
 
     super({
       key,
       metric,
-      histogramType,
+      metricType,
       panelConfig: {
-        // we want a panel type to be able to render the panel as soon as possible after activation
-        // so we don't determine if the metric is a native histogram here because it's an async process that will be done in onActivate()
-        type: panelOptions?.type || getPanelTypeForMetricSync(metric, histogramType),
+        type: panelOptions?.type || getPanelTypeForMetricSync(metric),
         title: metric,
         height: PANEL_HEIGHT.M,
-        headerActions: ({ metric }) => [new SelectAction({ metric })],
+        headerActions: ({ metric }) => [new SelectAction({ metric: metric.name })],
         ...panelOptions,
         ...prefConfig?.panelOptions,
       },
@@ -140,43 +141,70 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private async onActivate(discardPanelTypeUpdates: boolean) {
-    const { metric, panelConfig } = this.state;
-
     this.buildVizPanel();
 
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
 
-    const isNativeHistogram = await getTrailFor(this).isNativeHistogram(metric);
-    if (isNativeHistogram) {
+    this.checkMetricMetadata(discardPanelTypeUpdates);
+  }
+
+  private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
+    const { metric, metricType, panelConfig } = this.state;
+
+    const metricTypeFromMetadata = await getMetricType(metric, getTrailFor(this));
+    if (metricType === metricTypeFromMetadata) {
+      return;
+    }
+
+    const stateUpdate: Partial<GmdVizPanelState> = {};
+    const panelConfigUpdate: Partial<GmdVizPanelState['panelConfig']> = {};
+
+    // we found a native histogram
+    if (metricTypeFromMetadata === 'native-histogram') {
+      stateUpdate.metricType = 'native-histogram';
+      panelConfigUpdate.description = panelConfig.description ?? 'Native Histogram';
+
+      if (!discardPanelTypeUpdates) {
+        panelConfigUpdate.type = 'heatmap';
+      }
+    }
+
+    // we found a gauge metric that was previously identified as a counter (see https://github.com/grafana/metrics-drilldown/issues/698)
+    if (metricTypeFromMetadata === 'gauge' && metricType === 'counter') {
+      stateUpdate.metricType = 'gauge';
+    }
+    // or the opposite
+    if (metricTypeFromMetadata === 'counter' && metricType === 'gauge') {
+      stateUpdate.metricType = 'counter';
+    }
+
+    if (Object.keys(stateUpdate).length || Object.keys(panelConfigUpdate).length) {
       this.setState({
-        histogramType: 'native',
-        panelConfig: discardPanelTypeUpdates
-          ? panelConfig
-          : { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
+        ...stateUpdate,
+        panelConfig: { ...panelConfig, ...panelConfigUpdate },
       });
     }
   }
 
   private subscribeToStateChanges(discardPanelTypeUpdates: boolean) {
-    const { histogramType, body, panelConfig } = this.state;
+    const { metricType, body, panelConfig } = this.state;
 
     // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
     // we give another chance to display it properly by looking into the data frame type received
-    if (!discardPanelTypeUpdates && histogramType === 'none') {
+    if (!discardPanelTypeUpdates && !['classic-histogram', 'native-histogram'].includes(metricType)) {
       const bodySub = (body?.state.$data as SceneDataProvider)?.subscribeToState((newState) => {
         if (newState.data?.state !== LoadingState.Done) {
           return;
         }
 
-        const dataFrameType = newState.data.series[0]?.meta?.type;
+        const dataFrameType = newState.data.series?.[0]?.meta?.type;
         if (!dataFrameType) {
           return;
         }
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
           this.setState({
-            histogramType: 'native',
             panelConfig: { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
           });
         }
@@ -188,12 +216,26 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
 
     this.subscribeToState((newState, prevState) => {
-      if (
-        newState.histogramType !== prevState.histogramType ||
-        !isEqual(newState.panelConfig, prevState.panelConfig) ||
-        !isEqual(newState.queryConfig, prevState.queryConfig)
-      ) {
-        this.buildVizPanel();
+      if (newState.panelConfig.type !== prevState.panelConfig.type) {
+        this.buildVizPanel(); // rebuild the whole panel
+        return;
+      }
+
+      if (!isEqual(newState.panelConfig, prevState.panelConfig)) {
+        const diff = omitBy(
+          newState.panelConfig,
+          (value, key) => value === prevState.panelConfig[key as keyof typeof prevState.panelConfig]
+        );
+        this.updatePanelOptions(diff); // update only the panel options that have changed
+      }
+
+      if (newState.metricType !== prevState.metricType || !isEqual(newState.queryConfig, prevState.queryConfig)) {
+        this.updatePanelQueries(); // update the panel queries
+        // update the header actions and the menu because they have received the wrong type during the 1st render
+        this.updatePanelOptions({
+          headerActions: newState.panelConfig.headerActions,
+          menu: newState.panelConfig.menu,
+        });
       }
     });
   }
@@ -210,16 +252,65 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private buildVizPanel() {
-    const { metric, panelConfig, queryConfig, histogramType } = this.state;
+    const { metric: name, metricType, panelConfig, queryConfig } = this.state;
 
     this.setState({
       body: panelBuilder.buildVizPanel({
-        metric,
+        metric: { name, type: metricType },
         panelConfig,
         queryConfig,
-        histogramType,
       }),
     });
+  }
+
+  private updatePanelOptions(update: Partial<PanelOptions>) {
+    const { metric: name, metricType, body, panelConfig } = this.state;
+    if (!body) {
+      return;
+    }
+
+    const metric = {
+      name,
+      type: metricType,
+    };
+
+    // we support only a subset of options that work for the current app
+    // in the future, if we want to add more support, check each buildXYZPanel functions
+    if (update.description) {
+      body.setState({ description: update.description });
+    }
+
+    if (update.headerActions) {
+      body.setState({ headerActions: update.headerActions({ metric, panelConfig }) });
+    }
+
+    if (update.menu) {
+      body.setState({ menu: update.menu({ metric, panelConfig }) });
+    }
+  }
+
+  private updatePanelQueries() {
+    const { body, metric, metricType, panelConfig, queryConfig } = this.state;
+    if (!body) {
+      return;
+    }
+
+    const [queryRunner] = sceneGraph.findDescendents(body, SceneQueryRunner);
+    if (!queryRunner) {
+      return;
+    }
+
+    const queryRunnerParams = panelBuilder.getQueryRunnerParams({
+      panelType: panelConfig.type,
+      metric: { name: metric, type: metricType },
+      queryConfig,
+    });
+
+    queryRunner.setState({
+      queries: queryRunnerParams.queries,
+    });
+
+    queryRunner.runQueries(); // Scenes will cancel any running query
   }
 
   public update(panelOptions: PanelOptions, queryOptions: QueryOptions) {

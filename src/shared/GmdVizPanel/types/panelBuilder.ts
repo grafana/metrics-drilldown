@@ -1,7 +1,8 @@
 import { type SceneDataQuery, type VizPanel } from '@grafana/scenes';
 
-import { type HistogramType, type PanelConfig, type QueryConfig } from '../GmdVizPanel';
+import { type PanelConfig, type QueryConfig } from '../GmdVizPanel';
 import { type PanelType } from './available-panel-types';
+import { type Metric } from '../matchers/getMetricType';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { getHeatmapQueryRunnerParams } from './heatmap/getHeatmapQueryRunnerParams';
 import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';
@@ -14,16 +15,14 @@ import { buildTimeseriesPanel } from './timeseries/buildTimeseriesPanel';
 import { getTimeseriesQueryRunnerParams } from './timeseries/getTimeseriesQueryRunnerParams';
 
 export type BuildVizPanelOptions = {
-  metric: string;
+  metric: Metric;
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;
-  histogramType?: HistogramType; // heatmap & percentiles
 };
 
 export type GetQueryRunnerParamsOptions = {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
-  histogramType?: HistogramType; //  heatmap & percentiles
 };
 
 export type QueryRunnerParams = {

@@ -71,16 +71,17 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
             reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
           }),
         getLayoutChild: (option, colorIndex) => {
-          const metric = option.value as string;
-
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
               metric: option.value as string,
               vizPanelInGridItem: new GmdVizPanel({
-                metric,
+                metric: option.value as string,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
-                  headerActions: () => [new ConfigurePanelAction({ metric }), new SelectAction({ metric })],
+                  headerActions: ({ metric }) => [
+                    new ConfigurePanelAction({ metric }),
+                    new SelectAction({ metric: metric.name }),
+                  ],
                 },
               }),
             }),
