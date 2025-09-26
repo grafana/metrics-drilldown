@@ -1,19 +1,13 @@
 import { PanelBuilders, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 
-import { type PanelConfig, type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
 import { trailDS } from 'shared/shared';
 import { getColorByIndex } from 'shared/utils/utils';
 
+import { type BuildVizPanelOptions } from '../panelBuilder';
 import { getStatQueryRunnerParams } from './getStatQueryRunnerParams';
 import { UP_DOWN_VALUE_MAPPINGS } from '../statushistory/value-mappings';
 
-type StatushistoryPanelOptions = {
-  metric: string;
-  panelConfig: PanelConfig;
-  queryConfig: QueryConfig;
-};
-
-export function buildStatPanel(options: StatushistoryPanelOptions): VizPanel {
+export function buildStatPanel(options: BuildVizPanelOptions): VizPanel {
   const { metric, panelConfig, queryConfig } = options;
   const queryParams = getStatQueryRunnerParams({ metric, queryConfig });
   const unit = 'none';
