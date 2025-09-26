@@ -4,6 +4,7 @@
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
+    "preversion": "./scripts/preversion-ensure-origin-main.sh",
     "prebuild": "./scripts/update-commit-sha.sh",
     "build": "webpack -c ./webpack.config.ts --env production",
     "dev": "webpack -w -c ./webpack.config.ts --env development",

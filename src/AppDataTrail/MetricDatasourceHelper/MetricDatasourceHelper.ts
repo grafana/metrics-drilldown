@@ -15,7 +15,6 @@ import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/
 import { type Unsubscribable } from 'rxjs';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { displayError, displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
@@ -33,6 +32,7 @@ export type PrometheusRuntimeDatasource = Omit<PrometheusDatasource, 'languagePr
 };
 
 export class MetricDatasourceHelper {
+  private initialized = false;
   private trail: DataTrail;
   private datasource?: PrometheusRuntimeDatasource;
   private cache = {
@@ -53,30 +53,21 @@ export class MetricDatasourceHelper {
   }
 
   public init() {
+    this.initialized = true;
     this.reset();
-
-    for (const sub of this.subs) {
-      sub.unsubscribe();
-    }
-
-    this.subs = [];
-
-    const datasourceVariable = sceneGraph.findByKeyAndType(
-      this.trail,
-      VAR_DATASOURCE,
-      MetricsDrilldownDataSourceVariable
-    );
-
-    this.subs.push(
-      datasourceVariable.subscribeToState(async (newState, prevState) => {
-        if (newState.value !== prevState.value) {
-          this.reset();
-        }
-      })
-    );
   }
 
-  private reset() {
+  public reset() {
+    // Prevents duplicate metadata fetching during DataTrail initialization.
+    // This method is called twice when landing on a DataTrail:
+    // 1. During activation via init() -> reset()
+    // 2. After activation via onReferencedVariableValueChanged() (called automatically)
+    // The early return prevents the second call from clearing the cache and refetching
+    // metadata that was already loaded during the first call.
+    if (!this.initialized) {
+      return;
+    }
+
     this.datasource = undefined;
 
     this.cache = {

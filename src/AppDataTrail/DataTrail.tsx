@@ -15,6 +15,7 @@ import {
   SceneVariableSet,
   ScopesVariable,
   UrlSyncContextProvider,
+  VariableDependencyConfig,
   VariableValueSelectors,
   type SceneComponentProps,
   type SceneObject,
@@ -40,7 +41,7 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
-import { MetricSelectedEvent, trailDS, VAR_FILTERS } from '../shared/shared';
+import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
 import { limitAdhocProviders } from '../shared/utils/utils';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
@@ -75,6 +76,13 @@ export interface DataTrailState extends SceneObjectState {
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   private disableReportFiltersInteraction = false;
   private datasourceHelper = new MetricDatasourceHelper(this);
+
+  protected _variableDependency = new VariableDependencyConfig(this, {
+    variableNames: [VAR_DATASOURCE],
+    onReferencedVariableValueChanged: () => {
+      this.datasourceHelper.reset();
+    },
+  });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: ['metric'],
@@ -111,7 +119,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private onActivate() {
-    this.datasourceHelper.init();
+    // Delays init() to ensure proper initialization order and avoid race conditions.
+    // The variable dependency handler (onReferencedVariableValueChanged) calls reset()
+    // when landing, but we're uncertain whether it will always be called automatically
+    // in all scenarios. Using setTimeout ensures init() runs after variable changes
+    // are processed.
+    setTimeout(() => {
+      this.datasourceHelper.init();
+    }, 0);
 
     this.updateStateForNewMetric(this.state.metric);
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
