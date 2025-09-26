@@ -1,21 +1,11 @@
-import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
-import { type QueryConfig } from 'shared/GmdVizPanel/GmdVizPanel';
 
-type StatushistoryQueryRunnerParams = {
-  maxDataPoints: number;
-  queries: SceneDataQuery[];
-};
+import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
-type Options = {
-  metric: string;
-  queryConfig: QueryConfig;
-};
-
-export function getStatushistoryQueryRunnerParams(options: Options): StatushistoryQueryRunnerParams {
+export function getStatushistoryQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
   const { metric, queryConfig } = options;
   const expression = buildQueryExpression({
     metric,

@@ -6,7 +6,7 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
   test('handles native histogram metrics', () => {
     const result = getHeatmapQueryRunnerParams({
       metric: 'grafana_database_all_migrations_duration_seconds',
-      isNativeHistogram: true,
+      histogramType: 'native',
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],
@@ -28,7 +28,7 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
   test('handles non-native histogram metrics', () => {
     const result = getHeatmapQueryRunnerParams({
       metric: 'go_gc_heap_allocs_by_size_bytes_bucket',
-      isNativeHistogram: false,
+      histogramType: 'classic',
       queryConfig: {
         resolution: QUERY_RESOLUTION.HIGH,
         labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],

@@ -26,6 +26,7 @@ export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQuer
   const { metric, queryConfig, isRateQueryOverride } = options;
   // Prefer explicit override when available; otherwise fall back to heuristic.
   const isRateQuery = typeof isRateQueryOverride === 'boolean' ? isRateQueryOverride : isCounterMetric(metric);
+
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
