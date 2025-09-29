@@ -3,11 +3,12 @@ import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
 
 import { exposedComponentConfigs } from 'exposedComponents/components';
+import { datasourceConfigLinkConfigs } from 'extensions/datasourceConfigLinks';
 import { linkConfigs } from 'extensions/links';
-import { logger } from 'tracking/logger/logger';
+import { logger } from 'shared/logger/logger';
 
 const LazyApp = lazy(async () => {
-  const { wasmSupported } = await import('./services/sorting');
+  const { wasmSupported } = await import('./shared/services/sorting');
   const { default: initOutlier } = await import('@bsull/augurs/outlier');
 
   if (wasmSupported()) {
@@ -31,7 +32,8 @@ const App = (props: AppRootProps) => (
 
 export const plugin = new AppPlugin<{}>().setRootPage(App);
 
-for (const linkConfig of linkConfigs) {
+// Register all extension types
+for (const linkConfig of [...linkConfigs, ...datasourceConfigLinkConfigs]) {
   plugin.addLink(linkConfig);
 }
 

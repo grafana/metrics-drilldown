@@ -1,8 +1,9 @@
 import { expect, type Page } from '@playwright/test';
 
 import { DrilldownView } from './DrilldownView';
-import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
-import { UI_TEXT } from '../../../src/constants/ui';
+import { PLUGIN_BASE_URL } from '../../../src/shared/constants/plugin';
+import { ROUTES } from '../../../src/shared/constants/routes';
+import { UI_TEXT } from '../../../src/shared/constants/ui';
 import { AppControls } from '../components/AppControls';
 import { QuickSearchInput } from '../components/QuickSearchInput';
 import { Sidebar } from '../components/Sidebar';
@@ -38,28 +39,6 @@ export class MetricsReducerView extends DrilldownView {
     await this.sidebar.assert();
     await this.assertListControls();
     await this.assertMetricsList();
-  }
-
-  /* Ad Hoc filters */
-
-  async assertAdHocFilter(labelName: string, operator: string, labelValue: string) {
-    const filter = this.getByRole('button', { name: `Edit filter with key ${labelName}` });
-    await expect(filter).toBeVisible();
-    await expect(filter).toHaveText(`${labelName} ${operator} ${labelValue}`);
-  }
-
-  async clearAdHocFilter(labelName: string) {
-    await this.getByRole('button', { name: `Remove filter with key ${labelName}` }).click();
-    await this.getByTestId('metrics-drilldown-app').click(); // prevents the dropdown to appear
-  }
-
-  async setAdHocFilter(labelName: string, operator: string, labelValue: string) {
-    await this.getByRole('combobox', { name: 'Filter by label values' }).click();
-    await this.getByRole('option', { name: labelName }).click();
-    await this.page.keyboard.type(operator);
-    await this.page.keyboard.press('Enter');
-    await this.page.keyboard.type(labelValue);
-    await this.page.keyboard.press('Enter');
   }
 
   /* List controls */
@@ -163,7 +142,7 @@ export class MetricsReducerView extends DrilldownView {
     expect(panelsCount).toBeGreaterThan(0);
 
     // TODO: find a better way
-    await this.waitForTimeout(2500); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
+    await this.waitForTimeout(2000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   async selectMetricsGroup(labelName: string, labelValue: string) {

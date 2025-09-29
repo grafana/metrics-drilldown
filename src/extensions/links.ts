@@ -1,19 +1,19 @@
 // CAUTION: Imports in this file will contribute to the module.tsx bundle size
 import {
   PluginExtensionPoints,
-  type CustomVariableModel,
   type PluginExtensionAddedLinkConfig,
   type PluginExtensionPanelContext,
-  type QueryVariableModel,
 } from '@grafana/data';
-import { config, getTemplateSrv } from '@grafana/runtime';
+import { interpolateQueryExpr } from '@grafana/prometheus';
+import { getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
-import { parser } from '@prometheus-io/lezer-promql';
+
+import { PLUGIN_BASE_URL } from 'shared/constants/plugin';
+import { ROUTES } from 'shared/constants/routes';
+import { logger } from 'shared/logger/logger';
 
 import { parseMatcher } from './parseMatcher';
-import { PLUGIN_BASE_URL, ROUTES } from '../constants';
-import { logger } from '../tracking/logger/logger';
-import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../utils/utils.promql';
+import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../shared/utils/utils.promql';
 
 const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
@@ -41,7 +41,14 @@ export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPa
       'grafana/alerting/alertingrule/queryeditor',
       ASSISTANT_TARGET_V1,
     ],
-    configure: configureDrilldownLink,
+    configure: configureDrilldownLinkForAsync,
+    onClick: async (_, helpers) => {
+      const context = helpers.context;
+      const url = await buildDrilldownUrlAsync(context);
+      if (url) {
+        window.location.href = url;
+      }
+    },
   },
   {
     targets: [ASSISTANT_TARGET_V0],
@@ -69,7 +76,8 @@ export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPa
   },
 ];
 
-export function configureDrilldownLink<T extends PluginExtensionPanelContext>(context?: T) {
+// Simplified configure function for async onClick approach
+export function configureDrilldownLinkForAsync<T extends PluginExtensionPanelContext>(context?: T) {
   if (typeof context === 'undefined') {
     return;
   }
@@ -84,22 +92,42 @@ export function configureDrilldownLink<T extends PluginExtensionPanelContext>(co
     return;
   }
 
+  // Just return a basic config - the real URL building happens in onClick
+  return {};
+}
+
+// Async URL building function that uses lazy-loaded lezer parser
+export async function buildDrilldownUrlAsync<T extends PluginExtensionPanelContext>(
+  context?: T
+): Promise<string | null> {
+  if (typeof context === 'undefined') {
+    return null;
+  }
+
+  if ('pluginId' in context && context.pluginId !== 'timeseries') {
+    return null;
+  }
+
+  const queries = context.targets.filter(isPromQuery);
+
+  if (!queries.length) {
+    return null;
+  }
+
   const prometheusQuery = queries[0] as PromQuery;
 
   const templateSrv = getTemplateSrv();
-  const datasourceUid = templateSrv.replace(prometheusQuery?.datasource?.uid, context.scopedVars);
+  const datasourceUid = templateSrv.replace(prometheusQuery.datasource?.uid, context.scopedVars);
 
   // allow the user to navigate to the drilldown without a query (metrics reducer view)
   if (!prometheusQuery.expr) {
-    return {
-      path: createAppUrl(ROUTES.Drilldown),
-    };
+    return createAppUrl(ROUTES.Drilldown);
   }
 
   const expr = templateSrv.replace(prometheusQuery.expr, context.scopedVars, interpolateQueryExpr);
 
   try {
-    const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
+    const { metric, labels, hasErrors, errors } = await parsePromQLQuery(expr);
 
     if (hasErrors) {
       logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
@@ -118,21 +146,42 @@ export function configureDrilldownLink<T extends PluginExtensionPanelContext>(co
 
     const params = buildNavigateToMetricsParams(promURLObject);
 
-    const pathToMetricView = createAppUrl(ROUTES.Drilldown, params);
-
-    return {
-      path: pathToMetricView,
-    };
+    return createAppUrl(ROUTES.Drilldown, params);
   } catch (error) {
     logger.error(new Error(`[Metrics Drilldown] Error parsing PromQL query: ${error}`));
 
-    return {
-      path: createAppUrl(ROUTES.Drilldown),
-    };
+    return createAppUrl(ROUTES.Drilldown);
   }
 }
 
-export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
+// Legacy synchronous configure function (kept for compatibility)
+// Note: This doesn't parse PromQL - use the async onClick approach above for full functionality
+export function configureDrilldownLink<T extends PluginExtensionPanelContext>(context?: T) {
+  if (typeof context === 'undefined') {
+    return;
+  }
+
+  if ('pluginId' in context && context.pluginId !== 'timeseries') {
+    return;
+  }
+
+  const queries = context.targets.filter(isPromQuery);
+
+  if (!queries.length) {
+    return;
+  }
+
+  // Just return a basic path without PromQL parsing
+  return {
+    path: createAppUrl(ROUTES.Drilldown),
+  };
+}
+
+// Async PromQL parser using lazy-loaded lezer parser
+// lazy loading the parser to reduce the initial bundle size by ~52kB
+export async function parsePromQLQuery(expr: string): Promise<ParsedPromQLQuery> {
+  // Use dynamic import for lazy loading to reduce initial bundle size
+  const { parser } = await import('@prometheus-io/lezer-promql');
   const tree = parser.parse(expr);
   let metric = '';
   const labels: PromQLLabelMatcher[] = [];
@@ -259,7 +308,7 @@ export const UrlParameters = {
 
 type UrlParameterType = (typeof UrlParameters)[keyof typeof UrlParameters];
 
-function appendUrlParameters(
+export function appendUrlParameters(
   params: Array<[UrlParameterType, string | undefined]>,
   initialParams?: URLSearchParams
 ): URLSearchParams {
@@ -279,75 +328,6 @@ type PromQuery = DataQuery & { expr: string };
 function isPromQuery(query: DataQuery): query is PromQuery {
   const { datasource } = query;
   return datasource?.type === 'prometheus';
-}
-
-// Copied from interpolateQueryExpr in prometheus datasource, as we can't return a promise in the link extension config we can't fetch the datasource from the datasource srv, so we're forced to duplicate this method
-// eslint-disable-next-line sonarjs/function-return-type
-function interpolateQueryExpr(
-  value: string | string[] = [],
-  variable: QueryVariableModel | CustomVariableModel
-): string | string[] {
-  // if no multi or include all do not regexEscape
-  if (!variable.multi && !variable.includeAll) {
-    return prometheusRegularEscape(value);
-  }
-
-  if (typeof value === 'string') {
-    return prometheusSpecialRegexEscape(value);
-  }
-
-  const escapedValues = value.map((val) => prometheusSpecialRegexEscape(val));
-
-  if (escapedValues.length === 1) {
-    return escapedValues[0];
-  }
-
-  return '(' + escapedValues.join('|') + ')';
-}
-
-// not exported from @grafana/prometheus, so we're forced to duplicate it here
-// eslint-disable-next-line sonarjs/function-return-type
-function prometheusRegularEscape<T>(value: T) {
-  if (typeof value !== 'string') {
-    return value;
-  }
-
-  if (config.featureToggles.prometheusSpecialCharsInLabelValues) {
-    // if the string looks like a complete label matcher (e.g. 'job="grafana"' or 'job=~"grafana"'),
-    // don't escape the encapsulating quotes
-    if (/^\w+(=|!=|=~|!~)".*"$/.test(value)) {
-      return value;
-    }
-
-    return value
-      .replace(/\\/g, '\\\\') // escape backslashes
-      .replace(/"/g, '\\"'); // escape double quotes
-  }
-
-  // classic behavior
-  return value
-    .replace(/\\/g, '\\\\') // escape backslashes
-    .replace(/'/g, "\\\\'"); // escape single quotes
-}
-
-// not exported from @grafana/prometheus, so we're forced to duplicate it here
-// eslint-disable-next-line sonarjs/function-return-type
-function prometheusSpecialRegexEscape<T>(value: T) {
-  if (typeof value !== 'string') {
-    return value;
-  }
-
-  if (config.featureToggles.prometheusSpecialCharsInLabelValues) {
-    return value
-      .replace(/\\/g, '\\\\\\\\') // escape backslashes
-      .replace(/"/g, '\\\\\\"') // escape double quotes
-      .replace(/[$^*{}\[\]\'+?.()|]/g, '\\\\$&'); // escape regex metacharacters
-  }
-
-  // classic behavior
-  return value
-    .replace(/\\/g, '\\\\\\\\') // escape backslashes
-    .replace(/[$^*{}\[\]+?.()|]/g, '\\\\$&'); // escape regex metacharacters
 }
 
 // Need to export this function from scenes because importing scenesUtils is increasing the bundle entry point size by 522.51kB

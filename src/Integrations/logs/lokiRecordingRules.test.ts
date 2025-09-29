@@ -1,10 +1,10 @@
 import { of } from 'rxjs';
 
-import { getMockPlugin } from 'test/mocks/plugin';
+import { logger } from 'shared/logger/logger';
 
 import { type MetricsLogsConnector } from './base';
 import { createLokiRecordingRulesConnector, type RecordingRuleGroup } from './lokiRecordingRules';
-import { logger } from '../../tracking/logger/logger';
+import { getMockPlugin } from '../../test/mocks/plugin';
 
 import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
 import type * as runtime from '@grafana/runtime';
@@ -119,12 +119,9 @@ jest.mock('@grafana/runtime', () => ({
 }));
 
 describe('LokiRecordingRulesConnector', () => {
-  let loggerWarnSpy: jest.SpyInstance;
-
   beforeEach(() => {
     getListSpy.mockReturnValue([mockLokiDS1, mockLokiDS2]);
     fetchSpy.mockImplementation(defaultFetchImpl);
-    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
   });
 
   describe('getDataSources', () => {
@@ -182,7 +179,7 @@ describe('LokiRecordingRulesConnector', () => {
       // Should still get results from the working datasource
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({ name: 'Loki Main', uid: 'loki1' });
-      expect(loggerWarnSpy).toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 

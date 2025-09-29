@@ -2,39 +2,57 @@ import { expect, test } from '../../fixtures';
 
 type CategoryTest = {
   category: 'gauges and counters' | 'histograms' | 'others';
-  namesAndPresets: Array<[string, string, string[]]>;
+  nameLabelPresets: Array<{ metric: string; label: string; presetName: string; presetParams: string[] }>;
 };
 
 const TEST_DATA: CategoryTest[] = [
   {
     category: 'gauges and counters',
-    namesAndPresets: [
+    nameLabelPresets: [
       // gauge with no unit
-      ['go_goroutines', 'Standard deviation', []],
+      { metric: 'go_goroutines', label: 'job', presetName: 'Standard deviation', presetParams: [] },
       // gauge with "bytes" unit
-      ['go_memstats_heap_inuse_bytes', 'Minimum and maximum', []],
+      { metric: 'go_memstats_heap_inuse_bytes', label: 'job', presetName: 'Minimum and maximum', presetParams: [] },
       // counter / click on P95, P90 and P50 => P99 and P95 are selected
-      ['prometheus_http_requests_total', 'Percentiles', ['P95', 'P90', 'P50']],
+      {
+        metric: 'prometheus_http_requests_total',
+        label: 'code',
+        presetName: 'Percentiles',
+        presetParams: ['P95', 'P90', 'P50'],
+      },
     ],
   },
   {
     category: 'histograms',
-    namesAndPresets: [
+    nameLabelPresets: [
       // native histogram / click on P99 => P90 and P50 are selected
-      ['prometheus_http_request_duration_seconds', 'Percentiles', ['P99']],
+      {
+        metric: 'prometheus_http_request_duration_seconds',
+        label: 'handler',
+        presetName: 'Percentiles',
+        presetParams: ['P99'],
+      },
       // non-native histogram / click on P99 and P50 => P90 is selected
-      ['http_server_duration_milliseconds_bucket', 'Percentiles', ['P99', 'P50']],
+      {
+        metric: 'go_gc_heap_allocs_by_size_bytes_bucket',
+        label: 'job',
+        presetName: 'Percentiles',
+        presetParams: ['P99', 'P50'],
+      },
     ],
   },
   {
     category: 'others',
-    namesAndPresets: [
+    nameLabelPresets: [
       // age
-      ['grafana_alerting_ticker_last_consumed_tick_timestamp_seconds', 'Average age', []],
-      // info
-      ['pyroscope_build_info', 'Sum', []],
+      {
+        metric: 'grafana_alerting_ticker_last_consumed_tick_timestamp_seconds',
+        label: 'instance',
+        presetName: 'Average age',
+        presetParams: [],
+      },
       // status up/down
-      ['up', 'Stat with latest value', []],
+      { metric: 'up', label: 'job', presetName: 'Stat with latest value', presetParams: [] },
     ],
   },
 ];
@@ -46,8 +64,8 @@ test.describe('Metrics reducer: panel types', () => {
 
   // eslint-disable-next-line playwright/expect-expect
   test('All panel types', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
-    const searchText = TEST_DATA.flatMap(({ namesAndPresets }) =>
-      namesAndPresets.map(([metricName]) => `^${metricName}$`)
+    const searchText = TEST_DATA.flatMap(({ nameLabelPresets }) =>
+      nameLabelPresets.map(({ metric }) => `^${metric}$`)
     ).join(',');
     await metricsReducerView.quickSearch.enterText(searchText);
     await metricsReducerView.assertMetricsList();
@@ -71,28 +89,41 @@ test.describe('Metrics reducer: panel types', () => {
     );
   });
 
-  for (const { category, namesAndPresets } of TEST_DATA) {
+  for (const { category, nameLabelPresets } of TEST_DATA) {
     test(`Each metric type in its corresponding panel (${category})`, async ({
       metricsReducerView,
       metricSceneView,
       expectScreenshotInCurrentGrafanaVersion,
     }) => {
-      const searchText = namesAndPresets.map(([metricName]) => `^${metricName}$`).join(',');
+      const searchText = nameLabelPresets.map(({ metric }) => `^${metric}$`).join(',');
       await metricsReducerView.quickSearch.enterText(searchText);
 
-      for (const [metricName, presetName, presetParams] of namesAndPresets) {
-        await metricsReducerView.selectMetricPanel(metricName);
+      for (const { metric, label, presetName, presetParams } of nameLabelPresets) {
+        // select panel
+        await metricsReducerView.selectMetricPanel(metric);
+        await metricSceneView.assertMainViz(metric);
+        await expect(metricSceneView.getMainViz()).toHaveScreenshot(`metric-scene-main-viz-${metric}.png`);
 
-        await metricSceneView.assertMainViz(metricName);
-        await expect(metricSceneView.getMainViz()).toHaveScreenshot(`metric-scene-main-viz-${metricName}.png`);
+        await metricSceneView.selectLabel(label);
+        await metricSceneView.assertBreadownListControls({ label, sortBy: 'Outlying series' });
 
+        // open config slider and apply config
         await metricSceneView.clickPanelConfigureButton();
         await expect(metricSceneView.getConfigureSlider()).toHaveScreenshot(
-          `metric-scene-configure-slider-${category}-${metricName}.png`
+          `metric-scene-configure-slider-${category}-${metric}.png`
         );
         await metricSceneView.selectAndApplyConfigPreset(presetName, presetParams);
 
-        await metricSceneView.goBack();
+        // wait for panels updates
+        await metricSceneView.assertPanelsList();
+        await expectScreenshotInCurrentGrafanaVersion(
+          metricSceneView.getPanelsList(),
+          `metric-scene-labels-after-configure-${category}-${metric}.png`
+        );
+
+        // got back to metrics reducer
+        await metricSceneView.goBack(); // undo label selection
+        await metricSceneView.goBack(); // back to metrics reducer
       }
 
       await metricsReducerView.assertMetricsList();

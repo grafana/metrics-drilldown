@@ -1,14 +1,15 @@
 import { type DataSourceApi } from '@grafana/data';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
-import { Wingman } from 'App/Routes';
+import { Trail } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
-import { reportExploreMetrics } from 'interactions';
-import { newMetricsTrail } from 'utils';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { newMetricsTrail } from 'shared/utils/utils';
+import { type ParsedPromQLQuery } from 'shared/utils/utils.promql';
 
 import { parsePromQLQuery } from '../../extensions/links';
-import { toSceneTimeRange } from '../../utils/utils.timerange';
+import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
 export interface LabelBreakdownProps {
   query: string;
@@ -19,11 +20,28 @@ export interface LabelBreakdownProps {
 
 const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
   const [error] = useCatchExceptions();
-  const { metric, labels } = parsePromQLQuery(query);
+  const [parsedPromQLQuery, setParsedPromQLQuery] = useState<ParsedPromQLQuery | null>(null);
+  const initRef = useRef(false);
+
+  useEffect(() => {
+    if (!initRef.current) {
+      initRef.current = true;
+      reportExploreMetrics('exposed_component_viewed', { component: 'label_breakdown' });
+    }
+  }, []);
+
+  useEffect(() => {
+    parsePromQLQuery(query).then(setParsedPromQLQuery);
+  }, [query]);
+
+  if (!parsedPromQLQuery) {
+    return <div>Loading...</div>;
+  }
+
   const trail = newMetricsTrail({
-    metric,
+    metric: parsedPromQLQuery.metric,
     initialDS: dataSource.uid,
-    initialFilters: labels.map(({ label, op, value }) => ({
+    initialFilters: parsedPromQLQuery.labels.map(({ label, op, value }) => ({
       key: label,
       operator: op,
       value,
@@ -32,17 +50,9 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
     embedded: true,
   });
 
-  const initRef = useRef(false);
-  useEffect(() => {
-    if (!initRef.current) {
-      initRef.current = true;
-      reportExploreMetrics('exposed_component_viewed', { component: 'label_breakdown' });
-    }
-  }, []);
-
   return (
     <div data-testid="metrics-drilldown-embedded-label-breakdown">
-      {error ? <ErrorView error={error} /> : <Wingman trail={trail} />}
+      {error ? <ErrorView error={error} /> : <Trail trail={trail} />}
     </div>
   );
 };

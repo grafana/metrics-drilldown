@@ -10,6 +10,20 @@ test.describe('Metric Scene view', () => {
     await metricSceneView.assertDefaultBreadownListControls();
 
     await expect(metricSceneView.getMainViz()).toHaveScreenshot('metric-scene-main-viz.png');
+
+    await metricSceneView.assertMainPanelMenu(['Explore', 'Copy URL']); // after screenshot to prevent the menu from appearing in it
+  });
+
+  test.describe('Main viz', () => {
+    test('Shows "Explore" and "Copy URL" items in main panel menu', async ({ metricSceneView }) => {
+      await metricSceneView.goto(URL_SEARCH_PARAMS_WITH_METRIC_NAME);
+      await metricSceneView.assertMainViz(METRIC_NAME);
+
+      await metricSceneView.openMainPanelMenu();
+
+      await expect(metricSceneView.getByRole('menuitem', { name: 'Explore' })).toBeVisible();
+      await expect(metricSceneView.getByRole('menuitem', { name: 'Copy URL' })).toBeVisible();
+    });
   });
 
   test.describe('Histogram metrics', () => {
@@ -71,25 +85,33 @@ test.describe('Metric Scene view', () => {
         });
 
         test.describe('Sort by', () => {
-          test('Displays panels sorted by the selected criteria', async ({ metricSceneView }) => {
+          test('Reversed alphabetical order [Z-A]', async ({ metricSceneView }) => {
             await metricSceneView.assertPanelsList();
-
-            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
-              'metric-scene-breakdown-label-sort-outlying-panels-list.png'
-            );
-
             await metricSceneView.selectSortByOption('Name [Z-A]');
             await metricSceneView.assertPanelsList();
 
             await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
               'metric-scene-breakdown-label-sort-alpha-z-a-panels-list.png'
             );
+          });
 
+          test('Alphabetical order [A-Z]', async ({ metricSceneView }) => {
+            await metricSceneView.assertPanelsList();
             await metricSceneView.selectSortByOption('Name [A-Z]');
             await metricSceneView.assertPanelsList();
 
             await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
               'metric-scene-breakdown-label-sort-alpha-a-z-panels-list.png'
+            );
+          });
+
+          test('Outlying series', async ({ metricSceneView }) => {
+            await metricSceneView.assertPanelsList();
+            await metricSceneView.selectSortByOption('Outlying series');
+            await metricSceneView.assertPanelsList();
+
+            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
+              'metric-scene-breakdown-label-sort-outlying-panels-list.png'
             );
           });
         });
