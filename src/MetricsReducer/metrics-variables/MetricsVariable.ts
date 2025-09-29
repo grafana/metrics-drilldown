@@ -8,9 +8,10 @@ import {
 } from '@grafana/scenes';
 
 import { type LabelMatcher } from 'shared/GmdVizPanel/buildQueryExpression';
-import { trailDS, VAR_DATASOURCE, VAR_FILTERS } from 'shared/shared';
+import { trailDS, VAR_DATASOURCE } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
+import { VAR_METRICS_VAR_FILTERS } from './AdHocFiltersForMetricsVariable';
 import { withLifecycleEvents } from './withLifecycleEvents';
 
 export const VAR_METRICS_VARIABLE = 'metrics-wingman';
@@ -64,11 +65,13 @@ export class MetricsVariable extends QueryVariable {
     );
 
     this._subs.add(
-      sceneGraph.findByKeyAndType(this, VAR_FILTERS, AdHocFiltersVariable).subscribeToState((newState, prevState) => {
-        if (!this.state.query && newState.filterExpression !== prevState.filterExpression) {
-          this.toggleRecentMetrics();
-        }
-      })
+      sceneGraph
+        .findByKeyAndType(this, VAR_METRICS_VAR_FILTERS, AdHocFiltersVariable)
+        .subscribeToState((newState, prevState) => {
+          if (!this.state.query && newState.filterExpression !== prevState.filterExpression) {
+            this.toggleRecentMetrics();
+          }
+        })
     );
   }
 
@@ -86,8 +89,8 @@ export class MetricsVariable extends QueryVariable {
   public fetchAllMetrics() {
     this.setState({
       query: this.extraFilter
-        ? `label_values({${this.extraFilter},$${VAR_FILTERS}}, __name__)`
-        : `label_values({$${VAR_FILTERS}}, __name__)`,
+        ? `label_values({${this.extraFilter},$${VAR_METRICS_VAR_FILTERS}}, __name__)`
+        : `label_values({$${VAR_METRICS_VAR_FILTERS}}, __name__)`,
       refresh: VariableRefresh.onTimeRangeChanged,
     });
 
