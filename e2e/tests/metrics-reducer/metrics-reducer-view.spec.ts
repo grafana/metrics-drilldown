@@ -1,4 +1,4 @@
-import { UI_TEXT } from '../../../src/constants/ui';
+import { UI_TEXT } from '../../../src/shared/constants/ui';
 import { expect, test } from '../../fixtures';
 import { type SortByOptionNames } from '../../fixtures/views/MetricsReducerView';
 
@@ -54,21 +54,26 @@ test.describe('Metrics reducer view', () => {
 
     test.describe('Group by label', () => {
       test.describe('When selecting a value in the side bar', () => {
+        // eslint-disable-next-line playwright/expect-expect
         test('A list of metrics grouped by label values is displayed, each with a "Select" button', async ({
           metricsReducerView,
+          expectScreenshotInCurrentGrafanaVersion,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', true);
           await metricsReducerView.assertMetricsGroupByList();
 
-          await expect(metricsReducerView.getMetricsGroupByList()).toHaveScreenshot(
+          await expectScreenshotInCurrentGrafanaVersion(
+            metricsReducerView.getMetricsGroupByList(),
             'metrics-reducer-group-by-label.png'
           );
         });
 
+        // eslint-disable-next-line playwright/expect-expect
         test('When clicking on the "Select" button, it drills down the selected label value (adds a new filter, displays a non-grouped list of metrics and updates the list of label values)', async ({
           metricsReducerView,
+          expectScreenshotInCurrentGrafanaVersion,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
@@ -83,7 +88,8 @@ test.describe('Metrics reducer view', () => {
 
           await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
 
-          await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
+          expectScreenshotInCurrentGrafanaVersion(
+            metricsReducerView.getMetricsList(),
             'metrics-reducer-group-by-label-after-select.png'
           );
         });

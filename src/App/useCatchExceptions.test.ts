@@ -2,10 +2,10 @@ import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 
 import { useCatchExceptions } from './useCatchExceptions';
-import { logger } from '../tracking/logger/logger';
+import { logger } from '../shared/logger/logger';
 
 // Mock the logger
-jest.mock('../tracking/logger/logger', () => ({
+jest.mock('../shared/logger/logger', () => ({
   logger: {
     error: jest.fn(),
   },

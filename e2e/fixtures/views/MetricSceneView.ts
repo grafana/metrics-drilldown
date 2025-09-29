@@ -1,7 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 
 import { DrilldownView } from './DrilldownView';
-import { PLUGIN_BASE_URL, ROUTES } from '../../../src/constants';
+import { PLUGIN_BASE_URL } from '../../../src/shared/constants/plugin';
+import { ROUTES } from '../../../src/shared/constants/routes';
 import { AppControls } from '../components/AppControls';
 import { QuickSearchInput } from '../components/QuickSearchInput';
 
@@ -66,6 +67,22 @@ export class MetricSceneView extends DrilldownView {
 
   getConfigureSlider() {
     return this.getByRole('dialog', { name: /drawer title configure the prometheus function/i });
+  }
+
+  /* Panel menu */
+
+  async openMainPanelMenu() {
+    const panel = this.getMainViz();
+    await panel.hover();
+    await panel.getByRole('button', { name: /menu/i }).click();
+    await expect(this.getByTestId('panel-menu')).toBeVisible();
+  }
+
+  async assertMainPanelMenu(menuItems: string[]) {
+    await this.openMainPanelMenu();
+    for (const name of menuItems) {
+      await expect(this.getByRole('menuitem', { name })).toBeVisible();
+    }
   }
 
   async selectAndApplyConfigPreset(presetName: string, presetParams: string[]) {
