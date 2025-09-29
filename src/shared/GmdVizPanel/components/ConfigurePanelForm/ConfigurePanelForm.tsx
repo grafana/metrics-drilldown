@@ -105,7 +105,6 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
               panelOptions: {
                 ...option.panelOptions,
                 title: option.name,
-                description: '',
                 fixedColorIndex: colorIndex,
                 headerActions: () => [],
               },
