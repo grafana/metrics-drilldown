@@ -34,6 +34,7 @@ import { registerRuntimeDataSources } from 'MetricsReducer/helpers/registerRunti
 import { LabelsDataSource } from 'MetricsReducer/labels/LabelsDataSource';
 import { LabelsVariable } from 'MetricsReducer/labels/LabelsVariable';
 import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
+import { AdHocFiltersForMetricsVariable } from 'MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable';
 import { MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
@@ -370,6 +371,7 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
   let variables: SceneVariable[] = [
     new MetricsDrilldownDataSourceVariable({ initialDS }),
     new MetricsVariable(),
+    new AdHocFiltersForMetricsVariable(),
     new AdHocFiltersVariable({
       key: VAR_FILTERS,
       name: VAR_FILTERS,
@@ -384,14 +386,11 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
       allowCustomValue: true,
       useQueriesAsFilterForOptions: false,
       expressionBuilder: (filters: AdHocVariableFilter[]) => {
-        // remove any filters that include __name__ key in the expression
-        // to prevent the metric name from being set twice in the query and causing an error.
-        // also escapes equal signs to prevent invalid queries
-        // TODO: proper escaping as Scene does in https://github.com/grafana/scenes/blob/main/packages/scenes/src/variables/utils.ts#L45-L67
         return (
           filters
+            // remove any filters that include __name__ key in the expression
+            // to prevent the metric name from being set twice in the panel queries and causing an error
             .filter((filter) => filter.key !== '__name__')
-            // eslint-disable-next-line sonarjs/no-nested-template-literals
             .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
             .join(',')
         );
