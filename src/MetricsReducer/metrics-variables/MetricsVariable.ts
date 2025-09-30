@@ -54,12 +54,12 @@ export class MetricsVariable extends QueryVariable {
   }
 
   private onActivate() {
-    this.toggleRecentMetrics();
+    this.fetchAllOrRecentMetrics();
 
     this._subs.add(
       sceneGraph.findByKeyAndType(this, VAR_DATASOURCE, DataSourceVariable).subscribeToState((newState, prevState) => {
         if (!this.state.query && newState.value !== prevState.value) {
-          this.toggleRecentMetrics();
+          this.fetchAllOrRecentMetrics();
         }
       })
     );
@@ -69,13 +69,13 @@ export class MetricsVariable extends QueryVariable {
         .findByKeyAndType(this, VAR_METRICS_VAR_FILTERS, AdHocFiltersVariable)
         .subscribeToState((newState, prevState) => {
           if (!this.state.query && newState.filterExpression !== prevState.filterExpression) {
-            this.toggleRecentMetrics();
+            this.fetchAllOrRecentMetrics();
           }
         })
     );
   }
 
-  public toggleRecentMetrics() {
+  public fetchAllOrRecentMetrics() {
     // see side bar sections in SideBar.tsx and RecentMetricsSection.tsx
     const recentOffset = new URLSearchParams(window.location.search).get('filters-recent');
 

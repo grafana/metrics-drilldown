@@ -257,7 +257,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       addRecentMetric(metric);
     } else {
       // make sure we display all the proper metrics when coming back from the MetricScene (see RelatedMetricsScene.tsx, side bar sections in SideBar.tsx and RecentMetricsSection.tsx)
-      sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable).toggleRecentMetrics();
+      sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable).fetchAllOrRecentMetrics();
     }
 
     // Add metric to adhoc filters baseFilter
