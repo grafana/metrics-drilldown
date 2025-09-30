@@ -8,9 +8,10 @@ import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
 import { EventConfigurePanel } from './EventConfigurePanel';
+import { type Metric } from '../matchers/getMetricType';
 
 interface ConfigurePanelActionState extends SceneObjectState {
-  metric: string;
+  metric: Metric;
   disabled: boolean;
   isAlreadyConfigured: boolean;
 }
@@ -28,7 +29,7 @@ export class ConfigurePanelAction extends SceneObjectBase<ConfigurePanelActionSt
     super({
       metric,
       disabled: disabled !== undefined ? disabled : false,
-      isAlreadyConfigured: Boolean(userPrefs[metric]?.config),
+      isAlreadyConfigured: Boolean(userPrefs[metric.name]?.config),
     });
   }
 

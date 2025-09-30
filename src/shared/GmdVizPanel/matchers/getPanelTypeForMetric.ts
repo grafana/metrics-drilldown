@@ -1,8 +1,6 @@
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 
-import { getMetricType } from './getMetricType';
-import { isStatusUpDownMetric } from './isStatusUpDownMetric';
-import { type HistogramType } from '../GmdVizPanel';
+import { getMetricType, getMetricTypeSync } from './getMetricType';
 import { type PanelType } from '../types/available-panel-types';
 
 /**
@@ -28,12 +26,23 @@ export async function getPanelTypeForMetric(metric: string, dataTrail: DataTrail
 }
 
 /**
- * A sync version to use when we already know the histogram type and performance is important
+ * A sync version to use when performance is important. It'll be incorrect when the metric is a native histogram or
+ * if the type definded in the metric's metadata differs from the heuristics used in getMetricTypeSync().
+ * In both case, if correctness is key, use the async version above that fetch the metric metadata for correctness.
  */
-export function getPanelTypeForMetricSync(metric: string, histogramType: HistogramType): PanelType {
-  if (histogramType === 'classic' || histogramType === 'native') {
-    return 'heatmap';
-  }
+export function getPanelTypeForMetricSync(metric: string): PanelType {
+  const metricType = getMetricTypeSync(metric);
 
-  return isStatusUpDownMetric(metric) ? 'statushistory' : 'timeseries';
+  switch (metricType) {
+    case 'classic-histogram':
+      return 'heatmap';
+
+    case 'status-updown':
+      return 'statushistory';
+
+    case 'counter':
+    case 'age':
+    default:
+      return 'timeseries';
+  }
 }

@@ -16,6 +16,7 @@ import { useResizeObserver } from '@react-aria/utils';
 import React, { useRef } from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
+import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
@@ -26,7 +27,6 @@ import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicH
 
 import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';
-import { getMetricDescription } from '../AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { getTrailFor } from '../shared/utils/utils';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
@@ -58,12 +58,12 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               panelOptions: {
                 height: PANEL_HEIGHT.XL,
                 headerActions: isClassicHistogramMetric(metric)
-                  ? () => [
+                  ? ({ metric }) => [
                       new GmdVizPanelVariantSelector(),
                       new ConfigurePanelAction({ metric }),
                       new BookmarkHeaderAction(),
                     ]
-                  : () => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction()],
+                  : ({ metric }) => [new ConfigurePanelAction({ metric }), new BookmarkHeaderAction()],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
               },
               queryOptions: {
@@ -84,24 +84,28 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
   private async onActivate() {
     const { metric } = this.state;
-    const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
+    const metadata = await getTrailFor(this).getMetadataForMetric(metric);
 
-    if (gmdVizPanel.state.histogramType === 'classic') {
+    const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
+    const { metricType } = gmdVizPanel.state;
+
+    if (metadata) {
+      gmdVizPanel.update({ description: getMetricDescription(metadata) }, {});
+    }
+
+    if (metricType === 'classic-histogram') {
       return;
     }
 
-    const sub = gmdVizPanel.subscribeToState(async (newState, prevState) => {
-      if (prevState.histogramType !== 'native' && newState.histogramType === 'native') {
+    const sub = gmdVizPanel.subscribeToState(async (newState) => {
+      if (metricType !== 'native-histogram' && newState.metricType === 'native-histogram') {
         sub.unsubscribe();
-
-        const metadata = await getTrailFor(this).getMetadataForMetric(metric);
 
         gmdVizPanel.update(
           {
-            description: getMetricDescription(metadata),
             headerActions: () => [
               new GmdVizPanelVariantSelector(),
-              new ConfigurePanelAction({ metric }),
+              new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
               new BookmarkHeaderAction(),
             ],
           },
