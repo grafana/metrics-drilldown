@@ -2,31 +2,15 @@ import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
-import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
+import { PROMQL_FUNCTIONS, type PrometheusFunction } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
-import { isCounterMetric } from '../../matchers/isCounterMetric';
+import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
-type TimeseriesQueryRunnerParams = {
-  isRateQuery: boolean;
-  maxDataPoints: number;
-  queries: SceneDataQuery[];
-};
-
-type Options = {
-  metric: string;
-  queryConfig: QueryConfig;
-  // When provided, overrides the name-based heuristic for applying rate().
-  // This lets callers flip rate vs raw after an async metadata check.
-  isRateQueryOverride?: boolean;
-};
-
-export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQueryRunnerParams {
-  const { metric, queryConfig, isRateQueryOverride } = options;
-  // Prefer explicit override when available; otherwise fall back to heuristic.
-  const isRateQuery = typeof isRateQueryOverride === 'boolean' ? isRateQueryOverride : isCounterMetric(metric);
-
+export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
+  const { metric, queryConfig } = options;
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -34,14 +18,15 @@ export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQuer
     addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
 
+  const isRateQuery = metric.type === 'counter';
   const expr = isRateQuery ? promql.rate({ expr: expression, interval: '$__rate_interval' }) : expression;
 
   return {
     isRateQuery,
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
     queries: queryConfig.groupBy
-      ? buildGroupByQueries({ metric, queryConfig, isRateQuery, expr })
-      : buildQueriesWithPresetFunctions({ metric, queryConfig, isRateQuery, expr }),
+      ? buildGroupByQueries({ metric, queryConfig, expr })
+      : buildQueriesWithPresetFunctions({ metric, queryConfig, expr }),
   };
 }
 
@@ -49,20 +34,23 @@ export function getTimeseriesQueryRunnerParams(options: Options): TimeseriesQuer
 function buildGroupByQueries({
   metric,
   queryConfig,
-  isRateQuery,
   expr,
 }: {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
-  isRateQuery: boolean;
   expr: string;
 }): SceneDataQuery[] {
+  let fn: PrometheusFunction = 'avg';
+  if (metric.type === 'counter') {
+    fn = 'sum';
+  } else if (metric.type === 'info') {
+    fn = 'count';
+  }
+
   return [
     {
-      refId: `${metric}-by-${queryConfig.groupBy}`,
-      expr: isRateQuery
-        ? promql.sum({ expr, by: [queryConfig.groupBy!] })
-        : promql.avg({ expr, by: [queryConfig.groupBy!] }),
+      refId: `${metric.name}-by-${queryConfig.groupBy}`,
+      expr: promql[fn]({ expr, by: [queryConfig.groupBy!] }),
       legendFormat: `{{${queryConfig.groupBy}}}`,
       fromExploreMetrics: true,
     },
@@ -73,25 +61,28 @@ function buildGroupByQueries({
 function buildQueriesWithPresetFunctions({
   metric,
   queryConfig,
-  isRateQuery,
   expr,
 }: {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
-  isRateQuery: boolean;
   expr: string;
 }): SceneDataQuery[] {
-  const defaultPromqlFn = isRateQuery ? 'sum' : 'avg';
+  let defaultPromqlFn: PrometheusFunction = 'avg';
+  if (metric.type === 'counter') {
+    defaultPromqlFn = 'sum';
+  } else if (metric.type === 'info') {
+    defaultPromqlFn = 'count';
+  }
   const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
   const queries: SceneDataQuery[] = [];
 
   for (const { fn } of queryDefs) {
     const entry = PROMQL_FUNCTIONS.get(fn)!;
     const query = entry.fn({ expr });
-    const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
+    const fnName = metric.type === 'counter' ? `${entry.name}(rate)` : entry.name;
 
     queries.push({
-      refId: `${metric}-${fnName}`,
+      refId: `${metric.name}-${fnName}`,
       expr: query,
       legendFormat: fnName,
       fromExploreMetrics: true,

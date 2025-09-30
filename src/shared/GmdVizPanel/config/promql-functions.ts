@@ -8,6 +8,7 @@ const PROMETHEUS_FUNCTIONS = [
   'quantile',
   'min',
   'max',
+  'count',
   // histograms
   'histogram_quantile',
   // age
@@ -25,7 +26,7 @@ type MapEntry = {
 
 export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
   // methods exposed in the promql API
-  ...['avg', 'sum', 'stddev', 'quantile', 'min', 'max'].map(
+  ...['avg', 'sum', 'stddev', 'quantile', 'min', 'max', 'count'].map(
     (name) =>
       [
         name,

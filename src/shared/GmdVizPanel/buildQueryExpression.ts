@@ -3,6 +3,8 @@ import { Expression, MatchingOperator, promql } from 'tsqtsq';
 
 import { VAR_FILTERS } from 'shared/shared';
 
+import { type Metric } from './matchers/getMetricType';
+
 export type LabelMatcher = {
   key: string;
   operator: string;
@@ -15,7 +17,7 @@ function expressionToString(expression: Expression) {
 }
 
 type Options = {
-  metric: string;
+  metric: Metric;
   labelMatchers?: LabelMatcher[];
   addIgnoreUsageFilter?: boolean;
   addExtremeValuesFiltering?: boolean;
@@ -34,11 +36,11 @@ export function buildQueryExpression(options: Options): string {
     defaultSelectors.push({ label: '__ignore_usage__', operator: MatchingOperator.equal, value: '' });
   }
 
-  const isUtf8Metric = !isValidLegacyName(metric);
+  const isUtf8Metric = !isValidLegacyName(metric.name);
   if (isUtf8Metric) {
     // hack to have the UTF-8 metric name in braces alongside labels
     // but without extra quotes associated with an empty label value
-    defaultSelectors.push({ label: utf8Support(metric), operator: MatchingOperator.equal, value: '__REMOVE__' });
+    defaultSelectors.push({ label: utf8Support(metric.name), operator: MatchingOperator.equal, value: '__REMOVE__' });
   }
 
   // hack for Scenes to interpolate the VAR_FILTERS variable
@@ -47,7 +49,7 @@ export function buildQueryExpression(options: Options): string {
   defaultSelectors.push({ label: `\${${VAR_FILTERS}:raw}`, operator: MatchingOperator.equal, value: '__REMOVE__' });
 
   const expression = new Expression({
-    metric,
+    metric: metric.name,
     values: {},
     defaultOperator: MatchingOperator.equal,
     defaultSelectors,

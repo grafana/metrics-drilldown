@@ -6,7 +6,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
   describe('without group by label', () => {
     test('handles gauge metrics', () => {
       const result = getTimeseriesQueryRunnerParams({
-        metric: 'go_goroutines',
+        metric: { name: 'go_goroutines', type: 'gauge' },
         queryConfig: {
           resolution: QUERY_RESOLUTION.HIGH,
           labelMatchers: [{ key: 'instance', operator: '=', value: 'us-east:5000' }],
@@ -28,7 +28,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
 
     test('handles counter metrics', () => {
       const result = getTimeseriesQueryRunnerParams({
-        metric: 'go_gc_heap_frees_bytes_total',
+        metric: { name: 'go_gc_heap_frees_bytes_total', type: 'counter' },
         queryConfig: {
           resolution: QUERY_RESOLUTION.MEDIUM,
           labelMatchers: [{ key: 'job', operator: '!=', value: 'prometheus' }],
@@ -52,7 +52,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
   describe('with group by label', () => {
     test('handles gauge metrics', () => {
       const result = getTimeseriesQueryRunnerParams({
-        metric: 'go_goroutines',
+        metric: { name: 'go_goroutines', type: 'gauge' },
         queryConfig: {
           resolution: QUERY_RESOLUTION.HIGH,
           labelMatchers: [{ key: 'instance', operator: '=', value: 'us-east:5000' }],
@@ -75,7 +75,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
 
     test('handles counter metrics', () => {
       const result = getTimeseriesQueryRunnerParams({
-        metric: 'go_gc_heap_frees_bytes_total',
+        metric: { name: 'go_gc_heap_frees_bytes_total', type: 'counter' },
         queryConfig: {
           resolution: QUERY_RESOLUTION.MEDIUM,
           labelMatchers: [{ key: 'job', operator: '!=', value: 'prometheus' }],
@@ -91,32 +91,6 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
           refId: 'go_gc_heap_frees_bytes_total-by-instance',
           expr: 'sum by (instance) (rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
           legendFormat: '{{instance}}',
-          fromExploreMetrics: true,
-        },
-      ]);
-    });
-  });
-
-  describe('override behavior', () => {
-    test('respects isRateQueryOverride=false for counter-looking metric', () => {
-      // _sum suffix would normally trigger rate(); override forces raw
-      const result = getTimeseriesQueryRunnerParams({
-        metric: 'http_requests_sum',
-        queryConfig: {
-          resolution: QUERY_RESOLUTION.HIGH,
-          labelMatchers: [{ key: 'instance', operator: '=', value: 'us-east:5000' }],
-          addIgnoreUsageFilter: true,
-        },
-        isRateQueryOverride: false,
-      });
-
-      expect(result.isRateQuery).toBe(false);
-      expect(result.maxDataPoints).toBe(500);
-      expect(result.queries).toStrictEqual([
-        {
-          refId: 'http_requests_sum-avg',
-          expr: 'avg(http_requests_sum{instance="us-east:5000", __ignore_usage__="", ${filters:raw}})',
-          legendFormat: 'avg',
           fromExploreMetrics: true,
         },
       ]);

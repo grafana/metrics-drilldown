@@ -2,13 +2,12 @@ import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } 
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { extremeValueFilterBehavior } from 'shared/GmdVizPanel/behaviors/extremeValueFilterBehavior/extremeValueFilterBehavior';
-import { getIsCounterFromMetadata } from 'shared/GmdVizPanel/matchers/isCounterFromMetadata';
 import { trailDS } from 'shared/shared';
-import { getColorByIndex, getTrailFor } from 'shared/utils/utils';
-import { isSceneQueryRunner } from 'shared/utils/utils.queries';
+import { getColorByIndex } from 'shared/utils/utils';
 
 import { getPerSecondRateUnit, getUnit } from '../../units/getUnit';
 import { type BuildVizPanelOptions } from '../panelBuilder';
+import { updateColorsWhenQueriesChange } from './behaviors/updateColorsWhenQueriesChange';
 import { getTimeseriesQueryRunnerParams } from './getTimeseriesQueryRunnerParams';
 import { addRefId } from './transformations/addRefId';
 import { addUnspecifiedLabel } from './transformations/addUnspecifiedLabel';
@@ -20,9 +19,8 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
   }
 
   const { metric, panelConfig, queryConfig } = options;
-  // Build immediately using heuristic so UI renders quickly.
   const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
-  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
+  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric.name) : getUnit(metric.name);
 
   const $data =
     queryConfig.data ||
@@ -42,9 +40,19 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
     .setUnit(unit)
     .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setCustomFieldConfig('fillOpacity', 9)
-    .setBehaviors([extremeValueFilterBehavior, ...(panelConfig.behaviors || [])]);
+    .setBehaviors([
+      extremeValueFilterBehavior,
+      updateColorsWhenQueriesChange(panelConfig.fixedColorIndex),
+      ...(panelConfig.behaviors || []),
+    ]);
 
-  if (queryParams.queries.length > 1) {
+  if (queryParams.queries.length === 1) {
+    vizPanelBuilder.setColor(
+      panelConfig.fixedColorIndex
+        ? { mode: 'fixed', fixedColor: getColorByIndex(panelConfig.fixedColorIndex) }
+        : undefined
+    );
+  } else {
     const startColorIndex = panelConfig.fixedColorIndex || 0;
 
     vizPanelBuilder.setOverrides((b) => {
@@ -55,44 +63,9 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
         });
       });
     });
-  } else {
-    vizPanelBuilder.setColor(
-      panelConfig.fixedColorIndex
-        ? { mode: 'fixed', fixedColor: getColorByIndex(panelConfig.fixedColorIndex) }
-        : undefined
-    );
   }
 
-  const vizPanel = vizPanelBuilder.build();
-
-  // Use Scenes lifecycle: run after this panel is activated/attached.
-  vizPanel.addActivationHandler(() => {
-    (async () => {
-      const dataTrail = getTrailFor(vizPanel);
-      const isCounter = await getIsCounterFromMetadata(metric, dataTrail);
-      
-      if (typeof isCounter !== 'boolean') {
-        return; // inconclusive; keep heuristic
-      }
-      
-      if (isCounter === queryParams.isRateQuery) {
-        return; // no need to correct
-      }
-      
-      const corrected = getTimeseriesQueryRunnerParams({ metric, queryConfig, isRateQueryOverride: isCounter });
-      // Prefer the panel's direct SceneQueryRunner; if it's wrapped, bail (group-by path handles separately).
-      const provider = vizPanel.state.$data as unknown as SceneQueryRunner;
-      if (provider && isSceneQueryRunner(provider)) {
-        provider.setState({
-          maxDataPoints: corrected.maxDataPoints,
-          queries: corrected.queries,
-        });
-        provider.runQueries();
-      }
-    })().catch(() => {});
-  });
-
-  return vizPanel;
+  return vizPanelBuilder.build();
 }
 
 export const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
@@ -100,7 +73,7 @@ export const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
 function buildGroupByPanel(options: Required<BuildVizPanelOptions>): VizPanel {
   const { metric, panelConfig, queryConfig } = options;
   const queryParams = getTimeseriesQueryRunnerParams({ metric, queryConfig });
-  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric);
+  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric.name) : getUnit(metric.name);
 
   const $data = new SceneDataTransformer({
     $data: new SceneQueryRunner({

@@ -26,9 +26,9 @@ services:
       - 'host.docker.internal:172.17.0.1'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
-      interval: 3s
+      interval: 1s
       timeout: 1s
-      retries: 10
+      retries: 30
       start_period: 15s
 
   grafana-scopes-gmd:
@@ -47,9 +47,9 @@ services:
       - 'host.docker.internal:172.17.0.1'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
-      interval: 3s
+      interval: 1s
       timeout: 1s
-      retries: 10
+      retries: 30
       start_period: 15s
 
   prometheus-gmd:
@@ -70,9 +70,9 @@ services:
       # healthy only when metrics metadata is returned
       # it's important because the app heavily relies on them to determine how metrics are rendered in the UI (see GmdVizPanel.tsx)
       test: ['CMD-SHELL', 'wget -qO- http://localhost:9090/api/v1/targets/metadata | grep -Fq ''"data":[{''']
-      interval: 3s
+      interval: 1s
       timeout: 1s
-      retries: 10
+      retries: 30
       start_period: 15s
 
   # e2e testing

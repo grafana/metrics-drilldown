@@ -25,6 +25,7 @@ import { getPreferredConfigForMetric } from 'shared/GmdVizPanel/config/getPrefer
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { addUnspecifiedLabel } from 'shared/GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
@@ -41,7 +42,7 @@ import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTime
 import { syncYAxis } from '../MetricLabelsList/behaviors/syncYAxis';
 
 interface MetricLabelsValuesListState extends SceneObjectState {
-  metric: string;
+  metric: Metric;
   label: string;
   layoutSwitcher: LayoutSwitcher;
   quickSearch: QuickSearch;
@@ -62,7 +63,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [],
-        addIgnoreUsageFilter: true,
+        addIgnoreUsageFilter: false,
         groupBy: label,
       },
     });
@@ -180,7 +181,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const { metric, label } = this.state;
 
     return new GmdVizPanel({
-      metric,
+      metric: metric.name,
       discardUserPrefs: true,
       panelOptions: {
         type: 'timeseries',
@@ -197,7 +198,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
   private buildByFrameRepeater() {
     const { metric, label } = this.state;
-    const prefMetricConfig = getPreferredConfigForMetric(metric);
+    const prefMetricConfig = getPreferredConfigForMetric(metric.name);
 
     return new SceneByFrameRepeater({
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
@@ -242,7 +243,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         const canAddToFilters = !labelValue.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
 
         const vizPanel = new GmdVizPanel({
-          metric,
+          metric: metric.name,
           discardUserPrefs: true,
           panelOptions: {
             ...prefMetricConfig?.panelOptions,

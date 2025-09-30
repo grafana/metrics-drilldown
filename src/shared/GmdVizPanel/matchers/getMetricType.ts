@@ -3,16 +3,42 @@ import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { isAgeMetric } from './isAgeMetric';
 import { isClassicHistogramMetric } from './isClassicHistogramMetric';
 import { isCounterMetric } from './isCounterMetric';
+import { isInfoMetric } from './isInfoMetric';
 import { isStatusUpDownMetric } from './isStatusUpDownMetric';
 
-export type MetricType = 'status-updown' | 'classic-histogram' | 'native-histogram' | 'age' | 'counter' | 'gauge';
+export type MetricType =
+  | 'info'
+  | 'status-updown'
+  | 'classic-histogram'
+  | 'native-histogram'
+  | 'age'
+  | 'counter'
+  | 'gauge';
+
+export type Metric = {
+  name: string;
+  type: MetricType;
+};
 
 export async function getMetricType(metric: string, dataTrail: DataTrail): Promise<MetricType> {
-  let metricType = getMetricTypeSync(metric);
+  const metricType = getMetricTypeSync(metric);
 
   if (metricType === 'gauge') {
-    if (await dataTrail.isNativeHistogram(metric)) {
-      metricType = 'native-histogram';
+    const metadata = await dataTrail.getMetadataForMetric(metric);
+    if (metadata?.type === 'histogram') {
+      return 'native-histogram';
+    }
+    // we found a counter metric that was previously identified as a gauge (see https://github.com/grafana/metrics-drilldown/issues/698)
+    if (metadata?.type === 'counter') {
+      return 'counter';
+    }
+  }
+
+  if (metricType === 'counter') {
+    const metadata = await dataTrail.getMetadataForMetric(metric);
+    // same as above (see https://github.com/grafana/metrics-drilldown/issues/698)
+    if (metadata?.type === 'gauge') {
+      return 'gauge';
     }
   }
 
@@ -20,7 +46,7 @@ export async function getMetricType(metric: string, dataTrail: DataTrail): Promi
 }
 
 /**
- * A sync version to use when performance is important or when the metadata for determing native histograms is missing
+ * A sync version to use when performance is more important than correctness. If not, use the async version above.
  */
 export function getMetricTypeSync(metric: string): Omit<MetricType, 'native-histogram'> {
   if (isCounterMetric(metric)) {
@@ -37,6 +63,10 @@ export function getMetricTypeSync(metric: string): Omit<MetricType, 'native-hist
 
   if (isStatusUpDownMetric(metric)) {
     return 'status-updown';
+  }
+
+  if (isInfoMetric(metric)) {
+    return 'info';
   }
 
   return 'gauge';
