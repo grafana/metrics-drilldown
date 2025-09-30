@@ -25,6 +25,7 @@ import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { getConfigPresetsForMetric } from 'shared/GmdVizPanel/config/presets/getConfigPresetsForMetric';
 import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 import { getTrailFor } from 'shared/utils/utils';
@@ -34,7 +35,7 @@ import { EventCancelConfigurePanel } from './EventCancelConfigurePanel';
 import { WithConfigPanelOptions } from './WithConfigPanelOptions';
 
 interface ConfigurePanelFormState extends SceneObjectState {
-  metric: string;
+  metric: Metric;
   $timeRange: SceneTimeRange;
   controls: SceneObject[];
   isConfirmModalOpen: boolean;
@@ -72,8 +73,8 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
   private async buildBody() {
     const { metric } = this.state;
-    const prefConfig = getPreferredConfigForMetric(metric);
-    const presets = await getConfigPresetsForMetric(metric, getTrailFor(this));
+    const prefConfig = getPreferredConfigForMetric(metric.name);
+    const presets = await getConfigPresetsForMetric(metric.name, getTrailFor(this));
 
     // if not found in the user preferences, we use the first preset
     // it always works because the presets are organized to always have the default one as the first element (see GmdVizPanel/config/presets)
@@ -100,7 +101,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
               // we make sure that, if the user has previously configured some query parameters (like percentiles),
               // they are applied here
               discardUserPrefs: option.id !== prefConfig?.id,
-              metric,
+              metric: metric.name,
               panelOptions: {
                 ...option.panelOptions,
                 title: option.name,
@@ -131,12 +132,12 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     this.subscribeToEvent(EventApplyPanelConfig, (event) => {
       const { config, restoreDefault } = event.payload;
       const userPrefs = userStorage.getItem(PREF_KEYS.METRIC_PREFS) || {};
-      const userPrefForMetric = userPrefs[metric];
+      const userPrefForMetric = userPrefs[metric.name];
 
       if (restoreDefault && userPrefForMetric) {
-        delete userPrefs[metric].config;
+        delete userPrefs[metric.name].config;
       } else {
-        userPrefs[metric] = { ...userPrefForMetric, config };
+        userPrefs[metric.name] = { ...userPrefForMetric, config };
       }
 
       userStorage.setItem(PREF_KEYS.METRIC_PREFS, userPrefs);
@@ -227,7 +228,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
         </div>
 
         <div className={styles.messageContainer}>
-          <p>Select a Prometheus function that will be used by default to display the {metric} metric.</p>
+          <p>Select a Prometheus function that will be used by default to display the {metric.name} metric.</p>
         </div>
 
         {body && <body.Component model={body} />}

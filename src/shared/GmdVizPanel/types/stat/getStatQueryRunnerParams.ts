@@ -5,13 +5,13 @@ import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
-import { isCounterMetric } from '../../matchers/isCounterMetric';
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
 export function getStatQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
   const { metric, queryConfig } = options;
-  const isRateQuery = isCounterMetric(metric);
+  const isRateQuery = metric.type === 'counter';
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -35,7 +35,7 @@ function buildQueriesWithPresetFunctions({
   isRateQuery,
   expr,
 }: {
-  metric: string;
+  metric: Metric;
   queryConfig: QueryConfig;
   isRateQuery: boolean;
   expr: string;
@@ -50,7 +50,7 @@ function buildQueriesWithPresetFunctions({
     const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
 
     queries.push({
-      refId: `${metric}-${fnName}`,
+      refId: `${metric.name}-${fnName}`,
       expr: query,
       legendFormat: fnName,
       fromExploreMetrics: true,

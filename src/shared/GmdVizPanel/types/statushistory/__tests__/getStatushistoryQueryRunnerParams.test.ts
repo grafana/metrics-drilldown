@@ -4,7 +4,7 @@ import { getStatushistoryQueryRunnerParams } from '../getStatushistoryQueryRunne
 
 test('getStatushistoryQueryRunnerParams(options)', () => {
   const result = getStatushistoryQueryRunnerParams({
-    metric: 'memcached_up',
+    metric: { name: 'memcached_up', type: 'status-updown' },
     queryConfig: {
       resolution: QUERY_RESOLUTION.HIGH,
       labelMatchers: [{ key: 'cluster', operator: '=', value: 'prod' }],

@@ -24,6 +24,7 @@ import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsRed
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'MetricsReducer/MetricsList/MetricsList';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { buildTimeseriesPanel } from 'shared/GmdVizPanel/types/timeseries/buildTimeseriesPanel';
 import { VAR_GROUP_BY } from 'shared/shared';
@@ -35,7 +36,7 @@ import { SelectLabelAction } from './SelectLabelAction';
 import { PanelMenu } from '../../PanelMenu/PanelMenu';
 
 interface MetricLabelsListState extends SceneObjectState {
-  metric: string;
+  metric: Metric;
   layoutSwitcher: LayoutSwitcher;
   body: SceneByVariableRepeater;
 }
@@ -143,11 +144,10 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
   private subscribeToLayoutChange() {
     const layoutSwitcher = sceneGraph.findByKeyAndType(this, 'layout-switcher', LayoutSwitcher);
-    const body = this.state.body.state.body as SceneCSSGridLayout;
 
     const onChangeState = (newState: LayoutSwitcherState, prevState?: LayoutSwitcherState) => {
       if (newState.layout !== prevState?.layout) {
-        body.setState({
+        (this.state.body.state.body as SceneCSSGridLayout).setState({
           templateColumns: newState.layout === LayoutType.ROWS ? GRID_TEMPLATE_ROWS : GRID_TEMPLATE_COLUMNS,
         });
       }
@@ -174,8 +174,8 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricLabelsList>) => {
-    const { body } = model.useState();
     const styles = useStyles2(getStyles);
+    const { body } = model.useState();
 
     const variable = sceneGraph.lookupVariable(VAR_GROUP_BY, model) as MultiValueVariable;
     const { loading, error } = variable.useState();
