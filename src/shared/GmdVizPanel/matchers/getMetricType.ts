@@ -3,9 +3,17 @@ import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { isAgeMetric } from './isAgeMetric';
 import { isClassicHistogramMetric } from './isClassicHistogramMetric';
 import { isCounterMetric } from './isCounterMetric';
+import { isInfoMetric } from './isInfoMetric';
 import { isStatusUpDownMetric } from './isStatusUpDownMetric';
 
-export type MetricType = 'status-updown' | 'classic-histogram' | 'native-histogram' | 'age' | 'counter' | 'gauge';
+export type MetricType =
+  | 'info'
+  | 'status-updown'
+  | 'classic-histogram'
+  | 'native-histogram'
+  | 'age'
+  | 'counter'
+  | 'gauge';
 
 export type Metric = {
   name: string;
@@ -55,6 +63,10 @@ export function getMetricTypeSync(metric: string): Omit<MetricType, 'native-hist
 
   if (isStatusUpDownMetric(metric)) {
     return 'status-updown';
+  }
+
+  if (isInfoMetric(metric)) {
+    return 'info';
   }
 
   return 'gauge';
