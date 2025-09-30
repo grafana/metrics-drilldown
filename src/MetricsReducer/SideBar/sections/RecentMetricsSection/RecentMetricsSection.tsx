@@ -26,9 +26,11 @@ interface RecentMetricsSectionState extends SideBarSectionState {
   currentInterval: string;
 }
 
+const INTERVALS = ['1m', '3m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '24h'] as const;
+
 const INTERVAL_OPTIONS = [
   { value: 'all', label: 'All time' },
-  ...['1m', '3m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '24h'].map((value) => ({
+  ...INTERVALS.map((value) => ({
     value,
     label: `Past ${value}`,
   })),
