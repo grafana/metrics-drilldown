@@ -20,11 +20,6 @@ export type Metric = {
   type: MetricType;
 };
 
-export type Metric = {
-  name: string;
-  type: MetricType;
-};
-
 export async function getMetricType(metric: string, dataTrail: DataTrail): Promise<MetricType> {
   const metricType = getMetricTypeSync(metric);
 
