@@ -62,7 +62,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [],
-        addIgnoreUsageFilter: true,
+        addIgnoreUsageFilter: false,
         groupBy: label,
       },
     });
