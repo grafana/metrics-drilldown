@@ -6,6 +6,7 @@ export const CONFIG_PRESETS = {
   TIMESERIES_STDDEV: 'timeseries-stddev',
   TIMESERIES_PERCENTILES: 'timeseries-percentiles',
   TIMESERIES_MIN_MAX: 'timeseries-minmax',
+  TIMESERIES_COUNT: 'timeseries-count',
   TIMESERIES_AGE_TIME_MINUS_AVG: 'timeseries-age-time-minus-avg',
   TIMESERIES_AGE_TIME_MINUS_MIN_MAX: 'timeseries-age-time-minus-min-max',
   HISTOGRAM_HEATMAP: 'histogram-heatmap',
