@@ -1,9 +1,10 @@
 import { BusEventWithPayload } from '@grafana/data';
 
 import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 
 interface EventApplyPanelConfigPayload {
-  metric: string;
+  metric: Metric;
   config: PanelConfigPreset;
   restoreDefault?: boolean;
 }

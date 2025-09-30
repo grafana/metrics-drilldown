@@ -5,8 +5,7 @@ import { getHeatmapQueryRunnerParams } from '../getHeatmapQueryRunnerParams';
 describe('getHeatmapQueryRunnerParams(options)', () => {
   test('handles native histogram metrics', () => {
     const result = getHeatmapQueryRunnerParams({
-      metric: 'grafana_database_all_migrations_duration_seconds',
-      histogramType: 'native',
+      metric: { name: 'grafana_database_all_migrations_duration_seconds', type: 'native-histogram' },
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],
@@ -25,10 +24,9 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
     ]);
   });
 
-  test('handles non-native histogram metrics', () => {
+  test('handles non-native ("classic") histogram metrics', () => {
     const result = getHeatmapQueryRunnerParams({
-      metric: 'go_gc_heap_allocs_by_size_bytes_bucket',
-      histogramType: 'classic',
+      metric: { name: 'go_gc_heap_allocs_by_size_bytes_bucket', type: 'classic-histogram' },
       queryConfig: {
         resolution: QUERY_RESOLUTION.HIGH,
         labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],
