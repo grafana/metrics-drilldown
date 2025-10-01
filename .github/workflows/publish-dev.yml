@@ -2,24 +2,12 @@ name: Publish Dev
 run-name: Deploy ${{ inputs.branch }} to dev by @${{ github.actor }}
 
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: Branch to publish from. Can be used to deploy PRs to dev
-        default: main
-      skip-grafana-dev-image:
-        description: 'Bypass grafana-dev image for e2e tests'
-        required: false
-        type: boolean
-        default: false
   push:
     branches:
       - main
+  pull_request:
 
-permissions:
-  contents: 'write'
-  id-token: 'write'
-  attestations: 'write'
+permissions: {}
 
 jobs:
   CD:
