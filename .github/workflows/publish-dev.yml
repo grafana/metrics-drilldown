@@ -1,5 +1,5 @@
 name: Publish Dev
-run-name: Deploy ${{ inputs.branch }} to dev by @${{ github.actor }}
+run-name: Deploy main to dev by @${{ github.actor }}
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     name: Deploy plugin
     uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
     with:
-      branch: ${{ github.event.inputs.branch }}
+      branch: ${{ github.event_name == 'push' && github.ref_name || github.ref }}
       environment: dev
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
       run-playwright: false
