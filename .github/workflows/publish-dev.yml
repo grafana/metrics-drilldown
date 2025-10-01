@@ -1,5 +1,5 @@
 name: Publish Dev
-run-name: Deploy ${{ inputs.branch }} to ${{ inputs.environment }} by @${{ github.actor }}
+run-name: Deploy ${{ inputs.branch }} to dev by @${{ github.actor }}
 
 on:
   workflow_dispatch:
