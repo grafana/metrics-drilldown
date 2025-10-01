@@ -1,4 +1,5 @@
 name: Publish Dev
+run-name: Deploy ${{ inputs.branch }} to dev by @${{ github.actor }}
 
 on:
   push:
