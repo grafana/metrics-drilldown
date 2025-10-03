@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { dateTimeFormat, type GrafanaTheme2 } from '@grafana/data';
 import { type SceneObjectUrlValues } from '@grafana/scenes';
-import { Card, IconButton, useStyles2 } from '@grafana/ui';
+import { Card, IconButton, Text, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type Bookmark } from 'shared/bookmarks/useBookmarks';
@@ -57,10 +57,13 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
         <Card.Meta className={styles.meta}>
           {filters.map(([key, operator, value], i) => (
             <div key={i} className={styles.filter}>
-              <span className={styles.secondaryFont}>
+              <Text variant="bodySmall" color="secondary">
                 {key} {operator}
-              </span>
-              <span className={styles.primaryFont}> {truncateValue(key, value, 44)}</span>
+              </Text>
+              <Text variant="bodySmall" color="primary" weight="medium">
+                {' '}
+                {truncateValue(key, value, 44)}
+              </Text>
             </div>
           ))}
         </Card.Meta>
@@ -78,8 +81,12 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
         </div>
       </Card>
       <div className={styles.date}>
-        <div className={styles.secondaryFont}>Date created: </div>
-        <div className={styles.primaryFont}>{createdAt > 0 && dateTimeFormat(createdAt, { format: 'YYYY-MM-DD' })}</div>
+        <Text variant="bodySmall" color="secondary">
+          Date created:{' '}
+        </Text>
+        <Text variant="bodySmall" color="primary" weight="medium">
+          {createdAt > 0 && dateTimeFormat(createdAt, { format: 'YYYY-MM-DD' })}
+        </Text>
       </div>
     </article>
   );
@@ -135,21 +142,6 @@ function getStyles(theme: GrafanaTheme2) {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
-    }),
-    primaryFont: css({
-      display: 'inline',
-      color: theme.colors.text.primary,
-      fontSize: '12px',
-      fontWeight: '500',
-      letterSpacing: '0.018px',
-    }),
-    secondaryFont: css({
-      display: 'inline',
-      color: theme.colors.text.secondary,
-      fontSize: '12px',
-      fontWeight: '400',
-      lineHeight: '18px' /* 150% */,
-      letterSpacing: '0.018px',
     }),
     deleteButton: css({
       position: 'absolute',
