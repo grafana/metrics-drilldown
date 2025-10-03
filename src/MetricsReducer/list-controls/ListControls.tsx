@@ -1,4 +1,3 @@
-import { css } from '@emotion/css';
 import { type SelectableValue } from '@grafana/data';
 import {
   EmbeddedScene,
@@ -9,7 +8,7 @@ import {
   type SceneReactObject,
   type SceneVariableSet,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Stack } from '@grafana/ui';
 import React from 'react';
 
 import { LayoutSwitcher } from './LayoutSwitcher';
@@ -56,30 +55,12 @@ export class ListControls extends EmbeddedScene {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<ListControls>) => {
-    const styles = useStyles2(getStyles);
     const { body } = model.useState();
 
     return (
-      <div className={styles.headerWrapper}>
+      <Stack direction="row" alignItems="center">
         <body.Component model={body} />
-      </div>
+      </Stack>
     );
-  };
-}
-
-function getStyles() {
-  return {
-    headerWrapper: css({
-      display: 'flex',
-      alignItems: 'center',
-      '& > div': {
-        display: 'flex',
-        alignItems: 'center',
-        '& > div': {
-          display: 'flex',
-          alignItems: 'center',
-        },
-      },
-    }),
   };
 }
