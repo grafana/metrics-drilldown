@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Text, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { useBookmarks } from 'shared/bookmarks/useBookmarks';
@@ -70,8 +70,12 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
           </div>
         ) : (
           <div className={styles.emptyState}>
-            <div>No bookmarks yet for the</div>
-            <div>current data source.</div>
+            <Text color="secondary" italic>
+              No bookmarks yet for the
+            </Text>
+            <Text color="secondary" italic>
+              current data source.
+            </Text>
           </div>
         )}
       </div>
@@ -99,8 +103,6 @@ function getStyles(theme: GrafanaTheme2) {
       flexDirection: 'column',
       alignItems: 'center',
       height: '100px',
-      color: theme.colors.text.secondary,
-      fontStyle: 'italic',
     }),
   };
 }
