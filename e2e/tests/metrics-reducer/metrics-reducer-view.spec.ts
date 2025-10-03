@@ -153,7 +153,6 @@ test.describe('Metrics reducer view', () => {
   test.describe('Metrics sorting', () => {
     // eslint-disable-next-line playwright/expect-expect
     test('Default sorting shows recent metrics first, then alphabetical', async ({
-      page,
       metricsReducerView,
       metricSceneView,
       expectScreenshotInCurrentGrafanaVersion,
@@ -181,9 +180,10 @@ test.describe('Metrics reducer view', () => {
       await metricsReducerView.quickSearch.clear();
       await metricsReducerView.assertMetricsList();
 
-      await expectScreenshotInCurrentGrafanaVersion(page, 'metrics-reducer-default-sort.png', {
-        stylePath: './e2e/fixtures/css/hide-app-controls.css',
-      });
+      await expectScreenshotInCurrentGrafanaVersion(
+        metricsReducerView.getMetricsList(),
+        'metrics-reducer-default-sort.png'
+      );
     });
 
     const usageTypeSortOptions: Array<{ usageType: 'dashboard' | 'alerting'; sortOptionName: SortByOptionNames }> = [

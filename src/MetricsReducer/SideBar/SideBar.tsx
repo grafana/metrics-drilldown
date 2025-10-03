@@ -26,12 +26,13 @@ import { BookmarksList } from './sections/BookmarksList/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
+import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetricsSection';
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
 import { HGFeatureToggles, isFeatureToggleEnabled } from '../../shared/utils/utils.feature-toggles';
 
-type Section = MetricsFilterSection | LabelsBrowser | BookmarksList | Settings;
+type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList | Settings;
 
 interface SideBarState extends SceneObjectState {
   sections: Section[];
@@ -39,7 +40,7 @@ interface SideBarState extends SceneObjectState {
   sectionValues: Map<string, string[]>;
 }
 
-const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix'] as const;
+const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix', 'filters-recent'] as const;
 type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -78,6 +79,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           icon: '_Z',
           computeGroups: computeMetricSuffixGroups,
           active: Boolean(sectionValues.get('filters-suffix')?.length),
+        }),
+        new RecentMetricsSection({
+          key: 'filters-recent',
+          title: 'Recent metrics filters',
+          description: 'Filter metrics based on when they started being ingested',
+          icon: 'clock-nine',
+          active: Boolean(sectionValues.get('filters-recent')?.length),
         }),
         new LabelsBrowser({
           key: 'groupby-labels',
@@ -142,6 +150,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       'filters-rule': 'rule group',
       'filters-prefix': 'prefix',
       'filters-suffix': 'suffix',
+      'filters-recent': 'recent',
     };
 
     const newFilters = Array.from(sectionValues.entries()).reduce<Array<AdHocFilterWithLabels<{}>>>(
@@ -241,6 +250,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
     } else if (sectionKey === 'filters-suffix') {
       reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
+    } else if (sectionKey === 'filters-recent') {
+      reportExploreMetrics('sidebar_recent_filter_section_clicked', {});
     }
 
     this.setState({
@@ -309,6 +320,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             />
             {/* TODO: find a better way */}
             {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
+            {visibleSection instanceof RecentMetricsSection && <visibleSection.Component model={visibleSection} />}
             {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
             {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}
             {visibleSection instanceof Settings && <visibleSection.Component model={visibleSection} />}
