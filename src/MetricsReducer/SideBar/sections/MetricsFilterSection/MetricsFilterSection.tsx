@@ -9,7 +9,7 @@ import {
   type SceneComponentProps,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
-import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
+import { Icon, IconButton, Input, Spinner, Switch, Text, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
 import {
@@ -275,7 +275,9 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
         {showHideEmpty && (
           <div className={styles.switchContainer}>
-            <span className={styles.switchLabel}>Hide empty</span>
+            <Text variant="bodySmall" color="primary">
+              Hide empty
+            </Text>
             <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
           </div>
         )}
@@ -322,10 +324,6 @@ function getStyles(theme: GrafanaTheme2) {
       alignItems: 'center',
       justifyContent: 'flex-end',
       gap: theme.spacing(1),
-    }),
-    switchLabel: css({
-      fontSize: '12px',
-      color: theme.colors.text.primary,
     }),
     searchInput: css({
       flexBasis: '32px',
