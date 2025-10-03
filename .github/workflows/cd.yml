@@ -24,3 +24,5 @@ jobs:
       grafana-cloud-deployment-type: provisioned
       auto-merge-environments: dev,ops
       argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
+      # Add the git head ref sha to the plugin version as suffix (`+abcdef`). This is required for CD builds.
+      plugin-version-suffix: ${{ github.event_name == 'push' && github.sha || github.event.pull_request.head.sha }}
