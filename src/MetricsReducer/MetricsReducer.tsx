@@ -192,6 +192,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
     return (
       <>
+        <span>Hello dev</span>
         <div className={styles.listControls} data-testid="list-controls">
           <listControls.Component model={listControls} />
         </div>

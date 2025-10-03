@@ -1,11 +1,23 @@
-name: Publish Dev
-run-name: Deploy main to dev by @${{ github.actor }}
+name: Publish CD
+run-name: Deploy ${{ inputs.branch }} to ${{ inputs.environment }} by @${{ github.actor }}
 
 on:
   push:
     branches:
       - main
       - fix/cd-dev
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to publish from. Can be used to deploy PRs to dev
+        default: main
+      environment:
+        description: Environment to publish to
+        required: true
+        type: choice
+        options:
+          - 'dev'
+          - 'ops'
 
 permissions:
   contents: 'write'
