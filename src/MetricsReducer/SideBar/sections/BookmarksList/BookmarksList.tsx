@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
-import { Text, useStyles2 } from '@grafana/ui';
+import { Stack, Text, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { useBookmarks } from 'shared/bookmarks/useBookmarks';
@@ -53,55 +53,47 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
     };
 
     return (
-      <div className={styles.container}>
+      <Stack direction="column" gap={1} height="100%">
         <SectionTitle title={title} description={description} data-testid="bookmarks-list-sidebar" />
         {bookmarks.length > 0 ? (
           <div className={styles.bookmarksList}>
-            {bookmarks.map((bookmark) => (
-              <BookmarkListItem
-                key={bookmark.key}
-                bookmark={bookmark}
-                onSelect={() => onSelect(bookmark.key)}
-                onDelete={() => onDelete(bookmark.key)}
-                wide={true}
-                compactHeight={true}
-              />
-            ))}
+            <Stack direction="column" gap={1.5}>
+              {bookmarks.map((bookmark) => (
+                <BookmarkListItem
+                  key={bookmark.key}
+                  bookmark={bookmark}
+                  onSelect={() => onSelect(bookmark.key)}
+                  onDelete={() => onDelete(bookmark.key)}
+                  wide={true}
+                  compactHeight={true}
+                />
+              ))}
+            </Stack>
           </div>
         ) : (
           <div className={styles.emptyState}>
-            <Text color="secondary" italic>
-              No bookmarks yet for the
-            </Text>
-            <Text color="secondary" italic>
-              current data source.
-            </Text>
+            <Stack direction="column" alignItems="center">
+              <Text color="secondary" italic>
+                No bookmarks yet for the
+              </Text>
+              <Text color="secondary" italic>
+                current data source.
+              </Text>
+            </Stack>
           </div>
         )}
-      </div>
+      </Stack>
     );
   };
 }
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing(1),
-      height: '100%',
-    }),
     bookmarksList: css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: theme.spacing(1.5),
       overflowY: 'auto',
       paddingRight: theme.spacing(1),
     }),
     emptyState: css({
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
       height: '100px',
     }),
   };
