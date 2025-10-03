@@ -1,5 +1,4 @@
 name: Publish to plugin catalog
-description: Upload new plugin artifact to GCS & publish to plugin catalog
 
 # Version Tag Publishing Process (TODO: Automate this process more):
 # 1. Create your feature branch and make changes
@@ -18,6 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       skip-grafana-dev-image:
+        description: 'Bypass grafana-dev image for e2e tests'
         required: false
         type: boolean
         default: false
