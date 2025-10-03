@@ -1,5 +1,5 @@
-name: Publish CD
-run-name: Deploy main to dev by @${{ github.actor }}
+name: CD
+run-name: Deploy main to dev,ops by @${{ github.actor }}
 
 on:
   push:
