@@ -1,5 +1,5 @@
-name: Publish Dev
-run-name: Deploy ${{ inputs.branch }} to dev by @${{ github.actor }}
+name: CD
+run-name: Deploy main to dev,ops by @${{ github.actor }}
 
 on:
   push:
@@ -16,11 +16,11 @@ jobs:
     name: Deploy plugin
     uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
     with:
-      branch: ${{ github.event.inputs.branch }}
-      environment: dev
+      branch: ${{ github.event_name == 'push' && github.ref_name || github.ref }}
+      environment: dev,ops
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
       run-playwright: false
-      # Use argo workflows, auto merge to dev,ops in deployment tools
+      # Use argo workflows, auto merge to dev in deployment tools
       grafana-cloud-deployment-type: provisioned
-      auto-merge-environments: dev
+      auto-merge-environments: dev,ops
       argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
