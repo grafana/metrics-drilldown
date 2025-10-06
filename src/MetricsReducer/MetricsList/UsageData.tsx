@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2, type IconName } from '@grafana/data';
-import { Button, Dropdown, Icon, Menu, Tooltip, useStyles2 } from '@grafana/ui';
+import { Button, Dropdown, Icon, Menu, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type MetricUsageType } from 'MetricsReducer/list-controls/MetricsSorter/MetricUsageFetcher';
@@ -28,8 +28,8 @@ export function UsageData({
 
   return (
     <div className={styles.usageContainer} data-testid="usage-data-panel">
-      {usageType === 'dashboard-usage' ? (
-        <>
+      <Stack direction="row" justifyContent="flex-start" alignItems="center" gap={2}>
+        {usageType === 'dashboard-usage' ? (
           <Dropdown
             placement="right-start"
             overlay={
@@ -64,22 +64,26 @@ export function UsageData({
               } in dashboard queries. Click to view the dashboards.`}
               className={cx(styles.usageItem, styles.clickableUsageItem)}
             >
-              <span data-testid={usageType}>
-                <Icon name={icon} style={{ marginRight: '4px' }} /> {usageCount}
-              </span>
+              <Stack direction="row" alignItems="center" gap={0.5} data-testid={usageType}>
+                <Icon name={icon} />
+                <span>{usageCount}</span>
+              </Stack>
             </Button>
           </Dropdown>
-        </>
-      ) : (
-        <Tooltip
-          content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
-          placement="top"
-        >
-          <span className={styles.usageItem} data-testid={usageType}>
-            <Icon name={icon} /> {usageCount}
-          </span>
-        </Tooltip>
-      )}
+        ) : (
+          <Tooltip
+            content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
+            placement="top"
+          >
+            <span className={styles.usageItem} data-testid={usageType}>
+              <Stack direction="row" alignItems="center" gap={0.5}>
+                <Icon name={icon} />
+                <span>{usageCount}</span>
+              </Stack>
+            </span>
+          </Tooltip>
+        )}
+      </Stack>
     </div>
   );
 }
@@ -87,20 +91,12 @@ export function UsageData({
 function getStyles(theme: GrafanaTheme2) {
   return {
     usageContainer: css({
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'flex-start',
-      gap: '17px',
       padding: '8px 12px',
       border: `1px solid ${theme.colors.border.weak}`,
       borderTopWidth: 0,
       backgroundColor: theme.colors.background.primary,
-      alignItems: 'center',
     }),
     usageItem: css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
       color: theme.colors.text.secondary,
       opacity: '65%',
     }),
