@@ -33,7 +33,9 @@ export class ExploreAction {
       text: 'Explore',
       iconClassName: 'compass',
       onClick: () => exploreUrl?.then((url) => {
-        return url && window.open(`${config.appSubUrl}${url}`, '_blank');
+        if (url) {
+          window.open(`${config.appSubUrl}${url}`, '_blank');
+        }
       }),
       shortcut: 'p x',
     };
