@@ -12,7 +12,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Button, CollapsableSection, Spinner, useStyles2 } from '@grafana/ui';
+import { Button, CollapsableSection, Spinner, Stack, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
@@ -182,17 +182,19 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
     return (
       <div className={styles.container} data-testid={`${labelName}-${labelValue}-metrics-group`}>
         <div className={styles.containerHeader}>
-          <div className={styles.headerButtons}>
-            <Button
-              className={styles.selectButton}
-              variant="secondary"
-              onClick={onClickSelect}
-              tooltip={`See metrics with ${labelName}=${labelValue}`}
-              tooltipPlacement="top"
-            >
-              Select
-            </Button>
-          </div>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <div className={styles.headerButtons}>
+              <Button
+                className={styles.selectButton}
+                variant="secondary"
+                onClick={onClickSelect}
+                tooltip={`See metrics with ${labelName}=${labelValue}`}
+                tooltipPlacement="top"
+              >
+                Select
+              </Button>
+            </div>
+          </Stack>
         </div>
 
         {
@@ -201,28 +203,34 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             onToggle={() => setIsCollapsed(!isCollapsed)}
             label={
               <div className={styles.groupName}>
-                <GroupsIcon />
-                <div className={styles.labelValue}>{labelValue}</div>
-                {labelCardinality > 1 && (
-                  <div className={styles.index}>
-                    ({index + 1}/{labelCardinality})
-                  </div>
-                )}
+                <Stack direction="row" alignItems="center">
+                  <GroupsIcon />
+                  <div className={styles.labelValue}>{labelValue}</div>
+                  {labelCardinality > 1 && (
+                    <div className={styles.index}>
+                      ({index + 1}/{labelCardinality})
+                    </div>
+                  )}
+                </Stack>
               </div>
             }
           >
             <div className={styles.collapsableSectionBody}>
-              <body.Component model={body} />
+              <Stack direction="column" gap={3}>
+                <body.Component model={body} />
+              </Stack>
             </div>
 
             {shouldDisplayShowMoreButton && (
               <div className={styles.footer}>
-                <ShowMoreButton
-                  label="metric"
-                  batchSizes={batchSizes}
-                  onClick={onClickShowMore}
-                  tooltip={`Show more metrics for ${labelName}="${labelValue}"`}
-                />
+                <Stack direction="row" justifyContent="center" alignItems="center">
+                  <ShowMoreButton
+                    label="metric"
+                    batchSizes={batchSizes}
+                    onClick={onClickShowMore}
+                    tooltip={`Show more metrics for ${labelName}="${labelValue}"`}
+                  />
+                </Stack>
               </div>
             )}
           </CollapsableSection>
@@ -248,9 +256,6 @@ function getStyles(theme: GrafanaTheme2) {
       },
     }),
     containerHeader: css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
       marginBottom: '-36px',
       paddingBottom: theme.spacing(1.5),
       borderBottom: `1px solid ${theme.colors.border.medium}`,
@@ -266,14 +271,9 @@ function getStyles(theme: GrafanaTheme2) {
       height: '28px',
     }),
     collapsableSectionBody: css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '24px',
       padding: theme.spacing(1),
     }),
     groupName: css({
-      display: 'flex',
-      alignItems: 'center',
       fontSize: '1.3rem',
       lineHeight: '1.3rem',
     }),
@@ -287,9 +287,6 @@ function getStyles(theme: GrafanaTheme2) {
       marginLeft: '8px',
     }),
     footer: css({
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
       marginTop: theme.spacing(1),
 
       '& button': {
