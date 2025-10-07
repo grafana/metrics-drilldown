@@ -1,4 +1,6 @@
 import { AppPlugin, type AppRootProps } from '@grafana/data';
+import { initPluginTranslations } from '@grafana/i18n';
+import { loadResources } from '@grafana/scenes';
 import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
 
@@ -8,6 +10,7 @@ import { linkConfigs } from 'extensions/links';
 import { logger } from 'shared/logger/logger';
 
 const LazyApp = lazy(async () => {
+  await initPluginTranslations('grafana-scenes', [loadResources]); // Initialize i18n for scenes library
   const { wasmSupported } = await import('./shared/services/sorting');
   const { default: initOutlier } = await import('@bsull/augurs/outlier');
 
