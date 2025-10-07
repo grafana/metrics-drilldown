@@ -8,6 +8,12 @@ import { linkConfigs } from 'extensions/links';
 import { logger } from 'shared/logger/logger';
 
 const LazyApp = lazy(async () => {
+  // Initialize i18n for scenes library
+  const { initPluginTranslations } = await import('@grafana/i18n');
+  const { loadResources } = await import('@grafana/scenes');
+  await initPluginTranslations('grafana-scenes', [loadResources]);
+
+  // Initialize WASM-based outlier detection
   const { wasmSupported } = await import('./shared/services/sorting');
   const { default: initOutlier } = await import('@bsull/augurs/outlier');
 

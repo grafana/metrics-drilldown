@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/playwright:v1.55.1
+FROM mcr.microsoft.com/playwright:v1.56.0
 
 WORKDIR /app
 
 # required by the e2e test code
-RUN npm install "@playwright/test@^1.55.1" "dotenv@^16.3.1" "@grafana/plugin-e2e"
+RUN npm install "@playwright/test@^1.56.0" "dotenv@^16.3.1" "@grafana/plugin-e2e"
 
 ENV TZ=Europe/Madrid
 

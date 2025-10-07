@@ -2,7 +2,6 @@ import {
   MultiValueVariable,
   sceneGraph,
   SceneObjectBase,
-  VariableDependencyConfig,
   type SceneComponentProps,
   type SceneLayout,
   type SceneObject,
@@ -11,6 +10,7 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
+import { areArraysEqual } from 'MetricsReducer/metrics-variables/helpers/areArraysEqual';
 import { logger } from 'shared/logger/logger';
 
 /**
@@ -44,14 +44,6 @@ const DEFAULT_INITIAL_PAGE_SIZE = 6;
 const DEFAULT_PAGE_SIZE_INCREMENT = 9;
 
 export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepeaterState> {
-  protected _variableDependency: VariableDependencyConfig<SceneByVariableRepeaterState> = new VariableDependencyConfig(
-    this,
-    {
-      variableNames: [this.state.variableName],
-      onVariableUpdateCompleted: () => this.performRepeat(),
-    }
-  );
-
   public constructor({
     variableName,
     body,
@@ -86,31 +78,41 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
       emptyLayout: undefined,
     });
 
-    this.addActivationHandler(() => this.performRepeat());
+    this.addActivationHandler(() => {
+      const variable = sceneGraph.lookupVariable(this.state.variableName, this);
+      if (!(variable instanceof MultiValueVariable)) {
+        const error = new Error('SceneByVariableRepeater: variable is not a MultiValueVariable!');
+        logger.error(error);
+        return;
+      }
+
+      this.performRepeat(variable);
+
+      this._subs.add(
+        variable.subscribeToState((newState, prevState) => {
+          if (newState.loading !== prevState.loading || !areArraysEqual(newState.options, prevState.options)) {
+            this.performRepeat(variable);
+          }
+        })
+      );
+    });
   }
 
-  private performRepeat() {
-    if (this._variableDependency.hasDependencyInLoadingState()) {
+  private performRepeat(variable: MultiValueVariable) {
+    if (variable.state.error) {
       this.setState({
-        loadingLayout: this.state.getLayoutLoading?.(),
-        errorLayout: undefined,
+        errorLayout: this.state.getLayoutError?.(variable.state.error),
+        loadingLayout: undefined,
         emptyLayout: undefined,
         currentBatchSize: 0,
       });
       return;
     }
 
-    const variable = sceneGraph.lookupVariable(this.state.variableName, this);
-    if (!(variable instanceof MultiValueVariable)) {
-      const error = new Error('SceneByVariableRepeater: variable is not a MultiValueVariable!');
-      logger.error(error);
-      return;
-    }
-
-    if (variable.state.error) {
+    if (variable.state.loading) {
       this.setState({
-        errorLayout: this.state.getLayoutError?.(variable.state.error),
-        loadingLayout: undefined,
+        loadingLayout: this.state.getLayoutLoading?.(),
+        errorLayout: undefined,
         emptyLayout: undefined,
         currentBatchSize: 0,
       });
@@ -182,12 +184,12 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
   public static readonly Component = ({ model }: SceneComponentProps<SceneByVariableRepeater>) => {
     const { body, loadingLayout, errorLayout, emptyLayout } = model.useState();
 
-    if (loadingLayout) {
-      return <loadingLayout.Component model={loadingLayout} />;
-    }
-
     if (errorLayout) {
       return <errorLayout.Component model={errorLayout} />;
+    }
+
+    if (loadingLayout) {
+      return <loadingLayout.Component model={loadingLayout} />;
     }
 
     if (emptyLayout) {
