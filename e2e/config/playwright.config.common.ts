@@ -42,6 +42,8 @@ type CustomEnvConfig = {
   retries?: number;
   forbidOnly?: boolean;
   workers?: number;
+  testDir?: string;
+  baseURL?: string;
 };
 
 export function config(config: CustomEnvConfig) {
@@ -58,7 +60,7 @@ export function config(config: CustomEnvConfig) {
     forbidOnly: config.forbidOnly || false,
     workers: config.workers || 1,
     // Look for test files in the "tests" directory, relative to this configuration file.
-    testDir: path.join(process.cwd(), 'e2e', 'tests'),
+    testDir: config.testDir || path.join(process.cwd(), 'e2e', 'tests'),
     // Folder for test artifacts such as screenshots, videos, traces, etc.
     outputDir: '../test-results',
     /* Run tests in files in parallel */
@@ -71,7 +73,7 @@ export function config(config: CustomEnvConfig) {
       user: getGrafanaUser(),
       grafanaAPICredentials: getGrafanaUser(),
       /* Base URL to use in actions like `await page.goto('/')`. */
-      baseURL: getGrafanaUrl(),
+      baseURL: config.baseURL || getGrafanaUrl(),
       // Record trace only when retrying a test for the first time.
       screenshot: 'only-on-failure',
       // Record video only when retrying a test for the first time.
