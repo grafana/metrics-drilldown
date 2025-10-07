@@ -19,7 +19,7 @@ import { userStorage } from 'shared/user-preferences/userStorage';
 import { EventSortByChanged } from './events/EventSortByChanged';
 import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
-export type SortingOption = 'default' | 'dashboard-usage' | 'alerting-usage';
+export type SortingOption = 'default' | 'alphabetical' | 'alphabetical-reversed' | 'dashboard-usage' | 'alerting-usage';
 
 const MAX_RECENT_METRICS = 6;
 const RECENT_METRICS_EXPIRY_DAYS = 30;
@@ -91,6 +91,8 @@ interface MetricsSorterState extends SceneObjectState {
 
 const sortByOptions: VariableValueOption[] = [
   { label: 'Default', value: 'default' },
+  { label: 'Alphabetical [A-Z]', value: 'alphabetical' },
+  { label: 'Alphabetical [Z-A]', value: 'alphabetical-reversed' },
   { label: 'Dashboard Usage', value: 'dashboard-usage' },
   { label: 'Alerting Usage', value: 'alerting-usage' },
 ] as const;
@@ -99,7 +101,13 @@ export const VAR_WINGMAN_SORT_BY = 'metrics-reducer-sort-by';
 
 export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   initialized = false;
-  supportedSortByOptions = new Set<SortingOption>(['default', 'dashboard-usage', 'alerting-usage']);
+  supportedSortByOptions = new Set<SortingOption>([
+    'alerting-usage',
+    'alphabetical',
+    'alphabetical-reversed',
+    'dashboard-usage',
+    'default',
+  ]);
   private usageFetcher = new MetricUsageFetcher();
 
   constructor(state: Partial<MetricsSorterState>) {
@@ -114,7 +122,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
             value: 'default',
             query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
             description:
-              'Sort metrics by default (alphabetically, with recently-selected metrics first), by prevalence in dashboard panel queries, or by prevalence in alerting rules',
+              'Default metric sorting is alphabetical with recently-selected metrics first. Metrics can also be sorted purely alphabetically, by prevalence in dashboard panel queries, or by prevalence in alerting rules',
           }),
         ],
       }),
@@ -191,10 +199,14 @@ export function sortMetricsByCount(metrics: string[], counts: Record<string, num
 /**
  * Sort metrics in alphabetical order
  * @param metrics Array of metric names
+ * @param direction The direction to sort in ('asc' for A-Z, 'desc' for Z-A)
  * @returns Sorted array of metric names in alphabetical order
  */
-function sortMetricsAlphabetically(metrics: string[]): string[] {
-  return [...metrics].sort((a, b) => localeCompare(a, b));
+export function sortMetricsAlphabetically(metrics: string[], direction: 'asc' | 'desc' = 'asc'): string[] {
+  const compareFn: (a: string, b: string) => number =
+    direction === 'asc' ? (a, b) => localeCompare(a, b) : (a, b) => localeCompare(b, a);
+
+  return [...metrics].sort((a, b) => compareFn(a, b));
 }
 
 /**

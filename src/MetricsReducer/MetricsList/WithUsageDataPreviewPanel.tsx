@@ -13,6 +13,7 @@ import {
   VAR_WINGMAN_SORT_BY,
   type SortingOption,
 } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
+import { isMetricUsageType } from 'MetricsReducer/list-controls/MetricsSorter/MetricUsageFetcher';
 import { VAR_FILTERED_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { type GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
@@ -84,7 +85,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     this.setState({ sortBy });
     this.updateLayout(sortBy);
 
-    if (sortBy === 'default') {
+    if (!isMetricUsageType(sortBy)) {
       return;
     }
 
@@ -133,7 +134,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     const gridLayout = sceneGraph.getAncestor(this, SceneCSSGridLayout);
     const currentGridLayoutHeight = gridLayout?.state.autoRows;
 
-    const expectedPanelHeight = sortBy === 'default' ? VIZ_PANEL_HEIGHT : VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW;
+    const expectedPanelHeight = isMetricUsageType(sortBy) ? VIZ_PANEL_HEIGHT_WITH_USAGE_DATA_PREVIEW : VIZ_PANEL_HEIGHT;
 
     if (currentGridLayoutHeight !== expectedPanelHeight) {
       gridLayout.setState({ autoRows: expectedPanelHeight });
@@ -152,7 +153,7 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
     return (
       <div data-testid="with-usage-data-preview-panel">
         <vizPanelInGridItem.Component model={vizPanelInGridItem} />
-        {sortBy !== 'default' && (
+        {isMetricUsageType(sortBy) && (
           <UsageData
             usageType={sortBy}
             usageCount={usageCount}

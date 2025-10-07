@@ -13,3 +13,11 @@ type SnakeCaseInner<S extends string> = S extends `${infer T}${infer U}`
     ? `${Lowercase<T>}${SnakeCaseInner<U>}`
     : `${T}${SnakeCaseInner<U>}`
   : S;
+
+/**
+ * Utility type that extracts the type of items in a set
+ * @example ItemsInSet<Set<string>> -> string
+ * @example ItemsInSet<Set<number>> -> number
+ * @example ItemsInSet<Set<'a' | 'b' | 'c'>> -> 'a' | 'b' | 'c'
+ */
+export type ItemsInSet<T extends Set<unknown>> = T extends Set<infer U> ? U : never;

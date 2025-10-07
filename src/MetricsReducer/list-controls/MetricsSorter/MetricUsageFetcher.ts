@@ -1,5 +1,6 @@
 import { fetchAlertingMetrics } from './fetchers/fetchAlertingMetrics';
 import { fetchDashboardMetrics, type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
+import { type ItemsInSet } from '../../../shared/utils/utils.types';
 
 interface MetricsUsageState {
   metrics: Record<string, MetricUsageDetails>;
@@ -7,7 +8,10 @@ interface MetricsUsageState {
   fetcher: () => Promise<Record<string, MetricUsageDetails>>;
 }
 
-export type MetricUsageType = 'dashboard-usage' | 'alerting-usage';
+const metricUsageTypes = new Set(['dashboard-usage', 'alerting-usage'] as const);
+export type MetricUsageType = ItemsInSet<typeof metricUsageTypes>;
+export const isMetricUsageType = (x: string): x is MetricUsageType => metricUsageTypes.has(x as MetricUsageType);
+
 // Fetches and stores metric usage data for dashboards and alerting rules
 export class MetricUsageFetcher {
   private _usageState: Record<MetricUsageType, MetricsUsageState> = {
