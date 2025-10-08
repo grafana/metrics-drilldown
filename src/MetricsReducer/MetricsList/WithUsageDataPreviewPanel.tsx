@@ -91,21 +91,14 @@ export class WithUsageDataPreviewPanel extends SceneObjectBase<WithUsageDataPrev
 
     const usage = await metricsSorter.getUsageDetailsForMetric(this.state.metric, sortBy);
 
-    switch (sortBy) {
+    switch (usage.usageType) {
       case 'dashboard-usage':
-        // FIXME: we do this only to satisfy TS Lord
-        if (usage.usageType !== 'dashboard-usage') {
-          return;
-        }
-
-        const { dashboards } = usage;
-
         this.setState({
           usageCount: usage.count,
           singularUsageType: 'dashboard panel query',
           pluralUsageType: 'dashboard panel queries',
           icon: 'apps',
-          dashboardItems: Object.entries(dashboards)
+          dashboardItems: Object.entries(usage.dashboards)
             .map(([label, dashboardInfo]) => ({
               id: dashboardInfo.uid,
               label,
