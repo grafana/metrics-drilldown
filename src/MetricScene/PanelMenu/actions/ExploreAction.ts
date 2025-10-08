@@ -1,4 +1,5 @@
 import { type PanelMenuItem } from '@grafana/data';
+import { config } from '@grafana/runtime';
 import { getExploreURL, sceneGraph, VizPanel } from '@grafana/scenes';
 
 export class ExploreAction {
@@ -31,7 +32,11 @@ export class ExploreAction {
     return {
       text: 'Explore',
       iconClassName: 'compass',
-      onClick: () => exploreUrl?.then((url) => url && window.open(url, '_blank')),
+      onClick: () => exploreUrl?.then((url) => {
+        if (url) {
+          window.open(`${config.appSubUrl}${url}`, '_blank');
+        }
+      }),
       shortcut: 'p x',
     };
   }
