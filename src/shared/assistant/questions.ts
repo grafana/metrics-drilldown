@@ -23,7 +23,32 @@ export type { Question };
 // METRICS REDUCER (List View)
 // URL Pattern: /drilldown (no metric parameter)
 // ============================================================================
-export const metricsReducerQuestions: Question[] = [];
+export const metricsReducerQuestions: Question[] = [
+  {
+    prompt: 'How do I search for metrics without writing PromQL?',
+    context: [],
+  },
+  {
+    prompt: 'How do I filter metrics by their name prefix or suffix?',
+    context: [],
+  },
+  {
+    prompt: 'How do I group metrics by a label to see their values?',
+    context: [],
+  },
+  {
+    prompt: 'How do I sort metrics by dashboard usage or alerting rules?',
+    context: [],
+  },
+  {
+    prompt: 'How do I bookmark a metric for quick access later?',
+    context: [],
+  },
+  {
+    prompt: 'How do I filter metrics by label values?',
+    context: [],
+  },
+];
 
 // ============================================================================
 // METRIC SCENE (Detail View - General)
