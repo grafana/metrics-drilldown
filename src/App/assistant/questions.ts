@@ -1,5 +1,5 @@
 /**
- * Assistant Questions for Grafana Metrics Drilldown
+ * Assistant Questions for Grafana Metrics Drilldown app
  *
  * This file contains all questions that appear in Grafana Assistant for this app.
  * Questions provide quick-start guidance with contextual information about app features.
