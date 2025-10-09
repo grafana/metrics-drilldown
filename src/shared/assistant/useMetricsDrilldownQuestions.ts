@@ -20,18 +20,18 @@ import {
 
 export function useMetricsDrilldownQuestions() {
   // Register questions for metrics list view
-  useProvideQuestions('/drilldown', metricsReducerQuestions);
+  useProvideQuestions('/a/grafana-metricsdrilldown-app/drilldown', metricsReducerQuestions);
 
   // Register questions for metric detail view
-  useProvideQuestions('/drilldown?*metric=*', metricSceneQuestions);
+  useProvideQuestions('/a/grafana-metricsdrilldown-app/drilldown?*metric=*', metricSceneQuestions);
 
   // Register questions for breakdown tab
-  useProvideQuestions('/drilldown?*actionView=breakdown*', breakdownTabQuestions);
+  useProvideQuestions('/a/grafana-metricsdrilldown-app/drilldown?*actionView=breakdown*', breakdownTabQuestions);
 
   // Register questions for related metrics tab
-  useProvideQuestions('/drilldown?*actionView=related*', relatedMetricsTabQuestions);
+  useProvideQuestions('/a/grafana-metricsdrilldown-app/drilldown?*actionView=related*', relatedMetricsTabQuestions);
 
   // Register questions for related logs tab
-  useProvideQuestions('/drilldown?*actionView=logs*', relatedLogsTabQuestions);
+  useProvideQuestions('/a/grafana-metricsdrilldown-app/drilldown?*actionView=logs*', relatedLogsTabQuestions);
 }
 

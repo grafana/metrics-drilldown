@@ -7,11 +7,11 @@
  * When adding a new view or major feature, add corresponding questions here.
  *
  * URL Patterns in Metrics Drilldown:
- * - Metrics Reducer (list view): /drilldown (no 'metric' param)
- * - Metric Scene (detail view): /drilldown?metric=...
- * - Breakdown tab: /drilldown?metric=...&actionView=breakdown
- * - Related Metrics tab: /drilldown?metric=...&actionView=related
- * - Related Logs tab: /drilldown?metric=...&actionView=logs
+ * - Metrics Reducer (list view): /a/grafana-metricsdrilldown-app/drilldown (no 'metric' param)
+ * - Metric Scene (detail view): /a/grafana-metricsdrilldown-app/drilldown?metric=...
+ * - Breakdown tab: /a/grafana-metricsdrilldown-app/drilldown?metric=...&actionView=breakdown
+ * - Related Metrics tab: /a/grafana-metricsdrilldown-app/drilldown?metric=...&actionView=related
+ * - Related Logs tab: /a/grafana-metricsdrilldown-app/drilldown?metric=...&actionView=logs
  */
 
 import type { Question } from '@grafana/assistant';
@@ -21,7 +21,7 @@ export type { Question };
 
 // ============================================================================
 // METRICS REDUCER (List View)
-// URL Pattern: /drilldown (no metric parameter)
+// URL Pattern: /a/grafana-metricsdrilldown-app/drilldown (no metric parameter)
 // ============================================================================
 export const metricsReducerQuestions: Question[] = [
   {
@@ -41,10 +41,6 @@ export const metricsReducerQuestions: Question[] = [
     context: [],
   },
   {
-    prompt: 'How do I bookmark a metric for quick access later?',
-    context: [],
-  },
-  {
     prompt: 'How do I filter metrics by label values?',
     context: [],
   },
@@ -52,25 +48,25 @@ export const metricsReducerQuestions: Question[] = [
 
 // ============================================================================
 // METRIC SCENE (Detail View - General)
-// URL Pattern: /drilldown?metric=... (metric parameter present)
+// URL Pattern: /a/grafana-metricsdrilldown-app/drilldown?metric=... (metric parameter present)
 // ============================================================================
 export const metricSceneQuestions: Question[] = [];
 
 // ============================================================================
 // BREAKDOWN TAB
-// URL Pattern: /drilldown?metric=...&actionView=breakdown
+// URL Pattern: /a/grafana-metricsdrilldown-app/drilldown?metric=...&actionView=breakdown
 // ============================================================================
 export const breakdownTabQuestions: Question[] = [];
 
 // ============================================================================
 // RELATED METRICS TAB
-// URL Pattern: /drilldown?metric=...&actionView=related
+// URL Pattern: /a/grafana-metricsdrilldown-app/drilldown?metric=...&actionView=related
 // ============================================================================
 export const relatedMetricsTabQuestions: Question[] = [];
 
 // ============================================================================
 // RELATED LOGS TAB
-// URL Pattern: /drilldown?metric=...&actionView=logs
+// URL Pattern: /a/grafana-metricsdrilldown-app/drilldown?metric=...&actionView=logs
 // ============================================================================
 export const relatedLogsTabQuestions: Question[] = [];
 
