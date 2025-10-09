@@ -3,7 +3,7 @@ import React from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 
-import { useMetricsDrilldownQuestions } from './assistant/questions';
+import { useMetricsDrilldownQuestions } from './assistant/useMetricsDrilldownQuestions';
 
 type TrailProps = {
   trail: DataTrail;

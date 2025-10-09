@@ -8,7 +8,7 @@
  * These questions appear anywhere in the Metrics Drilldown app.
  */
 
-import { createAssistantContextItem, useProvideQuestions, type Question } from '@grafana/assistant';
+import { createAssistantContextItem, type Question } from '@grafana/assistant';
 
 // App context that provides information about Metrics Drilldown features
 const appContext = createAssistantContextItem('structured', {
@@ -58,6 +58,3 @@ export const metricsDrilldownQuestions: Question[] = [
   },
 ];
 
-export function useMetricsDrilldownQuestions() {
-  useProvideQuestions('/a/grafana-metricsdrilldown-app/drilldown*', metricsDrilldownQuestions);
-}
