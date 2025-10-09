@@ -3,6 +3,7 @@ import { sceneGraph, SceneVariableValueChangedEvent, type QueryVariable } from '
 import { sortRelatedMetrics } from 'MetricScene/RelatedMetrics/sortRelatedMetrics';
 import {
   MetricsSorter,
+  sortMetricsAlphabetically,
   sortMetricsByCount,
   sortMetricsWithRecentFirst,
   type SortingOption,
@@ -33,6 +34,14 @@ export class MetricsVariableSortEngine {
     let sortedMetrics: string[];
 
     switch (sortBy) {
+      case 'alphabetical':
+        sortedMetrics = sortMetricsAlphabetically(metrics, 'asc');
+        break;
+
+      case 'alphabetical-reversed':
+        sortedMetrics = sortMetricsAlphabetically(metrics, 'desc');
+        break;
+
       case 'dashboard-usage':
       case 'alerting-usage':
         sortedMetrics = await this.sortByUsage(metrics, sortBy);
