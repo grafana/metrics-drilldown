@@ -16,6 +16,7 @@ import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/Labe
 import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'MetricsReducer/metrics-variables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'MetricsReducer/metrics-variables/computeRulesGroups';
+import { getOdin } from 'services/odin';
 import { VAR_OTHER_METRIC_FILTERS } from 'shared/shared';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
@@ -30,7 +31,6 @@ import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetr
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
-import { HGFeatureToggles, isFeatureToggleEnabled } from '../../shared/utils/utils.feature-toggles';
 
 type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList | Settings;
 
@@ -131,9 +131,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     });
 
     // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
-    if (!this.state.visibleSection?.state.key && isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)) {
-      this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
-    }
+    getOdin()
+      ?.getBooleanFlag('<TODO-odin-sidebar-experiment-key>', false)
+      .then((isEnabled) => {
+        if (!this.state.visibleSection?.state.key && isEnabled) {
+          this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+        }
+      });
 
     return () => {
       cleanupOtherMetricsVar();
