@@ -33,7 +33,9 @@
  *   client.connect('my-experiment');
  */
 
-import { getFaro } from 'shared/logger/faro/faro';
+import { ensureErrorObject } from 'App/useCatchExceptions';
+import { getFaro } from '../shared/logger/faro/faro';
+import { logger } from '../shared/logger/logger';
 
 type EvaluationContextValue = string | number | boolean;
 
@@ -194,7 +196,7 @@ export class OdinClient {
       this.flagCache = flags;
       return flags;
     } catch (error) {
-      console.error('Failed to get all flags:', error);
+      logger.error(ensureErrorObject(error, 'Failed to get all flags'));
       return this.flagCache;
     }
   }
@@ -350,7 +352,7 @@ export class OdinClient {
 
       return data;
     } catch (error) {
-      console.error(`Failed to evaluate flag ${flagKey}:`, error);
+      logger.error(ensureErrorObject(error, `Failed to evaluate flag ${flagKey}`));
 
       // Return cached value or default
       return {
@@ -378,7 +380,7 @@ export class OdinClient {
     this.eventSource = new EventSource(url);
 
     this.eventSource.onopen = () => {
-      console.log('SSE connected');
+      logger.info('SSE connected');
     };
 
     this.eventSource.addEventListener('flag-change', (event) => {
@@ -387,12 +389,12 @@ export class OdinClient {
         this.flagCache = data.flags;
         this.notifyListeners(data.flags);
       } catch (error) {
-        console.error('Failed to parse SSE event:', error);
+        logger.error(ensureErrorObject(error, 'Failed to parse SSE event'));
       }
     });
 
     this.eventSource.onerror = (error) => {
-      console.error('SSE error:', error);
+      logger.error(ensureErrorObject(error, 'SSE error'));
       // EventSource will automatically attempt to reconnect
     };
   }
@@ -417,7 +419,7 @@ export class OdinClient {
       try {
         listener(flags);
       } catch (error) {
-        console.error('Error in flag change listener:', error);
+        logger.error(ensureErrorObject(error, 'Error in flag change listener'));
       }
     });
   }
