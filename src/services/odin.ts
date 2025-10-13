@@ -34,6 +34,7 @@
  */
 
 import { ensureErrorObject } from 'App/useCatchExceptions';
+
 import { getFaro } from '../shared/logger/faro/faro';
 import { logger } from '../shared/logger/logger';
 
@@ -306,23 +307,45 @@ export class OdinClient {
   /**
    * Build request headers including authentication if provided
    */
-  private buildHeaders(additionalHeaders?: HeadersInit): HeadersInit {
+  private buildHeaders(additionalHeaders?: HeadersInit): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
-    // Add authentication header if apiToken is provided
+    // Add authentication if provided
     if (this.config.apiToken) {
-      // Automatically add "Bearer " prefix if not already present
-      const token = this.config.apiToken.startsWith('Bearer ')
-        ? this.config.apiToken
-        : `Bearer ${this.config.apiToken}`;
-      headers['Authorization'] = token;
+      headers.Authorization = this.getAuthorizationHeader(this.config.apiToken);
     }
 
-    // Merge with additional headers
+    // Merge additional headers if provided
     if (additionalHeaders) {
-      Object.assign(headers, additionalHeaders);
+      Object.assign(headers, this.normalizeHeaders(additionalHeaders));
+    }
+
+    return headers;
+  }
+
+  /**
+   * Format token with Bearer prefix if not already present
+   */
+  private getAuthorizationHeader(token: string): string {
+    return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+  }
+
+  /**
+   * Normalize HeadersInit to Record<string, string>
+   */
+  private normalizeHeaders(headers: HeadersInit): Record<string, string> {
+    if (headers instanceof Headers) {
+      const result: Record<string, string> = {};
+      headers.forEach((value, key) => {
+        result[key] = value;
+      });
+      return result;
+    }
+
+    if (Array.isArray(headers)) {
+      return Object.fromEntries(headers);
     }
 
     return headers;
