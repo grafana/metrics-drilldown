@@ -130,14 +130,18 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       this.setState({ sectionValues: newSectionValues });
     });
 
-    // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
-    getOdin()
-      ?.getBooleanFlag('<TODO-odin-sidebar-experiment-key>', false, '<TODO-odin-experiment-key>')
-      .then((isEnabled) => {
-        if (!this.state.visibleSection?.state.key && isEnabled) {
-          this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
-        }
-      });
+    const sidebarIsOpen = Boolean(this.state.visibleSection?.state.key);
+
+    if (!sidebarIsOpen) {
+      // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
+      getOdin()
+        ?.getBooleanFlag('<TODO-odin-sidebar-experiment-key>', false, '<TODO-odin-experiment-key>')
+        .then((isEnabled) => {
+          if (isEnabled) {
+            this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+          }
+        });
+    }
 
     return () => {
       cleanupOtherMetricsVar();
