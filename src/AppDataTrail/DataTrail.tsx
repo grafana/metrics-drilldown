@@ -142,9 +142,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.initConfigPrometheusFunction();
     initOdin({
       endpoint: '<TODO-odin-endpoint>',
-      experimentKey: '<TODO-odin-experiment-key>',
-      context: {},
       apiToken: '<TODO-odin-api-token>', // TODO: Can we get this as an environment variable?
+      context: {
+        targetingKey: config.bootData.user.uid,
+      },
     });
   }
 

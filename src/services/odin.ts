@@ -12,7 +12,6 @@
  *
  *   const client = new OdinClient({
  *     endpoint: 'http://grafana.k3d.localhost:9999/api/plugins/odin-app/resources/gofeatureflag',
- *     experimentKey: 'default-my-experiment',
  *     context: {
  *       targetingKey: 'user-123',
  *       userType: 'vip',
@@ -20,15 +19,18 @@
  *   });
  *
  *   // Get flag value
- *   const isEnabled = await client.getBooleanFlag('new-feature', false);
+ *   const isEnabled = await client.getBooleanFlag('new-feature', false, 'my-experiment');
+ *
+ *   // Get all flags for an experiment
+ *   const allFlags = await client.getAllFlags('my-experiment');
  *
  *   // Listen for real-time updates
  *   client.onFlagChange((flags) => {
  *     console.log('Flags updated:', flags);
  *   });
  *
- *   // Start real-time updates
- *   client.connect();
+ *   // Start real-time updates (experimentKey required for connection)
+ *   client.connect('my-experiment');
  */
 
 import { getFaro } from 'shared/logger/faro/faro';
@@ -41,8 +43,6 @@ type EvaluationContextValue = string | number | boolean;
 export interface EvaluationContext {
   /** Unique identifier for the user/entity being evaluated */
   targetingKey: string;
-  /** Which experiment's flags to evaluate */
-  experimentKey: string;
   /** Additional custom attributes for targeting rules */
   [key: string]: EvaluationContextValue;
 }
@@ -89,10 +89,8 @@ export interface FlagChangeEvent {
 export interface OdinClientConfig {
   /** Base URL for the Odin plugin (e.g., 'http://localhost:9999/api/plugins/odin-app/resources/gofeatureflag') */
   endpoint: string;
-  /** The experiment key to evaluate flags from */
-  experimentKey: string;
-  /** Evaluation context (user attributes for targeting) */
-  context: Omit<EvaluationContext, 'experimentKey'>;
+  /** Evaluation context (user attributes for targeting, experimentKey not required) */
+  context: EvaluationContext;
   /**
    * Grafana service account token for authentication.
    * Required when accessing from external applications.
@@ -131,62 +129,53 @@ export class OdinClient {
       enableRealTimeUpdates: config.enableRealTimeUpdates ?? false,
       pollingInterval: config.pollingInterval ?? 30000,
     };
-
-    // Add experimentKey to context
-    const fullContext = {
-      ...this.config.context,
-      experimentKey: this.config.experimentKey,
-    };
-    this.config.context = fullContext;
-
-    // Auto-connect if real-time updates are enabled
-    if (this.config.enableRealTimeUpdates) {
-      this.connect();
-    }
   }
 
   /**
    * Evaluate a boolean flag
    */
-  async getBooleanFlag(flagKey: string, defaultValue: boolean): Promise<boolean> {
-    const result = await this.evaluateFlag<boolean>(flagKey, defaultValue);
+  async getBooleanFlag(flagKey: string, defaultValue: boolean, experimentKey: string): Promise<boolean> {
+    const result = await this.evaluateFlag<boolean>(flagKey, defaultValue, experimentKey);
     return result.value;
   }
 
   /**
    * Evaluate a string flag
    */
-  async getStringFlag(flagKey: string, defaultValue: string): Promise<string> {
-    const result = await this.evaluateFlag<string>(flagKey, defaultValue);
+  async getStringFlag(flagKey: string, defaultValue: string, experimentKey: string): Promise<string> {
+    const result = await this.evaluateFlag<string>(flagKey, defaultValue, experimentKey);
     return result.value;
   }
 
   /**
    * Evaluate a number flag
    */
-  async getNumberFlag(flagKey: string, defaultValue: number): Promise<number> {
-    const result = await this.evaluateFlag<number>(flagKey, defaultValue);
+  async getNumberFlag(flagKey: string, defaultValue: number, experimentKey: string): Promise<number> {
+    const result = await this.evaluateFlag<number>(flagKey, defaultValue, experimentKey);
     return result.value;
   }
 
   /**
    * Evaluate an object/JSON flag
    */
-  async getObjectFlag<T = unknown>(flagKey: string, defaultValue: T): Promise<T> {
-    const result = await this.evaluateFlag<T>(flagKey, defaultValue);
+  async getObjectFlag<T = unknown>(flagKey: string, defaultValue: T, experimentKey: string): Promise<T> {
+    const result = await this.evaluateFlag<T>(flagKey, defaultValue, experimentKey);
     return result.value;
   }
 
   /**
-   * Get all flags for the current experiment
+   * Get all flags for the specified experiment
    */
-  async getAllFlags(): Promise<Record<string, unknown>> {
+  async getAllFlags(experimentKey: string): Promise<Record<string, unknown>> {
     try {
       const response = await this.fetchWithTimeout(`${this.config.endpoint}/ofrep/v1/evaluate/flags`, {
         method: 'POST',
         headers: this.buildHeaders(),
         body: JSON.stringify({
-          context: this.config.context,
+          context: {
+            ...this.config.context,
+            experimentKey,
+          },
         }),
       });
 
@@ -228,7 +217,7 @@ export class OdinClient {
   /**
    * Connect to real-time updates (SSE or polling)
    */
-  connect(): void {
+  connect(experimentKey: string): void {
     if (this.connected) {
       return;
     }
@@ -236,9 +225,9 @@ export class OdinClient {
     this.connected = true;
 
     if (this.config.enableRealTimeUpdates) {
-      this.connectSSE();
+      this.connectSSE(experimentKey);
     } else {
-      this.startPolling();
+      this.startPolling(experimentKey);
     }
   }
 
@@ -261,8 +250,11 @@ export class OdinClient {
 
   /**
    * Update the evaluation context (e.g., when user changes)
+   * Note: If you're currently connected to real-time updates, you'll need to
+   * disconnect and reconnect manually with the desired experimentKey to
+   * ensure the updated context is used.
    */
-  updateContext(context: Partial<Omit<EvaluationContext, 'experimentKey'>>): void {
+  updateContext(context: Partial<EvaluationContext>): void {
     const filteredContext: Record<string, string | number | boolean> = {};
     for (const [key, value] of Object.entries(context)) {
       if (value !== undefined) {
@@ -274,12 +266,6 @@ export class OdinClient {
       ...this.config.context,
       ...filteredContext,
     };
-
-    // If connected, reconnect to update the context
-    if (this.connected) {
-      this.disconnect();
-      this.connect();
-    }
   }
 
   /**
@@ -340,13 +326,16 @@ export class OdinClient {
     return headers;
   }
 
-  private async evaluateFlag<T>(flagKey: string, defaultValue: T): Promise<FlagEvaluation<T>> {
+  private async evaluateFlag<T>(flagKey: string, defaultValue: T, experimentKey: string): Promise<FlagEvaluation<T>> {
     try {
       const response = await this.fetchWithTimeout(`${this.config.endpoint}/ofrep/v1/evaluate/flags/${flagKey}`, {
         method: 'POST',
         headers: this.buildHeaders(),
         body: JSON.stringify({
-          context: this.config.context,
+          context: {
+            ...this.config.context,
+            experimentKey,
+          },
         }),
       });
 
@@ -372,9 +361,9 @@ export class OdinClient {
     }
   }
 
-  private connectSSE(): void {
+  private connectSSE(experimentKey: string): void {
     // Build SSE URL with experiment key
-    let url = `${this.config.endpoint}/stream?experimentKey=${this.config.experimentKey}`;
+    let url = `${this.config.endpoint}/stream?experimentKey=${experimentKey}`;
 
     // Note: EventSource doesn't support custom headers (browser limitation)
     // For authentication with external apps, pass token as query parameter
@@ -408,18 +397,18 @@ export class OdinClient {
     };
   }
 
-  private startPolling(): void {
+  private startPolling(experimentKey: string): void {
     // Initial fetch
-    this.pollFlags();
+    this.pollFlags(experimentKey);
 
     // Set up recurring polling
     this.pollingTimer = window.setInterval(() => {
-      this.pollFlags();
+      this.pollFlags(experimentKey);
     }, this.config.pollingInterval);
   }
 
-  private async pollFlags(): Promise<void> {
-    const flags = await this.getAllFlags();
+  private async pollFlags(experimentKey: string): Promise<void> {
+    const flags = await this.getAllFlags(experimentKey);
     this.notifyListeners(flags);
   }
 
