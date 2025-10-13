@@ -144,8 +144,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       endpoint: '<TODO-odin-endpoint>',
       experimentKey: '<TODO-odin-experiment-key>',
       context: {},
-      // eslint-disable-next-line sonarjs/no-hardcoded-secrets
-      apiToken: '<TODO-odin-api-token>',
+      apiToken: '<TODO-odin-api-token>', // TODO: Can we get this as an environment variable?
     });
   }
 
