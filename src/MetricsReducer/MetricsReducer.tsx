@@ -11,7 +11,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Stack, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from 'shared/tracking/interactions';
@@ -186,7 +186,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
-    const styles = useStyles2(getStyles, chromeHeaderHeight);
+    const styles = useStyles2(getStyles);
 
     const { $variables, body, listControls, sidebar } = model.useState();
 
@@ -195,12 +195,12 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         <div className={styles.listControls} data-testid="list-controls">
           <listControls.Component model={listControls} />
         </div>
-        <div className={styles.body}>
+        <Stack direction="row" gap={1} height={`calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT}px)`}>
           <div className={styles.sidebar} data-testid="sidebar">
             <sidebar.Component model={sidebar} />
           </div>
           <div className={styles.list}>{body && <body.Component model={body} />}</div>
-        </div>
+        </Stack>
         <div className={styles.variables}>
           {$variables?.state.variables.map((variable) => (
             <variable.Component key={variable.state.name} model={variable} />
@@ -214,16 +214,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 // the height of header between Grafana's chrome header and the metrics list container.
 const APP_HEADER_HEIGHT = 144;
 
-function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
+function getStyles(theme: GrafanaTheme2) {
   return {
     listControls: css({
       marginBottom: theme.spacing(1.5),
-    }),
-    body: css({
-      display: 'flex',
-      flexDirection: 'row',
-      gap: theme.spacing(1),
-      height: `calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT}px)`,
     }),
     list: css({
       width: '100%',
