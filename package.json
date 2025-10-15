@@ -24,6 +24,7 @@
     "e2e:watch": "npm run e2e -- --ui",
     "e2e:codegen": "playwright codegen",
     "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh",
+    "e2e:smoke": "playwright test -c ./e2e/config/playwright.config.smoke.ts -x --trace on",
     "knip": "npx knip --config knip.js"
   },
   "packageManager": "npm@10.9.2",
@@ -33,6 +34,7 @@
   "dependencies": {
     "@bsull/augurs": "^0.9.0",
     "@emotion/css": "11.13.5",
+    "@grafana/assistant": "^0.0.20",
     "@grafana/data": "^12.2.0",
     "@grafana/faro-web-sdk": "^2.0.0-beta-2",
     "@grafana/i18n": "^12.2.0",
