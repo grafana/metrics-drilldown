@@ -44,5 +44,5 @@ for (const linkConfig of [...linkConfigs, ...datasourceConfigLinkConfigs]) {
 }
 
 for (const exposedComponent of exposedComponentConfigs) {
-  plugin.exposeComponent(exposedComponent);
+  plugin.exposeComponent(exposedComponent as any);
 }

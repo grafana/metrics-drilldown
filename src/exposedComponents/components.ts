@@ -1,7 +1,7 @@
 import { type PluginExtensionExposedComponentConfig } from '@grafana/data';
 
-import { labelBreakdownConfig } from './LabelBreakdown/config';
 import { entityMetricsConfig } from './EntityMetrics/config';
+import { labelBreakdownConfig } from './LabelBreakdown/config';
 
 type ExposedComponentConfigs = Array<PluginExtensionExposedComponentConfig<any>>;
 

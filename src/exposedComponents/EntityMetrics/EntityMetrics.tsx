@@ -1,4 +1,4 @@
-import { type DataSourceApi } from '@grafana/data';
+import { type AdHocVariableFilter, type DataSourceApi } from '@grafana/data';
 import React, { useEffect, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
@@ -6,15 +6,15 @@ import { Trail } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { newMetricsTrail } from 'shared/utils/utils';
+
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
-import { type AdHocVariableFilter } from '@grafana/scenes';
 
 export interface EntityMetricsProps {
-  labels: Record<string, string>;  // Entity labels (service, namespace, etc.)
+  labels: Record<string, string>; // Entity labels (service, namespace, etc.)
   initialStart: string | number;
   initialEnd: string | number;
-  dataSource: DataSourceApi;
-  entityType?: string;  // Optional for UI customization
+  dataSource: DataSourceApi<any, any>;
+  entityType?: string; // Optional for UI customization
 }
 
 const EntityMetrics = ({ labels, initialStart, initialEnd, dataSource, entityType }: EntityMetricsProps) => {
@@ -30,7 +30,7 @@ const EntityMetrics = ({ labels, initialStart, initialEnd, dataSource, entityTyp
 
   // Convert labels to AdHocVariableFilter format
   const initialFilters: AdHocVariableFilter[] = Object.entries(labels)
-    .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+    .filter(([, value]) => Boolean(value))
     .map(([key, value]) => ({
       key,
       operator: '=',
