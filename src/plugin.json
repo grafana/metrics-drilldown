@@ -73,6 +73,11 @@
         "targets": ["grafana/datasources/config/actions", "grafana/datasources/config/status"],
         "title": "Open in Metrics Drilldown",
         "description": "Browse metrics in Grafana Metrics Drilldown"
+      },
+      {
+        "targets": ["grafana/explore/add-to-dashboard/grafana-metrics-drilldown"],
+        "title": "Add to dashboard",
+        "description": "Use the panel from metrics drilldown and create/add it to a dashboard"
       }
     ],
     "extensionPoints": [
