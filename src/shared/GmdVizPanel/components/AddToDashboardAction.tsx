@@ -7,7 +7,7 @@ import React from 'react';
 
 import { getPanelData } from './addToDashboard/addToDashboard';
 
-const extensionPointId = 'grafana/explore/add-to-dashboard/grafana-metrics-drilldown';
+const extensionPointId = 'grafana-metricsdrilldown-app/add-to-dashboard/v1';
 
 interface AddToDashboardActionState extends SceneObjectState {}
 
@@ -23,7 +23,8 @@ export class AddToDashboardAction extends SceneObjectBase<AddToDashboardActionSt
     const vizPanel = sceneGraph.findObject(model, (o) => o instanceof VizPanel);
     
     // Get panel data for context (only if vizPanel exists)
-    const context = vizPanel instanceof VizPanel ? getPanelData(vizPanel) : undefined;
+    const panelData = vizPanel instanceof VizPanel ? getPanelData(vizPanel) : undefined;
+    const context = { panelData };
 
     // Get the add-to-dashboard extension link
     const { links } = usePluginLinks({ extensionPointId, context, limitPerPlugin: 1 });
