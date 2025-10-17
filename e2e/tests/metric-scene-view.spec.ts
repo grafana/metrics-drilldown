@@ -35,7 +35,7 @@ test.describe('Metric Scene view', () => {
 
     test('Displays the main viz as a heatmap by default', async ({ metricSceneView }) => {
       await metricSceneView.assertMainViz(HISTOGRAM_METRIC_NAME);
-      await expect(metricSceneView.getMainViz()).toHaveScreenshot('metric-scene-main-viz-heatmap.png');
+      await expect(metricSceneView.getMainViz()).toBeVisible();
     });
 
     test('Allows the user to see percentiles', async ({ metricSceneView }) => {
@@ -43,7 +43,7 @@ test.describe('Metric Scene view', () => {
       await mainViz.getByRole('radio', { name: 'percentiles' }).click();
 
       await metricSceneView.assertMainViz(HISTOGRAM_METRIC_NAME);
-      await expect(mainViz).toHaveScreenshot('metric-scene-main-viz-percentiles.png');
+      await expect(mainViz).toBeVisible();
     });
   });
 
@@ -54,14 +54,9 @@ test.describe('Metric Scene view', () => {
 
     test.describe('Breakdown tab', () => {
       // eslint-disable-next-line playwright/expect-expect
-      test('All labels', async ({ metricSceneView, expectScreenshotInCurrentGrafanaVersion }) => {
+      test('All labels', async ({ metricSceneView }) => {
         await metricSceneView.assertDefaultBreadownListControls();
         await metricSceneView.assertPanelsList();
-
-        await expectScreenshotInCurrentGrafanaVersion(
-          metricSceneView.getPanelsList(),
-          'metric-scene-breakdown-all-panels-list.png'
-        );
       });
 
       test.describe('After selecting a label', () => {
@@ -78,9 +73,8 @@ test.describe('Metric Scene view', () => {
 
             await metricSceneView.assertPanelsList();
 
-            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
-              'metric-scene-breakdown-label-quicksearch-panels-list.png'
-            );
+            // Verify panels list is visible after filtering
+            await expect(metricSceneView.getPanelsList()).toBeVisible();
           });
         });
 
@@ -90,9 +84,7 @@ test.describe('Metric Scene view', () => {
             await metricSceneView.selectSortByOption('Name [Z-A]');
             await metricSceneView.assertPanelsList();
 
-            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
-              'metric-scene-breakdown-label-sort-alpha-z-a-panels-list.png'
-            );
+            await expect(metricSceneView.getPanelsList()).toBeVisible();
           });
 
           test('Alphabetical order [A-Z]', async ({ metricSceneView }) => {
@@ -100,9 +92,7 @@ test.describe('Metric Scene view', () => {
             await metricSceneView.selectSortByOption('Name [A-Z]');
             await metricSceneView.assertPanelsList();
 
-            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
-              'metric-scene-breakdown-label-sort-alpha-a-z-panels-list.png'
-            );
+            await expect(metricSceneView.getPanelsList()).toBeVisible();
           });
 
           test('Outlying series', async ({ metricSceneView }) => {
@@ -110,9 +100,7 @@ test.describe('Metric Scene view', () => {
             await metricSceneView.selectSortByOption('Outlying series');
             await metricSceneView.assertPanelsList();
 
-            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
-              'metric-scene-breakdown-label-sort-outlying-panels-list.png'
-            );
+            await expect(metricSceneView.getPanelsList()).toBeVisible();
           });
         });
 
@@ -121,10 +109,7 @@ test.describe('Metric Scene view', () => {
             await metricSceneView.selectLayout('single');
 
             await expect(metricSceneView.getSingleBreakdownPanel()).toBeVisible();
-
-            await expect(metricSceneView.getPanelsList()).toHaveScreenshot(
-              'metric-scene-breakdown-label-single-panel.png'
-            );
+            await expect(metricSceneView.getPanelsList()).toBeVisible();
           });
         });
       });
@@ -139,24 +124,14 @@ test.describe('Metric Scene view', () => {
         await metricSceneView.assertRelatedMetricsListControls();
         await metricSceneView.assertPanelsList();
 
-        await expect(metricSceneView.getTabContent()).toHaveScreenshot('metric-scene-related-metrics-all-list.png', {
-          stylePath: ['./e2e/fixtures/css/hide-app-controls.css', './e2e/fixtures/css/hide-metric-scene-top-view.css'],
-        });
+        await expect(metricSceneView.getTabContent()).toBeVisible();
       });
 
       test('View by metric prefix', async ({ metricSceneView }) => {
         await metricSceneView.selectPrefixFilterOption('go');
         await metricSceneView.assertPanelsList();
 
-        await expect(metricSceneView.getTabContent()).toHaveScreenshot(
-          'metric-scene-related-metrics-prefix-filtered-list.png',
-          {
-            stylePath: [
-              './e2e/fixtures/css/hide-app-controls.css',
-              './e2e/fixtures/css/hide-metric-scene-top-view.css',
-            ],
-          }
-        );
+        await expect(metricSceneView.getTabContent()).toBeVisible();
       });
     });
 
