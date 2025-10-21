@@ -128,16 +128,6 @@ GRAFANA_IMAGE=grafana-enterprise GRAFANA_VERSION=12.1.0 npm run e2e:ci
 
 This generates screenshots only for Grafana Enterprise v12.1.0.
 
-##### All Supported Versions
-
-To generate screenshots for all supported Grafana versions:
-
-```shell
-./scripts/e2e-gen-all-screenshots.sh
-```
-
-This script automatically generates screenshots for each version defined in the [e2e/config/grafana-versions-supported.ts](../e2e/config/grafana-versions-supported.ts).
-
 > [!IMPORTANT]
 > Make sure that the GRAFANA_VERSIONS_SUPPORTED array in e2e/config/grafana-versions-supported.ts is up-to-date.
 > If you don't know which versions are currently supported, go to GitHub, check a recent "CI" job execution and open the logs for the "Dockerized Playwright E2E tests / Resolve Grafana images" step to see which versions are currently supported.
