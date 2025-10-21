@@ -6,14 +6,14 @@ PLAYWRIGHT_FILTERS=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --grafana-version)
-      SPECIFIED_VERSIONS+=("$2")
-      shift 2
-      ;;
-    *)
-      PLAYWRIGHT_FILTERS="$1"
-      shift
-      ;;
+  --grafana-version)
+    SPECIFIED_VERSIONS+=("$2")
+    shift 2
+    ;;
+  *)
+    PLAYWRIGHT_FILTERS="$1"
+    shift
+    ;;
   esac
 done
 
@@ -23,15 +23,15 @@ PARSED_VERSIONS=($(node -e "
 const fs = require('fs');
 const path = require('path');
 const content = fs.readFileSync(path.join(__dirname, './e2e/config/grafana-versions-supported.ts'), 'utf8');
-const objectMatches = content.match(/(?<!^[\s]*\/\/.*)(\{ image: '[^']+', version: '[^']+' \})/gm);
+const objectMatches = content.match(/(?<!^[\s]*\/\/.*)(\{ name: '[^']+', version: '[^']+' \})/gm);
 if (objectMatches) {
   objectMatches.forEach((m) => {
-    const [, image] = m.match(/image: '([^']+)'/);
+    const [, name] = m.match(/name: '([^']+)'/);
     const [, version] = m.match(/version: '([^']+)'/);
-    console.log(image + ':' + version);
+    console.log(name + ':' + version);
   });
 } else {
-  console.error('Could not find image/version objects!');
+  console.error('Could not find name/version objects!');
   process.exit(1);
 }
 "))
