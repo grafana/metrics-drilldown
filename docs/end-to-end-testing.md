@@ -43,7 +43,7 @@ npm run dev
 And in another terminal tab, start Grafana and Prometheus:
 
 ```shell
-npm run e2e:server
+npm run server
 ```
 
 Then you can start the tests in interactive UI mode (with a built-in watch mode):
@@ -71,8 +71,6 @@ Screenshots are generated using [Playwright's snapshot testing capabilities](htt
 **Local Development**: Screenshots generated on your machine are ignored by Git and serve as a development convenience for visual debugging.
 
 **CI Environment**: Screenshots are generated in Docker containers and committed to Git to ensure consistent rendering across different environments and Grafana versions.
-
-**Platform-Agnostic**: Screenshots are configured to be platform-agnostic, meaning the same screenshot files work on both macOS and Linux. This eliminates the need to maintain duplicate screenshots for different operating systems, as Chromium renders identically across platforms.
 
 #### Local vs CI Screenshot Workflow
 
