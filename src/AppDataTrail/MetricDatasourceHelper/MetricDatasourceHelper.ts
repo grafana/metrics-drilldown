@@ -94,7 +94,9 @@ export class MetricDatasourceHelper {
 
     try {
       const response = await (ds.languageProvider as any).request(`/api/v1/metadata?metric=${metric}`);
-      metadata = response[metric]?.[0];
+      if (response && typeof response === 'object') {
+        metadata = response[metric]?.[0];
+      }
     } catch (error) {
       displayWarning([`Error while fetching ${metric} metadata!`, (error as Error).toString()]);
     }

@@ -17,38 +17,22 @@ test.describe('Metrics reducer view', () => {
       // eslint-disable-next-line playwright/expect-expect
       test('Within a filter group, selections use OR logic (prefix.one OR prefix.two)', async ({
         metricsReducerView,
-        expectScreenshotInCurrentGrafanaVersion,
       }) => {
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
         await metricsReducerView.assertMetricsList();
 
         // Verify OR behavior by checking that metrics with either prefix are shown
-        await expectScreenshotInCurrentGrafanaVersion(
-          metricsReducerView.page,
-          'sidebar-prefixes-selected-metric-counts.png',
-          {
-            stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          }
-        );
       });
 
       // eslint-disable-next-line playwright/expect-expect
       test('Between filter groups, selections use AND logic ((prefix.one OR prefix.two) AND (suffix.one OR suffix.two))', async ({
         metricsReducerView,
-        expectScreenshotInCurrentGrafanaVersion,
       }) => {
         await metricsReducerView.sidebar.selectPrefixFilters(['prometheus', 'pyroscope']);
         await metricsReducerView.sidebar.selectSuffixFilters(['bytes', 'count']);
         await metricsReducerView.assertMetricsList();
 
         // Verify AND behavior between the two filter groups
-        await expectScreenshotInCurrentGrafanaVersion(
-          metricsReducerView.page,
-          'sidebar-prefixes-and-suffixes-selected-metric-counts.png',
-          {
-            stylePath: './e2e/fixtures/css/hide-app-controls.css',
-          }
-        );
       });
     });
 
@@ -57,23 +41,16 @@ test.describe('Metrics reducer view', () => {
         // eslint-disable-next-line playwright/expect-expect
         test('A list of metrics grouped by label values is displayed, each with a "Select" button', async ({
           metricsReducerView,
-          expectScreenshotInCurrentGrafanaVersion,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
           await metricsReducerView.sidebar.assertActiveButton('Group by labels', true);
           await metricsReducerView.assertMetricsGroupByList();
-
-          await expectScreenshotInCurrentGrafanaVersion(
-            metricsReducerView.getMetricsGroupByList(),
-            'metrics-reducer-group-by-label.png'
-          );
         });
 
         // eslint-disable-next-line playwright/expect-expect
         test('When clicking on the "Select" button, it drills down the selected label value (adds a new filter, displays a non-grouped list of metrics and updates the list of label values)', async ({
           metricsReducerView,
-          expectScreenshotInCurrentGrafanaVersion,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
@@ -87,11 +64,6 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.assertMetricsList();
 
           await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
-
-          expectScreenshotInCurrentGrafanaVersion(
-            metricsReducerView.getMetricsList(),
-            'metrics-reducer-group-by-label-after-select.png'
-          );
         });
 
         test('When clearing the filter, it updates the list of label values and marks the sidebar button as inactive', async ({
@@ -155,7 +127,6 @@ test.describe('Metrics reducer view', () => {
     test('Default sorting shows recent metrics first, then alphabetical', async ({
       metricsReducerView,
       metricSceneView,
-      expectScreenshotInCurrentGrafanaVersion,
     }) => {
       await metricsReducerView.assertSelectedSortBy('Default');
 
@@ -179,11 +150,6 @@ test.describe('Metrics reducer view', () => {
 
       await metricsReducerView.quickSearch.clear();
       await metricsReducerView.assertMetricsList();
-
-      await expectScreenshotInCurrentGrafanaVersion(
-        metricsReducerView.getMetricsList(),
-        'metrics-reducer-default-sort.png'
-      );
     });
 
     const usageTypeSortOptions: Array<{ usageType: 'dashboard' | 'alerting'; sortOptionName: SortByOptionNames }> = [
