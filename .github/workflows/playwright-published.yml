@@ -57,7 +57,7 @@ jobs:
           echo "plugin-name=$name" >> $GITHUB_OUTPUT
 
       - name: Sign and package
-        uses: grafana/plugin-ci-workflows/actions/plugins/package@main
+        uses: grafana/plugin-ci-workflows/actions/internal/plugins/package@main
         with:
           output-folder: dist-artifacts
           universal: 'true'

@@ -99,8 +99,6 @@ export function config(config: CustomEnvConfig) {
           permissions: ['clipboard-read', 'clipboard-write'],
         },
         dependencies: ['auth'],
-        // Use platform-agnostic screenshot names (removes -chromium-darwin/-chromium-linux suffix)
-        snapshotPathTemplate: '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}{ext}',
       },
     ],
   });
