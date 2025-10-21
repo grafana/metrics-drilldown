@@ -3,12 +3,17 @@
 # parse command line arguments
 SPECIFIED_VERSIONS=()
 PLAYWRIGHT_FILTERS=""
+LOCAL_MODE=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
   --grafana-version)
     SPECIFIED_VERSIONS+=("$2")
     shift 2
+    ;;
+  --local)
+    LOCAL_MODE=true
+    shift
     ;;
   *)
     PLAYWRIGHT_FILTERS="$1"
@@ -93,12 +98,35 @@ for i in "${!GRAFANA_VERSIONS[@]}"; do
 
   echo -e "\n🧪 Updating E2E screenshots for '$grafana_image v$grafana_version'..."
 
-  GRAFANA_IMAGE="$grafana_image" GRAFANA_VERSION="$grafana_version" PLAYWRIGHT_ARGS="$PLAYWRIGHT_ARGS" npm run e2e:ci
-  exit_code=$?
+  if [ "$LOCAL_MODE" = true ]; then
+    # start the e2e server
+    echo -e "\n🚀 Starting E2E server..."
+    GRAFANA_IMAGE="$grafana_image" GRAFANA_VERSION="$grafana_version" npm run e2e:server:up
 
-  # stop the e2e server
-  echo -e "\n🛑 Stopping E2E server..."
-  npm run e2e:server:down
+    # wait for Grafana to be ready
+    echo -e "\n⏳ Waiting for Grafana to be ready..."
+    ./scripts/wait-for-grafana.sh "http://localhost:3001/api/health" 200 120 2
+    wait_exit_code=$?
+
+    if [ $wait_exit_code -ne 0 ]; then
+      echo -e "\n❌ Grafana failed to start for '$grafana_image v$grafana_version'"
+      npm run e2e:server:down
+      overall_success=false
+      continue
+    fi
+
+    # run the e2e tests
+    GRAFANA_VERSION="$grafana_version" GRAFANA_PORT="3001" GRAFANA_SCOPES_PORT="3002" PLAYWRIGHT_ARGS="$PLAYWRIGHT_ARGS" npm run e2e
+    exit_code=$?
+
+    # stop the e2e server
+    echo -e "\n🛑 Stopping E2E server..."
+    npm run e2e:server:down
+  else
+    # run in CI mode
+    GRAFANA_IMAGE="$grafana_image" GRAFANA_VERSION="$grafana_version" PLAYWRIGHT_ARGS="$PLAYWRIGHT_ARGS" npm run e2e:ci
+    exit_code=$?
+  fi
 
   if [ $exit_code -ne 0 ]; then
     echo -e "\n❌ E2E tests failed for '$grafana_image v$grafana_version' (exit code: $exit_code)"
