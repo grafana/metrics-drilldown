@@ -1,15 +1,30 @@
 import { css, cx } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { usePluginLinks } from '@grafana/runtime';
-import { sceneGraph, SceneObjectBase, VizPanel, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import {
+  sceneGraph,
+  SceneObjectBase,
+  VizPanel,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
+import { type Panel } from '@grafana/schema';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { getPanelData } from './addToDashboard/addToDashboard';
 
-const extensionPointId = 'grafana-metricsdrilldown-app/add-to-dashboard/v1';
+const extensionPointId = 'grafana/app/panel/menu'; // TODO: Use `PluginExtensionPoints.AppPanelMenu` when it becomes available
 
 interface AddToDashboardActionState extends SceneObjectState {}
+
+// TODO: Import this type from `@grafana/data` when it becomes available
+interface PluginExtensionAppPanelContext {
+  // Panel configuration
+  panelData?: { panel: Panel; range: TimeRange };
+  // Source information
+  source?: { appId: string; appName: string };
+}
 
 export class AddToDashboardAction extends SceneObjectBase<AddToDashboardActionState> {
   constructor() {
@@ -21,12 +36,20 @@ export class AddToDashboardAction extends SceneObjectBase<AddToDashboardActionSt
 
     // Find the VizPanel in the scene graph
     const vizPanel = sceneGraph.findObject(model, (o) => o instanceof VizPanel);
-    
+
     // Get panel data for context (only if vizPanel exists)
     const panelData = vizPanel instanceof VizPanel ? getPanelData(vizPanel) : undefined;
-    const context = { panelData };
 
-    // Get the add-to-dashboard extension link
+    // Provide context with panel data and source information
+    const context: PluginExtensionAppPanelContext = {
+      panelData,
+      source: {
+        appId: 'grafana-metricsdrilldown-app',
+        appName: 'Grafana Metrics Drilldown',
+      },
+    };
+
+    // Get the add-to-dashboard extension link from Grafana core
     const { links } = usePluginLinks({ extensionPointId, context, limitPerPlugin: 1 });
     const link = links[0];
 
@@ -65,4 +88,3 @@ const getStyles = (theme: GrafanaTheme2) => ({
     margin-left: ${theme.spacing(1)};
   `,
 });
-

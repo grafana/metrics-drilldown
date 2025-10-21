@@ -81,9 +81,6 @@
       },
       {
         "id": "grafana-metricsdrilldown-app/open-in-logs-drilldown/v1"
-      },
-      {
-        "id": "grafana-metricsdrilldown-app/add-to-dashboard/v1"
       }
     ],
     "exposedComponents": [
