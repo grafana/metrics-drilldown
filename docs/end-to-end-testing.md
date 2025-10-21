@@ -123,10 +123,18 @@ await expectToHaveScreenshot(locator, 'metric-scene-breakdown-all-panels-list.pn
 To generate screenshots for a specific Grafana version:
 
 ```shell
-GRAFANA_IMAGE=grafana-enterprise GRAFANA_VERSION=12.1.0 npm run e2e:ci
+
+./scripts/e2e-gen-all-screenshots.sh --grafana-version 12.1.0
+
 ```
 
 This generates screenshots only for Grafana Enterprise v12.1.0.
+
+If you need to remove screenshots for a specific version before regenerating them, you can use the delete script:
+
+```shell
+./scripts/e2e-del-all-screenshots.sh --grafana-version 12.1.0
+```
 
 ##### All Supported Versions
 
