@@ -44,6 +44,7 @@ import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePa
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
@@ -355,6 +356,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // Update availability flag when component loads
     useEffect(() => {
       const isAvailable = !isLoadingAddToDashboard && Boolean(AddToDashboardComponent);
+      
+      // Log warning if component failed to load
+      if (!isLoadingAddToDashboard && !AddToDashboardComponent) {
+        logger.warn(
+          `Failed to load add to dashboard component from extension point: ${ADD_TO_DASHBOARD_EXTENSION_POINT}`
+        );
+      }
+      
       if (model.state.isAddToDashboardAvailable !== isAvailable) {
         model.setState({ isAddToDashboardAvailable: isAvailable });
       }
