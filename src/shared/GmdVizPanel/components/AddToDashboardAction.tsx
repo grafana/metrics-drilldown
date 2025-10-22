@@ -25,25 +25,27 @@ export class AddToDashboardAction extends SceneObjectBase<AddToDashboardActionSt
 
     // Find the VizPanel in the scene graph
     const vizPanel = sceneGraph.findObject(model, (o) => o instanceof VizPanel) as VizPanel | undefined;
-    
-    // Get panel data for context (only if vizPanel exists)
-    const panelData = vizPanel ? getPanelData(vizPanel) : undefined;
 
-    // Don't render if component is not available or no panel data
-    if (!trail.state.isAddToDashboardAvailable || !panelData) {
+    // Don't render if component is not available or no vizPanel
+    if (!trail.state.isAddToDashboardAvailable || !vizPanel) {
       return null;
     }
 
+    const handleClick = () => {
+      // Get fresh panel data at click time to ensure we capture the current state
+      const panelData = getPanelData(vizPanel);
+      model.publishEvent(new EventOpenAddToDashboard({ panelData }), true);
+    };
+
     return (
       <Button
+        id="add-to-dashboard-action"
         className={cx(styles.button)}
         aria-label={ADD_TO_DASHBOARD_LABEL}
         variant="secondary"
         size="sm"
         fill="text"
-        onClick={() => {
-          model.publishEvent(new EventOpenAddToDashboard({ panelData }), true);
-        }}
+        onClick={handleClick}
         icon={'apps'}
         tooltip={ADD_TO_DASHBOARD_LABEL}
         tooltipPlacement="top"
