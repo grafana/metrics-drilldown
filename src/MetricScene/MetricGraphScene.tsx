@@ -62,13 +62,13 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                   ? ({ metric }) => [
                       new GmdVizPanelVariantSelector(),
                       new ConfigurePanelAction({ metric }),
-                      new BookmarkHeaderAction(),
                       new AddToDashboardAction(),
+                      new BookmarkHeaderAction(),
                     ]
                   : ({ metric }) => [
                       new ConfigurePanelAction({ metric }),
-                      new BookmarkHeaderAction(),
                       new AddToDashboardAction(),
+                      new BookmarkHeaderAction(),
                     ],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
               },
