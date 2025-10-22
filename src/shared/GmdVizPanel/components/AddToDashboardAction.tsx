@@ -23,10 +23,10 @@ export class AddToDashboardAction extends SceneObjectBase<AddToDashboardActionSt
     const trail = getTrailFor(model);
 
     // Find the VizPanel in the scene graph
-    const vizPanel = sceneGraph.findObject(model, (o) => o instanceof VizPanel);
+    const vizPanel = sceneGraph.findObject(model, (o) => o instanceof VizPanel) as VizPanel | undefined;
     
     // Get panel data for context (only if vizPanel exists)
-    const panelData = vizPanel instanceof VizPanel ? getPanelData(vizPanel) : undefined;
+    const panelData = vizPanel ? getPanelData(vizPanel) : undefined;
 
     // Don't render if component is not available or no panel data
     if (!trail.state.isAddToDashboardAvailable || !panelData) {
