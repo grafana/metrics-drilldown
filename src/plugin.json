@@ -5,7 +5,12 @@
   "id": "grafana-metricsdrilldown-app",
   "dependencies": {
     "grafanaDependency": ">=11.6.0",
-    "plugins": []
+    "plugins": [],
+    "extensions": {
+      "exposedComponents": [
+        "grafana/drilldown-add-to-dashboard-panel/v1"
+      ]
+    }
   },
   "preload": true,
   "autoEnabled": true,
@@ -81,9 +86,6 @@
       },
       {
         "id": "grafana-metricsdrilldown-app/open-in-logs-drilldown/v1"
-      },
-      {
-        "id": "grafana-metricsdrilldown-app/add-to-dashboard/v1"
       }
     ],
     "exposedComponents": [
