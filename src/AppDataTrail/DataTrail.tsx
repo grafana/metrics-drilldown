@@ -37,6 +37,7 @@ import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/Metr
 import { AdHocFiltersForMetricsVariable } from 'MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
+import { ADD_TO_DASHBOARD_EXTENSION_POINT, ADD_TO_DASHBOARD_LABEL } from 'shared/GmdVizPanel/components/addToDashboard/constants';
 import { EventOpenAddToDashboard, type AddToDashboardComponentProps } from 'shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
@@ -348,8 +349,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const styles = useStyles2(getStyles, headerHeight, model);
 
     const { component: AddToDashboardComponent, isLoading: isLoadingAddToDashboard } = usePluginComponent(
-      // TODO: Use `PluginExtensionExposedComponents.DrilldownAddToDashboardPanelV1` when it becomes available from grafana
-      'grafana/drilldown-add-to-dashboard-panel/v1'
+      ADD_TO_DASHBOARD_EXTENSION_POINT
     );
 
     // Update availability flag when component loads
@@ -409,7 +409,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         </div>
         <drawer.Component model={drawer} />
         {isAddToDashboardModalOpen && AddToDashboardComponent && addToDashboardPanelData && (
-          <Modal title="Add to dashboard" isOpen={true} onDismiss={model.closeAddToDashboardModal}>
+          <Modal title={ADD_TO_DASHBOARD_LABEL} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
             {createElement(
               AddToDashboardComponent as React.ComponentType<AddToDashboardComponentProps>,
               { onClose: model.closeAddToDashboardModal, panelData: addToDashboardPanelData }

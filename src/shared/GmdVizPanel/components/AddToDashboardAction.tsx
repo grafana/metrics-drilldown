@@ -7,6 +7,7 @@ import React from 'react';
 import { getTrailFor } from 'shared/utils/utils';
 
 import { getPanelData } from './addToDashboard/addToDashboard';
+import { ADD_TO_DASHBOARD_LABEL } from './addToDashboard/constants';
 import { EventOpenAddToDashboard } from './addToDashboard/EventOpenAddToDashboard';
 
 interface AddToDashboardActionState extends SceneObjectState {}
@@ -36,7 +37,7 @@ export class AddToDashboardAction extends SceneObjectBase<AddToDashboardActionSt
     return (
       <Button
         className={cx(styles.button)}
-        aria-label={"Add to dashboard"}
+        aria-label={ADD_TO_DASHBOARD_LABEL}
         variant="secondary"
         size="sm"
         fill="text"
@@ -44,7 +45,7 @@ export class AddToDashboardAction extends SceneObjectBase<AddToDashboardActionSt
           model.publishEvent(new EventOpenAddToDashboard({ panelData }), true);
         }}
         icon={'apps'}
-        tooltip={"Add to dashboard"}
+        tooltip={ADD_TO_DASHBOARD_LABEL}
         tooltipPlacement="top"
         data-testid="add-to-dashboard-action"
       />
