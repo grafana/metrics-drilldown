@@ -10,3 +10,8 @@ export class EventOpenAddToDashboard extends BusEventWithPayload<EventOpenAddToD
   public static readonly type = 'open-add-to-dashboard';
 }
 
+export interface AddToDashboardComponentProps {
+  onClose: () => void;
+  panelData: PanelDataRequestPayload;
+}
+

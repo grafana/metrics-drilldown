@@ -25,7 +25,7 @@ import {
   type SceneVariable,
 } from '@grafana/scenes';
 import { Modal, useStyles2 } from '@grafana/ui';
-import React, { useEffect } from 'react';
+import React, { createElement, useEffect } from 'react';
 
 import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
@@ -37,7 +37,7 @@ import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/Metr
 import { AdHocFiltersForMetricsVariable } from 'MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
-import { EventOpenAddToDashboard } from 'shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
+import { EventOpenAddToDashboard, type AddToDashboardComponentProps } from 'shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
@@ -410,9 +410,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         <drawer.Component model={drawer} />
         {isAddToDashboardModalOpen && AddToDashboardComponent && addToDashboardPanelData && (
           <Modal title="Add to dashboard" isOpen={true} onDismiss={model.closeAddToDashboardModal}>
-            <AddToDashboardComponent 
-              {...({ onClose: model.closeAddToDashboardModal, panelData: addToDashboardPanelData } as any)} 
-            />
+            {createElement(
+              AddToDashboardComponent as React.ComponentType<AddToDashboardComponentProps>,
+              { onClose: model.closeAddToDashboardModal, panelData: addToDashboardPanelData }
+            )}
           </Modal>
         )}
       </>
