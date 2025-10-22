@@ -135,7 +135,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     if (!sidebarIsOpen) {
       // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
       getOdin()
-        ?.getBooleanFlag('<TODO-odin-sidebar-experiment-key>', false, '<TODO-odin-experiment-key>')
+        ?.getBooleanFlag('<TODO-odin-sidebar-flag-key>', false, '<TODO-odin-experiment-key>')
         .then((isEnabled) => {
           if (isEnabled) {
             this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
