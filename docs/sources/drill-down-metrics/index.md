@@ -74,3 +74,17 @@ After gathering your data in the Metric Drilldown app, you can take the followin
 - To copy the Metric Drilldown page's URL to your clipboard, click **Copy URL**. Now, you can share it with others.
 - To bookmark and save your Metric Drilldown journey, click the **Star** button.
 
+## Troubleshoot missing metrics
+
+Some Prometheus metrics may not appear in Metrics Drilldown, even though you can view them in Explore. This happens in high-cardinality environments when the Prometheus data source enforces its default 40,000-metric limit.
+
+To resolve this issue, choose one of the following options:
+
+- Increase the metric limit in your Prometheus data source settings.
+
+  {{< admonition type="caution" >}}
+  Increasing this limit can affect Metrics Drilldown performance.
+  {{< /admonition >}}
+
+- Use the name filter to focus on a specific metric. For example: `__name__ = vm_http`.
+
