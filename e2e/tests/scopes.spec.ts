@@ -50,10 +50,5 @@ test.describe('Scopes', () => {
     await metricsReducerView.appControls.assertAdHocFilter('method', '=', 'GET');
 
     await metricsReducerView.assertMetricsList();
-
-    // await expectScreenshotInCurrentGrafanaVersion(
-    //   metricsReducerView.getMetricsList(),
-    //   'metric-list-scopes-filters-applied.png'
-    // );
   });
 });

@@ -70,11 +70,6 @@ test.describe('Metrics reducer: panel types', () => {
     await metricsReducerView.quickSearch.enterText(searchText);
     await metricsReducerView.assertMetricsList();
 
-    // await expectScreenshotInCurrentGrafanaVersion(
-    //   metricsReducerView.getMetricsList(),
-    //   'metric-list-with-all-types.png'
-    // );
-
     // same but let's block the metadata fetching
     await metricsReducerView.route('**/api/datasources/uid/*/resources/api/v1/metadata*', async (route) => {
       await route.fulfill({ json: { status: 'success', data: {} } });
