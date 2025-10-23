@@ -30,7 +30,7 @@
     "e2e:smoke": "playwright test -c ./e2e/config/playwright.config.smoke.ts -x --trace on",
     "knip": "npx knip --config knip.js"
   },
-  "packageManager": "npm@10.9.2",
+  "packageManager": "npm@10.9.4",
   "engines": {
     "node": ">=22"
   },
