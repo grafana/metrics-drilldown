@@ -183,42 +183,41 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertLabelSelector(label: string) {
-    // Check if it's selected as a radio button
-    const radioGroup = this.getLabelSelectorContainer().getByRole('radiogroup');
-    if (await radioGroup.isVisible()) {
+    const container = this.getLabelSelectorContainer();
+
+    try {
+      // Try radio button first (with short timeout since it should be immediate)
+      const radioGroup = container.getByRole('radiogroup');
+      await expect(radioGroup).toBeVisible({ timeout: 2000 });
       const radioOption = radioGroup.getByRole('radio', { name: label });
       await expect(radioOption).toBeChecked();
       return;
-    }
-
-    // Check if it's selected in the combobox
-    const combobox = this.getLabelSelectorContainer().getByRole('combobox');
-    if (await combobox.isVisible()) {
+    } catch {
+      // Not a radio button, must be combobox
+      const combobox = container.getByRole('combobox');
       await expect(combobox).toHaveValue(label);
-      return;
     }
-
-    throw new Error('Label selector not found in DOM!');
   }
 
   async selectLabel(label: string) {
-    // Check it's a radio button
-    const radioGroup = this.getLabelSelectorContainer().getByRole('radiogroup');
-    if (await radioGroup.isVisible()) {
+    const container = this.getLabelSelectorContainer();
+
+    try {
+      // Try radio button first (with short timeout since it should be immediate)
+      const radioGroup = container.getByRole('radiogroup');
+      await expect(radioGroup).toBeVisible({ timeout: 2000 });
       const radioOption = radioGroup.getByRole('radio', { name: label });
       await radioOption.click();
       return;
-    }
-
-    // If not a radio button, use the combobox
-    const combobox = this.getLabelSelectorContainer().getByRole('combobox');
-    if (await combobox.isVisible()) {
+    } catch {
+      // Not a radio button, must be combobox
+      const combobox = container.getByRole('combobox');
       await combobox.click();
-      await this.getByRole('option', { name: label }).click();
-      return;
-    }
 
-    throw new Error('Label selector not found in DOM!');
+      // Wait for dropdown menu to open
+      await this.getByRole('option', { name: label }).waitFor({ state: 'visible' });
+      await this.getByRole('option', { name: label }).click();
+    }
   }
 
   async assertBreadownListControls({ label, sortBy }: { label: string; sortBy: string }) {

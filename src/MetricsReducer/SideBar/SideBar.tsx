@@ -8,7 +8,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { IconButton, useStyles2 } from '@grafana/ui';
+import { IconButton, Stack, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
@@ -269,63 +269,67 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
     return (
       <div className={styles.container}>
-        <div className={styles.buttonsBar} data-testid="sidebar-buttons">
-          {sections.map((section) => {
-            const { key, title, icon: iconOrText, disabled, active } = section.state;
-            const visible = visibleSection?.state.key === key;
-            let isActive;
-            let tooltip;
+        <Stack direction="row" height="100%">
+          <div className={styles.buttonsBar} data-testid="sidebar-buttons">
+            <Stack direction="column" alignItems="center" gap={0}>
+              {sections.map((section) => {
+                const { key, title, icon: iconOrText, disabled, active } = section.state;
+                const visible = visibleSection?.state.key === key;
+                let isActive;
+                let tooltip;
 
-            if (key === 'groupby-labels') {
-              isActive = Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE);
-              tooltip = `${title}: ${labelsVariableValue}`;
-            } else {
-              isActive = active;
-              tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
-            }
+                if (key === 'groupby-labels') {
+                  isActive = Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE);
+                  tooltip = `${title}: ${labelsVariableValue}`;
+                } else {
+                  isActive = active;
+                  tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
+                }
 
-            return (
-              <div
-                key={key}
-                className={cx(
-                  styles.buttonContainer,
-                  visible && 'visible',
-                  isActive && 'active',
-                  disabled && 'disabled'
-                )}
-              >
-                <SideBarButton
-                  key={key}
-                  ariaLabel={title}
-                  disabled={disabled}
-                  visible={visible}
-                  active={isActive}
-                  tooltip={tooltip}
-                  onClick={() => model.setActiveSection(key)}
-                  iconOrText={iconOrText}
-                />
-              </div>
-            );
-          })}
-        </div>
-        {visibleSection && (
-          <div className={styles.content} data-testid="sidebar-content">
-            <IconButton
-              className={styles.closeButton}
-              name="times"
-              aria-label="Close"
-              tooltip="Close"
-              tooltipPlacement="top"
-              onClick={() => model.setActiveSection('')}
-            />
-            {/* TODO: find a better way */}
-            {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
-            {visibleSection instanceof RecentMetricsSection && <visibleSection.Component model={visibleSection} />}
-            {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
-            {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}
-            {visibleSection instanceof Settings && <visibleSection.Component model={visibleSection} />}
+                return (
+                  <div
+                    key={key}
+                    className={cx(
+                      styles.buttonContainer,
+                      visible && 'visible',
+                      isActive && 'active',
+                      disabled && 'disabled'
+                    )}
+                  >
+                    <SideBarButton
+                      key={key}
+                      ariaLabel={title}
+                      disabled={disabled}
+                      visible={visible}
+                      active={isActive}
+                      tooltip={tooltip}
+                      onClick={() => model.setActiveSection(key)}
+                      iconOrText={iconOrText}
+                    />
+                  </div>
+                );
+              })}
+            </Stack>
           </div>
-        )}
+          {visibleSection && (
+            <div className={styles.content} data-testid="sidebar-content">
+              <IconButton
+                className={styles.closeButton}
+                name="times"
+                aria-label="Close"
+                tooltip="Close"
+                tooltipPlacement="top"
+                onClick={() => model.setActiveSection('')}
+              />
+              {/* TODO: find a better way */}
+              {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof RecentMetricsSection && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof Settings && <visibleSection.Component model={visibleSection} />}
+            </div>
+          )}
+        </Stack>
       </div>
     );
   };
@@ -335,15 +339,10 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       position: 'relative',
-      display: 'flex',
-      flexDirection: 'row',
       height: '100%',
       overflow: 'hidden',
     }),
     buttonsBar: css({
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
       gap: 0,
       width: '42px',
       padding: 0,

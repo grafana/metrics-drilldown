@@ -72,6 +72,8 @@ Screenshots are generated using [Playwright's snapshot testing capabilities](htt
 
 **CI Environment**: Screenshots are generated in Docker containers and committed to Git to ensure consistent rendering across different environments and Grafana versions.
 
+**Platform-Agnostic**: Screenshots are configured to be platform-agnostic, meaning the same screenshot files work on both macOS and Linux. This eliminates the need to maintain duplicate screenshots for different operating systems, as Chromium renders identically across platforms.
+
 #### Local vs CI Screenshot Workflow
 
 Since our plugin supports multiple Grafana versions (e.g., v12.1.0 and v11.6.4), and visual elements may differ between versions, we need a robust screenshot generation process:
@@ -94,7 +96,10 @@ await expect(locator).toHaveScreenshot('metric-scene-main-viz.png');
 
 **When to use**: Simple components (like single timeseries panels) that render consistently across versions.
 
-**File naming**: Standard Playwright naming (e.g., `metric-scene-main-viz-chromium-linux.png`)
+**File naming**: Platform-agnostic naming (e.g., `metric-scene-main-viz.png`)
+
+> [!NOTE]
+> Screenshots are platform-agnostic and work across both macOS and Linux CI environments. The same screenshot files are used regardless of the platform running the tests.
 
 ##### A2. Version-Specific Screenshots
 
@@ -106,7 +111,7 @@ await expectToHaveScreenshot(locator, 'metric-scene-breakdown-all-panels-list.pn
 
 **When to use**: Complex layouts, UI panels, or components that vary between Grafana versions.
 
-**File naming**: Prefixed with version (e.g., `12-1-0-metric-scene-breakdown-all-panels-list-chromium-linux.png`)
+**File naming**: Prefixed with version (e.g., `12-1-0-metric-scene-breakdown-all-panels-list.png`)
 
 > [!NOTE]
 > The custom `expectToHaveScreenshot` fixture automatically handles version prefixing and ensures screenshots are generated for each supported Grafana version.
@@ -118,10 +123,18 @@ await expectToHaveScreenshot(locator, 'metric-scene-breakdown-all-panels-list.pn
 To generate screenshots for a specific Grafana version:
 
 ```shell
-GRAFANA_IMAGE=grafana-enterprise GRAFANA_VERSION=12.1.0 npm run e2e:ci
+
+./scripts/e2e-gen-all-screenshots.sh --grafana-version 12.1.0
+
 ```
 
 This generates screenshots only for Grafana Enterprise v12.1.0.
+
+If you need to remove screenshots for a specific version before regenerating them, you can use the delete script:
+
+```shell
+./scripts/e2e-del-all-screenshots.sh --grafana-version 12.1.0
+```
 
 ##### All Supported Versions
 
