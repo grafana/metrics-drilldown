@@ -54,6 +54,7 @@ import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
 import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
 import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
+import { initOdin } from '../services/odin';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -139,6 +140,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     this.initFilters();
     this.initConfigPrometheusFunction();
+    initOdin({
+      endpoint: '<TODO-odin-endpoint>',
+      apiToken: '<TODO-odin-api-token>', // TODO: Can we get this as an environment variable?
+      context: {
+        targetingKey: config.bootData.user.uid,
+      },
+    });
   }
 
   private updateStateForNewMetric(metric?: string) {

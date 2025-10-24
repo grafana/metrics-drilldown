@@ -2,10 +2,10 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
 import { type ExposedComponentName } from 'exposedComponents/components';
+import { getOdin } from 'services/odin';
 import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { type PanelType } from 'shared/GmdVizPanel/types/available-panel-types';
-import { getFaro } from 'shared/logger/faro/faro';
 import { type SortSeriesByOption } from 'shared/services/sorting';
 import { type SnakeCase } from 'shared/utils/utils.types';
 
@@ -14,7 +14,6 @@ import { type LayoutType } from '../../MetricsReducer/list-controls/LayoutSwitch
 import { type SortingOption as MetricsReducerSortByOption } from '../../MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { GIT_COMMIT } from '../../version';
 import { PLUGIN_ID } from '../constants/plugin';
-import { HGFeatureToggles, isFeatureToggleEnabled } from '../utils/utils.feature-toggles';
 
 export type ViewName = 'metrics-reducer' | 'metric-details';
 
@@ -193,11 +192,12 @@ export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEve
 
   // Extra event tracking with Faro for "Default Open Sidebar" experiment
   if (event.includes('sidebar')) {
-    getFaro()?.api.pushEvent(event, {
-      // Convert all payload values to strings
-      ...Object.fromEntries(Object.entries(payload).map(([key, value]) => [key, String(value)])),
-      defaultOpenSidebar: String(isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)),
-    });
+    getOdin()?.captureInteraction(
+      '<TODO-odin-sidebar-experiment-key>',
+      'sidebar_interaction', // interaction name
+      Object.fromEntries(Object.entries(payload).map(([key, value]) => [key, String(value)])), // interaction attributes
+      'gmd-sidebar' // domain
+    );
   }
 }
 
