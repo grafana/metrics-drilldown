@@ -17,7 +17,7 @@ import React from 'react';
 
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
-import { actionViews, actionViewsDefinitions, type ActionViewType } from './MetricActionBar';
+import { actionViewsDefinitions, defaultActionView, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
@@ -53,7 +53,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   private _onActivate() {
     if (this.state.actionView === undefined) {
-      this.setActionView(actionViews.breakdown);
+      this.setActionView(defaultActionView);
     }
 
     this.relatedLogsOrchestrator.findAndCheckAllDatasources();
@@ -102,6 +102,12 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       body.setState({ selectedTab: undefined });
       this.setState({ actionView: undefined });
     }
+  }
+
+  public getActionViewName(): string {
+    return this.state.actionView
+      ? actionViewsDefinitions.find((v) => v.value === this.state.actionView)?.displayName ?? ''
+      : '';
   }
 
   static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
