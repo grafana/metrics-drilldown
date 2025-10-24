@@ -24,7 +24,7 @@ import {
   type SceneObjectWithUrlSync,
   type SceneVariable,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Stack, useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
 import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
@@ -346,27 +346,35 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return (
       <>
         <div className={styles.container}>
-          {controls && (
-            <div className={styles.controls} data-testid="app-controls">
-              <GiveFeedbackButton />
-              {controls.map((control) => (
-                <control.Component key={control.state.key} model={control} />
-              ))}
-              <div className={styles.settingsInfo}>
-                <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
+          <Stack direction="column" gap={1} grow={1}>
+            {controls && (
+              <div className={styles.controls} data-testid="app-controls">
+                <Stack direction="row" gap={1} alignItems="flex-end" wrap="wrap">
+                  <GiveFeedbackButton />
+                  {controls.map((control) => (
+                    <control.Component key={control.state.key} model={control} />
+                  ))}
+                  <Stack direction="row" gap={0.5}>
+                    <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
+                  </Stack>
+                </Stack>
               </div>
-            </div>
-          )}
-          {topScene && (
-            <UrlSyncContextProvider
-              scene={topScene}
-              createBrowserHistorySteps={true}
-              updateUrlOnInit={true}
-              namespace={model.state.urlNamespace}
-            >
-              <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
-            </UrlSyncContextProvider>
-          )}
+            )}
+            {topScene && (
+              <UrlSyncContextProvider
+                scene={topScene}
+                createBrowserHistorySteps={true}
+                updateUrlOnInit={true}
+                namespace={model.state.urlNamespace}
+              >
+                <div className={styles.body}>
+                  <Stack direction="column" grow={1}>
+                    {topScene && <topScene.Component model={topScene} />}
+                  </Stack>
+                </div>
+              </UrlSyncContextProvider>
+            )}
+          </Stack>
         </div>
         <drawer.Component model={drawer} />
       </>
@@ -421,34 +429,21 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
   return {
     container: css({
       flexGrow: 1,
-      display: 'flex',
-      gap: theme.spacing(1),
-      flexDirection: 'column',
       padding: theme.spacing(1, 2),
       position: 'relative',
       background,
     }),
     body: css({
       flexGrow: 1,
-      display: 'flex',
-      flexDirection: 'column',
       minHeight: 0, // Allow body to shrink below its content size
     }),
     controls: css({
-      display: 'flex',
-      gap: theme.spacing(1),
       padding: theme.spacing(1, 0),
-      alignItems: 'flex-end',
-      flexWrap: 'wrap',
       position: 'sticky',
       background,
       zIndex: theme.zIndex.navbarFixed,
       top: headerHeight,
       borderBottom: `1px solid ${theme.colors.border.weak}`,
-    }),
-    settingsInfo: css({
-      display: 'flex',
-      gap: theme.spacing(0.5),
     }),
   };
 }
