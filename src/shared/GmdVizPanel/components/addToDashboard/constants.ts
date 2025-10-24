@@ -1,5 +1,5 @@
-// TODO: Use `PluginExtensionExposedComponents.DrilldownAddToDashboardPanelV1` when it becomes available from grafana
-export const ADD_TO_DASHBOARD_EXTENSION_POINT = 'grafana/drilldown-add-to-dashboard-panel/v1';
+// TODO: Use `PluginExtensionExposedComponents.AddToDashboardFormV1` when it becomes available from grafana
+export const ADD_TO_DASHBOARD_COMPONENT_ID = 'grafana/add-to-dashboard-form/v1';
 
 export const ADD_TO_DASHBOARD_LABEL = 'Add to dashboard';
 
