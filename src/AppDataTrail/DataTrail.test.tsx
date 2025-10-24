@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
+import { type PanelDataRequestPayload } from 'shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from '../MetricScene/MetricScene';
@@ -147,5 +148,49 @@ describe('DataTrail', () => {
       filterVar.setState({ filters: [{ key: 'app', operator: '=~', value: 'start=4,end=2' }] });
       expect(filterVar.getValue()).toBe(`app=~"start\=4,end\=2"`);
     });
+  });
+});
+
+describe('DataTrail - Add to Dashboard', () => {
+  let dataTrail: DataTrail;
+
+  beforeEach(() => {
+    dataTrail = new DataTrail({});
+  });
+
+  it('should initialize with modal closed and component unavailable', () => {
+    expect(dataTrail.state.isAddToDashboardModalOpen).toBe(false);
+    expect(dataTrail.state.isAddToDashboardAvailable).toBe(false);
+    expect(dataTrail.state.addToDashboardPanelData).toBeUndefined();
+  });
+
+  it('should open modal with panel data', () => {
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: {
+        type: 'timeseries',
+        title: 'Test',
+        targets: [],
+        datasource: { type: 'prometheus', uid: 'test' },
+      },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.openAddToDashboardModal(mockPanelData);
+
+    expect(dataTrail.state.isAddToDashboardModalOpen).toBe(true);
+    expect(dataTrail.state.addToDashboardPanelData).toBe(mockPanelData);
+  });
+
+  it('should close modal and clear panel data', () => {
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: { type: 'timeseries', title: 'Test', targets: [], datasource: null },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.openAddToDashboardModal(mockPanelData);
+    dataTrail.closeAddToDashboardModal();
+
+    expect(dataTrail.state.isAddToDashboardModalOpen).toBe(false);
+    expect(dataTrail.state.addToDashboardPanelData).toBeUndefined();
   });
 });
