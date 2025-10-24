@@ -8,7 +8,7 @@
     "plugins": [],
     "extensions": {
       "exposedComponents": [
-        "grafana/drilldown-add-to-dashboard-panel/v1"
+        "grafana/add-to-dashboard-form/v1"
       ]
     }
   },
