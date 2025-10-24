@@ -37,8 +37,8 @@ import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/Metr
 import { AdHocFiltersForMetricsVariable } from 'MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
-import { ADD_TO_DASHBOARD_EXTENSION_POINT, ADD_TO_DASHBOARD_LABEL } from 'shared/GmdVizPanel/components/addToDashboard/constants';
-import { EventOpenAddToDashboard, type AddToDashboardComponentProps } from 'shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
+import { ADD_TO_DASHBOARD_COMPONENT_ID, ADD_TO_DASHBOARD_LABEL } from 'shared/GmdVizPanel/components/addToDashboard/constants';
+import { EventOpenAddToDashboard, type AddToDashboardFormProps } from 'shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
@@ -350,7 +350,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const styles = useStyles2(getStyles, headerHeight, model);
 
     const { component: AddToDashboardComponent, isLoading: isLoadingAddToDashboard } = usePluginComponent(
-      ADD_TO_DASHBOARD_EXTENSION_POINT
+      ADD_TO_DASHBOARD_COMPONENT_ID
     );
 
     // Update availability flag when component loads
@@ -360,7 +360,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       // Log warning if component failed to load
       if (!isLoadingAddToDashboard && !AddToDashboardComponent) {
         logger.warn(
-          `Failed to load add to dashboard component from extension point: ${ADD_TO_DASHBOARD_EXTENSION_POINT}`
+          `Failed to load add to dashboard component: ${ADD_TO_DASHBOARD_COMPONENT_ID}`
         );
       }
       
@@ -420,8 +420,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         {isAddToDashboardModalOpen && AddToDashboardComponent && addToDashboardPanelData && (
           <Modal title={ADD_TO_DASHBOARD_LABEL} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
             {createElement(
-              AddToDashboardComponent as React.ComponentType<AddToDashboardComponentProps>,
-              { onClose: model.closeAddToDashboardModal, panelData: addToDashboardPanelData }
+              AddToDashboardComponent as React.ComponentType<AddToDashboardFormProps>,
+              {
+                onClose: model.closeAddToDashboardModal,
+                buildPanel: () => addToDashboardPanelData.panel,
+                timeRange: addToDashboardPanelData.range,
+                options: { useAbsolutePath: true }
+              }
             )}
           </Modal>
         )}
