@@ -343,11 +343,7 @@ function getStyles(theme: GrafanaTheme2) {
       overflow: 'hidden',
     }),
     buttonsBar: css({
-      gap: 0,
       width: '42px',
-      padding: 0,
-      margin: 0,
-      boxSizing: 'border-box',
       border: `1px solid ${theme.colors.border.weak}`,
       borderRadius: theme.shape.radius.default,
       backgroundColor: theme.colors.background.primary,
@@ -404,7 +400,6 @@ function getStyles(theme: GrafanaTheme2) {
       position: 'absolute',
       top: theme.spacing(1.5),
       right: theme.spacing(1),
-      margin: 0,
     }),
   };
 }
