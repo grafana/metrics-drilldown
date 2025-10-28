@@ -329,6 +329,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   public openAddToDashboardModal(panelData: PanelDataRequestPayload) {
+    reportExploreMetrics('add_to_dashboard_modal_opened', {});
     this.setState({
       isAddToDashboardModalOpen: true,
       addToDashboardPanelData: panelData,
@@ -431,7 +432,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               AddToDashboardComponent as React.ComponentType<AddToDashboardFormProps>,
               {
                 onClose: model.closeAddToDashboardModal,
-                buildPanel: () => addToDashboardPanelData.panel,
+                buildPanel: () => {
+                  const expr = String(addToDashboardPanelData?.panel?.targets?.[0]?.expr) ?? '';
+                  reportExploreMetrics('add_to_dashboard_build_panel', { expr });
+                  return addToDashboardPanelData.panel;
+                },
                 timeRange: addToDashboardPanelData.range,
                 options: { useAbsolutePath: true }
               }

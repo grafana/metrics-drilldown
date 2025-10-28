@@ -169,6 +169,10 @@ type Interactions = {
   invalid_metric_config: { metricConfig: PanelConfigPreset };
   // the user has clicked on the "Give feedback" button in the app header
   give_feedback_clicked: {};
+  // User opens the "Add to Dashboard" modal
+  add_to_dashboard_modal_opened: {};
+  // User confirms to add to dashboard and builds a panel
+  add_to_dashboard_build_panel: { expr: string };
 };
 
 type OtherEvents = {
