@@ -66,7 +66,7 @@ After filtering the metrics in Metrics Drilldown, you can further drill down int
 A detailed view of the metric opens that shows the following details:
 
 - A **Breakdown** tab that shows time series visualizations for each of the label-value pairs for the selected metric. To add a label-value pair to your filters, you can  drill down on each label and then click **Add to filter**.
-- A **Related metrics** tab that shows related metrics with relevant keywords.
+- A **Related metrics** tab that shows other metrics with similar names and common prefixes. Use it to quickly find metrics that belong to the same area or task without knowing exact metric names.
 
 After gathering your data in the Metric Drilldown app, you can take the following next steps:
 
