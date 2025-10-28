@@ -1,4 +1,4 @@
-import { css, cx } from '@emotion/css';
+import { css } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
@@ -138,10 +138,10 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
     return (
       <div className={styles.container}>
-        <div className={cx(styles.topView, styles.nonSticky)} data-testid="top-view">
+        <div className={styles.nonSticky} data-testid="top-view">
           <topView.Component model={topView} />
         </div>
-        <div className={cx(styles.topView, styles.stickyTop)} id="action-bar-container" ref={controlsContainer}>
+        <div className={styles.stickyTop} id="action-bar-container" ref={controlsContainer}>
           <actionBar.Component model={actionBar} />
         </div>
         {selectedTab && (
@@ -165,7 +165,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
     tabContent: css({
       height: '100%',
     }),
-    topView: css({}),
     stickyTop: css({
       display: 'flex',
       flexDirection: 'row',
