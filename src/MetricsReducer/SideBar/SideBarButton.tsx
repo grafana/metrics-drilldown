@@ -67,7 +67,6 @@ export function SideBarButton({
 function getStyles(theme: GrafanaTheme2) {
   return {
     button: css({
-      margin: 0,
       color: theme.colors.text.secondary,
       '&:hover': {
         color: theme.colors.text.maxContrast,
