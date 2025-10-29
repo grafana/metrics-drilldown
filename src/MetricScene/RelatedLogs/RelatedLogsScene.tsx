@@ -1,9 +1,8 @@
+import { css } from '@emotion/css';
 import { LoadingState } from '@grafana/data';
 import {
   CustomVariable,
   PanelBuilders,
-  SceneFlexItem,
-  SceneFlexLayout,
   sceneGraph,
   SceneObjectBase,
   SceneQueryRunner,
@@ -17,7 +16,7 @@ import {
   type SceneObjectState,
   type SceneVariable,
 } from '@grafana/scenes';
-import { Spinner, Stack } from '@grafana/ui';
+import { Spinner, Stack, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { NoRelatedLogs } from './NoRelatedLogsFound';
@@ -36,11 +35,10 @@ interface RelatedLogsSceneProps {
 interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
   loading: boolean;
   controls: SceneObject[];
-  body: SceneFlexLayout;
+  body: SceneObject;
   logsDrilldownLinkContext: LogsDrilldownLinkContext;
 }
 
-const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
 const RELATED_LOGS_QUERY_KEY = 'related_logs/logs_query';
 
 export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
@@ -50,15 +48,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     super({
       loading: false,
       controls: [],
-      body: new SceneFlexLayout({
-        direction: 'column',
-        height: '100%',
-        children: [
-          new SceneFlexItem({
-            key: LOGS_PANEL_CONTAINER_KEY,
-            body: undefined,
-          }),
-        ],
+      body: new SceneReactObject({
+        component: () => <Spinner />,
       }),
       orchestrator: props.orchestrator,
       logsDrilldownLinkContext: {
@@ -89,11 +80,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   }
 
   private showNoLogsFound() {
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
-    logsPanelContainer.setState({
-      body: new SceneReactObject({ component: NoRelatedLogs }),
-    });
     this.setState({
+      body: new SceneReactObject({ component: NoRelatedLogs }),
       controls: undefined,
     });
     this.state.orchestrator.relatedLogsCount = 0;
@@ -138,9 +126,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     }
 
     // Set up UI for logs panel
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
-    logsPanelContainer.setState({
-      height: 500,
+    this.setState({
       body: PanelBuilders.logs()
         .setTitle('Logs')
         .setOption('showLogContextToggle', true)
@@ -248,6 +234,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
   static readonly Component = ({ model }: SceneComponentProps<RelatedLogsScene>) => {
     const { controls, body, logsDrilldownLinkContext, loading } = model.useState();
+    const styles = useStyles2(getRelatedLogsSceneStyles);
 
     if (loading) {
       return <Spinner />;
@@ -263,8 +250,29 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           </Stack>
           <OpenInLogsDrilldownButton context={logsDrilldownLinkContext} />
         </Stack>
-        <body.Component model={body} />
+        <div className={styles.bodyContainer}>
+          <div className={styles.bodyContent}>
+            <body.Component model={body} />
+          </div>
+        </div>
       </Stack>
     );
+  };
+}
+
+function getRelatedLogsSceneStyles() {
+  return {
+    bodyContainer: css({
+      flexGrow: 1,
+      minHeight: 500,
+      position: 'relative',
+    }),
+    bodyContent: css({
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    }),
   };
 }
