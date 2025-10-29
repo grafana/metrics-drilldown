@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
 import { utf8Support } from '@grafana/prometheus';
-import { config, useChromeHeaderHeight } from '@grafana/runtime';
+import { config, useChromeHeaderHeight, usePluginComponent } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   SceneControlsSpacer,
@@ -24,8 +24,8 @@ import {
   type SceneObjectWithUrlSync,
   type SceneVariable,
 } from '@grafana/scenes';
-import { Stack, useStyles2 } from '@grafana/ui';
-import React, { useEffect } from 'react';
+import { Modal, Stack, useStyles2 } from '@grafana/ui';
+import React, { createElement, useEffect } from 'react';
 
 import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
@@ -37,14 +37,18 @@ import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/Metr
 import { AdHocFiltersForMetricsVariable } from 'MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
+import { ADD_TO_DASHBOARD_COMPONENT_ID, ADD_TO_DASHBOARD_LABEL } from 'shared/GmdVizPanel/components/addToDashboard/constants';
+import { EventOpenAddToDashboard, type AddToDashboardFormProps } from 'shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
+import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
@@ -75,6 +79,11 @@ export interface DataTrailState extends SceneObjectState {
   urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
 
   drawer: SceneDrawer;
+
+  // Add to dashboard feature
+  isAddToDashboardAvailable: boolean;
+  isAddToDashboardModalOpen: boolean;
+  addToDashboardPanelData?: PanelDataRequestPayload;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -116,6 +125,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       dashboardMetrics: {},
       alertingMetrics: {},
       drawer: new SceneDrawer({}),
+      isAddToDashboardAvailable: false,
+      isAddToDashboardModalOpen: false,
       ...state,
     });
 
@@ -136,6 +147,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     this.updateStateForNewMetric(this.state.metric);
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
+    this.subscribeToEvent(EventOpenAddToDashboard, (event) => {
+      this.openAddToDashboardModal(event.payload.panelData);
+    });
 
     this.initFilters();
     this.initConfigPrometheusFunction();
@@ -314,12 +328,47 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.fetchRecentMetrics({ interval, extraFilter });
   }
 
+  public openAddToDashboardModal(panelData: PanelDataRequestPayload) {
+    reportExploreMetrics('add_to_dashboard_modal_opened', {});
+    this.setState({
+      isAddToDashboardModalOpen: true,
+      addToDashboardPanelData: panelData,
+    });
+  }
+
+  public closeAddToDashboardModal = () => {
+    this.setState({
+      isAddToDashboardModalOpen: false,
+      addToDashboardPanelData: undefined,
+    });
+  };
+
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, embedded, drawer } = model.useState();
+    const { controls, topScene, embedded, drawer, isAddToDashboardModalOpen, addToDashboardPanelData } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
     const styles = useStyles2(getStyles, headerHeight, model);
+
+    const { component: AddToDashboardComponent, isLoading: isLoadingAddToDashboard } = usePluginComponent(
+      ADD_TO_DASHBOARD_COMPONENT_ID
+    );
+
+    // Update availability flag when component loads
+    useEffect(() => {
+      const isAvailable = !isLoadingAddToDashboard && Boolean(AddToDashboardComponent);
+      
+      // Log warning if component failed to load
+      if (!isLoadingAddToDashboard && !AddToDashboardComponent) {
+        logger.warn(
+          `Failed to load add to dashboard component: ${ADD_TO_DASHBOARD_COMPONENT_ID}`
+        );
+      }
+      
+      if (model.state.isAddToDashboardAvailable !== isAvailable) {
+        model.setState({ isAddToDashboardAvailable: isAvailable });
+      }
+    }, [isLoadingAddToDashboard, AddToDashboardComponent, model]);
 
     // Set CSS custom property for app-controls height in embedded mode
     useEffect(() => {
@@ -377,6 +426,23 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           </Stack>
         </div>
         <drawer.Component model={drawer} />
+        {isAddToDashboardModalOpen && AddToDashboardComponent && addToDashboardPanelData && (
+          <Modal title={ADD_TO_DASHBOARD_LABEL} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
+            {createElement(
+              AddToDashboardComponent as React.ComponentType<AddToDashboardFormProps>,
+              {
+                onClose: model.closeAddToDashboardModal,
+                buildPanel: () => {
+                  const expr = String(addToDashboardPanelData?.panel?.targets?.[0]?.expr) ?? '';
+                  reportExploreMetrics('add_to_dashboard_build_panel', { expr });
+                  return addToDashboardPanelData.panel;
+                },
+                timeRange: addToDashboardPanelData.range,
+                options: { useAbsolutePath: true }
+              }
+            )}
+          </Modal>
+        )}
       </>
     );
   };
