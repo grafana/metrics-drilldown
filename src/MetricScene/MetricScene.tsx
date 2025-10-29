@@ -57,14 +57,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.setActionView(actionViews.breakdown);
     }
 
-    // Register handler to wait for active tab's data load completion
-    // This ensures the active tab has priority for data fetching
-    this.subscribeToEvent(EventActionViewDataLoadComplete, (event) => {
-      // Active tab has finished loading, safe to start background tasks like counting signals
-      const inactiveTabs = actionViewsDefinitions.filter((v) => v.value !== event.payload.currentActionView);
-      inactiveTabs.forEach(({ backgroundTask }) => backgroundTask(this));
-    });
-
     this.relatedLogsOrchestrator.addRelatedLogsCountChangeHandler((count) => {
       this.setState({ relatedLogsCount: count });
     });
@@ -80,6 +72,14 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         this.state.body.state.selectedTab?.publishEvent(event);
       });
     }
+
+    // Register handler to wait for active tab's data load completion
+    // This ensures the active tab has priority for data fetching
+    this.subscribeToEvent(EventActionViewDataLoadComplete, (event) => {
+      // Active tab has finished loading, safe to start background tasks like counting signals
+      const inactiveTabs = actionViewsDefinitions.filter((v) => v.value !== event.payload.currentActionView);
+      inactiveTabs.forEach(({ backgroundTask }) => backgroundTask(this));
+    });
   }
 
   getUrlState() {
