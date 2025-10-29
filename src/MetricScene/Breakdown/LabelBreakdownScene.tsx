@@ -78,9 +78,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       : new MetricLabelValuesList({ metric, label: groupByVariable.state.value as string });
 
     this.setState({ body: newBody });
-
-    // Wait for the body to signal data load completion
-    this.waitForBodyDataLoad(newBody);
+    this.signalBreakdownPanelsLoaded(newBody);
   }
 
   /**
@@ -89,8 +87,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
    *
    * This allows MetricScene to coordinate background work after the active tab is loaded.
    */
-  private waitForBodyDataLoad(body: MetricLabelsList | MetricLabelValuesList) {
-    // Find all query runners in the body
+  private signalBreakdownPanelsLoaded(body: MetricLabelsList | MetricLabelValuesList) {
     const queryRunners = sceneGraph.findDescendents(body, SceneQueryRunner);
 
     if (queryRunners.length === 0) {
