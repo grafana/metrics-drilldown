@@ -116,9 +116,19 @@ The plugin runs against a local Grafana instance via Docker:
 Create `.env` file for custom configuration:
 
 ```bash
+# Required for macOS/Windows local development
+DOCKER_HOST_IP=host-gateway
+
+# Optional: Custom ports
 GRAFANA_PORT=3001
 NODE_ENV=development
 ```
+
+#### Docker Host Connectivity
+
+- **macOS/Windows Local Development**: **REQUIRED** - Create a `.env` file with `DOCKER_HOST_IP=host-gateway`
+- **Linux CI Environments**: Uses default `172.17.0.1` automatically (no configuration needed)
+- This allows Grafana containers to connect to services running on the host machine (e.g., Prometheus/Loki running in other Docker networks)
 
 ### IDE Configuration
 

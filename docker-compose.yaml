@@ -21,8 +21,9 @@ services:
       - ../logs-drilldown/dist:/var/lib/grafana/plugins/grafana-lokiexplore-app
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
-      # host-gateway resolves to the correct host IP on macOS, Linux, and Windows
-      - 'host.docker.internal:host-gateway'
+      # Linux CI: Uses 172.17.0.1 (default)
+      # macOS/Windows local dev: Override with DOCKER_HOST_IP=host-gateway in .env file
+      - 'host.docker.internal:${DOCKER_HOST_IP:-172.17.0.1}'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 1s
@@ -41,8 +42,9 @@ services:
       GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
-      # host-gateway resolves to the correct host IP on macOS, Linux, and Windows
-      - 'host.docker.internal:host-gateway'
+      # Linux CI: Uses 172.17.0.1 (default)
+      # macOS/Windows local dev: Override with DOCKER_HOST_IP=host-gateway in .env file
+      - 'host.docker.internal:${DOCKER_HOST_IP:-172.17.0.1}'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 1s
