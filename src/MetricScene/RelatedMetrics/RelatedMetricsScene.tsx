@@ -63,19 +63,19 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
     const metricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable);
     metricsVariable.fetchAllMetrics();
 
-    // Subscribe to the metrics variable load completion and signal when done
+    this.subscribeToEvents(metricsVariable);
+  }
+
+  private subscribeToEvents(metricsVariable: MetricsVariable) {
+    this.initVariablesFilteringAndSorting();
+
+    // Subscribe to the metrics variable load completion and signal when done    const metricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable);
     const sub = metricsVariable.subscribeToState((state) => {
       if (state.loading === false) {
         sub.unsubscribe();
         this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.related }), true);
       }
     });
-
-    this.subscribeToEvents();
-  }
-
-  private subscribeToEvents() {
-    this.initVariablesFilteringAndSorting();
   }
 
   /**
