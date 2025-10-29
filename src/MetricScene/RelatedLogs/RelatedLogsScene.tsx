@@ -23,9 +23,11 @@ import React from 'react';
 import { NoRelatedLogs } from './NoRelatedLogsFound';
 import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './OpenInLogsDrilldownButton';
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
+import { actionViews } from '../../MetricScene/MetricActionBar';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared/shared';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
 import { isCustomVariable } from '../../shared/utils/utils.variables';
+import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
 
 interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;
@@ -51,7 +53,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       body: new SceneFlexLayout({
         direction: 'column',
         height: '100%',
-        minHeight: 500,
         children: [
           new SceneFlexItem({
             key: LOGS_PANEL_CONTAINER_KEY,
@@ -82,6 +83,9 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     } else {
       this.setupLogsPanel();
     }
+
+    // Signal that initial data load is complete
+    this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.relatedLogs }), true);
   }
 
   private showNoLogsFound() {
@@ -136,6 +140,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     // Set up UI for logs panel
     const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
     logsPanelContainer.setState({
+      height: 500,
       body: PanelBuilders.logs()
         .setTitle('Logs')
         .setOption('showLogContextToggle', true)

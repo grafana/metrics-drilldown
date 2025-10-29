@@ -32,8 +32,10 @@ import { MetricsList } from 'MetricsReducer/MetricsList/MetricsList';
 import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 
 import { RelatedListControls } from './RelatedListControls';
+import { actionViews } from '../../MetricScene/MetricActionBar';
 import { getTrailFor } from '../../shared/utils/utils';
 import { getAppBackgroundColor } from '../../shared/utils/utils.styles';
+import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
 
 interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;
@@ -58,7 +60,16 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
 
   private onActivate() {
     // make sure we display all the available metrics (see DataTrail.tsx, side bar sections in SideBar.tsx and RecentMetricsSection.tsx)
-    sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable).fetchAllMetrics();
+    const metricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable);
+    metricsVariable.fetchAllMetrics();
+
+    // Subscribe to the metrics variable load completion and signal when done
+    const sub = metricsVariable.subscribeToState((state) => {
+      if (state.loading === false) {
+        sub.unsubscribe();
+        this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.related }), true);
+      }
+    });
 
     this.subscribeToEvents();
   }
