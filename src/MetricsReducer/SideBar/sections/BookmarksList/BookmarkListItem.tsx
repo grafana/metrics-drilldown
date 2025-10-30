@@ -133,7 +133,6 @@ function getStyles(theme: GrafanaTheme2) {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       maxHeight: '36px', // 2 lines * 18px line-height
-      margin: 0,
       gridArea: 'Meta',
       color: theme.colors.text.secondary,
       whiteSpace: 'nowrap',
