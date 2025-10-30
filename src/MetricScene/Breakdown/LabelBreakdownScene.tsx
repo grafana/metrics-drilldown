@@ -1,9 +1,10 @@
 import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
+import { LoadingState, type GrafanaTheme2 } from '@grafana/data';
 import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   sceneGraph,
   SceneObjectBase,
+  SceneQueryRunner,
   type QueryVariable,
   type SceneComponentProps,
   type SceneObjectState,
@@ -16,8 +17,10 @@ import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
+import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
+import { actionViews } from '../../MetricScene/MetricActionBar';
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../../shared/shared';
 import { isQueryVariable } from '../../shared/utils/utils.variables';
 
@@ -70,10 +73,44 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       type: await getMetricType(name, getTrailFor(this)),
     };
 
-    this.setState({
-      body: groupByVariable.hasAllValue()
-        ? new MetricLabelsList({ metric })
-        : new MetricLabelValuesList({ metric, label: groupByVariable.state.value as string }),
+    const newBody = groupByVariable.hasAllValue()
+      ? new MetricLabelsList({ metric })
+      : new MetricLabelValuesList({ metric, label: groupByVariable.state.value as string });
+
+    this.setState({ body: newBody });
+    this.signalBreakdownPanelsLoaded(newBody);
+  }
+
+  /**
+   * Waits for all query runners in the body to complete their initial data load,
+   * then publishes the ActionViewDataLoadComplete event.
+   *
+   * This allows MetricScene to coordinate background work after the active tab is loaded.
+   */
+  private signalBreakdownPanelsLoaded(body: MetricLabelsList | MetricLabelValuesList) {
+    const queryRunners = sceneGraph.findDescendents(body, SceneQueryRunner);
+
+    if (queryRunners.length === 0) {
+      // No query runners, consider it loaded immediately
+      this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.breakdown }), true);
+      return;
+    }
+
+    let completedRunners = 0;
+    const checkAllComplete = () => {
+      completedRunners++;
+      if (completedRunners === queryRunners.length) {
+        this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.breakdown }), true);
+      }
+    };
+
+    queryRunners.forEach((runner) => {
+      const sub = runner.subscribeToState((state) => {
+        if (state.data?.state === LoadingState.Done || state.data?.state === LoadingState.Error) {
+          sub.unsubscribe();
+          checkAllComplete();
+        }
+      });
     });
   }
 
