@@ -64,7 +64,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     checkboxList: css({
       height: '100%',
-      margin: 0,
       padding: theme.spacing(0, 1, 1, 1),
       overflowY: 'auto',
       '&::-webkit-scrollbar': {
