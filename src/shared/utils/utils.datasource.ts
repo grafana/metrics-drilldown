@@ -67,10 +67,21 @@ export class DataSourceFetcher {
    * Fetches healthy data sources of the specified type
    */
   private async fetchHealthyDataSources(type: DataSourceType): Promise<DataSource[]> {
-    const allDataSourcesOfType = getDataSourceSrv().getList({
-      logs: true,
-      type,
-      filter: (ds) => ds.uid !== 'grafana',
+    const allDataSourcesOfType = [
+      ...getDataSourceSrv().getList({
+        logs: true,
+        type,
+        filter: (ds) => ds.uid !== 'grafana',
+      }),
+    ].sort((a, b) => {
+      // Default data source should be first in the list
+      if (a.isDefault && !b.isDefault) {
+        return -1;
+      }
+      if (!a.isDefault && b.isDefault) {
+        return 1;
+      }
+      return 0;
     });
 
     const healthyDataSources: DataSource[] = [];
