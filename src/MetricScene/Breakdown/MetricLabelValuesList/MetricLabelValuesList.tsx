@@ -239,16 +239,16 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
           return null;
         }
 
-        const title = getLabelValueFromDataFrame(frame);
-        const isEmptyLabelValue = title.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
-        const labelValue = isEmptyLabelValue ? '' : title;
+        const labelValueFromDataFrame = getLabelValueFromDataFrame(frame);
+        const isEmptyLabelValue = labelValueFromDataFrame.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
+        const labelValue = isEmptyLabelValue ? '' : labelValueFromDataFrame;
 
         const vizPanel = new GmdVizPanel({
           metric: metric.name,
           discardUserPrefs: true,
           panelOptions: {
             ...prefMetricConfig?.panelOptions,
-            title,
+            title: labelValueFromDataFrame,
             fixedColorIndex: frameIndex,
             description: '',
             headerActions: isEmptyLabelValue
