@@ -86,17 +86,15 @@ export class RelatedLogsOrchestrator {
   }
 
   /**
-   * Find all available datasources and check them for logs.
-   * Limits checking to the first 25 datasources to avoid performance issues.
-   * Instances with >25 Loki datasources should use dedicated log exploration tools.
+   * Find Loki datasources and check them for logs.
    */
   public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
     const allLokiDatasources = await this._dataSourceFetcher.getHealthyDataSources('loki');
 
-    // Limit to first 25 datasources to avoid performance issues
-    // Instances with >25 Loki datasources should use Logs Drilldown or Explore to find logs of interest
-    const datasourcesToCheck = allLokiDatasources.slice(0, 25);
+    // Limit to first five datasources to avoid performance issues
+    // Instances with more than five Loki datasources should use Logs Drilldown or Explore to find logs of interest
+    const datasourcesToCheck = allLokiDatasources.slice(0, 5);
 
     // Check datasources for logs
     if (datasourcesToCheck.length > 0) {
