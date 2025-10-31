@@ -39,7 +39,7 @@ export class DataSourceFetcher {
    * @param type - The type of data source to retrieve ('prometheus' or loki)
    * @returns Array of healthy data sources
    */
-  public async getHealthyDataSources(type: DataSourceType): Promise<DataSource[]> {
+  public async getHealthyDataSources(type: DataSourceType, limit = 25): Promise<DataSource[]> {
     // Check if we have cached results
     const cachedDataSources = this.cache.get(type);
     if (cachedDataSources?.length) {
@@ -49,7 +49,7 @@ export class DataSourceFetcher {
     // If there's already a pending request for this type, wait for it
     let pendingRequest = this.pendingRequests.get(type);
     if (!pendingRequest) {
-      pendingRequest = this.fetchHealthyDataSources(type).finally(() => {
+      pendingRequest = this.fetchHealthyDataSources(type, limit).finally(() => {
         // Clean up the pending request after it completes
         this.pendingRequests.delete(type);
       });
@@ -66,23 +66,25 @@ export class DataSourceFetcher {
   /**
    * Fetches healthy data sources of the specified type
    */
-  private async fetchHealthyDataSources(type: DataSourceType): Promise<DataSource[]> {
+  private async fetchHealthyDataSources(type: DataSourceType, limit: number): Promise<DataSource[]> {
     const allDataSourcesOfType = [
       ...getDataSourceSrv().getList({
         logs: true,
         type,
         filter: (ds) => ds.uid !== 'grafana',
       }),
-    ].sort((a, b) => {
-      // Default data source should be first in the list
-      if (a.isDefault && !b.isDefault) {
-        return -1;
-      }
-      if (!a.isDefault && b.isDefault) {
-        return 1;
-      }
-      return 0;
-    });
+    ]
+      .sort((a, b) => {
+        // Default data source should be first in the list
+        if (a.isDefault && !b.isDefault) {
+          return -1;
+        }
+        if (!a.isDefault && b.isDefault) {
+          return 1;
+        }
+        return 0;
+      })
+      .slice(0, limit);
 
     const healthyDataSources: DataSource[] = [];
     const unhealthyDataSources: DataSource[] = [];
