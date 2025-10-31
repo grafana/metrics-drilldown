@@ -90,10 +90,7 @@ export class DataSourceFetcher {
     await Promise.all(
       allDataSourcesOfType.map(async (ds) => {
         try {
-          const health = await getBackendSrv().get(`/api/datasources/uid/${ds.uid}/health`, undefined, undefined, {
-            showSuccessAlert: false,
-            showErrorAlert: false,
-          });
+          const health = await this.performHealthCheckWithTimeout(ds.uid);
 
           if (health?.status === 'OK') {
             healthyDataSources.push(ds);
@@ -115,6 +112,40 @@ export class DataSourceFetcher {
     }
 
     return healthyDataSources;
+  }
+
+  /**
+   * Performs a health check with a 3-second timeout.
+   * Data sources that don't respond within 3 seconds are considered unhealthy.
+   *
+   * @param uid - The data source UID to check
+   * @returns Health check response with status 'OK' or 'TIMEOUT'
+   */
+  private async performHealthCheckWithTimeout(uid: string): Promise<{ status: string }> {
+    const HEALTH_CHECK_TIMEOUT_MS = 3000;
+    const abortController = new AbortController();
+
+    const timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, HEALTH_CHECK_TIMEOUT_MS);
+
+    try {
+      const health = await getBackendSrv().get(`/api/datasources/uid/${uid}/health`, undefined, undefined, {
+        showSuccessAlert: false,
+        showErrorAlert: false,
+        abortSignal: abortController.signal,
+      });
+      clearTimeout(timeoutId);
+      return health;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      // If the request was aborted due to timeout, return TIMEOUT status
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return { status: 'TIMEOUT' };
+      }
+      // Re-throw other errors to be handled by the caller
+      throw error;
+    }
   }
 }
 
