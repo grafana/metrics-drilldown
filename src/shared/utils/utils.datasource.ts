@@ -96,7 +96,10 @@ export class DataSourceFetcher {
 
           if (health?.status === 'OK') {
             healthyDataSources.push(ds);
-          } else {
+          } else if (
+            // A timeout doesn't necessarily mean the data source is unhealthy
+            health?.status !== 'TIMEOUT'
+          ) {
             unhealthyDataSources.push(ds);
           }
         } catch {
