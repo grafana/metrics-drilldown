@@ -39,7 +39,7 @@ export class DataSourceFetcher {
    * @param type - The type of data source to retrieve ('prometheus' or loki)
    * @returns Array of healthy data sources
    */
-  public async getHealthyDataSources(type: DataSourceType, limit = 25): Promise<DataSource[]> {
+  public async getHealthyDataSources(type: DataSourceType, limit = 15): Promise<DataSource[]> {
     // Check if we have cached results
     const cachedDataSources = this.cache.get(type);
     if (cachedDataSources?.length) {
