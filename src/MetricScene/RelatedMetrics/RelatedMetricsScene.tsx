@@ -76,11 +76,10 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
       if (state.loading === false) {
         sub.unsubscribe();
 
-        const { body } = this.state;
-        if (body.isActive) {
+        if (this.state.body.isActive) {
           signalOnQueryComplete(this, actionViews.related);
         } else {
-          body.addActivationHandler(() => {
+          this.state.body.addActivationHandler(() => {
             signalOnQueryComplete(this, actionViews.related);
           });
         }
