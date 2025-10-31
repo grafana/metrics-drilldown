@@ -26,7 +26,7 @@ import { actionViews } from '../../MetricScene/MetricActionBar';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared/shared';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
 import { isCustomVariable } from '../../shared/utils/utils.variables';
-import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
+import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;
@@ -75,8 +75,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       this.setupLogsPanel();
     }
 
-    // Signal that initial data load is complete
-    this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.relatedLogs }), true);
+    // Signal when queries complete
+    signalOnQueryComplete(this, actionViews.relatedLogs);
   }
 
   private showNoLogsFound() {

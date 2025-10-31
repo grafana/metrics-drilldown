@@ -87,6 +87,10 @@ export class RelatedLogsOrchestrator {
 
   /**
    * Find Loki datasources and check them for logs.
+   * Limits checking to the first 5 datasources to avoid performance issues.
+   *
+   * Health checks are performed to avoid querying improperly configured datasources,
+   * which can cause timeouts and error messages.
    */
   public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
@@ -152,13 +156,9 @@ export class RelatedLogsOrchestrator {
     datasources.forEach((datasource) => {
       const queryRunner = new SceneQueryRunner({
         datasource: { uid: datasource.uid },
-        queries: [],
-        key: `related_logs_check_${datasource.uid}`,
-      });
-
-      // Build and set queries
-      queryRunner.setState({
         queries: this.getLokiQueries(datasource.uid),
+        key: `related_logs_check_${datasource.uid}`,
+        $timeRange: this._metricScene.state.$timeRange,
       });
 
       // Subscribe to results
