@@ -269,7 +269,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
     return (
       <div className={styles.container}>
-        <Stack direction="row" height="100%">
+        <Stack direction="row" height="100%" gap={0}>
           <div className={styles.buttonsBar} data-testid="sidebar-buttons">
             <Stack direction="column" alignItems="center" gap={0}>
               {sections.map((section) => {
@@ -343,7 +343,6 @@ function getStyles(theme: GrafanaTheme2) {
       overflow: 'hidden',
     }),
     buttonsBar: css({
-      gap: 0,
       width: '42px',
       padding: 0,
       margin: 0,
@@ -351,8 +350,6 @@ function getStyles(theme: GrafanaTheme2) {
       border: `1px solid ${theme.colors.border.weak}`,
       borderRadius: theme.shape.radius.default,
       backgroundColor: theme.colors.background.primary,
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
       position: 'relative',
     }),
     buttonContainer: css({

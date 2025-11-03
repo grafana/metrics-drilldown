@@ -19,7 +19,6 @@ import { InlineBanner } from 'App/InlineBanner';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
-import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 
@@ -78,10 +77,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
                 metric: option.value as string,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
-                  headerActions: ({ metric }) => [
-                    new ConfigurePanelAction({ metric }),
-                    new SelectAction({ metric: metric.name }),
-                  ],
+                  headerActions: ({ metric }) => [new SelectAction({ metric: metric.name })],
                 },
               }),
             }),

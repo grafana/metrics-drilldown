@@ -86,16 +86,19 @@ export class RelatedLogsOrchestrator {
   }
 
   /**
-   * Find all available datasources and check them for logs.
-   * This is used when filters change to ensure we're checking all possible datasources.
+   * Find Loki datasources and check them for logs.
    */
   public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
     const allLokiDatasources = await this._dataSourceFetcher.getHealthyDataSources('loki');
 
-    // Check all datasources for logs
-    if (allLokiDatasources.length > 0) {
-      this.checkLogsInDataSources(allLokiDatasources);
+    // Limit to first five datasources to avoid performance issues
+    // Instances with more than five Loki datasources should use Logs Drilldown or Explore to find logs of interest
+    const datasourcesToCheck = allLokiDatasources.slice(0, 5);
+
+    // Check datasources for logs
+    if (datasourcesToCheck.length > 0) {
+      this.checkLogsInDataSources(datasourcesToCheck);
     } else {
       // No datasources available
       this.lokiDataSources = [];
