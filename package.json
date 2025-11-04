@@ -103,7 +103,7 @@
     "swc-loader": "0.2.6",
     "terser-webpack-plugin": "5.3.14",
     "ts-node": "10.9.2",
-    "typescript": "5.8.3",
+    "typescript": "5.9.3",
     "webpack": "5.100.1",
     "webpack-bundle-analyzer": "4.10.2",
     "webpack-cli": "5.1.4",
