@@ -239,21 +239,22 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
           return null;
         }
 
-        const labelValue = getLabelValueFromDataFrame(frame);
-        const canAddToFilters = !labelValue.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
+        const labelValueFromDataFrame = getLabelValueFromDataFrame(frame);
+        const isEmptyLabelValue = labelValueFromDataFrame.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
+        const labelValue = isEmptyLabelValue ? '' : labelValueFromDataFrame;
 
         const vizPanel = new GmdVizPanel({
           metric: metric.name,
           discardUserPrefs: true,
           panelOptions: {
             ...prefMetricConfig?.panelOptions,
-            title: labelValue,
+            title: labelValueFromDataFrame,
             fixedColorIndex: frameIndex,
             description: '',
-            headerActions: canAddToFilters
-              ? () => [new AddToFiltersGraphAction({ labelName: label, labelValue })]
-              : () => [],
-            menu: () => new PanelMenu({ labelName: labelValue }),
+            headerActions: isEmptyLabelValue
+              ? () => []
+              : () => [new AddToFiltersGraphAction({ labelName: label, labelValue })],
+            menu: () => new PanelMenu({ labelName: label }),
             // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList)
             // no worries to add it for all panel types here as it will check if the panel is a timeseries
             // and if the data frame received is a timeseries before acting
