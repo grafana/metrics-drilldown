@@ -36,9 +36,8 @@ export const test = base.extend<AppTestFixture>({
         throw new Error('Cannot determine Grafana version, which is required for screenshot testing!');
       }
 
-      await base
-        .expect(locator)
-        .toHaveScreenshot(`${grafanaVersion}-${fileName}`, { ...options, maxDiffPixelRatio: 0 });
+      const expectedFileName = `${grafanaVersion}-${fileName}`;
+      await base.expect(locator).toHaveScreenshot(expectedFileName, { ...options, maxDiffPixelRatio: 0 });
     };
 
     await use(expectToHaveScreenshot);
