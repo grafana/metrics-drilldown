@@ -16,7 +16,7 @@ import {
   type SceneObjectState,
   type SceneVariable,
 } from '@grafana/scenes';
-import { Spinner, Stack, useStyles2 } from '@grafana/ui';
+import { Icon, Spinner, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { NoRelatedLogs } from './NoRelatedLogsFound';
@@ -25,6 +25,7 @@ import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared/shared';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
+import { DS_HEALTH_CHECK_TIMEOUT_S } from '../../shared/utils/utils.datasource';
 import { isCustomVariable } from '../../shared/utils/utils.variables';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
@@ -235,19 +236,25 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
   static readonly Component = ({ model }: SceneComponentProps<RelatedLogsScene>) => {
     const { controls, body, logsDrilldownLinkContext, loading } = model.useState();
     const styles = useStyles2(getRelatedLogsSceneStyles);
+    const dataSourceDropdown = controls?.[0];
 
     if (loading) {
       return <Spinner />;
     }
 
     return (
-      <Stack gap={1} direction={'column'} grow={1} height="100%">
-        <Stack gap={1} direction={'row'} justifyContent={'space-between'} alignItems={'start'}>
-          <Stack gap={1}>
-            {controls?.map((control) => (
-              <control.Component key={control.state.key} model={control} />
-            ))}
-          </Stack>
+      <Stack gap={1} direction="column" grow={1} height="100%">
+        <Stack gap={1} direction="row" justifyContent="space-between" alignItems="start">
+          {dataSourceDropdown && (
+            <Stack gap={1} direction="row" alignItems="center">
+              <dataSourceDropdown.Component model={dataSourceDropdown} />
+              <Tooltip
+                content={`Some Loki data sources might be missing from the dropdown if they took longer than ${DS_HEALTH_CHECK_TIMEOUT_S} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.`}
+              >
+                <Icon name="info-circle" />
+              </Tooltip>
+            </Stack>
+          )}
           <OpenInLogsDrilldownButton context={logsDrilldownLinkContext} />
         </Stack>
         <div className={styles.bodyContainer}>

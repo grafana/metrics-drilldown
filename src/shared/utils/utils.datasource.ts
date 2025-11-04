@@ -5,6 +5,11 @@ import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import { logger } from '../logger/logger';
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
+const DS_HEALTH_CHECK_TIMEOUT_MS = 3000;
+export const DS_HEALTH_CHECK_TIMEOUT_S = (DS_HEALTH_CHECK_TIMEOUT_MS / 1000).toFixed(
+  DS_HEALTH_CHECK_TIMEOUT_MS % 1000 === 0 ? 0 : 1
+);
+
 // This regex matches Grafana developed Prometheus data sources that are compatible with the vanilla Prometheus data source
 const PROMETHEUS_DATA_SOURCE_REGEX = /^grafana-[0-9a-z]+prometheus-datasource$/;
 
@@ -127,12 +132,11 @@ export class DataSourceFetcher {
    * @returns Health check response with status 'OK' or 'TIMEOUT'
    */
   private async performHealthCheckWithTimeout(uid: string): Promise<{ status: string }> {
-    const HEALTH_CHECK_TIMEOUT_MS = 3000;
     const abortController = new AbortController();
 
     const timeoutId = setTimeout(() => {
       abortController.abort();
-    }, HEALTH_CHECK_TIMEOUT_MS);
+    }, DS_HEALTH_CHECK_TIMEOUT_MS);
 
     try {
       const health = await getBackendSrv().get(`/api/datasources/uid/${uid}/health`, undefined, undefined, {
