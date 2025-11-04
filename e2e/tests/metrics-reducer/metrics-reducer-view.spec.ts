@@ -68,6 +68,7 @@ test.describe('Metrics reducer view', () => {
 
         test('When clearing the filter, it updates the list of label values and marks the sidebar button as inactive', async ({
           metricsReducerView,
+          expectScreenshotInCurrentGrafanaVersion,
         }) => {
           await metricsReducerView.sidebar.toggleButton('Group by labels');
           await metricsReducerView.sidebar.selectGroupByLabel('db_name');
@@ -83,7 +84,8 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertLabelsListCount('>', 3);
           await metricsReducerView.assertMetricsList();
 
-          await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
+          await expectScreenshotInCurrentGrafanaVersion(
+            metricsReducerView.getMetricsList(),
             'metrics-reducer-group-by-label-after-clear-filter.png'
           );
         });

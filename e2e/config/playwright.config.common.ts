@@ -23,13 +23,13 @@ type VersionType = 'major' | 'minor' | 'patch';
 
 export function getGrafanaVersion(versionType: VersionType = 'patch') {
   if (versionType === 'major') {
-    return process.env.GRAFANA_VERSION?.split('.').slice(0, 1).join('.');
+    return process.env.GRAFANA_VERSION?.split('.').slice(0, 1).join('-');
   }
   if (versionType === 'minor') {
-    return process.env.GRAFANA_VERSION?.split('.').slice(0, 2).join('.');
+    return process.env.GRAFANA_VERSION?.split('.').slice(0, 2).join('-');
   }
 
-  return process.env.GRAFANA_VERSION;
+  return process.env.GRAFANA_VERSION?.split('.').join('-');
 }
 
 export function getGrafanaUrl(options: GetGrafanaUrlOptions = {}) {
