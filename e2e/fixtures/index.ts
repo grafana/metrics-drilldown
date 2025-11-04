@@ -2,6 +2,7 @@ import { test as base, type AppConfigPage } from '@grafana/plugin-e2e';
 import { type Locator, type Page } from '@playwright/test';
 
 import pluginJson from '../../src/plugin.json';
+import { logger } from '../../src/shared/logger/logger';
 import { DEFAULT_STATIC_URL_SEARCH_PARAMS } from '../config/constants';
 import { MetricSceneView } from './views/MetricSceneView';
 import { MetricsReducerView } from './views/MetricsReducerView';
@@ -37,6 +38,7 @@ export const test = base.extend<AppTestFixture>({
       }
 
       const expectedFileName = `${grafanaVersion}-${fileName}`;
+      logger.log(`Comparing screenshot against expected file: ${expectedFileName}`);
       await base.expect(locator).toHaveScreenshot(expectedFileName, { ...options, maxDiffPixelRatio: 0 });
     };
 
