@@ -9,9 +9,9 @@ import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
 import { useMetricsDrilldownQuestions } from './assistant/useMetricsDrilldownQuestions';
 
-type TrailProps = {
+interface TrailProps {
   trail: DataTrail;
-};
+}
 
 /**
  * Generates the page navigation breadcrumb based on the current scene state
