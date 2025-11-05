@@ -28,9 +28,9 @@ export function getPageNav(
   if (metric && topScene instanceof MetricScene) {
     // When a metric is selected, we add the metric name and action view name to the navigation breadcrumbs
     // For example:
-    // - "Home > Drilldown > Metrics > metric_a > Breakdown"
-    // - "Home > Drilldown > Metrics > metric_b > Related metrics"
-    // - "Home > Drilldown > Metrics > metric_c > Related logs"
+    // - "Home > Drilldown > Metrics > some_metric > Breakdown"
+    // - "Home > Drilldown > Metrics > some_metric > Related metrics"
+    // - "Home > Drilldown > Metrics > some_metric > Related logs"
 
     const searchParams = new URLSearchParams(window.location.search);
     const searchParamsWithDefaultActionView = new URLSearchParams(searchParams);
@@ -68,24 +68,24 @@ export default function Trail({ trail }: Readonly<TrailProps>) {
 
   // Subscribe to MetricScene state changes to update breadcrumb
   useEffect(() => {
-    if (topScene instanceof MetricScene) {
-      // Get current action view name
-      setCurrentActionViewName(topScene.getActionViewName());
-
-      // Subscribe to action view state changes
-      const topSceneSubscription = topScene.subscribeToState(() => {
-        setCurrentActionViewName(topScene.getActionViewName());
-      });
-
-      return () => {
-        if (topSceneSubscription) {
-          topSceneSubscription.unsubscribe();
-        }
-      };
-    } else {
+    if (!(topScene instanceof MetricScene)) {
       setCurrentActionViewName('');
       return undefined;
     }
+
+    // Get current action view name
+    setCurrentActionViewName(topScene.getActionViewName());
+
+    // Subscribe to action view state changes
+    const topSceneSubscription = topScene.subscribeToState(() => {
+      setCurrentActionViewName(topScene.getActionViewName());
+    });
+
+    return () => {
+      if (topSceneSubscription) {
+        topSceneSubscription.unsubscribe();
+      }
+    };
   }, [topScene]);
 
   // Create pageNav based on current state
