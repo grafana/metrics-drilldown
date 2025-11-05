@@ -98,7 +98,6 @@ export class BookmarkHeaderAction extends SceneObjectBase<BookmarkHeaderActionSt
 
 const getStyles = (theme: GrafanaTheme2) => ({
   bookmarkButton: css`
-    margin: 0;
     padding: 0;
     margin-left: ${theme.spacing(1)};
   `,
