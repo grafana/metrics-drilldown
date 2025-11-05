@@ -1,10 +1,10 @@
 import { css } from '@emotion/css';
-import { LoadingState, type GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
+  behaviors,
   sceneGraph,
   SceneObjectBase,
-  SceneQueryRunner,
   type QueryVariable,
   type SceneComponentProps,
   type SceneObjectState,
@@ -17,12 +17,12 @@ import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
-import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../../shared/shared';
 import { isQueryVariable } from '../../shared/utils/utils.variables';
+import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
@@ -34,6 +34,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     super({
       metric,
       body: undefined,
+      $behaviors: [new behaviors.SceneQueryController()],
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -78,40 +79,15 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       : new MetricLabelValuesList({ metric, label: groupByVariable.state.value as string });
 
     this.setState({ body: newBody });
-    this.signalBreakdownPanelsLoaded(newBody);
-  }
 
-  /**
-   * Waits for all query runners in the body to complete their initial data load,
-   * then publishes the ActionViewDataLoadComplete event.
-   *
-   * This allows MetricScene to coordinate background work after the active tab is loaded.
-   */
-  private signalBreakdownPanelsLoaded(body: MetricLabelsList | MetricLabelValuesList) {
-    const queryRunners = sceneGraph.findDescendents(body, SceneQueryRunner);
-
-    if (queryRunners.length === 0) {
-      // No query runners, consider it loaded immediately
-      this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.breakdown }), true);
-      return;
-    }
-
-    let completedRunners = 0;
-    const checkAllComplete = () => {
-      completedRunners++;
-      if (completedRunners === queryRunners.length) {
-        this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.breakdown }), true);
-      }
-    };
-
-    queryRunners.forEach((runner) => {
-      const sub = runner.subscribeToState((state) => {
-        if (state.data?.state === LoadingState.Done || state.data?.state === LoadingState.Error) {
-          sub.unsubscribe();
-          checkAllComplete();
-        }
+    // Wait for body activation, then signal when queries complete
+    if (newBody.isActive) {
+      signalOnQueryComplete(this, actionViews.breakdown);
+    } else {
+      newBody.addActivationHandler(() => {
+        signalOnQueryComplete(this, actionViews.breakdown);
       });
-    });
+    }
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {

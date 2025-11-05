@@ -5,6 +5,11 @@ import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 import { logger } from '../logger/logger';
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
+const DS_HEALTH_CHECK_TIMEOUT_MS = 3000;
+export const DS_HEALTH_CHECK_TIMEOUT_S = (DS_HEALTH_CHECK_TIMEOUT_MS / 1000).toFixed(
+  DS_HEALTH_CHECK_TIMEOUT_MS % 1000 === 0 ? 0 : 1
+);
+
 // This regex matches Grafana developed Prometheus data sources that are compatible with the vanilla Prometheus data source
 const PROMETHEUS_DATA_SOURCE_REGEX = /^grafana-[0-9a-z]+prometheus-datasource$/;
 
@@ -39,7 +44,7 @@ export class DataSourceFetcher {
    * @param type - The type of data source to retrieve ('prometheus' or loki)
    * @returns Array of healthy data sources
    */
-  public async getHealthyDataSources(type: DataSourceType): Promise<DataSource[]> {
+  public async getHealthyDataSources(type: DataSourceType, limit = 15): Promise<DataSource[]> {
     // Check if we have cached results
     const cachedDataSources = this.cache.get(type);
     if (cachedDataSources?.length) {
@@ -49,7 +54,7 @@ export class DataSourceFetcher {
     // If there's already a pending request for this type, wait for it
     let pendingRequest = this.pendingRequests.get(type);
     if (!pendingRequest) {
-      pendingRequest = this.fetchHealthyDataSources(type).finally(() => {
+      pendingRequest = this.fetchHealthyDataSources(type, limit).finally(() => {
         // Clean up the pending request after it completes
         this.pendingRequests.delete(type);
       });
@@ -66,23 +71,25 @@ export class DataSourceFetcher {
   /**
    * Fetches healthy data sources of the specified type
    */
-  private async fetchHealthyDataSources(type: DataSourceType): Promise<DataSource[]> {
+  private async fetchHealthyDataSources(type: DataSourceType, limit: number): Promise<DataSource[]> {
     const allDataSourcesOfType = [
       ...getDataSourceSrv().getList({
         logs: true,
         type,
         filter: (ds) => ds.uid !== 'grafana',
       }),
-    ].sort((a, b) => {
-      // Default data source should be first in the list
-      if (a.isDefault && !b.isDefault) {
-        return -1;
-      }
-      if (!a.isDefault && b.isDefault) {
-        return 1;
-      }
-      return 0;
-    });
+    ]
+      .sort((a, b) => {
+        // Default data source should be first in the list
+        if (a.isDefault && !b.isDefault) {
+          return -1;
+        }
+        if (!a.isDefault && b.isDefault) {
+          return 1;
+        }
+        return 0;
+      })
+      .slice(0, limit);
 
     const healthyDataSources: DataSource[] = [];
     const unhealthyDataSources: DataSource[] = [];
@@ -90,14 +97,14 @@ export class DataSourceFetcher {
     await Promise.all(
       allDataSourcesOfType.map(async (ds) => {
         try {
-          const health = await getBackendSrv().get(`/api/datasources/uid/${ds.uid}/health`, undefined, undefined, {
-            showSuccessAlert: false,
-            showErrorAlert: false,
-          });
+          const health = await this.performHealthCheckWithTimeout(ds.uid);
 
           if (health?.status === 'OK') {
             healthyDataSources.push(ds);
-          } else {
+          } else if (
+            // A timeout doesn't necessarily mean the data source is unhealthy
+            health?.status !== 'TIMEOUT'
+          ) {
             unhealthyDataSources.push(ds);
           }
         } catch {
@@ -115,6 +122,39 @@ export class DataSourceFetcher {
     }
 
     return healthyDataSources;
+  }
+
+  /**
+   * Performs a health check with a 3-second timeout.
+   * Data sources that don't respond within 3 seconds are considered unhealthy.
+   *
+   * @param uid - The data source UID to check
+   * @returns Health check response with status 'OK' or 'TIMEOUT'
+   */
+  private async performHealthCheckWithTimeout(uid: string): Promise<{ status: string }> {
+    const abortController = new AbortController();
+
+    const timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, DS_HEALTH_CHECK_TIMEOUT_MS);
+
+    try {
+      const health = await getBackendSrv().get(`/api/datasources/uid/${uid}/health`, undefined, undefined, {
+        showSuccessAlert: false,
+        showErrorAlert: false,
+        abortSignal: abortController.signal,
+      });
+      clearTimeout(timeoutId);
+      return health;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      // If the request was aborted due to timeout, return TIMEOUT status
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return { status: 'TIMEOUT' };
+      }
+      // Re-throw other errors to be handled by the caller
+      throw error;
+    }
   }
 }
 
