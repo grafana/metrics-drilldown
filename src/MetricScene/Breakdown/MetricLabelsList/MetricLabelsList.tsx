@@ -190,9 +190,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
     return (
       <div data-testid="labels-list">
-        <div className={styles.container}>
-          <body.Component model={body} />
-        </div>
+        <body.Component model={body} />
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
             <ShowMoreButton label="label" batchSizes={batchSizes} onClick={onClickShowMore} />
@@ -205,7 +203,6 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css({ width: '100%' }),
     field: css({
       marginBottom: 0,
     }),
