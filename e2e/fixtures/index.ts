@@ -37,8 +37,6 @@ export const test = base.extend<AppTestFixture>({
       }
 
       const expectedFileName = `${grafanaVersion}-${fileName}`;
-      /* eslint-disable no-restricted-syntax */
-      console.log(`Comparing screenshot against expected file: ${expectedFileName}`);
       await base.expect(locator).toHaveScreenshot(expectedFileName, { ...options, maxDiffPixelRatio: 0 });
     };
 
