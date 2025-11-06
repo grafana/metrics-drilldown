@@ -127,7 +127,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
 
     return (
       <div data-testid="metrics-list">
-        <div className={styles.container}>
+        <div>
           <body.Component model={body} />
         </div>
         {shouldDisplayShowMoreButton && (
@@ -142,7 +142,6 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css({}),
     footer: css({
       display: 'flex',
       justifyContent: 'center',

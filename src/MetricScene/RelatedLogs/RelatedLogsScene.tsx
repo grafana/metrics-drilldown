@@ -25,8 +25,9 @@ import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared/shared';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
+import { DS_HEALTH_CHECK_TIMEOUT_S } from '../../shared/utils/utils.datasource';
 import { isCustomVariable } from '../../shared/utils/utils.variables';
-import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
+import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;
@@ -75,8 +76,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       this.setupLogsPanel();
     }
 
-    // Signal that initial data load is complete
-    this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.relatedLogs }), true);
+    // Signal when queries complete
+    signalOnQueryComplete(this, actionViews.relatedLogs);
   }
 
   private showNoLogsFound() {
@@ -143,6 +144,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       name: VAR_LOGS_DATASOURCE,
       label: 'Logs data source',
       query: this.state.orchestrator.lokiDataSources.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
+      description: `Some Loki data sources might be missing from the dropdown if they took longer than ${DS_HEALTH_CHECK_TIMEOUT_S} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.`,
     });
     this.setState({
       $variables: new SceneVariableSet({ variables: [logsDataSourceVariable] }),
@@ -241,8 +243,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     }
 
     return (
-      <Stack gap={1} direction={'column'} grow={1} height="100%">
-        <Stack gap={1} direction={'row'} justifyContent={'space-between'} alignItems={'start'}>
+      <Stack gap={1} direction="column" grow={1} height="100%">
+        <Stack gap={1} direction="row" justifyContent="space-between" alignItems="start">
           <Stack gap={1}>
             {controls?.map((control) => (
               <control.Component key={control.state.key} model={control} />
