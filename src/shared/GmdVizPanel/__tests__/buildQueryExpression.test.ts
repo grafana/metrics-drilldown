@@ -5,7 +5,7 @@ import { buildQueryExpression } from '../buildQueryExpression';
 describe('buildQueryExpression(options)', () => {
   test.each([
     ['non-utf8', 'go_goroutines', 'go_goroutines{${filters:raw}}'],
-    ['utf8', '🔥go_goroutines', '🔥go_goroutines{"🔥go_goroutines", ${filters:raw}}'],
+    ['utf8', '🔥go_goroutines', '{"🔥go_goroutines", ${filters:raw}}'],
   ])('supports %s metric names', (_, name, expected) => {
     const expression = buildQueryExpression({
       metric: { name, type: 'gauge' },
@@ -22,7 +22,7 @@ describe('buildQueryExpression(options)', () => {
     [
       'utf8',
       '🔥go_goroutines',
-      '🔥go_goroutines{cluster="test", instance!="us-east:5000", "🔥go_goroutines", ${filters:raw}}',
+      '{cluster="test", instance!="us-east:5000", "🔥go_goroutines", ${filters:raw}}',
     ],
   ])('supports labels (%s)', (_, name, expected) => {
     const expression = buildQueryExpression({
@@ -47,7 +47,7 @@ describe('buildQueryExpression(options)', () => {
     [
       'utf8',
       '🔥go_goroutines',
-      '🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}}',
+      '{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}}',
     ],
   ])('supports ignore usage filter (%s)', (_, name, expected) => {
     const expression = buildQueryExpression({
@@ -74,7 +74,7 @@ describe('extreme value filtering', () => {
     [
       'utf8',
       '🔥go_goroutines',
-      '🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} and 🔥go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} > -Inf',
+      '{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} and {cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} > -Inf',
     ],
   ])('supports extreme value filtering  (%s)', (_, name, expected) => {
     const expression = buildQueryExpression({
