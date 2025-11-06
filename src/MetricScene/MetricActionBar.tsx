@@ -22,6 +22,8 @@ export const actionViews = {
   relatedLogs: 'logs',
 } as const;
 
+export const defaultActionView = actionViews.breakdown;
+
 export type ActionViewType = (typeof actionViews)[keyof typeof actionViews];
 
 interface ActionViewDefinition {
