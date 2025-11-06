@@ -95,7 +95,7 @@ export default function Trail({ trail }: Readonly<TrailProps>) {
   );
 
   return (
-    <PluginPage pageNav={pageNav} layout={PageLayoutType.Canvas}>
+    <PluginPage pageNav={pageNav} layout={PageLayoutType.Custom}>
       <UrlSyncContextProvider
         scene={trail}
         createBrowserHistorySteps={true}
