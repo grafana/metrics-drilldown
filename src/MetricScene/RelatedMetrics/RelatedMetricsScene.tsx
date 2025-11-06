@@ -2,6 +2,7 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
+  behaviors,
   sceneGraph,
   SceneObjectBase,
   SceneVariableSet,
@@ -35,7 +36,7 @@ import { RelatedListControls } from './RelatedListControls';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { getTrailFor } from '../../shared/utils/utils';
 import { getAppBackgroundColor } from '../../shared/utils/utils.styles';
-import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
+import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;
@@ -50,6 +51,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
       $variables: new SceneVariableSet({
         variables: [new FilteredMetricsVariable()],
       }),
+      $behaviors: [new behaviors.SceneQueryController()],
       key: 'RelatedMetricsScene',
       body: new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }),
       listControls: new RelatedListControls({}),
@@ -69,11 +71,18 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   private subscribeToEvents(metricsVariable: MetricsVariable) {
     this.initVariablesFilteringAndSorting();
 
-    // Subscribe to the metrics variable load completion and signal when done    const metricsVariable = sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable);
+    // Wait for metrics to load, then signal when queries complete
     const sub = metricsVariable.subscribeToState((state) => {
       if (state.loading === false) {
         sub.unsubscribe();
-        this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.related }), true);
+
+        if (this.state.body.isActive) {
+          signalOnQueryComplete(this, actionViews.related);
+        } else {
+          this.state.body.addActivationHandler(() => {
+            signalOnQueryComplete(this, actionViews.related);
+          });
+        }
       }
     });
   }
