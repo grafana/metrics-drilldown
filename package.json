@@ -1,10 +1,9 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
-    "preversion": "./scripts/preversion-ensure-origin-main.sh",
     "prebuild": "./scripts/update-commit-sha.sh",
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
