@@ -59,7 +59,6 @@ function getStyles(theme: GrafanaTheme2) {
       justifyContent: 'space-between',
       alignItems: 'center',
       color: theme.colors.text.secondary,
-      margin: theme.spacing(0),
       padding: theme.spacing(0, 0, 0, 1),
     }),
     checkboxList: css({
@@ -79,7 +78,6 @@ function getStyles(theme: GrafanaTheme2) {
     checkboxItem: css({
       display: 'flex',
       alignItems: 'center',
-      width: '100%',
       padding: theme.spacing(0.5, 0),
     }),
     noResults: css({
