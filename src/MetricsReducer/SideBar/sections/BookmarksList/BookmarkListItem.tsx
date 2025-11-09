@@ -95,8 +95,6 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
 function getStyles(theme: GrafanaTheme2) {
   return {
     card: css({
-      position: 'relative',
-      width: '318px',
       padding: `12px ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2)}`,
       alignItems: 'start',
       marginBottom: 0,
