@@ -52,7 +52,7 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
     <article data-testid={`data-trail-card ${metric}`}>
       <Card onClick={onSelect} className={cardClassName}>
         <Card.Heading>
-          <div className={styles.metricValue}>{heading}</div>
+          <div>{heading}</div>
         </Card.Heading>
         <Card.Meta className={styles.meta}>
           {filters.map(([key, operator, value], i) => (
@@ -94,15 +94,7 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    metricValue: css({
-      display: 'inline',
-      color: theme.colors.text.primary,
-      fontWeight: 500,
-      wordBreak: 'break-all',
-    }),
     card: css({
-      position: 'relative',
-      width: '318px',
       padding: `12px ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2)}`,
       alignItems: 'start',
       marginBottom: 0,
