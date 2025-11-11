@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { shouldIgnoreError } from '../shared/logger/faro/faro';
 import { logger } from '../shared/logger/logger';
 
 export function ensureErrorObject(error: any, defaultMessage: string): Error {
@@ -24,12 +25,17 @@ export function ensureErrorObject(error: any, defaultMessage: string): Error {
  * Filters out known non-critical errors like browser extension errors and ResizeObserver warnings.
  */
 function shouldTreatAsApplicationError(errorEvent: ErrorEvent): boolean {
-  // Check if error is from a browser extension
-  if (errorEvent.filename) {
-    const protocol = new URL(errorEvent.filename).protocol;
+  if (shouldIgnoreError(errorEvent.message)) {
+    return false;
+  }
 
-    if (protocol.endsWith('extension:')) {
-      logger.error(new Error(`Browser extension error: ${errorEvent.message}`), {
+  // Add extra context for browser extension errors
+  if (errorEvent.filename) {
+    const extensionUrl = new URL(errorEvent.filename);
+
+    if (extensionUrl.protocol.endsWith('extension:')) {
+      logger.error(new Error(`Browser extension error: ${errorEvent.message}`, { cause: 'browser-extension' }), {
+        extensionName: extensionUrl.hostname,
         filename: errorEvent.filename,
         lineno: errorEvent.lineno?.toString(),
         colno: errorEvent.colno?.toString(),
@@ -38,7 +44,7 @@ function shouldTreatAsApplicationError(errorEvent: ErrorEvent): boolean {
     }
   }
 
-  // Check for null error with message (like ResizeObserver warnings)
+  // Add extra context for non-critical errors with a message
   if (errorEvent.error === null && errorEvent.message) {
     logger.error(new Error(`Non-critical error: ${errorEvent.message}`), {
       filename: errorEvent.filename,
@@ -48,6 +54,7 @@ function shouldTreatAsApplicationError(errorEvent: ErrorEvent): boolean {
     return false;
   }
 
+  // If it's not one of the special cases above, it's probably a legitimate application error
   return true;
 }
 
