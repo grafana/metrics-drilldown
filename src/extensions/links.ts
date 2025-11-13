@@ -26,7 +26,12 @@ const ASSISTANT_TARGET_V1 = 'grafana-assistant-app/navigateToDrilldown/v1';
 
 const ADHOC_URL_DELIMITER = '|';
 
-export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPanelContext>> = [
+// add an optional getPath function to the PluginExtensionAddedLinkConfig type
+type PluginExtensionAddedLinkConfigWithPath<Context extends object> = PluginExtensionAddedLinkConfig<Context> & {
+  buildPathAsync?: (context: Context) => Promise<string | null>;
+};
+
+export const linkConfigs: Array<PluginExtensionAddedLinkConfigWithPath<PluginExtensionPanelContext>> = [
   {
     title,
     description,
@@ -48,6 +53,11 @@ export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPa
       if (url) {
         window.location.href = url;
       }
+    },
+    buildPathAsync: async (context) => {
+      // lazy load the promQL parser to reduce the initial bundle size 
+      const url = await buildDrilldownUrlAsync(context);
+      return url;
     },
   },
   {
