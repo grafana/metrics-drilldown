@@ -13,6 +13,10 @@ import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/u
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
 import {
+  computeMetricPrefixSecondLevel,
+  HIERARCHICAL_SEPARATOR,
+} from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
+import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
@@ -25,10 +29,6 @@ import {
   MetricsVariableFilterEngine,
   type MetricFilters,
 } from 'MetricsReducer/metrics-variables/MetricsVariableFilterEngine';
-import {
-  computeMetricPrefixSecondLevel,
-  HIERARCHICAL_SEPARATOR,
-} from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import {
   RULE_GROUP_LABELS,
@@ -41,8 +41,8 @@ import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
-import { TreeCheckBoxList } from './TreeCheckBoxList';
 import { EventFiltersChanged } from './EventFiltersChanged';
+import { TreeCheckBoxList } from './TreeCheckBoxList';
 
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
