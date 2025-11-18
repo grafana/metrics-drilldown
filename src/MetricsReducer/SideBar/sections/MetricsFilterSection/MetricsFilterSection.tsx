@@ -282,6 +282,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
   private onExpandToggle = (prefix: string) => {
     const { expandedPrefixes, computedSublevels } = this.state;
     const newExpanded = new Set(expandedPrefixes);
+    let newComputedSublevels = computedSublevels;
 
     if (newExpanded.has(prefix)) {
       // Collapse
@@ -295,14 +296,16 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
         const options = metricsVariable.state.options as MetricOptions;
 
         const sublevels = computeMetricPrefixSecondLevel(options, prefix);
-        const newComputedSublevels = new Map(computedSublevels);
+        newComputedSublevels = new Map(computedSublevels);
         newComputedSublevels.set(prefix, sublevels);
-
-        this.setState({ computedSublevels: newComputedSublevels });
       }
     }
 
-    this.setState({ expandedPrefixes: newExpanded });
+    // Single setState call with all changes
+    this.setState({
+      expandedPrefixes: newExpanded,
+      computedSublevels: newComputedSublevels,
+    });
   };
 
   /**
