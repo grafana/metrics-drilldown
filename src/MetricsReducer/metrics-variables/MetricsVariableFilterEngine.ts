@@ -132,7 +132,7 @@ export class MetricsVariableFilterEngine {
             .join('|')}`;
         }
 
-        // Regular Level 0 prefix
+        // Single-level prefix pattern (backward compatibility)
         return `^${prefix}([^a-z0-9]|$)`;
       })
       .join('|');
