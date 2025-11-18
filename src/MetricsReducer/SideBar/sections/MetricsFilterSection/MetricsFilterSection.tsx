@@ -93,7 +93,8 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     ) {
       stateUpdate.selectedGroups = (values[this.state.key] as string)
         .split(',')
-        .filter(Boolean)
+        .map((v) => v.trim())
+        .filter((v) => v)
         .map((v) => ({
           label: this.parseLabel(v) as RuleGroupLabel,
           value: v,
