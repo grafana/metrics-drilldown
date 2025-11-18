@@ -31,14 +31,20 @@ export function TreeCheckBoxList({
     return selectedGroups.some((g) => g.value === parentValue);
   };
 
+  // Helper: Check if parent has selected children (indeterminate state)
+  const hasSelectedChildren = (parentValue: string) => {
+    return selectedGroups.some((g) => g.value.startsWith(parentValue + ':'));
+  };
+
   // Helper: Get children for a parent
   const getChildren = (parentValue: string) => {
     return computedSublevels.get(parentValue) || [];
   };
 
   // Handle parent checkbox click
-  const handleParentChange = (parent: { label: string; value: string }, checked: boolean) => {
-    if (checked) {
+  const handleParentChange = (parent: { label: string; value: string }, checked: boolean, isIndeterminate: boolean) => {
+    if (checked || isIndeterminate) {
+      // Clicking checked → uncheck, OR clicking indeterminate → check parent (remove children)
       // Add parent, remove any children
       const newGroups = [
         ...selectedGroups.filter((g) => !g.value.startsWith(parent.value + ':')),
@@ -46,7 +52,7 @@ export function TreeCheckBoxList({
       ];
       onSelectionChange(newGroups);
     } else {
-      // Remove parent
+      // Unchecking parent → remove it
       const newGroups = selectedGroups.filter((g) => g.value !== parent.value);
       onSelectionChange(newGroups);
     }
@@ -94,6 +100,7 @@ export function TreeCheckBoxList({
             const children = getChildren(group.value);
             const hasChildren = children.length > 0 || isExpanded;
             const isChecked = isParentChecked(group.value);
+            const isIndeterminate = !isChecked && hasSelectedChildren(group.value);
 
             return (
               <React.Fragment key={group.value}>
@@ -115,7 +122,8 @@ export function TreeCheckBoxList({
                       label={group.label}
                       count={group.count}
                       checked={isChecked}
-                      onChange={(e) => handleParentChange(group, e.currentTarget.checked)}
+                      indeterminate={isIndeterminate}
+                      onChange={(e) => handleParentChange(group, e.currentTarget.checked, isIndeterminate)}
                     />
                   </div>
                 </li>

@@ -7,18 +7,20 @@ export const CheckboxWithCount = ({
   label,
   count,
   checked,
+  indeterminate,
   onChange,
 }: {
   label: string;
   count: number;
   checked: boolean;
+  indeterminate?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const styles = useStyles2(getStyles);
 
   return (
     <div className={styles.checkboxWrapper}>
-      <Checkbox label={label} value={checked} onChange={onChange} />
+      <Checkbox label={label} value={checked} indeterminate={indeterminate} onChange={onChange} />
       <span className={styles.count}>({count})</span>
     </div>
   );
