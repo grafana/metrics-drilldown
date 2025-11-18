@@ -19,7 +19,7 @@ export const CheckboxWithCount = ({
   const styles = useStyles2(getStyles);
 
   return (
-    <div className={styles.checkboxWrapper}>
+    <div className={styles.checkboxWrapper} title={label}>
       <Checkbox label={label} value={checked} indeterminate={indeterminate} onChange={onChange} />
       <span className={styles.count}>({count})</span>
     </div>
