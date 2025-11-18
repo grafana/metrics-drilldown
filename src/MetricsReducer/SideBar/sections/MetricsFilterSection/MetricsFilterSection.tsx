@@ -25,7 +25,10 @@ import {
   MetricsVariableFilterEngine,
   type MetricFilters,
 } from 'MetricsReducer/metrics-variables/MetricsVariableFilterEngine';
-import { computeMetricPrefixSecondLevel } from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
+import {
+  computeMetricPrefixSecondLevel,
+  HIERARCHICAL_SEPARATOR,
+} from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import {
   RULE_GROUP_LABELS,
@@ -169,8 +172,8 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       const prefixesToExpand = new Set<string>();
 
       selectedGroups.forEach((group) => {
-        if (group.value.includes(':')) {
-          const [prefix] = group.value.split(':');
+        if (group.value.includes(HIERARCHICAL_SEPARATOR)) {
+          const [prefix] = group.value.split(HIERARCHICAL_SEPARATOR);
           prefixesToExpand.add(prefix);
         }
       });
@@ -246,6 +249,11 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     }
   }
 
+  /**
+   * Update metric counts for already-computed second-level substrings.
+   * Called when filters change to refresh counts without recomputing the entire tree.
+   * @param options Filtered metric options to count from
+   */
   private updateSublevelCounts(options: MetricOptions) {
     const { computedSublevels } = this.state;
     const newComputedSublevels = new Map(computedSublevels);
@@ -266,6 +274,11 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.setState({ computedSublevels: newComputedSublevels });
   }
 
+  /**
+   * Handle expanding/collapsing a prefix to show/hide its second-level substrings.
+   * Lazily computes sublevels on first expansion for performance.
+   * @param prefix The parent prefix to expand/collapse (e.g., "grafana")
+   */
   private onExpandToggle = (prefix: string) => {
     const { expandedPrefixes, computedSublevels } = this.state;
     const newExpanded = new Set(expandedPrefixes);
@@ -292,9 +305,15 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.setState({ expandedPrefixes: newExpanded });
   };
 
+  /**
+   * Parse a filter value into a user-friendly label for display.
+   * Converts hierarchical values (e.g., "grafana:alert") to readable format ("grafana > alert").
+   * @param value The filter value from URL or selection
+   * @returns Formatted label for display
+   */
   private parseLabel(value: string): string {
-    if (value.includes(':')) {
-      const [prefix, sublevel] = value.split(':');
+    if (value.includes(HIERARCHICAL_SEPARATOR)) {
+      const [prefix, sublevel] = value.split(HIERARCHICAL_SEPARATOR);
       return `${prefix} > ${sublevel}`;
     }
     return value;

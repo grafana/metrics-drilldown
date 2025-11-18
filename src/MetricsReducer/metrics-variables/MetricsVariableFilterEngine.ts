@@ -1,6 +1,7 @@
 import { SceneVariableValueChangedEvent, type QueryVariable, type VariableValueOption } from '@grafana/scenes';
 import { cloneDeep, isEqual } from 'lodash';
 
+import { HIERARCHICAL_SEPARATOR } from './computeMetricPrefixSecondLevel';
 import { type MetricOptions } from './MetricsVariable';
 
 export type MetricFilters = {
@@ -116,8 +117,8 @@ export class MetricsVariableFilterEngine {
     const pattern = prefixes
       .map((prefix) => {
         // Check if this is hierarchical (contains colon separator)
-        if (prefix.includes(':')) {
-          const [level0, level1] = prefix.split(':');
+        if (prefix.includes(HIERARCHICAL_SEPARATOR)) {
+          const [level0, level1] = prefix.split(HIERARCHICAL_SEPARATOR);
           // Match: ^level0[separator]level1[separator or end]
           // Example: grafana:alert → ^grafana[^a-z0-9]alert([^a-z0-9]|$)
           return `^${level0}[^a-z0-9]${level1}([^a-z0-9]|$)`;

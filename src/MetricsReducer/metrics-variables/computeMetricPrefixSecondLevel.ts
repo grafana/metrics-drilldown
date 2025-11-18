@@ -1,6 +1,19 @@
 import { localeCompare } from 'MetricsReducer/helpers/localCompare';
 
 /**
+ * Regex pattern for separating metric name parts.
+ * Matches any non-alphanumeric character (_, -, :, etc.)
+ * This should match the pattern used in MetricsVariableFilterEngine.
+ */
+const METRIC_NAME_SEPARATOR = /[^a-z0-9]/i;
+
+/**
+ * Separator used in hierarchical filter values to distinguish levels.
+ * Format: "parent:child" (e.g., "grafana:alert")
+ */
+export const HIERARCHICAL_SEPARATOR = ':';
+
+/**
  * Compute second-level prefix groups (lazy computation for tree filtering)
  * @param options All metric options
  * @param parentPrefix The parent prefix to compute children for (e.g., "grafana")
@@ -11,10 +24,9 @@ export function computeMetricPrefixSecondLevel(
   parentPrefix: string
 ): Array<{ label: string; value: string; count: number }> {
   const sublevelMap = new Map<string, number>();
-  const separator = /[^a-z0-9]/i;
 
   for (const option of options) {
-    const parts = option.value.split(separator);
+    const parts = option.value.split(METRIC_NAME_SEPARATOR);
     
     // Only process metrics matching the parent prefix and having a second level
     if (parts[0] === parentPrefix && parts.length > 1) {

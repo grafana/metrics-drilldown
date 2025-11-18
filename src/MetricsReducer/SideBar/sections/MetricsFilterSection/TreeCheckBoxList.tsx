@@ -3,6 +3,7 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { HIERARCHICAL_SEPARATOR } from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
 import { getSharedListStyles } from 'MetricsReducer/SideBar/sections/sharedListStyles';
 
 import { CheckboxWithCount } from './CheckboxWithCount';
@@ -18,6 +19,22 @@ type TreeCheckBoxListProps = {
   onExpandToggle: (prefix: string) => void;
 };
 
+/**
+ * TreeCheckBoxList - Hierarchical checkbox list for two-level prefix filtering.
+ * 
+ * Displays parent prefixes (Level 0) with expandable children (Level 1).
+ * Supports:
+ * - Indeterminate state when children are selected
+ * - Lazy computation of sublevels (only when expanded)
+ * - Sticky parent rows during scrolling for context
+ * - Clear parent/child selection logic
+ * 
+ * Selection behavior:
+ * - Checking parent: Adds parent, removes any children (select all with prefix)
+ * - Unchecking parent: Removes parent only
+ * - Checking child: Adds child, removes parent if selected (refine to specific subset)
+ * - Unchecking child: Removes child only
+ */
 export function TreeCheckBoxList({
   groups,
   selectedGroups,
@@ -36,7 +53,7 @@ export function TreeCheckBoxList({
 
   // Helper: Check if parent has selected children (indeterminate state)
   const hasSelectedChildren = (parentValue: string) => {
-    return selectedGroups.some((g) => g.value.startsWith(parentValue + ':'));
+    return selectedGroups.some((g) => g.value.startsWith(parentValue + HIERARCHICAL_SEPARATOR));
   };
 
   // Helper: Get children for a parent
@@ -47,7 +64,7 @@ export function TreeCheckBoxList({
   // Add parent to selection and remove any children
   const selectParent = (parent: { label: string; value: string }) => {
     const newGroups = [
-      ...selectedGroups.filter((g) => !g.value.startsWith(parent.value + ':')),
+      ...selectedGroups.filter((g) => !g.value.startsWith(parent.value + HIERARCHICAL_SEPARATOR)),
       { label: parent.label as RuleGroupLabel, value: parent.value },
     ];
     onSelectionChange(newGroups);
@@ -61,7 +78,7 @@ export function TreeCheckBoxList({
 
   // Handle child checkbox click
   const handleChildChange = (child: { label: string; value: string }, checked: boolean) => {
-    const [parentPrefix, sublevel] = child.value.split(':');
+    const [parentPrefix, sublevel] = child.value.split(HIERARCHICAL_SEPARATOR);
 
     if (checked) {
       // Add child with full hierarchy label for display in top chip
