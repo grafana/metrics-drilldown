@@ -46,8 +46,7 @@ type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 export class SideBar extends SceneObjectBase<SideBarState> {
   constructor(state: Partial<SideBarState>) {
     const sectionValues = SideBar.getSectionValuesFromUrl();
-    // TODO: Enable feature toggle when available:const useHierarchicalPrefixFiltering = isFeatureToggleEnabled(HGFeatureToggles.hierarchicalPrefixFiltering);
-    const useHierarchicalPrefixFiltering = true; 
+    const useHierarchicalPrefixFiltering = isFeatureToggleEnabled(HGFeatureToggles.hierarchicalPrefixFiltering);
 
     super({
       key: 'sidebar',
