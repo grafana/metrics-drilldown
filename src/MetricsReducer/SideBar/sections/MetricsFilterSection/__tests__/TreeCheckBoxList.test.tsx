@@ -1,5 +1,4 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { HIERARCHICAL_SEPARATOR } from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
@@ -25,7 +24,6 @@ function setup(overrides = {}) {
 
   return {
     ...defaultProps,
-    user: userEvent.setup(),
   };
 }
 
@@ -52,11 +50,11 @@ describe('TreeCheckBoxList', () => {
     expect(screen.getByText('(3)')).toBeInTheDocument();
   });
 
-  it('calls onExpandToggle when expand button is clicked', async () => {
+  it('calls onExpandToggle when expand button is clicked', () => {
     const props = setup();
     render(<TreeCheckBoxList {...props} />);
 
-    await props.user.click(screen.getByTestId('expand-grafana'));
+    fireEvent.click(screen.getByTestId('expand-grafana'));
 
     expect(props.onExpandToggle).toHaveBeenCalledWith('grafana');
     expect(props.onExpandToggle).toHaveBeenCalledTimes(1);
@@ -108,17 +106,17 @@ describe('TreeCheckBoxList', () => {
     expect(screen.queryByText('api')).not.toBeInTheDocument();
   });
 
-  it('calls onSelectionChange when parent checkbox is clicked', async () => {
+  it('calls onSelectionChange when parent checkbox is clicked', () => {
     const props = setup();
     render(<TreeCheckBoxList {...props} />);
 
     const checkbox = screen.getByLabelText('grafana');
-    await props.user.click(checkbox);
+    fireEvent.click(checkbox);
 
     expect(props.onSelectionChange).toHaveBeenCalledWith([{ label: 'grafana', value: 'grafana' }]);
   });
 
-  it('calls onSelectionChange when child checkbox is clicked', async () => {
+  it('calls onSelectionChange when child checkbox is clicked', () => {
     const computedSublevels = new Map([
       [
         'grafana',
@@ -137,14 +135,14 @@ describe('TreeCheckBoxList', () => {
     render(<TreeCheckBoxList {...props} />);
 
     const checkbox = screen.getByLabelText('alert');
-    await props.user.click(checkbox);
+    fireEvent.click(checkbox);
 
     expect(props.onSelectionChange).toHaveBeenCalledWith([
       { label: 'grafana > alert', value: `grafana${HIERARCHICAL_SEPARATOR}alert` },
     ]);
   });
 
-  it('removes children when parent is selected', async () => {
+  it('removes children when parent is selected', () => {
     const computedSublevels = new Map([
       [
         'grafana',
@@ -167,12 +165,12 @@ describe('TreeCheckBoxList', () => {
     render(<TreeCheckBoxList {...props} />);
 
     const parentCheckbox = screen.getByLabelText('grafana');
-    await props.user.click(parentCheckbox);
+    fireEvent.click(parentCheckbox);
 
     expect(props.onSelectionChange).toHaveBeenCalledWith([{ label: 'grafana', value: 'grafana' }]);
   });
 
-  it('removes parent when child is selected', async () => {
+  it('removes parent when child is selected', () => {
     const computedSublevels = new Map([
       [
         'grafana',
@@ -192,14 +190,14 @@ describe('TreeCheckBoxList', () => {
     render(<TreeCheckBoxList {...props} />);
 
     const childCheckbox = screen.getByLabelText('alert');
-    await props.user.click(childCheckbox);
+    fireEvent.click(childCheckbox);
 
     expect(props.onSelectionChange).toHaveBeenCalledWith([
       { label: 'grafana > alert', value: `grafana${HIERARCHICAL_SEPARATOR}alert` },
     ]);
   });
 
-  it('clicking parent when children are selected replaces children with parent', async () => {
+  it('clicking parent when children are selected replaces children with parent', () => {
     const computedSublevels = new Map([
       [
         'grafana',
@@ -219,13 +217,13 @@ describe('TreeCheckBoxList', () => {
     render(<TreeCheckBoxList {...props} />);
 
     const parentCheckbox = screen.getByLabelText('grafana');
-    await props.user.click(parentCheckbox);
+    fireEvent.click(parentCheckbox);
 
     // Should replace child with parent
     expect(props.onSelectionChange).toHaveBeenCalledWith([{ label: 'grafana', value: 'grafana' }]);
   });
 
-  it('unchecks parent when clicked while checked', async () => {
+  it('unchecks parent when clicked while checked', () => {
     const props = setup({
       selectedGroups: [{ label: 'grafana', value: 'grafana' }],
     });
@@ -233,7 +231,7 @@ describe('TreeCheckBoxList', () => {
     render(<TreeCheckBoxList {...props} />);
 
     const checkbox = screen.getByLabelText('grafana');
-    await props.user.click(checkbox);
+    fireEvent.click(checkbox);
 
     expect(props.onSelectionChange).toHaveBeenCalledWith([]);
   });
@@ -258,7 +256,7 @@ describe('TreeCheckBoxList', () => {
     expect(screen.getByText('2 selected')).toBeInTheDocument();
   });
 
-  it('clears all selections when clear button is clicked', async () => {
+  it('clears all selections when clear button is clicked', () => {
     const props = setup({
       selectedGroups: [
         { label: 'grafana', value: 'grafana' },
@@ -269,7 +267,7 @@ describe('TreeCheckBoxList', () => {
     render(<TreeCheckBoxList {...props} />);
 
     const clearButton = screen.getByRole('button', { name: /clear/i });
-    await props.user.click(clearButton);
+    fireEvent.click(clearButton);
 
     expect(props.onSelectionChange).toHaveBeenCalledWith([]);
   });
