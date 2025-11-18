@@ -5,9 +5,9 @@ import React from 'react';
 
 import { getSharedListStyles } from 'MetricsReducer/SideBar/sections/sharedListStyles';
 
-import { type RuleGroupLabel } from './rule-group-labels';
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
+import { type RuleGroupLabel } from './rule-group-labels';
 
 type TreeCheckBoxListProps = {
   groups: MetricsFilterSectionState['groups'];
@@ -44,21 +44,19 @@ export function TreeCheckBoxList({
     return computedSublevels.get(parentValue) || [];
   };
 
-  // Handle parent checkbox click
-  const handleParentChange = (parent: { label: string; value: string }, checked: boolean, isIndeterminate: boolean) => {
-    if (checked || isIndeterminate) {
-      // Clicking checked → uncheck, OR clicking indeterminate → check parent (remove children)
-      // Add parent, remove any children
-      const newGroups = [
-        ...selectedGroups.filter((g) => !g.value.startsWith(parent.value + ':')),
-        { label: parent.label as RuleGroupLabel, value: parent.value },
-      ];
-      onSelectionChange(newGroups);
-    } else {
-      // Unchecking parent → remove it
-      const newGroups = selectedGroups.filter((g) => g.value !== parent.value);
-      onSelectionChange(newGroups);
-    }
+  // Add parent to selection and remove any children
+  const selectParent = (parent: { label: string; value: string }) => {
+    const newGroups = [
+      ...selectedGroups.filter((g) => !g.value.startsWith(parent.value + ':')),
+      { label: parent.label as RuleGroupLabel, value: parent.value },
+    ];
+    onSelectionChange(newGroups);
+  };
+
+  // Remove parent from selection
+  const unselectParent = (parentValue: string) => {
+    const newGroups = selectedGroups.filter((g) => g.value !== parentValue);
+    onSelectionChange(newGroups);
   };
 
   // Handle child checkbox click
@@ -126,7 +124,7 @@ export function TreeCheckBoxList({
                       count={group.count}
                       checked={isChecked}
                       indeterminate={isIndeterminate}
-                      onChange={(e) => handleParentChange(group, e.currentTarget.checked, isIndeterminate)}
+                      onChange={(e) => (e.currentTarget.checked ? selectParent(group) : unselectParent(group.value))}
                     />
                   </div>
                 </li>
