@@ -5,7 +5,7 @@ import { localeCompare } from 'MetricsReducer/helpers/localCompare';
  * Matches any non-alphanumeric character (_, -, :, etc.)
  * This should match the pattern used in MetricsVariableFilterEngine.
  */
-const METRIC_NAME_SEPARATOR = /[^a-z0-9]/i;
+const METRIC_NAME_SEPARATOR = /[^a-zA-Z0-9]/;
 
 /**
  * Separator used in hierarchical filter values to distinguish levels.
