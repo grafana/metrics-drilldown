@@ -115,6 +115,14 @@ export class MetricsVariableFilterEngine {
   private static applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
     const pattern = prefixes
       .map((prefix) => {
+        // Check if this is hierarchical (contains colon separator)
+        if (prefix.includes(':')) {
+          const [level0, level1] = prefix.split(':');
+          // Match: ^level0[separator]level1[separator or end]
+          // Example: grafana:alert → ^grafana[^a-z0-9]alert([^a-z0-9]|$)
+          return `^${level0}[^a-z0-9]${level1}([^a-z0-9]|$)`;
+        }
+
         // Multi-value support (see computeMetricPrefixGroups)
         if (prefix.includes('|')) {
           return `${prefix
@@ -123,6 +131,7 @@ export class MetricsVariableFilterEngine {
             .join('|')}`;
         }
 
+        // Regular Level 0 prefix
         return `^${prefix}([^a-z0-9]|$)`;
       })
       .join('|');

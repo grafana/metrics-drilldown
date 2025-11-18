@@ -21,6 +21,7 @@ import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 import { getTrailFor } from 'shared/utils/utils';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
+import { HGFeatureToggles, isFeatureToggleEnabled } from '../../shared/utils/utils.feature-toggles';
 
 import { BookmarksList } from './sections/BookmarksList/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
@@ -30,7 +31,6 @@ import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetr
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
-import { HGFeatureToggles, isFeatureToggleEnabled } from '../../shared/utils/utils.feature-toggles';
 
 type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList | Settings;
 
@@ -46,6 +46,8 @@ type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 export class SideBar extends SceneObjectBase<SideBarState> {
   constructor(state: Partial<SideBarState>) {
     const sectionValues = SideBar.getSectionValuesFromUrl();
+    // TODO: Enable feature toggle when available:const useHierarchicalPrefixFiltering = isFeatureToggleEnabled(HGFeatureToggles.hierarchicalPrefixFiltering);
+    const useHierarchicalPrefixFiltering = true; 
 
     super({
       key: 'sidebar',
@@ -69,6 +71,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           description: 'Filter metrics based on their name prefix (Prometheus namespace)',
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
+          hierarchical: useHierarchicalPrefixFiltering,
           active: Boolean(sectionValues.get('filters-prefix')?.length),
         }),
         new MetricsFilterSection({
