@@ -86,7 +86,7 @@ describe('computeMetricPrefixSecondLevel()', () => {
       expect(result).toEqual([{ label: 'alert', value: `grafana${HIERARCHICAL_SEPARATOR}alert`, count: 1 }]);
     });
 
-    test('is case-sensitive', () => {
+    test('prefix matching is case-sensitive', () => {
       const options = createOptions(['HTTP_requests', 'http_requests']);
 
       const result = computeMetricPrefixSecondLevel(options, 'http');
