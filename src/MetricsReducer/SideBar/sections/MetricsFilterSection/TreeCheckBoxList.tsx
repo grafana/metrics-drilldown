@@ -116,7 +116,6 @@ export function TreeCheckBoxList({
           {groups.map((group) => {
             const isExpanded = expandedPrefixes.has(group.value);
             const children = getChildren(group.value);
-            const hasChildren = children.length > 0 || isExpanded;
             const isChecked = isParentChecked(group.value);
             const isIndeterminate = !isChecked && hasSelectedChildren(group.value);
 
@@ -147,7 +146,7 @@ export function TreeCheckBoxList({
                 </li>
 
                 {/* Children Rows (if expanded) */}
-                {isExpanded && hasChildren && (
+                {isExpanded && children.length > 0 && (
                   <ul className={treeStyles.childrenList}>
                     {children.map((child) => (
                       <li key={child.value} className={treeStyles.childItem}>
