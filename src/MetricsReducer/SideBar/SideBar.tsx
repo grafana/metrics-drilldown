@@ -20,8 +20,8 @@ import { VAR_OTHER_METRIC_FILTERS } from 'shared/shared';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 import { getTrailFor } from 'shared/utils/utils';
+import { HGFeatureToggles, isFeatureToggleEnabled } from 'shared/utils/utils.feature-toggles';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
-import { HGFeatureToggles, isFeatureToggleEnabled } from '../../shared/utils/utils.feature-toggles';
 
 import { BookmarksList } from './sections/BookmarksList/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
