@@ -34,7 +34,7 @@ export function computeMetricPrefixSecondLevel(
     .map(([sublevel, count]) => ({
       value: `${parentPrefix}:${sublevel}`,
       count,
-      label: sublevel,
+      label: sublevel, // Just the sublevel for display in tree
     }));
 }
 

@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -54,13 +54,14 @@ export function TreeCheckBoxList({
 
   // Handle child checkbox click
   const handleChildChange = (child: { label: string; value: string }, checked: boolean) => {
-    const [parentPrefix] = child.value.split(':');
+    const [parentPrefix, sublevel] = child.value.split(':');
 
     if (checked) {
-      // Add child, remove parent if it exists
+      // Add child with full hierarchy label for display in top chip
+      const hierarchicalLabel = `${parentPrefix} > ${sublevel}`;
       const newGroups = [
         ...selectedGroups.filter((g) => g.value !== parentPrefix),
-        { label: child.label as RuleGroupLabel, value: child.value },
+        { label: hierarchicalLabel as RuleGroupLabel, value: child.value },
       ];
       onSelectionChange(newGroups);
     } else {
@@ -97,7 +98,7 @@ export function TreeCheckBoxList({
             return (
               <React.Fragment key={group.value}>
                 {/* Parent Row */}
-                <li className={styles.checkboxItem}>
+                <li className={cx(styles.checkboxItem, isExpanded && styles.stickyParent)}>
                   <div className={styles.parentRow}>
                     {/* Expand/Collapse Icon */}
                     <button
@@ -173,10 +174,38 @@ function getStyles(theme: GrafanaTheme2) {
       alignItems: 'center',
       padding: theme.spacing(0.5, 0),
     }),
+    stickyParent: css({
+      position: 'sticky',
+      top: 0,
+      // Force fully opaque background using pseudo-element
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: theme.colors.background.canvas,
+        zIndex: -1,
+      },
+      backgroundColor: theme.colors.background.canvas,
+      zIndex: 10,
+      borderBottom: `1px solid ${theme.colors.border.weak}`,
+      marginLeft: theme.spacing(-1),
+      marginRight: theme.spacing(-1),
+      paddingLeft: theme.spacing(1),
+      paddingRight: theme.spacing(1),
+      paddingTop: theme.spacing(0.5),
+      paddingBottom: theme.spacing(0.5),
+      // Shadow to emphasize stickiness
+      boxShadow: `0 2px 4px rgba(0, 0, 0, 0.1)`,
+    }),
     parentRow: css({
       display: 'flex',
       alignItems: 'center',
       width: '100%',
+      position: 'relative',
+      zIndex: 1,
     }),
     expandButton: css({
       background: 'none',
