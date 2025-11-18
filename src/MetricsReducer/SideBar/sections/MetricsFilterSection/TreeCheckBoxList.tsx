@@ -3,6 +3,8 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { getSharedListStyles } from 'MetricsReducer/SideBar/sections/sharedListStyles';
+
 import { type RuleGroupLabel } from './rule-group-labels';
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
@@ -24,7 +26,8 @@ export function TreeCheckBoxList({
   onSelectionChange,
   onExpandToggle,
 }: Readonly<TreeCheckBoxListProps>) {
-  const styles = useStyles2(getStyles);
+  const sharedStyles = useStyles2(getSharedListStyles);
+  const treeStyles = useStyles2(getTreeStyles);
 
   // Helper: Check if parent is directly selected (not children)
   const isParentChecked = (parentValue: string) => {
@@ -79,7 +82,7 @@ export function TreeCheckBoxList({
 
   return (
     <>
-      <div className={styles.checkboxListHeader}>
+      <div className={sharedStyles.listHeader}>
         <div>{selectedGroups.length} selected</div>
         <Button
           variant="secondary"
@@ -91,10 +94,10 @@ export function TreeCheckBoxList({
         </Button>
       </div>
 
-      {!groups.length && <div className={styles.noResults}>No results.</div>}
+      {!groups.length && <div className={sharedStyles.noResults}>No results.</div>}
 
       {groups.length > 0 && (
-        <ul className={styles.checkboxList} data-testid="checkbox-filters-tree">
+        <ul className={sharedStyles.list} data-testid="checkbox-filters-tree">
           {groups.map((group) => {
             const isExpanded = expandedPrefixes.has(group.value);
             const children = getChildren(group.value);
@@ -105,11 +108,11 @@ export function TreeCheckBoxList({
             return (
               <React.Fragment key={group.value}>
                 {/* Parent Row */}
-                <li className={cx(styles.checkboxItem, isExpanded && styles.stickyParent)}>
-                  <div className={styles.parentRow}>
+                <li className={cx(sharedStyles.listItem, isExpanded && treeStyles.stickyParent)}>
+                  <div className={treeStyles.parentRow}>
                     {/* Expand/Collapse Icon */}
                     <button
-                      className={styles.expandButton}
+                      className={treeStyles.expandButton}
                       onClick={() => onExpandToggle(group.value)}
                       aria-label={isExpanded ? 'Collapse' : 'Expand'}
                       data-testid={`expand-${group.value}`}
@@ -130,9 +133,9 @@ export function TreeCheckBoxList({
 
                 {/* Children Rows (if expanded) */}
                 {isExpanded && hasChildren && (
-                  <ul className={styles.childrenList}>
+                  <ul className={treeStyles.childrenList}>
                     {children.map((child) => (
-                      <li key={child.value} className={styles.childItem}>
+                      <li key={child.value} className={treeStyles.childItem}>
                         <CheckboxWithCount
                           label={child.label}
                           count={child.count}
@@ -152,36 +155,12 @@ export function TreeCheckBoxList({
   );
 }
 
-function getStyles(theme: GrafanaTheme2) {
+/**
+ * Tree-specific styles for hierarchical checkbox list.
+ * Base list styles (header, list, items) are imported from sharedListStyles.
+ */
+function getTreeStyles(theme: GrafanaTheme2) {
   return {
-    checkboxListHeader: css({
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      color: theme.colors.text.secondary,
-      padding: theme.spacing(0, 0, 0, 1),
-    }),
-    checkboxList: css({
-      height: '100%',
-      padding: theme.spacing(0, 1, 1, 1),
-      overflowY: 'auto',
-      listStyle: 'none',
-      margin: 0,
-      '&::-webkit-scrollbar': {
-        '-webkit-appearance': 'none',
-        width: '7px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        borderRadius: '4px',
-        backgroundColor: theme.colors.secondary.main,
-        '-webkit-box-shadow': `0 0 1px ${theme.colors.secondary.shade}`,
-      },
-    }),
-    checkboxItem: css({
-      display: 'flex',
-      alignItems: 'center',
-      padding: theme.spacing(0.5, 0),
-    }),
     stickyParent: css({
       position: 'sticky',
       top: 0,
@@ -238,10 +217,6 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       alignItems: 'center',
       padding: theme.spacing(0.5, 0),
-    }),
-    noResults: css({
-      fontStyle: 'italic',
-      padding: theme.spacing(0, 1, 1, 1),
     }),
   };
 }
