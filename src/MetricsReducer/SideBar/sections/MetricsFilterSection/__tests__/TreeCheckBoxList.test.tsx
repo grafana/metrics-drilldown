@@ -142,7 +142,7 @@ describe('TreeCheckBoxList', () => {
     ]);
   });
 
-  it('removes children when parent is selected', () => {
+  it('unchecking parent removes all children from that branch', () => {
     const computedSublevels = new Map([
       [
         'grafana',
@@ -165,9 +165,11 @@ describe('TreeCheckBoxList', () => {
     render(<TreeCheckBoxList {...props} />);
 
     const parentCheckbox = screen.getByLabelText('grafana');
+    // Parent shows as checked because children are selected
+    // Clicking it unchecks and removes all children (clears entire branch)
     fireEvent.click(parentCheckbox);
 
-    expect(props.onSelectionChange).toHaveBeenCalledWith([{ label: 'grafana', value: 'grafana' }]);
+    expect(props.onSelectionChange).toHaveBeenCalledWith([]);
   });
 
   it('removes parent when child is selected', () => {
@@ -197,7 +199,7 @@ describe('TreeCheckBoxList', () => {
     ]);
   });
 
-  it('clicking parent when children are selected replaces children with parent', () => {
+  it('unchecking parent when children are selected removes all children', () => {
     const computedSublevels = new Map([
       [
         'grafana',
@@ -217,9 +219,23 @@ describe('TreeCheckBoxList', () => {
     render(<TreeCheckBoxList {...props} />);
 
     const parentCheckbox = screen.getByLabelText('grafana');
+    // Parent shows as checked because children are selected
+    // Clicking it should uncheck and remove all children (clear entire branch)
     fireEvent.click(parentCheckbox);
 
-    // Should replace child with parent
+    expect(props.onSelectionChange).toHaveBeenCalledWith([]);
+  });
+
+  it('checking parent when unchecked selects the parent', () => {
+    const props = setup({
+      selectedGroups: [],
+    });
+
+    render(<TreeCheckBoxList {...props} />);
+
+    const checkbox = screen.getByLabelText('grafana');
+    fireEvent.click(checkbox);
+
     expect(props.onSelectionChange).toHaveBeenCalledWith([{ label: 'grafana', value: 'grafana' }]);
   });
 

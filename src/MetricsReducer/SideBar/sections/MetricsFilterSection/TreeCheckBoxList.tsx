@@ -24,14 +24,14 @@ type TreeCheckBoxListProps = {
  * 
  * Displays parent prefixes (Level 0) with expandable children (Level 1).
  * Supports:
- * - Indeterminate state when children are selected
+ * - Parent checkbox shows as checked when parent OR any children are selected
  * - Lazy computation of sublevels (only when expanded)
  * - Sticky parent rows during scrolling for context
  * - Clear parent/child selection logic
  * 
  * Selection behavior:
  * - Checking parent: Adds parent, removes any children (select all with prefix)
- * - Unchecking parent: Removes parent only
+ * - Unchecking parent: Removes parent AND all children (clears entire branch)
  * - Checking child: Adds child, removes parent if selected (refine to specific subset)
  * - Unchecking last child: Selects parent (navigate up tree from specific to general)
  * - Unchecking child with siblings: Removes child only (keeps other children)
@@ -47,14 +47,12 @@ export function TreeCheckBoxList({
   const sharedStyles = useStyles2(getSharedListStyles);
   const treeStyles = useStyles2(getTreeStyles);
 
-  // Helper: Check if parent is directly selected (not children)
+  // Helper: Check if parent or any of its children are selected
   const isParentChecked = (parentValue: string) => {
-    return selectedGroups.some((g) => g.value === parentValue);
-  };
-
-  // Helper: Check if parent has selected children (indeterminate state)
-  const hasSelectedChildren = (parentValue: string) => {
-    return selectedGroups.some((g) => g.value.startsWith(parentValue + HIERARCHICAL_SEPARATOR));
+    return selectedGroups.some((g) => 
+      g.value === parentValue || 
+      g.value.startsWith(parentValue + HIERARCHICAL_SEPARATOR)
+    );
   };
 
   // Helper: Get children for a parent
@@ -71,9 +69,11 @@ export function TreeCheckBoxList({
     onSelectionChange(newGroups);
   };
 
-  // Remove parent from selection
+  // Remove parent AND all children from selection (clear entire branch)
   const unselectParent = (parentValue: string) => {
-    const newGroups = selectedGroups.filter((g) => g.value !== parentValue);
+    const newGroups = selectedGroups.filter(
+      (g) => g.value !== parentValue && !g.value.startsWith(parentValue + HIERARCHICAL_SEPARATOR)
+    );
     onSelectionChange(newGroups);
   };
 
@@ -142,7 +142,6 @@ export function TreeCheckBoxList({
             const isExpanded = expandedPrefixes.has(group.value);
             const children = getChildren(group.value);
             const isChecked = isParentChecked(group.value);
-            const isIndeterminate = !isChecked && hasSelectedChildren(group.value);
 
             return (
               <React.Fragment key={group.value}>
@@ -164,7 +163,6 @@ export function TreeCheckBoxList({
                       label={group.label}
                       count={group.count}
                       checked={isChecked}
-                      indeterminate={isIndeterminate}
                       onChange={(e) => (e.currentTarget.checked ? selectParent(group) : unselectParent(group.value))}
                     />
                   </div>
