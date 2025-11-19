@@ -236,6 +236,63 @@ describe('TreeCheckBoxList', () => {
     expect(props.onSelectionChange).toHaveBeenCalledWith([]);
   });
 
+  it('unselecting the last child selects the parent', () => {
+    const computedSublevels = new Map([
+      [
+        'grafana',
+        [
+          createGroup('alert', `grafana${HIERARCHICAL_SEPARATOR}alert`, 5),
+          createGroup('api', `grafana${HIERARCHICAL_SEPARATOR}api`, 3),
+        ],
+      ],
+    ]);
+
+    const props = setup({
+      selectedGroups: [{ label: 'grafana > alert', value: `grafana${HIERARCHICAL_SEPARATOR}alert` }],
+      expandedPrefixes: new Set(['grafana']),
+      computedSublevels,
+    });
+
+    render(<TreeCheckBoxList {...props} />);
+
+    const childCheckbox = screen.getByLabelText('alert');
+    fireEvent.click(childCheckbox);
+
+    // Should select parent when unchecking the last child (navigate up the tree)
+    expect(props.onSelectionChange).toHaveBeenCalledWith([{ label: 'grafana', value: 'grafana' }]);
+  });
+
+  it('unselecting a child when multiple children are selected keeps other children', () => {
+    const computedSublevels = new Map([
+      [
+        'grafana',
+        [
+          createGroup('alert', `grafana${HIERARCHICAL_SEPARATOR}alert`, 5),
+          createGroup('api', `grafana${HIERARCHICAL_SEPARATOR}api`, 3),
+        ],
+      ],
+    ]);
+
+    const props = setup({
+      selectedGroups: [
+        { label: 'grafana > alert', value: `grafana${HIERARCHICAL_SEPARATOR}alert` },
+        { label: 'grafana > api', value: `grafana${HIERARCHICAL_SEPARATOR}api` },
+      ],
+      expandedPrefixes: new Set(['grafana']),
+      computedSublevels,
+    });
+
+    render(<TreeCheckBoxList {...props} />);
+
+    const alertCheckbox = screen.getByLabelText('alert');
+    fireEvent.click(alertCheckbox);
+
+    // Should only remove the unchecked child, keep the other child
+    expect(props.onSelectionChange).toHaveBeenCalledWith([
+      { label: 'grafana > api', value: `grafana${HIERARCHICAL_SEPARATOR}api` },
+    ]);
+  });
+
   it('handles empty groups array', () => {
     const props = setup({ groups: [] });
     render(<TreeCheckBoxList {...props} />);

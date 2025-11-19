@@ -33,7 +33,8 @@ type TreeCheckBoxListProps = {
  * - Checking parent: Adds parent, removes any children (select all with prefix)
  * - Unchecking parent: Removes parent only
  * - Checking child: Adds child, removes parent if selected (refine to specific subset)
- * - Unchecking child: Removes child only
+ * - Unchecking last child: Selects parent (navigate up tree from specific to general)
+ * - Unchecking child with siblings: Removes child only (keeps other children)
  */
 export function TreeCheckBoxList({
   groups,
@@ -89,9 +90,33 @@ export function TreeCheckBoxList({
       ];
       onSelectionChange(newGroups);
     } else {
-      // Remove child
-      const newGroups = selectedGroups.filter((g) => g.value !== child.value);
-      onSelectionChange(newGroups);
+      // Unchecking a child
+      // Check if this is the last remaining child from this parent
+      const siblingsFromSameParent = selectedGroups.filter(
+        (g) => g.value.startsWith(parentPrefix + HIERARCHICAL_SEPARATOR) && g.value !== child.value
+      );
+
+      if (siblingsFromSameParent.length === 0) {
+        // This is the last child - navigate up the tree by selecting the parent
+        // Look up the actual parent from groups to get its proper label
+        const parentGroup = groups.find((g) => g.value === parentPrefix);
+        if (parentGroup) {
+          // Remove ALL children from this parent, not just the one being unchecked
+          const newGroups = [
+            ...selectedGroups.filter((g) => !g.value.startsWith(parentPrefix + HIERARCHICAL_SEPARATOR)),
+            { label: parentGroup.label as RuleGroupLabel, value: parentGroup.value },
+          ];
+          onSelectionChange(newGroups);
+        } else {
+          // Fallback: just remove the child if we can't find the parent
+          const newGroups = selectedGroups.filter((g) => g.value !== child.value);
+          onSelectionChange(newGroups);
+        }
+      } else {
+        // Other children still selected - just remove this child
+        const newGroups = selectedGroups.filter((g) => g.value !== child.value);
+        onSelectionChange(newGroups);
+      }
     }
   };
 
