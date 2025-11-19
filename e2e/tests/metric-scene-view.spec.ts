@@ -4,7 +4,9 @@ const METRIC_NAME = 'go_gc_duration_seconds';
 const URL_SEARCH_PARAMS_WITH_METRIC_NAME = new URLSearchParams([['metric', METRIC_NAME]]);
 
 test.describe('Metric Scene view', () => {
-  test('Core UI elements', async ({ metricSceneView, expectScreenshotInCurrentGrafanaVersion }) => {
+  // TODO: Enable this test once we have 12.3 supported
+  // eslint-disable-next-line playwright/no-skipped-test
+  test.skip('Core UI elements', async ({ metricSceneView, expectScreenshotInCurrentGrafanaVersion }) => {
     await metricSceneView.goto(URL_SEARCH_PARAMS_WITH_METRIC_NAME);
     await metricSceneView.assertCoreUI(METRIC_NAME);
     await metricSceneView.assertDefaultBreadownListControls();
