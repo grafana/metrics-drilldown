@@ -5,6 +5,7 @@ import React from 'react';
 
 import { HIERARCHICAL_SEPARATOR } from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
 import { getSharedListStyles } from 'MetricsReducer/SideBar/sections/sharedListStyles';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
@@ -89,6 +90,12 @@ export function TreeCheckBoxList({
         { label: hierarchicalLabel as RuleGroupLabel, value: child.value },
       ];
       onSelectionChange(newGroups);
+
+      // Track hierarchical child filter selection
+      reportExploreMetrics('sidebar_hierarchical_child_filter_applied', {
+        prefix: parentPrefix,
+        child: sublevel,
+      });
     } else {
       // Unchecking a child
       // Check if this is the last remaining child from this parent

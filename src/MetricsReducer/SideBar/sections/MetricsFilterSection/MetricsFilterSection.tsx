@@ -300,6 +300,9 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
         newComputedSublevels = new Map(computedSublevels);
         newComputedSublevels.set(prefix, sublevels);
       }
+
+      // Track hierarchical prefix expansion
+      reportExploreMetrics('sidebar_hierarchical_prefix_opened', { prefix });
     }
 
     // Single setState call with all changes
