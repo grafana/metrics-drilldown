@@ -21,13 +21,13 @@ export function getSharedListStyles(theme: GrafanaTheme2) {
       listStyle: 'none',
       margin: 0,
       '&::-webkit-scrollbar': {
-        '-webkit-appearance': 'none',
+        WebkitAppearance: 'none',
         width: '7px',
       },
       '&::-webkit-scrollbar-thumb': {
         borderRadius: '4px',
         backgroundColor: theme.colors.secondary.main,
-        '-webkit-box-shadow': `0 0 1px ${theme.colors.secondary.shade}`,
+        WebkitBoxShadow: `0 0 1px ${theme.colors.secondary.shade}`,
       },
     }),
     listItem: css({
