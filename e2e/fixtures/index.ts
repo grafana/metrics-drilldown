@@ -31,7 +31,7 @@ export const test = base.extend<AppTestFixture>({
       fileName,
       options
     ) => {
-      const grafanaVersion = getGrafanaVersion('minor');
+      const grafanaVersion = getGrafanaVersion('major');
       if (!grafanaVersion) {
         throw new Error('Cannot determine Grafana version, which is required for screenshot testing!');
       }
