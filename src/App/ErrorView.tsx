@@ -48,7 +48,6 @@ export function ErrorView({ error }: Readonly<ErrorViewProps>) {
             <p>
               <Collapse
                 className={styles.callStack}
-                collapsible
                 label="View stack trace"
                 isOpen={isCollapseOpen}
                 onToggle={() => setIsCollapseOpen(!isCollapseOpen)}
