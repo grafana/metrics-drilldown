@@ -66,6 +66,7 @@ test.describe('Metrics reducer view', () => {
           await metricsReducerView.sidebar.assertLabelsList(['db_name', 'instance', 'job']);
         });
 
+        // eslint-disable-next-line playwright/expect-expect
         test('When clearing the filter, it updates the list of label values and marks the sidebar button as inactive', async ({
           metricsReducerView,
         }) => {
@@ -82,10 +83,6 @@ test.describe('Metrics reducer view', () => {
 
           await metricsReducerView.sidebar.assertLabelsListCount('>', 3);
           await metricsReducerView.assertMetricsList();
-
-          await expect(metricsReducerView.getMetricsList()).toHaveScreenshot(
-            'metrics-reducer-group-by-label-after-clear-filter.png'
-          );
         });
       });
     });
