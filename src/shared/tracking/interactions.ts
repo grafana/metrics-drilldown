@@ -81,6 +81,10 @@ type Interactions = {
       | 'related_metrics';
     // The number of search terms activated when the selection was made
     searchTermCount: number | null;
+    // Whether any hierarchical filters (prefix:child format) are active
+    has_hierarchical_filter?: boolean;
+    // Number of hierarchical child filters active
+    hierarchical_filter_count?: number;
   };
   // User opens/closes the prefix filter dropdown
   prefix_filter_clicked: {
@@ -145,6 +149,15 @@ type Interactions = {
   };
   sidebar_recent_filter_section_clicked: {};
   sidebar_recent_filter_selected: { interval: string };
+  // User expands a parent prefix to view children (hierarchical filtering)
+  sidebar_hierarchical_prefix_opened: {
+    prefix: string;
+  };
+  // User selects a child filter (Level 1 hierarchical)
+  sidebar_hierarchical_child_filter_applied: {
+    prefix: string;
+    child: string;
+  };
   app_initialized: {
     view: ViewName;
     uel_epid: string;

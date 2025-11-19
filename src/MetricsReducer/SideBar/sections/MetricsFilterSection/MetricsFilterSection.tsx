@@ -13,6 +13,10 @@ import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/u
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
 import {
+  computeMetricPrefixSecondLevel,
+  HIERARCHICAL_SEPARATOR,
+} from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
+import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
@@ -38,6 +42,7 @@ import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
 import { EventFiltersChanged } from './EventFiltersChanged';
+import { TreeCheckBoxList } from './TreeCheckBoxList';
 
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
@@ -49,6 +54,9 @@ export interface MetricsFilterSectionState extends SideBarSectionState {
   groups: Array<{ label: string; value: string; count: number }>;
   selectedGroups: Array<{ label: RuleGroupLabel; value: string }>; // we need labels for displaying tooltips in `SideBar.tsx`
   loading: boolean;
+  hierarchical: boolean;
+  expandedPrefixes: Set<string>;
+  computedSublevels: Map<string, Array<{ label: string; value: string; count: number }>>;
 }
 
 export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionState> {
@@ -85,7 +93,12 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     ) {
       stateUpdate.selectedGroups = (values[this.state.key] as string)
         .split(',')
-        .map((v) => ({ label: v as RuleGroupLabel, value: v })) as Array<{ label: RuleGroupLabel; value: string }>;
+        .map((v) => v.trim())
+        .filter((v) => v)
+        .map((v) => ({
+          label: this.parseLabel(v) as RuleGroupLabel,
+          value: v,
+        }));
     }
 
     this.setState(stateUpdate);
@@ -102,6 +115,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     showSearch,
     disabled,
     active,
+    hierarchical,
   }: {
     key: MetricsFilterSectionState['key'];
     type: MetricsFilterSectionState['type'];
@@ -113,6 +127,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     showSearch?: MetricsFilterSectionState['showSearch'];
     disabled?: MetricsFilterSectionState['disabled'];
     active?: MetricsFilterSectionState['active'];
+    hierarchical?: MetricsFilterSectionState['hierarchical'];
   }) {
     super({
       key,
@@ -128,6 +143,9 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       showSearch: showSearch ?? true,
       disabled: disabled ?? false,
       active: active ?? false,
+      hierarchical: hierarchical ?? false,
+      expandedPrefixes: new Set(),
+      computedSublevels: new Map(),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -143,12 +161,41 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.updateLists(metricsVariable.state.options as MetricOptions);
     this.updateCounts();
 
-    const { selectedGroups } = this.state;
+    const { selectedGroups, hierarchical } = this.state;
 
     this.setState({
       loading: filteredMetricsVariable.state.loading,
       active: selectedGroups.length > 0,
     });
+
+    // Auto-expand and compute Level 1 for any hierarchical selections from URL
+    if (hierarchical) {
+      const prefixesToExpand = new Set<string>();
+
+      selectedGroups.forEach((group) => {
+        if (group.value.includes(HIERARCHICAL_SEPARATOR)) {
+          const [prefix] = group.value.split(HIERARCHICAL_SEPARATOR);
+          prefixesToExpand.add(prefix);
+        }
+      });
+
+      if (prefixesToExpand.size > 0) {
+        const options = metricsVariable.state.options as MetricOptions;
+        const newComputedSublevels = new Map(this.state.computedSublevels);
+
+        prefixesToExpand.forEach((prefix) => {
+          if (!newComputedSublevels.has(prefix)) {
+            const sublevels = computeMetricPrefixSecondLevel(options, prefix);
+            newComputedSublevels.set(prefix, sublevels);
+          }
+        });
+
+        this.setState({
+          expandedPrefixes: prefixesToExpand,
+          computedSublevels: newComputedSublevels,
+        });
+      }
+    }
   }
 
   private updateLists(options: MetricOptions) {
@@ -196,6 +243,87 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       groups: newGroupsWithCount,
       loading: false,
     });
+
+    // Update sublevel counts if hierarchical mode
+    if (this.state.hierarchical) {
+      this.updateSublevelCounts(optionsForCounting);
+    }
+  }
+
+  /**
+   * Update metric counts for already-computed second-level substrings.
+   * Called when filters change to refresh counts without recomputing the entire tree.
+   * @param options Filtered metric options to count from
+   */
+  private updateSublevelCounts(options: MetricOptions) {
+    const { computedSublevels } = this.state;
+    const newComputedSublevels = new Map(computedSublevels);
+
+    // Recompute counts for already-computed sublevels
+    for (const [prefix, sublevels] of computedSublevels.entries()) {
+      const updatedSublevels = computeMetricPrefixSecondLevel(options, prefix);
+      const countMap = new Map(updatedSublevels.map((s) => [s.label, s.count]));
+
+      const updatedSublevelsList = sublevels.map((sublevel) => ({
+        ...sublevel,
+        count: countMap.get(sublevel.label) ?? 0,
+      }));
+
+      newComputedSublevels.set(prefix, updatedSublevelsList);
+    }
+
+    this.setState({ computedSublevels: newComputedSublevels });
+  }
+
+  /**
+   * Handle expanding/collapsing a prefix to show/hide its second-level substrings.
+   * Lazily computes sublevels on first expansion for performance.
+   * @param prefix The parent prefix to expand/collapse (e.g., "grafana")
+   */
+  private onExpandToggle = (prefix: string) => {
+    const { expandedPrefixes, computedSublevels } = this.state;
+    const newExpanded = new Set(expandedPrefixes);
+    let newComputedSublevels = computedSublevels;
+
+    if (newExpanded.has(prefix)) {
+      // Collapse
+      newExpanded.delete(prefix);
+    } else {
+      // Expand - compute Level 1 if not already computed
+      newExpanded.add(prefix);
+
+      if (!computedSublevels.has(prefix)) {
+        const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
+        const options = metricsVariable.state.options as MetricOptions;
+
+        const sublevels = computeMetricPrefixSecondLevel(options, prefix);
+        newComputedSublevels = new Map(computedSublevels);
+        newComputedSublevels.set(prefix, sublevels);
+      }
+
+      // Track hierarchical prefix expansion
+      reportExploreMetrics('sidebar_hierarchical_prefix_opened', { prefix });
+    }
+
+    // Single setState call with all changes
+    this.setState({
+      expandedPrefixes: newExpanded,
+      computedSublevels: newComputedSublevels,
+    });
+  };
+
+  /**
+   * Parse a filter value into a user-friendly label for display.
+   * Converts hierarchical values (e.g., "grafana:alert") to readable format ("grafana > alert").
+   * @param value The filter value from URL or selection
+   * @returns Formatted label for display
+   */
+  private parseLabel(value: string): string {
+    if (value.includes(HIERARCHICAL_SEPARATOR)) {
+      const [prefix, sublevel] = value.split(HIERARCHICAL_SEPARATOR);
+      return `${prefix} > ${sublevel}`;
+    }
+    return value;
   }
 
   private onSelectionChange = (selectedGroups: MetricsFilterSectionState['selectedGroups']) => {
@@ -245,7 +373,18 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {
     const styles = useStyles2(getStyles);
-    const { groups, selectedGroups, loading, title, description, showHideEmpty, showSearch } = model.useState();
+    const {
+      groups,
+      selectedGroups,
+      loading,
+      title,
+      description,
+      showHideEmpty,
+      showSearch,
+      hierarchical,
+      expandedPrefixes,
+      computedSublevels,
+    } = model.useState();
 
     const [hideEmpty, setHideEmpty] = useState(false);
     const [searchValue, setSearchValue] = useState('');
@@ -296,7 +435,18 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
         {loading && <Spinner inline />}
 
-        {!loading && (
+        {!loading && hierarchical && (
+          <TreeCheckBoxList
+            groups={filteredGroups}
+            selectedGroups={selectedGroups}
+            expandedPrefixes={expandedPrefixes}
+            computedSublevels={computedSublevels}
+            onSelectionChange={model.onSelectionChange}
+            onExpandToggle={model.onExpandToggle}
+          />
+        )}
+
+        {!loading && !hierarchical && (
           <CheckBoxList
             groups={filteredGroups}
             selectedGroups={selectedGroups}
