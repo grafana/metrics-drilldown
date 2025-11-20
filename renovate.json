@@ -1,20 +1,70 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Extend Grafana Renovate Self-Hosted Configuration Template",
-  "ignorePresets": [
-    "github>grafana/grafana-renovate-config//presets/automerge",
-    "github>grafana/grafana-renovate-config//presets/labels",
-    "github>grafana/grafana-renovate-config//presets/docker"
+  "ignorePresets": ["github>grafana/grafana-renovate-config//presets/automerge"],
+  "schedule": ["before 6am on the first day of the week"],
+  "extends": [
+    "config:best-practices",
+    ":disableDependencyDashboard",
+    ":preserveSemverRanges",
+    "github>grafana/grafana-renovate-config//presets/plugin-ci-workflows"
   ],
-  "extends": ["config:best-practices"],
-  "minimumReleaseAge": "30 days",
-  "schedule": ["on the first day of the month"],
-  "rebaseWhen": "behind-base-branch",
   "packageRules": [
     {
-      "description": "Group all Grafana packages together",
       "groupName": "Grafana packages",
-      "matchPackageNames": ["/^@grafana//"]
+      "matchPackageNames": ["/^@grafana//"],
+      "matchDepTypes": ["dependencies"],
+      "enabled": false
+    },
+    {
+      "groupName": "React ecosystem",
+      "matchPackageNames": ["/^react$/", "/^react-/", "/^@types/react/"]
+    },
+    {
+      "groupName": "Testing tools",
+      "matchPackageNames": [
+        "/^jest$/",
+        "/^jest-/",
+        "/^@jest//",
+        "/^@testing-library//",
+        "/^@playwright//",
+        "/^playwright$/",
+        "/^@types/jest/",
+        "/^@types/testing-library/"
+      ]
+    },
+    {
+      "groupName": "Build tools",
+      "matchPackageNames": [
+        "/^webpack$/",
+        "/^webpack-/",
+        "/-webpack-plugin$/",
+        "/-loader$/",
+        "/^@swc//",
+        "/^swc-/",
+        "/^terser-/",
+        "/^copy-webpack-plugin$/",
+        "/^fork-ts-checker-webpack-plugin$/",
+        "/^replace-in-file-webpack-plugin$/",
+        "/^ts-node$/"
+      ]
+    },
+    {
+      "groupName": "TypeScript and linting",
+      "matchPackageNames": [
+        "/^typescript$/",
+        "/^@typescript-eslint//",
+        "/^eslint$/",
+        "/^eslint-/",
+        "/^@stylistic//",
+        "/^prettier$/",
+        "/^@types/eslint/"
+      ]
     }
-  ]
+  ],
+  "ignorePaths": [".config/**"],
+  "github-actions": { "enabled": true, "groupName": "GitHub Actions" },
+  "commitMessagePrefix": "chore(deps): ",
+  "minimumReleaseAge": "14 days",
+  "rebaseWhen": "behind-base-branch",
+  "rangeStrategy": "bump",
+  "branchPrefix": "renovate/"
 }
