@@ -6,8 +6,9 @@
  */
 // TODO: automate (see https://github.com/grafana/plugin-actions/blob/main/e2e-version/README.md)
 export const GRAFANA_VERSIONS_SUPPORTED = [
-  { name: 'grafana-enterprise', version: '12.2.1' },
-  { name: 'grafana-enterprise', version: '12.1.3' },
-  { name: 'grafana-enterprise', version: '12.0.6' },
-  { name: 'grafana-enterprise', version: '11.6.7' },
+  { name: 'grafana-enterprise', version: '12.3.0' },
+  { name: 'grafana-enterprise', version: '12.2.2' },
+  { name: 'grafana-enterprise', version: '12.1.4' },
+  { name: 'grafana-enterprise', version: '12.0.7' },
+  { name: 'grafana-enterprise', version: '11.6.8' },
 ];

@@ -6,7 +6,7 @@ import { expect, test } from '../fixtures';
 test.describe('Scopes', () => {
   // eslint-disable-next-line playwright/no-skipped-test
   test.skip(
-    getGrafanaVersion('minor')?.startsWith('11') ?? true,
+    getGrafanaVersion('major')?.startsWith('11') ?? true,
     'Scopes are not supported in Grafana v11.x, skipping the test suite.'
   );
 
