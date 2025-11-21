@@ -1,11 +1,11 @@
 import { sceneGraph, type QueryVariable } from '@grafana/scenes';
 
-import { VAR_GROUP_BY } from '../../shared/shared';
-import { isQueryVariable } from '../../shared/utils/utils.variables';
 import { type LabelBreakdownScene } from './LabelBreakdownScene';
+import { type MetricScene } from '../MetricScene';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
-import { type MetricScene } from '../MetricScene';
+import { VAR_GROUP_BY } from '../../shared/shared';
+import { isQueryVariable } from '../../shared/utils/utils.variables';
 
 /**
  * Manager class that handles counting breakdown panels for badge display.

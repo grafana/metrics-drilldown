@@ -278,7 +278,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
       // Track metric selection with hierarchical filter context
       const urlParams = new URLSearchParams(window.location.search);
-      const prefixFilters = urlParams.get('filters-prefix')?.split(',').filter((v) => v) || [];
+      const prefixFilters =
+        urlParams
+          .get('filters-prefix')
+          ?.split(',')
+          .filter((v) => v) || [];
       const hierarchicalFilters = prefixFilters.filter((f) => f.includes(':'));
 
       reportExploreMetrics('metric_selected', {

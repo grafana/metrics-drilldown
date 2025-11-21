@@ -19,11 +19,7 @@ describe('buildQueryExpression(options)', () => {
 
   test.each([
     ['non-utf8', 'go_goroutines', 'go_goroutines{cluster="test", instance!="us-east:5000", ${filters:raw}}'],
-    [
-      'utf8',
-      '🔥go_goroutines',
-      '{cluster="test", instance!="us-east:5000", "🔥go_goroutines", ${filters:raw}}',
-    ],
+    ['utf8', '🔥go_goroutines', '{cluster="test", instance!="us-east:5000", "🔥go_goroutines", ${filters:raw}}'],
   ])('supports labels (%s)', (_, name, expected) => {
     const expression = buildQueryExpression({
       metric: { name, type: 'gauge' },

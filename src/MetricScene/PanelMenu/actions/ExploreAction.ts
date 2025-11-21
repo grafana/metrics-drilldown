@@ -5,7 +5,7 @@ import { getExploreURL, sceneGraph, VizPanel } from '@grafana/scenes';
 export class ExploreAction {
   static create(panelMenuInstance: any): PanelMenuItem {
     let exploreUrl: Promise<string | undefined> | undefined;
-    
+
     try {
       const viz = sceneGraph.getAncestor(panelMenuInstance, VizPanel);
       const panelData = sceneGraph.getData(viz).state.data;
@@ -32,11 +32,12 @@ export class ExploreAction {
     return {
       text: 'Explore',
       iconClassName: 'compass',
-      onClick: () => exploreUrl?.then((url) => {
-        if (url) {
-          window.open(`${config.appSubUrl}${url}`, '_blank');
-        }
-      }),
+      onClick: () =>
+        exploreUrl?.then((url) => {
+          if (url) {
+            window.open(`${config.appSubUrl}${url}`, '_blank');
+          }
+        }),
       shortcut: 'p x',
     };
   }
