@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.0.23
+
+##### Chores
+
+* **deps:**  update dependency @grafana/faro-web-sdk to v2.0.2 (#854) (be2772dc)
+*  playwright only screenshot major versions (#860) (161ba87c)
+*  bump js-yaml from 3.14.1 to 3.14.2 (#857) (c6b07868)
+*  bump glob from 10.4.5 to 11.1.0 in the npm_and_yarn group across 1 directory (#855) (a2c8711c)
+
+##### New Features
+
+* **filters:**  simple tree filter for prefix filters (#858) (750af7cd)
+
+##### Bug Fixes
+
+* **deps:**  update dependency @bsull/augurs to ^0.10.0 (#842) (d88b79e0)
+
+##### Tests
+
+*  loosen up playwright screenshot version check (#826) (d2b36b72)
+
+
 ## 1.0.22
 
 

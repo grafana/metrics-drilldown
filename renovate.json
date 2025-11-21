@@ -1,0 +1,70 @@
+{
+  "ignorePresets": ["github>grafana/grafana-renovate-config//presets/automerge"],
+  "schedule": ["before 6am on the first day of the week"],
+  "extends": [
+    "config:best-practices",
+    ":disableDependencyDashboard",
+    ":preserveSemverRanges",
+    "github>grafana/grafana-renovate-config//presets/plugin-ci-workflows"
+  ],
+  "packageRules": [
+    {
+      "groupName": "Grafana packages",
+      "matchPackageNames": ["/^@grafana//"],
+      "matchDepTypes": ["dependencies"],
+      "enabled": false
+    },
+    {
+      "groupName": "React ecosystem",
+      "matchPackageNames": ["/^react$/", "/^react-/", "/^@types/react/"]
+    },
+    {
+      "groupName": "Testing tools",
+      "matchPackageNames": [
+        "/^jest$/",
+        "/^jest-/",
+        "/^@jest//",
+        "/^@testing-library//",
+        "/^@playwright//",
+        "/^playwright$/",
+        "/^@types/jest/",
+        "/^@types/testing-library/"
+      ]
+    },
+    {
+      "groupName": "Build tools",
+      "matchPackageNames": [
+        "/^webpack$/",
+        "/^webpack-/",
+        "/-webpack-plugin$/",
+        "/-loader$/",
+        "/^@swc//",
+        "/^swc-/",
+        "/^terser-/",
+        "/^copy-webpack-plugin$/",
+        "/^fork-ts-checker-webpack-plugin$/",
+        "/^replace-in-file-webpack-plugin$/",
+        "/^ts-node$/"
+      ]
+    },
+    {
+      "groupName": "TypeScript and linting",
+      "matchPackageNames": [
+        "/^typescript$/",
+        "/^@typescript-eslint//",
+        "/^eslint$/",
+        "/^eslint-/",
+        "/^@stylistic//",
+        "/^prettier$/",
+        "/^@types/eslint/"
+      ]
+    }
+  ],
+  "ignorePaths": [".config/**"],
+  "github-actions": { "enabled": true, "groupName": "GitHub Actions" },
+  "commitMessagePrefix": "chore(deps): ",
+  "minimumReleaseAge": "14 days",
+  "rebaseWhen": "behind-base-branch",
+  "rangeStrategy": "bump",
+  "branchPrefix": "renovate/"
+}
