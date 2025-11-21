@@ -73,7 +73,7 @@ export function useCatchExceptions(): [Error | undefined, React.Dispatch<React.S
     };
 
     const onUnHandledRejection = (event: PromiseRejectionEvent) => {
-      // TODO: remove me when we remove MetricSelectScene
+      // remove me when we remove MetricSelectScene
       // indeed, it seems there's always  a cancelled request when landing on the view :man_shrug:
       // Ideally, the code in DataTrail should handle the cancellation but we do it here because it's easier
       // See: https://github.com/grafana/metrics-drilldown/issues/862
