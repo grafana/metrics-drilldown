@@ -22,14 +22,14 @@ type TreeCheckBoxListProps = {
 
 /**
  * TreeCheckBoxList - Hierarchical checkbox list for two-level prefix filtering.
- * 
+ *
  * Displays parent prefixes (Level 0) with expandable children (Level 1).
  * Supports:
  * - Parent checkbox shows as checked when parent OR any children are selected
  * - Lazy computation of sublevels (only when expanded)
  * - Sticky parent rows during scrolling for context
  * - Clear parent/child selection logic
- * 
+ *
  * Selection behavior:
  * - Checking parent: Adds parent, removes any children (select all with prefix)
  * - Unchecking parent: Removes parent AND all children (clears entire branch)
@@ -50,9 +50,8 @@ export function TreeCheckBoxList({
 
   // Helper: Check if parent or any of its children are selected
   const isParentChecked = (parentValue: string) => {
-    return selectedGroups.some((g) => 
-      g.value === parentValue || 
-      g.value.startsWith(parentValue + HIERARCHICAL_SEPARATOR)
+    return selectedGroups.some(
+      (g) => g.value === parentValue || g.value.startsWith(parentValue + HIERARCHICAL_SEPARATOR)
     );
   };
 
@@ -131,12 +130,7 @@ export function TreeCheckBoxList({
     <>
       <div className={sharedStyles.listHeader}>
         <div>{selectedGroups.length} selected</div>
-        <Button
-          variant="secondary"
-          fill="text"
-          onClick={() => onSelectionChange([])}
-          disabled={!selectedGroups.length}
-        >
+        <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
           clear
         </Button>
       </div>
@@ -264,4 +258,3 @@ function getTreeStyles(theme: GrafanaTheme2) {
     }),
   };
 }
-

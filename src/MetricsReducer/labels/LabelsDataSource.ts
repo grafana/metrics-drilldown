@@ -16,7 +16,9 @@ import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 import { displayWarning } from '../helpers/displayStatus';
 import { localeCompare } from '../helpers/localCompare';
 
-// TODO can we get rid of it and use e.g. undefined or an empty string?
+// Sentinel value representing "no label selected" in the group-by dropdown.
+// Using a magic string is intentional: undefined wouldn't work with QueryVariable,
+// and empty string could conflict with actual Prometheus label values.
 export const NULL_GROUP_BY_VALUE = '(none)';
 
 export class LabelsDataSource extends RuntimeDataSource {
