@@ -19,7 +19,7 @@ interface PanelMenuState extends SceneObjectState {
 }
 
 /**
- * @todo the VizPanelMenu interface is overly restrictive, doesn't allow any member functions on this class, so everything is currently inlined
+ * the VizPanelMenu interface is overly restrictive, doesn't allow any member functions on this class, so everything is currently inlined
  * @see https://github.com/grafana/metrics-drilldown/issues/863
  */
 export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPanelMenu {
