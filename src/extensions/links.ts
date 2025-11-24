@@ -5,6 +5,7 @@ import {
   type PluginExtensionPanelContext,
 } from '@grafana/data';
 import { interpolateQueryExpr } from '@grafana/prometheus';
+import { parser } from '@prometheus-io/lezer-promql';
 import { getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
 
@@ -41,14 +42,7 @@ export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPa
       'grafana/alerting/alertingrule/queryeditor',
       ASSISTANT_TARGET_V1,
     ],
-    configure: configureDrilldownLinkForAsync,
-    onClick: async (_, helpers) => {
-      const context = helpers.context;
-      const url = await buildDrilldownUrlAsync(context);
-      if (url) {
-        window.location.href = url;
-      }
-    },
+    configure: configureDrilldownLink,
   },
   {
     targets: [ASSISTANT_TARGET_V0],
@@ -76,8 +70,8 @@ export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPa
   },
 ];
 
-// Simplified configure function for async onClick approach
-export function configureDrilldownLinkForAsync<T extends PluginExtensionPanelContext>(context?: T) {
+// Configure function for drilldown link
+export function configureDrilldownLink<T extends PluginExtensionPanelContext>(context?: T) {
   if (typeof context === 'undefined') {
     return;
   }
@@ -92,14 +86,15 @@ export function configureDrilldownLinkForAsync<T extends PluginExtensionPanelCon
     return;
   }
 
-  // Just return a basic config - the real URL building happens in onClick
-  return {};
+  const url = buildDrilldownUrl(context);
+
+  return {
+    path: url || createAppUrl(ROUTES.Drilldown),
+  };
 }
 
-// Async URL building function that uses lazy-loaded lezer parser
-export async function buildDrilldownUrlAsync<T extends PluginExtensionPanelContext>(
-  context?: T
-): Promise<string | null> {
+// URL building function for drilldown links
+export function buildDrilldownUrl<T extends PluginExtensionPanelContext>(context?: T): string | null {
   if (typeof context === 'undefined') {
     return null;
   }
@@ -127,7 +122,7 @@ export async function buildDrilldownUrlAsync<T extends PluginExtensionPanelConte
   const expr = templateSrv.replace(prometheusQuery.expr, context.scopedVars, interpolateQueryExpr);
 
   try {
-    const { metric, labels, hasErrors, errors } = await parsePromQLQuery(expr);
+    const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
 
     if (hasErrors) {
       logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
@@ -154,34 +149,9 @@ export async function buildDrilldownUrlAsync<T extends PluginExtensionPanelConte
   }
 }
 
-// Legacy synchronous configure function (kept for compatibility)
-// Note: This doesn't parse PromQL - use the async onClick approach above for full functionality
-export function configureDrilldownLink<T extends PluginExtensionPanelContext>(context?: T) {
-  if (typeof context === 'undefined') {
-    return;
-  }
 
-  if ('pluginId' in context && context.pluginId !== 'timeseries') {
-    return;
-  }
-
-  const queries = context.targets.filter(isPromQuery);
-
-  if (!queries.length) {
-    return;
-  }
-
-  // Just return a basic path without PromQL parsing
-  return {
-    path: createAppUrl(ROUTES.Drilldown),
-  };
-}
-
-// Async PromQL parser using lazy-loaded lezer parser
-// lazy loading the parser to reduce the initial bundle size by ~52kB
-export async function parsePromQLQuery(expr: string): Promise<ParsedPromQLQuery> {
-  // Use dynamic import for lazy loading to reduce initial bundle size
-  const { parser } = await import('@prometheus-io/lezer-promql');
+// PromQL parser using lezer parser
+export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
   const tree = parser.parse(expr);
   let metric = '';
   const labels: PromQLLabelMatcher[] = [];
