@@ -5,9 +5,9 @@ import {
   type PluginExtensionPanelContext,
 } from '@grafana/data';
 import { interpolateQueryExpr } from '@grafana/prometheus';
-import { parser } from '@prometheus-io/lezer-promql';
 import { getTemplateSrv } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
+import { parser } from '@prometheus-io/lezer-promql';
 
 import { PLUGIN_BASE_URL } from 'shared/constants/plugin';
 import { ROUTES } from 'shared/constants/routes';
