@@ -116,16 +116,16 @@ function getPanelsWithTargets(panels: Panel[]): Array<Panel & { targets: NonNull
   ) as Array<Panel & { targets: NonNullable<Panel['targets']> }>;
 }
 
-async function processTargetsForMetrics(
+function processTargetsForMetrics(
   targets: NonNullable<Panel['targets']>,
   dashboardName: string,
   dashboardUid: string,
   dashboardUrl: string,
   dashboardData: Record<string, MetricUsageDetails>
-): Promise<void> {
+): void {
   for (const target of targets) {
     const expr = typeof target.expr === 'string' ? target.expr : '';
-    const metrics = await extractMetricNames(expr);
+    const metrics = extractMetricNames(expr);
 
     for (const metric of metrics) {
       updateMetricUsage(metric, dashboardName, dashboardUid, dashboardUrl, dashboardData);
