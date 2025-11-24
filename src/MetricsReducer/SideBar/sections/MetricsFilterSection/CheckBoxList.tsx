@@ -1,9 +1,8 @@
-import { css } from '@emotion/css';
-import { type GrafanaTheme2 } from '@grafana/data';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type RuleGroupLabel } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/rule-group-labels';
+import { getSharedListStyles } from 'MetricsReducer/SideBar/sections/sharedListStyles';
 
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
@@ -15,11 +14,11 @@ type CheckBoxListProps = {
 };
 
 export function CheckBoxList({ groups, selectedGroups, onSelectionChange }: Readonly<CheckBoxListProps>) {
-  const styles = useStyles2(getStyles);
+  const styles = useStyles2(getSharedListStyles);
 
   return (
     <>
-      <div className={styles.checkboxListHeader}>
+      <div className={styles.listHeader}>
         <div>{selectedGroups.length} selected</div>
         <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
           clear
@@ -29,9 +28,9 @@ export function CheckBoxList({ groups, selectedGroups, onSelectionChange }: Read
       {!groups.length && <div className={styles.noResults}>No results.</div>}
 
       {groups.length > 0 && (
-        <ul className={styles.checkboxList} data-testid="checkbox-filters-list">
+        <ul className={styles.list} data-testid="checkbox-filters-list">
           {groups.map((group) => (
-            <li key={group.value} className={styles.checkboxItem}>
+            <li key={group.value} className={styles.listItem}>
               <CheckboxWithCount
                 label={group.label}
                 count={group.count}
@@ -50,41 +49,4 @@ export function CheckBoxList({ groups, selectedGroups, onSelectionChange }: Read
       )}
     </>
   );
-}
-
-function getStyles(theme: GrafanaTheme2) {
-  return {
-    checkboxListHeader: css({
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      color: theme.colors.text.secondary,
-      margin: theme.spacing(0),
-      padding: theme.spacing(0, 0, 0, 1),
-    }),
-    checkboxList: css({
-      height: '100%',
-      padding: theme.spacing(0, 1, 1, 1),
-      overflowY: 'auto',
-      '&::-webkit-scrollbar': {
-        '-webkit-appearance': 'none',
-        width: '7px',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        borderRadius: '4px',
-        backgroundColor: theme.colors.secondary.main,
-        '-webkit-box-shadow': `0 0 1px ${theme.colors.secondary.shade}`,
-      },
-    }),
-    checkboxItem: css({
-      display: 'flex',
-      alignItems: 'center',
-      width: '100%',
-      padding: theme.spacing(0.5, 0),
-    }),
-    noResults: css({
-      fontStyle: 'italic',
-      padding: theme.spacing(0, 1, 1, 1),
-    }),
-  };
 }

@@ -19,8 +19,17 @@ interface GetGrafanaUrlOptions {
   withScopes?: boolean;
 }
 
-export function getGrafanaVersion() {
-  return process.env.GRAFANA_VERSION;
+type VersionType = 'major' | 'minor' | 'patch';
+
+export function getGrafanaVersion(versionType: VersionType = 'patch') {
+  if (versionType === 'major') {
+    return process.env.GRAFANA_VERSION?.split('.')[0];
+  }
+  if (versionType === 'minor') {
+    return process.env.GRAFANA_VERSION?.split('.').slice(0, 2).join('-');
+  }
+
+  return process.env.GRAFANA_VERSION?.split('.').join('-');
 }
 
 export function getGrafanaUrl(options: GetGrafanaUrlOptions = {}) {
