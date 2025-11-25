@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.24
+
+##### Chores
+
+*  bump playwright to v1.57.0 (#869) (43d070ea)
+*  add renovate.json (#859) (2bcf0f8b)
+
+##### Bug Fixes
+
+*  manually revert lazy loading promql parser (#867) (76a733a9)
+
+
 ## 1.0.23
 
 ##### Chores
