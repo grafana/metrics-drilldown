@@ -55,8 +55,7 @@ export async function fetchAlertingMetrics(): Promise<Record<string, MetricUsage
       usageRequestOptions
     );
 
-    const metricCounts = await parseAlertingRules(alertingRules);
-    return transformCountsToAlertingUsage(metricCounts);
+    return transformCountsToAlertingUsage(parseAlertingRules(alertingRules));
   } catch (err) {
     const error = typeof err === 'string' ? new Error(err) : (err as Error);
     logger.error(error, {
@@ -67,7 +66,7 @@ export async function fetchAlertingMetrics(): Promise<Record<string, MetricUsage
   }
 }
 
-async function parseAlertingRules(alertingRules: AlertingRule[]): Promise<Record<string, number>> {
+function parseAlertingRules(alertingRules: AlertingRule[]): Record<string, number> {
   // Create a map to count metric occurrences
   const metricCounts: Record<string, number> = {};
 
@@ -79,10 +78,10 @@ async function parseAlertingRules(alertingRules: AlertingRule[]): Promise<Record
       (query) => typeof query.model?.expr === 'string' && query.datasourceUid !== '__expr__'
     );
 
-    const queryPromises = prometheusQueries.map(async (query) => {
+    for (const query of prometheusQueries) {
       try {
         // Extract metrics from the PromQL expression
-        const metrics = await extractMetricNames(query.model.expr as string);
+        const metrics = extractMetricNames(query.model.expr as string);
 
         // Count each metric occurrence
         for (const metric of metrics) {
@@ -94,9 +93,7 @@ async function parseAlertingRules(alertingRules: AlertingRule[]): Promise<Record
           message: `Failed to parse PromQL expression in alert rule ${rule.title}`,
         });
       }
-    });
-
-    await Promise.all(queryPromises);
+    }
   }
 
   return metricCounts;
