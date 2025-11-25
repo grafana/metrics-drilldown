@@ -56,22 +56,4 @@ describe('loadResources', () => {
       });
     });
   });
-
-  describe('error handling', () => {
-    it('should throw error when fallback language is requested but not found', async () => {
-      // This test verifies error propagation when en-US itself is missing
-      // In practice, en-US should always exist, so this is primarily a safety check
-      // We cannot easily test this with real files without breaking the fallback mechanism,
-      // so we verify the behavior indirectly through the fallback test above
-
-      // The error handling logic is:
-      // 1. Try to load requested language
-      // 2. If it fails and it's not en-US, try to load en-US
-      // 3. If en-US also fails, throw the error
-
-      // This is verified by the fallback test passing, which shows that
-      // when fr-FR fails, it successfully falls back to en-US
-      expect(true).toBe(true);
-    });
-  });
 });
