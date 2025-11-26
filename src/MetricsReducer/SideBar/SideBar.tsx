@@ -114,10 +114,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       ...state,
     });
 
-    // FIXME: rule values are regexes, we do this only to disable adding the values to the button tooltip
-    // we need to provide the corresponding label instead
-    sectionValues.set('filters-rule', []);
-
     this.addActivationHandler(this.onActivate.bind(this));
   }
 

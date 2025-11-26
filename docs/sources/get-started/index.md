@@ -44,6 +44,7 @@ Follow these steps to access the app through the Grafana main page.
 1. From the Grafana left-side menu, select **Drilldown**.
 
    The **Drilldown** page opens.
+
 1. From the list of Drilldown apps, select **Metrics**.
 
 The Grafana Metrics Drilldown app opens.

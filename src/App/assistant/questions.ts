@@ -45,11 +45,11 @@ const appContext = createAssistantContextItem('structured', {
 // ============================================================================
 export const metricsDrilldownQuestions: Question[] = [
   {
-    prompt: 'How can I find a metric I\'m interested in?',
+    prompt: "How can I find a metric I'm interested in?",
     context: [appContext],
   },
   {
-    prompt: 'How can I see a metric\'s labels?',
+    prompt: "How can I see a metric's labels?",
     context: [appContext],
   },
   {
@@ -57,4 +57,3 @@ export const metricsDrilldownQuestions: Question[] = [
     context: [appContext],
   },
 ];
-

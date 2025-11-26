@@ -50,7 +50,7 @@ export function buildQueryExpression(options: Options): string {
   defaultSelectors.push({ label: `\${${VAR_FILTERS}:raw}`, operator: MatchingOperator.equal, value: '__REMOVE__' });
 
   const expression = new Expression({
-    metric: isUtf8Metric ? "" : metric.name,
+    metric: isUtf8Metric ? '' : metric.name,
     values: {},
     defaultOperator: MatchingOperator.equal,
     defaultSelectors,

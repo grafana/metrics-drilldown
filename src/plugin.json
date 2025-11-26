@@ -7,9 +7,7 @@
     "grafanaDependency": ">=11.6.0",
     "plugins": [],
     "extensions": {
-      "exposedComponents": [
-        "grafana/add-to-dashboard-form/v1"
-      ]
+      "exposedComponents": ["grafana/add-to-dashboard-form/v1"]
     }
   },
   "preload": true,

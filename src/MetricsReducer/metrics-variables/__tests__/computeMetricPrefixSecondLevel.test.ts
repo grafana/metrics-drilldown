@@ -65,7 +65,9 @@ describe('computeMetricPrefixSecondLevel()', () => {
 
       const result = computeMetricPrefixSecondLevel(options, parent);
 
-      expect(result).toEqual([{ label: expectedChild, value: `${parent}${HIERARCHICAL_SEPARATOR}${expectedChild}`, count: 1 }]);
+      expect(result).toEqual([
+        { label: expectedChild, value: `${parent}${HIERARCHICAL_SEPARATOR}${expectedChild}`, count: 1 },
+      ]);
     });
 
     test('treats any non-alphanumeric character as separator', () => {
