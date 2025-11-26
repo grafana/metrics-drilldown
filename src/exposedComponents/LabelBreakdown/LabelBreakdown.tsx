@@ -6,20 +6,48 @@ import { Trail } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { newMetricsTrail } from 'shared/utils/utils';
+import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
 import { parsePromQLQuery } from '../../extensions/links';
+import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
+
+/**
+ * Extracts the prefix from a Prometheus metric name.
+ * The prefix is the first part of the metric name before any separator (underscore or colon).
+ * Example: "grafana_slo_threshold_expression" → "grafana"
+ *          "traces_spanmetrics_calls_total" → "traces"
+ */
+function extractMetricPrefix(metricName: string): string {
+  // Match up to the first non-alphanumeric character (typically underscore or colon)
+  const match = metricName.match(/^([a-zA-Z0-9]+)/);
+  return match ? match[1] : metricName;
+}
+
+/**
+ * Extracts unique prefixes from an array of metric names.
+ */
+function extractUniquePrefixes(metricNames: string[]): string[] {
+  const prefixes = new Set(metricNames.map(extractMetricPrefix));
+  return Array.from(prefixes);
+}
 
 export interface LabelBreakdownProps {
   query: string;
   initialStart: string | number;
   initialEnd: string | number;
   dataSource: DataSourceApi;
+  sourceMetrics?: Array<{
+    metricName: string;
+    labels: PromQLLabelMatcher[];
+  }>;
 }
 
-const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
+const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource, sourceMetrics }: LabelBreakdownProps) => {
   const [error] = useCatchExceptions();
   const initRef = useRef(false);
+
+  const hasSourceMetrics = sourceMetrics && sourceMetrics.length > 0;
 
   useEffect(() => {
     if (!initRef.current) {
@@ -28,18 +56,45 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
     }
   }, []);
 
-  const { metric, labels } = parsePromQLQuery(query);
+  const parsedPromQLQuery = parsePromQLQuery(query);
+
+  // Wait for data if needed
+  if (!hasSourceMetrics && !parsedPromQLQuery) {
+    return <div>Loading...</div>;
+  }
+
+  // Determine metric and filters based on data source
+  let metric: string | undefined;
+  let initialFilters: Array<{ key: string; operator: string; value: string }>;
+
+  if (hasSourceMetrics) {
+    // When sourceMetrics is provided, don't set a metric so MetricsReducer is shown
+    // allowing users to select from the filtered list of metrics
+    metric = undefined;
+    initialFilters = sourceMetrics[0].labels.map((label) => labelMatcherToAdHocFilter(label));
+  } else if (parsedPromQLQuery) {
+    metric = parsedPromQLQuery.metric;
+    initialFilters = parsedPromQLQuery.labels.map((label) => labelMatcherToAdHocFilter(label));
+  } else {
+    return <div>Error: No data available</div>;
+  }
+
+  // Extract unique prefixes from sourceMetrics to filter the metrics list
+  // This naturally excludes metrics like "asserts_*" and "ALERTS*" that aren't in sourceMetrics
+  const prefixesToExclude = ['asserts', 'ALERTS'];
+  const sourceMetricPrefixes = hasSourceMetrics
+    ? extractUniquePrefixes(sourceMetrics.map((m) => m.metricName)).filter((metric) =>
+        prefixesToExclude.every((excludedPrefix) => !metric.startsWith(excludedPrefix))
+      )
+    : undefined;
 
   const trail = newMetricsTrail({
     metric,
     initialDS: dataSource.uid,
-    initialFilters: labels.map(({ label, op, value }) => ({
-      key: label,
-      operator: op,
-      value,
-    })),
+    initialFilters,
     $timeRange: toSceneTimeRange(initialStart, initialEnd),
     embedded: true,
+    ...(sourceMetricPrefixes && { initialMetricPrefixes: sourceMetricPrefixes }),
   });
 
   return (
