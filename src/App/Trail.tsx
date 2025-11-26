@@ -1,4 +1,5 @@
 import { PageLayoutType, type NavModelItem } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { PluginPage } from '@grafana/runtime';
 import { UrlSyncContextProvider, type SceneObject } from '@grafana/scenes';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -44,7 +45,7 @@ export function getPageNav(
         // Clicking on the metric name should reset the default action view
         url: `${window.location.pathname}?${searchParamsWithDefaultActionView.toString()}`,
         parentItem: {
-          text: 'Metrics',
+          text: t('trail.breadcrumb.metrics', 'Metrics'),
           url: window.location.pathname,
         },
       },
@@ -52,7 +53,7 @@ export function getPageNav(
 
     return navModelItem;
   } else if (topScene instanceof MetricsReducer) {
-    return { text: 'All metrics' };
+    return { text: t('trail.breadcrumb.all-metrics', 'All metrics') };
   }
 
   return undefined;
