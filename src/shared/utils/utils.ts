@@ -26,12 +26,18 @@ export function getTrailFor(model: SceneObject): DataTrail {
   return sceneGraph.getAncestor(model, DataTrail);
 }
 
+/**
+ * When Metrics Drilldown is embedded in another plugin, we need to use a namespace for the url params
+ * to avoid conflicts with other plugins in embedded mode.
+ */
+export const embeddedTrailNamespace = 'gmd';
+
 export function newMetricsTrail(state?: Partial<DataTrailState>): DataTrail {
   return new DataTrail({
     initialDS: state?.initialDS,
     $timeRange: state?.$timeRange ?? new SceneTimeRange({ from: 'now-1h', to: 'now' }),
     embedded: state?.embedded ?? false,
-    urlNamespace: state?.embedded ? 'gmd' : undefined,
+    urlNamespace: state?.embedded ? embeddedTrailNamespace : undefined,
     ...state,
   });
 }
@@ -179,3 +185,12 @@ export function findObjectOfType<T extends SceneObject>(
 }
 
 export function noOp() {}
+
+/**
+ * Helper function to cast `Object.values` to the correct, narrowed type
+ * @param obj - The object to get the values from
+ * @returns The values of the object
+ */
+export function getObjectValues<T extends Record<string, unknown>>(obj: T): ReadonlyArray<T[keyof T]> {
+  return Object.values(obj) as ReadonlyArray<T[keyof T]>;
+}

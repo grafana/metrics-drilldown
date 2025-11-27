@@ -1,11 +1,14 @@
 import { type DataSourceApi } from '@grafana/data';
+import { locationService } from '@grafana/runtime';
 import React, { useEffect, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
 import { Trail } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
+import { VAR_WINGMAN_SORT_BY } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
+import { metricFilters } from 'MetricsReducer/SideBar/SideBar';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
-import { newMetricsTrail } from 'shared/utils/utils';
+import { embeddedTrailNamespace, newMetricsTrail } from 'shared/utils/utils';
 import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
 import { parsePromQLQuery } from '../../extensions/links';
@@ -88,13 +91,22 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource, sourceMet
       )
     : undefined;
 
+  // Set URL params for prefix filters BEFORE creating the trail
+  // This leverages Scenes' built-in URL sync in MetricsFilterSection
+  if (sourceMetricPrefixes?.length) {
+    const prefixUrlParam = `${embeddedTrailNamespace}-${metricFilters.prefix}`;
+    locationService.partial({ [prefixUrlParam]: sourceMetricPrefixes.join(',') }, true);
+
+    const sortByUrlParam = `${embeddedTrailNamespace}-var-${VAR_WINGMAN_SORT_BY}`;
+    locationService.partial({ [sortByUrlParam]: 'alphabetical' }, true);
+  }
+
   const trail = newMetricsTrail({
     metric,
     initialDS: dataSource.uid,
     initialFilters,
     $timeRange: toSceneTimeRange(initialStart, initialEnd),
     embedded: true,
-    ...(sourceMetricPrefixes && { initialMetricPrefixes: sourceMetricPrefixes }),
   });
 
   return (
