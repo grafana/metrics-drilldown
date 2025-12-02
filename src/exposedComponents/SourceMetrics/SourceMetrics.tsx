@@ -1,4 +1,4 @@
-import { type DataSourceApi } from '@grafana/data';
+import { type AdHocVariableFilter, type DataSourceApi } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
 import React, { useEffect, useRef } from 'react';
 
@@ -7,6 +7,7 @@ import { Trail } from 'App/Routes';
 import { useCatchExceptions } from 'App/useCatchExceptions';
 import { VAR_WINGMAN_SORT_BY } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { metricFilters } from 'MetricsReducer/SideBar/SideBar';
+import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { embeddedTrailNamespace, newMetricsTrail } from 'shared/utils/utils';
 import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
@@ -67,25 +68,23 @@ const KnowledgeGraphSourceMetrics = ({
 
   const parsedPromQLQuery = parsePromQLQuery(query);
 
-  // Wait for data if needed
-  if (!hasSourceMetrics && !parsedPromQLQuery) {
-    return <div>Loading...</div>;
-  }
-
   // Determine metric and filters based on data source
   let metric: string | undefined;
-  let initialFilters: Array<{ key: string; operator: string; value: string }>;
+  let initialFilters: AdHocVariableFilter[] | undefined;
 
   if (hasSourceMetrics) {
-    // When sourceMetrics is provided, don't set a metric so MetricsReducer is shown
-    // allowing users to select from the filtered list of metrics
-    metric = undefined;
+    // When sourceMetrics are provided, don't set a metric.
+    // This ensure that the MetricsReducer is shown, allowing
+    // users to select from the filtered list of metrics.
     initialFilters = sourceMetrics[0].labels.map((label) => labelMatcherToAdHocFilter(label));
   } else if (parsedPromQLQuery) {
+    // When sourceMetrics aren't provided, fall back to
+    // selecting the metric from the provided PromQL query.
     metric = parsedPromQLQuery.metric;
-    initialFilters = parsedPromQLQuery.labels.map((label) => labelMatcherToAdHocFilter(label));
   } else {
-    return <div>Error: No data available</div>;
+    const err = new Error('Missing metric information for Knowledge Graph insight');
+    logger.error(err, { query });
+    return <ErrorView error={err} />;
   }
 
   // Extract unique prefixes from sourceMetrics to filter the metrics list
