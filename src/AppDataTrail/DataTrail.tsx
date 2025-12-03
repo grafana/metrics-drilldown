@@ -114,6 +114,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
+    if (this.state.embedded) {
+      // In embedded mode, we want to avoid clearing a metric from the trail state
+      // when the trail has been freshly instantiated and the URL doesn't yet contain the metric.
+      return;
+    }
+
     this.updateStateForNewMetric((values.metric as string) || undefined);
   }
 
@@ -278,7 +284,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
       // Track metric selection with hierarchical filter context
       const urlParams = new URLSearchParams(window.location.search);
-      const prefixFilters = urlParams.get('filters-prefix')?.split(',').filter((v) => v) || [];
+      const prefixFilters =
+        urlParams
+          .get('filters-prefix')
+          ?.split(',')
+          .filter((v) => v) || [];
       const hierarchicalFilters = prefixFilters.filter((f) => f.includes(':'));
 
       reportExploreMetrics('metric_selected', {
