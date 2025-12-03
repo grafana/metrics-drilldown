@@ -81,6 +81,7 @@ const KnowledgeGraphSourceMetrics = ({
     // When sourceMetrics aren't provided, fall back to
     // selecting the metric from the provided PromQL query.
     metric = parsedPromQLQuery.metric;
+    initialFilters = parsedPromQLQuery.labels.map((label) => labelMatcherToAdHocFilter(label));
   } else {
     const err = new Error('Missing metric information for Knowledge Graph insight');
     logger.error(err, { query });
