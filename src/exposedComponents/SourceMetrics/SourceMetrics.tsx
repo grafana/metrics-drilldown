@@ -62,7 +62,7 @@ const KnowledgeGraphSourceMetrics = ({
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      reportExploreMetrics('exposed_component_viewed', { component: 'label_breakdown' });
+      reportExploreMetrics('exposed_component_viewed', { component: 'knowledge_graph_source_metrics' });
     }
   }, []);
 
