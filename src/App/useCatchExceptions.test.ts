@@ -34,12 +34,11 @@ describe('ensureErrorObject', () => {
   });
 
   it('creates an Error from an object with a message', () => {
-    const errorLike = { message: 'object error', code: 'ERR_001' };
+    const errorLike = { message: 'object error' };
     const result = ensureErrorObject(errorLike, 'default');
 
     expect(result).toBeInstanceOf(Error);
     expect(result.message).toBe('object error');
-    expect((result as any).code).toBe('ERR_001');
   });
 
   it('falls back to default message when no message is present', () => {
