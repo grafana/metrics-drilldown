@@ -20,26 +20,24 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
     const styles = useStyles2(getStyles);
     const [isAvailable, setIsAvailable] = useState(false);
 
-    // Find the VizPanel in the scene graph
     const vizPanel = sceneGraph.findObject(model, (o) => o instanceof VizPanel) as VizPanel | undefined;
 
     useEffect(() => {
       const subscription = isAssistantAvailable().subscribe((available) => {
         setIsAvailable(available);
       });
-
       return () => subscription.unsubscribe();
     }, []);
 
-    // Don't render if assistant is not available or no vizPanel
     if (!isAvailable || !vizPanel) {
       return null;
     }
 
     const handleClick = () => {
-      // Get fresh panel data at click time to ensure we capture the current state
-      const panelData = getPanelData(vizPanel);
-      const { panel } = panelData;
+      const { panel } = getPanelData(vizPanel);
+
+      // Get metric name from panel title
+      const metricName = panel.title || 'unknown';
 
       // Extract the query expression and remove __ignore_usage__ label (same as ExploreAction)
       const rawExpr = panel.targets?.[0]?.expr;
@@ -53,19 +51,10 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
         datasourceUid: panel.datasource?.uid || '',
       });
 
-      // Create structured context with metric and query info
-      const metricContext = createAssistantContextItem('structured', {
-        title: 'Metrics Drilldown Query',
-        data: {
-          metricName: panel.title || '',
-          query: query,
-        },
-      });
-
       openAssistant({
         origin: 'grafana-metricsdrilldown-app/metric-panel',
-        prompt: `Help me understand the metric "${panel.title || 'unknown'}" and explain what it measures. The current metrics drilldownquery is: ${query}. Be concise and to the point.`,
-        context: [datasourceContext, metricContext],
+        prompt: `Help me understand the metric "${metricName}" and explain what it measures. The current metrics drilldown query is: ${query}. Be concise and to the point.`,
+        context: [datasourceContext],
       });
     };
 
