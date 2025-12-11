@@ -115,6 +115,8 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             headerActions: () => [
               new GmdVizPanelVariantSelector(),
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
+              new OpenAssistant(),
+              new AddToDashboardAction(),
               new BookmarkHeaderAction(),
             ],
           },
