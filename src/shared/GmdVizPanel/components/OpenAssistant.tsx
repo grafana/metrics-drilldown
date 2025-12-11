@@ -49,15 +49,16 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
       // Build prompt with or without query
       const queryPart = query ? ` The current metrics drilldown query is: ${query}.` : '';
 
-      // Create datasource context
-      const datasourceContext = createAssistantContextItem('datasource', {
-        datasourceUid: panel.datasource?.uid || '',
-      });
+      // Only include datasource context when we have a valid UID
+      const datasourceUid = panel.datasource?.uid;
+      const context = datasourceUid
+        ? [createAssistantContextItem('datasource', { datasourceUid })]
+        : [];
 
       openAssistant({
         origin: 'grafana-metricsdrilldown-app/metric-panel',
         prompt: `Help me understand the metric "${metricName}" and explain what it measures.${queryPart} Be concise and to the point.`,
-        context: [datasourceContext],
+        context,
       });
     };
 
