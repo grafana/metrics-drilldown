@@ -16,6 +16,7 @@ import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/Labe
 import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'MetricsReducer/metrics-variables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'MetricsReducer/metrics-variables/computeRulesGroups';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { VAR_OTHER_METRIC_FILTERS } from 'shared/shared';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
@@ -139,8 +140,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     });
 
     // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
-    if (!this.state.visibleSection?.state.key && isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)) {
-      this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+    if (!this.state.visibleSection?.state.key) {
+      evaluateFeatureFlag('drilldown.metrics.default_open_sidebar').then((flagValue) => {
+        if (flagValue === 'treatment' && !this.state.visibleSection?.state.key) {
+          this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+        }
+      });
     }
 
     return () => {

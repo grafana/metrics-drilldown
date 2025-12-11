@@ -2,10 +2,10 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
 import { type ExposedComponentName } from 'exposedComponents/components';
+import { getTrackedFlagPayload } from 'shared/featureFlags/tracking';
 import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { type PanelType } from 'shared/GmdVizPanel/types/available-panel-types';
-import { getFaro } from 'shared/logger/faro/faro';
 import { type SortSeriesByOption } from 'shared/services/sorting';
 import { type SnakeCase } from 'shared/utils/utils.types';
 
@@ -14,7 +14,6 @@ import { type LayoutType } from '../../MetricsReducer/list-controls/LayoutSwitch
 import { type SortingOption as MetricsReducerSortByOption } from '../../MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { GIT_COMMIT } from '../../version';
 import { PLUGIN_ID } from '../constants/plugin';
-import { HGFeatureToggles, isFeatureToggleEnabled } from '../utils/utils.feature-toggles';
 
 export type ViewName = 'metrics-reducer' | 'metric-details';
 
@@ -198,24 +197,20 @@ type AllEvents = Interactions & OtherEvents;
 
 const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 
-export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P) {
-  reportInteraction(`${INTERACTION_NAME_PREFIX}${event}`, {
+function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): P {
+  return {
     ...payload,
+    ...(event.includes('sidebar') ? getTrackedFlagPayload('experiment_default_open_sidebar') : {}),
     meta: {
       // same naming as Faro (see src/tracking/faro/faro.ts)
       appRelease: config.apps[PLUGIN_ID].version,
       appVersion: GIT_COMMIT,
     },
-  });
+  };
+}
 
-  // Extra event tracking with Faro for "Default Open Sidebar" experiment
-  if (event.includes('sidebar')) {
-    getFaro()?.api.pushEvent(event, {
-      // Convert all payload values to strings
-      ...Object.fromEntries(Object.entries(payload).map(([key, value]) => [key, String(value)])),
-      defaultOpenSidebar: String(isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)),
-    });
-  }
+export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): void {
+  reportInteraction(`${INTERACTION_NAME_PREFIX}${event}`, enrichPayload(event, payload));
 }
 
 /**

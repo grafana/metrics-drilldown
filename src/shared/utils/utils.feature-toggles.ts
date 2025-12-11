@@ -7,7 +7,6 @@ import { config } from '@grafana/runtime';
  */
 export const HGFeatureToggles = {
   // Add new feature toggles here
-  sidebarOpenByDefault: 'metricsDrilldownDefaultOpenSidebar',
   hierarchicalPrefixFiltering: 'metricsDrilldownHierarchicalPrefixFiltering',
 } as const;
 
