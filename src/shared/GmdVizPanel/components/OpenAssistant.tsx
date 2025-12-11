@@ -41,8 +41,12 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
       const panelData = getPanelData(vizPanel);
       const { panel } = panelData;
 
-      // Extract the query expression from targets
-      const query = panel.targets?.[0]?.expr || '';
+      // Extract the query expression and remove __ignore_usage__ label (same as ExploreAction)
+      const rawExpr = panel.targets?.[0]?.expr;
+      let query = typeof rawExpr === 'string' ? rawExpr : '';
+      if (query.includes('__ignore_usage__')) {
+        query = query.replace(/,?__ignore_usage__="",?/, '');
+      }
 
       // Create datasource context
       const datasourceContext = createAssistantContextItem('datasource', {
@@ -60,7 +64,7 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
 
       openAssistant({
         origin: 'grafana-metricsdrilldown-app/metric-panel',
-        prompt: 'Help me understand this metric and provide a summary of the data. Be concise and to the point.',
+        prompt: `Help me understand the metric "${panel.title || 'unknown'}" and explain what it measures. The current metrics drilldownquery is: ${query}. Be concise and to the point.`,
         context: [datasourceContext, metricContext],
       });
     };
