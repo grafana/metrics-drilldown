@@ -55,14 +55,17 @@ type FeatureFlag =
 const featureFlagNames = getObjectKeys(goffFeatureFlags);
 export type FeatureFlagName = (typeof featureFlagNames)[number];
 export type FlagValue<T extends FeatureFlagName> = (typeof goffFeatureFlags)[T]['values'][number];
-export type FlagTrackingKey = (typeof goffFeatureFlags)[keyof typeof goffFeatureFlags]['trackingKey'] extends infer K
-  ? K
+export type FlagTrackingKey = (typeof goffFeatureFlags)[keyof typeof goffFeatureFlags] extends infer Flag
+  ? Flag extends { trackingKey: infer K }
+    ? K
+    : never
   : never;
 
 export const featureFlagTrackingKeys = Object.fromEntries(
   featureFlagNames.reduce<Array<[FeatureFlagName, FlagTrackingKey]>>((acc, flagName) => {
-    if ('trackingKey' in goffFeatureFlags[flagName]) {
-      acc.push([flagName, goffFeatureFlags[flagName].trackingKey]);
+    const flagDef = goffFeatureFlags[flagName];
+    if ('trackingKey' in flagDef) {
+      acc.push([flagName, flagDef.trackingKey as FlagTrackingKey]);
     }
     return acc;
   }, [])
