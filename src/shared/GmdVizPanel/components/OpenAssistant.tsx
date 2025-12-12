@@ -46,7 +46,7 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
       const query = removeIgnoreUsageLabel(typeof rawExpr === 'string' ? rawExpr : '');
 
       // Build prompt with or without query
-      const queryPart = query ? ` The current metrics drilldown query is: ${query}.` : '';
+      const queryPart = query ? ` The current metrics drilldown query is: \`${query}\`.` : '';
 
       // Build context with datasource and metric info when available
       const datasourceUid = panel.datasource?.uid;
