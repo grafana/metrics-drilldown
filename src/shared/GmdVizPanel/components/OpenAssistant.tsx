@@ -64,7 +64,7 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
 
       openAssistant({
         origin: 'grafana-metricsdrilldown-app/metric-panel',
-        prompt: `Help me understand the metric "${metricName}" and explain what it measures.${queryPart} Be concise and to the point.`,
+        prompt: `Help me understand the metric "${metricName}" and explain what it measures.${queryPart}`,
         context,
       });
     };
