@@ -49,10 +49,17 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
       // Build prompt with or without query
       const queryPart = query ? ` The current metrics drilldown query is: ${query}.` : '';
 
-      // Only include datasource context when we have a valid UID
+      // Build context with datasource and metric info when available
       const datasourceUid = panel.datasource?.uid;
       const context = datasourceUid
-        ? [createAssistantContextItem('datasource', { datasourceUid })]
+        ? [
+            createAssistantContextItem('datasource', { datasourceUid }),
+            createAssistantContextItem('label_value', {
+              datasourceUid,
+              labelName: '__name__',
+              labelValue: metricName,
+            }),
+          ]
         : [];
 
       openAssistant({
