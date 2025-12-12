@@ -5,6 +5,7 @@ import { sceneGraph, SceneObjectBase, VizPanel, type SceneComponentProps, type S
 import { Button, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useState } from 'react';
 
+import { getTrailFor } from 'shared/utils/utils';
 import { removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
 
 import { getPanelData } from './addToDashboard/addToDashboard';
@@ -35,7 +36,7 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
       return null;
     }
 
-    const handleClick = () => {
+    const handleClick = async () => {
       const { panel } = getPanelData(vizPanel);
 
       // Get metric name from panel title
@@ -60,6 +61,26 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
             }),
           ]
         : [];
+
+      // Try to get metric metadata and add it as context
+      try {
+        const trail = getTrailFor(model);
+        const metadata = await trail.getMetadataForMetric(metricName);
+        if (metadata) {
+          context.push(
+            createAssistantContextItem('structured', {
+              title: 'Prometheus metric metadata',
+              data: {
+                type: metadata.type,
+                description: metadata.help,
+                unit: metadata.unit,
+              },
+            })
+          );
+        }
+      } catch {
+        // Metadata fetch failed, continue without it
+      }
 
       openAssistant({
         origin: 'grafana-metricsdrilldown-app/metric-panel',
