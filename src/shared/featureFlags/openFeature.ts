@@ -61,7 +61,7 @@ export type FlagTrackingKey = (typeof goffFeatureFlags)[keyof typeof goffFeature
 
 export const featureFlagTrackingKeys = Object.fromEntries(
   featureFlagNames.reduce<Array<[FeatureFlagName, FlagTrackingKey]>>((acc, flagName) => {
-    if (goffFeatureFlags[flagName].trackingKey) {
+    if ('trackingKey' in goffFeatureFlags[flagName]) {
       acc.push([flagName, goffFeatureFlags[flagName].trackingKey]);
     }
     return acc;
