@@ -5,6 +5,8 @@ import { sceneGraph, SceneObjectBase, VizPanel, type SceneComponentProps, type S
 import { Button, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useState } from 'react';
 
+import { removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
+
 import { getPanelData } from './addToDashboard/addToDashboard';
 
 const EXPLAIN_IN_ASSISTANT_LABEL = 'Explain in Assistant';
@@ -39,12 +41,9 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
       // Get metric name from panel title
       const metricName = panel.title || 'unknown';
 
-      // Extract the query expression and remove __ignore_usage__ label (same as ExploreAction)
+      // Extract the query expression and remove __ignore_usage__ label
       const rawExpr = panel.targets?.[0]?.expr;
-      let query = typeof rawExpr === 'string' ? rawExpr : '';
-      if (query.includes('__ignore_usage__')) {
-        query = query.replace(/,?__ignore_usage__="",?/, '');
-      }
+      const query = removeIgnoreUsageLabel(typeof rawExpr === 'string' ? rawExpr : '');
 
       // Build prompt with or without query
       const queryPart = query ? ` The current metrics drilldown query is: ${query}.` : '';
