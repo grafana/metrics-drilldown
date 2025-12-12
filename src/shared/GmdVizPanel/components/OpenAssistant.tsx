@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 
 import { getPanelData } from './addToDashboard/addToDashboard';
 
-const OPEN_ASSISTANT_LABEL = 'Open in Assistant';
+const EXPLAIN_IN_ASSISTANT_LABEL = 'Explain in Assistant';
 
 interface OpenAssistantState extends SceneObjectState {}
 
@@ -73,13 +73,13 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
       <Button
         id="open-assistant-action"
         className={cx(styles.button)}
-        aria-label={OPEN_ASSISTANT_LABEL}
+        aria-label={EXPLAIN_IN_ASSISTANT_LABEL}
         variant="secondary"
         size="sm"
         fill="text"
         onClick={handleClick}
         icon="ai-sparkle"
-        tooltip={OPEN_ASSISTANT_LABEL}
+        tooltip={EXPLAIN_IN_ASSISTANT_LABEL}
         tooltipPlacement="top"
         data-testid="open-assistant-action"
       />
