@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       skip-grafana-dev-image:
-        description: 'Bypass grafana-dev image for e2e tests'
+        description: "Bypass grafana-dev image for e2e tests"
         required: false
         type: boolean
         default: false
@@ -26,9 +26,9 @@ on:
       - main
 
 permissions:
-  contents: 'write'
-  id-token: 'write'
-  attestations: 'write'
+  contents: "write"
+  id-token: "write"
+  attestations: "write"
 
 jobs:
   CD:
@@ -40,9 +40,9 @@ jobs:
         (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'npm version')) ||
         (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')))
       )
-    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v4.2.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v4.3.0
     with:
-      environment: 'prod' # publishing to 'prod' will also deploy to 'ops' and 'dev'
+      environment: "prod" # publishing to 'prod' will also deploy to 'ops' and 'dev'
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
       run-playwright: false
       run-playwright-docker: true
@@ -51,4 +51,4 @@ jobs:
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: docker-compose.yaml
       playwright-grafana-url: http://localhost:3001
-      argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
+      argo-workflow-slack-channel: "#proj-metricsdrilldown-cd"
