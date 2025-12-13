@@ -37,9 +37,7 @@ export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPa
     targets: [
       PluginExtensionPoints.DashboardPanelMenu,
       PluginExtensionPoints.ExploreToolbarAction,
-      // for testing purposes, this will be the target for the alerting rule query editor once the PR in grafana is merged
-      // PluginExtensionPoints.AlertingRuleQueryEditor,
-      'grafana/alerting/alertingrule/queryeditor',
+      PluginExtensionPoints.AlertingRuleQueryEditor,
       ASSISTANT_TARGET_V1,
     ],
     configure: configureDrilldownLink,
@@ -148,7 +146,6 @@ export function buildDrilldownUrl<T extends PluginExtensionPanelContext>(context
     return createAppUrl(ROUTES.Drilldown);
   }
 }
-
 
 // PromQL parser using lezer parser
 export function parsePromQLQuery(expr: string): ParsedPromQLQuery {
