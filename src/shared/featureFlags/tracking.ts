@@ -4,6 +4,7 @@ import type { EvaluationDetails, FlagValue, Hook, HookContext } from '@openfeatu
 
 export const TRACKED_FLAG_VALUES: Record<FlagTrackingKey, unknown> = {
   experiment_default_open_sidebar: null,
+  experiment_hierarchical_prefix_filtering: null,
 };
 
 /**
@@ -30,7 +31,7 @@ export class TrackingHook implements Hook {
  * @param flagTrackingKey - The `trackingKey` of the feature flag to track, as defined in the `goffFeatureFlags` object.
  * @returns The analytics payload for the tracked flag, as a record with the flag tracking key as the key and the flag value as the value.
  */
-export function getTrackedFlagPayload(flagTrackingKey: FlagTrackingKey): Record<FlagTrackingKey, unknown> | null {
+export function getTrackedFlagPayload(flagTrackingKey: FlagTrackingKey): Partial<Record<FlagTrackingKey, unknown>> | null {
   const trackedFlagItem = TRACKED_FLAG_VALUES[flagTrackingKey];
 
   if (!trackedFlagItem) {
