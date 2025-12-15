@@ -21,6 +21,16 @@ const goffFeatureFlags = {
     defaultValue: 'excluded',
     trackingKey: 'experiment_default_open_sidebar',
   },
+  'drilldown.metrics.hierarchical_prefix_filtering': {
+    valueType: 'string',
+    values: [
+      'treatment', // The sidebar opens by default
+      'control', // The sidebar remains closed (default behavior)
+      'excluded', // The user is excluded from experiment (sidebar remains closed)
+    ],
+    defaultValue: 'excluded',
+    trackingKey: 'experiment_hierarchical_prefix_filtering',
+  },
 } as const satisfies Record<`drilldown.metrics.${string}`, FeatureFlag>;
 
 /**
