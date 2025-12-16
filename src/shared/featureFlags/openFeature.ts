@@ -24,9 +24,9 @@ const goffFeatureFlags = {
   'drilldown.metrics.hierarchical_prefix_filtering': {
     valueType: 'string',
     values: [
-      'treatment', // The sidebar opens by default
-      'control', // The sidebar remains closed (default behavior)
-      'excluded', // The user is excluded from experiment (sidebar remains closed)
+      'treatment', // Hierarchical prefix filtering is enabled
+      'control', // Hierarchical prefix filtering is disabled (default behavior)
+      'excluded', // The user is excluded from the experiment (default filtering behavior is used)
     ],
     defaultValue: 'excluded',
     trackingKey: 'experiment_hierarchical_prefix_filtering',
