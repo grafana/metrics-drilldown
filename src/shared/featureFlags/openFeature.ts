@@ -94,9 +94,9 @@ export function initOpenFeatureProvider(): Promise<void> {
       timeoutMs: 10_000, // Timeout after 10 seconds
     }),
     {
-      // Multi-tenant feature flag service required context
-      targetingKey: config.namespace,
-      namespace: config.namespace,
+      targetingKey: config.namespace, // Dimension of uniqueness, to ensure flags are evaluated consistently for a given stack
+      namespace: config.namespace, // Required by the multi-tenant feature flag service
+      ...config.openFeatureContext,
     }
   );
 }
