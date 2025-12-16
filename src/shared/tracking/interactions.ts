@@ -200,7 +200,7 @@ const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): P {
   return {
     ...payload,
-    ...(event.includes('sidebar') ? getTrackedFlagPayload('experiment_default_open_sidebar') : {}),
+    ...(event.includes('sidebar') ? getTrackedFlagPayload('experiment_default_open_sidebar', true) : {}),
     meta: {
       // same naming as Faro (see src/tracking/faro/faro.ts)
       appRelease: config.apps[PLUGIN_ID].version,
