@@ -6,6 +6,7 @@ import type { EvaluationDetails, FlagValue, Hook, HookContext } from '@openfeatu
 
 export const TRACKED_FLAG_VALUES: Record<FlagTrackingKey, unknown> = {
   experiment_default_open_sidebar: null,
+  experiment_hierarchical_prefix_filtering: null,
 };
 
 /**
@@ -36,7 +37,7 @@ export class TrackingHook implements Hook {
 export function getTrackedFlagPayload(
   flagTrackingKey: FlagTrackingKey,
   addOpenFeatureContext = false
-): Record<FlagTrackingKey, unknown> | null {
+): Partial<Record<FlagTrackingKey, unknown>> | null {
   const trackedFlagItem = TRACKED_FLAG_VALUES[flagTrackingKey];
 
   if (!trackedFlagItem) {

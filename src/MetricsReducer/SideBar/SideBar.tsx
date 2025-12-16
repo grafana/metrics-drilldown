@@ -21,7 +21,6 @@ import { VAR_OTHER_METRIC_FILTERS } from 'shared/shared';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 import { embeddedTrailNamespace, getObjectValues, getTrailFor } from 'shared/utils/utils';
-import { HGFeatureToggles, isFeatureToggleEnabled } from 'shared/utils/utils.feature-toggles';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
 import { BookmarksList } from './sections/BookmarksList/BookmarksList';
@@ -53,7 +52,6 @@ type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 export class SideBar extends SceneObjectBase<SideBarState> {
   constructor(state: Partial<SideBarState>) {
     const sectionValues = SideBar.getSectionValuesFromUrl();
-    const useHierarchicalPrefixFiltering = isFeatureToggleEnabled(HGFeatureToggles.hierarchicalPrefixFiltering);
 
     super({
       key: 'sidebar',
@@ -77,7 +75,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           description: 'Filter metrics based on their name prefix (Prometheus namespace)',
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
-          hierarchical: useHierarchicalPrefixFiltering,
           active: Boolean(sectionValues.get('filters-prefix')?.length),
         }),
         new MetricsFilterSection({
@@ -147,6 +144,16 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         }
       });
     }
+
+    // Enable hierarchical prefix filtering if the experiment flag is set to treatment
+    evaluateFeatureFlag('drilldown.metrics.hierarchical_prefix_filtering').then((flagValue) => {
+      if (flagValue === 'treatment') {
+        const prefixSection = this.state.sections.find((s) => s.state.key === 'filters-prefix');
+        if (prefixSection instanceof MetricsFilterSection) {
+          prefixSection.setState({ hierarchical: true });
+        }
+      }
+    });
 
     return () => {
       cleanupOtherMetricsVar();
