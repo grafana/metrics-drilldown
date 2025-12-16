@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: 'read'
+  contents: "read"
 
 jobs:
   build:
@@ -27,8 +27,8 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -57,10 +57,10 @@ jobs:
           echo "plugin-name=$name" >> $GITHUB_OUTPUT
 
       - name: Sign and package
-        uses: grafana/plugin-ci-workflows/actions/internal/plugins/package@ci-cd-workflows/v4.2.0
+        uses: grafana/plugin-ci-workflows/actions/internal/plugins/package@ci-cd-workflows/v4.3.0
         with:
           output-folder: dist-artifacts
-          universal: 'true'
+          universal: "true"
           dist-folder: dist
           access-policy-token: ${{ fromJSON(steps.get-secrets.outputs.secrets).access_policy_token }}
 
@@ -73,7 +73,7 @@ jobs:
 
   playwright:
     needs: build
-    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@ci-cd-workflows/v4.2.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@ci-cd-workflows/v4.3.0
     with:
       id: ${{ needs.build.outputs.plugin-name }}
       version: ${{ needs.build.outputs.plugin-version }}

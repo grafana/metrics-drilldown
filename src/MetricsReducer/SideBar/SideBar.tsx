@@ -16,10 +16,11 @@ import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/Labe
 import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'MetricsReducer/metrics-variables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'MetricsReducer/metrics-variables/computeRulesGroups';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { VAR_OTHER_METRIC_FILTERS } from 'shared/shared';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
-import { getTrailFor } from 'shared/utils/utils';
+import { embeddedTrailNamespace, getObjectValues, getTrailFor } from 'shared/utils/utils';
 import { HGFeatureToggles, isFeatureToggleEnabled } from 'shared/utils/utils.feature-toggles';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
@@ -40,7 +41,13 @@ interface SideBarState extends SceneObjectState {
   sectionValues: Map<string, string[]>;
 }
 
-const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix', 'filters-recent'] as const;
+export const metricFilters = {
+  rule: 'filters-rule',
+  prefix: 'filters-prefix',
+  suffix: 'filters-suffix',
+  recent: 'filters-recent',
+} as const;
+const metricFiltersVariables = getObjectValues(metricFilters);
 type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -133,8 +140,12 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     });
 
     // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
-    if (!this.state.visibleSection?.state.key && isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)) {
-      this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+    if (!this.state.visibleSection?.state.key) {
+      evaluateFeatureFlag('drilldown.metrics.default_open_sidebar').then((flagValue) => {
+        if (flagValue === 'treatment' && !this.state.visibleSection?.state.key) {
+          this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+        }
+      });
     }
 
     return () => {
@@ -218,7 +229,9 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const sectionValues = new Map();
 
     for (const filterKey of metricFiltersVariables) {
-      const filterValueFromUrl = urlSearchParams.get(filterKey);
+      // Check for both namespaced key (for embedded mode) and raw key (for regular mode)
+      const namespacedKey = `${embeddedTrailNamespace}-${filterKey}`;
+      const filterValueFromUrl = urlSearchParams.get(namespacedKey) || urlSearchParams.get(filterKey);
       sectionValues.set(filterKey, filterValueFromUrl ? filterValueFromUrl.split(',').map((v) => v.trim()) : []);
     }
 

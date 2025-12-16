@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 
-import { useCatchExceptions } from './useCatchExceptions';
+import { ensureErrorObject, useCatchExceptions } from './useCatchExceptions';
 import { logger } from '../shared/logger/logger';
 
 // Mock the logger
@@ -11,6 +11,44 @@ jest.mock('../shared/logger/logger', () => ({
   },
 }));
 
+const makeRejectionEvent = (reason: unknown): PromiseRejectionEvent =>
+  Object.assign(new Event('unhandledrejection'), {
+    reason,
+    promise: Promise.resolve(),
+  }) as PromiseRejectionEvent;
+
+describe('ensureErrorObject', () => {
+  it('returns the same Error instance', () => {
+    const originalError = new Error('test error');
+    const result = ensureErrorObject(originalError, 'default');
+
+    expect(result).toBe(originalError);
+    expect(result.message).toBe('test error');
+  });
+
+  it('wraps a string in an Error', () => {
+    const result = ensureErrorObject('string error', 'default');
+
+    expect(result).toBeInstanceOf(Error);
+    expect(result.message).toBe('string error');
+  });
+
+  it('creates an Error from an object with a message', () => {
+    const errorLike = { message: 'object error' };
+    const result = ensureErrorObject(errorLike, 'default');
+
+    expect(result).toBeInstanceOf(Error);
+    expect(result.message).toBe('object error');
+  });
+
+  it('falls back to default message when no message is present', () => {
+    const result = ensureErrorObject(undefined, 'default message');
+
+    expect(result).toBeInstanceOf(Error);
+    expect(result.message).toBe('default message');
+  });
+});
+
 describe('useCatchExceptions', () => {
   const mockLogger = logger as jest.Mocked<typeof logger>;
 
@@ -18,10 +56,9 @@ describe('useCatchExceptions', () => {
     jest.clearAllMocks();
   });
 
-  it('should filter out browser extension errors and log them', () => {
+  it('filters browser extension errors and logs them', () => {
     const { result } = renderHook(() => useCatchExceptions());
 
-    // Simulate a browser extension error
     const browserExtensionError = new ErrorEvent('error', {
       message: 'Failed to execute appendChild on Node',
       filename: 'chrome-extension://some-extension-id/something.html',
@@ -30,12 +67,10 @@ describe('useCatchExceptions', () => {
       error: new Error('TypeError: Failed to execute appendChild on Node'),
     });
 
-    // Trigger the error event
     act(() => {
       window.dispatchEvent(browserExtensionError);
     });
 
-    // The error should be logged but not set as an application error
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Browser extension error: Failed to execute appendChild on Node',
@@ -46,15 +81,12 @@ describe('useCatchExceptions', () => {
         colno: '35',
       })
     );
-
-    // The error state should remain undefined
     expect(result.current[0]).toBeUndefined();
   });
 
-  it('should filter out null error events with messages and log them', () => {
+  it('filters null error events with messages and logs them', () => {
     const { result } = renderHook(() => useCatchExceptions());
 
-    // Simulate a ResizeObserver error
     const resizeObserverError = new ErrorEvent('error', {
       message: 'ResizeObserver loop completed with undelivered notifications.',
       filename: 'https://example.com/app.js',
@@ -63,12 +95,10 @@ describe('useCatchExceptions', () => {
       error: null,
     });
 
-    // Trigger the error event
     act(() => {
       window.dispatchEvent(resizeObserverError);
     });
 
-    // The error should be logged but not set as an application error
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Non-critical error: ResizeObserver loop completed with undelivered notifications.',
@@ -79,15 +109,12 @@ describe('useCatchExceptions', () => {
         colno: '10',
       })
     );
-
-    // The error state should remain undefined
     expect(result.current[0]).toBeUndefined();
   });
 
-  it('should catch legitimate application errors', () => {
+  it('catches legitimate application errors', () => {
     const { result } = renderHook(() => useCatchExceptions());
 
-    // Simulate a legitimate application error (not from browser extension and not null error)
     const appError = new ErrorEvent('error', {
       message: 'Cannot read property of undefined',
       filename: 'https://example.com/app.js',
@@ -96,13 +123,74 @@ describe('useCatchExceptions', () => {
       error: new Error('TypeError: Cannot read property of undefined'),
     });
 
-    // Trigger the error event
     act(() => {
       window.dispatchEvent(appError);
     });
 
-    // The error should be set as an application error
     expect(result.current[0]).toBeInstanceOf(Error);
     expect(result.current[0]?.message).toBe('TypeError: Cannot read property of undefined');
+  });
+
+  it('handles error events where error property is undefined', () => {
+    const { result } = renderHook(() => useCatchExceptions());
+
+    const errorEvent = new ErrorEvent('error', {
+      message: 'Script error',
+      filename: 'https://example.com/app.js',
+      lineno: 50,
+      colno: 10,
+    });
+
+    act(() => {
+      window.dispatchEvent(errorEvent);
+    });
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Non-critical error: Script error',
+      }),
+      expect.objectContaining({
+        filename: 'https://example.com/app.js',
+      })
+    );
+    expect(result.current[0]).toBeUndefined();
+  });
+
+  it('clears error on cancelled unhandled rejection', () => {
+    const { result } = renderHook(() => useCatchExceptions());
+
+    const rejectionEvent = makeRejectionEvent({ type: 'cancelled' });
+
+    act(() => {
+      window.dispatchEvent(rejectionEvent);
+    });
+
+    expect(result.current[0]).toBeUndefined();
+  });
+
+  it('sets error from unhandled rejection with message', () => {
+    const { result } = renderHook(() => useCatchExceptions());
+
+    const rejectionEvent = makeRejectionEvent('Something went wrong');
+
+    act(() => {
+      window.dispatchEvent(rejectionEvent);
+    });
+
+    expect(result.current[0]).toBeInstanceOf(Error);
+    expect(result.current[0]?.message).toBe('Something went wrong');
+  });
+
+  it('sets default error when unhandled rejection reason is missing', () => {
+    const { result } = renderHook(() => useCatchExceptions());
+
+    const rejectionEvent = makeRejectionEvent(undefined);
+
+    act(() => {
+      window.dispatchEvent(rejectionEvent);
+    });
+
+    expect(result.current[0]).toBeInstanceOf(Error);
+    expect(result.current[0]?.message).toBe('Unhandled rejection!');
   });
 });
