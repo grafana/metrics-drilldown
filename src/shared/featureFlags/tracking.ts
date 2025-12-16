@@ -1,9 +1,12 @@
+import { config } from '@grafana/runtime';
+
 import { featureFlagTrackingKeys, type FlagTrackingKey } from './openFeature';
 
 import type { EvaluationDetails, FlagValue, Hook, HookContext } from '@openfeature/web-sdk';
 
 export const TRACKED_FLAG_VALUES: Record<FlagTrackingKey, unknown> = {
   experiment_default_open_sidebar: null,
+  experiment_hierarchical_prefix_filtering: null,
 };
 
 /**
@@ -25,17 +28,24 @@ export class TrackingHook implements Hook {
 }
 
 /**
- * Returns the analytics payload for a tracked feature flag.
+ * Returns the analytics payload for a tracked feature flag, optionally including the open feature context.
  *
  * @param flagTrackingKey - The `trackingKey` of the feature flag to track, as defined in the `goffFeatureFlags` object.
+ * @param addOpenFeatureContext - Whether to include the open feature context in the payload.
  * @returns The analytics payload for the tracked flag, as a record with the flag tracking key as the key and the flag value as the value.
  */
-export function getTrackedFlagPayload(flagTrackingKey: FlagTrackingKey): Record<FlagTrackingKey, unknown> | null {
+export function getTrackedFlagPayload(
+  flagTrackingKey: FlagTrackingKey,
+  addOpenFeatureContext = false
+): Partial<Record<FlagTrackingKey, unknown>> | null {
   const trackedFlagItem = TRACKED_FLAG_VALUES[flagTrackingKey];
 
   if (!trackedFlagItem) {
     return null;
   }
 
-  return { [flagTrackingKey]: trackedFlagItem };
+  return {
+    [flagTrackingKey]: trackedFlagItem,
+    ...(addOpenFeatureContext ? config.openFeatureContext : {}),
+  };
 }
