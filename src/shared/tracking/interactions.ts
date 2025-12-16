@@ -202,12 +202,12 @@ function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<stri
 
   // Enrich all sidebar-related events (e.g., metrics_sidebar_toggled, sidebar_prefix_filter_applied)
   if (event.includes('sidebar')) {
-    Object.assign(payloads, getTrackedFlagPayload('experiment_default_open_sidebar'));
+    Object.assign(payloads, getTrackedFlagPayload('experiment_default_open_sidebar', true));
   }
 
   // Enrich only the metric_selected event to measure impact on metric selection behavior
   if (event === 'metric_selected') {
-    Object.assign(payloads, getTrackedFlagPayload('experiment_hierarchical_prefix_filtering'));
+    Object.assign(payloads, getTrackedFlagPayload('experiment_hierarchical_prefix_filtering', true));
   }
 
   return payloads;
