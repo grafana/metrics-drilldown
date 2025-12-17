@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.26
+
+##### Chores
+
+*  replace hardcoded constant with enum (#890) (fecb8ebd)
+*  add OpenFeature context to sidebar analytics (#893) (15980697)
+*  use PluginExtensionPoints constant from @grafana/data (#874) (648b4160)
+*  add `openFeature` context (#891) (fb7d6934)
+
+##### Continuous Integration
+
+*  bump shared workflows to `4.3.0` (#885) (8ec2aafc)
+
+##### New Features
+
+*  implement the tree filter experiment with open feature (#892) (33594f07)
+*  init OpenFeature flag evaluations (#886) (7d68f7bf)
+*  assistant integration fast follow (#888) (caeed347)
+
+
 ## 1.0.25
 
 ##### Chores
