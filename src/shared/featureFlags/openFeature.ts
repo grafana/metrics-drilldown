@@ -108,7 +108,11 @@ export function initOpenFeatureProvider(): Promise<void> {
       namespace: config.namespace, // Required by the multi-tenant feature flag service
       ...config.openFeatureContext,
     }
-  );
+  ).catch((error) => {
+    // OpenFeature initialization may fail in environments without the feature flag service.
+    // This is expected and the app will continue to work with default flag values.
+    logger.warn('OpenFeature provider initialization failed, using default flag values', error);
+  });
 }
 
 /**
