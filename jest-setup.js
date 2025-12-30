@@ -9,13 +9,3 @@ const mockIntersectionObserver = jest.fn().mockImplementation((callback) => ({
   disconnect: jest.fn(),
 }));
 global.IntersectionObserver = mockIntersectionObserver;
-
-jest.mock('@grafana/runtime', () => {
-  const actual = jest.requireActual('@grafana/runtime');
-  return {
-    ...actual,
-    getAppEvents: () => ({
-      publish: jest.fn(),
-    }),
-  };
-});
