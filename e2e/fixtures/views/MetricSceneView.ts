@@ -258,11 +258,11 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertPrefixFilterDropdown(optionLabel: string) {
-    await expect(this.getPrefixFilterDropdown().locator('input')).toHaveValue(optionLabel);
+    await expect(this.getPrefixFilterDropdown().getByRole('combobox')).toHaveValue(optionLabel);
   }
 
   async selectPrefixFilterOption(expectedOptionName: string) {
-    await this.getPrefixFilterDropdown().locator('input').click();
+    await this.getPrefixFilterDropdown().getByRole('combobox').click();
     await this.getByRole('option', { name: expectedOptionName }).click();
   }
 }
