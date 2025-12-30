@@ -12,8 +12,6 @@ import { useCatchExceptions } from './useCatchExceptions';
 import { useReportAppInitialized } from './useReportAppInitialized';
 import { initOpenFeatureProvider } from '../shared/featureFlags/openFeature';
 import { initFaro } from '../shared/logger/faro/faro';
-import { logger } from '../shared/logger/logger';
-import { userStorage } from '../shared/user-preferences/userStorage';
 import { isPrometheusDataSource } from '../shared/utils/utils.datasource';
 import { PluginPropsContext } from '../shared/utils/utils.plugin';
 
