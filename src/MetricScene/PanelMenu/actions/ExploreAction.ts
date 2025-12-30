@@ -2,6 +2,8 @@ import { type PanelMenuItem } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { getExploreURL, sceneGraph, VizPanel } from '@grafana/scenes';
 
+import { removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
+
 export class ExploreAction {
   static create(panelMenuInstance: any): PanelMenuItem {
     let exploreUrl: Promise<string | undefined> | undefined;
@@ -17,11 +19,10 @@ export class ExploreAction {
       // this will get the explore url with interpolated variables and include the labels __ignore_usage__, this is a known issue
       // in the metric scene we do not get use the __ignore_usage__ labels in the explore url
       exploreUrl = getExploreURL(panelData, panelMenuInstance, panelData.timeRange, (query) => {
-        // remove __ignore_usage__="" from the query
-        if ('expr' in query && typeof query.expr === 'string' && query.expr.includes('__ignore_usage__')) {
+        if ('expr' in query && typeof query.expr === 'string') {
           return {
             ...query,
-            expr: query.expr.replace(/,?__ignore_usage__="",?/, ''), // also remove leading/trailing comma if present
+            expr: removeIgnoreUsageLabel(query.expr),
           };
         }
 

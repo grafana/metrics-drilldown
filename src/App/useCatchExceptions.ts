@@ -1,7 +1,18 @@
+import { isObject } from '@grafana/data';
 import { useEffect, useState } from 'react';
 
 import { shouldIgnoreError } from '../shared/logger/faro/faro';
 import { logger } from '../shared/logger/logger';
+
+/**
+ * Check if input is an object with a string 'message' property.
+ */
+function isObjectWithStringProperty<T extends Record<string, unknown>>(
+  object: T,
+  propertyName: keyof T
+): object is T & { [propertyName]: string } {
+  return isObject(object) && propertyName in object && typeof object[propertyName] === 'string';
+}
 
 export function ensureErrorObject(error: any, defaultMessage: string): Error {
   if (error instanceof Error) {
@@ -10,12 +21,8 @@ export function ensureErrorObject(error: any, defaultMessage: string): Error {
   if (typeof error === 'string') {
     return new Error(error);
   }
-  if (typeof error.message === 'string') {
-    const e = new Error(error.message);
-    for (const prop of Object.getOwnPropertyNames(error)) {
-      (e as any)[prop] = error[prop];
-    }
-    return e;
+  if (isObjectWithStringProperty(error, 'message')) {
+    return new Error(error.message);
   }
   return new Error(defaultMessage);
 }
@@ -69,15 +76,14 @@ export function useCatchExceptions(): [Error | undefined, React.Dispatch<React.S
         return;
       }
 
-      setError(ensureErrorObject(errorEvent.error, 'Uncaught exception!'));
+      setError(ensureErrorObject(errorEvent.error ?? errorEvent, 'Uncaught exception!'));
     };
 
     const onUnHandledRejection = (event: PromiseRejectionEvent) => {
       // remove me when we remove MetricSelectScene
       // indeed, it seems there's always  a cancelled request when landing on the view :man_shrug:
       // Ideally, the code in DataTrail should handle the cancellation but we do it here because it's easier
-      // See: https://github.com/grafana/metrics-drilldown/issues/862
-      if (event.reason.type === 'cancelled') {
+      if (isObjectWithStringProperty(event.reason, 'type') && event.reason.type === 'cancelled') {
         setError(undefined);
         return;
       }
