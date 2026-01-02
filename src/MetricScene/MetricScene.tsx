@@ -16,28 +16,21 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
-import { BreakdownPanelsOrchestrator } from './Breakdown/BreakdownPanelsOrchestrator';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
-import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
-import { actionViews, actionViewsDefinitions, defaultActionView, type ActionViewType } from './MetricActionBar';
+import { actionViewsDefinitions, defaultActionView, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
-import { RelatedMetricsOrchestrator } from './RelatedMetrics/RelatedMetricsOrchestrator';
 
 interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
-  breakdownPanelsCount?: number;
-  relatedMetricsCount?: number;
 }
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
   public readonly relatedLogsOrchestrator = new RelatedLogsOrchestrator(this);
-  public readonly breakdownPanelsOrchestrator = new BreakdownPanelsOrchestrator(this);
-  public readonly relatedMetricsOrchestrator = new RelatedMetricsOrchestrator(this);
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
@@ -47,12 +40,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.relatedLogsOrchestrator.handleFiltersChange();
     },
   });
-  // Keeps track of which background tasks have run to avoid running them multiple times
-  private backgroundTaskHasRun: Record<ActionViewType, boolean> = {
-    [actionViews.breakdown]: false,
-    [actionViews.related]: false,
-    [actionViews.relatedLogs]: false,
-  };
 
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
@@ -73,14 +60,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.setState({ relatedLogsCount: count });
     });
 
-    this.breakdownPanelsOrchestrator.addBreakdownPanelsCountChangeHandler((count) => {
-      this.setState({ breakdownPanelsCount: count });
-    });
-
-    this.relatedMetricsOrchestrator.addRelatedMetricsCountChangeHandler((count) => {
-      this.setState({ relatedMetricsCount: count });
-    });
-
     this.subscribeToEvents();
   }
 
@@ -92,19 +71,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         this.state.body.state.selectedTab?.publishEvent(event);
       });
     }
-
-    // Register handler to wait for active tab's data load completion
-    // This ensures the active tab has priority for data fetching
-    this.subscribeToEvent(EventActionViewDataLoadComplete, (event) => {
-      // Active tab has finished loading, safe to start background tasks like counting signals
-      const inactiveTabs = actionViewsDefinitions.filter((v) => v.value !== event.payload.currentActionView);
-      inactiveTabs.forEach(({ backgroundTask, value: tabName }) => {
-        if (!this.backgroundTaskHasRun[tabName]) {
-          backgroundTask(this);
-          this.backgroundTaskHasRun[tabName] = true;
-        }
-      });
-    });
   }
 
   getUrlState() {

@@ -80,7 +80,7 @@ export function useCatchExceptions(): [Error | undefined, React.Dispatch<React.S
     };
 
     const onUnHandledRejection = (event: PromiseRejectionEvent) => {
-      // remove me when we remove MetricSelectScene
+      // TODO: remove me when we remove MetricSelectScene
       // indeed, it seems there's always  a cancelled request when landing on the view :man_shrug:
       // Ideally, the code in DataTrail should handle the cancellation but we do it here because it's easier
       if (isObjectWithStringProperty(event.reason, 'type') && event.reason.type === 'cancelled') {
