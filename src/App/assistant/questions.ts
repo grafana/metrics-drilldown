@@ -57,4 +57,3 @@ export const metricsDrilldownQuestions: Question[] = [
     context: [appContext],
   },
 ];
-

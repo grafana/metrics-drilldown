@@ -8,24 +8,33 @@ export function displayError(error: Error, msgs: Array<string | React.ReactEleme
 
   logger.error(error, context);
 
-  getAppEvents().publish({
-    type: AppEvents.alertError.name,
-    payload: msgs,
-  });
+  const appEvents = getAppEvents();
+  if (appEvents) {
+    appEvents.publish({
+      type: AppEvents.alertError.name,
+      payload: msgs,
+    });
+  }
 }
 
 export function displayWarning(msgs: Array<string | React.ReactElement>) {
   logger.warn(msgs);
 
-  getAppEvents().publish({
-    type: AppEvents.alertWarning.name,
-    payload: msgs,
-  });
+  const appEvents = getAppEvents();
+  if (appEvents) {
+    appEvents.publish({
+      type: AppEvents.alertWarning.name,
+      payload: msgs,
+    });
+  }
 }
 
 export function displaySuccess(msgs: Array<string | React.ReactElement>) {
-  getAppEvents().publish({
-    type: AppEvents.alertSuccess.name,
-    payload: msgs,
-  });
+  const appEvents = getAppEvents();
+  if (appEvents) {
+    appEvents.publish({
+      type: AppEvents.alertSuccess.name,
+      payload: msgs,
+    });
+  }
 }

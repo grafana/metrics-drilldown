@@ -32,6 +32,7 @@ import {
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import {
   RULE_GROUP_LABELS,
+  RULE_REGEX_TO_LABEL,
   type RuleGroupLabel,
 } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/rule-group-labels';
 import { logger } from 'shared/logger/logger';
@@ -314,15 +315,23 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
   /**
    * Parse a filter value into a user-friendly label for display.
-   * Converts hierarchical values (e.g., "grafana:alert") to readable format ("grafana > alert").
+   * Handles rule regex patterns, hierarchical values, and regular labels.
    * @param value The filter value from URL or selection
    * @returns Formatted label for display
    */
   private parseLabel(value: string): string {
+    // Check if it's a rule regex pattern first
+    if (value in RULE_REGEX_TO_LABEL) {
+      return RULE_REGEX_TO_LABEL[value];
+    }
+
+    // Handle hierarchical prefixes (e.g., "grafana::alert" -> "grafana > alert")
     if (value.includes(HIERARCHICAL_SEPARATOR)) {
       const [prefix, sublevel] = value.split(HIERARCHICAL_SEPARATOR);
       return `${prefix} > ${sublevel}`;
     }
+
+    // Return value as-is for regular labels
     return value;
   }
 

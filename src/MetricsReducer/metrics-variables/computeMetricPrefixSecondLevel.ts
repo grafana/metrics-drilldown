@@ -27,7 +27,7 @@ export function computeMetricPrefixSecondLevel(
 
   for (const option of options) {
     const parts = option.value.split(METRIC_NAME_SEPARATOR);
-    
+
     // Only process metrics matching the parent prefix and having a second level
     if (parts[0] === parentPrefix && parts.length > 1) {
       const sublevel = parts[1];
@@ -49,4 +49,3 @@ export function computeMetricPrefixSecondLevel(
       label: sublevel, // Just the sublevel for display in tree
     }));
 }
-

@@ -1,5 +1,5 @@
 import { type TimeRange } from '@grafana/data';
-import { sceneGraph , type VizPanel } from '@grafana/scenes';
+import { sceneGraph, type VizPanel } from '@grafana/scenes';
 import { type Panel } from '@grafana/schema';
 
 import { isSceneQueryRunner, removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
@@ -28,10 +28,14 @@ export function getPanelData(vizPanel: VizPanel): PanelDataRequestPayload {
     })) || [];
 
     // Datasource from QueryRunner with interpolated variables
-    datasource = queryRunner.state.datasource ? {
-      ...queryRunner.state.datasource,
-      uid: queryRunner.state.datasource.uid ? sceneGraph.interpolate(vizPanel, queryRunner.state.datasource.uid) : queryRunner.state.datasource.uid
-    } : queryRunner.state.datasource;
+    datasource = queryRunner.state.datasource
+      ? {
+          ...queryRunner.state.datasource,
+          uid: queryRunner.state.datasource.uid
+            ? sceneGraph.interpolate(vizPanel, queryRunner.state.datasource.uid)
+            : queryRunner.state.datasource.uid,
+        }
+      : queryRunner.state.datasource;
 
     maxDataPoints = queryRunner.state.maxDataPoints;
   }
@@ -57,7 +61,7 @@ export function getPanelData(vizPanel: VizPanel): PanelDataRequestPayload {
     ...(vizPanel.state.description && { description: vizPanel.state.description }),
     ...(maxDataPoints && { maxDataPoints }),
   };
-  return { panel, range }
+  return { panel, range };
 }
 
 export interface PanelDataRequestPayload {
