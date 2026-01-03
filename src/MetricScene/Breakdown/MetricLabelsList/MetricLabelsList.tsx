@@ -18,6 +18,7 @@ import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
+import { getTrailFor } from 'shared/utils/utils';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
@@ -116,6 +117,16 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   private onActivate() {
+    const trail = getTrailFor(this);
+
+    // In embeddedMini mode, limit to 3 panels with smaller height
+    if (trail.state.embeddedMini) {
+      this.state.body.setState({ initialPageSize: 3, pageSizeIncrement: 0 });
+      (this.state.body.state.body as SceneCSSGridLayout).setState({
+        autoRows: PANEL_HEIGHT.XS,
+      });
+    }
+
     this.subscribeToLayoutChange();
     this.subscribeToEvents();
   }
