@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
 import { useCatchExceptions } from 'App/useCatchExceptions';
-import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { newMetricsTrail } from 'shared/utils/utils';
 
@@ -16,36 +15,46 @@ export interface MiniBreakdownProps {
   dataSource: string; // The data source UID
 }
 
-export const MiniBreakdown = ({ query, initialStart, initialEnd, dataSource }: MiniBreakdownProps) => {
+const MiniBreakdown = ({ query, initialStart, initialEnd, dataSource }: MiniBreakdownProps) => {
   const [error] = useCatchExceptions();
   const initRef = useRef(false);
 
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      reportExploreMetrics('exposed_component_viewed', { component: 'label_breakdown' });
+      reportExploreMetrics('exposed_component_viewed', { component: 'mini_breakdown' });
     }
   }, []);
 
   const { metric, labels } = parsePromQLQuery(query);
 
-  const trail = newMetricsTrail({
-    metric,
-    initialDS: dataSource,
-    initialFilters: labels.map(({ label, op, value }) => ({
-      key: label,
-      operator: op,
-      value,
-    })),
-    $timeRange: toSceneTimeRange(initialStart, initialEnd),
-    embedded: true,
-  });
-
-  logger.log('trail', trail);
+  // useMemo to avoid recreating the trail on every render
+  const trail = useMemo(
+    () =>
+      newMetricsTrail({
+        metric,
+        initialDS: dataSource,
+        initialFilters: labels.map(({ label, op, value }) => ({
+          key: label,
+          operator: op,
+          value,
+        })),
+        $timeRange: toSceneTimeRange(initialStart, initialEnd),
+        embedded: true,
+        embeddedMini: true, // Enable mini mode for tooltip navigation preview
+      }),
+    [metric, dataSource, labels, initialStart, initialEnd]
+  );
 
   return (
-    <div data-testid="metrics-drilldown-mini-label-breakdown">
-      {error ? <ErrorView error={error} /> : <>Hello world</>}
+    <div data-testid="metrics-drilldown-mini-breakdown">
+      {error ? <ErrorView error={error} /> : <trail.Component model={trail} />}
     </div>
   );
 };
+
+// Default export required for React.lazy
+export default MiniBreakdown;
+
+// Named export for component usage
+export { MiniBreakdown };

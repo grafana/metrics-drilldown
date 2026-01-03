@@ -68,6 +68,7 @@ import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSource
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
+  embeddedMini?: boolean; // Mini embedded mode for tooltip preview navigation
   controls: SceneObject[];
   createdAt: number;
 
@@ -373,7 +374,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, embedded, drawer, isAddToDashboardModalOpen, addToDashboardPanelData } =
+    const { controls, topScene, embedded, embeddedMini, drawer, isAddToDashboardModalOpen, addToDashboardPanelData } =
       model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
@@ -423,7 +424,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       <>
         <div className={styles.container}>
           <Stack direction="column" gap={1} grow={1}>
-            {controls && (
+            {controls && !embeddedMini && (
               <div className={styles.controls} data-testid="app-controls">
                 <Stack direction="row" gap={1} alignItems="flex-end" wrap="wrap">
                   <GiveFeedbackButton />
@@ -437,18 +438,25 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               </div>
             )}
             {topScene && (
-              <UrlSyncContextProvider
-                scene={topScene}
-                createBrowserHistorySteps={true}
-                updateUrlOnInit={true}
-                namespace={model.state.urlNamespace}
-              >
+              embeddedMini ? (
+                // Skip URL sync in embeddedMini mode to avoid conflicts with host app
                 <div className={styles.body}>
-                  <Stack direction="column" grow={1}>
-                    {topScene && <topScene.Component model={topScene} />}
-                  </Stack>
+                  <topScene.Component model={topScene} />
                 </div>
-              </UrlSyncContextProvider>
+              ) : (
+                <UrlSyncContextProvider
+                  scene={topScene}
+                  createBrowserHistorySteps={true}
+                  updateUrlOnInit={true}
+                  namespace={model.state.urlNamespace}
+                >
+                  <div className={styles.body}>
+                    <Stack direction="column" grow={1}>
+                      {topScene && <topScene.Component model={topScene} />}
+                    </Stack>
+                  </div>
+                </UrlSyncContextProvider>
+              )
             )}
           </Stack>
         </div>
