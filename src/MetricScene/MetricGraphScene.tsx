@@ -93,7 +93,16 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
   private async onActivate() {
     const { metric } = this.state;
-    const metadata = await getTrailFor(this).getMetadataForMetric(metric);
+    const trail = getTrailFor(this);
+
+    // Hide header actions and menu in embeddedMini mode
+    if (trail.state.embeddedMini) {
+      const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
+      gmdVizPanel.update({ headerActions: () => [], menu: undefined }, {});
+      return; // Skip the rest of the setup for embeddedMini
+    }
+
+    const metadata = await trail.getMetadataForMetric(metric);
 
     const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
     const { metricType } = gmdVizPanel.state;
@@ -132,6 +141,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const { topView, selectedTab, actionBar } = model.useState();
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
+    const { embeddedMini } = trail.state;
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
     const controlsContainer = useRef<HTMLDivElement>(null);
 
@@ -152,9 +162,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
         <div className={styles.nonSticky} data-testid="top-view">
           <topView.Component model={topView} />
         </div>
-        <div className={styles.stickyTop} id="action-bar-container" ref={controlsContainer}>
-          <actionBar.Component model={actionBar} />
-        </div>
+        {!embeddedMini && (
+          <div className={styles.stickyTop} id="action-bar-container" ref={controlsContainer}>
+            <actionBar.Component model={actionBar} />
+          </div>
+        )}
         {selectedTab && (
           <div data-testid="tab-content" className={styles.tabContent}>
             <selectedTab.Component model={selectedTab} />
