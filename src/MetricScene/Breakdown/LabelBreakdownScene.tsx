@@ -93,19 +93,22 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
+    const { embeddedMini } = trail.state;
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
     return (
       <div className={styles.container}>
-        <div className={styles.stickyControls} data-testid="breakdown-controls">
-          <div className={styles.controls}>
-            <groupByVariable.Component model={groupByVariable} />
-            {body instanceof MetricLabelsList && <body.Controls model={body} />}
-            {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+        {!embeddedMini && (
+          <div className={styles.stickyControls} data-testid="breakdown-controls">
+            <div className={styles.controls}>
+              <groupByVariable.Component model={groupByVariable} />
+              {body instanceof MetricLabelsList && <body.Controls model={body} />}
+              {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+            </div>
           </div>
-        </div>
+        )}
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}
