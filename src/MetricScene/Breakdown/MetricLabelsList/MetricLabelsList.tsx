@@ -84,21 +84,32 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
         getLayoutChild: (option, labelIndex) => {
           const label = option.value as string;
 
+          // Check embeddedMini at runtime
+          let embeddedMini = false;
+          try {
+            const trail = getTrailFor(this);
+            embeddedMini = trail.state.embeddedMini ?? false;
+          } catch {
+            // Not in scene graph yet, use default
+          }
+
           return new SceneCSSGridItem({
             body: buildTimeseriesPanel({
               metric,
               panelConfig: {
                 type: 'timeseries',
-                height: PANEL_HEIGHT.M,
+                height: embeddedMini ? PANEL_HEIGHT.XS : PANEL_HEIGHT.M,
                 title: label,
                 fixedColorIndex: labelIndex,
-                behaviors: [
-                  // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
-                  publishTimeseriesData(),
-                  addCardinalityInfo(),
-                ],
-                headerActions: () => [new SelectLabelAction({ label })],
-                menu: () => new PanelMenu({ labelName: label }),
+                behaviors: embeddedMini
+                  ? []
+                  : [
+                      // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
+                      publishTimeseriesData(),
+                      addCardinalityInfo(),
+                    ],
+                headerActions: embeddedMini ? () => [] : () => [new SelectLabelAction({ label })],
+                menu: embeddedMini ? undefined : () => new PanelMenu({ labelName: label }),
                 legend: { placement: 'bottom' },
               },
               queryConfig: {
