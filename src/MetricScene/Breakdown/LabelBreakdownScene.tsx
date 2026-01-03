@@ -109,6 +109,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
             </div>
           </div>
         )}
+        {embeddedMini && <div className={styles.miniSectionLabel}>Breakdown</div>}
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}
@@ -144,6 +145,15 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
     }),
     searchField: css({
       flexGrow: 1,
+    }),
+    miniSectionLabel: css({
+      marginTop: theme.spacing(2),
+      marginBottom: theme.spacing(1),
+      fontSize: theme.typography.bodySmall.fontSize,
+      fontWeight: theme.typography.fontWeightMedium,
+      color: theme.colors.text.secondary,
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
     }),
   };
 }
