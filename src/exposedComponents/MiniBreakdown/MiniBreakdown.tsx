@@ -1,3 +1,5 @@
+import { css } from '@emotion/css';
+import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useMemo, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
@@ -17,6 +19,7 @@ export interface MiniBreakdownProps {
 
 const MiniBreakdown = ({ query, initialStart, initialEnd, dataSource }: MiniBreakdownProps) => {
   const [error] = useCatchExceptions();
+  const styles = useStyles2(getStyles);
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -47,11 +50,19 @@ const MiniBreakdown = ({ query, initialStart, initialEnd, dataSource }: MiniBrea
   );
 
   return (
-    <div data-testid="metrics-drilldown-mini-breakdown">
+    <div data-testid="metrics-drilldown-mini-breakdown" className={styles.container}>
       {error ? <ErrorView error={error} /> : <trail.Component model={trail} />}
     </div>
   );
 };
+
+function getStyles() {
+  return {
+    container: css({
+      width: '300px',
+    }),
+  };
+}
 
 // Default export required for React.lazy
 export default MiniBreakdown;

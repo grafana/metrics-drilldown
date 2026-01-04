@@ -162,11 +162,12 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   private onActivate() {
     const trail = getTrailFor(this);
 
-    // In embeddedMini mode, limit to 3 panels with smaller height
+    // In embeddedMini mode, limit to 3 panels with smaller height and rows layout
     if (trail.state.embeddedMini) {
       this.state.body.setState({ initialPageSize: 3, pageSizeIncrement: 0 });
       (this.state.body.state.body as SceneCSSGridLayout).setState({
         autoRows: PANEL_HEIGHT.XS,
+        templateColumns: GRID_TEMPLATE_ROWS,
       });
     }
 
@@ -197,6 +198,13 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   private subscribeToLayoutChange() {
+    const trail = getTrailFor(this);
+
+    // Skip URL sync entirely for embeddedMini - layout already set in onActivate
+    if (trail.state.embeddedMini) {
+      return;
+    }
+
     const layoutSwitcher = sceneGraph.findByKeyAndType(this, 'layout-switcher', LayoutSwitcher);
 
     const onChangeState = (newState: LayoutSwitcherState, prevState?: LayoutSwitcherState) => {
