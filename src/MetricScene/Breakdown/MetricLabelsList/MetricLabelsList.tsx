@@ -57,7 +57,7 @@ function buildLabelNavigationUrl(trail: ReturnType<typeof getTrailFor>, label: s
     dataSource: trail.state.initialDS!,
     from: String(timeRange.state.from),
     to: String(timeRange.state.to),
-    groupBy: label,
+    groupBy: label, // When groupBy is set, actionView=breakdown is automatically added
   });
 }
 

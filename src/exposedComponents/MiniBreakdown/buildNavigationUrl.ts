@@ -20,7 +20,7 @@ interface BuildMiniBreakdownUrlParams {
  * Build navigation URL for embeddedMini click navigation.
  *
  * - Without groupBy: navigates to metric breakdown (main panel click)
- * - With groupBy: navigates to metric breakdown with var-groupby set (label panel click)
+ * - With groupBy: navigates to metric breakdown with var-groupby AND actionView=breakdown (label panel click)
  */
 export function buildMiniBreakdownNavigationUrl({
   metric,
@@ -33,8 +33,10 @@ export function buildMiniBreakdownNavigationUrl({
   const promURLObject = createPromURLObject(dataSource, labels, metric, from, to);
   const params = buildNavigateToMetricsParams(promURLObject);
 
+  // Label panel click: set both groupBy and actionView together
   if (groupBy) {
     params.append('var-groupby', groupBy);
+    params.append('actionView', 'breakdown');
   }
 
   return createAppUrl(ROUTES.Drilldown, params);
