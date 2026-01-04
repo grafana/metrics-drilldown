@@ -73,7 +73,7 @@ function getLabelPanelConfig(label: string, labelIndex: number, embeddedMini: bo
       : [publishTimeseriesData(), addCardinalityInfo()],
     headerActions: embeddedMini ? () => [] : () => [new SelectLabelAction({ label })],
     menu: embeddedMini ? undefined : () => new PanelMenu({ labelName: label }),
-    legend: { placement: 'bottom' as const },
+    legend: embeddedMini ? { showLegend: false } : { placement: 'bottom' as const },
   };
 }
 
