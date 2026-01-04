@@ -32,11 +32,10 @@ export function buildMiniBreakdownNavigationUrl({
 }: BuildMiniBreakdownUrlParams): string {
   const promURLObject = createPromURLObject(dataSource, labels, metric, from, to);
   const params = buildNavigateToMetricsParams(promURLObject);
-
-  // Label panel click: set both groupBy and actionView together
+  params.append('actionView', 'breakdown');
+  // Label panel click: set groupBy
   if (groupBy) {
     params.append('var-groupby', groupBy);
-    params.append('actionView', 'breakdown');
   }
 
   return createAppUrl(ROUTES.Drilldown, params);
