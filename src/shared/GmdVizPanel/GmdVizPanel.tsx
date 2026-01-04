@@ -91,6 +91,8 @@ interface GmdVizPanelState extends SceneObjectState {
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;
   body?: VizPanel;
+  onClick?: () => void; // For embeddedMini click navigation
+  clickTitle?: string; // Hover text for embeddedMini
 }
 
 export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
@@ -329,22 +331,41 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {
-    const { body, panelConfig } = model.useState();
-    const styles = useStyles2(getStyles, panelConfig.height);
+    const { body, panelConfig, onClick, clickTitle } = model.useState();
+    const styles = useStyles2(getStyles, panelConfig.height, Boolean(onClick));
 
     return (
-      <div className={styles.container} data-testid="gmd-vizpanel">
+      <div
+        className={styles.container}
+        data-testid="gmd-vizpanel"
+        onClick={onClick}
+        title={clickTitle}
+      >
         {body && <body.Component model={body} />}
       </div>
     );
   };
 }
 
-function getStyles(theme: GrafanaTheme2, height: PANEL_HEIGHT) {
+function getStyles(theme: GrafanaTheme2, height: PANEL_HEIGHT, isClickable: boolean) {
   return {
     container: css`
       width: 100%;
       height: ${height}px;
+      ${isClickable ? `
+        position: relative;
+        cursor: pointer;
+        &:hover {
+          background: ${theme.colors.background.secondary};
+        }
+        /* Invisible overlay covering entire panel - ensures cursor shows in empty space */
+        &::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          cursor: inherit;
+        }
+      ` : ''}
     `,
   };
 }

@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
-import { useChromeHeaderHeight } from '@grafana/runtime';
+import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   behaviors,
   SceneFlexItem,
@@ -29,6 +29,7 @@ import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicH
 
 import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';
+import { buildMiniBreakdownNavigationUrl } from '../exposedComponents/MiniBreakdown/buildNavigationUrl';
 import { getTrailFor } from '../shared/utils/utils';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
@@ -95,10 +96,30 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const { metric } = this.state;
     const trail = getTrailFor(this);
 
-    // Hide header actions and menu in embeddedMini mode
+    // Hide header actions and menu in embeddedMini mode, add click navigation
     if (trail.state.embeddedMini) {
       const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
       gmdVizPanel.update({ headerActions: () => [], menu: undefined }, {});
+
+      // Build navigation URL from trail state
+      const timeRange = sceneGraph.getTimeRange(trail);
+      const url = buildMiniBreakdownNavigationUrl({
+        metric: trail.state.metric!,
+        labels: (trail.state.initialFilters || []).map((f) => ({
+          label: f.key,
+          op: f.operator,
+          value: f.value,
+        })),
+        dataSource: trail.state.initialDS!,
+        from: String(timeRange.state.from),
+        to: String(timeRange.state.to),
+      });
+
+      gmdVizPanel.setState({
+        onClick: () => locationService.push(url),
+        clickTitle: `Open Metrics Drilldown for ${metric}`,
+      });
+
       return; // Skip the rest of the setup for embeddedMini
     }
 
