@@ -18,7 +18,6 @@ import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { InlineBanner } from 'App/InlineBanner';
-import { getTrailFor } from 'shared/utils/utils';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
@@ -29,6 +28,7 @@ import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { buildTimeseriesPanel } from 'shared/GmdVizPanel/types/timeseries/buildTimeseriesPanel';
 import { VAR_GROUP_BY } from 'shared/shared';
+import { getTrailFor } from 'shared/utils/utils';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
 import { syncYAxis } from './behaviors/syncYAxis';
