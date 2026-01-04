@@ -96,10 +96,17 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const { metric } = this.state;
     const trail = getTrailFor(this);
 
-    // Hide header actions and menu in embeddedMini mode, add click navigation
+    // Hide header actions and menu in embeddedMini mode, reduce height, add click navigation
     if (trail.state.embeddedMini) {
+      const [flexItem] = sceneGraph.findDescendents(this, SceneFlexItem);
+      flexItem.setState({ minHeight: PANEL_HEIGHT.S, maxHeight: PANEL_HEIGHT.S });
+
       const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
-      gmdVizPanel.update({ headerActions: () => [], menu: undefined }, {});
+      gmdVizPanel.update({
+        headerActions: () => [],
+        menu: undefined,
+        height: PANEL_HEIGHT.S,
+      }, {});
 
       // Build navigation URL from trail state
       const timeRange = sceneGraph.getTimeRange(trail);
