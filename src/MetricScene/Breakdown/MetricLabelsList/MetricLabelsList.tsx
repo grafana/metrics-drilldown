@@ -32,14 +32,47 @@ import { getTrailFor } from 'shared/utils/utils';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
 import { syncYAxis } from './behaviors/syncYAxis';
+import { ClickablePanelWrapper } from './ClickablePanelWrapper';
 import { EventTimeseriesDataReceived } from './events/EventTimeseriesDataReceived';
 import { SelectLabelAction } from './SelectLabelAction';
+import { buildMiniBreakdownNavigationUrl } from '../../../exposedComponents/MiniBreakdown/buildNavigationUrl';
 import { PanelMenu } from '../../PanelMenu/PanelMenu';
 
 interface MetricLabelsListState extends SceneObjectState {
   metric: Metric;
   layoutSwitcher: LayoutSwitcher;
   body: SceneByVariableRepeater;
+}
+
+/** Build navigation URL for embeddedMini label panel click */
+function buildLabelNavigationUrl(trail: ReturnType<typeof getTrailFor>, label: string): string {
+  const timeRange = sceneGraph.getTimeRange(trail);
+  return buildMiniBreakdownNavigationUrl({
+    metric: trail.state.metric!,
+    labels: (trail.state.initialFilters || []).map((f) => ({
+      label: f.key,
+      op: f.operator,
+      value: f.value,
+    })),
+    dataSource: trail.state.initialDS!,
+    from: String(timeRange.state.from),
+    to: String(timeRange.state.to),
+    groupBy: label,
+  });
+}
+
+/** Get panel config for label panel, adjusted for embeddedMini mode */
+function getLabelPanelConfig(label: string, labelIndex: number, embeddedMini: boolean) {
+  return {
+    type: 'timeseries' as const,
+    height: embeddedMini ? PANEL_HEIGHT.XS : PANEL_HEIGHT.M,
+    title: label,
+    fixedColorIndex: labelIndex,
+    behaviors: embeddedMini ? [] : [publishTimeseriesData(), addCardinalityInfo()],
+    headerActions: embeddedMini ? () => [] : () => [new SelectLabelAction({ label })],
+    menu: embeddedMini ? undefined : () => new PanelMenu({ labelName: label }),
+    legend: { placement: 'bottom' as const },
+  };
 }
 
 export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
@@ -86,39 +119,38 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
           // Check embeddedMini at runtime
           let embeddedMini = false;
+          let trail;
           try {
-            const trail = getTrailFor(this);
+            trail = getTrailFor(this);
             embeddedMini = trail.state.embeddedMini ?? false;
           } catch {
             // Not in scene graph yet, use default
           }
 
+          const panel = buildTimeseriesPanel({
+            metric,
+            panelConfig: getLabelPanelConfig(label, labelIndex, embeddedMini),
+            queryConfig: {
+              resolution: QUERY_RESOLUTION.MEDIUM,
+              groupBy: label,
+              labelMatchers: [],
+              addIgnoreUsageFilter: true,
+            },
+          });
+
+          // Wrap panel with click navigation in embeddedMini mode
+          if (embeddedMini && trail) {
+            return new SceneCSSGridItem({
+              body: new ClickablePanelWrapper({
+                panel,
+                navigationUrl: buildLabelNavigationUrl(trail, label),
+                title: `Breakdown by ${label}`,
+              }),
+            });
+          }
+
           return new SceneCSSGridItem({
-            body: buildTimeseriesPanel({
-              metric,
-              panelConfig: {
-                type: 'timeseries',
-                height: embeddedMini ? PANEL_HEIGHT.XS : PANEL_HEIGHT.M,
-                title: label,
-                fixedColorIndex: labelIndex,
-                behaviors: embeddedMini
-                  ? []
-                  : [
-                      // publishTimeseriesData is required for the syncYAxis behavior (e.g. see MetricLabelsList)
-                      publishTimeseriesData(),
-                      addCardinalityInfo(),
-                    ],
-                headerActions: embeddedMini ? () => [] : () => [new SelectLabelAction({ label })],
-                menu: embeddedMini ? undefined : () => new PanelMenu({ labelName: label }),
-                legend: { placement: 'bottom' },
-              },
-              queryConfig: {
-                resolution: QUERY_RESOLUTION.MEDIUM,
-                groupBy: label,
-                labelMatchers: [],
-                addIgnoreUsageFilter: true,
-              },
-            }),
+            body: panel,
           });
         },
       }),
