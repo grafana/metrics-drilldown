@@ -358,12 +358,13 @@ function getStyles(theme: GrafanaTheme2, height: PANEL_HEIGHT, isClickable: bool
         &:hover {
           background: ${theme.colors.background.secondary};
         }
-        /* Invisible overlay covering entire panel - ensures cursor shows in empty space */
+        /* Invisible overlay covering entire panel - z-index ensures it's above panel content */
         &::after {
           content: '';
           position: absolute;
           inset: 0;
           cursor: inherit;
+          z-index: 1;
         }
       ` : ''}
     `,

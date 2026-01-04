@@ -38,12 +38,13 @@ function getStyles(theme: GrafanaTheme2) {
       &:hover {
         background: ${theme.colors.background.secondary};
       }
-      /* Invisible overlay covering entire panel */
+      /* Invisible overlay covering entire panel - z-index ensures it's above panel content */
       &::after {
         content: '';
         position: absolute;
         inset: 0;
         cursor: inherit;
+        z-index: 1;
       }
     `,
   };
