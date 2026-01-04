@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "@grafana/eslint-config": "8.2.0",
-    "@grafana/plugin-e2e": "1.19.9",
+    "@grafana/plugin-e2e": "3.1.0",
     "@grafana/tsconfig": "2.0.1",
     "@playwright/test": "1.57.0",
     "@stylistic/eslint-plugin-ts": "2.13.0",
