@@ -68,7 +68,9 @@ function getLabelPanelConfig(label: string, labelIndex: number, embeddedMini: bo
     height: embeddedMini ? PANEL_HEIGHT.XS : PANEL_HEIGHT.M,
     title: label,
     fixedColorIndex: labelIndex,
-    behaviors: embeddedMini ? [] : [publishTimeseriesData(), addCardinalityInfo()],
+    behaviors: embeddedMini
+      ? [addCardinalityInfo({ description: { ctaText: '' } })]
+      : [publishTimeseriesData(), addCardinalityInfo()],
     headerActions: embeddedMini ? () => [] : () => [new SelectLabelAction({ label })],
     menu: embeddedMini ? undefined : () => new PanelMenu({ labelName: label }),
     legend: { placement: 'bottom' as const },
