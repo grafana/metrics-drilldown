@@ -198,13 +198,15 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   public static readonly Component = ({ model }: SceneComponentProps<MetricLabelsList>) => {
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
+    const trail = getTrailFor(model);
+    const { embeddedMini } = trail.state;
 
     const variable = sceneGraph.lookupVariable(VAR_GROUP_BY, model) as MultiValueVariable;
     const { loading, error } = variable.useState();
 
     const batchSizes = body.useSizes();
     const shouldDisplayShowMoreButton =
-      !loading && !error && batchSizes.total > 0 && batchSizes.current < batchSizes.total;
+      !embeddedMini && !loading && !error && batchSizes.total > 0 && batchSizes.current < batchSizes.total;
 
     const onClickShowMore = () => {
       body.increaseBatchSize();
