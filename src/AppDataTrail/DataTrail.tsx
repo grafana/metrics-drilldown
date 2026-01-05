@@ -452,7 +452,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                 >
                   <div className={styles.body}>
                     <Stack direction="column" grow={1}>
-                      {topScene && <topScene.Component model={topScene} />}
+                      <topScene.Component model={topScene} />
                     </Stack>
                   </div>
                 </UrlSyncContextProvider>
