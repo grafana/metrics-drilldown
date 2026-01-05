@@ -34,7 +34,7 @@ export function buildMiniBreakdownNavigationUrl({
   const params = buildNavigateToMetricsParams(promURLObject);
   // default to breakdown and set the groupby if provided
   params.append('actionView', 'breakdown');
-  params.append('var-groupby', groupBy ? groupBy : '$__all');
+  params.append('var-groupby', groupBy ?? '$__all');
 
   return createAppUrl(ROUTES.Drilldown, params);
 }
