@@ -15,6 +15,7 @@ import { isEqual, omitBy } from 'lodash';
 import React from 'react';
 
 import { getTrailFor } from 'shared/utils/utils';
+import { getClickablePanelStyles } from 'shared/utils/utils.styles';
 
 import { type LabelMatcher } from './buildQueryExpression';
 import { EventPanelTypeChanged } from './components/EventPanelTypeChanged';
@@ -352,21 +353,7 @@ function getStyles(theme: GrafanaTheme2, height: PANEL_HEIGHT, isClickable: bool
     container: css`
       width: 100%;
       height: ${height}px;
-      ${isClickable ? `
-        position: relative;
-        cursor: pointer;
-        &:hover {
-          background: ${theme.colors.background.secondary};
-        }
-        /* Invisible overlay covering entire panel - z-index ensures it's above panel content */
-        &::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          cursor: inherit;
-          z-index: 1;
-        }
-      ` : ''}
+      ${isClickable ? getClickablePanelStyles(theme) : ''}
     `,
   };
 }

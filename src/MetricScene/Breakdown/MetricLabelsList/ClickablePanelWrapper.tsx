@@ -5,6 +5,8 @@ import { SceneObjectBase, type SceneComponentProps, type SceneObjectState, type 
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { getClickablePanelStyles } from 'shared/utils/utils.styles';
+
 interface ClickablePanelWrapperState extends SceneObjectState {
   panel: VizPanel;
   navigationUrl: string;
@@ -33,19 +35,7 @@ function getStyles(theme: GrafanaTheme2) {
     container: css`
       width: 100%;
       height: 100%;
-      position: relative;
-      cursor: pointer;
-      &:hover {
-        background: ${theme.colors.background.secondary};
-      }
-      /* Invisible overlay covering entire panel - z-index ensures it's above panel content */
-      &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        cursor: inherit;
-        z-index: 1;
-      }
+      ${getClickablePanelStyles(theme)}
     `,
   };
 }
