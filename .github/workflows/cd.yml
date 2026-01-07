@@ -7,14 +7,14 @@ on:
       - main
 
 permissions:
-  contents: "write"
-  id-token: "write"
-  attestations: "write"
+  contents: 'write'
+  id-token: 'write'
+  attestations: 'write'
 
 jobs:
   CD:
     name: Deploy plugin
-    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v4.2.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
     with:
       branch: ${{ github.event_name == 'push' && github.ref_name || github.ref }}
       environment: dev,ops
@@ -23,6 +23,6 @@ jobs:
       # Use argo workflows, auto merge to dev in deployment tools
       grafana-cloud-deployment-type: provisioned
       auto-merge-environments: dev,ops
-      argo-workflow-slack-channel: "#proj-metricsdrilldown-cd"
+      argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
       # Add the git head ref sha to the plugin version as suffix (`+abcdef`). This is required for CD builds.
       plugin-version-suffix: ${{ github.event_name == 'push' && github.sha || github.event.pull_request.head.sha }}

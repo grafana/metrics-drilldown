@@ -1,7 +1,6 @@
 ### ✨ Description
 
 **Related issue(s):** <!-- Paste a GitHub issue URL or another pull request URL -->
-Resolves <!-- Paste Github issue that is resolved by this pull request -->
 
 <!-- General summary of what the PR aims to do -->
 <!-- For UI changes, don't hesitate to provide before/after screenshots -->

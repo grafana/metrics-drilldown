@@ -3,7 +3,7 @@ import { AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { type MetricDatasourceHelper } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 
-import { limitAdhocProviders } from './utils.trail';
+import { limitAdhocProviders } from './utils';
 
 jest.mock('@grafana/scenes', () => ({
   ...jest.requireActual('@grafana/scenes'),

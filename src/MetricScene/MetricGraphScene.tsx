@@ -21,7 +21,6 @@ import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboa
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
-import { OpenAssistant } from 'shared/GmdVizPanel/components/OpenAssistant';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
@@ -63,13 +62,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                   ? ({ metric }) => [
                       new GmdVizPanelVariantSelector(),
                       new ConfigurePanelAction({ metric }),
-                      new OpenAssistant(),
                       new AddToDashboardAction(),
                       new BookmarkHeaderAction(),
                     ]
                   : ({ metric }) => [
                       new ConfigurePanelAction({ metric }),
-                      new OpenAssistant(),
                       new AddToDashboardAction(),
                       new BookmarkHeaderAction(),
                     ],
@@ -115,8 +112,6 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             headerActions: () => [
               new GmdVizPanelVariantSelector(),
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
-              new OpenAssistant(),
-              new AddToDashboardAction(),
               new BookmarkHeaderAction(),
             ],
           },

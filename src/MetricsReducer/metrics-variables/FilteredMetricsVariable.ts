@@ -32,15 +32,11 @@ export class FilteredMetricsVariable extends CustomVariable {
     this.setState({ loading, error, options });
 
     this._subs.add(
-      metricsVariable.subscribeToState((newState, prevState) => {
-        // Only copy options when loading completes (loading: true → false)
-        // This prevents overwriting filtered options on other state changes
-        const isLoadComplete = prevState.loading && !newState.loading;
-
+      metricsVariable.subscribeToState((newState) => {
         this.setState({
           loading: newState.loading,
           error: newState.error,
-          ...(isLoadComplete && { options: newState.options }),
+          options: newState.options,
         });
       })
     );
