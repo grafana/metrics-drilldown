@@ -48,7 +48,7 @@ function buildGroupByQueries({
     fn = 'count';
   }
 
-  const groupByLabel = utf8Support(queryConfig.groupBy!);
+  const groupByLabel = utf8Support(queryConfig.groupBy as string);
 
   return [
     {
