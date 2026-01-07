@@ -1,8 +1,8 @@
 {
   "trail": {
     "breadcrumb": {
-      "metrics": "Metrics",
-      "all-metrics": "All metrics"
+      "all-metrics": "All metrics",
+      "metrics": "Metrics"
     }
   }
 }

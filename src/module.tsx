@@ -2,7 +2,7 @@ import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
-import semver from 'semver';
+import { lt } from 'semver';
 
 import { exposedComponentConfigs } from 'exposedComponents/components';
 import { datasourceConfigLinkConfigs } from 'extensions/datasourceConfigLinks';
@@ -22,7 +22,7 @@ const LazyApp = lazy(async () => {
   // Before Grafana 12.1.0, plugins must load their own resources
   // After 12.1.0, Grafana handles resource loading
   const { loadResources } = await import('./i18n/loadResources');
-  const pluginLoaders = semver.lt(config?.buildInfo?.version || '12.1.0', '12.1.0') ? [loadResources] : [];
+  const pluginLoaders = lt(config?.buildInfo?.version || '0.0.0', '12.1.0') ? [loadResources] : [];
   await initPluginTranslations(pluginJson.id, pluginLoaders);
 
   // Initialize WASM-based outlier detection

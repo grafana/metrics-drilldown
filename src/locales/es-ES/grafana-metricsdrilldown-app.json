@@ -1,8 +1,8 @@
 {
   "trail": {
     "breadcrumb": {
-      "metrics": "Métricas",
-      "all-metrics": "Todas las métricas"
+      "all-metrics": "Todas las métricas",
+      "metrics": "Métricas"
     }
   }
 }
