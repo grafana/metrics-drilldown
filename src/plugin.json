@@ -7,9 +7,7 @@
     "grafanaDependency": ">=11.6.0",
     "plugins": [],
     "extensions": {
-      "exposedComponents": [
-        "grafana/add-to-dashboard-form/v1"
-      ]
+      "exposedComponents": ["grafana/add-to-dashboard-form/v1"]
     }
   },
   "preload": true,
@@ -83,9 +81,6 @@
     ],
     "extensionPoints": [
       {
-        "id": "grafana-exploremetrics-app/investigation/v1"
-      },
-      {
         "id": "grafana-metricsdrilldown-app/open-in-logs-drilldown/v1"
       }
     ],
@@ -94,6 +89,11 @@
         "id": "grafana-metricsdrilldown-app/label-breakdown-component/v1",
         "title": "Label Breakdown",
         "description": "A metrics label breakdown view from the Metrics Drilldown app."
+      },
+      {
+        "id": "grafana-metricsdrilldown-app/knowledge-graph-insight-metrics/v1",
+        "title": "Knowledge Graph Source Metrics",
+        "description": "Explore the underlying metrics related to a Knowledge Graph insight"
       }
     ]
   }
