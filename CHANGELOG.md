@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.27
+
+##### Chores
+
+*  adds "Resolves <link to issue>" so github automatically resolves issues (#895) (0e4d8765)
+
+##### Bug Fixes
+
+* **cve:**  update qs subdependency (#900) (4f8fbb5f)
+* **OpenFeature:**  gracefully degrade when OFREP endpoint is unavailable (#898) (9f7a7145)
+
+
 ## 1.0.26
 
 ##### Chores
