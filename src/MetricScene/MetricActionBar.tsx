@@ -31,6 +31,7 @@ interface ActionViewDefinition {
   value: ActionViewType;
   description?: string;
   getScene: (metricScene: MetricScene) => SceneObject<SceneObjectState>;
+  backgroundTask: (metricScene: MetricScene) => void;
 }
 
 export const actionViewsDefinitions: ActionViewDefinition[] = [
@@ -38,18 +39,21 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
     displayName: 'Breakdown',
     value: actionViews.breakdown,
     getScene: (metricScene: MetricScene) => new LabelBreakdownScene({ metric: metricScene.state.metric }),
+    backgroundTask: () => {}, // TODO: Implement background task for breakdown (e.g. count breakdown panels)
   },
   {
     displayName: 'Related metrics',
     value: actionViews.related,
     getScene: (metricScene: MetricScene) => new RelatedMetricsScene({ metric: metricScene.state.metric }),
     description: 'Relevant metrics based on current label filters',
+    backgroundTask: () => {}, // TODO: Implement background task for related metrics (e.g. count related metrics)
   },
   {
     displayName: 'Related logs',
     value: actionViews.relatedLogs,
     getScene: (metricScene: MetricScene) => metricScene.createRelatedLogsScene(),
     description: 'Relevant logs based on current label filters and time range',
+    backgroundTask: (metricScene: MetricScene) => metricScene.relatedLogsOrchestrator.findAndCheckAllDatasources(),
   },
 ];
 
