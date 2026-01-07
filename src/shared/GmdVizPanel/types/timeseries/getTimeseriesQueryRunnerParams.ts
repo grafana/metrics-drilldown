@@ -1,3 +1,4 @@
+import { utf8Support } from '@grafana/prometheus';
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
@@ -47,11 +48,13 @@ function buildGroupByQueries({
     fn = 'count';
   }
 
+  const groupByLabel = utf8Support(queryConfig.groupBy as string);
+
   return [
     {
       refId: `${metric.name}-by-${queryConfig.groupBy}`,
-      expr: promql[fn]({ expr, by: [queryConfig.groupBy!] }),
-      legendFormat: `{{${queryConfig.groupBy}}}`,
+      expr: promql[fn]({ expr, by: [groupByLabel] }),
+      legendFormat: `{{${groupByLabel}}}`,
       fromExploreMetrics: true,
     },
   ];
