@@ -157,14 +157,16 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   static readonly Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
-    const { targetName, value, countsProvider } = model.useState();
+    const { targetName, value, countsProvider, isQuestionMode } = model.useState();
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
     const isAssistantAvailable = useQuickSearchAssistantAvailability();
-    const isQuestionMode = value.startsWith('?');
 
-    const placeholder = isAssistantAvailable
-      ? `Quick search ${targetName}s or type ? to ask the Grafana Assistant`
-      : `Quick search ${targetName}s`;
+    let placeholder = `Quick search ${targetName}s`;
+    if (isQuestionMode) {
+      placeholder = 'Ask the Grafana Assistant a question and press enter';
+    } else if (isAssistantAvailable) {
+      placeholder = `Quick search ${targetName}s or type ? to ask the Grafana Assistant`;
+    }
 
     return (
       <Input
@@ -187,8 +189,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
                 variant="primary"
                 tooltip="Ask the Grafana Assistant"
                 onClick={() => {
-                  const question = value.slice(1);
-                  openQuickSearchAssistant(model, question);
+                  openQuickSearchAssistant(model, value);
                 }}
               />
             )}
@@ -197,7 +198,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
               variant="secondary"
               tooltip="Clear search"
               onClick={model.clear}
-              disabled={!value}
+              disabled={!value && !isQuestionMode}
             />
           </>
         }
