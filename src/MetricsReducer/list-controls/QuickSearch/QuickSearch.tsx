@@ -84,23 +84,30 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   private updateValue(value: string) {
     const wasEmpty = this.state.value === '';
     const isNewSearch = wasEmpty && value !== '';
-    const isQuestionMode = value.startsWith('?');
 
     // Only report search usage when not in question mode
-    if (isNewSearch && !isQuestionMode) {
+    if (isNewSearch && !this.state.isQuestionMode) {
       reportExploreMetrics('quick_search_used', {});
     }
 
     this.setState({ value });
 
     // Only notify for filtering when not in question mode
-    if (!isQuestionMode) {
+    if (!this.state.isQuestionMode) {
       this.notifyValueChange(value);
     }
   }
 
   private onChange = (e: React.FormEvent<HTMLInputElement>) => {
-    this.updateValue(e.currentTarget.value);
+    const newValue = e.currentTarget.value;
+
+    // Intercept '?' when input is empty and not already in question mode to enter AI mode
+    if (newValue === '?' && this.state.value === '' && !this.state.isQuestionMode) {
+      this.setState({ isQuestionMode: true });
+      return; // Don't add '?' to the input value
+    }
+
+    this.updateValue(newValue);
   };
 
   private clear = () => {
