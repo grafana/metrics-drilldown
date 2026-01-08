@@ -75,7 +75,7 @@ export function openQuickSearchAssistant(sceneObject: SceneObject, question: str
   );
 
   // Track the event
-  reportExploreMetrics('assistant_question_asked', {});
+  reportExploreMetrics('quick_search_assistant_question_asked', { question });
 
   openAssistant({
     origin: 'grafana-metricsdrilldown-app/quick-search',
