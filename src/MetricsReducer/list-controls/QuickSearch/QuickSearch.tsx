@@ -150,21 +150,38 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     const styles = useStyles2(getStyles);
     const { targetName, value, countsProvider } = model.useState();
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
+    const isAssistantAvailable = useQuickSearchAssistantAvailability();
+    const isQuestionMode = value.startsWith('?');
+
+    const placeholder = isAssistantAvailable
+      ? `Quick search ${targetName}s or type ? to ask the Grafana Assistant`
+      : `Quick search ${targetName}s`;
 
     return (
       <Input
         value={value}
         onChange={model.onChange}
         onKeyDown={model.onKeyDown}
-        placeholder={`Quick search ${targetName}s`}
+        placeholder={placeholder}
         prefix={<i className="fa fa-search" />}
         suffix={
           <>
             <countsProvider.Component model={countsProvider} />
-            {tagName && (
+            {!isQuestionMode && tagName && (
               <Tooltip content={tooltipContent} placement="top">
                 <Tag className={styles.counts} name={tagName} colorIndex={9} />
               </Tooltip>
+            )}
+            {isQuestionMode && isAssistantAvailable && (
+              <IconButton
+                name="ai-sparkle"
+                variant="primary"
+                tooltip="Ask the Grafana Assistant"
+                onClick={() => {
+                  const question = value.slice(1);
+                  openQuickSearchAssistant(model, question);
+                }}
+              />
             )}
             <IconButton
               name="times"
