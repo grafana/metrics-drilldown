@@ -28,7 +28,7 @@ export function useQuickSearchAssistantAvailability(): boolean {
  * Passes datasource, label filters, and time range as context.
  *
  * @param sceneObject - The scene object to gather context from
- * @param question - The user's question (without the leading '?')
+ * @param question - The user's question
  */
 export function openQuickSearchAssistant(sceneObject: SceneObject, question: string): void {
   if (!question.trim()) {
