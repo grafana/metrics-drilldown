@@ -111,6 +111,10 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   };
 
   private clear = () => {
+    this.resetToQuickSearch();
+  };
+
+  private resetToQuickSearch = () => {
     this.setState({ isQuestionMode: false });
     this.updateValue('');
   };
@@ -126,8 +130,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       e.preventDefault();
       openQuickSearchAssistant(this, this.state.value);
       // clear the question mode, return to quicksearch because the assistant has opened.
-      this.setState({ isQuestionMode: false });
-      this.updateValue('');
+      this.resetToQuickSearch();
     }
   };
 
@@ -193,6 +196,8 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
                 tooltip="Ask the Grafana Assistant"
                 onClick={() => {
                   openQuickSearchAssistant(model, value);
+                  // reset to quicksearch because the assistant has opened.
+                  model.resetToQuickSearch();
                 }}
               />
             )}
