@@ -16,6 +16,7 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
+import { openQuickSearchAssistant, useQuickSearchAssistantAvailability } from './QuickSearchAssistant';
 
 interface QuickSearchState extends SceneObjectState {
   urlSearchParamName: string;
