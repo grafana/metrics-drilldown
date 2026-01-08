@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
@@ -49,7 +49,7 @@
     "@lezer/common": "^1.2.3",
     "@openfeature/ofrep-web-provider": "^0.3.5",
     "@openfeature/web-sdk": "^1.7.2",
-    "@prometheus-io/lezer-promql": "^0.305.0-rc.1",
+    "@prometheus-io/lezer-promql": "^0.308.0",
     "leven": "^4.0.0",
     "p-limit": "^6.2.0",
     "react": "18.3.1",
