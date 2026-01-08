@@ -114,7 +114,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     this.resetToQuickSearch();
   };
 
-  private resetToQuickSearch = () => {
+  public resetToQuickSearch = () => {
     this.setState({ isQuestionMode: false });
     this.updateValue('');
   };
