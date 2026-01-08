@@ -16,6 +16,7 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
+import { openQuickSearchAssistant, useQuickSearchAssistantAvailability } from './QuickSearchAssistant';
 
 interface QuickSearchState extends SceneObjectState {
   urlSearchParamName: string;
@@ -23,13 +24,14 @@ interface QuickSearchState extends SceneObjectState {
   countsProvider: CountsProvider;
   displayCounts: boolean;
   value: string;
+  isQuestionMode: boolean;
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_DATASOURCE],
     onReferencedVariableValueChanged: () => {
-      this.setState({ value: '' });
+      this.setState({ value: '', isQuestionMode: false });
     },
   });
 
@@ -67,6 +69,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       countsProvider,
       displayCounts: Boolean(displayCounts),
       value: '',
+      isQuestionMode: false,
     });
   }
 
@@ -82,19 +85,37 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     const wasEmpty = this.state.value === '';
     const isNewSearch = wasEmpty && value !== '';
 
-    if (isNewSearch) {
+    // Only report search usage when not in question mode
+    if (isNewSearch && !this.state.isQuestionMode) {
       reportExploreMetrics('quick_search_used', {});
     }
 
     this.setState({ value });
-    this.notifyValueChange(value);
+
+    // Only notify for filtering when not in question mode
+    if (!this.state.isQuestionMode) {
+      this.notifyValueChange(value);
+    }
   }
 
   private onChange = (e: React.FormEvent<HTMLInputElement>) => {
-    this.updateValue(e.currentTarget.value);
+    const newValue = e.currentTarget.value;
+
+    // Intercept '?' when input is empty and not already in question mode to enter AI mode
+    if (newValue === '?' && this.state.value === '' && !this.state.isQuestionMode) {
+      this.setState({ isQuestionMode: true });
+      return; // Don't add '?' to the input value
+    }
+
+    this.updateValue(newValue);
   };
 
   private clear = () => {
+    this.resetToQuickSearch();
+  };
+
+  public resetToQuickSearch = () => {
+    this.setState({ isQuestionMode: false });
     this.updateValue('');
   };
 
@@ -102,6 +123,14 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     if (e.key === 'Escape') {
       e.preventDefault();
       this.clear();
+    }
+
+    // Handle Enter key in question mode to open assistant
+    if (e.key === 'Enter' && this.state.isQuestionMode && this.state.value.trim()) {
+      e.preventDefault();
+      openQuickSearchAssistant(this, this.state.value);
+      // clear the question mode, return to quicksearch because the assistant has opened.
+      this.resetToQuickSearch();
     }
   };
 
@@ -134,30 +163,54 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   static readonly Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
-    const { targetName, value, countsProvider } = model.useState();
+    const { targetName, value, countsProvider, isQuestionMode } = model.useState();
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
+    const isAssistantAvailable = useQuickSearchAssistantAvailability();
+
+    let placeholder = `Quick search ${targetName}s`;
+    if (isQuestionMode) {
+      placeholder = 'Ask the Grafana Assistant a question and press enter';
+    } else if (isAssistantAvailable) {
+      placeholder = `Quick search ${targetName}s or type ? to ask the Grafana Assistant`;
+    }
 
     return (
       <Input
         value={value}
         onChange={model.onChange}
         onKeyDown={model.onKeyDown}
-        placeholder={`Quick search ${targetName}s`}
+        placeholder={placeholder}
         prefix={<i className="fa fa-search" />}
         suffix={
           <>
             <countsProvider.Component model={countsProvider} />
-            {tagName && (
+            {!isQuestionMode && tagName && (
               <Tooltip content={tooltipContent} placement="top">
                 <Tag className={styles.counts} name={tagName} colorIndex={9} />
               </Tooltip>
+            )}
+            {isQuestionMode && isAssistantAvailable && (
+              <IconButton
+                name="ai-sparkle"
+                variant="primary"
+                tooltip="Ask the Grafana Assistant"
+                aria-label="Ask the Grafana Assistant"
+                onClick={() => {
+                  if (!value) {
+                    return;
+                  }
+                  openQuickSearchAssistant(model, value);
+                  // reset to quicksearch because the assistant has opened.
+                  model.resetToQuickSearch();
+                }}
+              />
             )}
             <IconButton
               name="times"
               variant="secondary"
               tooltip="Clear search"
               onClick={model.clear}
-              disabled={!value}
+              disabled={!value && !isQuestionMode}
             />
           </>
         }

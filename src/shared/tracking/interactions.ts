@@ -185,6 +185,8 @@ type Interactions = {
   add_to_dashboard_modal_opened: {};
   // User confirms to add to dashboard and builds a panel
   add_to_dashboard_build_panel: { expr: string };
+  // User asks a question in the Quick Search input
+  quick_search_assistant_question_asked: { question: string };
 };
 
 type OtherEvents = {
