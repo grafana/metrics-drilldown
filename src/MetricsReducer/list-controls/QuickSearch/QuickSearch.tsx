@@ -194,6 +194,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
                 name="ai-sparkle"
                 variant="primary"
                 tooltip="Ask the Grafana Assistant"
+                aria-label="Ask the Grafana Assistant"
                 onClick={() => {
                   if (!value) {
                     return;
