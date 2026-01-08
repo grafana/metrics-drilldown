@@ -126,7 +126,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     }
 
     // Handle Enter key in question mode to open assistant
-    if (e.key === 'Enter' && this.state.isQuestionMode) {
+    if (e.key === 'Enter' && this.state.isQuestionMode && this.state.value.trim()) {
       e.preventDefault();
       openQuickSearchAssistant(this, this.state.value);
       // clear the question mode, return to quicksearch because the assistant has opened.
@@ -195,6 +195,9 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
                 variant="primary"
                 tooltip="Ask the Grafana Assistant"
                 onClick={() => {
+                  if (!value) {
+                    return;
+                  }
                   openQuickSearchAssistant(model, value);
                   // reset to quicksearch because the assistant has opened.
                   model.resetToQuickSearch();
