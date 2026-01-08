@@ -31,7 +31,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_DATASOURCE],
     onReferencedVariableValueChanged: () => {
-      this.setState({ value: '' });
+      this.setState({ value: '', isQuestionMode: false });
     },
   });
 
