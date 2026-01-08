@@ -46,6 +46,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     [actionViews.breakdown]: false,
     [actionViews.related]: false,
     [actionViews.relatedLogs]: false,
+    [actionViews.queryResults]: false,
   };
 
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {

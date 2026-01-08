@@ -14,12 +14,14 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 import { MetricScene } from './MetricScene';
+import { QueryResultsScene } from './QueryResults/QueryResultsScene';
 import { RelatedMetricsScene } from './RelatedMetrics/RelatedMetricsScene';
 
 export const actionViews = {
   breakdown: 'breakdown',
   related: 'related',
   relatedLogs: 'logs',
+  queryResults: 'results',
 } as const;
 
 export const defaultActionView = actionViews.breakdown;
@@ -54,6 +56,13 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
     getScene: (metricScene: MetricScene) => metricScene.createRelatedLogsScene(),
     description: 'Relevant logs based on current label filters and time range',
     backgroundTask: (metricScene: MetricScene) => metricScene.relatedLogsOrchestrator.findAndCheckAllDatasources(),
+  },
+  {
+    displayName: 'Query Results',
+    value: actionViews.queryResults,
+    getScene: (metricScene: MetricScene) => new QueryResultsScene({ metric: metricScene.state.metric }),
+    description: 'Instant query data in table format',
+    backgroundTask: () => {},
   },
 ];
 

@@ -30,11 +30,12 @@ const appContext = createAssistantContextItem('structured', {
       relatedMetrics: 'Discover related metrics in the Related Metrics tab',
       relatedLogs: 'Discover related logs in the Related Logs tab',
       sharing: 'Use Copy URL button in panel menu to share metric views',
+      queryResults: 'View instant query results in table format in the Query Results tab',
     },
     navigation: {
       metricsList: 'Main view shows all available metrics',
       metricDetail: 'Selecting a metric opens detailed view with tabs',
-      tabs: ['Breakdown', 'Related Metrics', 'Related Logs'],
+      tabs: ['Breakdown', 'Related Metrics', 'Related Logs', 'Query Results'],
     },
   },
 });
@@ -45,11 +46,11 @@ const appContext = createAssistantContextItem('structured', {
 // ============================================================================
 export const metricsDrilldownQuestions: Question[] = [
   {
-    prompt: 'How can I find a metric I\'m interested in?',
+    prompt: "How can I find a metric I'm interested in?",
     context: [appContext],
   },
   {
-    prompt: 'How can I see a metric\'s labels?',
+    prompt: "How can I see a metric's labels?",
     context: [appContext],
   },
   {
@@ -57,4 +58,3 @@ export const metricsDrilldownQuestions: Question[] = [
     context: [appContext],
   },
 ];
-
