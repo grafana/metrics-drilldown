@@ -110,6 +110,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       e.preventDefault();
       this.clear();
     }
+
+    // Handle Enter key in question mode to open assistant
+    if (e.key === 'Enter' && this.state.value.startsWith('?')) {
+      e.preventDefault();
+      const question = this.state.value.slice(1); // Remove leading '?'
+      openQuickSearchAssistant(this, question);
+    }
   };
 
   private useHumanFriendlyCountsMessage() {
