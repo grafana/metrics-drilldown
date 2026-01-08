@@ -24,6 +24,7 @@ interface QuickSearchState extends SceneObjectState {
   countsProvider: CountsProvider;
   displayCounts: boolean;
   value: string;
+  isQuestionMode: boolean;
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
@@ -68,6 +69,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       countsProvider,
       displayCounts: Boolean(displayCounts),
       value: '',
+      isQuestionMode: false,
     });
   }
 
