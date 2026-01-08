@@ -125,6 +125,9 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     if (e.key === 'Enter' && this.state.isQuestionMode) {
       e.preventDefault();
       openQuickSearchAssistant(this, this.state.value);
+      // clear the question mode, return to quicksearch because the assistant has opened.
+      this.setState({ isQuestionMode: false });
+      this.updateValue('');
     }
   };
 
