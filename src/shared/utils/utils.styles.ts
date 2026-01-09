@@ -11,3 +11,25 @@ export function getAppBackgroundColor(theme: GrafanaTheme2, trail?: DataTrail): 
   // Otherwise, use the standard theme-based logic
   return theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas;
 }
+
+/**
+ * Returns CSS styles for making a panel clickable with proper cursor and hover feedback.
+ * Includes an invisible overlay to ensure cursor shows over entire panel area.
+ */
+export function getClickablePanelStyles(theme: GrafanaTheme2): string {
+  return `
+    position: relative;
+    cursor: pointer;
+    &:hover {
+      background: ${theme.colors.background.secondary};
+    }
+    /* Invisible overlay covering entire panel - z-index ensures it's above panel content */
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      cursor: inherit;
+      z-index: 1;
+    }
+  `;
+}
