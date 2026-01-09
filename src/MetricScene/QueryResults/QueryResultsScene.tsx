@@ -18,16 +18,20 @@ import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { getMetricTypeSync, type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { trailDS } from 'shared/shared';
 
+import {
+  DEFAULT_QUERY_RESULTS_TABLE_WIDTH,
+  PROMETHEUS_QUERY_RESULTS_COMPONENT_ID,
+  type PrometheusQueryResultsV1Props,
+} from './constants';
 import { InlineBanner } from '../../App/InlineBanner';
 import { getTrailFor } from '../../shared/utils/utils';
 import { getAppBackgroundColor } from '../../shared/utils/utils.styles';
 import { actionViews } from '../MetricActionBar';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
-import { PROMETHEUS_QUERY_RESULTS_COMPONENT_ID, PrometheusQueryResultsV1Props } from './constants';
 
 function useElementWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);
-  const [width, setWidth] = useState(0);
+  const [width, setWidth] = useState(DEFAULT_QUERY_RESULTS_TABLE_WIDTH);
 
   // Measure initial width synchronously before first paint
   useLayoutEffect(() => {
@@ -93,28 +97,27 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
     const tableResult = data?.series || [];
     const loadingState = data?.state || LoadingState.Loading;
 
-    const { component: InstantQueryResults, isLoading: isLoadingQueryResults } = usePluginComponent(
+    const { component: InstantQueryResults, isLoading: isLoadingComponent } = usePluginComponent(
       PROMETHEUS_QUERY_RESULTS_COMPONENT_ID
     );
 
     const { ref: containerRef, width } = useElementWidth<HTMLDivElement>();
 
     const hasError = data?.state === LoadingState.Error;
-    const isLoading = loadingState === LoadingState.Loading || isLoadingQueryResults;
 
     return (
       <div className={styles.container} ref={containerRef}>
-        {isLoading && <Spinner />}
+        {isLoadingComponent && <Spinner />}
         {hasError && data?.errors && (
           <InlineBanner severity="error" title="Query failed" error={data.errors[0] as Error} />
         )}
-        {!InstantQueryResults && !isLoadingQueryResults && (
+        {!InstantQueryResults && !isLoadingComponent && (
           <InlineBanner severity="warning" title="Query Results component unavailable">
             This feature requires a newer version of Grafana.
           </InlineBanner>
         )}
         {InstantQueryResults &&
-          !isLoadingQueryResults &&
+          !isLoadingComponent &&
           !hasError &&
           createElement(InstantQueryResults as React.ComponentType<PrometheusQueryResultsV1Props>, {
             tableResult,

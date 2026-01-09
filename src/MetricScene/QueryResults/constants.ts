@@ -1,6 +1,8 @@
 import type { DataFrame, LoadingState } from '@grafana/data';
 import type { TimeZone } from '@grafana/schema';
 
+export const DEFAULT_QUERY_RESULTS_TABLE_WIDTH = 800;
+
 // TODO: Use `PluginExtensionExposedComponents.PrometheusQueryResultsV1` when it becomes available from @grafana/data
 export const PROMETHEUS_QUERY_RESULTS_COMPONENT_ID = 'grafana/prometheus-query-results/v1';
 
