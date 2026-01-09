@@ -14,12 +14,14 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 import { MetricScene } from './MetricScene';
+import { QueryResultsScene } from './QueryResults/QueryResultsScene';
 import { RelatedMetricsScene } from './RelatedMetrics/RelatedMetricsScene';
 
 export const actionViews = {
   breakdown: 'breakdown',
   related: 'related',
   relatedLogs: 'logs',
+  queryResults: 'results',
 } as const;
 
 export const defaultActionView = actionViews.breakdown;
@@ -55,6 +57,13 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
     description: 'Relevant logs based on current label filters and time range',
     backgroundTask: (metricScene: MetricScene) => metricScene.relatedLogsOrchestrator.findAndCheckAllDatasources(),
   },
+  {
+    displayName: 'Query Results',
+    value: actionViews.queryResults,
+    getScene: (metricScene: MetricScene) => new QueryResultsScene({ metric: metricScene.state.metric }),
+    description: 'Instant query data in table format',
+    backgroundTask: () => {},
+  },
 ];
 
 interface MetricActionBarState extends SceneObjectState {}
@@ -63,7 +72,14 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
-    const { actionView } = metricScene.useState();
+    const { actionView, isQueryResultsAvailable } = metricScene.useState();
+
+    const visibleTabs = actionViewsDefinitions.filter((tab) => {
+      if (tab.value === actionViews.queryResults) {
+        return isQueryResultsAvailable;
+      }
+      return true;
+    });
 
     return (
       <Box paddingY={1} data-testid="action-bar" width="100%">
@@ -72,7 +88,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
         </div>
 
         <TabsBar className={styles.customTabsBar}>
-          {actionViewsDefinitions.map((tab, index) => {
+          {visibleTabs.map((tab, index) => {
             const label = tab.displayName;
             const isActive = actionView === tab.value;
             const counter =
