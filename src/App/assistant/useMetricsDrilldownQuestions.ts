@@ -17,4 +17,3 @@ export function useMetricsDrilldownQuestions() {
   // Matches any URL in the metrics drilldown app
   useProvideQuestions('/a/grafana-metricsdrilldown-app/drilldown*', metricsDrilldownQuestions);
 }
-

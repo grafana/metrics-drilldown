@@ -353,4 +353,3 @@ describe('TreeCheckBoxList', () => {
     expect(clearButton).toBeDisabled();
   });
 });
-
