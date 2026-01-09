@@ -41,4 +41,3 @@ export function getSharedListStyles(theme: GrafanaTheme2) {
     }),
   };
 }
-

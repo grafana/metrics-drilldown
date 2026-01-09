@@ -1,6 +1,12 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { sceneGraph, SceneObjectBase, VizPanel, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import {
+  sceneGraph,
+  SceneObjectBase,
+  VizPanel,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -62,4 +68,3 @@ const getStyles = (theme: GrafanaTheme2) => ({
     margin-left: ${theme.spacing(1)};
   `,
 });
-

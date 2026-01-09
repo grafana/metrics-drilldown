@@ -83,8 +83,9 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
         <TabsBar className={styles.customTabsBar}>
           {actionViewsDefinitions.map((tab, index) => {
             const label = tab.displayName;
-            const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
             const isActive = actionView === tab.value;
+            const counter =
+              tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
 
             const tabRender = (
               <Tab
