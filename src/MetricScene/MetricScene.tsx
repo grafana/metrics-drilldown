@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { config } from '@grafana/runtime';
+import { config, usePluginComponent } from '@grafana/runtime';
 import {
   ConstantVariable,
   SceneObjectBase,
@@ -13,13 +13,14 @@ import {
 } from '@grafana/scenes';
 import { VariableHide } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
 import { actionViews, actionViewsDefinitions, defaultActionView, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
+import { PROMETHEUS_QUERY_RESULTS_COMPONENT_ID } from './QueryResults/constants';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 
@@ -28,6 +29,7 @@ interface MetricSceneState extends SceneObjectState {
   metric: string;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
+  isQueryResultsAvailable?: boolean;
 }
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
@@ -133,6 +135,19 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
     const { body } = model.useState();
     const styles = useStyles2(getStyles);
+
+    // Check if Query Results component is available
+    const { component: QueryResultsComponent, isLoading } = usePluginComponent(
+      PROMETHEUS_QUERY_RESULTS_COMPONENT_ID
+    );
+
+    useEffect(() => {
+      const isAvailable = !isLoading && Boolean(QueryResultsComponent);
+
+      if (model.state.isQueryResultsAvailable !== isAvailable) {
+        model.setState({ isQueryResultsAvailable: isAvailable });
+      }
+    }, [isLoading, QueryResultsComponent, model]);
 
     return (
       <div className={styles.container} data-testid="metric-scene">

@@ -72,7 +72,14 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
-    const { actionView } = metricScene.useState();
+    const { actionView, isQueryResultsAvailable } = metricScene.useState();
+
+    const visibleTabs = actionViewsDefinitions.filter((tab) => {
+      if (tab.value === actionViews.queryResults) {
+        return isQueryResultsAvailable;
+      }
+      return true;
+    });
 
     return (
       <Box paddingY={1} data-testid="action-bar" width="100%">
@@ -81,7 +88,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
         </div>
 
         <TabsBar className={styles.customTabsBar}>
-          {actionViewsDefinitions.map((tab, index) => {
+          {visibleTabs.map((tab, index) => {
             const label = tab.displayName;
             const isActive = actionView === tab.value;
             const counter =
