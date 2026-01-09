@@ -12,6 +12,7 @@
   },
   "preload": true,
   "autoEnabled": true,
+  "languages": ["en-US"],
   "info": {
     "keywords": ["drilldown", "metrics", "app", "prometheus", "mimir"],
     "description": "Quickly find related metrics with a few clicks, without needing to write PromQL queries to retrieve metrics.",
