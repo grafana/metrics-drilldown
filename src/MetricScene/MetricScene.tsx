@@ -20,7 +20,10 @@ import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
 import { actionViews, actionViewsDefinitions, defaultActionView, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
-import { PROMETHEUS_QUERY_RESULTS_COMPONENT_ID } from './QueryResults/constants';
+import {
+  PROMETHEUS_QUERY_RESULTS_COMPONENT_ID,
+  type PrometheusQueryResultsV1Props,
+} from './QueryResults/constants';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 
@@ -30,6 +33,7 @@ interface MetricSceneState extends SceneObjectState {
   actionView?: ActionViewType;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
+  queryResultsComponent?: React.ComponentType<PrometheusQueryResultsV1Props>;
 }
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
@@ -143,9 +147,16 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
     useEffect(() => {
       const isAvailable = !isLoading && Boolean(QueryResultsComponent);
+      const typedComponent = QueryResultsComponent as React.ComponentType<PrometheusQueryResultsV1Props> | undefined;
 
-      if (model.state.isQueryResultsAvailable !== isAvailable) {
-        model.setState({ isQueryResultsAvailable: isAvailable });
+      if (
+        model.state.isQueryResultsAvailable !== isAvailable ||
+        model.state.queryResultsComponent !== typedComponent
+      ) {
+        model.setState({
+          isQueryResultsAvailable: isAvailable,
+          queryResultsComponent: typedComponent,
+        });
       }
     }, [isLoading, QueryResultsComponent, model]);
 

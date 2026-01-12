@@ -60,7 +60,11 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
   {
     displayName: 'Query Results',
     value: actionViews.queryResults,
-    getScene: (metricScene: MetricScene) => new QueryResultsScene({ metric: metricScene.state.metric }),
+    getScene: (metricScene: MetricScene) =>
+      new QueryResultsScene({
+        metric: metricScene.state.metric,
+        queryResultsComponent: metricScene.state.queryResultsComponent,
+      }),
     description: 'Instant query data in table format',
     backgroundTask: () => {},
   },

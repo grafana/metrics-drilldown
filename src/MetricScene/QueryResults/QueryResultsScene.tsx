@@ -1,6 +1,5 @@
 import { css } from '@emotion/css';
 import { LoadingState, type GrafanaTheme2 } from '@grafana/data';
-import { usePluginComponent } from '@grafana/runtime';
 import {
   behaviors,
   sceneGraph,
@@ -9,7 +8,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { Spinner, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
 import React, { createElement, useLayoutEffect, useRef, useState } from 'react';
 
@@ -18,11 +17,7 @@ import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { getMetricTypeSync, type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { trailDS } from 'shared/shared';
 
-import {
-  DEFAULT_QUERY_RESULTS_TABLE_WIDTH,
-  PROMETHEUS_QUERY_RESULTS_COMPONENT_ID,
-  type PrometheusQueryResultsV1Props,
-} from './constants';
+import { DEFAULT_QUERY_RESULTS_TABLE_WIDTH, type PrometheusQueryResultsV1Props } from './constants';
 import { InlineBanner } from '../../App/InlineBanner';
 import { getTrailFor } from '../../shared/utils/utils';
 import { getAppBackgroundColor } from '../../shared/utils/utils.styles';
@@ -56,12 +51,20 @@ function useElementWidth<T extends HTMLElement>() {
 
 interface QueryResultsSceneState extends SceneObjectState {
   metric: string;
+  queryResultsComponent?: React.ComponentType<PrometheusQueryResultsV1Props>;
 }
 
 export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
-  constructor({ metric }: { metric: QueryResultsSceneState['metric'] }) {
+  constructor({
+    metric,
+    queryResultsComponent,
+  }: {
+    metric: QueryResultsSceneState['metric'];
+    queryResultsComponent?: QueryResultsSceneState['queryResultsComponent'];
+  }) {
     super({
       metric,
+      queryResultsComponent,
       $data: new SceneQueryRunner({
         datasource: trailDS,
         queries: [
@@ -90,6 +93,7 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
   public static readonly Component = ({ model }: SceneComponentProps<QueryResultsScene>) => {
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles, trail);
+    const { queryResultsComponent: InstantQueryResults } = model.useState();
 
     // Get data from the SceneQueryRunner
     const dataProvider = sceneGraph.getData(model);
@@ -97,34 +101,29 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
     const tableResult = data?.series || [];
     const loadingState = data?.state || LoadingState.Loading;
 
-    const { component: InstantQueryResults, isLoading: isLoadingComponent } = usePluginComponent(
-      PROMETHEUS_QUERY_RESULTS_COMPONENT_ID
-    );
-
     const { ref: containerRef, width } = useElementWidth<HTMLDivElement>();
 
     const hasError = data?.state === LoadingState.Error;
 
     return (
       <div className={styles.container} ref={containerRef}>
-        {isLoadingComponent && <Spinner />}
         {hasError && data?.errors && (
           <InlineBanner severity="error" title="Query failed" error={data.errors[0] as Error} />
         )}
-        {!InstantQueryResults && !isLoadingComponent && (
+        {!InstantQueryResults && (
           <InlineBanner severity="warning" title="Query Results component unavailable">
             This feature requires a newer version of Grafana.
           </InlineBanner>
         )}
         {InstantQueryResults &&
-          !isLoadingComponent &&
           !hasError &&
-          createElement(InstantQueryResults as React.ComponentType<PrometheusQueryResultsV1Props>, {
+          createElement(InstantQueryResults, {
             tableResult,
             timeZone: 'browser',
             loading: loadingState,
             showRawPrometheus: true,
             width,
+            ariaLabel: 'Instant query results',
           })}
       </div>
     );
