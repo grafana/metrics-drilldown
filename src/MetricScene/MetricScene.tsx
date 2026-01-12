@@ -157,6 +157,15 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
           isQueryResultsAvailable: isAvailable,
           queryResultsComponent: typedComponent,
         });
+
+        // Update existing QueryResultsScene if it was created before component loaded
+        // (e.g., via direct URL navigation to ?actionView=results)
+        const selectedTab = model.state.body.state.selectedTab;
+        if (selectedTab?.state.key === 'QueryResultsScene' && typedComponent) {
+          (selectedTab as SceneObject<SceneObjectState & { queryResultsComponent?: typeof typedComponent }>).setState({
+            queryResultsComponent: typedComponent,
+          });
+        }
       }
     }, [isLoading, QueryResultsComponent, model]);
 
