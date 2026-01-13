@@ -336,11 +336,23 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     const { body, panelConfig, onClick, clickTitle } = model.useState();
     const styles = useStyles2(getStyles, panelConfig.height, Boolean(onClick));
 
+    const handleKeyDown = onClick
+      ? (event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick();
+          }
+        }
+      : undefined;
+
     return (
       <div
         className={styles.container}
         data-testid="gmd-vizpanel"
         onClick={onClick}
+        onKeyDown={handleKeyDown}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
         title={clickTitle}
       >
         {body && <body.Component model={body} />}

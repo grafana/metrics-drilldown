@@ -1,6 +1,7 @@
 import grafanaI18nPlugin from '@grafana/i18n/eslint-plugin';
 import importPlugin from 'eslint-plugin-import';
 import jestPlugin from 'eslint-plugin-jest';
+import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import playwrightPlugin from 'eslint-plugin-playwright';
 import sonarjsPlugin from 'eslint-plugin-sonarjs';
 
@@ -80,6 +81,15 @@ export default [
           },
         },
       ],
+    },
+  },
+  {
+    files: ['src/**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      'jsx-a11y': jsxA11yPlugin,
+    },
+    rules: {
+      ...jsxA11yPlugin.flatConfigs.recommended.rules,
     },
   },
   {
