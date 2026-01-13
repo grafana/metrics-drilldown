@@ -80,7 +80,7 @@ export function getRecentMetrics(): RecentMetric[] {
 
     return validMetrics;
   } catch (error) {
-    logger.error(error as Error, { message: 'Failed to get recent metrics:' });
+    logger.error(error as Error, { message: t('metrics-sorter.error.get-recent-metrics', 'Failed to get recent metrics:') });
     return [];
   }
 }
@@ -100,13 +100,7 @@ function getSortByOptions(): VariableValueOption[] {
   ];
 }
 
-const sortByOptions: VariableValueOption[] = [
-  { label: 'Default', value: 'default' },
-  { label: 'Alphabetical [A-Z]', value: 'alphabetical' },
-  { label: 'Alphabetical [Z-A]', value: 'alphabetical-reversed' },
-  { label: 'Dashboard Usage', value: 'dashboard-usage' },
-  { label: 'Alerting Usage', value: 'alerting-usage' },
-] as const;
+const sortByOptions: VariableValueOption[] = getSortByOptions();
 
 export const VAR_WINGMAN_SORT_BY = 'metrics-reducer-sort-by';
 
@@ -129,7 +123,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
         variables: [
           new CustomVariable({
             name: VAR_WINGMAN_SORT_BY,
-            label: 'Sort by',
+            label: t('metrics-sorter.label', 'Sort by'),
             value: 'default',
             query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
             description:

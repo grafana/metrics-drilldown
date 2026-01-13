@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { RadioButtonGroup } from '@grafana/ui';
 import React from 'react';
@@ -16,14 +17,18 @@ interface GmdVizPanelVariantSelectorState extends SceneObjectState {
   currentPanelType?: PanelType;
 }
 
+function getDefaultVariantOptions(): Array<{ label: string; value: PanelType }> {
+  return [
+    { value: 'percentiles' as PanelType, label: t('gmd-viz-panel.variant.percentiles', 'percentiles') },
+    { value: 'heatmap' as PanelType, label: t('gmd-viz-panel.variant.heatmap', 'heatmap') },
+  ];
+}
+
 // currently used only for histogram metrics
 export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVariantSelectorState> {
   constructor() {
     super({
-      options: [
-        { value: 'percentiles' as PanelType, label: 'percentiles' },
-        { value: 'heatmap' as PanelType, label: 'heatmap' },
-      ],
+      options: getDefaultVariantOptions(),
       currentPanelType: undefined,
     });
 
@@ -55,12 +60,13 @@ export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVaria
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanelVariantSelector>) => {
-    const { options, currentPanelType } = model.useState();
+    const { currentPanelType } = model.useState();
+    const translatedOptions = getDefaultVariantOptions();
 
-    if (!options.length) {
+    if (!translatedOptions.length) {
       return null;
     }
 
-    return <RadioButtonGroup size="sm" options={options} value={currentPanelType} onChange={model.onChange} />;
+    return <RadioButtonGroup size="sm" options={translatedOptions} value={currentPanelType} onChange={model.onChange} />;
   };
 }

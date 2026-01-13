@@ -39,23 +39,7 @@ function getDefaultOptions(): Array<ComboboxOption<SortSeriesByOption>> {
 }
 
 export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
-  static readonly DEFAULT_OPTIONS = [
-    {
-      value: 'outliers' as SortSeriesByOption,
-      label: 'Outlying series',
-      description: 'Prioritizes values that show distinct behavior from others within the same label',
-    },
-    {
-      value: 'alphabetical' as SortSeriesByOption,
-      label: 'Name [A-Z]',
-      description: 'Alphabetical order',
-    },
-    {
-      value: 'alphabetical-reversed' as SortSeriesByOption,
-      label: 'Name [Z-A]',
-      description: 'Reversed alphabetical order',
-    },
-  ];
+  static readonly DEFAULT_OPTIONS = getDefaultOptions();
 
   constructor(state: Pick<SortBySelectorState, 'target'>) {
     const sortBy = userStorage.getItem(PREF_KEYS.BREAKDOWN_SORTBY);

@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Tooltip, useStyles2 } from '@grafana/ui';
 import { cloneDeep } from 'lodash';
@@ -140,7 +141,11 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
         </div>
         <div className={styles.radioContainer}>
           <Tooltip
-            content={!isSelected ? 'Click to select this configuration' : 'Current configuration'}
+            content={
+              !isSelected
+                ? t('with-config-panel-options.click-to-select', 'Click to select this configuration')
+                : t('with-config-panel-options.current-config', 'Current configuration')
+            }
             placement="top"
           >
             <input type="radio" name="select-config" checked={isSelected} />

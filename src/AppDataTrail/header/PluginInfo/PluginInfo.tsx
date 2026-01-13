@@ -124,9 +124,11 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
       {promBuildInfo && (
         <Menu.Item
           className={styles.promBuildInfo}
-          label={`${promBuildInfo.application || '?'} ${promBuildInfo.version} ${
-            promBuildInfo.buildDate ? `(${promBuildInfo.buildDate})` : ''
-          }`}
+          label={t('plugin-info.menu.prom-build-info', '{{application}} {{version}} {{buildDate}}', {
+            application: promBuildInfo.application || '?',
+            version: promBuildInfo.version,
+            buildDate: promBuildInfo.buildDate ? `(${promBuildInfo.buildDate})` : '',
+          })}
           icon="gf-prometheus"
           onClick={() =>
             window.open(`${promBuildInfo.repository}/commit/${promBuildInfo.revision}`, '_blank', 'noopener,noreferrer')

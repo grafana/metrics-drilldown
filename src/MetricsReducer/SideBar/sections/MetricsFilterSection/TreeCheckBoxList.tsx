@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t, Trans } from '@grafana/i18n';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -129,13 +130,19 @@ export function TreeCheckBoxList({
   return (
     <>
       <div className={sharedStyles.listHeader}>
-        <div>{selectedGroups.length} selected</div>
+        <div>
+          <Trans i18nKey="sidebar.tree-checkbox.selected-count">{{ count: selectedGroups.length }} selected</Trans>
+        </div>
         <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
-          clear
+          <Trans i18nKey="sidebar.tree-checkbox.clear">clear</Trans>
         </Button>
       </div>
 
-      {!groups.length && <div className={sharedStyles.noResults}>No results.</div>}
+      {!groups.length && (
+        <div className={sharedStyles.noResults}>
+          <Trans i18nKey="sidebar.tree-checkbox.no-results">No results.</Trans>
+        </div>
+      )}
 
       {groups.length > 0 && (
         <ul className={sharedStyles.list} data-testid="checkbox-filters-tree">
@@ -153,7 +160,11 @@ export function TreeCheckBoxList({
                     <button
                       className={treeStyles.expandButton}
                       onClick={() => onExpandToggle(group.value)}
-                      aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                      aria-label={
+                        isExpanded
+                          ? t('sidebar.tree-checkbox.collapse', 'Collapse')
+                          : t('sidebar.tree-checkbox.expand', 'Expand')
+                      }
                       data-testid={`expand-${group.value}`}
                     >
                       <Icon name={isExpanded ? 'angle-down' : 'angle-right'} />

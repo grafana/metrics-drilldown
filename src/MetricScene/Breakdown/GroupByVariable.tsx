@@ -16,7 +16,7 @@ export class GroupByVariable extends QueryVariable {
   constructor() {
     super({
       name: VAR_GROUP_BY,
-      label: 'Group by',
+      label: t('breakdown.group-by.label', 'Group by'),
       datasource: trailDS,
       includeAll: true,
       defaultToAll: true,

@@ -35,10 +35,7 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> {
     keys: [this.state.urlSearchParamName],
   });
 
-  static readonly DEFAULT_OPTIONS = [
-    { label: 'Grid', value: LayoutType.GRID },
-    { label: 'Rows', value: LayoutType.ROWS },
-  ];
+  static readonly DEFAULT_OPTIONS = getDefaultLayoutOptions();
 
   static readonly DEFAULT_LAYOUT = LayoutType.GRID;
 
