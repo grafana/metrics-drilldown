@@ -1,11 +1,12 @@
 {
-  "plugins": ["import", "sonarjs", "jest"],
+  "plugins": ["import", "sonarjs", "jest", "jsx-a11y"],
   "extends": [
     "./.config/.eslintrc",
     "plugin:import/recommended",
     "plugin:import/typescript",
     "plugin:sonarjs/recommended-legacy",
-    "plugin:jest/recommended"
+    "plugin:jest/recommended",
+    "plugin:jsx-a11y/recommended"
   ],
   "settings": {
     "import/parsers": {
