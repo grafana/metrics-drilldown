@@ -8,6 +8,7 @@ import reactPlugin from 'eslint-plugin-react';
 import sonarjsPlugin from 'eslint-plugin-sonarjs';
 
 import grafanaI18nPlugin from '@grafana/i18n/eslint-plugin';
+import grafanaEslintConfig from '@grafana/eslint-config/flat.js';
 
 export default [
   // 1. Global ignores
@@ -26,15 +27,15 @@ export default [
     ],
   },
 
+  // 2. Base Grafana configuration
+  ...grafanaEslintConfig,
+
   // 3. Main source files configuration (TypeScript files)
   {
     name: 'metrics-drilldown/main',
     files: ['src/**/*.{ts,tsx}'],
     plugins: {
-      '@typescript-eslint': tseslint,
       import: importPlugin,
-      react: reactPlugin,
-      'react-hooks': reactHooksPlugin,
       sonarjs: sonarjsPlugin,
       jest: jestPlugin,
       '@grafana/i18n': grafanaI18nPlugin,
@@ -83,6 +84,7 @@ export default [
       'sonarjs/todo-tag': ['warn'],
       'sonarjs/fixme-tag': ['warn'],
       'sonarjs/prefer-regexp-exec': ['off'],
+      'sonarjs/slow-regex': ['off'],
 
       // Jest rules
       ...jestPlugin.configs.recommended.rules,
@@ -90,7 +92,8 @@ export default [
 
       // TypeScript rules
       '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-deprecated': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error'],
 
       // Custom rules
       'no-unused-vars': 'off',
@@ -127,9 +130,11 @@ export default [
   // 5. Test files configuration
   {
     name: 'metrics-drilldown/tests',
-    files: ['tests/**/*'],
+    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', 'tests/**/*', 'src/test/**/*'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
+      '@grafana/i18n/no-untranslated-strings': 'off',
+      '@grafana/i18n/no-translation-top-level': 'off',
     },
   },
 
@@ -155,6 +160,7 @@ export default [
         window: true,
         require: true,
         process: true,
+        URLSearchParams: true,
       },
     },
     rules: {
@@ -167,6 +173,8 @@ export default [
       'jest/expect-expect': 'off',
       'jest/valid-describe-callback': 'off',
       'jest/no-done-callback': 'off',
+      // Disable React hooks rules for Playwright fixtures
+      'react-hooks/rules-of-hooks': 'off',
     },
   },
 ];
