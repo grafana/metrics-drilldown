@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t, Trans } from '@grafana/i18n';
 import { Collapse, TextLink, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -33,22 +34,24 @@ export function ErrorView({ error }: Readonly<ErrorViewProps>) {
     <div className={styles.container}>
       <InlineBanner
         severity="error"
-        title="Fatal error!"
+        title={t('error-view.title', 'Fatal error!')}
         error={error}
         errorContext={{ handheldBy: 'React error boundary' }}
         message={
           <>
             <p className={styles.message}>
-              Please{' '}
-              <TextLink href="#" onClick={onClickReload}>
-                try reloading the page
-              </TextLink>{' '}
-              or, if the problem persists, contact your organization admin. Sorry for the inconvenience.
+              <Trans i18nKey="error-view.message">
+                Please{' '}
+                <TextLink href="#" onClick={onClickReload}>
+                  try reloading the page
+                </TextLink>{' '}
+                or, if the problem persists, contact your organization admin. Sorry for the inconvenience.
+              </Trans>
             </p>
             <p>
               <Collapse
                 className={styles.callStack}
-                label="View stack trace"
+                label={t('error-view.stack-trace-label', 'View stack trace')}
                 isOpen={isCollapseOpen}
                 onToggle={() => setIsCollapseOpen(!isCollapseOpen)}
               >

@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { usePluginContext, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
 import { Button, Dropdown, Menu, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useState } from 'react';
@@ -28,9 +29,9 @@ function InfoMenuHeader() {
     <div className={styles.menuHeader}>
       <h5>
         <PluginLogo size="small" />
-        Grafana Metrics Drilldown v{version}
+        {t('plugin-info.header.title', 'Grafana Metrics Drilldown v{{version}}', { version })}
       </h5>
-      <div className={styles.subTitle}>Last update: {updated}</div>
+      <div className={styles.subTitle}>{t('plugin-info.header.last-update', 'Last update: {{updated}}', { updated })}</div>
     </div>
   );
 }
@@ -55,13 +56,13 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
   return (
     <Menu header={<InfoMenuHeader />}>
       <Menu.Item
-        label={`Commit SHA: ${shortCommitSha}`}
+        label={t('plugin-info.menu.commit-sha', 'Commit SHA: {{sha}}', { sha: shortCommitSha })}
         icon="github"
         onClick={() => window.open(pluginCommitURL)}
         disabled={isDev}
       />
       <Menu.Item
-        label="Changelog"
+        label={t('plugin-info.menu.changelog', 'Changelog')}
         icon="list-ul"
         onClick={() =>
           window.open(
@@ -72,7 +73,7 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
         }
       />
       <Menu.Item
-        label="Contribute"
+        label={t('plugin-info.menu.contribute', 'Contribute')}
         icon="external-link-alt"
         onClick={() =>
           window.open(
@@ -83,7 +84,7 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
         }
       />
       <Menu.Item
-        label="Documentation"
+        label={t('plugin-info.menu.documentation', 'Documentation')}
         icon="document-info"
         onClick={() =>
           window.open(
@@ -94,7 +95,7 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
         }
       />
       <Menu.Item
-        label="Report an issue"
+        label={t('plugin-info.menu.report-issue', 'Report an issue')}
         icon="bug"
         onClick={() =>
           window.open(
@@ -106,7 +107,11 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
       />
       <Menu.Divider />
       <Menu.Item
-        label={`Grafana ${grafanaBuildInfo.edition} v${grafanaBuildInfo.version} (${grafanaBuildInfo.env})`}
+        label={t('plugin-info.menu.grafana-version', 'Grafana {{edition}} v{{version}} ({{env}})', {
+          edition: grafanaBuildInfo.edition,
+          version: grafanaBuildInfo.version,
+          env: grafanaBuildInfo.env,
+        })}
         icon="grafana"
         onClick={() =>
           window.open(
@@ -119,7 +124,6 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
       {promBuildInfo && (
         <Menu.Item
           className={styles.promBuildInfo}
-          // eslint-disable-next-line sonarjs/no-nested-template-literals
           label={`${promBuildInfo.application || '?'} ${promBuildInfo.version} ${
             promBuildInfo.buildDate ? `(${promBuildInfo.buildDate})` : ''
           }`}
@@ -141,9 +145,9 @@ export function PluginInfo({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>
       <Button
         icon="info-circle"
         variant="secondary"
-        tooltip="Plugin info"
+        tooltip={t('plugin-info.button.tooltip', 'Plugin info')}
         tooltipPlacement="top"
-        title="Plugin info"
+        title={t('plugin-info.button.title', 'Plugin info')}
         data-testid="plugin-info-button"
       />
     </Dropdown>

@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   behaviors,
@@ -109,7 +110,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
             </div>
           </div>
         )}
-        {embeddedMini && <div className={styles.miniSectionLabel}>Breakdown</div>}
+        {embeddedMini && (
+          <div className={styles.miniSectionLabel}>{t('breakdown.section-label', 'Breakdown')}</div>
+        )}
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}

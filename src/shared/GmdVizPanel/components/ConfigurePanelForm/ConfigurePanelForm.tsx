@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -218,7 +219,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
       <div>
         <div className={styles.controlsContainer}>
           <Button variant="secondary" size="md" onClick={model.onClickRestoreDefault}>
-            Restore default config
+            {t('configure-panel.restore-default', 'Restore default config')}
           </Button>
           <div className={styles.controls}>
             {controls.map((control) => (
@@ -228,25 +229,35 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
         </div>
 
         <div className={styles.messageContainer}>
-          <p>Select a Prometheus function that will be used by default to display the {metric.name} metric.</p>
+          <p>
+            {t(
+              'configure-panel.select-function-message',
+              'Select a Prometheus function that will be used by default to display the {{metricName}} metric.',
+              { metricName: metric.name }
+            )}
+          </p>
         </div>
 
         {body && <body.Component model={body} />}
 
         <div className={styles.formButtonsContainer}>
           <Button variant="primary" size="md" onClick={model.onClickApplyConfig}>
-            Apply
+            {t('configure-panel.apply', 'Apply')}
           </Button>
           <Button variant="secondary" size="md" onClick={model.onClickCancel}>
-            Cancel
+            {t('configure-panel.cancel', 'Cancel')}
           </Button>
         </div>
 
         <ConfirmModal
           isOpen={isConfirmModalOpen}
-          title="Restore default configuration"
-          body={`Are you sure you want to restore the default configuration for the ${metric} metric?`}
-          confirmText="Restore"
+          title={t('configure-panel.restore-modal-title', 'Restore default configuration')}
+          body={t(
+            'configure-panel.restore-modal-body',
+            'Are you sure you want to restore the default configuration for the {{metric}} metric?',
+            { metric: metric.name }
+          )}
+          confirmText={t('configure-panel.restore-modal-confirm', 'Restore')}
           onConfirm={model.onClickConfirmRestoreDefault}
           onDismiss={model.closeConfirmModal}
         />

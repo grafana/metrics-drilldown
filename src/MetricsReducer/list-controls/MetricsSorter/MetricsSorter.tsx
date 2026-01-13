@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import {
   CustomVariable,
   sceneGraph,
@@ -87,6 +88,16 @@ export function getRecentMetrics(): RecentMetric[] {
 interface MetricsSorterState extends SceneObjectState {
   $variables: SceneVariableSet;
   inputControls: SceneObject;
+}
+
+function getSortByOptions(): VariableValueOption[] {
+  return [
+    { label: t('metrics-sorter.option.default', 'Default'), value: 'default' },
+    { label: t('metrics-sorter.option.alphabetical', 'Alphabetical [A-Z]'), value: 'alphabetical' },
+    { label: t('metrics-sorter.option.alphabetical-reversed', 'Alphabetical [Z-A]'), value: 'alphabetical-reversed' },
+    { label: t('metrics-sorter.option.dashboard-usage', 'Dashboard Usage'), value: 'dashboard-usage' },
+    { label: t('metrics-sorter.option.alerting-usage', 'Alerting Usage'), value: 'alerting-usage' },
+  ];
 }
 
 const sortByOptions: VariableValueOption[] = [

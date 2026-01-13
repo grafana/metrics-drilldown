@@ -1,4 +1,5 @@
 import { css } from '@emotion/css';
+import { t } from '@grafana/i18n';
 import { QueryVariable, sceneGraph, type MultiValueVariable, type SceneComponentProps } from '@grafana/scenes';
 import { Field, useStyles2 } from '@grafana/ui';
 import React, { useCallback } from 'react';
@@ -68,7 +69,7 @@ export class GroupByVariable extends QueryVariable {
     );
 
     return (
-      <Field label="By label" data-testid="breakdown-label-selector" className={styles.field}>
+      <Field label={t('breakdown.by-label', 'By label')} data-testid="breakdown-label-selector" className={styles.field}>
         <GroupBySelector
           options={options as GroupByOptions}
           value={value as string}
