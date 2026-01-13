@@ -30,6 +30,8 @@
   },
   "checkbox-list": {
     "clear": "clear",
+    "collapse": "Collapse",
+    "expand": "Expand",
     "no-results": "No results.",
     "selected-count_one": "{{count}} selected",
     "selected-count_other": "{{count}} selected"
