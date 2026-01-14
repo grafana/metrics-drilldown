@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.0.28
+
+##### Chores
+
+*  add eslint-plugin-jsx-a11y and fix a11y violations (#924) (a805a40a)
+*  handle TODOs (#864) (26615aa9)
+*  add @grafana/i18n (#868) (86af4387)
+*  Remove investigations (#902) (8ae002f3)
+* **deps:**
+  *  Update docker.io/prom/prometheus Docker tag to v3.8.1 (#838) (9fb8c24d)
+  *  Update dependency @prometheus-io/lezer-promql to ^0.308.0 (#877) (d738973a)
+
+##### Continuous Integration
+
+*  upgrade shared workflows dependency (#909) (f362aa6f)
+
+##### New Features
+
+*  mini drilldown grafana assistant navigation integration (#899) (404db242)
+*  assistant quicksearch integration to ask a question (#908) (0721bcce)
+
+##### Bug Fixes
+
+*  bump @remix-run/router (#912) (a508afe5)
+*  group by utf8 label (#906) (77d6b227)
+
+
 ## 1.0.27
 
 ##### Chores
