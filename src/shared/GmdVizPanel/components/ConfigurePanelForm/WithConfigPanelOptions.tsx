@@ -113,10 +113,23 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
     const styles = useStyles2(getStyles);
     const { body, isSelected, queryParams } = model.useState();
 
+    const isClickable = !isSelected;
+    const handleKeyDown = isClickable
+      ? (event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            model.onClickPreset();
+          }
+        }
+      : undefined;
+
     return (
       <div
         className={cx(styles.container, isSelected && styles.selected)}
-        onClick={!isSelected ? model.onClickPreset : undefined}
+        onClick={isClickable ? model.onClickPreset : undefined}
+        onKeyDown={handleKeyDown}
+        role={isClickable ? 'button' : undefined}
+        tabIndex={isClickable ? 0 : undefined}
       >
         <div className={cx(styles.bodyAndParams)}>
           <body.Component model={body} />
