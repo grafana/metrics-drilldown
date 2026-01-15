@@ -1,5 +1,5 @@
-const jsxA11y = require('eslint-plugin-jsx-a11y');
 const tsParser = require('@typescript-eslint/parser');
+const jsxA11y = require('eslint-plugin-jsx-a11y');
 
 /**
  * @type {Array<import('eslint').Linter.Config>}

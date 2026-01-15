@@ -1,8 +1,8 @@
 const grafanaConfig = require('@grafana/eslint-config/flat');
 const importPlugin = require('eslint-plugin-import');
-const sonarjs = require('eslint-plugin-sonarjs');
 const jest = require('eslint-plugin-jest');
 const jsxA11y = require('eslint-plugin-jsx-a11y');
+const sonarjs = require('eslint-plugin-sonarjs');
 const globals = require('globals');
 
 /**
@@ -84,11 +84,23 @@ module.exports = [
       'sonarjs/todo-tag': ['warn'],
       'sonarjs/fixme-tag': ['warn'],
       'sonarjs/prefer-regexp-exec': ['off'],
+      // Grafana Scenes uses a pattern where hooks are called inside static Component
+      // functions on classes that extend SceneObjectBase. This is intentional and valid.
+      // react-hooks v7 is stricter about detecting "class components" even when hooks
+      // are used in static function properties. Disable these rules as they produce
+      // false positives for the Scenes architecture.
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/static-components': 'off',
     },
   },
   {
     name: 'metrics-drilldown/typescript-deprecation',
     files: ['src/**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.json',
+      },
+    },
     rules: {
       '@typescript-eslint/no-deprecated': 'warn',
     },
