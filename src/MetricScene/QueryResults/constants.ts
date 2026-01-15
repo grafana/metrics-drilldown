@@ -6,7 +6,7 @@ export const DEFAULT_QUERY_RESULTS_TABLE_WIDTH = 800;
 // TODO: Use `PluginExtensionExposedComponents.PrometheusQueryResultsV1` when it becomes available from @grafana/data
 export const PROMETHEUS_QUERY_RESULTS_COMPONENT_ID = 'grafana/prometheus-query-results/v1';
 
-// TODO: Swap the use of this type in favor of `PrometheusQueryResultsV1Props` from `@grafana/data` when it becomes available
+// TODO: Replace this type with `PrometheusQueryResultsV1Props` from `@grafana/data` when it becomes available
 export type PrometheusQueryResultsV1Props = {
   /** Raw DataFrames to display (processing handled internally). Defaults to empty array. */
   tableResult?: DataFrame[];
