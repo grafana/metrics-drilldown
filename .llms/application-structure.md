@@ -11,6 +11,27 @@ The typical Metrics Drilldown app user flow is as follows:
 
 ## Metrics Reducer Scene
 
+The Metrics Reducer scene is responsible for listing and refining the metrics that are available in the data source. It is the entry point for the user to the Metrics Drilldown app. It offers controls both above the list of metric panels and in the sidebar.
+
+### Top Controls
+
+The top controls are located above the list of metric panels. They include:
+
+- Data source selector: A dropdown for selecting a Prometheus-compatible data source.
+- Time range selector: A time range selector for selecting the time range for the metrics.
+- Auto refresh: A toggle for enabling or disabling automatic refreshing of the list of metrics by a selected time interval.
+- Plugin info: A button for displaying information about the Metrics Drilldown app (including the version number) and information about the Grafana instance and data source.
+- Give feedback: A button for providing feedback about the Metrics Drilldown app.
+- Search: A search input for filtering the list of metrics. Users can provide a plaintext search term to filter the list of metrics by name, or a regex expression. In environments with Grafana Assistant, users can also ask Assistant a question by first typing a question mark.
+- Sort by: A dropdown for sorting the list of metrics. Options include:
+  - "Default": The default sorting is alphabetical with recently-selected metrics first.
+  - "Alphabetical [A-Z]": The list is sorted alphabetically.
+  - "Alphabetical [Z-A]": The list is sorted alphabetically in reverse order.
+  - "Dashboard Usage": The list is sorted by the number of times the metric is used in dashboards, with the most used metrics first.
+  - "Alerting Usage": The list is sorted by the number of times the metric is used in alerting rules, with the most used metrics first.
+- Layout: A toggle for switching between grid and rows layout.
+- Label filters: A dropdown for selecting a label to filter the list of metrics by. This is a powerful tool for reducing the "sea of metrics" to a manageable set of metrics.
+
 ### Sidebar
 
 ## Metric Scene
