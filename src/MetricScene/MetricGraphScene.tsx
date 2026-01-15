@@ -18,6 +18,7 @@ import React, { useRef } from 'react';
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboardAction';
+import { CreateAlertAction } from 'shared/GmdVizPanel/components/CreateAlertAction';
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
@@ -66,12 +67,14 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                       new ConfigurePanelAction({ metric }),
                       new OpenAssistant(),
                       new AddToDashboardAction(),
+                      new CreateAlertAction(),
                       new BookmarkHeaderAction(),
                     ]
                   : ({ metric }) => [
                       new ConfigurePanelAction({ metric }),
                       new OpenAssistant(),
                       new AddToDashboardAction(),
+                      new CreateAlertAction(),
                       new BookmarkHeaderAction(),
                     ],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
@@ -154,6 +157,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
               new OpenAssistant(),
               new AddToDashboardAction(),
+              new CreateAlertAction(),
               new BookmarkHeaderAction(),
             ],
           },
