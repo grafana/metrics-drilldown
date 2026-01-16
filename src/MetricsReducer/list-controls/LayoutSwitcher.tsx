@@ -79,13 +79,12 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> {
   };
 
   static readonly Component = ({ model }: SceneComponentProps<LayoutSwitcher>) => {
-    const { layout } = model.useState();
-    const translatedOptions = getDefaultLayoutOptions();
+    const { layout, options } = model.useState();
 
     return (
       <RadioButtonGroup
         aria-label={t('layout-switcher.aria-label', 'Layout switcher')}
-        options={translatedOptions}
+        options={options}
         value={layout}
         onChange={model.onChange}
         fullWidth={false}
