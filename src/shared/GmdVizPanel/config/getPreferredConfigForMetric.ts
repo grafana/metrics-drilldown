@@ -35,7 +35,7 @@ export function getPreferredConfigForMetric(metric: string): PanelConfigPreset |
   return metricConfig;
 }
 
-/* eslint-disable sonarjs/prefer-single-boolean-return */
+ 
 export function isValid(metricConfig: PanelConfigPreset): boolean {
   if (!['id', 'panelOptions', 'queryOptions'].every((key) => key in metricConfig)) {
     return false;

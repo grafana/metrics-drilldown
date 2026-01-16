@@ -234,7 +234,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   public Controls({ model }: { model: MetricLabelsList }) {
-    const styles = useStyles2(getStyles); // eslint-disable-line react-hooks/rules-of-hooks
+    const styles = useStyles2(getStyles);  
     const { layoutSwitcher } = model.useState();
 
     return (
