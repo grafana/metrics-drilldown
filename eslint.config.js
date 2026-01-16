@@ -37,15 +37,11 @@ module.exports = [
     },
     rules: {
       '@grafana/i18n/no-untranslated-strings': [
-        'warn',
+        'error',
         {
           basePaths: ['src'],
           namespace: 'grafana-metricsdrilldown-app',
-          calleesToIgnore: [
-            '^css$',
-            'use[A-Z].*',
-            '^get.*Styles$',
-          ],
+          calleesToIgnore: ['^css$', 'use[A-Z].*', '^get.*Styles$'],
         },
       ],
       '@grafana/i18n/no-translation-top-level': 'warn',
