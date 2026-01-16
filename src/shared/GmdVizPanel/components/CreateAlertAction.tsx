@@ -46,9 +46,8 @@ export class CreateAlertAction extends SceneObjectBase<CreateAlertActionState> {
     }
 
     const handleClick = () => {
-      // We use getPanelData to transform the VizPanel into a Panel schema object
-      // with interpolated variables. This is required because plugin components
-      // cannot receive scene objects directly - they need serializable data.
+      // Transform VizPanel into Panel schema with interpolated variables
+      // as expected by the alerting component API.
       const data = getPanelData(vizPanel);
       setPanelData(data);
       setShowModal(true);
