@@ -44,7 +44,7 @@ module.exports = [
           calleesToIgnore: ['^css$', 'use[A-Z].*', '^get.*Styles$'],
         },
       ],
-      '@grafana/i18n/no-translation-top-level': 'warn',
+      '@grafana/i18n/no-translation-top-level': 'error',
     },
   },
   {
