@@ -33,6 +33,7 @@ export function buildQueryExpression(options: Options): string {
   }));
 
   if (addIgnoreUsageFilter) {
+    // eslint-disable-next-line @grafana/i18n/no-untranslated-strings -- This is a PromQL label name, not user-facing text
     defaultSelectors.push({ label: '__ignore_usage__', operator: MatchingOperator.equal, value: '' });
   }
 

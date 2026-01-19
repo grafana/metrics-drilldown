@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { VariableHide, VariableRefresh, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   AdHocFiltersVariable,
   DataSourceVariable,
@@ -23,8 +24,8 @@ export class LabelsVariable extends QueryVariable {
     super({
       key: VAR_WINGMAN_GROUP_BY,
       name: VAR_WINGMAN_GROUP_BY,
-      label: 'Group by label',
-      placeholder: 'Group by label...',
+      label: t('labels-variable.label', 'Group by label'),
+      placeholder: t('labels-variable.placeholder', 'Group by label...'),
       datasource: { uid: LabelsDataSource.uid },
       query: '',
       includeAll: false,

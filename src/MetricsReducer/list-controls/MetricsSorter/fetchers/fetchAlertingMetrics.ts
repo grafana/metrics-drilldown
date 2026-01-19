@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 
 import { logger } from 'shared/logger/logger';
@@ -59,7 +60,7 @@ export async function fetchAlertingMetrics(): Promise<Record<string, MetricUsage
   } catch (err) {
     const error = typeof err === 'string' ? new Error(err) : (err as Error);
     logger.error(error, {
-      message: 'Failed to fetch alerting rules',
+      message: t('fetch-alerting-metrics.error', 'Failed to fetch alerting rules'),
     });
     // Return empty object when fetch fails
     return {};

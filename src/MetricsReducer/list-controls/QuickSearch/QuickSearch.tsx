@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
@@ -148,7 +149,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     if (counts.current === counts.total) {
       return {
         tagName: `${counts.current}`,
-        tooltipContent: counts.current !== 1 ? `${counts.current} ${targetName}s in total` : `1 ${targetName} in total`,
+        tooltipContent:
+          counts.current !== 1
+            ? t('quick-search.count-total-plural', '{{count}} {{targetName}}s in total', {
+                count: counts.current,
+                targetName,
+              })
+            : t('quick-search.count-total-singular', '1 {{targetName}} in total', { targetName }),
       };
     }
 
@@ -156,8 +163,15 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       tagName: `${counts.current}/${counts.total}`,
       tooltipContent:
         counts.current !== 1
-          ? `${counts.current} out of ${counts.total} ${targetName}s in total`
-          : `1 out of ${counts.total} ${targetName}s in total`,
+          ? t('quick-search.count-filtered-plural', '{{current}} out of {{total}} {{targetName}}s in total', {
+              current: counts.current,
+              total: counts.total,
+              targetName,
+            })
+          : t('quick-search.count-filtered-singular', '1 out of {{total}} {{targetName}}s in total', {
+              total: counts.total,
+              targetName,
+            }),
     };
   }
 
@@ -167,11 +181,15 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
     const isAssistantAvailable = useQuickSearchAssistantAvailability();
 
-    let placeholder = `Quick search ${targetName}s`;
+    let placeholder = t('quick-search.placeholder', 'Quick search {{targetName}}s', { targetName });
     if (isQuestionMode) {
-      placeholder = 'Ask the Grafana Assistant a question and press enter';
+      placeholder = t('quick-search.placeholder-question-mode', 'Ask the Grafana Assistant a question and press enter');
     } else if (isAssistantAvailable) {
-      placeholder = `Quick search ${targetName}s or type ? to ask the Grafana Assistant`;
+      placeholder = t(
+        'quick-search.placeholder-with-assistant',
+        'Quick search {{targetName}}s or type ? to ask the Grafana Assistant',
+        { targetName }
+      );
     }
 
     return (
@@ -193,8 +211,8 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
               <IconButton
                 name="ai-sparkle"
                 variant="primary"
-                tooltip="Ask the Grafana Assistant"
-                aria-label="Ask the Grafana Assistant"
+                tooltip={t('quick-search.ask-assistant-tooltip', 'Ask the Grafana Assistant')}
+                aria-label={t('quick-search.ask-assistant-aria-label', 'Ask the Grafana Assistant')}
                 onClick={() => {
                   if (!value) {
                     return;
@@ -208,7 +226,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
             <IconButton
               name="times"
               variant="secondary"
-              tooltip="Clear search"
+              tooltip={t('quick-search.clear-search-tooltip', 'Clear search')}
               onClick={model.clear}
               disabled={!value && !isQuestionMode}
             />

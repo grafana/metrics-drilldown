@@ -1,6 +1,7 @@
 import { css, cx } from '@emotion/css';
 import { createAssistantContextItem, isAssistantAvailable, openAssistant } from '@grafana/assistant';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { sceneGraph, SceneObjectBase, VizPanel, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useState } from 'react';
@@ -9,8 +10,6 @@ import { getTrailFor } from 'shared/utils/utils';
 import { removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
 
 import { getPanelData } from './addToDashboard/addToDashboard';
-
-const EXPLAIN_IN_ASSISTANT_LABEL = 'Explain in Assistant';
 
 interface OpenAssistantState extends SceneObjectState {}
 
@@ -22,6 +21,7 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
   public static readonly Component = ({ model }: SceneComponentProps<OpenAssistant>) => {
     const styles = useStyles2(getStyles);
     const [isAvailable, setIsAvailable] = useState(false);
+    const explainInAssistantLabel = t('open-assistant.explain-label', 'Explain in Assistant');
 
     const vizPanel = sceneGraph.findObject(model, (o) => o instanceof VizPanel) as VizPanel | undefined;
 
@@ -69,7 +69,7 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
         if (metadata) {
           context.push(
             createAssistantContextItem('structured', {
-              title: 'Prometheus metric metadata',
+              title: t('open-assistant.metric-metadata-title', 'Prometheus metric metadata'),
               data: {
                 type: metadata.type,
                 description: metadata.help,
@@ -93,13 +93,13 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
       <Button
         id="open-assistant-action"
         className={cx(styles.button)}
-        aria-label={EXPLAIN_IN_ASSISTANT_LABEL}
+        aria-label={explainInAssistantLabel}
         variant="secondary"
         size="sm"
         fill="text"
         onClick={handleClick}
         icon="ai-sparkle"
-        tooltip={EXPLAIN_IN_ASSISTANT_LABEL}
+        tooltip={explainInAssistantLabel}
         tooltipPlacement="top"
         data-testid="open-assistant-action"
       />

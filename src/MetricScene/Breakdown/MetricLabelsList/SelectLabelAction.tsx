@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 import React from 'react';
@@ -27,7 +28,7 @@ export class SelectLabelAction extends SceneObjectBase<SelectLabelActionState> {
   public static readonly Component = ({ model }: SceneComponentProps<SelectLabelAction>) => {
     return (
       <Button variant="secondary" size="sm" fill="outline" onClick={model.onClick}>
-        Select
+        {t('breakdown.select-label', 'Select')}
       </Button>
     );
   };

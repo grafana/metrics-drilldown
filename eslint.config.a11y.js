@@ -1,4 +1,5 @@
 const grafanaConfig = require('@grafana/eslint-config/flat');
+const grafanaI18nPlugin = require('@grafana/i18n/eslint-plugin');
 const jsxA11y = require('eslint-plugin-jsx-a11y');
 const sonarjs = require('eslint-plugin-sonarjs');
 
@@ -12,6 +13,25 @@ module.exports = [
   ...grafanaConfig,
   sonarjs.configs.recommended,
   jsxA11y.flatConfigs.recommended,
+  {
+    name: 'metrics-drilldown/i18n',
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/__tests__/**', '**/test/**', '**/mocks/**'],
+    plugins: {
+      '@grafana/i18n': grafanaI18nPlugin,
+    },
+    rules: {
+      '@grafana/i18n/no-untranslated-strings': [
+        'error',
+        {
+          basePaths: ['src'],
+          namespace: 'grafana-metricsdrilldown-app',
+          calleesToIgnore: ['^css$', 'use[A-Z].*', '^get.*Styles$'],
+        },
+      ],
+      '@grafana/i18n/no-translation-top-level': 'error',
+    },
+  },
   {
     name: 'metrics-drilldown/a11y',
     files: ['**/*.{ts,tsx,js,jsx}'],

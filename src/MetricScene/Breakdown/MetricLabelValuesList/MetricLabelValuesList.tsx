@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { DashboardCursorSync, LoadingState, type DataFrame, type GrafanaTheme2, type PanelData } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -75,9 +76,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
-          { label: 'Single', value: LayoutType.SINGLE },
-          { label: 'Grid', value: LayoutType.GRID },
-          { label: 'Rows', value: LayoutType.ROWS },
+          { label: t('layout-switcher.option.single', 'Single'), value: LayoutType.SINGLE },
+          { label: t('layout-switcher.option.grid', 'Grid'), value: LayoutType.GRID },
+          { label: t('layout-switcher.option.rows', 'Rows'), value: LayoutType.ROWS },
         ],
       }),
       quickSearch: new QuickSearch({
@@ -223,14 +224,18 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         new SceneReactObject({
           reactNode: (
             <InlineBanner title="" severity="info">
-              No label values found for the current filters and time range.
+              {t('breakdown.label-values-list.no-values', 'No label values found for the current filters and time range.')}
             </InlineBanner>
           ),
         }),
       getLayoutError: (data: PanelData) =>
         new SceneReactObject({
           reactNode: (
-            <InlineBanner severity="error" title="Error while loading metrics!" error={data.errors![0] as Error} />
+            <InlineBanner
+              severity="error"
+              title={t('breakdown.label-values-list.error-title', 'Error while loading metrics!')}
+              error={data.errors![0] as Error}
+            />
           ),
         }),
       getLayoutChild: (data: PanelData, frame: DataFrame, frameIndex: number) => {
@@ -272,20 +277,23 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   public Controls({ model }: { model: MetricLabelValuesList }) {
-    const styles = useStyles2(getStyles); // eslint-disable-line react-hooks/rules-of-hooks
+    const styles = useStyles2(getStyles);  
     const { body, quickSearch, layoutSwitcher, sortBySelector } = model.useState();
 
     return (
       <>
         {body instanceof SceneByFrameRepeater && (
           <>
-            <Field className={cx(styles.field, styles.quickSearchField)} label="Search">
+            <Field
+              className={cx(styles.field, styles.quickSearchField)}
+              label={t('breakdown.label-values-list.search-label', 'Search')}
+            >
               <quickSearch.Component model={quickSearch} />
             </Field>
             <sortBySelector.Component model={sortBySelector} />
           </>
         )}
-        <Field label="View" className={styles.field}>
+        <Field label={t('breakdown.label-values-list.view-label', 'View')} className={styles.field}>
           <layoutSwitcher.Component model={layoutSwitcher} />
         </Field>
       </>
@@ -343,7 +351,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         </div>
         {shouldDisplayShowMoreButton && (
           <div className={styles.listFooter}>
-            <ShowMoreButton label="label value" batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton label={t('breakdown.label-values-list.label', 'label value')} batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
       </div>
