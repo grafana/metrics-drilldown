@@ -131,7 +131,7 @@ describe('initFaro()', () => {
         captureConsole: false,
       });
       expect(instrumentations).toBeInstanceOf(Array);
-      expect(instrumentations.length).toBe(1);
+      expect(instrumentations.length).toBe(2); // console instrumentation, replay instrumentation
 
       expect(isolate).toBe(true);
       expect(beforeSend).toBeInstanceOf(Function);
