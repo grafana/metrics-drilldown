@@ -139,7 +139,7 @@ export function TreeCheckBoxList({
       {!groups.length && <div className={sharedStyles.noResults}>{t('checkbox-list.no-results', 'No results.')}</div>}
 
       {groups.length > 0 && (
-        <ul className={sharedStyles.list} data-testid="checkbox-filters-tree">
+        <ul className={sharedStyles.list} data-testid="checkbox-filters-tree" data-sensitive>
           {groups.map((group) => {
             const isExpanded = expandedPrefixes.has(group.value);
             const children = getChildren(group.value);

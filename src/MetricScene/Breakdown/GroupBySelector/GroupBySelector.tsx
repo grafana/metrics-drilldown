@@ -36,17 +36,19 @@ export function GroupBySelector(props: Readonly<GroupBySelectorProps>) {
 
   if (useRadios) {
     return (
-      <RadioButtonGroup
-        data-testid="group-by-selector-radio-group"
-        options={processedOptions}
-        value={value}
-        onChange={onChange}
-      />
+      <div data-sensitive>
+        <RadioButtonGroup
+          data-testid="group-by-selector-radio-group"
+          options={processedOptions}
+          value={value}
+          onChange={onChange}
+        />
+      </div>
     );
   }
 
   return (
-    <div className={styles.combobox}>
+    <div className={styles.combobox} data-sensitive>
       <Combobox
         data-testid="group-by-selector-combobox"
         options={processedOptions}
