@@ -61,7 +61,7 @@ export class HistogramPercentilesDefaultBehavior extends SceneObjectBase<SceneOb
       // The WeakSet ensures we don't reprocess panels, making this efficient
       const subscription = root.subscribeToState(processPanels);
       
-      return subscription.unsubscribe;
+      return () => subscription.unsubscribe();
     });
   }
 }

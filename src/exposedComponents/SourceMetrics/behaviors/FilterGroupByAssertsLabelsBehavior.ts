@@ -21,7 +21,7 @@ export class FilterGroupByAssertsLabelsBehavior extends SceneObjectBase<SceneObj
         this.filterVariableOptions(event.payload);
       });
       
-      return subscription.unsubscribe;
+      return () => subscription.unsubscribe();
     });
   }
 
