@@ -13,7 +13,7 @@ import { embeddedTrailNamespace, newMetricsTrail } from 'shared/utils/utils';
 import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
 import { parsePromQLQuery } from '../../extensions/links';
-import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
+import { type ParsedPromQLQuery, type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
 /**
@@ -35,6 +35,27 @@ function extractUniquePrefixes(metricNames: string[]): string[] {
   const prefixes = new Set(metricNames.map(extractMetricPrefix));
   return Array.from(prefixes);
 }
+
+
+
+type SourceMetricsScenario = 'single_source_metric' | 'multiple_source_metrics' | 'recording_rule_fallback' | 'missing_metric_information';
+
+function getSourceMetricsScenario(sourceMetrics?: Array<{ metricName: string; labels: PromQLLabelMatcher[] }>, parsedPromQLQuery?: ParsedPromQLQuery): SourceMetricsScenario {
+  if ((!sourceMetrics || sourceMetrics.length === 0) && parsedPromQLQuery) {
+    return 'recording_rule_fallback';
+  }
+
+  if (sourceMetrics && sourceMetrics.length === 1) {
+    return 'single_source_metric';
+  }
+
+  if (sourceMetrics && sourceMetrics.length > 1) {
+    return 'multiple_source_metrics';
+  }
+
+
+  return 'missing_metric_information';
+};
 
 export interface SourceMetricsProps {
   query: string;
@@ -72,41 +93,53 @@ const KnowledgeGraphSourceMetrics = ({
   let metric: string | undefined;
   let initialFilters: AdHocVariableFilter[] | undefined;
 
-  if (hasSourceMetrics) {
-    // When sourceMetrics are provided, don't set a metric.
-    // This ensure that the MetricsReducer is shown, allowing
-    // users to select from the filtered list of metrics.
-    initialFilters = sourceMetrics[0].labels.map((label) => labelMatcherToAdHocFilter(label));
-  } else if (parsedPromQLQuery) {
-    // When sourceMetrics aren't provided, fall back to
-    // selecting the metric from the provided PromQL query.
-    metric = parsedPromQLQuery.metric;
-    initialFilters = parsedPromQLQuery.labels.map((label) => labelMatcherToAdHocFilter(label));
-  } else {
-    const err = new Error('Missing metric information for Knowledge Graph insight');
-    logger.error(err, { query });
-    return <ErrorView error={err} />;
+  const scenario = getSourceMetricsScenario(sourceMetrics);
+  switch (scenario) {
+    case 'recording_rule_fallback':
+      // When sourceMetrics aren't provided, fall back to
+      // selecting the metric from the provided PromQL query.
+      metric = parsedPromQLQuery.metric;
+      initialFilters = parsedPromQLQuery.labels.map((label) => labelMatcherToAdHocFilter(label));
+      break;
+    case 'single_source_metric':
+      // If there's a single source metric, select it.
+      metric = sourceMetrics![0].metricName;
+      initialFilters = sourceMetrics![0].labels.map((label) => labelMatcherToAdHocFilter(label));
+      break;
+    case 'multiple_source_metrics':
+      // If there are multiple source metrics, we display
+      // the source metrics in the MetricsReducer, allowing
+      // users to select from the filtered list of metrics.
+      initialFilters = sourceMetrics![0].labels.map((label) => labelMatcherToAdHocFilter(label));
+      
+      // Extract unique prefixes from sourceMetrics to filter the metrics list
+      // This naturally excludes metrics like "asserts_*" and "ALERTS*" that aren't in sourceMetrics
+      const prefixesToExclude = ['asserts', 'ALERTS'];
+      const sourceMetricPrefixes = hasSourceMetrics
+        ? extractUniquePrefixes(sourceMetrics.map((m) => m.metricName)).filter((metric) =>
+            prefixesToExclude.every((excludedPrefix) => !metric.startsWith(excludedPrefix))
+          )
+        : undefined;
+
+      // Set URL params for prefix filters BEFORE creating the trail
+      // This leverages Scenes' built-in URL sync in MetricsFilterSection
+      if (sourceMetricPrefixes?.length) {
+        const prefixUrlParam = `${embeddedTrailNamespace}-${metricFilters.prefix}`;
+        locationService.partial({ [prefixUrlParam]: sourceMetricPrefixes.join(',') }, true);
+
+        const sortByUrlParam = `${embeddedTrailNamespace}-var-${VAR_WINGMAN_SORT_BY}`;
+        locationService.partial({ [sortByUrlParam]: 'alphabetical' }, true);
+      }
+      break;
+    case 'missing_metric_information':
+      const err = new Error('Missing metric information for Knowledge Graph insight');
+      logger.error(err, { query });
+      return <ErrorView error={err} />;
   }
 
-  // Extract unique prefixes from sourceMetrics to filter the metrics list
-  // This naturally excludes metrics like "asserts_*" and "ALERTS*" that aren't in sourceMetrics
-  const prefixesToExclude = ['asserts', 'ALERTS'];
-  const sourceMetricPrefixes = hasSourceMetrics
-    ? extractUniquePrefixes(sourceMetrics.map((m) => m.metricName)).filter((metric) =>
-        prefixesToExclude.every((excludedPrefix) => !metric.startsWith(excludedPrefix))
-      )
-    : undefined;
-
-  // Set URL params for prefix filters BEFORE creating the trail
-  // This leverages Scenes' built-in URL sync in MetricsFilterSection
-  if (sourceMetricPrefixes?.length) {
-    const prefixUrlParam = `${embeddedTrailNamespace}-${metricFilters.prefix}`;
-    locationService.partial({ [prefixUrlParam]: sourceMetricPrefixes.join(',') }, true);
-
-    const sortByUrlParam = `${embeddedTrailNamespace}-var-${VAR_WINGMAN_SORT_BY}`;
-    locationService.partial({ [sortByUrlParam]: 'alphabetical' }, true);
-  }
-
+  // Create trail with behaviors:
+  // 1. Filter asserts labels from breakdown
+  // 2. Default histogram visualizations to percentiles (leveraging existing presets)
   const trail = newMetricsTrail({
     metric,
     initialDS: dataSource.uid,
