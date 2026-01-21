@@ -13,6 +13,7 @@ import { debounce } from 'lodash';
 import React, { type KeyboardEvent } from 'react';
 
 import { VAR_DATASOURCE } from 'shared/shared';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { type CountsProvider } from './CountsProvider/CountsProvider';
@@ -72,6 +73,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       value: '',
       isQuestionMode: false,
     });
+
+    this.addActivationHandler(this.onActivate.bind(this));
+  }
+
+  private onActivate() {
+    // EXPERIMENT: Evaluate early so analytics enrichment can include the variant when assistant events fire later.
+    evaluateFeatureFlag('drilldown.metrics.grafana_assistant_quick_search_tab_test');
   }
 
   public toggleCountsDisplay(displayCounts: boolean) {
