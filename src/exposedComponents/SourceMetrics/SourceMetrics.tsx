@@ -13,6 +13,7 @@ import { embeddedTrailNamespace, newMetricsTrail } from 'shared/utils/utils';
 import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
 import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
+import { HistogramPercentilesDefaultBehavior } from './behaviors/HistogramPercentilesDefaultBehavior';
 import { parsePromQLQuery } from '../../extensions/links';
 import { type ParsedPromQLQuery, type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
@@ -149,6 +150,7 @@ const KnowledgeGraphSourceMetrics = ({
     embedded: true,
     $behaviors: [
       new FilterGroupByAssertsLabelsBehavior({ metric }),
+      new HistogramPercentilesDefaultBehavior(),
     ],
   });
 
