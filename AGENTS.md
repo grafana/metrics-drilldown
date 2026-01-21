@@ -1,6 +1,6 @@
-# Grafana Metrics Drilldown - Context for LLMs
+# Grafana Metrics Drilldown
 
-> Project Description: A Grafana plugin for exploring metrics data.
+> A Grafana app plugin for exploring metrics data.
 
 ## Core Documentation
 
