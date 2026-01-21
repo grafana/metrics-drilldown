@@ -30,7 +30,7 @@ To begin drilling down your data, filter the metrics that appear in Metrics Dril
 1. (Optional) Select a label name from the **Filter by label values** dropdown. Then, follow the prompts to complete your filter criteria.
 
    {{< admonition type="note" >}}
-   You can apply multiple filters to your metrics.
+   You can apply multiple filters to your metrics. The Labels API returns at most 40,000 label values. If you don’t see a series in the returned values, you can still manually search for a metric by specifying `__name__="your_series_name"` to find the series.
    {{< /admonition >}}
 
 1. (Optional) To search for metrics, type keywords in the search bar under **Quick search metrics**.
