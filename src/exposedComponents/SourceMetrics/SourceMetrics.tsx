@@ -12,6 +12,7 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { embeddedTrailNamespace, newMetricsTrail } from 'shared/utils/utils';
 import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
+import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
 import { parsePromQLQuery } from '../../extensions/links';
 import { type ParsedPromQLQuery, type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
@@ -146,6 +147,9 @@ const KnowledgeGraphSourceMetrics = ({
     initialFilters,
     $timeRange: toSceneTimeRange(initialStart, initialEnd),
     embedded: true,
+    $behaviors: [
+      new FilterGroupByAssertsLabelsBehavior({ metric }),
+    ],
   });
 
   return (
