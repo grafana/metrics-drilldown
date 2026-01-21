@@ -101,7 +101,7 @@ for i in "${!GRAFANA_VERSIONS[@]}"; do
   if [ "$LOCAL_MODE" = true ]; then
     # start the e2e server
     echo -e "\n🚀 Starting E2E server..."
-    GRAFANA_IMAGE="$grafana_image" GRAFANA_VERSION="$grafana_version" npm run e2e:server:up
+    GRAFANA_IMAGE="$grafana_image" GRAFANA_VERSION="$grafana_version" pnpm run e2e:server:up
 
     # wait for Grafana to be ready
     echo -e "\n⏳ Waiting for Grafana to be ready..."
@@ -110,21 +110,21 @@ for i in "${!GRAFANA_VERSIONS[@]}"; do
 
     if [ $wait_exit_code -ne 0 ]; then
       echo -e "\n❌ Grafana failed to start for '$grafana_image v$grafana_version'"
-      npm run e2e:server:down
+      pnpm run e2e:server:down
       overall_success=false
       continue
     fi
 
     # run the e2e tests
-    GRAFANA_VERSION="$grafana_version" GRAFANA_PORT="3001" GRAFANA_SCOPES_PORT="3002" PLAYWRIGHT_ARGS="$PLAYWRIGHT_ARGS" npm run e2e
+    GRAFANA_VERSION="$grafana_version" GRAFANA_PORT="3001" GRAFANA_SCOPES_PORT="3002" PLAYWRIGHT_ARGS="$PLAYWRIGHT_ARGS" pnpm run e2e
     exit_code=$?
 
     # stop the e2e server
     echo -e "\n🛑 Stopping E2E server..."
-    npm run e2e:server:down
+    pnpm run e2e:server:down
   else
     # run in CI mode
-    GRAFANA_IMAGE="$grafana_image" GRAFANA_VERSION="$grafana_version" PLAYWRIGHT_ARGS="$PLAYWRIGHT_ARGS" npm run e2e:ci
+    GRAFANA_IMAGE="$grafana_image" GRAFANA_VERSION="$grafana_version" PLAYWRIGHT_ARGS="$PLAYWRIGHT_ARGS" pnpm run e2e:ci
     exit_code=$?
   fi
 
