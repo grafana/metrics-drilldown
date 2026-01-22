@@ -112,6 +112,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
     // Intercept '?' when input is empty and not already in question mode to enter AI mode
     if (newValue === '?' && this.state.value === '' && !this.state.isQuestionMode) {
+      reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'question_mark' });
       this.setState({ isQuestionMode: true });
       return; // Don't add '?' to the input value
     }
