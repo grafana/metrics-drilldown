@@ -187,7 +187,7 @@ type Interactions = {
   add_to_dashboard_build_panel: { expr: string };
   // User asks a question in the Quick Search input
   quick_search_assistant_question_asked: { question: string };
-  // User enters assistant mode in the Quick Search input (e.g., by typing '?', Tab in treatment, etc.)
+  // User enters assistant mode in the Quick Search input (e.g., by typing '?', clicking the AI button, or using the Tab+Enter keyboard flow)
   quick_search_assistant_mode_entered: { from: 'question_mark' | 'tab' | 'button' };
 };
 
