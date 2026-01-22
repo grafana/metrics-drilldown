@@ -34,7 +34,7 @@ const goffFeatureFlags = {
   'drilldown.metrics.grafana_assistant_quick_search_tab_test': {
     valueType: 'string',
     values: [
-      'treatment', // Always show assistant button (when available); Tab enters assistant mode
+      'treatment', // Always show assistant button (when available); allows keyboard navigation to activate assistant
       'control', // Default behavior (current)
       'excluded', // User excluded from experiment (default behavior)
     ],
