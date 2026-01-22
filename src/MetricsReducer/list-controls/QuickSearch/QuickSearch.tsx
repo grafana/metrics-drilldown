@@ -117,13 +117,6 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   private onChange = (e: React.FormEvent<HTMLInputElement>) => {
     const newValue = e.currentTarget.value;
 
-    // Intercept '?' when input is empty and not already in question mode to enter AI mode
-    if (newValue === '?' && this.state.value === '' && !this.state.isQuestionMode) {
-      reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'question_mark' });
-      this.setState({ isQuestionMode: true });
-      return; // Don't add '?' to the input value
-    }
-
     this.updateValue(newValue);
   };
 
@@ -201,10 +194,31 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     const assistantHint: AssistantHint = isAssistantTabExperimentTreatment ? 'tab' : 'question_mark';
     const placeholder = getQuickSearchPlaceholder({ targetName, isQuestionMode, isAssistantAvailable, assistantHint });
 
+    const onChange = (e: React.FormEvent<HTMLInputElement>) => {
+      const newValue = e.currentTarget.value;
+
+      // Intercept '?' when input is empty and not already in question mode to enter AI mode.
+      const isQuestionMarkAttempt = newValue === '?' && value === '' && !isQuestionMode;
+      if (!isQuestionMarkAttempt) {
+        model.onChange(e);
+        return;
+      }
+
+      // If assistant is not available, keep the UI in normal quick search (do not enter question mode),
+      // and do not report "mode entered" since we did not actually enter the mode.
+      if (!isAssistantAvailable) {
+        return; // Don't add '?' to the input value
+      }
+
+      reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'question_mark' });
+      model.setState({ isQuestionMode: true });
+      return; // Don't add '?' to the input value
+    };
+
     return (
       <Input
         value={value}
-        onChange={model.onChange}
+        onChange={onChange}
         onKeyDown={(e) => {
           // EXPERIMENT (treatment): pressing Tab enters assistant mode instead of moving focus.
           // Gate on assistant availability so we don't steal keyboard navigation when assistant is unavailable.

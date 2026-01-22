@@ -10,12 +10,12 @@ export function getQuickSearchPlaceholder(args: {
 }): string {
   const { targetName, isQuestionMode, isAssistantAvailable, assistantHint } = args;
 
-  if (isQuestionMode) {
-    return t('quick-search.placeholder-question-mode', 'Ask the Grafana Assistant a question and press enter');
-  }
-
   if (!isAssistantAvailable) {
     return t('quick-search.placeholder', 'Quick search {{targetName}}s', { targetName });
+  }
+
+  if (isQuestionMode) {
+    return t('quick-search.placeholder-question-mode', 'Ask the Grafana Assistant a question and press enter');
   }
 
   if (assistantHint === 'tab') {
