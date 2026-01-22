@@ -42,7 +42,7 @@ function extractUniquePrefixes(metricNames: string[]): string[] {
 
 type SourceMetricsScenario = 'single_source_metric' | 'multiple_source_metrics' | 'recording_rule_fallback' | 'missing_metric_information';
 
-function getSourceMetricsScenario(sourceMetrics?: Array<{ metricName: string; labels: PromQLLabelMatcher[] }>, parsedPromQLQuery?: ParsedPromQLQuery): SourceMetricsScenario {
+function getSourceMetricsScenario(sourceMetrics: Array<{ metricName: string; labels: PromQLLabelMatcher[] }> | undefined, parsedPromQLQuery: ParsedPromQLQuery | undefined): SourceMetricsScenario {
   if ((!sourceMetrics || sourceMetrics.length === 0) && parsedPromQLQuery) {
     return 'recording_rule_fallback';
   }
@@ -89,19 +89,19 @@ const KnowledgeGraphSourceMetrics = ({
     }
   }, []);
 
-  const parsedPromQLQuery = parsePromQLQuery(query);
+  const parsedPromQLQuery = query ? parsePromQLQuery(query) : undefined;
 
   // Determine metric and filters based on data source
   let metric: string | undefined;
   let initialFilters: AdHocVariableFilter[] | undefined;
 
-  const scenario = getSourceMetricsScenario(sourceMetrics);
+  const scenario = getSourceMetricsScenario(sourceMetrics, parsedPromQLQuery);
   switch (scenario) {
     case 'recording_rule_fallback':
       // When sourceMetrics aren't provided, fall back to
       // selecting the metric from the provided PromQL query.
-      metric = parsedPromQLQuery.metric;
-      initialFilters = parsedPromQLQuery.labels.map((label) => labelMatcherToAdHocFilter(label));
+      metric = parsedPromQLQuery!.metric;
+      initialFilters = parsedPromQLQuery!.labels.map((label) => labelMatcherToAdHocFilter(label));
       break;
     case 'single_source_metric':
       // If there's a single source metric, select it.
