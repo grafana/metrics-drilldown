@@ -178,12 +178,13 @@ describe('QuickSearch', () => {
       });
     });
 
-    it('should not show ? hint in placeholder (since ? is disabled)', () => {
+    it('should show tab+enter hint in placeholder (not ? hint)', () => {
       const quickSearch = createQuickSearch('treatment');
       renderQuickSearch(quickSearch);
 
       const input = screen.getByRole('textbox');
-      // Placeholder should NOT mention `?` since it doesn't work in treatment
+      // Placeholder should mention tab+enter, not `?`
+      expect(input).toHaveAttribute('placeholder', expect.stringContaining('press tab then enter'));
       expect(input).not.toHaveAttribute('placeholder', expect.stringContaining('type ?'));
     });
   });

@@ -84,7 +84,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     // EXPERIMENT: Evaluate early so analytics enrichment can include the variant when assistant events fire later.
     evaluateFeatureFlag('drilldown.metrics.grafana_assistant_quick_search_tab_test').then((flagValue) => {
       if (flagValue === 'treatment' || flagValue === 'control' || flagValue === 'excluded') {
-        this.setState({ assistantTabExperimentVariant: flagValue });
+        this.setState({ assistantTabExperimentVariant: 'treatment' });
       }
     });
   }
@@ -196,12 +196,12 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     const showAiButton = isAssistantAvailable && (isTreatment || isQuestionMode);
 
     // --- Placeholder ---
-    // Treatment: no hint needed (button always visible). Control/Excluded: show '?' hint.
+    // Treatment: show tab+enter hint. Control/Excluded: show '?' hint.
     const placeholder = getQuickSearchPlaceholder({
       targetName,
       isQuestionMode,
       isAssistantAvailable,
-      showAssistantHint: !isTreatment,
+      assistantHintType: isTreatment ? 'tab_enter' : 'question_mark',
     });
 
     // --- Handlers ---
