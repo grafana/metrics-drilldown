@@ -12,10 +12,10 @@ import { IconButton, Input, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { debounce } from 'lodash';
 import React, { type KeyboardEvent } from 'react';
 
-import { VAR_DATASOURCE } from 'shared/shared';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
-import { type AssistantHint, getQuickSearchPlaceholder } from 'shared/utils/utils.quicksearch';
+import { getQuickSearchPlaceholder, type AssistantHint } from 'shared/utils/utils.quicksearch';
 
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
@@ -212,7 +212,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
       reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'question_mark' });
       model.setState({ isQuestionMode: true });
-      return; // Don't add '?' to the input value
+      // Don't add '?' to the input value
     };
 
     return (
