@@ -60,7 +60,7 @@ const mockOpenQuickSearchAssistant = openQuickSearchAssistant as jest.Mock;
  * The real CountsProvider displays metric counts in the input suffix.
  */
 class MockCountsProvider extends CountsProvider {
-  static Component = () => null;
+  static readonly Component = () => null;
 }
 
 // =============================================================================
