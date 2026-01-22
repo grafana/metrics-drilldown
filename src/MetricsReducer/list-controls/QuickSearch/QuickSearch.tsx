@@ -142,20 +142,6 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       this.clear();
     }
 
-    // EXPERIMENT (treatment): pressing Tab enters assistant mode instead of moving focus.
-    // We keep Shift+Tab behavior to preserve backwards focus navigation.
-    if (
-      e.key === 'Tab' &&
-      !e.shiftKey &&
-      !this.state.isQuestionMode &&
-      this.state.assistantTabExperimentVariant === 'treatment'
-    ) {
-      e.preventDefault();
-      reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'tab' });
-      this.setState({ isQuestionMode: true });
-      return;
-    }
-
     // Handle Enter key in question mode to open assistant
     if (e.key === 'Enter' && this.state.isQuestionMode && this.state.value.trim()) {
       e.preventDefault();
@@ -219,7 +205,19 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       <Input
         value={value}
         onChange={model.onChange}
-        onKeyDown={model.onKeyDown}
+        onKeyDown={(e) => {
+          // EXPERIMENT (treatment): pressing Tab enters assistant mode instead of moving focus.
+          // Gate on assistant availability so we don't steal keyboard navigation when assistant is unavailable.
+          // Keep Shift+Tab to preserve backwards focus navigation.
+          if (e.key === 'Tab' && !e.shiftKey && !isQuestionMode && isAssistantTabExperimentTreatment && isAssistantAvailable) {
+            e.preventDefault();
+            reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'tab' });
+            model.setState({ isQuestionMode: true });
+            return;
+          }
+
+          model.onKeyDown(e);
+        }}
         placeholder={placeholder}
         prefix={<i className="fa fa-search" />}
         suffix={
