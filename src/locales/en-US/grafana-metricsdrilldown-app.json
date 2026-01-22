@@ -164,7 +164,8 @@
     "count-total-singular": "1 {{targetName}} in total",
     "placeholder": "Quick search {{targetName}}s",
     "placeholder-question-mode": "Ask the Grafana Assistant a question and press enter",
-    "placeholder-with-assistant": "Quick search {{targetName}}s or type ? to ask the Grafana Assistant"
+    "placeholder-with-assistant": "Quick search {{targetName}}s or type ? to ask the Grafana Assistant",
+    "placeholder-with-assistant-tab": "Quick search {{targetName}}s or press Tab to ask the Grafana Assistant"
   },
   "related-logs": {
     "datasource-description": "Some Loki data sources might be missing from the dropdown if they took longer than {{timeout}} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.",

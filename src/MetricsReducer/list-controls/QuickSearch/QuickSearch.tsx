@@ -15,6 +15,7 @@ import React, { type KeyboardEvent } from 'react';
 import { VAR_DATASOURCE } from 'shared/shared';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { type AssistantHint, getQuickSearchPlaceholder } from 'shared/utils/utils.quicksearch';
 
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
@@ -27,6 +28,7 @@ interface QuickSearchState extends SceneObjectState {
   displayCounts: boolean;
   value: string;
   isQuestionMode: boolean;
+  assistantTabExperimentVariant: 'treatment' | 'control' | 'excluded';
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
@@ -72,6 +74,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       displayCounts: Boolean(displayCounts),
       value: '',
       isQuestionMode: false,
+      assistantTabExperimentVariant: 'excluded',
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -79,7 +82,11 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   private onActivate() {
     // EXPERIMENT: Evaluate early so analytics enrichment can include the variant when assistant events fire later.
-    evaluateFeatureFlag('drilldown.metrics.grafana_assistant_quick_search_tab_test');
+    evaluateFeatureFlag('drilldown.metrics.grafana_assistant_quick_search_tab_test').then((flagValue) => {
+      if (flagValue === 'treatment' || flagValue === 'control' || flagValue === 'excluded') {
+        this.setState({ assistantTabExperimentVariant: flagValue });
+      }
+    });
   }
 
   public toggleCountsDisplay(displayCounts: boolean) {
@@ -135,6 +142,20 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       this.clear();
     }
 
+    // EXPERIMENT (treatment): pressing Tab enters assistant mode instead of moving focus.
+    // We keep Shift+Tab behavior to preserve backwards focus navigation.
+    if (
+      e.key === 'Tab' &&
+      !e.shiftKey &&
+      !this.state.isQuestionMode &&
+      this.state.assistantTabExperimentVariant === 'treatment'
+    ) {
+      e.preventDefault();
+      reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'tab' });
+      this.setState({ isQuestionMode: true });
+      return;
+    }
+
     // Handle Enter key in question mode to open assistant
     if (e.key === 'Enter' && this.state.isQuestionMode && this.state.value.trim()) {
       e.preventDefault();
@@ -186,20 +207,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   static readonly Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
-    const { targetName, value, countsProvider, isQuestionMode } = model.useState();
+    const { targetName, value, countsProvider, isQuestionMode, assistantTabExperimentVariant } = model.useState();
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
     const isAssistantAvailable = useQuickSearchAssistantAvailability();
+    const isAssistantTabExperimentTreatment = assistantTabExperimentVariant === 'treatment';
 
-    let placeholder = t('quick-search.placeholder', 'Quick search {{targetName}}s', { targetName });
-    if (isQuestionMode) {
-      placeholder = t('quick-search.placeholder-question-mode', 'Ask the Grafana Assistant a question and press enter');
-    } else if (isAssistantAvailable) {
-      placeholder = t(
-        'quick-search.placeholder-with-assistant',
-        'Quick search {{targetName}}s or type ? to ask the Grafana Assistant',
-        { targetName }
-      );
-    }
+    const assistantHint: AssistantHint = isAssistantTabExperimentTreatment ? 'tab' : 'question_mark';
+    const placeholder = getQuickSearchPlaceholder({ targetName, isQuestionMode, isAssistantAvailable, assistantHint });
 
     return (
       <Input
@@ -210,19 +224,20 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         prefix={<i className="fa fa-search" />}
         suffix={
           <>
-            <countsProvider.Component model={countsProvider} />
-            {!isQuestionMode && tagName && (
-              <Tooltip content={tooltipContent} placement="top">
-                <Tag className={styles.counts} name={tagName} colorIndex={9} />
-              </Tooltip>
-            )}
-            {isQuestionMode && isAssistantAvailable && (
+            {isAssistantAvailable && (isQuestionMode || isAssistantTabExperimentTreatment) && (
               <IconButton
                 name="ai-sparkle"
                 variant="primary"
                 tooltip={t('quick-search.ask-assistant-tooltip', 'Ask the Grafana Assistant')}
                 aria-label={t('quick-search.ask-assistant-aria-label', 'Ask the Grafana Assistant')}
                 onClick={() => {
+                  // EXPERIMENT (treatment): clicking the always-visible button enters assistant mode.
+                  // Control behavior remains: button is only shown in question mode.
+                  if (!isQuestionMode) {
+                    reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'button' });
+                    model.setState({ isQuestionMode: true });
+                    return;
+                  }
                   if (!value) {
                     return;
                   }
@@ -231,6 +246,12 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
                   model.resetToQuickSearch();
                 }}
               />
+            )}
+            <countsProvider.Component model={countsProvider} />
+            {!isQuestionMode && tagName && (
+              <Tooltip content={tooltipContent} placement="top">
+                <Tag className={styles.counts} name={tagName} colorIndex={9} />
+              </Tooltip>
             )}
             <IconButton
               name="times"
