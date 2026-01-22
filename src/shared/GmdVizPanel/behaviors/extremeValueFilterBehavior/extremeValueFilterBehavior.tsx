@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { LoadingState, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { sceneGraph, SceneQueryRunner, type CancelActivationHandler, type VizPanel } from '@grafana/scenes';
 import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -87,7 +88,10 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
       titleItems: (
         <VizPanelExtremeValuesMessage
           level="info"
-          message="Panel data was re-fetched with a more complex query to handle extremely small values in the series"
+          message={t(
+            'extreme-value-filter.message',
+            'Panel data was re-fetched with a more complex query to handle extremely small values in the series'
+          )}
         />
       ),
     });

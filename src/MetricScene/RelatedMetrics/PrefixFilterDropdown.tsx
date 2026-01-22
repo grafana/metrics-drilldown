@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -23,6 +24,13 @@ interface PrefixFilterDropdownState extends SceneObjectState {
   error: Error | null;
   options: ComboboxOption[];
   value: string;
+}
+
+function getMetricPrefixAllOption(): ComboboxOption {
+  return {
+    label: t('prefix-filter.all-metrics', 'All metric names'),
+    value: 'all',
+  };
 }
 
 const METRIC_PREFIX_ALL_OPTION = {
@@ -131,6 +139,8 @@ export class PrefixFilterDropdown extends SceneObjectBase<PrefixFilterDropdownSt
   public static readonly Component = ({ model }: SceneComponentProps<PrefixFilterDropdown>) => {
     const styles = useStyles2(getStyles);
     const { loading, options, value, error } = model.useState();
+    const allOption = getMetricPrefixAllOption();
+    const translatedOptions = [allOption, ...options.filter((o) => o.value !== 'all')];
 
     return (
       <div className={styles.container} data-testid="prefix-filter-selector">
@@ -139,9 +149,12 @@ export class PrefixFilterDropdown extends SceneObjectBase<PrefixFilterDropdownSt
           error={error && error.toString()}
           label={
             <InlineLabel width="auto" className={styles.label}>
-              <span>View by</span>
+              <span>{t('prefix-filter.view-by-label', 'View by')}</span>
               <Tooltip
-                content="View by the metric prefix. A metric prefix is a single word at the beginning of the metric name, relevant to the domain the metric belongs to."
+                content={t(
+                  'prefix-filter.tooltip',
+                  'View by the metric prefix. A metric prefix is a single word at the beginning of the metric name, relevant to the domain the metric belongs to.'
+                )}
                 placement="top"
               >
                 <Icon className={styles.tooltipIcon} name="info-circle" size="sm" />
@@ -149,7 +162,7 @@ export class PrefixFilterDropdown extends SceneObjectBase<PrefixFilterDropdownSt
             </InlineLabel>
           }
         >
-          <Combobox value={value} onChange={model.selectOption} options={options} />
+          <Combobox value={value} onChange={model.selectOption} options={translatedOptions} />
         </InlineField>
       </div>
     );

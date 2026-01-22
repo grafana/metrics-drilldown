@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -166,7 +167,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     // we found a native histogram
     if (metricTypeFromMetadata === 'native-histogram') {
       stateUpdate.metricType = 'native-histogram';
-      panelConfigUpdate.description = panelConfig.description ?? 'Native Histogram';
+      panelConfigUpdate.description = panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
 
       if (!discardPanelTypeUpdates) {
         panelConfigUpdate.type = 'heatmap';
@@ -208,7 +209,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
           this.setState({
-            panelConfig: { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
+            panelConfig: { description: t('gmd-viz-panel.native-histogram', 'Native Histogram'), ...panelConfig, type: 'heatmap' },
           });
         }
 

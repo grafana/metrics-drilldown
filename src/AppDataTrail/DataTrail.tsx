@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { utf8Support } from '@grafana/prometheus';
 import { config, useChromeHeaderHeight, usePluginComponent } from '@grafana/runtime';
 import {
@@ -236,7 +237,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       reportExploreMetrics('configure_panel_opened', { metricType: metric.type });
 
       this.state.drawer.open({
-        title: 'Configure the Prometheus function',
+        title: t('data-trail.configure-drawer.title', 'Configure the Prometheus function'),
         subTitle: `${metric.name} (${metric.type})`,
         body: new ConfigurePanelForm({ metric }),
       });
@@ -488,8 +489,8 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
     new AdHocFiltersVariable({
       key: VAR_FILTERS,
       name: VAR_FILTERS,
-      label: 'Filters',
-      addFilterButtonText: 'Add label',
+      label: t('data-trail.filters.label', 'Filters'),
+      addFilterButtonText: t('data-trail.filters.add-label', 'Add label'),
       datasource: trailDS,
       hide: VariableHide.dontHide,
       layout: 'combobox',

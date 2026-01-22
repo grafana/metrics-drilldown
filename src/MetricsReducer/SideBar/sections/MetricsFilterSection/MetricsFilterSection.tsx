@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -423,7 +424,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
         {showHideEmpty && (
           <div className={styles.switchContainer}>
-            <span className={styles.switchLabel}>Hide empty</span>
+            <span className={styles.switchLabel}>{t('sidebar.filter.hide-empty', 'Hide empty')}</span>
             <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
           </div>
         )}
@@ -432,12 +433,17 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
           <Input
             className={styles.searchInput}
             prefix={<Icon name="search" />}
-            placeholder="Search..."
+            placeholder={t('sidebar.filter.search-placeholder', 'Search...')}
             value={searchValue}
             onChange={(e) => setSearchValue(e.currentTarget.value)}
             onKeyDown={onKeyDown}
             suffix={
-              <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={() => setSearchValue('')} />
+              <IconButton
+                name="times"
+                variant="secondary"
+                tooltip={t('sidebar.filter.clear-search-tooltip', 'Clear search')}
+                onClick={() => setSearchValue('')}
+              />
             }
           />
         )}

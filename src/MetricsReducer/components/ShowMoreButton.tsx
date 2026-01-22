@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { Button } from '@grafana/ui';
 import React, { type MouseEventHandler } from 'react';
 
@@ -13,10 +14,24 @@ type ShowMoreButtonProps = {
 };
 
 export function ShowMoreButton({ label, batchSizes, onClick, tooltip }: Readonly<ShowMoreButtonProps>) {
+  const buttonText =
+    batchSizes.increment === 1
+      ? t('show-more-button.text-singular', 'Show {{increment}} more {{label}} ({{current}}/{{total}})', {
+          increment: batchSizes.increment,
+          label,
+          current: batchSizes.current,
+          total: batchSizes.total,
+        })
+      : t('show-more-button.text-plural', 'Show {{increment}} more {{label}}s ({{current}}/{{total}})', {
+          increment: batchSizes.increment,
+          label,
+          current: batchSizes.current,
+          total: batchSizes.total,
+        });
+
   return (
     <Button variant="secondary" fill="outline" onClick={onClick} tooltip={tooltip} tooltipPlacement="top">
-      Show {batchSizes.increment} more {batchSizes.increment === 1 ? label : `${label}s`} ({batchSizes.current}/
-      {batchSizes.total})
+      {buttonText}
     </Button>
   );
 }

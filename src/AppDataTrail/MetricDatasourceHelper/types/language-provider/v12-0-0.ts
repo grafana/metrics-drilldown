@@ -126,6 +126,6 @@ export function isPrometheusDatasourceV12_0_0(ds: PrometheusRuntimeDatasource): 
 } {
   const languageProvider = ds.languageProvider as PromQlLanguageProviderTwelveDotZero;
 
-  // eslint-disable-next-line sonarjs/deprecation
+   
   return typeof languageProvider.fetchLabelValues === 'function' && languageProvider.fetchLabelValues.length > 1;
 }

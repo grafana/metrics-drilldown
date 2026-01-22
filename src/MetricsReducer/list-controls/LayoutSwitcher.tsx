@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import {
   SceneObjectBase,
   SceneObjectUrlSyncConfig,
@@ -22,15 +23,19 @@ export interface LayoutSwitcherState extends SceneObjectState {
   options: Array<{ label: string; value: LayoutType }>;
 }
 
+function getDefaultLayoutOptions(): Array<{ label: string; value: LayoutType }> {
+  return [
+    { label: t('layout-switcher.option.grid', 'Grid'), value: LayoutType.GRID },
+    { label: t('layout-switcher.option.rows', 'Rows'), value: LayoutType.ROWS },
+  ];
+}
+
 export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> {
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
     keys: [this.state.urlSearchParamName],
   });
 
-  static readonly DEFAULT_OPTIONS = [
-    { label: 'Grid', value: LayoutType.GRID },
-    { label: 'Rows', value: LayoutType.ROWS },
-  ];
+  static readonly DEFAULT_OPTIONS = getDefaultLayoutOptions();
 
   static readonly DEFAULT_LAYOUT = LayoutType.GRID;
 
@@ -74,11 +79,11 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> {
   };
 
   static readonly Component = ({ model }: SceneComponentProps<LayoutSwitcher>) => {
-    const { options, layout } = model.useState();
+    const { layout, options } = model.useState();
 
     return (
       <RadioButtonGroup
-        aria-label="Layout switcher"
+        aria-label={t('layout-switcher.aria-label', 'Layout switcher')}
         options={options}
         value={layout}
         onChange={model.onChange}

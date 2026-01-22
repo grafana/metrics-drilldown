@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { Button, RadioButtonList, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -19,7 +20,9 @@ export function LabelsList({ labels, selectedLabel, onSelectLabel, onClearSelect
     <>
       <div className={styles.listHeader}>
         <div className={styles.selected}>
-          {selectedLabel === NULL_GROUP_BY_VALUE ? 'No selection' : `Selected: "${selectedLabel}"`}
+          {selectedLabel === NULL_GROUP_BY_VALUE
+            ? t('labels-list.no-selection', 'No selection')
+            : t('labels-list.selected', 'Selected: "{{selectedLabel}}"', { selectedLabel })}
         </div>
         <Button
           variant="secondary"
@@ -27,11 +30,13 @@ export function LabelsList({ labels, selectedLabel, onSelectLabel, onClearSelect
           onClick={onClearSelection}
           disabled={selectedLabel === NULL_GROUP_BY_VALUE}
         >
-          clear
+          {t('labels-list.clear', 'clear')}
         </Button>
       </div>
 
-      {!labels.length && <div className={styles.noResults}>No results.</div>}
+      {!labels.length && (
+        <div className={styles.noResults}>{t('labels-list.no-results', 'No results.')}</div>
+      )}
 
       {labels.length > 0 && (
         <div className={styles.list} data-testid="labels-list">

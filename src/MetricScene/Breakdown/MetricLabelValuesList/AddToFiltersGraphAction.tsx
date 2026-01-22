@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 import React from 'react';
@@ -26,7 +27,7 @@ export class AddToFiltersGraphAction extends SceneObjectBase<AddToFiltersGraphAc
   public static readonly Component = ({ model }: SceneComponentProps<AddToFiltersGraphAction>) => {
     return (
       <Button variant="secondary" size="sm" fill="outline" onClick={model.onClick}>
-        Add to filters
+        {t('breakdown.add-to-filters', 'Add to filters')}
       </Button>
     );
   };
