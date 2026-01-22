@@ -164,8 +164,7 @@
     "count-total-singular": "1 {{targetName}} en total",
     "placeholder": "Búsqueda rápida de {{targetName}}s",
     "placeholder-question-mode": "Haz una pregunta al Asistente de Grafana y presiona enter",
-    "placeholder-with-assistant": "Búsqueda rápida de {{targetName}}s o escribe ? para preguntar al Asistente de Grafana",
-    "placeholder-with-assistant-tab": "Búsqueda rápida de {{targetName}}s o presiona Tab para preguntar al Asistente de Grafana"
+    "placeholder-with-assistant": "Búsqueda rápida de {{targetName}}s o escribe ? para preguntar al Asistente de Grafana"
   },
   "related-logs": {
     "datasource-description": "Algunas fuentes de datos Loki podrían no aparecer en el menú si tardaron más de {{timeout}} segundos en responder. Para ver logs de todas las fuentes de datos Loki, intenta usar Logs Drilldown.",

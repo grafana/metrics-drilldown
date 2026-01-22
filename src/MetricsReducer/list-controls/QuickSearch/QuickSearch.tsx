@@ -15,7 +15,7 @@ import React, { type KeyboardEvent } from 'react';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
-import { getQuickSearchPlaceholder, type AssistantHint } from 'shared/utils/utils.quicksearch';
+import { getQuickSearchPlaceholder } from 'shared/utils/utils.quicksearch';
 
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
@@ -84,7 +84,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     // EXPERIMENT: Evaluate early so analytics enrichment can include the variant when assistant events fire later.
     evaluateFeatureFlag('drilldown.metrics.grafana_assistant_quick_search_tab_test').then((flagValue) => {
       if (flagValue === 'treatment' || flagValue === 'control' || flagValue === 'excluded') {
-        this.setState({ assistantTabExperimentVariant: flagValue });
+        this.setState({ assistantTabExperimentVariant: 'treatment' });
       }
     });
   }
@@ -189,74 +189,76 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     const { targetName, value, countsProvider, isQuestionMode, assistantTabExperimentVariant } = model.useState();
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
     const isAssistantAvailable = useQuickSearchAssistantAvailability();
-    const isAssistantTabExperimentTreatment = assistantTabExperimentVariant === 'treatment';
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
-    const assistantHint: AssistantHint = isAssistantTabExperimentTreatment ? 'tab' : 'question_mark';
-    const placeholder = getQuickSearchPlaceholder({ targetName, isQuestionMode, isAssistantAvailable, assistantHint });
+    // --- Experiment logic ---
+    const isTreatment = assistantTabExperimentVariant === 'treatment';
+    const showAiButton = isAssistantAvailable && (isTreatment || isQuestionMode);
 
-    const onChange = (e: React.FormEvent<HTMLInputElement>) => {
+    // --- Placeholder ---
+    // Treatment: no hint needed (button always visible). Control/Excluded: show '?' hint.
+    const placeholder = getQuickSearchPlaceholder({
+      targetName,
+      isQuestionMode,
+      isAssistantAvailable,
+      showAssistantHint: !isTreatment,
+    });
+
+    // --- Handlers ---
+    const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
       const newValue = e.currentTarget.value;
 
-      // Intercept '?' when input is empty and not already in question mode to enter AI mode.
-      const isQuestionMarkAttempt = newValue === '?' && value === '' && !isQuestionMode;
-      if (!isQuestionMarkAttempt) {
-        model.onChange(e);
+      // '?' shortcut: only control/excluded, only when assistant available
+      const isQuestionMarkShortcut =
+        newValue === '?' && value === '' && !isQuestionMode && !isTreatment && isAssistantAvailable;
+
+      if (isQuestionMarkShortcut) {
+        reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'question_mark' });
+        model.setState({ isQuestionMode: true });
         return;
       }
 
-      // If assistant is not available, keep the UI in normal quick search (do not enter question mode),
-      // and do not report "mode entered" since we did not actually enter the mode.
-      if (!isAssistantAvailable) {
-        return; // Don't add '?' to the input value
-      }
-
-      reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'question_mark' });
-      model.setState({ isQuestionMode: true });
-      // Don't add '?' to the input value
+      model.onChange(e);
     };
 
+    const handleAiButtonClick = () => {
+      // Enter question mode and focus input
+      if (!isQuestionMode) {
+        reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'button' });
+        model.setState({ isQuestionMode: true });
+        inputRef.current?.focus();
+        return;
+      }
+
+      // In question mode, no text: focus input as a hint to type
+      if (!value.trim()) {
+        inputRef.current?.focus();
+        return;
+      }
+
+      // In question mode with text: submit to assistant
+      openQuickSearchAssistant(model, value);
+      model.resetToQuickSearch();
+    };
+
+    // --- Render ---
     return (
       <Input
+        ref={inputRef}
         value={value}
-        onChange={onChange}
-        onKeyDown={(e) => {
-          // EXPERIMENT (treatment): pressing Tab enters assistant mode instead of moving focus.
-          // Gate on assistant availability so we don't steal keyboard navigation when assistant is unavailable.
-          // Keep Shift+Tab to preserve backwards focus navigation.
-          if (e.key === 'Tab' && !e.shiftKey && !isQuestionMode && isAssistantTabExperimentTreatment && isAssistantAvailable) {
-            e.preventDefault();
-            reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'tab' });
-            model.setState({ isQuestionMode: true });
-            return;
-          }
-
-          model.onKeyDown(e);
-        }}
+        onChange={handleChange}
+        onKeyDown={model.onKeyDown}
         placeholder={placeholder}
         prefix={<i className="fa fa-search" />}
         suffix={
           <>
-            {isAssistantAvailable && (isQuestionMode || isAssistantTabExperimentTreatment) && (
+            {showAiButton && (
               <IconButton
                 name="ai-sparkle"
                 variant="primary"
                 tooltip={t('quick-search.ask-assistant-tooltip', 'Ask the Grafana Assistant')}
                 aria-label={t('quick-search.ask-assistant-aria-label', 'Ask the Grafana Assistant')}
-                onClick={() => {
-                  // EXPERIMENT (treatment): clicking the always-visible button enters assistant mode.
-                  // Control behavior remains: button is only shown in question mode.
-                  if (!isQuestionMode) {
-                    reportExploreMetrics('quick_search_assistant_mode_entered', { from: 'button' });
-                    model.setState({ isQuestionMode: true });
-                    return;
-                  }
-                  if (!value) {
-                    return;
-                  }
-                  openQuickSearchAssistant(model, value);
-                  // reset to quicksearch because the assistant has opened.
-                  model.resetToQuickSearch();
-                }}
+                onClick={handleAiButtonClick}
               />
             )}
             <countsProvider.Component model={countsProvider} />
