@@ -428,7 +428,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             {controls && !embeddedMini && (
               <div className={styles.controls} data-testid="app-controls">
                 <Stack direction="row" gap={1} alignItems="flex-end" wrap="wrap">
-                  <GiveFeedbackButton />
+                  {!embedded && <GiveFeedbackButton />}
                   {controls.map((control) => (
                     <control.Component key={control.state.key} model={control} />
                   ))}
