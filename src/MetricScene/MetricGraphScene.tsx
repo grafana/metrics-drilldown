@@ -20,6 +20,7 @@ import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/Metric
 import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboardAction';
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
+import { CreateAlertAction } from 'shared/GmdVizPanel/components/CreateAlertAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { OpenAssistant } from 'shared/GmdVizPanel/components/OpenAssistant';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
@@ -66,12 +67,14 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                       new ConfigurePanelAction({ metric }),
                       new OpenAssistant(),
                       new AddToDashboardAction(),
+                      new CreateAlertAction(),
                       new BookmarkHeaderAction(),
                     ]
                   : ({ metric }) => [
                       new ConfigurePanelAction({ metric }),
                       new OpenAssistant(),
                       new AddToDashboardAction(),
+                      new CreateAlertAction(),
                       new BookmarkHeaderAction(),
                     ],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
@@ -154,6 +157,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
               new OpenAssistant(),
               new AddToDashboardAction(),
+              new CreateAlertAction(),
               new BookmarkHeaderAction(),
             ],
           },
