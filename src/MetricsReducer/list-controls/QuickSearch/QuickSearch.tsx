@@ -84,7 +84,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     // EXPERIMENT: Evaluate early so analytics enrichment can include the variant when assistant events fire later.
     evaluateFeatureFlag('drilldown.metrics.grafana_assistant_quick_search_tab_test').then((flagValue) => {
       if (flagValue === 'treatment' || flagValue === 'control' || flagValue === 'excluded') {
-        this.setState({ assistantTabExperimentVariant: 'treatment' });
+        this.setState({ assistantTabExperimentVariant: flagValue });
       }
     });
   }
