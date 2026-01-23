@@ -206,7 +206,8 @@
     "count-total-singular": "1 {{targetName}} in total",
     "placeholder": "Quick search {{targetName}}s",
     "placeholder-question-mode": "Ask the Grafana Assistant a question and press enter",
-    "placeholder-with-assistant": "Quick search {{targetName}}s or type ? to ask the Grafana Assistant"
+    "placeholder-with-assistant": "Quick search {{targetName}}s or type ? to ask the Grafana Assistant",
+    "placeholder-with-assistant-tab-enter": "Quick search {{targetName}}s or press tab then enter to ask the Grafana Assistant"
   },
   "quick-search-assistant": {
     "label-filters-title": "Current label filters",
