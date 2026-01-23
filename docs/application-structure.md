@@ -47,9 +47,17 @@ The toolbar provides essential controls for working with metrics:
 
 The collapsible sidebar provides a graphical way to filter and navigate metrics. Users who want to narrow down the metrics list can open it to access:
 
-#### Bookmarks
+#### Rules filters
 
-Quick access to saved metrics. Bookmarks persist across sessions, helping users return to frequently monitored metrics.
+For environments using Prometheus recording rules, this groups metrics by their originating rules, making it easy to find all metrics derived from a particular recording rule hierarchy.
+
+#### Prefix filters
+
+Filter metrics based on common prefixes (e.g., `node_`, `prometheus_`) to find metrics from specific exporters or subsystems.
+
+#### Suffix filters
+
+Filter metrics based on common suffixes (e.g., `_total`, `_seconds`) to identify metric types like counters or histograms.
 
 #### Recent metrics filters
 
@@ -62,17 +70,9 @@ A two-level drill-down for filtering by label values:
 1. First, select a label name (like `job` or `instance`)
 2. Then, select specific values for that label
 
-#### Prefix filters
+#### Bookmarks
 
-Filter metrics based on common prefixes (e.g., `node_`, `prometheus_`) to find metrics from specific exporters or subsystems.
-
-#### Suffix filters
-
-Filter metrics based on common suffixes (e.g., `_total`, `_seconds`) to identify metric types like counters or histograms.
-
-#### Rules filters
-
-For environments using Prometheus recording rules, this groups metrics by their originating rules, making it easy to find all metrics derived from a particular recording rule hierarchy.
+Quick access to saved metrics. Bookmarks persist across sessions, helping users return to frequently monitored metrics.
 
 All filters show counts of matching metrics and can be combined. Selections are saved in user preferences and restored on return visits.
 
