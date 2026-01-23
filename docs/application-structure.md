@@ -187,7 +187,7 @@ The `SourceMetrics` component is embedded in RCA Workbench's slide-out drawer to
 
 ### Compact Views
 
-The `MiniBreakdown` component is embedded in RCA Workbench to allow users to explore the metrics that are related to a Knowledge Graph Insight.
+The `MiniBreakdown` component is embedded in Grafana Assistant to allow users to preview a label breakdown of a metric in the Assistant UI before opening the full Metrics Drilldown experience.
 
 ### Linking Back
 
