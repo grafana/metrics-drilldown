@@ -84,4 +84,3 @@ export function openQuickSearchAssistant(sceneObject: SceneObject, question: str
     context,
   });
 }
-

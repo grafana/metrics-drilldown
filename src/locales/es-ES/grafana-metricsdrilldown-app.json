@@ -208,7 +208,8 @@
     "count-total-singular": "1 {{targetName}} en total",
     "placeholder": "Búsqueda rápida de {{targetName}}s",
     "placeholder-question-mode": "Haz una pregunta al Asistente de Grafana y presiona enter",
-    "placeholder-with-assistant": "Búsqueda rápida de {{targetName}}s o escribe ? para preguntar al Asistente de Grafana"
+    "placeholder-with-assistant": "Búsqueda rápida de {{targetName}}s o escribe ? para preguntar al Asistente de Grafana",
+    "placeholder-with-assistant-tab-enter": "Búsqueda rápida de {{targetName}}s o presiona tab luego enter para preguntar al Asistente de Grafana"
   },
   "quick-search-assistant": {
     "label-filters-title": "Current label filters",
