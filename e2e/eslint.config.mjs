@@ -1,11 +1,11 @@
-const baseConfig = require('../eslint.config.js');
-const playwright = require('eslint-plugin-playwright');
-const globals = require('globals');
+import baseConfig from '../eslint.config.mjs';
+import playwright from 'eslint-plugin-playwright';
+import globals from 'globals';
 
 /**
  * @type {Array<import('eslint').Linter.Config>}
  */
-module.exports = [
+export default [
   // Override ignores - don't ignore e2e directory in the e2e config
   {
     ignores: [
