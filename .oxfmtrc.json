@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "endOfLine": "lf",
+  "printWidth": 120,
+  "trailingComma": "es5",
+  "semi": true,
+  "jsxSingleQuote": false,
+  "singleQuote": true,
+  "useTabs": false,
+  "tabWidth": 2,
+  "ignorePatterns": ["dist/", "playwright/", "playwright-report/", "test-results/"]
+}

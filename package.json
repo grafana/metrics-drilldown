@@ -1,8 +1,8 @@
 {
   "name": "grafana-metricsdrilldown-app",
   "version": "1.0.28",
-  "author": "Grafana",
   "license": "AGPL-3.0",
+  "author": "Grafana",
   "scripts": {
     "prebuild": "./scripts/update-commit-sha.sh",
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
@@ -12,8 +12,8 @@
     "test": "jest --watch --onlyChanged",
     "test:ci": "jest --passWithNoTests --maxWorkers 4",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --cache .",
-    "lint:fix": "pnpm run lint -- --fix && prettier --write --list-different .",
+    "lint": "oxlint && eslint --cache .",
+    "lint:fix": "oxlint --fix && eslint --cache --fix . && oxfmt --list-different .",
     "server": "docker compose up --build",
     "sign": "pnpm dlx @grafana/sign-plugin@latest",
     "e2e:server": "COMPOSE_BAKE=true docker compose up --build",
@@ -27,13 +27,11 @@
     "e2e:codegen": "playwright codegen",
     "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh",
     "e2e:smoke": "playwright test -c ./e2e/config/playwright.config.smoke.ts -x --trace on",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
     "knip": "pnpm dlx knip --config knip.js",
     "i18n-extract": "i18next -c i18next-parser.config.ts",
     "i18n-extract-check": "i18next -c i18next-parser.config.ts --fail-on-update"
-  },
-  "packageManager": "pnpm@10.28.1",
-  "engines": {
-    "node": ">=22"
   },
   "dependencies": {
     "@bsull/augurs": "^0.10.0",
@@ -94,6 +92,7 @@
     "eslint-plugin-jest": "28.14.0",
     "eslint-plugin-jsdoc": "46.10.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-oxlint": "^1.41.0",
     "eslint-plugin-playwright": "2.2.0",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "^7.0.0",
@@ -107,6 +106,9 @@
     "imports-loader": "^5.0.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.41.0",
+    "oxlint-plugin-complexity": "^0.3.0",
     "prettier": "2.8.8",
     "replace-in-file-webpack-plugin": "^1.0.6",
     "sass": "1.93.3",
@@ -126,5 +128,9 @@
   },
   "peerDependencies": {
     "lodash": "^4.17.21"
-  }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.28.1"
 }

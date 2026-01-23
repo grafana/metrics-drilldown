@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "import", "jest", "jsx-a11y", "jsdoc"],
+  "jsPlugins": ["oxlint-plugin-complexity"],
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "artifacts/",
+    "coverage/",
+    ".config/",
+    "e2e/",
+    "playwright/",
+    "*.log",
+    "**/eslint.config.*"
+  ],
+  "rules": {
+    "react/prop-types": "off",
+    "react-hooks/rules-of-hooks": "off",
+    "react-hooks/static-components": "off",
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "complexity/max-cognitive": ["error", { "max": 15 }],
+    "jsdoc/check-tag-names": ["warn", { "definedTags": ["remarks"] }]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "**/__tests__/**"],
+      "rules": {
+        "complexity/max-cognitive": "off"
+      }
+    }
+  ]
+}

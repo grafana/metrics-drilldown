@@ -2,10 +2,9 @@ import baseConfig from './.config/eslint.config.mjs';
 // eslint-disable-next-line import/no-unresolved -- package.json exports field not recognized by import plugin
 import grafanaI18nPlugin from '@grafana/i18n/eslint-plugin';
 import importPlugin from 'eslint-plugin-import';
-import jest from 'eslint-plugin-jest';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
 import sonarjs from 'eslint-plugin-sonarjs';
 import globals from 'globals';
+import oxlint from 'eslint-plugin-oxlint';
 
 /**
  * @type {Array<import('eslint').Linter.Config>}
@@ -18,18 +17,15 @@ export default [
       'artifacts/',
       'coverage/',
       '.config/',
-      'e2e/', // handled by separate config
+      'e2e/',
       'playwright/',
       '*.log',
-      '**/eslint.config.*', // don't lint eslint config files
+      '**/eslint.config.*',
     ],
   },
   ...baseConfig,
-  importPlugin.flatConfigs.recommended,
   importPlugin.flatConfigs.typescript,
   sonarjs.configs.recommended,
-  jest.configs['flat/recommended'],
-  jsxA11y.flatConfigs.recommended,
   {
     name: 'metrics-drilldown/i18n',
     files: ['src/**/*.{ts,tsx}'],
@@ -69,14 +65,18 @@ export default [
       },
     },
     rules: {
-      'react/prop-types': 'off',
-      // Disallow console usage - suggests using the custom logger instead
+      // Grafana Scenes uses a pattern where hooks are called inside static Component
+      // functions on classes that extend SceneObjectBase. This is intentional and valid.
+      // react-hooks v7 is stricter about detecting "class components" even when hooks
+      // are used in static function properties. Disable these rules as they produce
+      // false positives for the Scenes architecture.
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/static-components': 'off',
       'no-restricted-syntax': [
         'error',
         {
           selector: "CallExpression[callee.object.name='console']",
-          message:
-            "Avoid using console directly. Use the custom logger from 'src/tracking/logger/logger.ts' instead. Example: import { logger } from 'src/tracking/logger/logger'; logger.log('message');",
+          message: "Avoid using console directly. Use the custom logger from 'src/tracking/logger/logger.ts' instead.",
         },
       ],
       'import/order': [
@@ -94,25 +94,10 @@ export default [
           },
         },
       ],
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          fixStyle: 'inline-type-imports',
-        },
-      ],
-      'jest/expect-expect': ['error'],
-      'no-unused-vars': ['error'],
-      'sonarjs/cognitive-complexity': ['error', 11],
+      'sonarjs/cognitive-complexity': 'off', // handled by oxlint
       'sonarjs/todo-tag': ['warn'],
       'sonarjs/fixme-tag': ['warn'],
       'sonarjs/prefer-regexp-exec': ['off'],
-      // Grafana Scenes uses a pattern where hooks are called inside static Component
-      // functions on classes that extend SceneObjectBase. This is intentional and valid.
-      // react-hooks v7 is stricter about detecting "class components" even when hooks
-      // are used in static function properties. Disable these rules as they produce
-      // false positives for the Scenes architecture.
-      'react-hooks/rules-of-hooks': 'off',
-      'react-hooks/static-components': 'off',
     },
   },
   {
@@ -127,18 +112,5 @@ export default [
       '@typescript-eslint/no-deprecated': 'warn',
     },
   },
-  {
-    name: 'metrics-drilldown/jest-config',
-    files: ['jest.config.js'],
-    rules: {
-      'import/order': 'off',
-    },
-  },
-  {
-    name: 'metrics-drilldown/tests',
-    files: ['./tests/**/*'],
-    rules: {
-      'react-hooks/rules-of-hooks': 'off',
-    },
-  },
+  ...oxlint.buildFromOxlintConfigFile('./.oxlintrc.json'),
 ];
