@@ -15,7 +15,7 @@ import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
 import { HistogramPercentilesDefaultBehavior } from './behaviors/HistogramPercentilesDefaultBehavior';
 import { parsePromQLQuery } from '../../extensions/links';
-import { type ParsedPromQLQuery, type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
+import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
 /**
@@ -38,53 +38,81 @@ function extractUniquePrefixes(metricNames: string[]): string[] {
   return Array.from(prefixes);
 }
 
+/**
+ * Captures the possible scenarios / data combinations for the Source Metrics experience.
+ * This discriminated union gives us type safety for the different scenarios, and prevents us
+ * from needing to use type assertions or null checks in the KnowledgeGraphSourceMetrics component.
+ *
+ * `fallbackQuery` typically contains an `asserts:*` recording rule metric and labels.
+ */
 type SourceMetricsScenario =
-  | 'single_source_metric'
-  | 'multiple_source_metrics'
-  | 'recording_rule_fallback'
-  | 'missing_metric_information';
+  | {
+      scenario: 'recording_rule_fallback';
+      sourceMetrics: undefined;
+      fallbackQuery: ReturnType<typeof parsePromQLQuery>;
+    }
+  | {
+      scenario: 'single_source_metric';
+      sourceMetrics: SourceMetrics;
+      fallbackQuery: undefined;
+    }
+  | {
+      scenario: 'multiple_source_metrics';
+      sourceMetrics: SourceMetrics;
+      fallbackQuery: undefined;
+    }
+  | {
+      scenario: 'missing_metric_information';
+      sourceMetrics: undefined;
+      fallbackQuery: undefined;
+    };
 
-function getSourceMetricsScenario(
-  sourceMetrics: Array<{ metricName: string; labels: PromQLLabelMatcher[] }> | undefined,
-  parsedPromQLQuery: ParsedPromQLQuery | undefined
-): SourceMetricsScenario {
-  if ((!sourceMetrics || sourceMetrics.length === 0) && parsedPromQLQuery) {
-    return 'recording_rule_fallback';
+function getSourceMetricsScenario(props: Pick<SourceMetricsProps, 'query' | 'sourceMetrics'>): SourceMetricsScenario {
+  if (props.sourceMetrics && props.sourceMetrics.length > 0) {
+    return {
+      scenario: props.sourceMetrics.length === 1 ? 'single_source_metric' : 'multiple_source_metrics',
+      sourceMetrics: props.sourceMetrics,
+      fallbackQuery: undefined,
+    };
   }
 
-  if (sourceMetrics && sourceMetrics.length === 1) {
-    return 'single_source_metric';
+  let fallbackQuery: ReturnType<typeof parsePromQLQuery> | undefined = undefined;
+
+  if (props.query) {
+    try {
+      fallbackQuery = parsePromQLQuery(props.query);
+    } catch (error) {
+      logger.error(new Error(`Failed to parse PromQL query: ${error}`), { query: props.query });
+    }
   }
 
-  if (sourceMetrics && sourceMetrics.length > 1) {
-    return 'multiple_source_metrics';
+  if (fallbackQuery) {
+    return {
+      scenario: 'recording_rule_fallback',
+      sourceMetrics: undefined,
+      fallbackQuery,
+    };
   }
 
-  return 'missing_metric_information';
+  return { scenario: 'missing_metric_information', sourceMetrics: undefined, fallbackQuery: undefined };
 }
+
+type SourceMetrics = Array<{
+  metricName: string;
+  labels: PromQLLabelMatcher[];
+}>;
 
 export interface SourceMetricsProps {
   query: string;
   initialStart: string | number;
   initialEnd: string | number;
   dataSource: DataSourceApi;
-  sourceMetrics?: Array<{
-    metricName: string;
-    labels: PromQLLabelMatcher[];
-  }>;
+  sourceMetrics?: SourceMetrics;
 }
 
-const KnowledgeGraphSourceMetrics = ({
-  query,
-  initialStart,
-  initialEnd,
-  dataSource,
-  sourceMetrics,
-}: SourceMetricsProps) => {
+const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
   const [error] = useCatchExceptions();
   const initRef = useRef(false);
-
-  const hasSourceMetrics = sourceMetrics && sourceMetrics.length > 0;
 
   useEffect(() => {
     if (!initRef.current) {
@@ -93,39 +121,29 @@ const KnowledgeGraphSourceMetrics = ({
     }
   }, []);
 
-  const parsedPromQLQuery = query ? parsePromQLQuery(query) : undefined;
-
   // Determine metric and filters based on data source
   let metric: string | undefined;
   let initialFilters: AdHocVariableFilter[] | undefined;
 
-  const scenario = getSourceMetricsScenario(sourceMetrics, parsedPromQLQuery);
+  const { scenario, sourceMetrics, fallbackQuery } = getSourceMetricsScenario(props);
   switch (scenario) {
-    case 'recording_rule_fallback':
-      // When sourceMetrics aren't provided, fall back to
-      // selecting the metric from the provided PromQL query.
-      metric = parsedPromQLQuery!.metric;
-      initialFilters = parsedPromQLQuery!.labels.map((label) => labelMatcherToAdHocFilter(label));
-      break;
     case 'single_source_metric':
       // If there's a single source metric, select it.
-      metric = sourceMetrics![0].metricName;
-      initialFilters = sourceMetrics![0].labels.map((label) => labelMatcherToAdHocFilter(label));
+      metric = sourceMetrics[0].metricName;
+      initialFilters = sourceMetrics[0].labels.map((label) => labelMatcherToAdHocFilter(label));
       break;
     case 'multiple_source_metrics':
       // If there are multiple source metrics, we display
       // the source metrics in the MetricsReducer, allowing
       // users to select from the filtered list of metrics.
-      initialFilters = sourceMetrics![0].labels.map((label) => labelMatcherToAdHocFilter(label));
+      initialFilters = sourceMetrics[0].labels.map((label) => labelMatcherToAdHocFilter(label));
 
       // Extract unique prefixes from sourceMetrics to filter the metrics list
       // This naturally excludes metrics like "asserts_*" and "ALERTS*" that aren't in sourceMetrics
       const prefixesToExclude = ['asserts', 'ALERTS'];
-      const sourceMetricPrefixes = hasSourceMetrics
-        ? extractUniquePrefixes(sourceMetrics.map((m) => m.metricName)).filter((metric) =>
-            prefixesToExclude.every((excludedPrefix) => !metric.startsWith(excludedPrefix))
-          )
-        : undefined;
+      const sourceMetricPrefixes = extractUniquePrefixes(sourceMetrics.map((m) => m.metricName)).filter((metric) =>
+        prefixesToExclude.every((excludedPrefix) => !metric.startsWith(excludedPrefix))
+      );
 
       // Set URL params for prefix filters BEFORE creating the trail
       // This leverages Scenes' built-in URL sync in MetricsFilterSection
@@ -137,9 +155,15 @@ const KnowledgeGraphSourceMetrics = ({
         locationService.partial({ [sortByUrlParam]: 'alphabetical' }, true);
       }
       break;
+    case 'recording_rule_fallback':
+      // When sourceMetrics aren't provided, fall back to
+      // selecting the metric from the provided PromQL query.
+      metric = fallbackQuery.metric;
+      initialFilters = fallbackQuery.labels.map((label) => labelMatcherToAdHocFilter(label));
+      break;
     case 'missing_metric_information':
       const err = new Error('Missing metric information for Knowledge Graph insight');
-      logger.error(err, { query });
+      logger.error(err, { query: props.query });
       return <ErrorView error={err} />;
   }
 
@@ -148,9 +172,9 @@ const KnowledgeGraphSourceMetrics = ({
   // 2. Default histogram visualizations to percentiles (leveraging existing presets)
   const trail = newMetricsTrail({
     metric,
-    initialDS: dataSource.uid,
+    initialDS: props.dataSource.uid,
     initialFilters,
-    $timeRange: toSceneTimeRange(initialStart, initialEnd),
+    $timeRange: toSceneTimeRange(props.initialStart, props.initialEnd),
     embedded: true,
     $behaviors: [new FilterGroupByAssertsLabelsBehavior({ metric }), new HistogramPercentilesDefaultBehavior()],
   });
