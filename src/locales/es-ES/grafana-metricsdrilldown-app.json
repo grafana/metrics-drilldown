@@ -11,6 +11,9 @@
   "breakdown": {
     "add-to-filters": "Añadir a filtros",
     "by-label": "Por etiqueta",
+    "group-by": {
+      "label": "Group by"
+    },
     "label-values-list": {
       "error-title": "¡Error al cargar métricas!",
       "label": "valor de etiqueta",
@@ -30,6 +33,8 @@
   },
   "checkbox-list": {
     "clear": "limpiar",
+    "collapse": "Collapse",
+    "expand": "Expand",
     "no-results": "Sin resultados.",
     "selected-count_one": "{{count}} seleccionado",
     "selected-count_many": "{{count}} seleccionados",
@@ -65,18 +70,42 @@
   "extreme-value-filter": {
     "message": "Los datos del panel se volvieron a obtener con una consulta más compleja para manejar valores extremadamente pequeños en la serie"
   },
+  "fetch-alerting-metrics": {
+    "error": "Failed to fetch alerting rules"
+  },
+  "fetch-dashboard-metrics": {
+    "error": "Failed to fetch dashboard metrics"
+  },
+  "filtered-metrics-variable": {
+    "label": "Filtered Metrics"
+  },
   "give-feedback": {
     "button": "Dar feedback",
     "tooltip": "Comparte tus opiniones sobre Métricas en Grafana."
   },
+  "gmd-viz-panel": {
+    "native-histogram": "Native Histogram",
+    "variant": {
+      "heatmap": "heatmap",
+      "percentiles": "percentiles"
+    }
+  },
   "inline-banner": {
     "unknown-error": "¡Error desconocido!"
+  },
+  "labels-datasource": {
+    "none-option": "(none)",
+    "test-success": "OK"
   },
   "labels-list": {
     "clear": "limpiar",
     "no-results": "Sin resultados.",
     "no-selection": "Sin selección",
     "selected": "Seleccionado: \"{{selectedLabel}}\""
+  },
+  "labels-variable": {
+    "label": "Group by label",
+    "placeholder": "Group by label..."
   },
   "layout-switcher": {
     "aria-label": "Selector de diseño",
@@ -85,6 +114,9 @@
       "rows": "Filas",
       "single": "Individual"
     }
+  },
+  "lazy-loading": {
+    "fallback": "Loading..."
   },
   "metrics-group-by-list": {
     "error-title": "¡Error al cargar valores de etiqueta \"{{labelName}}\"!",
@@ -105,6 +137,10 @@
     "no-metrics": "No se encontraron métricas para los filtros y rango de tiempo actuales."
   },
   "metrics-sorter": {
+    "error": {
+      "get-recent-metrics": "Failed to get recent metrics:"
+    },
+    "label": "Sort by",
     "option": {
       "alerting-usage": "Uso en alertas",
       "alphabetical": "Alfabético [A-Z]",
@@ -113,10 +149,17 @@
       "default": "Predeterminado"
     }
   },
+  "metrics-variable": {
+    "label": "Metrics"
+  },
   "onboarding": {
     "learn-more": "Consulta <2>nuestra documentación</2> para saber más o<5></5><6>pruébalo en línea</6> en Grafana Play!",
     "no-datasource": "Notamos que no hay ninguna fuente de datos Prometheus configurada.<1></1>Añade una <4>fuente de datos Prometheus</4> para ver métricas.",
     "title": "Bienvenido a Grafana Metrics Drilldown"
+  },
+  "open-assistant": {
+    "explain-label": "Explain in Assistant",
+    "metric-metadata-title": "Prometheus metric metadata"
   },
   "panel-menu": {
     "action": {
@@ -144,6 +187,7 @@
       "contribute": "Contribuir",
       "documentation": "Documentación",
       "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Reportar un problema"
     }
   },
@@ -166,6 +210,10 @@
     "placeholder-question-mode": "Haz una pregunta al Asistente de Grafana y presiona enter",
     "placeholder-with-assistant": "Búsqueda rápida de {{targetName}}s o escribe ? para preguntar al Asistente de Grafana"
   },
+  "quick-search-assistant": {
+    "label-filters-title": "Current label filters",
+    "time-range-title": "Time range"
+  },
   "related-logs": {
     "datasource-description": "Algunas fuentes de datos Loki podrían no aparecer en el menú si tardaron más de {{timeout}} segundos en responder. Para ver logs de todas las fuentes de datos Loki, intenta usar Logs Drilldown.",
     "datasource-label": "Fuente de datos de logs",
@@ -178,6 +226,9 @@
     "open-in-drilldown": "Abrir en Logs Drilldown",
     "open-in-drilldown-tooltip": "Usar la aplicación Logs Drilldown para explorar estos logs",
     "suggestions": "Para encontrar logs relacionados, intenta lo siguiente:<1><0>Ajusta tus filtros de etiquetas para incluir etiquetas que existan tanto en la métrica actual como en tus logs</0><1>Selecciona una métrica creada por una <2>Regla de Grabación de Loki</2></1><2>Amplía el rango de tiempo para incluir más datos</2></1>"
+  },
+  "select-action": {
+    "button": "Select"
   },
   "select-new-metric": {
     "button": "Seleccionar nueva métrica",
@@ -281,5 +332,9 @@
     "used-time-singular_one": "Usada {{count}} vez en {{label}}",
     "used-time-singular_many": "Usada {{count}} veces en {{label}}",
     "used-time-singular_other": "Usada {{count}} veces en {{label}}"
+  },
+  "with-config-panel-options": {
+    "click-to-select": "Click to select this configuration",
+    "current-config": "Current configuration"
   }
 }
