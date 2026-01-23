@@ -23,6 +23,11 @@ A comprehensive guide for contributors to the Grafana Metrics Drilldown plugin -
 - **Node.js**: 22+ required
 - **Docker**: For local Grafana development server
 - **Git**: For version control
+- **pnpm**: 10.28.1+ required - Install via corepack (recommended) or see [pnpm installation guide](https://pnpm.io/installation) for other methods:
+  ```bash
+  corepack enable
+  corepack prepare pnpm@10.28.1 --activate
+  ```
 
 ### Initial Setup
 
