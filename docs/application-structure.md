@@ -173,10 +173,6 @@ Navigates to Grafana Explore with the metric and its context (filters, time rang
 
 From the Related Logs tab, users can navigate to Logs Drilldown with the appropriate label filters already applied.
 
-### Bookmarking Metrics
-
-While not strictly an exit point, bookmarks let users mark important metrics for quick return access, reducing the need to search or filter repeatedly.
-
 ### URL Sharing
 
 The URL updates as users navigate and apply filters, making it simple to copy and share specific views with teammates. Recipients land in exactly the same state: same metric, filters, tab, and time range.
