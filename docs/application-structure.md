@@ -53,7 +53,7 @@ Quick access to saved metrics. Bookmarks persist across sessions, helping users 
 
 #### Recent Metrics
 
-A history of recently selected metrics, making it easy to return to metrics you were just exploring.
+Filter the metrics list to show only newly-created metrics from a chosen time window (past 1m, 3m, 5m, etc.). This helps users discover metrics that were recently added to the data source.
 
 #### Labels Browser
 
