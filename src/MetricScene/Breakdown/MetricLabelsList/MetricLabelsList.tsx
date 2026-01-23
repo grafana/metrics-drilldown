@@ -234,7 +234,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   public Controls({ model }: { model: MetricLabelsList }) {
-    const styles = useStyles2(getStyles);  
+    const styles = useStyles2(getStyles);
     const { layoutSwitcher } = model.useState();
 
     return (
@@ -266,7 +266,11 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
         <body.Component model={body} />
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <ShowMoreButton label={t('breakdown.labels-list.label-label', 'label')} batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton
+              label={t('breakdown.labels-list.label-label', 'label')}
+              batchSizes={batchSizes}
+              onClick={onClickShowMore}
+            />
           </div>
         )}
       </div>

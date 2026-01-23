@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: "read"
+  contents: 'read'
 
 jobs:
   build:
@@ -30,8 +30,8 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
-          cache: "pnpm"
+          node-version: '22'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -63,7 +63,7 @@ jobs:
         uses: grafana/plugin-ci-workflows/actions/internal/plugins/package@ci-cd-workflows/v4.3.0
         with:
           output-folder: dist-artifacts
-          universal: "true"
+          universal: 'true'
           dist-folder: dist
           access-policy-token: ${{ fromJSON(steps.get-secrets.outputs.secrets).access_policy_token }}
 

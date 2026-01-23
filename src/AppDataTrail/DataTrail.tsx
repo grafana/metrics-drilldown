@@ -438,8 +438,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                 </Stack>
               </div>
             )}
-            {topScene && (
-              embeddedMini ? (
+            {topScene &&
+              (embeddedMini ? (
                 // Skip URL sync in embeddedMini mode to avoid conflicts with host app
                 <div className={styles.body}>
                   <topScene.Component model={topScene} />
@@ -457,8 +457,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                     </Stack>
                   </div>
                 </UrlSyncContextProvider>
-              )
-            )}
+              ))}
           </Stack>
         </div>
         <drawer.Component model={drawer} />
@@ -467,7 +466,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             {createElement(AddToDashboardComponent as React.ComponentType<AddToDashboardFormProps>, {
               onClose: model.closeAddToDashboardModal,
               buildPanel: () => {
-                const expr = String(addToDashboardPanelData?.panel?.targets?.[0]?.expr) ?? '';
+                const expr = String(addToDashboardPanelData?.panel?.targets?.[0]?.expr ?? '');
                 reportExploreMetrics('add_to_dashboard_build_panel', { expr });
                 return addToDashboardPanelData.panel;
               },
@@ -568,9 +567,9 @@ function updateAppControlsHeight() {
 function isScopesSupported(): boolean {
   return Boolean(
     config.featureToggles.scopeFilters &&
-      config.featureToggles.enableScopesInMetricsExplore &&
-      // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
-      // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
-      !config.buildInfo.version.startsWith('11.')
+    config.featureToggles.enableScopesInMetricsExplore &&
+    // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
+    // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
+    !config.buildInfo.version.startsWith('11.')
   );
 }

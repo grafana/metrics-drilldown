@@ -38,11 +38,16 @@ function extractUniquePrefixes(metricNames: string[]): string[] {
   return Array.from(prefixes);
 }
 
+type SourceMetricsScenario =
+  | 'single_source_metric'
+  | 'multiple_source_metrics'
+  | 'recording_rule_fallback'
+  | 'missing_metric_information';
 
-
-type SourceMetricsScenario = 'single_source_metric' | 'multiple_source_metrics' | 'recording_rule_fallback' | 'missing_metric_information';
-
-function getSourceMetricsScenario(sourceMetrics: Array<{ metricName: string; labels: PromQLLabelMatcher[] }> | undefined, parsedPromQLQuery: ParsedPromQLQuery | undefined): SourceMetricsScenario {
+function getSourceMetricsScenario(
+  sourceMetrics: Array<{ metricName: string; labels: PromQLLabelMatcher[] }> | undefined,
+  parsedPromQLQuery: ParsedPromQLQuery | undefined
+): SourceMetricsScenario {
   if ((!sourceMetrics || sourceMetrics.length === 0) && parsedPromQLQuery) {
     return 'recording_rule_fallback';
   }
@@ -55,9 +60,8 @@ function getSourceMetricsScenario(sourceMetrics: Array<{ metricName: string; lab
     return 'multiple_source_metrics';
   }
 
-
   return 'missing_metric_information';
-};
+}
 
 export interface SourceMetricsProps {
   query: string;
@@ -113,7 +117,7 @@ const KnowledgeGraphSourceMetrics = ({
       // the source metrics in the MetricsReducer, allowing
       // users to select from the filtered list of metrics.
       initialFilters = sourceMetrics![0].labels.map((label) => labelMatcherToAdHocFilter(label));
-      
+
       // Extract unique prefixes from sourceMetrics to filter the metrics list
       // This naturally excludes metrics like "asserts_*" and "ALERTS*" that aren't in sourceMetrics
       const prefixesToExclude = ['asserts', 'ALERTS'];
@@ -148,10 +152,7 @@ const KnowledgeGraphSourceMetrics = ({
     initialFilters,
     $timeRange: toSceneTimeRange(initialStart, initialEnd),
     embedded: true,
-    $behaviors: [
-      new FilterGroupByAssertsLabelsBehavior({ metric }),
-      new HistogramPercentilesDefaultBehavior(),
-    ],
+    $behaviors: [new FilterGroupByAssertsLabelsBehavior({ metric }), new HistogramPercentilesDefaultBehavior()],
   });
 
   return (

@@ -1,6 +1,6 @@
-import { SceneObjectBase, type SceneObjectState } from "@grafana/scenes";
+import { SceneObjectBase, type SceneObjectState } from '@grafana/scenes';
 
-import { GroupByOptionsLoadedEvent, type GroupByVariable } from "MetricScene/Breakdown/GroupByVariable";
+import { GroupByOptionsLoadedEvent, type GroupByVariable } from 'MetricScene/Breakdown/GroupByVariable';
 
 /**
  * Behavior that filters out "asserts_*" labels from the Breakdown view.
@@ -20,7 +20,7 @@ export class FilterGroupByAssertsLabelsBehavior extends SceneObjectBase<SceneObj
 
         this.filterVariableOptions(event.payload);
       });
-      
+
       return () => subscription.unsubscribe();
     });
   }
@@ -33,7 +33,7 @@ export class FilterGroupByAssertsLabelsBehavior extends SceneObjectBase<SceneObj
     }
 
     const filtered = currentOptions.filter((option) => !String(option.value).startsWith('asserts'));
-    
+
     if (filtered.length !== currentOptions.length) {
       variable.setState({ options: filtered });
     }

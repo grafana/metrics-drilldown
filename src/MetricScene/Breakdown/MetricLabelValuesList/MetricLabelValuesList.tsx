@@ -224,7 +224,10 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         new SceneReactObject({
           reactNode: (
             <InlineBanner title="" severity="info">
-              {t('breakdown.label-values-list.no-values', 'No label values found for the current filters and time range.')}
+              {t(
+                'breakdown.label-values-list.no-values',
+                'No label values found for the current filters and time range.'
+              )}
             </InlineBanner>
           ),
         }),
@@ -277,7 +280,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   public Controls({ model }: { model: MetricLabelValuesList }) {
-    const styles = useStyles2(getStyles);  
+    const styles = useStyles2(getStyles);
     const { body, quickSearch, layoutSwitcher, sortBySelector } = model.useState();
 
     return (
@@ -351,7 +354,11 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         </div>
         {shouldDisplayShowMoreButton && (
           <div className={styles.listFooter}>
-            <ShowMoreButton label={t('breakdown.label-values-list.label', 'label value')} batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton
+              label={t('breakdown.label-values-list.label', 'label value')}
+              batchSizes={batchSizes}
+              onClick={onClickShowMore}
+            />
           </div>
         )}
       </div>

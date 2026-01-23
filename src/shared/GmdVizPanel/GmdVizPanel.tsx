@@ -167,7 +167,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     // we found a native histogram
     if (metricTypeFromMetadata === 'native-histogram') {
       stateUpdate.metricType = 'native-histogram';
-      panelConfigUpdate.description = panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
+      panelConfigUpdate.description =
+        panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
 
       if (!discardPanelTypeUpdates) {
         panelConfigUpdate.type = 'heatmap';
@@ -209,7 +210,11 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
           this.setState({
-            panelConfig: { description: t('gmd-viz-panel.native-histogram', 'Native Histogram'), ...panelConfig, type: 'heatmap' },
+            panelConfig: {
+              description: t('gmd-viz-panel.native-histogram', 'Native Histogram'),
+              ...panelConfig,
+              type: 'heatmap',
+            },
           });
         }
 

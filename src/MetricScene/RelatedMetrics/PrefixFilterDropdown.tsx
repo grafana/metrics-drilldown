@@ -173,7 +173,7 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     container: css`
       display: flex;
-
+      
       & > div {
         margin: 0;
       }

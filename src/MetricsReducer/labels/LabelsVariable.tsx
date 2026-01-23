@@ -106,7 +106,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     display: flex;
     align-items: center;
     gap: 0;
-
+    
     [class*='input-wrapper'] {
       width: 240px;
     }

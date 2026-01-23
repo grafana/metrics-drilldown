@@ -80,7 +80,9 @@ export function getRecentMetrics(): RecentMetric[] {
 
     return validMetrics;
   } catch (error) {
-    logger.error(error as Error, { message: t('metrics-sorter.error.get-recent-metrics', 'Failed to get recent metrics:') });
+    logger.error(error as Error, {
+      message: t('metrics-sorter.error.get-recent-metrics', 'Failed to get recent metrics:'),
+    });
     return [];
   }
 }

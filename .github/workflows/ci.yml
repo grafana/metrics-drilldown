@@ -13,8 +13,8 @@ on:
       - main
 
 permissions:
-  contents: "read"
-  id-token: "write"
+  contents: 'read'
+  id-token: 'write'
 
 jobs:
   CI:

@@ -125,7 +125,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   public getActionViewName(): string {
     return this.state.actionView
-      ? getActionViewsDefinitions().find((v) => v.value === this.state.actionView)?.displayName ?? ''
+      ? (getActionViewsDefinitions().find((v) => v.value === this.state.actionView)?.displayName ?? '')
       : '';
   }
 

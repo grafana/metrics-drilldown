@@ -5,7 +5,10 @@ import { expect } from '../';
 export class QuickSearchInput {
   private readonly locator: Locator;
 
-  constructor(private readonly page: Page, name: string) {
+  constructor(
+    private readonly page: Page,
+    name: string
+  ) {
     this.locator = page.getByRole('textbox', { name });
   }
 

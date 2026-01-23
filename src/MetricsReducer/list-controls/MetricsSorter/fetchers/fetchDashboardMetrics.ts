@@ -50,7 +50,7 @@ const getDashboardLimited = limitFunction(
           `grafana-metricsdrilldown-app-dashboard-metric-usage-${dashboardUid}`,
           usageRequestOptions
         )
-        .then(({ dashboard }) => ({ ...dashboard, url } as DashboardWithUrl))
+        .then(({ dashboard }) => ({ ...dashboard, url }) as DashboardWithUrl)
         .catch((error) => {
           // Prevent excessive noise
           if (dashboardRequestsFailedCount <= 5) {

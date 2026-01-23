@@ -64,11 +64,9 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
             reactNode: (
               <InlineBanner
                 severity="error"
-                title={t(
-                  'metrics-group-by-list.error-title',
-                  'Error while loading label "{{labelName}}" values!',
-                  { labelName }
-                )}
+                title={t('metrics-group-by-list.error-title', 'Error while loading label "{{labelName}}" values!', {
+                  labelName,
+                })}
                 error={error}
               />
             ),

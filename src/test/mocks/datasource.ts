@@ -60,7 +60,7 @@ class MockDataSource implements DataSourceApi {
     this.languageProvider = {
       queryMetricsMetadata: jest.fn(async () => ({})),
       queryLabelKeys: jest.fn(async () => []),
-      // eslint-disable-next-line no-unused-vars
+
       fetchLabelValues: jest.fn(async (_: any) => []),
       request: jest.fn(async () => ({})),
     };
@@ -90,13 +90,16 @@ export class MockDataSourceSrv implements DataSourceSrv {
   private datasources: Record<string, DataSourceApi> = {};
 
   constructor(datasources: Record<string, Partial<DataSourceApi>>) {
-    this.datasources = Object.entries(datasources).reduce((acc, [key, ds]) => {
-      const mockDs = createMockDataSourceApi(ds);
-      // Store by UID if available, otherwise by key
-      const storageKey = ds.uid || key;
-      acc[storageKey] = mockDs;
-      return acc;
-    }, {} as Record<string, DataSourceApi>);
+    this.datasources = Object.entries(datasources).reduce(
+      (acc, [key, ds]) => {
+        const mockDs = createMockDataSourceApi(ds);
+        // Store by UID if available, otherwise by key
+        const storageKey = ds.uid || key;
+        acc[storageKey] = mockDs;
+        return acc;
+      },
+      {} as Record<string, DataSourceApi>
+    );
   }
 
   async get(ref?: DataSourceRef | string | null, scopedVars?: any): Promise<DataSourceApi> {

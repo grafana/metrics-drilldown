@@ -105,11 +105,14 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
       flexItem.setState({ minHeight: PANEL_HEIGHT.S, maxHeight: PANEL_HEIGHT.S });
 
       const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
-      gmdVizPanel.update({
-        headerActions: () => [],
-        menu: undefined,
-        height: PANEL_HEIGHT.S,
-      }, {});
+      gmdVizPanel.update(
+        {
+          headerActions: () => [],
+          menu: undefined,
+          height: PANEL_HEIGHT.S,
+        },
+        {}
+      );
 
       // Build navigation URL from trail state
       const timeRange = sceneGraph.getTimeRange(trail);
@@ -174,7 +177,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
     const controlsContainer = useRef<HTMLDivElement>(null);
 
     useResizeObserver({

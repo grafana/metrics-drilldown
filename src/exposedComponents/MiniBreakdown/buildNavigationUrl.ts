@@ -1,10 +1,6 @@
 import { locationService } from '@grafana/runtime';
 
-import {
-  buildNavigateToMetricsParams,
-  createAppUrl,
-  createPromURLObject,
-} from '../../extensions/links';
+import { buildNavigateToMetricsParams, createAppUrl, createPromURLObject } from '../../extensions/links';
 import { ROUTES } from '../../shared/constants/routes';
 
 interface BuildMiniBreakdownUrlParams {
@@ -46,4 +42,3 @@ export function navigateToMiniBreakdownUrl(params: BuildMiniBreakdownUrlParams):
   const url = buildMiniBreakdownNavigationUrl(params);
   locationService.push(url);
 }
-

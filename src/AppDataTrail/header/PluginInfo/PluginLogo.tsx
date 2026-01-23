@@ -8,7 +8,13 @@ type PluginLogoProps = {
 
 export const PluginLogo = memo(function PluginLogoComponent({ size }: PluginLogoProps) {
   const styles = useStyles2(getStyles);
-  return <img className={cx(styles.logo, size)} src="public/plugins/grafana-metricsdrilldown-app/img/logo.svg" alt="Metrics Drilldown Logo" />;
+  return (
+    <img
+      className={cx(styles.logo, size)}
+      src="public/plugins/grafana-metricsdrilldown-app/img/logo.svg"
+      alt="Metrics Drilldown Logo"
+    />
+  );
 });
 
 const getStyles = () => ({
@@ -20,7 +26,7 @@ const getStyles = () => ({
       position: relative;
       top: -2px;
     }
-
+    
     &.large {
       width: 40px;
       height: 40px;

@@ -40,7 +40,7 @@ type Interactions = {
   // A user has changed a bookmark
   bookmark_changed: {
     action: // Toggled on or off from the bookmark icon
-    | 'toggled_on'
+      | 'toggled_on'
       | 'toggled_off'
       // Deleted from the sidebar bookmarks list
       | 'deleted';
@@ -57,7 +57,7 @@ type Interactions = {
   // User clicks on one of the action buttons associated with a selected metric
   selected_metric_action_clicked: {
     action: // Opens the metric queries in Explore
-    | 'open_in_explore'
+      | 'open_in_explore'
       // Clicks on the share URL button
       | 'share_url'
       // Deselects the current selected metrics by clicking the "Select new metric" button
@@ -68,14 +68,14 @@ type Interactions = {
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: // Opens Logs Drilldown
-    | 'open_logs_drilldown'
+      | 'open_logs_drilldown'
       // Logs data source changed
       | 'logs_data_source_changed';
   };
   // User selects a metric
   metric_selected: {
     from: // By clicking "Select" on a metric panel when on the no-metric-selected metrics list view
-    | 'metric_list'
+      | 'metric_list'
       // By clicking "Select" on a metric panel when on the related metrics tab
       | 'related_metrics';
     // The number of search terms activated when the selection was made
@@ -88,11 +88,11 @@ type Interactions = {
   // User opens/closes the prefix filter dropdown
   prefix_filter_clicked: {
     from: // By clicking "Select" on a metric panel when on the no-metric-selected metrics list view
-    | 'metric_list'
+      | 'metric_list'
       // By clicking "Select" on a metric panel when on the related metrics tab
       | 'related_metrics';
     action: // Opens the dropdown
-    | 'open'
+      | 'open'
       // Closes the dropdown
       | 'close';
   };
@@ -119,7 +119,7 @@ type Interactions = {
   // User toggles the Wingman sidebar
   metrics_sidebar_toggled: {
     action: // Opens the sidebar section
-    | 'opened'
+      | 'opened'
       // Closes the sidebar section
       | 'closed';
     section?: string;

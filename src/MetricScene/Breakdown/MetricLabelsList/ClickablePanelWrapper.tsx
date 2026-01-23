@@ -53,4 +53,3 @@ function getStyles(theme: GrafanaTheme2) {
     `,
   };
 }
-

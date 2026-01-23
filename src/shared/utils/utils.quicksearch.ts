@@ -19,9 +19,13 @@ export function getQuickSearchPlaceholder(args: {
   }
 
   if (assistantHintType === 'question_mark') {
-    return t('quick-search.placeholder-with-assistant', 'Quick search {{targetName}}s or type ? to ask the Grafana Assistant', {
-      targetName,
-    });
+    return t(
+      'quick-search.placeholder-with-assistant',
+      'Quick search {{targetName}}s or type ? to ask the Grafana Assistant',
+      {
+        targetName,
+      }
+    );
   }
 
   if (assistantHintType === 'tab_enter') {

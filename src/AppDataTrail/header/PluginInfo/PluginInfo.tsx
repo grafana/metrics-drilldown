@@ -31,7 +31,9 @@ function InfoMenuHeader() {
         <PluginLogo size="small" />
         {t('plugin-info.header.title', 'Grafana Metrics Drilldown v{{version}}', { version })}
       </h5>
-      <div className={styles.subTitle}>{t('plugin-info.header.last-update', 'Last update: {{updated}}', { updated })}</div>
+      <div className={styles.subTitle}>
+        {t('plugin-info.header.last-update', 'Last update: {{updated}}', { updated })}
+      </div>
     </div>
   );
 }

@@ -2,7 +2,13 @@ import { css, cx } from '@emotion/css';
 import { createAssistantContextItem, isAssistantAvailable, openAssistant } from '@grafana/assistant';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { sceneGraph, SceneObjectBase, VizPanel, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
+import {
+  sceneGraph,
+  SceneObjectBase,
+  VizPanel,
+  type SceneComponentProps,
+  type SceneObjectState,
+} from '@grafana/scenes';
 import { Button, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useState } from 'react';
 

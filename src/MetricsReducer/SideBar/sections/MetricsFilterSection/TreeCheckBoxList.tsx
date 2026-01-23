@@ -155,9 +155,7 @@ export function TreeCheckBoxList({
                       className={treeStyles.expandButton}
                       onClick={() => onExpandToggle(group.value)}
                       aria-label={
-                        isExpanded
-                          ? t('checkbox-list.collapse', 'Collapse')
-                          : t('checkbox-list.expand', 'Expand')
+                        isExpanded ? t('checkbox-list.collapse', 'Collapse') : t('checkbox-list.expand', 'Expand')
                       }
                       data-testid={`expand-${group.value}`}
                     >

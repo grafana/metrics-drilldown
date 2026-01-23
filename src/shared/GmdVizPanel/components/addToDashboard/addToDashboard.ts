@@ -19,13 +19,14 @@ export function getPanelData(vizPanel: VizPanel): PanelDataRequestPayload {
 
   if (isSceneQueryRunner(queryRunner)) {
     // Targets (queries) from QueryRunner with interpolated variables and __ignore_usage__ removed
-    targets = queryRunner.state.queries?.map((query) => ({
-      ...query,
-      expr: query.expr ? removeIgnoreUsageLabel(sceneGraph.interpolate(vizPanel, query.expr)) : query.expr,
-      legendFormat: query.legendFormat ? sceneGraph.interpolate(vizPanel, query.legendFormat) : query.legendFormat,
-      // remove the field fromExploreMetrics from the query because this will become a panel in the dashboard
-      fromExploreMetrics: false,
-    })) || [];
+    targets =
+      queryRunner.state.queries?.map((query) => ({
+        ...query,
+        expr: query.expr ? removeIgnoreUsageLabel(sceneGraph.interpolate(vizPanel, query.expr)) : query.expr,
+        legendFormat: query.legendFormat ? sceneGraph.interpolate(vizPanel, query.legendFormat) : query.legendFormat,
+        // remove the field fromExploreMetrics from the query because this will become a panel in the dashboard
+        fromExploreMetrics: false,
+      })) || [];
 
     // Datasource from QueryRunner with interpolated variables
     datasource = queryRunner.state.datasource

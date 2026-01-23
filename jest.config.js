@@ -2,8 +2,8 @@
 // generally used by snapshots, but can affect specific tests
 process.env.TZ = 'UTC';
 
+const { grafanaESModules, nodeModulesToTransform } = require('./.config/jest/utils');
 const baseConfig = require('./.config/jest.config'); // Jest configuration provided by Grafana scaffolding
-const { nodeModulesToTransform, grafanaESModules } = require('./.config/jest/utils');
 const esModules = [
   ...grafanaESModules,
   '@bsull/augurs',

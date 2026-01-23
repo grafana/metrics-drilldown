@@ -219,7 +219,7 @@ function getStyles(theme: GrafanaTheme2) {
       display: flex;
       align-items: center;
       justify-content: center;
-
+      
       & [type='radio'] {
         cursor: pointer;
       }

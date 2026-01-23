@@ -126,6 +126,5 @@ export function isPrometheusDatasourceV12_0_0(ds: PrometheusRuntimeDatasource): 
 } {
   const languageProvider = ds.languageProvider as PromQlLanguageProviderTwelveDotZero;
 
-   
   return typeof languageProvider.fetchLabelValues === 'function' && languageProvider.fetchLabelValues.length > 1;
 }
