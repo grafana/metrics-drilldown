@@ -53,7 +53,7 @@
     "@openfeature/web-sdk": "^1.7.2",
     "@prometheus-io/lezer-promql": "^0.308.0",
     "leven": "^4.0.0",
-    "p-limit": "^6.2.0",
+    "p-limit": "^7.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-inlinesvg": "^4.2.0",
