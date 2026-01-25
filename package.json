@@ -97,7 +97,7 @@
     "eslint-webpack-plugin": "4.2.0",
     "fork-ts-checker-webpack-plugin": "^8.0.0",
     "glob": "11.1.0",
-    "globals": "^15.0.0",
+    "globals": "^17.0.0",
     "i18next-cli": "^1.34.1",
     "identity-obj-proxy": "3.0.0",
     "imports-loader": "^5.0.0",
