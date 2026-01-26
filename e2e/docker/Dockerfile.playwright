@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/playwright:v1.57.0
 WORKDIR /app
 
 # Enable pnpm via corepack and install dependencies
-RUN corepack enable && corepack prepare pnpm@10 --activate && \
+RUN corepack enable && corepack prepare pnpm@10.28.1 --activate && \
     pnpm install "@playwright/test@1.57.0" "dotenv@^16.3.1" "@grafana/plugin-e2e" "@grafana/i18n@^12.3.0"
 
 ENV TZ=Europe/Madrid

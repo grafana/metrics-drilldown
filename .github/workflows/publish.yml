@@ -6,7 +6,7 @@ name: Publish to plugin catalog
 # 3. Create a separate version bump PR:
 #    - git switch -c bump-version-vX.Y.Z
 #    - update CHANGELOG.md with a link to the forthcoming tag's release notes
-#    - pnpm version <type>  # this creates the commit and tag (see https://docs.npmjs.com/cli/commands/npm-version for <type> options, e.g. patch, minor, major, prerelease, etc.)
+#    - pnpm version <type>  # this creates the commit and tag (see https://pnpm.io/cli/version for <type> options, e.g. patch, minor, major, prerelease, etc.)
 #    - git push origin bump-version-vX.Y.Z --follow-tags
 # 4. Get version bump PR approved
 # 5. Merge feature PR first
