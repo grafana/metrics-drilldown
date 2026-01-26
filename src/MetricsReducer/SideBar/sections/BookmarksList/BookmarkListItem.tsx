@@ -53,15 +53,15 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
     <article data-testid={`data-trail-card ${metric}`}>
       <Card onClick={onSelect} className={cardClassName}>
         <Card.Heading>
-          <div>{heading}</div>
+          <div data-sensitive>{heading}</div>
         </Card.Heading>
         <Card.Meta className={styles.meta}>
           {filters.map(([key, operator, value], i) => (
             <div key={i} className={styles.filter}>
-              <Text variant="bodySmall" color="secondary">
+              <Text variant="bodySmall" color="secondary" data-sensitive>
                 {key} {operator}
               </Text>
-              <Text variant="bodySmall" color="primary" weight="medium">
+              <Text variant="bodySmall" color="primary" weight="medium" data-sensitive>
                 {' '}
                 {truncateValue(key, value, 44)}
               </Text>

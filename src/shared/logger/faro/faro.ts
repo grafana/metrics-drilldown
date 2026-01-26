@@ -1,3 +1,4 @@
+import { ReplayInstrumentation } from '@grafana/faro-instrumentation-replay';
 import { getWebInstrumentations, initializeFaro, type Faro } from '@grafana/faro-web-sdk';
 import { config } from '@grafana/runtime';
 
@@ -54,6 +55,25 @@ export function initFaro() {
       instrumentations: [
         ...getWebInstrumentations({
           captureConsole: false,
+        }),
+        new ReplayInstrumentation({
+          maskInputOptions: {
+            password: true,
+            email: true,
+            text: true,
+            search: true,
+            textarea: true,
+            select: true,
+          },
+          maskTextSelector: [
+            // Custom data-sensitive attribute for explicitly marked elements
+            '[data-sensitive]',
+            // PanelChrome panel titles (contains metric names)
+            '[class*="panel-title"]',
+          ].join(', '),
+          maskAllInputs: false,
+          recordCrossOriginIframes: false,
+          recordCanvas: false,
         }),
       ],
       isolate: true,

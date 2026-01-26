@@ -93,7 +93,7 @@ export class LabelsVariable extends QueryVariable {
     const { label } = model.useState();
 
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-sensitive>
         <Label className={styles.label}>{label}</Label>
         <QueryVariable.Component model={model} />
       </div>

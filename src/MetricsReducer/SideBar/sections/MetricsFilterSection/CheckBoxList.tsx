@@ -29,7 +29,7 @@ export function CheckBoxList({ groups, selectedGroups, onSelectionChange }: Read
       {!groups.length && <div className={styles.noResults}>{t('checkbox-list.no-results', 'No results.')}</div>}
 
       {groups.length > 0 && (
-        <ul className={styles.list} data-testid="checkbox-filters-list">
+        <ul className={styles.list} data-testid="checkbox-filters-list" data-sensitive>
           {groups.map((group) => (
             <li key={group.value} className={styles.listItem}>
               <CheckboxWithCount

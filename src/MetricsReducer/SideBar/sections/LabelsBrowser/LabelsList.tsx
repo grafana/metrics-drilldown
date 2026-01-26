@@ -19,7 +19,7 @@ export function LabelsList({ labels, selectedLabel, onSelectLabel, onClearSelect
   return (
     <>
       <div className={styles.listHeader}>
-        <div className={styles.selected}>
+        <div className={styles.selected} data-sensitive>
           {selectedLabel === NULL_GROUP_BY_VALUE
             ? t('labels-list.no-selection', 'No selection')
             : t('labels-list.selected', 'Selected: "{{selectedLabel}}"', { selectedLabel })}
@@ -39,7 +39,7 @@ export function LabelsList({ labels, selectedLabel, onSelectLabel, onClearSelect
       )}
 
       {labels.length > 0 && (
-        <div className={styles.list} data-testid="labels-list">
+        <div className={styles.list} data-testid="labels-list" data-sensitive>
           {/* TODO: use a custom one to have option labels with ellipsis and title/tooltip when hovering
       now we're customizing too much the component CSS */}
           <RadioButtonList name="labels-list" options={labels} onChange={onSelectLabel} value={selectedLabel} />
