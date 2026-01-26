@@ -36,7 +36,6 @@
     "collapse": "",
     "expand": "",
     "no-results": "",
-    "selected-count_one": "",
     "selected-count_other": ""
   },
   "configure-panel": {
@@ -206,7 +205,6 @@
     "placeholder-question-mode": "",
     "placeholder-with-assistant": "",
     "placeholder-with-assistant-tab-enter": "",
-    "count-total-plural_one": "",
     "count-total-plural_other": ""
   },
   "quick-search-assistant": {
@@ -313,17 +311,11 @@
     }
   },
   "usage-data": {
-    "metric-used-in-plural_one": "",
     "metric-used-in-plural_other": "",
-    "metric-used-in-singular_one": "",
     "metric-used-in-singular_other": "",
-    "metric-used-plural_one": "",
     "metric-used-plural_other": "",
-    "metric-used-singular_one": "",
     "metric-used-singular_other": "",
-    "used-time-plural_one": "",
     "used-time-plural_other": "",
-    "used-time-singular_one": "",
     "used-time-singular_other": ""
   },
   "with-config-panel-options": {

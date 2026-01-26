@@ -98,7 +98,7 @@ importers:
         version: 9.0.0(@stylistic/eslint-plugin-ts@2.13.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/eslint-plugin@8.39.0(@typescript-eslint/parser@8.39.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/parser@8.39.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-config-prettier@8.10.2(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-jsdoc@46.10.1(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react@7.37.5(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       '@grafana/plugin-e2e':
         specifier: 1.19.9
-        version: 1.19.9(@playwright/test@1.57.0)
+        version: 1.19.9(@playwright/test@1.58.0)
       '@grafana/tsconfig':
         specifier: 2.0.1
         version: 2.0.1
@@ -106,8 +106,8 @@ importers:
         specifier: ^30.2.0
         version: 30.2.0
       '@playwright/test':
-        specifier: 1.57.0
-        version: 1.57.0
+        specifier: 1.58.0
+        version: 1.58.0
       '@stylistic/eslint-plugin-ts':
         specifier: 2.13.0
         version: 2.13.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
@@ -1455,8 +1455,8 @@ packages:
     resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
-  '@playwright/test@1.57.0':
-    resolution: {integrity: sha512-6TyEnHgd6SArQO8UO2OMTxshln3QMWBtPGrOCgs3wVEmQmwyuNtB10IZMfmYDE0riwNR1cu4q+pPcxMVtaG3TA==}
+  '@playwright/test@1.58.0':
+    resolution: {integrity: sha512-fWza+Lpbj6SkQKCrU6si4iu+fD2dD3gxNHFhUPxsfXBPhnv3rRSQVd0NtBUT9Z/RhF/boCBcuUaMUSTRTopjZg==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4966,13 +4966,13 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  playwright-core@1.57.0:
-    resolution: {integrity: sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==}
+  playwright-core@1.58.0:
+    resolution: {integrity: sha512-aaoB1RWrdNi3//rOeKuMiS65UCcgOVljU46At6eFcOFPFHWtd2weHRRow6z/n+Lec0Lvu0k9ZPKJSjPugikirw==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.57.0:
-    resolution: {integrity: sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==}
+  playwright@1.58.0:
+    resolution: {integrity: sha512-2SVA0sbPktiIY/MCOPX8e86ehA/e+tDNq+e5Y8qjKYti2Z/JG7xnronT/TXTIkKbYGWlCbuucZ6dziEgkoEjQQ==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -7294,10 +7294,10 @@ snapshots:
     dependencies:
       '@lezer/lr': 1.4.2
 
-  '@grafana/plugin-e2e@1.19.9(@playwright/test@1.57.0)':
+  '@grafana/plugin-e2e@1.19.9(@playwright/test@1.58.0)':
     dependencies:
       '@grafana/e2e-selectors': 12.3.1
-      '@playwright/test': 1.57.0
+      '@playwright/test': 1.58.0
       semver: 7.7.3
       uuid: 11.1.0
       yaml: 2.8.2
@@ -8352,9 +8352,9 @@ snapshots:
 
   '@pkgr/core@0.2.9': {}
 
-  '@playwright/test@1.57.0':
+  '@playwright/test@1.58.0':
     dependencies:
-      playwright: 1.57.0
+      playwright: 1.58.0
 
   '@polka/url@1.0.0-next.29': {}
 
@@ -12505,11 +12505,11 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  playwright-core@1.57.0: {}
+  playwright-core@1.58.0: {}
 
-  playwright@1.57.0:
+  playwright@1.58.0:
     dependencies:
-      playwright-core: 1.57.0
+      playwright-core: 1.58.0
     optionalDependencies:
       fsevents: 2.3.2
 
