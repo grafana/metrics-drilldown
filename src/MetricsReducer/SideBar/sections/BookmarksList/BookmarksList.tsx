@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { Trans } from '@grafana/i18n';
 import { SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { Stack, Text, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -74,10 +75,11 @@ export class BookmarksList extends SceneObjectBase<BookmarksListState> {
           <div className={styles.emptyState}>
             <Stack direction="column" alignItems="center">
               <Text color="secondary" italic>
-                No bookmarks yet for the
-              </Text>
-              <Text color="secondary" italic>
-                current data source.
+                <Trans i18nKey="sidebar.bookmarks.empty-state">
+                  No bookmarks yet for the
+                  <br />
+                  current data source.
+                </Trans>
               </Text>
             </Stack>
           </div>

@@ -18,7 +18,7 @@ import React, { useEffect } from 'react';
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
-import { actionViews, actionViewsDefinitions, defaultActionView, type ActionViewType } from './MetricActionBar';
+import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
 import {
   PROMETHEUS_QUERY_RESULTS_COMPONENT_ID,
@@ -90,7 +90,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     // This ensures the active tab has priority for data fetching
     this.subscribeToEvent(EventActionViewDataLoadComplete, (event) => {
       // Active tab has finished loading, safe to start background tasks like counting signals
-      const inactiveTabs = actionViewsDefinitions.filter((v) => v.value !== event.payload.currentActionView);
+      const inactiveTabs = getActionViewsDefinitions().filter((v) => v.value !== event.payload.currentActionView);
       inactiveTabs.forEach(({ backgroundTask, value: tabName }) => {
         if (!this.backgroundTaskHasRun[tabName]) {
           backgroundTask(this);
@@ -107,7 +107,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   updateFromUrl(values: SceneObjectUrlValues) {
     if (typeof values.actionView === 'string') {
       if (this.state.actionView !== values.actionView) {
-        const actionViewDef = actionViewsDefinitions.find((v) => v.value === values.actionView);
+        const actionViewDef = getActionViewsDefinitions().find((v) => v.value === values.actionView);
         if (actionViewDef) {
           this.setActionView(actionViewDef.value);
         }
@@ -119,7 +119,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   public setActionView(actionViewType: ActionViewType | null) {
     const { body } = this.state;
-    const actionViewDef = actionViewType ? actionViewsDefinitions.find((v) => v.value === actionViewType) : null;
+    const actionViewDef = actionViewType ? getActionViewsDefinitions().find((v) => v.value === actionViewType) : null;
 
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
       body.setState({ selectedTab: actionViewDef.getScene(this) });
@@ -132,7 +132,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   public getActionViewName(): string {
     return this.state.actionView
-      ? actionViewsDefinitions.find((v) => v.value === this.state.actionView)?.displayName ?? ''
+      ? getActionViewsDefinitions().find((v) => v.value === this.state.actionView)?.displayName ?? ''
       : '';
   }
 

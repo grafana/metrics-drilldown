@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps } from '@grafana/scenes';
 import { Icon, IconButton, Input, Spinner, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState } from 'react';
@@ -132,11 +133,18 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
         <Input
           className={styles.search}
           prefix={<Icon name="search" />}
-          placeholder="Search..."
+          placeholder={t('sidebar.labels-browser.search-placeholder', 'Search...')}
           value={searchValue}
           onChange={onInputChange}
           onKeyDown={onInputKeyDown}
-          suffix={<IconButton name="times" variant="secondary" tooltip="Clear search" onClick={onInputClear} />}
+          suffix={
+            <IconButton
+              name="times"
+              variant="secondary"
+              tooltip={t('sidebar.labels-browser.clear-search-tooltip', 'Clear search')}
+              onClick={onInputClear}
+            />
+          }
         />
 
         {loading && <Spinner inline />}

@@ -31,6 +31,16 @@ const goffFeatureFlags = {
     defaultValue: 'excluded',
     trackingKey: 'experiment_hierarchical_prefix_filtering',
   },
+  'drilldown.metrics.grafana_assistant_quick_search_tab_test': {
+    valueType: 'string',
+    values: [
+      'treatment', // Always show assistant button (when available); allows keyboard navigation to activate assistant
+      'control', // Default behavior (current)
+      'excluded', // User excluded from experiment (default behavior)
+    ],
+    defaultValue: 'excluded',
+    trackingKey: 'experiment_grafana_assistant_quick_search_tab_test',
+  },
 } as const satisfies Record<`drilldown.metrics.${string}`, FeatureFlag>;
 
 /**

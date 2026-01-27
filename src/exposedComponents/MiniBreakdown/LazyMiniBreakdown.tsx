@@ -1,3 +1,4 @@
+import { Trans } from '@grafana/i18n';
 import React, { lazy, Suspense } from 'react';
 
 import { type MiniBreakdownProps } from './MiniBreakdown';
@@ -12,7 +13,13 @@ const MiniBreakdown = lazy(async () => {
 });
 
 export const LazyMiniBreakdown = (props: MiniBreakdownProps) => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense
+    fallback={
+      <div>
+        <Trans i18nKey="lazy-loading.fallback">Loading...</Trans>
+      </div>
+    }
+  >
     <MiniBreakdown {...props} />
   </Suspense>
 );

@@ -1,4 +1,5 @@
 import { type PanelMenuItem } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
 import { getExploreURL, sceneGraph, VizPanel } from '@grafana/scenes';
 
@@ -31,7 +32,7 @@ export class ExploreAction {
     } catch {}
 
     return {
-      text: 'Explore',
+      text: t('panel-menu.action.explore', 'Explore'),
       iconClassName: 'compass',
       onClick: () =>
         exploreUrl?.then((url) => {

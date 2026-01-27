@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { locationUtil, type GrafanaTheme2 } from '@grafana/data';
+import { Trans } from '@grafana/i18n';
 import { useStyles2, useTheme2 } from '@grafana/ui';
 import React from 'react';
 import SVG from 'react-inlinesvg';
@@ -20,41 +21,47 @@ export function Onboarding() {
         />
       </div>
       <div className={styles.text}>
-        <h3 className={styles.title}>Welcome to Grafana Metrics Drilldown</h3>
+        <h3 className={styles.title}>
+          <Trans i18nKey="onboarding.title">Welcome to Grafana Metrics Drilldown</Trans>
+        </h3>
 
         <p>
-          We noticed there is no Prometheus datasource configured.
-          <br />
-          Add a{' '}
-          <a className="external-link" href={locationUtil.assureBaseUrl('/connections/datasources/new')}>
-            Prometheus datasource
-          </a>{' '}
-          to view metrics.
+          <Trans i18nKey="onboarding.no-datasource">
+            We noticed there is no Prometheus datasource configured.
+            <br />
+            Add a{' '}
+            <a className="external-link" href={locationUtil.assureBaseUrl('/connections/datasources/new')}>
+              Prometheus datasource
+            </a>{' '}
+            to view metrics.
+          </Trans>
         </p>
 
         <br />
 
         <p>
-          Check{' '}
-          <a
-            href="https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics/"
-            target="_blank"
-            className="external-link"
-            rel="noreferrer"
-          >
-            our docs
-          </a>{' '}
-          to learn more or
-          <br />
-          <a
-            href="https://play.grafana.org/a/grafana-metricsdrilldown-app/drilldown"
-            target="_blank"
-            className="external-link"
-            rel="noreferrer"
-          >
-            try it online
-          </a>{' '}
-          in Grafana Play!
+          <Trans i18nKey="onboarding.learn-more">
+            Check{' '}
+            <a
+              href="https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics/"
+              target="_blank"
+              className="external-link"
+              rel="noreferrer"
+            >
+              our docs
+            </a>{' '}
+            to learn more or
+            <br />
+            <a
+              href="https://play.grafana.org/a/grafana-metricsdrilldown-app/drilldown"
+              target="_blank"
+              className="external-link"
+              rel="noreferrer"
+            >
+              try it online
+            </a>{' '}
+            in Grafana Play!
+          </Trans>
         </p>
       </div>
     </div>

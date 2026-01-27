@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { LoadingState } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   CustomVariable,
   PanelBuilders,
@@ -142,9 +143,13 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     // Set up variables for datasource selection
     const logsDataSourceVariable = new CustomVariable({
       name: VAR_LOGS_DATASOURCE,
-      label: 'Logs data source',
+      label: t('related-logs.datasource-label', 'Logs data source'),
       query: this.state.orchestrator.lokiDataSources.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
-      description: `Some Loki data sources might be missing from the dropdown if they took longer than ${DS_HEALTH_CHECK_TIMEOUT_S} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.`,
+      description: t(
+        'related-logs.datasource-description',
+        'Some Loki data sources might be missing from the dropdown if they took longer than {{timeout}} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.',
+        { timeout: DS_HEALTH_CHECK_TIMEOUT_S }
+      ),
     });
     this.setState({
       $variables: new SceneVariableSet({ variables: [logsDataSourceVariable] }),

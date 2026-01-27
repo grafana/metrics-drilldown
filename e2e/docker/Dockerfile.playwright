@@ -1,10 +1,11 @@
-FROM mcr.microsoft.com/playwright:v1.57.0
+FROM mcr.microsoft.com/playwright:v1.58.0
 
 WORKDIR /app
 
-# required by the e2e test code
-RUN npm install "@playwright/test@^1.57.0" "dotenv@^16.3.1" "@grafana/plugin-e2e"
+# Enable pnpm via corepack and install dependencies
+RUN corepack enable && corepack prepare pnpm@10.28.1 --activate && \
+  pnpm install "@playwright/test@1.58.0" "dotenv@^16.3.1" "@grafana/plugin-e2e" "@grafana/i18n@^12.3.0"
 
 ENV TZ=Europe/Madrid
 
-ENTRYPOINT ["npx", "playwright", "test", "-c", "e2e/config/playwright.config.ci.ts"]
+ENTRYPOINT ["pnpm", "exec", "playwright", "test", "-c", "e2e/config/playwright.config.ci.ts"]

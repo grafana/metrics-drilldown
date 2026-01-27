@@ -6,6 +6,7 @@ import {
   type MetricFindValue,
   type TestDataSourceResponse,
 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { type PrometheusDatasource } from '@grafana/prometheus';
 import { RuntimeDataSource, sceneGraph, type SceneObject } from '@grafana/scenes';
 
@@ -70,7 +71,7 @@ export class LabelsDataSource extends RuntimeDataSource {
       displayWarning(['Error while fetching labels! Defaulting to an empty array.', (error as Error).toString()]);
     }
 
-    return [{ value: NULL_GROUP_BY_VALUE, text: '(none)' }, ...labelOptions] as MetricFindValue[];
+    return [{ value: NULL_GROUP_BY_VALUE, text: t('labels-datasource.none-option', '(none)') }, ...labelOptions] as MetricFindValue[];
   }
 
   private async fetchLabels(ds: PrometheusDatasource, sceneObject: SceneObject, matcher: string) {
@@ -154,7 +155,7 @@ export class LabelsDataSource extends RuntimeDataSource {
   async testDatasource(): Promise<TestDataSourceResponse> {
     return {
       status: 'success',
-      message: 'OK',
+      message: t('labels-datasource.test-success', 'OK'),
     };
   }
 }

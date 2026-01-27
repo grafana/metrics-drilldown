@@ -1,14 +1,16 @@
-const grafanaConfig = require('@grafana/eslint-config/flat');
-const importPlugin = require('eslint-plugin-import');
-const jest = require('eslint-plugin-jest');
-const jsxA11y = require('eslint-plugin-jsx-a11y');
-const sonarjs = require('eslint-plugin-sonarjs');
-const globals = require('globals');
+import baseConfig from './.config/eslint.config.mjs';
+// eslint-disable-next-line import/no-unresolved -- package.json exports field not recognized by import plugin
+import grafanaI18nPlugin from '@grafana/i18n/eslint-plugin';
+import importPlugin from 'eslint-plugin-import';
+import jest from 'eslint-plugin-jest';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import sonarjs from 'eslint-plugin-sonarjs';
+import globals from 'globals';
 
 /**
  * @type {Array<import('eslint').Linter.Config>}
  */
-module.exports = [
+export default [
   {
     ignores: [
       'node_modules/',
@@ -19,14 +21,34 @@ module.exports = [
       'e2e/', // handled by separate config
       'playwright/',
       '*.log',
+      '**/eslint.config.*', // don't lint eslint config files
     ],
   },
-  ...grafanaConfig,
+  ...baseConfig,
   importPlugin.flatConfigs.recommended,
   importPlugin.flatConfigs.typescript,
   sonarjs.configs.recommended,
   jest.configs['flat/recommended'],
   jsxA11y.flatConfigs.recommended,
+  {
+    name: 'metrics-drilldown/i18n',
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/__tests__/**', '**/test/**', '**/mocks/**'],
+    plugins: {
+      '@grafana/i18n': grafanaI18nPlugin,
+    },
+    rules: {
+      '@grafana/i18n/no-untranslated-strings': [
+        'error',
+        {
+          basePaths: ['src'],
+          namespace: 'grafana-metricsdrilldown-app',
+          calleesToIgnore: ['^css$', 'use[A-Z].*', '^get.*Styles$'],
+        },
+      ],
+      '@grafana/i18n/no-translation-top-level': 'error',
+    },
+  },
   {
     name: 'metrics-drilldown/main',
     files: ['**/*.{ts,tsx,js,jsx}'],

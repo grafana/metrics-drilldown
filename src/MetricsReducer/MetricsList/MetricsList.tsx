@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -61,13 +62,19 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
           new SceneReactObject({
             reactNode: (
               <InlineBanner title="" severity="info">
-                No metrics found for the current filters and time range.
+                {t('metrics-list.no-metrics', 'No metrics found for the current filters and time range.')}
               </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
-            reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
+            reactNode: (
+              <InlineBanner
+                severity="error"
+                title={t('metrics-list.error-title', 'Error while loading metrics!')}
+                error={error}
+              />
+            ),
           }),
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
@@ -132,7 +139,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
         </div>
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <ShowMoreButton label="metric" batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton label={t('metrics-list.metric-label', 'metric')} batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
       </div>

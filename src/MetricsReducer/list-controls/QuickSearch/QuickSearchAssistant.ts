@@ -1,4 +1,5 @@
 import { createAssistantContextItem, isAssistantAvailable, openAssistant } from '@grafana/assistant';
+import { t } from '@grafana/i18n';
 import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 import { useEffect, useState } from 'react';
 
@@ -50,7 +51,7 @@ export function openQuickSearchAssistant(sceneObject: SceneObject, question: str
   if (isAdHocFiltersVariable(filtersVariable) && filtersVariable.state.filters.length > 0) {
     context.push(
       createAssistantContextItem('structured', {
-        title: 'Current label filters',
+        title: t('quick-search-assistant.label-filters-title', 'Current label filters'),
         data: {
           filters: filtersVariable.state.filters.map((f) => ({
             key: f.key,
@@ -66,7 +67,7 @@ export function openQuickSearchAssistant(sceneObject: SceneObject, question: str
   const timeRange = sceneGraph.getTimeRange(sceneObject).state;
   context.push(
     createAssistantContextItem('structured', {
-      title: 'Time range',
+      title: t('quick-search-assistant.time-range-title', 'Time range'),
       data: {
         from: timeRange.from,
         to: timeRange.to,
@@ -83,4 +84,3 @@ export function openQuickSearchAssistant(sceneObject: SceneObject, question: str
     context,
   });
 }
-
