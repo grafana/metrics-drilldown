@@ -1,3 +1,5 @@
+import path from 'path';
+
 import { type Configuration } from 'webpack';
 import { merge } from 'webpack-merge';
 
@@ -14,6 +16,13 @@ const config = async (env): Promise<Configuration> => {
     },
     output: {
       asyncChunks: true,
+    },
+    resolve: {
+      alias: {
+        // Ensure single instances of these packages when using pnpm
+        // This prevents module duplication issues with i18n state
+        '@grafana/i18n': path.resolve(process.cwd(), 'node_modules/@grafana/i18n'),
+      },
     },
   });
 };
