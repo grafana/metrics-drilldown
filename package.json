@@ -28,8 +28,8 @@
     "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh",
     "e2e:smoke": "playwright test -c ./e2e/config/playwright.config.smoke.ts -x --trace on",
     "knip": "pnpm dlx knip --config knip.js",
-    "i18n-extract": "i18next -c i18next-parser.config.ts",
-    "i18n-extract-check": "i18next -c i18next-parser.config.ts --fail-on-update"
+    "i18n-extract": "i18next-cli extract -c i18next.config.ts",
+    "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --ci"
   },
   "packageManager": "pnpm@10.28.1",
   "engines": {
