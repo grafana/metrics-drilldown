@@ -232,11 +232,6 @@ const config = async (env: Env): Promise<Configuration> => {
       // handle resolving "rootDir" paths
       modules: [path.resolve(process.cwd(), 'src'), 'node_modules'],
       unsafeCache: true,
-      // Ensure single instances of these packages when using pnpm
-      // This prevents module duplication issues with i18n state
-      alias: {
-        '@grafana/i18n': path.resolve(process.cwd(), 'node_modules/@grafana/i18n'),
-      },
     },
   };
 
