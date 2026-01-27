@@ -23,9 +23,9 @@ Before a piece of work is finished, it should:
 ## Get started
 
 1. Clone the repository `git clone git@github.com:grafana/metrics-drilldown.git`
-2. Install the dependencies: `npm install`
-3. Build the plugin in dev mode: `npm run dev`
-4. Start the Grafana server (with static data): `npm run server`
+2. Install the dependencies: `pnpm install`
+3. Build the plugin in dev mode: `pnpm run dev`
+4. Start the Grafana server (with static data): `pnpm run server`
 
 Then visit http://localhost:3001/a/grafana-metricsdrilldown-app/
 
