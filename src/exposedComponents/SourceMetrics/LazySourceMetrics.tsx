@@ -1,3 +1,4 @@
+import { Trans } from '@grafana/i18n';
 import React, { lazy, Suspense } from 'react';
 
 import { type SourceMetricsProps } from './SourceMetrics';
@@ -12,7 +13,13 @@ const LabelBreakdown = lazy(async () => {
 });
 
 export const LazySourceMetrics = (props: SourceMetricsProps) => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense
+    fallback={
+      <div>
+        <Trans i18nKey="lazy-loading.fallback">Loading...</Trans>
+      </div>
+    }
+  >
     <LabelBreakdown {...props} />
   </Suspense>
 );

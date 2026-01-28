@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Combobox, Field, IconButton, useStyles2, type ComboboxOption } from '@grafana/ui';
 import React from 'react';
@@ -14,24 +15,31 @@ export interface SortBySelectorState extends SceneObjectState {
   value: ComboboxOption<SortSeriesByOption>;
 }
 
-export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
-  static readonly DEFAULT_OPTIONS = [
+function getDefaultOptions(): Array<ComboboxOption<SortSeriesByOption>> {
+  return [
     {
       value: 'outliers' as SortSeriesByOption,
-      label: 'Outlying series',
-      description: 'Prioritizes values that show distinct behavior from others within the same label',
+      label: t('sort-by.option.outliers', 'Outlying series'),
+      description: t(
+        'sort-by.option.outliers-description',
+        'Prioritizes values that show distinct behavior from others within the same label'
+      ),
     },
     {
       value: 'alphabetical' as SortSeriesByOption,
-      label: 'Name [A-Z]',
-      description: 'Alphabetical order',
+      label: t('sort-by.option.alphabetical', 'Name [A-Z]'),
+      description: t('sort-by.option.alphabetical-description', 'Alphabetical order'),
     },
     {
       value: 'alphabetical-reversed' as SortSeriesByOption,
-      label: 'Name [Z-A]',
-      description: 'Reversed alphabetical order',
+      label: t('sort-by.option.alphabetical-reversed', 'Name [Z-A]'),
+      description: t('sort-by.option.alphabetical-reversed-description', 'Reversed alphabetical order'),
     },
   ];
+}
+
+export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
+  static readonly DEFAULT_OPTIONS = getDefaultOptions();
 
   constructor(state: Pick<SortBySelectorState, 'target'>) {
     const sortBy = userStorage.getItem(PREF_KEYS.BREAKDOWN_SORTBY);
@@ -52,7 +60,8 @@ export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
 
   public static readonly Component = ({ model }: SceneComponentProps<SortBySelector>) => {
     const styles = useStyles2(getStyles);
-    const { value, options } = model.useState();
+    const { value } = model.useState();
+    const translatedOptions = getDefaultOptions();
 
     return (
       <Field
@@ -61,21 +70,21 @@ export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
         htmlFor="sort-by-criteria"
         label={
           <div className={styles.sortByTooltip}>
-            Sort by
+            {t('sort-by.label', 'Sort by')}
             <IconButton
               name={'info-circle'}
               size="sm"
               variant={'secondary'}
-              tooltip="Sorts values using standard or smart time series calculations."
+              tooltip={t('sort-by.tooltip', 'Sorts values using standard or smart time series calculations.')}
             />
           </div>
         }
       >
         <Combobox
           id="sort-by-criteria"
-          placeholder="Choose criteria"
+          placeholder={t('sort-by.placeholder', 'Choose criteria')}
           width={20}
-          options={options}
+          options={translatedOptions}
           value={value}
           onChange={model.onChange}
           isClearable={false}

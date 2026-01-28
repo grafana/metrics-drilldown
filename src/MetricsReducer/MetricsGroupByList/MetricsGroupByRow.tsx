@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -96,13 +97,22 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           new SceneReactObject({
             reactNode: (
               <InlineBanner title="" severity="info">
-                No metrics found for the current filters and time range.
+                {t(
+                  'metrics-group-by-row.no-metrics',
+                  'No metrics found for the current filters and time range.'
+                )}
               </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
-            reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
+            reactNode: (
+              <InlineBanner
+                severity="error"
+                title={t('metrics-group-by-row.error-title', 'Error while loading metrics!')}
+                error={error}
+              />
+            ),
           }),
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
@@ -184,15 +194,18 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         <div className={styles.containerHeader}>
           <Stack direction="row" alignItems="center" gap={1}>
             <div className={styles.headerButtons}>
-              <Button
-                className={styles.selectButton}
-                variant="secondary"
-                onClick={onClickSelect}
-                tooltip={`See metrics with ${labelName}=${labelValue}`}
-                tooltipPlacement="top"
-              >
-                Select
-              </Button>
+                <Button
+                  className={styles.selectButton}
+                  variant="secondary"
+                  onClick={onClickSelect}
+                  tooltip={t('metrics-group-by-row.select-tooltip', 'See metrics with {{labelName}}={{labelValue}}', {
+                    labelName,
+                    labelValue,
+                  })}
+                  tooltipPlacement="top"
+                >
+                  {t('metrics-group-by-row.select', 'Select')}
+                </Button>
             </div>
           </Stack>
         </div>
@@ -225,10 +238,14 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
               <div className={styles.footer}>
                 <Stack direction="row" justifyContent="center" alignItems="center">
                   <ShowMoreButton
-                    label="metric"
+                    label={t('metrics-group-by-row.metric-label', 'metric')}
                     batchSizes={batchSizes}
                     onClick={onClickShowMore}
-                    tooltip={`Show more metrics for ${labelName}="${labelValue}"`}
+                    tooltip={t(
+                      'metrics-group-by-row.show-more-tooltip',
+                      'Show more metrics for {{labelName}}="{{labelValue}}"',
+                      { labelName, labelValue }
+                    )}
                   />
                 </Stack>
               </div>

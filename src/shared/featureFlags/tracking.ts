@@ -7,6 +7,7 @@ import type { EvaluationDetails, FlagValue, Hook, HookContext } from '@openfeatu
 export const TRACKED_FLAG_VALUES: Record<FlagTrackingKey, unknown> = {
   experiment_default_open_sidebar: null,
   experiment_hierarchical_prefix_filtering: null,
+  experiment_grafana_assistant_quick_search_tab_test: null,
 };
 
 /**

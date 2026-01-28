@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   SceneCSSGridItem,
   SceneCSSGridLayout,
@@ -52,14 +53,24 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
           new SceneReactObject({
             reactNode: (
               <InlineBanner title="" severity="info">
-                No label values found for label &quot;{labelName}&quot;.
+                {t('metrics-group-by-list.no-values', 'No label values found for label "{{labelName}}".', {
+                  labelName,
+                })}
               </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
             reactNode: (
-              <InlineBanner severity="error" title={`Error while loading label "${labelName}" values!`} error={error} />
+              <InlineBanner
+                severity="error"
+                title={t(
+                  'metrics-group-by-list.error-title',
+                  'Error while loading label "{{labelName}}" values!',
+                  { labelName }
+                )}
+                error={error}
+              />
             ),
           }),
         getLayoutChild: (option, index, options) => {
@@ -97,7 +108,11 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
 
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <ShowMoreButton label={`"${labelName}" value`} batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton
+              label={t('metrics-group-by-list.show-more-label', '"{{labelName}}" value', { labelName })}
+              batchSizes={batchSizes}
+              onClick={onClickShowMore}
+            />
           </div>
         )}
 

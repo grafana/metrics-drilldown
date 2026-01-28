@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import {
   CustomVariable,
   sceneGraph,
@@ -79,7 +80,7 @@ export function getRecentMetrics(): RecentMetric[] {
 
     return validMetrics;
   } catch (error) {
-    logger.error(error as Error, { message: 'Failed to get recent metrics:' });
+    logger.error(error as Error, { message: t('metrics-sorter.error.get-recent-metrics', 'Failed to get recent metrics:') });
     return [];
   }
 }
@@ -89,13 +90,17 @@ interface MetricsSorterState extends SceneObjectState {
   inputControls: SceneObject;
 }
 
-const sortByOptions: VariableValueOption[] = [
-  { label: 'Default', value: 'default' },
-  { label: 'Alphabetical [A-Z]', value: 'alphabetical' },
-  { label: 'Alphabetical [Z-A]', value: 'alphabetical-reversed' },
-  { label: 'Dashboard Usage', value: 'dashboard-usage' },
-  { label: 'Alerting Usage', value: 'alerting-usage' },
-] as const;
+function getSortByOptions(): VariableValueOption[] {
+  return [
+    { label: t('metrics-sorter.option.default', 'Default'), value: 'default' },
+    { label: t('metrics-sorter.option.alphabetical', 'Alphabetical [A-Z]'), value: 'alphabetical' },
+    { label: t('metrics-sorter.option.alphabetical-reversed', 'Alphabetical [Z-A]'), value: 'alphabetical-reversed' },
+    { label: t('metrics-sorter.option.dashboard-usage', 'Dashboard Usage'), value: 'dashboard-usage' },
+    { label: t('metrics-sorter.option.alerting-usage', 'Alerting Usage'), value: 'alerting-usage' },
+  ];
+}
+
+const sortByOptions: VariableValueOption[] = getSortByOptions();
 
 export const VAR_WINGMAN_SORT_BY = 'metrics-reducer-sort-by';
 
@@ -118,7 +123,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
         variables: [
           new CustomVariable({
             name: VAR_WINGMAN_SORT_BY,
-            label: 'Sort by',
+            label: t('metrics-sorter.label', 'Sort by'),
             value: 'default',
             query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
             description:

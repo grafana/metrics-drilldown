@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import { type Dashboard, type Panel } from '@grafana/schema';
 import { limitFunction } from 'p-limit';
@@ -96,7 +97,7 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
   } catch (err) {
     const error = typeof err === 'string' ? new Error(err) : (err as Error);
     logger.error(error, {
-      message: 'Failed to fetch dashboard metrics',
+      message: t('fetch-dashboard-metrics.error', 'Failed to fetch dashboard metrics'),
     });
     return {};
   }

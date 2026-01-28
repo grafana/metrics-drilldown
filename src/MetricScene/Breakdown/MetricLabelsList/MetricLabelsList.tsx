@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -108,13 +109,19 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
           new SceneReactObject({
             reactNode: (
               <InlineBanner title="" severity="info">
-                No labels found for the current filters and time range.
+                {t('breakdown.labels-list.no-labels', 'No labels found for the current filters and time range.')}
               </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
-            reactNode: <InlineBanner severity="error" title="Error while loading labels!" error={error} />,
+            reactNode: (
+              <InlineBanner
+                severity="error"
+                title={t('breakdown.labels-list.error-title', 'Error while loading labels!')}
+                error={error}
+              />
+            ),
           }),
         getLayoutChild: (option, labelIndex) => {
           const label = option.value as string;
@@ -146,7 +153,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
               body: new ClickablePanelWrapper({
                 panel,
                 navigationUrl: buildLabelNavigationUrl(trail, label),
-                title: `Breakdown by ${label}`,
+                title: t('breakdown.labels-list.breakdown-by-label', 'Breakdown by {{label}}', { label }),
               }),
             });
           }
@@ -227,11 +234,11 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
   }
 
   public Controls({ model }: { model: MetricLabelsList }) {
-    const styles = useStyles2(getStyles); // eslint-disable-line react-hooks/rules-of-hooks
+    const styles = useStyles2(getStyles);  
     const { layoutSwitcher } = model.useState();
 
     return (
-      <Field label="View" className={styles.field}>
+      <Field label={t('breakdown.labels-list.view-label', 'View')} className={styles.field}>
         <layoutSwitcher.Component model={layoutSwitcher} />
       </Field>
     );
@@ -259,7 +266,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
         <body.Component model={body} />
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <ShowMoreButton label="label" batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton label={t('breakdown.labels-list.label-label', 'label')} batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
       </div>

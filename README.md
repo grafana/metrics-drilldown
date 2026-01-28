@@ -111,17 +111,17 @@ One-click installation available through the Grafana Cloud marketplace.
 2. **Install dependencies**
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Start development environment**
 
    ```bash
    # Start Grafana server (default port 3001)
-   npm run server
+   pnpm run server
 
    # In another terminal, run plugin in watch mode
-   npm run dev
+   pnpm run dev
    ```
 
 4. **Access the plugin**
@@ -139,24 +139,24 @@ GRAFANA_PORT=3001
 
 ```bash
 # Run tests in watch mode
-npm run tdd
+pnpm run tdd
 
 # Run all tests with coverage
-npm run test
+pnpm run test
 
 # End-to-end tests
-npm run e2e
+pnpm run e2e
 
 # Type checking
-npm run typecheck
+pnpm run typecheck
 
 # Linting
-npm run lint
-npm run lint:fix
+pnpm run lint
+pnpm run lint:fix
 
 # Build
-npm run build
-npm run analyze    # Bundle analysis
+pnpm run build
+pnpm run analyze    # Bundle analysis
 ```
 
 ## 📁 Project Structure

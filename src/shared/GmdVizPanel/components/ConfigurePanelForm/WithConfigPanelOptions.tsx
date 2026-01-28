@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Tooltip, useStyles2 } from '@grafana/ui';
 import { cloneDeep } from 'lodash';
@@ -113,10 +114,23 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
     const styles = useStyles2(getStyles);
     const { body, isSelected, queryParams } = model.useState();
 
+    const isClickable = !isSelected;
+    const handleKeyDown = isClickable
+      ? (event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            model.onClickPreset();
+          }
+        }
+      : undefined;
+
     return (
       <div
         className={cx(styles.container, isSelected && styles.selected)}
-        onClick={!isSelected ? model.onClickPreset : undefined}
+        onClick={isClickable ? model.onClickPreset : undefined}
+        onKeyDown={handleKeyDown}
+        role={isClickable ? 'button' : undefined}
+        tabIndex={isClickable ? 0 : undefined}
       >
         <div className={cx(styles.bodyAndParams)}>
           <body.Component model={body} />
@@ -140,7 +154,11 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
         </div>
         <div className={styles.radioContainer}>
           <Tooltip
-            content={!isSelected ? 'Click to select this configuration' : 'Current configuration'}
+            content={
+              !isSelected
+                ? t('with-config-panel-options.click-to-select', 'Click to select this configuration')
+                : t('with-config-panel-options.current-config', 'Current configuration')
+            }
             placement="top"
           >
             <input type="radio" name="select-config" checked={isSelected} />

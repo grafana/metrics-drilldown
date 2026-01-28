@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { Button, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -19,13 +20,13 @@ export function CheckBoxList({ groups, selectedGroups, onSelectionChange }: Read
   return (
     <>
       <div className={styles.listHeader}>
-        <div>{selectedGroups.length} selected</div>
+        <div>{t('checkbox-list.selected-count', '{{count}} selected', { count: selectedGroups.length })}</div>
         <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
-          clear
+          {t('checkbox-list.clear', 'clear')}
         </Button>
       </div>
 
-      {!groups.length && <div className={styles.noResults}>No results.</div>}
+      {!groups.length && <div className={styles.noResults}>{t('checkbox-list.no-results', 'No results.')}</div>}
 
       {groups.length > 0 && (
         <ul className={styles.list} data-testid="checkbox-filters-list">

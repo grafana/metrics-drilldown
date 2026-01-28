@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2, type IconName } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { Button, Dropdown, Icon, Menu, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -43,7 +44,17 @@ export function UsageData({
                     className={styles.menuItem}
                     component={() => (
                       <Tooltip
-                        content={`Used ${item.count} ${item.count === 1 ? 'time' : 'times'} in ${item.label}`}
+                        content={
+                          item.count === 1
+                            ? t('usage-data.used-time-singular', 'Used {{count}} time in {{label}}', {
+                                count: item.count,
+                                label: item.label,
+                              })
+                            : t('usage-data.used-time-plural', 'Used {{count}} times in {{label}}', {
+                                count: item.count,
+                                label: item.label,
+                              })
+                        }
                         placement="right"
                       >
                         <div className={styles.menuItemContent}>
@@ -59,9 +70,19 @@ export function UsageData({
             <Button
               variant="secondary"
               size="sm"
-              tooltip={`Metric used ${usageCount} ${
-                usageCount === 1 ? 'time' : 'times'
-              } in dashboard queries. Click to view the dashboards.`}
+              tooltip={
+                usageCount === 1
+                  ? t(
+                      'usage-data.metric-used-singular',
+                      'Metric used {{count}} time in dashboard queries. Click to view the dashboards.',
+                      { count: usageCount }
+                    )
+                  : t(
+                      'usage-data.metric-used-plural',
+                      'Metric used {{count}} times in dashboard queries. Click to view the dashboards.',
+                      { count: usageCount }
+                    )
+              }
               className={cx(styles.usageItem, styles.clickableUsageItem)}
             >
               <Stack direction="row" alignItems="center" gap={0.5} data-testid={usageType}>
@@ -72,7 +93,17 @@ export function UsageData({
           </Dropdown>
         ) : (
           <Tooltip
-            content={`Metric is used in ${usageCount} ${usageCount === 1 ? singularUsageType : pluralUsageType}`}
+            content={
+              usageCount === 1
+                ? t('usage-data.metric-used-in-singular', 'Metric is used in {{count}} {{usageType}}', {
+                    count: usageCount,
+                    usageType: singularUsageType,
+                  })
+                : t('usage-data.metric-used-in-plural', 'Metric is used in {{count}} {{usageType}}', {
+                    count: usageCount,
+                    usageType: pluralUsageType,
+                  })
+            }
             placement="top"
           >
             <span className={styles.usageItem} data-testid={usageType}>

@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { config, usePluginLinks } from '@grafana/runtime';
 import { type SceneDataQuery, type SceneTimeRangeState } from '@grafana/scenes';
 import { LinkButton } from '@grafana/ui';
@@ -26,7 +27,7 @@ export function OpenInLogsDrilldownButton({ context }: Readonly<{ context: LogsD
   if (isLoading) {
     return (
       <LinkButton variant="secondary" size="sm" disabled>
-        Loading...
+        {t('related-logs.loading', 'Loading...')}
       </LinkButton>
     );
   }
@@ -44,14 +45,16 @@ export function OpenInLogsDrilldownButton({ context }: Readonly<{ context: LogsD
       target="_blank"
       tooltip={
         logsDrilldownLinkExists
-          ? 'Use the Logs Drilldown app to explore these logs'
-          : 'Navigate to the Logs Drilldown app'
+          ? t('related-logs.open-in-drilldown-tooltip', 'Use the Logs Drilldown app to explore these logs')
+          : t('related-logs.open-drilldown-tooltip', 'Navigate to the Logs Drilldown app')
       }
       variant="secondary"
       size="sm"
       onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_logs_drilldown' })}
     >
-      {logsDrilldownLinkExists ? 'Open in Logs Drilldown' : 'Open Logs Drilldown'}
+      {logsDrilldownLinkExists
+        ? t('related-logs.open-in-drilldown', 'Open in Logs Drilldown')
+        : t('related-logs.open-drilldown', 'Open Logs Drilldown')}
     </LinkButton>
   );
 }

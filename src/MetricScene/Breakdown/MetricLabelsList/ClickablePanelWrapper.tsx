@@ -22,8 +22,22 @@ export class ClickablePanelWrapper extends SceneObjectBase<ClickablePanelWrapper
       locationService.push(navigationUrl);
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleClick();
+      }
+    };
+
     return (
-      <div className={styles.container} onClick={handleClick} title={title}>
+      <div
+        className={styles.container}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        title={title}
+      >
         <panel.Component model={panel} />
       </div>
     );
