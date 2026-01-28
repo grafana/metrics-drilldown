@@ -16,7 +16,7 @@ importers:
         version: 11.13.5
       '@grafana/assistant':
         specifier: ^0.1.0
-        version: 0.1.11(674199bd026bc9581130ab157e1fda0e)
+        version: 0.1.11(ad97441fbf28d78ea27dd4e8e72140cf)
       '@grafana/data':
         specifier: ^12.3.0
         version: 12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
@@ -37,7 +37,7 @@ importers:
         version: 12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       '@grafana/scenes':
         specifier: ^6.39.0
-        version: 6.52.11(@grafana/data@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/e2e-selectors@12.3.1)(@grafana/i18n@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/runtime@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/schema@12.3.1)(@grafana/ui@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 6.52.11(@grafana/data@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/e2e-selectors@12.4.0-21205677807)(@grafana/i18n@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/runtime@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/schema@12.3.1)(@grafana/ui@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@grafana/schema':
         specifier: ^12.3.0
         version: 12.3.1
@@ -97,8 +97,8 @@ importers:
         specifier: ^9.0.0
         version: 9.0.0(@stylistic/eslint-plugin-ts@2.13.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/eslint-plugin@8.39.0(@typescript-eslint/parser@8.39.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/parser@8.39.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-config-prettier@8.10.2(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-jsdoc@46.10.1(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@9.39.2(jiti@2.6.1)))(eslint-plugin-react@7.37.5(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       '@grafana/plugin-e2e':
-        specifier: 1.19.9
-        version: 1.19.9(@playwright/test@1.58.0)
+        specifier: 3.1.4
+        version: 3.1.4(@playwright/test@1.58.0)
       '@grafana/tsconfig':
         specifier: 2.0.1
         version: 2.0.1
@@ -226,11 +226,11 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6
       sass:
-        specifier: 1.93.3
-        version: 1.93.3
+        specifier: 1.97.3
+        version: 1.97.3
       sass-loader:
         specifier: 13.3.3
-        version: 13.3.3(sass@1.93.3)(webpack@5.102.1)
+        version: 13.3.3(sass@1.97.3)(webpack@5.102.1)
       style-loader:
         specifier: 3.3.4
         version: 3.3.4(webpack@5.102.1)
@@ -785,6 +785,9 @@ packages:
   '@grafana/e2e-selectors@12.3.1':
     resolution: {integrity: sha512-65riVBmMDMIqndLL/dQcmVP/Jujn5nkTs9IbE5+nTjEniqLopWXlkz1OGt7k/Q32PRVmzNKJbFvNqp4msGWK7Q==}
 
+  '@grafana/e2e-selectors@12.4.0-21205677807':
+    resolution: {integrity: sha512-Sao5QHVVv/XCbjzqcWcsG+QgxU3Y0CZOxxhOTHUm98paVNwP3Sv7tqIslfIMzKhBQlv4d8MzTDpECjKOo2MqPw==}
+
   '@grafana/eslint-config@9.0.0':
     resolution: {integrity: sha512-Jw7/kyO29iNKiHrDwsVwP3/YSNdYCt8ofCgSFNfcYQeK7+Z3zn1RrMBXWohVQ47OuwjXr6AUqo5ReQBCPq6Fzw==}
     peerDependencies:
@@ -820,9 +823,9 @@ packages:
     peerDependencies:
       '@lezer/lr': ^1.0.0
 
-  '@grafana/plugin-e2e@1.19.9':
-    resolution: {integrity: sha512-f8qBQhqQ6PtqzFgTwiIRlVC3Obbad0sgugEfS4B8C0tziHW9akjjcP2fu0+qtPSlUXqQmDsusyAATZKM2MtiIw==}
-    engines: {node: '>=18 <=22'}
+  '@grafana/plugin-e2e@3.1.4':
+    resolution: {integrity: sha512-goDVC9dS3HzpOcWPk5cc49eM2g43EVrHae1KlTqUkgKxjFLh1+0l4XnqsNt48821XWKXyV3y127mqtj5Kijnzw==}
+    engines: {node: '>=20 <=24'}
     peerDependencies:
       '@playwright/test': ^1.52.0
 
@@ -5716,8 +5719,8 @@ packages:
       sass-embedded:
         optional: true
 
-  sass@1.93.3:
-    resolution: {integrity: sha512-elOcIZRTM76dvxNAjqYrucTSI0teAF/L2Lv0s6f6b7FOwcwIuA357bIE871580AjHJuSvLIRUosgV+lIWx6Rgg==}
+  sass@1.97.3:
+    resolution: {integrity: sha512-fDz1zJpd5GycprAbu4Q2PV/RprsRtKC/0z82z0JLgdytmcq0+ujJbJ/09bPGDxCLkKY3Np5cRAOcWiVkLXJURg==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -6354,6 +6357,10 @@ packages:
 
   uuid@11.1.0:
     resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+    hasBin: true
+
+  uuid@13.0.0:
+    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
     hasBin: true
 
   uuid@9.0.1:
@@ -7186,11 +7193,11 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@grafana/assistant@0.1.11(674199bd026bc9581130ab157e1fda0e)':
+  '@grafana/assistant@0.1.11(ad97441fbf28d78ea27dd4e8e72140cf)':
     dependencies:
       '@grafana/data': 12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       '@grafana/runtime': 12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
-      '@grafana/scenes': 6.52.11(@grafana/data@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/e2e-selectors@12.3.1)(@grafana/i18n@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/runtime@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/schema@12.3.1)(@grafana/ui@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      '@grafana/scenes': 6.52.11(@grafana/data@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/e2e-selectors@12.4.0-21205677807)(@grafana/i18n@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/runtime@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/schema@12.3.1)(@grafana/ui@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@grafana/ui': 12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       react: 18.3.1
       rxjs: 7.8.2
@@ -7233,6 +7240,12 @@ snapshots:
       - typescript
 
   '@grafana/e2e-selectors@12.3.1':
+    dependencies:
+      semver: 7.7.3
+      tslib: 2.8.1
+      typescript: 5.9.2
+
+  '@grafana/e2e-selectors@12.4.0-21205677807':
     dependencies:
       semver: 7.7.3
       tslib: 2.8.1
@@ -7294,12 +7307,12 @@ snapshots:
     dependencies:
       '@lezer/lr': 1.4.2
 
-  '@grafana/plugin-e2e@1.19.9(@playwright/test@1.58.0)':
+  '@grafana/plugin-e2e@3.1.4(@playwright/test@1.58.0)':
     dependencies:
-      '@grafana/e2e-selectors': 12.3.1
+      '@grafana/e2e-selectors': 12.4.0-21205677807
       '@playwright/test': 1.58.0
       semver: 7.7.3
-      uuid: 11.1.0
+      uuid: 13.0.0
       yaml: 2.8.2
 
   '@grafana/plugin-ui@0.10.10(@grafana/data@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/e2e-selectors@12.3.1)(@grafana/runtime@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/ui@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.2)':
@@ -7436,11 +7449,11 @@ snapshots:
       - supports-color
       - typescript
 
-  '@grafana/scenes@6.52.11(@grafana/data@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/e2e-selectors@12.3.1)(@grafana/i18n@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/runtime@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/schema@12.3.1)(@grafana/ui@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+  '@grafana/scenes@6.52.11(@grafana/data@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/e2e-selectors@12.4.0-21205677807)(@grafana/i18n@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/runtime@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(@grafana/schema@12.3.1)(@grafana/ui@12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react-router-dom@6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@floating-ui/react': 0.26.28(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@grafana/data': 12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
-      '@grafana/e2e-selectors': 12.3.1
+      '@grafana/e2e-selectors': 12.4.0-21205677807
       '@grafana/i18n': 12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       '@grafana/runtime': 12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       '@grafana/schema': 12.3.1
@@ -13353,14 +13366,14 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
-  sass-loader@13.3.3(sass@1.93.3)(webpack@5.102.1):
+  sass-loader@13.3.3(sass@1.97.3)(webpack@5.102.1):
     dependencies:
       neo-async: 2.6.2
       webpack: 5.102.1(@swc/core@1.14.0(@swc/helpers@0.5.17))(webpack-cli@5.1.4)
     optionalDependencies:
-      sass: 1.93.3
+      sass: 1.97.3
 
-  sass@1.93.3:
+  sass@1.97.3:
     dependencies:
       chokidar: 4.0.3
       immutable: 5.1.4
@@ -14092,6 +14105,8 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   uuid@11.1.0: {}
+
+  uuid@13.0.0: {}
 
   uuid@9.0.1: {}
 
