@@ -31,7 +31,7 @@ importers:
         version: 0.2.9(@lezer/lr@1.4.2)
       '@grafana/prometheus':
         specifier: ^12.3.0
-        version: 12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)(typescript@5.9.3)
+        version: 12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@4.2.1))(react@18.3.1)(typescript@5.9.3)
       '@grafana/runtime':
         specifier: ^12.3.0
         version: 12.3.1(@types/react@18.3.27)(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
@@ -226,11 +226,11 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6
       sass:
-        specifier: 1.93.3
-        version: 1.93.3
+        specifier: 1.97.3
+        version: 1.97.3
       sass-loader:
         specifier: 13.3.3
-        version: 13.3.3(sass@1.93.3)(webpack@5.102.1)
+        version: 13.3.3(sass@1.97.3)(webpack@5.102.1)
       style-loader:
         specifier: 3.3.4
         version: 3.3.4(webpack@5.102.1)
@@ -5716,8 +5716,8 @@ packages:
       sass-embedded:
         optional: true
 
-  sass@1.93.3:
-    resolution: {integrity: sha512-elOcIZRTM76dvxNAjqYrucTSI0teAF/L2Lv0s6f6b7FOwcwIuA357bIE871580AjHJuSvLIRUosgV+lIWx6Rgg==}
+  sass@1.97.3:
+    resolution: {integrity: sha512-fDz1zJpd5GycprAbu4Q2PV/RprsRtKC/0z82z0JLgdytmcq0+ujJbJ/09bPGDxCLkKY3Np5cRAOcWiVkLXJURg==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -7329,7 +7329,7 @@ snapshots:
       - react-native
       - supports-color
 
-  '@grafana/prometheus@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)(typescript@5.9.3)':
+  '@grafana/prometheus@12.3.1(eslint@9.39.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@4.2.1))(react@18.3.1)(typescript@5.9.3)':
     dependencies:
       '@emotion/css': 11.13.5
       '@floating-ui/react': 0.27.16(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7346,7 +7346,7 @@ snapshots:
       '@lezer/highlight': 1.2.1
       '@lezer/lr': 1.4.2
       '@prometheus-io/lezer-promql': 0.305.0(@lezer/highlight@1.2.1)(@lezer/lr@1.4.2)
-      '@reduxjs/toolkit': 2.9.0(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
+      '@reduxjs/toolkit': 2.9.0(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@4.2.1))(react@18.3.1)
       '@types/debounce-promise': 3.1.9
       '@types/lodash': 4.17.20
       '@types/react': 18.3.18
@@ -8572,7 +8572,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@reduxjs/toolkit@2.9.0(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)':
+  '@reduxjs/toolkit@2.9.0(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@4.2.1))(react@18.3.1)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@standard-schema/utils': 0.3.0
@@ -8582,7 +8582,7 @@ snapshots:
       reselect: 5.1.1
     optionalDependencies:
       react: 18.3.1
-      react-redux: 9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1)
+      react-redux: 9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@4.2.1)
 
   '@remix-run/router@1.23.0': {}
 
@@ -12976,6 +12976,16 @@ snapshots:
       '@types/react': 18.3.18
       redux: 5.0.1
 
+  react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@4.2.1):
+    dependencies:
+      '@types/use-sync-external-store': 0.0.6
+      react: 18.3.1
+      use-sync-external-store: 1.6.0(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.27
+      redux: 4.2.1
+    optional: true
+
   react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1):
     dependencies:
       '@types/use-sync-external-store': 0.0.6
@@ -13343,14 +13353,14 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
-  sass-loader@13.3.3(sass@1.93.3)(webpack@5.102.1):
+  sass-loader@13.3.3(sass@1.97.3)(webpack@5.102.1):
     dependencies:
       neo-async: 2.6.2
       webpack: 5.102.1(@swc/core@1.14.0(@swc/helpers@0.5.17))(webpack-cli@5.1.4)
     optionalDependencies:
-      sass: 1.93.3
+      sass: 1.97.3
 
-  sass@1.93.3:
+  sass@1.97.3:
     dependencies:
       chokidar: 4.0.3
       immutable: 5.1.4
