@@ -3,14 +3,14 @@ name: create bundle stats
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *' # Run once per day at midnight UTC
+    - cron: "0 0 * * *" # Run once per day at midnight UTC
   push:
     branches:
       - main
 
 permissions:
-  contents: 'read'
-  actions: 'write'
+  contents: "read"
+  actions: "write"
 
 jobs:
   build-stats:
@@ -27,14 +27,14 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '22'
-          cache: 'pnpm'
+          node-version: "22"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        run: pnpm run build -- --profile --json stats.json
+        run: pnpm run build --profile --json stats.json
 
       - name: Upload stats.json artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
