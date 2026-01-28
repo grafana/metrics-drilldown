@@ -31,7 +31,7 @@
     "i18n-extract": "i18next-cli extract -c i18next.config.ts",
     "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --ci"
   },
-  "packageManager": "pnpm@10.28.1",
+  "packageManager": "pnpm@10.28.2",
   "engines": {
     "node": ">=22"
   },
