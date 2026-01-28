@@ -125,13 +125,13 @@
     "webpack-virtual-modules": "^0.6.2"
   },
   "peerDependencies": {
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.23"
   },
   "pnpm": {
     "overrides": {
-      "@remix-run/router": ">=1.23.2",
-      "react-router": ">=6.30.2",
-      "lodash": ">=4.17.23"
+      "@remix-run/router": "^1.23.2",
+      "react-router": "^6.30.2",
+      "lodash": "^4.17.23"
     }
   }
 }
