@@ -94,19 +94,7 @@ export class MetricsReducerView extends DrilldownView {
   async assertMetricsList() {
     const metricsList = this.getMetricsList();
     await expect(metricsList).toBeVisible();
-
-    const panelsLocator = metricsList.locator('[data-viz-panel-key]');
-
-    // we have to wait... if not, the assertion on the count of panels below will fail without waiting for elements to be in the DOM
-    // AFAIK, Playwright does not have an API to wait for multiple elements to be visible
-    await this.waitForTimeout(500); // Wait for some extra time to prevent flakiness
-    await expect(panelsLocator.first()).toBeVisible();
-
-    expect(await panelsLocator.count()).toBeGreaterThan(0);
-
-    // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, native histograms, ...)
-    // TODO: find a better way
-    await this.waitForTimeout(2000);
+    await expect(metricsList.locator('[data-viz-panel-key]').first()).toBeVisible();
   }
 
   /* Panels */
@@ -131,18 +119,8 @@ export class MetricsReducerView extends DrilldownView {
 
   async assertMetricsGroupByList() {
     const metricsList = this.getMetricsGroupByList();
-
     await expect(metricsList).toBeVisible();
-
-    // we have to wait... if not, the assertion below (on the count) will fail without waiting for elements to be in the DOM
-    // AFAIK, Playwright does not have an API to wait for multiple elements to be visible
     await expect(metricsList.locator('[data-viz-panel-key]').first()).toBeVisible();
-
-    const panelsCount = await metricsList.locator('[data-viz-panel-key]').count();
-    expect(panelsCount).toBeGreaterThan(0);
-
-    // TODO: find a better way
-    await this.waitForTimeout(2000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   async selectMetricsGroup(labelName: string, labelValue: string) {
@@ -151,6 +129,8 @@ export class MetricsReducerView extends DrilldownView {
       .getByRole('button', { name: 'Select' })
       .first()
       .click();
+    // Wait for panels to re-render after group selection
+    await expect(this.getMetricsList().locator('[data-viz-panel-key]').first()).toBeVisible();
   }
 
   async openPanelInExplore() {
