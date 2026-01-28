@@ -5,8 +5,8 @@
   "license": "AGPL-3.0",
   "scripts": {
     "prebuild": "./scripts/update-commit-sha.sh",
-    "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
-    "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
+    "build": "webpack -c ./webpack.config.ts --env production",
+    "dev": "webpack -w -c ./webpack.config.ts --env development",
     "analyze": "webpack -c ./webpack-analyze.config.ts --env production",
     "tdd": "jest --watch --onlyChanged",
     "test": "jest --watch --onlyChanged",
@@ -28,8 +28,8 @@
     "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh",
     "e2e:smoke": "playwright test -c ./e2e/config/playwright.config.smoke.ts -x --trace on",
     "knip": "pnpm dlx knip --config knip.js",
-    "i18n-extract": "i18next -c i18next-parser.config.ts",
-    "i18n-extract-check": "i18next -c i18next-parser.config.ts --fail-on-update"
+    "i18n-extract": "i18next-cli extract -c i18next.config.ts",
+    "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --ci"
   },
   "packageManager": "pnpm@10.28.1",
   "engines": {
