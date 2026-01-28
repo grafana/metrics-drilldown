@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { LoadingState, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   behaviors,
   sceneGraph,
@@ -108,11 +109,18 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
     return (
       <div className={styles.container} ref={containerRef}>
         {hasError && data?.errors && (
-          <InlineBanner severity="error" title="Query failed" error={data.errors[0] as Error} />
+          <InlineBanner
+            severity="error"
+            title={t('query-results.error-title', 'Query failed')}
+            error={data.errors[0] as Error}
+          />
         )}
         {!InstantQueryResults && (
-          <InlineBanner severity="warning" title="Query Results component unavailable">
-            This feature requires a newer version of Grafana.
+          <InlineBanner
+            severity="warning"
+            title={t('query-results.unavailable-title', 'Query Results component unavailable')}
+          >
+            {t('query-results.unavailable-message', 'This feature requires a newer version of Grafana.')}
           </InlineBanner>
         )}
         {InstantQueryResults &&
@@ -123,7 +131,7 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
             loading: loadingState,
             showRawPrometheus: true,
             width,
-            ariaLabel: 'Instant query results',
+            ariaLabel: t('query-results.aria-label', 'Instant query results'),
           })}
       </div>
     );
