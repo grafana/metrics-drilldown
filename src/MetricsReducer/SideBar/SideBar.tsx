@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
+import { availableIconsIndex, VariableHide, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import {
   AdHocFiltersVariable,
@@ -30,7 +30,7 @@ import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetricsSection';
 import { Settings } from './sections/Settings';
-import { SideBarButton } from './SideBarButton';
+import { CustomIcons, SideBarButton } from './SideBarButton';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
 
 type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList | Settings;
@@ -355,6 +355,14 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                     : translatedInfo.title;
                 }
 
+                // For text-based buttons (not icons), include the visible text in the aria-label
+                // to satisfy WCAG 2.5.3 Label in Name requirement
+                const isTextButton =
+                  !(iconOrText in availableIconsIndex) && !CustomIcons.has(iconOrText);
+                const ariaLabel = isTextButton
+                  ? `${iconOrText} - ${translatedInfo.title}`
+                  : translatedInfo.title;
+
                 return (
                   <div
                     key={key}
@@ -367,7 +375,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                   >
                     <SideBarButton
                       key={key}
-                      ariaLabel={translatedInfo.title}
+                      ariaLabel={ariaLabel}
                       disabled={disabled}
                       visible={visible}
                       active={isActive}
