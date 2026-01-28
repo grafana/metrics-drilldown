@@ -185,6 +185,10 @@ type Interactions = {
   add_to_dashboard_modal_opened: {};
   // User confirms to add to dashboard and builds a panel
   add_to_dashboard_build_panel: { expr: string };
+  // User asks a question in the Quick Search input
+  quick_search_assistant_question_asked: { question: string };
+  // User enters assistant mode in the Quick Search input (e.g., by typing '?', clicking the AI button, or using the Tab+Enter keyboard flow)
+  quick_search_assistant_mode_entered: { from: 'question_mark' | 'tab' | 'button' };
 };
 
 type OtherEvents = {
@@ -208,6 +212,11 @@ function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<stri
   // Enrich only the metric_selected event to measure impact on metric selection behavior
   if (event === 'metric_selected') {
     Object.assign(payloads, getTrackedFlagPayload('experiment_hierarchical_prefix_filtering', true));
+  }
+
+  // Enrich assistant events to measure impact of the assistant quick search experiment
+  if (event === 'quick_search_assistant_question_asked' || event === 'quick_search_assistant_mode_entered') {
+    Object.assign(payloads, getTrackedFlagPayload('experiment_grafana_assistant_quick_search_tab_test', true));
   }
 
   return payloads;

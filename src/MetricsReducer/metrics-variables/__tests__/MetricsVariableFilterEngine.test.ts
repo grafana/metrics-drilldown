@@ -71,11 +71,7 @@ describe('MetricsVariableFilterEngine - hierarchical prefix filtering', () => {
 
   test('handles mixed single-level and hierarchical prefixes', () => {
     const { engine, setState } = setup();
-    const options = createOptions([
-      'grafana_alert_active',
-      'grafana_api_response',
-      'prometheus_http_requests',
-    ]);
+    const options = createOptions(['grafana_alert_active', 'grafana_api_response', 'prometheus_http_requests']);
 
     engine.setInitOptions(options);
     engine.applyFilters({ prefixes: ['grafana:alert', 'prometheus'] }, { forceUpdate: false, notify: false });
@@ -159,7 +155,10 @@ describe('MetricsVariableFilterEngine - hierarchical prefix filtering', () => {
       const options = createOptions(['grafana_alert_active', 'grafana_alert_pending', 'grafana_alert_firing']);
 
       engine.setInitOptions(options);
-      engine.applyFilters({ prefixes: ['grafana:alert'], names: ['.*active.*'] }, { forceUpdate: false, notify: false });
+      engine.applyFilters(
+        { prefixes: ['grafana:alert'], names: ['.*active.*'] },
+        { forceUpdate: false, notify: false }
+      );
 
       expect(setState).toHaveBeenCalledWith({
         options: [{ label: 'grafana_alert_active', value: 'grafana_alert_active' }],

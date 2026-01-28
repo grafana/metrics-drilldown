@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -34,19 +35,48 @@ interface ActionViewDefinition {
   backgroundTask: (metricScene: MetricScene) => void;
 }
 
+export function getActionViewsDefinitions(): ActionViewDefinition[] {
+  return [
+    {
+      displayName: t('action-bar.tab.breakdown', 'Breakdown'),
+      value: actionViews.breakdown,
+      getScene: (metricScene: MetricScene) => new LabelBreakdownScene({ metric: metricScene.state.metric }),
+      backgroundTask: () => {}, // TODO: Implement background task for breakdown (e.g. count breakdown panels)
+    },
+    {
+      displayName: t('action-bar.tab.related-metrics', 'Related metrics'),
+      value: actionViews.related,
+      getScene: (metricScene: MetricScene) => new RelatedMetricsScene({ metric: metricScene.state.metric }),
+      description: t('action-bar.tab.related-metrics-description', 'Relevant metrics based on current label filters'),
+      backgroundTask: () => {}, // TODO: Implement background task for related metrics (e.g. count related metrics)
+    },
+    {
+      displayName: t('action-bar.tab.related-logs', 'Related logs'),
+      value: actionViews.relatedLogs,
+      getScene: (metricScene: MetricScene) => metricScene.createRelatedLogsScene(),
+      description: t(
+        'action-bar.tab.related-logs-description',
+        'Relevant logs based on current label filters and time range'
+      ),
+      backgroundTask: (metricScene: MetricScene) => metricScene.relatedLogsOrchestrator.findAndCheckAllDatasources(),
+    },
+  ];
+}
+
+/** @deprecated Use getActionViewsDefinitions() instead */
 export const actionViewsDefinitions: ActionViewDefinition[] = [
   {
     displayName: 'Breakdown',
     value: actionViews.breakdown,
     getScene: (metricScene: MetricScene) => new LabelBreakdownScene({ metric: metricScene.state.metric }),
-    backgroundTask: () => {}, // TODO: Implement background task for breakdown (e.g. count breakdown panels)
+    backgroundTask: () => {},
   },
   {
     displayName: 'Related metrics',
     value: actionViews.related,
     getScene: (metricScene: MetricScene) => new RelatedMetricsScene({ metric: metricScene.state.metric }),
     description: 'Relevant metrics based on current label filters',
-    backgroundTask: () => {}, // TODO: Implement background task for related metrics (e.g. count related metrics)
+    backgroundTask: () => {},
   },
   {
     displayName: 'Related logs',
@@ -64,6 +94,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const styles = useStyles2(getStyles);
     const { actionView } = metricScene.useState();
+    const translatedActionViews = getActionViewsDefinitions();
 
     return (
       <Box paddingY={1} data-testid="action-bar" width="100%">
@@ -72,10 +103,11 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
         </div>
 
         <TabsBar className={styles.customTabsBar}>
-          {actionViewsDefinitions.map((tab, index) => {
+          {translatedActionViews.map((tab, index) => {
             const label = tab.displayName;
-            const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
             const isActive = actionView === tab.value;
+            const counter =
+              tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
 
             const tabRender = (
               <Tab

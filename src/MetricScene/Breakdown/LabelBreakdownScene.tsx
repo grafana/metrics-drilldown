@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   behaviors,
@@ -93,19 +94,25 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
+    const { embeddedMini } = trail.state;
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
     return (
       <div className={styles.container}>
-        <div className={styles.stickyControls} data-testid="breakdown-controls">
-          <div className={styles.controls}>
-            <groupByVariable.Component model={groupByVariable} />
-            {body instanceof MetricLabelsList && <body.Controls model={body} />}
-            {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+        {!embeddedMini && (
+          <div className={styles.stickyControls} data-testid="breakdown-controls">
+            <div className={styles.controls}>
+              <groupByVariable.Component model={groupByVariable} />
+              {body instanceof MetricLabelsList && <body.Controls model={body} />}
+              {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+            </div>
           </div>
-        </div>
+        )}
+        {embeddedMini && (
+          <div className={styles.miniSectionLabel}>{t('breakdown.section-label', 'Breakdown')}</div>
+        )}
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}
@@ -141,6 +148,15 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
     }),
     searchField: css({
       flexGrow: 1,
+    }),
+    miniSectionLabel: css({
+      marginTop: theme.spacing(2),
+      marginBottom: theme.spacing(1),
+      fontSize: theme.typography.bodySmall.fontSize,
+      fontWeight: theme.typography.fontWeightMedium,
+      color: theme.colors.text.secondary,
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
     }),
   };
 }

@@ -14,7 +14,7 @@ permissions:
 jobs:
   CD:
     name: Deploy plugin
-    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v4.2.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v4.3.0
     with:
       branch: ${{ github.event_name == 'push' && github.ref_name || github.ref }}
       environment: dev,ops

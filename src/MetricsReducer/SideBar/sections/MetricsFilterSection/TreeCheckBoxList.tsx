@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { Button, Icon, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
@@ -22,14 +23,14 @@ type TreeCheckBoxListProps = {
 
 /**
  * TreeCheckBoxList - Hierarchical checkbox list for two-level prefix filtering.
- * 
+ *
  * Displays parent prefixes (Level 0) with expandable children (Level 1).
  * Supports:
  * - Parent checkbox shows as checked when parent OR any children are selected
  * - Lazy computation of sublevels (only when expanded)
  * - Sticky parent rows during scrolling for context
  * - Clear parent/child selection logic
- * 
+ *
  * Selection behavior:
  * - Checking parent: Adds parent, removes any children (select all with prefix)
  * - Unchecking parent: Removes parent AND all children (clears entire branch)
@@ -50,9 +51,8 @@ export function TreeCheckBoxList({
 
   // Helper: Check if parent or any of its children are selected
   const isParentChecked = (parentValue: string) => {
-    return selectedGroups.some((g) => 
-      g.value === parentValue || 
-      g.value.startsWith(parentValue + HIERARCHICAL_SEPARATOR)
+    return selectedGroups.some(
+      (g) => g.value === parentValue || g.value.startsWith(parentValue + HIERARCHICAL_SEPARATOR)
     );
   };
 
@@ -130,18 +130,13 @@ export function TreeCheckBoxList({
   return (
     <>
       <div className={sharedStyles.listHeader}>
-        <div>{selectedGroups.length} selected</div>
-        <Button
-          variant="secondary"
-          fill="text"
-          onClick={() => onSelectionChange([])}
-          disabled={!selectedGroups.length}
-        >
-          clear
+        <div>{t('checkbox-list.selected-count', '{{count}} selected', { count: selectedGroups.length })}</div>
+        <Button variant="secondary" fill="text" onClick={() => onSelectionChange([])} disabled={!selectedGroups.length}>
+          {t('checkbox-list.clear', 'clear')}
         </Button>
       </div>
 
-      {!groups.length && <div className={sharedStyles.noResults}>No results.</div>}
+      {!groups.length && <div className={sharedStyles.noResults}>{t('checkbox-list.no-results', 'No results.')}</div>}
 
       {groups.length > 0 && (
         <ul className={sharedStyles.list} data-testid="checkbox-filters-tree">
@@ -159,7 +154,11 @@ export function TreeCheckBoxList({
                     <button
                       className={treeStyles.expandButton}
                       onClick={() => onExpandToggle(group.value)}
-                      aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                      aria-label={
+                        isExpanded
+                          ? t('checkbox-list.collapse', 'Collapse')
+                          : t('checkbox-list.expand', 'Expand')
+                      }
                       data-testid={`expand-${group.value}`}
                     >
                       <Icon name={isExpanded ? 'angle-down' : 'angle-right'} />
@@ -264,4 +263,3 @@ function getTreeStyles(theme: GrafanaTheme2) {
     }),
   };
 }
-

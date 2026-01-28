@@ -1,0 +1,341 @@
+{
+  "action-bar": {
+    "tab": {
+      "breakdown": "",
+      "related-logs": "",
+      "related-logs-description": "",
+      "related-metrics": "",
+      "related-metrics-description": ""
+    }
+  },
+  "breakdown": {
+    "add-to-filters": "",
+    "by-label": "",
+    "group-by": {
+      "label": ""
+    },
+    "label-values-list": {
+      "error-title": "",
+      "label": "",
+      "no-values": "",
+      "search-label": "",
+      "view-label": ""
+    },
+    "labels-list": {
+      "breakdown-by-label": "",
+      "error-title": "",
+      "label-label": "",
+      "no-labels": "",
+      "view-label": ""
+    },
+    "section-label": "",
+    "select-label": ""
+  },
+  "checkbox-list": {
+    "clear": "",
+    "collapse": "",
+    "expand": "",
+    "no-results": "",
+    "selected-count_one": "",
+    "selected-count_many": "",
+    "selected-count_other": ""
+  },
+  "configure-panel": {
+    "apply": "",
+    "cancel": "",
+    "restore-default": "",
+    "restore-modal-body": "",
+    "restore-modal-confirm": "",
+    "restore-modal-title": "",
+    "select-function-message": ""
+  },
+  "data-source-variable": {
+    "description": "",
+    "label": ""
+  },
+  "data-trail": {
+    "configure-drawer": {
+      "title": ""
+    },
+    "filters": {
+      "add-label": "",
+      "label": ""
+    }
+  },
+  "error-view": {
+    "message": "",
+    "stack-trace-label": "",
+    "title": ""
+  },
+  "extreme-value-filter": {
+    "message": ""
+  },
+  "fetch-alerting-metrics": {
+    "error": ""
+  },
+  "fetch-dashboard-metrics": {
+    "error": ""
+  },
+  "filtered-metrics-variable": {
+    "label": ""
+  },
+  "give-feedback": {
+    "button": "",
+    "tooltip": ""
+  },
+  "gmd-viz-panel": {
+    "native-histogram": "",
+    "variant": {
+      "heatmap": "",
+      "percentiles": ""
+    }
+  },
+  "inline-banner": {
+    "unknown-error": ""
+  },
+  "labels-datasource": {
+    "none-option": "",
+    "test-success": ""
+  },
+  "labels-list": {
+    "clear": "",
+    "no-results": "",
+    "no-selection": "",
+    "selected": ""
+  },
+  "labels-variable": {
+    "label": "",
+    "placeholder": ""
+  },
+  "layout-switcher": {
+    "aria-label": "",
+    "option": {
+      "grid": "",
+      "rows": "",
+      "single": ""
+    }
+  },
+  "lazy-loading": {
+    "fallback": ""
+  },
+  "metrics-group-by-list": {
+    "error-title": "",
+    "no-values": "",
+    "show-more-label": ""
+  },
+  "metrics-group-by-row": {
+    "error-title": "",
+    "metric-label": "",
+    "no-metrics": "",
+    "select": "",
+    "select-tooltip": "",
+    "show-more-tooltip": ""
+  },
+  "metrics-list": {
+    "error-title": "",
+    "metric-label": "",
+    "no-metrics": ""
+  },
+  "metrics-sorter": {
+    "error": {
+      "get-recent-metrics": ""
+    },
+    "label": "",
+    "option": {
+      "alerting-usage": "",
+      "alphabetical": "",
+      "alphabetical-reversed": "",
+      "dashboard-usage": "",
+      "default": ""
+    }
+  },
+  "metrics-variable": {
+    "label": ""
+  },
+  "onboarding": {
+    "learn-more": "",
+    "no-datasource": "",
+    "title": ""
+  },
+  "open-assistant": {
+    "explain-label": "",
+    "metric-metadata-title": ""
+  },
+  "panel-menu": {
+    "action": {
+      "copy-url": "",
+      "copy-url-success": "",
+      "explore": ""
+    },
+    "group": {
+      "actions": "",
+      "navigation": ""
+    }
+  },
+  "plugin-info": {
+    "button": {
+      "title": "",
+      "tooltip": ""
+    },
+    "header": {
+      "last-update": "",
+      "title": ""
+    },
+    "menu": {
+      "changelog": "",
+      "commit-sha": "",
+      "contribute": "",
+      "documentation": "",
+      "grafana-version": "",
+      "prom-build-info": "",
+      "report-issue": ""
+    }
+  },
+  "prefix-filter": {
+    "all-metrics": "",
+    "tooltip": "",
+    "view-by-label": ""
+  },
+  "quick-search": {
+    "ask-assistant-aria-label": "",
+    "ask-assistant-tooltip": "",
+    "clear-search-tooltip": "",
+    "count-filtered-plural": "",
+    "count-filtered-singular": "",
+    "count-total-plural_one": "",
+    "count-total-plural_many": "",
+    "count-total-plural_other": "",
+    "count-total-singular": "",
+    "placeholder": "",
+    "placeholder-question-mode": "",
+    "placeholder-with-assistant": "",
+    "placeholder-with-assistant-tab-enter": ""
+  },
+  "quick-search-assistant": {
+    "label-filters-title": "",
+    "time-range-title": ""
+  },
+  "related-logs": {
+    "datasource-description": "",
+    "datasource-label": "",
+    "experimental-note": "",
+    "loading": "",
+    "no-logs-message": "",
+    "no-logs-title": "",
+    "open-drilldown": "",
+    "open-drilldown-tooltip": "",
+    "open-in-drilldown": "",
+    "open-in-drilldown-tooltip": "",
+    "suggestions": ""
+  },
+  "select-action": {
+    "button": ""
+  },
+  "select-new-metric": {
+    "button": "",
+    "metrics-drilldown": "",
+    "open-in-drilldown-tooltip": ""
+  },
+  "show-more-button": {
+    "text-plural": "",
+    "text-singular": ""
+  },
+  "sidebar": {
+    "bookmarks": {
+      "date-created": "",
+      "empty-state": "",
+      "remove-tooltip": ""
+    },
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "filter": {
+      "clear-search-tooltip": "",
+      "hide-empty": "",
+      "search-placeholder": ""
+    },
+    "filter-type": {
+      "prefix": "",
+      "recent": "",
+      "rule-group": "",
+      "suffix": ""
+    },
+    "labels-browser": {
+      "clear-search-tooltip": "",
+      "search-placeholder": ""
+    },
+    "recent-metrics": {
+      "all-time": "",
+      "past-interval": ""
+    },
+    "section": {
+      "bookmarks": "",
+      "bookmarks-description": "",
+      "group-by-labels": "",
+      "group-by-labels-description": "",
+      "prefix-filters": "",
+      "prefix-filters-description": "",
+      "recent-metrics": "",
+      "recent-metrics-description": "",
+      "rules-filters": "",
+      "rules-filters-description": "",
+      "settings": "",
+      "settings-description": "",
+      "suffix-filters": "",
+      "suffix-filters-description": ""
+    }
+  },
+  "sort-by": {
+    "label": "",
+    "option": {
+      "alphabetical": "",
+      "alphabetical-description": "",
+      "alphabetical-reversed": "",
+      "alphabetical-reversed-description": "",
+      "outliers": "",
+      "outliers-description": ""
+    },
+    "placeholder": "",
+    "tooltip": ""
+  },
+  "trail": {
+    "breadcrumb": {
+      "all-metrics": "",
+      "metrics": ""
+    }
+  },
+  "ui-text": {
+    "metric-select": {
+      "bookmark": "",
+      "copy-url": "",
+      "open-explore": "",
+      "select-new-metric-tooltip": ""
+    },
+    "search": {
+      "title": ""
+    }
+  },
+  "usage-data": {
+    "metric-used-in-plural_one": "",
+    "metric-used-in-plural_many": "",
+    "metric-used-in-plural_other": "",
+    "metric-used-in-singular_one": "",
+    "metric-used-in-singular_many": "",
+    "metric-used-in-singular_other": "",
+    "metric-used-plural_one": "",
+    "metric-used-plural_many": "",
+    "metric-used-plural_other": "",
+    "metric-used-singular_one": "",
+    "metric-used-singular_many": "",
+    "metric-used-singular_other": "",
+    "used-time-plural_one": "",
+    "used-time-plural_many": "",
+    "used-time-plural_other": "",
+    "used-time-singular_one": "",
+    "used-time-singular_many": "",
+    "used-time-singular_other": ""
+  },
+  "with-config-panel-options": {
+    "click-to-select": "",
+    "current-config": ""
+  }
+}

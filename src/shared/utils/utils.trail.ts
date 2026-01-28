@@ -40,7 +40,9 @@ export function newMetricsTrail(state?: Partial<DataTrailState>): DataTrail {
     initialDS: state?.initialDS,
     $timeRange: state?.$timeRange ?? new SceneTimeRange({ from: 'now-1h', to: 'now' }),
     embedded: state?.embedded ?? false,
-    urlNamespace: state?.embedded ? embeddedTrailNamespace : undefined,
+    embeddedMini: state?.embeddedMini ?? false,
+    // Use namespace for embedded mode, skip entirely for embeddedMini (no URL sync)
+    urlNamespace: state?.embedded && !state?.embeddedMini ? embeddedTrailNamespace : undefined,
     ...state,
   });
 }

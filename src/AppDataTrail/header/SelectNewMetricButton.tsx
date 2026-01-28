@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { LinkButton, ToolbarButton } from '@grafana/ui';
 import React from 'react';
@@ -34,11 +35,11 @@ export class SelectNewMetricButton extends SceneObjectBase<SelectNewMetricButton
           href={createAppUrl(getUrlForTrail(trail))}
           variant={'secondary'}
           icon="arrow-right"
-          tooltip="Open in Metrics Drilldown"
+          tooltip={t('select-new-metric.open-in-drilldown-tooltip', 'Open in Metrics Drilldown')}
           onClick={() => reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' })}
           data-testid="open-metrics-drilldown-button"
         >
-          Metrics Drilldown
+          {t('select-new-metric.metrics-drilldown', 'Metrics Drilldown')}
         </LinkButton>
       );
     }
@@ -51,7 +52,7 @@ export class SelectNewMetricButton extends SceneObjectBase<SelectNewMetricButton
         onClick={model.onSelectNewMetric}
         data-testid="select-new-metric-button"
       >
-        Select new metric
+        {t('select-new-metric.button', 'Select new metric')}
       </ToolbarButton>
     );
   };

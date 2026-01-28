@@ -1,4 +1,5 @@
 import { type DataFrame, type PanelMenuItem } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { SceneObjectBase, VizPanelMenu, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import React from 'react';
 
@@ -16,6 +17,7 @@ interface PanelMenuState extends SceneObjectState {
 
 /**
  * @todo the VizPanelMenu interface is overly restrictive, doesn't allow any member functions on this class, so everything is currently inlined
+ * @see https://github.com/grafana/metrics-drilldown/issues/863
  */
 export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPanelMenu {
   constructor(state: Omit<PanelMenuState, 'body'>) {
@@ -28,7 +30,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
       // Navigation group of options (all panels)
       const items: PanelMenuItem[] = [
         {
-          text: 'Navigation',
+          text: t('panel-menu.group.navigation', 'Navigation'),
           type: 'group',
         },
         ExploreAction.create(this),
@@ -39,7 +41,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
         // Only add Copy URL to the main metric graph panel
         items.push(
           {
-            text: 'Actions',
+            text: t('panel-menu.group.actions', 'Actions'),
             type: 'group',
           },
           CopyUrlAction.create(getTrailFor(this))

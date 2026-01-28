@@ -1,6 +1,3 @@
-import { reportExploreMetrics } from 'shared/tracking/interactions';
-
-import { PREF_KEYS } from './pref-keys';
 import pluginJson from '../../plugin.json';
 
 class UserStorage {
@@ -8,38 +5,6 @@ class UserStorage {
 
   constructor(service: string) {
     this.service = service;
-  }
-
-  // TODO: temporary, let's wait for the new version to be in prod to remove it
-  public migrate() {
-    let hasMigrations = false;
-
-    const migrations = [
-      { legacyKey: 'metricsDrilldownDataSource', newKey: PREF_KEYS.DATASOURCE },
-      { legacyKey: 'metrics-drilldown-recent-metrics/v1', newKey: PREF_KEYS.RECENT_METRICS },
-      { legacyKey: 'grafana.trails.bookmarks', newKey: PREF_KEYS.BOOKMARKS },
-      { legacyKey: 'grafana.trails.breakdown.sort.labels.by', newKey: PREF_KEYS.BREAKDOWN_SORTBY },
-    ];
-
-    for (const { legacyKey, newKey } of migrations) {
-      let existingItem = localStorage.getItem(legacyKey);
-      if (existingItem === null) {
-        continue;
-      }
-
-      try {
-        existingItem = JSON.parse(existingItem);
-      } catch {}
-
-      this.setItem(newKey, existingItem);
-      localStorage.removeItem(legacyKey);
-
-      hasMigrations = true;
-    }
-
-    if (hasMigrations) {
-      reportExploreMetrics('user_preferences_migrated', {});
-    }
   }
 
   private buildStorageKey(key: string) {

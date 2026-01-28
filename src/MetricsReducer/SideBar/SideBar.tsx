@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   AdHocFiltersVariable,
   sceneGraph,
@@ -40,6 +41,47 @@ interface SideBarState extends SceneObjectState {
   sectionValues: Map<string, string[]>;
 }
 
+function getTranslatedSectionInfo(key: string): { title: string; description: string } {
+  const sectionMap: Record<string, { title: string; description: string }> = {
+    'filters-rule': {
+      title: t('sidebar.section.rules-filters', 'Rules filters'),
+      description: t('sidebar.section.rules-filters-description', 'Filter metrics and recording rules'),
+    },
+    'filters-prefix': {
+      title: t('sidebar.section.prefix-filters', 'Prefix filters'),
+      description: t(
+        'sidebar.section.prefix-filters-description',
+        'Filter metrics based on their name prefix (Prometheus namespace)'
+      ),
+    },
+    'filters-suffix': {
+      title: t('sidebar.section.suffix-filters', 'Suffix filters'),
+      description: t('sidebar.section.suffix-filters-description', 'Filter metrics based on their name suffix'),
+    },
+    'filters-recent': {
+      title: t('sidebar.section.recent-metrics', 'Recent metrics filters'),
+      description: t(
+        'sidebar.section.recent-metrics-description',
+        'Filter metrics based on when they started being ingested'
+      ),
+    },
+    'groupby-labels': {
+      title: t('sidebar.section.group-by-labels', 'Group by labels'),
+      description: t('sidebar.section.group-by-labels-description', 'Group metrics by their label values'),
+    },
+    bookmarks: {
+      title: t('sidebar.section.bookmarks', 'Bookmarks'),
+      description: t('sidebar.section.bookmarks-description', 'Access your saved metrics for quick reference'),
+    },
+    settings: {
+      title: t('sidebar.section.settings', 'Settings'),
+      description: t('sidebar.section.settings-description', 'Settings'),
+    },
+  };
+
+  return sectionMap[key] || { title: key, description: '' };
+}
+
 export const metricFilters = {
   rule: 'filters-rule',
   prefix: 'filters-prefix',
@@ -60,8 +102,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new MetricsFilterSection({
           key: 'filters-rule',
           type: 'categories',
-          title: 'Rules filters',
-          description: 'Filter metrics and recording rules',
+          title: t('sidebar.section.rules-filters', 'Rules filters'),
+          description: t('sidebar.section.rules-filters-description', 'Filter metrics and recording rules'),
           icon: 'rules',
           computeGroups: computeRulesGroups,
           showHideEmpty: false,
@@ -71,8 +113,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new MetricsFilterSection({
           key: 'filters-prefix',
           type: 'prefixes',
-          title: 'Prefix filters',
-          description: 'Filter metrics based on their name prefix (Prometheus namespace)',
+          title: t('sidebar.section.prefix-filters', 'Prefix filters'),
+          description: t(
+            'sidebar.section.prefix-filters-description',
+            'Filter metrics based on their name prefix (Prometheus namespace)'
+          ),
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
           active: Boolean(sectionValues.get('filters-prefix')?.length),
@@ -80,36 +125,39 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new MetricsFilterSection({
           key: 'filters-suffix',
           type: 'suffixes',
-          title: 'Suffix filters',
-          description: 'Filter metrics based on their name suffix',
+          title: t('sidebar.section.suffix-filters', 'Suffix filters'),
+          description: t('sidebar.section.suffix-filters-description', 'Filter metrics based on their name suffix'),
           icon: '_Z',
           computeGroups: computeMetricSuffixGroups,
           active: Boolean(sectionValues.get('filters-suffix')?.length),
         }),
         new RecentMetricsSection({
           key: 'filters-recent',
-          title: 'Recent metrics filters',
-          description: 'Filter metrics based on when they started being ingested',
+          title: t('sidebar.section.recent-metrics', 'Recent metrics filters'),
+          description: t(
+            'sidebar.section.recent-metrics-description',
+            'Filter metrics based on when they started being ingested'
+          ),
           icon: 'clock-nine',
           active: Boolean(sectionValues.get('filters-recent')?.length),
         }),
         new LabelsBrowser({
           key: 'groupby-labels',
           variableName: VAR_WINGMAN_GROUP_BY,
-          title: 'Group by labels',
-          description: 'Group metrics by their label values',
+          title: t('sidebar.section.group-by-labels', 'Group by labels'),
+          description: t('sidebar.section.group-by-labels-description', 'Group metrics by their label values'),
           icon: 'groups',
         }),
         new BookmarksList({
           key: 'bookmarks',
-          title: 'Bookmarks',
-          description: 'Access your saved metrics for quick reference',
+          title: t('sidebar.section.bookmarks', 'Bookmarks'),
+          description: t('sidebar.section.bookmarks-description', 'Access your saved metrics for quick reference'),
           icon: 'star',
         }),
         new Settings({
           key: 'settings',
-          title: 'Settings',
-          description: 'Settings',
+          title: t('sidebar.section.settings', 'Settings'),
+          description: t('sidebar.section.settings-description', 'Settings'),
           icon: 'cog',
           disabled: true,
         }),
@@ -117,10 +165,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       sectionValues,
       ...state,
     });
-
-    // FIXME: rule values are regexes, we do this only to disable adding the values to the button tooltip
-    // we need to provide the corresponding label instead
-    sectionValues.set('filters-rule', []);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
@@ -167,10 +211,10 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     }
 
     const varToTextMap: Record<MetricFiltersVariable, string> = {
-      'filters-rule': 'rule group',
-      'filters-prefix': 'prefix',
-      'filters-suffix': 'suffix',
-      'filters-recent': 'recent',
+      'filters-rule': t('sidebar.filter-type.rule-group', 'rule group'),
+      'filters-prefix': t('sidebar.filter-type.prefix', 'prefix'),
+      'filters-suffix': t('sidebar.filter-type.suffix', 'suffix'),
+      'filters-recent': t('sidebar.filter-type.recent', 'recent'),
     };
 
     const newFilters = Array.from(sectionValues.entries()).reduce<Array<AdHocFilterWithLabels<{}>>>(
@@ -295,17 +339,20 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           <div className={styles.buttonsBar} data-testid="sidebar-buttons">
             <Stack direction="column" alignItems="center" gap={0}>
               {sections.map((section) => {
-                const { key, title, icon: iconOrText, disabled, active } = section.state;
+                const { key, icon: iconOrText, disabled, active } = section.state;
                 const visible = visibleSection?.state.key === key;
+                const translatedInfo = getTranslatedSectionInfo(key);
                 let isActive;
                 let tooltip;
 
                 if (key === 'groupby-labels') {
                   isActive = Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE);
-                  tooltip = `${title}: ${labelsVariableValue}`;
+                  tooltip = `${translatedInfo.title}: ${labelsVariableValue}`;
                 } else {
                   isActive = active;
-                  tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
+                  tooltip = sectionValues.get(key)?.length
+                    ? `${translatedInfo.title}: ${sectionValues.get(key)?.join(', ')}`
+                    : translatedInfo.title;
                 }
 
                 return (
@@ -320,7 +367,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                   >
                     <SideBarButton
                       key={key}
-                      ariaLabel={title}
+                      ariaLabel={translatedInfo.title}
                       disabled={disabled}
                       visible={visible}
                       active={isActive}
@@ -338,8 +385,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               <IconButton
                 className={styles.closeButton}
                 name="times"
-                aria-label="Close"
-                tooltip="Close"
+                aria-label={t('sidebar.close-aria-label', 'Close')}
+                tooltip={t('sidebar.close-tooltip', 'Close')}
                 tooltipPlacement="top"
                 onClick={() => model.setActiveSection('')}
               />

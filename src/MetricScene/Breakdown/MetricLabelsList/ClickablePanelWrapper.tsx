@@ -1,0 +1,56 @@
+import { css } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
+import { locationService } from '@grafana/runtime';
+import { SceneObjectBase, type SceneComponentProps, type SceneObjectState, type VizPanel } from '@grafana/scenes';
+import { useStyles2 } from '@grafana/ui';
+import React from 'react';
+
+import { getClickablePanelStyles } from 'shared/utils/utils.styles';
+
+interface ClickablePanelWrapperState extends SceneObjectState {
+  panel: VizPanel;
+  navigationUrl: string;
+  title?: string;
+}
+
+export class ClickablePanelWrapper extends SceneObjectBase<ClickablePanelWrapperState> {
+  public static readonly Component = ({ model }: SceneComponentProps<ClickablePanelWrapper>) => {
+    const { panel, navigationUrl, title } = model.useState();
+    const styles = useStyles2(getStyles);
+
+    const handleClick = () => {
+      locationService.push(navigationUrl);
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleClick();
+      }
+    };
+
+    return (
+      <div
+        className={styles.container}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        title={title}
+      >
+        <panel.Component model={panel} />
+      </div>
+    );
+  };
+}
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    container: css`
+      width: 100%;
+      height: 100%;
+      ${getClickablePanelStyles(theme)}
+    `,
+  };
+}
+
