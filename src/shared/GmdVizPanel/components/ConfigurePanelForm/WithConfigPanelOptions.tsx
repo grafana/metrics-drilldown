@@ -112,7 +112,8 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
 
   public static readonly Component = ({ model }: SceneComponentProps<WithConfigPanelOptions>) => {
     const styles = useStyles2(getStyles);
-    const { body, isSelected, queryParams } = model.useState();
+    const { body, isSelected, presetId, queryParams } = model.useState();
+    const radioLabel = body.state.panelConfig?.title ?? presetId;
 
     const isClickable = !isSelected;
     const handleKeyDown = isClickable
@@ -161,7 +162,12 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
             }
             placement="top"
           >
-            <input type="radio" name="select-config" checked={isSelected} />
+            <input
+              type="radio"
+              name="select-config"
+              checked={isSelected}
+              aria-label={radioLabel}
+            />
           </Tooltip>
         </div>
       </div>
