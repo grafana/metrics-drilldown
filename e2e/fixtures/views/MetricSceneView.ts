@@ -154,16 +154,7 @@ export class MetricSceneView extends DrilldownView {
   async assertPanelsList() {
     const panelsList = this.getPanelsList();
     await expect(panelsList).toBeVisible();
-
-    // we have to wait... if not, the assertion below (on the count) will fail without waiting for elements to be in the DOM
-    // AFAIK, Playwright does not have an API to wait for multiple elements to be visible
     await expect(panelsList.locator('[data-viz-panel-key]').first()).toBeVisible();
-
-    const panelsCount = await panelsList.locator('[data-viz-panel-key]').count();
-    expect(panelsCount).toBeGreaterThan(0);
-
-    // TODO: find a better way
-    await this.waitForTimeout(2000); // Wait for some extra time for the panels to show data and the UI to stabilize (y-axis sync, ...)
   }
 
   /* Breakdown tab */
@@ -208,7 +199,6 @@ export class MetricSceneView extends DrilldownView {
       await expect(radioGroup).toBeVisible({ timeout: 2000 });
       const radioOption = radioGroup.getByRole('radio', { name: label });
       await radioOption.click();
-      return;
     } catch {
       // Not a radio button, must be combobox
       const combobox = container.getByRole('combobox');
@@ -218,6 +208,9 @@ export class MetricSceneView extends DrilldownView {
       await this.getByRole('option', { name: label }).waitFor({ state: 'visible' });
       await this.getByRole('option', { name: label }).click();
     }
+
+    // Wait for panels to re-render after label selection
+    await expect(this.getPanelsList().locator('[data-viz-panel-key]').first()).toBeVisible();
   }
 
   async assertBreadownListControls({ label, sortBy }: { label: string; sortBy: string }) {
@@ -240,6 +233,8 @@ export class MetricSceneView extends DrilldownView {
   async selectSortByOption(optionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
     await this.getByRole('option', { name: optionName }).getByText(optionName).click();
+    // Wait for panels to re-render after sort
+    await expect(this.getPanelsList().locator('[data-viz-panel-key]').first()).toBeVisible();
   }
 
   /* Related metrics tab */
@@ -264,5 +259,7 @@ export class MetricSceneView extends DrilldownView {
   async selectPrefixFilterOption(expectedOptionName: string) {
     await this.getPrefixFilterDropdown().getByRole('combobox').click();
     await this.getByRole('option', { name: expectedOptionName }).click();
+    // Wait for panels to re-render after filter selection
+    await expect(this.getPanelsList().locator('[data-viz-panel-key]').first()).toBeVisible();
   }
 }

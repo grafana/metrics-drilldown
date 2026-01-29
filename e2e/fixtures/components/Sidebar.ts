@@ -97,8 +97,8 @@ export class Sidebar {
   async assertLabelsList(expectedLabels: string[]) {
     const labelsBrowser = this.locator.getByTestId('labels-browser');
 
-    const radiosCount = await labelsBrowser.getByRole('radio').count();
-    expect(radiosCount).toBe(expectedLabels.length);
+    // Wait for radios to be present, then verify count
+    await expect(labelsBrowser.getByRole('radio')).toHaveCount(expectedLabels.length);
 
     for (const expectedLabel of expectedLabels) {
       const radioButton = labelsBrowser.getByRole('radio', { name: expectedLabel, exact: true });
@@ -115,6 +115,8 @@ export class Sidebar {
     }
 
     if (operator === '>') {
+      // Wait for at least one radio to be visible before counting
+      await expect(labelsBrowser.getByRole('radio').first()).toBeVisible();
       const radiosCount = await labelsBrowser.getByRole('radio').count();
       expect(radiosCount).toBeGreaterThan(expectedCount);
       return;
