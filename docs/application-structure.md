@@ -169,6 +169,8 @@ Takes the current metric visualization and adds it to a dashboard, preserving th
 
 Navigates to Grafana Explore with the metric and its context (filters, time range) pre-populated. This is useful for users who want to write custom queries or perform ad-hoc analysis.
 
+### Create an Alert: Navigates to the Grafana Alert form with the query and datasource pre-populated. This is useful when exploring metrics and creating an alert based on the exploration.
+
 ### Open Logs in Logs Drilldown
 
 From the Related Logs tab, users can navigate to Logs Drilldown with the appropriate label filters already applied.
