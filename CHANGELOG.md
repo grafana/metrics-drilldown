@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.0.29
+
+##### Chores
+
+* **deps:**
+  *  Update pnpm to v10.28.2 [SECURITY] (#990) (2ddab3b7)
+  *  Pin mcr.microsoft.com/playwright Docker tag to 35c7d48 (#914) (c9da3f25)
+  *  Update dependency @grafana/plugin-e2e to v3 (#939) (2418890b)
+  *  Update actions/upload-artifact action to v6 (#919) (bf086f6e)
+  *  Update dependency sass to v1.97.3 (#916) (d2cbe54a)
+  *  update grafana/shared-workflows/get-vault-secrets action to v1.3.0 (#917) (709836ed)
+  *  Update dependency @types/node to v20.19.30 (#915) (7ebb4784)
+*  migrate from npm to pnpm (#957) (2bdf5944)
+*  Download translations from Crowdin (#975) (0a18c236)
+*  quick search assistant experiment (#959) (531b187f)
+*  migrate eslint config to `.mjs` (#962) (052ef827)
+*  merge eslint-plugin-jsx-a11y into main eslint config (#956) (408f2f47)
+*  update @grafana/create-plugin to v6.7.5 (#929) (6591e4f6)
+* **i18n:**  add crowdin github actions (#942) (8d6b8783)
+* **eslint:**  add @grafana/i18n rules (#926) (140798ec)
+
+##### New Features
+
+*  Knowledge Graph source metrics enhancements (#958) (2201b01e)
+*  create alert from metric scene (#937) (8a90598a)
+
+##### Bug Fixes
+
+* **ci:**
+  *  remove double dashes (#992) (0a36e456)
+  *  remove extraneous `--` in bundle stats script (#991) (1e57122c)
+*  update i18n-extract to use i18next-cli (#987) (e0fccfc3)
+*  add webpack alias for @grafana/i18n to resolve pnpm module duplication (#985) (7bf7d895)
+
+##### Refactors
+
+*  leverage disco union for improved type safety (#960) (4358c90b)
+
+
 ## 1.0.28
 
 ##### Chores
