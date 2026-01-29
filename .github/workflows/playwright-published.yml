@@ -20,12 +20,12 @@ jobs:
       plugin-name: ${{ steps.get-name.outputs.plugin-name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
 
       - name: Setup Node.js environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -37,11 +37,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        run: pnpm run build -- --profile --json stats.json
+        run: pnpm run build --profile --json stats.json
 
       - name: Get vault secrets
         id: get-secrets
-        uses: grafana/shared-workflows/actions/get-vault-secrets@5d7e361bc7e0a183cde8afe9899fb7b596d2659b # get-vault-secrets-v1.2.0
+        uses: grafana/shared-workflows/actions/get-vault-secrets@a37de51f3d713a30a9e4b21bcdfbd38170020593 # get-vault-secrets/v1.3.0
         with:
           repo_secrets: |
             access_policy_token=ci:access_policy_token
@@ -68,7 +68,7 @@ jobs:
           access-policy-token: ${{ fromJSON(steps.get-secrets.outputs.secrets).access_policy_token }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: dist-artifacts
           path: dist-artifacts/
