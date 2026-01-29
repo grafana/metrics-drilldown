@@ -75,7 +75,7 @@ function getTranslatedSectionInfo(key: string): { title: string; description: st
     },
     settings: {
       title: t('sidebar.section.settings', 'Settings'),
-      description: t('sidebar.section.settings-description', 'Settings'),
+      description: t('sidebar.section.settings-description', 'Configure display preferences and filtering behavior'),
     },
   };
 
@@ -157,7 +157,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new Settings({
           key: 'settings',
           title: t('sidebar.section.settings', 'Settings'),
-          description: t('sidebar.section.settings-description', 'Settings'),
+          description: t('sidebar.section.settings-description', 'Configure display preferences and filtering behavior'),
           icon: 'cog',
           disabled: true,
         }),
