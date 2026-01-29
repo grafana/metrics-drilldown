@@ -15,6 +15,8 @@ export class QuickSearchInput {
 
   async enterText(searchText: string) {
     await this.get().fill(searchText);
+    // Wait for the debounced quick search to process the input (debounce is 250ms)
+    await this.page.waitForTimeout(300);
   }
 
   clear() {
