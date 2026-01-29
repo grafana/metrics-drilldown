@@ -399,6 +399,8 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     const [hideEmpty, setHideEmpty] = useState(false);
     const [searchValue, setSearchValue] = useState('');
 
+    const switchId = `hide-empty-switch-${model.state.key}`;
+
     const filteredGroups = useMemo(() => {
       const filters: Array<(item: { label: string; value: string; count: number }) => boolean> = [];
 
@@ -424,8 +426,10 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
         {showHideEmpty && (
           <div className={styles.switchContainer}>
-            <span className={styles.switchLabel}>{t('sidebar.filter.hide-empty', 'Hide empty')}</span>
-            <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
+            <label className={styles.switchLabel} htmlFor={switchId}>
+              {t('sidebar.filter.hide-empty', 'Hide empty')}
+            </label>
+            <Switch id={switchId} value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
           </div>
         )}
 
