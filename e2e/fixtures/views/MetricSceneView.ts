@@ -174,37 +174,39 @@ export class MetricSceneView extends DrilldownView {
   async assertLabelSelector(label: string) {
     const container = this.getLabelSelectorContainer();
 
-    try {
-      // Try radio button first (with short timeout since it should be immediate)
+    // Retry until assertion passes (handles DOM updates during render)
+    await expect(async () => {
       const radioGroup = container.getByRole('radiogroup');
-      await expect(radioGroup).toBeVisible({ timeout: 2000 });
-      const radioOption = radioGroup.getByRole('radio', { name: label });
-      await expect(radioOption).toBeChecked();
-      return;
-    } catch {
-      // Not a radio button, must be combobox
-      const combobox = container.getByRole('combobox');
-      await expect(combobox).toHaveValue(label);
-    }
+
+      if ((await radioGroup.count()) > 0) {
+        const radioOption = radioGroup.getByRole('radio', { name: label });
+        await expect(radioOption).toBeChecked();
+      } else {
+        const combobox = container.getByRole('combobox');
+        await expect(combobox).toHaveValue(label);
+      }
+    }).toPass();
   }
 
   async selectLabel(label: string) {
     const container = this.getLabelSelectorContainer();
+    const radioGroup = container.getByRole('radiogroup');
 
-    try {
-      // Try radio button first (with short timeout since it should be immediate)
-      const radioGroup = container.getByRole('radiogroup');
-      await expect(radioGroup).toBeVisible({ timeout: 2000 });
+    // Try radiogroup first (more common), fall back to combobox
+    const isRadioGroup = await radioGroup
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (isRadioGroup) {
       const radioOption = radioGroup.getByRole('radio', { name: label });
       await radioOption.click();
-    } catch {
-      // Not a radio button, must be combobox
+    } else {
       const combobox = container.getByRole('combobox');
       await combobox.click();
-
-      // Wait for dropdown menu to open
-      await this.getByRole('option', { name: label }).waitFor({ state: 'visible' });
-      await this.getByRole('option', { name: label }).click();
+      const option = this.getByRole('option', { name: label });
+      await option.waitFor({ state: 'visible' });
+      await option.click();
     }
 
     // Wait for panels to re-render after label selection
