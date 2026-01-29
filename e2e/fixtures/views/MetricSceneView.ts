@@ -55,10 +55,8 @@ export class MetricSceneView extends DrilldownView {
 
   async assertMainViz(metricName: string) {
     await expect(this.getByTestId('top-view').getByRole('heading', { name: metricName })).toBeVisible();
-
-    // we wait for some time to make sure that data is rendered, especially for native histograms
-    // TODO: how to improve this and not rely on an arbitrary timeout?
-    await this.waitForTimeout(1000);
+    // Wait for the visualization panel to render (including native histograms)
+    await expect(this.getMainViz()).toBeVisible();
   }
 
   async clickPanelConfigureButton() {

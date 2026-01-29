@@ -15,7 +15,6 @@ export class QuickSearchInput {
 
   async enterText(searchText: string) {
     await this.get().fill(searchText);
-    await this.page.waitForTimeout(250); // eslint-disable-line playwright/no-wait-for-timeout
   }
 
   clear() {
