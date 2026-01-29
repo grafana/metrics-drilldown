@@ -193,8 +193,9 @@ export class MetricSceneView extends DrilldownView {
     const radioGroup = container.getByRole('radiogroup');
 
     // Try radiogroup first (more common), fall back to combobox
+    // Use 500ms timeout - enough for React to render, but saves 1.5s vs original 2000ms in combobox cases
     const isRadioGroup = await radioGroup
-      .waitFor({ state: 'visible', timeout: 2000 })
+      .waitFor({ state: 'visible', timeout: 500 })
       .then(() => true)
       .catch(() => false);
 
@@ -203,6 +204,7 @@ export class MetricSceneView extends DrilldownView {
       await radioOption.click();
     } else {
       const combobox = container.getByRole('combobox');
+      await combobox.waitFor({ state: 'visible' });
       await combobox.click();
       const option = this.getByRole('option', { name: label });
       await option.waitFor({ state: 'visible' });
