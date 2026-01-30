@@ -134,6 +134,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
           className={styles.search}
           prefix={<Icon name="search" />}
           placeholder={t('sidebar.labels-browser.search-placeholder', 'Search...')}
+          aria-label={t('sidebar.labels-browser.search-aria-label', 'Search labels')}
           value={searchValue}
           onChange={onInputChange}
           onKeyDown={onInputKeyDown}
