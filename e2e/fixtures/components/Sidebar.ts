@@ -41,9 +41,11 @@ export class Sidebar {
   }
 
   async assertAllButtons() {
-    for (const buttonName of BUTTON_NAMES) {
-      await expect(this.locator.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
-    }
+    await Promise.all(
+      BUTTON_NAMES.map((buttonName) =>
+        expect(this.locator.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible()
+      )
+    );
   }
 
   async assertActiveButton(buttonName: ButtonName, expectToBeActive: boolean) {

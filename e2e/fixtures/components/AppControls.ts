@@ -34,8 +34,7 @@ export class AppControls {
   }
 
   async assertSelectedDataSource(expectedDataSource: string) {
-    const name = await this.getDataSourceDropdown().textContent();
-    expect(name?.trim()).toBe(expectedDataSource);
+    await expect(this.getDataSourceDropdown()).toContainText(expectedDataSource);
   }
 
   /* Ad Hoc filters */
