@@ -25,7 +25,7 @@ const MiniBreakdown = ({ query, initialStart, initialEnd, dataSource }: MiniBrea
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      reportExploreMetrics('exposed_component_viewed', { component: 'mini_breakdown' });
+      reportExploreMetrics('exposed_component_viewed', { component: 'mini_label_breakdown_navigation' });
     }
   }, []);
 
