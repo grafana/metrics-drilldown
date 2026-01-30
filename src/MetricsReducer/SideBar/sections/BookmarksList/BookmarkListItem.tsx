@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { dateTimeFormat, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { type SceneObjectUrlValues } from '@grafana/scenes';
 import { Card, IconButton, Text, useStyles2 } from '@grafana/ui';
 import React from 'react';
@@ -52,7 +53,7 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
     <article data-testid={`data-trail-card ${metric}`}>
       <Card onClick={onSelect} className={cardClassName}>
         <Card.Heading>
-          <div className={styles.metricValue}>{heading}</div>
+          <div>{heading}</div>
         </Card.Heading>
         <Card.Meta className={styles.meta}>
           {filters.map(([key, operator, value], i) => (
@@ -73,7 +74,7 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
               key="delete"
               name="trash-alt"
               className={styles.secondary}
-              tooltip="Remove bookmark"
+              tooltip={t('sidebar.bookmarks.remove-tooltip', 'Remove bookmark')}
               tooltipPlacement="top"
               onClick={onDelete}
             />
@@ -82,7 +83,7 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
       </Card>
       <div className={styles.date}>
         <Text variant="bodySmall" color="secondary">
-          Date created:{' '}
+          {t('sidebar.bookmarks.date-created', 'Date created:')}{' '}
         </Text>
         <Text variant="bodySmall" color="primary" weight="medium">
           {createdAt > 0 && dateTimeFormat(createdAt, { format: 'YYYY-MM-DD' })}
@@ -94,15 +95,7 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    metricValue: css({
-      display: 'inline',
-      color: theme.colors.text.primary,
-      fontWeight: 500,
-      wordBreak: 'break-all',
-    }),
     card: css({
-      position: 'relative',
-      width: '318px',
       padding: `12px ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2)}`,
       alignItems: 'start',
       marginBottom: 0,
@@ -133,7 +126,6 @@ function getStyles(theme: GrafanaTheme2) {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       maxHeight: '36px', // 2 lines * 18px line-height
-      margin: 0,
       gridArea: 'Meta',
       color: theme.colors.text.secondary,
       whiteSpace: 'nowrap',

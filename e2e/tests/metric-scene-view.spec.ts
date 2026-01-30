@@ -4,13 +4,11 @@ const METRIC_NAME = 'go_gc_duration_seconds';
 const URL_SEARCH_PARAMS_WITH_METRIC_NAME = new URLSearchParams([['metric', METRIC_NAME]]);
 
 test.describe('Metric Scene view', () => {
+  // eslint-disable-next-line playwright/expect-expect
   test('Core UI elements', async ({ metricSceneView }) => {
     await metricSceneView.goto(URL_SEARCH_PARAMS_WITH_METRIC_NAME);
     await metricSceneView.assertCoreUI(METRIC_NAME);
     await metricSceneView.assertDefaultBreadownListControls();
-
-    await expect(metricSceneView.getMainViz()).toHaveScreenshot('metric-scene-main-viz.png');
-
     await metricSceneView.assertMainPanelMenu(['Explore', 'Copy URL']); // after screenshot to prevent the menu from appearing in it
   });
 

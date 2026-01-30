@@ -22,13 +22,11 @@ jest.mock('@grafana/runtime', () => ({
   }),
 }));
 
-jest.mock('../../shared/utils/utils', () => {
-  const actualModule = jest.requireActual('../../shared/utils/utils');
-  return {
-    ...actualModule,
-    getTrailFor: jest.fn(actualModule.getTrailFor),
-  };
-});
+jest.mock('../../shared/utils/utils', () => ({
+  // Mock getTrailFor to return the scene object itself - works because
+  // sceneGraph.lookupVariable is also mocked and controls what's returned
+  getTrailFor: jest.fn((scene) => scene),
+}));
 
 function buildConnector(filters: AdHocVariableFilter[] | null) {
   const mockScene = {

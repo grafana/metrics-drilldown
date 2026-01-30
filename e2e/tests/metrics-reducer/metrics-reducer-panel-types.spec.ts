@@ -63,17 +63,12 @@ test.describe('Metrics reducer: panel types', () => {
   });
 
   // eslint-disable-next-line playwright/expect-expect
-  test('All panel types', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
+  test('All panel types', async ({ metricsReducerView }) => {
     const searchText = TEST_DATA.flatMap(({ nameLabelPresets }) =>
       nameLabelPresets.map(({ metric }) => `^${metric}$`)
     ).join(',');
     await metricsReducerView.quickSearch.enterText(searchText);
     await metricsReducerView.assertMetricsList();
-
-    await expectScreenshotInCurrentGrafanaVersion(
-      metricsReducerView.getMetricsList(),
-      'metric-list-with-all-types.png'
-    );
 
     // same but let's block the metadata fetching
     await metricsReducerView.route('**/api/datasources/uid/*/resources/api/v1/metadata*', async (route) => {

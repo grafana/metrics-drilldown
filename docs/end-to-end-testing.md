@@ -18,9 +18,9 @@ When developing tests locally, we use a [dockerized Prometheus with static data]
 Install Playwright with Chromium:
 
 ```shell
-npm i
+pnpm install
 
-npm run e2e:prepare
+pnpm run e2e:prepare
 ```
 
 Make sure your `.env` file in the root folder contains these environment variables:
@@ -37,25 +37,25 @@ An easy way to do this is to open [env.example](../.env.example) and save it as 
 In one terminal window, build the app (with the code watcher):
 
 ```shell
-npm run dev
+pnpm run dev
 ```
 
 And in another terminal tab, start Grafana and Prometheus:
 
 ```shell
-npm run e2e:server
+pnpm run e2e:server
 ```
 
 Then you can start the tests in interactive UI mode (with a built-in watch mode):
 
 ```shell
-npm run e2e:watch
+pnpm run e2e:watch
 ```
 
 You can also run the [code generator](https://playwright.dev/docs/codegen#running-codegen):
 
 ```shell
-npm run e2e:codegen -- http://localhost:3001
+pnpm run e2e:codegen -- http://localhost:3001
 ```
 
 If you want to write tests that perform [visual comparisons](https://playwright.dev/docs/test-snapshots), check the next section.
@@ -123,10 +123,18 @@ await expectToHaveScreenshot(locator, 'metric-scene-breakdown-all-panels-list.pn
 To generate screenshots for a specific Grafana version:
 
 ```shell
-GRAFANA_IMAGE=grafana-enterprise GRAFANA_VERSION=12.1.0 npm run e2e:ci
+
+./scripts/e2e-gen-all-screenshots.sh --grafana-version 12.1.0
+
 ```
 
 This generates screenshots only for Grafana Enterprise v12.1.0.
+
+If you need to remove screenshots for a specific version before regenerating them, you can use the delete script:
+
+```shell
+./scripts/e2e-del-all-screenshots.sh --grafana-version 12.1.0
+```
 
 ##### All Supported Versions
 
@@ -187,7 +195,7 @@ This ensures your visual tests work consistently across all supported Grafana ve
 - Identify the current Playwright version, e.g. `1.50.0`
 - Identify the new Playwright version, e.g. `1.51.0`
 - In a terminal, execute: `./scripts/upgrade-playwright.sh 1.50.0 1.51.0`
-- Launch the E2E tests locally with Docker to verify that the new version works: `npm run e2e:ci`
+- Launch the E2E tests locally with Docker to verify that the new version works: `pnpm run e2e:ci`
 - Push the modified files to the PR
 
 ### When launching the tests, I see more Prometheus metrics than expected

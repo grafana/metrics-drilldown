@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
 import { DataSourceVariable } from '@grafana/scenes';
 
@@ -13,8 +14,8 @@ export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
       key: VAR_DATASOURCE,
       name: VAR_DATASOURCE,
       pluginId: 'prometheus',
-      label: 'Data source',
-      description: 'Only prometheus data sources are supported',
+      label: t('data-source-variable.label', 'Data source'),
+      description: t('data-source-variable.description', 'Only prometheus data sources are supported'),
       // if no initialDS is passed to the constructor, we bypass Scenes native behaviour by determining the data source ourselves (see getCurrentDataSource())...
       skipUrlSync: !initialDS,
       // ... by doing this, we make sure that we'll always have a data source when the "var-ds" URL search param is missing, incorrect, etc.

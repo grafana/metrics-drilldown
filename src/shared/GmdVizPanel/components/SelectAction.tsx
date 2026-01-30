@@ -1,3 +1,4 @@
+import { Trans } from '@grafana/i18n';
 import { SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { Button } from '@grafana/ui';
 import React from 'react';
@@ -43,7 +44,7 @@ export class SelectAction extends SceneObjectBase<SelectActionState> {
         onClick={model.onClick}
         data-testid={`select-action-${model.state.metric}`}
       >
-        Select
+        <Trans i18nKey="select-action.button">Select</Trans>
       </Button>
     );
   };

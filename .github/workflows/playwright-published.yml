@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: 'read'
+  contents: "read"
 
 jobs:
   build:
@@ -20,25 +20,28 @@ jobs:
       plugin-name: ${{ steps.get-name.outputs.plugin-name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
 
       - name: Setup Node.js environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        run: npm run build -- --profile --json stats.json
+        run: pnpm run build --profile --json stats.json
 
       - name: Get vault secrets
         id: get-secrets
-        uses: grafana/shared-workflows/actions/get-vault-secrets@get-vault-secrets-v1.2.0
+        uses: grafana/shared-workflows/actions/get-vault-secrets@a37de51f3d713a30a9e4b21bcdfbd38170020593 # get-vault-secrets/v1.3.0
         with:
           repo_secrets: |
             access_policy_token=ci:access_policy_token
@@ -57,15 +60,15 @@ jobs:
           echo "plugin-name=$name" >> $GITHUB_OUTPUT
 
       - name: Sign and package
-        uses: grafana/plugin-ci-workflows/actions/plugins/package@main
+        uses: grafana/plugin-ci-workflows/actions/internal/plugins/package@ci-cd-workflows/v4.3.0
         with:
           output-folder: dist-artifacts
-          universal: 'true'
+          universal: "true"
           dist-folder: dist
           access-policy-token: ${{ fromJSON(steps.get-secrets.outputs.secrets).access_policy_token }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: dist-artifacts
           path: dist-artifacts/
@@ -73,7 +76,7 @@ jobs:
 
   playwright:
     needs: build
-    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@main
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@ci-cd-workflows/v4.3.0
     with:
       id: ${{ needs.build.outputs.plugin-name }}
       version: ${{ needs.build.outputs.plugin-version }}

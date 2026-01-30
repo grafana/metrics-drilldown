@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   behaviors,
   SceneCSSGridItem,
@@ -19,7 +20,6 @@ import { InlineBanner } from 'App/InlineBanner';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
-import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 
@@ -62,13 +62,19 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
           new SceneReactObject({
             reactNode: (
               <InlineBanner title="" severity="info">
-                No metrics found for the current filters and time range.
+                {t('metrics-list.no-metrics', 'No metrics found for the current filters and time range.')}
               </InlineBanner>
             ),
           }),
         getLayoutError: (error: Error) =>
           new SceneReactObject({
-            reactNode: <InlineBanner severity="error" title="Error while loading metrics!" error={error} />,
+            reactNode: (
+              <InlineBanner
+                severity="error"
+                title={t('metrics-list.error-title', 'Error while loading metrics!')}
+                error={error}
+              />
+            ),
           }),
         getLayoutChild: (option, colorIndex) => {
           return new SceneCSSGridItem({
@@ -78,10 +84,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
                 metric: option.value as string,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
-                  headerActions: ({ metric }) => [
-                    new ConfigurePanelAction({ metric }),
-                    new SelectAction({ metric: metric.name }),
-                  ],
+                  headerActions: ({ metric }) => [new SelectAction({ metric: metric.name })],
                 },
               }),
             }),
@@ -131,12 +134,12 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
 
     return (
       <div data-testid="metrics-list">
-        <div className={styles.container}>
+        <div>
           <body.Component model={body} />
         </div>
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <ShowMoreButton label="metric" batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton label={t('metrics-list.metric-label', 'metric')} batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
       </div>
@@ -146,7 +149,6 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
-    container: css({}),
     footer: css({
       display: 'flex',
       justifyContent: 'center',

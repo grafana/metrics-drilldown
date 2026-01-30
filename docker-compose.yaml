@@ -13,7 +13,7 @@ services:
       - '${GRAFANA_PORT:-3001}:3000'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
-      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin
+      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,localizationForPlugins
       # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
       GF_PLUGINS_PREINSTALL_DISABLED: true
     volumes:
@@ -21,9 +21,9 @@ services:
       - ../logs-drilldown/dist:/var/lib/grafana/plugins/grafana-lokiexplore-app
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
-      # 172.17.0.1 is the default Docker bridge network gateway IP address
-      # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
-      - 'host.docker.internal:172.17.0.1'
+      # Linux CI: Uses 172.17.0.1 (default)
+      # macOS/Windows local dev: Override with DOCKER_HOST_IP=host-gateway in .env file
+      - 'host.docker.internal:${DOCKER_HOST_IP:-172.17.0.1}'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 1s
@@ -39,12 +39,12 @@ services:
       - '${GRAFANA_SCOPES_PORT:-3002}:3000'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_SCOPES_PORT:-3002}'
-      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore
+      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore,localizationForPlugins
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
-      # 172.17.0.1 is the default Docker bridge network gateway IP address
-      # Using "host-gateway" would be more portable across different Docker setups but fails in our CI build
-      - 'host.docker.internal:172.17.0.1'
+      # Linux CI: Uses 172.17.0.1 (default)
+      # macOS/Windows local dev: Override with DOCKER_HOST_IP=host-gateway in .env file
+      - 'host.docker.internal:${DOCKER_HOST_IP:-172.17.0.1}'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 1s

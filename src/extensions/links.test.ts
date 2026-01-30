@@ -2,7 +2,7 @@ import { type PluginExtensionPanelContext } from '@grafana/data';
 import { type PromQuery } from '@grafana/prometheus';
 
 import {
-  buildDrilldownUrlAsync,
+  buildDrilldownUrl,
   buildNavigateToMetricsParams,
   configureDrilldownLink,
   createPromURLObject,
@@ -38,24 +38,24 @@ function createMockContext(overrides: Partial<PluginExtensionPanelContext> = {})
 }
 
 describe('parsePromQLQuery - lezer parser tests', () => {
-  test('should parse basic metric name', async () => {
-    const result = await parsePromQLQuery('http_requests_total');
+  test('should parse basic metric name', () => {
+    const result = parsePromQLQuery('http_requests_total');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([]);
     expect(result.hasErrors).toBe(false);
     expect(result.errors).toEqual([]);
   });
 
-  test('should parse metric with single label', async () => {
-    const result = await parsePromQLQuery('http_requests_total{method="GET"}');
+  test('should parse metric with single label', () => {
+    const result = parsePromQLQuery('http_requests_total{method="GET"}');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([{ label: 'method', op: '=', value: 'GET' }]);
     expect(result.hasErrors).toBe(false);
     expect(result.errors).toEqual([]);
   });
 
-  test('should parse metric with multiple labels', async () => {
-    const result = await parsePromQLQuery('http_requests_total{method="GET",status="200"}');
+  test('should parse metric with multiple labels', () => {
+    const result = parsePromQLQuery('http_requests_total{method="GET",status="200"}');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([
       { label: 'method', op: '=', value: 'GET' },
@@ -63,8 +63,8 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     ]);
   });
 
-  test('should parse metric with different operators', async () => {
-    const result = await parsePromQLQuery('http_requests_total{method!="POST",status=~"2.."}');
+  test('should parse metric with different operators', () => {
+    const result = parsePromQLQuery('http_requests_total{method!="POST",status=~"2.."}');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([
       { label: 'method', op: '!=', value: 'POST' },
@@ -72,8 +72,8 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     ]);
   });
 
-  test('should handle escaped quotes in label values', async () => {
-    const result = await parsePromQLQuery('http_requests_total{path="/api/v1/users",method="GET"}');
+  test('should handle escaped quotes in label values', () => {
+    const result = parsePromQLQuery('http_requests_total{path="/api/v1/users",method="GET"}');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([
       { label: 'path', op: '=', value: '/api/v1/users' },
@@ -81,26 +81,26 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     ]);
   });
 
-  test('should handle function expressions', async () => {
-    const result = await parsePromQLQuery('rate(http_requests_total[5m])');
+  test('should handle function expressions', () => {
+    const result = parsePromQLQuery('rate(http_requests_total[5m])');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([]);
   });
 
-  test('should handle complex function expressions', async () => {
-    const result = await parsePromQLQuery('sum(rate(http_requests_total{status="200"}[5m])) by (service)');
+  test('should handle complex function expressions', () => {
+    const result = parsePromQLQuery('sum(rate(http_requests_total{status="200"}[5m])) by (service)');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([{ label: 'status', op: '=', value: '200' }]);
   });
 
-  test('should handle binary operations', async () => {
-    const result = await parsePromQLQuery('http_requests_total{status="200"} / http_requests_total');
+  test('should handle binary operations', () => {
+    const result = parsePromQLQuery('http_requests_total{status="200"} / http_requests_total');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([{ label: 'status', op: '=', value: '200' }]);
   });
 
-  test('should handle empty label values', async () => {
-    const result = await parsePromQLQuery('http_requests_total{method="",status="200"}');
+  test('should handle empty label values', () => {
+    const result = parsePromQLQuery('http_requests_total{method="",status="200"}');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([
       { label: 'method', op: '=', value: '' },
@@ -108,8 +108,8 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     ]);
   });
 
-  test('should handle invalid queries gracefully', async () => {
-    const result = await parsePromQLQuery('invalid{query');
+  test('should handle invalid queries gracefully', () => {
+    const result = parsePromQLQuery('invalid{query');
     expect(result).toBeDefined();
     expect(result.metric).toBe('invalid'); // Should still extract the metric
     expect(result.labels).toEqual([]); // Should have no valid labels
@@ -118,8 +118,8 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     expect(result.errors[0]).toContain('Parse error at position');
   });
 
-  test('should handle regex match operators', async () => {
-    const result = await parsePromQLQuery('up{job=~"prometheus.*",instance!~"localhost:.*"}');
+  test('should handle regex match operators', () => {
+    const result = parsePromQLQuery('up{job=~"prometheus.*",instance!~"localhost:.*"}');
     expect(result.metric).toBe('up');
     expect(result.labels).toEqual([
       { label: 'job', op: '=~', value: 'prometheus.*' },
@@ -127,28 +127,28 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     ]);
   });
 
-  test('should handle aggregation functions with grouping', async () => {
-    const result = await parsePromQLQuery('sum by (job) (up{job="prometheus"})');
+  test('should handle aggregation functions with grouping', () => {
+    const result = parsePromQLQuery('sum by (job) (up{job="prometheus"})');
     expect(result.metric).toBe('up');
     expect(result.labels).toEqual([{ label: 'job', op: '=', value: 'prometheus' }]);
   });
 
-  test('should handle histogram_quantile functions', async () => {
-    const result = await parsePromQLQuery(
+  test('should handle histogram_quantile functions', () => {
+    const result = parsePromQLQuery(
       'histogram_quantile(0.95, rate(http_duration_seconds_bucket{job="api"}[5m]))'
     );
     expect(result.metric).toBe('http_duration_seconds_bucket');
     expect(result.labels).toEqual([{ label: 'job', op: '=', value: 'api' }]);
   });
 
-  test('should handle metrics with special characters in names', async () => {
-    const result = await parsePromQLQuery('namespace:http_requests_total{service="api"}');
+  test('should handle metrics with special characters in names', () => {
+    const result = parsePromQLQuery('namespace:http_requests_total{service="api"}');
     expect(result.metric).toBe('namespace:http_requests_total');
     expect(result.labels).toEqual([{ label: 'service', op: '=', value: 'api' }]);
   });
 
-  test('should handle node_exporter style metrics', async () => {
-    const result = await parsePromQLQuery('node_filesystem_size_bytes{device="/dev/sda1",mountpoint="/"}');
+  test('should handle node_exporter style metrics', () => {
+    const result = parsePromQLQuery('node_filesystem_size_bytes{device="/dev/sda1",mountpoint="/"}');
     expect(result.metric).toBe('node_filesystem_size_bytes');
     expect(result.labels).toEqual([
       { label: 'device', op: '=', value: '/dev/sda1' },
@@ -157,8 +157,8 @@ describe('parsePromQLQuery - lezer parser tests', () => {
   });
 
   // Test edge cases specific to the lezer parser
-  test('should extract first metric when multiple metrics in binary operations', async () => {
-    const result = await parsePromQLQuery('metric_a{label="value"} + metric_b{other="test"}');
+  test('should extract first metric when multiple metrics in binary operations', () => {
+    const result = parsePromQLQuery('metric_a{label="value"} + metric_b{other="test"}');
     expect(result.metric).toBe('metric_a');
     expect(result.labels).toEqual([
       { label: 'label', op: '=', value: 'value' },
@@ -166,8 +166,8 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     ]);
   });
 
-  test('should handle nested function calls', async () => {
-    const result = await parsePromQLQuery('round(increase(http_requests_total{status="200"}[5m]), 0.1)');
+  test('should handle nested function calls', () => {
+    const result = parsePromQLQuery('round(increase(http_requests_total{status="200"}[5m]), 0.1)');
     expect(result.metric).toBe('http_requests_total');
     expect(result.labels).toEqual([{ label: 'status', op: '=', value: '200' }]);
   });
@@ -232,7 +232,7 @@ describe('configureDrilldownLink', () => {
   });
 
   describe('successful URL construction', () => {
-    test('should construct URL with all components', async () => {
+    test('should construct URL with all components', () => {
       const context = createMockContext({
         targets: [
           {
@@ -247,7 +247,7 @@ describe('configureDrilldownLink', () => {
         },
       });
 
-      const result = await buildDrilldownUrlAsync(context);
+      const result = buildDrilldownUrl(context);
       expect(result).toContain('/a/grafana-metricsdrilldown-app/drilldown');
 
       // Verify template service was called with correct arguments
@@ -259,7 +259,7 @@ describe('configureDrilldownLink', () => {
       );
     });
 
-    test('should construct URL with special characters in labels', async () => {
+    test('should construct URL with special characters in labels', () => {
       const context = createMockContext({
         targets: [
           {
@@ -270,7 +270,7 @@ describe('configureDrilldownLink', () => {
         ],
       });
 
-      const result = await buildDrilldownUrlAsync(context);
+      const result = buildDrilldownUrl(context);
       expect(result).toContain('/a/grafana-metricsdrilldown-app/drilldown');
 
       // Verify template service was called with correct arguments
@@ -282,7 +282,7 @@ describe('configureDrilldownLink', () => {
       );
     });
 
-    test('should call template service with template variables', async () => {
+    test('should call template service with template variables', () => {
       const context = createMockContext({
         targets: [
           {
@@ -301,7 +301,7 @@ describe('configureDrilldownLink', () => {
         },
       });
 
-      const result = await buildDrilldownUrlAsync(context);
+      const result = buildDrilldownUrl(context);
 
       expect(result).toBeDefined();
 
@@ -319,7 +319,7 @@ describe('configureDrilldownLink', () => {
       expect(templateSrvReplaceMock).toHaveBeenCalledTimes(2);
     });
 
-    test('should call template service with datasource variable', async () => {
+    test('should call template service with datasource variable', () => {
       const context = createMockContext({
         targets: [
           {
@@ -337,7 +337,7 @@ describe('configureDrilldownLink', () => {
         },
       });
 
-      const result = await buildDrilldownUrlAsync(context);
+      const result = buildDrilldownUrl(context);
 
       expect(result).toBeDefined();
 
@@ -356,7 +356,7 @@ describe('configureDrilldownLink', () => {
   });
 
   describe('error handling', () => {
-    test('should return fallback URL when parsing fails', async () => {
+    test('should return fallback URL when parsing fails', () => {
       // Test with a context that has a malformed query that might cause parsePromQLQuery to throw
       const context = createMockContext({
         targets: [
@@ -368,7 +368,7 @@ describe('configureDrilldownLink', () => {
         ],
       });
 
-      const result = await buildDrilldownUrlAsync(context);
+      const result = buildDrilldownUrl(context);
 
       // Should still return a result (either with parsed data or fallback)
       expect(result).toBeDefined();

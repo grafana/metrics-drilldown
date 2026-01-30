@@ -6,6 +6,7 @@ import {
   type MetricFindValue,
   type TestDataSourceResponse,
 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { type PrometheusDatasource } from '@grafana/prometheus';
 import { RuntimeDataSource, sceneGraph, type SceneObject } from '@grafana/scenes';
 
@@ -16,7 +17,9 @@ import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 import { displayWarning } from '../helpers/displayStatus';
 import { localeCompare } from '../helpers/localCompare';
 
-// TODO can we get rid of it and use e.g. undefined or an empty string?
+// Sentinel value representing "no label selected" in the group-by dropdown.
+// Using a magic string is intentional: undefined wouldn't work with QueryVariable,
+// and empty string could conflict with actual Prometheus label values.
 export const NULL_GROUP_BY_VALUE = '(none)';
 
 export class LabelsDataSource extends RuntimeDataSource {
@@ -68,7 +71,7 @@ export class LabelsDataSource extends RuntimeDataSource {
       displayWarning(['Error while fetching labels! Defaulting to an empty array.', (error as Error).toString()]);
     }
 
-    return [{ value: NULL_GROUP_BY_VALUE, text: '(none)' }, ...labelOptions] as MetricFindValue[];
+    return [{ value: NULL_GROUP_BY_VALUE, text: t('labels-datasource.none-option', '(none)') }, ...labelOptions] as MetricFindValue[];
   }
 
   private async fetchLabels(ds: PrometheusDatasource, sceneObject: SceneObject, matcher: string) {
@@ -152,7 +155,7 @@ export class LabelsDataSource extends RuntimeDataSource {
   async testDatasource(): Promise<TestDataSourceResponse> {
     return {
       status: 'success',
-      message: 'OK',
+      message: t('labels-datasource.test-success', 'OK'),
     };
   }
 }

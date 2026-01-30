@@ -1,7 +1,9 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { config, useChromeHeaderHeight } from '@grafana/runtime';
 import {
+  behaviors,
   sceneGraph,
   SceneObjectBase,
   type QueryVariable,
@@ -18,8 +20,10 @@ import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
+import { actionViews } from '../../MetricScene/MetricActionBar';
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../../shared/shared';
 import { isQueryVariable } from '../../shared/utils/utils.variables';
+import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
@@ -31,6 +35,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     super({
       metric,
       body: undefined,
+      $behaviors: [new behaviors.SceneQueryController()],
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -70,29 +75,44 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       type: await getMetricType(name, getTrailFor(this)),
     };
 
-    this.setState({
-      body: groupByVariable.hasAllValue()
-        ? new MetricLabelsList({ metric })
-        : new MetricLabelValuesList({ metric, label: groupByVariable.state.value as string }),
-    });
+    const newBody = groupByVariable.hasAllValue()
+      ? new MetricLabelsList({ metric })
+      : new MetricLabelValuesList({ metric, label: groupByVariable.state.value as string });
+
+    this.setState({ body: newBody });
+
+    // Wait for body activation, then signal when queries complete
+    if (newBody.isActive) {
+      signalOnQueryComplete(this, actionViews.breakdown);
+    } else {
+      newBody.addActivationHandler(() => {
+        signalOnQueryComplete(this, actionViews.breakdown);
+      });
+    }
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<LabelBreakdownScene>) => {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
+    const { embeddedMini } = trail.state;
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
     return (
       <div className={styles.container}>
-        <div className={styles.stickyControls} data-testid="breakdown-controls">
-          <div className={styles.controls}>
-            <groupByVariable.Component model={groupByVariable} />
-            {body instanceof MetricLabelsList && <body.Controls model={body} />}
-            {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+        {!embeddedMini && (
+          <div className={styles.stickyControls} data-testid="breakdown-controls">
+            <div className={styles.controls}>
+              <groupByVariable.Component model={groupByVariable} />
+              {body instanceof MetricLabelsList && <body.Controls model={body} />}
+              {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+            </div>
           </div>
-        </div>
+        )}
+        {embeddedMini && (
+          <div className={styles.miniSectionLabel}>{t('breakdown.section-label', 'Breakdown')}</div>
+        )}
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}
@@ -128,6 +148,15 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
     }),
     searchField: css({
       flexGrow: 1,
+    }),
+    miniSectionLabel: css({
+      marginTop: theme.spacing(2),
+      marginBottom: theme.spacing(1),
+      fontSize: theme.typography.bodySmall.fontSize,
+      fontWeight: theme.typography.fontWeightMedium,
+      color: theme.colors.text.secondary,
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
     }),
   };
 }

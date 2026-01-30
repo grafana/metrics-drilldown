@@ -1,5 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   AdHocFiltersVariable,
   sceneGraph,
@@ -8,7 +9,7 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { IconButton, useStyles2 } from '@grafana/ui';
+import { IconButton, Stack, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
@@ -16,10 +17,11 @@ import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/Labe
 import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'MetricsReducer/metrics-variables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'MetricsReducer/metrics-variables/computeRulesGroups';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { VAR_OTHER_METRIC_FILTERS } from 'shared/shared';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
-import { getTrailFor } from 'shared/utils/utils';
+import { embeddedTrailNamespace, getObjectValues, getTrailFor } from 'shared/utils/utils';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
 import { BookmarksList } from './sections/BookmarksList/BookmarksList';
@@ -30,7 +32,6 @@ import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetr
 import { Settings } from './sections/Settings';
 import { SideBarButton } from './SideBarButton';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
-import { HGFeatureToggles, isFeatureToggleEnabled } from '../../shared/utils/utils.feature-toggles';
 
 type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList | Settings;
 
@@ -40,7 +41,54 @@ interface SideBarState extends SceneObjectState {
   sectionValues: Map<string, string[]>;
 }
 
-const metricFiltersVariables = ['filters-rule', 'filters-prefix', 'filters-suffix', 'filters-recent'] as const;
+function getTranslatedSectionInfo(key: string): { title: string; description: string } {
+  const sectionMap: Record<string, { title: string; description: string }> = {
+    'filters-rule': {
+      title: t('sidebar.section.rules-filters', 'Rules filters'),
+      description: t('sidebar.section.rules-filters-description', 'Filter metrics and recording rules'),
+    },
+    'filters-prefix': {
+      title: t('sidebar.section.prefix-filters', 'Prefix filters'),
+      description: t(
+        'sidebar.section.prefix-filters-description',
+        'Filter metrics based on their name prefix (Prometheus namespace)'
+      ),
+    },
+    'filters-suffix': {
+      title: t('sidebar.section.suffix-filters', 'Suffix filters'),
+      description: t('sidebar.section.suffix-filters-description', 'Filter metrics based on their name suffix'),
+    },
+    'filters-recent': {
+      title: t('sidebar.section.recent-metrics', 'Recent metrics filters'),
+      description: t(
+        'sidebar.section.recent-metrics-description',
+        'Filter metrics based on when they started being ingested'
+      ),
+    },
+    'groupby-labels': {
+      title: t('sidebar.section.group-by-labels', 'Group by labels'),
+      description: t('sidebar.section.group-by-labels-description', 'Group metrics by their label values'),
+    },
+    bookmarks: {
+      title: t('sidebar.section.bookmarks', 'Bookmarks'),
+      description: t('sidebar.section.bookmarks-description', 'Access your saved metrics for quick reference'),
+    },
+    settings: {
+      title: t('sidebar.section.settings', 'Settings'),
+      description: t('sidebar.section.settings-description', 'Settings'),
+    },
+  };
+
+  return sectionMap[key] || { title: key, description: '' };
+}
+
+export const metricFilters = {
+  rule: 'filters-rule',
+  prefix: 'filters-prefix',
+  suffix: 'filters-suffix',
+  recent: 'filters-recent',
+} as const;
+const metricFiltersVariables = getObjectValues(metricFilters);
 type MetricFiltersVariable = (typeof metricFiltersVariables)[number];
 
 export class SideBar extends SceneObjectBase<SideBarState> {
@@ -54,8 +102,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new MetricsFilterSection({
           key: 'filters-rule',
           type: 'categories',
-          title: 'Rules filters',
-          description: 'Filter metrics and recording rules',
+          title: t('sidebar.section.rules-filters', 'Rules filters'),
+          description: t('sidebar.section.rules-filters-description', 'Filter metrics and recording rules'),
           icon: 'rules',
           computeGroups: computeRulesGroups,
           showHideEmpty: false,
@@ -65,8 +113,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new MetricsFilterSection({
           key: 'filters-prefix',
           type: 'prefixes',
-          title: 'Prefix filters',
-          description: 'Filter metrics based on their name prefix (Prometheus namespace)',
+          title: t('sidebar.section.prefix-filters', 'Prefix filters'),
+          description: t(
+            'sidebar.section.prefix-filters-description',
+            'Filter metrics based on their name prefix (Prometheus namespace)'
+          ),
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
           active: Boolean(sectionValues.get('filters-prefix')?.length),
@@ -74,36 +125,39 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new MetricsFilterSection({
           key: 'filters-suffix',
           type: 'suffixes',
-          title: 'Suffix filters',
-          description: 'Filter metrics based on their name suffix',
+          title: t('sidebar.section.suffix-filters', 'Suffix filters'),
+          description: t('sidebar.section.suffix-filters-description', 'Filter metrics based on their name suffix'),
           icon: '_Z',
           computeGroups: computeMetricSuffixGroups,
           active: Boolean(sectionValues.get('filters-suffix')?.length),
         }),
         new RecentMetricsSection({
           key: 'filters-recent',
-          title: 'Recent metrics filters',
-          description: 'Filter metrics based on when they started being ingested',
+          title: t('sidebar.section.recent-metrics', 'Recent metrics filters'),
+          description: t(
+            'sidebar.section.recent-metrics-description',
+            'Filter metrics based on when they started being ingested'
+          ),
           icon: 'clock-nine',
           active: Boolean(sectionValues.get('filters-recent')?.length),
         }),
         new LabelsBrowser({
           key: 'groupby-labels',
           variableName: VAR_WINGMAN_GROUP_BY,
-          title: 'Group by labels',
-          description: 'Group metrics by their label values',
+          title: t('sidebar.section.group-by-labels', 'Group by labels'),
+          description: t('sidebar.section.group-by-labels-description', 'Group metrics by their label values'),
           icon: 'groups',
         }),
         new BookmarksList({
           key: 'bookmarks',
-          title: 'Bookmarks',
-          description: 'Access your saved metrics for quick reference',
+          title: t('sidebar.section.bookmarks', 'Bookmarks'),
+          description: t('sidebar.section.bookmarks-description', 'Access your saved metrics for quick reference'),
           icon: 'star',
         }),
         new Settings({
           key: 'settings',
-          title: 'Settings',
-          description: 'Settings',
+          title: t('sidebar.section.settings', 'Settings'),
+          description: t('sidebar.section.settings-description', 'Settings'),
           icon: 'cog',
           disabled: true,
         }),
@@ -111,10 +165,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       sectionValues,
       ...state,
     });
-
-    // FIXME: rule values are regexes, we do this only to disable adding the values to the button tooltip
-    // we need to provide the corresponding label instead
-    sectionValues.set('filters-rule', []);
 
     this.addActivationHandler(this.onActivate.bind(this));
   }
@@ -131,9 +181,23 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     });
 
     // Open the sidebar to the most recently selected section if the "Default Open Sidebar" experiment is enabled
-    if (!this.state.visibleSection?.state.key && isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)) {
-      this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+    if (!this.state.visibleSection?.state.key) {
+      evaluateFeatureFlag('drilldown.metrics.default_open_sidebar').then((flagValue) => {
+        if (flagValue === 'treatment' && !this.state.visibleSection?.state.key) {
+          this.setActiveSection(userStorage.getItem(PREF_KEYS.SIDEBAR_SECTION) || 'filters-prefix');
+        }
+      });
     }
+
+    // Enable hierarchical prefix filtering if the experiment flag is set to treatment
+    evaluateFeatureFlag('drilldown.metrics.hierarchical_prefix_filtering').then((flagValue) => {
+      if (flagValue === 'treatment') {
+        const prefixSection = this.state.sections.find((s) => s.state.key === 'filters-prefix');
+        if (prefixSection instanceof MetricsFilterSection) {
+          prefixSection.setState({ hierarchical: true });
+        }
+      }
+    });
 
     return () => {
       cleanupOtherMetricsVar();
@@ -147,10 +211,10 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     }
 
     const varToTextMap: Record<MetricFiltersVariable, string> = {
-      'filters-rule': 'rule group',
-      'filters-prefix': 'prefix',
-      'filters-suffix': 'suffix',
-      'filters-recent': 'recent',
+      'filters-rule': t('sidebar.filter-type.rule-group', 'rule group'),
+      'filters-prefix': t('sidebar.filter-type.prefix', 'prefix'),
+      'filters-suffix': t('sidebar.filter-type.suffix', 'suffix'),
+      'filters-recent': t('sidebar.filter-type.recent', 'recent'),
     };
 
     const newFilters = Array.from(sectionValues.entries()).reduce<Array<AdHocFilterWithLabels<{}>>>(
@@ -216,7 +280,9 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const sectionValues = new Map();
 
     for (const filterKey of metricFiltersVariables) {
-      const filterValueFromUrl = urlSearchParams.get(filterKey);
+      // Check for both namespaced key (for embedded mode) and raw key (for regular mode)
+      const namespacedKey = `${embeddedTrailNamespace}-${filterKey}`;
+      const filterValueFromUrl = urlSearchParams.get(namespacedKey) || urlSearchParams.get(filterKey);
       sectionValues.set(filterKey, filterValueFromUrl ? filterValueFromUrl.split(',').map((v) => v.trim()) : []);
     }
 
@@ -269,63 +335,70 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
     return (
       <div className={styles.container}>
-        <div className={styles.buttonsBar} data-testid="sidebar-buttons">
-          {sections.map((section) => {
-            const { key, title, icon: iconOrText, disabled, active } = section.state;
-            const visible = visibleSection?.state.key === key;
-            let isActive;
-            let tooltip;
+        <Stack direction="row" height="100%" gap={0}>
+          <div className={styles.buttonsBar} data-testid="sidebar-buttons">
+            <Stack direction="column" alignItems="center" gap={0}>
+              {sections.map((section) => {
+                const { key, icon: iconOrText, disabled, active } = section.state;
+                const visible = visibleSection?.state.key === key;
+                const translatedInfo = getTranslatedSectionInfo(key);
+                let isActive;
+                let tooltip;
 
-            if (key === 'groupby-labels') {
-              isActive = Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE);
-              tooltip = `${title}: ${labelsVariableValue}`;
-            } else {
-              isActive = active;
-              tooltip = sectionValues.get(key)?.length ? `${title}: ${sectionValues.get(key)?.join(', ')}` : title;
-            }
+                if (key === 'groupby-labels') {
+                  isActive = Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE);
+                  tooltip = `${translatedInfo.title}: ${labelsVariableValue}`;
+                } else {
+                  isActive = active;
+                  tooltip = sectionValues.get(key)?.length
+                    ? `${translatedInfo.title}: ${sectionValues.get(key)?.join(', ')}`
+                    : translatedInfo.title;
+                }
 
-            return (
-              <div
-                key={key}
-                className={cx(
-                  styles.buttonContainer,
-                  visible && 'visible',
-                  isActive && 'active',
-                  disabled && 'disabled'
-                )}
-              >
-                <SideBarButton
-                  key={key}
-                  ariaLabel={title}
-                  disabled={disabled}
-                  visible={visible}
-                  active={isActive}
-                  tooltip={tooltip}
-                  onClick={() => model.setActiveSection(key)}
-                  iconOrText={iconOrText}
-                />
-              </div>
-            );
-          })}
-        </div>
-        {visibleSection && (
-          <div className={styles.content} data-testid="sidebar-content">
-            <IconButton
-              className={styles.closeButton}
-              name="times"
-              aria-label="Close"
-              tooltip="Close"
-              tooltipPlacement="top"
-              onClick={() => model.setActiveSection('')}
-            />
-            {/* TODO: find a better way */}
-            {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
-            {visibleSection instanceof RecentMetricsSection && <visibleSection.Component model={visibleSection} />}
-            {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
-            {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}
-            {visibleSection instanceof Settings && <visibleSection.Component model={visibleSection} />}
+                return (
+                  <div
+                    key={key}
+                    className={cx(
+                      styles.buttonContainer,
+                      visible && 'visible',
+                      isActive && 'active',
+                      disabled && 'disabled'
+                    )}
+                  >
+                    <SideBarButton
+                      key={key}
+                      ariaLabel={translatedInfo.title}
+                      disabled={disabled}
+                      visible={visible}
+                      active={isActive}
+                      tooltip={tooltip}
+                      onClick={() => model.setActiveSection(key)}
+                      iconOrText={iconOrText}
+                    />
+                  </div>
+                );
+              })}
+            </Stack>
           </div>
-        )}
+          {visibleSection && (
+            <div className={styles.content} data-testid="sidebar-content">
+              <IconButton
+                className={styles.closeButton}
+                name="times"
+                aria-label={t('sidebar.close-aria-label', 'Close')}
+                tooltip={t('sidebar.close-tooltip', 'Close')}
+                tooltipPlacement="top"
+                onClick={() => model.setActiveSection('')}
+              />
+              {/* TODO: find a better way */}
+              {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof RecentMetricsSection && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof Settings && <visibleSection.Component model={visibleSection} />}
+            </div>
+          )}
+        </Stack>
       </div>
     );
   };
@@ -335,25 +408,14 @@ function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
       position: 'relative',
-      display: 'flex',
-      flexDirection: 'row',
       height: '100%',
       overflow: 'hidden',
     }),
     buttonsBar: css({
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 0,
       width: '42px',
-      padding: 0,
-      margin: 0,
-      boxSizing: 'border-box',
       border: `1px solid ${theme.colors.border.weak}`,
       borderRadius: theme.shape.radius.default,
       backgroundColor: theme.colors.background.primary,
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
       position: 'relative',
     }),
     buttonContainer: css({
@@ -405,7 +467,6 @@ function getStyles(theme: GrafanaTheme2) {
       position: 'absolute',
       top: theme.spacing(1.5),
       right: theme.spacing(1),
-      margin: 0,
     }),
   };
 }

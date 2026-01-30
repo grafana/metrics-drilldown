@@ -33,6 +33,7 @@ export function buildQueryExpression(options: Options): string {
   }));
 
   if (addIgnoreUsageFilter) {
+    // eslint-disable-next-line @grafana/i18n/no-untranslated-strings -- This is a PromQL label name, not user-facing text
     defaultSelectors.push({ label: '__ignore_usage__', operator: MatchingOperator.equal, value: '' });
   }
 
@@ -41,6 +42,7 @@ export function buildQueryExpression(options: Options): string {
     // hack to have the UTF-8 metric name in braces alongside labels
     // but without extra quotes associated with an empty label value
     defaultSelectors.push({ label: utf8Support(metric.name), operator: MatchingOperator.equal, value: '__REMOVE__' });
+    // Because we've added the metric name as a label matcher, we set the metric name to an empty string for the Expression below
   }
 
   // hack for Scenes to interpolate the VAR_FILTERS variable
@@ -49,7 +51,7 @@ export function buildQueryExpression(options: Options): string {
   defaultSelectors.push({ label: `\${${VAR_FILTERS}:raw}`, operator: MatchingOperator.equal, value: '__REMOVE__' });
 
   const expression = new Expression({
-    metric: metric.name,
+    metric: isUtf8Metric ? '' : metric.name,
     values: {},
     defaultOperator: MatchingOperator.equal,
     defaultSelectors,

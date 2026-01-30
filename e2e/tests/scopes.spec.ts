@@ -6,7 +6,7 @@ import { expect, test } from '../fixtures';
 test.describe('Scopes', () => {
   // eslint-disable-next-line playwright/no-skipped-test
   test.skip(
-    getGrafanaVersion()?.startsWith('11') ?? true,
+    getGrafanaVersion('major')?.startsWith('11') ?? true,
     'Scopes are not supported in Grafana v11.x, skipping the test suite.'
   );
 
@@ -16,7 +16,7 @@ test.describe('Scopes', () => {
   });
 
   // eslint-disable-next-line playwright/expect-expect
-  test('Scopes filters are applied', async ({ metricsReducerView, expectScreenshotInCurrentGrafanaVersion }) => {
+  test('Scopes filters are applied', async ({ metricsReducerView }) => {
     const testScope: Scope = {
       metadata: {
         name: 'test-scope',
@@ -50,10 +50,5 @@ test.describe('Scopes', () => {
     await metricsReducerView.appControls.assertAdHocFilter('method', '=', 'GET');
 
     await metricsReducerView.assertMetricsList();
-
-    await expectScreenshotInCurrentGrafanaVersion(
-      metricsReducerView.getMetricsList(),
-      'metric-list-scopes-filters-applied.png'
-    );
   });
 });

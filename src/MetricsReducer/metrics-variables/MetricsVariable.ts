@@ -1,4 +1,5 @@
 import { VariableHide, VariableRefresh, VariableSort } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   AdHocFiltersVariable,
   DataSourceVariable,
@@ -32,7 +33,7 @@ export class MetricsVariable extends QueryVariable {
     super({
       key: key || VAR_METRICS_VARIABLE,
       name: name || VAR_METRICS_VARIABLE,
-      label: 'Metrics',
+      label: t('metrics-variable.label', 'Metrics'),
       datasource: trailDS,
       query: '',
       refresh: VariableRefresh.never,

@@ -86,16 +86,23 @@ export class RelatedLogsOrchestrator {
   }
 
   /**
-   * Find all available datasources and check them for logs.
-   * This is used when filters change to ensure we're checking all possible datasources.
+   * Find Loki datasources and check them for logs.
+   * Limits checking to the first 5 datasources to avoid performance issues.
+   *
+   * Health checks are performed to avoid querying improperly configured datasources,
+   * which can cause timeouts and error messages.
    */
   public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
     const allLokiDatasources = await this._dataSourceFetcher.getHealthyDataSources('loki');
 
-    // Check all datasources for logs
-    if (allLokiDatasources.length > 0) {
-      this.checkLogsInDataSources(allLokiDatasources);
+    // Limit to first five datasources to avoid performance issues
+    // Instances with more than five Loki datasources should use Logs Drilldown or Explore to find logs of interest
+    const datasourcesToCheck = allLokiDatasources.slice(0, 5);
+
+    // Check datasources for logs
+    if (datasourcesToCheck.length > 0) {
+      this.checkLogsInDataSources(datasourcesToCheck);
     } else {
       // No datasources available
       this.lokiDataSources = [];
@@ -149,13 +156,9 @@ export class RelatedLogsOrchestrator {
     datasources.forEach((datasource) => {
       const queryRunner = new SceneQueryRunner({
         datasource: { uid: datasource.uid },
-        queries: [],
-        key: `related_logs_check_${datasource.uid}`,
-      });
-
-      // Build and set queries
-      queryRunner.setState({
         queries: this.getLokiQueries(datasource.uid),
+        key: `related_logs_check_${datasource.uid}`,
+        $timeRange: this._metricScene.state.$timeRange,
       });
 
       // Subscribe to results

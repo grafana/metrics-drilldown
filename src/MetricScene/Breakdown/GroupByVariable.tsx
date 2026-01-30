@@ -1,4 +1,6 @@
 import { css } from '@emotion/css';
+import { BusEventWithPayload } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { QueryVariable, sceneGraph, type MultiValueVariable, type SceneComponentProps } from '@grafana/scenes';
 import { Field, useStyles2 } from '@grafana/ui';
 import React, { useCallback } from 'react';
@@ -11,11 +13,19 @@ import { GroupBySelector, type GroupByOptions } from './GroupBySelector/GroupByS
 
 const ALL_VARIABLE_VALUE = '$__all';
 
+/**
+ * Event emitted when GroupByVariable options are loaded or updated.
+ * This allows external behaviors to react to option changes.
+ */
+export class GroupByOptionsLoadedEvent extends BusEventWithPayload<GroupByVariable> {
+  public static readonly type = 'groupby-options-loaded';
+}
+
 export class GroupByVariable extends QueryVariable {
   constructor() {
     super({
       name: VAR_GROUP_BY,
-      label: 'Group by',
+      label: t('breakdown.group-by.label', 'Group by'),
       datasource: trailDS,
       includeAll: true,
       defaultToAll: true,
@@ -30,6 +40,12 @@ export class GroupByVariable extends QueryVariable {
   private onActivate() {
     this.filterOptions();
 
+    // Emit event on activation if options are already loaded (handles edge case where variable 
+    // is reactivated with cached options or activates after behavior subscribes)
+    if (this.state.options.length > 0) {
+      this.publishEvent(new GroupByOptionsLoadedEvent(this), true);
+    }
+
     this.subscribeToState((newState, prevState) => {
       if (newState.value && newState.value !== prevState.value) {
         reportExploreMetrics('groupby_label_changed', { label: String(newState.value) });
@@ -37,6 +53,11 @@ export class GroupByVariable extends QueryVariable {
 
       if (newState.options !== prevState.options && newState.options.find((o) => o.value === 'le')) {
         this.filterOptions(newState.options);
+      }
+      
+      // Emit event when options are loaded or updated
+      if (newState.options !== prevState.options && newState.options.length > 0) {
+        this.publishEvent(new GroupByOptionsLoadedEvent(this), true);
       }
     });
 
@@ -68,7 +89,7 @@ export class GroupByVariable extends QueryVariable {
     );
 
     return (
-      <Field label="By label" data-testid="breakdown-label-selector" className={styles.field}>
+      <Field label={t('breakdown.by-label', 'By label')} data-testid="breakdown-label-selector" className={styles.field}>
         <GroupBySelector
           options={options as GroupByOptions}
           value={value as string}

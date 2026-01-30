@@ -6,7 +6,7 @@ name: Publish to plugin catalog
 # 3. Create a separate version bump PR:
 #    - git switch -c bump-version-vX.Y.Z
 #    - update CHANGELOG.md with a link to the forthcoming tag's release notes
-#    - npm version <type>  # this creates the commit and tag (see https://docs.npmjs.com/cli/commands/npm-version for <type> options, e.g. patch, minor, major, prerelease, etc.)
+#    - pnpm version <type>  # this creates the commit and tag (see https://pnpm.io/cli/version for <type> options, e.g. patch, minor, major, prerelease, etc.)
 #    - git push origin bump-version-vX.Y.Z --follow-tags
 # 4. Get version bump PR approved
 # 5. Merge feature PR first
@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       skip-grafana-dev-image:
-        description: 'Bypass grafana-dev image for e2e tests'
+        description: "Bypass grafana-dev image for e2e tests"
         required: false
         type: boolean
         default: false
@@ -26,9 +26,9 @@ on:
       - main
 
 permissions:
-  contents: 'write'
-  id-token: 'write'
-  attestations: 'write'
+  contents: "write"
+  id-token: "write"
+  attestations: "write"
 
 jobs:
   CD:
@@ -37,12 +37,12 @@ jobs:
     if: |
       github.repository == 'grafana/metrics-drilldown' &&
       (
-        (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'npm version')) ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'pnpm version')) ||
         (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')))
       )
-    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@main
+    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v4.3.0
     with:
-      environment: 'prod' # publishing to 'prod' will also deploy to 'ops' and 'dev'
+      environment: "prod" # publishing to 'prod' will also deploy to 'ops' and 'dev'
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
       run-playwright: false
       run-playwright-docker: true
@@ -51,4 +51,4 @@ jobs:
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: docker-compose.yaml
       playwright-grafana-url: http://localhost:3001
-      argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
+      argo-workflow-slack-channel: "#proj-metricsdrilldown-cd"

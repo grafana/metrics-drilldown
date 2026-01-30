@@ -1,9 +1,9 @@
+import { css } from '@emotion/css';
 import { LoadingState } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   CustomVariable,
   PanelBuilders,
-  SceneFlexItem,
-  SceneFlexLayout,
   sceneGraph,
   SceneObjectBase,
   SceneQueryRunner,
@@ -17,15 +17,18 @@ import {
   type SceneObjectState,
   type SceneVariable,
 } from '@grafana/scenes';
-import { Spinner, Stack } from '@grafana/ui';
+import { Spinner, Stack, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { NoRelatedLogs } from './NoRelatedLogsFound';
 import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './OpenInLogsDrilldownButton';
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
+import { actionViews } from '../../MetricScene/MetricActionBar';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared/shared';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
+import { DS_HEALTH_CHECK_TIMEOUT_S } from '../../shared/utils/utils.datasource';
 import { isCustomVariable } from '../../shared/utils/utils.variables';
+import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;
@@ -34,11 +37,10 @@ interface RelatedLogsSceneProps {
 interface RelatedLogsSceneState extends SceneObjectState, RelatedLogsSceneProps {
   loading: boolean;
   controls: SceneObject[];
-  body: SceneFlexLayout;
+  body: SceneObject;
   logsDrilldownLinkContext: LogsDrilldownLinkContext;
 }
 
-const LOGS_PANEL_CONTAINER_KEY = 'related_logs/logs_panel_container';
 const RELATED_LOGS_QUERY_KEY = 'related_logs/logs_query';
 
 export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
@@ -48,16 +50,8 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     super({
       loading: false,
       controls: [],
-      body: new SceneFlexLayout({
-        direction: 'column',
-        height: '100%',
-        minHeight: 500,
-        children: [
-          new SceneFlexItem({
-            key: LOGS_PANEL_CONTAINER_KEY,
-            body: undefined,
-          }),
-        ],
+      body: new SceneReactObject({
+        component: () => <Spinner />,
       }),
       orchestrator: props.orchestrator,
       logsDrilldownLinkContext: {
@@ -82,14 +76,14 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     } else {
       this.setupLogsPanel();
     }
+
+    // Signal when queries complete
+    signalOnQueryComplete(this, actionViews.relatedLogs);
   }
 
   private showNoLogsFound() {
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
-    logsPanelContainer.setState({
-      body: new SceneReactObject({ component: NoRelatedLogs }),
-    });
     this.setState({
+      body: new SceneReactObject({ component: NoRelatedLogs }),
       controls: undefined,
     });
     this.state.orchestrator.relatedLogsCount = 0;
@@ -134,8 +128,7 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     }
 
     // Set up UI for logs panel
-    const logsPanelContainer = sceneGraph.findByKeyAndType(this, LOGS_PANEL_CONTAINER_KEY, SceneFlexItem);
-    logsPanelContainer.setState({
+    this.setState({
       body: PanelBuilders.logs()
         .setTitle('Logs')
         .setOption('showLogContextToggle', true)
@@ -150,8 +143,13 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     // Set up variables for datasource selection
     const logsDataSourceVariable = new CustomVariable({
       name: VAR_LOGS_DATASOURCE,
-      label: 'Logs data source',
+      label: t('related-logs.datasource-label', 'Logs data source'),
       query: this.state.orchestrator.lokiDataSources.map((ds) => `${ds.name} : ${ds.uid}`).join(','),
+      description: t(
+        'related-logs.datasource-description',
+        'Some Loki data sources might be missing from the dropdown if they took longer than {{timeout}} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.',
+        { timeout: DS_HEALTH_CHECK_TIMEOUT_S }
+      ),
     });
     this.setState({
       $variables: new SceneVariableSet({ variables: [logsDataSourceVariable] }),
@@ -243,14 +241,15 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
 
   static readonly Component = ({ model }: SceneComponentProps<RelatedLogsScene>) => {
     const { controls, body, logsDrilldownLinkContext, loading } = model.useState();
+    const styles = useStyles2(getRelatedLogsSceneStyles);
 
     if (loading) {
       return <Spinner />;
     }
 
     return (
-      <Stack gap={1} direction={'column'} grow={1} height="100%">
-        <Stack gap={1} direction={'row'} justifyContent={'space-between'} alignItems={'start'}>
+      <Stack gap={1} direction="column" grow={1} height="100%">
+        <Stack gap={1} direction="row" justifyContent="space-between" alignItems="start">
           <Stack gap={1}>
             {controls?.map((control) => (
               <control.Component key={control.state.key} model={control} />
@@ -258,8 +257,29 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
           </Stack>
           <OpenInLogsDrilldownButton context={logsDrilldownLinkContext} />
         </Stack>
-        <body.Component model={body} />
+        <div className={styles.bodyContainer}>
+          <div className={styles.bodyContent}>
+            <body.Component model={body} />
+          </div>
+        </div>
       </Stack>
     );
+  };
+}
+
+function getRelatedLogsSceneStyles() {
+  return {
+    bodyContainer: css({
+      flexGrow: 1,
+      minHeight: 500,
+      position: 'relative',
+    }),
+    bodyContent: css({
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    }),
   };
 }

@@ -1,7 +1,8 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { utf8Support } from '@grafana/prometheus';
-import { config, useChromeHeaderHeight } from '@grafana/runtime';
+import { config, useChromeHeaderHeight, usePluginComponent } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
   SceneControlsSpacer,
@@ -24,8 +25,8 @@ import {
   type SceneObjectWithUrlSync,
   type SceneVariable,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
-import React, { useEffect } from 'react';
+import { Modal, Stack, useStyles2 } from '@grafana/ui';
+import React, { createElement, useEffect } from 'react';
 
 import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
@@ -37,27 +38,38 @@ import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/Metr
 import { AdHocFiltersForMetricsVariable } from 'MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
+import {
+  ADD_TO_DASHBOARD_COMPONENT_ID,
+  ADD_TO_DASHBOARD_LABEL,
+} from 'shared/GmdVizPanel/components/addToDashboard/constants';
+import {
+  EventOpenAddToDashboard,
+  type AddToDashboardFormProps,
+} from 'shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
+import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
-import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
-import { limitAdhocProviders } from '../shared/utils/utils';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
+import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
 import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
+import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
 import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
   embedded?: boolean;
+  embeddedMini?: boolean; // Mini embedded mode for tooltip preview navigation
   controls: SceneObject[];
   createdAt: number;
 
@@ -75,6 +87,11 @@ export interface DataTrailState extends SceneObjectState {
   urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
 
   drawer: SceneDrawer;
+
+  // Add to dashboard feature
+  isAddToDashboardAvailable: boolean;
+  isAddToDashboardModalOpen: boolean;
+  addToDashboardPanelData?: PanelDataRequestPayload;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -99,6 +116,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
+    if (this.state.embedded) {
+      // In embedded mode, we want to avoid clearing a metric from the trail state
+      // when the trail has been freshly instantiated and the URL doesn't yet contain the metric.
+      return;
+    }
+
     this.updateStateForNewMetric((values.metric as string) || undefined);
   }
 
@@ -116,6 +139,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       dashboardMetrics: {},
       alertingMetrics: {},
       drawer: new SceneDrawer({}),
+      isAddToDashboardAvailable: false,
+      isAddToDashboardModalOpen: false,
       ...state,
     });
 
@@ -136,6 +161,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     this.updateStateForNewMetric(this.state.metric);
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
+    this.subscribeToEvent(EventOpenAddToDashboard, (event) => {
+      this.openAddToDashboardModal(event.payload.panelData);
+    });
 
     this.initFilters();
     this.initConfigPrometheusFunction();
@@ -209,7 +237,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       reportExploreMetrics('configure_panel_opened', { metricType: metric.type });
 
       this.state.drawer.open({
-        title: 'Configure the Prometheus function',
+        title: t('data-trail.configure-drawer.title', 'Configure the Prometheus function'),
         subTitle: `${metric.name} (${metric.type})`,
         body: new ConfigurePanelForm({ metric }),
       });
@@ -255,6 +283,22 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     if (metric) {
       addRecentMetric(metric);
+
+      // Track metric selection with hierarchical filter context
+      const urlParams = new URLSearchParams(window.location.search);
+      const prefixFilters =
+        urlParams
+          .get('filters-prefix')
+          ?.split(',')
+          .filter((v) => v) || [];
+      const hierarchicalFilters = prefixFilters.filter((f) => f.includes(':'));
+
+      reportExploreMetrics('metric_selected', {
+        from: 'metric_list',
+        searchTermCount: null,
+        has_hierarchical_filter: hierarchicalFilters.length > 0,
+        hierarchical_filter_count: hierarchicalFilters.length,
+      });
     } else {
       // make sure we display all the proper metrics when coming back from the MetricScene (see RelatedMetricsScene.tsx, side bar sections in SideBar.tsx and RecentMetricsSection.tsx)
       sceneGraph.findByKeyAndType(this, VAR_METRICS_VARIABLE, MetricsVariable).fetchAllOrRecentMetrics();
@@ -284,6 +328,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     });
   }
 
+  // we use the class field syntax with an arrow function to bind this properly so its usage is easier (see the component below)
+  private getPrometheusBuildInfo = async () => {
+    return this.datasourceHelper.getPrometheusBuildInfo();
+  };
+
   /**
    * Assuming that the change in filter was already reported with a cause other than `'adhoc_filter'`,
    * this will modify the adhoc filter variable and prevent the automatic reporting which would
@@ -306,20 +355,49 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
 
-  public async getPrometheusBuildInfo() {
-    return this.datasourceHelper.getPrometheusBuildInfo();
-  }
-
   public async fetchRecentMetrics({ interval, extraFilter }: { interval: string; extraFilter?: string }) {
     return this.datasourceHelper.fetchRecentMetrics({ interval, extraFilter });
   }
 
+  public openAddToDashboardModal(panelData: PanelDataRequestPayload) {
+    reportExploreMetrics('add_to_dashboard_modal_opened', {});
+    this.setState({
+      isAddToDashboardModalOpen: true,
+      addToDashboardPanelData: panelData,
+    });
+  }
+
+  public closeAddToDashboardModal = () => {
+    this.setState({
+      isAddToDashboardModalOpen: false,
+      addToDashboardPanelData: undefined,
+    });
+  };
+
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, embedded, drawer } = model.useState();
+    const { controls, topScene, embedded, embeddedMini, drawer, isAddToDashboardModalOpen, addToDashboardPanelData } =
+      model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
     const styles = useStyles2(getStyles, headerHeight, model);
+
+    const { component: AddToDashboardComponent, isLoading: isLoadingAddToDashboard } =
+      usePluginComponent(ADD_TO_DASHBOARD_COMPONENT_ID);
+
+    // Update availability flag when component loads
+    useEffect(() => {
+      const isAvailable = !isLoadingAddToDashboard && Boolean(AddToDashboardComponent);
+
+      // Log warning if component failed to load
+      if (!isLoadingAddToDashboard && !AddToDashboardComponent) {
+        logger.warn(`Failed to load add to dashboard component: ${ADD_TO_DASHBOARD_COMPONENT_ID}`);
+      }
+
+      if (model.state.isAddToDashboardAvailable !== isAvailable) {
+        model.setState({ isAddToDashboardAvailable: isAvailable });
+      }
+    }, [isLoadingAddToDashboard, AddToDashboardComponent, model]);
 
     // Set CSS custom property for app-controls height in embedded mode
     useEffect(() => {
@@ -346,29 +424,58 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return (
       <>
         <div className={styles.container}>
-          {controls && (
-            <div className={styles.controls} data-testid="app-controls">
-              <GiveFeedbackButton />
-              {controls.map((control) => (
-                <control.Component key={control.state.key} model={control} />
-              ))}
-              <div className={styles.settingsInfo}>
-                <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
+          <Stack direction="column" gap={1} grow={1}>
+            {controls && !embeddedMini && (
+              <div className={styles.controls} data-testid="app-controls">
+                <Stack direction="row" gap={1} alignItems="flex-end" wrap="wrap">
+                  {!embedded && <GiveFeedbackButton />}
+                  {controls.map((control) => (
+                    <control.Component key={control.state.key} model={control} />
+                  ))}
+                  <Stack direction="row" gap={0.5}>
+                    <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
+                  </Stack>
+                </Stack>
               </div>
-            </div>
-          )}
-          {topScene && (
-            <UrlSyncContextProvider
-              scene={topScene}
-              createBrowserHistorySteps={true}
-              updateUrlOnInit={true}
-              namespace={model.state.urlNamespace}
-            >
-              <div className={styles.body}>{topScene && <topScene.Component model={topScene} />}</div>
-            </UrlSyncContextProvider>
-          )}
+            )}
+            {topScene && (
+              embeddedMini ? (
+                // Skip URL sync in embeddedMini mode to avoid conflicts with host app
+                <div className={styles.body}>
+                  <topScene.Component model={topScene} />
+                </div>
+              ) : (
+                <UrlSyncContextProvider
+                  scene={topScene}
+                  createBrowserHistorySteps={true}
+                  updateUrlOnInit={true}
+                  namespace={model.state.urlNamespace}
+                >
+                  <div className={styles.body}>
+                    <Stack direction="column" grow={1}>
+                      <topScene.Component model={topScene} />
+                    </Stack>
+                  </div>
+                </UrlSyncContextProvider>
+              )
+            )}
+          </Stack>
         </div>
         <drawer.Component model={drawer} />
+        {isAddToDashboardModalOpen && AddToDashboardComponent && addToDashboardPanelData && (
+          <Modal title={ADD_TO_DASHBOARD_LABEL} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
+            {createElement(AddToDashboardComponent as React.ComponentType<AddToDashboardFormProps>, {
+              onClose: model.closeAddToDashboardModal,
+              buildPanel: () => {
+                const expr = String(addToDashboardPanelData?.panel?.targets?.[0]?.expr) ?? '';
+                reportExploreMetrics('add_to_dashboard_build_panel', { expr });
+                return addToDashboardPanelData.panel;
+              },
+              timeRange: addToDashboardPanelData.range,
+              options: { useAbsolutePath: true },
+            })}
+          </Modal>
+        )}
       </>
     );
   };
@@ -382,8 +489,8 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
     new AdHocFiltersVariable({
       key: VAR_FILTERS,
       name: VAR_FILTERS,
-      label: 'Filters',
-      addFilterButtonText: 'Add label',
+      label: t('data-trail.filters.label', 'Filters'),
+      addFilterButtonText: t('data-trail.filters.add-label', 'Add label'),
       datasource: trailDS,
       hide: VariableHide.dontHide,
       layout: 'combobox',
@@ -421,34 +528,21 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
   return {
     container: css({
       flexGrow: 1,
-      display: 'flex',
-      gap: theme.spacing(1),
-      flexDirection: 'column',
       padding: theme.spacing(1, 2),
       position: 'relative',
       background,
     }),
     body: css({
       flexGrow: 1,
-      display: 'flex',
-      flexDirection: 'column',
       minHeight: 0, // Allow body to shrink below its content size
     }),
     controls: css({
-      display: 'flex',
-      gap: theme.spacing(1),
       padding: theme.spacing(1, 0),
-      alignItems: 'flex-end',
-      flexWrap: 'wrap',
       position: 'sticky',
       background,
       zIndex: theme.zIndex.navbarFixed,
       top: headerHeight,
       borderBottom: `1px solid ${theme.colors.border.weak}`,
-    }),
-    settingsInfo: css({
-      display: 'flex',
-      gap: theme.spacing(0.5),
     }),
   };
 }

@@ -17,7 +17,8 @@ import React from 'react';
 
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
-import { actionViews, actionViewsDefinitions, type ActionViewType } from './MetricActionBar';
+import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
+import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
@@ -40,6 +41,12 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.relatedLogsOrchestrator.handleFiltersChange();
     },
   });
+  // Keeps track of which background tasks have run to avoid running them multiple times
+  private backgroundTaskHasRun: Record<ActionViewType, boolean> = {
+    [actionViews.breakdown]: false,
+    [actionViews.related]: false,
+    [actionViews.relatedLogs]: false,
+  };
 
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
@@ -53,10 +60,9 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   private _onActivate() {
     if (this.state.actionView === undefined) {
-      this.setActionView(actionViews.breakdown);
+      this.setActionView(defaultActionView);
     }
 
-    this.relatedLogsOrchestrator.findAndCheckAllDatasources();
     this.relatedLogsOrchestrator.addRelatedLogsCountChangeHandler((count) => {
       this.setState({ relatedLogsCount: count });
     });
@@ -72,6 +78,19 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
         this.state.body.state.selectedTab?.publishEvent(event);
       });
     }
+
+    // Register handler to wait for active tab's data load completion
+    // This ensures the active tab has priority for data fetching
+    this.subscribeToEvent(EventActionViewDataLoadComplete, (event) => {
+      // Active tab has finished loading, safe to start background tasks like counting signals
+      const inactiveTabs = getActionViewsDefinitions().filter((v) => v.value !== event.payload.currentActionView);
+      inactiveTabs.forEach(({ backgroundTask, value: tabName }) => {
+        if (!this.backgroundTaskHasRun[tabName]) {
+          backgroundTask(this);
+          this.backgroundTaskHasRun[tabName] = true;
+        }
+      });
+    });
   }
 
   getUrlState() {
@@ -81,7 +100,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   updateFromUrl(values: SceneObjectUrlValues) {
     if (typeof values.actionView === 'string') {
       if (this.state.actionView !== values.actionView) {
-        const actionViewDef = actionViewsDefinitions.find((v) => v.value === values.actionView);
+        const actionViewDef = getActionViewsDefinitions().find((v) => v.value === values.actionView);
         if (actionViewDef) {
           this.setActionView(actionViewDef.value);
         }
@@ -93,7 +112,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   public setActionView(actionViewType: ActionViewType | null) {
     const { body } = this.state;
-    const actionViewDef = actionViewType ? actionViewsDefinitions.find((v) => v.value === actionViewType) : null;
+    const actionViewDef = actionViewType ? getActionViewsDefinitions().find((v) => v.value === actionViewType) : null;
 
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
       body.setState({ selectedTab: actionViewDef.getScene(this) });
@@ -102,6 +121,12 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       body.setState({ selectedTab: undefined });
       this.setState({ actionView: undefined });
     }
+  }
+
+  public getActionViewName(): string {
+    return this.state.actionView
+      ? getActionViewsDefinitions().find((v) => v.value === this.state.actionView)?.displayName ?? ''
+      : '';
   }
 
   static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {

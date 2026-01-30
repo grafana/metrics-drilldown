@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -12,6 +13,10 @@ import {
 import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
 import React, { useMemo, useState, type KeyboardEventHandler } from 'react';
 
+import {
+  computeMetricPrefixSecondLevel,
+  HIERARCHICAL_SEPARATOR,
+} from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
 import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
@@ -28,6 +33,7 @@ import {
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import {
   RULE_GROUP_LABELS,
+  RULE_REGEX_TO_LABEL,
   type RuleGroupLabel,
 } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/rule-group-labels';
 import { logger } from 'shared/logger/logger';
@@ -38,6 +44,7 @@ import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
 import { CheckBoxList } from './CheckBoxList';
 import { EventFiltersChanged } from './EventFiltersChanged';
+import { TreeCheckBoxList } from './TreeCheckBoxList';
 
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
@@ -49,6 +56,9 @@ export interface MetricsFilterSectionState extends SideBarSectionState {
   groups: Array<{ label: string; value: string; count: number }>;
   selectedGroups: Array<{ label: RuleGroupLabel; value: string }>; // we need labels for displaying tooltips in `SideBar.tsx`
   loading: boolean;
+  hierarchical: boolean;
+  expandedPrefixes: Set<string>;
+  computedSublevels: Map<string, Array<{ label: string; value: string; count: number }>>;
 }
 
 export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionState> {
@@ -85,7 +95,12 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     ) {
       stateUpdate.selectedGroups = (values[this.state.key] as string)
         .split(',')
-        .map((v) => ({ label: v as RuleGroupLabel, value: v })) as Array<{ label: RuleGroupLabel; value: string }>;
+        .map((v) => v.trim())
+        .filter((v) => v)
+        .map((v) => ({
+          label: this.parseLabel(v) as RuleGroupLabel,
+          value: v,
+        }));
     }
 
     this.setState(stateUpdate);
@@ -102,6 +117,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     showSearch,
     disabled,
     active,
+    hierarchical,
   }: {
     key: MetricsFilterSectionState['key'];
     type: MetricsFilterSectionState['type'];
@@ -113,6 +129,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     showSearch?: MetricsFilterSectionState['showSearch'];
     disabled?: MetricsFilterSectionState['disabled'];
     active?: MetricsFilterSectionState['active'];
+    hierarchical?: MetricsFilterSectionState['hierarchical'];
   }) {
     super({
       key,
@@ -128,6 +145,9 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       showSearch: showSearch ?? true,
       disabled: disabled ?? false,
       active: active ?? false,
+      hierarchical: hierarchical ?? false,
+      expandedPrefixes: new Set(),
+      computedSublevels: new Map(),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -143,12 +163,41 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.updateLists(metricsVariable.state.options as MetricOptions);
     this.updateCounts();
 
-    const { selectedGroups } = this.state;
+    const { selectedGroups, hierarchical } = this.state;
 
     this.setState({
       loading: filteredMetricsVariable.state.loading,
       active: selectedGroups.length > 0,
     });
+
+    // Auto-expand and compute Level 1 for any hierarchical selections from URL
+    if (hierarchical) {
+      const prefixesToExpand = new Set<string>();
+
+      selectedGroups.forEach((group) => {
+        if (group.value.includes(HIERARCHICAL_SEPARATOR)) {
+          const [prefix] = group.value.split(HIERARCHICAL_SEPARATOR);
+          prefixesToExpand.add(prefix);
+        }
+      });
+
+      if (prefixesToExpand.size > 0) {
+        const options = metricsVariable.state.options as MetricOptions;
+        const newComputedSublevels = new Map(this.state.computedSublevels);
+
+        prefixesToExpand.forEach((prefix) => {
+          if (!newComputedSublevels.has(prefix)) {
+            const sublevels = computeMetricPrefixSecondLevel(options, prefix);
+            newComputedSublevels.set(prefix, sublevels);
+          }
+        });
+
+        this.setState({
+          expandedPrefixes: prefixesToExpand,
+          computedSublevels: newComputedSublevels,
+        });
+      }
+    }
   }
 
   private updateLists(options: MetricOptions) {
@@ -196,6 +245,95 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       groups: newGroupsWithCount,
       loading: false,
     });
+
+    // Update sublevel counts if hierarchical mode
+    if (this.state.hierarchical) {
+      this.updateSublevelCounts(optionsForCounting);
+    }
+  }
+
+  /**
+   * Update metric counts for already-computed second-level substrings.
+   * Called when filters change to refresh counts without recomputing the entire tree.
+   * @param options Filtered metric options to count from
+   */
+  private updateSublevelCounts(options: MetricOptions) {
+    const { computedSublevels } = this.state;
+    const newComputedSublevels = new Map(computedSublevels);
+
+    // Recompute counts for already-computed sublevels
+    for (const [prefix, sublevels] of computedSublevels.entries()) {
+      const updatedSublevels = computeMetricPrefixSecondLevel(options, prefix);
+      const countMap = new Map(updatedSublevels.map((s) => [s.label, s.count]));
+
+      const updatedSublevelsList = sublevels.map((sublevel) => ({
+        ...sublevel,
+        count: countMap.get(sublevel.label) ?? 0,
+      }));
+
+      newComputedSublevels.set(prefix, updatedSublevelsList);
+    }
+
+    this.setState({ computedSublevels: newComputedSublevels });
+  }
+
+  /**
+   * Handle expanding/collapsing a prefix to show/hide its second-level substrings.
+   * Lazily computes sublevels on first expansion for performance.
+   * @param prefix The parent prefix to expand/collapse (e.g., "grafana")
+   */
+  private onExpandToggle = (prefix: string) => {
+    const { expandedPrefixes, computedSublevels } = this.state;
+    const newExpanded = new Set(expandedPrefixes);
+    let newComputedSublevels = computedSublevels;
+
+    if (newExpanded.has(prefix)) {
+      // Collapse
+      newExpanded.delete(prefix);
+    } else {
+      // Expand - compute Level 1 if not already computed
+      newExpanded.add(prefix);
+
+      if (!computedSublevels.has(prefix)) {
+        const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
+        const options = metricsVariable.state.options as MetricOptions;
+
+        const sublevels = computeMetricPrefixSecondLevel(options, prefix);
+        newComputedSublevels = new Map(computedSublevels);
+        newComputedSublevels.set(prefix, sublevels);
+      }
+
+      // Track hierarchical prefix expansion
+      reportExploreMetrics('sidebar_hierarchical_prefix_opened', { prefix });
+    }
+
+    // Single setState call with all changes
+    this.setState({
+      expandedPrefixes: newExpanded,
+      computedSublevels: newComputedSublevels,
+    });
+  };
+
+  /**
+   * Parse a filter value into a user-friendly label for display.
+   * Handles rule regex patterns, hierarchical values, and regular labels.
+   * @param value The filter value from URL or selection
+   * @returns Formatted label for display
+   */
+  private parseLabel(value: string): string {
+    // Check if it's a rule regex pattern first
+    if (value in RULE_REGEX_TO_LABEL) {
+      return RULE_REGEX_TO_LABEL[value];
+    }
+
+    // Handle hierarchical prefixes (e.g., "grafana::alert" -> "grafana > alert")
+    if (value.includes(HIERARCHICAL_SEPARATOR)) {
+      const [prefix, sublevel] = value.split(HIERARCHICAL_SEPARATOR);
+      return `${prefix} > ${sublevel}`;
+    }
+
+    // Return value as-is for regular labels
+    return value;
   }
 
   private onSelectionChange = (selectedGroups: MetricsFilterSectionState['selectedGroups']) => {
@@ -245,10 +383,23 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {
     const styles = useStyles2(getStyles);
-    const { groups, selectedGroups, loading, title, description, showHideEmpty, showSearch } = model.useState();
+    const {
+      groups,
+      selectedGroups,
+      loading,
+      title,
+      description,
+      showHideEmpty,
+      showSearch,
+      hierarchical,
+      expandedPrefixes,
+      computedSublevels,
+    } = model.useState();
 
     const [hideEmpty, setHideEmpty] = useState(false);
     const [searchValue, setSearchValue] = useState('');
+
+    const switchId = `hide-empty-switch-${model.state.key}`;
 
     const filteredGroups = useMemo(() => {
       const filters: Array<(item: { label: string; value: string; count: number }) => boolean> = [];
@@ -275,8 +426,10 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
         {showHideEmpty && (
           <div className={styles.switchContainer}>
-            <span className={styles.switchLabel}>Hide empty</span>
-            <Switch value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
+            <label className={styles.switchLabel} htmlFor={switchId}>
+              {t('sidebar.filter.hide-empty', 'Hide empty')}
+            </label>
+            <Switch id={switchId} value={hideEmpty} onChange={(e) => setHideEmpty(e.currentTarget.checked)} />
           </div>
         )}
 
@@ -284,19 +437,35 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
           <Input
             className={styles.searchInput}
             prefix={<Icon name="search" />}
-            placeholder="Search..."
+            placeholder={t('sidebar.filter.search-placeholder', 'Search...')}
             value={searchValue}
             onChange={(e) => setSearchValue(e.currentTarget.value)}
             onKeyDown={onKeyDown}
             suffix={
-              <IconButton name="times" variant="secondary" tooltip="Clear search" onClick={() => setSearchValue('')} />
+              <IconButton
+                name="times"
+                variant="secondary"
+                tooltip={t('sidebar.filter.clear-search-tooltip', 'Clear search')}
+                onClick={() => setSearchValue('')}
+              />
             }
           />
         )}
 
         {loading && <Spinner inline />}
 
-        {!loading && (
+        {!loading && hierarchical && (
+          <TreeCheckBoxList
+            groups={filteredGroups}
+            selectedGroups={selectedGroups}
+            expandedPrefixes={expandedPrefixes}
+            computedSublevels={computedSublevels}
+            onSelectionChange={model.onSelectionChange}
+            onExpandToggle={model.onExpandToggle}
+          />
+        )}
+
+        {!loading && !hierarchical && (
           <CheckBoxList
             groups={filteredGroups}
             selectedGroups={selectedGroups}

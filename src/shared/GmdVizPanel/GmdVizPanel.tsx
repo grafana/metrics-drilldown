@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { DataFrameType, LoadingState, type GrafanaTheme2, type ValueMapping } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -15,6 +16,7 @@ import { isEqual, omitBy } from 'lodash';
 import React from 'react';
 
 import { getTrailFor } from 'shared/utils/utils';
+import { getClickablePanelStyles } from 'shared/utils/utils.styles';
 
 import { type LabelMatcher } from './buildQueryExpression';
 import { EventPanelTypeChanged } from './components/EventPanelTypeChanged';
@@ -91,6 +93,8 @@ interface GmdVizPanelState extends SceneObjectState {
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;
   body?: VizPanel;
+  onClick?: () => void; // For embeddedMini click navigation
+  clickTitle?: string; // Hover text for embeddedMini
 }
 
 export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
@@ -163,7 +167,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     // we found a native histogram
     if (metricTypeFromMetadata === 'native-histogram') {
       stateUpdate.metricType = 'native-histogram';
-      panelConfigUpdate.description = panelConfig.description ?? 'Native Histogram';
+      panelConfigUpdate.description = panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
 
       if (!discardPanelTypeUpdates) {
         panelConfigUpdate.type = 'heatmap';
@@ -205,7 +209,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
           this.setState({
-            panelConfig: { description: 'Native Histogram ', ...panelConfig, type: 'heatmap' },
+            panelConfig: { description: t('gmd-viz-panel.native-histogram', 'Native Histogram'), ...panelConfig, type: 'heatmap' },
           });
         }
 
@@ -329,22 +333,40 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<GmdVizPanel>) => {
-    const { body, panelConfig } = model.useState();
-    const styles = useStyles2(getStyles, panelConfig.height);
+    const { body, panelConfig, onClick, clickTitle } = model.useState();
+    const styles = useStyles2(getStyles, panelConfig.height, Boolean(onClick));
+
+    const handleKeyDown = onClick
+      ? (event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick();
+          }
+        }
+      : undefined;
 
     return (
-      <div className={styles.container} data-testid="gmd-vizpanel">
+      <div
+        className={styles.container}
+        data-testid="gmd-vizpanel"
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        title={clickTitle}
+      >
         {body && <body.Component model={body} />}
       </div>
     );
   };
 }
 
-function getStyles(theme: GrafanaTheme2, height: PANEL_HEIGHT) {
+function getStyles(theme: GrafanaTheme2, height: PANEL_HEIGHT, isClickable: boolean) {
   return {
     container: css`
       width: 100%;
       height: ${height}px;
+      ${isClickable ? getClickablePanelStyles(theme) : ''}
     `,
   };
 }

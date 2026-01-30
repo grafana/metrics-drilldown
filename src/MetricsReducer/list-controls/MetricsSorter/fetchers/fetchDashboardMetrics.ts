@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import { type Dashboard, type Panel } from '@grafana/schema';
 import { limitFunction } from 'p-limit';
@@ -96,7 +97,7 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
   } catch (err) {
     const error = typeof err === 'string' ? new Error(err) : (err as Error);
     logger.error(error, {
-      message: 'Failed to fetch dashboard metrics',
+      message: t('fetch-dashboard-metrics.error', 'Failed to fetch dashboard metrics'),
     });
     return {};
   }
@@ -116,16 +117,16 @@ function getPanelsWithTargets(panels: Panel[]): Array<Panel & { targets: NonNull
   ) as Array<Panel & { targets: NonNullable<Panel['targets']> }>;
 }
 
-async function processTargetsForMetrics(
+function processTargetsForMetrics(
   targets: NonNullable<Panel['targets']>,
   dashboardName: string,
   dashboardUid: string,
   dashboardUrl: string,
   dashboardData: Record<string, MetricUsageDetails>
-): Promise<void> {
+): void {
   for (const target of targets) {
     const expr = typeof target.expr === 'string' ? target.expr : '';
-    const metrics = await extractMetricNames(expr);
+    const metrics = extractMetricNames(expr);
 
     for (const metric of metrics) {
       updateMetricUsage(metric, dashboardName, dashboardUid, dashboardUrl, dashboardData);

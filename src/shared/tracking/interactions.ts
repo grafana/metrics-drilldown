@@ -2,10 +2,10 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { config, reportInteraction } from '@grafana/runtime';
 
 import { type ExposedComponentName } from 'exposedComponents/components';
+import { getTrackedFlagPayload } from 'shared/featureFlags/tracking';
 import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { type PanelType } from 'shared/GmdVizPanel/types/available-panel-types';
-import { getFaro } from 'shared/logger/faro/faro';
 import { type SortSeriesByOption } from 'shared/services/sorting';
 import { type SnakeCase } from 'shared/utils/utils.types';
 
@@ -14,7 +14,6 @@ import { type LayoutType } from '../../MetricsReducer/list-controls/LayoutSwitch
 import { type SortingOption as MetricsReducerSortByOption } from '../../MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { GIT_COMMIT } from '../../version';
 import { PLUGIN_ID } from '../constants/plugin';
-import { HGFeatureToggles, isFeatureToggleEnabled } from '../utils/utils.feature-toggles';
 
 export type ViewName = 'metrics-reducer' | 'metric-details';
 
@@ -81,6 +80,10 @@ type Interactions = {
       | 'related_metrics';
     // The number of search terms activated when the selection was made
     searchTermCount: number | null;
+    // Whether any hierarchical filters (prefix:child format) are active
+    has_hierarchical_filter?: boolean;
+    // Number of hierarchical child filters active
+    hierarchical_filter_count?: number;
   };
   // User opens/closes the prefix filter dropdown
   prefix_filter_clicked: {
@@ -145,6 +148,15 @@ type Interactions = {
   };
   sidebar_recent_filter_section_clicked: {};
   sidebar_recent_filter_selected: { interval: string };
+  // User expands a parent prefix to view children (hierarchical filtering)
+  sidebar_hierarchical_prefix_opened: {
+    prefix: string;
+  };
+  // User selects a child filter (Level 1 hierarchical)
+  sidebar_hierarchical_child_filter_applied: {
+    prefix: string;
+    child: string;
+  };
   app_initialized: {
     view: ViewName;
     uel_epid: string;
@@ -169,6 +181,14 @@ type Interactions = {
   invalid_metric_config: { metricConfig: PanelConfigPreset };
   // the user has clicked on the "Give feedback" button in the app header
   give_feedback_clicked: {};
+  // User opens the "Add to Dashboard" modal
+  add_to_dashboard_modal_opened: {};
+  // User confirms to add to dashboard and builds a panel
+  add_to_dashboard_build_panel: { expr: string };
+  // User asks a question in the Quick Search input
+  quick_search_assistant_question_asked: { question: string };
+  // User enters assistant mode in the Quick Search input (e.g., by typing '?', clicking the AI button, or using the Tab+Enter keyboard flow)
+  quick_search_assistant_mode_entered: { from: 'question_mark' | 'tab' | 'button' };
 };
 
 type OtherEvents = {
@@ -181,24 +201,41 @@ type AllEvents = Interactions & OtherEvents;
 
 const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 
-export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P) {
-  reportInteraction(`${INTERACTION_NAME_PREFIX}${event}`, {
+function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<string, unknown> {
+  const payloads: Record<string, unknown> = {};
+
+  // Enrich all sidebar-related events (e.g., metrics_sidebar_toggled, sidebar_prefix_filter_applied)
+  if (event.includes('sidebar')) {
+    Object.assign(payloads, getTrackedFlagPayload('experiment_default_open_sidebar', true));
+  }
+
+  // Enrich only the metric_selected event to measure impact on metric selection behavior
+  if (event === 'metric_selected') {
+    Object.assign(payloads, getTrackedFlagPayload('experiment_hierarchical_prefix_filtering', true));
+  }
+
+  // Enrich assistant events to measure impact of the assistant quick search experiment
+  if (event === 'quick_search_assistant_question_asked' || event === 'quick_search_assistant_mode_entered') {
+    Object.assign(payloads, getTrackedFlagPayload('experiment_grafana_assistant_quick_search_tab_test', true));
+  }
+
+  return payloads;
+}
+
+function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): P {
+  return {
     ...payload,
+    ...getExperimentPayloads(event),
     meta: {
       // same naming as Faro (see src/tracking/faro/faro.ts)
       appRelease: config.apps[PLUGIN_ID].version,
       appVersion: GIT_COMMIT,
     },
-  });
+  };
+}
 
-  // Extra event tracking with Faro for "Default Open Sidebar" experiment
-  if (event.includes('sidebar')) {
-    getFaro()?.api.pushEvent(event, {
-      // Convert all payload values to strings
-      ...Object.fromEntries(Object.entries(payload).map(([key, value]) => [key, String(value)])),
-      defaultOpenSidebar: String(isFeatureToggleEnabled(HGFeatureToggles.sidebarOpenByDefault)),
-    });
-  }
+export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): void {
+  reportInteraction(`${INTERACTION_NAME_PREFIX}${event}`, enrichPayload(event, payload));
 }
 
 /**

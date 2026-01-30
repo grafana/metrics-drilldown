@@ -10,6 +10,19 @@ let faro: Faro | null = null;
 export const getFaro = () => faro;
 export const setFaro = (instance: Faro | null) => (faro = instance);
 
+const errorsToIgnore = [
+  // Matches core Grafana config (see https://github.com/grafana grafana/pull/54824)
+  'ResizeObserver loop limit exceeded',
+  'ResizeObserver loop completed',
+  'Non-Error exception captured with keys',
+  'Failed sending payload to the receiver',
+];
+const errorsToIgnoreSet = new Set(errorsToIgnore);
+/**
+ * Determines if an error message is in the list of known non-critical errors that should not be reported to Faro.
+ */
+export const shouldIgnoreError = (errorMessage: string) => errorsToIgnoreSet.has(errorMessage);
+
 export function initFaro() {
   if (getFaro()) {
     return;
@@ -37,6 +50,7 @@ export function initFaro() {
       user: {
         email: userEmail,
       },
+      ignoreErrors: errorsToIgnore,
       instrumentations: [
         ...getWebInstrumentations({
           captureConsole: false,

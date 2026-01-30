@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -27,6 +28,16 @@ interface RecentMetricsSectionState extends SideBarSectionState {
 }
 
 const INTERVALS = ['1m', '3m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '24h'] as const;
+
+function getIntervalOptions(): Array<{ value: string; label: string }> {
+  return [
+    { value: 'all', label: t('sidebar.recent-metrics.all-time', 'All time') },
+    ...INTERVALS.map((value) => ({
+      value,
+      label: t('sidebar.recent-metrics.past-interval', 'Past {{interval}}', { interval: value }),
+    })),
+  ];
+}
 
 const INTERVAL_OPTIONS = [
   { value: 'all', label: 'All time' },
@@ -123,7 +134,8 @@ export class RecentMetricsSection extends SceneObjectBase<RecentMetricsSectionSt
 
   public static readonly Component = ({ model }: SceneComponentProps<RecentMetricsSection>) => {
     const styles = useStyles2(getStyles);
-    const { title, description, intervalOptions, currentInterval } = model.useState();
+    const { title, description, currentInterval } = model.useState();
+    const translatedOptions = getIntervalOptions();
 
     return (
       <div className={styles.container} data-testid="new-metrics">
@@ -133,7 +145,7 @@ export class RecentMetricsSection extends SceneObjectBase<RecentMetricsSectionSt
           <RadioButtonList
             name="offsets"
             value={currentInterval}
-            options={intervalOptions}
+            options={translatedOptions}
             onChange={model.onChangeInterval}
           />
         </div>
@@ -153,7 +165,6 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     list: css({
       height: '100%',
-      margin: 0,
       padding: theme.spacing(0, 1, 1, 1),
       overflowY: 'auto',
     }),

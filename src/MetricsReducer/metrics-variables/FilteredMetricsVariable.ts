@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { CustomVariable, sceneGraph } from '@grafana/scenes';
 
 import { MetricsVariable, VAR_METRICS_VARIABLE } from './MetricsVariable';
@@ -10,7 +11,7 @@ export class FilteredMetricsVariable extends CustomVariable {
     super({
       key: VAR_FILTERED_METRICS_VARIABLE,
       name: VAR_FILTERED_METRICS_VARIABLE,
-      label: 'Filtered Metrics',
+      label: t('filtered-metrics-variable.label', 'Filtered Metrics'),
       loading: false,
       error: null,
       options: [],
@@ -32,11 +33,15 @@ export class FilteredMetricsVariable extends CustomVariable {
     this.setState({ loading, error, options });
 
     this._subs.add(
-      metricsVariable.subscribeToState((newState) => {
+      metricsVariable.subscribeToState((newState, prevState) => {
+        // Only copy options when loading completes (loading: true → false)
+        // This prevents overwriting filtered options on other state changes
+        const isLoadComplete = prevState.loading && !newState.loading;
+
         this.setState({
           loading: newState.loading,
           error: newState.error,
-          options: newState.options,
+          ...(isLoadComplete && { options: newState.options }),
         });
       })
     );

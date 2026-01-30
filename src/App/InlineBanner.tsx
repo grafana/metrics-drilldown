@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { Alert, type AlertVariant } from '@grafana/ui';
 import React from 'react';
 
@@ -30,7 +31,7 @@ export function InlineBanner({ severity, title, message, error, errorContext, ch
   let errorObject;
 
   if (error) {
-    errorObject = ensureErrorObject(error, 'Unknown error!');
+    errorObject = ensureErrorObject(error, t('inline-banner.unknown-error', 'Unknown error!'));
 
     logger.error(errorObject, {
       ...(errorObject.cause || {}),
