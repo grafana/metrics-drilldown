@@ -57,8 +57,8 @@ importers:
         specifier: ^0.308.0
         version: 0.308.0(@lezer/highlight@1.2.1)(@lezer/lr@1.4.2)
       '@react-aria/utils':
-        specifier: 3.31.0
-        version: 3.31.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.32.0
+        version: 3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       leven:
         specifier: ^4.1.0
         version: 4.1.0
@@ -8361,7 +8361,7 @@ snapshots:
     dependencies:
       '@react-aria/interactions': 3.26.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/overlays': 3.30.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@react-aria/utils': 3.31.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@react-aria/utils': 3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-types/dialog': 3.5.22(react@18.3.1)
       '@react-types/shared': 3.32.1(react@18.3.1)
       '@swc/helpers': 0.5.18
@@ -8371,7 +8371,7 @@ snapshots:
   '@react-aria/focus@3.21.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@react-aria/interactions': 3.26.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@react-aria/utils': 3.31.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@react-aria/utils': 3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-types/shared': 3.32.1(react@18.3.1)
       '@swc/helpers': 0.5.18
       clsx: 2.1.1
@@ -8407,7 +8407,7 @@ snapshots:
       '@react-aria/i18n': 3.12.14(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/interactions': 3.26.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/ssr': 3.9.10(react@18.3.1)
-      '@react-aria/utils': 3.31.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@react-aria/utils': 3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/visually-hidden': 3.8.29(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-stately/overlays': 3.6.21(react@18.3.1)
       '@react-types/button': 3.14.1(react@18.3.1)
