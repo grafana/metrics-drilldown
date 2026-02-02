@@ -446,6 +446,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
                 name="times"
                 variant="secondary"
                 tooltip={t('sidebar.filter.clear-search-tooltip', 'Clear search')}
+                aria-label={t('sidebar.filter.clear-search-tooltip', 'Clear search')}
                 onClick={() => setSearchValue('')}
               />
             }

@@ -271,6 +271,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
               name="times"
               variant="secondary"
               tooltip={t('quick-search.clear-search-tooltip', 'Clear search')}
+              aria-label={t('quick-search.clear-search-tooltip', 'Clear search')}
               onClick={model.clear}
               disabled={!value && !isQuestionMode}
             />

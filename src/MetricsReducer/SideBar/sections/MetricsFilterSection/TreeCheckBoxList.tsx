@@ -159,6 +159,7 @@ export function TreeCheckBoxList({
                           ? t('checkbox-list.collapse', 'Collapse')
                           : t('checkbox-list.expand', 'Expand')
                       }
+                      aria-expanded={isExpanded}
                       data-testid={`expand-${group.value}`}
                     >
                       <Icon name={isExpanded ? 'angle-down' : 'angle-right'} />

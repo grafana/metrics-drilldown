@@ -354,6 +354,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
         title={clickTitle}
+        aria-label={onClick ? clickTitle : undefined}
       >
         {body && <body.Component model={body} />}
       </div>
