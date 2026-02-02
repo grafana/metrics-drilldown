@@ -23,6 +23,11 @@ A comprehensive guide for contributors to the Grafana Metrics Drilldown plugin -
 - **Node.js**: 22+ required
 - **Docker**: For local Grafana development server
 - **Git**: For version control
+- **pnpm**: 10.28.1+ required - Install via corepack (recommended) or see [pnpm installation guide](https://pnpm.io/installation) for other methods:
+  ```bash
+  corepack enable
+  corepack prepare pnpm@10.28.1 --activate
+  ```
 
 ### Initial Setup
 
@@ -30,38 +35,38 @@ A comprehensive guide for contributors to the Grafana Metrics Drilldown plugin -
 # Clone and setup
 git clone <repository-url>
 cd metrics-drilldown
-npm install
+pnpm install
 
 # Start development environment
-npm run server     # Start Grafana server (http://localhost:3001)
-npm run dev        # Build plugin in watch mode
+pnpm run server     # Start Grafana server (http://localhost:3001)
+pnpm run dev        # Build plugin in watch mode
 
 # Run tests
-npm run test       # Unit tests with coverage
-npm run e2e        # End-to-end tests
+pnpm run test       # Unit tests with coverage
+pnpm run e2e        # End-to-end tests
 ```
 
 ### Development Commands
 
 ```bash
 # Development
-npm run dev        # Watch mode development
-npm run server     # Docker-based Grafana server (port 3001)
+pnpm run dev        # Watch mode development
+pnpm run server     # Docker-based Grafana server (port 3001)
 
 # Testing
-npm run test       # Jest unit tests with coverage
-npm run tdd        # Tests in watch mode
-npm run e2e        # Playwright end-to-end tests
-npm run e2e:watch  # E2E tests with UI mode
+pnpm run test       # Jest unit tests with coverage
+pnpm run tdd        # Tests in watch mode
+pnpm run e2e        # Playwright end-to-end tests
+pnpm run e2e:watch  # E2E tests with UI mode
 
 # Code Quality
-npm run lint       # Check for lint errors
-npm run lint:fix   # Fix lint errors automatically
-npm run typecheck  # Type checking without compilation
+pnpm run lint       # Check for lint errors
+pnpm run lint:fix   # Fix lint errors automatically
+pnpm run typecheck  # Type checking without compilation
 
 # Build
-npm run build      # Production build
-npm run analyze    # Bundle analysis
+pnpm run build      # Production build
+pnpm run analyze    # Bundle analysis
 ```
 
 ## Architecture Overview
@@ -559,9 +564,9 @@ test('should display filtered metrics correctly', async ({ metricsReducerView })
    ```
 
 3. **Pull Request Process**:
-   - Ensure all tests pass (`npm run test`, `npm run e2e`)
-   - Run linting (`npm run lint:fix`)
-   - Type checking passes (`npm run typecheck`)
+   - Ensure all tests pass (`pnpm run test`, `pnpm run e2e`)
+   - Run linting (`pnpm run lint:fix`)
+   - Type checking passes (`pnpm run typecheck`)
    - Add appropriate tests for new functionality
 
 ### Code Patterns
@@ -692,7 +697,7 @@ const MetricScene = React.lazy(() => import('./MetricScene'));
 **Bundle Analysis**: Regular monitoring
 
 ```bash
-npm run analyze  # Opens webpack-bundle-analyzer
+pnpm run analyze  # Opens webpack-bundle-analyzer
 ```
 
 ## Troubleshooting
@@ -767,14 +772,14 @@ const variable = new MyVariable({
 
 ### Build Issues
 
-**TypeScript Errors**: Run `npm run typecheck` for detailed error messages
-**SWC Compilation**: Clear Jest cache if tests fail: `npx jest --clearCache`
-**Webpack Bundle**: Use `npm run analyze` to investigate bundle size issues
+**TypeScript Errors**: Run `pnpm run typecheck` for detailed error messages
+**SWC Compilation**: Clear Jest cache if tests fail: `pnpm exec jest --clearCache`
+**Webpack Bundle**: Use `pnpm run analyze` to investigate bundle size issues
 
 ### Testing Issues
 
 **Jest + ESM**: Ensure modules are listed in `transformIgnorePatterns`
-**Playwright Failures**: Run `npm run e2e:watch` for interactive debugging
+**Playwright Failures**: Run `pnpm run e2e:watch` for interactive debugging
 **Coverage Issues**: Check `collectCoverageFrom` patterns in jest.config.js
 
 ---

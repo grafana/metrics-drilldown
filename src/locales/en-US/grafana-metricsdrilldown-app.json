@@ -11,6 +11,9 @@
   "breakdown": {
     "add-to-filters": "Add to filters",
     "by-label": "By label",
+    "group-by": {
+      "label": "Group by"
+    },
     "label-values-list": {
       "error-title": "Error while loading metrics!",
       "label": "label value",
@@ -66,18 +69,42 @@
   "extreme-value-filter": {
     "message": "Panel data was re-fetched with a more complex query to handle extremely small values in the series"
   },
+  "fetch-alerting-metrics": {
+    "error": "Failed to fetch alerting rules"
+  },
+  "fetch-dashboard-metrics": {
+    "error": "Failed to fetch dashboard metrics"
+  },
+  "filtered-metrics-variable": {
+    "label": "Filtered Metrics"
+  },
   "give-feedback": {
     "button": "Give feedback",
     "tooltip": "Share your thoughts about Metrics in Grafana."
   },
+  "gmd-viz-panel": {
+    "native-histogram": "Native Histogram",
+    "variant": {
+      "heatmap": "heatmap",
+      "percentiles": "percentiles"
+    }
+  },
   "inline-banner": {
     "unknown-error": "Unknown error!"
+  },
+  "labels-datasource": {
+    "none-option": "(none)",
+    "test-success": "OK"
   },
   "labels-list": {
     "clear": "clear",
     "no-results": "No results.",
     "no-selection": "No selection",
     "selected": "Selected: \"{{selectedLabel}}\""
+  },
+  "labels-variable": {
+    "label": "Group by label",
+    "placeholder": "Group by label..."
   },
   "layout-switcher": {
     "aria-label": "Layout switcher",
@@ -86,6 +113,9 @@
       "rows": "Rows",
       "single": "Single"
     }
+  },
+  "lazy-loading": {
+    "fallback": "Loading..."
   },
   "metrics-group-by-list": {
     "error-title": "Error while loading label \"{{labelName}}\" values!",
@@ -106,6 +136,10 @@
     "no-metrics": "No metrics found for the current filters and time range."
   },
   "metrics-sorter": {
+    "error": {
+      "get-recent-metrics": "Failed to get recent metrics:"
+    },
+    "label": "Sort by",
     "option": {
       "alerting-usage": "Alerting Usage",
       "alphabetical": "Alphabetical [A-Z]",
@@ -114,10 +148,17 @@
       "default": "Default"
     }
   },
+  "metrics-variable": {
+    "label": "Metrics"
+  },
   "onboarding": {
     "learn-more": "Check <2>our docs</2> to learn more or<5></5><6>try it online</6> in Grafana Play!",
     "no-datasource": "We noticed there is no Prometheus datasource configured.<1></1>Add a <4>Prometheus datasource</4> to view metrics.",
     "title": "Welcome to Grafana Metrics Drilldown"
+  },
+  "open-assistant": {
+    "explain-label": "Explain in Assistant",
+    "metric-metadata-title": "Prometheus metric metadata"
   },
   "panel-menu": {
     "action": {
@@ -145,6 +186,7 @@
       "contribute": "Contribute",
       "documentation": "Documentation",
       "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Report an issue"
     }
   },
@@ -164,7 +206,12 @@
     "count-total-singular": "1 {{targetName}} in total",
     "placeholder": "Quick search {{targetName}}s",
     "placeholder-question-mode": "Ask the Grafana Assistant a question and press enter",
-    "placeholder-with-assistant": "Quick search {{targetName}}s or type ? to ask the Grafana Assistant"
+    "placeholder-with-assistant": "Quick search {{targetName}}s or type ? to ask the Grafana Assistant",
+    "placeholder-with-assistant-tab-enter": "Quick search {{targetName}}s or press tab then enter to ask the Grafana Assistant"
+  },
+  "quick-search-assistant": {
+    "label-filters-title": "Current label filters",
+    "time-range-title": "Time range"
   },
   "related-logs": {
     "datasource-description": "Some Loki data sources might be missing from the dropdown if they took longer than {{timeout}} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.",
@@ -178,6 +225,9 @@
     "open-in-drilldown": "Open in Logs Drilldown",
     "open-in-drilldown-tooltip": "Use the Logs Drilldown app to explore these logs",
     "suggestions": "To find related logs, try the following:<1><0>Adjust your label filters to include labels that exist in both the current metric and your logs</0><1>Select a metric created by a <2>Loki Recording Rule</2></1><2>Broaden the time range to include more data</2></1>"
+  },
+  "select-action": {
+    "button": "Select"
   },
   "select-new-metric": {
     "button": "Select new metric",
@@ -275,5 +325,9 @@
     "used-time-plural_other": "Used {{count}} times in {{label}}",
     "used-time-singular_one": "Used {{count}} time in {{label}}",
     "used-time-singular_other": "Used {{count}} time in {{label}}"
+  },
+  "with-config-panel-options": {
+    "click-to-select": "Click to select this configuration",
+    "current-config": "Current configuration"
   }
 }
