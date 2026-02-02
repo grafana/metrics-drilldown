@@ -47,10 +47,12 @@ services:
       - 'host.docker.internal:${DOCKER_HOST_IP:-172.17.0.1}'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
-      interval: 1s
-      timeout: 1s
+      # Longer intervals and start_period to accommodate experimental feature flags
+      # which require additional initialization time on slower CI infrastructure
+      interval: 2s
+      timeout: 2s
       retries: 30
-      start_period: 15s
+      start_period: 30s
 
   prometheus-gmd:
     container_name: 'prometheus-gmd'
