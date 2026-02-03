@@ -176,13 +176,12 @@ export class MetricSceneView extends DrilldownView {
 
     // Retry until assertion passes (handles DOM updates during render)
     await expect(async () => {
-      const radioGroup = container.getByRole('radiogroup');
+      const radioButton = container.getByRole('radio', { name: label });
+      const combobox = container.getByRole('combobox');
 
-      if ((await radioGroup.count()) > 0) {
-        const radioOption = radioGroup.getByRole('radio', { name: label });
-        await expect(radioOption).toBeChecked();
+      if ((await radioButton.count()) > 0) {
+        await expect(radioButton).toBeChecked();
       } else {
-        const combobox = container.getByRole('combobox');
         await expect(combobox).toHaveValue(label);
       }
     }).toPass();
@@ -190,18 +189,17 @@ export class MetricSceneView extends DrilldownView {
 
   async selectLabel(label: string) {
     const container = this.getLabelSelectorContainer();
-    const radioGroup = container.getByRole('radiogroup');
+    const radioButton = container.getByRole('radio', { name: label });
 
-    // Try radiogroup first (more common), fall back to combobox
-    // Use 500ms timeout - enough for React to render, but saves 1.5s vs original 2000ms in combobox cases
-    const isRadioGroup = await radioGroup
-      .waitFor({ state: 'visible', timeout: 500 })
+    // Wait for the specific radio button to appear (only exists after loading completes in radio mode)
+    // Use 2s timeout - if it doesn't appear, we fall back to combobox
+    const hasRadioButton = await radioButton
+      .waitFor({ state: 'visible', timeout: 2000 })
       .then(() => true)
       .catch(() => false);
 
-    if (isRadioGroup) {
-      const radioOption = radioGroup.getByRole('radio', { name: label });
-      await radioOption.click();
+    if (hasRadioButton) {
+      await radioButton.click();
     } else {
       const combobox = container.getByRole('combobox');
       await combobox.waitFor({ state: 'visible' });

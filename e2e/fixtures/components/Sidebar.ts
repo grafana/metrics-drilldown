@@ -117,10 +117,12 @@ export class Sidebar {
     }
 
     if (operator === '>') {
-      // Wait for at least one radio to be visible before counting
+      // Wait for at least one radio to be visible, then retry until count exceeds expected
       await expect(labelsBrowser.getByRole('radio').first()).toBeVisible();
-      const radiosCount = await labelsBrowser.getByRole('radio').count();
-      expect(radiosCount).toBeGreaterThan(expectedCount);
+      await expect(async () => {
+        const radiosCount = await labelsBrowser.getByRole('radio').count();
+        expect(radiosCount).toBeGreaterThan(expectedCount);
+      }).toPass();
       return;
     }
 
