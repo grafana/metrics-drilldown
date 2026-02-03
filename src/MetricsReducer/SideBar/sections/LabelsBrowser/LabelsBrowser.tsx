@@ -143,6 +143,7 @@ export class LabelsBrowser extends SceneObjectBase<LabelsBrowserState> {
               name="times"
               variant="secondary"
               tooltip={t('sidebar.labels-browser.clear-search-tooltip', 'Clear search')}
+              aria-label={t('sidebar.labels-browser.clear-search-tooltip', 'Clear search')}
               onClick={onInputClear}
             />
           }

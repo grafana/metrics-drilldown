@@ -116,6 +116,11 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
     const radioLabel = body.state.panelConfig?.title ?? presetId;
 
     const isClickable = !isSelected;
+    const clickToSelectLabel = t('with-config-panel-options.click-to-select', 'Click to select this configuration');
+    const tooltipContent = isClickable
+      ? clickToSelectLabel
+      : t('with-config-panel-options.current-config', 'Current configuration');
+
     const handleKeyDown = isClickable
       ? (event: React.KeyboardEvent) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -132,6 +137,7 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
         onKeyDown={handleKeyDown}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
+        aria-label={isClickable ? clickToSelectLabel : undefined}
       >
         <div className={cx(styles.bodyAndParams)}>
           <body.Component model={body} />
@@ -154,14 +160,7 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
           )}
         </div>
         <div className={styles.radioContainer}>
-          <Tooltip
-            content={
-              !isSelected
-                ? t('with-config-panel-options.click-to-select', 'Click to select this configuration')
-                : t('with-config-panel-options.current-config', 'Current configuration')
-            }
-            placement="top"
-          >
+          <Tooltip content={tooltipContent} placement="top">
             <input
               type="radio"
               name="select-config"

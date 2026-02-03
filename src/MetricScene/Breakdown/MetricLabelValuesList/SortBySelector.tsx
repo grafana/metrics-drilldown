@@ -76,6 +76,7 @@ export class SortBySelector extends SceneObjectBase<SortBySelectorState> {
               size="sm"
               variant={'secondary'}
               tooltip={t('sort-by.tooltip', 'Sorts values using standard or smart time series calculations.')}
+              aria-label={t('sort-by.tooltip', 'Sorts values using standard or smart time series calculations.')}
             />
           </div>
         }
