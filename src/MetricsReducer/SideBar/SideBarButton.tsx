@@ -6,7 +6,7 @@ import React from 'react';
 import { GroupsIcon } from './custom-icons/GroupsIcon';
 import { RulesIcon } from './custom-icons/RulesIcon';
 
-const CustomIcons = new Map<string, React.FC>([
+export const CustomIcons = new Map<string, React.FC>([
   ['rules', RulesIcon],
   ['groups', GroupsIcon],
 ]);
