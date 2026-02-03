@@ -118,6 +118,20 @@ describe('QuickSearch', () => {
       // Default to excluded ensures users get control behavior until flag resolves
       expect(quickSearch.state.assistantTabExperimentVariant).toBe('excluded');
     });
+
+    it('should apply ariaLabel as aria-label attribute on the textbox for WCAG 3.3.2 compliance', () => {
+      const countsProvider = new MockCountsProvider({});
+      const quickSearch = new QuickSearch({
+        urlSearchParamName: 'search',
+        targetName: 'metric',
+        countsProvider,
+        ariaLabel: 'Search metrics',
+      });
+      renderQuickSearch(quickSearch);
+
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveAttribute('aria-label', 'Search metrics');
+    });
   });
 
   // ---------------------------------------------------------------------------
