@@ -6,7 +6,7 @@ import React from 'react';
 
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
-const FEEDBACK_FORM_URL_GOOGLE = 'https://forms.gle/dKHDM4GDXVYPny3L6';
+const FEEDBACK_FORM_URL_GOOGLE = 'https://forms.gle/5E9JGAuHqTcS5YJ29';
 
 function trackUsage() {
   reportExploreMetrics('give_feedback_clicked', {});
