@@ -40,7 +40,7 @@ export class ListControls extends EmbeddedScene {
               urlSearchParamName: 'search_txt',
               targetName: 'metric',
               countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
-              ariaLabel: t('list-controls.search-aria-label', 'Search metrics'),
+              ariaLabel: t('list-controls.search-aria-label', 'Quick search metrics'),
             }),
           }),
           new SceneFlexItem({

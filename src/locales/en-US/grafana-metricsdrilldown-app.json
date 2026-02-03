@@ -119,7 +119,7 @@
     "fallback": "Loading..."
   },
   "list-controls": {
-    "search-aria-label": "Search metrics"
+    "search-aria-label": "Quick search metrics"
   },
   "metrics-group-by-list": {
     "error-title": "Error while loading label \"{{labelName}}\" values!",
