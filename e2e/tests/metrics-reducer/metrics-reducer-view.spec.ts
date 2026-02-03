@@ -161,7 +161,7 @@ test.describe('Metrics reducer view', () => {
         // Wait for the usage count to load
         await expect(async () => {
           const firstPanel = metricsReducerView.getByTestId('with-usage-data-preview-panel').first();
-          const usageElement = firstPanel.locator(`[data-testid="${usageType}-usage"]`);
+          const usageElement = firstPanel.getByTestId(`${usageType}-usage`);
           const usageCount = parseInt((await usageElement.textContent()) || '0', 10);
           expect(usageCount).toBeGreaterThan(0);
         }).toPass();
@@ -175,7 +175,7 @@ test.describe('Metrics reducer view', () => {
           const metricName = await item.getByRole('heading').textContent();
           expect(metricName).not.toBeNull();
           const usagePanel = item.locator('[data-testid="usage-data-panel"]');
-          const usageCount = await usagePanel.locator(`[data-testid="${usageType}-usage"]`).textContent();
+          const usageCount = await usagePanel.getByTestId(`${usageType}-usage`).textContent();
           usageCounts[metricName as string] = parseInt(usageCount || '0', 10);
         }
         const metricNames = Object.keys(usageCounts);
