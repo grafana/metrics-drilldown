@@ -37,6 +37,7 @@ export class ClickablePanelWrapper extends SceneObjectBase<ClickablePanelWrapper
         role="button"
         tabIndex={0}
         title={title}
+        aria-label={title}
       >
         <panel.Component model={panel} />
       </div>
