@@ -18,7 +18,7 @@
       "error-title": "Error while loading metrics!",
       "label": "label value",
       "no-values": "No label values found for the current filters and time range.",
-      "search-aria-label": "Search label values",
+      "search-aria-label": "Quick search label values",
       "search-label": "Search",
       "view-label": "View"
     },
@@ -231,7 +231,7 @@
     "suggestions": "To find related logs, try the following:<1><0>Adjust your label filters to include labels that exist in both the current metric and your logs</0><1>Select a metric created by a <2>Loki Recording Rule</2></1><2>Broaden the time range to include more data</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": "Search related metrics"
+    "search-aria-label": "Quick search related metrics"
   },
   "select-action": {
     "button": "Select"

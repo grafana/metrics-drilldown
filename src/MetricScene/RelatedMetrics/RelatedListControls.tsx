@@ -46,7 +46,7 @@ export class RelatedListControls extends EmbeddedScene {
               targetName: 'related metric',
               countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
               displayCounts: true,
-              ariaLabel: t('related-metrics.search-aria-label', 'Search related metrics'),
+              ariaLabel: t('related-metrics.search-aria-label', 'Quick search related metrics'),
             }),
           }),
           new SceneFlexItem({
