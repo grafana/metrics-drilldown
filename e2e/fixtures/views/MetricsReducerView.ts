@@ -68,6 +68,8 @@ export class MetricsReducerView extends DrilldownView {
   async selectSortByOption(optionName: SortByOptionNames) {
     await this.getSortByDropdown().locator('input').click();
     await this.getByRole('option', { name: optionName }).locator('span').click();
+    // Wait for metrics list to re-render after sort
+    await expect(this.getMetricsList().locator('[data-viz-panel-key]').first()).toBeVisible();
   }
 
   /* Layout switcher */
@@ -77,8 +79,7 @@ export class MetricsReducerView extends DrilldownView {
   }
 
   async assertSelectedLayout(expectedLayoutName: 'Grid' | 'Row') {
-    const layoutName = await this.getLayoutSwitcher().locator('input[checked]~label').textContent();
-    expect(layoutName?.trim()).toBe(expectedLayoutName);
+    await expect(this.getLayoutSwitcher().locator('input[checked]~label')).toContainText(expectedLayoutName);
   }
 
   selectLayout(layoutName: string) {
