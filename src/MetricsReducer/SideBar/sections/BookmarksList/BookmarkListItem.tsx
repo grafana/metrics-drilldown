@@ -75,6 +75,7 @@ export function BookmarkListItem(props: Readonly<BookmarkListItemProps>) {
               name="trash-alt"
               className={styles.secondary}
               tooltip={t('sidebar.bookmarks.remove-tooltip', 'Remove bookmark')}
+              aria-label={t('sidebar.bookmarks.remove-tooltip', 'Remove bookmark')}
               tooltipPlacement="top"
               onClick={onDelete}
             />

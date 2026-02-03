@@ -41,9 +41,11 @@ export class Sidebar {
   }
 
   async assertAllButtons() {
-    for (const buttonName of BUTTON_NAMES) {
-      await expect(this.locator.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible();
-    }
+    await Promise.all(
+      BUTTON_NAMES.map((buttonName) =>
+        expect(this.locator.getByRole('button', { name: new RegExp(buttonName, 'i') })).toBeVisible()
+      )
+    );
   }
 
   async assertActiveButton(buttonName: ButtonName, expectToBeActive: boolean) {
@@ -115,10 +117,12 @@ export class Sidebar {
     }
 
     if (operator === '>') {
-      // Wait for at least one radio to be visible before counting
+      // Wait for at least one radio to be visible, then retry until count exceeds expected
       await expect(labelsBrowser.getByRole('radio').first()).toBeVisible();
-      const radiosCount = await labelsBrowser.getByRole('radio').count();
-      expect(radiosCount).toBeGreaterThan(expectedCount);
+      await expect(async () => {
+        const radiosCount = await labelsBrowser.getByRole('radio').count();
+        expect(radiosCount).toBeGreaterThan(expectedCount);
+      }).toPass();
       return;
     }
 

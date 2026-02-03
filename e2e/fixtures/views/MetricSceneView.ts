@@ -55,10 +55,8 @@ export class MetricSceneView extends DrilldownView {
 
   async assertMainViz(metricName: string) {
     await expect(this.getByTestId('top-view').getByRole('heading', { name: metricName })).toBeVisible();
-
-    // we wait for some time to make sure that data is rendered, especially for native histograms
-    // TODO: how to improve this and not rely on an arbitrary timeout?
-    await this.waitForTimeout(1000);
+    // Wait for the visualization panel to render (including native histograms)
+    await expect(this.getMainViz()).toBeVisible();
   }
 
   async clickPanelConfigureButton() {
@@ -176,37 +174,39 @@ export class MetricSceneView extends DrilldownView {
   async assertLabelSelector(label: string) {
     const container = this.getLabelSelectorContainer();
 
-    try {
-      // Try radio button first (with short timeout since it should be immediate)
-      const radioGroup = container.getByRole('radiogroup');
-      await expect(radioGroup).toBeVisible({ timeout: 2000 });
-      const radioOption = radioGroup.getByRole('radio', { name: label });
-      await expect(radioOption).toBeChecked();
-      return;
-    } catch {
-      // Not a radio button, must be combobox
+    // Retry until assertion passes (handles DOM updates during render)
+    await expect(async () => {
+      const radioButton = container.getByRole('radio', { name: label });
       const combobox = container.getByRole('combobox');
-      await expect(combobox).toHaveValue(label);
-    }
+
+      if ((await radioButton.count()) > 0) {
+        await expect(radioButton).toBeChecked();
+      } else {
+        await expect(combobox).toHaveValue(label);
+      }
+    }).toPass();
   }
 
   async selectLabel(label: string) {
     const container = this.getLabelSelectorContainer();
+    const radioButton = container.getByRole('radio', { name: label });
 
-    try {
-      // Try radio button first (with short timeout since it should be immediate)
-      const radioGroup = container.getByRole('radiogroup');
-      await expect(radioGroup).toBeVisible({ timeout: 2000 });
-      const radioOption = radioGroup.getByRole('radio', { name: label });
-      await radioOption.click();
-    } catch {
-      // Not a radio button, must be combobox
+    // Wait for the specific radio button to appear (only exists after loading completes in radio mode)
+    // Use 2s timeout - if it doesn't appear, we fall back to combobox
+    const hasRadioButton = await radioButton
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (hasRadioButton) {
+      await radioButton.click();
+    } else {
       const combobox = container.getByRole('combobox');
+      await combobox.waitFor({ state: 'visible' });
       await combobox.click();
-
-      // Wait for dropdown menu to open
-      await this.getByRole('option', { name: label }).waitFor({ state: 'visible' });
-      await this.getByRole('option', { name: label }).click();
+      const option = this.getByRole('option', { name: label });
+      await option.waitFor({ state: 'visible' });
+      await option.click();
     }
 
     // Wait for panels to re-render after label selection
