@@ -78,6 +78,7 @@ function createQuickSearch(variant: 'treatment' | 'control' | 'excluded' = 'excl
     targetName: 'metric',
     countsProvider,
     displayCounts: false,
+    ariaLabel: 'Search metrics',
   });
   // Bypass async evaluateFeatureFlag by setting variant directly
   quickSearch.setState({ assistantTabExperimentVariant: variant });
@@ -112,6 +113,7 @@ describe('QuickSearch', () => {
         urlSearchParamName: 'search',
         targetName: 'metric',
         countsProvider,
+        ariaLabel: 'Search metrics',
       });
       // Default to excluded ensures users get control behavior until flag resolves
       expect(quickSearch.state.assistantTabExperimentVariant).toBe('excluded');

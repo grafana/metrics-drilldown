@@ -1,4 +1,5 @@
 import { type SelectableValue } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   EmbeddedScene,
   SceneFlexItem,
@@ -39,6 +40,7 @@ export class ListControls extends EmbeddedScene {
               urlSearchParamName: 'search_txt',
               targetName: 'metric',
               countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
+              ariaLabel: t('list-controls.search-aria-label', 'Search metrics'),
             }),
           }),
           new SceneFlexItem({

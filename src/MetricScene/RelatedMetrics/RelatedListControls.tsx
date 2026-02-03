@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { type SelectableValue } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import {
   EmbeddedScene,
   SceneFlexItem,
@@ -45,6 +46,7 @@ export class RelatedListControls extends EmbeddedScene {
               targetName: 'related metric',
               countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
               displayCounts: true,
+              ariaLabel: t('related-metrics.search-aria-label', 'Search related metrics'),
             }),
           }),
           new SceneFlexItem({
