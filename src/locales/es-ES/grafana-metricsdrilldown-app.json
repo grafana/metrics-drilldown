@@ -206,7 +206,10 @@
     "count-filtered_one": "{{targetName}}: 1 of {{total}} in total",
     "count-filtered_other": "{{targetName}}: {{current}} of {{total}} in total",
     "count-total_one": "{{targetName}}: 1 in total",
-    "count-total_other": "{{targetName}}: {{count}} in total"
+    "count-total_other": "{{targetName}}: {{count}} in total",
+    "aria-label-label-values": "Quick search label values",
+    "aria-label-metrics": "Quick search metrics",
+    "aria-label-related-metrics": "Quick search related metrics"
   },
   "quick-search-assistant": {
     "label-filters-title": "",

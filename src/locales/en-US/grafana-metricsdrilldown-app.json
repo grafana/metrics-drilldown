@@ -196,6 +196,9 @@
     "view-by-label": "View by"
   },
   "quick-search": {
+    "aria-label-label-values": "Quick search label values",
+    "aria-label-metrics": "Quick search metrics",
+    "aria-label-related-metrics": "Quick search related metrics",
     "ask-assistant-aria-label": "Ask the Grafana Assistant",
     "ask-assistant-tooltip": "Ask the Grafana Assistant",
     "clear-search-tooltip": "Clear search",
