@@ -1,7 +1,9 @@
 name: 'PR title validation (Conventional Commits spec)'
 
 on:
-  pull_request:
+  # Using pull_request_target to allow labeling fork PRs.
+  # This is safe because this workflow only reads PR metadata (title) and never checks out or runs fork code.
+  pull_request_target:
     types: [opened, synchronize, reopened, edited]
 
 jobs:
