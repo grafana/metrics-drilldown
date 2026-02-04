@@ -199,15 +199,14 @@
     "ask-assistant-aria-label": "Ask the Grafana Assistant",
     "ask-assistant-tooltip": "Ask the Grafana Assistant",
     "clear-search-tooltip": "Clear search",
-    "count-filtered-plural": "{{current}} out of {{total}} {{targetName}}s in total",
-    "count-filtered-singular": "1 out of {{total}} {{targetName}}s in total",
-    "count-total-plural_one": "{{count}} {{targetName}}s in total",
-    "count-total-plural_other": "{{count}} {{targetName}}s in total",
-    "count-total-singular": "1 {{targetName}} in total",
-    "placeholder": "Quick search {{targetName}}s",
+    "count-filtered_one": "{{targetName}}: 1 of {{total}} in total",
+    "count-filtered_other": "{{targetName}}: {{current}} of {{total}} in total",
+    "count-total_one": "{{targetName}}: 1 in total",
+    "count-total_other": "{{targetName}}: {{count}} in total",
+    "placeholder": "Search {{targetName}}",
     "placeholder-question-mode": "Ask the Grafana Assistant a question and press enter",
-    "placeholder-with-assistant": "Quick search {{targetName}}s or type ? to ask the Grafana Assistant",
-    "placeholder-with-assistant-tab-enter": "Quick search {{targetName}}s or press tab then enter to ask the Grafana Assistant"
+    "placeholder-with-assistant": "Search {{targetName}} or type ? to ask the Grafana Assistant",
+    "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant"
   },
   "quick-search-assistant": {
     "label-filters-title": "Current label filters",
@@ -235,8 +234,8 @@
     "open-in-drilldown-tooltip": "Open in Metrics Drilldown"
   },
   "show-more-button": {
-    "text-plural": "Show {{increment}} more {{label}}s ({{current}}/{{total}})",
-    "text-singular": "Show {{increment}} more {{label}} ({{current}}/{{total}})"
+    "text_one": "Show 1 more ({{current}}/{{total}})",
+    "text_other": "Show {{increment}} more ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
