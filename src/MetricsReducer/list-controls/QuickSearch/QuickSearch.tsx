@@ -17,6 +17,7 @@ import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getQuickSearchPlaceholder } from 'shared/utils/utils.quicksearch';
 
+import { NOTIFY_VALUE_CHANGE_DELAY } from './constants';
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
 import { openQuickSearchAssistant, useQuickSearchAssistantAvailability } from './QuickSearchAssistant';
@@ -95,7 +96,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   private notifyValueChange = debounce((value: string) => {
     this.publishEvent(new EventQuickSearchChanged({ searchText: value }), true);
-  }, 250);
+  }, NOTIFY_VALUE_CHANGE_DELAY);
 
   private updateValue(value: string) {
     const wasEmpty = this.state.value === '';
@@ -271,6 +272,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
               name="times"
               variant="secondary"
               tooltip={t('quick-search.clear-search-tooltip', 'Clear search')}
+              aria-label={t('quick-search.clear-search-tooltip', 'Clear search')}
               onClick={model.clear}
               disabled={!value && !isQuestionMode}
             />

@@ -83,11 +83,6 @@ export class DrilldownView {
     return this.page.waitForResponse(urlOrPredicate, options);
   }
 
-  waitForTimeout(timeout: number) {
-    // eslint-disable-next-line playwright/no-wait-for-timeout
-    return this.page.waitForTimeout(timeout);
-  }
-
   route(url: string, handler: (route: Route, request: Request) => any, options?: Record<string, any>) {
     return this.page.route(url, handler, options);
   }

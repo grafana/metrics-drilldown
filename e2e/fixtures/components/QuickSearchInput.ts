@@ -1,6 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 
 import { expect } from '../';
+import { NOTIFY_VALUE_CHANGE_DELAY } from '../../../src/MetricsReducer/list-controls/QuickSearch/constants';
 
 export class QuickSearchInput {
   private readonly locator: Locator;
@@ -15,7 +16,9 @@ export class QuickSearchInput {
 
   async enterText(searchText: string) {
     await this.get().fill(searchText);
-    await this.page.waitForTimeout(250); // eslint-disable-line playwright/no-wait-for-timeout
+    // Wait for the debounced quick search to process the input (include 50ms buffer)
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(NOTIFY_VALUE_CHANGE_DELAY + 50);
   }
 
   clear() {
