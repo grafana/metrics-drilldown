@@ -3,7 +3,6 @@ import { Button } from '@grafana/ui';
 import React, { type MouseEventHandler } from 'react';
 
 type ShowMoreButtonProps = {
-  label: string;
   batchSizes: {
     increment: number;
     current: number;
@@ -13,8 +12,7 @@ type ShowMoreButtonProps = {
   tooltip?: string;
 };
 
-// eslint-disable-next-line no-unused-vars
-export function ShowMoreButton({ label, batchSizes, onClick, tooltip }: Readonly<ShowMoreButtonProps>) {
+export function ShowMoreButton({ batchSizes, onClick, tooltip }: Readonly<ShowMoreButtonProps>) {
   const buttonText = t('show-more-button.text', 'Show {{increment}} more ({{current}}/{{total}})', {
     increment: batchSizes.increment,
     current: batchSizes.current,

@@ -174,9 +174,8 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     // When filtered
     return {
       tagName: `${counts.current}/${counts.total}`,
-      tooltipContent: t('quick-search.count-filtered', '{{targetName}}: {{current}} of {{total}} in total', {
+      tooltipContent: t('quick-search.count-filtered', '{{targetName}}: {{count}} of {{total}} in total', {
         targetName,
-        current: counts.current,
         total: counts.total,
         count: counts.current,
       }),

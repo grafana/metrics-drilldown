@@ -15,7 +15,6 @@ import { ShowMoreButton } from './ShowMoreButton';
 
 describe('ShowMoreButton', () => {
   const defaultProps = {
-    label: 'item',
     onClick: jest.fn(),
   };
 

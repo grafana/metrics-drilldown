@@ -203,7 +203,7 @@
     "ask-assistant-tooltip": "Ask the Grafana Assistant",
     "clear-search-tooltip": "Clear search",
     "count-filtered_one": "{{targetName}}: 1 of {{total}} in total",
-    "count-filtered_other": "{{targetName}}: {{current}} of {{total}} in total",
+    "count-filtered_other": "{{targetName}}: {{count}} of {{total}} in total",
     "count-total_one": "{{targetName}}: 1 in total",
     "count-total_other": "{{targetName}}: {{count}} in total",
     "placeholder": "Search {{targetName}}",

@@ -204,7 +204,7 @@
     "placeholder-with-assistant": "Search {{targetName}} or type ? to ask the Grafana Assistant",
     "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant",
     "count-filtered_one": "{{targetName}}: 1 of {{total}} in total",
-    "count-filtered_other": "{{targetName}}: {{current}} of {{total}} in total",
+    "count-filtered_other": "{{targetName}}: {{count}} of {{total}} in total",
     "count-total_one": "{{targetName}}: 1 in total",
     "count-total_other": "{{targetName}}: {{count}} in total",
     "aria-label-label-values": "Quick search label values",
