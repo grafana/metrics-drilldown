@@ -16,7 +16,6 @@
     },
     "label-values-list": {
       "error-title": "",
-      "label": "",
       "no-values": "",
       "search-aria-label": "",
       "search-label": "",
@@ -25,7 +24,6 @@
     "labels-list": {
       "breakdown-by-label": "",
       "error-title": "",
-      "label-label": "",
       "no-labels": "",
       "view-label": ""
     },
@@ -124,12 +122,10 @@
   },
   "metrics-group-by-list": {
     "error-title": "",
-    "no-values": "",
-    "show-more-label": ""
+    "no-values": ""
   },
   "metrics-group-by-row": {
     "error-title": "",
-    "metric-label": "",
     "no-metrics": "",
     "select": "",
     "select-tooltip": "",
@@ -137,7 +133,6 @@
   },
   "metrics-list": {
     "error-title": "",
-    "metric-label": "",
     "no-metrics": ""
   },
   "metrics-sorter": {
@@ -205,8 +200,10 @@
     "ask-assistant-tooltip": "",
     "clear-search-tooltip": "",
     "count-filtered_one": "{{targetName}}: 1 of {{total}} in total",
+    "count-filtered_many": "",
     "count-filtered_other": "{{targetName}}: {{count}} of {{total}} in total",
     "count-total_one": "{{targetName}}: 1 in total",
+    "count-total_many": "",
     "count-total_other": "{{targetName}}: {{count}} in total",
     "placeholder": "Search {{targetName}}",
     "placeholder-question-mode": "",
@@ -243,6 +240,7 @@
   },
   "show-more-button": {
     "text_one": "Show 1 more ({{current}}/{{total}})",
+    "text_many": "",
     "text_other": "Show {{increment}} more ({{current}}/{{total}})"
   },
   "sidebar": {

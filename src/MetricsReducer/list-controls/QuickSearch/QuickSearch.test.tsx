@@ -408,6 +408,7 @@ describe('QuickSearch', () => {
         targetName: 'metric',
         countsProvider,
         displayCounts: true,
+        ariaLabel: 'Quick search metrics',
       });
 
       renderQuickSearch(quickSearch);
@@ -426,6 +427,7 @@ describe('QuickSearch', () => {
         targetName: 'metric',
         countsProvider,
         displayCounts: true,
+        ariaLabel: 'Quick search metrics',
       });
 
       renderQuickSearch(quickSearch);
@@ -444,6 +446,7 @@ describe('QuickSearch', () => {
         targetName: 'metric',
         countsProvider,
         displayCounts: true,
+        ariaLabel: 'Quick search metrics',
       });
 
       renderQuickSearch(quickSearch);

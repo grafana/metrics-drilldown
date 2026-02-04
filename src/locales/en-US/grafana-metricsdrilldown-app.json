@@ -16,7 +16,6 @@
     },
     "label-values-list": {
       "error-title": "Error while loading metrics!",
-      "label": "label value",
       "no-values": "No label values found for the current filters and time range.",
       "search-aria-label": "Quick search label values",
       "search-label": "Search",
@@ -25,7 +24,6 @@
     "labels-list": {
       "breakdown-by-label": "Breakdown by {{label}}",
       "error-title": "Error while loading labels!",
-      "label-label": "label",
       "no-labels": "No labels found for the current filters and time range.",
       "view-label": "View"
     },
@@ -123,12 +121,10 @@
   },
   "metrics-group-by-list": {
     "error-title": "Error while loading label \"{{labelName}}\" values!",
-    "no-values": "No label values found for label \"{{labelName}}\".",
-    "show-more-label": "\"{{labelName}}\" value"
+    "no-values": "No label values found for label \"{{labelName}}\"."
   },
   "metrics-group-by-row": {
     "error-title": "Error while loading metrics!",
-    "metric-label": "metric",
     "no-metrics": "No metrics found for the current filters and time range.",
     "select": "Select",
     "select-tooltip": "See metrics with {{labelName}}={{labelValue}}",
@@ -136,7 +132,6 @@
   },
   "metrics-list": {
     "error-title": "Error while loading metrics!",
-    "metric-label": "metric",
     "no-metrics": "No metrics found for the current filters and time range."
   },
   "metrics-sorter": {

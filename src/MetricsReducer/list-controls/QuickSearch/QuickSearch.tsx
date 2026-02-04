@@ -249,7 +249,6 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
         onChange={handleChange}
         onKeyDown={model.onKeyDown}
         placeholder={placeholder}
-        aria-label={ariaLabel}
         prefix={<i className="fa fa-search" />}
         suffix={
           <>
