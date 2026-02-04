@@ -286,7 +286,7 @@
       "rules-filters": "Rules filters",
       "rules-filters-description": "Filter metrics and recording rules",
       "settings": "Settings",
-      "settings-description": "Settings",
+      "settings-description": "Configure display preferences and filtering behavior",
       "suffix-filters": "Suffix filters",
       "suffix-filters-description": "Filter metrics based on their name suffix"
     }
