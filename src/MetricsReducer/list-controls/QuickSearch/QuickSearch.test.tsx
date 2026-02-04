@@ -365,4 +365,99 @@ describe('QuickSearch', () => {
       expect(quickSearch.state.isQuestionMode).toBe(true);
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Count Display Behavior (Pluralization)
+  // ---------------------------------------------------------------------------
+
+  describe('count display behavior', () => {
+    /**
+     * PLURALIZATION BEHAVIOR:
+     * - Uses i18next pluralization with _one and _other variants
+     * - Passes count parameter to let framework handle plural selection
+     * - No hardcoded 's' suffix in translation strings
+     *
+     * NOTE: These tests verify the component renders correctly. The actual
+     * pluralization logic is handled by i18next based on the translation keys
+     * (_one, _other) and the count parameter we pass. The framework selects
+     * the correct variant based on the locale's pluralization rules.
+     */
+
+    it('should display filtered count tag with format "current/total"', () => {
+      const countsProvider = new MockCountsProvider({});
+      jest.spyOn(countsProvider, 'useCounts').mockReturnValue({ current: 1, total: 10 });
+
+      const quickSearch = new QuickSearch({
+        urlSearchParamName: 'search',
+        targetName: 'metric',
+        countsProvider,
+        displayCounts: true,
+      });
+
+      renderQuickSearch(quickSearch);
+
+      // Tag displays filtered count
+      const tag = screen.getByText('1/10');
+      expect(tag).toBeInTheDocument();
+    });
+
+    it('should display filtered count tag for multiple items', () => {
+      const countsProvider = new MockCountsProvider({});
+      jest.spyOn(countsProvider, 'useCounts').mockReturnValue({ current: 5, total: 10 });
+
+      const quickSearch = new QuickSearch({
+        urlSearchParamName: 'search',
+        targetName: 'metric',
+        countsProvider,
+        displayCounts: true,
+      });
+
+      renderQuickSearch(quickSearch);
+
+      // Tag displays filtered count
+      const tag = screen.getByText('5/10');
+      expect(tag).toBeInTheDocument();
+    });
+
+    it('should display total count tag when not filtered (current equals total)', () => {
+      const countsProvider = new MockCountsProvider({});
+      jest.spyOn(countsProvider, 'useCounts').mockReturnValue({ current: 10, total: 10 });
+
+      const quickSearch = new QuickSearch({
+        urlSearchParamName: 'search',
+        targetName: 'metric',
+        countsProvider,
+        displayCounts: true,
+      });
+
+      renderQuickSearch(quickSearch);
+
+      // Tag displays total count only
+      const tag = screen.getByText('10');
+      expect(tag).toBeInTheDocument();
+    });
+
+    it('should use placeholder without plural "s" suffix', () => {
+      mockUseQuickSearchAssistantAvailability.mockReturnValue(false);
+
+      const quickSearch = createQuickSearch('excluded');
+      renderQuickSearch(quickSearch);
+
+      const input = screen.getByRole('textbox');
+      // New placeholder format: "Search metric" (not "Quick search metrics")
+      expect(input).toHaveAttribute('placeholder', 'Search metric');
+    });
+
+    it('should use placeholder without plural "s" suffix when assistant available', () => {
+      mockUseQuickSearchAssistantAvailability.mockReturnValue(true);
+
+      const quickSearch = createQuickSearch('control');
+      renderQuickSearch(quickSearch);
+
+      const input = screen.getByRole('textbox');
+      // New placeholder format: "Search metric or type ? to ask..." (not "Quick search metrics...")
+      expect(input).toHaveAttribute('placeholder', expect.stringContaining('Search metric'));
+      expect(input).not.toHaveAttribute('placeholder', expect.stringContaining('metrics'));
+    });
+  });
 });
