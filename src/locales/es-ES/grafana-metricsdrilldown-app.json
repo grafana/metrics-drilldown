@@ -18,6 +18,7 @@
       "error-title": "",
       "label": "",
       "no-values": "",
+      "search-aria-label": "",
       "search-label": "",
       "view-label": ""
     },
@@ -37,6 +38,7 @@
     "expand": "",
     "no-results": "",
     "selected-count_one": "",
+    "selected-count_many": "",
     "selected-count_other": ""
   },
   "configure-panel": {
@@ -116,6 +118,9 @@
   },
   "lazy-loading": {
     "fallback": ""
+  },
+  "list-controls": {
+    "search-aria-label": ""
   },
   "metrics-group-by-list": {
     "error-title": "",
@@ -199,17 +204,14 @@
     "ask-assistant-aria-label": "",
     "ask-assistant-tooltip": "",
     "clear-search-tooltip": "",
-    "placeholder": "Search {{targetName}}",
-    "placeholder-question-mode": "",
-    "placeholder-with-assistant": "Search {{targetName}} or type ? to ask the Grafana Assistant",
-    "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant",
     "count-filtered_one": "{{targetName}}: 1 of {{total}} in total",
     "count-filtered_other": "{{targetName}}: {{count}} of {{total}} in total",
     "count-total_one": "{{targetName}}: 1 in total",
     "count-total_other": "{{targetName}}: {{count}} in total",
-    "aria-label-label-values": "Quick search label values",
-    "aria-label-metrics": "Quick search metrics",
-    "aria-label-related-metrics": "Quick search related metrics"
+    "placeholder": "Search {{targetName}}",
+    "placeholder-question-mode": "",
+    "placeholder-with-assistant": "Search {{targetName}} or type ? to ask the Grafana Assistant",
+    "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant"
   },
   "quick-search-assistant": {
     "label-filters-title": "",
@@ -227,6 +229,9 @@
     "open-in-drilldown": "",
     "open-in-drilldown-tooltip": "",
     "suggestions": ""
+  },
+  "related-metrics": {
+    "search-aria-label": ""
   },
   "select-action": {
     "button": ""
@@ -318,16 +323,22 @@
   },
   "usage-data": {
     "metric-used-in-plural_one": "",
+    "metric-used-in-plural_many": "",
     "metric-used-in-plural_other": "",
     "metric-used-in-singular_one": "",
+    "metric-used-in-singular_many": "",
     "metric-used-in-singular_other": "",
     "metric-used-plural_one": "",
+    "metric-used-plural_many": "",
     "metric-used-plural_other": "",
     "metric-used-singular_one": "",
+    "metric-used-singular_many": "",
     "metric-used-singular_other": "",
     "used-time-plural_one": "",
+    "used-time-plural_many": "",
     "used-time-plural_other": "",
     "used-time-singular_one": "",
+    "used-time-singular_many": "",
     "used-time-singular_other": ""
   },
   "with-config-panel-options": {

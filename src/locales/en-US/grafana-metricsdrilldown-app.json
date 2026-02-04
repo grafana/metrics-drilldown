@@ -18,6 +18,7 @@
       "error-title": "Error while loading metrics!",
       "label": "label value",
       "no-values": "No label values found for the current filters and time range.",
+      "search-aria-label": "Quick search label values",
       "search-label": "Search",
       "view-label": "View"
     },
@@ -117,6 +118,9 @@
   "lazy-loading": {
     "fallback": "Loading..."
   },
+  "list-controls": {
+    "search-aria-label": "Quick search metrics"
+  },
   "metrics-group-by-list": {
     "error-title": "Error while loading label \"{{labelName}}\" values!",
     "no-values": "No label values found for label \"{{labelName}}\".",
@@ -196,9 +200,6 @@
     "view-by-label": "View by"
   },
   "quick-search": {
-    "aria-label-label-values": "Quick search label values",
-    "aria-label-metrics": "Quick search metrics",
-    "aria-label-related-metrics": "Quick search related metrics",
     "ask-assistant-aria-label": "Ask the Grafana Assistant",
     "ask-assistant-tooltip": "Ask the Grafana Assistant",
     "clear-search-tooltip": "Clear search",
@@ -227,6 +228,9 @@
     "open-in-drilldown": "Open in Logs Drilldown",
     "open-in-drilldown-tooltip": "Use the Logs Drilldown app to explore these logs",
     "suggestions": "To find related logs, try the following:<1><0>Adjust your label filters to include labels that exist in both the current metric and your logs</0><1>Select a metric created by a <2>Loki Recording Rule</2></1><2>Broaden the time range to include more data</2></1>"
+  },
+  "related-metrics": {
+    "search-aria-label": "Quick search related metrics"
   },
   "select-action": {
     "button": "Select"

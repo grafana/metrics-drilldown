@@ -30,7 +30,7 @@ interface QuickSearchState extends SceneObjectState {
   value: string;
   isQuestionMode: boolean;
   assistantTabExperimentVariant: 'treatment' | 'control' | 'excluded';
-  ariaLabel?: string;
+  ariaLabel: string;
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
@@ -68,7 +68,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     targetName: QuickSearchState['targetName'];
     countsProvider: QuickSearchState['countsProvider'];
     displayCounts?: QuickSearchState['displayCounts'];
-    ariaLabel?: QuickSearchState['ariaLabel'];
+    ariaLabel: QuickSearchState['ariaLabel'];
   }) {
     super({
       key: 'quick-search',
@@ -184,7 +184,8 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   static readonly Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
-    const { targetName, value, countsProvider, isQuestionMode, assistantTabExperimentVariant, ariaLabel } = model.useState();
+    const { targetName, value, countsProvider, isQuestionMode, assistantTabExperimentVariant, ariaLabel } =
+      model.useState();
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
     const isAssistantAvailable = useQuickSearchAssistantAvailability();
     const inputRef = React.useRef<HTMLInputElement>(null);
@@ -243,6 +244,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     return (
       <Input
         ref={inputRef}
+        aria-label={ariaLabel}
         value={value}
         onChange={handleChange}
         onKeyDown={model.onKeyDown}
