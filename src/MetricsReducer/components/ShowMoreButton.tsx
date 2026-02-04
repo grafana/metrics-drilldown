@@ -13,21 +13,14 @@ type ShowMoreButtonProps = {
   tooltip?: string;
 };
 
+// eslint-disable-next-line no-unused-vars
 export function ShowMoreButton({ label, batchSizes, onClick, tooltip }: Readonly<ShowMoreButtonProps>) {
-  const buttonText =
-    batchSizes.increment === 1
-      ? t('show-more-button.text-singular', 'Show {{increment}} more {{label}} ({{current}}/{{total}})', {
-          increment: batchSizes.increment,
-          label,
-          current: batchSizes.current,
-          total: batchSizes.total,
-        })
-      : t('show-more-button.text-plural', 'Show {{increment}} more {{label}}s ({{current}}/{{total}})', {
-          increment: batchSizes.increment,
-          label,
-          current: batchSizes.current,
-          total: batchSizes.total,
-        });
+  const buttonText = t('show-more-button.text', 'Show {{increment}} more ({{current}}/{{total}})', {
+    increment: batchSizes.increment,
+    current: batchSizes.current,
+    total: batchSizes.total,
+    count: batchSizes.increment,
+  });
 
   return (
     <Button variant="secondary" fill="outline" onClick={onClick} tooltip={tooltip} tooltipPlacement="top">
