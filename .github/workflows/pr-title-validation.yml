@@ -9,6 +9,7 @@ on:
 permissions:
   issues: write
   pull-requests: read
+
 jobs:
   validate-pr-title:
     runs-on: ubuntu-latest
