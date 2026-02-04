@@ -9,7 +9,8 @@
     "extensions": {
       "exposedComponents": [
         "grafana/add-to-dashboard-form/v1",
-        "grafana/alerting/create-alert-from-panel/v1"
+        "grafana/alerting/create-alert-from-panel/v1",
+        "grafana/prometheus-query-results/v1"
       ]
     }
   },

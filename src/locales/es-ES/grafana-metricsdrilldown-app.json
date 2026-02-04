@@ -2,6 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "",
+      "query-results": "",
+      "query-results-description": "",
       "related-logs": "",
       "related-logs-description": "",
       "related-metrics": "",
@@ -194,6 +196,12 @@
     "all-metrics": "",
     "tooltip": "",
     "view-by-label": ""
+  },
+  "query-results": {
+    "aria-label": "",
+    "error-title": "",
+    "unavailable-message": "",
+    "unavailable-title": ""
   },
   "quick-search": {
     "ask-assistant-aria-label": "",

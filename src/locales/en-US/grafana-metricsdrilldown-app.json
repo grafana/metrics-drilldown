@@ -2,6 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Breakdown",
+      "query-results": "Query Results",
+      "query-results-description": "Instant query data in table format",
       "related-logs": "Related logs",
       "related-logs-description": "Relevant logs based on current label filters and time range",
       "related-metrics": "Related metrics",
@@ -193,6 +195,12 @@
     "all-metrics": "All metric names",
     "tooltip": "View by the metric prefix. A metric prefix is a single word at the beginning of the metric name, relevant to the domain the metric belongs to.",
     "view-by-label": "View by"
+  },
+  "query-results": {
+    "aria-label": "Instant query results",
+    "error-title": "Query failed",
+    "unavailable-message": "This feature requires a newer version of Grafana.",
+    "unavailable-title": "Query Results component unavailable"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Ask the Grafana Assistant",
