@@ -249,6 +249,7 @@
     "filter": {
       "clear-search-tooltip": "",
       "hide-empty": "",
+      "search-aria-label": "",
       "search-placeholder": ""
     },
     "filter-type": {
@@ -259,6 +260,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "",
+      "search-aria-label": "",
       "search-placeholder": ""
     },
     "recent-metrics": {
