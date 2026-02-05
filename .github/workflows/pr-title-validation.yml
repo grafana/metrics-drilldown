@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: PR Conventional Commit Validation
-        uses: grafana/PRConventionalCommits@7e66b7b56aa1c4b0fe22cae36d47e955e578b060 # main
+        uses: grafana/PRConventionalCommits@cb03ddf6a6e701a86681d33114e42cb6c491941d # main
         with:
           task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert","build","i18n"]'
           add_label: 'true'
