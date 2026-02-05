@@ -12,9 +12,7 @@ export function HelpControls() {
   return (
     <div className={styles.container}>
       <Stack direction="row" gap={1} alignItems="center">
-        <div className={styles.feedbackWrapper}>
-          <GiveFeedbackButton />
-        </div>
+        <GiveFeedbackButton className={styles.feedbackStatic} />
         <PluginInfo />
       </Stack>
     </div>
@@ -29,11 +27,8 @@ function getStyles(theme: GrafanaTheme2) {
       right: theme.spacing(2),
       zIndex: theme.zIndex.dropdown,
     }),
-    // Override GiveFeedbackButton's internal absolute positioning
-    feedbackWrapper: css({
-      '& > div': {
-        position: 'static',
-      },
+    feedbackStatic: css({
+      position: 'static',
     }),
   };
 }

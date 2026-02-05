@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { Icon, useStyles2 } from '@grafana/ui';
@@ -8,15 +8,19 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 const FEEDBACK_FORM_URL_GOOGLE = 'https://forms.gle/5E9JGAuHqTcS5YJ29';
 
+interface Props {
+  className?: string;
+}
+
 function trackUsage() {
   reportExploreMetrics('give_feedback_clicked', {});
 }
 
-export const GiveFeedbackButton = () => {
+export const GiveFeedbackButton = ({ className }: Props) => {
   const styles = useStyles2(getStyles);
 
   return (
-    <div className={styles.wrapper}>
+    <div className={cx(styles.wrapper, className)}>
       <a
         href={FEEDBACK_FORM_URL_GOOGLE}
         className={styles.feedback}
