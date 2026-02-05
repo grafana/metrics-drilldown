@@ -7,3 +7,6 @@ rules:
       policies:
         actions/*: any # trust GitHub
         grafana/*: any # trust Grafana
+  dangerous-triggers:
+    ignore:
+      - pr-title-validation.yml

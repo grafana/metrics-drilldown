@@ -86,6 +86,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         targetName: 'label value',
         countsProvider: new LabelValuesCountsProvider(),
         displayCounts: true,
+        ariaLabel: t('breakdown.label-values-list.search-aria-label', 'Quick search label values'),
       }),
       sortBySelector: new SortBySelector({ target: 'labels' }),
       $data: new SceneDataTransformer({
