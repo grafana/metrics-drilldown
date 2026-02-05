@@ -2,6 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "",
+      "query-results": "",
+      "query-results-description": "",
       "related-logs": "",
       "related-logs-description": "",
       "related-metrics": "",
@@ -18,6 +20,7 @@
       "error-title": "",
       "label": "",
       "no-values": "",
+      "search-aria-label": "",
       "search-label": "",
       "view-label": ""
     },
@@ -119,6 +122,9 @@
   "lazy-loading": {
     "fallback": ""
   },
+  "list-controls": {
+    "search-aria-label": ""
+  },
   "metrics-group-by-list": {
     "error-title": "",
     "no-values": "",
@@ -197,6 +203,12 @@
     "tooltip": "",
     "view-by-label": ""
   },
+  "query-results": {
+    "aria-label": "",
+    "error-title": "",
+    "unavailable-message": "",
+    "unavailable-title": ""
+  },
   "quick-search": {
     "ask-assistant-aria-label": "",
     "ask-assistant-tooltip": "",
@@ -230,6 +242,9 @@
     "open-in-drilldown-tooltip": "",
     "suggestions": ""
   },
+  "related-metrics": {
+    "search-aria-label": ""
+  },
   "select-action": {
     "button": ""
   },
@@ -253,6 +268,7 @@
     "filter": {
       "clear-search-tooltip": "",
       "hide-empty": "",
+      "search-aria-label": "",
       "search-placeholder": ""
     },
     "filter-type": {
@@ -263,6 +279,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "",
+      "search-aria-label": "",
       "search-placeholder": ""
     },
     "recent-metrics": {
