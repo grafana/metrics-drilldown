@@ -213,14 +213,14 @@
     "ask-assistant-aria-label": "",
     "ask-assistant-tooltip": "",
     "clear-search-tooltip": "",
-    "placeholder": "Search {{targetName}}",
+    "placeholder": "",
     "placeholder-question-mode": "",
-    "placeholder-with-assistant": "Search {{targetName}} or type ? to ask the Grafana Assistant",
-    "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant",
+    "placeholder-with-assistant": "",
+    "placeholder-with-assistant-tab-enter": "",
     "count-filtered_one": "",
-    "count-filtered_other": "{{targetName}}: {{count}} of {{total}} in total",
+    "count-filtered_other": "",
     "count-total_one": "",
-    "count-total_other": "{{targetName}}: {{count}} in total"
+    "count-total_other": ""
   },
   "quick-search-assistant": {
     "label-filters-title": "",
