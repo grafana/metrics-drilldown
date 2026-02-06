@@ -40,7 +40,7 @@ jobs:
         (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'pnpm version')) ||
         (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')))
       )
-    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v4.3.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v6.0.0
     with:
       environment: "prod" # publishing to 'prod' will also deploy to 'ops' and 'dev'
       attestation: true # this guarantees that the plugin was built from the source code provided in the release
