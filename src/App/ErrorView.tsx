@@ -5,6 +5,7 @@ import { Collapse, TextLink, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { HelpControls } from './HelpControls';
 import { InlineBanner } from './InlineBanner';
 
 type ErrorViewProps = { error: Error };
@@ -32,6 +33,7 @@ export function ErrorView({ error }: Readonly<ErrorViewProps>) {
 
   return (
     <div className={styles.container}>
+      <HelpControls />
       <InlineBanner
         severity="error"
         title={t('error-view.title', 'Fatal error!')}
@@ -70,6 +72,7 @@ export function ErrorView({ error }: Readonly<ErrorViewProps>) {
 function getStyles(theme: GrafanaTheme2) {
   return {
     container: css({
+      position: 'relative',
       margin: theme.spacing(2),
     }),
     message: css({

@@ -44,6 +44,9 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
 
   const [promBuildInfo, setPromBuildInfo] = useState<PrometheusBuildInfo>();
   useEffect(() => {
+    if (!getPrometheusBuildInfo) {
+      return;
+    }
     getPrometheusBuildInfo()
       .then((info) => setPromBuildInfo(info))
       .catch((e) => {
@@ -139,7 +142,7 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
   );
 }
 
-type PluginInfoProps = { getPrometheusBuildInfo: () => Promise<PrometheusBuildInfo | undefined> };
+type PluginInfoProps = { getPrometheusBuildInfo?: () => Promise<PrometheusBuildInfo | undefined> };
 
 export function PluginInfo({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
   return (
