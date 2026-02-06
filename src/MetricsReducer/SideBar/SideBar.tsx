@@ -10,7 +10,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { IconButton, Stack, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/LabelsVariable';
@@ -333,6 +333,37 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       .findByKeyAndType(model, VAR_WINGMAN_GROUP_BY, LabelsVariable)
       .useState().value;
 
+    // Focus management refs
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const buttonRefs = useRef<Record<string, React.RefObject<HTMLButtonElement>>>({});
+    const lastOpenedKeyRef = useRef<string | null>(null);
+
+    // Lazily create refs for each section button
+    for (const section of sections) {
+      const key = section.state.key;
+      if (key && !buttonRefs.current[key]) {
+        buttonRefs.current[key] = React.createRef<HTMLButtonElement>();
+      }
+    }
+
+    // Move focus on open/close
+    const visibleKey = visibleSection?.state.key ?? null;
+    useEffect(() => {
+      let rafId: number | undefined;
+      if (visibleKey) {
+        lastOpenedKeyRef.current = visibleKey;
+        rafId = requestAnimationFrame(() => closeButtonRef.current?.focus());
+      } else if (lastOpenedKeyRef.current) {
+        const returnKey = lastOpenedKeyRef.current;
+        rafId = requestAnimationFrame(() => buttonRefs.current[returnKey]?.current?.focus());
+      }
+      return () => {
+        if (rafId !== undefined) {
+          cancelAnimationFrame(rafId);
+        }
+      };
+    }, [visibleKey]);
+
     return (
       <div className={styles.container}>
         <Stack direction="row" height="100%" gap={0}>
@@ -374,6 +405,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                     )}
                   >
                     <SideBarButton
+                      ref={buttonRefs.current[key]}
                       key={key}
                       ariaLabel={ariaLabel}
                       disabled={disabled}
@@ -391,6 +423,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           {visibleSection && (
             <div className={styles.content} data-testid="sidebar-content">
               <IconButton
+                ref={closeButtonRef}
                 className={styles.closeButton}
                 name="times"
                 aria-label={t('sidebar.close-aria-label', 'Close')}
