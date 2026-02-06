@@ -341,7 +341,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     // Lazily create refs for each section button
     for (const section of sections) {
       const key = section.state.key;
-      if (!buttonRefs.current[key]) {
+      if (key && !buttonRefs.current[key]) {
         buttonRefs.current[key] = React.createRef<HTMLButtonElement>();
       }
     }
@@ -349,13 +349,15 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     // Move focus on open/close
     const visibleKey = visibleSection?.state.key ?? null;
     useEffect(() => {
+      let rafId: number;
       if (visibleKey) {
         lastOpenedKeyRef.current = visibleKey;
-        requestAnimationFrame(() => closeButtonRef.current?.focus());
+        rafId = requestAnimationFrame(() => closeButtonRef.current?.focus());
       } else if (lastOpenedKeyRef.current) {
         const returnKey = lastOpenedKeyRef.current;
-        requestAnimationFrame(() => buttonRefs.current[returnKey]?.current?.focus());
+        rafId = requestAnimationFrame(() => buttonRefs.current[returnKey]?.current?.focus());
       }
+      return () => cancelAnimationFrame(rafId);
     }, [visibleKey]);
 
     return (
