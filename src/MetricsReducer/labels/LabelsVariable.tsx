@@ -41,11 +41,15 @@ export class LabelsVariable extends QueryVariable {
   onActivate() {
     this.subscribeToState((newState, prevState) => {
       if (newState.query !== prevState.query) {
-        // store the current value in a static option so we can preserve it in the UI even if new options don't contain it
-        this.setState({
-          staticOptions: [{ value: newState.value as string, label: newState.value as string }],
-        });
+        // Store the current value in a static option so we can preserve it in the UI even if new options don't contain it.
+        // Only add when value is non-empty; otherwise we'd inject an option with empty label (a11y bug on first render).
+        const value = newState.value as string;
+        const staticOptions =
+          value != null && String(value).trim() !== ''
+            ? [{ value, label: value }]
+            : [];
 
+        this.setState({ staticOptions });
         this.refreshOptions();
       }
 
