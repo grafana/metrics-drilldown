@@ -214,9 +214,9 @@
     "placeholder-question-mode": "",
     "placeholder-with-assistant": "Search {{targetName}} or type ? to ask the Grafana Assistant",
     "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant",
-    "count-filtered_one": "{{targetName}}: 1 of {{total}} in total",
+    "count-filtered_one": "",
     "count-filtered_other": "{{targetName}}: {{count}} of {{total}} in total",
-    "count-total_one": "{{targetName}}: 1 in total",
+    "count-total_one": "",
     "count-total_other": "{{targetName}}: {{count}} in total"
   },
   "quick-search-assistant": {
@@ -248,7 +248,7 @@
     "open-in-drilldown-tooltip": ""
   },
   "show-more-button": {
-    "text_one": "Show 1 more ({{current}}/{{total}})",
+    "text_one": "",
     "text_other": "Show {{increment}} more ({{current}}/{{total}})"
   },
   "sidebar": {
