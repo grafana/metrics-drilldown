@@ -89,7 +89,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
 
   static readonly Component = ({ model }: SceneComponentProps<MetricsGroupByList>) => {
     const styles = useStyles2(getStyles);
-    const { body, $variables, labelName } = model.useState();
+    const { body, $variables } = model.useState();
 
     const variable = $variables.state.variables[0] as LabelValuesVariable;
     const { loading, error } = variable.useState();
@@ -109,7 +109,6 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
             <ShowMoreButton
-              label={t('metrics-group-by-list.show-more-label', '"{{labelName}}" value', { labelName })}
               batchSizes={batchSizes}
               onClick={onClickShowMore}
             />

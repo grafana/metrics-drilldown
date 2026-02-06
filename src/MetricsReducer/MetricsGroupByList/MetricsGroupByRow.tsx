@@ -238,7 +238,6 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
               <div className={styles.footer}>
                 <Stack direction="row" justifyContent="center" alignItems="center">
                   <ShowMoreButton
-                    label={t('metrics-group-by-row.metric-label', 'metric')}
                     batchSizes={batchSizes}
                     onClick={onClickShowMore}
                     tooltip={t(

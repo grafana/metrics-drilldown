@@ -160,32 +160,25 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       };
     }
 
+    // When showing all items
     if (counts.current === counts.total) {
       return {
         tagName: `${counts.current}`,
-        tooltipContent:
-          counts.current !== 1
-            ? t('quick-search.count-total-plural', '{{count}} {{targetName}}s in total', {
-                count: counts.current,
-                targetName,
-              })
-            : t('quick-search.count-total-singular', '1 {{targetName}} in total', { targetName }),
+        tooltipContent: t('quick-search.count-total', '{{targetName}}: {{count}} in total', {
+          targetName,
+          count: counts.current,
+        }),
       };
     }
 
+    // When filtered
     return {
       tagName: `${counts.current}/${counts.total}`,
-      tooltipContent:
-        counts.current !== 1
-          ? t('quick-search.count-filtered-plural', '{{current}} out of {{total}} {{targetName}}s in total', {
-              current: counts.current,
-              total: counts.total,
-              targetName,
-            })
-          : t('quick-search.count-filtered-singular', '1 out of {{total}} {{targetName}}s in total', {
-              total: counts.total,
-              targetName,
-            }),
+      tooltipContent: t('quick-search.count-filtered', '{{targetName}}: {{count}} of {{total}} in total', {
+        targetName,
+        total: counts.total,
+        count: counts.current,
+      }),
     };
   }
 
