@@ -11,7 +11,7 @@ export function getQuickSearchPlaceholder(args: {
   const { targetName, isQuestionMode, isAssistantAvailable, assistantHintType } = args;
 
   if (!isAssistantAvailable) {
-    return t('quick-search.placeholder', 'Quick search {{targetName}}s', { targetName });
+    return t('quick-search.placeholder', 'Search {{targetName}}', { targetName });
   }
 
   if (isQuestionMode) {
@@ -19,7 +19,7 @@ export function getQuickSearchPlaceholder(args: {
   }
 
   if (assistantHintType === 'question_mark') {
-    return t('quick-search.placeholder-with-assistant', 'Quick search {{targetName}}s or type ? to ask the Grafana Assistant', {
+    return t('quick-search.placeholder-with-assistant', 'Search {{targetName}} or type ? to ask the Grafana Assistant', {
       targetName,
     });
   }
@@ -27,10 +27,10 @@ export function getQuickSearchPlaceholder(args: {
   if (assistantHintType === 'tab_enter') {
     return t(
       'quick-search.placeholder-with-assistant-tab-enter',
-      'Quick search {{targetName}}s or press tab then enter to ask the Grafana Assistant',
+      'Search {{targetName}} or press tab then enter to ask the Grafana Assistant',
       { targetName }
     );
   }
 
-  return t('quick-search.placeholder', 'Quick search {{targetName}}s', { targetName });
+  return t('quick-search.placeholder', 'Search {{targetName}}', { targetName });
 }
