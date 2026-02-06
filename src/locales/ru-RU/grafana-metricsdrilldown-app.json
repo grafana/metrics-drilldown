@@ -252,7 +252,7 @@
   },
   "show-more-button": {
     "text_one": "",
-    "text_other": "Show {{increment}} more ({{current}}/{{total}})"
+    "text_other": ""
   },
   "sidebar": {
     "bookmarks": {

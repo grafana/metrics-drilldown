@@ -245,7 +245,7 @@
   },
   "show-more-button": {
     "text_one": "Show {{count}} more ({{current}}/{{total}})",
-    "text_other": "Show {{increment}} more ({{current}}/{{total}})"
+    "text_other": "Show {{count}} more ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {

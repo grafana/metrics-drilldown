@@ -13,8 +13,7 @@ type ShowMoreButtonProps = {
 };
 
 export function ShowMoreButton({ batchSizes, onClick, tooltip }: Readonly<ShowMoreButtonProps>) {
-  const buttonText = t('show-more-button.text', 'Show {{increment}} more ({{current}}/{{total}})', {
-    increment: batchSizes.increment,
+  const buttonText = t('show-more-button.text', 'Show {{count}} more ({{current}}/{{total}})', {
     current: batchSizes.current,
     total: batchSizes.total,
     count: batchSizes.increment,
