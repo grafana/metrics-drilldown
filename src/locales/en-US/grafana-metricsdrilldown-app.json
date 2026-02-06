@@ -206,12 +206,14 @@
     "ask-assistant-aria-label": "Ask the Grafana Assistant",
     "ask-assistant-tooltip": "Ask the Grafana Assistant",
     "clear-search-tooltip": "Clear search",
+    "count-filtered_one": "{{targetName}}: 1 of {{total}} in total",
+    "count-filtered_other": "{{targetName}}: {{count}} of {{total}} in total",
+    "count-total_one": "{{targetName}}: 1 in total",
+    "count-total_other": "{{targetName}}: {{count}} in total",
     "placeholder": "Search {{targetName}}",
     "placeholder-question-mode": "Ask the Grafana Assistant a question and press enter",
     "placeholder-with-assistant": "Search {{targetName}} or type ? to ask the Grafana Assistant",
-    "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant",
-    "count-filtered": "{{targetName}}: {{count}} of {{total}} in total",
-    "count-total": "{{targetName}}: {{count}} in total"
+    "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant"
   },
   "quick-search-assistant": {
     "label-filters-title": "Current label filters",
@@ -242,7 +244,8 @@
     "open-in-drilldown-tooltip": "Open in Metrics Drilldown"
   },
   "show-more-button": {
-    "text": "Show {{count}} more ({{current}}/{{total}})"
+    "text_one": "Show 1 more ({{current}}/{{total}})",
+    "text_other": "Show {{increment}} more ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
