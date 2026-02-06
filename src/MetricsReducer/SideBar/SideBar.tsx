@@ -349,7 +349,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     // Move focus on open/close
     const visibleKey = visibleSection?.state.key ?? null;
     useEffect(() => {
-      let rafId: number;
+      let rafId: number | undefined;
       if (visibleKey) {
         lastOpenedKeyRef.current = visibleKey;
         rafId = requestAnimationFrame(() => closeButtonRef.current?.focus());
@@ -357,7 +357,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         const returnKey = lastOpenedKeyRef.current;
         rafId = requestAnimationFrame(() => buttonRefs.current[returnKey]?.current?.focus());
       }
-      return () => cancelAnimationFrame(rafId);
+      return () => {
+        if (rafId !== undefined) {
+          cancelAnimationFrame(rafId);
+        }
+      };
     }, [visibleKey]);
 
     return (

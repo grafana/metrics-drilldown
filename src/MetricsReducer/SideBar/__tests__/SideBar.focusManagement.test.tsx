@@ -1,5 +1,5 @@
-import { act, render, screen } from '@testing-library/react';
-import React from 'react';
+import { render, screen } from '@testing-library/react';
+import React, { act } from 'react';
 
 import { Settings } from '../sections/Settings';
 import { SideBar } from '../SideBar';
@@ -27,7 +27,9 @@ jest.mock('@grafana/scenes', () => ({
  * We only care about the SideBar shell (buttons, close button, focus behavior).
  */
 // @ts-expect-error - overriding readonly static for test stub
-Settings.Component = () => null;
+Settings.Component = function SettingsStub() {
+  return null;
+};
 
 // =============================================================================
 // HELPERS
@@ -65,8 +67,8 @@ function renderSideBar(sidebar: SideBar) {
  * The focus management logic uses rAF to wait for the DOM update
  * after the close button is conditionally rendered.
  */
-function flushRAF() {
-  act(() => {
+async function flushRAF() {
+  await act(async () => {
     jest.runAllTimers();
   });
 }
@@ -84,102 +86,102 @@ describe('SideBar focus management (WCAG 2.4.3)', () => {
     jest.useRealTimers();
   });
 
-  it('should move focus to close button when a section opens', () => {
+  it('should move focus to close button when a section opens', async () => {
     const sidebar = createSideBar();
     renderSideBar(sidebar);
 
     // Open section A
-    act(() => {
+    await act(async () => {
       sidebar.setState({
         visibleSection: sidebar.state.sections.find((s) => s.state.key === 'section-a') ?? null,
       });
     });
-    flushRAF();
+    await flushRAF();
 
     const closeButton = screen.getByRole('button', { name: /close/i });
     expect(closeButton).toHaveFocus();
   });
 
-  it('should return focus to the triggering button when a section closes', () => {
+  it('should return focus to the triggering button when a section closes', async () => {
     const sidebar = createSideBar();
     renderSideBar(sidebar);
 
     // Open section A
-    act(() => {
+    await act(async () => {
       sidebar.setState({
         visibleSection: sidebar.state.sections.find((s) => s.state.key === 'section-a') ?? null,
       });
     });
-    flushRAF();
+    await flushRAF();
 
     // Close the sidebar
-    act(() => {
+    await act(async () => {
       sidebar.setState({ visibleSection: null });
     });
-    flushRAF();
+    await flushRAF();
 
     const sectionAButton = screen.getByRole('button', { name: 'section-a' });
     expect(sectionAButton).toHaveFocus();
   });
 
-  it('should move focus to close button when switching between sections', () => {
+  it('should move focus to close button when switching between sections', async () => {
     const sidebar = createSideBar();
     renderSideBar(sidebar);
 
     // Open section A
-    act(() => {
+    await act(async () => {
       sidebar.setState({
         visibleSection: sidebar.state.sections.find((s) => s.state.key === 'section-a') ?? null,
       });
     });
-    flushRAF();
+    await flushRAF();
 
     // Switch to section B
-    act(() => {
+    await act(async () => {
       sidebar.setState({
         visibleSection: sidebar.state.sections.find((s) => s.state.key === 'section-b') ?? null,
       });
     });
-    flushRAF();
+    await flushRAF();
 
     const closeButton = screen.getByRole('button', { name: /close/i });
     expect(closeButton).toHaveFocus();
   });
 
-  it('should return focus to the last opened section button after switching and closing', () => {
+  it('should return focus to the last opened section button after switching and closing', async () => {
     const sidebar = createSideBar();
     renderSideBar(sidebar);
 
     // Open section A, then switch to section B
-    act(() => {
+    await act(async () => {
       sidebar.setState({
         visibleSection: sidebar.state.sections.find((s) => s.state.key === 'section-a') ?? null,
       });
     });
-    flushRAF();
+    await flushRAF();
 
-    act(() => {
+    await act(async () => {
       sidebar.setState({
         visibleSection: sidebar.state.sections.find((s) => s.state.key === 'section-b') ?? null,
       });
     });
-    flushRAF();
+    await flushRAF();
 
     // Close the sidebar
-    act(() => {
+    await act(async () => {
       sidebar.setState({ visibleSection: null });
     });
-    flushRAF();
+    await flushRAF();
 
     // Focus should return to section B's button (the last opened section)
     const sectionBButton = screen.getByRole('button', { name: 'section-b' });
     expect(sectionBButton).toHaveFocus();
   });
 
-  it('should not move focus on initial render when no section is open', () => {
+  it('should not move focus on initial render when no section is open', async () => {
     const sidebar = createSideBar();
     renderSideBar(sidebar);
-    flushRAF();
+    await flushRAF();
 
     // No button should have focus — the sidebar is closed and nothing triggered focus management
     const sectionAButton = screen.getByRole('button', { name: 'section-a' });
