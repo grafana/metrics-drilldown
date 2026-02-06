@@ -8,6 +8,6 @@ on:
 
 jobs:
   create-tasks-in-crowdin:
-    uses: grafana/grafana-github-actions/.github/workflows/crowdin-create-tasks.yml@chore/i18n-npm
+    uses: grafana/grafana-github-actions/.github/workflows/crowdin-create-tasks.yml@main
     with:
       crowdin_project_id: 38
