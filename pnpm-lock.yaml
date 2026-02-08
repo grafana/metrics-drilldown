@@ -139,8 +139,8 @@ importers:
         specifier: ^4.17.23
         version: 4.17.23
       '@types/node':
-        specifier: 20.19.30
-        version: 20.19.30
+        specifier: 24.10.11
+        version: 24.10.11
       '@types/react':
         specifier: ^18.3.27
         version: 18.3.27
@@ -179,7 +179,7 @@ importers:
         version: 2.32.0(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-jest:
         specifier: 28.14.0
-        version: 28.14.0(@typescript-eslint/eslint-plugin@8.54.0(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(jest@29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 28.14.0(@typescript-eslint/eslint-plugin@8.54.0(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(jest@29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3)))(typescript@5.9.3)
       eslint-plugin-jsdoc:
         specifier: 46.10.1
         version: 46.10.1(eslint@9.39.2(jiti@2.6.1))
@@ -212,7 +212,7 @@ importers:
         version: 17.3.0
       i18next-cli:
         specifier: ^1.40.1
-        version: 1.41.4(@swc/helpers@0.5.18)(@types/node@20.19.30)(i18next@25.8.2(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(typescript@5.9.3)
+        version: 1.41.4(@swc/helpers@0.5.18)(@types/node@24.10.11)(i18next@25.8.2(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(typescript@5.9.3)
       identity-obj-proxy:
         specifier: 3.0.0
         version: 3.0.0
@@ -221,7 +221,7 @@ importers:
         version: 5.0.0(webpack@5.104.1)
       jest:
         specifier: 29.7.0
-        version: 29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+        version: 29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
       jest-environment-jsdom:
         specifier: 29.7.0
         version: 29.7.0
@@ -248,7 +248,7 @@ importers:
         version: 5.3.16(@swc/core@1.15.11(@swc/helpers@0.5.18))(webpack@5.104.1)
       ts-node:
         specifier: 10.9.2
-        version: 10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3)
+        version: 10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1890,8 +1890,8 @@ packages:
   '@types/minimatch@3.0.5':
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
 
-  '@types/node@20.19.30':
-    resolution: {integrity: sha512-WJtwWJu7UdlvzEAUm484QNg5eAoq5QR08KDNx7g45Usrs2NtOPiX8ugDqmKdXkyL03rBqU5dYNYVQetEpBHq2g==}
+  '@types/node@24.10.11':
+    resolution: {integrity: sha512-/Af7O8r1frCVgOz0I62jWUtMohJ0/ZQU/ZoketltOJPZpnb17yoNc9BSoVuV9qlaIXJiPNOpsfq4ByFajSArNQ==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -6129,8 +6129,8 @@ packages:
   underscore.string@3.3.6:
     resolution: {integrity: sha512-VoC83HWXmCrF6rgkyxS9GHv8W9Q5nhMKho+OadDJGzL2oDYbYEppBaCMH6pFlwLeqj2QS+hhkw2kpXkSdD1JxQ==}
 
-  undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+  undici-types@7.16.0:
+    resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
   undici@7.20.0:
     resolution: {integrity: sha512-MJZrkjyd7DeC+uPZh+5/YaMDxFiiEEaDgbUSVMXayofAkDWF1088CDo+2RPg7B1BuS1qf1vgNE7xqwPxE0DuSQ==}
@@ -7516,122 +7516,122 @@ snapshots:
 
   '@inquirer/ansi@2.0.3': {}
 
-  '@inquirer/checkbox@5.0.4(@types/node@20.19.30)':
+  '@inquirer/checkbox@5.0.4(@types/node@24.10.11)':
     dependencies:
       '@inquirer/ansi': 2.0.3
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
       '@inquirer/figures': 2.0.3
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
-  '@inquirer/confirm@6.0.4(@types/node@20.19.30)':
+  '@inquirer/confirm@6.0.4(@types/node@24.10.11)':
     dependencies:
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
-  '@inquirer/core@11.1.1(@types/node@20.19.30)':
+  '@inquirer/core@11.1.1(@types/node@24.10.11)':
     dependencies:
       '@inquirer/ansi': 2.0.3
       '@inquirer/figures': 2.0.3
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
       cli-width: 4.1.0
       mute-stream: 3.0.0
       signal-exit: 4.1.0
       wrap-ansi: 9.0.2
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
-  '@inquirer/editor@5.0.4(@types/node@20.19.30)':
+  '@inquirer/editor@5.0.4(@types/node@24.10.11)':
     dependencies:
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/external-editor': 2.0.3(@types/node@20.19.30)
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/external-editor': 2.0.3(@types/node@24.10.11)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
-  '@inquirer/expand@5.0.4(@types/node@20.19.30)':
+  '@inquirer/expand@5.0.4(@types/node@24.10.11)':
     dependencies:
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
-  '@inquirer/external-editor@2.0.3(@types/node@20.19.30)':
+  '@inquirer/external-editor@2.0.3(@types/node@24.10.11)':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.2
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
   '@inquirer/figures@2.0.3': {}
 
-  '@inquirer/input@5.0.4(@types/node@20.19.30)':
+  '@inquirer/input@5.0.4(@types/node@24.10.11)':
     dependencies:
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
-  '@inquirer/number@4.0.4(@types/node@20.19.30)':
+  '@inquirer/number@4.0.4(@types/node@24.10.11)':
     dependencies:
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
-  '@inquirer/password@5.0.4(@types/node@20.19.30)':
-    dependencies:
-      '@inquirer/ansi': 2.0.3
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
-    optionalDependencies:
-      '@types/node': 20.19.30
-
-  '@inquirer/prompts@8.2.0(@types/node@20.19.30)':
-    dependencies:
-      '@inquirer/checkbox': 5.0.4(@types/node@20.19.30)
-      '@inquirer/confirm': 6.0.4(@types/node@20.19.30)
-      '@inquirer/editor': 5.0.4(@types/node@20.19.30)
-      '@inquirer/expand': 5.0.4(@types/node@20.19.30)
-      '@inquirer/input': 5.0.4(@types/node@20.19.30)
-      '@inquirer/number': 4.0.4(@types/node@20.19.30)
-      '@inquirer/password': 5.0.4(@types/node@20.19.30)
-      '@inquirer/rawlist': 5.2.0(@types/node@20.19.30)
-      '@inquirer/search': 4.1.0(@types/node@20.19.30)
-      '@inquirer/select': 5.0.4(@types/node@20.19.30)
-    optionalDependencies:
-      '@types/node': 20.19.30
-
-  '@inquirer/rawlist@5.2.0(@types/node@20.19.30)':
-    dependencies:
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
-    optionalDependencies:
-      '@types/node': 20.19.30
-
-  '@inquirer/search@4.1.0(@types/node@20.19.30)':
-    dependencies:
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/figures': 2.0.3
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
-    optionalDependencies:
-      '@types/node': 20.19.30
-
-  '@inquirer/select@5.0.4(@types/node@20.19.30)':
+  '@inquirer/password@5.0.4(@types/node@24.10.11)':
     dependencies:
       '@inquirer/ansi': 2.0.3
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/figures': 2.0.3
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
-  '@inquirer/type@4.0.3(@types/node@20.19.30)':
+  '@inquirer/prompts@8.2.0(@types/node@24.10.11)':
+    dependencies:
+      '@inquirer/checkbox': 5.0.4(@types/node@24.10.11)
+      '@inquirer/confirm': 6.0.4(@types/node@24.10.11)
+      '@inquirer/editor': 5.0.4(@types/node@24.10.11)
+      '@inquirer/expand': 5.0.4(@types/node@24.10.11)
+      '@inquirer/input': 5.0.4(@types/node@24.10.11)
+      '@inquirer/number': 4.0.4(@types/node@24.10.11)
+      '@inquirer/password': 5.0.4(@types/node@24.10.11)
+      '@inquirer/rawlist': 5.2.0(@types/node@24.10.11)
+      '@inquirer/search': 4.1.0(@types/node@24.10.11)
+      '@inquirer/select': 5.0.4(@types/node@24.10.11)
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
+
+  '@inquirer/rawlist@5.2.0(@types/node@24.10.11)':
+    dependencies:
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
+    optionalDependencies:
+      '@types/node': 24.10.11
+
+  '@inquirer/search@4.1.0(@types/node@24.10.11)':
+    dependencies:
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/figures': 2.0.3
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
+    optionalDependencies:
+      '@types/node': 24.10.11
+
+  '@inquirer/select@5.0.4(@types/node@24.10.11)':
+    dependencies:
+      '@inquirer/ansi': 2.0.3
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/figures': 2.0.3
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
+    optionalDependencies:
+      '@types/node': 24.10.11
+
+  '@inquirer/type@4.0.3(@types/node@24.10.11)':
+    optionalDependencies:
+      '@types/node': 24.10.11
 
   '@internationalized/date@3.11.0':
     dependencies:
@@ -7678,27 +7678,27 @@ snapshots:
   '@jest/console@29.7.0':
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       chalk: 4.1.2
       jest-message-util: 29.7.0
       jest-util: 29.7.0
       slash: 3.0.0
 
-  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))':
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))':
     dependencies:
       '@jest/console': 29.7.0
       '@jest/reporters': 29.7.0
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       ci-info: 3.9.0
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -7729,14 +7729,14 @@ snapshots:
     dependencies:
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-mock: 29.7.0
 
   '@jest/environment@30.2.0':
     dependencies:
       '@jest/fake-timers': 30.2.0
       '@jest/types': 30.2.0
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-mock: 30.2.0
 
   '@jest/expect-utils@29.7.0':
@@ -7765,7 +7765,7 @@ snapshots:
     dependencies:
       '@jest/types': 29.6.3
       '@sinonjs/fake-timers': 10.3.0
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-message-util: 29.7.0
       jest-mock: 29.7.0
       jest-util: 29.7.0
@@ -7774,7 +7774,7 @@ snapshots:
     dependencies:
       '@jest/types': 30.2.0
       '@sinonjs/fake-timers': 13.0.5
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-message-util: 30.2.0
       jest-mock: 30.2.0
       jest-util: 30.2.0
@@ -7801,7 +7801,7 @@ snapshots:
 
   '@jest/pattern@30.0.1':
     dependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-regex-util: 30.0.1
 
   '@jest/reporters@29.7.0':
@@ -7812,7 +7812,7 @@ snapshots:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       '@jridgewell/trace-mapping': 0.3.31
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       chalk: 4.1.2
       collect-v8-coverage: 1.0.3
       exit: 0.1.2
@@ -7913,7 +7913,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -7923,7 +7923,7 @@ snapshots:
       '@jest/schemas': 30.0.5
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -8619,7 +8619,7 @@ snapshots:
 
   '@types/graceful-fs@4.1.9':
     dependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
   '@types/hoist-non-react-statics@3.3.7(@types/react@18.3.18)':
     dependencies:
@@ -8649,7 +8649,7 @@ snapshots:
 
   '@types/jsdom@20.0.1':
     dependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       '@types/tough-cookie': 4.0.5
       parse5: 7.3.0
 
@@ -8663,9 +8663,9 @@ snapshots:
 
   '@types/minimatch@3.0.5': {}
 
-  '@types/node@20.19.30':
+  '@types/node@24.10.11':
     dependencies:
-      undici-types: 6.21.0
+      undici-types: 7.16.0
 
   '@types/parse-json@4.0.2': {}
 
@@ -9510,13 +9510,13 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  create-jest@29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3)):
+  create-jest@29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3)):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -10176,13 +10176,13 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-jest@28.14.0(@typescript-eslint/eslint-plugin@8.54.0(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(jest@29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3)))(typescript@5.9.3):
+  eslint-plugin-jest@28.14.0(@typescript-eslint/eslint-plugin@8.54.0(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(jest@29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3)))(typescript@5.9.3):
     dependencies:
       '@typescript-eslint/utils': 8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       eslint: 9.39.2(jiti@2.6.1)
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 8.54.0(@typescript-eslint/parser@8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      jest: 29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+      jest: 29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -10831,7 +10831,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.28.6
 
-  i18next-cli@1.41.4(@swc/helpers@0.5.18)(@types/node@20.19.30)(i18next@25.8.2(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(typescript@5.9.3):
+  i18next-cli@1.41.4(@swc/helpers@0.5.18)(@types/node@24.10.11)(i18next@25.8.2(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(typescript@5.9.3):
     dependencies:
       '@croct/json5-parser': 0.2.2
       '@swc/core': 1.15.11(@swc/helpers@0.5.18)
@@ -10841,7 +10841,7 @@ snapshots:
       execa: 9.6.1
       glob: 13.0.0
       i18next-resources-for-ts: 2.0.0(@swc/helpers@0.5.18)
-      inquirer: 13.2.2(@types/node@20.19.30)
+      inquirer: 13.2.2(@types/node@24.10.11)
       jiti: 2.6.1
       jsonc-parser: 3.3.1
       minimatch: 10.1.1
@@ -10973,17 +10973,17 @@ snapshots:
     dependencies:
       css-in-js-utils: 3.1.0
 
-  inquirer@13.2.2(@types/node@20.19.30):
+  inquirer@13.2.2(@types/node@24.10.11):
     dependencies:
       '@inquirer/ansi': 2.0.3
-      '@inquirer/core': 11.1.1(@types/node@20.19.30)
-      '@inquirer/prompts': 8.2.0(@types/node@20.19.30)
-      '@inquirer/type': 4.0.3(@types/node@20.19.30)
+      '@inquirer/core': 11.1.1(@types/node@24.10.11)
+      '@inquirer/prompts': 8.2.0(@types/node@24.10.11)
+      '@inquirer/type': 4.0.3(@types/node@24.10.11)
       mute-stream: 3.0.0
       run-async: 4.0.6
       rxjs: 7.8.2
     optionalDependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
 
   internal-slot@1.1.0:
     dependencies:
@@ -11239,7 +11239,7 @@ snapshots:
       '@jest/expect': 29.7.0
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       chalk: 4.1.2
       co: 4.6.0
       dedent: 1.7.1(babel-plugin-macros@3.1.0)
@@ -11259,16 +11259,16 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-cli@29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3)):
+  jest-cli@29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+      create-jest: 29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
       exit: 0.1.2
       import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -11278,7 +11278,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-config@29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3)):
+  jest-config@29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3)):
     dependencies:
       '@babel/core': 7.29.0
       '@jest/test-sequencer': 29.7.0
@@ -11303,8 +11303,8 @@ snapshots:
       slash: 3.0.0
       strip-json-comments: 3.1.1
     optionalDependencies:
-      '@types/node': 20.19.30
-      ts-node: 10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3)
+      '@types/node': 24.10.11
+      ts-node: 10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -11341,7 +11341,7 @@ snapshots:
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
       '@types/jsdom': 20.0.1
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-mock: 29.7.0
       jest-util: 29.7.0
       jsdom: 20.0.3
@@ -11355,7 +11355,7 @@ snapshots:
       '@jest/environment': 29.7.0
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-mock: 29.7.0
       jest-util: 29.7.0
 
@@ -11365,7 +11365,7 @@ snapshots:
     dependencies:
       '@jest/types': 29.6.3
       '@types/graceful-fs': 4.1.9
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -11380,7 +11380,7 @@ snapshots:
   jest-haste-map@30.2.0:
     dependencies:
       '@jest/types': 30.2.0
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -11438,13 +11438,13 @@ snapshots:
   jest-mock@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-util: 29.7.0
 
   jest-mock@30.2.0:
     dependencies:
       '@jest/types': 30.2.0
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-util: 30.2.0
 
   jest-pnp-resolver@1.2.3(jest-resolve@29.7.0):
@@ -11481,7 +11481,7 @@ snapshots:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       chalk: 4.1.2
       emittery: 0.13.1
       graceful-fs: 4.2.11
@@ -11509,7 +11509,7 @@ snapshots:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       chalk: 4.1.2
       cjs-module-lexer: 1.4.3
       collect-v8-coverage: 1.0.3
@@ -11581,7 +11581,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -11590,7 +11590,7 @@ snapshots:
   jest-util@30.2.0:
     dependencies:
       '@jest/types': 30.2.0
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       chalk: 4.1.2
       ci-info: 4.4.0
       graceful-fs: 4.2.11
@@ -11609,7 +11609,7 @@ snapshots:
     dependencies:
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.13.1
@@ -11618,31 +11618,31 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
   jest-worker@30.2.0:
     dependencies:
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       '@ungap/structured-clone': 1.3.0
       jest-util: 30.2.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
-  jest@29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3)):
+  jest@29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
       '@jest/types': 29.6.3
       import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@20.19.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3))
+      jest-cli: 29.7.0(@types/node@24.10.11)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -12279,7 +12279,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       long: 5.3.2
 
   protobufjs@8.0.0:
@@ -12294,7 +12294,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       long: 5.3.2
 
   protocol-buffers-schema@3.6.0: {}
@@ -13556,14 +13556,14 @@ snapshots:
 
   ts-easing@0.2.0: {}
 
-  ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@20.19.30)(typescript@5.9.3):
+  ts-node@10.9.2(@swc/core@1.15.11(@swc/helpers@0.5.18))(@types/node@24.10.11)(typescript@5.9.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.12
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.19.30
+      '@types/node': 24.10.11
       acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
@@ -13650,7 +13650,7 @@ snapshots:
       sprintf-js: 1.1.3
       util-deprecate: 1.0.2
 
-  undici-types@6.21.0: {}
+  undici-types@7.16.0: {}
 
   undici@7.20.0: {}
 
