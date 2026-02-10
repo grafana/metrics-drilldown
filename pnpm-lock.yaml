@@ -63,8 +63,8 @@ importers:
         specifier: ^0.308.0
         version: 0.308.0(@lezer/highlight@1.2.1)(@lezer/lr@1.4.2)
       '@react-aria/utils':
-        specifier: 3.32.0
-        version: 3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.33.0
+        version: 3.33.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       leven:
         specifier: ^4.1.0
         version: 4.1.0
@@ -1563,12 +1563,6 @@ packages:
 
   '@react-aria/utils@3.31.0':
     resolution: {integrity: sha512-ABOzCsZrWzf78ysswmguJbx3McQUja7yeGj6/vZo4JVsZNlxAN+E9rs381ExBRI0KzVo6iBTeX5De8eMZPJXig==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-      react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  '@react-aria/utils@3.32.0':
-    resolution: {integrity: sha512-/7Rud06+HVBIlTwmwmJa2W8xVtgxgzm0+kLbuFooZRzKDON6hhozS1dOMR/YLMxyJOaYOTpImcP4vRR9gL1hEg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
@@ -8239,7 +8233,7 @@ snapshots:
     dependencies:
       '@react-aria/interactions': 3.27.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/overlays': 3.30.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@react-aria/utils': 3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@react-aria/utils': 3.33.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-types/dialog': 3.5.23(react@18.3.1)
       '@react-types/shared': 3.33.0(react@18.3.1)
       '@swc/helpers': 0.5.18
@@ -8249,7 +8243,7 @@ snapshots:
   '@react-aria/focus@3.21.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@react-aria/interactions': 3.27.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@react-aria/utils': 3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@react-aria/utils': 3.33.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-types/shared': 3.33.0(react@18.3.1)
       '@swc/helpers': 0.5.18
       clsx: 2.1.1
@@ -8285,7 +8279,7 @@ snapshots:
       '@react-aria/i18n': 3.12.15(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/interactions': 3.27.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/ssr': 3.9.10(react@18.3.1)
-      '@react-aria/utils': 3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@react-aria/utils': 3.33.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/visually-hidden': 3.8.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-stately/overlays': 3.6.22(react@18.3.1)
       '@react-types/button': 3.15.0(react@18.3.1)
@@ -8301,17 +8295,6 @@ snapshots:
       react: 18.3.1
 
   '@react-aria/utils@3.31.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@react-aria/ssr': 3.9.10(react@18.3.1)
-      '@react-stately/flags': 3.1.2
-      '@react-stately/utils': 3.11.0(react@18.3.1)
-      '@react-types/shared': 3.33.0(react@18.3.1)
-      '@swc/helpers': 0.5.18
-      clsx: 2.1.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
-  '@react-aria/utils@3.32.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@react-aria/ssr': 3.9.10(react@18.3.1)
       '@react-stately/flags': 3.1.2
