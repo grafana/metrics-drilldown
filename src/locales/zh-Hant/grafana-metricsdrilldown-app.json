@@ -18,7 +18,6 @@
     },
     "label-values-list": {
       "error-title": "",
-      "label": "",
       "no-values": "",
       "search-aria-label": "",
       "search-label": "",
@@ -27,7 +26,6 @@
     "labels-list": {
       "breakdown-by-label": "",
       "error-title": "",
-      "label-label": "",
       "no-labels": "",
       "view-label": ""
     },
@@ -124,12 +122,10 @@
   },
   "metrics-group-by-list": {
     "error-title": "",
-    "no-values": "",
-    "show-more-label": ""
+    "no-values": ""
   },
   "metrics-group-by-row": {
     "error-title": "",
-    "metric-label": "",
     "no-metrics": "",
     "select": "",
     "select-tooltip": "",
@@ -137,7 +133,6 @@
   },
   "metrics-list": {
     "error-title": "",
-    "metric-label": "",
     "no-metrics": ""
   },
   "metrics-sorter": {
@@ -214,9 +209,7 @@
     "placeholder-question-mode": "",
     "placeholder-with-assistant": "",
     "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
     "count-filtered_other": "",
-    "count-total_one": "",
     "count-total_other": ""
   },
   "quick-search-assistant": {
@@ -248,7 +241,6 @@
     "open-in-drilldown-tooltip": ""
   },
   "show-more-button": {
-    "text_one": "",
     "text_other": ""
   },
   "sidebar": {
