@@ -2,6 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "",
+      "query-results": "",
+      "query-results-description": "",
       "related-logs": "",
       "related-logs-description": "",
       "related-metrics": "",
@@ -16,15 +18,14 @@
     },
     "label-values-list": {
       "error-title": "",
-      "label": "",
       "no-values": "",
+      "search-aria-label": "",
       "search-label": "",
       "view-label": ""
     },
     "labels-list": {
       "breakdown-by-label": "",
       "error-title": "",
-      "label-label": "",
       "no-labels": "",
       "view-label": ""
     },
@@ -103,7 +104,7 @@
   },
   "labels-variable": {
     "label": "",
-    "placeholder": ""
+    "placeholder": "按标签分组..."
   },
   "layout-switcher": {
     "aria-label": "",
@@ -114,16 +115,17 @@
     }
   },
   "lazy-loading": {
-    "fallback": ""
+    "fallback": "正在加载…"
+  },
+  "list-controls": {
+    "search-aria-label": ""
   },
   "metrics-group-by-list": {
     "error-title": "",
-    "no-values": "",
-    "show-more-label": ""
+    "no-values": ""
   },
   "metrics-group-by-row": {
     "error-title": "",
-    "metric-label": "",
     "no-metrics": "",
     "select": "",
     "select-tooltip": "",
@@ -131,7 +133,6 @@
   },
   "metrics-list": {
     "error-title": "",
-    "metric-label": "",
     "no-metrics": ""
   },
   "metrics-sorter": {
@@ -194,18 +195,22 @@
     "tooltip": "",
     "view-by-label": ""
   },
+  "query-results": {
+    "aria-label": "",
+    "error-title": "",
+    "unavailable-message": "",
+    "unavailable-title": ""
+  },
   "quick-search": {
     "ask-assistant-aria-label": "",
     "ask-assistant-tooltip": "",
     "clear-search-tooltip": "",
-    "count-filtered-plural": "",
-    "count-filtered-singular": "",
-    "count-total-singular": "",
     "placeholder": "",
     "placeholder-question-mode": "",
     "placeholder-with-assistant": "",
     "placeholder-with-assistant-tab-enter": "",
-    "count-total-plural_other": ""
+    "count-filtered_other": "",
+    "count-total_other": ""
   },
   "quick-search-assistant": {
     "label-filters-title": "",
@@ -215,7 +220,7 @@
     "datasource-description": "",
     "datasource-label": "",
     "experimental-note": "",
-    "loading": "",
+    "loading": "正在加载…",
     "no-logs-message": "",
     "no-logs-title": "",
     "open-drilldown": "",
@@ -223,6 +228,9 @@
     "open-in-drilldown": "",
     "open-in-drilldown-tooltip": "",
     "suggestions": ""
+  },
+  "related-metrics": {
+    "search-aria-label": ""
   },
   "select-action": {
     "button": ""
@@ -233,8 +241,7 @@
     "open-in-drilldown-tooltip": ""
   },
   "show-more-button": {
-    "text-plural": "",
-    "text-singular": ""
+    "text_other": ""
   },
   "sidebar": {
     "bookmarks": {
@@ -247,7 +254,8 @@
     "filter": {
       "clear-search-tooltip": "",
       "hide-empty": "",
-      "search-placeholder": ""
+      "search-aria-label": "",
+      "search-placeholder": "搜索..."
     },
     "filter-type": {
       "prefix": "",
@@ -257,7 +265,8 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "",
-      "search-placeholder": ""
+      "search-aria-label": "",
+      "search-placeholder": "搜索..."
     },
     "recent-metrics": {
       "all-time": "",
@@ -302,7 +311,7 @@
   "ui-text": {
     "metric-select": {
       "bookmark": "",
-      "copy-url": "",
+      "copy-url": "复制 URL",
       "open-explore": "",
       "select-new-metric-tooltip": ""
     },

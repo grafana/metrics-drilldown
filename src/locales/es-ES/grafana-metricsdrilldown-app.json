@@ -2,6 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "",
+      "query-results": "",
+      "query-results-description": "",
       "related-logs": "",
       "related-logs-description": "",
       "related-metrics": "",
@@ -16,15 +18,14 @@
     },
     "label-values-list": {
       "error-title": "",
-      "label": "",
       "no-values": "",
+      "search-aria-label": "",
       "search-label": "",
       "view-label": ""
     },
     "labels-list": {
       "breakdown-by-label": "",
       "error-title": "",
-      "label-label": "",
       "no-labels": "",
       "view-label": ""
     },
@@ -118,14 +119,15 @@
   "lazy-loading": {
     "fallback": ""
   },
+  "list-controls": {
+    "search-aria-label": ""
+  },
   "metrics-group-by-list": {
     "error-title": "",
-    "no-values": "",
-    "show-more-label": ""
+    "no-values": ""
   },
   "metrics-group-by-row": {
     "error-title": "",
-    "metric-label": "",
     "no-metrics": "",
     "select": "",
     "select-tooltip": "",
@@ -133,7 +135,6 @@
   },
   "metrics-list": {
     "error-title": "",
-    "metric-label": "",
     "no-metrics": ""
   },
   "metrics-sorter": {
@@ -196,16 +197,22 @@
     "tooltip": "",
     "view-by-label": ""
   },
+  "query-results": {
+    "aria-label": "",
+    "error-title": "",
+    "unavailable-message": "",
+    "unavailable-title": ""
+  },
   "quick-search": {
     "ask-assistant-aria-label": "",
     "ask-assistant-tooltip": "",
     "clear-search-tooltip": "",
-    "count-filtered-plural": "",
-    "count-filtered-singular": "",
-    "count-total-plural_one": "",
-    "count-total-plural_many": "",
-    "count-total-plural_other": "",
-    "count-total-singular": "",
+    "count-filtered_one": "",
+    "count-filtered_many": "",
+    "count-filtered_other": "",
+    "count-total_one": "",
+    "count-total_many": "",
+    "count-total_other": "",
     "placeholder": "",
     "placeholder-question-mode": "",
     "placeholder-with-assistant": "",
@@ -228,6 +235,9 @@
     "open-in-drilldown-tooltip": "",
     "suggestions": ""
   },
+  "related-metrics": {
+    "search-aria-label": ""
+  },
   "select-action": {
     "button": ""
   },
@@ -237,8 +247,9 @@
     "open-in-drilldown-tooltip": ""
   },
   "show-more-button": {
-    "text-plural": "",
-    "text-singular": ""
+    "text_one": "",
+    "text_many": "",
+    "text_other": ""
   },
   "sidebar": {
     "bookmarks": {
@@ -251,6 +262,7 @@
     "filter": {
       "clear-search-tooltip": "",
       "hide-empty": "",
+      "search-aria-label": "",
       "search-placeholder": ""
     },
     "filter-type": {
@@ -261,6 +273,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "",
+      "search-aria-label": "",
       "search-placeholder": ""
     },
     "recent-metrics": {

@@ -1,16 +1,22 @@
 name: 'PR title validation (Conventional Commits spec)'
 
 on:
-  pull_request:
+  # Using pull_request_target to allow labeling fork PRs.
+  # This is safe because this workflow only reads PR metadata (title) and never checks out or runs fork code.
+  pull_request_target:
     types: [opened, synchronize, reopened, edited]
+
+permissions:
+  issues: write
+  pull-requests: write
 
 jobs:
   validate-pr-title:
     runs-on: ubuntu-latest
     steps:
       - name: PR Conventional Commit Validation
-        uses: ytanikin/PRConventionalCommits@b628c5a234cc32513014b7bfdd1e47b532124d98 # v1.3.0
+        uses: ytanikin/pr-conventional-commits@fda730cb152c05a849d6d84325e50c6182d9d1e9 # 1.5.1
         with:
-          task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert","build"]'
+          task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert","build","I18n"]'
           add_label: 'true'
-          custom_labels: '{"docs": "type/docs"}'
+          custom_labels: '{"docs": "type/docs", "I18n": "i18n"}'

@@ -6,7 +6,7 @@ import React from 'react';
 import { GroupsIcon } from './custom-icons/GroupsIcon';
 import { RulesIcon } from './custom-icons/RulesIcon';
 
-const CustomIcons = new Map<string, React.FC>([
+export const CustomIcons = new Map<string, React.FC>([
   ['rules', RulesIcon],
   ['groups', GroupsIcon],
 ]);
@@ -21,48 +21,43 @@ type SideBarButtonProps = {
   iconOrText: string | IconName;
 };
 
-export function SideBarButton({
-  ariaLabel,
-  disabled,
-  visible,
-  active,
-  tooltip,
-  iconOrText,
-  onClick,
-}: Readonly<SideBarButtonProps>) {
-  const styles = useStyles2(getStyles);
+export const SideBarButton = React.forwardRef<HTMLButtonElement, Readonly<SideBarButtonProps>>(
+  function SideBarButton({ ariaLabel, disabled, visible, active, tooltip, iconOrText, onClick }, ref) {
+    const styles = useStyles2(getStyles);
 
-  let buttonIcon;
-  let ButtonChild;
+    let buttonIcon;
+    let ButtonChild;
 
-  if (iconOrText in availableIconsIndex) {
-    buttonIcon = iconOrText as IconName;
-  } else if (CustomIcons.has(iconOrText)) {
-    // some icons are not available in the Saga Design System and have been added as SVG files to the code base
-    ButtonChild = CustomIcons.get(iconOrText);
-  } else {
-    ButtonChild = function ButtonChildText() {
-      return <>{iconOrText}</>;
-    };
+    if (iconOrText in availableIconsIndex) {
+      buttonIcon = iconOrText as IconName;
+    } else if (CustomIcons.has(iconOrText)) {
+      // some icons are not available in the Saga Design System and have been added as SVG files to the code base
+      ButtonChild = CustomIcons.get(iconOrText);
+    } else {
+      ButtonChild = function ButtonChildText() {
+        return <>{iconOrText}</>;
+      };
+    }
+
+    return (
+      <Button
+        ref={ref}
+        className={cx(styles.button, disabled && 'disabled', visible && 'visible', active && 'active')}
+        size="md"
+        variant="secondary"
+        fill="text"
+        icon={buttonIcon}
+        aria-label={ariaLabel}
+        tooltip={tooltip}
+        tooltipPlacement="right"
+        onClick={onClick}
+        disabled={disabled}
+      >
+        {ButtonChild && <ButtonChild />}
+      </Button>
+    );
   }
-
-  return (
-    <Button
-      className={cx(styles.button, disabled && 'disabled', visible && 'visible', active && 'active')}
-      size="md"
-      variant="secondary"
-      fill="text"
-      icon={buttonIcon}
-      aria-label={ariaLabel}
-      tooltip={tooltip}
-      tooltipPlacement="right"
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {ButtonChild && <ButtonChild />}
-    </Button>
-  );
-}
+);
 
 function getStyles(theme: GrafanaTheme2) {
   return {

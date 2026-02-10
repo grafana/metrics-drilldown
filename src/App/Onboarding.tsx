@@ -5,11 +5,14 @@ import { useStyles2, useTheme2 } from '@grafana/ui';
 import React from 'react';
 import SVG from 'react-inlinesvg';
 
+import { HelpControls } from './HelpControls';
+
 export function Onboarding() {
   const styles = useStyles2(getStyles);
   const theme = useTheme2();
   return (
     <div className={styles.wrap}>
+      <HelpControls />
       <div className={styles.graphicContainer}>
         <SVG
           src={
@@ -101,6 +104,7 @@ const getStyles = (theme: GrafanaTheme2) => {
       marginBottom: '1.5rem',
     }),
     wrap: css({
+      position: 'relative',
       [theme.breakpoints.up('md')]: {
         flexDirection: 'row',
         margin: '4rem auto auto auto',

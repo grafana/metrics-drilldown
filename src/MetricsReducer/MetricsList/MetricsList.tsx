@@ -139,7 +139,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
         </div>
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <ShowMoreButton label={t('metrics-list.metric-label', 'metric')} batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
       </div>

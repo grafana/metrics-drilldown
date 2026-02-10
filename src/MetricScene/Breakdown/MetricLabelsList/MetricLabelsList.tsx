@@ -266,7 +266,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
         <body.Component model={body} />
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
-            <ShowMoreButton label={t('breakdown.labels-list.label-label', 'label')} batchSizes={batchSizes} onClick={onClickShowMore} />
+            <ShowMoreButton batchSizes={batchSizes} onClick={onClickShowMore} />
           </div>
         )}
       </div>

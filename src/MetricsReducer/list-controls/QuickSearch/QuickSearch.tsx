@@ -17,6 +17,7 @@ import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getQuickSearchPlaceholder } from 'shared/utils/utils.quicksearch';
 
+import { NOTIFY_VALUE_CHANGE_DELAY } from './constants';
 import { type CountsProvider } from './CountsProvider/CountsProvider';
 import { EventQuickSearchChanged } from './EventQuickSearchChanged';
 import { openQuickSearchAssistant, useQuickSearchAssistantAvailability } from './QuickSearchAssistant';
@@ -29,6 +30,7 @@ interface QuickSearchState extends SceneObjectState {
   value: string;
   isQuestionMode: boolean;
   assistantTabExperimentVariant: 'treatment' | 'control' | 'excluded';
+  ariaLabel: string;
 }
 
 export class QuickSearch extends SceneObjectBase<QuickSearchState> {
@@ -60,11 +62,13 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     targetName,
     countsProvider,
     displayCounts,
+    ariaLabel,
   }: {
     urlSearchParamName: QuickSearchState['urlSearchParamName'];
     targetName: QuickSearchState['targetName'];
     countsProvider: QuickSearchState['countsProvider'];
     displayCounts?: QuickSearchState['displayCounts'];
+    ariaLabel: QuickSearchState['ariaLabel'];
   }) {
     super({
       key: 'quick-search',
@@ -75,6 +79,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       value: '',
       isQuestionMode: false,
       assistantTabExperimentVariant: 'excluded',
+      ariaLabel,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -95,7 +100,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 
   private notifyValueChange = debounce((value: string) => {
     this.publishEvent(new EventQuickSearchChanged({ searchText: value }), true);
-  }, 250);
+  }, NOTIFY_VALUE_CHANGE_DELAY);
 
   private updateValue(value: string) {
     const wasEmpty = this.state.value === '';
@@ -155,38 +160,32 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
       };
     }
 
+    // When showing all items
     if (counts.current === counts.total) {
       return {
         tagName: `${counts.current}`,
-        tooltipContent:
-          counts.current !== 1
-            ? t('quick-search.count-total-plural', '{{count}} {{targetName}}s in total', {
-                count: counts.current,
-                targetName,
-              })
-            : t('quick-search.count-total-singular', '1 {{targetName}} in total', { targetName }),
+        tooltipContent: t('quick-search.count-total', '{{targetName}}: {{count}} in total', {
+          targetName,
+          count: counts.current,
+        }),
       };
     }
 
+    // When filtered
     return {
       tagName: `${counts.current}/${counts.total}`,
-      tooltipContent:
-        counts.current !== 1
-          ? t('quick-search.count-filtered-plural', '{{current}} out of {{total}} {{targetName}}s in total', {
-              current: counts.current,
-              total: counts.total,
-              targetName,
-            })
-          : t('quick-search.count-filtered-singular', '1 out of {{total}} {{targetName}}s in total', {
-              total: counts.total,
-              targetName,
-            }),
+      tooltipContent: t('quick-search.count-filtered', '{{targetName}}: {{count}} of {{total}} in total', {
+        targetName,
+        total: counts.total,
+        count: counts.current,
+      }),
     };
   }
 
   static readonly Component = ({ model }: { model: QuickSearch }) => {
     const styles = useStyles2(getStyles);
-    const { targetName, value, countsProvider, isQuestionMode, assistantTabExperimentVariant } = model.useState();
+    const { targetName, value, countsProvider, isQuestionMode, assistantTabExperimentVariant, ariaLabel } =
+      model.useState();
     const { tagName, tooltipContent } = model.useHumanFriendlyCountsMessage();
     const isAssistantAvailable = useQuickSearchAssistantAvailability();
     const inputRef = React.useRef<HTMLInputElement>(null);
@@ -245,6 +244,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     return (
       <Input
         ref={inputRef}
+        aria-label={ariaLabel}
         value={value}
         onChange={handleChange}
         onKeyDown={model.onKeyDown}
@@ -271,6 +271,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
               name="times"
               variant="secondary"
               tooltip={t('quick-search.clear-search-tooltip', 'Clear search')}
+              aria-label={t('quick-search.clear-search-tooltip', 'Clear search')}
               onClick={model.clear}
               disabled={!value && !isQuestionMode}
             />

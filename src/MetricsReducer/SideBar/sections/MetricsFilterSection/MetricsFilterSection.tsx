@@ -438,6 +438,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
             className={styles.searchInput}
             prefix={<Icon name="search" />}
             placeholder={t('sidebar.filter.search-placeholder', 'Search...')}
+            aria-label={t('sidebar.filter.search-aria-label', 'Search filter options')}
             value={searchValue}
             onChange={(e) => setSearchValue(e.currentTarget.value)}
             onKeyDown={onKeyDown}
@@ -446,6 +447,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
                 name="times"
                 variant="secondary"
                 tooltip={t('sidebar.filter.clear-search-tooltip', 'Clear search')}
+                aria-label={t('sidebar.filter.clear-search-tooltip', 'Clear search')}
                 onClick={() => setSearchValue('')}
               />
             }

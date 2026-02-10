@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { VariableHide, type GrafanaTheme2 } from '@grafana/data';
+import { availableIconsIndex, VariableHide, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import {
   AdHocFiltersVariable,
@@ -10,7 +10,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { IconButton, Stack, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/LabelsVariable';
@@ -30,7 +30,7 @@ import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetricsSection';
 import { Settings } from './sections/Settings';
-import { SideBarButton } from './SideBarButton';
+import { CustomIcons, SideBarButton } from './SideBarButton';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
 
 type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList | Settings;
@@ -75,7 +75,7 @@ function getTranslatedSectionInfo(key: string): { title: string; description: st
     },
     settings: {
       title: t('sidebar.section.settings', 'Settings'),
-      description: t('sidebar.section.settings-description', 'Settings'),
+      description: t('sidebar.section.settings-description', 'Configure display preferences and filtering behavior'),
     },
   };
 
@@ -157,7 +157,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         new Settings({
           key: 'settings',
           title: t('sidebar.section.settings', 'Settings'),
-          description: t('sidebar.section.settings-description', 'Settings'),
+          description: t('sidebar.section.settings-description', 'Configure display preferences and filtering behavior'),
           icon: 'cog',
           disabled: true,
         }),
@@ -333,6 +333,37 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       .findByKeyAndType(model, VAR_WINGMAN_GROUP_BY, LabelsVariable)
       .useState().value;
 
+    // Focus management refs
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const buttonRefs = useRef<Record<string, React.RefObject<HTMLButtonElement>>>({});
+    const lastOpenedKeyRef = useRef<string | null>(null);
+
+    // Lazily create refs for each section button
+    for (const section of sections) {
+      const key = section.state.key;
+      if (key && !buttonRefs.current[key]) {
+        buttonRefs.current[key] = React.createRef<HTMLButtonElement>();
+      }
+    }
+
+    // Move focus on open/close
+    const visibleKey = visibleSection?.state.key ?? null;
+    useEffect(() => {
+      let rafId: number | undefined;
+      if (visibleKey) {
+        lastOpenedKeyRef.current = visibleKey;
+        rafId = requestAnimationFrame(() => closeButtonRef.current?.focus());
+      } else if (lastOpenedKeyRef.current) {
+        const returnKey = lastOpenedKeyRef.current;
+        rafId = requestAnimationFrame(() => buttonRefs.current[returnKey]?.current?.focus());
+      }
+      return () => {
+        if (rafId !== undefined) {
+          cancelAnimationFrame(rafId);
+        }
+      };
+    }, [visibleKey]);
+
     return (
       <div className={styles.container}>
         <Stack direction="row" height="100%" gap={0}>
@@ -355,6 +386,14 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                     : translatedInfo.title;
                 }
 
+                // For text-based buttons (not icons), include the visible text in the aria-label
+                // to satisfy WCAG 2.5.3 Label in Name requirement
+                const isTextButton =
+                  !(iconOrText in availableIconsIndex) && !CustomIcons.has(iconOrText);
+                const ariaLabel = isTextButton
+                  ? `${iconOrText} - ${translatedInfo.title}`
+                  : translatedInfo.title;
+
                 return (
                   <div
                     key={key}
@@ -366,8 +405,9 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                     )}
                   >
                     <SideBarButton
+                      ref={buttonRefs.current[key]}
                       key={key}
-                      ariaLabel={translatedInfo.title}
+                      ariaLabel={ariaLabel}
                       disabled={disabled}
                       visible={visible}
                       active={isActive}
@@ -383,6 +423,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           {visibleSection && (
             <div className={styles.content} data-testid="sidebar-content">
               <IconButton
+                ref={closeButtonRef}
                 className={styles.closeButton}
                 name="times"
                 aria-label={t('sidebar.close-aria-label', 'Close')}

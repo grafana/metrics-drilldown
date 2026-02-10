@@ -30,7 +30,7 @@ To begin drilling down your data, filter the metrics that appear in Metrics Dril
 1. (Optional) Select a label name from the **Filter by label values** dropdown. Then, follow the prompts to complete your filter criteria.
 
    {{< admonition type="note" >}}
-   You can apply multiple filters to your metrics.
+   You can apply multiple filters to your metrics. If you don't see a metric you expect, refer to [Troubleshoot missing metrics](#troubleshoot-missing-metrics).
    {{< /admonition >}}
 
 1. (Optional) To search for metrics, type keywords in the search bar under **Quick search metrics**.
