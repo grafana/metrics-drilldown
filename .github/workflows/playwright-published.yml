@@ -60,7 +60,7 @@ jobs:
           echo "plugin-name=$name" >> $GITHUB_OUTPUT
 
       - name: Sign and package
-        uses: grafana/plugin-ci-workflows/actions/internal/plugins/package@ci-cd-workflows/v4.3.0
+        uses: grafana/plugin-ci-workflows/actions/internal/plugins/package@ci-cd-workflows/v6.0.0
         with:
           output-folder: dist-artifacts
           universal: "true"
@@ -76,7 +76,7 @@ jobs:
 
   playwright:
     needs: build
-    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@ci-cd-workflows/v4.3.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/playwright-docker.yml@ci-cd-workflows/v6.0.0
     with:
       id: ${{ needs.build.outputs.plugin-name }}
       version: ${{ needs.build.outputs.plugin-version }}
