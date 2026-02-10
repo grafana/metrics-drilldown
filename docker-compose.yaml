@@ -18,7 +18,7 @@ services:
       GF_PLUGINS_PREINSTALL_DISABLED: true
     volumes:
       - ./provisioning/dashboards/dashboardJson:/etc/dashboards
-      - ../logs-drilldown/dist:/var/lib/grafana/plugins/grafana-lokiexplore-app
+      - ${LOGS_DRILLDOWN_DIST:-../logs-drilldown/dist}:/var/lib/grafana/plugins/grafana-lokiexplore-app
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
       # Linux CI: Uses 172.17.0.1 (default)
