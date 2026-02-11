@@ -4,10 +4,10 @@ import React from 'react';
 
 
 
-import { useCheckForExistingSearch, useSavedSearches } from './saveSearch';
-import { SaveSearchModal } from './SaveSearchModal';
+import { useCheckForExistingQuery, useSavedQueries } from './savedQuery';
+import { SaveQueryModal } from './SaveQueryModal';
 
-jest.mock('./saveSearch');
+jest.mock('./savedQuery');
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   getAppEvents: jest.fn(),
@@ -33,72 +33,72 @@ jest.mock('@grafana/ui', () => {
   };
 });
 
-const mockUseSaveSearches = jest.mocked(useSavedSearches);
-const mockUseCheckForExistingSearch = jest.mocked(useCheckForExistingSearch);
+const mockUseSavedQueries = jest.mocked(useSavedQueries);
+const mockUseCheckForExistingQuery = jest.mocked(useCheckForExistingQuery);
 
-describe('SaveSearchModal', () => {
+describe('SaveQueryModal', () => {
   const mockOnClose = jest.fn();
-  const mockSaveSearch = jest.fn();
+  const mockSaveQuery = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(getAppEvents).mockReturnValue({ publish: jest.fn() } as any);
-    mockUseCheckForExistingSearch.mockReturnValue(undefined);
+    mockUseCheckForExistingQuery.mockReturnValue(undefined);
 
-    mockUseSaveSearches.mockReturnValue({
-      saveSearch: mockSaveSearch,
+    mockUseSavedQueries.mockReturnValue({
+      saveQuery: mockSaveQuery,
       isLoading: false,
-      searches: [],
-      deleteSearch: jest.fn(),
+      queries: [],
+      deleteQuery: jest.fn(),
     });
   });
 
   test('renders the modal with query', () => {
-    render(<SaveSearchModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
+    render(<SaveQueryModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
 
-    expect(screen.getByText('Save current search')).toBeInTheDocument();
+    expect(screen.getByText('Save current query')).toBeInTheDocument();
     expect(screen.getByText('http_requests_total{method="GET"}')).toBeInTheDocument();
   });
 
   test('submits the form with title and description', async () => {
-    mockSaveSearch.mockResolvedValue(undefined);
+    mockSaveQuery.mockResolvedValue(undefined);
 
-    render(<SaveSearchModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
+    render(<SaveQueryModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
 
-    fireEvent.change(screen.getByLabelText(/title/i), { target: { value: 'My Search' } });
+    fireEvent.change(screen.getByLabelText(/title/i), { target: { value: 'My Query' } });
     fireEvent.change(screen.getByLabelText(/description/i), { target: { value: 'Test description' } });
     fireEvent.click(screen.getByRole('button', { name: /^save$/i }));
 
     await waitFor(() => {
-      expect(mockSaveSearch).toHaveBeenCalledWith({
+      expect(mockSaveQuery).toHaveBeenCalledWith({
         description: 'Test description',
         dsUid: 'test-ds',
         query: 'http_requests_total{method="GET"}',
-        title: 'My Search',
+        title: 'My Query',
       });
     });
 
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  test('shows alert when search already exists', () => {
-    mockUseCheckForExistingSearch.mockReturnValue({
+  test('shows alert when query already exists', () => {
+    mockUseCheckForExistingQuery.mockReturnValue({
       description: 'Test description',
       dsUid: 'test-ds',
       query: 'http_requests_total{method="GET"}',
-      title: 'Existing Search',
+      title: 'Existing Query',
       timestamp: 123456,
       uid: 'test',
     });
 
-    render(<SaveSearchModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
+    render(<SaveQueryModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
 
-    expect(screen.getByText(/previously saved search/i)).toBeInTheDocument();
-    expect(screen.getByText(/Existing Search/i)).toBeInTheDocument();
+    expect(screen.getByText(/previously saved query/i)).toBeInTheDocument();
+    expect(screen.getByText(/Existing Query/i)).toBeInTheDocument();
   });
 
   test('disables submit button when title is empty', () => {
-    render(<SaveSearchModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
+    render(<SaveQueryModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
 
     const submitButton = screen.getByRole('button', { name: /^save$/i });
     expect(submitButton).toBeDisabled();

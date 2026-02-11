@@ -1,10 +1,10 @@
-import { narrowSavedSearch, narrowSavedSearches } from './narrowSavedSearch';
+import { narrowSavedQueries, narrowSavedQuery } from './narrowSavedQuery';
 
-describe('narrowSavedSearch', () => {
-  test('returns a valid SavedSearch from a valid object', () => {
-    const result = narrowSavedSearch({
+describe('narrowSavedQuery', () => {
+  test('returns a valid SavedQuery from a valid object', () => {
+    const result = narrowSavedQuery({
       title: 'Test',
-      description: 'A test search',
+      description: 'A test query',
       query: 'up{job="test"}',
       timestamp: 1234567890,
       dsUid: 'ds-1',
@@ -13,7 +13,7 @@ describe('narrowSavedSearch', () => {
 
     expect(result).toEqual({
       title: 'Test',
-      description: 'A test search',
+      description: 'A test query',
       query: 'up{job="test"}',
       timestamp: 1234567890,
       dsUid: 'ds-1',
@@ -22,22 +22,22 @@ describe('narrowSavedSearch', () => {
   });
 
   test('returns null for null input', () => {
-    expect(narrowSavedSearch(null)).toBeNull();
+    expect(narrowSavedQuery(null)).toBeNull();
   });
 
   test('returns null for non-object input', () => {
-    expect(narrowSavedSearch('string')).toBeNull();
-    expect(narrowSavedSearch(123)).toBeNull();
-    expect(narrowSavedSearch(undefined)).toBeNull();
+    expect(narrowSavedQuery('string')).toBeNull();
+    expect(narrowSavedQuery(123)).toBeNull();
+    expect(narrowSavedQuery(undefined)).toBeNull();
   });
 
   test('returns null when required fields are missing', () => {
-    expect(narrowSavedSearch({ title: 'Test' })).toBeNull();
-    expect(narrowSavedSearch({ title: 'Test', description: 'desc' })).toBeNull();
+    expect(narrowSavedQuery({ title: 'Test' })).toBeNull();
+    expect(narrowSavedQuery({ title: 'Test', description: 'desc' })).toBeNull();
   });
 
   test('coerces non-string fields to empty strings', () => {
-    const result = narrowSavedSearch({
+    const result = narrowSavedQuery({
       title: 123,
       description: null,
       query: undefined,
@@ -57,9 +57,9 @@ describe('narrowSavedSearch', () => {
   });
 });
 
-describe('narrowSavedSearches', () => {
-  test('returns an array of valid SavedSearches', () => {
-    const result = narrowSavedSearches([
+describe('narrowSavedQueries', () => {
+  test('returns an array of valid SavedQueries', () => {
+    const result = narrowSavedQueries([
       {
         title: 'Test 1',
         description: 'First',
@@ -84,7 +84,7 @@ describe('narrowSavedSearches', () => {
   });
 
   test('filters out invalid entries', () => {
-    const result = narrowSavedSearches([
+    const result = narrowSavedQueries([
       {
         title: 'Valid',
         description: 'Valid',
@@ -103,12 +103,12 @@ describe('narrowSavedSearches', () => {
   });
 
   test('returns empty array for non-array input', () => {
-    expect(narrowSavedSearches('not-an-array')).toEqual([]);
-    expect(narrowSavedSearches(null)).toEqual([]);
-    expect(narrowSavedSearches(undefined)).toEqual([]);
+    expect(narrowSavedQueries('not-an-array')).toEqual([]);
+    expect(narrowSavedQueries(null)).toEqual([]);
+    expect(narrowSavedQueries(undefined)).toEqual([]);
   });
 
   test('returns empty array for empty array', () => {
-    expect(narrowSavedSearches([])).toEqual([]);
+    expect(narrowSavedQueries([])).toEqual([]);
   });
 });

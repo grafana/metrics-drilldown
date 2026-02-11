@@ -265,28 +265,28 @@ export class MetricSceneView extends DrilldownView {
 
   /* Saved queries */
 
-  getSaveSearchButton() {
-    return this.getByRole('button', { name: 'Save search' });
+  getSaveQueryButton() {
+    return this.getByRole('button', { name: 'Save query' });
   }
 
-  getLoadSearchButton() {
-    return this.getByRole('button', { name: /saved search/ });
+  getLoadQueryButton() {
+    return this.getByRole('button', { name: /saved query/ });
   }
 
   getSaveModal() {
-    return this.getByRole('dialog', { name: /Save current search/i });
+    return this.getByRole('dialog', { name: /Save current query/i });
   }
 
   getLoadModal() {
-    return this.getByRole('dialog', { name: /Load a previously saved search/i });
+    return this.getByRole('dialog', { name: /Load a previously saved query/i });
   }
 
   async openSaveModal() {
-    await this.getSaveSearchButton().click();
+    await this.getSaveQueryButton().click();
     await expect(this.getSaveModal()).toBeVisible();
   }
 
-  async saveSearch(title: string, description?: string) {
+  async saveQuery(title: string, description?: string) {
     await this.openSaveModal();
     const modal = this.getSaveModal();
     await modal.getByLabel('Title').fill(title);
@@ -301,15 +301,15 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async openLoadModal() {
-    await this.getLoadSearchButton().click();
+    await this.getLoadQueryButton().click();
     await expect(this.getLoadModal()).toBeVisible();
   }
 
-  async selectSavedSearchInList(title: string) {
+  async selectSavedQueryInList(title: string) {
     await this.getLoadModal().getByRole('radio', { name: title }).click();
   }
 
-  async deleteSelectedSearch() {
+  async deleteSelectedQuery() {
     await this.getLoadModal().getByRole('button', { name: 'Remove' }).click();
   }
 
@@ -327,6 +327,6 @@ export class MetricSceneView extends DrilldownView {
   }
 
   async assertLoadModalEmpty() {
-    await expect(this.getLoadModal().getByText('No saved searches to display.')).toBeVisible();
+    await expect(this.getLoadModal().getByText('No saved queries to display.')).toBeVisible();
   }
 }

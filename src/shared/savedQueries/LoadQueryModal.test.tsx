@@ -8,10 +8,10 @@ import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { type MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { buildNavigateToMetricsParams, createAppUrl, createPromURLObject, parsePromQLQuery } from 'extensions/links';
 
-import { LoadSearchModal } from './LoadSearchModal';
-import { useSavedSearches, type SavedSearch } from './saveSearch';
+import { LoadQueryModal } from './LoadQueryModal';
+import { useSavedQueries, type SavedQuery } from './savedQuery';
 
-jest.mock('./saveSearch');
+jest.mock('./savedQuery');
 jest.mock('extensions/links');
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
@@ -37,30 +37,30 @@ jest.mock('@grafana/ui', () => {
   };
 });
 
-const mockUseSavedSearches = useSavedSearches as jest.MockedFunction<typeof useSavedSearches>;
+const mockUseSavedQueries = useSavedQueries as jest.MockedFunction<typeof useSavedQueries>;
 
-const mockSearches: SavedSearch[] = [
+const mockQueries: SavedQuery[] = [
   {
     uid: '1',
-    title: 'Test Search 1',
-    description: 'First test search',
+    title: 'Test Query 1',
+    description: 'First test query',
     query: 'http_requests_total{method="GET"}',
     dsUid: 'test-ds',
     timestamp: Date.now(),
   },
   {
     uid: '2',
-    title: 'Test Search 2',
-    description: 'Second test search',
+    title: 'Test Query 2',
+    description: 'Second test query',
     query: 'up{job="prometheus"}',
     dsUid: 'test-ds',
     timestamp: Date.now() - 1,
   },
 ];
 
-describe('LoadSearchModal', () => {
+describe('LoadQueryModal', () => {
   const mockOnClose = jest.fn();
-  const mockDeleteSearch = jest.fn();
+  const mockDeleteQuery = jest.fn();
   const mockSceneRef = {} as any;
 
   beforeEach(() => {
@@ -88,55 +88,55 @@ describe('LoadSearchModal', () => {
     jest.mocked(buildNavigateToMetricsParams).mockReturnValue(new URLSearchParams());
     jest.mocked(createAppUrl).mockReturnValue('/a/grafana-metricsdrilldown-app/drilldown');
 
-    mockUseSavedSearches.mockReturnValue({
-      saveSearch: jest.fn(),
-      searches: mockSearches,
+    mockUseSavedQueries.mockReturnValue({
+      saveQuery: jest.fn(),
+      queries: mockQueries,
       isLoading: false,
-      deleteSearch: mockDeleteSearch,
+      deleteQuery: mockDeleteQuery,
     });
   });
 
-  test('renders the modal with saved searches', () => {
-    render(<LoadSearchModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
+  test('renders the modal with saved queries', () => {
+    render(<LoadQueryModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
 
-    expect(screen.getAllByText('Test Search 1')).toHaveLength(2);
-    expect(screen.getByText('Test Search 2')).toBeInTheDocument();
+    expect(screen.getAllByText('Test Query 1')).toHaveLength(2);
+    expect(screen.getByText('Test Query 2')).toBeInTheDocument();
   });
 
-  test('Renders empty state when no searches', () => {
-    mockUseSavedSearches.mockReturnValue({
-      saveSearch: jest.fn(),
-      searches: [],
+  test('Renders empty state when no queries', () => {
+    mockUseSavedQueries.mockReturnValue({
+      saveQuery: jest.fn(),
+      queries: [],
       isLoading: false,
-      deleteSearch: mockDeleteSearch,
+      deleteQuery: mockDeleteQuery,
     });
 
-    render(<LoadSearchModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
+    render(<LoadQueryModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
 
-    expect(screen.getByText('No saved searches to display.')).toBeInTheDocument();
+    expect(screen.getByText('No saved queries to display.')).toBeInTheDocument();
   });
 
-  test('Selects a search when clicked', () => {
-    render(<LoadSearchModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
+  test('Selects a query when clicked', () => {
+    render(<LoadQueryModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
 
-    fireEvent.click(screen.getAllByLabelText('Test Search 2')[0]);
+    fireEvent.click(screen.getAllByLabelText('Test Query 2')[0]);
 
     expect(screen.getByText('up{job="prometheus"}')).toBeInTheDocument();
   });
 
-  test('Calls deleteSearch when delete button is clicked', () => {
-    render(<LoadSearchModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
+  test('Calls deleteQuery when delete button is clicked', () => {
+    render(<LoadQueryModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
 
     const deleteButton = screen.getByRole('button', { name: /remove/i });
     fireEvent.click(deleteButton);
 
-    expect(mockDeleteSearch).toHaveBeenCalledWith('1');
+    expect(mockDeleteQuery).toHaveBeenCalledWith('1');
   });
 
   test('Creates a link using parsePromQLQuery with relative time', () => {
     jest.mocked(parsePromQLQuery).mockClear();
 
-    render(<LoadSearchModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
+    render(<LoadQueryModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
 
     expect(parsePromQLQuery).toHaveBeenCalledWith('http_requests_total{method="GET"}');
     expect(createPromURLObject).toHaveBeenCalledWith(
@@ -160,7 +160,7 @@ describe('LoadSearchModal', () => {
       },
     } as unknown as SceneTimeRange);
 
-    render(<LoadSearchModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
+    render(<LoadQueryModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
 
     expect(createPromURLObject).toHaveBeenCalledWith(
       'test-ds',

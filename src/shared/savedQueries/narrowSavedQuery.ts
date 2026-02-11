@@ -1,8 +1,8 @@
-import { type SavedSearch } from './saveSearch';
+import { type SavedQuery } from './savedQuery';
 
 const isString = (s: unknown) => (typeof s === 'string' && s) || '';
 
-export function narrowSavedSearch(search: unknown): SavedSearch | null {
+export function narrowSavedQuery(search: unknown): SavedQuery | null {
   if (typeof search !== 'object' || search === null) {
     return null;
   }
@@ -23,9 +23,9 @@ export function narrowSavedSearch(search: unknown): SavedSearch | null {
     : null;
 }
 
-export function narrowSavedSearches(searches: unknown): SavedSearch[] {
-  if (!Array.isArray(searches)) {
+export function narrowSavedQueries(queries: unknown): SavedQuery[] {
+  if (!Array.isArray(queries)) {
     return [];
   }
-  return searches.map((search) => narrowSavedSearch(search)).filter((search) => search !== null);
+  return queries.map((q) => narrowSavedQuery(q)).filter((q) => q !== null);
 }

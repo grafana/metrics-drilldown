@@ -11,14 +11,14 @@ import { MetricScene } from 'MetricScene/MetricScene';
 import { VAR_DATASOURCE, VAR_FILTERS } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
-import { isQueryLibrarySupported, type OpenQueryLibraryComponentProps } from './saveSearch';
-import { SaveSearchModal } from './SaveSearchModal';
+import { isQueryLibrarySupported, type OpenQueryLibraryComponentProps } from './savedQuery';
+import { SaveQueryModal } from './SaveQueryModal';
 
 interface Props {
   readonly sceneRef: SceneObject;
 }
 
-export function SaveSearchButton({ sceneRef }: Props) {
+export function SaveQueryButton({ sceneRef }: Props) {
   const [saving, setSaving] = useState(false);
   const { component: OpenQueryLibraryComponent, isLoading: isLoadingExposedComponent } =
     usePluginComponent<OpenQueryLibraryComponentProps>('grafana/query-library-context/v1');
@@ -52,9 +52,9 @@ export function SaveSearchButton({ sceneRef }: Props) {
           variant="canvas"
           icon="save"
           onClick={() => setSaving(true)}
-          tooltip={t('metrics.metrics-drilldown.save-search.button-tooltip', 'Save search')}
+          tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip', 'Save query')}
         />
-        {saving && <SaveSearchModal dsUid={dsUid} query={promql} onClose={() => setSaving(false)} />}
+        {saving && <SaveQueryModal dsUid={dsUid} query={promql} onClose={() => setSaving(false)} />}
       </>
     ),
     [dsUid, promql, saving]
@@ -86,7 +86,7 @@ export function SaveSearchButton({ sceneRef }: Props) {
     <OpenQueryLibraryComponent
       datasourceFilters={[dsName]}
       query={query}
-      tooltip={t('metrics.metrics-drilldown.save-search.button-tooltip-saved-queries', 'Save in Saved Queries')}
+      tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip-saved-queries', 'Save in Saved Queries')}
     />
   );
 }

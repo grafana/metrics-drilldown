@@ -10,14 +10,14 @@ import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { type MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { buildNavigateToMetricsParams, createAppUrl, createPromURLObject, parsePromQLQuery } from 'extensions/links';
 
-import { LoadSearchScene } from './LoadSearchScene';
-import { isQueryLibrarySupported, useHasSavedSearches } from './saveSearch';
+import { LoadQueryScene } from './LoadQueryScene';
+import { isQueryLibrarySupported, useHasSavedQueries } from './savedQuery';
 
-jest.mock('./saveSearch');
-jest.mock('./LoadSearchModal', () => ({
-  LoadSearchModal: ({ onClose }: { onClose(): void }) => (
-    <div data-testid="load-search-modal">
-      Load a previously saved search
+jest.mock('./savedQuery');
+jest.mock('./LoadQueryModal', () => ({
+  LoadQueryModal: ({ onClose }: { onClose(): void }) => (
+    <div data-testid="load-query-modal">
+      Load a previously saved query
       <button aria-label="Close" onClick={onClose}>
         Close
       </button>
@@ -27,7 +27,7 @@ jest.mock('./LoadSearchModal', () => ({
 jest.mock('@grafana/runtime');
 jest.mock('extensions/links');
 
-const mockUseHasSavedSearches = jest.mocked(useHasSavedSearches);
+const mockUseHasSavedQueries = jest.mocked(useHasSavedQueries);
 
 function FakeExposedComponent({ onSelectQuery }: Readonly<{ onSelectQuery(query: PromQuery): void }>) {
   return (
@@ -50,7 +50,7 @@ function FakeExposedComponent({ onSelectQuery }: Readonly<{ onSelectQuery(query:
   );
 }
 
-describe('LoadSearchScene', () => {
+describe('LoadQueryScene', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -86,20 +86,20 @@ describe('LoadSearchScene', () => {
     jest.mocked(isQueryLibrarySupported).mockReturnValue(false);
   });
 
-  test('Disables button when there are no saved searches', () => {
-    mockUseHasSavedSearches.mockReturnValue(false);
+  test('Disables button when there are no saved queries', () => {
+    mockUseHasSavedQueries.mockReturnValue(false);
 
-    const scene = new LoadSearchScene();
+    const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
   });
 
-  test('Enables button when there are saved searches', () => {
-    mockUseHasSavedSearches.mockReturnValue(true);
+  test('Enables button when there are saved queries', () => {
+    mockUseHasSavedQueries.mockReturnValue(true);
 
-    const scene = new LoadSearchScene();
+    const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
     const button = screen.getByRole('button');
@@ -107,20 +107,20 @@ describe('LoadSearchScene', () => {
   });
 
   test('Opens modal when button is clicked', () => {
-    mockUseHasSavedSearches.mockReturnValue(true);
+    mockUseHasSavedQueries.mockReturnValue(true);
 
-    const scene = new LoadSearchScene();
+    const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
-    expect(screen.queryByText('Load a previously saved search')).not.toBeInTheDocument();
+    expect(screen.queryByText('Load a previously saved query')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button'));
 
-    expect(screen.queryByText('Load a previously saved search')).toBeInTheDocument();
+    expect(screen.queryByText('Load a previously saved query')).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText('Close'));
 
-    expect(screen.queryByText('Load a previously saved search')).not.toBeInTheDocument();
+    expect(screen.queryByText('Load a previously saved query')).not.toBeInTheDocument();
   });
 
   test('Returns null when the scene is embedded', () => {
@@ -128,7 +128,7 @@ describe('LoadSearchScene', () => {
       state: { embedded: true },
     } as unknown as DataTrail);
 
-    const scene = new LoadSearchScene();
+    const scene = new LoadQueryScene();
     const { container } = render(<scene.Component model={scene} />);
 
     expect(container.firstChild).toBeNull();
@@ -139,23 +139,23 @@ describe('LoadSearchScene', () => {
     jest.mocked(isQueryLibrarySupported).mockReturnValue(true);
     jest.mocked(usePluginComponent).mockReturnValue({ component, isLoading: false });
 
-    const scene = new LoadSearchScene();
+    const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
     expect(screen.getByText('Exposed component')).toBeInTheDocument();
   });
 
-  describe('Loading a search', () => {
+  describe('Loading a query', () => {
     beforeEach(() => {
       jest.mocked(parsePromQLQuery).mockClear();
       jest.mocked(isQueryLibrarySupported).mockReturnValue(true);
       // @ts-expect-error FakeExposedComponent has different shape
       jest.mocked(usePluginComponent).mockReturnValue({ component: FakeExposedComponent, isLoading: false });
-      mockUseHasSavedSearches.mockReturnValue(true);
+      mockUseHasSavedQueries.mockReturnValue(true);
     });
 
-    test('Parses the query and navigates when a search is selected', () => {
-      const scene = new LoadSearchScene();
+    test('Parses the query and navigates when a query is selected', () => {
+      const scene = new LoadQueryScene();
       render(<scene.Component model={scene} />);
 
       fireEvent.click(screen.getByText('Select'));
@@ -181,7 +181,7 @@ describe('LoadSearchScene', () => {
         },
       } as unknown as SceneTimeRange);
 
-      const scene = new LoadSearchScene();
+      const scene = new LoadQueryScene();
       render(<scene.Component model={scene} />);
 
       fireEvent.click(screen.getByText('Select'));

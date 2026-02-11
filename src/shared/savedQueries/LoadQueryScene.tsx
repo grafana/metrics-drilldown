@@ -15,17 +15,17 @@ import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
 
-import { LoadSearchModal } from './LoadSearchModal';
-import { isQueryLibrarySupported, useHasSavedSearches, type OpenQueryLibraryComponentProps } from './saveSearch';
+import { LoadQueryModal } from './LoadQueryModal';
+import { isQueryLibrarySupported, useHasSavedQueries, type OpenQueryLibraryComponentProps } from './savedQuery';
 
-export interface LoadSearchSceneState extends SceneObjectState {
+export interface LoadQuerySceneState extends SceneObjectState {
   dsName: string;
   dsUid: string;
   isOpen: boolean;
 }
 
-export class LoadSearchScene extends SceneObjectBase<LoadSearchSceneState> {
-  constructor(state: Partial<LoadSearchSceneState> = {}) {
+export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
+  constructor(state: Partial<LoadQuerySceneState> = {}) {
     super({
       dsUid: '',
       dsName: '',
@@ -67,10 +67,10 @@ export class LoadSearchScene extends SceneObjectBase<LoadSearchSceneState> {
     });
   };
 
-  static readonly Component = ({ model }: SceneComponentProps<LoadSearchScene>) => {
+  static readonly Component = ({ model }: SceneComponentProps<LoadQueryScene>) => {
     const { dsName, dsUid, isOpen } = model.useState();
     const styles = useStyles2(getStyles);
-    const hasSavedSearches = useHasSavedSearches(dsUid);
+    const hasSavedQueries = useHasSavedQueries(dsUid);
 
     const { component: OpenQueryLibraryComponent, isLoading: isLoadingExposedComponent } =
       usePluginComponent<OpenQueryLibraryComponentProps>('grafana/query-library-context/v1');
@@ -83,19 +83,19 @@ export class LoadSearchScene extends SceneObjectBase<LoadSearchSceneState> {
           <ToolbarButton
             icon="folder-open"
             variant="canvas"
-            disabled={!hasSavedSearches}
+            disabled={!hasSavedQueries}
             onClick={model.toggleOpen}
             className={styles.button}
             tooltip={
-              hasSavedSearches
-                ? t('metrics.metrics-drilldown.load-search.button-tooltip', 'Load saved search')
-                : t('metrics.metrics-drilldown.load-search.button-no-search-tooltip', 'No saved searches to load')
+              hasSavedQueries
+                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Load saved query')
+                : t('metrics.metrics-drilldown.load-query.button-no-query-tooltip', 'No saved queries to load')
             }
           />
-          {isOpen && <LoadSearchModal sceneRef={model} onClose={model.toggleClosed} />}
+          {isOpen && <LoadQueryModal sceneRef={model} onClose={model.toggleClosed} />}
         </>
       ),
-      [hasSavedSearches, isOpen, model, styles.button]
+      [hasSavedQueries, isOpen, model, styles.button]
     );
 
     const onSelectQuery = useCallback(
@@ -105,7 +105,7 @@ export class LoadSearchScene extends SceneObjectBase<LoadSearchSceneState> {
         if (query.datasource?.type !== 'prometheus') {
           appEvents.publish({
             payload: [
-              t('metrics.metrics-drilldown.load-search.load-type-error', 'Please select a Prometheus query.'),
+              t('metrics.metrics-drilldown.load-query.load-type-error', 'Please select a Prometheus query.'),
             ],
             type: AppEvents.alertError.name,
           });
@@ -127,7 +127,12 @@ export class LoadSearchScene extends SceneObjectBase<LoadSearchSceneState> {
           reportExploreMetrics('saved_query_loaded_from_library', {});
         } catch {
           appEvents.publish({
-            payload: [t('metrics.metrics-drilldown.load-search.load-error', 'Could not generate a link.')],
+            payload: [
+              t(
+                'metrics.metrics-drilldown.load-query.load-error',
+                'This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.'
+              ),
+            ],
             type: AppEvents.alertError.name,
           });
         }
@@ -152,7 +157,7 @@ export class LoadSearchScene extends SceneObjectBase<LoadSearchSceneState> {
         datasourceFilters={[dsName]}
         icon="folder-open"
         onSelectQuery={onSelectQuery}
-        tooltip={t('metrics.metrics-drilldown.load-search.saved-query-button-tooltip', 'Load saved query')}
+        tooltip={t('metrics.metrics-drilldown.load-query.saved-query-button-tooltip', 'Load saved query')}
       />
     );
   };

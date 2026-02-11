@@ -9,14 +9,14 @@ import { DataTrail } from 'AppDataTrail/DataTrail';
 import { type MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { MetricScene } from 'MetricScene/MetricScene';
 
-import { isQueryLibrarySupported } from './saveSearch';
-import { SaveSearchButton } from './SaveSearchButton';
+import { isQueryLibrarySupported } from './savedQuery';
+import { SaveQueryButton } from './SaveQueryButton';
 
-jest.mock('./saveSearch');
-jest.mock('./SaveSearchModal', () => ({
-  SaveSearchModal: ({ onClose }: { onClose(): void }) => (
-    <div data-testid="save-search-modal">
-      Save current search
+jest.mock('./savedQuery');
+jest.mock('./SaveQueryModal', () => ({
+  SaveQueryModal: ({ onClose }: { onClose(): void }) => (
+    <div data-testid="save-query-modal">
+      Save current query
       <button onClick={onClose}>Cancel</button>
     </div>
   ),
@@ -26,7 +26,7 @@ jest.mock('@grafana/prometheus', () => ({
   utf8Support: (key: string) => key,
 }));
 
-describe('SaveSearchButton', () => {
+describe('SaveQueryButton', () => {
   const mockSceneRef = {} as any;
 
   beforeEach(() => {
@@ -66,17 +66,17 @@ describe('SaveSearchButton', () => {
   });
 
   test('Opens the modal when the button is clicked', () => {
-    render(<SaveSearchButton sceneRef={mockSceneRef} />);
+    render(<SaveQueryButton sceneRef={mockSceneRef} />);
 
-    expect(screen.queryByText('Save current search')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save current query')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Save/i }));
 
-    expect(screen.getByText('Save current search')).toBeInTheDocument();
+    expect(screen.getByText('Save current query')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Cancel/i }));
 
-    expect(screen.queryByText('Save current search')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save current query')).not.toBeInTheDocument();
   });
 
   test('Returns null when the scene is embedded', () => {
@@ -90,7 +90,7 @@ describe('SaveSearchButton', () => {
       return {} as any;
     });
 
-    const { container } = render(<SaveSearchButton sceneRef={mockSceneRef} />);
+    const { container } = render(<SaveQueryButton sceneRef={mockSceneRef} />);
     expect(container.firstChild).toBeNull();
   });
 
@@ -99,7 +99,7 @@ describe('SaveSearchButton', () => {
     jest.mocked(isQueryLibrarySupported).mockReturnValue(true);
     jest.mocked(usePluginComponent).mockReturnValue({ component, isLoading: false });
 
-    render(<SaveSearchButton sceneRef={mockSceneRef} />);
+    render(<SaveQueryButton sceneRef={mockSceneRef} />);
 
     expect(screen.getByText('Exposed component')).toBeInTheDocument();
   });

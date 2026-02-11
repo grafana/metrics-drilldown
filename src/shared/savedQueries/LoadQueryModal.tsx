@@ -13,14 +13,14 @@ import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
 
-import { useSavedSearches, type SavedSearch } from './saveSearch';
+import { useSavedQueries, type SavedQuery } from './savedQuery';
 
 interface Props {
   readonly onClose: () => void;
   readonly sceneRef: SceneObject;
 }
 
-export function LoadSearchModal({ onClose, sceneRef }: Props) {
+export function LoadQueryModal({ onClose, sceneRef }: Props) {
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   const styles = useStyles2(getStyles);
 
@@ -31,27 +31,27 @@ export function LoadSearchModal({ onClose, sceneRef }: Props) {
   }, [trail]);
   const sceneTimeRange = useMemo(() => sceneGraph.getTimeRange(sceneRef).state.value, [sceneRef]);
 
-  const { deleteSearch, searches, isLoading } = useSavedSearches(dsUid);
+  const { deleteQuery, queries, isLoading } = useSavedQueries(dsUid);
 
-  const selectedSearch = useMemo(() => {
-    if (!searches.length) {
+  const selectedQuery = useMemo(() => {
+    if (!queries.length) {
       return null;
     }
-    return searches.find((search) => search.uid === selectedUid) ?? searches[0];
-  }, [searches, selectedUid]);
+    return queries.find((q) => q.uid === selectedUid) ?? queries[0];
+  }, [queries, selectedUid]);
 
   useEffect(() => {
     reportExploreMetrics('saved_query_load_modal_opened', {});
   }, []);
 
   const href = useMemo(() => {
-    if (!selectedSearch) {
+    if (!selectedQuery) {
       return '';
     }
     try {
-      const { metric, labels } = parsePromQLQuery(selectedSearch.query);
+      const { metric, labels } = parsePromQLQuery(selectedQuery.query);
       const promURLObject = createPromURLObject(
-        selectedSearch.dsUid,
+        selectedQuery.dsUid,
         labels,
         metric,
         sceneTimeRange.raw.from.toString(),
@@ -62,25 +62,25 @@ export function LoadSearchModal({ onClose, sceneRef }: Props) {
     } catch {
       return '';
     }
-  }, [sceneTimeRange, selectedSearch]);
+  }, [sceneTimeRange, selectedQuery]);
 
   const formattedTime = useMemo(
-    () => (selectedSearch ? dateTime(selectedSearch.timestamp).format('ddd MMM DD YYYY HH:mm [GMT]ZZ') : ''),
-    [selectedSearch]
+    () => (selectedQuery ? dateTime(selectedQuery.timestamp).format('ddd MMM DD YYYY HH:mm [GMT]ZZ') : ''),
+    [selectedQuery]
   );
 
-  const onSelect = useCallback((search: SavedSearch) => {
-    setSelectedUid(search.uid);
+  const onSelect = useCallback((query: SavedQuery) => {
+    setSelectedUid(query.uid);
     reportExploreMetrics('saved_query_toggled', { source: 'local' });
   }, []);
 
   const onDelete = useCallback(() => {
-    if (!selectedSearch) {
+    if (!selectedQuery) {
       return;
     }
-    deleteSearch(selectedSearch.uid);
+    deleteQuery(selectedQuery.uid);
     reportExploreMetrics('saved_query_deleted', { source: 'local' });
-  }, [deleteSearch, selectedSearch]);
+  }, [deleteQuery, selectedQuery]);
 
   const onLinkClick = useCallback(() => {
     reportExploreMetrics('saved_query_loaded', {});
@@ -89,26 +89,26 @@ export function LoadSearchModal({ onClose, sceneRef }: Props) {
 
   return (
     <Modal
-      title={t('metrics.metrics-drilldown.load-search.modal-title', 'Load a previously saved search')}
+      title={t('metrics.metrics-drilldown.load-query.modal-title', 'Load a previously saved query')}
       isOpen={true}
       onDismiss={onClose}
     >
-      {!isLoading && searches.length === 0 && (
+      {!isLoading && queries.length === 0 && (
         <Box backgroundColor="secondary" padding={1.5} marginBottom={2}>
-          {!searches.length && (
+          {!queries.length && (
             <Text variant="body">
-              {t('metrics.metrics-drilldown.load-search.empty', 'No saved searches to display.')}
+              {t('metrics.metrics-drilldown.load-query.empty', 'No saved queries to display.')}
             </Text>
           )}
         </Box>
       )}
-      {searches.length > 0 && (
+      {queries.length > 0 && (
         <Stack flex={1} gap={0} minHeight={25}>
           <Box display="flex" flex={1} minWidth={0}>
             <ScrollContainer>
               <Stack direction="column" gap={0} flex={1} minWidth={0} role="radiogroup">
-                {searches.map((search) => (
-                  <SavedSearchItem key={search.uid} search={search} selected={search === selectedSearch} onSelect={onSelect} />
+                {queries.map((query) => (
+                  <SavedQueryItem key={query.uid} query={query} selected={query === selectedQuery} onSelect={onSelect} />
                 ))}
               </Stack>
             </ScrollContainer>
@@ -116,7 +116,7 @@ export function LoadSearchModal({ onClose, sceneRef }: Props) {
           </Box>
           <Box display="flex" flex={2} minWidth={0}>
             <ScrollContainer>
-              {selectedSearch && (
+              {selectedQuery && (
                 <Box
                   direction="column"
                   display="flex"
@@ -127,28 +127,28 @@ export function LoadSearchModal({ onClose, sceneRef }: Props) {
                   paddingRight={1}
                 >
                   <Text variant="h5" element="h3" truncate>
-                    {selectedSearch.title}
+                    {selectedQuery.title}
                   </Text>
                   <Text variant="bodySmall" truncate>
                     {formattedTime}
                   </Text>
-                  {selectedSearch.description && (
+                  {selectedQuery.description && (
                     <Text variant="body" truncate>
-                      {selectedSearch.description}
+                      {selectedQuery.description}
                     </Text>
                   )}
 
-                  <code className={styles.query}>{selectedSearch.query}</code>
+                  <code className={styles.query}>{selectedQuery.query}</code>
                   <Box display="flex" flex={1} justifyContent="flex-end" direction="column">
                     <Stack justifyContent="flex-start">
                       <IconButton
                         size="xl"
                         name="trash-alt"
                         onClick={onDelete}
-                        tooltip={t('metrics.metrics-drilldown.load-search.remove', 'Remove')}
+                        tooltip={t('metrics.metrics-drilldown.load-query.remove', 'Remove')}
                       />
                       <LinkButton onClick={onLinkClick} href={href} variant="primary">
-                        {t('metrics.metrics-drilldown.load-search.select', 'Select')}
+                        {t('metrics.metrics-drilldown.load-query.select', 'Select')}
                       </LinkButton>
                     </Stack>
                   </Box>
@@ -162,30 +162,30 @@ export function LoadSearchModal({ onClose, sceneRef }: Props) {
   );
 }
 
-interface SavedSearchItemProps {
-  readonly onSelect: (search: SavedSearch) => void;
-  readonly search: SavedSearch;
+interface SavedQueryItemProps {
+  readonly onSelect: (query: SavedQuery) => void;
+  readonly query: SavedQuery;
   readonly selected?: boolean;
 }
 
-function SavedSearchItem({ onSelect, search, selected }: SavedSearchItemProps) {
+function SavedQueryItem({ onSelect, query, selected }: SavedQueryItemProps) {
   const styles = useStyles2(getStyles);
 
   const id = useId();
   return (
-    <label className={styles.label} htmlFor={id} aria-label={search.title}>
+    <label className={styles.label} htmlFor={id} aria-label={query.title}>
       <input
         tabIndex={selected ? 0 : -1}
         type="radio"
         id={id}
-        name="saved-searches"
+        name="saved-queries"
         className={styles.input}
-        onChange={() => onSelect(search)}
+        onChange={() => onSelect(query)}
         checked={selected}
       />
       <Stack alignItems="center" justifyContent="space-between">
         <Stack minWidth={0}>
-          <Text truncate>{search.title ?? ''}</Text>
+          <Text truncate>{query.title ?? ''}</Text>
         </Stack>
       </Stack>
     </label>
