@@ -52,13 +52,13 @@ describe('SaveQueryButton', () => {
       },
     } as unknown as MetricsDrilldownDataSourceVariable);
 
+    const defaultFilters = [
+      { key: 'method', operator: '=', value: 'GET' },
+      { key: '__name__', operator: '=', value: 'http_requests_total' },
+    ];
     jest.spyOn(sceneGraph, 'lookupVariable').mockReturnValue({
-      state: {
-        filters: [
-          { key: 'method', operator: '=', value: 'GET' },
-          { key: '__name__', operator: '=', value: 'http_requests_total' },
-        ],
-      },
+      state: { filters: defaultFilters },
+      useState: () => ({ filters: defaultFilters }),
     } as any);
 
     jest.mocked(usePluginComponent).mockReturnValue({ component: undefined, isLoading: false });
@@ -92,6 +92,40 @@ describe('SaveQueryButton', () => {
 
     const { container } = render(<SaveQueryButton sceneRef={mockSceneRef} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  test('Renders disabled button when no MetricScene ancestor and no filters', () => {
+    jest.spyOn(sceneGraph, 'getAncestor').mockImplementation((_ref, type) => {
+      if (type === DataTrail) {
+        return { state: { embedded: false } } as unknown as DataTrail;
+      }
+      throw new Error('No MetricScene ancestor');
+    });
+
+    jest.spyOn(sceneGraph, 'lookupVariable').mockReturnValue({
+      state: { filters: [] },
+      useState: () => ({ filters: [] }),
+    } as any);
+
+    render(<SaveQueryButton sceneRef={mockSceneRef} />);
+
+    const button = screen.getByRole('button', { name: /Save/i });
+    expect(button).toBeDisabled();
+  });
+
+  test('Builds filter-only promql when no MetricScene ancestor but filters exist', () => {
+    jest.spyOn(sceneGraph, 'getAncestor').mockImplementation((_ref, type) => {
+      if (type === DataTrail) {
+        return { state: { embedded: false } } as unknown as DataTrail;
+      }
+      throw new Error('No MetricScene ancestor');
+    });
+
+    render(<SaveQueryButton sceneRef={mockSceneRef} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Save/i }));
+
+    expect(screen.getByText('Save current query')).toBeInTheDocument();
   });
 
   test('Uses the exposed component if available', () => {

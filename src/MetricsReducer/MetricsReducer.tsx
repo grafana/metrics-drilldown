@@ -14,6 +14,8 @@ import {
 import { Stack, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { LoadQueryScene } from 'shared/savedQueries/LoadQueryScene';
+import { SaveQueryButton } from 'shared/savedQueries/SaveQueryButton';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { NULL_GROUP_BY_VALUE } from './labels/LabelsDataSource';
@@ -37,6 +39,7 @@ import { SideBar } from './SideBar/SideBar';
 
 interface MetricsReducerState extends SceneObjectState {
   listControls: ListControls;
+  loadQueryScene: LoadQueryScene;
   sidebar: SideBar;
   body?: SceneObjectBase;
   enginesMap: Map<string, { filterEngine: MetricsVariableFilterEngine; sortEngine: MetricsVariableSortEngine }>;
@@ -56,6 +59,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         variables: [new FilteredMetricsVariable()],
       }),
       listControls: new ListControls({}),
+      loadQueryScene: new LoadQueryScene({}),
       sidebar: new SideBar({}),
       body: undefined,
       enginesMap: new Map(),
@@ -188,12 +192,18 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles);
 
-    const { $variables, body, listControls, sidebar } = model.useState();
+    const { $variables, body, listControls, loadQueryScene, sidebar } = model.useState();
 
     return (
       <>
         <div className={styles.listControls} data-testid="list-controls">
-          <listControls.Component model={listControls} />
+          <Stack direction="row" alignItems="center" gap={1}>
+            <div style={{ flex: 1 }}>
+              <listControls.Component model={listControls} />
+            </div>
+            <SaveQueryButton sceneRef={model} />
+            <loadQueryScene.Component model={loadQueryScene} />
+          </Stack>
         </div>
         <Stack direction="row" gap={1} height={`calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT}px)`}>
           <div className={styles.sidebar} data-testid="sidebar">

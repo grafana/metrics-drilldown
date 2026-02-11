@@ -33,17 +33,28 @@ export function SaveQueryButton({ sceneRef }: Props) {
     };
   }, [trail]);
 
+  const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, sceneRef) as AdHocFiltersVariable;
+  const { filters: allFilters } = filtersVar.useState();
+
   const promql = useMemo(() => {
-    const metricScene = sceneGraph.getAncestor(sceneRef, MetricScene);
-    const metric = metricScene.state.metric;
-    const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, metricScene) as AdHocFiltersVariable;
-    const filters = filtersVar.state.filters;
-    const labelStr = filters
+    let metric = '';
+    try {
+      const metricScene = sceneGraph.getAncestor(sceneRef, MetricScene);
+      metric = metricScene.state.metric;
+    } catch {
+      // No MetricScene ancestor — we're in the MetricsReducer view
+    }
+
+    const labelStr = allFilters
       .filter((f) => f.key !== '__name__')
       .map((f) => `${utf8Support(f.key)}${f.operator}"${f.value}"`)
       .join(',');
-    return labelStr ? `${metric}{${labelStr}}` : metric;
-  }, [sceneRef]);
+
+    if (labelStr) {
+      return metric ? `${metric}{${labelStr}}` : `{${labelStr}}`;
+    }
+    return metric;
+  }, [sceneRef, allFilters]);
 
   const fallbackComponent = useMemo(
     () => (
@@ -51,6 +62,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
         <ToolbarButton
           variant="canvas"
           icon="save"
+          disabled={!promql}
           onClick={() => setSaving(true)}
           tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip', 'Save query')}
         />
@@ -76,7 +88,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
     return null;
   }
 
-  if (!isQueryLibrarySupported()) {
+  if (!isQueryLibrarySupported() || !promql) {
     return fallbackComponent;
   } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent) {
     return null;
