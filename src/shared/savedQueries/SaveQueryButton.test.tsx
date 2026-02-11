@@ -50,6 +50,7 @@ describe('SaveQueryButton', () => {
       state: {
         text: 'test-datasource-uid',
       },
+      subscribeToState: () => ({ unsubscribe: jest.fn() }),
     } as unknown as MetricsDrilldownDataSourceVariable);
 
     const defaultFilters = [

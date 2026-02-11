@@ -117,6 +117,13 @@ describe('useSavedQueries', () => {
 
     expect(result.current.queries).toHaveLength(0);
   });
+
+  test('Should handle corrupted JSON in localStorage gracefully', () => {
+    localStorage.setItem(SAVED_QUERIES_KEY, '{invalid json!!!');
+    const { result } = renderHook(() => useSavedQueries('ds-local-1'));
+
+    expect(result.current.queries).toHaveLength(0);
+  });
 });
 
 describe('useCheckForExistingQuery', () => {
@@ -144,6 +151,14 @@ describe('useHasSavedQueries', () => {
 });
 
 describe('isQueryLibrarySupported', () => {
+  const originalVersion = config.buildInfo.version;
+  const originalQueryLibrary = config.featureToggles.queryLibrary;
+
+  afterEach(() => {
+    config.buildInfo.version = originalVersion;
+    config.featureToggles.queryLibrary = originalQueryLibrary;
+  });
+
   test('Returns true when supported', () => {
     expect(isQueryLibrarySupported()).toBe(true);
   });

@@ -77,27 +77,6 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
 
     const trail = useMemo(() => getTrailFor(model), [model]);
 
-    const fallbackComponent = useMemo(
-      () => (
-        <>
-          <ToolbarButton
-            icon="folder-open"
-            variant="canvas"
-            disabled={!hasSavedQueries}
-            onClick={model.toggleOpen}
-            className={styles.button}
-            tooltip={
-              hasSavedQueries
-                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Load saved query')
-                : t('metrics.metrics-drilldown.load-query.button-no-query-tooltip', 'No saved queries to load')
-            }
-          />
-          {isOpen && <LoadQueryModal sceneRef={model} onClose={model.toggleClosed} />}
-        </>
-      ),
-      [hasSavedQueries, isOpen, model, styles.button]
-    );
-
     const onSelectQuery = useCallback(
       (query: PromQuery) => {
         const appEvents = getAppEvents();
@@ -145,7 +124,23 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     }
 
     if (!isQueryLibrarySupported()) {
-      return fallbackComponent;
+      return (
+        <>
+          <ToolbarButton
+            icon="folder-open"
+            variant="canvas"
+            disabled={!hasSavedQueries}
+            onClick={model.toggleOpen}
+            className={styles.button}
+            tooltip={
+              hasSavedQueries
+                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Load saved query')
+                : t('metrics.metrics-drilldown.load-query.button-no-query-tooltip', 'No saved queries to load')
+            }
+          />
+          {isOpen && <LoadQueryModal sceneRef={model} onClose={model.toggleClosed} />}
+        </>
+      );
     } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent) {
       return null;
     }

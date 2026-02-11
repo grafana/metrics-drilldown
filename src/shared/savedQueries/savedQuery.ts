@@ -108,7 +108,7 @@ function saveInLocalStorage({ query, title, description, dsUid }: Omit<SavedQuer
 
 function removeFromLocalStorage(uid: string) {
   const stored = getLocallySavedQueries();
-  localStorage.setItem(SAVED_QUERIES_KEY, JSON.stringify(stored.filter((stored) => stored.uid !== uid)));
+  localStorage.setItem(SAVED_QUERIES_KEY, JSON.stringify(stored.filter((q) => q.uid !== uid)));
 }
 
 export interface OpenQueryLibraryComponentProps {

@@ -4,7 +4,7 @@ import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 import { ToolbarButton } from '@grafana/ui';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { MetricScene } from 'MetricScene/MetricScene';
@@ -25,13 +25,20 @@ export function SaveQueryButton({ sceneRef }: Props) {
 
   const trail = useMemo(() => getTrailFor(sceneRef), [sceneRef]);
 
-  const { dsUid, dsName } = useMemo(() => {
-    const ds = sceneGraph.findByKeyAndType(trail, VAR_DATASOURCE, MetricsDrilldownDataSourceVariable);
-    return {
-      dsUid: ds.getValue().toString(),
-      dsName: ds.state.text?.toString() ?? '',
-    };
-  }, [trail]);
+  const dsVar = useMemo(
+    () => sceneGraph.findByKeyAndType(trail, VAR_DATASOURCE, MetricsDrilldownDataSourceVariable),
+    [trail]
+  );
+  const [dsUid, setDsUid] = useState(() => dsVar.getValue().toString());
+  const [dsName, setDsName] = useState(() => dsVar.state.text?.toString() ?? '');
+
+  useEffect(() => {
+    const sub = dsVar.subscribeToState((newState) => {
+      setDsUid(newState.value.toString());
+      setDsName(newState.text?.toString() ?? '');
+    });
+    return () => sub.unsubscribe();
+  }, [dsVar]);
 
   const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, sceneRef) as AdHocFiltersVariable;
   const { filters: allFilters } = filtersVar.useState();
@@ -56,22 +63,6 @@ export function SaveQueryButton({ sceneRef }: Props) {
     return metric;
   }, [sceneRef, allFilters]);
 
-  const fallbackComponent = useMemo(
-    () => (
-      <>
-        <ToolbarButton
-          variant="canvas"
-          icon="save"
-          disabled={!promql}
-          onClick={() => setSaving(true)}
-          tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip', 'Save query')}
-        />
-        {saving && <SaveQueryModal dsUid={dsUid} query={promql} onClose={() => setSaving(false)} />}
-      </>
-    ),
-    [dsUid, promql, saving]
-  );
-
   const query: PromQuery = useMemo(
     () => ({
       refId: 'drilldown',
@@ -89,7 +80,18 @@ export function SaveQueryButton({ sceneRef }: Props) {
   }
 
   if (!isQueryLibrarySupported() || !promql) {
-    return fallbackComponent;
+    return (
+      <>
+        <ToolbarButton
+          variant="canvas"
+          icon="save"
+          disabled={!promql}
+          onClick={() => setSaving(true)}
+          tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip', 'Save query')}
+        />
+        {saving && <SaveQueryModal dsUid={dsUid} query={promql} onClose={() => setSaving(false)} />}
+      </>
+    );
   } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent) {
     return null;
   }

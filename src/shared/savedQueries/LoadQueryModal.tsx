@@ -29,7 +29,6 @@ export function LoadQueryModal({ onClose, sceneRef }: Props) {
     const dsVar = sceneGraph.findByKeyAndType(trail, VAR_DATASOURCE, MetricsDrilldownDataSourceVariable);
     return dsVar.getValue().toString();
   }, [trail]);
-  const sceneTimeRange = useMemo(() => sceneGraph.getTimeRange(sceneRef).state.value, [sceneRef]);
 
   const { deleteQuery, queries, isLoading } = useSavedQueries(dsUid);
 
@@ -50,19 +49,20 @@ export function LoadQueryModal({ onClose, sceneRef }: Props) {
     }
     try {
       const { metric, labels } = parsePromQLQuery(selectedQuery.query);
+      const timeRange = sceneGraph.getTimeRange(sceneRef).state.value;
       const promURLObject = createPromURLObject(
         selectedQuery.dsUid,
         labels,
         metric,
-        sceneTimeRange.raw.from.toString(),
-        sceneTimeRange.raw.to.toString()
+        timeRange.raw.from.toString(),
+        timeRange.raw.to.toString()
       );
       const params = buildNavigateToMetricsParams(promURLObject);
       return createAppUrl(ROUTES.Drilldown, params);
     } catch {
       return '';
     }
-  }, [sceneTimeRange, selectedQuery]);
+  }, [sceneRef, selectedQuery]);
 
   const formattedTime = useMemo(
     () => (selectedQuery ? dateTime(selectedQuery.timestamp).format('ddd MMM DD YYYY HH:mm [GMT]ZZ') : ''),
@@ -95,11 +95,9 @@ export function LoadQueryModal({ onClose, sceneRef }: Props) {
     >
       {!isLoading && queries.length === 0 && (
         <Box backgroundColor="secondary" padding={1.5} marginBottom={2}>
-          {!queries.length && (
-            <Text variant="body">
-              {t('metrics.metrics-drilldown.load-query.empty', 'No saved queries to display.')}
-            </Text>
-          )}
+          <Text variant="body">
+            {t('metrics.metrics-drilldown.load-query.empty', 'No saved queries to display.')}
+          </Text>
         </Box>
       )}
       {queries.length > 0 && (
