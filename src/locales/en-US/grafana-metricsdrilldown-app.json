@@ -121,6 +121,36 @@
   "list-controls": {
     "search-aria-label": "Quick search metrics"
   },
+  "metrics": {
+    "metrics-drilldown": {
+      "load-search": {
+        "button-no-search-tooltip": "No saved searches to load",
+        "button-tooltip": "Load saved search",
+        "empty": "No saved searches to display.",
+        "load-error": "Could not generate a link.",
+        "load-type-error": "Please select a Prometheus query.",
+        "modal-title": "Load a previously saved search",
+        "remove": "Remove",
+        "saved-query-button-tooltip": "Load saved query",
+        "select": "Select"
+      },
+      "save-search": {
+        "already-exists": {
+          "alert": "There is a previously saved search with the same query: {{title}}"
+        },
+        "button-tooltip": "Save search",
+        "button-tooltip-saved-queries": "Save in Saved Queries",
+        "cancel": "Cancel",
+        "description": "Description",
+        "error": "Unexpected error saving this search.",
+        "modal-alert": "Saved searches are stored locally in your browser and will only be available on this device.",
+        "modal-title": "Save current search",
+        "save": "Save",
+        "success": "Search successfully saved.",
+        "title": "Title"
+      }
+    }
+  },
   "metrics-group-by-list": {
     "error-title": "Error while loading label \"{{labelName}}\" values!",
     "no-values": "No label values found for label \"{{labelName}}\"."
