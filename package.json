@@ -25,7 +25,6 @@
     "e2e": "playwright test -c ./e2e/config/playwright.config.local.ts",
     "e2e:watch": "pnpm run e2e --ui",
     "e2e:codegen": "playwright codegen",
-    "e2e:screenshots:gen": "./scripts/e2e-gen-screenshots.sh",
     "e2e:smoke": "playwright test -c ./e2e/config/playwright.config.smoke.ts -x --trace on",
     "knip": "pnpm dlx knip --config knip.js",
     "i18n-extract": "i18next-cli extract -c i18next.config.ts",

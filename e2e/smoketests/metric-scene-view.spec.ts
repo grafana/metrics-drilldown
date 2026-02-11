@@ -9,7 +9,7 @@ test.describe('Metric Scene view', () => {
     await metricSceneView.goto(URL_SEARCH_PARAMS_WITH_METRIC_NAME);
     await metricSceneView.assertCoreUI(METRIC_NAME);
     await metricSceneView.assertDefaultBreadownListControls();
-    await metricSceneView.assertMainPanelMenu(['Explore', 'Copy URL']); // after screenshot to prevent the menu from appearing in it
+    await metricSceneView.assertMainPanelMenu(['Explore', 'Copy URL']);
   });
 
   test.describe('Main viz', () => {
