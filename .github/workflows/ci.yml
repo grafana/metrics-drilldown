@@ -31,3 +31,4 @@ jobs:
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: docker-compose.yaml
       playwright-grafana-url: http://localhost:3001
+      playwright-config: ./e2e/config/playwright.config.ci.ts
