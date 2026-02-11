@@ -11,6 +11,8 @@ import {
 import { Box, Stack, Tab, TabsBar, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { LoadSearchScene } from 'shared/savedQueries/LoadSearchScene';
+import { SaveSearchButton } from 'shared/savedQueries/SaveSearchButton';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
@@ -111,11 +113,21 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
   },
 ];
 
-interface MetricActionBarState extends SceneObjectState {}
+interface MetricActionBarState extends SceneObjectState {
+  loadSearchScene: LoadSearchScene;
+}
 
 export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
+  constructor(state?: Partial<MetricActionBarState>) {
+    super({
+      loadSearchScene: new LoadSearchScene({}),
+      ...state,
+    });
+  }
+
   public static readonly Component = ({ model }: SceneComponentProps<MetricActionBar>) => {
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
+    const { loadSearchScene } = model.useState();
     const styles = useStyles2(getStyles);
     const { actionView, isQueryResultsAvailable } = metricScene.useState();
     const translatedActionViews = getActionViewsDefinitions().filter((tab) => {
@@ -128,7 +140,10 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
     return (
       <Box paddingY={1} data-testid="action-bar" width="100%">
         <div className={styles.actions}>
-          <Stack gap={1}>{/* Action buttons moved to panel menu */}</Stack>
+          <Stack gap={1}>
+            <SaveSearchButton sceneRef={model} />
+            <LoadSearchScene.Component model={loadSearchScene} />
+          </Stack>
         </div>
 
         <TabsBar className={styles.customTabsBar}>

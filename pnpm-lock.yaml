@@ -98,6 +98,9 @@ importers:
       tsqtsq:
         specifier: ^1.1.0
         version: 1.1.0
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
     devDependencies:
       '@grafana/eslint-config':
         specifier: ^9.0.0
