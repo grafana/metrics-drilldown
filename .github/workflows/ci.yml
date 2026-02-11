@@ -8,20 +8,22 @@ on:
         required: false
         type: boolean
         default: false
-  pull_request:
+  push:
     branches:
-      - develop
-
-permissions:
-  contents: 'read'
-  id-token: 'write'
+      - main
+  pull_request:
+permissions: {}
 
 jobs:
   CI:
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@ci-cd-workflows/v4.3.0
     with:
-      run-playwright: false
-      run-playwright-docker: true
+      run-playwright: true
+      run-playwright-docker: false
       # TEMP until the Docker Hub issue is fixed (2025-07-09)
       run-playwright-with-skip-grafana-dev-image: true
       # run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
