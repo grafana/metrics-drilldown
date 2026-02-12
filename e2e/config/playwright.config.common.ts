@@ -33,7 +33,9 @@ export function getGrafanaVersion(versionType: VersionType = 'patch') {
 }
 
 export function getGrafanaUrl(options: GetGrafanaUrlOptions = {}) {
-  const port = options.withScopes ? process.env.GRAFANA_SCOPES_PORT : process.env.GRAFANA_PORT;
+  const port = options.withScopes
+    ? (process.env.GRAFANA_SCOPES_PORT ?? '3002')
+    : (process.env.GRAFANA_PORT ?? '3001');
   return `http://localhost:${port}`;
 }
 
