@@ -33,7 +33,9 @@ export function getGrafanaVersion(versionType: VersionType = 'patch') {
 }
 
 export function getGrafanaUrl(options: GetGrafanaUrlOptions = {}) {
-  const port = options.withScopes ? process.env.GRAFANA_SCOPES_PORT : process.env.GRAFANA_PORT;
+  const port = options.withScopes
+    ? (process.env.GRAFANA_SCOPES_PORT ?? '3002')
+    : (process.env.GRAFANA_PORT ?? '3001');
   return `http://localhost:${port}`;
 }
 
@@ -60,10 +62,6 @@ export function config(config: CustomEnvConfig) {
     reporter: config.reporter,
     expect: {
       timeout: Number(config.expectTimeout) > 0 ? config.expectTimeout : 5000,
-      toHaveScreenshot: {
-        // tweak me with experience ;)
-        maxDiffPixelRatio: 0.005, // 0.5% of the screenshot size in pixels
-      },
     },
     retries: config.retries && config.retries > 0 ? config.retries : 0,
     forbidOnly: config.forbidOnly || false,

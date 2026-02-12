@@ -8,20 +8,22 @@ on:
         required: false
         type: boolean
         default: false
-  pull_request:
+  push:
     branches:
       - main
-
-permissions:
-  contents: "read"
-  id-token: "write"
+  pull_request:
+permissions: {}
 
 jobs:
   CI:
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@ci-cd-workflows/v4.3.0
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@ci-cd-workflows/v5.1.0
     with:
-      run-playwright: false
-      run-playwright-docker: true
+      run-playwright: true
+      run-playwright-docker: false
       # TEMP until the Docker Hub issue is fixed (2025-07-09)
       run-playwright-with-skip-grafana-dev-image: true
       # run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
@@ -29,3 +31,4 @@ jobs:
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: docker-compose.yaml
       playwright-grafana-url: http://localhost:3001
+      playwright-config: e2e/config/playwright.config.ci.ts
