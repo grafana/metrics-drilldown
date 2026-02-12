@@ -129,7 +129,7 @@ test.describe('Metrics reducer view', () => {
 
       // We'll select seven metrics, but only the 6 most recent metrics should be shown above the alphabetical list
       const metricsToSelect = [
-        'pyroscope_write_path_downstream_request_duration_seconds', // This one should not appear in the screenshot
+        'pyroscope_write_path_downstream_request_duration_seconds',
         'grafana_access_evaluation_duration_bucket',
         'process_network_transmit_bytes_total',
         'memberlist_client_cas_success_total',
