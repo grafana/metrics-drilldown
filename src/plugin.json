@@ -103,6 +103,11 @@
         "id": "grafana-metricsdrilldown-app/mini-breakdown-component/v1",
         "title": "Mini Label Breakdown Navigation",
         "description": "A mini metrics label breakdown view from the Metrics Drilldown app used for navigation."
+      },
+      {
+        "id": "grafana-metricsdrilldown-app/entity-metrics-component/v1",
+        "title": "Entity Metrics",
+        "description": "A metrics exploration view for entity labels from the Metrics Drilldown app."
       }
     ]
   }
