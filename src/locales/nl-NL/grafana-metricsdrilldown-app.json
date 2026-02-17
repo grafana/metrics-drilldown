@@ -1,200 +1,200 @@
 {
   "action-bar": {
     "tab": {
-      "breakdown": "",
+      "breakdown": "Breakdown",
       "query-results": "",
       "query-results-description": "",
-      "related-logs": "",
-      "related-logs-description": "",
-      "related-metrics": "",
-      "related-metrics-description": ""
+      "related-logs": "Gerelateerde logs",
+      "related-logs-description": "Relevante logs op basis van huidige labelfilters en tijdsbereik",
+      "related-metrics": "Gerelateerde metrics",
+      "related-metrics-description": "Relevante metrics op basis van huidige labelfilters"
     }
   },
   "breakdown": {
-    "add-to-filters": "",
-    "by-label": "",
+    "add-to-filters": "Toevoegen aan filters",
+    "by-label": "Op label",
     "group-by": {
-      "label": ""
+      "label": "Groeperen op"
     },
     "label-values-list": {
-      "error-title": "",
-      "no-values": "",
+      "error-title": "Er is een fout opgetreden bij het laden van metrics!",
+      "no-values": "Geen labelwaarden gevonden voor de huidige filters en het huidige tijdsbereik.",
       "search-aria-label": "",
-      "search-label": "",
-      "view-label": ""
+      "search-label": "Zoeken",
+      "view-label": "Weergeven"
     },
     "labels-list": {
-      "breakdown-by-label": "",
-      "error-title": "",
-      "no-labels": "",
-      "view-label": ""
+      "breakdown-by-label": "Breakdown door {{label}}",
+      "error-title": "Er is een fout opgetreden bij het laden van labels!",
+      "no-labels": "Geen labels gevonden voor de huidige filters en het huidige tijdsbereik.",
+      "view-label": "Weergeven"
     },
-    "section-label": "",
-    "select-label": ""
+    "section-label": "Breakdown",
+    "select-label": "Selecteren"
   },
   "checkbox-list": {
-    "clear": "",
-    "collapse": "",
-    "expand": "",
-    "no-results": "",
-    "selected-count_one": "",
-    "selected-count_other": ""
+    "clear": "wissen",
+    "collapse": "Inklappen",
+    "expand": "Uitvouwen",
+    "no-results": "Geen resultaten.",
+    "selected-count_one": "{{count}} geselecteerd",
+    "selected-count_other": "{{count}} geselecteerd"
   },
   "configure-panel": {
-    "apply": "",
-    "cancel": "",
-    "restore-default": "",
-    "restore-modal-body": "",
-    "restore-modal-confirm": "",
-    "restore-modal-title": "",
-    "select-function-message": ""
+    "apply": "Toepassen",
+    "cancel": "Annuleren",
+    "restore-default": "Standaardconfiguratie herstellen",
+    "restore-modal-body": "Weet u zeker dat u de standaardconfiguratie voor de {{metric}} metric wilt herstellen?",
+    "restore-modal-confirm": "Herstellen",
+    "restore-modal-title": "Standaardconfiguratie herstellen",
+    "select-function-message": "Selecteer een Prometheus-functie die standaard wordt gebruikt om de {{metricName}} metric weer te geven."
   },
   "data-source-variable": {
-    "description": "",
-    "label": ""
+    "description": "Alleen Prometheus-databronnen worden ondersteund",
+    "label": "Databron"
   },
   "data-trail": {
     "configure-drawer": {
-      "title": ""
+      "title": "Configureer de Prometheus-functie"
     },
     "filters": {
-      "add-label": "",
-      "label": ""
+      "add-label": "Label toevoegen",
+      "label": "Filters"
     }
   },
   "error-view": {
-    "message": "",
-    "stack-trace-label": "",
-    "title": ""
+    "message": "<2>Probeer de pagina opnieuw te laden</2> of neem contact op met de beheerder van uw organisatie als het probleem zich blijft voordoen. Sorry voor het ongemak.",
+    "stack-trace-label": "Stacktrace weergeven",
+    "title": "Fatale fout!"
   },
   "extreme-value-filter": {
-    "message": ""
+    "message": "Paneelgegevens zijn opnieuw opgehaald met een complexere query om extreem kleine waarden in de reeks te verwerken"
   },
   "fetch-alerting-metrics": {
-    "error": ""
+    "error": "Kan waarschuwingsregels niet ophalen"
   },
   "fetch-dashboard-metrics": {
-    "error": ""
+    "error": "Kan dashboardmetrics niet ophalen"
   },
   "filtered-metrics-variable": {
-    "label": ""
+    "label": "Gefilterde Metrics"
   },
   "give-feedback": {
-    "button": "",
-    "tooltip": ""
+    "button": "Feedback geven",
+    "tooltip": "Deel uw mening over Metrics in Grafana."
   },
   "gmd-viz-panel": {
-    "native-histogram": "",
+    "native-histogram": "Native Histogram",
     "variant": {
-      "heatmap": "",
-      "percentiles": ""
+      "heatmap": "heatmap",
+      "percentiles": "percentielen"
     }
   },
   "inline-banner": {
-    "unknown-error": ""
+    "unknown-error": "Onbekende fout!"
   },
   "labels-datasource": {
-    "none-option": "",
-    "test-success": ""
+    "none-option": "(geen)",
+    "test-success": "OK"
   },
   "labels-list": {
-    "clear": "",
-    "no-results": "",
-    "no-selection": "",
-    "selected": ""
+    "clear": "wissen",
+    "no-results": "Geen resultaten.",
+    "no-selection": "Geen selectie",
+    "selected": "Geselecteerd: \"{{selectedLabel}}\""
   },
   "labels-variable": {
-    "label": "",
-    "placeholder": ""
+    "label": "Groeperen op label",
+    "placeholder": "Groeperen op label..."
   },
   "layout-switcher": {
-    "aria-label": "",
+    "aria-label": "Layoutwisselaar",
     "option": {
-      "grid": "",
-      "rows": "",
-      "single": ""
+      "grid": "Raster",
+      "rows": "Rijen",
+      "single": "Enkel"
     }
   },
   "lazy-loading": {
-    "fallback": ""
+    "fallback": "Laden..."
   },
   "list-controls": {
     "search-aria-label": ""
   },
   "metrics-group-by-list": {
-    "error-title": "",
-    "no-values": ""
+    "error-title": "Er is een fout opgetreden bij het laden van label \"{{labelName}}\"-waarden!",
+    "no-values": "Geen labelwaarden gevonden voor label \"{{labelName}}\"."
   },
   "metrics-group-by-row": {
-    "error-title": "",
-    "no-metrics": "",
-    "select": "",
-    "select-tooltip": "",
-    "show-more-tooltip": ""
+    "error-title": "Er is een fout opgetreden bij het laden van metrics!",
+    "no-metrics": "Geen metrics gevonden voor de huidige filters en het huidige tijdsbereik.",
+    "select": "Selecteren",
+    "select-tooltip": "Zie metrics met {{labelName}}={{labelValue}}",
+    "show-more-tooltip": "Meer metrics weergeven voor {{labelName}}=\"{{labelValue}}\""
   },
   "metrics-list": {
-    "error-title": "",
-    "no-metrics": ""
+    "error-title": "Er is een fout opgetreden bij het laden van metrics!",
+    "no-metrics": "Geen metrics gevonden voor de huidige filters en het huidige tijdsbereik."
   },
   "metrics-sorter": {
     "error": {
-      "get-recent-metrics": ""
+      "get-recent-metrics": "Kan recente metrics niet ophalen:"
     },
-    "label": "",
+    "label": "Sorteren op",
     "option": {
-      "alerting-usage": "",
-      "alphabetical": "",
-      "alphabetical-reversed": "",
-      "dashboard-usage": "",
-      "default": ""
+      "alerting-usage": "Alerting-gebruik",
+      "alphabetical": "Alfabetisch [A-Z]",
+      "alphabetical-reversed": "Alfabetisch [Z-A]",
+      "dashboard-usage": "Dashboardgebruik",
+      "default": "Standaard"
     }
   },
   "metrics-variable": {
-    "label": ""
+    "label": "Metrics"
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
-    "title": ""
+    "learn-more": "Bekijk <2>onze documenten</2> voor meer informatie of<5></5><6>probeer het online</6> in Grafana Play!",
+    "no-datasource": "We hebben gemerkt dat er geen Prometheus-databron is geconfigureerd.<1></1>Voeg een <4>Prometheus-databron</4> toe om metrics te bekijken.",
+    "title": "Welkom bij Grafana Metrics Drilldown"
   },
   "open-assistant": {
-    "explain-label": "",
-    "metric-metadata-title": ""
+    "explain-label": "Leg uit in Assistent",
+    "metric-metadata-title": "Prometheus metric metadata"
   },
   "panel-menu": {
     "action": {
-      "copy-url": "",
-      "copy-url-success": "",
-      "explore": ""
+      "copy-url": "URL kopiëren",
+      "copy-url-success": "URL naar klembord gekopieerd",
+      "explore": "Verkennen"
     },
     "group": {
-      "actions": "",
-      "navigation": ""
+      "actions": "Acties",
+      "navigation": "Navigatie"
     }
   },
   "plugin-info": {
     "button": {
-      "title": "",
-      "tooltip": ""
+      "title": "Plugin-informatie",
+      "tooltip": "Plugin-informatie"
     },
     "header": {
-      "last-update": "",
-      "title": ""
+      "last-update": "Laatste update: {{updated}}",
+      "title": "Grafana Metrics Drilldown v{{version}}"
     },
     "menu": {
-      "changelog": "",
-      "commit-sha": "",
-      "contribute": "",
-      "documentation": "",
-      "grafana-version": "",
-      "prom-build-info": "",
-      "report-issue": ""
+      "changelog": "Changelog",
+      "commit-sha": "Commit-SHA: {{sha}} ",
+      "contribute": "Bijdragen",
+      "documentation": "Documentatie",
+      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "report-issue": "Een probleem melden"
     }
   },
   "prefix-filter": {
-    "all-metrics": "",
-    "tooltip": "",
-    "view-by-label": ""
+    "all-metrics": "Alle metricnamen",
+    "tooltip": "Weergeven op metricvoorvoegsel. Een metricvoorvoegsel is een enkel woord aan het begin van de metricnaam, relevant voor het domein waartoe de metric behoort.",
+    "view-by-label": "Weergeven per"
   },
   "query-results": {
     "aria-label": "",
@@ -203,11 +203,11 @@
     "unavailable-title": ""
   },
   "quick-search": {
-    "ask-assistant-aria-label": "",
-    "ask-assistant-tooltip": "",
-    "clear-search-tooltip": "",
+    "ask-assistant-aria-label": "Vraag het de Grafana-assistent",
+    "ask-assistant-tooltip": "Vraag het de Grafana-assistent",
+    "clear-search-tooltip": "Zoekopdracht wissen",
     "placeholder": "",
-    "placeholder-question-mode": "",
+    "placeholder-question-mode": "Stel de Grafana-assistent een vraag en druk op enter",
     "placeholder-with-assistant": "",
     "placeholder-with-assistant-tab-enter": "",
     "count-filtered_one": "",
@@ -216,32 +216,32 @@
     "count-total_other": ""
   },
   "quick-search-assistant": {
-    "label-filters-title": "",
-    "time-range-title": ""
+    "label-filters-title": "Huidige labelfilters",
+    "time-range-title": "Tijdsbereik"
   },
   "related-logs": {
-    "datasource-description": "",
-    "datasource-label": "",
-    "experimental-note": "",
-    "loading": "",
-    "no-logs-message": "",
-    "no-logs-title": "",
-    "open-drilldown": "",
-    "open-drilldown-tooltip": "",
-    "open-in-drilldown": "",
-    "open-in-drilldown-tooltip": "",
-    "suggestions": ""
+    "datasource-description": "Sommige Loki-databronnen ontbreken mogelijk in de vervolgkeuzelijst als het langer dan {{timeout}} seconden duurde om te reageren. Probeer Logs Drilldown te gebruiken om logs voor alle Loki-databronnen te bekijken.",
+    "datasource-label": "Logs-databron",
+    "experimental-note": "Let op: gerelateerde logs is een experimentele functie.",
+    "loading": "Laden...",
+    "no-logs-message": "We konden geen logs vinden met betrekking tot de huidige metric met uw geselecteerde filters.",
+    "no-logs-title": "Geen gerelateerde logs gevonden",
+    "open-drilldown": "Open Logs Drilldown",
+    "open-drilldown-tooltip": "Navigeer naar de app Logs Drilldown",
+    "open-in-drilldown": "Openen in Logs Drilldown",
+    "open-in-drilldown-tooltip": "Gebruik de Logs Drilldown-app om deze logs te verkennen",
+    "suggestions": "Om gerelateerde logs te vinden, probeer het volgende:<1><0>Pas uw labelfilters aan zodat ze labels bevatten die zowel in de huidige metric als in uw logs voorkomen</0><1>Selecteer een metric die is aangemaakt door een <2>Loki Recording Rule</2></1><2>Vergroot het tijdbereik om meer gegevens op te nemen</2></1>"
   },
   "related-metrics": {
     "search-aria-label": ""
   },
   "select-action": {
-    "button": ""
+    "button": "Selecteren"
   },
   "select-new-metric": {
-    "button": "",
-    "metrics-drilldown": "",
-    "open-in-drilldown-tooltip": ""
+    "button": "Selecteer een nieuwe metric",
+    "metrics-drilldown": "Metrics Drilldown",
+    "open-in-drilldown-tooltip": "Openen in Metrics Drilldown"
   },
   "show-more-button": {
     "text_one": "",
@@ -249,96 +249,96 @@
   },
   "sidebar": {
     "bookmarks": {
-      "date-created": "",
-      "empty-state": "",
-      "remove-tooltip": ""
+      "date-created": "Aangemaakt op:",
+      "empty-state": "Nog geen bladwijzers voor de<1></1>huidige databron.",
+      "remove-tooltip": "Bladwijzer verwijderen"
     },
-    "close-aria-label": "",
-    "close-tooltip": "",
+    "close-aria-label": "Sluiten",
+    "close-tooltip": "Sluiten",
     "filter": {
-      "clear-search-tooltip": "",
-      "hide-empty": "",
+      "clear-search-tooltip": "Zoekopdracht wissen",
+      "hide-empty": "Lege verbergen",
       "search-aria-label": "",
-      "search-placeholder": ""
+      "search-placeholder": "Zoeken..."
     },
     "filter-type": {
-      "prefix": "",
-      "recent": "",
-      "rule-group": "",
-      "suffix": ""
+      "prefix": "voorvoegsel",
+      "recent": "recent",
+      "rule-group": "regelgroep",
+      "suffix": "achtervoegsel"
     },
     "labels-browser": {
-      "clear-search-tooltip": "",
+      "clear-search-tooltip": "Zoekopdracht wissen",
       "search-aria-label": "",
-      "search-placeholder": ""
+      "search-placeholder": "Zoeken..."
     },
     "recent-metrics": {
-      "all-time": "",
-      "past-interval": ""
+      "all-time": "Altijd",
+      "past-interval": "Verleden {{interval}}"
     },
     "section": {
-      "bookmarks": "",
-      "bookmarks-description": "",
-      "group-by-labels": "",
-      "group-by-labels-description": "",
-      "prefix-filters": "",
-      "prefix-filters-description": "",
-      "recent-metrics": "",
-      "recent-metrics-description": "",
-      "rules-filters": "",
-      "rules-filters-description": "",
-      "settings": "",
+      "bookmarks": "Bladwijzers",
+      "bookmarks-description": "Toegang tot uw opgeslagen metrics voor snelle referentie",
+      "group-by-labels": "Groeperen op labels",
+      "group-by-labels-description": "Groeperen van statistieken op hun labelwaarden",
+      "prefix-filters": "Voorvoegselsfilters",
+      "prefix-filters-description": "Metrics filteren op basis van hun naamvoorvoegsel (Prometheus-namespace)",
+      "recent-metrics": "Recente metricsfilters",
+      "recent-metrics-description": "Metrics filteren op basis van wanneer ze zijn gaan binnenkomen",
+      "rules-filters": "Regelfilters",
+      "rules-filters-description": "Metrics en opnameregels filteren",
+      "settings": "Instellingen",
       "settings-description": "",
-      "suffix-filters": "",
-      "suffix-filters-description": ""
+      "suffix-filters": "Achtervoegselfilters",
+      "suffix-filters-description": "Metrics filteren op basis van hun naamachtervoegsel"
     }
   },
   "sort-by": {
-    "label": "",
+    "label": "Sorteren op",
     "option": {
-      "alphabetical": "",
-      "alphabetical-description": "",
-      "alphabetical-reversed": "",
-      "alphabetical-reversed-description": "",
-      "outliers": "",
-      "outliers-description": ""
+      "alphabetical": "Naam [A-Z]",
+      "alphabetical-description": "Alfabetische volgorde",
+      "alphabetical-reversed": "Naam [Z-A]",
+      "alphabetical-reversed-description": "Omgekeerde alfabetische volgorde",
+      "outliers": "Uitschietende reeksen",
+      "outliers-description": "Geeft prioriteit aan waarden die duidelijk verschillend gedrag vertonen van anderen binnen hetzelfde label"
     },
-    "placeholder": "",
-    "tooltip": ""
+    "placeholder": "Criteria kiezen",
+    "tooltip": "Sorteert waarden met behulp van standaard of slimme tijdreeksberekeningen."
   },
   "trail": {
     "breadcrumb": {
-      "all-metrics": "",
-      "metrics": ""
+      "all-metrics": "Alle metrics",
+      "metrics": "Metrics"
     }
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "",
-      "copy-url": "",
-      "open-explore": "",
-      "select-new-metric-tooltip": ""
+      "bookmark": "Bladwijzer",
+      "copy-url": "URL kopiëren",
+      "open-explore": "Openen in verkennen",
+      "select-new-metric-tooltip": "Verwijder bestaande metric en kies een nieuwe metric"
     },
     "search": {
-      "title": ""
+      "title": "Zoekmetrics"
     }
   },
   "usage-data": {
-    "metric-used-in-plural_one": "",
-    "metric-used-in-plural_other": "",
-    "metric-used-in-singular_one": "",
-    "metric-used-in-singular_other": "",
-    "metric-used-plural_one": "",
-    "metric-used-plural_other": "",
-    "metric-used-singular_one": "",
-    "metric-used-singular_other": "",
-    "used-time-plural_one": "",
-    "used-time-plural_other": "",
-    "used-time-singular_one": "",
-    "used-time-singular_other": ""
+    "metric-used-in-plural_one": "Metric wordt gebruikt in {{count}} {{usageType}}",
+    "metric-used-in-plural_other": "Metric wordt gebruikt in {{count}} {{usageType}}",
+    "metric-used-in-singular_one": "Metric wordt gebruikt in {{count}} {{usageType}}",
+    "metric-used-in-singular_other": "Metric wordt gebruikt in {{count}} {{usageType}}",
+    "metric-used-plural_one": "Metric {{count}} keer gebruikt in dashboardqueries. Klik om de dashboards te bekijken.",
+    "metric-used-plural_other": "Metric {{count}} keer gebruikt in dashboardqueries. Klik om de dashboards te bekijken.",
+    "metric-used-singular_one": "Metric {{count}} keer gebruikt in dashboardqueries. Klik om de dashboards te bekijken.",
+    "metric-used-singular_other": "Metric {{count}} keer gebruikt in dashboardqueries. Klik om de dashboards te bekijken.",
+    "used-time-plural_one": "{{count}} keer gebruikt in {{label}}",
+    "used-time-plural_other": "{{count}} keer gebruikt in {{label}}",
+    "used-time-singular_one": "{{count}} keer gebruikt in {{label}}",
+    "used-time-singular_other": "{{count}} keer gebruikt in {{label}}"
   },
   "with-config-panel-options": {
-    "click-to-select": "",
-    "current-config": ""
+    "click-to-select": "Klik om deze configuratie te selecteren",
+    "current-config": "Huidige configuratie"
   }
 }

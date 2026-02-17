@@ -76,31 +76,3 @@ services:
       timeout: 1s
       retries: 30
       start_period: 15s
-
-  # e2e testing
-  playwright:
-    network_mode: host
-    container_name: 'playwright-e2e'
-    build:
-      dockerfile: ./e2e/docker/Dockerfile.playwright
-      context: .
-    volumes:
-      - ./e2e:/app/e2e
-      - ./src:/app/src
-    command: ${PLAYWRIGHT_ARGS:-}
-    profiles: [playwright]
-    # this is only for local testing, in our CI pipeline, our shared plugin actions wait for Grafana to start before launching Playwright
-    depends_on:
-      grafana-scopes-gmd:
-        condition: service_healthy
-      grafana-gmd:
-        condition: service_healthy
-      prometheus-gmd:
-        condition: service_healthy
-    environment:
-      # required for screenshot testing across Grafana versions
-      GRAFANA_VERSION: ${GRAFANA_VERSION:-11.6.5}
-      # required for testing Scopes functionality (see the grafana-scopes-gmd service above)
-      GRAFANA_SCOPES_PORT: ${GRAFANA_SCOPES_PORT:-3002}
-      # see the grafana-gmd service above
-      GRAFANA_PORT: ${GRAFANA_PORT:-3001}
