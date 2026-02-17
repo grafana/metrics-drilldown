@@ -13,20 +13,20 @@ export interface EntityMetricsProps {
   labels: Record<string, string>; // Entity labels (service, namespace, etc.)
   initialStart: string | number;
   initialEnd: string | number;
-  dataSource: DataSourceApi<any, any>;
+  dataSource: DataSourceApi;
   entityType?: string; // Optional for UI customization
 }
 
-const EntityMetrics = ({ labels, initialStart, initialEnd, dataSource, entityType }: EntityMetricsProps) => {
+const EntityMetrics = ({ labels, initialStart, initialEnd, dataSource }: EntityMetricsProps) => {
   const [error] = useCatchExceptions();
   const initRef = useRef(false);
 
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      reportExploreMetrics('exposed_component_viewed', { component: 'entity_metrics', entityType });
+      reportExploreMetrics('exposed_component_viewed', { component: 'entity_metrics' });
     }
-  }, [entityType]);
+  }, []);
 
   // Convert labels to AdHocVariableFilter format
   const initialFilters: AdHocVariableFilter[] = Object.entries(labels)
