@@ -93,7 +93,19 @@ export function SaveQueryButton({ sceneRef }: Props) {
       </>
     );
   } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent) {
-    return null;
+    // Fall back to local UI when Query Library is supported but the exposed component is not available
+    return (
+      <>
+        <ToolbarButton
+          variant="canvas"
+          icon="save"
+          disabled={!promql}
+          onClick={() => setSaving(true)}
+          tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip', 'Save query')}
+        />
+        {saving && <SaveQueryModal dsUid={dsUid} query={promql} onClose={() => setSaving(false)} />}
+      </>
+    );
   }
 
   return (

@@ -142,7 +142,24 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
         </>
       );
     } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent) {
-      return null;
+      // Fall back to local UI when Query Library is supported but the exposed component is not available
+      return (
+        <>
+          <ToolbarButton
+            icon="folder-open"
+            variant="canvas"
+            disabled={!hasSavedQueries}
+            onClick={model.toggleOpen}
+            className={styles.button}
+            tooltip={
+              hasSavedQueries
+                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Load saved query')
+                : t('metrics.metrics-drilldown.load-query.button-no-query-tooltip', 'No saved queries to load')
+            }
+          />
+          {isOpen && <LoadQueryModal sceneRef={model} onClose={model.toggleClosed} />}
+        </>
+      );
     }
 
     return (
