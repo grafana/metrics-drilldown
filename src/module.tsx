@@ -4,7 +4,10 @@ import { LoadingPlaceholder } from '@grafana/ui';
 import React, { lazy, Suspense } from 'react';
 import { lt } from 'semver';
 
-import { exposedComponentConfigs } from 'exposedComponents/components';
+import { entityMetricsConfig } from 'exposedComponents/EntityMetrics/config';
+import { labelBreakdownConfig } from 'exposedComponents/LabelBreakdown/config';
+import { miniBreakdownConfig } from 'exposedComponents/MiniBreakdown/config';
+import { sourceMetricsConfig } from 'exposedComponents/SourceMetrics/config';
 import { datasourceConfigLinkConfigs } from 'extensions/datasourceConfigLinks';
 import { linkConfigs } from 'extensions/links';
 import { logger } from 'shared/logger/logger';
@@ -55,6 +58,7 @@ for (const linkConfig of [...linkConfigs, ...datasourceConfigLinkConfigs]) {
   plugin.addLink(linkConfig);
 }
 
-for (const exposedComponent of exposedComponentConfigs) {
-  plugin.exposeComponent(exposedComponent as any);
-}
+plugin.exposeComponent(entityMetricsConfig);
+plugin.exposeComponent(labelBreakdownConfig);
+plugin.exposeComponent(miniBreakdownConfig);
+plugin.exposeComponent(sourceMetricsConfig);
