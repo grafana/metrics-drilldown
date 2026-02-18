@@ -55,8 +55,7 @@
           "noDataState": "NoData",
           "execErrState": "Error",
           "for": "4h",
-          "isPaused": false,
-          "notification_settings": { "receiver": "grafana-default-email" }
+          "isPaused": false
         },
         {
           "uid": "ceedukphd7da8c",
@@ -145,8 +144,7 @@
           "noDataState": "NoData",
           "execErrState": "Error",
           "for": "4h",
-          "isPaused": false,
-          "notification_settings": { "receiver": "grafana-default-email" }
+          "isPaused": false
         }
       ]
     }
