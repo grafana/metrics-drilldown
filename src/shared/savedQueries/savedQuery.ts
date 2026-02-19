@@ -23,9 +23,7 @@ export function isQueryLibrarySupported() {
   return !semver.ltr(config.buildInfo.version, MIN_VERSION) && config.featureToggles.queryLibrary;
 }
 
-export function useCheckForExistingQuery(dsUid: string, query: string) {
-  const { queries } = useSavedQueries(dsUid);
-
+export function findExistingQuery(queries: SavedQuery[], query: string) {
   return queries.find((q) => q.query === query);
 }
 
@@ -39,6 +37,7 @@ export function useSavedQueries(dsUid: string) {
 
   useEffect(() => {
     const refresh = () => setQueries(getLocallySavedQueries(dsUid));
+    refresh(); // immediately sync state when dsUid changes
     savedQueryListeners.add(refresh);
     return () => {
       savedQueryListeners.delete(refresh);

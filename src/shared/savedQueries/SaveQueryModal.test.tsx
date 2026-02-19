@@ -4,10 +4,13 @@ import React from 'react';
 
 
 
-import { useCheckForExistingQuery, useSavedQueries } from './savedQuery';
+import { useSavedQueries } from './savedQuery';
 import { SaveQueryModal } from './SaveQueryModal';
 
-jest.mock('./savedQuery');
+jest.mock('./savedQuery', () => ({
+  ...jest.requireActual('./savedQuery'),
+  useSavedQueries: jest.fn(),
+}));
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
   getAppEvents: jest.fn(),
@@ -34,7 +37,6 @@ jest.mock('@grafana/ui', () => {
 });
 
 const mockUseSavedQueries = jest.mocked(useSavedQueries);
-const mockUseCheckForExistingQuery = jest.mocked(useCheckForExistingQuery);
 
 describe('SaveQueryModal', () => {
   const mockOnClose = jest.fn();
@@ -43,7 +45,6 @@ describe('SaveQueryModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(getAppEvents).mockReturnValue({ publish: jest.fn() } as any);
-    mockUseCheckForExistingQuery.mockReturnValue(undefined);
 
     mockUseSavedQueries.mockReturnValue({
       saveQuery: mockSaveQuery,
@@ -82,13 +83,20 @@ describe('SaveQueryModal', () => {
   });
 
   test('shows alert when query already exists', () => {
-    mockUseCheckForExistingQuery.mockReturnValue({
-      description: 'Test description',
-      dsUid: 'test-ds',
-      query: 'http_requests_total{method="GET"}',
-      title: 'Existing Query',
-      timestamp: 123456,
-      uid: 'test',
+    mockUseSavedQueries.mockReturnValue({
+      saveQuery: mockSaveQuery,
+      isLoading: false,
+      queries: [
+        {
+          description: 'Test description',
+          dsUid: 'test-ds',
+          query: 'http_requests_total{method="GET"}',
+          title: 'Existing Query',
+          timestamp: 123456,
+          uid: 'test',
+        },
+      ],
+      deleteQuery: jest.fn(),
     });
 
     render(<SaveQueryModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);

@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
-import { useCheckForExistingQuery, useSavedQueries } from './savedQuery';
+import { findExistingQuery, useSavedQueries } from './savedQuery';
 
 interface Props {
   readonly dsUid: string;
@@ -23,8 +23,8 @@ export function SaveQueryModal({ dsUid, query, onClose }: Props) {
   const [state, setState] = useState<'error' | 'idle' | 'saving'>('idle');
   const styles = useStyles2(getStyles);
 
-  const { saveQuery } = useSavedQueries(dsUid);
-  const existingQuery = useCheckForExistingQuery(dsUid, query);
+  const { saveQuery, queries } = useSavedQueries(dsUid);
+  const existingQuery = findExistingQuery(queries, query);
 
   useEffect(() => {
     reportExploreMetrics('saved_query_save_modal_opened', {});

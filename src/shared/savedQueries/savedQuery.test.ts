@@ -5,9 +5,9 @@ import { act } from 'react';
 
 import { narrowSavedQueries } from './narrowSavedQuery';
 import {
+  findExistingQuery,
   isQueryLibrarySupported,
   SAVED_QUERIES_KEY,
-  useCheckForExistingQuery,
   useHasSavedQueries,
   useSavedQueries,
   type SavedQuery,
@@ -126,15 +126,16 @@ describe('useSavedQueries', () => {
   });
 });
 
-describe('useCheckForExistingQuery', () => {
-  test('Checks for existing queries', () => {
-    const { result } = renderHook(() => useCheckForExistingQuery('ds-local-1', localQueries[0].query));
-    expect(result.current).toBeDefined();
+describe('findExistingQuery', () => {
+  test('finds an existing query', () => {
+    const result = findExistingQuery(localQueries, localQueries[0].query);
+    expect(result).toBeDefined();
+    expect(result?.uid).toBe('local-uid-1');
   });
 
-  test('Checks for non-existing queries', () => {
-    const { result } = renderHook(() => useCheckForExistingQuery('ds-local-1', 'nonexistent_metric'));
-    expect(result.current).toBeUndefined();
+  test('returns undefined for non-existing query', () => {
+    const result = findExistingQuery(localQueries, 'nonexistent_metric');
+    expect(result).toBeUndefined();
   });
 });
 
