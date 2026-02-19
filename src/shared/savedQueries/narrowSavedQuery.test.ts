@@ -41,7 +41,7 @@ describe('narrowSavedQuery', () => {
       title: 123,
       description: null,
       query: undefined,
-      timestamp: 'not-a-number',
+      timestamp: 1000,
       dsUid: true,
       uid: {},
     });
@@ -50,10 +50,60 @@ describe('narrowSavedQuery', () => {
       title: '',
       description: '',
       query: '',
-      timestamp: NaN,
+      timestamp: 1000,
       dsUid: '',
       uid: '',
     });
+  });
+
+  test('returns null for NaN timestamp', () => {
+    expect(
+      narrowSavedQuery({
+        title: 'Test',
+        description: '',
+        query: 'up',
+        timestamp: 'not-a-number',
+        dsUid: 'ds-1',
+        uid: 'uid-1',
+      })
+    ).toBeNull();
+  });
+
+  test('returns null for undefined timestamp value', () => {
+    expect(
+      narrowSavedQuery({
+        title: 'Test',
+        description: '',
+        query: 'up',
+        timestamp: undefined,
+        dsUid: 'ds-1',
+        uid: 'uid-1',
+      })
+    ).toBeNull();
+  });
+
+  test('returns null for Infinity timestamp', () => {
+    expect(
+      narrowSavedQuery({
+        title: 'Test',
+        description: '',
+        query: 'up',
+        timestamp: Infinity,
+        dsUid: 'ds-1',
+        uid: 'uid-1',
+      })
+    ).toBeNull();
+
+    expect(
+      narrowSavedQuery({
+        title: 'Test',
+        description: '',
+        query: 'up',
+        timestamp: -Infinity,
+        dsUid: 'ds-1',
+        uid: 'uid-1',
+      })
+    ).toBeNull();
   });
 });
 

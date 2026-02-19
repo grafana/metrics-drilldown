@@ -83,9 +83,12 @@ export function LoadQueryModal({ onClose, sceneRef }: Props) {
   }, [deleteQuery, selectedQuery]);
 
   const onLinkClick = useCallback(() => {
+    if (!href) {
+      return;
+    }
     reportExploreMetrics('saved_query_loaded', {});
     onClose();
-  }, [onClose]);
+  }, [href, onClose]);
 
   return (
     <Modal
@@ -145,7 +148,7 @@ export function LoadQueryModal({ onClose, sceneRef }: Props) {
                         onClick={onDelete}
                         tooltip={t('metrics.metrics-drilldown.load-query.remove', 'Remove')}
                       />
-                      <LinkButton onClick={onLinkClick} href={href} variant="primary">
+                      <LinkButton onClick={onLinkClick} href={href} variant="primary" disabled={!href}>
                         {t('metrics.metrics-drilldown.load-query.select', 'Select')}
                       </LinkButton>
                     </Stack>

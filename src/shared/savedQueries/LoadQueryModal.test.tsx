@@ -148,6 +148,17 @@ describe('LoadQueryModal', () => {
     );
   });
 
+  test('Disables Select button when parsePromQLQuery throws', () => {
+    jest.mocked(parsePromQLQuery).mockImplementation(() => {
+      throw new Error('parse error');
+    });
+
+    render(<LoadQueryModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
+
+    const selectButton = screen.getByRole('link', { name: /select/i });
+    expect(selectButton).toHaveAttribute('aria-disabled', 'true');
+  });
+
   test('Creates a link with absolute time', () => {
     jest.mocked(parsePromQLQuery).mockClear();
     jest.spyOn(sceneGraph, 'getTimeRange').mockReturnValue({
