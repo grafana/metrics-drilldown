@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.31
+
+##### Chores
+
+* **docker:**  support appending feature toggles and fix alert rules (#1083) (17e410e6)
+* **deps:**
+  *  Update dependency glob to v13.0.3 (#1077) (49253934)
+  *  Update dependency @types/node to v24.10.13 (#1075) (cf871a47)
+  *  Update dependency dotenv to v17.3.1 (#1076) (be33a6da)
+  *  Update dependency webpack to v5.105.2 (#1078) (3e356546)
+  *  Update dependency @playwright/test to v1.58.2 (#1074) (da5349e2)
+  *  Update TypeScript and linting (#1080) (283a2720)
+  *  Update pnpm to v10.29.3 (#1079) (7470035c)
+  *  Update dependency @grafana/plugin-e2e to v3.3.0 (#1073) (eedbcf51)
+*  remove Docker-based Playwright in favor of node-based execution (#1065) (b982b661)
+
+##### Documentation Changes
+
+*  remove Docker-based screenshot testing documentation (#1072) (e584da65)
+
+##### Other Changes
+
+*  Download translations from Crowdin (#1069) (071cc911)
+
+
 ## 1.0.30
 
 ##### Chores

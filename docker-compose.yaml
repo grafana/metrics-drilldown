@@ -13,7 +13,7 @@ services:
       - '${GRAFANA_PORT:-3001}:3000'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_PORT:-3001}'
-      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,localizationForPlugins
+      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,localizationForPlugins${GF_FEATURE_TOGGLES_ENABLE:+,${GF_FEATURE_TOGGLES_ENABLE}}
       # prevents a Grafana startup error in case a newer plugin version (set in package.json) is used compared to the latest one published in the catalog
       GF_PLUGINS_PREINSTALL_DISABLED: true
     volumes:
@@ -39,7 +39,7 @@ services:
       - '${GRAFANA_SCOPES_PORT:-3002}:3000'
     environment:
       GF_SERVER_ROOT_URL: 'http://localhost:${GRAFANA_SCOPES_PORT:-3002}'
-      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore,localizationForPlugins
+      GF_FEATURE_TOGGLES_ENABLE: exploreMetricsUseExternalAppPlugin,grafanaAPIServer,grafanaAPIServerWithExperimentalAPIs,scopeFilters,promQLScope,enableScopesInMetricsExplore,localizationForPlugins${GF_FEATURE_TOGGLES_ENABLE:+,${GF_FEATURE_TOGGLES_ENABLE}}
     extra_hosts:
       # This allows us to connect to other services running on the host machine.
       # Linux CI: Uses 172.17.0.1 (default)
