@@ -8,7 +8,8 @@ jest.mock('@grafana/runtime');
 jest.mock('MetricsReducer/helpers/displayStatus');
 
 function setup() {
-  const get = jest.fn(async () => ({}));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const get = jest.fn(async (..._args: any[]) => ({}));
   (getBackendSrv as jest.Mock).mockImplementation(() => ({ get }));
   return { get };
 }
