@@ -199,5 +199,26 @@ describe('fetchDashboardMetrics()', () => {
 
       expect(displayWarning).not.toHaveBeenCalled();
     });
+
+    test('does not break the main flow when the second request fails', async () => {
+      const { get } = setup();
+
+      get.mockImplementation((url: string, params: Record<string, unknown>) => {
+        if (url === '/api/search' && params?.page === 2) {
+          return Promise.reject(new Error('Network error'));
+        }
+        if (url === '/api/search') {
+          return Promise.resolve(
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+          );
+        }
+        return Promise.resolve({ dashboard: { panels: [] } });
+      });
+
+      const result = await fetchDashboardMetrics();
+
+      expect(result).toBeDefined();
+      expect(displayWarning).not.toHaveBeenCalled();
+    });
   });
 });
