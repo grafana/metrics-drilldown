@@ -1,5 +1,5 @@
 import { type AdHocVariableFilter } from '@grafana/data';
-import { config, reportInteraction } from '@grafana/runtime';
+import { getAppPluginVersion, reportInteraction } from '@grafana/runtime';
 
 import { type ExposedComponentName } from 'exposedComponents/components';
 import { getTrackedFlagPayload } from 'shared/featureFlags/tracking';
@@ -201,6 +201,11 @@ type AllEvents = Interactions & OtherEvents;
 
 const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 
+let cachedAppVersion: string | null = null;
+getAppPluginVersion(PLUGIN_ID).then((v) => {
+  cachedAppVersion = v;
+});
+
 function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<string, unknown> {
   const payloads: Record<string, unknown> = {};
 
@@ -227,8 +232,7 @@ function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event:
     ...payload,
     ...getExperimentPayloads(event),
     meta: {
-      // same naming as Faro (see src/tracking/faro/faro.ts)
-      appRelease: config.apps[PLUGIN_ID].version,
+      appRelease: cachedAppVersion ?? '',
       appVersion: GIT_COMMIT,
     },
   };

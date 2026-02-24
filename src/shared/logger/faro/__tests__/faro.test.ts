@@ -1,7 +1,7 @@
 import { getWebInstrumentations, initializeFaro } from '@grafana/faro-web-sdk';
+import { getAppPluginVersion } from '@grafana/runtime';
 
 import { GIT_COMMIT } from '../../../../version';
-import { PLUGIN_ID } from '../../../constants/plugin';
 import { initFaro, setFaro } from '../faro';
 
 // Faro dependencies
@@ -10,11 +10,6 @@ jest.mock('@grafana/faro-web-sdk');
 // Grafana dependency
 jest.mock('@grafana/runtime', () => ({
   config: {
-    apps: {
-      [PLUGIN_ID]: {
-        version: 'v1-test',
-      },
-    },
     bootData: {
       user: {
         email: 'sixty.four@grafana.com',
@@ -25,11 +20,13 @@ jest.mock('@grafana/runtime', () => ({
       edition: 'Enterprise',
     },
   },
+  getAppPluginVersion: jest.fn().mockResolvedValue('v1-test'),
 }));
 
 function setup(location: Partial<Location>) {
   (initializeFaro as jest.Mock).mockReturnValue({});
   (getWebInstrumentations as jest.Mock).mockReturnValue([{}]);
+  (getAppPluginVersion as jest.Mock).mockResolvedValue('v1-test');
 
   Object.defineProperty(window, 'location', {
     value: location,
@@ -47,20 +44,20 @@ describe('initFaro()', () => {
   });
 
   describe('when running in environment where the host not defined', () => {
-    test('does not initialize Faro', () => {
+    test('does not initialize Faro', async () => {
       const { initializeFaro } = setup({ host: undefined });
 
-      initFaro();
+      await initFaro();
 
       expect(initializeFaro).not.toHaveBeenCalled();
     });
   });
 
   describe('when running in an unknown environment', () => {
-    test('does not initialize Faro', () => {
+    test('does not initialize Faro', async () => {
       const { initializeFaro } = setup({ host: 'unknownhost' });
 
-      initFaro();
+      await initFaro();
 
       expect(initializeFaro).not.toHaveBeenCalled();
     });
@@ -101,20 +98,20 @@ describe('initFaro()', () => {
         'https://faro-collector-ops-eu-south-0.grafana-ops.net/collect/0f4f1bbc97c9e2db4fa85ef75a559885',
         'grafana-metricsdrilldown-app-prod',
       ],
-    ])('initializes Faro for the host "%s"', (host, faroUrl, appName) => {
+    ])('initializes Faro for the host "%s"', async (host, faroUrl, appName) => {
       const { initializeFaro } = setup({ host });
 
-      initFaro();
+      await initFaro();
 
       expect(initializeFaro).toHaveBeenCalledTimes(1);
       expect(initializeFaro.mock.lastCall[0].url).toBe(faroUrl);
       expect(initializeFaro.mock.lastCall[0].app.name).toBe(appName);
     });
 
-    test('initializes Faro with the proper configuration', () => {
+    test('initializes Faro with the proper configuration', async () => {
       const { initializeFaro } = setup({ host: 'grafana.net' });
 
-      initFaro();
+      await initFaro();
 
       const { app, user, instrumentations, isolate, beforeSend } = initializeFaro.mock.lastCall[0];
 
@@ -139,11 +136,11 @@ describe('initFaro()', () => {
   });
 
   describe('when called several times', () => {
-    test('initializes Faro only once', () => {
+    test('initializes Faro only once', async () => {
       const { initializeFaro } = setup({ host: 'grafana.net' });
 
-      initFaro();
-      initFaro();
+      await initFaro();
+      await initFaro();
 
       expect(initializeFaro).toHaveBeenCalledTimes(1);
     });

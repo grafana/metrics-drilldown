@@ -1,5 +1,5 @@
 import { getWebInstrumentations, initializeFaro, type Faro } from '@grafana/faro-web-sdk';
-import { config } from '@grafana/runtime';
+import { config, getAppPluginVersion } from '@grafana/runtime';
 
 import { getFaroEnvironment } from './getFaroEnvironment';
 import { GIT_COMMIT } from '../../../version';
@@ -23,7 +23,7 @@ const errorsToIgnoreSet = new Set(errorsToIgnore);
  */
 export const shouldIgnoreError = (errorMessage: string) => errorsToIgnoreSet.has(errorMessage);
 
-export function initFaro() {
+export async function initFaro() {
   if (getFaro()) {
     return;
   }
@@ -34,8 +34,8 @@ export function initFaro() {
   }
 
   const { environment, faroUrl, appName } = faroEnvironment;
-  const { apps, bootData } = config;
-  const appRelease = apps[PLUGIN_ID].version;
+  const appRelease = await getAppPluginVersion(PLUGIN_ID);
+  const { bootData } = config;
   const userEmail = bootData.user.email;
 
   setFaro(
