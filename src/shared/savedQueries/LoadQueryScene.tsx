@@ -19,14 +19,14 @@ import { isQueryLibrarySupported, useHasSavedQueries, type OpenQueryLibraryCompo
 
 export interface LoadQuerySceneState extends SceneObjectState {
   dsName: string;
-  dsUid: string;
+  dsUid: string | undefined;
   isOpen: boolean;
 }
 
 export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
   constructor(state: Partial<LoadQuerySceneState> = {}) {
     super({
-      dsUid: '',
+      dsUid: undefined,
       dsName: '',
       isOpen: false,
       ...state,

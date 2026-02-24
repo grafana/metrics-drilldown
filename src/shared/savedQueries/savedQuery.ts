@@ -27,12 +27,12 @@ export function findExistingQuery(queries: SavedQuery[], query: string) {
   return queries.find((q) => q.query === query);
 }
 
-export function useHasSavedQueries(dsUid: string) {
+export function useHasSavedQueries(dsUid: string | undefined) {
   const { queries } = useSavedQueries(dsUid);
   return queries.length > 0;
 }
 
-export function useSavedQueries(dsUid: string) {
+export function useSavedQueries(dsUid: string | undefined) {
   const [queries, setQueries] = useState<SavedQuery[]>(getLocallySavedQueries(dsUid));
 
   useEffect(() => {
