@@ -46,7 +46,7 @@ test.describe('Scopes', () => {
 
     await metricsReducerView.goto(new URLSearchParams({ scopes: testScope.metadata.name }));
 
-    await expect(metricsReducerView.getByLabel('Select scopes...')).toHaveValue(testScope.spec.title);
+    await expect(metricsReducerView.getByLabel(/select scopes/i)).toHaveValue(testScope.spec.title);
     await metricsReducerView.appControls.assertAdHocFilter('method', '=', 'GET');
 
     await metricsReducerView.assertMetricsList();

@@ -64,7 +64,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getConfigureSlider() {
-    return this.getByRole('dialog', { name: /drawer title configure the prometheus function/i });
+    return this.page.locator('[aria-label*="Configure the Prometheus function" i]');
   }
 
   /* Panel menu */
