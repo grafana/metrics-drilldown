@@ -1,6 +1,5 @@
-
 import { css } from '@emotion/css';
-import { AppEvents, CoreApp, type GrafanaTheme2 } from '@grafana/data';
+import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { type PromQuery } from '@grafana/prometheus';
 import { getAppEvents, locationService, usePluginComponent } from '@grafana/runtime';
@@ -83,9 +82,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
 
         if (query.datasource?.type !== 'prometheus') {
           appEvents.publish({
-            payload: [
-              t('metrics.metrics-drilldown.load-query.load-type-error', 'Please select a Prometheus query.'),
-            ],
+            payload: [t('metrics.metrics-drilldown.load-query.load-type-error', 'Please select a Prometheus query.')],
             type: AppEvents.alertError.name,
           });
           return;
