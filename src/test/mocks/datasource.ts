@@ -5,7 +5,6 @@ import { type DataSourceRef } from '@grafana/schema';
 export const dataSourceStub: DataSourceApi = {
   name: 'Prometheus',
   type: 'prometheus',
-  id: 1,
   uid: 'ds',
   meta: {
     id: 'prometheus',
@@ -30,7 +29,6 @@ export const dataSourceStub: DataSourceApi = {
 
 export function createMockDataSource(settings: Partial<DataSourceInstanceSettings> = {}): DataSourceInstanceSettings {
   return {
-    id: settings.id || dataSourceStub.id,
     uid: settings.uid || dataSourceStub.uid,
     type: settings.type || dataSourceStub.type,
     name: settings.name || dataSourceStub.name,
@@ -45,7 +43,6 @@ export function createMockDataSource(settings: Partial<DataSourceInstanceSetting
 class MockDataSource implements DataSourceApi {
   name: string;
   type: string;
-  id: number;
   uid: string;
   meta: any;
   languageProvider: any;
@@ -54,7 +51,6 @@ class MockDataSource implements DataSourceApi {
   constructor(settings: Partial<DataSourceApi> = {}) {
     this.name = settings.name || 'Prometheus';
     this.type = settings.type || 'prometheus';
-    this.id = settings.id || 1;
     this.uid = settings.uid || 'ds';
     this.meta = settings.meta || dataSourceStub.meta;
     this.languageProvider = {

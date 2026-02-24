@@ -5,6 +5,7 @@ import { evaluateFeatureFlag, OPEN_FEATURE_DOMAIN } from './openFeature';
 jest.mock('@openfeature/web-sdk', () => ({
   OpenFeature: {
     getClient: jest.fn(),
+    setProvider: jest.fn(),
   },
   ClientProviderStatus: {
     READY: 'READY',
@@ -13,6 +14,8 @@ jest.mock('@openfeature/web-sdk', () => ({
   ProviderEvents: {
     Ready: 'PROVIDER_READY',
   },
+  InMemoryProvider: class InMemoryProvider {},
+  NOOP_PROVIDER: {},
 }));
 
 // Mock the tracking hook module since it's used in the function under test
