@@ -46,7 +46,14 @@ test.describe('Scopes', () => {
 
     await metricsReducerView.goto(new URLSearchParams({ scopes: testScope.metadata.name }));
 
-    await expect(metricsReducerView.getByLabel(/select scopes/i)).toHaveValue(testScope.spec.title);
+    const scopesSelectorButton = metricsReducerView.getByTestId('scopes-selector-input');
+
+    if ((await scopesSelectorButton.count()) > 0) {
+      await expect(scopesSelectorButton).toContainText(testScope.spec.title);
+    } else {
+      await expect(metricsReducerView.getByLabel(/select scopes/i)).toHaveValue(testScope.spec.title);
+    }
+
     await metricsReducerView.appControls.assertAdHocFilter('method', '=', 'GET');
 
     await metricsReducerView.assertMetricsList();
