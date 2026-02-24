@@ -148,7 +148,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     return (
       <OpenQueryLibraryComponent
         className={styles.button}
-        context={CoreApp.Explore}
+        context="drilldown"
         datasourceFilters={[dsName]}
         icon="folder-open"
         onSelectQuery={onSelectQuery}
