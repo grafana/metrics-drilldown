@@ -1,3 +1,4 @@
+import { getGrafanaVersion } from '../../config/playwright.config.common';
 import { expect, test } from '../../fixtures';
 
 type CategoryTest = {
@@ -57,8 +58,7 @@ const TEST_DATA: CategoryTest[] = [
   },
 ];
 
-// eslint-disable-next-line playwright/no-skipped-test
-test.describe.skip('Metrics reducer: panel types', () => {
+test.describe('Metrics reducer: panel types', () => {
   test.beforeEach(async ({ metricsReducerView }) => {
     await metricsReducerView.goto();
   });
@@ -87,6 +87,11 @@ test.describe.skip('Metrics reducer: panel types', () => {
       metricsReducerView,
       metricSceneView,
     }) => {
+      test.skip(
+        category === 'histograms' && getGrafanaVersion('minor') === '12-4',
+        'Native histogram breakdown crashes Grafana 12.4.0 (RangeError: Invalid array length in core splits function)'
+      );
+
       const searchText = nameLabelPresets.map(({ metric }) => `^${metric}$`).join(',');
       await metricsReducerView.quickSearch.enterText(searchText);
 

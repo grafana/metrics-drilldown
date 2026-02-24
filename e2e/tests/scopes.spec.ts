@@ -15,8 +15,8 @@ test.describe('Scopes', () => {
     baseURL: getGrafanaUrl({ withScopes: true }),
   });
 
-  // eslint-disable-next-line playwright/no-skipped-test
-  test.skip('Scopes filters are applied', async ({ metricsReducerView }) => {
+  // eslint-disable-next-line playwright/expect-expect
+  test('Scopes filters are applied', async ({ metricsReducerView }) => {
     const testScope: Scope = {
       metadata: {
         name: 'test-scope',
@@ -46,7 +46,14 @@ test.describe('Scopes', () => {
 
     await metricsReducerView.goto(new URLSearchParams({ scopes: testScope.metadata.name }));
 
-    await expect(metricsReducerView.getByLabel('Select scopes...')).toHaveValue(testScope.spec.title);
+    const scopesSelectorButton = metricsReducerView.locator('button[data-testid="scopes-selector-input"]');
+
+    if ((await scopesSelectorButton.count()) > 0) {
+      await expect(scopesSelectorButton).toContainText(testScope.spec.title);
+    } else {
+      await expect(metricsReducerView.getByLabel(/select scopes/i)).toHaveValue(testScope.spec.title);
+    }
+
     await metricsReducerView.appControls.assertAdHocFilter('method', '=', 'GET');
 
     await metricsReducerView.assertMetricsList();
