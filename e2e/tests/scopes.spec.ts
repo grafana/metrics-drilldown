@@ -46,7 +46,7 @@ test.describe('Scopes', () => {
 
     await metricsReducerView.goto(new URLSearchParams({ scopes: testScope.metadata.name }));
 
-    const scopesSelectorButton = metricsReducerView.getByTestId('scopes-selector-input');
+    const scopesSelectorButton = metricsReducerView.locator('button[data-testid="scopes-selector-input"]');
 
     if ((await scopesSelectorButton.count()) > 0) {
       await expect(scopesSelectorButton).toContainText(testScope.spec.title);
