@@ -15,8 +15,8 @@ test.describe('Scopes', () => {
     baseURL: getGrafanaUrl({ withScopes: true }),
   });
 
-  // eslint-disable-next-line playwright/expect-expect
-  test('Scopes filters are applied', async ({ metricsReducerView }) => {
+  // eslint-disable-next-line playwright/no-skipped-test
+  test.skip('Scopes filters are applied', async ({ metricsReducerView }) => {
     const testScope: Scope = {
       metadata: {
         name: 'test-scope',

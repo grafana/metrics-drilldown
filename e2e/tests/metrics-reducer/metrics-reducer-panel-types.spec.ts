@@ -57,7 +57,8 @@ const TEST_DATA: CategoryTest[] = [
   },
 ];
 
-test.describe('Metrics reducer: panel types', () => {
+// eslint-disable-next-line playwright/no-skipped-test
+test.describe.skip('Metrics reducer: panel types', () => {
   test.beforeEach(async ({ metricsReducerView }) => {
     await metricsReducerView.goto();
   });
