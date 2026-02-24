@@ -43,7 +43,7 @@ export async function initFaro() {
       url: faroUrl,
       app: {
         name: appName,
-        release: appRelease,
+        release: appRelease ?? undefined,
         version: GIT_COMMIT,
         environment,
       },
