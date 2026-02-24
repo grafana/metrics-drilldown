@@ -1,7 +1,7 @@
 import { getWebInstrumentations, initializeFaro } from '@grafana/faro-web-sdk';
-import { getAppPluginVersion } from '@grafana/runtime';
 
 import { GIT_COMMIT } from '../../../../version';
+import { getPluginVersion } from '../../../utils/getPluginVersion';
 import { initFaro, setFaro } from '../faro';
 
 // Faro dependencies
@@ -20,13 +20,16 @@ jest.mock('@grafana/runtime', () => ({
       edition: 'Enterprise',
     },
   },
-  getAppPluginVersion: jest.fn().mockResolvedValue('v1-test'),
+}));
+
+jest.mock('../../../utils/getPluginVersion', () => ({
+  getPluginVersion: jest.fn().mockResolvedValue('v1-test'),
 }));
 
 function setup(location: Partial<Location>) {
   (initializeFaro as jest.Mock).mockReturnValue({});
   (getWebInstrumentations as jest.Mock).mockReturnValue([{}]);
-  (getAppPluginVersion as jest.Mock).mockResolvedValue('v1-test');
+  (getPluginVersion as jest.Mock).mockResolvedValue('v1-test');
 
   Object.defineProperty(window, 'location', {
     value: location,

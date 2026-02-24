@@ -1,9 +1,10 @@
 import { getWebInstrumentations, initializeFaro, type Faro } from '@grafana/faro-web-sdk';
-import { config, getAppPluginVersion } from '@grafana/runtime';
+import { config } from '@grafana/runtime';
 
 import { getFaroEnvironment } from './getFaroEnvironment';
 import { GIT_COMMIT } from '../../../version';
-import { PLUGIN_BASE_URL, PLUGIN_ID } from '../../constants/plugin';
+import { PLUGIN_BASE_URL } from '../../constants/plugin';
+import { getPluginVersion } from '../../utils/getPluginVersion';
 
 let faro: Faro | null = null;
 
@@ -34,7 +35,7 @@ export async function initFaro() {
   }
 
   const { environment, faroUrl, appName } = faroEnvironment;
-  const appRelease = await getAppPluginVersion(PLUGIN_ID);
+  const appRelease = await getPluginVersion();
   const { bootData } = config;
   const userEmail = bootData.user.email;
 
