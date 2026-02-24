@@ -76,7 +76,7 @@ function getLocallySavedQueries(dsUid?: string) {
     logger.error(e instanceof Error ? e : new Error(String(e)));
   }
   stored.sort((a, b) => b.timestamp - a.timestamp);
-  return stored.filter((q) => (dsUid ? q.dsUid === dsUid : true));
+  return stored.filter((q) => (dsUid !== undefined ? q.dsUid === dsUid : true));
 }
 
 export const SAVED_QUERIES_KEY = `${pluginJson.id}.savedQueries`;
