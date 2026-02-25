@@ -66,8 +66,8 @@
         "targets": [
           "grafana/dashboard/panel/menu",
           "grafana/explore/toolbar/action",
-          "grafana-assistant-app/navigateToDrilldown/v1",
-          "grafana/alerting/alertingrule/queryeditor"
+          "grafana/alerting/alertingrule/queryeditor",
+          "grafana-assistant-app/navigateToDrilldown/v1"
         ],
         "title": "Open in Grafana Metrics Drilldown",
         "description": "Open current query in the Grafana Metrics Drilldown view"
@@ -103,6 +103,11 @@
         "id": "grafana-metricsdrilldown-app/mini-breakdown-component/v1",
         "title": "Mini Label Breakdown Navigation",
         "description": "A mini metrics label breakdown view from the Metrics Drilldown app used for navigation."
+      },
+      {
+        "id": "grafana-metricsdrilldown-app/entity-metrics-component/v1",
+        "title": "Entity Metrics",
+        "description": "A metrics exploration view for entity labels from the Metrics Drilldown app."
       }
     ]
   }
