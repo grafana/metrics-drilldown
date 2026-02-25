@@ -126,6 +126,7 @@ describe('fetchDashboardMetrics()', () => {
       );
 
       await fetchDashboardMetrics();
+      await Promise.resolve();
 
       expect(get).not.toHaveBeenCalledWith(
         '/api/search',
@@ -151,6 +152,7 @@ describe('fetchDashboardMetrics()', () => {
       });
 
       await fetchDashboardMetrics();
+      await Promise.resolve();
 
       expect(get).toHaveBeenCalledWith(
         '/api/search',
@@ -176,8 +178,14 @@ describe('fetchDashboardMetrics()', () => {
       });
 
       await fetchDashboardMetrics();
+      await Promise.resolve();
 
-      expect(displayWarning).toHaveBeenCalled();
+      expect(displayWarning).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.stringContaining('500'),
+          expect.stringContaining('incomplete'),
+        ])
+      );
     });
 
     test('does not show warning when there are exactly 500 dashboards', async () => {
@@ -196,6 +204,7 @@ describe('fetchDashboardMetrics()', () => {
       });
 
       await fetchDashboardMetrics();
+      await Promise.resolve();
 
       expect(displayWarning).not.toHaveBeenCalled();
     });
@@ -216,6 +225,7 @@ describe('fetchDashboardMetrics()', () => {
       });
 
       const result = await fetchDashboardMetrics();
+      await Promise.resolve();
 
       expect(result).toBeDefined();
       expect(displayWarning).not.toHaveBeenCalled();
