@@ -74,7 +74,9 @@
     "error": "Failed to fetch alerting rules"
   },
   "fetch-dashboard-metrics": {
-    "error": "Failed to fetch dashboard metrics"
+    "error": "Failed to fetch dashboard metrics",
+    "limit-warning-body": "Your organization has more dashboards than this limit. Usage counts may be incomplete.",
+    "limit-warning-title": "Dashboard usage sort is limited to 500 dashboards."
   },
   "filtered-metrics-variable": {
     "label": "Filtered Metrics"

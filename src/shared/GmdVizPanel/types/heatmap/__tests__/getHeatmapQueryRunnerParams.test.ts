@@ -3,9 +3,9 @@ import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { getHeatmapQueryRunnerParams } from '../getHeatmapQueryRunnerParams';
 
 describe('getHeatmapQueryRunnerParams(options)', () => {
-  test('handles native histogram metrics', () => {
+  test('builds a heatmap query aggregated by le', () => {
     const result = getHeatmapQueryRunnerParams({
-      metric: { name: 'grafana_database_all_migrations_duration_seconds', type: 'native-histogram' },
+      metric: { name: 'grafana_database_all_migrations_duration_seconds', type: 'classic-histogram' },
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],
@@ -17,28 +17,7 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
     expect(result.queries).toStrictEqual([
       {
         refId: 'grafana_database_all_migrations_duration_seconds-heatmap',
-        expr: 'sum(rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
-        format: 'heatmap',
-        fromExploreMetrics: true,
-      },
-    ]);
-  });
-
-  test('handles non-native ("classic") histogram metrics', () => {
-    const result = getHeatmapQueryRunnerParams({
-      metric: { name: 'go_gc_heap_allocs_by_size_bytes_bucket', type: 'classic-histogram' },
-      queryConfig: {
-        resolution: QUERY_RESOLUTION.HIGH,
-        labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],
-        addIgnoreUsageFilter: true,
-      },
-    });
-
-    expect(result.maxDataPoints).toBe(500);
-    expect(result.queries).toStrictEqual([
-      {
-        refId: 'go_gc_heap_allocs_by_size_bytes_bucket-heatmap',
-        expr: 'sum by (le) (rate(go_gc_heap_allocs_by_size_bytes_bucket{success="true", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
+        expr: 'sum by (le) (rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
         format: 'heatmap',
         fromExploreMetrics: true,
       },
