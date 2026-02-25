@@ -14,10 +14,7 @@ export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions
     addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
 
-  const query =
-    metric.type === 'native-histogram'
-      ? promql.sum({ expr: promql.rate({ expr: expression }) })
-      : promql.sum({ expr: promql.rate({ expr: expression }), by: ['le'] });
+  const query = promql.sum({ expr: promql.rate({ expr: expression }), by: ['le'] });
 
   return {
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
