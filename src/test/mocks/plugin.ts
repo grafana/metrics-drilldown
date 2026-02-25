@@ -3,16 +3,12 @@
 // - `public/app/features/alerting/unified/mocks.ts`
 
 import {
-  PanelPlugin,
   PluginExtensionTypes,
   PluginType,
-  type PanelPluginMeta,
-  type PanelProps,
   type PluginExtensionLink,
   type PluginMeta,
 } from '@grafana/data';
 import { defaultsDeep } from 'lodash';
-import { type ComponentType } from 'react';
 
 export const getMockPlugins = (amount: number): PluginMeta[] => {
   const plugins: PluginMeta[] = [];
@@ -47,40 +43,6 @@ export const getMockPlugins = (amount: number): PluginMeta[] => {
 
   return plugins;
 };
-
-export function getPanelPlugin(
-  options: Partial<PanelPluginMeta>,
-  reactPanel?: ComponentType<PanelProps>,
-  angularPanel?: any
-): PanelPlugin {
-  const plugin = new PanelPlugin(reactPanel!);
-  plugin.angularPanelCtrl = angularPanel;
-  plugin.meta = {
-    id: options.id!,
-    type: PluginType.panel,
-    name: options.id!,
-    sort: options.sort || 1,
-    info: {
-      author: {
-        name: options.id + 'name',
-      },
-      description: '',
-      links: [],
-      logos: {
-        large: '',
-        small: '',
-      },
-      screenshots: [],
-      updated: '',
-      version: '1',
-    },
-    hideFromList: options.hideFromList === true,
-    module: options.module ?? '',
-    baseUrl: '',
-    skipDataQuery: options.skipDataQuery,
-  };
-  return plugin;
-}
 
 export function getMockPlugin(overrides?: Partial<PluginMeta>): PluginMeta {
   const defaults: PluginMeta = {

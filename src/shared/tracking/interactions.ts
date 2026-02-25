@@ -1,5 +1,5 @@
 import { type AdHocVariableFilter } from '@grafana/data';
-import { config, reportInteraction } from '@grafana/runtime';
+import { reportInteraction } from '@grafana/runtime';
 
 import { type ExposedComponentName } from 'exposedComponents/components';
 import { getTrackedFlagPayload } from 'shared/featureFlags/tracking';
@@ -7,13 +7,13 @@ import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types'
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { type PanelType } from 'shared/GmdVizPanel/types/available-panel-types';
 import { type SortSeriesByOption } from 'shared/services/sorting';
+import { getPluginVersion } from 'shared/utils/getPluginVersion';
 import { type SnakeCase } from 'shared/utils/utils.types';
 
 import { type ActionViewType } from '../../MetricScene/MetricActionBar';
 import { type LayoutType } from '../../MetricsReducer/list-controls/LayoutSwitcher';
 import { type SortingOption as MetricsReducerSortByOption } from '../../MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { GIT_COMMIT } from '../../version';
-import { PLUGIN_ID } from '../constants/plugin';
 
 export type ViewName = 'metrics-reducer' | 'metric-details';
 
@@ -215,6 +215,11 @@ type AllEvents = Interactions & OtherEvents;
 
 const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 
+let cachedAppVersion: string | null = null;
+getPluginVersion().then((v) => {
+  cachedAppVersion = v;
+});
+
 function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<string, unknown> {
   const payloads: Record<string, unknown> = {};
 
@@ -241,8 +246,7 @@ function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event:
     ...payload,
     ...getExperimentPayloads(event),
     meta: {
-      // same naming as Faro (see src/tracking/faro/faro.ts)
-      appRelease: config.apps[PLUGIN_ID].version,
+      appRelease: cachedAppVersion ?? '',
       appVersion: GIT_COMMIT,
     },
   };
