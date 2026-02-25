@@ -1,3 +1,4 @@
+import { getGrafanaVersion } from '../../config/playwright.config.common';
 import { expect, test } from '../../fixtures';
 
 type CategoryTest = {
@@ -86,6 +87,11 @@ test.describe('Metrics reducer: panel types', () => {
       metricsReducerView,
       metricSceneView,
     }) => {
+      test.skip(
+        category === 'histograms' && getGrafanaVersion('minor') === '12-4',
+        'Native histogram breakdown crashes Grafana 12.4.0 (RangeError: Invalid array length in core splits function)'
+      );
+
       const searchText = nameLabelPresets.map(({ metric }) => `^${metric}$`).join(',');
       await metricsReducerView.quickSearch.enterText(searchText);
 
