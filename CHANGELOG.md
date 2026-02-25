@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.0.32
+
+##### Chores
+
+* **i18n:**  Expose all supported languages in plugin.json (#1096) (cb9f88e0)
+*  update grafana dependencies to v12.4.0 (#1098) (52b88597)
+* **deps:**
+  *  Lock file maintenance (#1094) (9ec9e703)
+  *  Update dependency css-loader to v7.1.4 (#1090) (1b4a293a)
+  *  Update dependency @grafana/plugin-e2e to v3.3.2 (#1089) (5a880cae)
+  *  Update dependency glob to v13.0.6 (#1091) (ccd140d6)
+  *  Update TypeScript and linting (#1093) (c924cce1)
+  *  Update pnpm to v10.30.1 (#1092) (b160d37b)
+
+##### New Features
+
+*  add saved queries (#1064) (14ba8ac2)
+*  show dashboard sort limit warning (#1088) (2f2a6150)
+*  expose embeded metrics component (#782) (0c726307)
+
+##### Bug Fixes
+
+*  native histogram can sum by le without effect (#1101) (b675b97e)
+
+##### Other Changes
+
+*  Download translations from Crowdin (#1087) (7597632d)
+
+
 ## 1.0.31
 
 ##### Chores
