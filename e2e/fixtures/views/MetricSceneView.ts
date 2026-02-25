@@ -262,4 +262,71 @@ export class MetricSceneView extends DrilldownView {
     // Wait for panels to re-render after filter selection
     await expect(this.getPanelsList().locator('[data-viz-panel-key]').first()).toBeVisible();
   }
+
+  /* Saved queries */
+
+  getSaveQueryButton() {
+    return this.getByRole('button', { name: 'Save query' });
+  }
+
+  getLoadQueryButton() {
+    return this.getByRole('button', { name: /saved quer(?:y|ies)/ });
+  }
+
+  getSaveModal() {
+    return this.getByRole('dialog', { name: /Save current query/i });
+  }
+
+  getLoadModal() {
+    return this.getByRole('dialog', { name: /Load a previously saved query/i });
+  }
+
+  async openSaveModal() {
+    await this.getSaveQueryButton().click();
+    await expect(this.getSaveModal()).toBeVisible();
+  }
+
+  async saveQuery(title: string, description?: string) {
+    await this.openSaveModal();
+    const modal = this.getSaveModal();
+    await modal.getByLabel('Title').fill(title);
+    if (description) {
+      await modal.getByLabel('Description').fill(description);
+    }
+    await modal.getByRole('button', { name: 'Save' }).click();
+    // Dismiss success toast (same pattern as selectAndApplyConfigPreset)
+    const successToast = this.getByTestId('data-testid Alert success');
+    await expect(successToast).toBeVisible();
+    await successToast.getByRole('button', { name: /close alert/i }).click();
+  }
+
+  async openLoadModal() {
+    await this.getLoadQueryButton().click();
+    await expect(this.getLoadModal()).toBeVisible();
+  }
+
+  async selectSavedQueryInList(title: string) {
+    await this.getLoadModal().getByRole('radio', { name: title }).click();
+  }
+
+  async deleteSelectedQuery() {
+    await this.getLoadModal().getByRole('button', { name: 'Remove' }).click();
+  }
+
+  getLoadModalSelectLink() {
+    return this.getLoadModal().getByRole('link', { name: 'Select' });
+  }
+
+  async assertLoadModalDetails(expected: { title: string; query: string; description?: string }) {
+    const modal = this.getLoadModal();
+    await expect(modal.getByRole('heading', { name: expected.title })).toBeVisible();
+    await expect(modal.locator('code')).toHaveText(expected.query);
+    if (expected.description) {
+      await expect(modal.getByText(expected.description)).toBeVisible();
+    }
+  }
+
+  async assertLoadModalEmpty() {
+    await expect(this.getLoadModal().getByText('No saved queries to display.')).toBeVisible();
+  }
 }

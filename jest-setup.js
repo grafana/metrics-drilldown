@@ -9,3 +9,9 @@ const mockIntersectionObserver = jest.fn().mockImplementation((callback) => ({
   disconnect: jest.fn(),
 }));
 global.IntersectionObserver = mockIntersectionObserver;
+
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};

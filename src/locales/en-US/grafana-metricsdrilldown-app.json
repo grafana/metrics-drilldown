@@ -123,6 +123,36 @@
   "list-controls": {
     "search-aria-label": "Quick search metrics"
   },
+  "metrics": {
+    "metrics-drilldown": {
+      "load-query": {
+        "button-no-query-tooltip": "No saved queries to load",
+        "button-tooltip": "Load saved query",
+        "empty": "No saved queries to display.",
+        "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
+        "load-type-error": "Please select a Prometheus query.",
+        "modal-title": "Load a previously saved query",
+        "remove": "Remove",
+        "saved-query-button-tooltip": "Load saved query",
+        "select": "Select"
+      },
+      "save-query": {
+        "already-exists": {
+          "alert": "There is a previously saved query with the same expression: {{title}}"
+        },
+        "button-tooltip": "Save query",
+        "button-tooltip-saved-queries": "Save in Saved Queries",
+        "cancel": "Cancel",
+        "description": "Description",
+        "error": "Unexpected error saving this query.",
+        "modal-alert": "Saved queries are stored locally in your browser and will only be available on this device.",
+        "modal-title": "Save current query",
+        "save": "Save",
+        "success": "Query successfully saved.",
+        "title": "Title"
+      }
+    }
+  },
   "metrics-group-by-list": {
     "error-title": "Error while loading label \"{{labelName}}\" values!",
     "no-values": "No label values found for label \"{{labelName}}\"."

@@ -189,6 +189,20 @@ type Interactions = {
   quick_search_assistant_question_asked: { question: string };
   // User enters assistant mode in the Quick Search input (e.g., by typing '?', clicking the AI button, or using the Tab+Enter keyboard flow)
   quick_search_assistant_mode_entered: { from: 'question_mark' | 'tab' | 'button' };
+  // User opens the save query modal
+  saved_query_save_modal_opened: {};
+  // User successfully saves a query
+  saved_query_saved: { source: 'local' | 'query_library' };
+  // User opens the load query modal
+  saved_query_load_modal_opened: {};
+  // User toggles between saved queries in the load list
+  saved_query_toggled: { source: 'local' | 'query_library' };
+  // User deletes a saved query
+  saved_query_deleted: { source: 'local' | 'query_library' };
+  // User loads a saved query (localStorage)
+  saved_query_loaded: {};
+  // User loads a saved query from Query Library
+  saved_query_loaded_from_library: {};
 };
 
 type OtherEvents = {

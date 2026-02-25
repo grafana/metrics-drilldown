@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-nested-functions */
 import { dateTime, LoadingState } from '@grafana/data';
 import { locationService, setDataSourceSrv, setRunRequest } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
