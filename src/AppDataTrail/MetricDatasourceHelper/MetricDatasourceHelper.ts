@@ -300,6 +300,11 @@ export class MetricDatasourceHelper {
     }
   }
 
+  public async getSeriesLimit(): Promise<number | undefined> {
+    const ds = await this.getRuntimeDatasource();
+    return ds?.seriesLimit;
+  }
+
   public async getPrometheusBuildInfo(): Promise<PrometheusBuildInfo | undefined> {
     const ds = await this.getRuntimeDatasource();
     if (!ds) {
