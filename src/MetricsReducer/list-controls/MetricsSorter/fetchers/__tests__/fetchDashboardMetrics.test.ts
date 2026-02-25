@@ -1,11 +1,14 @@
 import { getBackendSrv } from '@grafana/runtime';
 
+import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
+
 import { fetchDashboardMetrics } from '../fetchDashboardMetrics';
 
 jest.mock('@grafana/runtime');
+jest.mock('MetricsReducer/helpers/displayStatus');
 
 function setup() {
-  const get = jest.fn(async () => ({}));
+  const get = jest.fn() as jest.Mock;
   (getBackendSrv as jest.Mock).mockImplementation(() => ({ get }));
   return { get };
 }
@@ -111,6 +114,121 @@ describe('fetchDashboardMetrics()', () => {
           },
         },
       });
+    });
+  });
+
+  describe('dashboard limit warning', () => {
+    test('does not make a second request when fewer than 500 dashboards are returned', async () => {
+      const { get } = setup();
+
+      get.mockResolvedValueOnce(
+        Array.from({ length: 499 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+      );
+
+      await fetchDashboardMetrics();
+      await Promise.resolve();
+
+      expect(get).not.toHaveBeenCalledWith(
+        '/api/search',
+        expect.objectContaining({ page: 2 }),
+        expect.any(String),
+        expect.any(Object)
+      );
+    });
+
+    test('makes a second request when 500 dashboards are returned', async () => {
+      const { get } = setup();
+
+      get.mockImplementation((url: string, params: Record<string, unknown>) => {
+        if (url === '/api/search' && params?.page === 2) {
+          return Promise.resolve([]);
+        }
+        if (url === '/api/search') {
+          return Promise.resolve(
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+          );
+        }
+        return Promise.resolve({ dashboard: { panels: [] } });
+      });
+
+      await fetchDashboardMetrics();
+      await Promise.resolve();
+
+      expect(get).toHaveBeenCalledWith(
+        '/api/search',
+        { type: 'dash-db', limit: 500, page: 2 },
+        expect.any(String),
+        expect.any(Object)
+      );
+    });
+
+    test('shows warning when there are more than 500 dashboards', async () => {
+      const { get } = setup();
+
+      get.mockImplementation((url: string, params: Record<string, unknown>) => {
+        if (url === '/api/search' && params?.page === 2) {
+          return Promise.resolve([{ uid: 'uid-501', url: 'http://501.test.com' }]);
+        }
+        if (url === '/api/search') {
+          return Promise.resolve(
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+          );
+        }
+        return Promise.resolve({ dashboard: { panels: [] } });
+      });
+
+      await fetchDashboardMetrics();
+      await Promise.resolve();
+
+      expect(displayWarning).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.stringContaining('500'),
+          expect.stringContaining('incomplete'),
+        ])
+      );
+    });
+
+    test('does not show warning when there are exactly 500 dashboards', async () => {
+      const { get } = setup();
+
+      get.mockImplementation((url: string, params: Record<string, unknown>) => {
+        if (url === '/api/search' && params?.page === 2) {
+          return Promise.resolve([]);
+        }
+        if (url === '/api/search') {
+          return Promise.resolve(
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+          );
+        }
+        return Promise.resolve({ dashboard: { panels: [] } });
+      });
+
+      await fetchDashboardMetrics();
+      await Promise.resolve();
+
+      expect(displayWarning).not.toHaveBeenCalled();
+    });
+
+    test('does not break the main flow when the second request fails', async () => {
+      const { get } = setup();
+
+      get.mockImplementation((url: string, params: Record<string, unknown>) => {
+        if (url === '/api/search' && params?.page === 2) {
+          return Promise.reject(new Error('Network error'));
+        }
+        if (url === '/api/search') {
+          return Promise.resolve(
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+          );
+        }
+        return Promise.resolve({ dashboard: { panels: [] } });
+      });
+
+      const result = await fetchDashboardMetrics();
+      await Promise.resolve();
+
+      expect(result).toBeDefined();
+      expect(displayWarning).not.toHaveBeenCalled();
     });
   });
 });

@@ -3,6 +3,7 @@ import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import { type Dashboard, type Panel } from '@grafana/schema';
 import { limitFunction } from 'p-limit';
 
+import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { logger } from 'shared/logger/logger';
 
 import { isPrometheusDataSource } from '../../../../shared/utils/utils.datasource';
@@ -87,6 +88,10 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
       usageRequestOptions
     );
 
+    if (dashboards.length >= 500) {
+      checkDashboardLimitExceeded();
+    }
+
     let dashboardRequestsFailedCount = 0;
 
     const metricCounts = await Promise.all(
@@ -101,6 +106,37 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
     });
     return {};
   }
+}
+
+function checkDashboardLimitExceeded() {
+  getBackendSrv()
+    .get<DashboardSearchItem[]>(
+      '/api/search',
+      {
+        type: 'dash-db',
+        limit: 500,
+        page: 2,
+      },
+      'grafana-metricsdrilldown-app-dashboard-limit-check',
+      usageRequestOptions
+    )
+    .then((response) => {
+      if (response.length > 0) {
+        displayWarning([
+          t(
+            'fetch-dashboard-metrics.limit-warning-title',
+            'Dashboard usage sort is limited to 500 dashboards.'
+          ),
+          t(
+            'fetch-dashboard-metrics.limit-warning-body',
+            'Your organization has more dashboards than this limit. Usage counts may be incomplete.'
+          ),
+        ]);
+      }
+    })
+    .catch((error) => {
+      logger.warn('Failed to check dashboard count', error);
+    });
 }
 
 function getDashboardsWithPanels(
