@@ -74,7 +74,9 @@
     "error": "A riasztási szabályok lekérése nem sikerült"
   },
   "fetch-dashboard-metrics": {
-    "error": "Az irányítópult-metrikák lekérése nem sikerült"
+    "error": "Az irányítópult-metrikák lekérése nem sikerült",
+    "limit-warning-body": "",
+    "limit-warning-title": ""
   },
   "filtered-metrics-variable": {
     "label": "Szűrt metrikák"
@@ -120,6 +122,36 @@
   },
   "list-controls": {
     "search-aria-label": ""
+  },
+  "metrics": {
+    "metrics-drilldown": {
+      "load-query": {
+        "button-no-query-tooltip": "",
+        "button-tooltip": "",
+        "empty": "",
+        "load-error": "",
+        "load-type-error": "",
+        "modal-title": "",
+        "remove": "",
+        "saved-query-button-tooltip": "",
+        "select": ""
+      },
+      "save-query": {
+        "already-exists": {
+          "alert": ""
+        },
+        "button-tooltip": "",
+        "button-tooltip-saved-queries": "",
+        "cancel": "",
+        "description": "",
+        "error": "",
+        "modal-alert": "",
+        "modal-title": "",
+        "save": "",
+        "success": "",
+        "title": ""
+      }
+    }
   },
   "metrics-group-by-list": {
     "error-title": "Hiba történt a(z) „{{labelName}}” címke értékeinek betöltésekor!",
