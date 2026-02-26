@@ -73,7 +73,9 @@
     "error": "경고 규칙 가져오기 실패"
   },
   "fetch-dashboard-metrics": {
-    "error": "대시보드 메트릭 가져오기 실패"
+    "error": "대시보드 메트릭 가져오기 실패",
+    "limit-warning-body": "",
+    "limit-warning-title": ""
   },
   "filtered-metrics-variable": {
     "label": "필터링된 메트릭"
@@ -119,6 +121,36 @@
   },
   "list-controls": {
     "search-aria-label": ""
+  },
+  "metrics": {
+    "metrics-drilldown": {
+      "load-query": {
+        "button-no-query-tooltip": "",
+        "button-tooltip": "",
+        "empty": "",
+        "load-error": "",
+        "load-type-error": "",
+        "modal-title": "",
+        "remove": "",
+        "saved-query-button-tooltip": "",
+        "select": ""
+      },
+      "save-query": {
+        "already-exists": {
+          "alert": ""
+        },
+        "button-tooltip": "",
+        "button-tooltip-saved-queries": "",
+        "cancel": "",
+        "description": "",
+        "error": "",
+        "modal-alert": "",
+        "modal-title": "",
+        "save": "",
+        "success": "",
+        "title": ""
+      }
+    }
   },
   "metrics-group-by-list": {
     "error-title": "레이블 \"{{labelName}}\" 값을 불러오는 중 오류가 발생했습니다!",

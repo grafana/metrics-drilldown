@@ -76,7 +76,9 @@
     "error": "Nepodařilo se načíst pravidla pro upozorňování"
   },
   "fetch-dashboard-metrics": {
-    "error": "Nepodařilo se načíst metriky ovládacího panelu"
+    "error": "Nepodařilo se načíst metriky ovládacího panelu",
+    "limit-warning-body": "",
+    "limit-warning-title": ""
   },
   "filtered-metrics-variable": {
     "label": "Filtrované metriky"
@@ -122,6 +124,36 @@
   },
   "list-controls": {
     "search-aria-label": ""
+  },
+  "metrics": {
+    "metrics-drilldown": {
+      "load-query": {
+        "button-no-query-tooltip": "",
+        "button-tooltip": "",
+        "empty": "",
+        "load-error": "",
+        "load-type-error": "",
+        "modal-title": "",
+        "remove": "",
+        "saved-query-button-tooltip": "",
+        "select": ""
+      },
+      "save-query": {
+        "already-exists": {
+          "alert": ""
+        },
+        "button-tooltip": "",
+        "button-tooltip-saved-queries": "",
+        "cancel": "",
+        "description": "",
+        "error": "",
+        "modal-alert": "",
+        "modal-title": "",
+        "save": "",
+        "success": "",
+        "title": ""
+      }
+    }
   },
   "metrics-group-by-list": {
     "error-title": "Při načítání hodnot štítku „{{labelName}}“ došlo k chybě!",

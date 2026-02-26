@@ -74,7 +74,9 @@
     "error": "Kan waarschuwingsregels niet ophalen"
   },
   "fetch-dashboard-metrics": {
-    "error": "Kan dashboardmetrics niet ophalen"
+    "error": "Kan dashboardmetrics niet ophalen",
+    "limit-warning-body": "",
+    "limit-warning-title": ""
   },
   "filtered-metrics-variable": {
     "label": "Gefilterde Metrics"
@@ -120,6 +122,36 @@
   },
   "list-controls": {
     "search-aria-label": ""
+  },
+  "metrics": {
+    "metrics-drilldown": {
+      "load-query": {
+        "button-no-query-tooltip": "",
+        "button-tooltip": "",
+        "empty": "",
+        "load-error": "",
+        "load-type-error": "",
+        "modal-title": "",
+        "remove": "",
+        "saved-query-button-tooltip": "",
+        "select": ""
+      },
+      "save-query": {
+        "already-exists": {
+          "alert": ""
+        },
+        "button-tooltip": "",
+        "button-tooltip-saved-queries": "",
+        "cancel": "",
+        "description": "",
+        "error": "",
+        "modal-alert": "",
+        "modal-title": "",
+        "save": "",
+        "success": "",
+        "title": ""
+      }
+    }
   },
   "metrics-group-by-list": {
     "error-title": "Er is een fout opgetreden bij het laden van label \"{{labelName}}\"-waarden!",

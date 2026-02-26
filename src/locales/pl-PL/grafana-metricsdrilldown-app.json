@@ -76,7 +76,9 @@
     "error": "Nie udało się pobrać reguł alertów"
   },
   "fetch-dashboard-metrics": {
-    "error": "Nie udało się pobrać wskaźników pulpitu"
+    "error": "Nie udało się pobrać wskaźników pulpitu",
+    "limit-warning-body": "",
+    "limit-warning-title": ""
   },
   "filtered-metrics-variable": {
     "label": "Przefiltrowane wskaźniki"
@@ -122,6 +124,36 @@
   },
   "list-controls": {
     "search-aria-label": ""
+  },
+  "metrics": {
+    "metrics-drilldown": {
+      "load-query": {
+        "button-no-query-tooltip": "",
+        "button-tooltip": "",
+        "empty": "",
+        "load-error": "",
+        "load-type-error": "",
+        "modal-title": "",
+        "remove": "",
+        "saved-query-button-tooltip": "",
+        "select": ""
+      },
+      "save-query": {
+        "already-exists": {
+          "alert": ""
+        },
+        "button-tooltip": "",
+        "button-tooltip-saved-queries": "",
+        "cancel": "",
+        "description": "",
+        "error": "",
+        "modal-alert": "",
+        "modal-title": "",
+        "save": "",
+        "success": "",
+        "title": ""
+      }
+    }
   },
   "metrics-group-by-list": {
     "error-title": "Błąd podczas wczytywania wartości etykiety „{{labelName}}”",

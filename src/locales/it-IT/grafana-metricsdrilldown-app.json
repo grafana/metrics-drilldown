@@ -74,7 +74,9 @@
     "error": "Impossibile recuperare le regole di avviso"
   },
   "fetch-dashboard-metrics": {
-    "error": "Impossibile recuperare le metriche della dashboard"
+    "error": "Impossibile recuperare le metriche della dashboard",
+    "limit-warning-body": "",
+    "limit-warning-title": ""
   },
   "filtered-metrics-variable": {
     "label": "Metriche filtrate"
@@ -120,6 +122,36 @@
   },
   "list-controls": {
     "search-aria-label": ""
+  },
+  "metrics": {
+    "metrics-drilldown": {
+      "load-query": {
+        "button-no-query-tooltip": "",
+        "button-tooltip": "",
+        "empty": "",
+        "load-error": "",
+        "load-type-error": "",
+        "modal-title": "",
+        "remove": "",
+        "saved-query-button-tooltip": "",
+        "select": ""
+      },
+      "save-query": {
+        "already-exists": {
+          "alert": ""
+        },
+        "button-tooltip": "",
+        "button-tooltip-saved-queries": "",
+        "cancel": "",
+        "description": "",
+        "error": "",
+        "modal-alert": "",
+        "modal-title": "",
+        "save": "",
+        "success": "",
+        "title": ""
+      }
+    }
   },
   "metrics-group-by-list": {
     "error-title": "Errore durante il caricamento dei valori dell'etichetta \"{{labelName}}\"!",
