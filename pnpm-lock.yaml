@@ -37,7 +37,7 @@ importers:
         version: 0.2.9(@lezer/lr@1.4.3)
       '@grafana/prometheus':
         specifier: ^12.4.0
-        version: 12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(eslint@9.39.3(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1))(react@18.3.1)(typescript@5.9.3)
+        version: 12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(eslint@9.39.3(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1))(react@18.3.1)(typescript@5.9.3)
       '@grafana/runtime':
         specifier: ^12.4.0
         version: 12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(@types/react@18.3.28)(eslint@9.39.3(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
@@ -106,8 +106,8 @@ importers:
         specifier: ^9.0.0
         version: 9.0.0(@stylistic/eslint-plugin-ts@2.13.0(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/eslint-plugin@8.56.0(@typescript-eslint/parser@8.56.0(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/parser@8.56.0(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3))(eslint-config-prettier@8.10.2(eslint@9.39.3(jiti@2.6.1)))(eslint-plugin-jsdoc@46.10.1(eslint@9.39.3(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@9.39.3(jiti@2.6.1)))(eslint-plugin-react@7.37.5(eslint@9.39.3(jiti@2.6.1)))(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
       '@grafana/plugin-e2e':
-        specifier: 3.3.2
-        version: 3.3.2(@playwright/test@1.58.2)
+        specifier: 3.4.0
+        version: 3.4.0(@axe-core/playwright@4.11.1(playwright-core@1.58.2))(@playwright/test@1.58.2)(axe-core@4.11.1)
       '@grafana/tsconfig':
         specifier: 2.0.1
         version: 2.0.1
@@ -281,6 +281,11 @@ packages:
 
   '@adobe/css-tools@4.4.4':
     resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
+
+  '@axe-core/playwright@4.11.1':
+    resolution: {integrity: sha512-mKEfoUIB1MkVTht0BGZFXtSAEKXMJoDkyV5YZ9jbBmZCcWDz71tegNsdTkIN8zc/yMi5Gm2kx7Z5YQ9PfWNAWw==}
+    peerDependencies:
+      playwright-core: '>= 1.0.0'
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -832,11 +837,13 @@ packages:
     peerDependencies:
       '@lezer/lr': ^1.0.0
 
-  '@grafana/plugin-e2e@3.3.2':
-    resolution: {integrity: sha512-zrG79ti+/aPzkUFsEq/8U/bQaDzzu9E75ihy1E/XSKLqv3zePKrn6r2D6MgZr61y06D+HH95CGXCr1QY/Z4pdA==}
+  '@grafana/plugin-e2e@3.4.0':
+    resolution: {integrity: sha512-UmYu0Xwlajkghcjddb5Ip7mFC3m2TlnuXtlfUUS7dBxEJMuSwm2Iq0XjvN0vihMbdlVnkRx4BL7kQ0MbkTVYBQ==}
     engines: {node: '>=20 <=24'}
     peerDependencies:
+      '@axe-core/playwright': ^4.11.1
       '@playwright/test': ^1.52.0
+      axe-core: ^4.11.1
 
   '@grafana/plugin-ui@0.12.1':
     resolution: {integrity: sha512-OIIySSay3iGBAhjK7tzTkpeBJIqNKR43FSS0yVveLWBRK5dxmYD911hz7oXrUr2qFvF0kVXZ/3M4BL7lgEQW9A==}
@@ -6528,6 +6535,11 @@ snapshots:
 
   '@adobe/css-tools@4.4.4': {}
 
+  '@axe-core/playwright@4.11.1(playwright-core@1.58.2)':
+    dependencies:
+      axe-core: 4.11.1
+      playwright-core: 1.58.2
+
   '@babel/code-frame@7.29.0':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
@@ -7159,10 +7171,12 @@ snapshots:
     dependencies:
       '@lezer/lr': 1.4.3
 
-  '@grafana/plugin-e2e@3.3.2(@playwright/test@1.58.2)':
+  '@grafana/plugin-e2e@3.4.0(@axe-core/playwright@4.11.1(playwright-core@1.58.2))(@playwright/test@1.58.2)(axe-core@4.11.1)':
     dependencies:
+      '@axe-core/playwright': 4.11.1(playwright-core@1.58.2)
       '@grafana/e2e-selectors': 12.4.0-21983999378
       '@playwright/test': 1.58.2
+      axe-core: 4.11.1
       semver: 7.7.4
       uuid: 13.0.0
       yaml: 2.8.2
@@ -7194,7 +7208,7 @@ snapshots:
       - react-native
       - supports-color
 
-  '@grafana/prometheus@12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(eslint@9.39.3(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1))(react@18.3.1)(typescript@5.9.3)':
+  '@grafana/prometheus@12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(eslint@9.39.3(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1))(react@18.3.1)(typescript@5.9.3)':
     dependencies:
       '@emotion/css': 11.13.5
       '@floating-ui/react': 0.27.16(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7211,7 +7225,7 @@ snapshots:
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.3
       '@prometheus-io/lezer-promql': 0.307.3(@lezer/highlight@1.2.3)(@lezer/lr@1.4.3)
-      '@reduxjs/toolkit': 2.10.1(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
+      '@reduxjs/toolkit': 2.10.1(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1))(react@18.3.1)
       '@types/debounce-promise': 3.1.9
       '@types/lodash': 4.17.20
       '@types/react': 18.3.18
@@ -8534,7 +8548,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@reduxjs/toolkit@2.10.1(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1))(react@18.3.1)':
+  '@reduxjs/toolkit@2.10.1(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1))(react@18.3.1)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@standard-schema/utils': 0.3.0
@@ -8544,7 +8558,7 @@ snapshots:
       reselect: 5.1.1
     optionalDependencies:
       react: 18.3.1
-      react-redux: 9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1)
+      react-redux: 9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1)
 
   '@remix-run/router@1.23.2': {}
 
@@ -12696,6 +12710,16 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.18
       redux: 5.0.1
+
+  react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1):
+    dependencies:
+      '@types/use-sync-external-store': 0.0.6
+      react: 18.3.1
+      use-sync-external-store: 1.6.0(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.28
+      redux: 4.2.1
+    optional: true
 
   react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1):
     dependencies:
