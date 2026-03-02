@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { MetricScene } from 'MetricScene/MetricScene';
 import { VAR_DATASOURCE, VAR_FILTERS } from 'shared/shared';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
 
 import { isQueryLibrarySupported, type OpenQueryLibraryComponentProps } from './savedQuery';
@@ -97,10 +98,12 @@ export function SaveQueryButton({ sceneRef }: Props) {
   }
 
   return (
-    <OpenQueryLibraryComponent
-      datasourceFilters={[dsName]}
-      query={query}
-      tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip-saved-queries', 'Save in Saved Queries')}
-    />
+    <div style={{ display: 'contents' }} onClick={() => reportExploreMetrics('saved_query_save_modal_opened', {})}>
+      <OpenQueryLibraryComponent
+        datasourceFilters={[dsName]}
+        query={query}
+        tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip-saved-queries', 'Save in Saved Queries')}
+      />
+    </div>
   );
 }
