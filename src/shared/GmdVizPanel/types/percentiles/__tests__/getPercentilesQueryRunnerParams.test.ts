@@ -1,8 +1,44 @@
+import { type PrometheusFunction } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
+import { logger } from 'shared/logger/logger';
 
 import { getPercentilesQueryRunnerParams } from '../getPercentilesQueryRunnerParams';
 
 describe('getPercentilesQueryRunnerParams(options)', () => {
+  test('skips unknown PromQL function in histogram path and logs a warning', () => {
+    const result = getPercentilesQueryRunnerParams({
+      metric: { name: 'some_histogram', type: 'native-histogram' },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: false,
+        queries: [{ fn: 'unknown_fn' as PrometheusFunction, params: { percentiles: [99] } }],
+      },
+    });
+
+    expect(result.queries).toStrictEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[getPercentilesQueryRunnerParams] Unknown PromQL function "unknown_fn", skipping histogram query.'
+    );
+  });
+
+  test('skips unknown PromQL function in non-histogram path and logs a warning', () => {
+    const result = getPercentilesQueryRunnerParams({
+      metric: { name: 'go_goroutines', type: 'gauge' },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: false,
+        queries: [{ fn: 'unknown_fn' as PrometheusFunction, params: { percentiles: [99] } }],
+      },
+    });
+
+    expect(result.queries).toStrictEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[getPercentilesQueryRunnerParams] Unknown PromQL function "unknown_fn", skipping non-histogram query.'
+    );
+  });
+
   test('handles gauge metrics', () => {
     const result = getPercentilesQueryRunnerParams({
       metric: { name: 'go_goroutines', type: 'gauge' },

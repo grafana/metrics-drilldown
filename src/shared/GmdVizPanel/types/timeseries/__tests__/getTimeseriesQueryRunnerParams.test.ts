@@ -1,8 +1,27 @@
+import { type PrometheusFunction } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
+import { logger } from 'shared/logger/logger';
 
 import { getTimeseriesQueryRunnerParams } from '../getTimeseriesQueryRunnerParams';
 
 describe('getTimeseriesQueryRunnerParams(options)', () => {
+  test('skips unknown PromQL function and logs a warning', () => {
+    const result = getTimeseriesQueryRunnerParams({
+      metric: { name: 'go_goroutines', type: 'gauge' },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: false,
+        queries: [{ fn: 'unknown_fn' as PrometheusFunction }],
+      },
+    });
+
+    expect(result.queries).toStrictEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[getTimeseriesQueryRunnerParams] Unknown PromQL function "unknown_fn", skipping query.'
+    );
+  });
+
   describe('without group by label', () => {
     test('handles gauge metrics', () => {
       const result = getTimeseriesQueryRunnerParams({

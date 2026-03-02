@@ -154,7 +154,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
-    const { metric, metricType, panelConfig } = this.state;
+    const { metric, metricType } = this.state;
 
     const metricTypeFromMetadata = await getMetricType(metric, getTrailFor(this));
     if (metricType === metricTypeFromMetadata) {
@@ -167,7 +167,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     // we found a native histogram
     if (metricTypeFromMetadata === 'native-histogram') {
       stateUpdate.metricType = 'native-histogram';
-      panelConfigUpdate.description = panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
+      panelConfigUpdate.description = this.state.panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
 
       if (!discardPanelTypeUpdates) {
         panelConfigUpdate.type = 'heatmap';
@@ -183,16 +183,23 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       stateUpdate.metricType = 'counter';
     }
 
+    const currentPanelConfig = this.state.panelConfig;
+
+    // Guard: if Path B already rebuilt to the target type, skip the type update.
+    if (panelConfigUpdate.type === currentPanelConfig.type) {
+      delete panelConfigUpdate.type;
+    }
+
     if (Object.keys(stateUpdate).length || Object.keys(panelConfigUpdate).length) {
       this.setState({
         ...stateUpdate,
-        panelConfig: { ...panelConfig, ...panelConfigUpdate },
+        panelConfig: { ...currentPanelConfig, ...panelConfigUpdate },
       });
     }
   }
 
   private subscribeToStateChanges(discardPanelTypeUpdates: boolean) {
-    const { metricType, body, panelConfig } = this.state;
+    const { metricType, body } = this.state;
 
     // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
     // we give another chance to display it properly by looking into the data frame type received
@@ -202,18 +209,29 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
           return;
         }
 
+        // Always unsubscribe on first Done event — prevents multiple firings.
+        bodySub.unsubscribe();
+
         const dataFrameType = newState.data.series?.[0]?.meta?.type;
         if (!dataFrameType) {
           return;
         }
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
+          // Guard: if checkMetricMetadata (Path A) already rebuilt to heatmap, skip.
+          if (this.state.panelConfig.type === 'heatmap') {
+            return;
+          }
+
           this.setState({
-            panelConfig: { description: t('gmd-viz-panel.native-histogram', 'Native Histogram'), ...panelConfig, type: 'heatmap' },
+            metricType: 'native-histogram',
+            panelConfig: {
+              description: t('gmd-viz-panel.native-histogram', 'Native Histogram'),
+              ...this.state.panelConfig,
+              type: 'heatmap',
+            },
           });
         }
-
-        bodySub.unsubscribe();
       });
 
       this._subs.add(bodySub);

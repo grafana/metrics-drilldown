@@ -6,6 +6,7 @@ import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { logger } from 'shared/logger/logger';
 
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
@@ -45,7 +46,11 @@ function buildQueriesWithPresetFunctions({
   const queries: SceneDataQuery[] = [];
 
   for (const { fn } of queryDefs) {
-    const entry = PROMQL_FUNCTIONS.get(fn)!;
+    const entry = PROMQL_FUNCTIONS.get(fn);
+    if (!entry) {
+      logger.warn(`[getStatQueryRunnerParams] Unknown PromQL function "${fn}", skipping query.`);
+      continue;
+    }
     const query = entry.fn({ expr });
     const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
 
