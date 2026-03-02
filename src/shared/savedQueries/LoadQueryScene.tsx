@@ -143,7 +143,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     }
 
     return (
-      <div style={{ display: 'contents' }} onClick={() => reportExploreMetrics('saved_query_load_modal_opened', {})}>
+      <div role="none" style={{ display: 'contents' }} onClick={() => reportExploreMetrics('saved_query_load_modal_opened', {})}>
         <OpenQueryLibraryComponent
           className={styles.button}
           context="drilldown"

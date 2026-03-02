@@ -98,7 +98,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
   }
 
   return (
-    <div style={{ display: 'contents' }} onClick={() => reportExploreMetrics('saved_query_save_modal_opened', {})}>
+    <div role="none" style={{ display: 'contents' }} onClick={() => reportExploreMetrics('saved_query_save_modal_opened', {})}>
       <OpenQueryLibraryComponent
         datasourceFilters={[dsName]}
         query={query}
