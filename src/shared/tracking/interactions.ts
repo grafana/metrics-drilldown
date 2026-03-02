@@ -185,6 +185,8 @@ type Interactions = {
   add_to_dashboard_modal_opened: {};
   // User confirms to add to dashboard and builds a panel
   add_to_dashboard_build_panel: { expr: string };
+  // User clicks the "Create Alert" button, opening the alert creation flow
+  create_alert_clicked: { metric: string };
   // User asks a question in the Quick Search input
   quick_search_assistant_question_asked: { question: string };
   // User enters assistant mode in the Quick Search input (e.g., by typing '?', clicking the AI button, or using the Tab+Enter keyboard flow)
