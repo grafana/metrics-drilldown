@@ -8,6 +8,7 @@ import { type DataTrail } from '../AppDataTrail/DataTrail';
 import { defaultActionView } from '../MetricScene/MetricActionBar';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
+import { VAR_GROUP_BY } from '../shared/shared';
 import { useMetricsDrilldownQuestions } from './assistant/useMetricsDrilldownQuestions';
 
 interface TrailProps {
@@ -36,6 +37,7 @@ export function getPageNav(
     const searchParams = new URLSearchParams(window.location.search);
     const searchParamsWithDefaultActionView = new URLSearchParams(searchParams);
     searchParamsWithDefaultActionView.set('actionView', defaultActionView);
+    searchParamsWithDefaultActionView.delete(`var-${VAR_GROUP_BY}`);
 
     const navModelItem: NavModelItem = {
       text: currentActionViewName,

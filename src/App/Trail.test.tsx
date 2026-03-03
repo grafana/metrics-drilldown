@@ -66,6 +66,14 @@ describe('Trail Component - Breadcrumb Logic Tests', () => {
       expect(result?.url).toContain('actionView=breakdown');
       expect(result?.parentItem?.url).toContain('actionView=breakdown');
     });
+
+    it('should not include var-groupby in the metric breadcrumb URL', () => {
+      mockLocation.search = '?metric=test_metric&actionView=related&var-groupby=instance';
+
+      const result = getPageNav(mockMetricScene, 'test_metric', 'Related metrics');
+
+      expect(result?.parentItem?.url).not.toContain('var-groupby');
+    });
   });
 
   describe('Edge cases', () => {
