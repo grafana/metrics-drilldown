@@ -62,12 +62,12 @@ function getQueries(sceneObject: SceneObject): PromQuery[] {
   );
 }
 
-// frontend hardening limit
-const MAX_ADHOC_VARIABLE_OPTIONS = 10000;
+// frontend hardening limit (fallback when the datasource series limit is not available)
+const DEFAULT_ADHOC_VARIABLE_OPTIONS_LIMIT = 10000;
 
 /**
  * Add custom providers for the adhoc filters variable that limit the responses for labels keys and label values.
- * Currently hard coded to 10000.
+ * Uses the datasource's configured series limit, falling back to a default of 10000.
  *
  * The current provider functions for adhoc filter variables are the functions getTagKeys and getTagValues in the data source.
  * This function still uses these functions from inside the data source helper.
@@ -112,7 +112,8 @@ export function limitAdhocProviders(
         opts.queries = [];
       }
 
-      let values = (await datasourceHelper.getTagKeys(opts)).slice(0, MAX_ADHOC_VARIABLE_OPTIONS);
+      const adhocLimit = (await datasourceHelper.getSeriesLimit()) || DEFAULT_ADHOC_VARIABLE_OPTIONS_LIMIT;
+      let values = (await datasourceHelper.getTagKeys(opts)).slice(0, adhocLimit);
 
       // use replace: true to override the default lookup in adhoc filter variable
       return { replace: true, values };
@@ -149,7 +150,8 @@ export function limitAdhocProviders(
         opts.queries = [];
       }
 
-      const values = (await datasourceHelper.getTagValues(opts)).slice(0, MAX_ADHOC_VARIABLE_OPTIONS);
+      const adhocLimit = (await datasourceHelper.getSeriesLimit()) || DEFAULT_ADHOC_VARIABLE_OPTIONS_LIMIT;
+      const values = (await datasourceHelper.getTagValues(opts)).slice(0, adhocLimit);
       // use replace: true to override the default lookup in adhoc filter variable
       return { replace: true, values };
     },
