@@ -143,14 +143,16 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     }
 
     return (
-      <OpenQueryLibraryComponent
-        className={styles.button}
-        context="drilldown"
-        datasourceFilters={[dsName]}
-        icon="folder-open"
-        onSelectQuery={onSelectQuery}
-        tooltip={t('metrics.metrics-drilldown.load-query.saved-query-button-tooltip', 'Load saved query')}
-      />
+      <div role="none" style={{ display: 'contents' }} onClick={() => reportExploreMetrics('saved_query_load_modal_opened', {})}>
+        <OpenQueryLibraryComponent
+          className={styles.button}
+          context="drilldown"
+          datasourceFilters={[dsName]}
+          icon="folder-open"
+          onSelectQuery={onSelectQuery}
+          tooltip={t('metrics.metrics-drilldown.load-query.saved-query-button-tooltip', 'Load saved query')}
+        />
+      </div>
     );
   };
 }
