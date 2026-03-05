@@ -1,4 +1,4 @@
-import { FieldType, createDataFrame } from '@grafana/data';
+import { createDataFrame, FieldType } from '@grafana/data';
 import { firstValueFrom, of } from 'rxjs';
 
 import { filterEmptyFrames } from '../transformations/filterEmptyFrames';
