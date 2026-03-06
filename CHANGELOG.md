@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.33
+
+##### New Features
+
+*  fix saved queries instrumentation, fix dead path events (#1115) (3801bff6)
+*  add create alert event for tracking (#1114) (e44b28d2)
+
+##### Bug Fixes
+
+*  filter empty native histogram heatmap frames to prevent OOM crash (#1116) (d491acaf)
+
+##### Other Changes
+
+*  Download translations from Crowdin (#1103) (755a5192)
+
+
 ## 1.0.32
 
 ##### Chores
