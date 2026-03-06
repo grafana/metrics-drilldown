@@ -1,8 +1,8 @@
 import { VariableHide, type AdHocVariableFilter } from '@grafana/data';
-import { utf8Support } from '@grafana/prometheus';
 import { AdHocFiltersVariable, sceneGraph } from '@grafana/scenes';
 
 import { VAR_FILTERS } from 'shared/shared';
+import { buildFilterExpression } from 'shared/utils/utils.queries';
 
 export const VAR_METRICS_VAR_FILTERS = 'metrics_filters';
 
@@ -17,17 +17,7 @@ export class AdHocFiltersForMetricsVariable extends AdHocFiltersVariable {
       allowCustomValue: true,
       applyMode: 'manual',
       expressionBuilder: (filters: AdHocVariableFilter[]) => {
-        return (
-          filters
-            .map((filter) => {
-              // if the filter.value is "" or '' we need to return nothing to avoid a PromQL error label=""""
-              if (filter.value === '' || filter.value === '""') {
-                return `${utf8Support(filter.key)}${filter.operator}""`;
-              }
-              return `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`;
-            })
-            .join(',')
-        );
+        return filters.map(buildFilterExpression).join(',');
       },
       skipUrlSync: true,
     });

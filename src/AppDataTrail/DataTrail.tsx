@@ -1,7 +1,6 @@
 import { css } from '@emotion/css';
 import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { utf8Support } from '@grafana/prometheus';
 import { config, useChromeHeaderHeight, usePluginComponent } from '@grafana/runtime';
 import {
   AdHocFiltersVariable,
@@ -58,6 +57,7 @@ import { MetricScene } from '../MetricScene/MetricScene';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
+import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
@@ -502,16 +502,8 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
       expressionBuilder: (filters: AdHocVariableFilter[]) => {
         return (
           filters
-            // remove any filters that include __name__ key in the expression
-            // to prevent the metric name from being set twice in the panel queries and causing an error
             .filter((filter) => filter.key !== '__name__')
-            .map((filter) => {
-              // if the filter.value is "" or '' we need to return nothing to avoid a PromQL error label=""""
-              if (filter.value === '' || filter.value === '""') {
-                return `${utf8Support(filter.key)}${filter.operator}""`;
-              }
-              return `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`;
-            })
+            .map(buildFilterExpression)
             .join(',')
         );
       },
