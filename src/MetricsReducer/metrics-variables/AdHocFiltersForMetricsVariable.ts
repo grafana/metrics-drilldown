@@ -16,8 +16,19 @@ export class AdHocFiltersForMetricsVariable extends AdHocFiltersVariable {
       hide: VariableHide.hideVariable,
       allowCustomValue: true,
       applyMode: 'manual',
-      expressionBuilder: (filters: AdHocVariableFilter[]) =>
-        filters.map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`).join(','),
+      expressionBuilder: (filters: AdHocVariableFilter[]) => {
+        return (
+          filters
+            .map((filter) => {
+              // if the filter.value is "" or '' we need to return nothing to avoid a PromQL error label=""""
+              if (filter.value === '' || filter.value === '""') {
+                return `${utf8Support(filter.key)}${filter.operator}""`;
+              }
+              return `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`;
+            })
+            .join(',')
+        );
+      },
       skipUrlSync: true,
     });
 

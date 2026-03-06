@@ -505,7 +505,13 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
             // remove any filters that include __name__ key in the expression
             // to prevent the metric name from being set twice in the panel queries and causing an error
             .filter((filter) => filter.key !== '__name__')
-            .map((filter) => `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`)
+            .map((filter) => {
+              // if the filter.value is "" or '' we need to return nothing to avoid a PromQL error label=""""
+              if (filter.value === '' || filter.value === '""') {
+                return `${utf8Support(filter.key)}${filter.operator}""`;
+              }
+              return `${utf8Support(filter.key)}${filter.operator}"${filter.value}"`;
+            })
             .join(',')
         );
       },
