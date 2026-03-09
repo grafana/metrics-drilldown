@@ -131,6 +131,7 @@
       "@remix-run/router": ">=1.23.2",
       "react-router": ">=6.30.2",
       "@isaacs/brace-expansion": ">=5.0.1",
+      "dompurify": "^3.3.2",
       "lodash": ">=4.17.23",
       "minimatch@^3": "~3.1.4",
       "minimatch@^9": "~9.0.7",

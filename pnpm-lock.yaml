@@ -8,6 +8,7 @@ overrides:
   '@remix-run/router': '>=1.23.2'
   react-router: '>=6.30.2'
   '@isaacs/brace-expansion': '>=5.0.1'
+  dompurify: ^3.3.2
   lodash: '>=4.17.23'
   minimatch@^3: ~3.1.4
   minimatch@^9: ~9.0.7
@@ -42,7 +43,7 @@ importers:
         version: 0.2.9(@lezer/lr@1.4.3)
       '@grafana/prometheus':
         specifier: ^12.4.0
-        version: 12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(eslint@10.0.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1))(react@18.3.1)(typescript@5.9.3)
+        version: 12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(eslint@10.0.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1))(react@18.3.1)(typescript@5.9.3)
       '@grafana/runtime':
         specifier: ^12.4.0
         version: 12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(@types/react@18.3.28)(eslint@10.0.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
@@ -3139,8 +3140,9 @@ packages:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
 
-  dompurify@3.3.0:
-    resolution: {integrity: sha512-r+f6MYR1gGN1eJv0TVQbhA7if/U7P87cdPl3HN5rikqaBSBxLiCb/b9O+2eG0cxz0ghyU+mU1QkbsOwERMYlWQ==}
+  dompurify@3.3.2:
+    resolution: {integrity: sha512-6obghkliLdmKa56xdbLOpUZ43pAR6xFy1uOrxBaIDjT+yaRuuybLjGS9eVBoSR/UPU5fq3OXClEHLJNGvbxKpQ==}
+    engines: {node: '>=20'}
 
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
@@ -7068,7 +7070,7 @@ snapshots:
       d3-interpolate: 3.0.1
       d3-scale-chromatic: 3.1.0
       date-fns: 4.1.0
-      dompurify: 3.3.0
+      dompurify: 3.3.2
       eventemitter3: 5.0.1
       fast_array_intersect: 1.1.0
       history: 4.10.1
@@ -7198,7 +7200,7 @@ snapshots:
       - react-native
       - supports-color
 
-  '@grafana/prometheus@12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(eslint@10.0.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1))(react@18.3.1)(typescript@5.9.3)':
+  '@grafana/prometheus@12.4.0(@openfeature/web-sdk@1.7.3(@openfeature/core@1.9.2))(eslint@10.0.2(jiti@2.6.1))(react-dom@18.3.1(react@18.3.1))(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1))(react@18.3.1)(typescript@5.9.3)':
     dependencies:
       '@emotion/css': 11.13.5
       '@floating-ui/react': 0.27.16(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7215,7 +7217,7 @@ snapshots:
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.3
       '@prometheus-io/lezer-promql': 0.307.3(@lezer/highlight@1.2.3)(@lezer/lr@1.4.3)
-      '@reduxjs/toolkit': 2.10.1(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
+      '@reduxjs/toolkit': 2.10.1(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1))(react@18.3.1)
       '@types/debounce-promise': 3.1.9
       '@types/lodash': 4.17.20
       '@types/react': 18.3.18
@@ -8530,7 +8532,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@reduxjs/toolkit@2.10.1(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1))(react@18.3.1)':
+  '@reduxjs/toolkit@2.10.1(react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1))(react@18.3.1)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@standard-schema/utils': 0.3.0
@@ -8540,7 +8542,7 @@ snapshots:
       reselect: 5.1.1
     optionalDependencies:
       react: 18.3.1
-      react-redux: 9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1)
+      react-redux: 9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1)
 
   '@remix-run/router@1.23.2': {}
 
@@ -10009,7 +10011,7 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
 
-  dompurify@3.3.0:
+  dompurify@3.3.2:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
@@ -12708,6 +12710,16 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.18
       redux: 5.0.1
+
+  react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@4.2.1):
+    dependencies:
+      '@types/use-sync-external-store': 0.0.6
+      react: 18.3.1
+      use-sync-external-store: 1.6.0(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.28
+      redux: 4.2.1
+    optional: true
 
   react-redux@9.2.0(@types/react@18.3.28)(react@18.3.1)(redux@5.0.1):
     dependencies:
