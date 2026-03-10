@@ -67,12 +67,13 @@ describe('Trail Component - Breadcrumb Logic Tests', () => {
       expect(result?.parentItem?.url).toContain('actionView=breakdown');
     });
 
-    it('should not include var-groupby in the metric breadcrumb URL', () => {
+    it('should reset var-groupby to $__all in the metric breadcrumb URL', () => {
       mockLocation.search = '?metric=test_metric&actionView=related&var-groupby=instance';
 
       const result = getPageNav(mockMetricScene, 'test_metric', 'Related metrics');
 
-      expect(result?.parentItem?.url).not.toContain('var-groupby');
+      expect(result?.parentItem?.url).not.toContain('instance');
+      expect(result?.parentItem?.url).toContain('var-groupby=%24__all');
     });
   });
 

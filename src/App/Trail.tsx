@@ -37,7 +37,7 @@ export function getPageNav(
     const searchParams = new URLSearchParams(window.location.search);
     const searchParamsWithDefaultActionView = new URLSearchParams(searchParams);
     searchParamsWithDefaultActionView.set('actionView', defaultActionView);
-    searchParamsWithDefaultActionView.delete(`var-${VAR_GROUP_BY}`);
+    searchParamsWithDefaultActionView.set(`var-${VAR_GROUP_BY}`, '$__all');
 
     const navModelItem: NavModelItem = {
       text: currentActionViewName,
