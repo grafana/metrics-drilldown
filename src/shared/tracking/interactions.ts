@@ -193,14 +193,14 @@ type Interactions = {
   quick_search_assistant_mode_entered: { from: 'question_mark' | 'tab' | 'button' };
   // User opens the save query modal
   saved_query_save_modal_opened: {};
-  // User successfully saves a query
-  saved_query_saved: { source: 'local' | 'query_library' };
+  // User successfully saves a query (local storage only — Query Library save has no callback)
+  saved_query_saved: { source: 'local' };
   // User opens the load query modal
   saved_query_load_modal_opened: {};
-  // User toggles between saved queries in the load list
-  saved_query_toggled: { source: 'local' | 'query_library' };
-  // User deletes a saved query
-  saved_query_deleted: { source: 'local' | 'query_library' };
+  // User toggles between saved queries in the load list (local storage only — Query Library has no callback)
+  saved_query_toggled: { source: 'local' };
+  // User deletes a saved query (local storage only — Query Library delete has no callback)
+  saved_query_deleted: { source: 'local' };
   // User loads a saved query (localStorage)
   saved_query_loaded: {};
   // User loads a saved query from Query Library

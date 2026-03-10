@@ -1,7 +1,23 @@
+import { type AdHocVariableFilter } from '@grafana/data';
+import { utf8Support } from '@grafana/prometheus';
 import { type SceneObject, type SceneQueryRunner } from '@grafana/scenes';
 
 export function isSceneQueryRunner(input: SceneObject | null | undefined): input is SceneQueryRunner {
   return typeof input !== 'undefined' && input !== null && 'state' in input && 'runQueries' in input;
+}
+
+/**
+ * Builds a PromQL label matcher string from an AdHocVariableFilter.
+ * Normalizes empty and double-quoted empty filter values to produce
+ * a valid empty string matcher (e.g. `label!=""`) instead of the
+ * malformed `label!=""""`.
+ */
+export function buildFilterExpression(filter: AdHocVariableFilter): string {
+  const key = utf8Support(filter.key);
+  if (filter.value === '' || filter.value === '""') {
+    return `${key}${filter.operator}""`;
+  }
+  return `${key}${filter.operator}"${filter.value}"`;
 }
 
 /**

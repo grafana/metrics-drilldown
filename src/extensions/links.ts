@@ -16,10 +16,14 @@ import { logger } from 'shared/logger/logger';
 import { parseMatcher } from './parseMatcher';
 import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../shared/utils/utils.promql';
 
+// TODO: Remove this once @grafana/data exports the group field type (https://github.com/grafana/grafana/pull/116481)
+type PluginExtensionAddedLinkConfigWithGroup<T extends object = object> = PluginExtensionAddedLinkConfig<T> & {
+  group?: { name: string; icon: string };
+};
+
 const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
 const description = `Open current query in the ${PRODUCT_NAME} view`;
-const category = 'metrics-drilldown';
 const icon = 'gf-prometheus';
 
 const ASSISTANT_TARGET_V0 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha';
@@ -27,15 +31,22 @@ const ASSISTANT_TARGET_V1 = 'grafana-assistant-app/navigateToDrilldown/v1';
 
 const ADHOC_URL_DELIMITER = '|';
 
-export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPanelContext>> = [
+export const linkConfigs: Array<PluginExtensionAddedLinkConfigWithGroup<PluginExtensionPanelContext>> = [
   {
     title,
     description,
-    category,
+    icon,
+    group: { name: '${root}/Metrics drilldown', icon: 'code-branch' },
+    path: createAppUrl(ROUTES.Drilldown),
+    targets: [PluginExtensionPoints.DashboardPanelMenu],
+    configure: configureDrilldownLink,
+  },
+  {
+    title,
+    description,
     icon,
     path: createAppUrl(ROUTES.Drilldown),
     targets: [
-      PluginExtensionPoints.DashboardPanelMenu,
       PluginExtensionPoints.ExploreToolbarAction,
       PluginExtensionPoints.AlertingRuleQueryEditor,
       ASSISTANT_TARGET_V1,
