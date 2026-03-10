@@ -238,7 +238,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
   };
 }
 
-function updateActionBarHeight(controlsContainer: React.RefObject<HTMLDivElement>) {
+function updateActionBarHeight(controlsContainer: React.RefObject<HTMLDivElement | null>) {
   const actionBar = controlsContainer.current;
 
   if (!actionBar) {
