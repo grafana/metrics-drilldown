@@ -137,7 +137,8 @@
       "minimatch@^9": "~9.0.7",
       "minimatch@^10": ">=10.2.3",
       "serialize-javascript": ">=7.0.3",
-      "immutable": ">=5.1.5"
+      "immutable": ">=5.1.5",
+      "@tootallnate/once": ">=3.0.1"
     }
   }
 }
