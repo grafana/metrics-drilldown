@@ -8,6 +8,7 @@ import { trailDS } from 'shared/shared';
 
 import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
 import { filterEmptyFrames } from './transformations/filterEmptyFrames';
+import { filterZeroBucketFrames } from './transformations/filterZeroBucketFrames';
 import { getUnit } from '../../units/getUnit';
 import { type BuildVizPanelOptions } from '../panelBuilder';
 
@@ -29,7 +30,7 @@ export function buildHeatmapPanel(options: BuildVizPanelOptions): VizPanel {
 
   const $data = new SceneDataTransformer({
     $data: queryRunner,
-    transformations: [filterEmptyFrames],
+    transformations: [filterEmptyFrames, filterZeroBucketFrames],
   });
 
   return PanelBuilders.heatmap()
