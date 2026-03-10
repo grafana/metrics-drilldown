@@ -15,6 +15,7 @@ overrides:
   minimatch@^10: '>=10.2.3'
   serialize-javascript: '>=7.0.3'
   immutable: '>=5.1.5'
+  '@tootallnate/once': '>=3.0.1'
 
 importers:
 
@@ -1878,8 +1879,8 @@ packages:
       react: ^18.0.0
       react-dom: ^18.0.0
 
-  '@tootallnate/once@2.0.0':
-    resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
+  '@tootallnate/once@3.0.1':
+    resolution: {integrity: sha512-VyMVKRrpHTT8PnotUeV8L/mDaMwD5DaAKCFLP73zAqAtvF0FCqky+Ki7BYbFCYQmqFyTe9316Ed5zS70QUR9eg==}
     engines: {node: '>= 10'}
 
   '@tsconfig/node10@1.0.12':
@@ -8686,7 +8687,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@tootallnate/once@2.0.0': {}
+  '@tootallnate/once@3.0.1': {}
 
   '@tsconfig/node10@1.0.12': {}
 
@@ -10970,7 +10971,7 @@ snapshots:
 
   http-proxy-agent@5.0.0:
     dependencies:
-      '@tootallnate/once': 2.0.0
+      '@tootallnate/once': 3.0.1
       agent-base: 6.0.2
       debug: 4.4.3
     transitivePeerDependencies:
