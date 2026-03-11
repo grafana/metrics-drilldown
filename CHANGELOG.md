@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.0.34
+
+##### Chores
+
+* **deps:**
+  *  Update dependency copy-webpack-plugin to v14 (#1120) (41869e6c)
+  *  Update dependency @react-aria/utils to v3.33.1 (#1119) (745d8944)
+  *  Update TypeScript and linting (major) (#1111) (1f06969f)
+  *  Update pnpm to v10.30.3 (#1107) (5ce4565f)
+
+##### New Features
+
+* **extensions:**  migrate DashboardPanelMenu from category to group API (#1121) (2350e210)
+
+##### Bug Fixes
+
+*  breadcrumb navigation issue (#1126) (4261601b)
+*  filter native histogram zero-bucket-only frames to prevent heatmap crash (#1127) (0d847bdb)
+*  resolve CVE-2026-3449 (@tootallnate/once) (#1125) (a8908a1c)
+*  resolve high CVEs in transitive dependencies (#1122) (9eed652c)
+*  filter "" and '' values as empty matchers like `label!=""` (#1118) (ebe53941)
+
+
 ## 1.0.33
 
 ##### New Features
