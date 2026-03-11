@@ -156,6 +156,7 @@ describe('LoadQueryModal', () => {
     render(<LoadQueryModal onClose={mockOnClose} sceneRef={mockSceneRef} />);
 
     const selectButton = screen.getByText(/select/i).closest('a');
+    expect(selectButton).not.toBeNull();
     expect(selectButton).toHaveAttribute('aria-disabled', 'true');
   });
 
