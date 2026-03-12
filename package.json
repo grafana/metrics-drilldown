@@ -15,7 +15,7 @@
     "lint": "eslint --cache .",
     "lint:fix": "pnpm run lint --fix && prettier --write --list-different .",
     "server": "docker compose up --build",
-    "server:react19": "GF_FEATURE_TOGGLES_ENABLE=react19 docker compose up --build",
+    "server:react19": "GF_FEATURE_TOGGLES_ENABLE=react19 GRAFANA_VERSION=dev-preview-react19 docker compose up --build",
     "sign": "pnpm dlx @grafana/sign-plugin@latest",
     "e2e:server": "COMPOSE_BAKE=true docker compose up --build",
     "e2e:server:up": "COMPOSE_BAKE=true docker compose up --build -d",
