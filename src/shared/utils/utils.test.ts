@@ -59,6 +59,7 @@ describe('limitAdhocProviders', () => {
     datasourceHelper = {
       getTagKeys: jest.fn().mockResolvedValue(Array(20000).fill({ text: 'key' })),
       getTagValues: jest.fn().mockResolvedValue(Array(20000).fill({ text: 'value' })),
+      getSeriesLimit: jest.fn().mockResolvedValue(undefined),
     } as unknown as MetricDatasourceHelper;
 
     dataTrail = {
@@ -67,12 +68,22 @@ describe('limitAdhocProviders', () => {
   });
 
   describe('getTagKeysProvider', () => {
-    it('should limit the number of tag keys returned in the variable to 10000', async () => {
+    it('should fall back to default limit of 10000 when datasource series limit is not available', async () => {
       limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
 
       const result = await filtersVariable.state!.getTagKeysProvider!(filtersVariable, null);
 
       expect(result.values).toHaveLength(10000);
+      expect(result.replace).toBe(true);
+    });
+
+    it('should use datasource series limit when available', async () => {
+      (datasourceHelper.getSeriesLimit as jest.Mock).mockResolvedValue(15000);
+      limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
+
+      const result = await filtersVariable.state!.getTagKeysProvider!(filtersVariable, null);
+
+      expect(result.values).toHaveLength(15000);
       expect(result.replace).toBe(true);
     });
 
@@ -104,12 +115,22 @@ describe('limitAdhocProviders', () => {
       value: 'testValue',
     } as const;
 
-    it('should limit the number of tag values returned in the variable to 10000', async () => {
+    it('should fall back to default limit of 10000 when datasource series limit is not available', async () => {
       limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
 
       const result = await filtersVariable.state!.getTagValuesProvider!(filtersVariable, filter);
 
       expect(result.values).toHaveLength(10000);
+      expect(result.replace).toBe(true);
+    });
+
+    it('should use datasource series limit when available', async () => {
+      (datasourceHelper.getSeriesLimit as jest.Mock).mockResolvedValue(15000);
+      limitAdhocProviders(dataTrail, filtersVariable, datasourceHelper);
+
+      const result = await filtersVariable.state!.getTagValuesProvider!(filtersVariable, filter);
+
+      expect(result.values).toHaveLength(15000);
       expect(result.replace).toBe(true);
     });
 
