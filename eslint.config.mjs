@@ -18,6 +18,7 @@ export default [
       'artifacts/',
       'coverage/',
       '.config/',
+      '.claude/',
       'e2e/', // handled by separate config
       'playwright/',
       '*.log',

@@ -119,7 +119,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     }
   }
 
-  private onChange = (e: React.FormEvent<HTMLInputElement>) => {
+  private onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.currentTarget.value;
 
     this.updateValue(newValue);
@@ -204,7 +204,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     });
 
     // --- Handlers ---
-    const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.currentTarget.value;
 
       // '?' shortcut: only control/excluded, only when assistant available
