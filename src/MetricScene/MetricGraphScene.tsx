@@ -3,8 +3,6 @@ import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
 import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   behaviors,
-  dataLayers,
-  SceneDataLayerSet,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
@@ -13,7 +11,6 @@ import {
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { type DataQuery } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
 import React, { useRef } from 'react';
@@ -31,6 +28,7 @@ import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 
+import { buildKgAnnotationsLayer, type KgEntityConfig } from './kgAnnotations';
 import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';
 import { buildMiniBreakdownNavigationUrl } from '../exposedComponents/MiniBreakdown/buildNavigationUrl';
@@ -41,62 +39,6 @@ const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
 
 export const TOPVIEW_PANEL_MENU_KEY = 'topview-panel-menu';
-
-export type KgEntityScope = {
-  env?: string;
-  site?: string;
-  namespace?: string;
-};
-
-export type KgEntityConfig = {
-  datasourceUid: string;
-  entityType: string;
-  entityName: string;
-  entityScope?: KgEntityScope;
-};
-
-function buildKgAnnotationsLayer({ datasourceUid, entityType, entityName, entityScope }: KgEntityConfig): SceneDataLayerSet {
-  return new SceneDataLayerSet({
-    layers: [
-      new dataLayers.AnnotationsDataLayer({
-        name: 'Asserts Insights',
-        isEnabled: true,
-        query: {
-          name: 'Asserts Insights',
-          enable: true,
-          iconColor: 'red',
-          datasource: { type: 'grafana-knowledgegraph-datasource', uid: datasourceUid },
-          target: {
-            refId: 'kgAnnotations',
-            queryType: 'annotations',
-            queryMode: 'advanced',
-            advancedQuery: {
-              filterCriteria: [
-                {
-                  entityType,
-                  propertyMatchers: [{ id: -1, name: 'name', op: '=', value: entityName, type: 'String' }],
-                  connectToEntityTypes: [],
-                  havingAssertion: false,
-                },
-              ],
-              ...(entityScope
-                ? {
-                    scopeCriteria: {
-                      nameAndValues: {
-                        env: entityScope.env ? [entityScope.env] : undefined,
-                        site: entityScope.site ? [entityScope.site] : undefined,
-                        namespace: entityScope.namespace ? [entityScope.namespace] : undefined,
-                      },
-                    },
-                  }
-                : {}),
-            },
-          } as unknown as DataQuery,
-        },
-      }),
-    ],
-  });
-}
 
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;

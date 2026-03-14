@@ -19,7 +19,8 @@ import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from 
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
 import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
-import { MetricGraphScene, type KgEntityConfig } from './MetricGraphScene';
+import { type KgEntityConfig } from './kgAnnotations';
+import { MetricGraphScene } from './MetricGraphScene';
 import {
   PROMETHEUS_QUERY_RESULTS_COMPONENT_ID,
   type PrometheusQueryResultsV1Props,

@@ -15,7 +15,7 @@ import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
 import { HistogramPercentilesDefaultBehavior } from './behaviors/HistogramPercentilesDefaultBehavior';
 import { parsePromQLQuery } from '../../extensions/links';
-import { type KgEntityConfig, type KgEntityScope } from '../../MetricScene/MetricGraphScene';
+import { type KgEntityConfig, type KgEntityScope } from '../../MetricScene/kgAnnotations';
 import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
