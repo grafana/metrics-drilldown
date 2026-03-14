@@ -53,6 +53,7 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
+import { type KgEntityConfig } from '../MetricScene/MetricGraphScene';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
@@ -80,6 +81,8 @@ export interface DataTrailState extends SceneObjectState {
   // just for the starting data source
   initialDS?: string;
   initialFilters?: AdHocVariableFilter[];
+
+  kgEntityConfig?: KgEntityConfig;
 
   // Synced with url
   metric?: string;
@@ -179,11 +182,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         ? [...baseControls, new SelectNewMetricButton(), new SceneTimePicker({}), new SceneRefreshPicker({})]
         : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
 
-      this.setState({
-        metric,
-        topScene: metric ? new MetricScene({ metric }) : new MetricsReducer(),
-        controls,
-      });
+      const topScene = metric
+        ? new MetricScene({ metric, kgEntityConfig: this.state.kgEntityConfig })
+        : new MetricsReducer();
+
+      this.setState({ metric, topScene, controls });
     }
   }
 

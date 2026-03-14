@@ -3,6 +3,8 @@ import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
 import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   behaviors,
+  dataLayers,
+  SceneDataLayerSet,
   SceneFlexItem,
   SceneFlexLayout,
   sceneGraph,
@@ -11,6 +13,7 @@ import {
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
+import { type DataQuery } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import { useResizeObserver } from '@react-aria/utils';
 import React, { useRef } from 'react';
@@ -39,6 +42,62 @@ const MAIN_PANEL_MAX_HEIGHT = '40%';
 
 export const TOPVIEW_PANEL_MENU_KEY = 'topview-panel-menu';
 
+export type KgEntityScope = {
+  env?: string;
+  site?: string;
+  namespace?: string;
+};
+
+export type KgEntityConfig = {
+  datasourceUid: string;
+  entityType: string;
+  entityName: string;
+  entityScope?: KgEntityScope;
+};
+
+function buildKgAnnotationsLayer({ datasourceUid, entityType, entityName, entityScope }: KgEntityConfig): SceneDataLayerSet {
+  return new SceneDataLayerSet({
+    layers: [
+      new dataLayers.AnnotationsDataLayer({
+        name: 'Asserts Insights',
+        isEnabled: true,
+        query: {
+          name: 'Asserts Insights',
+          enable: true,
+          iconColor: 'red',
+          datasource: { type: 'grafana-knowledgegraph-datasource', uid: datasourceUid },
+          target: {
+            refId: 'kgAnnotations',
+            queryType: 'annotations',
+            queryMode: 'advanced',
+            advancedQuery: {
+              filterCriteria: [
+                {
+                  entityType,
+                  propertyMatchers: [{ id: -1, name: 'name', op: '=', value: entityName, type: 'String' }],
+                  connectToEntityTypes: [],
+                  havingAssertion: false,
+                },
+              ],
+              ...(entityScope
+                ? {
+                    scopeCriteria: {
+                      nameAndValues: {
+                        env: entityScope.env ? [entityScope.env] : undefined,
+                        site: entityScope.site ? [entityScope.site] : undefined,
+                        namespace: entityScope.namespace ? [entityScope.namespace] : undefined,
+                      },
+                    },
+                  }
+                : {}),
+            },
+          } as unknown as DataQuery,
+        },
+      }),
+    ],
+  });
+}
+
 interface MetricGraphSceneState extends SceneObjectState {
   metric: string;
   topView: SceneFlexLayout;
@@ -47,11 +106,18 @@ interface MetricGraphSceneState extends SceneObjectState {
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
-  public constructor({ metric }: { metric: MetricGraphSceneState['metric'] }) {
+  public constructor({
+    metric,
+    kgEntityConfig,
+  }: {
+    metric: MetricGraphSceneState['metric'];
+    kgEntityConfig?: KgEntityConfig;
+  }) {
     super({
       metric,
       topView: new SceneFlexLayout({
         direction: 'column',
+        ...(kgEntityConfig ? { $data: buildKgAnnotationsLayer(kgEntityConfig) } : {}),
         $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
         children: [
           new SceneFlexItem({
