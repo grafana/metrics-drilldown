@@ -142,7 +142,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
         <div className={styles.actions}>
           <Stack gap={1}>
             <SaveQueryButton sceneRef={model} />
-            <LoadQueryScene.Component model={loadQueryScene} />
+            <loadQueryScene.Component model={loadQueryScene} />
           </Stack>
         </div>
 

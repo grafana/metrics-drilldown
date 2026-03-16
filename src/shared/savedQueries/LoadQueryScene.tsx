@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { type PromQuery } from '@grafana/prometheus';
-import { getAppEvents, locationService, usePluginComponent } from '@grafana/runtime';
+import { getAppEvents, getDataSourceSrv, locationService, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { ToolbarButton, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useMemo } from 'react';
@@ -39,16 +39,18 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     const trail = getTrailFor(this);
     const dsVar = sceneGraph.findByKeyAndType(trail, VAR_DATASOURCE, MetricsDrilldownDataSourceVariable);
 
+    const uid = dsVar.getValue().toString();
     this.setState({
-      dsUid: dsVar.getValue().toString(),
-      dsName: dsVar.state.text?.toString() ?? '',
+      dsUid: uid,
+      dsName: getDataSourceSrv().getInstanceSettings(uid)?.name ?? '',
     });
 
     this._subs.add(
       dsVar.subscribeToState((newState) => {
+        const uid = newState.value.toString();
         this.setState({
-          dsUid: newState.value.toString(),
-          dsName: newState.text?.toString() ?? '',
+          dsUid: uid,
+          dsName: getDataSourceSrv().getInstanceSettings(uid)?.name ?? '',
         });
       })
     );
@@ -143,7 +145,11 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     }
 
     return (
-      <div role="none" style={{ display: 'contents' }} onClick={() => reportExploreMetrics('saved_query_load_modal_opened', {})}>
+      <div
+        role="none"
+        style={{ display: 'contents' }}
+        onClick={() => reportExploreMetrics('saved_query_load_modal_opened', {})}
+      >
         <OpenQueryLibraryComponent
           className={styles.button}
           context="drilldown"
