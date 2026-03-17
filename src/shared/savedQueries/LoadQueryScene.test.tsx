@@ -1,7 +1,7 @@
 
 
 import { type PromQuery } from '@grafana/prometheus';
-import { usePluginComponent } from '@grafana/runtime';
+import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type SceneTimeRange } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -53,6 +53,10 @@ function FakeExposedComponent({ onSelectQuery }: Readonly<{ onSelectQuery(query:
 describe('LoadQueryScene', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    jest.mocked(getDataSourceSrv).mockReturnValue({
+      getInstanceSettings: () => ({ name: 'Test Datasource' }),
+    } as any);
 
     jest.spyOn(sceneGraph, 'findByKeyAndType').mockReturnValue({
       getValue: () => 'test-datasource-uid',
