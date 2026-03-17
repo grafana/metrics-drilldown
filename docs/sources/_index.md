@@ -4,11 +4,11 @@ labels:
     - cloud
     - enterprise
     - oss
-title: Metrics Drilldown
+title: Grafana Metrics Drilldown
 aliases:
   - ../explore-metrics/ # /docs/grafana/latest/explore/explore-metrics/
 canonical: https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics/
-description: Grafana Metrics Drilldown lets you browse Prometheus-compatible metrics using an intuitive, queryless experience.
+description: Grafana Metrics Drilldown lets you browse Prometheus-compatible metrics using an intuitive, queryless experience. Find related metrics and spot anomalies.
 hero:
   title: Queryless metrics exploration with Grafana Metrics Drilldown
   level: 1
@@ -18,13 +18,13 @@ hero:
 cards:
   title_class: pt-0 lh-1
   items:
-    - title: Metrics and telemetry
+    - title: About metrics and telemetry
       href: ./about-metrics/
       description: Learn about metrics and the role they serve in analyzing telemetry data.
       height: 24
     - title: Get started
       href: ./get-started/
-      description: Get started analyzing your metrics with Grafana Metrics Drilldown
+      description: Get started analyzing your metrics with Grafana Metrics Drilldown.
       height: 24
     - title: Drill down your metrics
       href: ./drill-down-metrics/
@@ -35,7 +35,7 @@ weight: 200
 
 # Grafana Metrics Drilldown
 
-Grafana Metrics Drilldown is a queryless experience for browsing Prometheus-compatible metrics. Quickly find related metrics with just a few simple clicks, without needing to write a PromQL query.
+Grafana Metrics Drilldown is a queryless experience for browsing Prometheus-compatible metrics. Quickly find related metrics in a few clicks, without needing to write a PromQL query.
 
 {{< docs/learning-journeys title="Explore data using Metrics Drilldown" url="https://grafana.com/docs/learning-journeys/drilldown-metrics/" >}}
 
@@ -48,7 +48,7 @@ With Metrics Drilldown, you can:
 - Uncover related metrics relevant to the one you're viewing.
 - Seamlessly pivot to related telemetry, including log data.
 
-{{< docs/play title="Metrics Drilldown" url="https://play.grafana.org/a/grafana-metricsdrilldown-app/trail?from=now-1h&to=now&var-ds=grafanacloud-demoinfra-prom&var-filters=&refresh=&metricPrefix=all" >}}
+{{< docs/play title="Metrics Drilldown" url="https://play.grafana.org/a/grafana-metricsdrilldown-app/drilldown?from=now-1h&to=now&var-ds=grafanacloud-demoinfra-prom&var-filters=&refresh=&metricPrefix=all" >}}
 
 ## Explore
 
