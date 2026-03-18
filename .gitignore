@@ -65,3 +65,5 @@ e2e/provisioning/prometheus/data*
 
 # GitNexus
 .gitnexus/
+!.claude/skills/gitnexus/
+!.claude/skills/generated/
