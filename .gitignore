@@ -65,3 +65,4 @@ e2e/provisioning/prometheus/data*
 
 # GitNexus
 .gitnexus/
+CLAUDE.md
