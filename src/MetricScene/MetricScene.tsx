@@ -18,9 +18,9 @@ import React, { useEffect } from 'react';
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
+import { type KgEntityConfig } from './kgAnnotations';
 import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
-import { type KgEntityConfig } from './kgAnnotations';
 import {
   PROMETHEUS_QUERY_RESULTS_COMPONENT_ID,
   type PrometheusQueryResultsV1Props,
