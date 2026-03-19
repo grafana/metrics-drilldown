@@ -2,12 +2,6 @@ name: CI
 
 on:
   workflow_dispatch:
-    inputs:
-      skip-grafana-dev-image:
-        description: Skip the grafana dev image e2e test
-        required: false
-        type: boolean
-        default: false
   push:
     branches:
       - main
@@ -20,13 +14,10 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@ci-cd-workflows/v5.1.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/ci.yml@ci-cd-workflows/v6.0.0
     with:
       run-playwright: true
       run-playwright-docker: false
-      # TEMP until the Docker Hub issue is fixed (2025-07-09)
-      run-playwright-with-skip-grafana-dev-image: true
-      # run-playwright-with-skip-grafana-dev-image: ${{ inputs.skip-grafana-dev-image || false }}
       upload-playwright-artifacts: true
       playwright-report-path: e2e/test-reports/
       playwright-docker-compose-file: docker-compose.yaml
