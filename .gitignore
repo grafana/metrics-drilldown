@@ -62,3 +62,8 @@ playwright
 e2e/tests/**/*darwin.png
 e2e/provisioning/prometheus/data*
 !e2e/provisioning/prometheus/data.zip
+
+# GitNexus
+.gitnexus/
+!.claude/skills/gitnexus/
+!.claude/skills/generated/
