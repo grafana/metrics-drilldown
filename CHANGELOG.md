@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.0
+
+##### Chores
+
+*  upgrade to React 19 for Grafana 13 compatibility (#1128) (dcc4215a)
+
+##### Documentation Changes
+
+*  Update docs for latest UI changes (#1141) (d36c5ee4)
+
+##### Bug Fixes
+
+* **ci:**  add pull-requests read permission to CD workflow (#1149) (86fac9e2)
+
+
 ## 1.0.34
 
 ##### Chores
