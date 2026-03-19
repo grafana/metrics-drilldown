@@ -12,6 +12,8 @@ import { type Panel } from '@grafana/schema';
 import { Button, useStyles2 } from '@grafana/ui';
 import React, { useState } from 'react';
 
+import { reportExploreMetrics } from 'shared/tracking/interactions';
+
 import { getPanelData, type PanelDataRequestPayload } from './addToDashboard/addToDashboard';
 
 // NOTE: Until a new version of @grafana/data is released that includes
@@ -49,6 +51,8 @@ export class CreateAlertAction extends SceneObjectBase<CreateAlertActionState> {
       // Transform VizPanel into Panel schema with interpolated variables
       // as expected by the alerting component API.
       const data = getPanelData(vizPanel);
+      const metric = vizPanel.state.title ?? '';
+      reportExploreMetrics('create_alert_clicked', { metric });
       setPanelData(data);
       setShowModal(true);
     };
