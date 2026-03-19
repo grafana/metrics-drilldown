@@ -6,7 +6,6 @@ const BUTTON_NAMES = [
   'Suffix filters',
   'Group by labels',
   'Bookmarks',
-  'Settings',
 ] as const;
 
 type ButtonName = (typeof BUTTON_NAMES)[number];
