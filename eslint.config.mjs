@@ -142,4 +142,11 @@ export default [
       'react-hooks/rules-of-hooks': 'off',
     },
   },
+  {
+    name: 'metrics-drilldown/declaration-files',
+    files: ['**/*.d.ts'],
+    rules: {
+      'no-unused-vars': 'off',
+    },
+  },
 ];
