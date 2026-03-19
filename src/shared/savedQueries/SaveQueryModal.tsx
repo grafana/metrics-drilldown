@@ -4,7 +4,7 @@ import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { getAppEvents } from '@grafana/runtime';
 import { Alert, Box, Button, Field, Input, Modal, Stack, useStyles2 } from '@grafana/ui';
-import React, { useCallback, useEffect, useState, type FormEvent } from 'react';
+import React, { useCallback, useEffect, useState, type ChangeEvent, type SyntheticEvent } from 'react';
 
 import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
@@ -31,7 +31,7 @@ export function SaveQueryModal({ dsUid, query, onClose }: Props) {
   }, []);
 
   const handleSubmit = useCallback(
-    async (e: FormEvent) => {
+    async (e: SyntheticEvent) => {
       e.preventDefault();
       const appEvents = getAppEvents();
 
@@ -98,7 +98,7 @@ export function SaveQueryModal({ dsUid, query, onClose }: Props) {
                 id="save-query-title"
                 required
                 value={title}
-                onChange={(e: FormEvent<HTMLInputElement>) => setTitle(e.currentTarget.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.currentTarget.value)}
                 disabled={state === 'saving'}
               />
             </Field>
@@ -112,7 +112,7 @@ export function SaveQueryModal({ dsUid, query, onClose }: Props) {
               <Input
                 id="save-query-description"
                 value={description}
-                onChange={(e: FormEvent<HTMLInputElement>) => setDescription(e.currentTarget.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setDescription(e.currentTarget.value)}
                 disabled={state === 'saving'}
               />
             </Field>
