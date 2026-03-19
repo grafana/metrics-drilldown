@@ -12,7 +12,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install pnpm
-        uses: pnpm/action-setup@fc06bc40cdd3e076db1ecba0f50f859dab955d99 # v4
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
       - name: Setup Node.js environment
         uses: actions/setup-node@53b839154dc4703b09d0d45e5c2b2429d8afe20d # v6.3.0
         with:

@@ -4,8 +4,6 @@ import { GIT_COMMIT } from '../../../../version';
 import { getPluginVersion } from '../../../utils/getPluginVersion';
 import { initFaro, setFaro } from '../faro';
 
-declare const __setWindowLocation: (urlOrProps: string | Record<string, string>) => void;
-
 // Faro dependencies
 jest.mock('@grafana/faro-web-sdk');
 
@@ -52,6 +50,18 @@ describe('initFaro()', () => {
       await initFaro();
 
       expect(initializeFaro).not.toHaveBeenCalled();
+    });
+
+    test('does not initialize Faro when host is empty', async () => {
+      (initializeFaro as jest.Mock).mockReturnValue({});
+      (getWebInstrumentations as jest.Mock).mockReturnValue([{}]);
+      (getPluginVersion as jest.Mock).mockResolvedValue('v1-test');
+
+      __setWindowLocation('about:blank');
+
+      await initFaro();
+
+      expect(initializeFaro as jest.Mock).not.toHaveBeenCalled();
     });
   });
 

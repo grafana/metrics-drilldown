@@ -1,7 +1,5 @@
 import { getEnvironment } from '../getEnvironment';
 
-declare const __setWindowLocation: (urlOrProps: string | Record<string, string>) => void;
-
 describe('getEnvironment()', () => {
   test.each([
     // edge cases
@@ -21,5 +19,11 @@ describe('getEnvironment()', () => {
     __setWindowLocation({ host });
 
     expect(getEnvironment()).toBe(expectedEnvironment);
+  });
+
+  test('when the host is empty → null', () => {
+    __setWindowLocation('about:blank');
+
+    expect(getEnvironment()).toBe(null);
   });
 });
