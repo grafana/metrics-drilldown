@@ -20,6 +20,7 @@ import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
 import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
+import { type KgEntityConfig } from './kgAnnotations';
 import {
   PROMETHEUS_QUERY_RESULTS_COMPONENT_ID,
   type PrometheusQueryResultsV1Props,
@@ -30,6 +31,7 @@ import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
+  kgEntityConfig?: KgEntityConfig;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
@@ -58,7 +60,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
-      body: state.body ?? new MetricGraphScene({ metric: state.metric }),
+      body: state.body ?? new MetricGraphScene({ metric: state.metric, kgEntityConfig: state.kgEntityConfig }),
       ...state,
     });
 

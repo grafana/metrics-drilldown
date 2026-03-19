@@ -54,6 +54,7 @@ import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
+import { type KgEntityConfig } from '../MetricScene/kgAnnotations';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
@@ -71,6 +72,7 @@ export interface DataTrailState extends SceneObjectState {
   embedded?: boolean;
   embeddedMini?: boolean; // Mini embedded mode for tooltip preview navigation
   controls: SceneObject[];
+  kgEntityConfig?: KgEntityConfig;
   createdAt: number;
 
   // wingman
@@ -181,7 +183,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
       this.setState({
         metric,
-        topScene: metric ? new MetricScene({ metric }) : new MetricsReducer(),
+        topScene: metric ? new MetricScene({ metric, kgEntityConfig: this.state.kgEntityConfig }) : new MetricsReducer(),
         controls,
       });
     }
