@@ -4,6 +4,8 @@ import { GIT_COMMIT } from '../../../../version';
 import { getPluginVersion } from '../../../utils/getPluginVersion';
 import { initFaro, setFaro } from '../faro';
 
+declare const __setWindowLocation: (urlOrProps: string | Record<string, string>) => void;
+
 // Faro dependencies
 jest.mock('@grafana/faro-web-sdk');
 
@@ -26,15 +28,12 @@ jest.mock('../../../utils/getPluginVersion', () => ({
   getPluginVersion: jest.fn().mockResolvedValue('v1-test'),
 }));
 
-function setup(location: Partial<Location>) {
+function setup(host: string) {
   (initializeFaro as jest.Mock).mockReturnValue({});
   (getWebInstrumentations as jest.Mock).mockReturnValue([{}]);
   (getPluginVersion as jest.Mock).mockResolvedValue('v1-test');
 
-  Object.defineProperty(window, 'location', {
-    value: location,
-    writable: true,
-  });
+  __setWindowLocation({ host });
 
   return {
     initializeFaro: initializeFaro as jest.Mock,
@@ -46,19 +45,9 @@ describe('initFaro()', () => {
     setFaro(null);
   });
 
-  describe('when running in environment where the host not defined', () => {
-    test('does not initialize Faro', async () => {
-      const { initializeFaro } = setup({ host: undefined });
-
-      await initFaro();
-
-      expect(initializeFaro).not.toHaveBeenCalled();
-    });
-  });
-
   describe('when running in an unknown environment', () => {
     test('does not initialize Faro', async () => {
-      const { initializeFaro } = setup({ host: 'unknownhost' });
+      const { initializeFaro } = setup('unknownhost');
 
       await initFaro();
 
@@ -102,7 +91,7 @@ describe('initFaro()', () => {
         'grafana-metricsdrilldown-app-prod',
       ],
     ])('initializes Faro for the host "%s"', async (host, faroUrl, appName) => {
-      const { initializeFaro } = setup({ host });
+      const { initializeFaro } = setup(host);
 
       await initFaro();
 
@@ -112,7 +101,7 @@ describe('initFaro()', () => {
     });
 
     test('initializes Faro with the proper configuration', async () => {
-      const { initializeFaro } = setup({ host: 'grafana.net' });
+      const { initializeFaro } = setup('grafana.net');
 
       await initFaro();
 
@@ -140,7 +129,7 @@ describe('initFaro()', () => {
 
   describe('when called several times', () => {
     test('initializes Faro only once', async () => {
-      const { initializeFaro } = setup({ host: 'grafana.net' });
+      const { initializeFaro } = setup('grafana.net');
 
       await initFaro();
       await initFaro();

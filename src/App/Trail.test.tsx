@@ -2,24 +2,16 @@ import { getPageNav } from './Trail';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
 
-const mockLocation = {
-  pathname: '/a/grafana-metricsdrilldown-app/drilldown',
-  search: '?metric=test_metric&actionView=breakdown',
-  href: 'http://localhost:3001/a/grafana-metricsdrilldown-app/drilldown?metric=test_metric&actionView=breakdown',
-};
+declare const __setWindowLocation: (urlOrProps: string | Record<string, string>) => void;
 
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true,
-});
+const DEFAULT_URL = 'http://localhost:3001/a/grafana-metricsdrilldown-app/drilldown?metric=test_metric&actionView=breakdown';
 
 const mockMetricScene = new MetricScene({ metric: 'test_metric' });
 const mockMetricsReducer = new MetricsReducer();
 
 describe('Trail Component - Breadcrumb Logic Tests', () => {
   beforeEach(() => {
-    // Reset location mock
-    mockLocation.search = '?metric=test_metric&actionView=breakdown';
+    __setWindowLocation(DEFAULT_URL);
   });
 
   describe('When no metric is selected (MetricsReducer)', () => {
@@ -40,8 +32,7 @@ describe('Trail Component - Breadcrumb Logic Tests', () => {
     });
 
     it('should handle URL with different action view parameter', () => {
-      // Mock URL with logs action view
-      mockLocation.search = '?metric=test_metric&actionView=logs';
+      __setWindowLocation({ search: '?metric=test_metric&actionView=logs' });
 
       const result = getPageNav(mockMetricScene, 'test_metric', 'Related logs');
 
@@ -50,8 +41,7 @@ describe('Trail Component - Breadcrumb Logic Tests', () => {
     });
 
     it('should handle URL with invalid action view parameter', () => {
-      // Mock URL with invalid action view
-      mockLocation.search = '?metric=test_metric&actionView=invalid';
+      __setWindowLocation({ search: '?metric=test_metric&actionView=invalid' });
 
       const result = getPageNav(mockMetricScene, 'test_metric', 'Breakdown');
 
@@ -68,7 +58,7 @@ describe('Trail Component - Breadcrumb Logic Tests', () => {
     });
 
     it('should reset var-groupby to $__all in the metric breadcrumb URL', () => {
-      mockLocation.search = '?metric=test_metric&actionView=related&var-groupby=instance';
+      __setWindowLocation({ search: '?metric=test_metric&actionView=related&var-groupby=instance' });
 
       const result = getPageNav(mockMetricScene, 'test_metric', 'Related metrics');
 

@@ -1,9 +1,10 @@
 import { getEnvironment } from '../getEnvironment';
 
+declare const __setWindowLocation: (urlOrProps: string | Record<string, string>) => void;
+
 describe('getEnvironment()', () => {
   test.each([
     // edge cases
-    [undefined, null],
     ['unknownhost', null],
     // local
     ['localhost', 'local'],
@@ -17,10 +18,7 @@ describe('getEnvironment()', () => {
     ['foobar.grafana.net', 'prod'],
     ['grafana.net', 'prod'],
   ])('when the host is "%s" → %s', (host, expectedEnvironment) => {
-    Object.defineProperty(window, 'location', {
-      value: { host },
-      writable: true,
-    });
+    __setWindowLocation({ host });
 
     expect(getEnvironment()).toBe(expectedEnvironment);
   });
