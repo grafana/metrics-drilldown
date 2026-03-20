@@ -22,6 +22,7 @@ const esModules = [
 
 module.exports = {
   ...baseConfig,
+  testEnvironment: './jest-environment.js',
   transformIgnorePatterns: [nodeModulesToTransform(esModules)],
   moduleNameMapper: {
     ...baseConfig.moduleNameMapper,
