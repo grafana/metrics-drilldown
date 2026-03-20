@@ -18,6 +18,7 @@ export default [
       'artifacts/',
       'coverage/',
       '.config/',
+      '.claude/',
       'e2e/', // handled by separate config
       'playwright/',
       '*.log',
@@ -139,6 +140,13 @@ export default [
     files: ['./tests/**/*'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
+    },
+  },
+  {
+    name: 'metrics-drilldown/declaration-files',
+    files: ['**/*.d.ts'],
+    rules: {
+      'no-unused-vars': 'off',
     },
   },
 ];
