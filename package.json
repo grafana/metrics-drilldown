@@ -9,7 +9,8 @@
     "dev": "webpack -w -c ./webpack.config.ts --env development",
     "analyze": "webpack -c ./webpack-analyze.config.ts --env production",
     "tdd": "jest --watch --onlyChanged",
-    "test": "jest --watch --onlyChanged",
+    "test:watch": "pnpm run tdd",
+    "test": "jest --coverage",
     "test:ci": "jest --passWithNoTests --maxWorkers 4",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --cache .",
@@ -140,7 +141,9 @@
       "minimatch@^10": ">=10.2.3",
       "serialize-javascript": ">=7.0.3",
       "immutable": ">=5.1.5",
-      "@tootallnate/once": ">=3.0.1"
+      "@tootallnate/once": ">=3.0.1",
+      "flatted": ">=3.4.0",
+      "undici": ">=7.24.0"
     }
   }
 }

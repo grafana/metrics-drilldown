@@ -110,7 +110,7 @@ export class MetricsReducerView extends DrilldownView {
 
   selectMetricPanel(panelTitle: string) {
     return this.getPanelByTitle(panelTitle)
-      .getByRole('button', { name: /select/i })
+      .getByTestId(`select-action-${panelTitle}`)
       .click();
   }
 
