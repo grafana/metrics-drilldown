@@ -1,6 +1,6 @@
 import { type AdHocVariableFilter, type DataSourceApi } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
 import { Trail } from 'App/Routes';
@@ -15,6 +15,7 @@ import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
 import { HistogramPercentilesDefaultBehavior } from './behaviors/HistogramPercentilesDefaultBehavior';
 import { parsePromQLQuery } from '../../extensions/links';
+import { type KgEntityConfig, type KgEntityScope } from '../../MetricScene/kgAnnotations';
 import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
@@ -108,9 +109,13 @@ export interface SourceMetricsProps {
   initialEnd: string | number;
   dataSource: DataSourceApi;
   sourceMetrics?: SourceMetrics;
+  kgDatasourceUid?: string;
+  entityType?: string;
+  entityName?: string;
+  entityScope?: KgEntityScope;
 }
 
-const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
+const KnowledgeGraphSourceMetrics = ({ kgDatasourceUid, entityType, entityName, entityScope, ...props }: SourceMetricsProps) => {
   const [error] = useCatchExceptions();
   const initRef = useRef(false);
 
@@ -120,6 +125,13 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
       reportExploreMetrics('exposed_component_viewed', { component: 'knowledge_graph_source_metrics' });
     }
   }, []);
+
+  const kgEntityConfig = useMemo<KgEntityConfig | undefined>(() => {
+    if (!kgDatasourceUid || !entityType || !entityName) {
+      return undefined;
+    }
+    return { datasourceUid: kgDatasourceUid, entityType, entityName, entityScope };
+  }, [kgDatasourceUid, entityType, entityName, entityScope]);
 
   // Determine metric and filters based on data source
   let metric: string | undefined;
@@ -177,6 +189,7 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
     $timeRange: toSceneTimeRange(props.initialStart, props.initialEnd),
     embedded: true,
     $behaviors: [new FilterGroupByAssertsLabelsBehavior({ metric }), new HistogramPercentilesDefaultBehavior()],
+    ...(kgEntityConfig ? { kgEntityConfig } : {}),
   });
 
   return (
