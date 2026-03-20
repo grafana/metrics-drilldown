@@ -10,7 +10,7 @@
     "analyze": "webpack -c ./webpack-analyze.config.ts --env production",
     "tdd": "jest --watch --onlyChanged",
     "test:watch": "pnpm run tdd",
-    "test": "jest --onlyChanged",
+    "test": "jest --coverage",
     "test:ci": "jest --passWithNoTests --maxWorkers 4",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --cache .",
