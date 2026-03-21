@@ -1,6 +1,6 @@
 
 
-import { usePluginComponent } from '@grafana/runtime';
+import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -31,6 +31,10 @@ describe('SaveQueryButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    jest.mocked(getDataSourceSrv).mockReturnValue({
+      getInstanceSettings: () => ({ name: 'Test Datasource' }),
+    } as any);
 
     const mockTrail = { state: { embedded: false } } as unknown as DataTrail;
     jest.spyOn(sceneGraph, 'getAncestor').mockImplementation((_ref, type) => {
