@@ -1,7 +1,6 @@
-
 import { t } from '@grafana/i18n';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-import { usePluginComponent } from '@grafana/runtime';
+import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 import { ToolbarButton } from '@grafana/ui';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -31,12 +30,11 @@ export function SaveQueryButton({ sceneRef }: Props) {
     [trail]
   );
   const [dsUid, setDsUid] = useState(() => dsVar.getValue().toString());
-  const [dsName, setDsName] = useState(() => dsVar.state.text?.toString() ?? '');
+  const dsName = getDataSourceSrv().getInstanceSettings(dsUid)?.name ?? '';
 
   useEffect(() => {
     const sub = dsVar.subscribeToState((newState) => {
       setDsUid(newState.value.toString());
-      setDsName(newState.text?.toString() ?? '');
     });
     return () => sub.unsubscribe();
   }, [dsVar]);
@@ -98,7 +96,11 @@ export function SaveQueryButton({ sceneRef }: Props) {
   }
 
   return (
-    <div role="none" style={{ display: 'contents' }} onClick={() => reportExploreMetrics('saved_query_save_modal_opened', {})}>
+    <div
+      role="none"
+      style={{ display: 'contents' }}
+      onClick={() => reportExploreMetrics('saved_query_save_modal_opened', {})}
+    >
       <OpenQueryLibraryComponent
         datasourceFilters={[dsName]}
         query={query}
