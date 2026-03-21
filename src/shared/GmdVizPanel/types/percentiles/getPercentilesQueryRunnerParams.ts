@@ -6,6 +6,7 @@ import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { logger } from 'shared/logger/logger';
 
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
@@ -54,7 +55,11 @@ function buildHistogramQueries({
       : promql.sum({ expr: promql.rate({ expr }), by: ['le'] });
 
   for (const { fn, params } of queryDefs) {
-    const entry = PROMQL_FUNCTIONS.get(fn)!;
+    const entry = PROMQL_FUNCTIONS.get(fn);
+    if (!entry) {
+      logger.warn(`[getPercentilesQueryRunnerParams] Unknown PromQL function "${fn}", skipping histogram query.`);
+      continue;
+    }
     const fnName = entry.name;
     const percentiles = params?.percentiles || DEFAULT_PERCENTILES;
 
@@ -92,7 +97,11 @@ function buildNonHistogramQueries({
   const newExpr = isRateQuery ? promql.rate({ expr }) : expr;
 
   for (const { fn, params } of queryDefs) {
-    const entry = PROMQL_FUNCTIONS.get(fn)!;
+    const entry = PROMQL_FUNCTIONS.get(fn);
+    if (!entry) {
+      logger.warn(`[getPercentilesQueryRunnerParams] Unknown PromQL function "${fn}", skipping non-histogram query.`);
+      continue;
+    }
     const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
 
     for (const percentile of params!.percentiles) {
