@@ -10,7 +10,6 @@ import { miniBreakdownConfig } from 'exposedComponents/MiniBreakdown/config';
 import { sourceMetricsConfig } from 'exposedComponents/SourceMetrics/config';
 import { datasourceConfigLinkConfigs } from 'extensions/datasourceConfigLinks';
 import { linkConfigs } from 'extensions/links';
-import { logger } from 'shared/logger/logger';
 
 import pluginJson from './plugin.json';
 
@@ -31,6 +30,7 @@ const LazyApp = lazy(async () => {
   // Initialize WASM-based outlier detection
   const { wasmSupported } = await import('./shared/services/sorting');
   const { default: initOutlier } = await import('@bsull/augurs/outlier');
+  const { logger } = await import('shared/logger/logger');
 
   if (wasmSupported()) {
     try {

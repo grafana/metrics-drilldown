@@ -2,7 +2,6 @@ import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafa
 import { type PrometheusDatasource } from '@grafana/prometheus';
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 
-import { logger } from '../logger/logger';
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
 const DS_HEALTH_CHECK_TIMEOUT_MS = 3000;
@@ -114,6 +113,7 @@ export class DataSourceFetcher {
     );
 
     if (unhealthyDataSources.length > 0) {
+      const { logger } = await import('../logger/logger');
       logger.warn(
         `Found ${unhealthyDataSources.length} unhealthy ${type} data sources: ${unhealthyDataSources
           .map((ds) => ds.name)
