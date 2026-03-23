@@ -9,6 +9,7 @@ import { miniBreakdownConfig } from 'exposedComponents/MiniBreakdown/config';
 import { sourceMetricsConfig } from 'exposedComponents/SourceMetrics/config';
 import { datasourceConfigLinkConfigs } from 'extensions/datasourceConfigLinks';
 import { linkConfigs } from 'extensions/links';
+
 import pluginJson from './plugin.json';
 
 const LazyApp = lazy(async () => {
