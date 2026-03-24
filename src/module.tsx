@@ -1,6 +1,7 @@
 import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { LoadingPlaceholder } from '@grafana/ui';
+import { compare } from 'compare-versions';
 import React, { lazy, Suspense } from 'react';
 
 import { entityMetricsConfig } from 'exposedComponents/EntityMetrics/config';
@@ -9,7 +10,6 @@ import { miniBreakdownConfig } from 'exposedComponents/MiniBreakdown/config';
 import { sourceMetricsConfig } from 'exposedComponents/SourceMetrics/config';
 import { datasourceConfigLinkConfigs } from 'extensions/datasourceConfigLinks';
 import { linkConfigs } from 'extensions/links';
-import { compare } from 'compare-versions';
 
 import pluginJson from './plugin.json';
 
