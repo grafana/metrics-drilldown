@@ -319,8 +319,6 @@
       "recent-metrics-description": "Filter metrics based on when they started being ingested",
       "rules-filters": "Rules filters",
       "rules-filters-description": "Filter metrics and recording rules",
-      "settings": "Settings",
-      "settings-description": "Configure display preferences and filtering behavior",
       "suffix-filters": "Suffix filters",
       "suffix-filters-description": "Filter metrics based on their name suffix"
     }

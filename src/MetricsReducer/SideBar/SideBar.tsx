@@ -29,11 +29,10 @@ import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetricsSection';
-import { Settings } from './sections/Settings';
 import { CustomIcons, SideBarButton } from './SideBarButton';
 import { reportExploreMetrics } from '../../shared/tracking/interactions';
 
-type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList | Settings;
+type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList;
 
 interface SideBarState extends SceneObjectState {
   sections: Section[];
@@ -72,10 +71,6 @@ function getTranslatedSectionInfo(key: string): { title: string; description: st
     bookmarks: {
       title: t('sidebar.section.bookmarks', 'Bookmarks'),
       description: t('sidebar.section.bookmarks-description', 'Access your saved metrics for quick reference'),
-    },
-    settings: {
-      title: t('sidebar.section.settings', 'Settings'),
-      description: t('sidebar.section.settings-description', 'Configure display preferences and filtering behavior'),
     },
   };
 
@@ -153,13 +148,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title: t('sidebar.section.bookmarks', 'Bookmarks'),
           description: t('sidebar.section.bookmarks-description', 'Access your saved metrics for quick reference'),
           icon: 'star',
-        }),
-        new Settings({
-          key: 'settings',
-          title: t('sidebar.section.settings', 'Settings'),
-          description: t('sidebar.section.settings-description', 'Configure display preferences and filtering behavior'),
-          icon: 'cog',
-          disabled: true,
         }),
       ],
       sectionValues,
@@ -436,7 +424,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               {visibleSection instanceof RecentMetricsSection && <visibleSection.Component model={visibleSection} />}
               {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
               {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}
-              {visibleSection instanceof Settings && <visibleSection.Component model={visibleSection} />}
             </div>
           )}
         </Stack>
