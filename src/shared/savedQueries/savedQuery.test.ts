@@ -24,7 +24,6 @@ jest.mock('@grafana/runtime', () => ({
     },
   },
 }));
-jest.unmock('semver/preload');
 
 const localQueries = [
   {
