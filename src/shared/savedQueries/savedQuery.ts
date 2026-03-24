@@ -1,11 +1,12 @@
 import { config } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
+import { compare } from 'compare-versions';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+
 import { narrowSavedQueries } from './narrowSavedQuery';
 import pluginJson from '../../plugin.json';
 import { logger } from '../logger/logger';
-import { compare } from 'compare-versions';
 
 const MIN_VERSION = '12.4.0-21256324731';
 
