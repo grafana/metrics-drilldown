@@ -1,13 +1,11 @@
 import { config } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import semver from 'semver/preload';
 import { v4 as uuidv4 } from 'uuid';
-
-
 import { narrowSavedQueries } from './narrowSavedQuery';
 import pluginJson from '../../plugin.json';
 import { logger } from '../logger/logger';
+import { compare } from 'compare-versions';
 
 const MIN_VERSION = '12.4.0-21256324731';
 
@@ -20,7 +18,7 @@ function notifySavedQueryChanges() {
 }
 
 export function isQueryLibrarySupported() {
-  return !semver.ltr(config.buildInfo.version, MIN_VERSION) && config.featureToggles.queryLibrary;
+  return !compare(config.buildInfo.version, MIN_VERSION, '<') && config.featureToggles.queryLibrary;
 }
 
 export function findExistingQuery(queries: SavedQuery[], query: string) {
@@ -44,21 +42,15 @@ export function useSavedQueries(dsUid: string | undefined) {
     };
   }, [dsUid]);
 
-  const deleteQuery = useCallback(
-    async (uid: string) => {
-      removeFromLocalStorage(uid);
-      notifySavedQueryChanges();
-    },
-    []
-  );
+  const deleteQuery = useCallback(async (uid: string) => {
+    removeFromLocalStorage(uid);
+    notifySavedQueryChanges();
+  }, []);
 
-  const saveQuery = useCallback(
-    async (query: Omit<SavedQuery, 'timestamp' | 'uid'>) => {
-      saveInLocalStorage(query);
-      notifySavedQueryChanges();
-    },
-    []
-  );
+  const saveQuery = useCallback(async (query: Omit<SavedQuery, 'timestamp' | 'uid'>) => {
+    saveInLocalStorage(query);
+    notifySavedQueryChanges();
+  }, []);
 
   return {
     isLoading: false,
