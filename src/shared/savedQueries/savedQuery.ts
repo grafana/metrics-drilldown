@@ -1,9 +1,8 @@
 import { config } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
+import { compare } from 'compare-versions';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import semver from 'semver/preload';
 import { v4 as uuidv4 } from 'uuid';
-
 
 import { narrowSavedQueries } from './narrowSavedQuery';
 import pluginJson from '../../plugin.json';
@@ -20,7 +19,7 @@ function notifySavedQueryChanges() {
 }
 
 export function isQueryLibrarySupported() {
-  return !semver.ltr(config.buildInfo.version, MIN_VERSION) && config.featureToggles.queryLibrary;
+  return !compare(config.buildInfo.version, MIN_VERSION, '<') && config.featureToggles.queryLibrary;
 }
 
 export function findExistingQuery(queries: SavedQuery[], query: string) {

@@ -1,8 +1,8 @@
 import { AppPlugin, type AppRootProps } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { LoadingPlaceholder } from '@grafana/ui';
+import { compare } from 'compare-versions';
 import React, { lazy, Suspense } from 'react';
-import { lt } from 'semver';
 
 import { entityMetricsConfig } from 'exposedComponents/EntityMetrics/config';
 import { labelBreakdownConfig } from 'exposedComponents/LabelBreakdown/config';
@@ -10,7 +10,6 @@ import { miniBreakdownConfig } from 'exposedComponents/MiniBreakdown/config';
 import { sourceMetricsConfig } from 'exposedComponents/SourceMetrics/config';
 import { datasourceConfigLinkConfigs } from 'extensions/datasourceConfigLinks';
 import { linkConfigs } from 'extensions/links';
-import { logger } from 'shared/logger/logger';
 
 import pluginJson from './plugin.json';
 
@@ -25,12 +24,13 @@ const LazyApp = lazy(async () => {
   // Before Grafana 12.1.0, plugins must load their own resources
   // After 12.1.0, Grafana handles resource loading
   const { loadResources } = await import('./i18n/loadResources');
-  const pluginLoaders = lt(config?.buildInfo?.version || '0.0.0', '12.1.0') ? [loadResources] : [];
+  const pluginLoaders = compare(config.buildInfo.version ?? '0.0.0', '12.1.0', '<') ? [loadResources] : [];
   await initPluginTranslations(pluginJson.id, pluginLoaders);
 
   // Initialize WASM-based outlier detection
   const { wasmSupported } = await import('./shared/services/sorting');
   const { default: initOutlier } = await import('@bsull/augurs/outlier');
+  const { logger } = await import('shared/logger/logger');
 
   if (wasmSupported()) {
     try {
