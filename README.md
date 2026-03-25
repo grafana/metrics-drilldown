@@ -1,4 +1,4 @@
-# Grafana Metrics Drilldown
+# Grafana Metrics Drilldown - Test
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/grafana/metrics-drilldown)](https://github.com/grafana/metrics-drilldown/releases)
