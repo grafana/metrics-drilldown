@@ -315,8 +315,6 @@
       "recent-metrics-description": "根據開始擷取的時間篩選指標",
       "rules-filters": "規則篩選條件",
       "rules-filters-description": "篩選指標和錄製規則",
-      "settings": "設定",
-      "settings-description": "",
       "suffix-filters": "後綴篩選條件",
       "suffix-filters-description": "根據其名稱後綴篩選指標"
     }

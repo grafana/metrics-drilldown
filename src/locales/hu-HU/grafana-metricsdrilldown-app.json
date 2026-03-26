@@ -319,8 +319,6 @@
       "recent-metrics-description": "Metrikák szűrése a feldolgozásuk kezdete alapján",
       "rules-filters": "Szabályszűrők",
       "rules-filters-description": "Szűrési metrikák és felvételkészítési szabályok",
-      "settings": "Beállítások",
-      "settings-description": "",
       "suffix-filters": "Utótagszűrők",
       "suffix-filters-description": "Metrikák szűrése a névutótagjuk alapján"
     }

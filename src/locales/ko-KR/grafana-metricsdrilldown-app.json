@@ -315,8 +315,6 @@
       "recent-metrics-description": "메트릭 수집 시작 시점 기준 필터링",
       "rules-filters": "규칙 필터",
       "rules-filters-description": "메트릭 및 기록 규칙 필터링",
-      "settings": "설정",
-      "settings-description": "",
       "suffix-filters": "접미사 필터",
       "suffix-filters-description": "접미사 기준으로 메트릭 필터링"
     }
