@@ -1,6 +1,6 @@
-import { ClientProviderStatus, OpenFeature, ProviderEvents } from '@openfeature/web-sdk';
 import { config } from '@grafana/runtime';
 import { OFREPWebProvider } from '@openfeature/ofrep-web-provider';
+import { ClientProviderStatus, OpenFeature, ProviderEvents } from '@openfeature/web-sdk';
 
 import { evaluateFeatureFlag, initOpenFeatureProvider, OPEN_FEATURE_DOMAIN } from './openFeature';
 
