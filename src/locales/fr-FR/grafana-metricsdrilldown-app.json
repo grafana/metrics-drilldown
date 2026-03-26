@@ -319,8 +319,6 @@
       "recent-metrics-description": "Filtrer les métriques selon leur date de début d’ingestion",
       "rules-filters": "Filtres de règles",
       "rules-filters-description": "Filtrer les métriques et les règles d’enregistrement",
-      "settings": "Paramètres",
-      "settings-description": "",
       "suffix-filters": "Filtres par suffixe",
       "suffix-filters-description": "Filtrer les métriques selon le suffixe de leur nom"
     }

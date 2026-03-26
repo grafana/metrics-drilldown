@@ -327,8 +327,6 @@
       "recent-metrics-description": "Отфильтруйте метрики по времени начала их получения",
       "rules-filters": "Фильтры правил",
       "rules-filters-description": "Отфильтруйте метрики и правила записи",
-      "settings": "Параметры",
-      "settings-description": "",
       "suffix-filters": "Фильтры суффиксов",
       "suffix-filters-description": "Отфильтруйте метрики по суффиксу имени"
     }
