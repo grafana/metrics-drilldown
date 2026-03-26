@@ -131,19 +131,20 @@
   },
   "pnpm": {
     "overrides": {
-      "@remix-run/router": ">=1.23.2",
-      "react-router": ">=6.30.2",
-      "@isaacs/brace-expansion": ">=5.0.1",
+      "@remix-run/router": "^1.23.2",
+      "react-router": "^6.30.2",
       "dompurify": "^3.3.2",
-      "lodash": ">=4.17.23",
+      "lodash": "^4.17.23",
       "minimatch@^3": "~3.1.4",
       "minimatch@^9": "~9.0.7",
-      "minimatch@^10": ">=10.2.3",
-      "serialize-javascript": ">=7.0.3",
-      "immutable": ">=5.1.5",
-      "@tootallnate/once": ">=3.0.1",
-      "flatted": ">=3.4.0",
-      "undici": ">=7.24.0"
+      "minimatch@^10": "^10.2.3",
+      "serialize-javascript": "^7.0.3",
+      "immutable": "^5.1.5",
+      "flatted": "^3.4.0",
+      "undici": "^7.24.0",
+      "picomatch@^2": "~2.3.2",
+      "picomatch@^4": "^4.0.4",
+      "yaml": "^2.8.3"
     }
   }
 }
