@@ -327,8 +327,6 @@
       "recent-metrics-description": "Filtrovat metriky na základě toho, kdy začaly být přijímány",
       "rules-filters": "Filtry pravidel",
       "rules-filters-description": "Filtrovat metriky a pravidla nahrávání",
-      "settings": "Nastavení",
-      "settings-description": "",
       "suffix-filters": "Filtry přípon",
       "suffix-filters-description": "Filtrovat metriky na základě jejich přípony názvu"
     }

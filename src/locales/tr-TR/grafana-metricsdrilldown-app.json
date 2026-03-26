@@ -319,8 +319,6 @@
       "recent-metrics-description": "Metrikleri, alınmaya başladıkları zamana göre filtreleyin",
       "rules-filters": "Kural filtreleri",
       "rules-filters-description": "Metrikleri ve kayıt kurallarını filtreleyin",
-      "settings": "Ayarlar",
-      "settings-description": "",
       "suffix-filters": "Son ek filtreleri",
       "suffix-filters-description": "Metrikleri ad son eklerine göre filtreleyin"
     }

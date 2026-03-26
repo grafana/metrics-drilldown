@@ -319,8 +319,6 @@
       "recent-metrics-description": "Metrics filteren op basis van wanneer ze zijn gaan binnenkomen",
       "rules-filters": "Regelfilters",
       "rules-filters-description": "Metrics en opnameregels filteren",
-      "settings": "Instellingen",
-      "settings-description": "",
       "suffix-filters": "Achtervoegselfilters",
       "suffix-filters-description": "Metrics filteren op basis van hun naamachtervoegsel"
     }
