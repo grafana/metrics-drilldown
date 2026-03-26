@@ -319,8 +319,6 @@
       "recent-metrics-description": "Filtrera mätvärden baserat på när insamlingen påbörjades",
       "rules-filters": "Regelfilter",
       "rules-filters-description": "Filtrera mätvärden och registreringsregler",
-      "settings": "Inställningar",
-      "settings-description": "",
       "suffix-filters": "Suffixfilter",
       "suffix-filters-description": "Filtrera mätvärden baserat på deras namnsuffix"
     }
