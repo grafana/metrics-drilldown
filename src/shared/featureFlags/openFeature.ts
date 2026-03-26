@@ -106,10 +106,12 @@ export const OPEN_FEATURE_DOMAIN = 'metrics-drilldown';
  * This prevents re-initialization if the app component re-renders.
  */
 export function initOpenFeatureProvider(): Promise<void> {
+  const subPath = config.appSubUrl ?? '';
+
   return OpenFeature.setProviderAndWait(
     OPEN_FEATURE_DOMAIN,
     new OFREPWebProvider({
-      baseUrl: `/apis/features.grafana.app/v0alpha1/namespaces/${config.namespace}`,
+      baseUrl: `${subPath}/apis/features.grafana.app/v0alpha1/namespaces/${config.namespace}`,
       pollInterval: -1, // Do not poll - flags are fetched once on init
       timeoutMs: 10_000, // Timeout after 10 seconds
     }),
