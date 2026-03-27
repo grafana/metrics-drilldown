@@ -18,6 +18,7 @@ import React, { useEffect } from 'react';
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
+import { type KgEntityConfig } from './kgAnnotations';
 import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
 import {
@@ -30,6 +31,7 @@ import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
+  kgEntityConfig?: KgEntityConfig;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
@@ -58,7 +60,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
-      body: state.body ?? new MetricGraphScene({ metric: state.metric }),
+      body: state.body ?? new MetricGraphScene({ metric: state.metric, kgEntityConfig: state.kgEntityConfig }),
       ...state,
     });
 
