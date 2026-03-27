@@ -39,6 +39,7 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
     .setData($data)
     .setUnit(unit)
     .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
+    .setOption('annotations', { multiLane: true })
     .setCustomFieldConfig('fillOpacity', 9)
     .setBehaviors([
       extremeValueFilterBehavior,
