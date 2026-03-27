@@ -1,11 +1,30 @@
+import { config } from '@grafana/runtime';
+import { OFREPWebProvider } from '@openfeature/ofrep-web-provider';
 import { ClientProviderStatus, OpenFeature, ProviderEvents } from '@openfeature/web-sdk';
 
-import { evaluateFeatureFlag, OPEN_FEATURE_DOMAIN } from './openFeature';
+import { evaluateFeatureFlag, initOpenFeatureProvider, OPEN_FEATURE_DOMAIN } from './openFeature';
+
+jest.mock('@grafana/runtime', () => {
+  const actual = jest.requireActual('@grafana/runtime');
+  return {
+    ...actual,
+    config: {
+      ...actual.config,
+      appSubUrl: '',
+      namespace: 'test-namespace',
+      openFeatureContext: {},
+    },
+  };
+});
+
+jest.mock('@openfeature/ofrep-web-provider', () => ({
+  OFREPWebProvider: jest.fn().mockImplementation((options) => ({ options })),
+}));
 
 jest.mock('@openfeature/web-sdk', () => ({
   OpenFeature: {
     getClient: jest.fn(),
-    setProvider: jest.fn(),
+    setProviderAndWait: jest.fn().mockResolvedValue(undefined),
   },
   ClientProviderStatus: {
     READY: 'READY',
@@ -86,5 +105,24 @@ describe('evaluateFeatureFlag', () => {
 
     // 'excluded' is the default value defined in openFeature.ts for this flag
     await expect(evaluateFeatureFlag('drilldown.metrics.default_open_sidebar')).resolves.toBe('excluded');
+  });
+});
+
+describe('initOpenFeatureProvider', () => {
+  beforeEach(() => {
+    (OpenFeature.setProviderAndWait as jest.Mock).mockResolvedValue(undefined);
+    (config as { appSubUrl: string }).appSubUrl = '';
+  });
+
+  it('uses appSubUrl when building the feature flag API baseUrl', async () => {
+    (config as { appSubUrl: string }).appSubUrl = '/grafana';
+
+    await initOpenFeatureProvider();
+
+    expect(OFREPWebProvider).toHaveBeenCalledWith({
+      baseUrl: '/grafana/apis/features.grafana.app/v0alpha1/namespaces/test-namespace',
+      pollInterval: -1,
+      timeoutMs: 10_000,
+    });
   });
 });
