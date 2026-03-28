@@ -28,6 +28,7 @@ import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 
+import { buildKgAnnotationsLayer, type KgEntityConfig } from './kgAnnotations';
 import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';
 import { buildMiniBreakdownNavigationUrl } from '../exposedComponents/MiniBreakdown/buildNavigationUrl';
@@ -47,11 +48,18 @@ interface MetricGraphSceneState extends SceneObjectState {
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
-  public constructor({ metric }: { metric: MetricGraphSceneState['metric'] }) {
+  public constructor({
+    metric,
+    kgEntityConfig,
+  }: {
+    metric: MetricGraphSceneState['metric'];
+    kgEntityConfig?: KgEntityConfig;
+  }) {
     super({
       metric,
       topView: new SceneFlexLayout({
         direction: 'column',
+        ...(kgEntityConfig ? { $data: buildKgAnnotationsLayer(kgEntityConfig) } : {}),
         $behaviors: [new behaviors.CursorSync({ key: 'metricCrosshairSync', sync: DashboardCursorSync.Crosshair })],
         children: [
           new SceneFlexItem({
