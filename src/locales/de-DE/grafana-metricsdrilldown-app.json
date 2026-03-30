@@ -319,8 +319,6 @@
       "recent-metrics-description": "Metriken je nach dem Beginn ihrer Aufnahme filtern",
       "rules-filters": "Regelfilter",
       "rules-filters-description": "Metriken und Aufnahmeregeln filtern",
-      "settings": "Einstellungen",
-      "settings-description": "",
       "suffix-filters": "Suffixfilter",
       "suffix-filters-description": "Metriken nach ihrem Namenssuffix filtern"
     }

@@ -315,8 +315,6 @@
       "recent-metrics-description": "Filter metrik berdasarkan kapan metrik mulai di-ingest",
       "rules-filters": "Filter aturan",
       "rules-filters-description": "Filter metrik dan aturan pencatatan",
-      "settings": "Pengaturan",
-      "settings-description": "",
       "suffix-filters": "Filter akhiran",
       "suffix-filters-description": "Filter metrik berdasarkan akhiran namanya"
     }

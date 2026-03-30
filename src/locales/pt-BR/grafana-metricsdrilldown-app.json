@@ -319,8 +319,6 @@
       "recent-metrics-description": "Filtrar métricas com base em quando começaram a ser registradas",
       "rules-filters": "Filtros de regras",
       "rules-filters-description": "Filtrar métricas e regras de registro",
-      "settings": "Configurações",
-      "settings-description": "",
       "suffix-filters": "Filtros de sufixo",
       "suffix-filters-description": "Filtrar métricas com base no sufixo de nome delas"
     }

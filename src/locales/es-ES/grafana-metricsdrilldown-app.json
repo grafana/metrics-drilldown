@@ -319,8 +319,6 @@
       "recent-metrics-description": "Filtra las métricas en función del inicio de la importación.",
       "rules-filters": "Filtros de reglas",
       "rules-filters-description": "Filtra métricas y reglas de registro.",
-      "settings": "Ajustes",
-      "settings-description": "",
       "suffix-filters": "Filtros de sufijos",
       "suffix-filters-description": "Filtra las métricas en función de su sufijo de nombre."
     }

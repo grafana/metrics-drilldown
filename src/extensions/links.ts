@@ -11,7 +11,6 @@ import { parser } from '@prometheus-io/lezer-promql';
 
 import { PLUGIN_BASE_URL } from 'shared/constants/plugin';
 import { ROUTES } from 'shared/constants/routes';
-import { logger } from 'shared/logger/logger';
 
 import { parseMatcher } from './parseMatcher';
 import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../shared/utils/utils.promql';
@@ -134,7 +133,9 @@ export function buildDrilldownUrl<T extends PluginExtensionPanelContext>(context
     const { metric, labels, hasErrors, errors } = parsePromQLQuery(expr);
 
     if (hasErrors) {
-      logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`);
+      import('shared/logger/logger').then(({ logger }) =>
+        logger.warn(`PromQL query has parsing errors: ${errors.join(', ')}`)
+      );
     }
 
     const timeRange =
@@ -152,7 +153,9 @@ export function buildDrilldownUrl<T extends PluginExtensionPanelContext>(context
 
     return createAppUrl(ROUTES.Drilldown, params);
   } catch (error) {
-    logger.error(new Error(`[Metrics Drilldown] Error parsing PromQL query: ${error}`));
+    import('shared/logger/logger').then(({ logger }) =>
+      logger.error(new Error(`[Metrics Drilldown] Error parsing PromQL query: ${error}`))
+    );
 
     return createAppUrl(ROUTES.Drilldown);
   }

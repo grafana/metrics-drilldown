@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React, { act } from 'react';
 
-import { Settings } from '../sections/Settings';
+import { BookmarksList } from '../sections/BookmarksList/BookmarksList';
 import { SideBar } from '../SideBar';
 
 // =============================================================================
@@ -23,11 +23,11 @@ jest.mock('@grafana/scenes', () => ({
 }));
 
 /**
- * Stub out the Settings section Component so it renders nothing.
+ * Stub out the BookmarksList section Component so it renders nothing.
  * We only care about the SideBar shell (buttons, close button, focus behavior).
  */
 // @ts-expect-error - overriding readonly static for test stub
-Settings.Component = function SettingsStub() {
+BookmarksList.Component = function BookmarksListStub() {
   return null;
 };
 
@@ -37,18 +37,18 @@ Settings.Component = function SettingsStub() {
 
 /**
  * Creates a SideBar with two minimal sections for testing focus behavior.
- * Uses Settings because it's the simplest section type (no data dependencies).
+ * Uses BookmarksList because it's a simple section type (no data dependencies).
  */
 function createSideBar() {
   return new SideBar({
     sections: [
-      new Settings({
+      new BookmarksList({
         key: 'section-a',
         title: 'Section A',
         description: 'First test section',
         icon: 'cog',
       }),
-      new Settings({
+      new BookmarksList({
         key: 'section-b',
         title: 'Section B',
         description: 'Second test section',
