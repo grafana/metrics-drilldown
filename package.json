@@ -31,7 +31,7 @@
     "i18n-extract": "i18next-cli extract -c i18next.config.ts",
     "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --ci"
   },
-  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be",
+  "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319",
   "engines": {
     "node": ">=22"
   },
@@ -83,8 +83,8 @@
     "@types/react": "^18.3.27",
     "@types/react-dom": "^18.3.7",
     "@types/semver": "^7.7.1",
-    "@typescript-eslint/eslint-plugin": "8.57.1",
-    "@typescript-eslint/parser": "8.57.1",
+    "@typescript-eslint/eslint-plugin": "8.57.2",
+    "@typescript-eslint/parser": "8.57.2",
     "compare-versions": "^6.1.1",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "7.1.4",
@@ -93,8 +93,8 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import": "2.32.0",
-    "eslint-plugin-jest": "29.15.0",
-    "eslint-plugin-jsdoc": "62.8.0",
+    "eslint-plugin-jest": "29.15.1",
+    "eslint-plugin-jsdoc": "62.8.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-playwright": "2.10.1",
     "eslint-plugin-react": "7.37.5",
