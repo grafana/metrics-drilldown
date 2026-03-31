@@ -94,7 +94,7 @@ function createDirectAnnotationLayers(entity: KgEntityHint) {
               filterCriteria: [
                 {
                   entityType: entity.entityType,
-                  propertyMatchers: [{ name: 'name', value: entity.entityName, op: 'EQUALS' }],
+                  propertyMatchers: [{ name: 'name', value: entity.entityName, op: '=' }],
                   havingAssertion: true,
                 },
               ],
