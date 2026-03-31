@@ -61,6 +61,9 @@ import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
+import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
+import { getKgSceneProps } from 'shared/knowledgeGraph/kgAnnotations';
+
 import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
@@ -87,6 +90,9 @@ export interface DataTrailState extends SceneObjectState {
   urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
 
   drawer: SceneDrawer;
+
+  // Knowledge Graph annotations
+  kgAnnotationToggle?: KgAnnotationToggle;
 
   // Add to dashboard feature
   isAddToDashboardAvailable: boolean;
@@ -126,6 +132,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   public constructor(state: Partial<DataTrailState>) {
+    const kg = getKgSceneProps();
+
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
@@ -142,6 +150,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       isAddToDashboardAvailable: false,
       isAddToDashboardModalOpen: false,
       ...state,
+      ...(kg
+        ? {
+            $data: state.$data ?? kg.$data,
+            $behaviors: [...(state.$behaviors ?? []), ...kg.behaviors],
+            kgAnnotationToggle: state.kgAnnotationToggle ?? kg.controls,
+          }
+        : {}),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -375,8 +390,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, embedded, embeddedMini, drawer, isAddToDashboardModalOpen, addToDashboardPanelData } =
-      model.useState();
+    const {
+      controls,
+      topScene,
+      embedded,
+      embeddedMini,
+      drawer,
+      isAddToDashboardModalOpen,
+      addToDashboardPanelData,
+      kgAnnotationToggle,
+    } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
@@ -432,6 +455,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                   {controls.map((control) => (
                     <control.Component key={control.state.key} model={control} />
                   ))}
+                  {kgAnnotationToggle && (
+                    <kgAnnotationToggle.Component model={kgAnnotationToggle} />
+                  )}
                   <Stack direction="row" gap={0.5}>
                     <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
                   </Stack>

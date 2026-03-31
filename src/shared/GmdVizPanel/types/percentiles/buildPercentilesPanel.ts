@@ -32,6 +32,7 @@ export function buildPercentilesPanel(options: BuildVizPanelOptions) {
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
+    .setOption('annotations', { multiLane: true })
     .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
     .setCustomFieldConfig('fillOpacity', 9)
