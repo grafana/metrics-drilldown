@@ -119,8 +119,11 @@ export class KgAnnotationBehavior extends SceneObjectBase<KgAnnotationBehaviorSt
 
     const datasourceUid = (dsVar?.getValue() as string) || '';
     const lookupKey = `${datasourceUid}::${JSON.stringify(labels)}`;
+    const hasLabels = Object.keys(labels).length > 0;
 
-    if (lookupKey === this.currentLookupKey) {
+    // Only deduplicate when we have labels — always allow the clear path to run
+    // so that stale annotation data is removed when filters are emptied
+    if (lookupKey === this.currentLookupKey && hasLabels) {
       return;
     }
     this.currentLookupKey = lookupKey;
@@ -128,7 +131,7 @@ export class KgAnnotationBehavior extends SceneObjectBase<KgAnnotationBehaviorSt
     const layerSet = this.state.layerSet.resolve();
     const toggle = this.state.toggle.resolve();
 
-    if (Object.keys(labels).length > 0 && datasourceUid) {
+    if (hasLabels && datasourceUid) {
       const layers = createAnnotationLayers(labels, datasourceUid);
       layerSet.setState({ layers });
       toggle.syncLayerEnabledState();
