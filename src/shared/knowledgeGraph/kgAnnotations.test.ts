@@ -1,8 +1,8 @@
 import { config } from '@grafana/runtime';
 import { SceneDataLayerSet, SceneObjectRef } from '@grafana/scenes';
 
-import { isKgAnnotationsAvailable, getKgSceneProps } from './kgAnnotations';
-import { KgAnnotationToggle } from './KgAnnotationToggle';
+import { getKgSceneProps, isKgAnnotationsAvailable } from 'shared/knowledgeGraph/kgAnnotations';
+import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 
 const originalDatasources = config.datasources;
 const originalFeatureToggles = { ...config.featureToggles };
