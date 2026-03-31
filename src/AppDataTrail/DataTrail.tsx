@@ -50,7 +50,7 @@ import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePa
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
-import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
+import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { getKgSceneProps } from 'shared/knowledgeGraph/kgAnnotations';
 import { logger } from 'shared/logger/logger';
 

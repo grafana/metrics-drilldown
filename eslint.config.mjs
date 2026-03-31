@@ -129,6 +129,16 @@ export default [
     },
   },
   {
+    // eslint-plugin-import crashes on ESLint 10 when fixing import/order in this file
+    // (sourceCode.getTokenOrCommentAfter is not a function). Safe to remove once
+    // eslint-plugin-import is updated with ESLint 10 compatibility.
+    name: 'metrics-drilldown/data-trail-import-order-workaround',
+    files: ['src/AppDataTrail/DataTrail.tsx'],
+    rules: {
+      'import/order': 'off',
+    },
+  },
+  {
     name: 'metrics-drilldown/jest-config',
     files: ['jest.config.js'],
     rules: {
