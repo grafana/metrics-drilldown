@@ -1,7 +1,7 @@
-import React from 'react';
-
-import { ControlsLabel, SceneDataLayerSet, SceneObjectBase, SceneObjectRef, SceneObjectState } from '@grafana/scenes';
+import { t } from '@grafana/i18n';
+import { ControlsLabel, SceneObjectBase, type SceneDataLayerSet, type SceneObjectRef, type SceneObjectState } from '@grafana/scenes';
 import { InlineSwitch } from '@grafana/ui';
+import React from 'react';
 
 export const KG_INSIGHTS_DESCRIPTION =
   'Overlay health states (critical, warning, info) from the Knowledge Graph on timeseries panels';
@@ -12,7 +12,7 @@ export interface KgAnnotationToggleState extends SceneObjectState {
 }
 
 export class KgAnnotationToggle extends SceneObjectBase<KgAnnotationToggleState> {
-  static Component = KgAnnotationToggleRenderer;
+  static readonly Component = KgAnnotationToggleRenderer;
 
   public toggleEnabled = () => {
     const next = !this.state.isEnabled;
@@ -29,7 +29,7 @@ export class KgAnnotationToggle extends SceneObjectBase<KgAnnotationToggleState>
   };
 }
 
-function KgAnnotationToggleRenderer({ model }: { model: KgAnnotationToggle }) {
+function KgAnnotationToggleRenderer({ model }: Readonly<{ model: KgAnnotationToggle }>) {
   const { isEnabled, layerSetRef } = model.useState();
   const { layers } = layerSetRef.resolve().useState();
 
@@ -39,7 +39,7 @@ function KgAnnotationToggleRenderer({ model }: { model: KgAnnotationToggle }) {
 
   return (
     <div style={{ display: 'flex', alignSelf: 'flex-end' }}>
-      <ControlsLabel label="Insights" description={KG_INSIGHTS_DESCRIPTION} />
+      <ControlsLabel label={t('kg-annotations.toggle.label', 'Insights')} description={KG_INSIGHTS_DESCRIPTION} />
       <InlineSwitch value={isEnabled} onChange={model.toggleEnabled} />
     </div>
   );

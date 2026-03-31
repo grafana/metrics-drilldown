@@ -1,19 +1,19 @@
+import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
 import {
-  AdHocFiltersVariable,
   dataLayers,
   SceneDataLayerSet,
+  sceneGraph,
   SceneObjectBase,
   SceneObjectRef,
-  SceneObjectState,
-  sceneGraph,
+  type AdHocFiltersVariable,
+  type SceneObjectState,
 } from '@grafana/scenes';
-import { DataQuery } from '@grafana/schema';
+import { type DataQuery } from '@grafana/schema';
 
+import { isKnowledgeGraphAnnotationsEnabled } from 'shared/featureToggles/knowledgeGraphAnnotations';
+import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { VAR_DATASOURCE, VAR_FILTERS } from 'shared/shared';
-
-import { isKnowledgeGraphAnnotationsEnabled } from '../featureToggles/knowledgeGraphAnnotations';
-import { KgAnnotationToggle } from './KgAnnotationToggle';
 
 const KG_DATASOURCE_TYPE = 'grafana-knowledgegraph-datasource';
 const KG_DATASOURCE_UID = 'grafanacloud-knowledgegraph';
@@ -33,10 +33,10 @@ export function isKgAnnotationsAvailable(): boolean {
 
 function createAnnotationLayers(labels: Record<string, string>, datasourceUid: string) {
   const severities = [
-    { value: 'critical', color: 'red', label: 'Critical' },
-    { value: 'warning', color: 'orange', label: 'Warning' },
-    { value: 'info', color: 'blue', label: 'Info' },
-  ] as const;
+    { value: 'critical', color: 'red', label: t('kg-annotations.severity.critical', 'Critical') },
+    { value: 'warning', color: 'orange', label: t('kg-annotations.severity.warning', 'Warning') },
+    { value: 'info', color: 'blue', label: t('kg-annotations.severity.info', 'Info') },
+  ];
 
   return severities.map(
     (s) =>
