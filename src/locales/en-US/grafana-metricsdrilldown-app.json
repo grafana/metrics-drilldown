@@ -95,6 +95,16 @@
   "inline-banner": {
     "unknown-error": "Unknown error!"
   },
+  "kg-annotations": {
+    "severity": {
+      "critical": "Critical",
+      "info": "Info",
+      "warning": "Warning"
+    },
+    "toggle": {
+      "label": "Insights"
+    }
+  },
   "labels-datasource": {
     "none-option": "(none)",
     "test-success": "OK"
