@@ -50,6 +50,8 @@ import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePa
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
+import { getKgSceneProps } from 'shared/knowledgeGraph/kgAnnotations';
 import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
@@ -61,8 +63,6 @@ import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
-import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
-import { getKgSceneProps } from 'shared/knowledgeGraph/kgAnnotations';
 
 import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
