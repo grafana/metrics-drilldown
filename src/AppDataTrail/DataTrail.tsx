@@ -51,7 +51,7 @@ import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/Configu
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
-import { getKgSceneProps } from 'shared/knowledgeGraph/kgAnnotations';
+import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
 import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
@@ -92,6 +92,7 @@ export interface DataTrailState extends SceneObjectState {
   drawer: SceneDrawer;
 
   // Knowledge Graph annotations
+  kgEntityHint?: KgEntityHint;
   kgAnnotationToggle?: KgAnnotationToggle;
 
   // Add to dashboard feature
@@ -132,7 +133,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   public constructor(state: Partial<DataTrailState>) {
-    const kg = getKgSceneProps();
+    const kg = getKgSceneProps(state.kgEntityHint);
 
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
