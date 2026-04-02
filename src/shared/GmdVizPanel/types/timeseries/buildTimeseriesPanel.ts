@@ -38,6 +38,7 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
+    .setOption('annotations', { multiLane: true })
     .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
     .setCustomFieldConfig('fillOpacity', 9)
     .setBehaviors([
@@ -99,6 +100,7 @@ function buildGroupByPanel(options: Required<BuildVizPanelOptions>): VizPanel {
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
+    .setOption('annotations', { multiLane: true })
     .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'right' as LegendPlacement })
     .setOption('tooltip', { mode: TooltipDisplayMode.Multi, sort: SortOrder.Descending })
     .setOverrides((b) => {

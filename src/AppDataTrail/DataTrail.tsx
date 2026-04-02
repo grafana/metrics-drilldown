@@ -50,6 +50,9 @@ import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePa
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
+import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
@@ -61,6 +64,7 @@ import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
+
 import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
@@ -87,6 +91,10 @@ export interface DataTrailState extends SceneObjectState {
   urlNamespace?: string; // optional namespace for url params, to avoid conflicts with other plugins in embedded mode
 
   drawer: SceneDrawer;
+
+  // Knowledge Graph annotations
+  kgEntityHint?: KgEntityHint;
+  kgAnnotationToggle?: KgAnnotationToggle;
 
   // Add to dashboard feature
   isAddToDashboardAvailable: boolean;
@@ -149,6 +157,19 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   private onActivate() {
     registerRuntimeDataSources([new LabelsDataSource()]);
+
+    evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then((enabled) => {
+      if (enabled) {
+        const kg = getKgSceneProps(this.state.kgEntityHint);
+        if (kg) {
+          this.setState({
+            $data: this.state.$data ?? kg.$data,
+            $behaviors: [...(this.state.$behaviors ?? []), ...kg.behaviors],
+            kgAnnotationToggle: this.state.kgAnnotationToggle ?? kg.controls,
+          });
+        }
+      }
+    });
 
     // Delays init() to ensure proper initialization order and avoid race conditions.
     // The variable dependency handler (onReferencedVariableValueChanged) calls reset()
@@ -375,8 +396,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
-    const { controls, topScene, embedded, embeddedMini, drawer, isAddToDashboardModalOpen, addToDashboardPanelData } =
-      model.useState();
+    const {
+      controls,
+      topScene,
+      embedded,
+      embeddedMini,
+      drawer,
+      isAddToDashboardModalOpen,
+      addToDashboardPanelData,
+      kgAnnotationToggle,
+    } = model.useState();
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
@@ -432,6 +461,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                   {controls.map((control) => (
                     <control.Component key={control.state.key} model={control} />
                   ))}
+                  {kgAnnotationToggle && (
+                    <kgAnnotationToggle.Component model={kgAnnotationToggle} />
+                  )}
                   <Stack direction="row" gap={0.5}>
                     <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
                   </Stack>
