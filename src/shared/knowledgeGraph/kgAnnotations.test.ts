@@ -1,5 +1,5 @@
 import { config } from '@grafana/runtime';
-import { SceneDataLayerSet, SceneObjectRef } from '@grafana/scenes';
+import { dataLayers, SceneDataLayerSet, SceneObjectRef } from '@grafana/scenes';
 
 import { getKgSceneProps, isKgAnnotationsAvailable } from 'shared/knowledgeGraph/kgAnnotations';
 import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
@@ -61,30 +61,42 @@ describe('getKgSceneProps', () => {
   });
 });
 
+function makeLayerSet(isEnabled: boolean) {
+  const layer = new dataLayers.AnnotationsDataLayer({ name: 'test-layer', isEnabled, query: {} as any });
+  const layerSet = new SceneDataLayerSet({ name: 'test', layers: [layer] });
+  return { layer, layerSet };
+}
+
 describe('KgAnnotationToggle', () => {
   it('toggles enabled state and propagates to layers', () => {
-    const layerSet = new SceneDataLayerSet({ name: 'test', layers: [] });
+    const { layer, layerSet } = makeLayerSet(true);
     const toggle = new KgAnnotationToggle({
       isEnabled: true,
       layerSetRef: new SceneObjectRef(layerSet),
     });
 
-    expect(toggle.state.isEnabled).toBe(true);
     toggle.toggleEnabled();
     expect(toggle.state.isEnabled).toBe(false);
+    expect(layer.state.isEnabled).toBe(false);
+
     toggle.toggleEnabled();
     expect(toggle.state.isEnabled).toBe(true);
+    expect(layer.state.isEnabled).toBe(true);
   });
 
   it('syncLayerEnabledState syncs current toggle state to layers', () => {
-    const layerSet = new SceneDataLayerSet({ name: 'test', layers: [] });
+    const { layer, layerSet } = makeLayerSet(true);
     const toggle = new KgAnnotationToggle({
       isEnabled: false,
       layerSetRef: new SceneObjectRef(layerSet),
     });
 
     toggle.syncLayerEnabledState();
-    // With empty layers, this should not throw
-    expect(toggle.state.isEnabled).toBe(false);
+    expect(layer.state.isEnabled).toBe(false);
   });
+
+  // KgAnnotationBehavior reactive tests (filter/datasource subscriptions, layer creation, dedup)
+  // are not covered here. The behavior relies on sceneGraph.lookupVariable which requires a
+  // fully mounted scene tree with AdHocFiltersVariable and a datasource variable wired up.
+  // This needs a dedicated integration-style test with scene activation -- deferred to a follow-up.
 });
