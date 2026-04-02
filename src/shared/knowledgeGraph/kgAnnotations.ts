@@ -30,7 +30,7 @@ interface KgSceneProps {
 }
 
 export function isKgAnnotationsAvailable(): boolean {
-  return Object.values(config.datasources).some((d) => d.uid === KG_DATASOURCE_UID);
+  return Object.values(config.datasources).some((d) => d.uid === KG_DATASOURCE_UID && d.type === KG_DATASOURCE_TYPE);
 }
 
 function getSeverities() {

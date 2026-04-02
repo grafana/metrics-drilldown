@@ -35,6 +35,12 @@ describe('isKgAnnotationsAvailable', () => {
 
     expect(isKgAnnotationsAvailable()).toBe(true);
   });
+
+  it('returns false when uid matches but type does not', () => {
+    config.datasources = { knowledgegraph: { ...KG_DATASOURCE, type: 'some-other-datasource' } };
+
+    expect(isKgAnnotationsAvailable()).toBe(false);
+  });
 });
 
 describe('getKgSceneProps', () => {
