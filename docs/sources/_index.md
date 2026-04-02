@@ -5,6 +5,7 @@ labels:
     - enterprise
     - oss
 title: Grafana Metrics Drilldown
+menuTitle: Metrics Drilldown
 aliases:
   - ../explore-metrics/ # /docs/grafana/latest/explore/explore-metrics/
 canonical: https://grafana.com/docs/grafana/latest/explore/simplified-exploration/metrics/
@@ -30,7 +31,7 @@ cards:
       href: ./drill-down-metrics/
       description: Drill down into your metrics without writing a PromQL query.
       height: 24
-weight: 200
+weight: 50
 ---
 
 # Grafana Metrics Drilldown
