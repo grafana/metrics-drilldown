@@ -96,6 +96,12 @@
     "unknown-error": "Unknown error!"
   },
   "kg-annotations": {
+    "layer": {
+      "name": "Insights - {{severityLabel}}"
+    },
+    "query": {
+      "name": "KG Assertions - {{severityLabel}}"
+    },
     "severity": {
       "critical": "Critical",
       "info": "Info",

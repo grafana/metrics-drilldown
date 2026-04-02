@@ -45,14 +45,14 @@ function createFromLabelsAnnotationLayers(labels: Record<string, string>, dataso
   return getSeverities().map(
     (s) =>
       new dataLayers.AnnotationsDataLayer({
-        name: `Insights - ${s.label}`,
+        name: t('kg-annotations.layer.name', 'Insights - {{severityLabel}}', { severityLabel: s.label }),
         isEnabled: true,
         isHidden: true,
         query: {
           datasource: { type: KG_DATASOURCE_TYPE, uid: KG_DATASOURCE_UID },
           enable: true,
           iconColor: s.color,
-          name: `KG Assertions - ${s.label}`,
+          name: t('kg-annotations.query.name', 'KG Assertions - {{severityLabel}}', { severityLabel: s.label }),
           target: {
             refId: `kgAnnotations-${s.value}`,
             queryType: 'annotations',
@@ -73,14 +73,14 @@ function createDirectAnnotationLayers(entity: KgEntityHint) {
   return getSeverities().map(
     (s) =>
       new dataLayers.AnnotationsDataLayer({
-        name: `Insights - ${s.label}`,
+        name: t('kg-annotations.layer.name', 'Insights - {{severityLabel}}', { severityLabel: s.label }),
         isEnabled: true,
         isHidden: true,
         query: {
           datasource: { type: KG_DATASOURCE_TYPE, uid: KG_DATASOURCE_UID },
           enable: true,
           iconColor: s.color,
-          name: `KG Assertions - ${s.label}`,
+          name: t('kg-annotations.query.name', 'KG Assertions - {{severityLabel}}', { severityLabel: s.label }),
           target: {
             refId: `kgAnnotations-${s.value}`,
             queryType: 'annotations',
