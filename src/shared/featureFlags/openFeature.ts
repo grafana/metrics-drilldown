@@ -11,6 +11,11 @@ import { logger } from '../logger/logger';
  * See {@link https://github.com/grafana/deployment_tools/blob/master/ksonnet/environments/hosted-grafana/waves/feature-toggles/goff/drilldown/metrics/flag-definitions.libsonnet | Metrics Drilldown GoFF flag definitions} for the source of truth.
  */
 const goffFeatureFlags = {
+  kgAnnotationsInMetricsDrilldown: {
+    valueType: 'boolean',
+    values: [true, false] as const,
+    defaultValue: false,
+  },
   'drilldown.metrics.default_open_sidebar': {
     valueType: 'string',
     values: [
@@ -41,7 +46,7 @@ const goffFeatureFlags = {
     defaultValue: 'excluded',
     trackingKey: 'experiment_grafana_assistant_quick_search_tab_test',
   },
-} as const satisfies Record<`drilldown.metrics.${string}`, FeatureFlag>;
+} as const satisfies Record<string, FeatureFlag>;
 
 /**
  * This discriminated union captures the different types of feature flags that can be evaluated.
@@ -155,7 +160,6 @@ export async function evaluateFeatureFlag<T extends keyof typeof goffFeatureFlag
     switch (flagDef.valueType) {
       case 'boolean':
         const booleanValue = client.getBooleanValue(flagName, flagDef.defaultValue);
-        // @ts-expect-error - this can be removed once we add a boolean-type flag to `goffFeatureFlags`
         return booleanValue as FlagValue<T>;
       case 'number':
         const numberValue = client.getNumberValue(flagName, flagDef.defaultValue);

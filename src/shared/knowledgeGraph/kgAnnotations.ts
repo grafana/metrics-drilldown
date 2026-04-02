@@ -11,7 +11,6 @@ import {
 } from '@grafana/scenes';
 import { type DataQuery } from '@grafana/schema';
 
-import { isKnowledgeGraphAnnotationsEnabled } from 'shared/featureToggles/knowledgeGraphAnnotations';
 import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { VAR_DATASOURCE, VAR_FILTERS } from 'shared/shared';
 
@@ -31,9 +30,6 @@ interface KgSceneProps {
 }
 
 export function isKgAnnotationsAvailable(): boolean {
-  if (!isKnowledgeGraphAnnotationsEnabled()) {
-    return false;
-  }
   return Object.values(config.datasources).some((d) => d.uid === KG_DATASOURCE_UID);
 }
 

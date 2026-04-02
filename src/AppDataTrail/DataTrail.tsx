@@ -52,6 +52,7 @@ import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigur
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
@@ -133,8 +134,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   public constructor(state: Partial<DataTrailState>) {
-    const kg = getKgSceneProps(state.kgEntityHint);
-
     super({
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
       $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
@@ -151,13 +150,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       isAddToDashboardAvailable: false,
       isAddToDashboardModalOpen: false,
       ...state,
-      ...(kg
-        ? {
-            $data: state.$data ?? kg.$data,
-            $behaviors: [...(state.$behaviors ?? []), ...kg.behaviors],
-            kgAnnotationToggle: state.kgAnnotationToggle ?? kg.controls,
-          }
-        : {}),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -165,6 +157,19 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   private onActivate() {
     registerRuntimeDataSources([new LabelsDataSource()]);
+
+    evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then((enabled) => {
+      if (enabled) {
+        const kg = getKgSceneProps(this.state.kgEntityHint);
+        if (kg) {
+          this.setState({
+            $data: this.state.$data ?? kg.$data,
+            $behaviors: [...(this.state.$behaviors ?? []), ...kg.behaviors],
+            kgAnnotationToggle: this.state.kgAnnotationToggle ?? kg.controls,
+          });
+        }
+      }
+    });
 
     // Delays init() to ensure proper initialization order and avoid race conditions.
     // The variable dependency handler (onReferencedVariableValueChanged) calls reset()

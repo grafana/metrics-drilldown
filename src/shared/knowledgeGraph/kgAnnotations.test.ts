@@ -5,7 +5,6 @@ import { getKgSceneProps, isKgAnnotationsAvailable } from 'shared/knowledgeGraph
 import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 
 const originalDatasources = config.datasources;
-const originalFeatureToggles = { ...config.featureToggles };
 
 const KG_DATASOURCE = {
   uid: 'grafanacloud-knowledgegraph',
@@ -22,27 +21,16 @@ const KG_DATASOURCE = {
 
 afterEach(() => {
   config.datasources = originalDatasources;
-  config.featureToggles = { ...originalFeatureToggles };
 });
 
 describe('isKgAnnotationsAvailable', () => {
-  it('returns false when feature flag is off', () => {
-    config.featureToggles = { ...originalFeatureToggles };
-    delete (config.featureToggles as Record<string, unknown>).kgAnnotationsInMetricsDrilldown;
-    config.datasources = { knowledgegraph: KG_DATASOURCE };
-
-    expect(isKgAnnotationsAvailable()).toBe(false);
-  });
-
   it('returns false when KG datasource is missing', () => {
-    (config.featureToggles as Record<string, unknown>).kgAnnotationsInMetricsDrilldown = true;
     config.datasources = {};
 
     expect(isKgAnnotationsAvailable()).toBe(false);
   });
 
-  it('returns true when both flag and datasource are present', () => {
-    (config.featureToggles as Record<string, unknown>).kgAnnotationsInMetricsDrilldown = true;
+  it('returns true when KG datasource is present', () => {
     config.datasources = { knowledgegraph: KG_DATASOURCE };
 
     expect(isKgAnnotationsAvailable()).toBe(true);
@@ -50,15 +38,13 @@ describe('isKgAnnotationsAvailable', () => {
 });
 
 describe('getKgSceneProps', () => {
-  it('returns undefined when not available', () => {
-    config.featureToggles = { ...originalFeatureToggles };
-    delete (config.featureToggles as Record<string, unknown>).kgAnnotationsInMetricsDrilldown;
+  it('returns undefined when KG datasource is missing', () => {
+    config.datasources = {};
 
     expect(getKgSceneProps()).toBeUndefined();
   });
 
-  it('returns proper structure when available', () => {
-    (config.featureToggles as Record<string, unknown>).kgAnnotationsInMetricsDrilldown = true;
+  it('returns proper structure when KG datasource is present', () => {
     config.datasources = { knowledgegraph: KG_DATASOURCE };
 
     const props = getKgSceneProps();
