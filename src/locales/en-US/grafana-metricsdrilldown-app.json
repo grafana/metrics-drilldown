@@ -102,7 +102,10 @@
       "warning": "Warning"
     },
     "toggle": {
-      "label": "Insights"
+      "description": "Overlay health states (critical, warning, info) from the Knowledge Graph on timeseries panels.",
+      "disabled-tooltip": "Add label filters to match entities.",
+      "label": "Insights",
+      "learn-more": "Learn more"
     }
   },
   "labels-datasource": {

@@ -1,10 +1,7 @@
 import { t } from '@grafana/i18n';
-import { ControlsLabel, SceneObjectBase, type SceneDataLayerSet, type SceneObjectRef, type SceneObjectState } from '@grafana/scenes';
-import { InlineSwitch } from '@grafana/ui';
+import { SceneObjectBase, type SceneDataLayerSet, type SceneObjectRef, type SceneObjectState } from '@grafana/scenes';
+import { InlineLabel, InlineSwitch, TextLink } from '@grafana/ui';
 import React from 'react';
-
-export const KG_INSIGHTS_DESCRIPTION =
-  'Overlay health states (critical, warning, info) from the Knowledge Graph on timeseries panels';
 
 export interface KgAnnotationToggleState extends SceneObjectState {
   isEnabled: boolean;
@@ -32,15 +29,31 @@ export class KgAnnotationToggle extends SceneObjectBase<KgAnnotationToggleState>
 function KgAnnotationToggleRenderer({ model }: Readonly<{ model: KgAnnotationToggle }>) {
   const { isEnabled, layerSetRef } = model.useState();
   const { layers } = layerSetRef.resolve().useState();
+  const hasLayers = layers.length > 0;
 
-  if (layers.length === 0) {
-    return null;
-  }
+  const description = t(
+    'kg-annotations.toggle.description',
+    'Overlay health states (critical, warning, info) from the Knowledge Graph on timeseries panels.'
+  );
+
+  const tooltipContent = hasLayers ? (
+    description
+  ) : (
+    <span>
+      {description}{' '}
+      {t('kg-annotations.toggle.disabled-tooltip', 'Add label filters to match entities.')}{' '}
+      <TextLink external href="https://grafana.com/docs/grafana-cloud/knowledge-graph/introduction/">
+        {t('kg-annotations.toggle.learn-more', 'Learn more')}
+      </TextLink>
+    </span>
+  );
 
   return (
     <div style={{ display: 'flex', alignSelf: 'flex-end' }}>
-      <ControlsLabel label={t('kg-annotations.toggle.label', 'Insights')} description={KG_INSIGHTS_DESCRIPTION} />
-      <InlineSwitch value={isEnabled} onChange={model.toggleEnabled} />
+      <InlineLabel tooltip={tooltipContent} interactive={!hasLayers} width="auto" transparent>
+        {t('kg-annotations.toggle.label', 'Insights')}
+      </InlineLabel>
+      <InlineSwitch value={isEnabled} onChange={model.toggleEnabled} disabled={!hasLayers} />
     </div>
   );
 }
