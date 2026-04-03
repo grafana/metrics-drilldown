@@ -94,6 +94,25 @@
   "inline-banner": {
     "unknown-error": "未知錯誤！"
   },
+  "kg-annotations": {
+    "layer": {
+      "name": ""
+    },
+    "query": {
+      "name": ""
+    },
+    "severity": {
+      "critical": "",
+      "info": "",
+      "warning": ""
+    },
+    "toggle": {
+      "description": "",
+      "disabled-tooltip": "",
+      "label": "",
+      "learn-more": ""
+    }
+  },
   "labels-datasource": {
     "none-option": "（無）",
     "test-success": "確定"
