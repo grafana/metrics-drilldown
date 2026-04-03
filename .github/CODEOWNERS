@@ -1,2 +1,2 @@
 * @grafana/observability-metrics
-/docs/sources/ @grafana/docs-metrics
+/docs/sources/ @grafana/docs-metrics @grafana/observability-metrics
