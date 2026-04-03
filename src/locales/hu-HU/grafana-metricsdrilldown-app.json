@@ -95,6 +95,25 @@
   "inline-banner": {
     "unknown-error": "Ismeretlen hiba!"
   },
+  "kg-annotations": {
+    "layer": {
+      "name": ""
+    },
+    "query": {
+      "name": ""
+    },
+    "severity": {
+      "critical": "",
+      "info": "",
+      "warning": ""
+    },
+    "toggle": {
+      "description": "",
+      "disabled-tooltip": "",
+      "label": "",
+      "learn-more": ""
+    }
+  },
   "labels-datasource": {
     "none-option": "(nincs)",
     "test-success": "OK"
