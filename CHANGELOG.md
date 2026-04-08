@@ -1,5 +1,58 @@
 # Changelog
 
+## 2.0.1
+
+##### Chores
+
+* **deps:**
+  *  Pin dependencies (#1168) (ceb93c7c)
+  *  update grafana/plugin-ci-workflows/ci-cd-workflows action to v7.0.0 (#1161) (12a1c041)
+  *  Update actions/upload-artifact action to v7 (#1157) (140fbe3a)
+  *  Update docker.io/prom/prometheus Docker tag to v3.10.0 (#1155) (aecd1fee)
+  *  Update Build tools (#1169) (c9b845bf)
+  *  Update dependency @grafana/plugin-e2e to v3.4.10 (#1152) (f30a3ef9)
+  *  Update TypeScript and linting (#1170) (2a8b7df4)
+  *  Update pnpm to v10.33.0 (#1171) (55dd1db3)
+  *  Update dependency minimatch@^9 to v10 (#1159) (f25dd9fc)
+  *  Update TypeScript and linting (#1154) (5164b27d)
+  *  Update pnpm to v10.32.1 (#1156) (6ed18a4b)
+  *  Update dependency webpack-cli to v7 (#1160) (90607a85)
+  *  combine all Renovate dependency updates (#1150) (6863852c)
+*  assign @grafana/docs-metrics as codeowners for docs (#1164) (39871b0d)
+*  remove disabled Settings section from sidebar (#1143) (b776da2e)
+*  add GitNexus dev tooling (#1147) (304e8d33)
+
+##### Documentation Changes
+
+*  Update menu title and weight in _index.md (#1178) (cd9e487a)
+
+##### New Features
+
+* **units:**  expand unit detection with hardware, energy, and ratio s… (#1176) (5b2a73f1)
+*  add Knowledge Graph annotation overlays (#1173) (4e384aa0)
+
+##### Bug Fixes
+
+*  add entry in CODEOWNERS for the docs (#1180) (c0349175)
+*  publish to catalog workflow (#1174) (d75c1d95)
+*  pin versions to fix `pnpm audit` (#1166) (85ced206)
+*  populate datasource filter in LoadQueryScene (#1139) (deb3cd77)
+* **deps:**
+  *  resolve lodash CVEs (CVE-2026-4800, CVE-2026-2950) (#1177) (904f7093)
+  *  resolve `pnpm audit` vulnerabilities in `serialize-javascr… (#1172) (d3993afd)
+  *  override flatted and undici to resolve Trivy CVEs (#1151) (8ee55901)
+* **goff:**  use subpath in the openfeature api url (#1167) (44e977e1)
+
+##### Other Changes
+
+*  Download translations from Crowdin (#1179) (9ec556b1)
+*  Download translations from Crowdin (#1163) (5bba679d)
+
+##### Performance Improvements
+
+*  Lazy-load Faro in module.tsx (#1162) (f6f6f655)
+
+
 ## 2.0.0
 
 ##### Chores
