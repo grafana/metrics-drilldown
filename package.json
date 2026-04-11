@@ -88,7 +88,7 @@
     "compare-versions": "^6.1.1",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "7.1.4",
-    "dotenv": "17.3.1",
+    "dotenv": "17.4.1",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-import-resolver-typescript": "4.4.4",
