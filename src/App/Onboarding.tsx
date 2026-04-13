@@ -74,13 +74,13 @@ export function Onboarding() {
 const getStyles = (theme: GrafanaTheme2) => {
   return {
     graphicContainer: css({
-      [theme.breakpoints.up('md')]: {
+      [theme.breakpoints.container.up('md')]: {
         alignSelf: 'flex-end',
         height: 'auto',
         padding: theme.spacing(1),
         width: '300px',
       },
-      [theme.breakpoints.up('lg')]: {
+      [theme.breakpoints.container.up('lg')]: {
         alignSelf: 'flex-end',
         height: 'auto',
         padding: theme.spacing(1),
@@ -105,7 +105,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
     wrap: css({
       position: 'relative',
-      [theme.breakpoints.up('md')]: {
+      [theme.breakpoints.container.up('md')]: {
         flexDirection: 'row',
         margin: '4rem auto auto auto',
       },

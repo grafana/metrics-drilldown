@@ -165,7 +165,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
 
 const getStyles = (theme: GrafanaTheme2) => ({
   button: css({
-    [theme.breakpoints.down('lg')]: {
+    [theme.breakpoints.container.down('lg')]: {
       alignSelf: 'flex-start',
     },
     alignSelf: 'flex-end',

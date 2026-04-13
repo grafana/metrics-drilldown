@@ -193,7 +193,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     actions: css({
-      [theme.breakpoints.up(theme.breakpoints.values.md)]: {
+      [theme.breakpoints.container.up(theme.breakpoints.values.md)]: {
         position: 'absolute',
         right: 0,
         top: 16,
