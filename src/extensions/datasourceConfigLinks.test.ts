@@ -18,7 +18,7 @@ describe('DataSource Configuration Extensions', () => {
       const config = datasourceConfigLinkConfigs[0];
       expect(config.title).toBe('Open in Metrics Drilldown');
       expect(config.description).toContain('Browse metrics in Grafana Metrics Drilldown');
-      expect(config.group).toEqual({ name: 'metrics-drilldown' });
+      expect(config.group).toEqual({ name: 'Metrics drilldown', icon: 'drilldown' });
       expect(config.icon).toBe('drilldown');
       expect(config.path).toContain('/a/grafana-metricsdrilldown-app/drilldown');
     });
