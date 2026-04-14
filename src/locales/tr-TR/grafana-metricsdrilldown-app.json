@@ -225,8 +225,8 @@
   },
   "plugin-info": {
     "button": {
-      "title": "Eklenti bilgisi",
-      "tooltip": "Eklenti bilgisi"
+      "title": "Eklenti bilgileri",
+      "tooltip": "Eklenti bilgileri"
     },
     "header": {
       "last-update": "Son güncelleme: {{updated}}",
@@ -271,7 +271,7 @@
     "time-range-title": "Zaman aralığı"
   },
   "related-logs": {
-    "datasource-description": "Yanıt vermesi {{timeout}} saniyeden uzun sürdüyse bazı Loki veri kaynakları açılır listede görünmeyebilir. Tüm Loki veri kaynaklarının günlüklerini görüntülemek için Logs Drilldown'u kullanmayı deneyin.",
+    "datasource-description": "Yanıt vermesi {{timeout}} saniyeden uzun sürdüyse bazı Loki veri kaynakları açılır listede görünmeyebilir. Tüm Loki veri kaynaklarının günlük kayıtlarını görüntülemek için Logs Drilldown'u kullanmayı deneyin.",
     "datasource-label": "Günlük kayıtları veri kaynağı",
     "experimental-note": "Not: İlgili günlük kayıtları deneysel bir özelliktir.",
     "loading": "Yükleniyor...",
