@@ -11,7 +11,7 @@ export const loadResources: ResourceLoader = async (language: string) => {
 
   try {
     return await import(`../locales/${locale}/grafana-metricsdrilldown-app.json`);
-  } catch (error) {
+  } catch {
     return {};
   }
 };
