@@ -67,7 +67,7 @@
     "title": "致命错误！"
   },
   "extreme-value-filter": {
-    "message": "使用了更复杂的查询重新获取面板数据，以处理系列中的极小值"
+    "message": "使用了更复杂的查询重新获取面板数据，以处理序列中的极小值"
   },
   "fetch-alerting-metrics": {
     "error": "获取警报规则失败"
@@ -192,10 +192,10 @@
     },
     "label": "排序方式",
     "option": {
-      "alerting-usage": "警报使用情况",
+      "alerting-usage": "警报使用量",
       "alphabetical": "按字母顺序 [A-Z]",
       "alphabetical-reversed": "按字母顺序 [Z-A]",
-      "dashboard-usage": "数据面板使用情况",
+      "dashboard-usage": "数据面板使用量",
       "default": "默认"
     }
   },

@@ -296,7 +296,7 @@
   },
   "sidebar": {
     "bookmarks": {
-      "date-created": "Tanggal pembuatan: ",
+      "date-created": "Tanggal pembuatan:",
       "empty-state": "Belum ada bookmark untuk<1></1>sumber data saat ini.",
       "remove-tooltip": "Hapus bookmark"
     },
