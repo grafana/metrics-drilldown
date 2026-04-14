@@ -1,5 +1,7 @@
 import { type ResourceLoader } from '@grafana/i18n';
 
+import { logger } from '../shared/logger/logger';
+
 const FALLBACK_LANGUAGE = 'en-US';
 
 export const loadResources: ResourceLoader = async (language: string) => {
@@ -11,7 +13,8 @@ export const loadResources: ResourceLoader = async (language: string) => {
 
   try {
     return await import(`../locales/${locale}/grafana-metricsdrilldown-app.json`);
-  } catch {
+  } catch (error) {
+    logger.warn(`Failed to load translations for locale "${locale}"`, error);
     return {};
   }
 };

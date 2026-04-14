@@ -1,4 +1,11 @@
+import { logger } from '../../shared/logger/logger';
 import { loadResources } from '../loadResources';
+
+jest.mock('../../shared/logger/logger', () => ({
+  logger: {
+    warn: jest.fn(),
+  },
+}));
 
 describe('loadResources', () => {
   describe('default language short-circuit', () => {
@@ -24,11 +31,15 @@ describe('loadResources', () => {
     });
   });
 
-  describe('fallback behavior', () => {
-    it('should return an empty object when requested language is not found', async () => {
+  describe('missing locale handling', () => {
+    it('should return an empty object and warn when requested language is not found', async () => {
       const result = await loadResources('xx-XX');
 
       expect(result).toEqual({});
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to load translations for locale "xx-XX"'),
+        expect.anything()
+      );
     });
   });
 });
