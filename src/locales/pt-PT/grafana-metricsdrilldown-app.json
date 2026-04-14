@@ -206,7 +206,7 @@
   "onboarding": {
     "learn-more": "Consulte <2>os nossos documentos</2> para saber mais ou<5></5><6>experimente online</6> no Grafana Play!",
     "no-datasource": "Reparámos que não existe uma origem de dados Prometheus configurada.<1></1>Adicione uma <4>origem de dados Prometheus</4> para ver as métricas.",
-    "title": "Boas-vindas ao Grafana Metrics Drilldown"
+    "title": "Boas-vindas à Grafana Metrics Drilldown"
   },
   "open-assistant": {
     "explain-label": "Explicar no Assistente",
@@ -279,7 +279,7 @@
     "no-logs-title": "Não foram encontrados registos relacionados",
     "open-drilldown": "Abrir o Logs Drilldown",
     "open-drilldown-tooltip": "Navegue até à aplicação Logs Drilldown",
-    "open-in-drilldown": "Abrir no Logs Drilldown",
+    "open-in-drilldown": "Abrir na Logs Drilldown",
     "open-in-drilldown-tooltip": "Utilize a aplicação Logs Drilldown para explorar estes registos",
     "suggestions": "Para encontrar registos relacionados, experimente fazer o seguinte:<1><0>Ajuste os seus filtros de etiquetas para incluir etiquetas que existem tanto na métrica atual como nos seus registos</0><1>Selecione uma métrica criada por uma <2>Regra de gravação do Loki</2></1><2>Amplie o intervalo de tempo para incluir mais dados</2></1>"
   },
@@ -292,7 +292,7 @@
   "select-new-metric": {
     "button": "Selecionar nova métrica",
     "metrics-drilldown": "Metrics Drilldown",
-    "open-in-drilldown-tooltip": "Abrir no Metrics Drilldown"
+    "open-in-drilldown-tooltip": "Abrir na Metrics Drilldown"
   },
   "show-more-button": {
     "text_one": "",

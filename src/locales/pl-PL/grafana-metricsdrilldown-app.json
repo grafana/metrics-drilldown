@@ -67,7 +67,7 @@
   "error-view": {
     "message": "Spróbuj <2>odświeżyć stronę</2>, a jeśli problem się powtarza, skontaktuj się z administratorem organizacji. Przepraszamy za niedogodności.",
     "stack-trace-label": "Wyświetl śledzenie stosu",
-    "title": "Błąd krytyczny!"
+    "title": "Błąd krytyczny"
   },
   "extreme-value-filter": {
     "message": "Dane panelu zostały ponownie pobrane za pomocą bardziej złożonego zapytania, aby obsłużyć bardzo małe wartości w szeregu"
