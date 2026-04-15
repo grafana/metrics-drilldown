@@ -26,7 +26,7 @@ export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
     description: EXTENSION_DESCRIPTION,
     targets: [PluginExtensionPoints.DataSourceConfigActions, PluginExtensionPoints.DataSourceConfigStatus],
     icon: 'drilldown',
-    category: 'metrics-drilldown',
+    group: { name: 'Metrics drilldown', icon: 'drilldown' },
     path: createAppUrl(ROUTES.Drilldown),
     configure: (context: DataSourceConfigContext | undefined) => {
       // Validate context and datasource
