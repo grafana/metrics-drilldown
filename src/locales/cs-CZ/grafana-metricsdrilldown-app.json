@@ -66,7 +66,7 @@
   },
   "error-view": {
     "message": "<2>Zkuste stránku znovu načíst</2> nebo, pokud problém přetrvává, kontaktujte správce organizace. Omlouváme se za nepříjemnosti.",
-    "stack-trace-label": "Zobrazit seznam míst s chybou",
+    "stack-trace-label": "Zobrazit trasování stacků",
     "title": "Závažná chyba!"
   },
   "extreme-value-filter": {
@@ -76,7 +76,7 @@
     "error": "Nepodařilo se načíst pravidla pro upozorňování"
   },
   "fetch-dashboard-metrics": {
-    "error": "Nepodařilo se načíst metriky ovládacího panelu",
+    "error": "Nepodařilo se načíst metriky nástěnky",
     "limit-warning-body": "",
     "limit-warning-title": ""
   },
@@ -195,10 +195,10 @@
     },
     "label": "Seřadit podle",
     "option": {
-      "alerting-usage": "Použití upozorňování",
+      "alerting-usage": "Využití upozorňování",
       "alphabetical": "Abecedně [A–Z]",
       "alphabetical-reversed": "Abecedně [Z–A]",
-      "dashboard-usage": "Použití ovládacího panelu",
+      "dashboard-usage": "Využití nástěnky",
       "default": "Výchozí"
     }
   },
@@ -208,7 +208,7 @@
   "onboarding": {
     "learn-more": "Přečtěte si <2>naši dokumentaci</2> a zjistěte víc nebo<5></5><6>to vyzkoušejte online</6> v Grafana Play.",
     "no-datasource": "Všimli jsme si, že není nakonfigurován žádný zdroj dat Prometheus.<1></1>Přidejte <4>zdroj dat Prometheus</4> pro zobrazení metrik.",
-    "title": "Vítejte v Grafana Metrics Drilldown"
+    "title": "Vítejte v Podrobném rozpisu metrik Grafana"
   },
   "open-assistant": {
     "explain-label": "Vysvětlit v asistentovi",
@@ -232,7 +232,7 @@
     },
     "header": {
       "last-update": "Poslední aktualizace: {{updated}}",
-      "title": "Grafana Metrics Drilldown verze {{version}}"
+      "title": "Podrobný rozpis metrik Grafana, verze {{version}}"
     },
     "menu": {
       "changelog": "Seznam změn",
@@ -277,17 +277,17 @@
     "time-range-title": "Časový rozsah"
   },
   "related-logs": {
-    "datasource-description": "Některé zdroje dat Loki mohou v rozevírací nabídce chybět, pokud jejich odezva trvala déle než {{timeout}} sek. Chcete-li zobrazit protokoly pro všechny zdroje dat Loki, zkuste použít funkci Logs Drilldown.",
+    "datasource-description": "Některé zdroje dat Loki mohou v rozevírací nabídce chybět, pokud jejich odezva trvala déle než {{timeout}} sek. Chcete-li zobrazit protokoly pro všechny zdroje dat Loki, zkuste použít Podrobný rozpis protokolů.",
     "datasource-label": "Zdroj dat protokolů",
     "experimental-note": "Poznámka: Související protokoly je experimentální funkce.",
     "loading": "Načítání…",
     "no-logs-message": "Nepodařilo se nám najít žádné protokoly související s aktuální metrikou a vybranými filtry.",
     "no-logs-title": "Nebyly nalezeny žádné související protokoly",
-    "open-drilldown": "Otevřít podrobný přehled protokolů",
-    "open-drilldown-tooltip": "Přejít do aplikace Logs Drilldown",
-    "open-in-drilldown": "Otevřít v aplikaci Logs Drilldown",
-    "open-in-drilldown-tooltip": "K prozkoumání těchto protokolů použijte aplikaci Logs Drilldown",
-    "suggestions": "Chcete-li najít související protokoly, zkuste následující:<1><0>Upravte filtry štítků tak, aby zahrnovaly štítky, které existují v aktuální metrice i ve vašich protokolech</0><1>Vyberte metriku vytvořenou <2>pravidlem záznamu Loki</2></1><2>Rozšiřte časový rozsah tak, aby zahrnoval více dat</2></1>"
+    "open-drilldown": "Otevřít Podrobný rozpis protokolů",
+    "open-drilldown-tooltip": "Přejít do aplikace Podrobný rozpis protokolů",
+    "open-in-drilldown": "Otevřít v Podrobném rozpisu protokolů",
+    "open-in-drilldown-tooltip": "K prozkoumání těchto protokolů použijte aplikaci Podrobný rozpis protokolů",
+    "suggestions": "Chcete-li najít související protokoly, zkuste následující:<1><0>Upravte filtry štítků tak, aby zahrnovaly štítky, které existují v aktuální metrice i ve vašich protokolech</0><1>Vyberte metriku vytvořenou <2>pravidlem nahrávání Loki</2></1><2>Rozšiřte časový rozsah tak, aby zahrnoval více dat</2></1>"
   },
   "related-metrics": {
     "search-aria-label": ""
@@ -297,8 +297,8 @@
   },
   "select-new-metric": {
     "button": "Vyberte novou metriku",
-    "metrics-drilldown": "Metrics Drilldown",
-    "open-in-drilldown-tooltip": "Otevřít v aplikaci Metrics Drilldown"
+    "metrics-drilldown": "Podrobný rozpis metrik",
+    "open-in-drilldown-tooltip": "Otevřít v Podrobném rozpisu metrik"
   },
   "show-more-button": {
     "text_one": "",
@@ -389,14 +389,14 @@
     "metric-used-in-singular_few": "Metrika se používá v {{count}} {{usageType}}",
     "metric-used-in-singular_many": "Metrika se používá v {{count}} {{usageType}}",
     "metric-used-in-singular_other": "Metrika se používá v {{count}} {{usageType}}",
-    "metric-used-plural_one": "Metrika byla použita {{count}}krát v dotazech na ovládacím panelu. Kliknutím zobrazíte ovládací panely.",
-    "metric-used-plural_few": "Metrika byla použita {{count}}krát v dotazech na ovládacím panelu. Kliknutím zobrazíte ovládací panely.",
-    "metric-used-plural_many": "Metrika byla použita {{count}}krát v dotazech na ovládacím panelu. Kliknutím zobrazíte ovládací panely.",
-    "metric-used-plural_other": "Metrika byla použita {{count}}krát v dotazech na ovládacím panelu. Kliknutím zobrazíte ovládací panely.",
-    "metric-used-singular_one": "Metrika byla použita {{count}}krát v dotazech na ovládacím panelu. Kliknutím zobrazíte ovládací panely.",
-    "metric-used-singular_few": "Metrika byla použita {{count}}krát v dotazech na ovládacím panelu. Kliknutím zobrazíte ovládací panely.",
-    "metric-used-singular_many": "Metrika byla použita {{count}}krát v dotazech na ovládacím panelu. Kliknutím zobrazíte ovládací panely.",
-    "metric-used-singular_other": "Metrika byla použita {{count}}krát v dotazech na ovládacím panelu. Kliknutím zobrazíte ovládací panely.",
+    "metric-used-plural_one": "Metrika byla použita {{count}}krát v dotazech na nástěnce. Kliknutím zobrazíte nástěnky.",
+    "metric-used-plural_few": "Metrika byla použita {{count}}krát v dotazech na nástěnce. Kliknutím zobrazíte nástěnky.",
+    "metric-used-plural_many": "Metrika byla použita {{count}}krát v dotazech na nástěnce. Kliknutím zobrazíte nástěnky.",
+    "metric-used-plural_other": "Metrika byla použita {{count}}krát v dotazech na nástěnce. Kliknutím zobrazíte nástěnky.",
+    "metric-used-singular_one": "Metrika byla použita {{count}}krát v dotazech na nástěnce. Kliknutím zobrazíte nástěnky.",
+    "metric-used-singular_few": "Metrika byla použita {{count}}krát v dotazech na nástěnce. Kliknutím zobrazíte nástěnky.",
+    "metric-used-singular_many": "Metrika byla použita {{count}}krát v dotazech na nástěnce. Kliknutím zobrazíte nástěnky.",
+    "metric-used-singular_other": "Metrika byla použita {{count}}krát v dotazech na nástěnce. Kliknutím zobrazíte nástěnky.",
     "used-time-plural_one": "Použito {{count}}krát v {{label}}",
     "used-time-plural_few": "Použito {{count}}krát v {{label}}",
     "used-time-plural_many": "Použito {{count}}krát v {{label}}",

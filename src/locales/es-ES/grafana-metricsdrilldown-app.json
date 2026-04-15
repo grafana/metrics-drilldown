@@ -258,7 +258,7 @@
     "ask-assistant-tooltip": "Preguntar a Grafana Assistant",
     "clear-search-tooltip": "Borrar búsqueda",
     "placeholder": "",
-    "placeholder-question-mode": "Haz una pregunta a Grafana Assistant y pulsa Intro",
+    "placeholder-question-mode": "Haz una pregunta a Grafana Assistant y pulsa Intro.",
     "placeholder-with-assistant": "",
     "placeholder-with-assistant-tab-enter": "",
     "count-filtered_one": "",
@@ -281,7 +281,7 @@
     "open-drilldown-tooltip": "Ir a la aplicación Logs Drilldown",
     "open-in-drilldown": "Abrir en Logs Drilldown",
     "open-in-drilldown-tooltip": "Utilizar la aplicación Logs Drilldown para explorar estos logs",
-    "suggestions": "Para encontrar logs relacionados, prueba lo siguiente:<1><0>Ajusta los filtros de etiquetas para incluir etiquetas que existan tanto en la métrica actual como en tus logs</0><1>Selecciona una métrica creada por una <2>regla de log de Loki</2></1><2>Amplía el intervalo de tiempo para incluir más datos</2></1>"
+    "suggestions": "Para encontrar logs relacionados, prueba lo siguiente:<1><0>Ajusta los filtros de etiquetas para incluir etiquetas que existan tanto en la métrica actual como en tus logs</0><1>Selecciona una métrica creada por una <2>regla de registro de Loki</2></1><2>Amplía el intervalo de tiempo para incluir más datos.</2></1>"
   },
   "related-metrics": {
     "search-aria-label": ""
@@ -377,7 +377,7 @@
     "metric-used-in-plural_other": "La métrica se utiliza en {{count}} {{usageType}}",
     "metric-used-in-singular_one": "La métrica se utiliza en {{count}} {{usageType}}",
     "metric-used-in-singular_other": "La métrica se utiliza en {{count}} {{usageType}}",
-    "metric-used-plural_one": "Métrica utilizada {{count}} veces en consultas del dashboard. Haz clic para ver los dashboards.",
+    "metric-used-plural_one": "Métrica utilizada {{count}} vez en consultas del dashboard. Haz clic para ver los dashboards.",
     "metric-used-plural_other": "Métrica utilizada {{count}} veces en consultas del dashboard. Haz clic para ver los dashboards.",
     "metric-used-singular_one": "Métrica utilizada {{count}} vez en consultas del dashboard. Haz clic para ver los dashboards.",
     "metric-used-singular_other": "Métrica utilizada {{count}} veces en consultas del dashboard. Haz clic para ver los dashboards.",

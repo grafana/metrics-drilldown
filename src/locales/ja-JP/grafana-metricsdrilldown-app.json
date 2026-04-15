@@ -81,7 +81,7 @@
     "label": "フィルタリングされたメトリクス"
   },
   "give-feedback": {
-    "button": "フィードバックを送信",
+    "button": "フィードバックを提供",
     "tooltip": "Grafanaメトリクスについてのご意見をお聞かせください。"
   },
   "gmd-viz-panel": {
@@ -218,7 +218,7 @@
       "explore": "探索"
     },
     "group": {
-      "actions": "アクション",
+      "actions": "操作",
       "navigation": "ナビゲーション"
     }
   },
