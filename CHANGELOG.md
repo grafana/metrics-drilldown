@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.0.2
+
+##### Chores
+
+* **deps:**
+  *  Update dependency @grafana/plugin-e2e to v3.4.12 (#1181) (b0f171a1)
+  *  Update TypeScript and linting (#1184) (181c6fc5)
+*  bump @grafana packages toward 13.0.0 (#1196) (a76ec552)
+
+##### Bug Fixes
+
+*  update related metrics select button to secondary variant (#1192) (912f6f84)
+
+##### Other Changes
+
+*  Download translations from Crowdin (#1197) (1513d73b)
+*  Download translations from Crowdin (#1194) (7849d423)
+
+##### Performance Improvements
+
+* **i18n:**  prevent loading en-US translations at runtime (#1195) (905d7bd1)
+
+
 ## 2.0.1
 
 ##### Chores
