@@ -5,28 +5,28 @@
       "query-results": "",
       "query-results-description": "",
       "related-logs": "관련 로그",
-      "related-logs-description": "현재 레이블 필터 및 시간 범위 기준 관련 로그",
+      "related-logs-description": "현재 라벨 필터 및 시간 범위 기준 관련 로그",
       "related-metrics": "관련 메트릭",
-      "related-metrics-description": "현재 레이블 필터 기준 관련 메트릭"
+      "related-metrics-description": "현재 라벨 필터 기준 관련 메트릭"
     }
   },
   "breakdown": {
     "add-to-filters": "필터에 추가",
-    "by-label": "레이블 기준",
+    "by-label": "라벨 기준",
     "group-by": {
       "label": "그룹 기준"
     },
     "label-values-list": {
       "error-title": "메트릭을 불러오는 중 오류가 발생했습니다!",
-      "no-values": "필터 및 시간 범위에 해당하는 레이블 값이 없습니다.",
+      "no-values": "필터 및 시간 범위에 해당하는 라벨 값이 없습니다.",
       "search-aria-label": "",
       "search-label": "검색",
       "view-label": "보기"
     },
     "labels-list": {
       "breakdown-by-label": "{{label}} 기준으로 세부 분류",
-      "error-title": "레이블을 불러오는 중 오류가 발생했습니다!",
-      "no-labels": "필터 및 시간 범위에 해당하는 레이블이 없습니다.",
+      "error-title": "라벨을 불러오는 중 오류가 발생했습니다!",
+      "no-labels": "필터 및 시간 범위에 해당하는 라벨이 없습니다.",
       "view-label": "보기"
     },
     "section-label": "세부 분류",
@@ -57,7 +57,7 @@
       "title": "Prometheus 함수 구성"
     },
     "filters": {
-      "add-label": "레이블 추가",
+      "add-label": "라벨 추가",
       "label": "필터"
     }
   },
@@ -124,8 +124,8 @@
     "selected": "선택됨: \"{{selectedLabel}}\""
   },
   "labels-variable": {
-    "label": "레이블 기준으로 그룹화",
-    "placeholder": "레이블 기준으로 그룹화..."
+    "label": "라벨 기준으로 그룹화",
+    "placeholder": "라벨 기준으로 그룹화..."
   },
   "layout-switcher": {
     "aria-label": "레이아웃 전환기",
@@ -172,8 +172,8 @@
     }
   },
   "metrics-group-by-list": {
-    "error-title": "레이블 \"{{labelName}}\" 값을 불러오는 중 오류가 발생했습니다!",
-    "no-values": "레이블 \"{{labelName}}\"에 대한 레이블 값을 찾을 수 없습니다."
+    "error-title": "라벨 \"{{labelName}}\" 값을 불러오는 중 오류가 발생했습니다!",
+    "no-values": "라벨 \"{{labelName}}\"에 대한 라벨 값을 찾을 수 없습니다."
   },
   "metrics-group-by-row": {
     "error-title": "메트릭을 불러오는 중 오류가 발생했습니다!",
@@ -236,7 +236,7 @@
       "commit-sha": "SHA 커밋: {{sha}}",
       "contribute": "기여",
       "documentation": "문서",
-      "grafana-version": "Grafana  {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "Grafana {{edition}} v{{version}}({{env}})",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "문제 보고"
     }
@@ -257,14 +257,14 @@
     "ask-assistant-tooltip": "Grafana Assistant에게 문의",
     "clear-search-tooltip": "검색 초기화",
     "placeholder": "",
-    "placeholder-question-mode": "Grafana Assistant에게 질문을 입력하고 엔터 키를 누르세요",
+    "placeholder-question-mode": "Grafana Assistant에 질문 입력 및 Enter 키 누르기",
     "placeholder-with-assistant": "",
     "placeholder-with-assistant-tab-enter": "",
     "count-filtered_other": "",
     "count-total_other": ""
   },
   "quick-search-assistant": {
-    "label-filters-title": "현재 레이블 필터",
+    "label-filters-title": "현재 라벨 필터",
     "time-range-title": "시간 범위"
   },
   "related-logs": {
@@ -326,8 +326,8 @@
     "section": {
       "bookmarks": "북마크",
       "bookmarks-description": "빠른 참조를 위해 저장된 메트릭에 접근하세요",
-      "group-by-labels": "레이블별로 그룹화",
-      "group-by-labels-description": "레이블 값별로 메트릭 그룹화",
+      "group-by-labels": "라벨별로 그룹화",
+      "group-by-labels-description": "라벨 값별로 메트릭 그룹화",
       "prefix-filters": "접두사 필터",
       "prefix-filters-description": "접두사(Prometheus 네임스페이스)기준으로 메트릭 필터링",
       "recent-metrics": "최근 메트릭 필터",
@@ -346,7 +346,7 @@
       "alphabetical-reversed": "이름 [Z-A]",
       "alphabetical-reversed-description": "알파벳 역순",
       "outliers": "이상치 시계열",
-      "outliers-description": "동일 레이블 내에서 다른 값들보다 뚜렷히 다른 동작을 보이는 값을 우선합니다"
+      "outliers-description": "동일 라벨 내에서 다른 값들보다 뚜렷히 다른 동작을 보이는 값을 우선합니다"
     },
     "placeholder": "기준 선택",
     "tooltip": "표준 또는 스마트 시계열 계산을 사용하여 값을 정렬합니다."

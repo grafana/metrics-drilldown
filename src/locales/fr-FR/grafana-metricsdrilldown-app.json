@@ -63,7 +63,7 @@
     }
   },
   "error-view": {
-    "message": "Essayez de <2>recharger la page</2> ou, si le problème persiste, contactez l’administrateur de votre entreprise. Veuillez nous excuser pour la gêne occasionnée.",
+    "message": "Essayez de <2>recharger la page</2> ou, si le problème persiste, contactez l’administrateur de votre organisation. Veuillez nous excuser pour la gêne occasionnée.",
     "stack-trace-label": "Afficher la trace de la stack",
     "title": "Erreur fatale !"
   },
