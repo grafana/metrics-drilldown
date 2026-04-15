@@ -39,14 +39,14 @@
     "@bsull/augurs": "^0.10.1",
     "@emotion/css": "11.13.5",
     "@grafana/assistant": "^0.1.12",
-    "@grafana/data": "^12.4.0",
+    "@grafana/data": "^13.0.0",
     "@grafana/faro-web-sdk": "^2.2.1",
-    "@grafana/i18n": "^12.4.0",
+    "@grafana/i18n": "^13.0.0",
     "@grafana/lezer-logql": "^0.2.9",
     "@grafana/prometheus": "^12.4.0",
     "@grafana/runtime": "^12.4.0",
-    "@grafana/scenes": "^6.52.11",
-    "@grafana/schema": "^12.4.0",
+    "@grafana/scenes": "^7.0.0",
+    "@grafana/schema": "^13.0.0",
     "@grafana/ui": "^12.4.0",
     "@lezer/common": "^1.5.0",
     "@openfeature/ofrep-web-provider": "^0.3.5",
@@ -146,7 +146,10 @@
       "picomatch@^4": "^4.0.4",
       "brace-expansion@^1": "^1.1.13",
       "brace-expansion@^5": "^5.0.5",
-      "yaml": "^2.8.3"
+      "yaml": "^2.8.3",
+      "@grafana/data": "^13.0.0",
+      "@grafana/i18n": "^13.0.0",
+      "@grafana/schema": "^13.0.0"
     }
   }
 }
