@@ -5,6 +5,7 @@ import { compare } from 'compare-versions';
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 
 const CONTAINER_QUERIES_MIN_VERSION = '12.4.0';
+const supportsContainerQueries = !compare(config.buildInfo.version ?? '0.0.0', CONTAINER_QUERIES_MIN_VERSION, '<');
 
 /**
  * Returns the appropriate breakpoints API based on Grafana version.
@@ -12,10 +13,7 @@ const CONTAINER_QUERIES_MIN_VERSION = '12.4.0';
  * and falls back to viewport-based breakpoints (theme.breakpoints) for older versions.
  */
 export function getResponsiveBreakpoints(theme: GrafanaTheme2) {
-  if (compare(config.buildInfo.version ?? '0.0.0', CONTAINER_QUERIES_MIN_VERSION, '<')) {
-    return theme.breakpoints;
-  }
-  return theme.breakpoints.container;
+  return supportsContainerQueries ? theme.breakpoints.container : theme.breakpoints;
 }
 
 export function getAppBackgroundColor(theme: GrafanaTheme2, trail?: DataTrail): string {
