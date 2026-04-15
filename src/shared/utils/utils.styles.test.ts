@@ -7,13 +7,16 @@ const mockTheme = {
   },
 } as unknown as GrafanaTheme2;
 
+type UtilsStylesModule = {
+  getResponsiveBreakpoints: (theme: GrafanaTheme2) => GrafanaTheme2['breakpoints'];
+};
+
 function loadWithVersion(version: string | undefined) {
   jest.resetModules();
   jest.doMock('@grafana/runtime', () => ({
     config: { buildInfo: { version } },
   }));
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require('./utils.styles') as typeof import('./utils.styles');
+  return require('./utils.styles') as UtilsStylesModule;
 }
 
 describe('getResponsiveBreakpoints', () => {
