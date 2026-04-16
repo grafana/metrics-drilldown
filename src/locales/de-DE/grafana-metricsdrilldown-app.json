@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Aufschlüsselung",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Abfrageergebnisse",
+      "query-results-description": "Instant-Abfragedaten im Tabellenformat",
       "related-logs": "Zugehörige Logs",
       "related-logs-description": "Relevante Logs basieren auf aktuellen Label-Filtern und dem Zeitbereich",
       "related-metrics": "Zugehörige Metriken",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Beim Laden der Metriken ist ein Fehler aufgetreten!",
       "no-values": "Für die aktuellen Filter und den Zeitbereich wurden keine Label-Werte gefunden.",
-      "search-aria-label": "",
+      "search-aria-label": "Label-Werte für die Schnellsuche",
       "search-label": "Suchen",
       "view-label": "Anzeigen"
     },
@@ -75,8 +75,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Dashboard-Metriken konnten nicht abgerufen werden.",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Ihre Organisation hat mehr Dashboards, als diese Grenze zulässt. Die Nutzungszählungen sind möglicherweise unvollständig.",
+    "limit-warning-title": "Die Sortierung der Dashboard-Nutzung ist auf 500 Dashboards beschränkt."
   },
   "filtered-metrics-variable": {
     "label": "Gefilterte Metriken"
@@ -97,21 +97,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Insights – {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "KG-Assertionen – {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Kritisch",
+      "info": "Info",
+      "warning": "Warnung"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Überlagern Sie Integritätszustände (kritisch, Warnung, Info) aus dem Wissensgraphen in Zeitreihen-Panels.",
+      "disabled-tooltip": "Fügen Sie Label-Filter hinzu, um Entitäten abzugleichen.",
+      "label": "Insights",
+      "learn-more": "Mehr erfahren"
     }
   },
   "labels-datasource": {
@@ -140,35 +140,35 @@
     "fallback": "Wird geladen …"
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Metriken für die Schnellsuche"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Keine gespeicherten Abfragen zum Laden vorhanden",
+        "button-tooltip": "Gespeicherte Abfrage laden",
+        "empty": "Keine gespeicherten Abfragen zum Anzeigen vorhanden.",
+        "load-error": "Diese Abfrage enthält Ausdrücke, die in Metrics Drilldown nicht dargestellt werden können. Es werden nur einfache Metrik{label}-Selektoren unterstützt.",
+        "load-type-error": "Bitte wählen Sie eine Prometheus-Abfrage aus.",
+        "modal-title": "Zuvor gespeicherte Abfrage laden",
+        "remove": "Entfernen",
+        "saved-query-button-tooltip": "Gespeicherte Abfrage laden",
+        "select": "Auswählen"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Es gibt eine zuvor gespeicherte Abfrage mit demselben Ausdruck: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Abfrage speichern",
+        "button-tooltip-saved-queries": "In „Gespeicherte Abfragen“ speichern",
+        "cancel": "Abbrechen",
+        "description": "Beschreibung",
+        "error": "Beim Speichern dieser Abfrage ist ein unerwarteter Fehler aufgetreten.",
+        "modal-alert": "Gespeicherte Abfragen werden lokal in Ihrem Browser gespeichert und sind nur auf diesem Gerät verfügbar.",
+        "modal-title": "Aktuelle Abfrage speichern",
+        "save": "Speichern",
+        "success": "Abfrage erfolgreich gespeichert.",
+        "title": "Titel"
       }
     }
   },
@@ -248,23 +248,23 @@
     "view-by-label": "Anzeigen nach"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Sofortige Abfrageergebnisse",
+    "error-title": "Abfrage fehlgeschlagen",
+    "unavailable-message": "Für diese Funktion ist eine neuere Version von Grafana erforderlich.",
+    "unavailable-title": "Komponente „Abfrageergebnisse“ nicht verfügbar"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Fragen Sie Grafana Assistant",
     "ask-assistant-tooltip": "Fragen Sie Grafana Assistant",
     "clear-search-tooltip": "Suche löschen",
-    "placeholder": "",
+    "placeholder": "{{targetName}} suchen",
     "placeholder-question-mode": "Stellen Sie Grafana Assistant eine Frage und drücken Sie die Eingabetaste",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Suchen Sie nach {{targetName}} oder geben Sie „?“ ein, um den Grafana Assistant zu befragen.",
+    "placeholder-with-assistant-tab-enter": "Führen Sie eine Suche nach {{targetName}} durch oder drücken Sie die Tabulator- und anschließend die Eingabetaste, um den Grafana Assistant zu fragen.",
+    "count-filtered_one": "{{targetName}}: {{count}} von {{total}} insgesamt",
+    "count-filtered_other": "{{targetName}}: {{count}} von {{total}} insgesamt",
+    "count-total_one": "{{targetName}}: {{count}} insgesamt",
+    "count-total_other": "{{targetName}}: {{count}} insgesamt"
   },
   "quick-search-assistant": {
     "label-filters-title": "Aktuelle Label-Filter",
@@ -284,7 +284,7 @@
     "suggestions": "Um zugehörige Logs zu finden, versuchen Sie bitte Folgendes:<1><0>Passen Sie Ihre Label-Filter an, um Labels zu berücksichtigen, die sowohl in der aktuellen Metrik als auch in Ihren Logs vorhanden sind.</0><1>Wählen Sie eine Metrik, die von einer <2>Loki-Aufnahmeregel erstellt wurde.</2></1><2>Erweitern Sie den Zeitbereich, um mehr Daten zu berücksichtigen.</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Zugehörige Metriken für die Schnellsuche"
   },
   "select-action": {
     "button": "Auswählen"
@@ -295,8 +295,8 @@
     "open-in-drilldown-tooltip": "In Metrics Drilldown öffnen"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_other": ""
+    "text_one": "Anzeige von {{count}} weiteren ({{current}}/{{total}})",
+    "text_other": "Anzeige von {{count}} weiteren ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -309,7 +309,7 @@
     "filter": {
       "clear-search-tooltip": "Suche löschen",
       "hide-empty": "Leere ausblenden",
-      "search-aria-label": "",
+      "search-aria-label": "Suchfilteroptionen",
       "search-placeholder": "Suche …"
     },
     "filter-type": {
@@ -320,7 +320,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Suche löschen",
-      "search-aria-label": "",
+      "search-aria-label": "Labels suchen",
       "search-placeholder": "Suche …"
     },
     "recent-metrics": {

@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "세부 분류",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "쿼리 결과",
+      "query-results-description": "테이블 형식의 인스턴트 쿼리 데이터",
       "related-logs": "관련 로그",
       "related-logs-description": "현재 라벨 필터 및 시간 범위 기준 관련 로그",
       "related-metrics": "관련 메트릭",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "메트릭을 불러오는 중 오류가 발생했습니다!",
       "no-values": "필터 및 시간 범위에 해당하는 라벨 값이 없습니다.",
-      "search-aria-label": "",
+      "search-aria-label": "빠른 라벨 값 검색",
       "search-label": "검색",
       "view-label": "보기"
     },
@@ -74,8 +74,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "대시보드 메트릭 가져오기 실패",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "조직에 있는 대시보드 수가 이 한도를 초과했습니다. 사용 횟수가 불완전할 수 있습니다.",
+    "limit-warning-title": "대시보드 사용량 정렬은 500개 대시보드로 제한됩니다."
   },
   "filtered-metrics-variable": {
     "label": "필터링된 메트릭"
@@ -96,21 +96,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "인사이트 - {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "KG 어설션 - {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "중요",
+      "info": "정보",
+      "warning": "경고"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "시계열 패널에 Knowledge Graph의 상태(중요, 경고, 정보)를 오버레이합니다.",
+      "disabled-tooltip": "엔터티와 일치하도록 라벨 필터를 추가합니다.",
+      "label": "인사이트",
+      "learn-more": "자세히 알아보기"
     }
   },
   "labels-datasource": {
@@ -139,35 +139,35 @@
     "fallback": "로딩 중..."
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "빠른 검색 메트릭"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "불러올 저장된 쿼리가 없음",
+        "button-tooltip": "저장된 쿼리 불러오기",
+        "empty": "표시할 저장된 쿼리가 없습니다.",
+        "load-error": "이 쿼리에는 메트릭 드릴다운에서 표시할 수 없는 식이 포함되어 있습니다. 간단한 메트릭{label} 선택기만 지원됩니다.",
+        "load-type-error": "Prometheus 쿼리를 선택해 주세요.",
+        "modal-title": "이전에 저장된 쿼리 불러오기",
+        "remove": "제거",
+        "saved-query-button-tooltip": "저장된 쿼리 불러오기",
+        "select": "선택"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "동일한 식을 가진 이전에 저장된 쿼리가 있음: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "쿼리 저장",
+        "button-tooltip-saved-queries": "저장된 쿼리에 저장",
+        "cancel": "취소",
+        "description": "설명",
+        "error": "이 쿼리를 저장하는 동안 예기치 않은 오류가 발생했습니다.",
+        "modal-alert": "저장된 쿼리는 브라우저에 로컬로 저장되며 이 기기에서만 사용할 수 있습니다.",
+        "modal-title": "현재 쿼리 저장",
+        "save": "저장",
+        "success": "쿼리가 성공적으로 저장되었습니다.",
+        "title": "제목"
       }
     }
   },
@@ -247,21 +247,21 @@
     "view-by-label": "보기 기준"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "즉각적인 쿼리 결과",
+    "error-title": "쿼리 실패",
+    "unavailable-message": "이 기능을 사용하려면 최신 버전의 Grafana가 필요합니다.",
+    "unavailable-title": "쿼리 결과 구성 요소를 사용할 수 없음"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Grafana Assistant에게 문의",
     "ask-assistant-tooltip": "Grafana Assistant에게 문의",
     "clear-search-tooltip": "검색 초기화",
-    "placeholder": "",
+    "placeholder": "{{targetName}} 검색",
     "placeholder-question-mode": "Grafana Assistant에 질문 입력 및 Enter 키 누르기",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_other": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "{{targetName}} 검색 또는 ? 입력을 통해 Grafana Assistant에 질문하기",
+    "placeholder-with-assistant-tab-enter": "{{targetName}} 검색 또는 Tab 키를 누른 다음 Enter 키를 눌러 Grafana Assistant에 질문하기",
+    "count-filtered_other": "{{targetName}}: 총 {{total}}개 중 {{count}}개",
+    "count-total_other": "{{targetName}}: 총 {{count}}개"
   },
   "quick-search-assistant": {
     "label-filters-title": "현재 라벨 필터",
@@ -281,7 +281,7 @@
     "suggestions": "관련 로그를 찾으려면 다음을 시도해 보세요.<1><0>현재 메트릭과 로그에 존재하는 라벨을 포함하도록 라벨 필터를 조정하세요.</0><1> <2>Loki 기록 규칙</2>에 의해 생성된 메트릭을 선택하세요.</1><2>더 많은 데이터가 포함되도록 시간 범위를 확장하세요.</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "관련 메트릭 빠른 검색"
   },
   "select-action": {
     "button": "선택"
@@ -292,7 +292,7 @@
     "open-in-drilldown-tooltip": "메트릭 드릴다운에서 열기"
   },
   "show-more-button": {
-    "text_other": ""
+    "text_other": "{{count}}개 더 표시({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -305,7 +305,7 @@
     "filter": {
       "clear-search-tooltip": "검색 초기화",
       "hide-empty": "빈 항목 숨기기",
-      "search-aria-label": "",
+      "search-aria-label": "검색 필터 옵션",
       "search-placeholder": "검색..."
     },
     "filter-type": {
@@ -316,7 +316,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "검색 초기화",
-      "search-aria-label": "",
+      "search-aria-label": "라벨 검색",
       "search-placeholder": "검색..."
     },
     "recent-metrics": {

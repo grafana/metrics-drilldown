@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Részletezés",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Lekérdezési eredmények",
+      "query-results-description": "Azonnali lekérdezési adatok táblázatos formában",
       "related-logs": "Kapcsolódó naplók",
       "related-logs-description": "Releváns naplók az aktuális címkeszűrők és időtartomány alapján",
       "related-metrics": "Kapcsolódó metrikák",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Hiba történt a metrikák betöltésekor!",
       "no-values": "Nem található címkeérték az aktuális szűrőkhöz és időtartományhoz.",
-      "search-aria-label": "",
+      "search-aria-label": "Címkeértékek gyorskeresése",
       "search-label": "Keresés",
       "view-label": "Nézet"
     },
@@ -75,8 +75,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Az irányítópult-metrikák lekérése nem sikerült",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "A szervezeténél a műszerfalak száma meghaladja ezt a korlátot. Előfordulhat, hogy a használati statisztikák nem teljesek.",
+    "limit-warning-title": "A műszerfalhasználat szerinti rendezés legfeljebb 500 elemre korlátozott."
   },
   "filtered-metrics-variable": {
     "label": "Szűrt metrikák"
@@ -97,21 +97,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Adatok – {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "KG-állítások – {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Kritikus",
+      "info": "Tájékoztatás",
+      "warning": "Figyelmeztetés"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "A Knowledge Graphból származó állapotok (kritikus, figyelmeztetés, tájékoztatás) megjelenítése az idősoros paneleken.",
+      "disabled-tooltip": "Címkeszűrők hozzáadása az entitások párosításához.",
+      "label": "Adatok",
+      "learn-more": "További információk"
     }
   },
   "labels-datasource": {
@@ -140,35 +140,35 @@
     "fallback": "Betöltés…"
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Metrikák gyorskeresése"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Nincsenek betölthető mentett lekérdezések",
+        "button-tooltip": "Mentett lekérdezés betöltése",
+        "empty": "Nincsenek megjeleníthető mentett lekérdezések.",
+        "load-error": "Ez a lekérdezés olyan kifejezéseket tartalmaz, amelyeket a Metrics Drilldown nem tud megjeleníteni. Csak az egyszerű metrika{címke} választók támogatottak.",
+        "load-type-error": "Válasszon ki egy Prometheus-lekérdezést.",
+        "modal-title": "Korábban mentett lekérdezés betöltése",
+        "remove": "Eltávolítás",
+        "saved-query-button-tooltip": "Mentett lekérdezés betöltése",
+        "select": "Kiválasztás"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Már létezik egy korábban mentett lekérdezés ugyanezzel a kifejezéssel: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Lekérdezés mentése",
+        "button-tooltip-saved-queries": "Mentés a mentett lekérdezések közé",
+        "cancel": "Mégse",
+        "description": "Leírás",
+        "error": "Váratlan hiba történt a lekérdezés mentése közben.",
+        "modal-alert": "A mentett lekérdezéseket a böngésző helyileg tárolja, így azok csak ezen az eszközön lesznek elérhetőek.",
+        "modal-title": "Aktuális lekérdezés mentése",
+        "save": "Mentés",
+        "success": "Lekérdezés sikeresen mentve.",
+        "title": "Cím"
       }
     }
   },
@@ -248,23 +248,23 @@
     "view-by-label": "Megjelenítés alapja"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Azonnali lekérdezési eredmények",
+    "error-title": "Sikertelen lekérdezés",
+    "unavailable-message": "Ehhez a funkcióhoz a Grafana újabb verziójára van szükség.",
+    "unavailable-title": "A lekérdezési eredmények összetevője nem érhető el"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Kérdezze a Grafana Asszisztenst",
     "ask-assistant-tooltip": "Kérdezze a Grafana Asszisztenst",
     "clear-search-tooltip": "Keresés törlése",
-    "placeholder": "",
+    "placeholder": "Keresés: {{targetName}}",
     "placeholder-question-mode": "Tegyen fel egy kérdést a Grafana Asszisztensnek, és nyomja le az Enter gombot",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Keressen a(z) {{targetName}} elemei között, vagy írjon be egy kérdőjelet a Grafana Asszisztens indításához",
+    "placeholder-with-assistant-tab-enter": "Keressen a(z) {{targetName}} elemei között, vagy nyomja le a Tab, majd az Enter billentyűt a Grafana Asszisztens indításához",
+    "count-filtered_one": "{{targetName}}: összesen {{count}}/{{total}}",
+    "count-filtered_other": "{{targetName}}: összesen {{count}}/{{total}}",
+    "count-total_one": "{{targetName}}: összesen {{count}}",
+    "count-total_other": "{{targetName}}: összesen {{count}}"
   },
   "quick-search-assistant": {
     "label-filters-title": "Jelenlegi címkeszűrők",
@@ -284,7 +284,7 @@
     "suggestions": "A kapcsolódó naplók megkereséséhez próbálkozzon a következőkkel:<1><0>Állítsa be a címkeszűrőket úgy, hogy tartalmazzák az aktuális metrikában és a naplókban is megtalálható címkéket</0><1>Válasszon ki egy <2>Loki-felvételkészítési szabály</2> által létrehozott metrikát</1><2>Bővítse az időtartományt, hogy több adatot tartalmazzon</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Kapcsolódó metrikák gyorskeresése"
   },
   "select-action": {
     "button": "Kiválasztás"
@@ -295,8 +295,8 @@
     "open-in-drilldown-tooltip": "Megnyitás a Metrics Drilldownban"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_other": ""
+    "text_one": "További {{count}} megjelenítése ({{current}}/{{total}})",
+    "text_other": "További {{count}} megjelenítése ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -309,7 +309,7 @@
     "filter": {
       "clear-search-tooltip": "Keresés törlése",
       "hide-empty": "Üres elrejtése",
-      "search-aria-label": "",
+      "search-aria-label": "Keresési szűrőbeállítások",
       "search-placeholder": "Keresés…"
     },
     "filter-type": {
@@ -320,7 +320,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Keresés törlése",
-      "search-aria-label": "",
+      "search-aria-label": "Címkék keresése",
       "search-placeholder": "Keresés…"
     },
     "recent-metrics": {

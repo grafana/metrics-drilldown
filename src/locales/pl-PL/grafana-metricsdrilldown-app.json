@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Zestawienie",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Wyniki zapytania",
+      "query-results-description": "Dane z zapytania natychmiastowego w formacie tabeli",
       "related-logs": "Powiązane logi",
       "related-logs-description": "Odpowiednie logi na podstawie bieżących filtrów etykiet i zakresu czasu",
       "related-metrics": "Powiązane wskaźniki",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Błąd podczas wczytywania wskaźników",
       "no-values": "Nie znaleziono wartości etykiet dla bieżących filtrów i zakresu czasu.",
-      "search-aria-label": "",
+      "search-aria-label": "Szybkie wyszukiwanie wartości etykiet",
       "search-label": "Szukaj",
       "view-label": "Wyświetl"
     },
@@ -77,8 +77,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Nie udało się pobrać wskaźników pulpitu",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Liczba pulpitów w Twojej organizacji przekracza ten limit. Dane dotyczące wykorzystania mogą być niekompletne.",
+    "limit-warning-title": "Sortowanie według wykorzystania jest ograniczone do 500 pulpitów."
   },
   "filtered-metrics-variable": {
     "label": "Przefiltrowane wskaźniki"
@@ -99,21 +99,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Analizy – {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "Asercje KG – {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Krytyczne",
+      "info": "Informacje",
+      "warning": "Ostrzeżenie"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Nakładanie stanów (krytyczny, ostrzeżenie, informacja) z grafu wiedzy na panele szeregów czasowych.",
+      "disabled-tooltip": "Dodaj filtry etykiet, aby dopasować encje.",
+      "label": "Analizy",
+      "learn-more": "Dowiedz się więcej"
     }
   },
   "labels-datasource": {
@@ -142,35 +142,35 @@
     "fallback": "Wczytywanie…"
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Szybkie wyszukiwanie wskaźników"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Brak zapisanych zapytań do wczytania",
+        "button-tooltip": "Wczytaj zapisane zapytanie",
+        "empty": "Brak zapisanych zapytań do wyświetlenia.",
+        "load-error": "To zapytanie zawiera wyrażenia, których nie można przedstawić w aplikacji Metrics Drilldown. Obsługiwane są tylko proste selektory metric{label}.",
+        "load-type-error": "Wybierz zapytanie Prometheus.",
+        "modal-title": "Wczytaj zapisane wcześniej zapytanie",
+        "remove": "Usuń",
+        "saved-query-button-tooltip": "Wczytaj zapisane zapytanie",
+        "select": "Wybierz"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Istnieje już zapisane zapytanie z tym samym wyrażeniem: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Zapisz zapytanie",
+        "button-tooltip-saved-queries": "Dodaj do zapisanych zapytań",
+        "cancel": "Anuluj",
+        "description": "Opis",
+        "error": "Podczas zapisywania tego zapytania wystąpił nieoczekiwany błąd.",
+        "modal-alert": "Zapisane zapytania są przechowywane lokalnie w przeglądarce i będą dostępne tylko na tym urządzeniu.",
+        "modal-title": "Zapisz bieżące zapytanie",
+        "save": "Zapisz",
+        "success": "Zapytanie zostało zapisane.",
+        "title": "Tytuł"
       }
     }
   },
@@ -250,27 +250,27 @@
     "view-by-label": "Wyświetl według"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Wyniki zapytania natychmiastowego",
+    "error-title": "Zapytanie się nie powiodło",
+    "unavailable-message": "Ta funkcja wymaga nowszej wersji usługi Grafana.",
+    "unavailable-title": "Komponent „Wyniki zapytania” jest niedostępny"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Zapytaj Asystenta Grafany",
     "ask-assistant-tooltip": "Zapytaj Asystenta Grafany",
     "clear-search-tooltip": "Wyczyść wyszukiwanie",
-    "placeholder": "",
+    "placeholder": "Szukaj: {{targetName}}",
     "placeholder-question-mode": "Zadaj pytanie Asystentowi Grafany i naciśnij klawisz Enter",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_few": "",
-    "count-filtered_many": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_few": "",
-    "count-total_many": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Wyszukaj „{{targetName}}” lub wpisz ?, aby zapytać Asystenta Grafany",
+    "placeholder-with-assistant-tab-enter": "Wyszukaj „{{targetName}}” lub naciśnij klawisz Tab, a następnie Enter, aby zapytać Asystenta Grafany",
+    "count-filtered_one": "{{targetName}}: {{count}} z {{total}} elementów łącznie",
+    "count-filtered_few": "{{targetName}}: {{count}} z {{total}} elementów łącznie",
+    "count-filtered_many": "{{targetName}}: {{count}} z {{total}} elementów łącznie",
+    "count-filtered_other": "{{targetName}}: {{count}} z {{total}} elementów łącznie",
+    "count-total_one": "{{targetName}}: {{count}} element łącznie",
+    "count-total_few": "{{targetName}}: {{count}} elementy łącznie",
+    "count-total_many": "{{targetName}}: {{count}} elementów łącznie",
+    "count-total_other": "{{targetName}}: {{count}} elementu łącznie"
   },
   "quick-search-assistant": {
     "label-filters-title": "Bieżące filtry etykiet",
@@ -290,7 +290,7 @@
     "suggestions": "Aby znaleźć powiązane logi, spróbuj wykonać następujące czynności:<1><0>Dostosuj filtry etykiet, aby uwzględnić etykiety, które istnieją zarówno w bieżącej metryce, jak i w logach.</0><1>Wybierz metrykę utworzoną przez <2>Regułę rejestracji Loki</2></1><2>Poszerz zakres czasu, aby uwzględnić więcej danych.</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Szybkie wyszukiwanie powiązanych wskaźników"
   },
   "select-action": {
     "button": "Wybierz"
@@ -301,10 +301,10 @@
     "open-in-drilldown-tooltip": "Otwórz w aplikacji Metrics Drilldown"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_few": "",
-    "text_many": "",
-    "text_other": ""
+    "text_one": "Pokaż jeszcze {{count}} ({{current}}/{{total}})",
+    "text_few": "Pokaż jeszcze {{count}} ({{current}}/{{total}})",
+    "text_many": "Pokaż jeszcze {{count}} ({{current}}/{{total}})",
+    "text_other": "Pokaż jeszcze {{count}} ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -317,7 +317,7 @@
     "filter": {
       "clear-search-tooltip": "Wyczyść wyszukiwanie",
       "hide-empty": "Ukryj puste",
-      "search-aria-label": "",
+      "search-aria-label": "Opcje filtrów wyszukiwania",
       "search-placeholder": "Szukaj…"
     },
     "filter-type": {
@@ -328,7 +328,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Wyczyść wyszukiwanie",
-      "search-aria-label": "",
+      "search-aria-label": "Szukaj etykiet",
       "search-placeholder": "Szukaj…"
     },
     "recent-metrics": {
