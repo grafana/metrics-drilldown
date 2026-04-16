@@ -36,7 +36,7 @@ export function isKgAnnotationsAvailable(): boolean {
 function getSeverities() {
   return [
     { value: 'critical', color: 'red', label: t('kg-annotations.severity.critical', 'Critical') },
-    { value: 'warning', color: 'orange', label: t('kg-annotations.severity.warning', 'Warning') },
+    { value: 'warning', color: 'yellow', label: t('kg-annotations.severity.warning', 'Warning') },
     { value: 'info', color: 'blue', label: t('kg-annotations.severity.info', 'Info') },
   ];
 }
