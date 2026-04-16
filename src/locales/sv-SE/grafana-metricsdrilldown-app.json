@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Uppdelning",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Frågeresultat",
+      "query-results-description": "Direktfrågedata i tabellformat",
       "related-logs": "Relaterade loggar",
       "related-logs-description": "Relevanta loggar baserat på aktuella etikettfilter och tidsintervall",
       "related-metrics": "Relaterade mätvärden",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Fel vid laddning av mätvärden!",
       "no-values": "Inga etikettvärden hittades för de aktuella filtren och tidsintervallet.",
-      "search-aria-label": "",
+      "search-aria-label": "Snabbsök etikettvärden",
       "search-label": "Sök",
       "view-label": "Visa"
     },
@@ -75,8 +75,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Det gick inte att hämta instrumentpanelmätvärden",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Din organisation har fler instrumentpaneler än denna gräns. Användningsantalen kan vara ofullständiga.",
+    "limit-warning-title": "Sorteringen av instrumentpanelens användning är begränsad till 500 instrumentpaneler."
   },
   "filtered-metrics-variable": {
     "label": "Filtrerade mätvärden"
@@ -97,21 +97,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Insikter – {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "KG-påståenden – {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Kritisk",
+      "info": "Information",
+      "warning": "Varning"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Lägg till hälsotillstånd (kritisk, varning, information) från kunskapsdiagrammet på tidsseriepaneler.",
+      "disabled-tooltip": "Lägg till etikettfilter för att matcha enheter.",
+      "label": "Insikter",
+      "learn-more": "Läs mer"
     }
   },
   "labels-datasource": {
@@ -140,35 +140,35 @@
     "fallback": "Laddar …"
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Snabbsök mätvärden"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Inga sparade frågor att ladda",
+        "button-tooltip": "Läs in sparad fråga",
+        "empty": "Inga sparade frågor att visa.",
+        "load-error": "Denna fråga innehåller uttryck som inte kan återges i Metrics Drilldown. Endast enkla {label}-väljare för mätvärden stöds.",
+        "load-type-error": "Välj en Prometheus-fråga.",
+        "modal-title": "Läs in en tidigare sparad fråga",
+        "remove": "Ta bort",
+        "saved-query-button-tooltip": "Läs in sparad fråga",
+        "select": "Välj"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Det finns en tidigare sparad fråga med samma uttryck: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Spara fråga",
+        "button-tooltip-saved-queries": "Spara i Sparade frågor",
+        "cancel": "Avbryt",
+        "description": "Beskrivning",
+        "error": "Ett oväntat fel uppstod när denna fråga skulle sparas.",
+        "modal-alert": "Sparade frågor lagras lokalt i din webbläsare och kommer endast att vara tillgängliga på den här enheten.",
+        "modal-title": "Spara aktuell fråga",
+        "save": "Spara",
+        "success": "Förfrågan har sparats.",
+        "title": "Titel"
       }
     }
   },
@@ -248,23 +248,23 @@
     "view-by-label": "Visa efter"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Omedelbara frågeresultat",
+    "error-title": "Frågan misslyckades",
+    "unavailable-message": "Denna funktion kräver en nyare version av Grafana.",
+    "unavailable-title": "Resultatkomponenten är inte tillgänglig"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Fråga Grafana-assistenten",
     "ask-assistant-tooltip": "Fråga Grafana-assistenten",
     "clear-search-tooltip": "Rensa sökningen",
-    "placeholder": "",
+    "placeholder": "Sök {{targetName}}",
     "placeholder-question-mode": "Ställ en fråga till Grafana-assistenten och tryck på enter",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Sök {{targetName}} eller skriv ? för att fråga Grafana-assistenten",
+    "placeholder-with-assistant-tab-enter": "Sök {{targetName}} eller tryck på tab och sedan på enter för att fråga Grafana-assistenten",
+    "count-filtered_one": "{{targetName}}: {{count}} av {{total}} totalt",
+    "count-filtered_other": "{{targetName}}: {{count}} av {{total}} totalt",
+    "count-total_one": "{{targetName}}: {{count}} totalt",
+    "count-total_other": "{{targetName}}: {{count}} totalt"
   },
   "quick-search-assistant": {
     "label-filters-title": "Nuvarande etikettfilter",
@@ -284,7 +284,7 @@
     "suggestions": "Hitta relaterade loggar genom att prova följande:<1><0>Justera etikettfiltren för att inkludera etiketter som finns i både den aktuella statistiken och dina loggar</0><1>Välj en statistik skapad av en <2>Loki-inspelningsregel</2></1><2>Bredda tidsintervallet för att inkludera mer data</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Snabbsök relaterade mätvärden"
   },
   "select-action": {
     "button": "Välj"
@@ -295,8 +295,8 @@
     "open-in-drilldown-tooltip": "Öppna i Metrics Drilldown"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_other": ""
+    "text_one": "Visa {{count}} till ({{current}}/{{total}})",
+    "text_other": "Visa {{count}} till ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -309,7 +309,7 @@
     "filter": {
       "clear-search-tooltip": "Rensa sökningen",
       "hide-empty": "Dölj tomma",
-      "search-aria-label": "",
+      "search-aria-label": "Sökfilteralternativ",
       "search-placeholder": "Sök …"
     },
     "filter-type": {
@@ -320,7 +320,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Rensa sökningen",
-      "search-aria-label": "",
+      "search-aria-label": "Sök etiketter",
       "search-placeholder": "Sök …"
     },
     "recent-metrics": {

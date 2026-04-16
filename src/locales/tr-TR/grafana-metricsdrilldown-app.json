@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Kırılım",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Sorgu Sonuçları",
+      "query-results-description": "Tablo biçiminde anlık sorgu verileri",
       "related-logs": "İlgili günlük kayıtları",
       "related-logs-description": "Geçerli etiket filtrelerine ve zaman aralığına göre ilgili günlük kayıtları",
       "related-metrics": "İlgili metrikler",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Metrikler yüklenirken hata oluştu.",
       "no-values": "Geçerli filtreler ve zaman aralığı için etiket değeri bulunamadı.",
-      "search-aria-label": "",
+      "search-aria-label": "Hızlı etiket değeri araması",
       "search-label": "Ara",
       "view-label": "Göster"
     },
@@ -75,8 +75,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Pano metrikleri alınamadı",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Kuruluşunuzun bu sınırın üzerinde panosu var. Kullanım sayıları eksik olabilir.",
+    "limit-warning-title": "Pano kullanım sıralaması 500 panoyla sınırlıdır."
   },
   "filtered-metrics-variable": {
     "label": "Filtrelenmiş Metrikler"
@@ -97,21 +97,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "İçgörüler - {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "KG Doğrulamaları - {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Kritik",
+      "info": "Bilgi",
+      "warning": "Uyarı"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Bilgi Grafiği'nden alınan sağlık durumlarını (kritik, uyarı, bilgi) zaman serisi panelleri üzerinde gösterin.",
+      "disabled-tooltip": "Varlıklarla eşleşmesi için etiket filtreleri ekleyin.",
+      "label": "İçgörüler",
+      "learn-more": "Daha fazla bilgi edinin"
     }
   },
   "labels-datasource": {
@@ -140,35 +140,35 @@
     "fallback": "Yükleniyor..."
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Metrikleri hızlıca arayın"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Yüklenecek kayıtlı sorgu yok",
+        "button-tooltip": "Kaydedilen sorguyu yükle",
+        "empty": "Görüntülenecek kayıtlı sorgu yok.",
+        "load-error": "Bu sorgu, Metrics Drilldown içinde gösterilemeyen ifadeler içeriyor. Yalnızca basit metrik{label} seçicileri desteklenir.",
+        "load-type-error": "Lütfen bir Prometheus sorgusu seçin.",
+        "modal-title": "Daha önce kaydedilmiş bir sorguyu yükleyin",
+        "remove": "Kaldır",
+        "saved-query-button-tooltip": "Kaydedilen sorguyu yükle",
+        "select": "Seçin"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Aynı ifadeye sahip, daha önceden kaydedilmiş bir sorgu var: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Sorguyu kaydet",
+        "button-tooltip-saved-queries": "Kayıtlı Sorgular'a kaydet",
+        "cancel": "İptal et",
+        "description": "Açıklama",
+        "error": "Bu sorgu kaydedilirken beklenmeyen bir hata oluştu.",
+        "modal-alert": "Kayıtlı sorgular tarayıcınızda yerel olarak depolanır ve yalnızca bu cihazda kullanılabilir.",
+        "modal-title": "Geçerli sorguyu kaydet",
+        "save": "Kaydet",
+        "success": "Bu sorgu başarıyla kaydedildi.",
+        "title": "Başlık"
       }
     }
   },
@@ -248,23 +248,23 @@
     "view-by-label": "Görüntüleme ölçütü"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Anlık sorgu sonuçları",
+    "error-title": "Sorgu başarısız oldu",
+    "unavailable-message": "Bu özellik için Grafana'nın daha yeni bir sürümü gerekir.",
+    "unavailable-title": "Sorgu Sonuçları bileşeni kullanılamıyor"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Grafana Asistanına sorun",
     "ask-assistant-tooltip": "Grafana Asistanına sorun",
     "clear-search-tooltip": "Aramayı temizle",
-    "placeholder": "",
+    "placeholder": "{{targetName}} ara",
     "placeholder-question-mode": "Grafana Asistanına bir soru sorun ve Enter tuşuna basın",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "{{targetName}} arayın veya Grafana Asistanına sormak için ? yazın",
+    "placeholder-with-assistant-tab-enter": "{{targetName}} arayın veya Grafana Asistanına sormak için Tab ve ardından Enter tuşuna basın",
+    "count-filtered_one": "{{targetName}}: Toplam {{count}}/{{total}}",
+    "count-filtered_other": "{{targetName}}: Toplam {{count}}/{{total}}",
+    "count-total_one": "{{targetName}}: Toplam {{count}}",
+    "count-total_other": "{{targetName}}: Toplam {{count}}"
   },
   "quick-search-assistant": {
     "label-filters-title": "Geçerli etiket filtreleri",
@@ -284,7 +284,7 @@
     "suggestions": "İlgili günlük kayıtlarını bulmak için aşağıdakileri deneyin: <1><0>Etiket filtrelerinizi, hem mevcut metriktе hem de günlük kayıtlarınızda bulunan etiketleri içerecek şekilde ayarlayın.</0><1><2>Loki Kayıt Kuralı</2></1> ile oluşturulmuş bir metrik seçin.<2>Zaman aralığını genişleterek daha fazla veriyi dâhil edin.</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "İlgili metrikleri hızlıca arayın"
   },
   "select-action": {
     "button": "Seçin"
@@ -295,8 +295,8 @@
     "open-in-drilldown-tooltip": "Metrics Drilldown'da aç"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_other": ""
+    "text_one": "{{count}} tane daha göster ({{current}}/{{total}})",
+    "text_other": "{{count}} tane daha göster ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -309,7 +309,7 @@
     "filter": {
       "clear-search-tooltip": "Aramayı temizle",
       "hide-empty": "Boş olanları gizle",
-      "search-aria-label": "",
+      "search-aria-label": "Arama filtresi seçenekleri",
       "search-placeholder": "Ara..."
     },
     "filter-type": {
@@ -320,7 +320,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Aramayı temizle",
-      "search-aria-label": "",
+      "search-aria-label": "Etiket ara",
       "search-placeholder": "Ara..."
     },
     "recent-metrics": {
