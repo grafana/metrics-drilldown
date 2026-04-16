@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "明細",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Query Results",
+      "query-results-description": "Instant query data in table format",
       "related-logs": "相關記錄",
       "related-logs-description": "根據目前標籤篩選條件和時間範圍的相關記錄",
       "related-metrics": "相關指標",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "載入指標時發生錯誤！",
       "no-values": "沒有找到目前篩選條件和時間範圍的標籤值。",
-      "search-aria-label": "",
+      "search-aria-label": "Quick search label values",
       "search-label": "搜尋",
       "view-label": "檢視"
     },
@@ -74,8 +74,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "擷取儀表板指標失敗",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Your organization has more dashboards than this limit. Usage counts may be incomplete.",
+    "limit-warning-title": "Dashboard usage sort is limited to 500 dashboards."
   },
   "filtered-metrics-variable": {
     "label": "篩選的指標"
@@ -96,21 +96,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Insights - {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "KG Assertions - {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Critical",
+      "info": "Info",
+      "warning": "Warning"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Overlay health states (critical, warning, info) from the Knowledge Graph on timeseries panels.",
+      "disabled-tooltip": "Add label filters to match entities.",
+      "label": "Insights",
+      "learn-more": "Learn more"
     }
   },
   "labels-datasource": {
@@ -139,35 +139,35 @@
     "fallback": "正在載入…"
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Quick search metrics"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "No saved queries to load",
+        "button-tooltip": "Load saved query",
+        "empty": "No saved queries to display.",
+        "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
+        "load-type-error": "Please select a Prometheus query.",
+        "modal-title": "Load a previously saved query",
+        "remove": "Remove",
+        "saved-query-button-tooltip": "Load saved query",
+        "select": "Select"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "There is a previously saved query with the same expression: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Save query",
+        "button-tooltip-saved-queries": "Save in Saved Queries",
+        "cancel": "Cancel",
+        "description": "Description",
+        "error": "Unexpected error saving this query.",
+        "modal-alert": "Saved queries are stored locally in your browser and will only be available on this device.",
+        "modal-title": "Save current query",
+        "save": "Save",
+        "success": "Query successfully saved.",
+        "title": "Title"
       }
     }
   },
@@ -247,21 +247,21 @@
     "view-by-label": "檢視方式"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Instant query results",
+    "error-title": "Query failed",
+    "unavailable-message": "This feature requires a newer version of Grafana.",
+    "unavailable-title": "Query Results component unavailable"
   },
   "quick-search": {
     "ask-assistant-aria-label": "詢問 Grafana 助理",
     "ask-assistant-tooltip": "詢問 Grafana 助理",
     "clear-search-tooltip": "清除搜尋",
-    "placeholder": "",
+    "placeholder": "Search {{targetName}}",
     "placeholder-question-mode": "詢問 Grafana 助理問題，然後按下 Enter 鍵",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_other": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Search {{targetName}} or type ? to ask the Grafana Assistant",
+    "placeholder-with-assistant-tab-enter": "Search {{targetName}} or press tab then enter to ask the Grafana Assistant",
+    "count-filtered_other": "{{targetName}}: {{count}} of {{total}} in total",
+    "count-total_other": "{{targetName}}: {{count}} in total"
   },
   "quick-search-assistant": {
     "label-filters-title": "目前的標籤篩選條件",
@@ -281,7 +281,7 @@
     "suggestions": "若要尋找相關記錄，請嘗試以下方式：<1><0>調整標籤篩選條件，以納入目前指標和記錄中存在的標籤</0><1>選擇由 <2>Loki 錄製規則</2></1>建立的指標<2>擴大時間範圍以包含更多資料</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Quick search related metrics"
   },
   "select-action": {
     "button": "選取"
@@ -292,7 +292,7 @@
     "open-in-drilldown-tooltip": "在「指標深入分析」中開啟"
   },
   "show-more-button": {
-    "text_other": ""
+    "text_other": "Show {{count}} more ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -305,7 +305,7 @@
     "filter": {
       "clear-search-tooltip": "清除搜尋",
       "hide-empty": "隱藏空白",
-      "search-aria-label": "",
+      "search-aria-label": "Search filter options",
       "search-placeholder": "搜尋…"
     },
     "filter-type": {
@@ -316,7 +316,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "清除搜尋",
-      "search-aria-label": "",
+      "search-aria-label": "Search labels",
       "search-placeholder": "搜尋…"
     },
     "recent-metrics": {

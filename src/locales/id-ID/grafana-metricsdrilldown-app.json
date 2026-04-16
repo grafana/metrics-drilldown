@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Perincian",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Hasil Kueri",
+      "query-results-description": "Data kueri instan dalam format tabel",
       "related-logs": "Log terkait",
       "related-logs-description": "Log yang relevan berdasarkan filter label dan rentang waktu saat ini",
       "related-metrics": "Metrik terkait",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Terjadi kesalahan saat memuat metrik!",
       "no-values": "Tidak ada nilai label yang ditemukan untuk filter dan rentang waktu saat ini.",
-      "search-aria-label": "",
+      "search-aria-label": "Cari cepat nilai label",
       "search-label": "Cari",
       "view-label": "Lihat"
     },
@@ -74,8 +74,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Gagal mengambil metrik dasbor",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Jumlah dasbor organisasi Anda melebihi batas ini. Jumlah penggunaan mungkin tidak lengkap.",
+    "limit-warning-title": "Pengurutan penggunaan dasbor dibatasi 500 dasbor."
   },
   "filtered-metrics-variable": {
     "label": "Metrik yang Difilter"
@@ -96,21 +96,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Wawasan - {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "Pengecekan Otomatis KG - {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Kritikal",
+      "info": "Info",
+      "warning": "Peringatan"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Tampilkan lapsan status kesehatan (kritikal, peringatan, info) dari Knowledge Graph pada panel deret waktu (timeseries).",
+      "disabled-tooltip": "Tambahkan filter label untuk mencocokkan entitas.",
+      "label": "Wawasan",
+      "learn-more": "Pelajari lebih lanjut"
     }
   },
   "labels-datasource": {
@@ -139,35 +139,35 @@
     "fallback": "Memuat..."
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Cari cepat metrik"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Tidak ada kueri tersimpan untuk dimuat",
+        "button-tooltip": "Muat kueri tersimpan",
+        "empty": "Tidak ada kueri tersimpan untuk ditampilkan.",
+        "load-error": "Kueri ini berisi ekspresi yang tidak dapat direpresentasikan dalam Metrics Drilldown. Hanya pemilih metric{label} sederhana yang didukung.",
+        "load-type-error": "Pilih kueri Prometheus.",
+        "modal-title": "Muat kueri yang sudah disimpan sebelumnya",
+        "remove": "Hapus",
+        "saved-query-button-tooltip": "Muat kueri tersimpan",
+        "select": "Pilih"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Ada kueri yang sudah disimpan sebelumnya dengan ekspresi yang sama: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Simpan kueri",
+        "button-tooltip-saved-queries": "Simpan di Kueri Tersimpan",
+        "cancel": "Batal",
+        "description": "Deskripsi",
+        "error": "Terjadi kesalahan tidak terduga saat menyimpan kueri ini.",
+        "modal-alert": "Kueri tersimpan disimpan secara lokal di browser Anda dan hanya akan tersedia di perangkat ini.",
+        "modal-title": "Simpan kueri saat ini",
+        "save": "Simpan",
+        "success": "Kueri berhasil disimpan.",
+        "title": "Judul"
       }
     }
   },
@@ -247,21 +247,21 @@
     "view-by-label": "Dilihat oleh"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Hasil kueri instan",
+    "error-title": "Kueri gagal",
+    "unavailable-message": "Fitur ini memerlukan versi Grafana yang lebih baru.",
+    "unavailable-title": "Komponen Hasil Kueri tidak tersedia"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Tanyakan kepada Asisten Grafana",
     "ask-assistant-tooltip": "Tanyakan kepada Asisten Grafana",
     "clear-search-tooltip": "Hapus pencarian",
-    "placeholder": "",
+    "placeholder": "Cari {{targetName}}",
     "placeholder-question-mode": "Ajukan pertanyaan kepada Asisten Grafana dan tekan enter",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_other": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Cari {{targetName}} atau ketik ? untuk bertanya ke Grafana Assistant",
+    "placeholder-with-assistant-tab-enter": "Cari {{targetName}} atau tekan tab, lalu enter untuk bertanya ke Grafana Assistant",
+    "count-filtered_other": "{{targetName}}: {{count}} dari total {{total}}",
+    "count-total_other": "{{targetName}}: total {{count}}"
   },
   "quick-search-assistant": {
     "label-filters-title": "Filter label saat ini",
@@ -281,7 +281,7 @@
     "suggestions": "Untuk menemukan log terkait, coba hal berikut:<1><0>Sesuaikan filter label Anda untuk menyertakan label yang ada di metrik saat ini dan log Anda</0><1>Pilih metrik yang dibuat oleh <2>Aturan Pencatatan Loki</2></1><2>Perluas rentang waktu untuk menyertakan lebih banyak data</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Cari cepat metrik terkait"
   },
   "select-action": {
     "button": "Pilih"
@@ -292,7 +292,7 @@
     "open-in-drilldown-tooltip": "Buka di Metrics Drilldown"
   },
   "show-more-button": {
-    "text_other": ""
+    "text_other": "Tampilkan {{count}} lainnya ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -305,7 +305,7 @@
     "filter": {
       "clear-search-tooltip": "Hapus pencarian",
       "hide-empty": "Sembunyikan yang kosong",
-      "search-aria-label": "",
+      "search-aria-label": "Opsi filter pencarian",
       "search-placeholder": "Cari..."
     },
     "filter-type": {
@@ -316,7 +316,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Hapus pencarian",
-      "search-aria-label": "",
+      "search-aria-label": "Cari label",
       "search-placeholder": "Cari..."
     },
     "recent-metrics": {

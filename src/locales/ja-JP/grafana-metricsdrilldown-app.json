@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "内訳",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "クエリ結果",
+      "query-results-description": "テーブル形式のインスタントクエリデータ",
       "related-logs": "関連ログ",
       "related-logs-description": "現在のラベルフィルターと時間範囲に基づく関連ログ",
       "related-metrics": "関連メトリクス",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "メトリクスの読み込み中にエラーが発生しました！",
       "no-values": "現在のフィルターと時間範囲でラベル値が見つかりません。",
-      "search-aria-label": "",
+      "search-aria-label": "ラベル値をクイック検索",
       "search-label": "検索",
       "view-label": "表示"
     },
@@ -74,8 +74,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "ダッシュボードメトリクスの取得に失敗しました",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "お客様の組織のダッシュボード数がこの上限を超えています。使用回数のカウントが不完全である可能性があります。",
+    "limit-warning-title": "ダッシュボード使用状況の並び替えは、500件のダッシュボードまでに制限されています。"
   },
   "filtered-metrics-variable": {
     "label": "フィルタリングされたメトリクス"
@@ -96,21 +96,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "インサイト - {{severityLabel}} "
     },
     "query": {
-      "name": ""
+      "name": "KGアサーション - {{severityLabel}} "
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "クリティカル",
+      "info": "情報",
+      "warning": "警告"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "ナレッジグラフの健全性状態（クリティカル、警告、情報）を時系列パネルにオーバーレイ表示します。",
+      "disabled-tooltip": "エンティティに一致するラベルフィルターを追加します。",
+      "label": "インサイト",
+      "learn-more": "詳細を見る"
     }
   },
   "labels-datasource": {
@@ -139,35 +139,35 @@
     "fallback": "読み込み中..."
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "メトリクスをクイック検索"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "読み込む保存されたクエリがありません",
+        "button-tooltip": "保存されたクエリを読み込む",
+        "empty": "表示する保存されたクエリがありません。",
+        "load-error": "このクエリには、Metrics Drilldownで表現できない式が含まれています。サポートされているのは、単純なメトリクス{label}セレクターのみです。",
+        "load-type-error": "Prometheusクエリを選択してください。",
+        "modal-title": "以前に保存したクエリを読み込む",
+        "remove": "削除",
+        "saved-query-button-tooltip": "保存されたクエリを読み込む",
+        "select": "選択"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "同じ式を使用した、以前に保存したクエリが存在します：{{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "クエリを保存",
+        "button-tooltip-saved-queries": "保存されたクエリに保存",
+        "cancel": "キャンセル",
+        "description": "説明",
+        "error": "このクエリの保存中に予期しないエラーが発生しました。",
+        "modal-alert": "保存したクエリはブラウザーのローカルデータに保存され、このデバイスでのみ利用できます。",
+        "modal-title": "現在のクエリを保存",
+        "save": "保存",
+        "success": "クエリが正常に保存されました。",
+        "title": "タイトル"
       }
     }
   },
@@ -247,21 +247,21 @@
     "view-by-label": "表示形式"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "インスタントクエリ結果",
+    "error-title": "クエリに失敗しました",
+    "unavailable-message": "この機能を使用するには、より新しいバージョンのGrafanaが必要です。",
+    "unavailable-title": "クエリ結果コンポーネントは利用できません"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Grafana Assistantに質問する",
     "ask-assistant-tooltip": "Grafana Assistantに質問する",
     "clear-search-tooltip": "検索をクリア",
-    "placeholder": "",
+    "placeholder": "検索{{targetName}} ",
     "placeholder-question-mode": "Grafana Assistantに質問してEnterキーを押します",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_other": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "{{targetName}}を検索するか、「？」と入力してGrafana Assistantに質問してください",
+    "placeholder-with-assistant-tab-enter": "{{targetName}}を検索するか、Tabキーの次にEnterキーを押してGrafana Assistantに質問してください",
+    "count-filtered_other": "{{targetName}}：合計{{total}}件中{{count}}件目",
+    "count-total_other": "{{targetName}}：合計{{count}}件"
   },
   "quick-search-assistant": {
     "label-filters-title": "現在のラベルフィルター",
@@ -281,7 +281,7 @@
     "suggestions": "関連するログを検索するには、次のいずれかを実行します。<1><0>ラベルフィルターを調整して、現在のメトリクスとログの両方に存在するラベルを含めます</0><1><2>Lokiレコーディングルール</2>によって作成されたメトリクスを選択します</1><2>時間範囲を広げて、より多くのデータを含めます</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "関連メトリクスをクイック検索"
   },
   "select-action": {
     "button": "選択"
@@ -292,7 +292,7 @@
     "open-in-drilldown-tooltip": "Metrics Drilldownで開く"
   },
   "show-more-button": {
-    "text_other": ""
+    "text_other": "さらに{{count}}件表示（{{current}}/{{total}}）"
   },
   "sidebar": {
     "bookmarks": {
@@ -305,7 +305,7 @@
     "filter": {
       "clear-search-tooltip": "検索をクリア",
       "hide-empty": "空のものを非表示",
-      "search-aria-label": "",
+      "search-aria-label": "検索フィルターのオプション",
       "search-placeholder": "検索..."
     },
     "filter-type": {
@@ -316,7 +316,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "検索をクリア",
-      "search-aria-label": "",
+      "search-aria-label": "ラベルを検索",
       "search-placeholder": "検索..."
     },
     "recent-metrics": {

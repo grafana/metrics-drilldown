@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "明细",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "查询结果",
+      "query-results-description": "表格格式的即时查询数据",
       "related-logs": "相关日志",
       "related-logs-description": "基于当前标签筛选条件和时间范围的相关日志",
       "related-metrics": "相关指标",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "加载指标时出错！",
       "no-values": "找不到当前筛选条件和时间范围的标签值。",
-      "search-aria-label": "",
+      "search-aria-label": "快速搜索标签值",
       "search-label": "搜索",
       "view-label": "查看"
     },
@@ -74,8 +74,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "获取数据面板指标失败",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "您的组织拥有的数据面板数量超过了此上限。使用量计数可能不完整。",
+    "limit-warning-title": "数据面板使用量排序最多可涵盖 500 个数据面板。"
   },
   "filtered-metrics-variable": {
     "label": "已筛选的指标"
@@ -96,21 +96,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "洞察 - {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "知识图谱断言 - {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "严重",
+      "info": "信息",
+      "warning": "警告"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "在时间序列面板上叠加来自知识图谱的运行状况状态（严重、警告、信息）。",
+      "disabled-tooltip": "添加标签筛选条件以匹配实体。",
+      "label": "洞察",
+      "learn-more": "了解更多"
     }
   },
   "labels-datasource": {
@@ -139,35 +139,35 @@
     "fallback": "正在加载…"
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "快速搜索指标"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "没有可加载的已保存查询",
+        "button-tooltip": "加载已保存的查询",
+        "empty": "没有要显示的已保存查询。",
+        "load-error": "此查询包含无法在指标深入分析中表示的表达式。仅支持简单的指标{label}选择器。",
+        "load-type-error": "请选择一个 Prometheus 查询。",
+        "modal-title": "加载之前保存的查询",
+        "remove": "移除",
+        "saved-query-button-tooltip": "加载已保存的查询",
+        "select": "选择"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "之前保存的一个查询具有相同表达式：{{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "保存查询",
+        "button-tooltip-saved-queries": "保存在“已保存的查询”中",
+        "cancel": "取消",
+        "description": "描述",
+        "error": "保存此查询时出现意外错误。",
+        "modal-alert": "已保存的查询会存储在您的浏览器本地，并且只能在此设备上使用。",
+        "modal-title": "保存当前查询",
+        "save": "保存",
+        "success": "已成功保存查询。",
+        "title": "标题"
       }
     }
   },
@@ -247,21 +247,21 @@
     "view-by-label": "查看方式"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "即时查询结果",
+    "error-title": "查询失败",
+    "unavailable-message": "此功能需要更高版本的 Grafana。",
+    "unavailable-title": "“查询结果”组件不可用"
   },
   "quick-search": {
     "ask-assistant-aria-label": "询问 Grafana 助手",
     "ask-assistant-tooltip": "询问 Grafana 助手",
     "clear-search-tooltip": "清除搜索",
-    "placeholder": "",
+    "placeholder": "搜索 {{targetName}}",
     "placeholder-question-mode": "向 Grafana 助手提问并按 enter 键",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_other": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "搜索 {{targetName}} 或输入“?”以询问 Grafana 助手",
+    "placeholder-with-assistant-tab-enter": "搜索 {{targetName}} 或按 tab 键后输入以询问 Grafana 助手",
+    "count-filtered_other": "{{targetName}}：{{count}} 个，共 {{total}} 个",
+    "count-total_other": "{{targetName}}：共 {{count}} 个"
   },
   "quick-search-assistant": {
     "label-filters-title": "当前标签筛选条件",
@@ -281,7 +281,7 @@
     "suggestions": "要查找相关日志，请尝试以下操作：<1><0>调整标签筛选条件以包含当前指标和日志中都存在的标签</0><1>选择由 <2>Loki 录制规则</2>创建的指标</1><2>扩大时间范围以包含更多数据</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "快速搜索相关指标"
   },
   "select-action": {
     "button": "选择"
@@ -292,7 +292,7 @@
     "open-in-drilldown-tooltip": "在指标深入分析中打开"
   },
   "show-more-button": {
-    "text_other": ""
+    "text_other": "显示另外 {{count}} 个 ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -305,7 +305,7 @@
     "filter": {
       "clear-search-tooltip": "清除搜索",
       "hide-empty": "隐藏空的结果",
-      "search-aria-label": "",
+      "search-aria-label": "搜索筛选器选项",
       "search-placeholder": "搜索..."
     },
     "filter-type": {
@@ -316,7 +316,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "清除搜索",
-      "search-aria-label": "",
+      "search-aria-label": "搜索标签",
       "search-placeholder": "搜索..."
     },
     "recent-metrics": {
