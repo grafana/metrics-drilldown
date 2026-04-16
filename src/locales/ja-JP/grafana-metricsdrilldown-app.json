@@ -81,7 +81,7 @@
     "label": "フィルタリングされたメトリクス"
   },
   "give-feedback": {
-    "button": "フィードバックを送信",
+    "button": "フィードバックを提供",
     "tooltip": "Grafanaメトリクスについてのご意見をお聞かせください。"
   },
   "gmd-viz-panel": {
@@ -93,6 +93,25 @@
   },
   "inline-banner": {
     "unknown-error": "不明なエラーが発生しました！"
+  },
+  "kg-annotations": {
+    "layer": {
+      "name": ""
+    },
+    "query": {
+      "name": ""
+    },
+    "severity": {
+      "critical": "",
+      "info": "",
+      "warning": ""
+    },
+    "toggle": {
+      "description": "",
+      "disabled-tooltip": "",
+      "label": "",
+      "learn-more": ""
+    }
   },
   "labels-datasource": {
     "none-option": "（なし）",
@@ -199,7 +218,7 @@
       "explore": "探索"
     },
     "group": {
-      "actions": "アクション",
+      "actions": "操作",
       "navigation": "ナビゲーション"
     }
   },

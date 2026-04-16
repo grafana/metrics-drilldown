@@ -95,6 +95,25 @@
   "inline-banner": {
     "unknown-error": "Unbekannter Fehler!"
   },
+  "kg-annotations": {
+    "layer": {
+      "name": ""
+    },
+    "query": {
+      "name": ""
+    },
+    "severity": {
+      "critical": "",
+      "info": "",
+      "warning": ""
+    },
+    "toggle": {
+      "description": "",
+      "disabled-tooltip": "",
+      "label": "",
+      "learn-more": ""
+    }
+  },
   "labels-datasource": {
     "none-option": "(keine)",
     "test-success": "OK"
@@ -210,7 +229,7 @@
       "tooltip": "Plugin-Info"
     },
     "header": {
-      "last-update": "Letzte Aktualisierung: {{updated}}",
+      "last-update": "Letztes Update: {{updated}}",
       "title": "Grafana Metrics Drilldown Ver. {{version}}"
     },
     "menu": {

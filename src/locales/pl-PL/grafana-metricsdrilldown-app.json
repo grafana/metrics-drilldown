@@ -67,7 +67,7 @@
   "error-view": {
     "message": "Spróbuj <2>odświeżyć stronę</2>, a jeśli problem się powtarza, skontaktuj się z administratorem organizacji. Przepraszamy za niedogodności.",
     "stack-trace-label": "Wyświetl śledzenie stosu",
-    "title": "Błąd krytyczny!"
+    "title": "Błąd krytyczny"
   },
   "extreme-value-filter": {
     "message": "Dane panelu zostały ponownie pobrane za pomocą bardziej złożonego zapytania, aby obsłużyć bardzo małe wartości w szeregu"
@@ -96,6 +96,25 @@
   },
   "inline-banner": {
     "unknown-error": "Nieznany błąd!"
+  },
+  "kg-annotations": {
+    "layer": {
+      "name": ""
+    },
+    "query": {
+      "name": ""
+    },
+    "severity": {
+      "critical": "",
+      "info": "",
+      "warning": ""
+    },
+    "toggle": {
+      "description": "",
+      "disabled-tooltip": "",
+      "label": "",
+      "learn-more": ""
+    }
   },
   "labels-datasource": {
     "none-option": "(brak)",

@@ -94,6 +94,25 @@
   "inline-banner": {
     "unknown-error": "Kesalahan tidak diketahui!"
   },
+  "kg-annotations": {
+    "layer": {
+      "name": ""
+    },
+    "query": {
+      "name": ""
+    },
+    "severity": {
+      "critical": "",
+      "info": "",
+      "warning": ""
+    },
+    "toggle": {
+      "description": "",
+      "disabled-tooltip": "",
+      "label": "",
+      "learn-more": ""
+    }
+  },
   "labels-datasource": {
     "none-option": "(tidak ada)",
     "test-success": "OK"
@@ -277,7 +296,7 @@
   },
   "sidebar": {
     "bookmarks": {
-      "date-created": "Tanggal pembuatan: ",
+      "date-created": "Tanggal pembuatan:",
       "empty-state": "Belum ada bookmark untuk<1></1>sumber data saat ini.",
       "remove-tooltip": "Hapus bookmark"
     },

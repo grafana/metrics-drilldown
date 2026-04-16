@@ -40,7 +40,7 @@ export class AppControls {
   /* Ad Hoc filters */
 
   getAdHocFiltersInput() {
-    return this.get().getByRole('combobox', { name: 'Filter by label values' });
+    return this.get().getByRole('combobox', { name: 'Filters' });
   }
 
   async addAdHocFilter(labelName: string, operator: string, labelValue: string) {

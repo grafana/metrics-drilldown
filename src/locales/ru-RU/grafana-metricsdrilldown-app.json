@@ -67,7 +67,7 @@
   "error-view": {
     "message": "<2>Попробуйте перезагрузить страницу.</2> Если проблема не исчезнет, обратитесь к администратору организации. Приносим извинения за неудобства.",
     "stack-trace-label": "Просмотр трассировки стека",
-    "title": "Критическая ошибка."
+    "title": "Критическая ошибка"
   },
   "extreme-value-filter": {
     "message": "Для обработки крайне малых значений в рядах выполнена повторная выборка данных дашборда с использованием более сложного запроса"
@@ -97,6 +97,25 @@
   "inline-banner": {
     "unknown-error": "Неизвестная ошибка."
   },
+  "kg-annotations": {
+    "layer": {
+      "name": ""
+    },
+    "query": {
+      "name": ""
+    },
+    "severity": {
+      "critical": "",
+      "info": "",
+      "warning": ""
+    },
+    "toggle": {
+      "description": "",
+      "disabled-tooltip": "",
+      "label": "",
+      "learn-more": ""
+    }
+  },
   "labels-datasource": {
     "none-option": "(нет)",
     "test-success": "OK"
@@ -112,7 +131,7 @@
     "placeholder": "Группировать по меткам..."
   },
   "layout-switcher": {
-    "aria-label": "Переключатель раскладки",
+    "aria-label": "Переключатель макетов",
     "option": {
       "grid": "Сетка",
       "rows": "Строки",
