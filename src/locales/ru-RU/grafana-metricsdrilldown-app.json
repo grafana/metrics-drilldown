@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Разбивка",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Результаты запроса",
+      "query-results-description": "Данные мгновенного запроса в формате таблицы",
       "related-logs": "Связанные журналы",
       "related-logs-description": "Журналы, соответствующие текущим фильтрам меток и временному диапазону",
       "related-metrics": "Связанные метрики",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Ошибка при загрузке метрик.",
       "no-values": "Значения меток, соответствующие текущим фильтрам и временному диапазону, не найдены.",
-      "search-aria-label": "",
+      "search-aria-label": "Быстрый поиск значений меток",
       "search-label": "Поиск",
       "view-label": "Просмотр"
     },
@@ -77,8 +77,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Не удалось получить метрики дашборда",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "В вашей организации количество дашбордов превышает этот лимит. Данные об использовании могут быть неполными.",
+    "limit-warning-title": "Сортировка по использованию дашбордов ограничена 500 дашбордами."
   },
   "filtered-metrics-variable": {
     "label": "Отфильтрованные метрики"
@@ -99,21 +99,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Аналитика - {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "Утверждения KG - {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Критический",
+      "info": "Информация",
+      "warning": "Предупреждение"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Наложите состояния работоспособности (критическое, предупреждение, информация) из графа знаний на панель временных рядов.",
+      "disabled-tooltip": "Добавьте фильтры меток для сопоставления объектов.",
+      "label": "Аналитика",
+      "learn-more": "Подробнее"
     }
   },
   "labels-datasource": {
@@ -142,35 +142,35 @@
     "fallback": "Загрузка…"
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Быстрый поиск метрик"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Нет сохраненных запросов для загрузки",
+        "button-tooltip": "Загрузить сохраненный запрос",
+        "empty": "Нет сохраненных запросов для отображения.",
+        "load-error": "Этот запрос содержит выражения, которые невозможно представить в Metrics Drilldown. Поддерживаются только простые селекторы метрик {label}.",
+        "load-type-error": "Выберите запрос Prometheus.",
+        "modal-title": "Загрузить ранее сохраненный запрос",
+        "remove": "Удалить",
+        "saved-query-button-tooltip": "Загрузить сохраненный запрос",
+        "select": "Выбрать"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Ранее был сохранен запрос с таким же выражением: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Сохранить запрос",
+        "button-tooltip-saved-queries": "Сохранить в сохраненных запросах",
+        "cancel": "Отмена",
+        "description": "Описание",
+        "error": "Непредвиденная ошибка при сохранении этого запроса.",
+        "modal-alert": "Сохраненные запросы хранятся локально в вашем браузере и будут доступны только на этом устройстве.",
+        "modal-title": "Сохраните текущий запрос",
+        "save": "Сохранить",
+        "success": "Запрос сохранен.",
+        "title": "Заголовок"
       }
     }
   },
@@ -250,27 +250,27 @@
     "view-by-label": "Просмотр по"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Результаты мгновенного запроса",
+    "error-title": "Запрос не выполнен",
+    "unavailable-message": "Для этой функции требуется более новая версия Grafana.",
+    "unavailable-title": "Компонент «Результаты запроса» недоступен"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Спросить Grafana Assistant",
     "ask-assistant-tooltip": "Задайте вопрос Grafana Assistant",
     "clear-search-tooltip": "Очистить поиск",
-    "placeholder": "",
+    "placeholder": "Поиск {{targetName}}",
     "placeholder-question-mode": "Задайте вопрос Grafana Assistant и нажмите Enter",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_few": "",
-    "count-filtered_many": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_few": "",
-    "count-total_many": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Выполните поиск {{targetName}} или введите «?», чтобы задать вопрос Grafana Assistant",
+    "placeholder-with-assistant-tab-enter": "Выполните поиск {{targetName}} или нажмите клавишу Tab, а затем Enter, чтобы задать вопрос Grafana Assistant",
+    "count-filtered_one": "{{targetName}}: всего {{count}} из {{total}}",
+    "count-filtered_few": "{{targetName}}: всего {{count}} из {{total}}",
+    "count-filtered_many": "{{targetName}}: всего {{count}} из {{total}}",
+    "count-filtered_other": "{{targetName}}: всего {{count}} из {{total}}",
+    "count-total_one": "{{targetName}}: всего {{count}}",
+    "count-total_few": "{{targetName}}: всего {{count}}",
+    "count-total_many": "{{targetName}}: всего {{count}}",
+    "count-total_other": "{{targetName}}: всего {{count}}"
   },
   "quick-search-assistant": {
     "label-filters-title": "Текущие фильтры меток",
@@ -290,7 +290,7 @@
     "suggestions": "Чтобы найти связанные журналы, попробуйте следующее:<1><0>Настройте фильтры меток, добавив те, которые есть как в текущей метрике, так и в ваших журналах.</0><1>Выберите метрику, созданную с помощью <2>правила записи Loki</2>.</1><2>Расширьте временной диапазон, включив больше данных.</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Быстрый поиск связанных метрик"
   },
   "select-action": {
     "button": "Выбрать"
@@ -301,10 +301,10 @@
     "open-in-drilldown-tooltip": "Откройте Metrics Drilldown"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_few": "",
-    "text_many": "",
-    "text_other": ""
+    "text_one": "Показать еще {{count}} ({{current}}/{{total}})",
+    "text_few": "Показать еще {{count}} ({{current}}/{{total}})",
+    "text_many": "Показать еще {{count}} ({{current}}/{{total}})",
+    "text_other": "Показать еще {{count}} ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -317,7 +317,7 @@
     "filter": {
       "clear-search-tooltip": "Очистить поиск",
       "hide-empty": "Скрыть пустые",
-      "search-aria-label": "",
+      "search-aria-label": "Параметры фильтра для поиска",
       "search-placeholder": "Поиск…"
     },
     "filter-type": {
@@ -328,7 +328,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Очистить поиск",
-      "search-aria-label": "",
+      "search-aria-label": "Поиск меток",
       "search-placeholder": "Поиск…"
     },
     "recent-metrics": {

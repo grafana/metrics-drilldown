@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Rozpis",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Výsledky dotazu",
+      "query-results-description": "Data okamžitého dotazu ve formátu tabulky",
       "related-logs": "Související protokoly",
       "related-logs-description": "Související protokoly založené na aktuálních filtrech štítků a časovém rozsahu",
       "related-metrics": "Související metriky",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Při načítání metrik došlo k chybě!",
       "no-values": "Nebyly nalezeny žádné hodnoty štítků pro aktuální filtry a časový rozsah.",
-      "search-aria-label": "",
+      "search-aria-label": "Rychlé vyhledávání hodnot štítků",
       "search-label": "Hledat",
       "view-label": "Zobrazit"
     },
@@ -77,8 +77,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Nepodařilo se načíst metriky nástěnky",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Vaše organizace má více nástěnek, než je tento limit. Počty využití mohou být neúplné.",
+    "limit-warning-title": "Řazení podle využití nástěnky je omezeno na 500 nástěnek."
   },
   "filtered-metrics-variable": {
     "label": "Filtrované metriky"
@@ -99,21 +99,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Poznatky – {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "Tvrzení KG – {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Kritické",
+      "info": "Info",
+      "warning": "Varování"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Překryjte kondice stavu (kritický, varování, informace) ze znalostního grafu na panelech časových řad.",
+      "disabled-tooltip": "Přidejte filtry štítků pro shodu s entitami.",
+      "label": "Poznatky",
+      "learn-more": "Další informace"
     }
   },
   "labels-datasource": {
@@ -142,35 +142,35 @@
     "fallback": "Načítání…"
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Rychlé vyhledávání metrik"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Žádné uložené dotazy k načtení",
+        "button-tooltip": "Načíst uložený dotaz",
+        "empty": "Žádné uložené dotazy k zobrazení.",
+        "load-error": "Tento dotaz obsahuje výrazy, které nelze zastoupit v Podrobném rozpisu metrik Grafana. Podporovány jsou pouze jednoduché výběry metrik {label}.",
+        "load-type-error": "Vyberte dotaz Prometheus.",
+        "modal-title": "Načíst dříve uložený dotaz",
+        "remove": "Odebrat",
+        "saved-query-button-tooltip": "Načíst uložený dotaz",
+        "select": "Vybrat"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Existuje dříve uložený dotaz se stejným výrazem: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Uložit dotaz",
+        "button-tooltip-saved-queries": "Uložit do uložených dotazů",
+        "cancel": "Zrušit",
+        "description": "Popis",
+        "error": "Při ukládání tohoto dotazu došlo k neočekávané chybě.",
+        "modal-alert": "Uložené dotazy se ukládají místně do vašeho prohlížeče a budou k dispozici pouze na tomto zařízení.",
+        "modal-title": "Uložit aktuální dotaz",
+        "save": "Uložit",
+        "success": "Dotaz byl úspěšně uložen.",
+        "title": "Název"
       }
     }
   },
@@ -250,27 +250,27 @@
     "view-by-label": "Zobrazit podle"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Výsledky okamžitého dotazu",
+    "error-title": "Dotaz se nezdařil",
+    "unavailable-message": "Tato funkce vyžaduje novější verzi Grafany.",
+    "unavailable-title": "Komponenta Výsledky dotazu není k dispozici"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Zeptejte se asistenta Grafana",
     "ask-assistant-tooltip": "Zeptejte se asistenta Grafana",
     "clear-search-tooltip": "Vymazat vyhledávání",
-    "placeholder": "",
+    "placeholder": "Hledat {{targetName}}",
     "placeholder-question-mode": "Zeptejte se asistenta Grafana a stiskněte klávesu Enter",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_few": "",
-    "count-filtered_many": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_few": "",
-    "count-total_many": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Vyhledejte {{targetName}} nebo napište ? a zeptejte se asistenta Grafana",
+    "placeholder-with-assistant-tab-enter": "Vyhledejte {{targetName}} nebo stiskněte klávesu Tab a poté klávesu Enter a zeptejte se asistenta Grafana",
+    "count-filtered_one": "{{targetName}}: {{count}} z celkem {{total}}",
+    "count-filtered_few": "{{targetName}}: {{count}} z celkem {{total}}",
+    "count-filtered_many": "{{targetName}}: {{count}} z celkem {{total}}",
+    "count-filtered_other": "{{targetName}}: {{count}} z celkem {{total}}",
+    "count-total_one": "{{targetName}}: celkem {{count}}",
+    "count-total_few": "{{targetName}}: celkem {{count}}",
+    "count-total_many": "{{targetName}}: celkem {{count}}",
+    "count-total_other": "{{targetName}}: celkem {{count}}"
   },
   "quick-search-assistant": {
     "label-filters-title": "Aktuální filtry štítků",
@@ -290,7 +290,7 @@
     "suggestions": "Chcete-li najít související protokoly, zkuste následující:<1><0>Upravte filtry štítků tak, aby zahrnovaly štítky, které existují v aktuální metrice i ve vašich protokolech</0><1>Vyberte metriku vytvořenou <2>pravidlem nahrávání Loki</2></1><2>Rozšiřte časový rozsah tak, aby zahrnoval více dat</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Rychlé vyhledávání souvisejících metrik"
   },
   "select-action": {
     "button": "Vybrat"
@@ -301,10 +301,10 @@
     "open-in-drilldown-tooltip": "Otevřít v Podrobném rozpisu metrik"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_few": "",
-    "text_many": "",
-    "text_other": ""
+    "text_one": "Zobrazit {{count}} další ({{current}}/{{total}})",
+    "text_few": "Zobrazit {{count}} další ({{current}}/{{total}})",
+    "text_many": "Zobrazit {{count}} dalších ({{current}}/{{total}})",
+    "text_other": "Zobrazit {{count}} dalších ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -317,7 +317,7 @@
     "filter": {
       "clear-search-tooltip": "Vymazat vyhledávání",
       "hide-empty": "Skrýt prázdné",
-      "search-aria-label": "",
+      "search-aria-label": "Možnosti filtru vyhledávání",
       "search-placeholder": "Vyhledávání…"
     },
     "filter-type": {
@@ -328,7 +328,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Vymazat vyhledávání",
-      "search-aria-label": "",
+      "search-aria-label": "Hledat štítky",
       "search-placeholder": "Vyhledávání…"
     },
     "recent-metrics": {

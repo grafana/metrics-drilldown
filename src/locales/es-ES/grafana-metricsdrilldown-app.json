@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Desglose",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Resultados de la consulta",
+      "query-results-description": "Datos de la consulta instantánea en formato de tabla",
       "related-logs": "Logs relacionados",
       "related-logs-description": "Logs relevantes basados en los filtros de etiquetas y el intervalo de tiempo actuales",
       "related-metrics": "Métricas relacionadas",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "¡Error al cargar las métricas!",
       "no-values": "No se han encontrado valores de etiqueta para los filtros y el intervalo de tiempo actuales.",
-      "search-aria-label": "",
+      "search-aria-label": "Búsqueda rápida de valores de etiqueta",
       "search-label": "Búsqueda",
       "view-label": "Ver"
     },
@@ -75,8 +75,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Error al obtener métricas del dashboard",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Tu organización supera el límite de dashboards. Es posible que los recuentos de uso estén incompletos.",
+    "limit-warning-title": "La ordenación del uso de los dashboards está limitada a 500 dashboards."
   },
   "filtered-metrics-variable": {
     "label": "Métricas filtradas"
@@ -97,21 +97,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Información: {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "Afirmaciones del gráfico de conocimiento: {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Crítico",
+      "info": "Información",
+      "warning": "Advertencia"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Muestra los estados del gráfico de conocimiento («Crítico», «Advertencia» o «Información») en los paneles de series temporales.",
+      "disabled-tooltip": "Añade filtros de etiquetas para que coincidan con las entidades.",
+      "label": "Información",
+      "learn-more": "Más información"
     }
   },
   "labels-datasource": {
@@ -140,35 +140,35 @@
     "fallback": "Cargando..."
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Búsqueda rápida de métricas"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "No hay consultas guardadas para cargar",
+        "button-tooltip": "Cargar consulta guardada",
+        "empty": "No hay consultas guardadas para mostrar.",
+        "load-error": "Esta consulta contiene expresiones que no se pueden representar en Metrics Drilldown. Solo se admiten selectores de {label} de métricas simples.",
+        "load-type-error": "Selecciona una consulta de Prometheus.",
+        "modal-title": "Carga una consulta guardada anteriormente",
+        "remove": "Eliminar",
+        "saved-query-button-tooltip": "Cargar consulta guardada",
+        "select": "Seleccionar"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Hay una consulta guardada anteriormente con la misma expresión: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Guardar la consulta",
+        "button-tooltip-saved-queries": "Guardar en Consultas guardadas",
+        "cancel": "Cancelar",
+        "description": "Descripción",
+        "error": "Se ha producido un error inesperado al guardar esta consulta.",
+        "modal-alert": "Las consultas guardadas se almacenan localmente en tu navegador y solo estarán disponibles en este dispositivo.",
+        "modal-title": "Guardar la consulta actual",
+        "save": "Guardar",
+        "success": "Consulta guardada correctamente.",
+        "title": "Título"
       }
     }
   },
@@ -248,23 +248,23 @@
     "view-by-label": "Ver por"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Resultados de la consulta instantánea",
+    "error-title": "La consulta ha fallado",
+    "unavailable-message": "Esta función requiere una versión más reciente de Grafana.",
+    "unavailable-title": "El componente de resultados de la consulta no está disponible."
   },
   "quick-search": {
     "ask-assistant-aria-label": "Preguntar a Grafana Assistant",
     "ask-assistant-tooltip": "Preguntar a Grafana Assistant",
     "clear-search-tooltip": "Borrar búsqueda",
-    "placeholder": "",
+    "placeholder": "Buscar {{targetName}}",
     "placeholder-question-mode": "Haz una pregunta a Grafana Assistant y pulsa Intro.",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Busca {{targetName}} o escribe «?» para preguntar a Grafana Assistant.",
+    "placeholder-with-assistant-tab-enter": "Busca {{targetName}} o pulsa la tecla de tabulación y luego Intro para preguntar a Grafana Assistant.",
+    "count-filtered_one": "{{targetName}}: {{count}} de {{total}} en total",
+    "count-filtered_other": "{{targetName}}: {{count}} de {{total}} en total",
+    "count-total_one": "{{targetName}}: {{count}} en total",
+    "count-total_other": "{{targetName}}: {{count}} en total"
   },
   "quick-search-assistant": {
     "label-filters-title": "Filtros de etiquetas actuales",
@@ -284,7 +284,7 @@
     "suggestions": "Para encontrar logs relacionados, prueba lo siguiente:<1><0>Ajusta los filtros de etiquetas para incluir etiquetas que existan tanto en la métrica actual como en tus logs</0><1>Selecciona una métrica creada por una <2>regla de registro de Loki</2></1><2>Amplía el intervalo de tiempo para incluir más datos.</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Búsqueda rápida de métricas relacionadas"
   },
   "select-action": {
     "button": "Seleccionar"
@@ -295,8 +295,8 @@
     "open-in-drilldown-tooltip": "Abrir en Metrics Drilldown"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_other": ""
+    "text_one": "Mostrar {{count}} más ({{current}}/{{total}})",
+    "text_other": "Mostrar {{count}} más ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -309,7 +309,7 @@
     "filter": {
       "clear-search-tooltip": "Borrar búsqueda",
       "hide-empty": "Ocultar vacíos",
-      "search-aria-label": "",
+      "search-aria-label": "Opciones de filtro de búsqueda",
       "search-placeholder": "Buscar…"
     },
     "filter-type": {
@@ -320,7 +320,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Borrar búsqueda",
-      "search-aria-label": "",
+      "search-aria-label": "Buscar etiquetas",
       "search-placeholder": "Buscar…"
     },
     "recent-metrics": {
