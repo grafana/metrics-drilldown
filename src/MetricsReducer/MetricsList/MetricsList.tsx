@@ -84,7 +84,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
                 metric: option.value as string,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
-                  headerActions: ({ metric }) => [new SelectAction({ metric: metric.name })],
+                  headerActions: ({ metric }) => [new SelectAction({ metric: metric.name, variant: 'secondary' })],
                 },
               }),
             }),

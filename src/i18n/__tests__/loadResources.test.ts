@@ -1,31 +1,24 @@
+import { logger } from '../../shared/logger/logger';
 import { loadResources } from '../loadResources';
 
+jest.mock('../../shared/logger/logger', () => ({
+  logger: {
+    warn: jest.fn(),
+  },
+}));
+
 describe('loadResources', () => {
-  describe('successful resource loading', () => {
-    it('should load en-US resources when language is en-US', async () => {
+  describe('default language short-circuit', () => {
+    it('should return an empty object when language is en-US', async () => {
       const result = await loadResources('en-US');
 
-      expect(result).toMatchObject({
-        trail: {
-          breadcrumb: {
-            metrics: 'Metrics',
-            'all-metrics': 'All metrics',
-          },
-        },
-      });
+      expect(result).toEqual({});
     });
 
-    it('should load en-US resources when language is undefined', async () => {
+    it('should return an empty object when language is empty string', async () => {
       const result = await loadResources('');
 
-      expect(result).toMatchObject({
-        trail: {
-          breadcrumb: {
-            metrics: 'Metrics',
-            'all-metrics': 'All metrics',
-          },
-        },
-      });
+      expect(result).toEqual({});
     });
 
     it('should load specific language resources when available', async () => {
@@ -38,20 +31,15 @@ describe('loadResources', () => {
     });
   });
 
-  describe('fallback behavior', () => {
-    it('should fallback to en-US when requested language is not found', async () => {
-      // Use a non-existent locale to test fallback behavior
-      // (fr-FR exists in locales, so it won't trigger fallback)
+  describe('missing locale handling', () => {
+    it('should return an empty object and warn when requested language is not found', async () => {
       const result = await loadResources('xx-XX');
 
-      expect(result).toMatchObject({
-        trail: {
-          breadcrumb: {
-            metrics: 'Metrics',
-            'all-metrics': 'All metrics',
-          },
-        },
-      });
+      expect(result).toEqual({});
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to load translations for locale "xx-XX"'),
+        expect.anything()
+      );
     });
   });
 });

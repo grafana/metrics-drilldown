@@ -229,7 +229,7 @@
       "tooltip": "Plugin-Info"
     },
     "header": {
-      "last-update": "Letzte Aktualisierung: {{updated}}",
+      "last-update": "Letztes Update: {{updated}}",
       "title": "Grafana Metrics Drilldown Ver. {{version}}"
     },
     "menu": {
