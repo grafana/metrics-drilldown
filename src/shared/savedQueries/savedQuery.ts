@@ -43,21 +43,15 @@ export function useSavedQueries(dsUid: string | undefined) {
     };
   }, [dsUid]);
 
-  const deleteQuery = useCallback(
-    async (uid: string) => {
-      removeFromLocalStorage(uid);
-      notifySavedQueryChanges();
-    },
-    []
-  );
+  const deleteQuery = useCallback(async (uid: string) => {
+    removeFromLocalStorage(uid);
+    notifySavedQueryChanges();
+  }, []);
 
-  const saveQuery = useCallback(
-    async (query: Omit<SavedQuery, 'timestamp' | 'uid'>) => {
-      saveInLocalStorage(query);
-      notifySavedQueryChanges();
-    },
-    []
-  );
+  const saveQuery = useCallback(async (query: Omit<SavedQuery, 'timestamp' | 'uid'>) => {
+    saveInLocalStorage(query);
+    notifySavedQueryChanges();
+  }, []);
 
   return {
     isLoading: false,

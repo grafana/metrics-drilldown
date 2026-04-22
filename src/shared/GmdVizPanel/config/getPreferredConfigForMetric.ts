@@ -35,7 +35,6 @@ export function getPreferredConfigForMetric(metric: string): PanelConfigPreset |
   return metricConfig;
 }
 
- 
 export function isValid(metricConfig: PanelConfigPreset): boolean {
   if (!['id', 'panelOptions', 'queryOptions'].every((key) => key in metricConfig)) {
     return false;

@@ -34,9 +34,7 @@ export function LabelsList({ labels, selectedLabel, onSelectLabel, onClearSelect
         </Button>
       </div>
 
-      {!labels.length && (
-        <div className={styles.noResults}>{t('labels-list.no-results', 'No results.')}</div>
-      )}
+      {!labels.length && <div className={styles.noResults}>{t('labels-list.no-results', 'No results.')}</div>}
 
       {labels.length > 0 && (
         <div className={styles.list} data-testid="labels-list">

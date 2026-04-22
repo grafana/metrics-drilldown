@@ -51,7 +51,7 @@ const getDashboardLimited = limitFunction(
           `grafana-metricsdrilldown-app-dashboard-metric-usage-${dashboardUid}`,
           usageRequestOptions
         )
-        .then(({ dashboard }) => ({ ...dashboard, url } as DashboardWithUrl))
+        .then(({ dashboard }) => ({ ...dashboard, url }) as DashboardWithUrl)
         .catch((error) => {
           // Prevent excessive noise
           if (dashboardRequestsFailedCount <= 5) {
@@ -123,10 +123,7 @@ function checkDashboardLimitExceeded() {
     .then((response) => {
       if (response.length > 0) {
         displayWarning([
-          t(
-            'fetch-dashboard-metrics.limit-warning-title',
-            'Dashboard usage sort is limited to 500 dashboards.'
-          ),
+          t('fetch-dashboard-metrics.limit-warning-title', 'Dashboard usage sort is limited to 500 dashboards.'),
           t(
             'fetch-dashboard-metrics.limit-warning-body',
             'Your organization has more dashboards than this limit. Usage counts may be incomplete.'

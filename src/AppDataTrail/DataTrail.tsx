@@ -37,6 +37,7 @@ import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/Metr
 import { AdHocFiltersForMetricsVariable } from 'MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import {
   ADD_TO_DASHBOARD_COMPONENT_ID,
   ADD_TO_DASHBOARD_LABEL,
@@ -50,9 +51,8 @@ import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePa
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
-import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
-import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { logger } from 'shared/logger/logger';
 
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
@@ -64,7 +64,6 @@ import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
-
 import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
@@ -461,17 +460,15 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                   {controls.map((control) => (
                     <control.Component key={control.state.key} model={control} />
                   ))}
-                  {kgAnnotationToggle && (
-                    <kgAnnotationToggle.Component model={kgAnnotationToggle} />
-                  )}
+                  {kgAnnotationToggle && <kgAnnotationToggle.Component model={kgAnnotationToggle} />}
                   <Stack direction="row" gap={0.5}>
                     <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
                   </Stack>
                 </Stack>
               </div>
             )}
-            {topScene && (
-              embeddedMini ? (
+            {topScene &&
+              (embeddedMini ? (
                 // Skip URL sync in embeddedMini mode to avoid conflicts with host app
                 <div className={styles.body}>
                   <topScene.Component model={topScene} />
@@ -489,8 +486,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                     </Stack>
                   </div>
                 </UrlSyncContextProvider>
-              )
-            )}
+              ))}
           </Stack>
         </div>
         <drawer.Component model={drawer} />
@@ -532,12 +528,10 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
       allowCustomValue: true,
       useQueriesAsFilterForOptions: false,
       expressionBuilder: (filters: AdHocVariableFilter[]) => {
-        return (
-          filters
-            .filter((filter) => filter.key !== '__name__')
-            .map(buildFilterExpression)
-            .join(',')
-        );
+        return filters
+          .filter((filter) => filter.key !== '__name__')
+          .map(buildFilterExpression)
+          .join(',');
       },
     }),
     new LabelsVariable(),
@@ -598,9 +592,9 @@ function updateAppControlsHeight() {
 function isScopesSupported(): boolean {
   return Boolean(
     config.featureToggles.scopeFilters &&
-      config.featureToggles.enableScopesInMetricsExplore &&
-      // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
-      // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
-      !config.buildInfo.version.startsWith('11.')
+    config.featureToggles.enableScopesInMetricsExplore &&
+    // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
+    // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
+    !config.buildInfo.version.startsWith('11.')
   );
 }

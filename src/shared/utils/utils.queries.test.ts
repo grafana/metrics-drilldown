@@ -44,4 +44,3 @@ describe('removeIgnoreUsageLabel', () => {
     expect(removeIgnoreUsageLabel('')).toBe('');
   });
 });
-

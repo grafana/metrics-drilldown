@@ -65,7 +65,7 @@ describe('getPluginVersion', () => {
 
       const first = await getPluginVersion();
       // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- testing fallback for Grafana <12.4.0
-  mockConfig.apps = {};
+      mockConfig.apps = {};
       const second = await getPluginVersion();
 
       expect(first).toBe('0.9.0');

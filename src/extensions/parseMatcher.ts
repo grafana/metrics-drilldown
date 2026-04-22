@@ -11,7 +11,6 @@ const VALUE_REGEX = '.+';
 const MATCHER_REGEX = new RegExp(`(${LABEL_REGEX})(${OPERATOR_REGEX})(${VALUE_REGEX})`);
 
 export function parseMatcher(matcher: string): Filter {
-   
   const [, rawKey, rawOperator, rawValue] = matcher.match(MATCHER_REGEX) || [, '', '', ''];
   return {
     key: rawKey.trim(),

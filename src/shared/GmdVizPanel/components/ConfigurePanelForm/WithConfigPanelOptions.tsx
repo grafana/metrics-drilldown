@@ -161,12 +161,7 @@ export class WithConfigPanelOptions extends SceneObjectBase<WithConfigPanelOptio
         </div>
         <div className={styles.radioContainer}>
           <Tooltip content={tooltipContent} placement="top">
-            <input
-              type="radio"
-              name="select-config"
-              checked={isSelected}
-              aria-label={radioLabel}
-            />
+            <input type="radio" name="select-config" checked={isSelected} aria-label={radioLabel} />
           </Tooltip>
         </div>
       </div>

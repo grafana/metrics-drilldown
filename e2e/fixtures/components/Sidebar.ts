@@ -1,12 +1,6 @@
 import { expect, type Locator, type Mouse, type Page } from '@playwright/test';
 
-const BUTTON_NAMES = [
-  'Rules filters',
-  'Prefix filters',
-  'Suffix filters',
-  'Group by labels',
-  'Bookmarks',
-] as const;
+const BUTTON_NAMES = ['Rules filters', 'Prefix filters', 'Suffix filters', 'Group by labels', 'Bookmarks'] as const;
 
 type ButtonName = (typeof BUTTON_NAMES)[number];
 

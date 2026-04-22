@@ -2,8 +2,6 @@ import { sceneGraph, type SceneTimeRange } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-
-
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { type MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { buildNavigateToMetricsParams, createAppUrl, createPromURLObject, parsePromQLQuery } from 'extensions/links';

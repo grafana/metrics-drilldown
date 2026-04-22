@@ -225,7 +225,10 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         new SceneReactObject({
           reactNode: (
             <InlineBanner title="" severity="info">
-              {t('breakdown.label-values-list.no-values', 'No label values found for the current filters and time range.')}
+              {t(
+                'breakdown.label-values-list.no-values',
+                'No label values found for the current filters and time range.'
+              )}
             </InlineBanner>
           ),
         }),
@@ -278,7 +281,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   public Controls({ model }: { model: MetricLabelValuesList }) {
-    const styles = useStyles2(getStyles);  
+    const styles = useStyles2(getStyles);
     const { body, quickSearch, layoutSwitcher, sortBySelector } = model.useState();
 
     return (
