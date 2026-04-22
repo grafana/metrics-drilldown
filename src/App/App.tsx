@@ -9,12 +9,12 @@ import { ErrorView } from './ErrorView';
 import { Onboarding } from './Onboarding';
 import { patchSceneQueryRunnerFilters } from './patchSceneQueryRunner';
 import { AppRoutes } from './Routes';
+import { useCatchExceptions } from './useCatchExceptions';
+import { useReportAppInitialized } from './useReportAppInitialized';
 import { initOpenFeatureProvider } from '../shared/featureFlags/openFeature';
 import { initFaro } from '../shared/logger/faro/faro';
 import { isPrometheusDataSource } from '../shared/utils/utils.datasource';
 import { PluginPropsContext } from '../shared/utils/utils.plugin';
-import { useCatchExceptions } from './useCatchExceptions';
-import { useReportAppInitialized } from './useReportAppInitialized';
 
 initFaro();
 initOpenFeatureProvider();

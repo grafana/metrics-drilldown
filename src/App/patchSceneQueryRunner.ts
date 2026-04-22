@@ -36,7 +36,6 @@ type DsArg = { meta?: { id?: string } } | null | undefined;
 export function patchSceneQueryRunnerFilters() {
   // `as any` is required: Symbol keys and private methods are not part of the public
   // SceneQueryRunner type, so TypeScript cannot index the prototype without it.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const proto = SceneQueryRunner.prototype as any;
 
   if (proto[PATCHED]) {
