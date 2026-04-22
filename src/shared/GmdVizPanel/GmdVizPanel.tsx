@@ -150,51 +150,21 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
 
-    this.checkMetricMetadata(discardPanelTypeUpdates);
+    this.checkMetricMetadata();
   }
 
-  private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
+  private async checkMetricMetadata() {
     const { metric, metricType } = this.state;
 
     const metricTypeFromMetadata = await getMetricType(metric, getTrailFor(this));
-    if (metricType === metricTypeFromMetadata) {
-      return;
-    }
-
-    const stateUpdate: Partial<GmdVizPanelState> = {};
-    const panelConfigUpdate: Partial<GmdVizPanelState['panelConfig']> = {};
-
-    // we found a native histogram
-    if (metricTypeFromMetadata === 'native-histogram') {
-      stateUpdate.metricType = 'native-histogram';
-      panelConfigUpdate.description = this.state.panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
-
-      if (!discardPanelTypeUpdates) {
-        panelConfigUpdate.type = 'heatmap';
-      }
-    }
 
     // we found a gauge metric that was previously identified as a counter (see https://github.com/grafana/metrics-drilldown/issues/698)
     if (metricTypeFromMetadata === 'gauge' && metricType === 'counter') {
-      stateUpdate.metricType = 'gauge';
+      this.setState({ metricType: 'gauge' });
     }
     // or the opposite
     if (metricTypeFromMetadata === 'counter' && metricType === 'gauge') {
-      stateUpdate.metricType = 'counter';
-    }
-
-    const currentPanelConfig = this.state.panelConfig;
-
-    // Guard: if Path B already rebuilt to the target type, skip the type update.
-    if (panelConfigUpdate.type === currentPanelConfig.type) {
-      delete panelConfigUpdate.type;
-    }
-
-    if (Object.keys(stateUpdate).length || Object.keys(panelConfigUpdate).length) {
-      this.setState({
-        ...stateUpdate,
-        panelConfig: { ...currentPanelConfig, ...panelConfigUpdate },
-      });
+      this.setState({ metricType: 'counter' });
     }
   }
 
@@ -218,7 +188,6 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         }
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
-          // Guard: if checkMetricMetadata (Path A) already rebuilt to heatmap, skip.
           if (this.state.panelConfig.type === 'heatmap') {
             return;
           }
