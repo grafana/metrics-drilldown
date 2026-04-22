@@ -2,8 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Breakdown",
-      "query-results": "",
-      "query-results-description": "",
+      "query-results": "Queryresultaten",
+      "query-results-description": "Instant-querygegevens in tabelformaat",
       "related-logs": "Gerelateerde logs",
       "related-logs-description": "Relevante logs op basis van huidige labelfilters en tijdsbereik",
       "related-metrics": "Gerelateerde metrics",
@@ -19,7 +19,7 @@
     "label-values-list": {
       "error-title": "Er is een fout opgetreden bij het laden van metrics!",
       "no-values": "Geen labelwaarden gevonden voor de huidige filters en het huidige tijdsbereik.",
-      "search-aria-label": "",
+      "search-aria-label": "Snel zoeken op labelwaarden",
       "search-label": "Zoeken",
       "view-label": "Weergeven"
     },
@@ -75,8 +75,8 @@
   },
   "fetch-dashboard-metrics": {
     "error": "Kan dashboardmetrics niet ophalen",
-    "limit-warning-body": "",
-    "limit-warning-title": ""
+    "limit-warning-body": "Je organisatie heeft meer dashboards dan deze limiet. Gebruikstellingen zijn mogelijk onvolledig.",
+    "limit-warning-title": "Het sorteren op dashboardgebruik is beperkt tot 500 dashboards."
   },
   "filtered-metrics-variable": {
     "label": "Gefilterde Metrics"
@@ -97,21 +97,21 @@
   },
   "kg-annotations": {
     "layer": {
-      "name": ""
+      "name": "Inzichten - {{severityLabel}}"
     },
     "query": {
-      "name": ""
+      "name": "KG-asserties - {{severityLabel}}"
     },
     "severity": {
-      "critical": "",
-      "info": "",
-      "warning": ""
+      "critical": "Kritiek",
+      "info": "Info",
+      "warning": "Waarschuwing"
     },
     "toggle": {
-      "description": "",
-      "disabled-tooltip": "",
-      "label": "",
-      "learn-more": ""
+      "description": "Statusniveaus (kritiek, waarschuwing, info) uit de Knowledge Graph als overlay op tijdreekspanelen weergeven.",
+      "disabled-tooltip": "Labelfilters toevoegen om entiteiten te matchen.",
+      "label": "Inzichten",
+      "learn-more": "Meer informatie"
     }
   },
   "labels-datasource": {
@@ -140,35 +140,35 @@
     "fallback": "Laden..."
   },
   "list-controls": {
-    "search-aria-label": ""
+    "search-aria-label": "Snel zoeken op metrics"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
-        "button-no-query-tooltip": "",
-        "button-tooltip": "",
-        "empty": "",
-        "load-error": "",
-        "load-type-error": "",
-        "modal-title": "",
-        "remove": "",
-        "saved-query-button-tooltip": "",
-        "select": ""
+        "button-no-query-tooltip": "Geen opgeslagen query's om te laden",
+        "button-tooltip": "Opgeslagen query laden",
+        "empty": "Geen opgeslagen query's om weer te geven.",
+        "load-error": "Deze query bevat expressies die niet in Metrics Drilldown kunnen worden weergegeven. Alleen eenvoudige metric{label}-selectors worden ondersteund.",
+        "load-type-error": "Selecteer een Prometheus-query.",
+        "modal-title": "Een eerder opgeslagen zoekopdracht laden",
+        "remove": "Verwijderen",
+        "saved-query-button-tooltip": "Opgeslagen query laden",
+        "select": "Selecteren"
       },
       "save-query": {
         "already-exists": {
-          "alert": ""
+          "alert": "Er is al een eerder opgeslagen zoekopdracht met dezelfde expressie: {{title}}"
         },
-        "button-tooltip": "",
-        "button-tooltip-saved-queries": "",
-        "cancel": "",
-        "description": "",
-        "error": "",
-        "modal-alert": "",
-        "modal-title": "",
-        "save": "",
-        "success": "",
-        "title": ""
+        "button-tooltip": "Query opslaan",
+        "button-tooltip-saved-queries": "Opslaan in Opgeslagen queries",
+        "cancel": "Annuleren",
+        "description": "Beschrijving",
+        "error": "Er is een onverwachte fout opgetreden bij het opslaan van deze zoekopdracht.",
+        "modal-alert": "Opgeslagen zoekopdrachten worden lokaal in je browser opgeslagen en zijn alleen op dit apparaat beschikbaar.",
+        "modal-title": "Huidige query opslaan",
+        "save": "Opslaan",
+        "success": "Query is opgeslagen.",
+        "title": "Titel"
       }
     }
   },
@@ -248,23 +248,23 @@
     "view-by-label": "Weergeven per"
   },
   "query-results": {
-    "aria-label": "",
-    "error-title": "",
-    "unavailable-message": "",
-    "unavailable-title": ""
+    "aria-label": "Directe queryresultaten",
+    "error-title": "Query is mislukt",
+    "unavailable-message": "Voor deze functie is een nieuwere versie van Grafana vereist.",
+    "unavailable-title": "Component voor queryresultaten niet beschikbaar"
   },
   "quick-search": {
     "ask-assistant-aria-label": "Vraag het de Grafana-assistent",
     "ask-assistant-tooltip": "Vraag het de Grafana-assistent",
     "clear-search-tooltip": "Zoekopdracht wissen",
-    "placeholder": "",
+    "placeholder": "Zoek op {{targetName}}",
     "placeholder-question-mode": "Stel de Grafana-assistent een vraag en druk op enter",
-    "placeholder-with-assistant": "",
-    "placeholder-with-assistant-tab-enter": "",
-    "count-filtered_one": "",
-    "count-filtered_other": "",
-    "count-total_one": "",
-    "count-total_other": ""
+    "placeholder-with-assistant": "Zoek op {{targetName}} of typ ? om het aan de Grafana-assistent te vragen",
+    "placeholder-with-assistant-tab-enter": "Zoek op {{targetName}} of druk op tab en vervolgens op enter om het de Grafana-assistent te vragen",
+    "count-filtered_one": "{{targetName}}: {{count}} van {{total}} in totaal",
+    "count-filtered_other": "{{targetName}}: {{count}} van {{total}} in totaal",
+    "count-total_one": "{{targetName}}: {{count}} in totaal",
+    "count-total_other": "{{targetName}}: {{count}} in totaal"
   },
   "quick-search-assistant": {
     "label-filters-title": "Huidige labelfilters",
@@ -284,7 +284,7 @@
     "suggestions": "Om gerelateerde logs te vinden, probeer het volgende:<1><0>Pas uw labelfilters aan zodat ze labels bevatten die zowel in de huidige metric als in uw logs voorkomen</0><1>Selecteer een metric die is aangemaakt door een <2>Loki Recording Rule</2></1><2>Vergroot het tijdbereik om meer gegevens op te nemen</2></1>"
   },
   "related-metrics": {
-    "search-aria-label": ""
+    "search-aria-label": "Snel zoeken op gerelateerde metrics"
   },
   "select-action": {
     "button": "Selecteren"
@@ -295,8 +295,8 @@
     "open-in-drilldown-tooltip": "Openen in Metrics Drilldown"
   },
   "show-more-button": {
-    "text_one": "",
-    "text_other": ""
+    "text_one": "Toon nog {{count}} ({{current}}/{{total}})",
+    "text_other": "Toon nog {{count}} ({{current}}/{{total}})"
   },
   "sidebar": {
     "bookmarks": {
@@ -309,7 +309,7 @@
     "filter": {
       "clear-search-tooltip": "Zoekopdracht wissen",
       "hide-empty": "Lege verbergen",
-      "search-aria-label": "",
+      "search-aria-label": "Opties voor zoekfilter",
       "search-placeholder": "Zoeken..."
     },
     "filter-type": {
@@ -320,7 +320,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Zoekopdracht wissen",
-      "search-aria-label": "",
+      "search-aria-label": "Labels zoeken",
       "search-placeholder": "Zoeken..."
     },
     "recent-metrics": {

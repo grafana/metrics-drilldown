@@ -14,6 +14,7 @@ import React from 'react';
 import { LoadQueryScene } from 'shared/savedQueries/LoadQueryScene';
 import { SaveQueryButton } from 'shared/savedQueries/SaveQueryButton';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { getResponsiveBreakpoints } from 'shared/utils/utils.styles';
 
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 import { MetricScene } from './MetricScene';
@@ -193,7 +194,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
 function getStyles(theme: GrafanaTheme2) {
   return {
     actions: css({
-      [theme.breakpoints.up(theme.breakpoints.values.md)]: {
+      [getResponsiveBreakpoints(theme).up('md')]: {
         position: 'absolute',
         right: 0,
         top: 16,

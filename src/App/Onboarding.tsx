@@ -5,6 +5,8 @@ import { useStyles2, useTheme2 } from '@grafana/ui';
 import React from 'react';
 import SVG from 'react-inlinesvg';
 
+import { getResponsiveBreakpoints } from 'shared/utils/utils.styles';
+
 import { HelpControls } from './HelpControls';
 
 export function Onboarding() {
@@ -74,13 +76,13 @@ export function Onboarding() {
 const getStyles = (theme: GrafanaTheme2) => {
   return {
     graphicContainer: css({
-      [theme.breakpoints.up('md')]: {
+      [getResponsiveBreakpoints(theme).up('md')]: {
         alignSelf: 'flex-end',
         height: 'auto',
         padding: theme.spacing(1),
         width: '300px',
       },
-      [theme.breakpoints.up('lg')]: {
+      [getResponsiveBreakpoints(theme).up('lg')]: {
         alignSelf: 'flex-end',
         height: 'auto',
         padding: theme.spacing(1),
@@ -105,7 +107,7 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
     wrap: css({
       position: 'relative',
-      [theme.breakpoints.up('md')]: {
+      [getResponsiveBreakpoints(theme).up('md')]: {
         flexDirection: 'row',
         margin: '4rem auto auto auto',
       },

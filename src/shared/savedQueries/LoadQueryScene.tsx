@@ -13,6 +13,7 @@ import { ROUTES } from 'shared/constants/routes';
 import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
+import { getResponsiveBreakpoints } from 'shared/utils/utils.styles';
 
 import { LoadQueryModal } from './LoadQueryModal';
 import { isQueryLibrarySupported, useHasSavedQueries, type OpenQueryLibraryComponentProps } from './savedQuery';
@@ -165,7 +166,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
 
 const getStyles = (theme: GrafanaTheme2) => ({
   button: css({
-    [theme.breakpoints.down('lg')]: {
+    [getResponsiveBreakpoints(theme).down('lg')]: {
       alignSelf: 'flex-start',
     },
     alignSelf: 'flex-end',
