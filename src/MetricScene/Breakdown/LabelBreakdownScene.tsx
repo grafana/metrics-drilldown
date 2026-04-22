@@ -95,7 +95,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
     const { body } = model.useState();
     const groupByVariable = model.getVariable();
 
@@ -110,9 +110,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
             </div>
           </div>
         )}
-        {embeddedMini && (
-          <div className={styles.miniSectionLabel}>{t('breakdown.section-label', 'Breakdown')}</div>
-        )}
+        {embeddedMini && <div className={styles.miniSectionLabel}>{t('breakdown.section-label', 'Breakdown')}</div>}
         <div data-testid="panels-list">
           {body instanceof MetricLabelsList && <body.Component model={body} />}
           {body instanceof MetricLabelValuesList && <body.Component model={body} />}

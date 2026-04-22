@@ -37,7 +37,6 @@ jest.mock('shared/GmdVizPanel/types/panelBuilder', () => ({
   },
 }));
 
-
 function createPanel() {
   return new GmdVizPanel({ metric: 'go_goroutines' });
 }

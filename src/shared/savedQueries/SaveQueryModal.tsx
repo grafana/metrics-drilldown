@@ -1,4 +1,3 @@
-
 import { css } from '@emotion/css';
 import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
@@ -89,11 +88,7 @@ export function SaveQueryModal({ dsUid, query, onClose }: Props) {
                 )}
               </Alert>
             )}
-            <Field
-              label={t('metrics.metrics-drilldown.save-query.title', 'Title')}
-              noMargin
-              htmlFor="save-query-title"
-            >
+            <Field label={t('metrics.metrics-drilldown.save-query.title', 'Title')} noMargin htmlFor="save-query-title">
               <Input
                 id="save-query-title"
                 required

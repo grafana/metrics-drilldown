@@ -10,8 +10,8 @@ type SnakeCaseInner<S extends string> = S extends `${infer T}${infer U}`
   ? T extends ' '
     ? `_${SnakeCaseInner<U>}`
     : T extends Capitalize<T>
-    ? `${Lowercase<T>}${SnakeCaseInner<U>}`
-    : `${T}${SnakeCaseInner<U>}`
+      ? `${Lowercase<T>}${SnakeCaseInner<U>}`
+      : `${T}${SnakeCaseInner<U>}`
   : S;
 
 /**

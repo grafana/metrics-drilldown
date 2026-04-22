@@ -376,11 +376,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
                 // For text-based buttons (not icons), include the visible text in the aria-label
                 // to satisfy WCAG 2.5.3 Label in Name requirement
-                const isTextButton =
-                  !(iconOrText in availableIconsIndex) && !CustomIcons.has(iconOrText);
-                const ariaLabel = isTextButton
-                  ? `${iconOrText} - ${translatedInfo.title}`
-                  : translatedInfo.title;
+                const isTextButton = !(iconOrText in availableIconsIndex) && !CustomIcons.has(iconOrText);
+                const ariaLabel = isTextButton ? `${iconOrText} - ${translatedInfo.title}` : translatedInfo.title;
 
                 return (
                   <div

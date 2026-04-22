@@ -1,6 +1,6 @@
 ---
 name: metricsfiltersection
-description: "Skill for the MetricsFilterSection area of metrics-drilldown. 14 symbols across 4 files."
+description: 'Skill for the MetricsFilterSection area of metrics-drilldown. 14 symbols across 4 files.'
 ---
 
 # MetricsFilterSection
@@ -15,12 +15,12 @@ description: "Skill for the MetricsFilterSection area of metrics-drilldown. 14 s
 
 ## Key Files
 
-| File | Symbols |
-|------|---------|
-| `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | onActivate, updateLists, updateCounts, updateSublevelCounts, updateFromUrl (+1) |
-| `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx` | TreeCheckBoxList, isParentChecked, getChildren, selectParent, unselectParent (+1) |
-| `src/MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel.ts` | computeMetricPrefixSecondLevel |
-| `src/MetricsReducer/metrics-variables/MetricsVariableFilterEngine.ts` | getFilters |
+| File                                                                                | Symbols                                                                           |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | onActivate, updateLists, updateCounts, updateSublevelCounts, updateFromUrl (+1)   |
+| `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx`     | TreeCheckBoxList, isParentChecked, getChildren, selectParent, unselectParent (+1) |
+| `src/MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel.ts`            | computeMetricPrefixSecondLevel                                                    |
+| `src/MetricsReducer/metrics-variables/MetricsVariableFilterEngine.ts`               | getFilters                                                                        |
 
 ## Entry Points
 
@@ -34,39 +34,39 @@ Start here when exploring this area:
 
 ## Key Symbols
 
-| Symbol | Type | File | Line |
-|--------|------|------|------|
-| `computeMetricPrefixSecondLevel` | Function | `src/MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel.ts` | 21 |
-| `TreeCheckBoxList` | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx` | 40 |
-| `isParentChecked` | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx` | 52 |
-| `getChildren` | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx` | 59 |
-| `selectParent` | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx` | 64 |
-| `unselectParent` | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx` | 73 |
-| `handleChildChange` | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx` | 81 |
-| `getFilters` | Method | `src/MetricsReducer/metrics-variables/MetricsVariableFilterEngine.ts` | 34 |
-| `onActivate` | Method | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 155 |
-| `updateLists` | Method | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 202 |
-| `updateCounts` | Method | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 209 |
-| `updateSublevelCounts` | Method | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 259 |
-| `updateFromUrl` | Method | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 88 |
-| `parseLabel` | Method | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 322 |
+| Symbol                           | Type     | File                                                                                | Line |
+| -------------------------------- | -------- | ----------------------------------------------------------------------------------- | ---- |
+| `computeMetricPrefixSecondLevel` | Function | `src/MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel.ts`            | 21   |
+| `TreeCheckBoxList`               | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx`     | 40   |
+| `isParentChecked`                | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx`     | 52   |
+| `getChildren`                    | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx`     | 59   |
+| `selectParent`                   | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx`     | 64   |
+| `unselectParent`                 | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx`     | 73   |
+| `handleChildChange`              | Function | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/TreeCheckBoxList.tsx`     | 81   |
+| `getFilters`                     | Method   | `src/MetricsReducer/metrics-variables/MetricsVariableFilterEngine.ts`               | 34   |
+| `onActivate`                     | Method   | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 155  |
+| `updateLists`                    | Method   | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 202  |
+| `updateCounts`                   | Method   | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 209  |
+| `updateSublevelCounts`           | Method   | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 259  |
+| `updateFromUrl`                  | Method   | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 88   |
+| `parseLabel`                     | Method   | `src/MetricsReducer/SideBar/sections/MetricsFilterSection/MetricsFilterSection.tsx` | 322  |
 
 ## Execution Flows
 
-| Flow | Type | Steps |
-|------|------|-------|
-| `OnActivate → BuildRegex` | cross_community | 5 |
-| `OnActivate → ApplyPrefixFilters` | cross_community | 4 |
-| `OnActivate → ApplySuffixFilters` | cross_community | 4 |
-| `OnActivate → ApplyNameFilters` | cross_community | 4 |
-| `OnActivate → ComputeMetricPrefixSecondLevel` | intra_community | 4 |
+| Flow                                          | Type            | Steps |
+| --------------------------------------------- | --------------- | ----- |
+| `OnActivate → BuildRegex`                     | cross_community | 5     |
+| `OnActivate → ApplyPrefixFilters`             | cross_community | 4     |
+| `OnActivate → ApplySuffixFilters`             | cross_community | 4     |
+| `OnActivate → ApplyNameFilters`               | cross_community | 4     |
+| `OnActivate → ComputeMetricPrefixSecondLevel` | intra_community | 4     |
 
 ## Connected Areas
 
-| Area | Connections |
-|------|-------------|
-| QuickSearch | 1 calls |
-| Metrics-variables | 1 calls |
+| Area              | Connections |
+| ----------------- | ----------- |
+| QuickSearch       | 1 calls     |
+| Metrics-variables | 1 calls     |
 
 ## How to Explore
 

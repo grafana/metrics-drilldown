@@ -40,7 +40,7 @@ export class GroupByVariable extends QueryVariable {
   private onActivate() {
     this.filterOptions();
 
-    // Emit event on activation if options are already loaded (handles edge case where variable 
+    // Emit event on activation if options are already loaded (handles edge case where variable
     // is reactivated with cached options or activates after behavior subscribes)
     if (this.state.options.length > 0) {
       this.publishEvent(new GroupByOptionsLoadedEvent(this), true);
@@ -54,7 +54,7 @@ export class GroupByVariable extends QueryVariable {
       if (newState.options !== prevState.options && newState.options.find((o) => o.value === 'le')) {
         this.filterOptions(newState.options);
       }
-      
+
       // Emit event when options are loaded or updated
       if (newState.options !== prevState.options && newState.options.length > 0) {
         this.publishEvent(new GroupByOptionsLoadedEvent(this), true);
@@ -89,7 +89,11 @@ export class GroupByVariable extends QueryVariable {
     );
 
     return (
-      <Field label={t('breakdown.by-label', 'By label')} data-testid="breakdown-label-selector" className={styles.field}>
+      <Field
+        label={t('breakdown.by-label', 'By label')}
+        data-testid="breakdown-label-selector"
+        className={styles.field}
+      >
         <GroupBySelector
           options={options as GroupByOptions}
           value={value as string}

@@ -40,8 +40,7 @@ function KgAnnotationToggleRenderer({ model }: Readonly<{ model: KgAnnotationTog
     description
   ) : (
     <span>
-      {description}{' '}
-      {t('kg-annotations.toggle.disabled-tooltip', 'Add label filters to match entities.')}{' '}
+      {description} {t('kg-annotations.toggle.disabled-tooltip', 'Add label filters to match entities.')}{' '}
       <TextLink external href="https://grafana.com/docs/grafana-cloud/knowledge-graph/introduction/">
         {t('kg-annotations.toggle.learn-more', 'Learn more')}
       </TextLink>

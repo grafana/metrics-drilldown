@@ -3,14 +3,14 @@ name: create bundle stats
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # Run once per day at midnight UTC
+    - cron: '0 0 * * *' # Run once per day at midnight UTC
   push:
     branches:
       - main
 
 permissions:
-  contents: "read"
-  actions: "write"
+  contents: 'read'
+  actions: 'write'
 
 jobs:
   build-stats:
@@ -27,8 +27,8 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: "22"
-          cache: "pnpm"
+          node-version: '22'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -1,6 +1,6 @@
 ---
 name: labels
-description: "Skill for the Labels area of metrics-drilldown. 12 symbols across 4 files."
+description: 'Skill for the Labels area of metrics-drilldown. 12 symbols across 4 files.'
 ---
 
 # Labels
@@ -15,12 +15,12 @@ description: "Skill for the Labels area of metrics-drilldown. 12 symbols across 
 
 ## Key Files
 
-| File | Symbols |
-|------|---------|
-| `src/MetricsReducer/labels/LabelsDataSource.ts` | metricFindQuery, fetchLabelValues, fetchLabels, getLabelsMatchAPISupport, getFiltersFromVariable (+1) |
-| `src/AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper.ts` | fetchLabelValues, getPrometheusDataSourceForScene, fetchLabels |
-| `src/MetricsReducer/labels/LabelsVariable.tsx` | onActivate, updateQuery |
-| `src/MetricsReducer/helpers/displayStatus.ts` | displayWarning |
+| File                                                                | Symbols                                                                                               |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `src/MetricsReducer/labels/LabelsDataSource.ts`                     | metricFindQuery, fetchLabelValues, fetchLabels, getLabelsMatchAPISupport, getFiltersFromVariable (+1) |
+| `src/AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper.ts` | fetchLabelValues, getPrometheusDataSourceForScene, fetchLabels                                        |
+| `src/MetricsReducer/labels/LabelsVariable.tsx`                      | onActivate, updateQuery                                                                               |
+| `src/MetricsReducer/helpers/displayStatus.ts`                       | displayWarning                                                                                        |
 
 ## Entry Points
 
@@ -34,37 +34,37 @@ Start here when exploring this area:
 
 ## Key Symbols
 
-| Symbol | Type | File | Line |
-|--------|------|------|------|
-| `displayWarning` | Function | `src/MetricsReducer/helpers/displayStatus.ts` | 19 |
-| `metricFindQuery` | Method | `src/MetricsReducer/labels/LabelsDataSource.ts` | 51 |
-| `fetchLabelValues` | Method | `src/MetricsReducer/labels/LabelsDataSource.ts` | 133 |
-| `fetchLabelValues` | Method | `src/AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper.ts` | 258 |
-| `getPrometheusDataSourceForScene` | Method | `src/AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper.ts` | 287 |
-| `fetchLabels` | Method | `src/MetricsReducer/labels/LabelsDataSource.ts` | 76 |
-| `getLabelsMatchAPISupport` | Method | `src/MetricsReducer/labels/LabelsDataSource.ts` | 107 |
-| `getFiltersFromVariable` | Method | `src/MetricsReducer/labels/LabelsDataSource.ts` | 119 |
-| `processLabelOptions` | Method | `src/MetricsReducer/labels/LabelsDataSource.ts` | 129 |
-| `fetchLabels` | Method | `src/AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper.ts` | 214 |
-| `onActivate` | Method | `src/MetricsReducer/labels/LabelsVariable.tsx` | 40 |
-| `updateQuery` | Method | `src/MetricsReducer/labels/LabelsVariable.tsx` | 89 |
+| Symbol                            | Type     | File                                                                | Line |
+| --------------------------------- | -------- | ------------------------------------------------------------------- | ---- |
+| `displayWarning`                  | Function | `src/MetricsReducer/helpers/displayStatus.ts`                       | 19   |
+| `metricFindQuery`                 | Method   | `src/MetricsReducer/labels/LabelsDataSource.ts`                     | 51   |
+| `fetchLabelValues`                | Method   | `src/MetricsReducer/labels/LabelsDataSource.ts`                     | 133  |
+| `fetchLabelValues`                | Method   | `src/AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper.ts` | 258  |
+| `getPrometheusDataSourceForScene` | Method   | `src/AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper.ts` | 287  |
+| `fetchLabels`                     | Method   | `src/MetricsReducer/labels/LabelsDataSource.ts`                     | 76   |
+| `getLabelsMatchAPISupport`        | Method   | `src/MetricsReducer/labels/LabelsDataSource.ts`                     | 107  |
+| `getFiltersFromVariable`          | Method   | `src/MetricsReducer/labels/LabelsDataSource.ts`                     | 119  |
+| `processLabelOptions`             | Method   | `src/MetricsReducer/labels/LabelsDataSource.ts`                     | 129  |
+| `fetchLabels`                     | Method   | `src/AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper.ts` | 214  |
+| `onActivate`                      | Method   | `src/MetricsReducer/labels/LabelsVariable.tsx`                      | 40   |
+| `updateQuery`                     | Method   | `src/MetricsReducer/labels/LabelsVariable.tsx`                      | 89   |
 
 ## Execution Flows
 
-| Flow | Type | Steps |
-|------|------|-------|
-| `MetricFindQuery → IsPrometheusDataSource` | cross_community | 5 |
-| `MetricFindQuery → DisplayError` | cross_community | 4 |
-| `MetricFindQuery → DisplayWarning` | cross_community | 4 |
-| `MetricFindQuery → IsAdHocFiltersVariable` | cross_community | 4 |
+| Flow                                       | Type            | Steps |
+| ------------------------------------------ | --------------- | ----- |
+| `MetricFindQuery → IsPrometheusDataSource` | cross_community | 5     |
+| `MetricFindQuery → DisplayError`           | cross_community | 4     |
+| `MetricFindQuery → DisplayWarning`         | cross_community | 4     |
+| `MetricFindQuery → IsAdHocFiltersVariable` | cross_community | 4     |
 
 ## Connected Areas
 
-| Area | Connections |
-|------|-------------|
-| MetricDatasourceHelper | 1 calls |
-| Breakdown | 1 calls |
-| Bookmarks | 1 calls |
+| Area                   | Connections |
+| ---------------------- | ----------- |
+| MetricDatasourceHelper | 1 calls     |
+| Breakdown              | 1 calls     |
+| Bookmarks              | 1 calls     |
 
 ## How to Explore
 

@@ -87,7 +87,6 @@ test.describe('Metrics reducer: panel types', () => {
       metricsReducerView,
       metricSceneView,
     }) => {
-
       const searchText = nameLabelPresets.map(({ metric }) => `^${metric}$`).join(',');
       await metricsReducerView.quickSearch.enterText(searchText);
 
