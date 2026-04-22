@@ -25,7 +25,17 @@ const PATCHED = Symbol.for('metrics-drilldown/patchSceneQueryRunnerFilters');
  * which reads VAR_FILTERS.state.filters directly via its own expressionBuilder. That path is
  * unaffected by this patch.
  */
+// Minimal shapes for the internal prepareRequests API.
+// Typed loosely because this is a private Scenes method; the goal is to avoid
+// propagating `any` through our own logic while keeping the prototype cast contained.
+type FilterEntry = { key: string; [k: string]: unknown };
+type RequestWithFilters = { filters?: FilterEntry[] };
+type PrepareRequestsResult = { primary: RequestWithFilters; secondaries?: RequestWithFilters[] } | null | undefined;
+type DsArg = { meta?: { id?: string } } | null | undefined;
+
 export function patchSceneQueryRunnerFilters() {
+  // `as any` is required: Symbol keys and private methods are not part of the public
+  // SceneQueryRunner type, so TypeScript cannot index the prototype without it.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const proto = SceneQueryRunner.prototype as any;
 
@@ -40,11 +50,10 @@ export function patchSceneQueryRunnerFilters() {
     return;
   }
 
-  const stripNameFilter = (f: { key: string }) => f.key !== '__name__';
+  const stripNameFilter = (f: FilterEntry) => f.key !== '__name__';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  proto.prepareRequests = function (timeRange: any, ds: any) {
-    const result = original.call(this, timeRange, ds);
+  proto.prepareRequests = function (timeRange: unknown, ds: DsArg): PrepareRequestsResult {
+    const result: PrepareRequestsResult = original.call(this, timeRange, ds);
 
     if (!result || !result.primary) {
       logger.warn('[patchSceneQueryRunner] prepareRequests returned unexpected shape -- skipping filter strip');

@@ -6,7 +6,6 @@ jest.mock('@grafana/scenes', () => ({
   SceneQueryRunner: { prototype: {} },
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const proto = (SceneQueryRunner as any).prototype;
 const PATCHED = Symbol.for('metrics-drilldown/patchSceneQueryRunnerFilters');
 
