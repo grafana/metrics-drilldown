@@ -1,5 +1,3 @@
-
-
 import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';

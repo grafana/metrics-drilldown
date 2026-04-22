@@ -1,4 +1,3 @@
- 
 import { setDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 

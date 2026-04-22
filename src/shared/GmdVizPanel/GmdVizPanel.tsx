@@ -167,7 +167,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     // we found a native histogram
     if (metricTypeFromMetadata === 'native-histogram') {
       stateUpdate.metricType = 'native-histogram';
-      panelConfigUpdate.description = this.state.panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
+      panelConfigUpdate.description =
+        this.state.panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
 
       if (!discardPanelTypeUpdates) {
         panelConfigUpdate.type = 'heatmap';

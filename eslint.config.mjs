@@ -1,7 +1,7 @@
 import baseConfig from './.config/eslint.config.mjs';
-// eslint-disable-next-line import/no-unresolved -- package.json exports field not recognized by import plugin
+// eslint-disable-next-line import-x/no-unresolved -- package.json exports field not recognized by import plugin
 import grafanaI18nPlugin from '@grafana/i18n/eslint-plugin';
-import importPlugin from 'eslint-plugin-import';
+import importPlugin from 'eslint-plugin-import-x';
 import jest from 'eslint-plugin-jest';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import sonarjs from 'eslint-plugin-sonarjs';
@@ -54,10 +54,10 @@ export default [
     name: 'metrics-drilldown/main',
     files: ['**/*.{ts,tsx,js,jsx}'],
     settings: {
-      'import/parsers': {
+      'import-x/parsers': {
         '@typescript-eslint/parser': ['.ts', '.tsx'],
       },
-      'import/resolver': {
+      'import-x/resolver': {
         typescript: {
           project: './tsconfig.json',
         },
@@ -80,7 +80,7 @@ export default [
             "Avoid using console directly. Use the custom logger from 'src/tracking/logger/logger.ts' instead. Example: import { logger } from 'src/tracking/logger/logger'; logger.log('message');",
         },
       ],
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           groups: ['builtin', 'external', 'internal', ['parent', 'sibling'], 'index', 'object', 'type'],
@@ -129,22 +129,10 @@ export default [
     },
   },
   {
-    // eslint-plugin-import crashes on ESLint 10 when fixing import/order in this file
-    // (sourceCode.getTokenOrCommentAfter is not a function). This is a pre-existing issue
-    // on main hidden by eslint cache.
-    // TODO: migrate from eslint-plugin-import to eslint-plugin-import-x (ESLint 10 compatible fork)
-    // and remove this workaround. eslint-plugin-import@2.32.0 is the last release with no fix planned.
-    name: 'metrics-drilldown/data-trail-import-order-workaround',
-    files: ['src/AppDataTrail/DataTrail.tsx'],
-    rules: {
-      'import/order': 'off',
-    },
-  },
-  {
     name: 'metrics-drilldown/jest-config',
     files: ['jest.config.js'],
     rules: {
-      'import/order': 'off',
+      'import-x/order': 'off',
     },
   },
   {

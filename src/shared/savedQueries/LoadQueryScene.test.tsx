@@ -1,5 +1,3 @@
-
-
 import { type PromQuery } from '@grafana/prometheus';
 import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type SceneTimeRange } from '@grafana/scenes';

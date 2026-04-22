@@ -181,10 +181,7 @@ describe('fetchDashboardMetrics()', () => {
       await Promise.resolve();
 
       expect(displayWarning).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.stringContaining('500'),
-          expect.stringContaining('incomplete'),
-        ])
+        expect.arrayContaining([expect.stringContaining('500'), expect.stringContaining('incomplete')])
       );
     });
 

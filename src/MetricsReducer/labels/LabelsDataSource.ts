@@ -71,7 +71,10 @@ export class LabelsDataSource extends RuntimeDataSource {
       displayWarning(['Error while fetching labels! Defaulting to an empty array.', (error as Error).toString()]);
     }
 
-    return [{ value: NULL_GROUP_BY_VALUE, text: t('labels-datasource.none-option', '(none)') }, ...labelOptions] as MetricFindValue[];
+    return [
+      { value: NULL_GROUP_BY_VALUE, text: t('labels-datasource.none-option', '(none)') },
+      ...labelOptions,
+    ] as MetricFindValue[];
   }
 
   private async fetchLabels(ds: PrometheusDatasource, sceneObject: SceneObject, matcher: string) {

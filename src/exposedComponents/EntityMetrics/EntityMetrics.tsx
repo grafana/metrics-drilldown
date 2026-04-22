@@ -19,7 +19,14 @@ export interface EntityMetricsProps {
   entityName?: string;
 }
 
-const EntityMetrics = ({ labels, initialStart, initialEnd, dataSource, entityType, entityName }: EntityMetricsProps) => {
+const EntityMetrics = ({
+  labels,
+  initialStart,
+  initialEnd,
+  dataSource,
+  entityType,
+  entityName,
+}: EntityMetricsProps) => {
   const [error] = useCatchExceptions();
   const initRef = useRef(false);
 

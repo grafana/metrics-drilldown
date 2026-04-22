@@ -15,7 +15,10 @@ export class MetricSceneView extends DrilldownView {
 
   private static readonly ACTION_BAR_TABS = ['Breakdown', 'Related metrics', 'Related logs'] as const;
 
-  constructor(readonly page: Page, defaultUrlSearchParams: URLSearchParams) {
+  constructor(
+    readonly page: Page,
+    defaultUrlSearchParams: URLSearchParams
+  ) {
     super(page, PLUGIN_BASE_URL, new URLSearchParams(defaultUrlSearchParams));
 
     this.appControls = new AppControls(page);

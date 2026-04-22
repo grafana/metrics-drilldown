@@ -2,7 +2,8 @@ import { getPageNav } from './Trail';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
 
-const DEFAULT_URL = 'http://localhost:3001/a/grafana-metricsdrilldown-app/drilldown?metric=test_metric&actionView=breakdown';
+const DEFAULT_URL =
+  'http://localhost:3001/a/grafana-metricsdrilldown-app/drilldown?metric=test_metric&actionView=breakdown';
 
 const mockMetricScene = new MetricScene({ metric: 'test_metric' });
 const mockMetricsReducer = new MetricsReducer();
