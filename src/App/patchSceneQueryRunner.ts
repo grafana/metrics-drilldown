@@ -1,7 +1,8 @@
-import { logger } from 'shared/logger/logger';
 import { SceneQueryRunner } from '@grafana/scenes';
 
-let patched = false;
+import { logger } from 'shared/logger/logger';
+
+const PATCHED = Symbol('patchSceneQueryRunnerFilters');
 
 /**
  * Patches SceneQueryRunner.prototype.prepareRequests to strip __name__ from request.filters
@@ -18,12 +19,13 @@ let patched = false;
  * unaffected by this patch.
  */
 export function patchSceneQueryRunnerFilters() {
-  if (patched) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const proto = SceneQueryRunner.prototype as any;
+
+  if (proto[PATCHED]) {
     return;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const proto = SceneQueryRunner.prototype as any;
   const original = proto.prepareRequests;
 
   if (typeof original !== 'function') {
@@ -49,5 +51,5 @@ export function patchSceneQueryRunnerFilters() {
     return result;
   };
 
-  patched = true;
+  proto[PATCHED] = true;
 }
