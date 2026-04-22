@@ -97,10 +97,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
           new SceneReactObject({
             reactNode: (
               <InlineBanner title="" severity="info">
-                {t(
-                  'metrics-group-by-row.no-metrics',
-                  'No metrics found for the current filters and time range.'
-                )}
+                {t('metrics-group-by-row.no-metrics', 'No metrics found for the current filters and time range.')}
               </InlineBanner>
             ),
           }),
@@ -194,18 +191,18 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
         <div className={styles.containerHeader}>
           <Stack direction="row" alignItems="center" gap={1}>
             <div className={styles.headerButtons}>
-                <Button
-                  className={styles.selectButton}
-                  variant="secondary"
-                  onClick={onClickSelect}
-                  tooltip={t('metrics-group-by-row.select-tooltip', 'See metrics with {{labelName}}={{labelValue}}', {
-                    labelName,
-                    labelValue,
-                  })}
-                  tooltipPlacement="top"
-                >
-                  {t('metrics-group-by-row.select', 'Select')}
-                </Button>
+              <Button
+                className={styles.selectButton}
+                variant="secondary"
+                onClick={onClickSelect}
+                tooltip={t('metrics-group-by-row.select-tooltip', 'See metrics with {{labelName}}={{labelValue}}', {
+                  labelName,
+                  labelValue,
+                })}
+                tooltipPlacement="top"
+              >
+                {t('metrics-group-by-row.select', 'Select')}
+              </Button>
             </div>
           </Stack>
         </div>

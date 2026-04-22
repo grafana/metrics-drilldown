@@ -2,7 +2,6 @@ import { config } from '@grafana/runtime';
 import { renderHook, waitFor } from '@testing-library/react';
 import { act } from 'react';
 
-
 import { narrowSavedQueries } from './narrowSavedQuery';
 import {
   findExistingQuery,

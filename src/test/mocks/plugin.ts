@@ -2,12 +2,7 @@
 // - `packages/grafana-data/test/__mocks__/pluginMocks.ts`
 // - `public/app/features/alerting/unified/mocks.ts`
 
-import {
-  PluginExtensionTypes,
-  PluginType,
-  type PluginExtensionLink,
-  type PluginMeta,
-} from '@grafana/data';
+import { PluginExtensionTypes, PluginType, type PluginExtensionLink, type PluginMeta } from '@grafana/data';
 import { defaultsDeep } from 'lodash';
 
 export const getMockPlugins = (amount: number): PluginMeta[] => {

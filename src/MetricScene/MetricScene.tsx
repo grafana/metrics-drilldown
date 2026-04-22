@@ -20,10 +20,7 @@ import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
 import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
-import {
-  PROMETHEUS_QUERY_RESULTS_COMPONENT_ID,
-  type PrometheusQueryResultsV1Props,
-} from './QueryResults/constants';
+import { PROMETHEUS_QUERY_RESULTS_COMPONENT_ID, type PrometheusQueryResultsV1Props } from './QueryResults/constants';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 
@@ -132,7 +129,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   public getActionViewName(): string {
     return this.state.actionView
-      ? getActionViewsDefinitions().find((v) => v.value === this.state.actionView)?.displayName ?? ''
+      ? (getActionViewsDefinitions().find((v) => v.value === this.state.actionView)?.displayName ?? '')
       : '';
   }
 
@@ -141,18 +138,13 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     const styles = useStyles2(getStyles);
 
     // Check if Query Results component is available
-    const { component: QueryResultsComponent, isLoading } = usePluginComponent(
-      PROMETHEUS_QUERY_RESULTS_COMPONENT_ID
-    );
+    const { component: QueryResultsComponent, isLoading } = usePluginComponent(PROMETHEUS_QUERY_RESULTS_COMPONENT_ID);
 
     useEffect(() => {
       const isAvailable = !isLoading && Boolean(QueryResultsComponent);
       const typedComponent = QueryResultsComponent as React.ComponentType<PrometheusQueryResultsV1Props> | undefined;
 
-      if (
-        model.state.isQueryResultsAvailable !== isAvailable ||
-        model.state.queryResultsComponent !== typedComponent
-      ) {
+      if (model.state.isQueryResultsAvailable !== isAvailable || model.state.queryResultsComponent !== typedComponent) {
         model.setState({
           isQueryResultsAvailable: isAvailable,
           queryResultsComponent: typedComponent,

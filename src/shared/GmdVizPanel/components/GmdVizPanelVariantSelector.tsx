@@ -67,6 +67,8 @@ export class GmdVizPanelVariantSelector extends SceneObjectBase<GmdVizPanelVaria
       return null;
     }
 
-    return <RadioButtonGroup size="sm" options={translatedOptions} value={currentPanelType} onChange={model.onChange} />;
+    return (
+      <RadioButtonGroup size="sm" options={translatedOptions} value={currentPanelType} onChange={model.onChange} />
+    );
   };
 }

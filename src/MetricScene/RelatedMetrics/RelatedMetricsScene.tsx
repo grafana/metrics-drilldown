@@ -159,7 +159,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   public static readonly Component = ({ model }: SceneComponentProps<RelatedMetricsScene>) => {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : chromeHeaderHeight ?? 0, trail);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
     const { $variables, body, listControls } = model.useState();
 
     return (

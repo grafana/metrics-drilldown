@@ -1,4 +1,3 @@
-
 import { css } from '@emotion/css';
 import { dateTime, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
@@ -98,9 +97,7 @@ export function LoadQueryModal({ onClose, sceneRef }: Props) {
     >
       {!isLoading && queries.length === 0 && (
         <Box backgroundColor="secondary" padding={1.5} marginBottom={2}>
-          <Text variant="body">
-            {t('metrics.metrics-drilldown.load-query.empty', 'No saved queries to display.')}
-          </Text>
+          <Text variant="body">{t('metrics.metrics-drilldown.load-query.empty', 'No saved queries to display.')}</Text>
         </Box>
       )}
       {queries.length > 0 && (
@@ -109,7 +106,12 @@ export function LoadQueryModal({ onClose, sceneRef }: Props) {
             <ScrollContainer>
               <Stack direction="column" gap={0} flex={1} minWidth={0} role="radiogroup">
                 {queries.map((query) => (
-                  <SavedQueryItem key={query.uid} query={query} selected={query === selectedQuery} onSelect={onSelect} />
+                  <SavedQueryItem
+                    key={query.uid}
+                    query={query}
+                    selected={query === selectedQuery}
+                    onSelect={onSelect}
+                  />
                 ))}
               </Stack>
             </ScrollContainer>

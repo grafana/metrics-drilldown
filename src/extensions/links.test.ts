@@ -134,9 +134,7 @@ describe('parsePromQLQuery - lezer parser tests', () => {
   });
 
   test('should handle histogram_quantile functions', () => {
-    const result = parsePromQLQuery(
-      'histogram_quantile(0.95, rate(http_duration_seconds_bucket{job="api"}[5m]))'
-    );
+    const result = parsePromQLQuery('histogram_quantile(0.95, rate(http_duration_seconds_bucket{job="api"}[5m]))');
     expect(result.metric).toBe('http_duration_seconds_bucket');
     expect(result.labels).toEqual([{ label: 'job', op: '=', value: 'api' }]);
   });

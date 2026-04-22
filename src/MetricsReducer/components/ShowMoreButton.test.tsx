@@ -38,12 +38,7 @@ describe('ShowMoreButton', () => {
      */
 
     it('should display button text when increment is 1', () => {
-      render(
-        <ShowMoreButton
-          {...defaultProps}
-          batchSizes={{ increment: 1, current: 10, total: 20 }}
-        />
-      );
+      render(<ShowMoreButton {...defaultProps} batchSizes={{ increment: 1, current: 10, total: 20 }} />);
 
       // Button should be rendered (exact text depends on translation)
       const button = screen.getByRole('button');
@@ -55,12 +50,7 @@ describe('ShowMoreButton', () => {
     });
 
     it('should display button text when increment is greater than 1', () => {
-      render(
-        <ShowMoreButton
-          {...defaultProps}
-          batchSizes={{ increment: 5, current: 10, total: 20 }}
-        />
-      );
+      render(<ShowMoreButton {...defaultProps} batchSizes={{ increment: 5, current: 10, total: 20 }} />);
 
       // Button should be rendered
       const button = screen.getByRole('button');
@@ -79,12 +69,7 @@ describe('ShowMoreButton', () => {
       ];
 
       testCases.forEach(({ increment, current, total }) => {
-        const { unmount } = render(
-          <ShowMoreButton
-            {...defaultProps}
-            batchSizes={{ increment, current, total }}
-          />
-        );
+        const { unmount } = render(<ShowMoreButton {...defaultProps} batchSizes={{ increment, current, total }} />);
 
         const button = screen.getByRole('button');
         expect(button).toHaveTextContent(String(increment));
@@ -99,11 +84,7 @@ describe('ShowMoreButton', () => {
       const onClick = jest.fn();
 
       render(
-        <ShowMoreButton
-          {...defaultProps}
-          onClick={onClick}
-          batchSizes={{ increment: 5, current: 10, total: 20 }}
-        />
+        <ShowMoreButton {...defaultProps} onClick={onClick} batchSizes={{ increment: 5, current: 10, total: 20 }} />
       );
 
       const button = screen.getByRole('button');
