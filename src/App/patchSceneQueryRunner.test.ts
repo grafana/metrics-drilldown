@@ -16,7 +16,12 @@ const fakeTimeRange = {};
 beforeEach(() => {
   delete proto[PATCHED];
   proto.prepareRequests = jest.fn().mockReturnValue({
-    primary: { filters: [{ key: '__name__', operator: '=~', value: '.*' }, { key: 'job', operator: '=', value: 'api' }] },
+    primary: {
+      filters: [
+        { key: '__name__', operator: '=~', value: '.*' },
+        { key: 'job', operator: '=', value: 'api' },
+      ],
+    },
     secondaries: [{ filters: [{ key: '__name__', operator: '=~', value: '.*' }] }],
   });
 });

@@ -7,10 +7,10 @@ import {
 import { trailDS } from 'shared/shared';
 
 import { getHeatmapQueryRunnerParams } from './getHeatmapQueryRunnerParams';
+import { type BuildVizPanelOptions } from '../panelBuilder';
 import { filterEmptyFrames } from './transformations/filterEmptyFrames';
 import { filterZeroBucketFrames } from './transformations/filterZeroBucketFrames';
 import { getUnit } from '../../units/getUnit';
-import { type BuildVizPanelOptions } from '../panelBuilder';
 
 export function buildHeatmapPanel(options: BuildVizPanelOptions): VizPanel {
   const { metric, panelConfig, queryConfig } = options;
