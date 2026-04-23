@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.0.3
+
+##### Chores
+
+* **webpack:**  fix Immutable.js build warnings (#1209) (61e4113c)
+*  bump @bsull/augurs to 0.10.2 (#1203) (a6fc62f6)
+*  update media queries to use container queries (#1193) (842c7fa8)
+
+##### Bug Fixes
+
+* **adhocFiltersVariable:**  add patch in query runner to remove __name__ filter in queries (#1205) (a71070f0)
+*  ts error and run prettier (#1206) (269861f1)
+*  prevent native histogram double-rebuild race condition (#1113) (10b55a9f)
+* **deps:**  resolve pnpm audit CVEs (protobufjs, dompurify, protocol-buffers-schema) (#1204) (db4d0989)
+* **kg:**  change warning annotation color from orange to yellow (#1191) (67e8914f)
+
+##### Other Changes
+
+*  Download translations from Crowdin (#1208) (5965657e)
+*  Download translations from Crowdin (#1198) (1373adc0)
+
+
 ## 2.0.2
 
 ##### Chores
