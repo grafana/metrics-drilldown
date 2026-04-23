@@ -154,9 +154,11 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private async checkMetricMetadata() {
-    const { metric, metricType } = this.state;
+    const { metric } = this.state;
 
     const metricTypeFromMetadata = await getMetricType(metric, getTrailFor(this));
+
+    const { metricType } = this.state;
 
     // we found a gauge metric that was previously identified as a counter (see https://github.com/grafana/metrics-drilldown/issues/698)
     if (metricTypeFromMetadata === 'gauge' && metricType === 'counter') {
