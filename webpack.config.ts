@@ -22,6 +22,7 @@ const config = async (env): Promise<Configuration> => {
         // Ensure single instances of these packages when using pnpm
         // This prevents module duplication issues with i18n state
         '@grafana/i18n': path.resolve(process.cwd(), 'node_modules/@grafana/i18n'),
+        immutable: require.resolve('immutable/dist/immutable.js'),
       },
     },
   });
