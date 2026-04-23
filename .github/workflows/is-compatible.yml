@@ -37,4 +37,4 @@ jobs:
           fail-if-incompatible: yes
           # @grafana/data is pinned because the project uses v13.0.0 while npm latest is still 12.x.
           # TODO: remove the version pin once @grafana/data@13.x becomes the npm latest tag.
-          targets: "@grafana/data@13.0.0,@grafana/ui,@grafana/runtime,@grafana/schema,@grafana/e2e-selectors,@grafana/experimental"
+          targets: '@grafana/data@13.0.0,@grafana/ui,@grafana/runtime,@grafana/schema,@grafana/e2e-selectors,@grafana/experimental'
