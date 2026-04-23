@@ -145,14 +145,33 @@ describe('GmdVizPanel', () => {
       expect(subscription.unsubscribe).toHaveBeenCalledTimes(1);
     });
 
-    test('does not subscribe when discardPanelTypeUpdates=true', () => {
+    test('subscribes to data provider even when discardPanelTypeUpdates=true', () => {
       const { provider } = createMockDataProvider();
       const panel = createPanel();
       panel.setState({ body: { state: { $data: provider } } as any });
 
       (panel as any).subscribeToStateChanges(true);
 
-      expect(provider.subscribeToState).not.toHaveBeenCalled();
+      expect(provider.subscribeToState).toHaveBeenCalledTimes(1);
+    });
+
+    test('sets metricType but not panelConfig.type when discardPanelTypeUpdates=true and data frame is HeatmapCells', () => {
+      const { provider, fire } = createMockDataProvider();
+      const panel = createPanel();
+      panel.setState({ body: { state: { $data: provider } } as any });
+      const originalPanelType = panel.state.panelConfig.type;
+
+      (panel as any).subscribeToStateChanges(true);
+
+      fire({
+        data: {
+          state: LoadingState.Done,
+          series: [{ meta: { type: DataFrameType.HeatmapCells } }],
+        },
+      });
+
+      expect(panel.state.metricType).toBe('native-histogram');
+      expect(panel.state.panelConfig.type).toBe(originalPanelType);
     });
 
     test('does not subscribe when metricType is already native-histogram', () => {

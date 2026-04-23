@@ -173,7 +173,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
     // we give another chance to display it properly by looking into the data frame type received
-    if (!discardPanelTypeUpdates && !['classic-histogram', 'native-histogram'].includes(metricType)) {
+    if (!['classic-histogram', 'native-histogram'].includes(metricType)) {
       const bodySub = (body?.state.$data as SceneDataProvider)?.subscribeToState((newState) => {
         if (newState.data?.state !== LoadingState.Done) {
           return;
@@ -192,14 +192,18 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
             return;
           }
 
-          this.setState({
-            metricType: 'native-histogram',
-            panelConfig: {
-              description: t('gmd-viz-panel.native-histogram', 'Native Histogram'),
-              ...this.state.panelConfig,
-              type: 'heatmap',
-            },
-          });
+          if (discardPanelTypeUpdates) {
+            this.setState({ metricType: 'native-histogram' });
+          } else {
+            this.setState({
+              metricType: 'native-histogram',
+              panelConfig: {
+                description: t('gmd-viz-panel.native-histogram', 'Native Histogram'),
+                ...this.state.panelConfig,
+                type: 'heatmap',
+              },
+            });
+          }
         }
       });
 
