@@ -141,7 +141,7 @@
       "serialize-javascript": "^7.0.5",
       "immutable": "^5.1.5",
       "flatted": "^3.4.0",
-      "undici": "^7.24.0",
+      "undici": "^8.0.0",
       "picomatch@^2": "~4.0.0",
       "picomatch@^4": "^4.0.4",
       "protobufjs@^7": "^7.5.5",
