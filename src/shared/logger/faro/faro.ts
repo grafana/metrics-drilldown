@@ -11,10 +11,11 @@ let faro: Faro | null = null;
 export const getFaro = () => faro;
 export const setFaro = (instance: Faro | null) => (faro = instance);
 
-const errorsToIgnore = [
+export const errorsToIgnore = [
   // Matches core Grafana config (see https://github.com/grafana grafana/pull/54824)
   'ResizeObserver loop limit exceeded',
   'ResizeObserver loop completed',
+  'ResizeObserver loop completed with undelivered notifications.',
   'Non-Error exception captured with keys',
   'Failed sending payload to the receiver',
 ];
