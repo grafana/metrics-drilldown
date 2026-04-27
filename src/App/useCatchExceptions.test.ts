@@ -2,6 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 
 import { ensureErrorObject, useCatchExceptions } from './useCatchExceptions';
+import { errorsToIgnore } from '../shared/logger/faro/faro';
 import { logger } from '../shared/logger/logger';
 
 // Mock the logger
@@ -56,6 +57,23 @@ describe('useCatchExceptions', () => {
     jest.clearAllMocks();
   });
 
+  it.each(errorsToIgnore)('suppresses ignored error: %s', (message) => {
+    const { result } = renderHook(() => useCatchExceptions());
+
+    const ignoredError = new ErrorEvent('error', {
+      message,
+      filename: 'https://example.com/app.js',
+      error: new Error(message),
+    });
+
+    act(() => {
+      window.dispatchEvent(ignoredError);
+    });
+
+    expect(mockLogger.error).not.toHaveBeenCalled();
+    expect(result.current[0]).toBeUndefined();
+  });
+
   it('filters browser extension errors and logs them', () => {
     const { result } = renderHook(() => useCatchExceptions());
 
@@ -87,8 +105,8 @@ describe('useCatchExceptions', () => {
   it('filters null error events with messages and logs them', () => {
     const { result } = renderHook(() => useCatchExceptions());
 
-    const resizeObserverError = new ErrorEvent('error', {
-      message: 'ResizeObserver loop completed with undelivered notifications.',
+    const nullError = new ErrorEvent('error', {
+      message: 'Some non-critical browser error',
       filename: 'https://example.com/app.js',
       lineno: 42,
       colno: 10,
@@ -96,12 +114,12 @@ describe('useCatchExceptions', () => {
     });
 
     act(() => {
-      window.dispatchEvent(resizeObserverError);
+      window.dispatchEvent(nullError);
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.objectContaining({
-        message: 'Non-critical error: ResizeObserver loop completed with undelivered notifications.',
+        message: 'Non-critical error: Some non-critical browser error',
       }),
       expect.objectContaining({
         filename: 'https://example.com/app.js',
