@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 
-import { ensureErrorObject, useCatchExceptions } from './useCatchExceptions';
+import { ensureErrorObject, isSafariExtensionError, useCatchExceptions } from './useCatchExceptions';
 import { errorsToIgnore } from '../shared/logger/faro/faro';
 import { logger } from '../shared/logger/logger';
 
@@ -50,6 +50,20 @@ describe('ensureErrorObject', () => {
   });
 });
 
+describe('isSafariExtensionError', () => {
+  it('returns true for Safari extension background page errors', () => {
+    expect(
+      isSafariExtensionError(
+        "Looks like there is an error in the background page. You might want to inspect your background page for more details: undefined is not an object (evaluating 'window.fixinatorInputs.has')"
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for unrelated errors', () => {
+    expect(isSafariExtensionError('Cannot read property of undefined')).toBe(false);
+  });
+});
+
 describe('useCatchExceptions', () => {
   const mockLogger = logger as jest.Mocked<typeof logger>;
 
@@ -94,9 +108,42 @@ describe('useCatchExceptions', () => {
         message: 'Browser extension error: Failed to execute appendChild on Node',
       }),
       expect.objectContaining({
+        errorType: 'browser-extension',
         filename: 'chrome-extension://some-extension-id/something.html',
         lineno: '13',
         colno: '35',
+      })
+    );
+    expect(result.current[0]).toBeUndefined();
+  });
+
+  it('filters Safari-attributed browser extension errors and logs them', () => {
+    const { result } = renderHook(() => useCatchExceptions());
+
+    const safariMessage =
+      "Looks like there is an error in the background page. You might want to inspect your background page for more details: undefined is not an object (evaluating 'window.fixinatorInputs.has')";
+
+    const safariExtensionError = new ErrorEvent('error', {
+      message: safariMessage,
+      filename: 'https://grafana.example.com/public/plugins/grafana-metricsdrilldown-app/686.js',
+      lineno: 1,
+      colno: 1881,
+      error: new TypeError("undefined is not an object (evaluating 'window.fixinatorInputs.has')"),
+    });
+
+    act(() => {
+      window.dispatchEvent(safariExtensionError);
+    });
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: `Browser extension error: ${safariMessage}`,
+      }),
+      expect.objectContaining({
+        errorType: 'browser-extension',
+        filename: 'https://grafana.example.com/public/plugins/grafana-metricsdrilldown-app/686.js',
+        lineno: '1',
+        colno: '1881',
       })
     );
     expect(result.current[0]).toBeUndefined();

@@ -28,6 +28,7 @@
     "e2e:codegen": "playwright codegen",
     "e2e:smoke": "playwright test -c ./e2e/config/playwright.config.smoke.ts -x --trace on",
     "knip": "pnpm dlx knip --config knip.js",
+    "cve-scan": "trivy repo . -f table --scanners vuln",
     "i18n-extract": "i18next-cli extract -c i18next.config.ts",
     "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --ci"
   },
@@ -152,7 +153,8 @@
       "yaml": "^2.8.3",
       "@grafana/data": "^13.0.0",
       "@grafana/i18n": "^13.0.0",
-      "@grafana/schema": "^13.0.0"
+      "@grafana/schema": "^13.0.0",
+      "uuid": "^14.0.0"
     }
   }
 }
