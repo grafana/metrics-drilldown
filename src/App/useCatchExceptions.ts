@@ -27,6 +27,15 @@ export function ensureErrorObject(error: any, defaultMessage: string): Error {
   return new Error(defaultMessage);
 }
 
+// Safari wraps extension background-script errors with this prefix and
+// attributes them to the page's own scripts, so the filename-based
+// extension:// check below never matches.
+const SAFARI_EXTENSION_ERROR_PREFIX = 'Looks like there is an error in the background page';
+
+export function isSafariExtensionError(message: string): boolean {
+  return message.startsWith(SAFARI_EXTENSION_ERROR_PREFIX);
+}
+
 /**
  * Determines if an error should be treated as an application-breaking error.
  * Filters out known non-critical errors like browser extension errors and ResizeObserver warnings.
@@ -36,12 +45,23 @@ function shouldTreatAsApplicationError(errorEvent: ErrorEvent): boolean {
     return false;
   }
 
+  if (isSafariExtensionError(errorEvent.message)) {
+    logger.error(new Error(`Browser extension error: ${errorEvent.message}`, { cause: errorEvent.error }), {
+      errorType: 'browser-extension',
+      filename: errorEvent.filename,
+      lineno: errorEvent.lineno?.toString(),
+      colno: errorEvent.colno?.toString(),
+    });
+    return false;
+  }
+
   // Add extra context for browser extension errors
   if (errorEvent.filename) {
     const extensionUrl = new URL(errorEvent.filename);
 
     if (extensionUrl.protocol.endsWith('extension:')) {
-      logger.error(new Error(`Browser extension error: ${errorEvent.message}`, { cause: 'browser-extension' }), {
+      logger.error(new Error(`Browser extension error: ${errorEvent.message}`, { cause: errorEvent.error }), {
+        errorType: 'browser-extension',
         extensionName: extensionUrl.hostname,
         filename: errorEvent.filename,
         lineno: errorEvent.lineno?.toString(),
