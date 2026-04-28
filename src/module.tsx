@@ -4,7 +4,6 @@ import { LoadingPlaceholder } from '@grafana/ui';
 import { compare } from 'compare-versions';
 import React, { lazy, Suspense } from 'react';
 
-import { patchSceneQueryRunnerFilters } from 'App/patchSceneQueryRunner';
 import { entityMetricsConfig } from 'exposedComponents/EntityMetrics/config';
 import { labelBreakdownConfig } from 'exposedComponents/LabelBreakdown/config';
 import { miniBreakdownConfig } from 'exposedComponents/MiniBreakdown/config';
@@ -14,7 +13,7 @@ import { linkConfigs } from 'extensions/links';
 
 import pluginJson from './plugin.json';
 
-patchSceneQueryRunnerFilters();
+
 
 const LazyApp = lazy(async () => {
   
@@ -45,6 +44,9 @@ const LazyApp = lazy(async () => {
   } else {
     logger.warn('WASM not supported, outlier detection will not work');
   }
+
+  const { patchSceneQueryRunnerFilters } = await import('App/patchSceneQueryRunner');
+  patchSceneQueryRunnerFilters();
 
   return import('./App/App');
 });
