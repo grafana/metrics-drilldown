@@ -108,6 +108,7 @@ describe('useCatchExceptions', () => {
         message: 'Browser extension error: Failed to execute appendChild on Node',
       }),
       expect.objectContaining({
+        errorType: 'browser-extension',
         filename: 'chrome-extension://some-extension-id/something.html',
         lineno: '13',
         colno: '35',
@@ -139,6 +140,7 @@ describe('useCatchExceptions', () => {
         message: `Browser extension error: ${safariMessage}`,
       }),
       expect.objectContaining({
+        errorType: 'browser-extension',
         filename: 'https://grafana.example.com/public/plugins/grafana-metricsdrilldown-app/686.js',
         lineno: '1',
         colno: '1881',

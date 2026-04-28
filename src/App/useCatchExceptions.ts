@@ -46,7 +46,8 @@ function shouldTreatAsApplicationError(errorEvent: ErrorEvent): boolean {
   }
 
   if (isSafariExtensionError(errorEvent.message)) {
-    logger.error(new Error(`Browser extension error: ${errorEvent.message}`, { cause: 'browser-extension' }), {
+    logger.error(new Error(`Browser extension error: ${errorEvent.message}`, { cause: errorEvent.error }), {
+      errorType: 'browser-extension',
       filename: errorEvent.filename,
       lineno: errorEvent.lineno?.toString(),
       colno: errorEvent.colno?.toString(),
@@ -59,7 +60,8 @@ function shouldTreatAsApplicationError(errorEvent: ErrorEvent): boolean {
     const extensionUrl = new URL(errorEvent.filename);
 
     if (extensionUrl.protocol.endsWith('extension:')) {
-      logger.error(new Error(`Browser extension error: ${errorEvent.message}`, { cause: 'browser-extension' }), {
+      logger.error(new Error(`Browser extension error: ${errorEvent.message}`, { cause: errorEvent.error }), {
+        errorType: 'browser-extension',
         extensionName: extensionUrl.hostname,
         filename: errorEvent.filename,
         lineno: errorEvent.lineno?.toString(),
