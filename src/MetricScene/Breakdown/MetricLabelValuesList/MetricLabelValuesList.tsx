@@ -238,7 +238,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
             <InlineBanner
               severity="error"
               title={t('breakdown.label-values-list.error-title', 'Error while loading metrics!')}
-              error={data.errors![0] as Error}
+              error={data.errors?.[0]}
             />
           ),
         }),
