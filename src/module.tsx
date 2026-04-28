@@ -13,10 +13,7 @@ import { linkConfigs } from 'extensions/links';
 
 import pluginJson from './plugin.json';
 
-
-
 const LazyApp = lazy(async () => {
-  
   const { initPluginTranslations } = await import('@grafana/i18n');
 
   // Initialize i18n for scenes library
