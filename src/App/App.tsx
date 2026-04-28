@@ -7,7 +7,6 @@ import React from 'react';
 import { AppContext, defaultTrail } from './AppContext';
 import { ErrorView } from './ErrorView';
 import { Onboarding } from './Onboarding';
-import { patchSceneQueryRunnerFilters } from './patchSceneQueryRunner';
 import { AppRoutes } from './Routes';
 import { useCatchExceptions } from './useCatchExceptions';
 import { useReportAppInitialized } from './useReportAppInitialized';
@@ -18,7 +17,6 @@ import { PluginPropsContext } from '../shared/utils/utils.plugin';
 
 initFaro();
 initOpenFeatureProvider();
-patchSceneQueryRunnerFilters();
 
 const prometheusDatasources = Object.values(config.datasources).filter(isPrometheusDataSource);
 

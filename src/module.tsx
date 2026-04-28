@@ -4,6 +4,7 @@ import { LoadingPlaceholder } from '@grafana/ui';
 import { compare } from 'compare-versions';
 import React, { lazy, Suspense } from 'react';
 
+import { patchSceneQueryRunnerFilters } from 'App/patchSceneQueryRunner';
 import { entityMetricsConfig } from 'exposedComponents/EntityMetrics/config';
 import { labelBreakdownConfig } from 'exposedComponents/LabelBreakdown/config';
 import { miniBreakdownConfig } from 'exposedComponents/MiniBreakdown/config';
@@ -13,7 +14,10 @@ import { linkConfigs } from 'extensions/links';
 
 import pluginJson from './plugin.json';
 
+patchSceneQueryRunnerFilters();
+
 const LazyApp = lazy(async () => {
+  
   const { initPluginTranslations } = await import('@grafana/i18n');
 
   // Initialize i18n for scenes library
