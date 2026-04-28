@@ -49,7 +49,7 @@ const LazyApp = lazy(async () => {
   // The patch is also applied inside each LazyExposedComponent (Entity/Label/Mini/SourceMetrics),
   // because exposed components mount in host Grafana surfaces without going through LazyApp.
   // The patch is idempotent (Symbol.for guard in patchSceneQueryRunner.ts), so multiple
-  // lazy boundaries calling it is safe. Kept dynamic to avoid pulling @grafana/scenes
+  // lazy boundaries calling it are safe. Kept dynamic to avoid pulling @grafana/scenes
   // and the logger graph into the entry chunk (see bundle-stats history in extensions/links.ts).
   const { patchSceneQueryRunnerFilters } = await import('App/patchSceneQueryRunner');
   patchSceneQueryRunnerFilters();
