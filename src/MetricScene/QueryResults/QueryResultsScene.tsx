@@ -112,7 +112,7 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
           <InlineBanner
             severity="error"
             title={t('query-results.error-title', 'Query failed')}
-            error={data.errors[0] as Error}
+            error={data.errors?.[0]}
           />
         )}
         {!InstantQueryResults && (
