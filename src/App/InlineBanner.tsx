@@ -9,7 +9,7 @@ type InlineBannerProps = {
   severity: AlertVariant;
   title: string;
   message?: string | React.ReactNode;
-  error?: Error;
+  error?: unknown;
   errorContext?: ErrorContext;
   children?: React.ReactNode;
 };
