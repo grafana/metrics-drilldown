@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   ci-cd:
-    name: CI / CD
+    name: GMD
     # Skip when publish.yml handles the version-bump push (it deploys to prod which covers dev,ops)
     if: >-
       !(
