@@ -150,52 +150,23 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
 
-    this.checkMetricMetadata(discardPanelTypeUpdates);
+    this.checkMetricMetadata();
   }
 
-  private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
-    const { metric, metricType } = this.state;
+  private async checkMetricMetadata() {
+    const { metric } = this.state;
 
     const metricTypeFromMetadata = await getMetricType(metric, getTrailFor(this));
-    if (metricType === metricTypeFromMetadata) {
-      return;
-    }
 
-    const stateUpdate: Partial<GmdVizPanelState> = {};
-    const panelConfigUpdate: Partial<GmdVizPanelState['panelConfig']> = {};
-
-    // we found a native histogram
-    if (metricTypeFromMetadata === 'native-histogram') {
-      stateUpdate.metricType = 'native-histogram';
-      panelConfigUpdate.description =
-        this.state.panelConfig.description ?? t('gmd-viz-panel.native-histogram', 'Native Histogram');
-
-      if (!discardPanelTypeUpdates) {
-        panelConfigUpdate.type = 'heatmap';
-      }
-    }
+    const { metricType } = this.state;
 
     // we found a gauge metric that was previously identified as a counter (see https://github.com/grafana/metrics-drilldown/issues/698)
     if (metricTypeFromMetadata === 'gauge' && metricType === 'counter') {
-      stateUpdate.metricType = 'gauge';
+      this.setState({ metricType: 'gauge' });
     }
     // or the opposite
     if (metricTypeFromMetadata === 'counter' && metricType === 'gauge') {
-      stateUpdate.metricType = 'counter';
-    }
-
-    const currentPanelConfig = this.state.panelConfig;
-
-    // Guard: if Path B already rebuilt to the target type, skip the type update.
-    if (panelConfigUpdate.type === currentPanelConfig.type) {
-      delete panelConfigUpdate.type;
-    }
-
-    if (Object.keys(stateUpdate).length || Object.keys(panelConfigUpdate).length) {
-      this.setState({
-        ...stateUpdate,
-        panelConfig: { ...currentPanelConfig, ...panelConfigUpdate },
-      });
+      this.setState({ metricType: 'counter' });
     }
   }
 
@@ -204,7 +175,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
     // we give another chance to display it properly by looking into the data frame type received
-    if (!discardPanelTypeUpdates && !['classic-histogram', 'native-histogram'].includes(metricType)) {
+    if (!['classic-histogram', 'native-histogram'].includes(metricType)) {
       const bodySub = (body?.state.$data as SceneDataProvider)?.subscribeToState((newState) => {
         if (newState.data?.state !== LoadingState.Done) {
           return;
@@ -219,19 +190,22 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
         }
 
         if (dataFrameType === DataFrameType.HeatmapCells) {
-          // Guard: if checkMetricMetadata (Path A) already rebuilt to heatmap, skip.
           if (this.state.panelConfig.type === 'heatmap') {
             return;
           }
 
-          this.setState({
-            metricType: 'native-histogram',
-            panelConfig: {
-              description: t('gmd-viz-panel.native-histogram', 'Native Histogram'),
-              ...this.state.panelConfig,
-              type: 'heatmap',
-            },
-          });
+          if (discardPanelTypeUpdates) {
+            this.setState({ metricType: 'native-histogram' });
+          } else {
+            this.setState({
+              metricType: 'native-histogram',
+              panelConfig: {
+                description: t('gmd-viz-panel.native-histogram', 'Native Histogram'),
+                ...this.state.panelConfig,
+                type: 'heatmap',
+              },
+            });
+          }
         }
       });
 

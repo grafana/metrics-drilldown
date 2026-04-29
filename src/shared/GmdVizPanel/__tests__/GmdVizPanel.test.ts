@@ -65,48 +65,16 @@ describe('GmdVizPanel', () => {
   });
 
   describe('checkMetricMetadata', () => {
-    test('returns early without state update when metricType already matches metadata', async () => {
-      jest.mocked(getMetricType).mockResolvedValue('gauge');
+    test('does not update state when metadata returns native-histogram (detection is via data frames only)', async () => {
+      jest.mocked(getMetricType).mockResolvedValue('native-histogram');
       const panel = createPanel();
+      const initialMetricType = panel.state.metricType;
       const initialPanelConfig = panel.state.panelConfig;
 
-      await (panel as any).checkMetricMetadata(false);
+      await (panel as any).checkMetricMetadata();
 
+      expect(panel.state.metricType).toBe(initialMetricType);
       expect(panel.state.panelConfig).toBe(initialPanelConfig);
-    });
-
-    test('updates metricType and panelConfig.type to heatmap when metadata returns native-histogram', async () => {
-      jest.mocked(getMetricType).mockResolvedValue('native-histogram');
-      const panel = createPanel();
-
-      await (panel as any).checkMetricMetadata(false);
-
-      expect(panel.state.metricType).toBe('native-histogram');
-      expect(panel.state.panelConfig.type).toBe('heatmap');
-    });
-
-    test('updates metricType but skips panelConfig.type when discardPanelTypeUpdates=true', async () => {
-      jest.mocked(getMetricType).mockResolvedValue('native-histogram');
-      const panel = createPanel();
-
-      await (panel as any).checkMetricMetadata(true);
-
-      expect(panel.state.metricType).toBe('native-histogram');
-      expect(panel.state.panelConfig.type).toBe('timeseries');
-    });
-
-    test('guard: skips panelConfig.type update when already heatmap (Path B already ran)', async () => {
-      jest.mocked(getMetricType).mockResolvedValue('native-histogram');
-      const panel = createPanel();
-
-      // Simulate Path B (subscribeToStateChanges) having already set type to heatmap
-      panel.setState({ panelConfig: { ...panel.state.panelConfig, type: 'heatmap' } });
-
-      await (panel as any).checkMetricMetadata(false);
-
-      // metricType is updated but type is NOT changed (guard prevents redundant rebuild)
-      expect(panel.state.metricType).toBe('native-histogram');
-      expect(panel.state.panelConfig.type).toBe('heatmap');
     });
 
     test('updates metricType from counter to gauge when metadata disagrees', async () => {
@@ -114,7 +82,7 @@ describe('GmdVizPanel', () => {
       jest.mocked(getMetricType).mockResolvedValue('gauge');
       const panel = createPanel();
 
-      await (panel as any).checkMetricMetadata(false);
+      await (panel as any).checkMetricMetadata();
 
       expect(panel.state.metricType).toBe('gauge');
       expect(panel.state.panelConfig.type).toBe('timeseries');
@@ -140,11 +108,10 @@ describe('GmdVizPanel', () => {
       expect(panel.state.panelConfig.type).toBe('heatmap');
     });
 
-    test('guard: returns early when panelConfig.type is already heatmap (Path A already ran)', () => {
+    test('guard: returns early when panelConfig.type is already heatmap', () => {
       const { provider, fire } = createMockDataProvider();
       const panel = createPanel();
 
-      // Simulate Path A (checkMetricMetadata) having already set type to heatmap
       panel.setState({ panelConfig: { ...panel.state.panelConfig, type: 'heatmap' } });
       panel.setState({ body: { state: { $data: provider } } as any });
 
@@ -178,14 +145,33 @@ describe('GmdVizPanel', () => {
       expect(subscription.unsubscribe).toHaveBeenCalledTimes(1);
     });
 
-    test('does not subscribe when discardPanelTypeUpdates=true', () => {
+    test('subscribes to data provider even when discardPanelTypeUpdates=true', () => {
       const { provider } = createMockDataProvider();
       const panel = createPanel();
       panel.setState({ body: { state: { $data: provider } } as any });
 
       (panel as any).subscribeToStateChanges(true);
 
-      expect(provider.subscribeToState).not.toHaveBeenCalled();
+      expect(provider.subscribeToState).toHaveBeenCalledTimes(1);
+    });
+
+    test('sets metricType but not panelConfig.type when discardPanelTypeUpdates=true and data frame is HeatmapCells', () => {
+      const { provider, fire } = createMockDataProvider();
+      const panel = createPanel();
+      panel.setState({ body: { state: { $data: provider } } as any });
+      const originalPanelType = panel.state.panelConfig.type;
+
+      (panel as any).subscribeToStateChanges(true);
+
+      fire({
+        data: {
+          state: LoadingState.Done,
+          series: [{ meta: { type: DataFrameType.HeatmapCells } }],
+        },
+      });
+
+      expect(panel.state.metricType).toBe('native-histogram');
+      expect(panel.state.panelConfig.type).toBe(originalPanelType);
     });
 
     test('does not subscribe when metricType is already native-histogram', () => {
