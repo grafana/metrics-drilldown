@@ -9,6 +9,9 @@ const MiniBreakdown = lazy(async () => {
   const { loadResources } = await import('@grafana/scenes');
   await initPluginTranslations('grafana-scenes', [loadResources]);
 
+  const { patchSceneQueryRunnerFilters } = await import('App/patchSceneQueryRunner');
+  patchSceneQueryRunnerFilters();
+
   return import('./MiniBreakdown');
 });
 
