@@ -31,7 +31,7 @@ jobs:
       grafana-cloud-deployment-type: provisioned
       auto-merge-environments: dev,ops
       argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
-      plugin-version-suffix: ${{ github.event_name == 'push' && github.sha || github.event.pull_request.head.sha }}
+      plugin-version-suffix: ${{ github.event.pull_request.head.sha || github.sha }}
       run-playwright: true
       run-playwright-docker: false
       upload-playwright-artifacts: true
