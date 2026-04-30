@@ -1,5 +1,39 @@
 # Changelog
 
+## 2.0.4
+
+##### Chores
+
+* **deps:**
+  *  fix CVEs (#1220) (e3cfa78e)
+  *  update grafana/plugin-ci-workflows/ci-cd-workflows action to v7.1.0 (#1218) (95de2fba)
+  *  Update docker.io/prom/prometheus Docker tag to v3.11.2 (#1217) (3f17a74e)
+  *  Update dependency sass to v1.99.0 (#1216) (5fc52786)
+  *  Update dependency @react-aria/utils to v3.34.0 (#1215) (86cd25c6)
+  *  Update dependency @prometheus-io/lezer-promql to ^0.311.0 (#1214) (c674dce0)
+  *  Update dependency @grafana/plugin-e2e to v3.6.0 (#1213) (a3d2076d)
+  *  Update pnpm to v10.33.2 (#1212) (1bdb51fc)
+  *  Update dependency brace-expansion@^1 to v5 (#1185) (74991fdb)
+  *  Update Build tools (#1201) (b298eb27)
+  *  Update dependency picomatch@^2 to v4 (#1186) (01e46bbf)
+  *  Update dependency dotenv to v17.4.2 (#1183) (ff18f618)
+  *  Update dependency @playwright/test to v1.59.1 (#1182) (49900bd1)
+  *  Update dependency uuid to v14 [SECURITY] (#1210) (2e6bfa76)
+  *  Update pnpm/action-setup action to v5 (#1188) (048c7ba8)
+  *  Update dependency @types/node to v24.12.2 (#1202) (fe2ec294)
+*  add mise.toml and align CI node version (#1211) (a3e8254a)
+
+##### Bug Fixes
+
+* **ci:**  consolidate CI/CD into single workflow (#1229) (e09c0678)
+* **native-histogram:**  rely solely on data frames for native histogram detection (#1207) (cce239fa)
+*  test __name__ patch to use in components (#1226) (ad8a3909)
+*  type InlineBanner error prop as unknown to prevent crash (#1225) (effce5ed)
+*  filter Safari extension errors that crash the app (#1223) (fe0b63a9)
+*  ignore new resize observer error that causes fatal crash (#1219) (2c208dec)
+* **provisioning:**  use Docker service name for Prometheus datasource URL (#1222) (1ab1c083)
+
+
 ## 2.0.3
 
 ##### Chores
