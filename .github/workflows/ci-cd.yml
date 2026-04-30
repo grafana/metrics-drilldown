@@ -18,7 +18,7 @@ jobs:
         github.event_name == 'push' &&
         contains(github.event.head_commit.message, 'pnpm version')
       )
-    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v7.1.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v7.3.1
     permissions:
       contents: write
       id-token: write
