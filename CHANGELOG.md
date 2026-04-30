@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.5
+
+##### Bug Fixes
+
+* **ci:**  bump plugin-ci-workflows to v7.3.1 (#1230) (2dcd73ad)
+
+
 ## 2.0.4
 
 ##### Chores
