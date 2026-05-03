@@ -122,8 +122,8 @@ importers:
         specifier: ^9.0.0
         version: 9.0.0(@stylistic/eslint-plugin-ts@4.4.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/eslint-plugin@8.58.1(@typescript-eslint/parser@8.58.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(@typescript-eslint/parser@8.58.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-config-prettier@10.1.8(eslint@10.0.2(jiti@2.6.1)))(eslint-plugin-jsdoc@62.9.0(eslint@10.0.2(jiti@2.6.1)))(eslint-plugin-react-hooks@7.0.1(eslint@10.0.2(jiti@2.6.1)))(eslint-plugin-react@7.37.5(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3)
       '@grafana/plugin-e2e':
-        specifier: 3.6.0
-        version: 3.6.0(@playwright/test@1.59.1)
+        specifier: 3.6.1
+        version: 3.6.1(@playwright/test@1.59.1)
       '@grafana/tsconfig':
         specifier: 2.0.1
         version: 2.0.1
@@ -748,8 +748,8 @@ packages:
     peerDependencies:
       '@lezer/lr': ^1.0.0
 
-  '@grafana/plugin-e2e@3.6.0':
-    resolution: {integrity: sha512-j2JpExb1kIrqY+yJYm2UehZO5f+3lc6MHNLtn3GlfqcH8f0ZHU54rlMVrtrCu7z3yC2kEvlj5vTHAzvl9oCzJg==}
+  '@grafana/plugin-e2e@3.6.1':
+    resolution: {integrity: sha512-BQAEMk2yVymYA2cKbHEuGDqXwZ5MwWnCD+293QJgMey3G6ao4PbiZTaZ/c5BVyfWxLOZ3izqay0F7eU0Ncty9Q==}
     engines: {node: '>=20 <=24'}
     peerDependencies:
       '@axe-core/playwright': ^4.11.1
@@ -6781,7 +6781,7 @@ snapshots:
     dependencies:
       '@lezer/lr': 1.4.3
 
-  '@grafana/plugin-e2e@3.6.0(@playwright/test@1.59.1)':
+  '@grafana/plugin-e2e@3.6.1(@playwright/test@1.59.1)':
     dependencies:
       '@grafana/e2e-selectors': 13.1.0-24448182242
       '@playwright/test': 1.59.1
