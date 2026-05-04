@@ -154,7 +154,8 @@
       "@grafana/data": "^13.0.0",
       "@grafana/i18n": "^13.0.0",
       "@grafana/schema": "^13.0.0",
-      "uuid": "^14.0.0"
+      "uuid": "^14.0.0",
+      "postcss": "^8.5.10"
     }
   }
 }
