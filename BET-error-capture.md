@@ -24,6 +24,29 @@ The first attempt at using `<ErrorBoundary>` (PR #228 → reverted by #233) was 
 
 ## Evidence
 
+### Cross‑repo comparison (Drilldown family)
+
+Metrics Drilldown is the **only** Drilldown app that still maintains an exact‑string ignore list + global `window.error` listener. Every sister app has already converged on a simpler model.
+
+| Repo | Faro setup | App‑level boundary | Per‑feature boundary | `errorsToIgnore` allowlist | `window.error` listener |
+|---|---|---|---|---|---|
+| **metrics-drilldown** (this app) | Isolated Faro (`isolate: true`) | ❌ removed in PR #233 | ❌ | ✅ fragile, 5 strings | ✅ overzealous |
+| **profiles-drilldown** | Isolated Faro (`isolate: true`) | ✅ `<ErrorBoundary>` + `<ErrorPage>` (PR #264) | — | ❌ | ❌ |
+| **logs-drilldown** | `@grafana/runtime` `logError` (global Faro) | ❌ | ✅ `<ErrorBoundaryAlert>` per config page (PR #1735) | ❌ | ❌ |
+| **traces-drilldown** | none in `src/` tree | ❌ | ❌ | ❌ | ❌ |
+| **sql-drilldown** | none | ❌ | ✅ `<ErrorBoundaryAlert>` per panel in `RowsScene.tsx` | ❌ | ❌ |
+
+Key takeaways:
+
+- **profiles-drilldown is the closest mirror of MD's setup** (same `isolate: true` Faro, same `handheldBy: 'React error boundary'` taxonomy, same `<InlineBanner>`/`displayError` shape, same author of the original architecture). Their `App.tsx` keeps the canonical `ErrorBoundary onError={setError}` + `<ErrorPage>` pattern that MD removed in #233. They live without an `errorsToIgnore` list and without a global `window.error` listener — MD can do the same.
+- **logs-drilldown PR #1735** (`feat(default columns): Wrap default columns in error boundary`, merged Feb 2026) demonstrates the same family is now actively *adding* boundary scoping where it was missing — the direction of travel across all drilldowns is toward more (not fewer) boundaries.
+- **logs-drilldown issue #1713** (open: "ChunkLoadError: investigate if the error can be catched (e.g. ErrorBoundary) and better communicated") is the *exact same* UX gap our Step 4 closes. Our work is also a partial answer to a sister team's open question; conversely, their issue gives us a public reference point for designing the recovery UX.
+- **profiles-drilldown PR #312** (`fix(Header): Prevent crash if useChromeHeaderHeight is not available (for Grafana < v11.3)`) shows the failure mode an app‑level boundary catches gracefully — the boundary turned a hard crash into a recoverable one while the targeted fix shipped. MD has the same risk surface (any `@grafana/runtime` API that may not exist on older Grafana versions). The boundary is the safety net for that whole class of regressions, not just the listed string errors.
+- **profiles-drilldown PR #302** (`test(EndToEnd): Add expectation to prevent waiting when a fatal error…`) shows the same drilldown family hardening their CI against the fatal screen wasting Playwright time — worth replicating in MD's e2e once the new boundary is in place.
+- **sql-drilldown** uses `<ErrorBoundaryAlert>` directly around a single dangerous scene (`RowsScene.tsx`) — a proof point that the per‑scene scoping mode works for an isolated rendering risk, even without app‑level coverage. This is the model for any future MD per‑panel boundaries (out‑of‑scope for this bet, but a sane next step).
+
+Net: every sister app has already moved away from the pattern MD is stuck on. The bet is bringing MD in line with **profiles-drilldown's proven shape**, plus the chunk‑load handling that MD specifically needs because of its lazy routes.
+
 ### Current behavior
 
 - `src/App/App.tsx:14-32` — `initFaro()` is called at module load; `useCatchExceptions()` is called from the root `App`; if `error` is set, the entire app is replaced by `<ErrorView>`. There is **no React error boundary** wrapping `<AppRoutes>` today, despite the comment in `useCatchExceptions.ts:91` claiming otherwise.
@@ -40,6 +63,18 @@ The first attempt at using `<ErrorBoundary>` (PR #228 → reverted by #233) was 
 - **PR #228** (`feat: Add error boundary + logger`, 2025‑Mar) — introduced `<ErrorBoundary>` from `@grafana/ui`.
 - **PR #233** (`fix(App): Remove the ErrorBoundary component`, 2025‑Mar) — removed the boundary because async chunk‑loading errors were being caught and crashing the app into the fatal screen. The fix was attributed as a "shot in the dark."
 - **PRs #538, #849, #1219, #1223** — each added a new entry to `errorsToIgnore` or a new special‑case branch (Safari extension prefix). This is the fragility tax.
+- **profiles-drilldown PR #264** (`refactor(*): Improve error tracking`, 2024‑Nov, by `@grafakus`) — the original blueprint MD's tracking layer was forked from. Profiles kept the `<ErrorBoundary>` around the app; MD lost it in #233 and never got it back. This bet restores parity.
+
+### Cross‑repo links
+
+- profiles-drilldown App.tsx (current): https://github.com/grafana/profiles-drilldown/blob/main/src/app/App.tsx
+- profiles-drilldown ErrorPage.tsx (current): https://github.com/grafana/profiles-drilldown/blob/main/src/app/ui/ErrorPage.tsx
+- profiles-drilldown PR #264 (`Improve error tracking`): https://github.com/grafana/profiles-drilldown/pull/264
+- profiles-drilldown PR #312 (`Prevent crash if useChromeHeaderHeight is not available`): https://github.com/grafana/profiles-drilldown/pull/312
+- profiles-drilldown PR #302 (`E2E expectation to prevent waiting on fatal error`): https://github.com/grafana/profiles-drilldown/pull/302
+- logs-drilldown PR #1735 (`Wrap default columns in error boundary`): https://github.com/grafana/logs-drilldown/pull/1735
+- logs-drilldown issue #1713 (`ChunkLoadError + ErrorBoundary`): https://github.com/grafana/logs-drilldown/issues/1713
+- sql-drilldown `RowsScene.tsx` (per‑panel `<ErrorBoundaryAlert>`): https://github.com/grafana/sql-drilldown/blob/main/src/pages/Home/scenes/RowsScene.tsx
 
 ### Library APIs
 
@@ -142,6 +177,13 @@ The `cancelled`‑promise short‑circuit (TODO around `MetricSelectScene`) gets
 2. **Will we need to change the FE O11y dashboard?** No, as long as we pass a custom `errorLogger` that calls our `logger.error` with `handheldBy: 'React error boundary'`. The existing `app.name`, `app.environment`, and Faro `isolate: true` scoping all keep working. Worth a 5‑minute pre‑merge eyeball of the existing dashboard panels to confirm no panel filters on `event.context.type === 'boundary'` (the default `@grafana/ui` key, which we're intentionally overriding).
 3. **Edge cases when switching to ErrorBoundary?** Three known ones, all addressed: (a) chunk loading → Step 4; (b) async/event‑handler errors don't bubble to boundaries → Step 3 explicitly covers; (c) errors in providers above the boundary → wrap broad enough to cover `PluginPropsContext` and `AppContext` but **outside** the providers needed by `<ErrorView>` itself (it uses `useNavigate` / `useLocation`, so the boundary must sit *inside* the router).
 
+## Cross‑repo signals to act on
+
+Beyond strengthening the case, the cross‑repo audit produced two concrete follow‑ups that fit naturally into this bet:
+
+- **Coordinate with logs-drilldown on issue #1713.** Their open issue and our Step 4 are the same problem. Once Step 4 ships in MD, post the pattern (boundary + `ChunkLoadError` detection + soft reload) on #1713 so the wider Drilldown family can adopt it. This also creates external review pressure on our chunk‑load UX before merge.
+- **Replicate profiles-drilldown PR #302's e2e guard.** Add an explicit Playwright expectation that the `<ErrorView>` banner is *not* visible after navigation, so a future regression can't quietly waste 15 minutes of CI time. This is small (one test addition) and lives alongside Step 2's tests.
+
 ## Risks & rollback
 
 - **R1 — Repeating PR #233.** Mitigation: Step 4 is a hard gate; merge is blocked until ChunkLoadError recovery is observed in a real deploy. Rollback is a one‑line revert that re‑exposes the existing `<ErrorView>` path; no schema/storage migration to undo.
@@ -156,4 +198,5 @@ The `cancelled`‑promise short‑circuit (TODO around `MetricSelectScene`) gets
 - Replacing or refactoring the existing `<ErrorView>` UI itself. (We reuse it as the boundary's fallback.)
 - Reworking the `MetricSelectScene` cancellation handling. Tracked as a follow‑up.
 - Changing the global Faro initialization timing or the `beforeSend` URL filter. (Both are working.)
-- Per‑panel boundaries inside `<Trail>`. The bet adds an app‑level boundary; finer‑grained scenes/breakdown boundaries are a follow‑up if signal volume warrants.
+- Per‑panel boundaries inside `<Trail>`. The bet adds an app‑level boundary; finer‑grained scenes/breakdown boundaries (the model `sql-drilldown`'s `RowsScene.tsx` and `logs-drilldown` PR #1735 follow) are a sensible follow‑up if signal volume warrants.
+- Cross‑drilldown harmonization of the logger/Faro layer. `logs-drilldown` and `traces-drilldown` use `@grafana/runtime`'s `logError` against the global Faro; MD and `profiles-drilldown` use isolated Faro instances. This split is a separate platform‑level conversation.
