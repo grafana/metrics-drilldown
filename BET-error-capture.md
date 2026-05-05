@@ -4,6 +4,12 @@
 > **Status:** Proposed
 > **Author:** Miguel Palau
 
+## Summary
+
+Metrics Drilldown is the only Drilldown app still maintaining a fragile exact‑string `errorsToIgnore` allowlist plus a global `window.error` listener that replaces the entire UI with "Fatal error!" whenever any script on the page — including unrelated browser extensions — throws. We've patched this 4+ times ([#538](https://github.com/grafana/metrics-drilldown/pull/538), [#849](https://github.com/grafana/metrics-drilldown/pull/849), [#1219](https://github.com/grafana/metrics-drilldown/pull/1219), [#1223](https://github.com/grafana/metrics-drilldown/pull/1223)) and every browser/Grafana rephrasing forces another. Every sister Drilldown (`profiles-`, `logs-`, `traces-`, `sql-`) has already moved on.
+
+The bet replaces the allowlist with regex patterns in Faro's native `ignoreErrors`, drops the global `window.error` listener, and adds a properly‑scoped `<AppErrorBoundary>` (the same shape `profiles-drilldown` ships in production) routed through MD's isolated Faro so Frontend O11y dashboards stay intact. The one historical landmine — lazy‑chunk load failures crashing the boundary, which is why [PR #233](https://github.com/grafana/metrics-drilldown/pull/233) reverted the previous attempt — is handled explicitly with a `ChunkLoadError` recovery path modeled on Grafana core ([grafana/grafana#55339](https://github.com/grafana/grafana/pull/55339)). Appetite: ~3 days, single PR, single‑line revert if it regresses.
+
 ## Problem
 
 Metrics Drilldown's "Fatal error!" screen is triggered by two coupled mechanisms that have proven painful:
