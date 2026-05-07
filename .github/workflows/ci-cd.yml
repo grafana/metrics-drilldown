@@ -7,10 +7,6 @@ on:
       - main
   pull_request:
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   ci-cd:
     name: GMD
@@ -29,7 +25,7 @@ jobs:
     with:
       branch: ${{ github.event_name == 'push' && github.ref_name || github.ref }}
       environment: ${{ (github.event_name == 'push' && github.ref_name == 'main') && 'dev,ops' || 'none' }}
-      attestation: true
+      attestation: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
       grafana-cloud-deployment-type: provisioned
       auto-merge-environments: dev,ops
       argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
