@@ -115,6 +115,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           ),
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
+          hierarchical: true,
           active: Boolean(sectionValues.get('filters-prefix')?.length),
         }),
         new MetricsFilterSection({
