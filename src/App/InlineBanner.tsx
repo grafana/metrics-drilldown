@@ -2,7 +2,7 @@ import { t } from '@grafana/i18n';
 import { Alert, type AlertVariant } from '@grafana/ui';
 import React from 'react';
 
-import { ensureErrorObject } from './useCatchExceptions';
+import { ensureErrorObject } from './errorUtils';
 import { logger, type ErrorContext } from '../shared/logger/logger';
 
 type InlineBannerProps = {

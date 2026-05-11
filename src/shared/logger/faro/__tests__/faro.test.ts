@@ -2,7 +2,7 @@ import { getWebInstrumentations, initializeFaro } from '@grafana/faro-web-sdk';
 
 import { GIT_COMMIT } from '../../../../version';
 import { getPluginVersion } from '../../../utils/getPluginVersion';
-import { initFaro, setFaro } from '../faro';
+import { ignoreErrorPatterns, initFaro, setFaro } from '../faro';
 
 // Faro dependencies
 jest.mock('@grafana/faro-web-sdk');
@@ -115,7 +115,8 @@ describe('initFaro()', () => {
 
       await initFaro();
 
-      const { app, user, instrumentations, isolate, beforeSend } = initializeFaro.mock.lastCall[0];
+      const { app, user, instrumentations, isolate, beforeSend, ignoreErrors } =
+        initializeFaro.mock.lastCall[0];
 
       expect(app).toStrictEqual({
         name: 'grafana-metricsdrilldown-app-prod',
@@ -134,6 +135,7 @@ describe('initFaro()', () => {
 
       expect(isolate).toBe(true);
       expect(beforeSend).toBeInstanceOf(Function);
+      expect(ignoreErrors).toBe(ignoreErrorPatterns);
     });
   });
 
@@ -146,5 +148,45 @@ describe('initFaro()', () => {
 
       expect(initializeFaro).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('ignoreErrorPatterns', () => {
+  function matchesAnyPattern(message: string): boolean {
+    return ignoreErrorPatterns.some((p) => (typeof p === 'string' ? message.includes(p) : p.test(message)));
+  }
+
+  it.each([
+    'ResizeObserver loop limit exceeded',
+    'ResizeObserver loop completed',
+    'ResizeObserver loop completed with undelivered notifications.',
+    'Non-Error exception captured with keys',
+    'Failed sending payload to the receiver',
+  ])('matches historical exact string: %s', (message) => {
+    expect(matchesAnyPattern(message)).toBe(true);
+  });
+
+  it.each([
+    'chrome-extension://some-extension-id/something.js',
+    'moz-extension://some-extension-id/something.js',
+  ])('matches extension URL: %s', (message) => {
+    expect(matchesAnyPattern(message)).toBe(true);
+  });
+
+  it('matches Safari extension error prefix', () => {
+    expect(
+      matchesAnyPattern(
+        "Looks like there is an error in the background page. You might want to inspect your background page for more details: undefined is not an object (evaluating 'window.fixinatorInputs.has')"
+      )
+    ).toBe(true);
+  });
+
+  it('matches cancelled promise rejections', () => {
+    expect(matchesAnyPattern('cancelled')).toBe(true);
+  });
+
+  it('does not match legitimate application errors', () => {
+    expect(matchesAnyPattern('TypeError: Cannot read property of undefined')).toBe(false);
+    expect(matchesAnyPattern('Uncaught ReferenceError: foo is not defined')).toBe(false);
   });
 });
