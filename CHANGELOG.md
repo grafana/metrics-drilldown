@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.6
+
+##### Chores
+
+* **extensions:**  use group type from grafana data (#1231) (9742b9d0)
+*  skip attestation for forks (#1241) (ae70ad30)
+* **deps:**  Update dependency @grafana/plugin-e2e to v3.6.1 (#1232) (ff280ca4)
+
+##### Bug Fixes
+
+* **ci/cd:**  add permissions to workflow (#1240) (c77e7641)
+* **deps:**  override postcss to >=8.5.10 for CVE fix (#1239) (f45b7bf7)
+
+
 ## 2.0.5
 
 ##### Bug Fixes
