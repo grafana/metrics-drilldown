@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
 import { Trail } from 'App/Routes';
-import { useCatchExceptions } from 'App/useCatchExceptions';
 import { VAR_WINGMAN_SORT_BY } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { metricFilters } from 'MetricsReducer/SideBar/SideBar';
 import { logger } from 'shared/logger/logger';
@@ -111,7 +110,6 @@ export interface SourceMetricsProps {
 }
 
 const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
-  const [error] = useCatchExceptions();
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -181,7 +179,7 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
 
   return (
     <div data-testid="metrics-drilldown-embedded-label-breakdown">
-      {error ? <ErrorView error={error} /> : <Trail trail={trail} />}
+      <Trail trail={trail} />
     </div>
   );
 };
