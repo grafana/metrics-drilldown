@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} selected",
     "selected-count_other": "{{count}} selected"
   },
+  "chunk-load-recovery": {
+    "auto-message": "A newer version of Metrics Drilldown is available — reloading…",
+    "manual-message": "A newer version of Metrics Drilldown is available but could not be loaded automatically.",
+    "reload-button": "Reload now"
+  },
   "configure-panel": {
     "apply": "Apply",
     "cancel": "Cancel",

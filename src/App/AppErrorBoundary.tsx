@@ -63,14 +63,14 @@ function ChunkLoadRecovery() {
   );
 }
 
-function SuccessfulMount({ children }: { children: React.ReactNode }) {
+function SuccessfulMount({ children }: Readonly<{ children: React.ReactNode }>) {
   useEffect(() => {
     sessionStorage.removeItem(CHUNK_RELOAD_KEY);
   }, []);
   return <>{children}</>;
 }
 
-export function AppErrorBoundary({ children }: { children: React.ReactNode }) {
+export function AppErrorBoundary({ children }: Readonly<{ children: React.ReactNode }>) {
   const { pathname } = useLocation();
 
   return (

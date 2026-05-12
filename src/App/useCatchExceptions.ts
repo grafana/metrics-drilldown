@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 /**
  * @deprecated No-op shim retained for exposed-component compatibility.

@@ -1,9 +1,7 @@
 import { type DataSourceApi } from '@grafana/data';
 import React, { useEffect, useRef } from 'react';
 
-import { ErrorView } from 'App/ErrorView';
 import { Trail } from 'App/Routes';
-import { useCatchExceptions } from 'App/useCatchExceptions';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { newMetricsTrail } from 'shared/utils/utils';
 
@@ -18,7 +16,6 @@ export interface LabelBreakdownProps {
 }
 
 const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
-  const [error] = useCatchExceptions();
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -44,7 +41,7 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
 
   return (
     <div data-testid="metrics-drilldown-embedded-label-breakdown">
-      {error ? <ErrorView error={error} /> : <Trail trail={trail} />}
+      <Trail trail={trail} />
     </div>
   );
 };
