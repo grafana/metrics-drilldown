@@ -115,6 +115,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           ),
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,
+          hierarchical: true,
           active: Boolean(sectionValues.get('filters-prefix')?.length),
         }),
         new MetricsFilterSection({
@@ -176,16 +177,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
         }
       });
     }
-
-    // Enable hierarchical prefix filtering if the experiment flag is set to treatment
-    evaluateFeatureFlag('drilldown.metrics.hierarchical_prefix_filtering').then((flagValue) => {
-      if (flagValue === 'treatment') {
-        const prefixSection = this.state.sections.find((s) => s.state.key === 'filters-prefix');
-        if (prefixSection instanceof MetricsFilterSection) {
-          prefixSection.setState({ hierarchical: true });
-        }
-      }
-    });
 
     return () => {
       cleanupOtherMetricsVar();

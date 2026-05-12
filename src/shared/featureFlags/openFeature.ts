@@ -26,16 +26,6 @@ const goffFeatureFlags = {
     defaultValue: 'excluded',
     trackingKey: 'experiment_default_open_sidebar',
   },
-  'drilldown.metrics.hierarchical_prefix_filtering': {
-    valueType: 'string',
-    values: [
-      'treatment', // Hierarchical prefix filtering is enabled
-      'control', // Hierarchical prefix filtering is disabled (default behavior)
-      'excluded', // The user is excluded from the experiment (default filtering behavior is used)
-    ],
-    defaultValue: 'excluded',
-    trackingKey: 'experiment_hierarchical_prefix_filtering',
-  },
   'drilldown.metrics.grafana_assistant_quick_search_tab_test': {
     valueType: 'string',
     values: [
