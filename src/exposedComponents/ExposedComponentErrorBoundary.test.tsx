@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { ExposedComponentErrorBoundary } from './ExposedComponentErrorBoundary';
-import { logger } from '../shared/logger/logger';
 
 jest.mock('@grafana/i18n', () => ({
   ...jest.requireActual('@grafana/i18n'),
@@ -17,7 +16,10 @@ jest.mock('@grafana/i18n', () => ({
   },
 }));
 
-const mockLogger = logger as jest.Mocked<typeof logger>;
+const mockLoggerError = jest.fn();
+jest.mock('../shared/logger/logger', () => ({
+  logger: { error: (...args: unknown[]) => mockLoggerError(...args) },
+}));
 
 function ThrowingChild({ error }: { error: Error }): React.ReactNode {
   throw error;
@@ -65,14 +67,18 @@ describe('ExposedComponentErrorBoundary', () => {
     expect(screen.queryByText('Fatal error!')).not.toBeInTheDocument();
   });
 
-  it('logs error through our isolated Faro instance with correct context', () => {
+  it('logs error through our isolated Faro instance with correct context', async () => {
     render(
       <ExposedComponentErrorBoundary boundaryName="test-boundary" componentName="Entity Metrics">
         <ThrowingChild error={new Error('render boom')} />
       </ExposedComponentErrorBoundary>
     );
 
-    expect(mockLogger.error).toHaveBeenCalledWith(expect.objectContaining({ message: 'render boom' }), {
+    // The errorLogger uses a dynamic import() to avoid pulling the logger
+    // into the entry chunk. Flush the microtask queue so the import resolves.
+    await new Promise(process.nextTick);
+
+    expect(mockLoggerError).toHaveBeenCalledWith(expect.objectContaining({ message: 'render boom' }), {
       handheldBy: 'exposed-component-error-boundary',
       component: 'Entity Metrics',
     });

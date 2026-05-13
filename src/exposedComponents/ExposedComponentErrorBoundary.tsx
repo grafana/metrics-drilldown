@@ -2,8 +2,6 @@ import { t } from '@grafana/i18n';
 import { Alert, ErrorBoundary } from '@grafana/ui';
 import React from 'react';
 
-import { logger } from '../shared/logger/logger';
-
 interface ExposedComponentErrorBoundaryProps {
   /** Faro boundary name for error attribution (e.g. 'metrics-drilldown-entity-metrics') */
   boundaryName: string;
@@ -14,9 +12,15 @@ interface ExposedComponentErrorBoundaryProps {
 
 function errorLoggerFor(componentName: string) {
   return (error: Error) => {
-    logger.error(error, {
-      handheldBy: 'exposed-component-error-boundary',
-      component: componentName,
+    // Dynamic import to avoid pulling the entire logger → Faro dependency tree
+    // into the synchronous entry chunk (module.js). The Lazy wrappers are imported
+    // synchronously via config.ts → module.tsx, so any top-level import here
+    // ends up in the entry bundle.
+    import('../shared/logger/logger').then(({ logger }) => {
+      logger.error(error, {
+        handheldBy: 'exposed-component-error-boundary',
+        component: componentName,
+      });
     });
   };
 }
