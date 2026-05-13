@@ -27,6 +27,6 @@ jobs:
           echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
 
       - name: Compare bundle stats
-        uses: grafana/plugin-actions/bundle-size@4698961fa64137fcac207108397ebe8a738a33d1 # main
+        uses: grafana/plugin-actions/bundle-size@d03819869ff83790bb6549d1b917cff7bb7278ae # main
         with:
           node-version: ${{ steps.node-version.outputs.version }}
