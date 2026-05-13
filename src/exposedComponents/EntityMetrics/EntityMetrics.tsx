@@ -1,9 +1,7 @@
 import { type AdHocVariableFilter, type DataSourceApi } from '@grafana/data';
 import React, { useEffect, useRef } from 'react';
 
-import { ErrorView } from 'App/ErrorView';
 import { Trail } from 'App/Routes';
-import { useCatchExceptions } from 'App/useCatchExceptions';
 import { type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { newMetricsTrail } from 'shared/utils/utils';
@@ -27,7 +25,6 @@ const EntityMetrics = ({
   entityType,
   entityName,
 }: EntityMetricsProps) => {
-  const [error] = useCatchExceptions();
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -67,7 +64,7 @@ const EntityMetrics = ({
 
   return (
     <div data-testid="metrics-drilldown-embedded-entity-metrics">
-      {error ? <ErrorView error={error} /> : <Trail trail={trail} />}
+      <Trail trail={trail} />
     </div>
   );
 };

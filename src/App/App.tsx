@@ -5,10 +5,9 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { AppContext, defaultTrail } from './AppContext';
-import { ErrorView } from './ErrorView';
+import { AppErrorBoundary } from './AppErrorBoundary';
 import { Onboarding } from './Onboarding';
 import { AppRoutes } from './Routes';
-import { useCatchExceptions } from './useCatchExceptions';
 import { useReportAppInitialized } from './useReportAppInitialized';
 import { initOpenFeatureProvider } from '../shared/featureFlags/openFeature';
 import { initFaro } from '../shared/logger/faro/faro';
@@ -22,17 +21,8 @@ const prometheusDatasources = Object.values(config.datasources).filter(isPrometh
 
 export default function App(props: Readonly<AppRootProps>) {
   const styles = useStyles2(getStyles);
-  const [error] = useCatchExceptions();
 
   useReportAppInitialized();
-
-  if (error) {
-    return (
-      <div className={styles.appContainer} data-testid="metrics-drilldown-app">
-        <ErrorView error={error} />
-      </div>
-    );
-  }
 
   if (!prometheusDatasources.length) {
     return <Onboarding />;
@@ -40,11 +30,13 @@ export default function App(props: Readonly<AppRootProps>) {
 
   return (
     <div className={styles.appContainer} data-testid="metrics-drilldown-app">
-      <PluginPropsContext.Provider value={props}>
-        <AppContext.Provider value={{ trail: defaultTrail }}>
-          <AppRoutes />
-        </AppContext.Provider>
-      </PluginPropsContext.Provider>
+      <AppErrorBoundary>
+        <PluginPropsContext.Provider value={props}>
+          <AppContext.Provider value={{ trail: defaultTrail }}>
+            <AppRoutes />
+          </AppContext.Provider>
+        </PluginPropsContext.Provider>
+      </AppErrorBoundary>
     </div>
   );
 }

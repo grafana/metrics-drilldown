@@ -2,8 +2,7 @@ import { css } from '@emotion/css';
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useMemo, useRef } from 'react';
 
-import { ErrorView } from 'App/ErrorView';
-import { useCatchExceptions } from 'App/useCatchExceptions';
+
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { newMetricsTrail } from 'shared/utils/utils';
 
@@ -18,7 +17,6 @@ export interface MiniBreakdownProps {
 }
 
 const MiniBreakdown = ({ query, initialStart, initialEnd, dataSource }: MiniBreakdownProps) => {
-  const [error] = useCatchExceptions();
   const styles = useStyles2(getStyles);
   const initRef = useRef(false);
 
@@ -51,7 +49,7 @@ const MiniBreakdown = ({ query, initialStart, initialEnd, dataSource }: MiniBrea
 
   return (
     <div data-testid="metrics-drilldown-mini-breakdown" className={styles.container}>
-      {error ? <ErrorView error={error} /> : <trail.Component model={trail} />}
+      <trail.Component model={trail} />
     </div>
   );
 };
