@@ -72,6 +72,10 @@
     "stack-trace-label": "View stack trace",
     "title": "Fatal error!"
   },
+  "exposed-component-error-boundary": {
+    "message": "{{componentName}} failed to load. Please try again or contact your organization admin.",
+    "title": "Something went wrong"
+  },
   "extreme-value-filter": {
     "message": "Panel data was re-fetched with a more complex query to handle extremely small values in the series"
   },
