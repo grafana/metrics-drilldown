@@ -231,7 +231,12 @@ function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<stri
   }
 
   // Enrich assistant events to measure impact of the assistant quick search experiment
-  if (event === 'quick_search_assistant_question_asked' || event === 'quick_search_assistant_mode_entered') {
+  if (
+    event === 'quick_search_assistant_question_asked' ||
+    event === 'quick_search_assistant_mode_entered' ||
+    event === 'app_initialized' ||
+    event === 'metric_selected'
+  ) {
     Object.assign(payloads, getTrackedFlagPayload('experiment_grafana_assistant_quick_search_tab_test', true));
   }
 
