@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.0.7
+
+##### Chores
+
+*  add enrichment for conversion measurement (#1251) (0fb2aecc)
+*  make tree filters GA, remove feature toggle (#1245) (a732ac61)
+
+##### Bug Fixes
+
+* **cve:**
+  *  override protobufjs to patched versions (#1249) (6c768df8)
+  *  override fast-uri (#1243) (5a2f2eb7)
+
+##### Refactors
+
+* **error-handling:**
+  *  add exposed component + route-level error boundaries (#1253) (e0e7d5ef)
+  *  replace global error capture with scoped React Error Boundary (#1244) (6d56d7b6)
+
+
 ## 2.0.6
 
 ##### Chores
