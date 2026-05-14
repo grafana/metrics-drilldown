@@ -1,6 +1,6 @@
 import { t } from '@grafana/i18n';
 import { Alert, ErrorBoundary } from '@grafana/ui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface ExposedComponentErrorBoundaryProps {
   /** Faro boundary name for error attribution (e.g. 'metrics-drilldown-entity-metrics') */
@@ -18,7 +18,7 @@ function errorLoggerFor(componentName: string) {
     // ends up in the entry bundle.
     import('../shared/logger/logger').then(({ logger }) => {
       logger.error(error, {
-        handheldBy: 'exposed-component-error-boundary',
+        handledBy: 'exposed-component-error-boundary',
         component: componentName,
       });
     });
@@ -38,8 +38,10 @@ export function ExposedComponentErrorBoundary({
   componentName,
   children,
 }: Readonly<ExposedComponentErrorBoundaryProps>) {
+  const errorLogger = useMemo(() => errorLoggerFor(componentName), [componentName]);
+
   return (
-    <ErrorBoundary boundaryName={boundaryName} errorLogger={errorLoggerFor(componentName)}>
+    <ErrorBoundary boundaryName={boundaryName} errorLogger={errorLogger}>
       {({ error }) => {
         if (error) {
           return (

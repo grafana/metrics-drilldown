@@ -79,7 +79,7 @@ describe('ExposedComponentErrorBoundary', () => {
     await new Promise(process.nextTick);
 
     expect(mockLoggerError).toHaveBeenCalledWith(expect.objectContaining({ message: 'render boom' }), {
-      handheldBy: 'exposed-component-error-boundary',
+      handledBy: 'exposed-component-error-boundary',
       component: 'Entity Metrics',
     });
   });

@@ -38,7 +38,7 @@ export function ErrorView({ error }: Readonly<ErrorViewProps>) {
         severity="error"
         title={t('error-view.title', 'Fatal error!')}
         error={error}
-        errorContext={{ handheldBy: 'React error boundary' }}
+        errorContext={{ handledBy: 'React error boundary' }}
         message={
           <>
             <p className={styles.message}>

@@ -4,7 +4,7 @@ import { getAppEvents } from '@grafana/runtime';
 import { logger } from 'shared/logger/logger';
 
 export function displayError(error: Error, msgs: Array<string | React.ReactElement>) {
-  const context = msgs.reduce((acc, msg, i) => ({ ...acc, [`info${i + 1}`]: msg }), { handheldBy: 'displayError' });
+  const context = msgs.reduce((acc, msg, i) => ({ ...acc, [`info${i + 1}`]: msg }), { handledBy: 'displayError' });
 
   logger.error(error, context);
 

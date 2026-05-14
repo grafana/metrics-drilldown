@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import React, { act } from 'react';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 
 import { TrailErrorBoundary } from './TrailErrorBoundary';
 import { logger } from '../shared/logger/logger';
@@ -58,7 +58,7 @@ describe('TrailErrorBoundary', () => {
     );
 
     expect(mockLogger.error).toHaveBeenCalledWith(expect.objectContaining({ message: 'scene crash' }), {
-      handheldBy: 'trail-error-boundary',
+      handledBy: 'trail-error-boundary',
     });
   });
 
@@ -80,6 +80,40 @@ describe('TrailErrorBoundary', () => {
     // (which sits above Trail), not by TrailErrorBoundary. TrailErrorBoundary only
     // catches errors from trail.Component, which are scene-level errors, not chunk errors.
     expect(screen.getByText('Fatal error!')).toBeInTheDocument();
+  });
+
+  it('recovers when pathname changes (navigation recovery)', () => {
+    let shouldThrow = true;
+
+    function ConditionalChild(): React.ReactNode {
+      if (shouldThrow) {
+        throw new Error('scene crash');
+      }
+      return <div data-testid="recovered">Recovered</div>;
+    }
+
+    function NavigateButton() {
+      const navigate = useNavigate();
+      return <button onClick={() => navigate('/other')}>Navigate</button>;
+    }
+
+    render(
+      <MemoryRouter initialEntries={['/drilldown']}>
+        <NavigateButton />
+        <TrailErrorBoundary>
+          <ConditionalChild />
+        </TrailErrorBoundary>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Fatal error!')).toBeInTheDocument();
+
+    shouldThrow = false;
+    act(() => {
+      screen.getByText('Navigate').click();
+    });
+
+    expect(screen.getByTestId('recovered')).toBeInTheDocument();
   });
 
   it('shows stack trace in ErrorView', () => {

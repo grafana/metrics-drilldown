@@ -1,12 +1,13 @@
 import { ErrorBoundary } from '@grafana/ui';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { ErrorView } from './ErrorView';
 import { logger } from '../shared/logger/logger';
 
 function errorLogger(error: Error): void {
   logger.error(error, {
-    handheldBy: 'trail-error-boundary',
+    handledBy: 'trail-error-boundary',
   });
 }
 
@@ -21,8 +22,10 @@ function errorLogger(error: Error): void {
  * propagate to AppErrorBoundary at the app root for soft-reload handling.
  */
 export function TrailErrorBoundary({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { pathname } = useLocation();
+
   return (
-    <ErrorBoundary boundaryName="metrics-drilldown-trail" errorLogger={errorLogger}>
+    <ErrorBoundary boundaryName="metrics-drilldown-trail" errorLogger={errorLogger} dependencies={[pathname]}>
       {({ error }) => {
         if (error) {
           return <ErrorView error={error} />;

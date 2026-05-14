@@ -75,7 +75,7 @@ describe('AppErrorBoundary', () => {
     expect(screen.getByText('Fatal error!')).toBeInTheDocument();
   });
 
-  it('calls logger.error with handheldBy context on render error', () => {
+  it('calls logger.error with handledBy context on render error', () => {
     renderWithRouter(
       <AppErrorBoundary>
         <ThrowingChild error={new Error('boom')} />
@@ -83,7 +83,7 @@ describe('AppErrorBoundary', () => {
     );
 
     expect(mockLogger.error).toHaveBeenCalledWith(expect.objectContaining({ message: 'boom' }), {
-      handheldBy: 'React error boundary',
+      handledBy: 'React error boundary',
     });
   });
 
@@ -112,7 +112,7 @@ describe('AppErrorBoundary', () => {
     expect(screen.getByText(/reloading…/)).toBeInTheDocument();
   });
 
-  it('logs ChunkLoadError with chunk-load-recovery handheldBy', () => {
+  it('logs ChunkLoadError with chunk-load-recovery handledBy', () => {
     const error = new Error('Loading chunk 42 failed');
 
     renderWithRouter(
@@ -122,7 +122,7 @@ describe('AppErrorBoundary', () => {
     );
 
     expect(mockLogger.error).toHaveBeenCalledWith(expect.objectContaining({ message: 'Loading chunk 42 failed' }), {
-      handheldBy: 'chunk-load-recovery',
+      handledBy: 'chunk-load-recovery',
     });
   });
 
