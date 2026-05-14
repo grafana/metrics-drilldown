@@ -2,6 +2,7 @@ import { Trans } from '@grafana/i18n';
 import React, { lazy, Suspense } from 'react';
 
 import { type MiniBreakdownProps } from './MiniBreakdown';
+import { ExposedComponentErrorBoundary } from '../ExposedComponentErrorBoundary';
 
 const MiniBreakdown = lazy(async () => {
   // Initialize i18n for scenes library before loading the component
@@ -16,13 +17,18 @@ const MiniBreakdown = lazy(async () => {
 });
 
 export const LazyMiniBreakdown = (props: MiniBreakdownProps) => (
-  <Suspense
-    fallback={
-      <div>
-        <Trans i18nKey="lazy-loading.fallback">Loading...</Trans>
-      </div>
-    }
+  <ExposedComponentErrorBoundary
+    boundaryName="metrics-drilldown-mini-breakdown"
+    componentName="Mini Breakdown"
   >
-    <MiniBreakdown {...props} />
-  </Suspense>
+    <Suspense
+      fallback={
+        <div>
+          <Trans i18nKey="lazy-loading.fallback">Loading...</Trans>
+        </div>
+      }
+    >
+      <MiniBreakdown {...props} />
+    </Suspense>
+  </ExposedComponentErrorBoundary>
 );

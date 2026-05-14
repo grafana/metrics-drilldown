@@ -4,6 +4,7 @@ import { PluginPage } from '@grafana/runtime';
 import { UrlSyncContextProvider, type SceneObject } from '@grafana/scenes';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { TrailErrorBoundary } from './TrailErrorBoundary';
 import { type DataTrail } from '../AppDataTrail/DataTrail';
 import { defaultActionView } from '../MetricScene/MetricActionBar';
 import { MetricScene } from '../MetricScene/MetricScene';
@@ -105,7 +106,9 @@ export default function Trail({ trail }: Readonly<TrailProps>) {
         updateUrlOnInit={true}
         namespace={trail.state.urlNamespace}
       >
-        <trail.Component model={trail} />
+        <TrailErrorBoundary>
+          <trail.Component model={trail} />
+        </TrailErrorBoundary>
       </UrlSyncContextProvider>
     </PluginPage>
   );

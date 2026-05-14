@@ -2,6 +2,7 @@ import { Trans } from '@grafana/i18n';
 import React, { lazy, Suspense } from 'react';
 
 import { type LabelBreakdownProps } from './LabelBreakdown';
+import { ExposedComponentErrorBoundary } from '../ExposedComponentErrorBoundary';
 
 const LabelBreakdown = lazy(async () => {
   // Initialize i18n for scenes library
@@ -16,13 +17,18 @@ const LabelBreakdown = lazy(async () => {
 });
 
 export const LazyLabelBreakdown = (props: LabelBreakdownProps) => (
-  <Suspense
-    fallback={
-      <div>
-        <Trans i18nKey="lazy-loading.fallback">Loading...</Trans>
-      </div>
-    }
+  <ExposedComponentErrorBoundary
+    boundaryName="metrics-drilldown-label-breakdown"
+    componentName="Label Breakdown"
   >
-    <LabelBreakdown {...props} />
-  </Suspense>
+    <Suspense
+      fallback={
+        <div>
+          <Trans i18nKey="lazy-loading.fallback">Loading...</Trans>
+        </div>
+      }
+    >
+      <LabelBreakdown {...props} />
+    </Suspense>
+  </ExposedComponentErrorBoundary>
 );

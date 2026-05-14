@@ -20,7 +20,7 @@ export function isChunkLoadError(error: Error): boolean {
 
 function errorLogger(error: Error): void {
   logger.error(error, {
-    handheldBy: isChunkLoadError(error) ? 'chunk-load-recovery' : 'React error boundary',
+    handledBy: isChunkLoadError(error) ? 'chunk-load-recovery' : 'React error boundary',
   });
 }
 

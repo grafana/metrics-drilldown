@@ -2,6 +2,7 @@ import { Trans } from '@grafana/i18n';
 import React, { lazy, Suspense } from 'react';
 
 import { type EntityMetricsProps } from './EntityMetrics';
+import { ExposedComponentErrorBoundary } from '../ExposedComponentErrorBoundary';
 
 const EntityMetrics = lazy(async () => {
   // Initialize i18n for scenes library before loading the component
@@ -16,13 +17,18 @@ const EntityMetrics = lazy(async () => {
 });
 
 export const LazyEntityMetrics = (props: EntityMetricsProps) => (
-  <Suspense
-    fallback={
-      <div>
-        <Trans i18nKey="lazy-loading.fallback">Loading...</Trans>
-      </div>
-    }
+  <ExposedComponentErrorBoundary
+    boundaryName="metrics-drilldown-entity-metrics"
+    componentName="Entity Metrics"
   >
-    <EntityMetrics {...props} />
-  </Suspense>
+    <Suspense
+      fallback={
+        <div>
+          <Trans i18nKey="lazy-loading.fallback">Loading...</Trans>
+        </div>
+      }
+    >
+      <EntityMetrics {...props} />
+    </Suspense>
+  </ExposedComponentErrorBoundary>
 );
