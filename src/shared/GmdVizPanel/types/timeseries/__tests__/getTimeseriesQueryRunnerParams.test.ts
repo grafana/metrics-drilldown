@@ -66,6 +66,41 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
         },
       ]);
     });
+
+    test('applies customRateInterval override to counter rate window', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'go_gc_heap_frees_bytes_total', type: 'counter' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [{ key: 'job', operator: '!=', value: 'prometheus' }],
+          addIgnoreUsageFilter: true,
+          customRateInterval: '5m',
+        },
+      });
+
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'go_gc_heap_frees_bytes_total-sum(rate)',
+          expr: 'sum(rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[5m]))',
+          legendFormat: 'sum(rate)',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+
+    test('ignores customRateInterval for gauge metrics (no rate wrap)', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'go_goroutines', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          customRateInterval: '5m',
+        },
+      });
+
+      expect(result.queries[0].expr).toBe('avg(go_goroutines{__ignore_usage__="", ${filters:raw}})');
+    });
   });
 
   describe('with group by label', () => {
@@ -109,6 +144,28 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
         {
           refId: 'go_gc_heap_frees_bytes_total-by-instance',
           expr: 'sum by (instance) (rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
+          legendFormat: '{{instance}}',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+
+    test('applies customRateInterval override to grouped counter rate window', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'go_gc_heap_frees_bytes_total', type: 'counter' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [{ key: 'job', operator: '!=', value: 'prometheus' }],
+          addIgnoreUsageFilter: true,
+          groupBy: 'instance',
+          customRateInterval: '1h',
+        },
+      });
+
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'go_gc_heap_frees_bytes_total-by-instance',
+          expr: 'sum by (instance) (rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[1h]))',
           legendFormat: '{{instance}}',
           fromExploreMetrics: true,
         },

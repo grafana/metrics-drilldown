@@ -23,4 +23,25 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
       },
     ]);
   });
+
+  test('applies customRateInterval override to heatmap rate window', () => {
+    const result = getHeatmapQueryRunnerParams({
+      metric: { name: 'grafana_database_all_migrations_duration_seconds', type: 'classic-histogram' },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [{ key: 'success', operator: '=', value: 'true' }],
+        addIgnoreUsageFilter: true,
+        customRateInterval: '5m',
+      },
+    });
+
+    expect(result.queries).toStrictEqual([
+      {
+        refId: 'grafana_database_all_migrations_duration_seconds-heatmap',
+        expr: 'sum by (le) (rate(grafana_database_all_migrations_duration_seconds{success="true", __ignore_usage__="", ${filters:raw}}[5m]))',
+        format: 'heatmap',
+        fromExploreMetrics: true,
+      },
+    ]);
+  });
 });
