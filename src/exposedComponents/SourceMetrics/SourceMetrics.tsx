@@ -99,6 +99,13 @@ function getSourceMetricsScenario(props: Pick<SourceMetricsProps, 'query' | 'sou
 type SourceMetrics = Array<{
   metricName: string;
   labels: PromQLLabelMatcher[];
+  // KG-supplied per-metric overrides. Mirror of asserts-app-plugin's AssertionSourceMetric.
+  // Consumed in issue #1058: skips name-suffix heuristic and /api/v1/metadata fallback.
+  metricType?: 'counter' | 'gauge' | 'histogram' | 'summary';
+  // Consumed in issue #1130: replaces $__rate_interval inside rate(metric[X]).
+  customRateInterval?: string;
+  // Consumed in issue #1131: replaces default gauge aggregation (e.g. max_over_time).
+  customFunction?: string;
 }>;
 
 export interface SourceMetricsProps {
