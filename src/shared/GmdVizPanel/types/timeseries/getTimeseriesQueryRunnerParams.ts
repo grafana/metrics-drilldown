@@ -21,7 +21,8 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
   });
 
   const isRateQuery = metric.type === 'counter';
-  const expr = isRateQuery ? promql.rate({ expr: expression, interval: '$__rate_interval' }) : expression;
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
+  const expr = isRateQuery ? promql.rate({ expr: expression, interval }) : expression;
 
   return {
     isRateQuery,
