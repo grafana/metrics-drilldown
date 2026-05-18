@@ -5,6 +5,31 @@ import { getExploreURL, sceneGraph, VizPanel } from '@grafana/scenes';
 
 import { removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
 
+type ExploreQueryTransform = NonNullable<Parameters<typeof getExploreURL>[3]>;
+type ExploreQuery = Parameters<ExploreQueryTransform>[0];
+type ExploreMetricsQuery = ExploreQuery & {
+  expr?: unknown;
+  fromExploreMetrics?: unknown;
+  legendFormat?: unknown;
+};
+
+export const transformExploreQuery: ExploreQueryTransform = (query) => {
+  const queryWithoutDrilldownLegend: ExploreMetricsQuery = { ...query };
+
+  if (queryWithoutDrilldownLegend.fromExploreMetrics === true) {
+    delete queryWithoutDrilldownLegend.legendFormat;
+  }
+
+  if ('expr' in queryWithoutDrilldownLegend && typeof queryWithoutDrilldownLegend.expr === 'string') {
+    return {
+      ...queryWithoutDrilldownLegend,
+      expr: removeIgnoreUsageLabel(queryWithoutDrilldownLegend.expr),
+    } as ExploreQuery;
+  }
+
+  return queryWithoutDrilldownLegend;
+};
+
 export class ExploreAction {
   static create(panelMenuInstance: any): PanelMenuItem {
     let exploreUrl: Promise<string | undefined> | undefined;
@@ -19,16 +44,7 @@ export class ExploreAction {
       // when used in the metric select scene case,
       // this will get the explore url with interpolated variables and include the labels __ignore_usage__, this is a known issue
       // in the metric scene we do not get use the __ignore_usage__ labels in the explore url
-      exploreUrl = getExploreURL(panelData, panelMenuInstance, panelData.timeRange, (query) => {
-        if ('expr' in query && typeof query.expr === 'string') {
-          return {
-            ...query,
-            expr: removeIgnoreUsageLabel(query.expr),
-          };
-        }
-
-        return query;
-      });
+      exploreUrl = getExploreURL(panelData, panelMenuInstance, panelData.timeRange, transformExploreQuery);
     } catch {}
 
     return {
