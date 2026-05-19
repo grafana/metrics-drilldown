@@ -118,23 +118,41 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric'],
+    keys: ['metric', 'customRateInterval'],
   });
 
   getUrlState(): SceneObjectUrlValues {
+    // Emit the active metric's customRateInterval (issue #1130) so the outbound
+    // "Open in Metrics Drilldown" link carries the KG-supplied override across to standalone.
+    const entry = this.state.metric
+      ? this.state.sourceMetrics?.find((s) => s.metricName === this.state.metric)
+      : undefined;
     return {
       metric: this.state.metric,
+      customRateInterval: entry?.customRateInterval,
     };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
     if (this.state.embedded) {
-      // In embedded mode, we want to avoid clearing a metric from the trail state
-      // when the trail has been freshly instantiated and the URL doesn't yet contain the metric.
+      // In embedded mode the React prop is authoritative; skip URL values entirely.
+      // This also preserves a freshly-instantiated metric when the URL does not yet contain it.
       return;
     }
 
-    this.updateStateForNewMetric((values.metric as string) || undefined);
+    const metric = typeof values.metric === 'string' && values.metric ? values.metric : undefined;
+    const customRateInterval =
+      typeof values.customRateInterval === 'string' && values.customRateInterval
+        ? values.customRateInterval
+        : undefined;
+
+    // Standalone hydration of the KG override (issue #1130). Synthesize a single-entry
+    // sourceMetrics array so the GmdVizPanel construction sites find the override via the
+    // same lookup path used in embedded mode.
+    const sourceMetricsOverride =
+      metric && customRateInterval ? [{ metricName: metric, labels: [], customRateInterval }] : undefined;
+
+    this.updateStateForNewMetric(metric, sourceMetricsOverride);
   }
 
   public constructor(state: Partial<DataTrailState>) {
@@ -194,7 +212,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.initConfigPrometheusFunction();
   }
 
-  private updateStateForNewMetric(metric?: string) {
+  private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics) {
     if (!this.state.topScene || metric !== this.state.metric) {
       // Update controls based on whether a metric is selected
       const baseControls = [new VariableValueSelectors({ layout: 'vertical' }), new SceneControlsSpacer()];
@@ -205,7 +223,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
 
       // Resolve KG-supplied per-metric overrides for this metric (issue #1130).
-      const entry = metric ? this.state.sourceMetrics?.find((s) => s.metricName === metric) : undefined;
+      // sourceMetricsOverride lets callers (updateFromUrl in standalone) merge a new array into the same setState.
+      const effectiveSourceMetrics = sourceMetricsOverride ?? this.state.sourceMetrics;
+      const entry = metric ? effectiveSourceMetrics?.find((s) => s.metricName === metric) : undefined;
 
       this.setState({
         metric,
@@ -213,6 +233,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           ? new MetricScene({ metric, customRateInterval: entry?.customRateInterval })
           : new MetricsReducer(),
         controls,
+        ...(sourceMetricsOverride !== undefined && { sourceMetrics: sourceMetricsOverride }),
       });
     }
   }
