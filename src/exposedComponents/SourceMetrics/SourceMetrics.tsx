@@ -13,8 +13,8 @@ import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
 import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
 import { HistogramPercentilesDefaultBehavior } from './behaviors/HistogramPercentilesDefaultBehavior';
+import { type SourceMetrics } from './types';
 import { parsePromQLQuery } from '../../extensions/links';
-import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
 /**
@@ -96,18 +96,6 @@ function getSourceMetricsScenario(props: Pick<SourceMetricsProps, 'query' | 'sou
   return { scenario: 'missing_metric_information', sourceMetrics: undefined, fallbackQuery: undefined };
 }
 
-type SourceMetrics = Array<{
-  metricName: string;
-  labels: PromQLLabelMatcher[];
-  // KG-supplied per-metric overrides. Mirror of asserts-app-plugin's AssertionSourceMetric.
-  // Consumed in issue #1058: skips name-suffix heuristic and /api/v1/metadata fallback.
-  metricType?: 'counter' | 'gauge' | 'histogram' | 'summary';
-  // Consumed in issue #1130: replaces $__rate_interval inside rate(metric[X]).
-  customRateInterval?: string;
-  // Consumed in issue #1131: replaces default gauge aggregation (e.g. max_over_time).
-  customFunction?: string;
-}>;
-
 export interface SourceMetricsProps {
   query: string;
   initialStart: string | number;
@@ -179,6 +167,7 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
     metric,
     initialDS: props.dataSource.uid,
     initialFilters,
+    sourceMetrics: props.sourceMetrics,
     $timeRange: toSceneTimeRange(props.initialStart, props.initialEnd),
     embedded: true,
     $behaviors: [new FilterGroupByAssertsLabelsBehavior({ metric }), new HistogramPercentilesDefaultBehavior()],

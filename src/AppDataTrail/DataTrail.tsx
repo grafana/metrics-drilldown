@@ -55,6 +55,7 @@ import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnno
 import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { logger } from 'shared/logger/logger';
 
+import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
@@ -94,6 +95,10 @@ export interface DataTrailState extends SceneObjectState {
   // Knowledge Graph annotations
   kgEntityHint?: KgEntityHint;
   kgAnnotationToggle?: KgAnnotationToggle;
+
+  // Per-metric overrides supplied by KG via the SourceMetrics exposed component.
+  // Looked up by metric name at GmdVizPanel construction sites.
+  sourceMetrics?: SourceMetrics;
 
   // Add to dashboard feature
   isAddToDashboardAvailable: boolean;
