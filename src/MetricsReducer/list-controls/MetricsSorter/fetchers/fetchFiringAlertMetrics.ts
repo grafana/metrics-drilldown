@@ -1,8 +1,10 @@
 import { t } from '@grafana/i18n';
-import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
+import { getBackendSrv } from '@grafana/runtime';
 
+import { ensureErrorObject } from 'App/errorUtils';
 import { logger } from 'shared/logger/logger';
 
+import { usageRequestOptions } from './shared';
 import { extractMetricNames } from '../../../../shared/utils/utils.promql';
 
 /**
@@ -35,11 +37,6 @@ interface Rule {
   duration?: number;
 }
 
-const usageRequestOptions: Partial<BackendSrvRequest> = {
-  showSuccessAlert: false,
-  showErrorAlert: false,
-} as const;
-
 /**
  * Fetches currently firing alert rules from Grafana's Prometheus-compatible ruler endpoint
  * and maps them to metric names.
@@ -60,8 +57,7 @@ export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
 
     return parseFiringRules(response);
   } catch (err) {
-    const error = typeof err === 'string' ? new Error(err) : (err as Error);
-    logger.error(error, {
+    logger.error(ensureErrorObject(err, 'Failed to fetch firing alert rules'), {
       message: t(
         'fetch-firing-alert-metrics.error',
         'Failed to fetch firing alert rules from Prometheus ruler endpoint'
@@ -84,29 +80,29 @@ function parseFiringRules(response: RulerRulesResponse): Map<string, number> {
       continue;
     }
 
-    for (const rule of group.rules) {
-      // Only process alerting rules, skip recording rules
-      if (rule.type !== 'alerting') {
-        continue;
-      }
+    const alertingRules = group.rules.filter(
+      (rule): rule is Rule & { query: string } =>
+        rule.type === 'alerting' && typeof rule.query === 'string' && rule.query !== ''
+    );
 
-      if (typeof rule.query !== 'string' || rule.query === '') {
-        continue;
-      }
-
-      try {
-        const metrics = extractMetricNames(rule.query);
-
-        for (const metric of metrics) {
-          metricCounts.set(metric, (metricCounts.get(metric) || 0) + 1);
-        }
-      } catch (error) {
-        logger.warn(error, {
-          message: `Failed to parse PromQL expression in firing alert rule ${rule.name}`,
-        });
-      }
+    for (const rule of alertingRules) {
+      countMetricsFromRule(rule, metricCounts);
     }
   }
 
   return metricCounts;
+}
+
+function countMetricsFromRule(rule: Rule, metricCounts: Map<string, number>): void {
+  try {
+    const metrics = extractMetricNames(rule.query);
+
+    for (const metric of metrics) {
+      metricCounts.set(metric, (metricCounts.get(metric) || 0) + 1);
+    }
+  } catch (error) {
+    logger.warn(error, {
+      message: `Failed to parse PromQL expression in firing alert rule ${rule.name}`,
+    });
+  }
 }

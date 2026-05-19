@@ -1,11 +1,12 @@
 import { t } from '@grafana/i18n';
-import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
+import { getBackendSrv } from '@grafana/runtime';
 import { type Dashboard, type Panel } from '@grafana/schema';
 import { limitFunction } from 'p-limit';
 
 import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { logger } from 'shared/logger/logger';
 
+import { usageRequestOptions } from './shared';
 import { isPrometheusDataSource } from '../../../../shared/utils/utils.datasource';
 import { extractMetricNames } from '../../../../shared/utils/utils.promql';
 
@@ -29,11 +30,6 @@ export type MetricUsageDetails =
   | { usageType: 'alerting-usage'; count: number }; // TODO: implement `alerts: Record<string, number>`
 
 type MetricUsageMap = Record<string, MetricUsageDetails>;
-
-const usageRequestOptions: Partial<BackendSrvRequest> = {
-  showSuccessAlert: false,
-  showErrorAlert: false,
-} as const;
 
 type DashboardWithUrl = Dashboard & { url: string };
 
