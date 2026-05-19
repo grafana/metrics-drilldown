@@ -47,7 +47,13 @@ interface MetricGraphSceneState extends SceneObjectState {
 }
 
 export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
-  public constructor({ metric }: { metric: MetricGraphSceneState['metric'] }) {
+  public constructor({
+    metric,
+    customRateInterval,
+  }: {
+    metric: MetricGraphSceneState['metric'];
+    customRateInterval?: string;
+  }) {
     super({
       metric,
       topView: new SceneFlexLayout({
@@ -81,6 +87,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               },
               queryOptions: {
                 resolution: QUERY_RESOLUTION.HIGH,
+                customRateInterval,
               },
             }),
           }),

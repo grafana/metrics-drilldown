@@ -27,6 +27,8 @@ import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
+  // KG-supplied per-metric override (issue #1130). Forwarded to MetricGraphScene and the main GmdVizPanel.
+  customRateInterval?: string;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
@@ -55,7 +57,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
-      body: state.body ?? new MetricGraphScene({ metric: state.metric }),
+      body: state.body ?? new MetricGraphScene({ metric: state.metric, customRateInterval: state.customRateInterval }),
       ...state,
     });
 

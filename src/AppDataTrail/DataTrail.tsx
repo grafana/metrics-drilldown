@@ -204,9 +204,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         ? [...baseControls, new SelectNewMetricButton(), new SceneTimePicker({}), new SceneRefreshPicker({})]
         : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
 
+      // Resolve KG-supplied per-metric overrides for this metric (issue #1130).
+      const entry = metric ? this.state.sourceMetrics?.find((s) => s.metricName === metric) : undefined;
+
       this.setState({
         metric,
-        topScene: metric ? new MetricScene({ metric }) : new MetricsReducer(),
+        topScene: metric
+          ? new MetricScene({ metric, customRateInterval: entry?.customRateInterval })
+          : new MetricsReducer(),
         controls,
       });
     }
