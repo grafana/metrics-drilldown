@@ -47,6 +47,13 @@ test.describe('Firing alert metrics - Ruler API integration', () => {
 
     expect(body.status).toBe('success');
     expect(Array.isArray(body.data.groups)).toBe(true);
-    expect(body.data.groups).toHaveLength(0);
+
+    // Older Grafana versions (≤12.0.x) return group shells with empty rules arrays
+    // instead of omitting groups entirely, so assert no rules rather than no groups
+    const totalRules = body.data.groups.reduce(
+      (sum: number, g: { rules: unknown[] }) => sum + g.rules.length,
+      0
+    );
+    expect(totalRules).toBe(0);
   });
 });
