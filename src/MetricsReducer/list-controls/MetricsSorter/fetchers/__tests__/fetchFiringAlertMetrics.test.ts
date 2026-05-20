@@ -2,6 +2,7 @@ import { getBackendSrv } from '@grafana/runtime';
 
 import { logger } from 'shared/logger/logger';
 
+import { GRAFANA_RULER_RULES_URL } from '../shared';
 import { fetchFiringAlertMetrics } from '../fetchFiringAlertMetrics';
 
 jest.mock('@grafana/runtime');
@@ -43,7 +44,7 @@ describe('fetchFiringAlertMetrics()', () => {
     await fetchFiringAlertMetrics();
 
     expect(get).toHaveBeenCalledWith(
-      '/api/prometheus/grafana/api/v1/rules',
+      GRAFANA_RULER_RULES_URL,
       { state: 'firing', limit_alerts: 0 },
       'grafana-metricsdrilldown-app-firing-alert-metric-usage',
       expect.any(Object)

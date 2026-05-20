@@ -1,3 +1,4 @@
+import { GRAFANA_RULER_RULES_URL } from '../../../src/MetricsReducer/list-controls/MetricsSorter/fetchers/shared';
 import { expect, test } from '../../fixtures';
 
 test.describe('Firing alert metrics - Ruler API integration', () => {
@@ -7,7 +8,7 @@ test.describe('Firing alert metrics - Ruler API integration', () => {
 
   test('Ruler endpoint returns a successful response with provisioned alert rules', async ({ page }) => {
     const response = await page.request.get(
-      '/api/prometheus/grafana/api/v1/rules?limit_alerts=0'
+      `${GRAFANA_RULER_RULES_URL}?limit_alerts=0`
     );
 
     expect(response.ok()).toBe(true);
@@ -37,7 +38,7 @@ test.describe('Firing alert metrics - Ruler API integration', () => {
 
   test('Ruler endpoint with state=firing filter returns empty groups when no alerts are firing', async ({ page }) => {
     const response = await page.request.get(
-      '/api/prometheus/grafana/api/v1/rules?state=firing&limit_alerts=0'
+      `${GRAFANA_RULER_RULES_URL}?state=firing&limit_alerts=0`
     );
 
     expect(response.ok()).toBe(true);

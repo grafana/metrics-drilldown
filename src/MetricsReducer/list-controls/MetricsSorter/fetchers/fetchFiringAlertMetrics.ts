@@ -4,7 +4,7 @@ import { getBackendSrv } from '@grafana/runtime';
 import { ensureErrorObject } from 'App/errorUtils';
 import { logger } from 'shared/logger/logger';
 
-import { usageRequestOptions } from './shared';
+import { GRAFANA_RULER_RULES_URL, usageRequestOptions } from './shared';
 import { extractMetricNames } from '../../../../shared/utils/utils.promql';
 
 /**
@@ -49,7 +49,7 @@ interface Rule {
 export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
   try {
     const response = await getBackendSrv().get<RulerRulesResponse>(
-      '/api/prometheus/grafana/api/v1/rules',
+      GRAFANA_RULER_RULES_URL,
       { state: 'firing', limit_alerts: 0 },
       'grafana-metricsdrilldown-app-firing-alert-metric-usage',
       usageRequestOptions
