@@ -2,8 +2,8 @@ import { getBackendSrv } from '@grafana/runtime';
 
 import { logger } from 'shared/logger/logger';
 
-import { GRAFANA_RULER_RULES_URL } from '../shared';
 import { fetchFiringAlertMetrics } from '../fetchFiringAlertMetrics';
+import { GRAFANA_RULER_RULES_URL } from '../shared';
 
 jest.mock('@grafana/runtime');
 jest.mock('shared/logger/logger');
@@ -153,10 +153,7 @@ describe('fetchFiringAlertMetrics()', () => {
         buildRulerResponse([
           {
             name: 'group-1',
-            rules: [
-              alertingRule('EmptyQuery', ''),
-              alertingRule('ValidRule', 'up == 0'),
-            ],
+            rules: [alertingRule('EmptyQuery', ''), alertingRule('ValidRule', 'up == 0')],
           },
         ])
       );
@@ -223,7 +220,10 @@ describe('fetchFiringAlertMetrics()', () => {
 
       expect(result).toBeInstanceOf(Map);
       expect(result.size).toBe(0);
-      expect(logger.error).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ message: expect.any(String) }));
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ message: expect.any(String) })
+      );
     });
 
     test('handles string error from API', async () => {
@@ -234,7 +234,10 @@ describe('fetchFiringAlertMetrics()', () => {
 
       expect(result).toBeInstanceOf(Map);
       expect(result.size).toBe(0);
-      expect(logger.error).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ message: expect.any(String) }));
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ message: expect.any(String) })
+      );
     });
   });
 });
