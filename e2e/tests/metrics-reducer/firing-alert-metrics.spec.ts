@@ -22,7 +22,11 @@ test.describe('Firing alert metrics - Ruler API integration', () => {
     const group = body.data.groups.find(
       (g: { name: string }) => g.name === 'test-evaluation-group-00'
     );
-    expect(group).toBeDefined();
+
+    if (!group) {
+      throw new Error('Expected group "test-evaluation-group-00" not found in ruler response');
+    }
+
     expect(group.rules.length).toBe(2);
 
     const ruleNames = group.rules.map((r: { name: string }) => r.name);

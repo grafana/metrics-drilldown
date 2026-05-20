@@ -10,25 +10,28 @@ import { extractMetricNames } from '../../../../shared/utils/utils.promql';
 /**
  * Prometheus-compatible ruler API response shape.
  * Returned by GET /api/prometheus/grafana/api/v1/rules
+ *
+ * Fields are typed as optional where parseFiringRules defensively checks
+ * for their presence, so the types reflect the actual runtime guarantees.
  */
 interface RulerRulesResponse {
-  status: string;
-  data: {
-    groups: RuleGroup[];
+  status?: string;
+  data?: {
+    groups?: RuleGroup[];
   };
 }
 
 interface RuleGroup {
-  name: string;
-  file: string;
-  rules: Rule[];
-  interval: number;
+  name?: string;
+  file?: string;
+  rules?: Rule[];
+  interval?: number;
 }
 
 interface Rule {
-  type: 'alerting' | 'recording';
-  name: string;
-  query: string;
+  type?: string;
+  name?: string;
+  query?: unknown;
   state?: string;
   health?: string;
   alerts?: unknown[];
@@ -81,7 +84,7 @@ function parseFiringRules(response: RulerRulesResponse): Map<string, number> {
     }
 
     const alertingRules = group.rules.filter(
-      (rule): rule is Rule & { query: string } =>
+      (rule): rule is Rule & { name: string; query: string } =>
         rule.type === 'alerting' && typeof rule.query === 'string' && rule.query !== ''
     );
 
@@ -93,7 +96,7 @@ function parseFiringRules(response: RulerRulesResponse): Map<string, number> {
   return metricCounts;
 }
 
-function countMetricsFromRule(rule: Rule, metricCounts: Map<string, number>): void {
+function countMetricsFromRule(rule: Rule & { name: string; query: string }, metricCounts: Map<string, number>): void {
   try {
     const metrics = extractMetricNames(rule.query);
 
