@@ -19,7 +19,7 @@ const PATCHED = Symbol.for('metrics-drilldown/patchSceneQueryRunnerFilters');
  * DrilldownDependenciesManager.getFilters() ignores the expressionBuilder on AdHocFiltersVariable
  * and always injects raw state.filters. Tracked upstream:
  * TODO: remove this patch once Scenes respects expressionBuilder in DrilldownDependenciesManager
- * https://github.com/grafana/scenes/issues/new (open an issue referencing getFilters / expressionBuilder)
+ * https://github.com/grafana/scenes/issues/1436
  *
  * __name__ filtering for the metrics list is handled separately by AdHocFiltersForMetricsVariable,
  * which reads VAR_FILTERS.state.filters directly via its own expressionBuilder. That path is
