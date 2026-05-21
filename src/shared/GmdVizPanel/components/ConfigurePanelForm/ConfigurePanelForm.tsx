@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
+import { DashboardCursorSync, DataFrameType, LoadingState, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import {
   behaviors,
@@ -11,6 +11,7 @@ import {
   SceneTimePicker,
   SceneTimeRange,
   type SceneComponentProps,
+  type SceneDataProvider,
   type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
@@ -24,7 +25,7 @@ import { GRID_TEMPLATE_COLUMNS } from 'MetricsReducer/MetricsList/MetricsList';
 import { getPreferredConfigForMetric } from 'shared/GmdVizPanel/config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { getConfigPresetsForMetric } from 'shared/GmdVizPanel/config/presets/getConfigPresetsForMetric';
-import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
+import { CONFIG_PRESETS, type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
@@ -101,9 +102,8 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
             onSelect: (presetId) => this.onSelectPreset(presetId),
             body: new GmdVizPanel({
               key: `panel-${option.id}`,
-              // we make sure that, if the user has previously configured some query parameters (like percentiles),
-              // they are applied here
-              discardUserPrefs: option.id !== prefConfig?.id,
+              // Discard user prefs in the configure drawer so all panels start with their defaults.
+              discardUserPrefs: true,
               metric: metric.name,
               panelOptions: {
                 ...option.panelOptions,
@@ -123,6 +123,26 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     });
 
     this.setState({ presets, selectedPresetId, body });
+
+    // Detect native histograms via data frames (same pattern as PR #1207 for the main viz panel).
+    // For the configure drawer, metadata is unreliable for native histograms (no entry or wrong type),
+    // so we rely on HeatmapCells data frame type to determine the correct preset.
+    const firstPanel = sceneGraph.findByKeyAndType(this, `panel-${presets[0]?.id}`, GmdVizPanel);
+    if (firstPanel) {
+      const dataProvider = (firstPanel.state.body as any)?.state?.$data as SceneDataProvider | undefined;
+      if (dataProvider) {
+        const sub = dataProvider.subscribeToState((newState: any) => {
+          if (newState.data?.state !== LoadingState.Done) {
+            return;
+          }
+          sub.unsubscribe();
+          const dataFrameType = newState.data.series?.[0]?.meta?.type;
+          if (dataFrameType === DataFrameType.HeatmapCells) {
+            this.setState({ selectedPresetId: CONFIG_PRESETS.HISTOGRAM_HEATMAP });
+          }
+        });
+      }
+    }
   }
 
   private onSelectPreset = (presetId: string) => {
