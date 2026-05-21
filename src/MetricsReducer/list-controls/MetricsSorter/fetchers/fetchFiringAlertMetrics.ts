@@ -98,6 +98,8 @@ function parseFiringRules(response: RulerRulesResponse): Map<string, number> {
 
 function countMetricsFromRule(rule: Rule & { name: string; query: string }, metricCounts: Map<string, number>): void {
   try {
+    // Safety net: the lezer PromQL parser is tolerant and won't throw on malformed
+    // strings, but we keep this catch for unexpected failures in extractMetricNames.
     const metrics = extractMetricNames(rule.query);
 
     for (const metric of metrics) {

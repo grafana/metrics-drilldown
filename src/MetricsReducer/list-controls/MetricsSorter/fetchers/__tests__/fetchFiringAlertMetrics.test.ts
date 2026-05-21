@@ -7,6 +7,17 @@ import { GRAFANA_RULER_RULES_URL } from '../shared';
 
 jest.mock('@grafana/runtime');
 jest.mock('shared/logger/logger');
+jest.mock('../../../../../shared/utils/utils.promql', () => ({
+  extractMetricNames: jest.fn(),
+}));
+
+const { extractMetricNames: realExtractMetricNames } = jest.requireActual(
+  '../../../../../shared/utils/utils.promql'
+) as { extractMetricNames: (...args: unknown[]) => string[] };
+
+const { extractMetricNames: mockExtractMetricNames } = jest.requireMock<{ extractMetricNames: jest.Mock }>(
+  '../../../../../shared/utils/utils.promql'
+);
 
 function setup() {
   const get = jest.fn() as jest.Mock;
@@ -37,6 +48,10 @@ function recordingRule(name: string, query: string) {
 }
 
 describe('fetchFiringAlertMetrics()', () => {
+  beforeEach(() => {
+    mockExtractMetricNames.mockImplementation(realExtractMetricNames);
+  });
+
   test('calls the correct endpoint with state=firing and limit_alerts=0', async () => {
     const { get } = setup();
     get.mockResolvedValueOnce(buildRulerResponse([]));
@@ -164,7 +179,7 @@ describe('fetchFiringAlertMetrics()', () => {
       expect(result.get('up')).toBe(1);
     });
 
-    test('skips rules with unparseable PromQL and logs a warning', async () => {
+    test('returns zero metrics for malformed PromQL that yields no identifiers', async () => {
       const { get } = setup();
 
       get.mockResolvedValueOnce(
@@ -181,7 +196,39 @@ describe('fetchFiringAlertMetrics()', () => {
 
       const result = await fetchFiringAlertMetrics();
 
-      // The valid rule should still be processed
+      // The lezer PromQL parser is tolerant — malformed input returns [] rather than throwing.
+      // The valid rule should still be processed.
+      expect(result.size).toBe(1);
+      expect(result.get('node_cpu_seconds_total')).toBe(1);
+    });
+
+    test('logs a warning and continues processing when metric extraction throws', async () => {
+      const { get } = setup();
+      mockExtractMetricNames
+        .mockImplementationOnce(() => {
+          throw new TypeError('unexpected failure');
+        })
+        .mockImplementationOnce(() => ['node_cpu_seconds_total']);
+
+      get.mockResolvedValueOnce(
+        buildRulerResponse([
+          {
+            name: 'group-1',
+            rules: [
+              alertingRule('FailRule', 'some_expr > 1'),
+              alertingRule('GoodRule', 'node_cpu_seconds_total > 0.9'),
+            ],
+          },
+        ])
+      );
+
+      const result = await fetchFiringAlertMetrics();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.any(TypeError),
+        expect.objectContaining({ message: expect.stringContaining('FailRule') })
+      );
+      expect(result.size).toBe(1);
       expect(result.get('node_cpu_seconds_total')).toBe(1);
     });
 
