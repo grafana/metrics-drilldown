@@ -75,6 +75,9 @@ export type QueryConfig = {
   groupBy?: string;
   queries?: QueryDefs;
   data?: SceneDataProvider;
+  // KG-supplied per-metric override (issue #1130). Replaces $__rate_interval inside rate(metric[X]).
+  // Prometheus duration string, e.g. '5m', '1h'.
+  customRateInterval?: string;
 };
 
 export type QueryOptions = {
@@ -83,6 +86,7 @@ export type QueryOptions = {
   groupBy?: string;
   queries?: QueryDefs;
   data?: QueryConfig['data'];
+  customRateInterval?: QueryConfig['customRateInterval'];
 };
 
 /* GmdVizPanelState */

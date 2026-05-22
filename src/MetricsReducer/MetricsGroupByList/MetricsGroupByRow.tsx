@@ -29,6 +29,7 @@ import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePan
 import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { VAR_FILTERS } from 'shared/shared';
+import { getTrailFor } from 'shared/utils/utils';
 
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from '..//MetricsList/MetricsList';
 import { InlineBanner } from '../../App/InlineBanner';
@@ -112,11 +113,13 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
             ),
           }),
         getLayoutChild: (option, colorIndex) => {
+          const metricName = option.value as string;
+          const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metricName);
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
-              metric: option.value as string,
+              metric: metricName,
               vizPanelInGridItem: new GmdVizPanel({
-                metric: option.value as string,
+                metric: metricName,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
                   headerActions: ({ metric }) => [
@@ -126,6 +129,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 },
                 queryOptions: {
                   labelMatchers: [{ key: labelName, operator: '=', value: labelValue }],
+                  customRateInterval: entry?.customRateInterval,
                 },
               }),
             }),

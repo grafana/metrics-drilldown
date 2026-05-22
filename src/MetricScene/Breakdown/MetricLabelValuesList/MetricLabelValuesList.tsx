@@ -31,6 +31,7 @@ import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behavior
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { addUnspecifiedLabel } from 'shared/GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { trailDS } from 'shared/shared';
+import { getTrailFor } from 'shared/utils/utils';
 
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
@@ -181,6 +182,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
   private buildSinglePanel() {
     const { metric, label } = this.state;
+    const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
 
     return new GmdVizPanel({
       metric: metric.name,
@@ -194,6 +196,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       queryOptions: {
         groupBy: label,
         data: sceneGraph.getData(this),
+        customRateInterval: entry?.customRateInterval,
       },
     });
   }
@@ -201,6 +204,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   private buildByFrameRepeater() {
     const { metric, label } = this.state;
     const prefMetricConfig = getPreferredConfigForMetric(metric.name);
+    const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
 
     return new SceneByFrameRepeater({
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
@@ -272,6 +276,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
           queryOptions: {
             ...prefMetricConfig?.queryOptions,
             labelMatchers: [{ key: label, operator: '=', value: labelValue }],
+            customRateInterval: entry?.customRateInterval,
           },
         });
 
