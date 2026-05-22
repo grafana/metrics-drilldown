@@ -67,4 +67,26 @@ describe('getStatQueryRunnerParams(options)', () => {
       },
     ]);
   });
+
+  test('applies customRateInterval override to counter rate window', () => {
+    const result = getStatQueryRunnerParams({
+      metric: { name: 'go_gc_heap_frees_bytes_total', type: 'counter' },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [{ key: 'job', operator: '!=', value: 'prometheus' }],
+        addIgnoreUsageFilter: true,
+        queries: [],
+        customRateInterval: '5m',
+      },
+    });
+
+    expect(result.queries).toStrictEqual([
+      {
+        refId: 'go_gc_heap_frees_bytes_total-sum(rate)',
+        expr: 'sum(rate(go_gc_heap_frees_bytes_total{job!="prometheus", __ignore_usage__="", ${filters:raw}}[5m]))',
+        legendFormat: 'sum(rate)',
+        fromExploreMetrics: true,
+      },
+    ]);
+  });
 });

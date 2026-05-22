@@ -13,8 +13,8 @@ import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
 import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
 import { HistogramPercentilesDefaultBehavior } from './behaviors/HistogramPercentilesDefaultBehavior';
+import { type SourceMetrics } from './types';
 import { parsePromQLQuery } from '../../extensions/links';
-import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
 /**
@@ -96,11 +96,6 @@ function getSourceMetricsScenario(props: Pick<SourceMetricsProps, 'query' | 'sou
   return { scenario: 'missing_metric_information', sourceMetrics: undefined, fallbackQuery: undefined };
 }
 
-type SourceMetrics = Array<{
-  metricName: string;
-  labels: PromQLLabelMatcher[];
-}>;
-
 export interface SourceMetricsProps {
   query: string;
   initialStart: string | number;
@@ -172,6 +167,7 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
     metric,
     initialDS: props.dataSource.uid,
     initialFilters,
+    sourceMetrics: props.sourceMetrics,
     $timeRange: toSceneTimeRange(props.initialStart, props.initialEnd),
     embedded: true,
     $behaviors: [new FilterGroupByAssertsLabelsBehavior({ metric }), new HistogramPercentilesDefaultBehavior()],
