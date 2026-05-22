@@ -74,8 +74,10 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 
   private async buildBody() {
     const { metric } = this.state;
+    const trail = getTrailFor(this);
     const prefConfig = getPreferredConfigForMetric(metric.name);
-    const presets = await getConfigPresetsForMetric(metric.name, getTrailFor(this));
+    const presets = await getConfigPresetsForMetric(metric.name, trail);
+    const entry = trail.state.sourceMetrics?.find((s) => s.metricName === metric.name);
 
     // if not found in the user preferences, we use the first preset
     // it always works because the presets are organized to always have the default one as the first element (see GmdVizPanel/config/presets)
@@ -109,7 +111,11 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
                 fixedColorIndex: colorIndex,
                 headerActions: () => [],
               },
-              queryOptions: option.queryOptions,
+              queryOptions: {
+                ...option.queryOptions,
+                // KG override wins over preset/user-pref values (issue #1130).
+                ...(entry?.customRateInterval !== undefined && { customRateInterval: entry.customRateInterval }),
+              },
             }),
           }),
         });

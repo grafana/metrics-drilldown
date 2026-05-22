@@ -49,10 +49,11 @@ function buildHistogramQueries({
 
   const queries: SceneDataQuery[] = [];
 
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
   const newExpr =
     metric.type === 'native-histogram'
-      ? promql.sum({ expr: promql.rate({ expr }) })
-      : promql.sum({ expr: promql.rate({ expr }), by: ['le'] });
+      ? promql.sum({ expr: promql.rate({ expr, interval }) })
+      : promql.sum({ expr: promql.rate({ expr, interval }), by: ['le'] });
 
   for (const { fn, params } of queryDefs) {
     const entry = PROMQL_FUNCTIONS.get(fn);
@@ -94,7 +95,8 @@ function buildNonHistogramQueries({
     : [{ fn: 'quantile', params: { percentiles: [99, 90, 50] } }];
 
   const queries: SceneDataQuery[] = [];
-  const newExpr = isRateQuery ? promql.rate({ expr }) : expr;
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
+  const newExpr = isRateQuery ? promql.rate({ expr, interval }) : expr;
 
   for (const { fn, params } of queryDefs) {
     const entry = PROMQL_FUNCTIONS.get(fn);

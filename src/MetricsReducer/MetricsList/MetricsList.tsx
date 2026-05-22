@@ -22,6 +22,7 @@ import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
 import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { getTrailFor } from 'shared/utils/utils';
 
 import { VIZ_PANEL_HEIGHT, WithUsageDataPreviewPanel } from './WithUsageDataPreviewPanel';
 
@@ -77,14 +78,19 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
             ),
           }),
         getLayoutChild: (option, colorIndex) => {
+          const metricName = option.value as string;
+          const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metricName);
           return new SceneCSSGridItem({
             body: new WithUsageDataPreviewPanel({
-              metric: option.value as string,
+              metric: metricName,
               vizPanelInGridItem: new GmdVizPanel({
-                metric: option.value as string,
+                metric: metricName,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
                   headerActions: ({ metric }) => [new SelectAction({ metric: metric.name, variant: 'secondary' })],
+                },
+                queryOptions: {
+                  customRateInterval: entry?.customRateInterval,
                 },
               }),
             }),
