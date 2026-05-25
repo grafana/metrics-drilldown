@@ -87,6 +87,9 @@
     "limit-warning-body": "Your organization has more dashboards than this limit. Usage counts may be incomplete.",
     "limit-warning-title": "Dashboard usage sort is limited to 500 dashboards."
   },
+  "fetch-firing-alert-metrics": {
+    "error": "Failed to fetch firing alert rules from Prometheus ruler endpoint"
+  },
   "filtered-metrics-variable": {
     "label": "Filtered Metrics"
   },
