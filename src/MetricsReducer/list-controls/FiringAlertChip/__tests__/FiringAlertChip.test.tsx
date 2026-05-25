@@ -1,11 +1,11 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
-import { FiringAlertChip } from '../FiringAlertChip';
 import { fetchFiringAlertMetrics } from '../../MetricsSorter/fetchers/fetchFiringAlertMetrics';
+import { FiringAlertChip } from '../FiringAlertChip';
 
 // =============================================================================
 // MOCKS
@@ -49,7 +49,7 @@ const mockFetchFiringAlertMetrics = fetchFiringAlertMetrics as jest.Mock;
 // HELPERS
 // =============================================================================
 
-function buildFiringMap(entries: [string, number][]): Map<string, number> {
+function buildFiringMap(entries: Array<[string, number]>): Map<string, number> {
   return new Map(entries);
 }
 

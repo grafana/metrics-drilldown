@@ -13,13 +13,10 @@ import {
 import { Button, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import {
-  VAR_FILTERED_METRICS_VARIABLE,
-  type FilteredMetricsVariable,
-} from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
+import { VAR_FILTERED_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
 import { VAR_METRICS_VARIABLE, type MetricOptions, type MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
-import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { MetricsVariableFilterEngine } from 'MetricsReducer/metrics-variables/MetricsVariableFilterEngine';
+import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
@@ -89,7 +86,7 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
       this.setState({ firingAlertMetrics: metricsMap, loading: false });
     } catch (err) {
       logger.error(err instanceof Error ? err : new Error(String(err)), {
-        message: 'FiringAlertChip: failed to load firing alert metrics',
+        message: t('firing-alert-chip.fetch-error', 'FiringAlertChip: failed to load firing alert metrics'),
       });
       this.setState({ loading: false });
     }
