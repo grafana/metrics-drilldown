@@ -36,6 +36,11 @@ const goffFeatureFlags = {
     defaultValue: 'excluded',
     trackingKey: 'experiment_grafana_assistant_quick_search_tab_test',
   },
+  'drilldown.metrics.sort_by_firing_alerts': {
+    valueType: 'boolean',
+    values: [true, false] as const,
+    defaultValue: false,
+  },
 } as const satisfies Record<string, FeatureFlag>;
 
 /**

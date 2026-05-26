@@ -1,8 +1,9 @@
 import { t } from '@grafana/i18n';
-import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
+import { getBackendSrv } from '@grafana/runtime';
 
 import { logger } from 'shared/logger/logger';
 
+import { usageRequestOptions } from './shared';
 import { extractMetricNames } from '../../../../shared/utils/utils.promql';
 
 import type { MetricUsageDetails } from './fetchDashboardMetrics';
@@ -25,11 +26,6 @@ interface AlertingRule {
     };
   }>;
 }
-
-const usageRequestOptions: Partial<BackendSrvRequest> = {
-  showSuccessAlert: false,
-  showErrorAlert: false,
-} as const;
 
 // TODO: update parseAlertingRules to do what the dashboards function does
 function transformCountsToAlertingUsage(counts: Record<string, number>): Record<string, MetricUsageDetails> {
