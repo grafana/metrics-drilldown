@@ -32,7 +32,7 @@
     "i18n-extract": "i18next-cli extract -c i18next.config.ts",
     "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --ci"
   },
-  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8",
+  "packageManager": "pnpm@11.3.0+sha512.2c403d6594527287672b1f7056343a1f7c3634036a67ffabfcc2b3d7595d843768f8787148d1b57cf7956c90606bbd192857c363af19e96d2d0ec9ec5741d215",
   "engines": {
     "node": ">=22"
   },
@@ -129,37 +129,5 @@
   },
   "peerDependencies": {
     "lodash": "^4.18.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@remix-run/router": "^1.23.2",
-      "react-router": "^6.30.2",
-      "dompurify": "^3.4.0",
-      "lodash": "^4.18.0",
-      "minimatch@^3": "~3.1.4",
-      "minimatch@^9": "~10.2.0",
-      "minimatch@^10": "^10.2.3",
-      "serialize-javascript": "^7.0.5",
-      "immutable": "^5.1.5",
-      "flatted": "^3.4.0",
-      "undici": "^7.24.0",
-      "picomatch@^2": "~4.0.0",
-      "picomatch@^4": "^4.0.4",
-      "protobufjs@^7": "^7.5.6",
-      "protobufjs@^8": "^8.0.2",
-      "protocol-buffers-schema": "^3.6.1",
-      "brace-expansion@^1": "^5.0.0",
-      "brace-expansion@^5": "^5.0.6",
-      "yaml": "^2.8.3",
-      "@grafana/data": "^13.0.0",
-      "@grafana/i18n": "^13.0.0",
-      "@grafana/schema": "^13.0.0",
-      "uuid": "^14.0.0",
-      "postcss": "^8.5.10",
-      "fast-uri": "^3.1.2",
-      "ws": "^8.20.1",
-      "js-cookie": "^3.0.7",
-      "qs": "^6.15.2"
-    }
   }
 }
