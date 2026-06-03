@@ -121,7 +121,8 @@ describe('initOpenFeatureProvider', () => {
 
     expect(OFREPWebProvider).toHaveBeenCalledWith({
       baseUrl: '/grafana/apis/features.grafana.app/v0alpha1/namespaces/test-namespace',
-      pollInterval: -1,
+      disableVisibilityRefresh: true,
+      cacheMode: 'disabled',
       timeoutMs: 10_000,
     });
   });

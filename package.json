@@ -50,7 +50,7 @@
     "@grafana/schema": "^13.0.0",
     "@grafana/ui": "^12.4.0",
     "@lezer/common": "^1.5.0",
-    "@openfeature/ofrep-web-provider": "^0.3.5",
+    "@openfeature/ofrep-web-provider": "^0.4.1",
     "@openfeature/web-sdk": "^1.7.2",
     "@prometheus-io/lezer-promql": "^0.311.0",
     "@react-aria/utils": "3.34.0",
