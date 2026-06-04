@@ -249,7 +249,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Contribute",
       "documentation": "Documentation",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Report an issue"
     }
