@@ -66,7 +66,7 @@ export function getActionViewsDefinitions(): ActionViewDefinition[] {
       backgroundTask: (metricScene: MetricScene) => metricScene.relatedLogsOrchestrator.findAndCheckAllDatasources(),
     },
     {
-      displayName: t('action-bar.tab.query-results', 'Query Results'),
+      displayName: t('action-bar.tab.query-results', 'Query results'),
       value: actionViews.queryResults,
       getScene: (metricScene: MetricScene) =>
         new QueryResultsScene({
