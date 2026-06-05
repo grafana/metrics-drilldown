@@ -134,7 +134,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
             className={styles.button}
             tooltip={
               hasSavedQueries
-                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Load saved query')
+                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Load Saved query')
                 : t('metrics.metrics-drilldown.load-query.button-no-query-tooltip', 'No saved queries to load')
             }
           />
@@ -157,7 +157,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
           datasourceFilters={[dsName]}
           icon="folder-open"
           onSelectQuery={onSelectQuery}
-          tooltip={t('metrics.metrics-drilldown.load-query.saved-query-button-tooltip', 'Load saved query')}
+          tooltip={t('metrics.metrics-drilldown.load-query.saved-query-button-tooltip', 'Load Saved query')}
         />
       </div>
     );

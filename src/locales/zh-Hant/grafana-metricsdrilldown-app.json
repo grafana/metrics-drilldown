@@ -145,13 +145,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "No saved queries to load",
-        "button-tooltip": "Load saved query",
+        "button-tooltip": "Load Saved query",
         "empty": "No saved queries to display.",
         "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
         "load-type-error": "Please select a Prometheus query.",
         "modal-title": "Load a previously saved query",
         "remove": "Remove",
-        "saved-query-button-tooltip": "Load saved query",
+        "saved-query-button-tooltip": "Load Saved query",
         "select": "Select"
       },
       "save-query": {
@@ -159,7 +159,7 @@
           "alert": "There is a previously saved query with the same expression: {{title}}"
         },
         "button-tooltip": "Save query",
-        "button-tooltip-saved-queries": "Save in Saved Queries",
+        "button-tooltip-saved-queries": "Save in Saved queries",
         "cancel": "Cancel",
         "description": "Description",
         "error": "Unexpected error saving this query.",

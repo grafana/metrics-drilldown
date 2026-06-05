@@ -273,7 +273,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getLoadQueryButton() {
-    return this.getByRole('button', { name: /saved quer(?:y|ies)/ });
+    return this.getByRole('button', { name: /saved quer(?:y|ies)/i });
   }
 
   getSaveModal() {
