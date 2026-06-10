@@ -2,4 +2,4 @@
 node.corepack = true
 
 [tools]
-node = "24.15.0"
+node = "24.16.0"
