@@ -1,4 +1,4 @@
-import leven from 'leven';
+import leven from 'shared/utils/leven';
 
 export function sortRelatedMetrics(metricList: string[], metric: string) {
   return metricList.sort((aValue, bValue) => {
