@@ -1,9 +1,8 @@
 import { css } from '@emotion/css';
 import { locationUtil, type GrafanaTheme2 } from '@grafana/data';
 import { Trans } from '@grafana/i18n';
-import { useStyles2, useTheme2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
-import SVG from 'react-inlinesvg';
 
 import { getResponsiveBreakpoints } from 'shared/utils/utils.styles';
 
@@ -11,19 +10,11 @@ import { HelpControls } from './HelpControls';
 
 export function Onboarding() {
   const styles = useStyles2(getStyles);
-  const theme = useTheme2();
   return (
     <div className={styles.wrap}>
       <HelpControls />
       <div className={styles.graphicContainer}>
-        <SVG
-          src={
-            // eslint-disable-next-line sonarjs/no-all-duplicated-branches
-            theme.isDark
-              ? `/public/plugins/grafana-metricsdrilldown-app/img/logo.svg`
-              : `/public/plugins/grafana-metricsdrilldown-app/img/logo.svg`
-          }
-        />
+        <img src="/public/plugins/grafana-metricsdrilldown-app/img/logo.svg" alt="" />
       </div>
       <div className={styles.text}>
         <h3 className={styles.title}>
