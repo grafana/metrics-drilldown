@@ -2,9 +2,10 @@
 # based on conventional commits since the last tag.
 #
 # Release flow in this repo:
-#   1. Run this workflow manually (Actions → Release Please → Run workflow).
-#      It opens (or updates) a draft release PR proposing the next version
-#      and CHANGELOG entries.
+#   1. Every merge to main triggers this workflow automatically.
+#      It opens (or updates) a draft release PR proposing the next
+#      version and CHANGELOG entries based on conventional commits
+#      since the last tag.
 #   2. Mark the release PR ready for review and merge it. Merging creates a
 #      `v<version>` tag on the merge commit and a GitHub Release stub.
 #   3. Publish the plugin by manually running the
@@ -27,7 +28,9 @@
 name: Release Please
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
