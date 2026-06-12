@@ -6,7 +6,13 @@ import React from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { type MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
-import { buildNavigateToMetricsParams, createAppUrl, createPromURLObject, parsePromQLQuery } from 'extensions/links';
+import {
+  buildNavigateToMetricsParams,
+  createAppUrl,
+  createPromURLObject,
+  isPrometheusCompatibleDatasourceType,
+  parsePromQLQuery,
+} from 'extensions/links';
 
 import { LoadQueryScene } from './LoadQueryScene';
 import { isQueryLibrarySupported, useHasSavedQueries } from './savedQuery';
@@ -83,6 +89,7 @@ describe('LoadQueryScene', () => {
     jest.mocked(createPromURLObject).mockReturnValue({});
     jest.mocked(buildNavigateToMetricsParams).mockReturnValue(new URLSearchParams());
     jest.mocked(createAppUrl).mockReturnValue('/a/grafana-metricsdrilldown-app/drilldown');
+    jest.mocked(isPrometheusCompatibleDatasourceType).mockImplementation((type) => type === 'prometheus');
 
     jest.mocked(usePluginComponent).mockReturnValue({ component: undefined, isLoading: false });
     jest.mocked(isQueryLibrarySupported).mockReturnValue(false);

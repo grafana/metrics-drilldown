@@ -295,7 +295,7 @@ export class MetricDatasourceHelper {
 
       return ds as unknown as PrometheusDatasource; // we trust that VAR_DATASOURCE has been set to a Prometheus datasource
     } catch (error) {
-      displayError(error as Error, ['Error while getting the Prometheus data source!']);
+      displayError(error as Error, ['Error while getting the Prometheus-compatible metrics data source!']);
       return undefined;
     }
   }
@@ -320,7 +320,11 @@ export class MetricDatasourceHelper {
       response.buildDate = response.buildDate.replace(/(\d{4})(\d{2})(\d{2})(.+)/, '$1-$2-$3');
     }
 
-    return response;
+    return {
+      ...response,
+      dataSourcePluginId: ds.meta?.id,
+      dataSourceType: ds.type,
+    };
   }
 }
 
@@ -329,6 +333,8 @@ export type PrometheusBuildInfo = {
   version: string;
   buildDate?: string;
   branch?: string;
+  dataSourcePluginId?: string;
+  dataSourceType?: string;
   repository: string;
   revision: string;
 };

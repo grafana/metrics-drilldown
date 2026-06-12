@@ -47,15 +47,15 @@
     "restore-modal-body": "Weet u zeker dat u de standaardconfiguratie voor de {{metric}} metric wilt herstellen?",
     "restore-modal-confirm": "Herstellen",
     "restore-modal-title": "Standaardconfiguratie herstellen",
-    "select-function-message": "Selecteer een Prometheus-functie die standaard wordt gebruikt om de {{metricName}} metric weer te geven."
+    "select-function-message": "Selecteer een PromQL-functie die standaard wordt gebruikt om de {{metricName}} metric weer te geven."
   },
   "data-source-variable": {
-    "description": "Alleen Prometheus-databronnen worden ondersteund",
+    "description": "Alleen Prometheus-compatibele metrics-databronnen worden ondersteund",
     "label": "Databron"
   },
   "data-trail": {
     "configure-drawer": {
-      "title": "Configureer de Prometheus-functie"
+      "title": "Configureer de PromQL-functie"
     },
     "filters": {
       "add-label": "Label toevoegen",
@@ -149,7 +149,7 @@
         "button-tooltip": "Opgeslagen query laden",
         "empty": "Geen opgeslagen query's om weer te geven.",
         "load-error": "Deze query bevat expressies die niet in Metrics Drilldown kunnen worden weergegeven. Alleen eenvoudige metric{label}-selectors worden ondersteund.",
-        "load-type-error": "Selecteer een Prometheus-query.",
+        "load-type-error": "Selecteer een Prometheus-compatibele metrics-query.",
         "modal-title": "Een eerder opgeslagen zoekopdracht laden",
         "remove": "Verwijderen",
         "saved-query-button-tooltip": "Opgeslagen query laden",
@@ -205,12 +205,12 @@
   },
   "onboarding": {
     "learn-more": "Bekijk <2>onze documenten</2> voor meer informatie of<5></5><6>probeer het online</6> in Grafana Play!",
-    "no-datasource": "We hebben gemerkt dat er geen Prometheus-databron is geconfigureerd.<1></1>Voeg een <4>Prometheus-databron</4> toe om metrics te bekijken.",
+    "no-datasource": "We hebben gemerkt dat er geen Prometheus-compatibele metrics-databron is geconfigureerd.<1></1>Voeg een <4>Prometheus- of compatibele metrics-databron</4> toe om metrics te bekijken.",
     "title": "Welkom bij Grafana Metrics Drilldown"
   },
   "open-assistant": {
     "explain-label": "Leg uit in Assistent",
-    "metric-metadata-title": "Prometheus metric metadata"
+    "metric-metadata-title": "Metric metadata"
   },
   "panel-menu": {
     "action": {
@@ -333,7 +333,7 @@
       "group-by-labels": "Groeperen op labels",
       "group-by-labels-description": "Groeperen van statistieken op hun labelwaarden",
       "prefix-filters": "Voorvoegselsfilters",
-      "prefix-filters-description": "Metrics filteren op basis van hun naamvoorvoegsel (Prometheus-namespace)",
+      "prefix-filters-description": "Metrics filteren op basis van hun naamvoorvoegsel",
       "recent-metrics": "Recente metricsfilters",
       "recent-metrics-description": "Metrics filteren op basis van wanneer ze zijn gaan binnenkomen",
       "rules-filters": "Regelfilters",

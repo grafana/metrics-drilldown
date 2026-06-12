@@ -6,6 +6,7 @@ import {
   buildNavigateToMetricsParams,
   configureDrilldownLink,
   createPromURLObject,
+  isPrometheusCompatibleDatasourceType,
   parseFiltersToLabelMatchers,
   parsePromQLQuery,
   UrlParameters,
@@ -213,9 +214,25 @@ describe('configureDrilldownLink', () => {
       const result = configureDrilldownLink(context);
       expect(result).toBeDefined();
       expect(result?.path).toBe('/a/grafana-metricsdrilldown-app/drilldown');
+      expect(result?.icon).toBe('drilldown');
     });
 
-    test('should return undefined when datasource is not prometheus', () => {
+    test('should return drilldown path for a Grafana-developed Prometheus-compatible datasource', () => {
+      const context = createMockContext({
+        targets: [
+          {
+            refId: 'A',
+            datasource: { type: 'grafana-amazonprometheus-datasource', uid: 'grafana-amazonprometheus-datasource' },
+          },
+        ],
+      });
+      const result = configureDrilldownLink(context);
+      expect(result).toBeDefined();
+      expect(result?.path).toBe('/a/grafana-metricsdrilldown-app/drilldown');
+      expect(result?.icon).toBe('drilldown');
+    });
+
+    test('should return undefined when datasource is not Prometheus-compatible', () => {
       const context = createMockContext({
         targets: [
           {
@@ -375,6 +392,21 @@ describe('configureDrilldownLink', () => {
       // Note: The actual parsePromQLQuery might handle this gracefully with hasErrors=true,
       // so we just test that the function doesn't crash and returns a valid path
     });
+  });
+});
+
+describe('isPrometheusCompatibleDatasourceType', () => {
+  test('returns true for the core Prometheus datasource type', () => {
+    expect(isPrometheusCompatibleDatasourceType('prometheus')).toBe(true);
+  });
+
+  test('returns true for Grafana-developed Prometheus-compatible datasource types', () => {
+    expect(isPrometheusCompatibleDatasourceType('grafana-amazonprometheus-datasource')).toBe(true);
+  });
+
+  test('returns false for non Prometheus-compatible datasource types', () => {
+    expect(isPrometheusCompatibleDatasourceType('elasticsearch')).toBe(false);
+    expect(isPrometheusCompatibleDatasourceType(undefined)).toBe(false);
   });
 });
 

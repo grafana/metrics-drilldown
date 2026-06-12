@@ -75,7 +75,7 @@ export class OpenAssistant extends SceneObjectBase<OpenAssistantState> {
         if (metadata) {
           context.push(
             createAssistantContextItem('structured', {
-              title: t('open-assistant.metric-metadata-title', 'Prometheus metric metadata'),
+              title: t('open-assistant.metric-metadata-title', 'Metric metadata'),
               data: {
                 type: metadata.type,
                 description: metadata.help,

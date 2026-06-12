@@ -32,11 +32,11 @@ export function Onboarding() {
 
         <p>
           <Trans i18nKey="onboarding.no-datasource">
-            We noticed there is no Prometheus datasource configured.
+            We noticed there is no Prometheus-compatible metrics data source configured.
             <br />
             Add a{' '}
             <a className="external-link" href={locationUtil.assureBaseUrl('/connections/datasources/new')}>
-              Prometheus datasource
+              Prometheus or compatible metrics data source
             </a>{' '}
             to view metrics.
           </Trans>

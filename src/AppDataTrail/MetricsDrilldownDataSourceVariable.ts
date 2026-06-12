@@ -15,7 +15,7 @@ export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
       name: VAR_DATASOURCE,
       pluginId: 'prometheus',
       label: t('data-source-variable.label', 'Data source'),
-      description: t('data-source-variable.description', 'Only prometheus data sources are supported'),
+      description: t('data-source-variable.description', 'Only Prometheus-compatible metrics data sources are supported'),
       // if no initialDS is passed to the constructor, we bypass Scenes native behaviour by determining the data source ourselves (see getCurrentDataSource())...
       skipUrlSync: !initialDS,
       // ... by doing this, we make sure that we'll always have a data source when the "var-ds" URL search param is missing, incorrect, etc.
@@ -49,7 +49,7 @@ export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
       prometheusDataSources[0];
 
     if (!currentDataSource) {
-      logger.warn('Cannot find any Prometheus data source!');
+      logger.warn('Cannot find any Prometheus-compatible metrics data source!');
       return 'no-data-source-configured';
     }
 

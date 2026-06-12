@@ -8,7 +8,13 @@ import { ToolbarButton, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useMemo } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
-import { buildNavigateToMetricsParams, createAppUrl, createPromURLObject, parsePromQLQuery } from 'extensions/links';
+import {
+  buildNavigateToMetricsParams,
+  createAppUrl,
+  createPromURLObject,
+  isPrometheusCompatibleDatasourceType,
+  parsePromQLQuery,
+} from 'extensions/links';
 import { ROUTES } from 'shared/constants/routes';
 import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
@@ -83,9 +89,14 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
       (query: PromQuery) => {
         const appEvents = getAppEvents();
 
-        if (query.datasource?.type !== 'prometheus') {
+        if (!isPrometheusCompatibleDatasourceType(query.datasource?.type)) {
           appEvents.publish({
-            payload: [t('metrics.metrics-drilldown.load-query.load-type-error', 'Please select a Prometheus query.')],
+            payload: [
+              t(
+                'metrics.metrics-drilldown.load-query.load-type-error',
+                'Please select a Prometheus-compatible metrics query.'
+              ),
+            ],
             type: AppEvents.alertError.name,
           });
           return;
