@@ -12,7 +12,6 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import { useResizeObserver } from '@react-aria/utils';
 import React, { useRef } from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
@@ -27,6 +26,7 @@ import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
+import { useResizeObserver } from 'shared/hooks/useResizeObserver';
 
 import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';

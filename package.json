@@ -32,7 +32,7 @@
     "i18n-extract": "i18next-cli extract -c i18next.config.ts",
     "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --ci"
   },
-  "packageManager": "pnpm@11.3.0+sha512.2c403d6594527287672b1f7056343a1f7c3634036a67ffabfcc2b3d7595d843768f8787148d1b57cf7956c90606bbd192857c363af19e96d2d0ec9ec5741d215",
+  "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed",
   "engines": {
     "node": ">=22"
   },
@@ -53,17 +53,14 @@
     "@openfeature/ofrep-web-provider": "^0.4.1",
     "@openfeature/web-sdk": "^1.7.2",
     "@prometheus-io/lezer-promql": "^0.311.0",
-    "@react-aria/utils": "3.34.0",
-    "leven": "^4.1.0",
-    "p-limit": "^7.0.0",
+    "compare-versions": "^6.1.1",
     "react": "18.3.1",
+    "tslib": "^2.8.1",
     "react-dom": "18.3.1",
     "react-inlinesvg": "^4.2.0",
     "react-router-dom": "^6.30.4",
     "rxjs": "7.8.2",
-    "tslib": "^2.8.1",
-    "tsqtsq": "^1.1.0",
-    "uuid": "^14.0.0"
+    "tsqtsq": "^1.1.0"
   },
   "devDependencies": {
     "@grafana/eslint-config": "^9.0.0",
@@ -83,10 +80,8 @@
     "@types/node": "24.12.2",
     "@types/react": "^18.3.27",
     "@types/react-dom": "^18.3.7",
-    "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "8.58.1",
     "@typescript-eslint/parser": "8.58.1",
-    "compare-versions": "^6.1.1",
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "7.1.4",
     "dotenv": "17.4.2",
