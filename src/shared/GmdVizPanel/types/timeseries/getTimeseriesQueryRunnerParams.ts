@@ -78,6 +78,33 @@ function buildGroupByQueries({
   ];
 }
 
+// KG-supplied customFunction (issue #1131) wins over the localStorage queryConfig.queries
+// pref and over the type-driven default. URL is authoritative. The whitelist is the v1
+// accepted KG values; custom-shaped entries (histogram_quantile, time-*) are kept out.
+const CUSTOM_FUNCTION_WHITELIST = new Set<PrometheusFunction>([
+  'avg',
+  'sum',
+  'min',
+  'max',
+  'count',
+  'max_over_time',
+  'min_over_time',
+]);
+
+function resolveQueryDefs(
+  customFn: PrometheusFunction | undefined,
+  queries: QueryDefs | undefined,
+  defaultFn: PrometheusFunction
+): QueryDefs {
+  if (customFn && CUSTOM_FUNCTION_WHITELIST.has(customFn)) {
+    return [{ fn: customFn }];
+  }
+  if (queries?.length) {
+    return queries;
+  }
+  return [{ fn: defaultFn }];
+}
+
 // here we support preset functions
 function buildQueriesWithPresetFunctions({
   metric,
@@ -95,25 +122,8 @@ function buildQueriesWithPresetFunctions({
     defaultPromqlFn = 'count';
   }
 
-  // KG-supplied customFunction (issue #1131) wins over the localStorage queryConfig.queries
-  // pref and over the type-driven default. URL is authoritative. The whitelist is the v1
-  // accepted KG values; custom-shaped entries (histogram_quantile, time-*) are kept out.
-  const CUSTOM_FUNCTION_WHITELIST = new Set<PrometheusFunction>([
-    'avg',
-    'sum',
-    'min',
-    'max',
-    'count',
-    'max_over_time',
-    'min_over_time',
-  ]);
   const customFn = queryConfig.customFunction as PrometheusFunction | undefined;
-  const queryDefs: QueryDefs =
-    customFn && CUSTOM_FUNCTION_WHITELIST.has(customFn)
-      ? [{ fn: customFn }]
-      : queryConfig.queries?.length
-        ? queryConfig.queries
-        : [{ fn: defaultPromqlFn }];
+  const queryDefs = resolveQueryDefs(customFn, queryConfig.queries, defaultPromqlFn);
 
   const interval = queryConfig.customRateInterval ?? '$__rate_interval';
   const queries: SceneDataQuery[] = [];

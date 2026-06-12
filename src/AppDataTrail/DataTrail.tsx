@@ -106,6 +106,67 @@ export interface DataTrailState extends SceneObjectState {
   addToDashboardPanelData?: PanelDataRequestPayload;
 }
 
+// Multi-value URL value parser for the customFunction key (issue #1131).
+// The scenes URL layer collapses a single-entry array to a bare string and keeps
+// multi-entry as an array; this helper normalises both shapes and returns a Map
+// keyed by metricName. Splits each value on the FIRST `-` so metric names
+// containing `:` from recording rules are preserved intact.
+function parseCustomFunctionValues(raw: SceneObjectUrlValues[string]): Map<string, string> {
+  let values: string[];
+  if (Array.isArray(raw)) {
+    values = raw;
+  } else if (typeof raw === 'string' && raw) {
+    values = [raw];
+  } else {
+    values = [];
+  }
+
+  const result = new Map<string, string>();
+  for (const item of values) {
+    const dashIdx = item.indexOf('-');
+    if (dashIdx <= 0) {
+      continue;
+    }
+    const fn = item.slice(0, dashIdx);
+    const metricName = item.slice(dashIdx + 1);
+    if (!fn || !metricName) {
+      continue;
+    }
+    result.set(metricName, fn);
+  }
+  return result;
+}
+
+// Build a synthesised sourceMetrics array from URL-parsed values for standalone
+// hydration. Merges the single-entry customRateInterval payload (#1130, active
+// metric only) with the multi-entry customFunction payload (#1131). Returns
+// undefined when no metric or override entries were parsed, leaving any existing
+// state.sourceMetrics untouched.
+function buildSourceMetricsOverride(
+  metric: string | undefined,
+  customRateInterval: string | undefined,
+  customFunctionByMetric: Map<string, string>
+): SourceMetrics | undefined {
+  const allMetricNames = new Set<string>();
+  if (metric) {
+    allMetricNames.add(metric);
+  }
+  for (const name of customFunctionByMetric.keys()) {
+    allMetricNames.add(name);
+  }
+
+  if (allMetricNames.size === 0) {
+    return undefined;
+  }
+
+  return Array.from(allMetricNames).map((name) => ({
+    metricName: name,
+    labels: [],
+    ...(name === metric && customRateInterval ? { customRateInterval } : {}),
+    ...(customFunctionByMetric.has(name) ? { customFunction: customFunctionByMetric.get(name) } : {}),
+  }));
+}
+
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   private disableReportFiltersInteraction = false;
   private datasourceHelper = new MetricDatasourceHelper(this);
@@ -154,44 +215,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         ? values.customRateInterval
         : undefined;
 
-    // Parse multi-value customFunction (issue #1131). The scenes URL layer collapses a single-entry
-    // array to a bare string and keeps multi-entry as an array. Build a Map keyed by metricName.
-    const rawCustomFunction = values.customFunction;
-    const customFunctionValues = Array.isArray(rawCustomFunction)
-      ? rawCustomFunction
-      : typeof rawCustomFunction === 'string' && rawCustomFunction
-        ? [rawCustomFunction]
-        : [];
-    const customFunctionByMetric = new Map<string, string>();
-    for (const raw of customFunctionValues) {
-      if (typeof raw !== 'string') continue;
-      // Split on the FIRST `-` so metric names containing `:` from recording rules are preserved intact.
-      const dashIdx = raw.indexOf('-');
-      if (dashIdx <= 0) continue;
-      const fn = raw.slice(0, dashIdx);
-      const metricName = raw.slice(dashIdx + 1);
-      if (!fn || !metricName) continue;
-      customFunctionByMetric.set(metricName, fn);
-    }
-
-    // Standalone hydration. Synthesise a sourceMetrics array merging:
-    //   - the single-entry customRateInterval payload (issue #1130, active metric only)
-    //   - the multi-entry customFunction payload (issue #1131, one entry per metric carrying the hint)
-    // The construction sites look up by metricName, so the synthesised array must contain every
-    // metric mentioned in the URL.
-    const allMetricNames = new Set<string>();
-    if (metric) allMetricNames.add(metric);
-    for (const name of customFunctionByMetric.keys()) allMetricNames.add(name);
-
-    const sourceMetricsOverride =
-      allMetricNames.size > 0
-        ? Array.from(allMetricNames).map((name) => ({
-            metricName: name,
-            labels: [],
-            ...(name === metric && customRateInterval ? { customRateInterval } : {}),
-            ...(customFunctionByMetric.has(name) ? { customFunction: customFunctionByMetric.get(name) } : {}),
-          }))
-        : undefined;
+    const customFunctionByMetric = parseCustomFunctionValues(values.customFunction);
+    const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric);
 
     this.updateStateForNewMetric(metric, sourceMetricsOverride);
   }
