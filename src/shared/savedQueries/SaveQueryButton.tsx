@@ -104,7 +104,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
       <OpenQueryLibraryComponent
         datasourceFilters={[dsName]}
         query={query}
-        tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip-saved-queries', 'Save in Saved Queries')}
+        tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip-saved-queries', 'Save in Saved queries')}
       />
     </div>
   );
