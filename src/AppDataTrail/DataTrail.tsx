@@ -230,7 +230,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.setState({
         metric,
         topScene: metric
-          ? new MetricScene({ metric, customRateInterval: entry?.customRateInterval })
+          ? new MetricScene({
+              metric,
+              customRateInterval: entry?.customRateInterval,
+              customFunction: entry?.customFunction,
+            })
           : new MetricsReducer(),
         controls,
         ...(sourceMetricsOverride !== undefined && { sourceMetrics: sourceMetricsOverride }),

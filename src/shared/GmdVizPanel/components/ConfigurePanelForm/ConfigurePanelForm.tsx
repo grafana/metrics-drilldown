@@ -115,6 +115,8 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
                 ...option.queryOptions,
                 // KG override wins over preset/user-pref values (issue #1130).
                 ...(entry?.customRateInterval !== undefined && { customRateInterval: entry.customRateInterval }),
+                // KG override wins over preset/user-pref values (issue #1131).
+                ...(entry?.customFunction !== undefined && { customFunction: entry.customFunction }),
               },
             }),
           }),
