@@ -9,6 +9,9 @@ const PROMETHEUS_FUNCTIONS = [
   'min',
   'max',
   'count',
+  // range-vector aggregations (issue #1131)
+  'max_over_time',
+  'min_over_time',
   // histograms
   'histogram_quantile',
   // age
@@ -43,6 +46,23 @@ export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
       name: 'histogram_quantile',
       // histogram_quantile is not available in the tsqtsq library
       fn: ({ expr, parameter }: { expr: string; parameter: number }) => `histogram_quantile(${parameter},${expr})`,
+    },
+  ],
+  [
+    'max_over_time',
+    {
+      name: 'max_over_time',
+      // range-vector aggregation (issue #1131); interval defaults to $__rate_interval when not supplied
+      fn: ({ expr, interval = '$__rate_interval' }: { expr: string; interval?: string }) =>
+        `max_over_time(${expr}[${interval}])`,
+    },
+  ],
+  [
+    'min_over_time',
+    {
+      name: 'min_over_time',
+      fn: ({ expr, interval = '$__rate_interval' }: { expr: string; interval?: string }) =>
+        `min_over_time(${expr}[${interval}])`,
     },
   ],
   [
