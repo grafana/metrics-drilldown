@@ -118,7 +118,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'customRateInterval'],
+    keys: ['metric', 'customRateInterval', 'customFunction'],
   });
 
   getUrlState(): SceneObjectUrlValues {
@@ -127,9 +127,17 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const entry = this.state.metric
       ? this.state.sourceMetrics?.find((s) => s.metricName === this.state.metric)
       : undefined;
+
+    // Multi-value customFunction (issue #1131). Emit one '{fn}-{metricName}' per entry that has
+    // the override set, so every KG-known tile in the standalone view restores its function.
+    const customFunctionPairs = this.state.sourceMetrics
+      ?.filter((s) => s.customFunction !== undefined)
+      .map((s) => `${s.customFunction}-${s.metricName}`);
+
     return {
       metric: this.state.metric,
       customRateInterval: entry?.customRateInterval,
+      customFunction: customFunctionPairs?.length ? customFunctionPairs : undefined,
     };
   }
 
@@ -146,11 +154,44 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         ? values.customRateInterval
         : undefined;
 
-    // Standalone hydration of the KG override (issue #1130). Synthesize a single-entry
-    // sourceMetrics array so the GmdVizPanel construction sites find the override via the
-    // same lookup path used in embedded mode.
+    // Parse multi-value customFunction (issue #1131). The scenes URL layer collapses a single-entry
+    // array to a bare string and keeps multi-entry as an array. Build a Map keyed by metricName.
+    const rawCustomFunction = values.customFunction;
+    const customFunctionValues = Array.isArray(rawCustomFunction)
+      ? rawCustomFunction
+      : typeof rawCustomFunction === 'string' && rawCustomFunction
+        ? [rawCustomFunction]
+        : [];
+    const customFunctionByMetric = new Map<string, string>();
+    for (const raw of customFunctionValues) {
+      if (typeof raw !== 'string') continue;
+      // Split on the FIRST `-` so metric names containing `:` from recording rules are preserved intact.
+      const dashIdx = raw.indexOf('-');
+      if (dashIdx <= 0) continue;
+      const fn = raw.slice(0, dashIdx);
+      const metricName = raw.slice(dashIdx + 1);
+      if (!fn || !metricName) continue;
+      customFunctionByMetric.set(metricName, fn);
+    }
+
+    // Standalone hydration. Synthesise a sourceMetrics array merging:
+    //   - the single-entry customRateInterval payload (issue #1130, active metric only)
+    //   - the multi-entry customFunction payload (issue #1131, one entry per metric carrying the hint)
+    // The construction sites look up by metricName, so the synthesised array must contain every
+    // metric mentioned in the URL.
+    const allMetricNames = new Set<string>();
+    if (metric) allMetricNames.add(metric);
+    for (const name of customFunctionByMetric.keys()) allMetricNames.add(name);
+
     const sourceMetricsOverride =
-      metric && customRateInterval ? [{ metricName: metric, labels: [], customRateInterval }] : undefined;
+      allMetricNames.size > 0
+        ? Array.from(allMetricNames).map((name) => ({
+            metricName: name,
+            labels: [],
+            ...(name === metric && customRateInterval ? { customRateInterval } : {}),
+            ...(customFunctionByMetric.has(name) ? { customFunction: customFunctionByMetric.get(name) } : {}),
+          }))
+        : undefined;
 
     this.updateStateForNewMetric(metric, sourceMetricsOverride);
   }
