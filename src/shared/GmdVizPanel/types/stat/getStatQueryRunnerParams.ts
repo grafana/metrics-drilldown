@@ -2,7 +2,7 @@ import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
-import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
+import { PROMQL_FUNCTIONS, type PrometheusFunction } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
@@ -43,7 +43,27 @@ function buildQueriesWithPresetFunctions({
   expr: string;
 }): SceneDataQuery[] {
   const defaultPromqlFn = isRateQuery ? 'sum' : 'avg';
-  const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
+
+  // KG-supplied customFunction (issue #1131) wins over the localStorage queryConfig.queries
+  // pref and over the type-driven default. URL is authoritative. Whitelist mirrors timeseries.
+  const CUSTOM_FUNCTION_WHITELIST = new Set<PrometheusFunction>([
+    'avg',
+    'sum',
+    'min',
+    'max',
+    'count',
+    'max_over_time',
+    'min_over_time',
+  ]);
+  const customFn = queryConfig.customFunction as PrometheusFunction | undefined;
+  const queryDefs: QueryDefs =
+    customFn && CUSTOM_FUNCTION_WHITELIST.has(customFn)
+      ? [{ fn: customFn }]
+      : queryConfig.queries?.length
+        ? queryConfig.queries
+        : [{ fn: defaultPromqlFn }];
+
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
   const queries: SceneDataQuery[] = [];
 
   for (const { fn } of queryDefs) {
@@ -52,7 +72,8 @@ function buildQueriesWithPresetFunctions({
       logger.warn(`[getStatQueryRunnerParams] Unknown PromQL function "${fn}", skipping query.`);
       continue;
     }
-    const query = entry.fn({ expr });
+    const isRangeFn = entry.name === 'max_over_time' || entry.name === 'min_over_time';
+    const query = isRangeFn ? entry.fn({ expr, interval }) : entry.fn({ expr });
     const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
 
     queries.push({
