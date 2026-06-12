@@ -62,11 +62,16 @@ function buildGroupByQueries({
   }
 
   const groupByLabel = utf8Support(queryConfig.groupBy as string);
+  const entry = PROMQL_FUNCTIONS.get(fn);
+  if (!entry) {
+    logger.warn(`[getTimeseriesQueryRunnerParams] Unknown PromQL function "${fn}" in group-by path, skipping query.`);
+    return [];
+  }
 
   return [
     {
       refId: `${metric.name}-by-${queryConfig.groupBy}`,
-      expr: promql[fn]({ expr, by: [groupByLabel] }),
+      expr: entry.fn({ expr, by: [groupByLabel] }),
       legendFormat: `{{${groupByLabel}}}`,
       fromExploreMetrics: true,
     },
