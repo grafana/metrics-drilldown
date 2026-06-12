@@ -46,15 +46,15 @@
     "restore-modal-body": "確定要還原 {{metric}} 指標的預設設定嗎？",
     "restore-modal-confirm": "還原",
     "restore-modal-title": "還原預設設定",
-    "select-function-message": "選取一個 Prometheus 函數，預設會用來顯示 {{metricName}} 指標。"
+    "select-function-message": "選取一個 PromQL 函數，預設會用來顯示 {{metricName}} 指標。"
   },
   "data-source-variable": {
-    "description": "僅支援 prometheus 資料來源",
+    "description": "僅支援 Prometheus 相容的指標資料來源",
     "label": "資料來源"
   },
   "data-trail": {
     "configure-drawer": {
-      "title": "設定 Prometheus 函式"
+      "title": "設定 PromQL 函式"
     },
     "filters": {
       "add-label": "新增標籤",
@@ -148,7 +148,7 @@
         "button-tooltip": "Load Saved query",
         "empty": "No saved queries to display.",
         "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
-        "load-type-error": "Please select a Prometheus query.",
+        "load-type-error": "請選取 Prometheus 相容的指標查詢。",
         "modal-title": "Load a previously saved query",
         "remove": "Remove",
         "saved-query-button-tooltip": "Load Saved query",
@@ -204,12 +204,12 @@
   },
   "onboarding": {
     "learn-more": "查看<2>我們的文件</2>以了解更多資訊，或在 Grafana Play 中<5></5><6>線上試用</6>！",
-    "no-datasource": "我們注意到 Prometheus 資料來源尚未設定。<1></1>新增 <4>Prometheus 資料來源</4>以檢視指標。",
+    "no-datasource": "我們注意到尚未設定 Prometheus 相容的指標資料來源。<1></1>新增 <4>Prometheus 或相容的指標資料來源</4>以檢視指標。",
     "title": "歡迎使用 Grafana 指標深入分析"
   },
   "open-assistant": {
     "explain-label": "在 Assistant 中解釋",
-    "metric-metadata-title": "Prometheus 指標中繼資料"
+    "metric-metadata-title": "指標中繼資料"
   },
   "panel-menu": {
     "action": {
@@ -329,7 +329,7 @@
       "group-by-labels": "按標籤分組",
       "group-by-labels-description": "按標籤值將指標分組",
       "prefix-filters": "前綴篩選條件",
-      "prefix-filters-description": "根據其名稱前綴（Prometheus 命名空間）篩選指標",
+      "prefix-filters-description": "根據其名稱前綴篩選指標",
       "recent-metrics": "最近的指標篩選條件",
       "recent-metrics-description": "根據開始擷取的時間篩選指標",
       "rules-filters": "規則篩選條件",

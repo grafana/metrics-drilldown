@@ -1,5 +1,6 @@
 // CAUTION: Imports in this file will contribute to the module.tsx bundle size
 import {
+  type IconName,
   PluginExtensionPoints,
   type PluginExtensionAddedLinkConfig,
   type PluginExtensionPanelContext,
@@ -18,7 +19,8 @@ import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } 
 const PRODUCT_NAME = 'Grafana Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
 const description = `Open current query in the ${PRODUCT_NAME} view`;
-const icon = 'gf-prometheus';
+const icon: IconName = 'drilldown';
+const PROMETHEUS_COMPATIBLE_DATA_SOURCE_REGEX = /^grafana-[0-9a-z]+prometheus-datasource$/;
 
 const ASSISTANT_TARGET_V0 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha';
 const ASSISTANT_TARGET_V1 = 'grafana-assistant-app/navigateToDrilldown/v1';
@@ -93,6 +95,7 @@ export function configureDrilldownLink<T extends PluginExtensionPanelContext>(co
 
   return {
     path: url || createAppUrl(ROUTES.Drilldown),
+    icon,
   };
 }
 
@@ -303,7 +306,12 @@ type PromQuery = DataQuery & { expr: string };
 
 function isPromQuery(query: DataQuery): query is PromQuery {
   const { datasource } = query;
-  return datasource?.type === 'prometheus';
+  return isPrometheusCompatibleDatasourceType(datasource?.type);
+}
+
+export function isPrometheusCompatibleDatasourceType(type: string | undefined): boolean {
+  const normalizedType = type?.toLowerCase();
+  return normalizedType === 'prometheus' || Boolean(normalizedType?.match(PROMETHEUS_COMPATIBLE_DATA_SOURCE_REGEX));
 }
 
 // Need to export this function from scenes because importing scenesUtils is increasing the bundle entry point size by 522.51kB

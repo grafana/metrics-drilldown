@@ -52,15 +52,15 @@
     "restore-modal-body": "Are you sure you want to restore the default configuration for the {{metric}} metric?",
     "restore-modal-confirm": "Restore",
     "restore-modal-title": "Restore default configuration",
-    "select-function-message": "Select a Prometheus function that will be used by default to display the {{metricName}} metric."
+    "select-function-message": "Select a PromQL function that will be used by default to display the {{metricName}} metric."
   },
   "data-source-variable": {
-    "description": "Only prometheus data sources are supported",
+    "description": "Only Prometheus-compatible metrics data sources are supported",
     "label": "Data source"
   },
   "data-trail": {
     "configure-drawer": {
-      "title": "Configure the Prometheus function"
+      "title": "Configure the PromQL function"
     },
     "filters": {
       "add-label": "Add label",
@@ -161,7 +161,7 @@
         "button-tooltip": "Load Saved query",
         "empty": "No saved queries to display.",
         "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
-        "load-type-error": "Please select a Prometheus query.",
+        "load-type-error": "Please select a Prometheus-compatible metrics query.",
         "modal-title": "Load a previously saved query",
         "remove": "Remove",
         "saved-query-button-tooltip": "Load Saved query",
@@ -217,12 +217,12 @@
   },
   "onboarding": {
     "learn-more": "Check <2>our docs</2> to learn more or<5></5><6>try it online</6> in Grafana Play!",
-    "no-datasource": "We noticed there is no Prometheus datasource configured.<1></1>Add a <4>Prometheus datasource</4> to view metrics.",
+    "no-datasource": "We noticed there is no Prometheus-compatible metrics data source configured.<1></1>Add a <4>Prometheus or compatible metrics data source</4> to view metrics.",
     "title": "Welcome to Grafana Metrics Drilldown"
   },
   "open-assistant": {
     "explain-label": "Explain in Assistant",
-    "metric-metadata-title": "Prometheus metric metadata"
+    "metric-metadata-title": "Metric metadata"
   },
   "panel-menu": {
     "action": {
@@ -345,7 +345,7 @@
       "group-by-labels": "Group by labels",
       "group-by-labels-description": "Group metrics by their label values",
       "prefix-filters": "Prefix filters",
-      "prefix-filters-description": "Filter metrics based on their name prefix (Prometheus namespace)",
+      "prefix-filters-description": "Filter metrics based on their name prefix",
       "recent-metrics": "Recent metrics filters",
       "recent-metrics-description": "Filter metrics based on when they started being ingested",
       "rules-filters": "Rules filters",

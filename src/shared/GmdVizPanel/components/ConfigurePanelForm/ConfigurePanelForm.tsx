@@ -238,7 +238,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
           <p>
             {t(
               'configure-panel.select-function-message',
-              'Select a Prometheus function that will be used by default to display the {{metricName}} metric.',
+              'Select a PromQL function that will be used by default to display the {{metricName}} metric.',
               { metricName: metric.name }
             )}
           </p>

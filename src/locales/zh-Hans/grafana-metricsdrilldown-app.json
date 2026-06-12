@@ -46,15 +46,15 @@
     "restore-modal-body": "您确定要恢复{{metric}}指标的默认配置吗？",
     "restore-modal-confirm": "恢复",
     "restore-modal-title": "恢复默认配置",
-    "select-function-message": "选择将默认用于显示 {{metricName}} 指标的 Prometheus 函数。"
+    "select-function-message": "选择将默认用于显示 {{metricName}} 指标的 PromQL 函数。"
   },
   "data-source-variable": {
-    "description": "仅支持 prometheus 数据源",
+    "description": "仅支持 Prometheus 兼容的指标数据源",
     "label": "数据源"
   },
   "data-trail": {
     "configure-drawer": {
-      "title": "配置 Prometheus 函数"
+      "title": "配置 PromQL 函数"
     },
     "filters": {
       "add-label": "添加标签",
@@ -148,7 +148,7 @@
         "button-tooltip": "加载已保存的查询",
         "empty": "没有要显示的已保存查询。",
         "load-error": "此查询包含无法在指标深入分析中表示的表达式。仅支持简单的指标{label}选择器。",
-        "load-type-error": "请选择一个 Prometheus 查询。",
+        "load-type-error": "请选择一个 Prometheus 兼容的指标查询。",
         "modal-title": "加载之前保存的查询",
         "remove": "移除",
         "saved-query-button-tooltip": "加载已保存的查询",
@@ -204,12 +204,12 @@
   },
   "onboarding": {
     "learn-more": "查看<2>我们的文档</2>以了解更多信息，或在 Grafana Play 中<5></5><6>在线试用</6>！",
-    "no-datasource": "我们注意到没有配置 Prometheus 数据源。<1></1>添加 <4>Prometheus 数据源</4>以查看指标。",
+    "no-datasource": "我们注意到没有配置 Prometheus 兼容的指标数据源。<1></1>添加 <4>Prometheus 或兼容的指标数据源</4>以查看指标。",
     "title": "欢迎使用 Grafana 指标深入分析"
   },
   "open-assistant": {
     "explain-label": "在助手中解释",
-    "metric-metadata-title": "Prometheus 指标元数据"
+    "metric-metadata-title": "指标元数据"
   },
   "panel-menu": {
     "action": {
@@ -329,7 +329,7 @@
       "group-by-labels": "按标签分组",
       "group-by-labels-description": "按标签值对指标分组",
       "prefix-filters": "前缀筛选条件",
-      "prefix-filters-description": "根据名称前缀（Prometheus 命名空间）筛选指标",
+      "prefix-filters-description": "根据名称前缀筛选指标",
       "recent-metrics": "最近的指标筛选条件",
       "recent-metrics-description": "根据开始采集的时间筛选指标",
       "rules-filters": "规则筛选条件",

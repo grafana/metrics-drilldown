@@ -51,4 +51,31 @@ describe('MetricDatasourceHelper', () => {
       expect(result).toEqual(metadata);
     });
   });
+
+  describe('getPrometheusBuildInfo()', () => {
+    test('returns build info with datasource identifiers', async () => {
+      const { runtimeDatasource, metricDatasourceHelper } = await setup();
+
+      runtimeDatasource.languageProvider.request.mockResolvedValue({
+        application: 'Elasticsearch',
+        version: '9.5.0',
+        buildDate: '20260603T00:40:02.0385-33-65',
+        repository: 'https://github.com/elastic/elasticsearch',
+        revision: 'abc123',
+      });
+
+      const result = await metricDatasourceHelper.getPrometheusBuildInfo();
+
+      expect(runtimeDatasource.languageProvider.request).toHaveBeenCalledWith('/api/v1/status/buildinfo');
+      expect(result).toEqual({
+        application: 'Elasticsearch',
+        version: '9.5.0',
+        buildDate: '2026-06-03',
+        repository: 'https://github.com/elastic/elasticsearch',
+        revision: 'abc123',
+        dataSourcePluginId: 'prometheus',
+        dataSourceType: 'prometheus',
+      });
+    });
+  });
 });

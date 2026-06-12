@@ -288,7 +288,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       reportExploreMetrics('configure_panel_opened', { metricType: metric.type });
 
       this.state.drawer.open({
-        title: t('data-trail.configure-drawer.title', 'Configure the Prometheus function'),
+        title: t('data-trail.configure-drawer.title', 'Configure the PromQL function'),
         subTitle: `${metric.name} (${metric.type})`,
         body: new ConfigurePanelForm({ metric }),
       });
