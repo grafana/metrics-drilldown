@@ -50,6 +50,17 @@ function buildGroupByQueries({
     fn = 'count';
   }
 
+  // KG-supplied customFunction (issue #1131) wins over the type default for instant aggregations.
+  // The group-by path calls `promql[fn]({expr, by})` directly on tsqtsq, so the override is only
+  // honored for instant aggregations that tsqtsq exposes and that accept a `by` clause. Range-vector
+  // functions and custom-shaped entries (histogram_quantile, time-*) fall back to the type default
+  // in group-by mode.
+  const GROUP_BY_SAFE_FUNCTIONS = new Set<PrometheusFunction>(['avg', 'sum', 'min', 'max', 'count']);
+  const customFn = queryConfig.customFunction as PrometheusFunction | undefined;
+  if (customFn && GROUP_BY_SAFE_FUNCTIONS.has(customFn)) {
+    fn = customFn;
+  }
+
   const groupByLabel = utf8Support(queryConfig.groupBy as string);
 
   return [
@@ -78,7 +89,28 @@ function buildQueriesWithPresetFunctions({
   } else if (metric.type === 'info') {
     defaultPromqlFn = 'count';
   }
-  const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
+
+  // KG-supplied customFunction (issue #1131) wins over the localStorage queryConfig.queries
+  // pref and over the type-driven default. URL is authoritative. The whitelist is the v1
+  // accepted KG values; custom-shaped entries (histogram_quantile, time-*) are kept out.
+  const CUSTOM_FUNCTION_WHITELIST = new Set<PrometheusFunction>([
+    'avg',
+    'sum',
+    'min',
+    'max',
+    'count',
+    'max_over_time',
+    'min_over_time',
+  ]);
+  const customFn = queryConfig.customFunction as PrometheusFunction | undefined;
+  const queryDefs: QueryDefs =
+    customFn && CUSTOM_FUNCTION_WHITELIST.has(customFn)
+      ? [{ fn: customFn }]
+      : queryConfig.queries?.length
+        ? queryConfig.queries
+        : [{ fn: defaultPromqlFn }];
+
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
   const queries: SceneDataQuery[] = [];
 
   for (const { fn } of queryDefs) {
@@ -87,7 +119,8 @@ function buildQueriesWithPresetFunctions({
       logger.warn(`[getTimeseriesQueryRunnerParams] Unknown PromQL function "${fn}", skipping query.`);
       continue;
     }
-    const query = entry.fn({ expr });
+    const isRangeFn = entry.name === 'max_over_time' || entry.name === 'min_over_time';
+    const query = isRangeFn ? entry.fn({ expr, interval }) : entry.fn({ expr });
     const fnName = metric.type === 'counter' ? `${entry.name}(rate)` : entry.name;
 
     queries.push({
