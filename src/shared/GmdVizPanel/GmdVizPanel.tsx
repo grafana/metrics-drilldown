@@ -78,6 +78,9 @@ export type QueryConfig = {
   // KG-supplied per-metric override (issue #1130). Replaces $__rate_interval inside rate(metric[X]).
   // Prometheus duration string, e.g. '5m', '1h'.
   customRateInterval?: string;
+  // KG-supplied per-metric override (issue #1131). Replaces the default aggregation function for the metric
+  // (e.g. avg for gauges) with a value like 'max_over_time' or 'min_over_time'.
+  customFunction?: string;
 };
 
 export type QueryOptions = {
@@ -87,6 +90,7 @@ export type QueryOptions = {
   queries?: QueryDefs;
   data?: QueryConfig['data'];
   customRateInterval?: QueryConfig['customRateInterval'];
+  customFunction?: QueryConfig['customFunction'];
 };
 
 /* GmdVizPanelState */

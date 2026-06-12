@@ -130,6 +130,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 queryOptions: {
                   labelMatchers: [{ key: labelName, operator: '=', value: labelValue }],
                   customRateInterval: entry?.customRateInterval,
+                  customFunction: entry?.customFunction,
                 },
               }),
             }),

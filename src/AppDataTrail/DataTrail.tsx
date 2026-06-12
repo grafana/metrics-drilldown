@@ -106,6 +106,67 @@ export interface DataTrailState extends SceneObjectState {
   addToDashboardPanelData?: PanelDataRequestPayload;
 }
 
+// Multi-value URL value parser for the customFunction key (issue #1131).
+// The scenes URL layer collapses a single-entry array to a bare string and keeps
+// multi-entry as an array; this helper normalises both shapes and returns a Map
+// keyed by metricName. Splits each value on the FIRST `-` so metric names
+// containing `:` from recording rules are preserved intact.
+function parseCustomFunctionValues(raw: SceneObjectUrlValues[string]): Map<string, string> {
+  let values: string[];
+  if (Array.isArray(raw)) {
+    values = raw;
+  } else if (typeof raw === 'string' && raw) {
+    values = [raw];
+  } else {
+    values = [];
+  }
+
+  const result = new Map<string, string>();
+  for (const item of values) {
+    const dashIdx = item.indexOf('-');
+    if (dashIdx <= 0) {
+      continue;
+    }
+    const fn = item.slice(0, dashIdx);
+    const metricName = item.slice(dashIdx + 1);
+    if (!fn || !metricName) {
+      continue;
+    }
+    result.set(metricName, fn);
+  }
+  return result;
+}
+
+// Build a synthesised sourceMetrics array from URL-parsed values for standalone
+// hydration. Merges the single-entry customRateInterval payload (#1130, active
+// metric only) with the multi-entry customFunction payload (#1131). Returns
+// undefined when no metric or override entries were parsed, leaving any existing
+// state.sourceMetrics untouched.
+function buildSourceMetricsOverride(
+  metric: string | undefined,
+  customRateInterval: string | undefined,
+  customFunctionByMetric: Map<string, string>
+): SourceMetrics | undefined {
+  const allMetricNames = new Set<string>();
+  if (metric) {
+    allMetricNames.add(metric);
+  }
+  for (const name of customFunctionByMetric.keys()) {
+    allMetricNames.add(name);
+  }
+
+  if (allMetricNames.size === 0) {
+    return undefined;
+  }
+
+  return Array.from(allMetricNames).map((name) => ({
+    metricName: name,
+    labels: [],
+    ...(name === metric && customRateInterval ? { customRateInterval } : {}),
+    ...(customFunctionByMetric.has(name) ? { customFunction: customFunctionByMetric.get(name) } : {}),
+  }));
+}
+
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
   private disableReportFiltersInteraction = false;
   private datasourceHelper = new MetricDatasourceHelper(this);
@@ -118,7 +179,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'customRateInterval'],
+    keys: ['metric', 'customRateInterval', 'customFunction'],
   });
 
   getUrlState(): SceneObjectUrlValues {
@@ -127,9 +188,17 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const entry = this.state.metric
       ? this.state.sourceMetrics?.find((s) => s.metricName === this.state.metric)
       : undefined;
+
+    // Multi-value customFunction (issue #1131). Emit one '{fn}-{metricName}' per entry that has
+    // the override set, so every KG-known tile in the standalone view restores its function.
+    const customFunctionPairs = this.state.sourceMetrics
+      ?.filter((s) => s.customFunction !== undefined)
+      .map((s) => `${s.customFunction}-${s.metricName}`);
+
     return {
       metric: this.state.metric,
       customRateInterval: entry?.customRateInterval,
+      customFunction: customFunctionPairs?.length ? customFunctionPairs : undefined,
     };
   }
 
@@ -146,11 +215,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         ? values.customRateInterval
         : undefined;
 
-    // Standalone hydration of the KG override (issue #1130). Synthesize a single-entry
-    // sourceMetrics array so the GmdVizPanel construction sites find the override via the
-    // same lookup path used in embedded mode.
-    const sourceMetricsOverride =
-      metric && customRateInterval ? [{ metricName: metric, labels: [], customRateInterval }] : undefined;
+    const customFunctionByMetric = parseCustomFunctionValues(values.customFunction);
+    const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric);
 
     this.updateStateForNewMetric(metric, sourceMetricsOverride);
   }
@@ -230,7 +296,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.setState({
         metric,
         topScene: metric
-          ? new MetricScene({ metric, customRateInterval: entry?.customRateInterval })
+          ? new MetricScene({
+              metric,
+              customRateInterval: entry?.customRateInterval,
+              customFunction: entry?.customFunction,
+            })
           : new MetricsReducer(),
         controls,
         ...(sourceMetricsOverride !== undefined && { sourceMetrics: sourceMetricsOverride }),
