@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} vald",
     "selected-count_other": "{{count}} valda"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Tillämpa",
     "cancel": "Avbryt",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Visa stackspårning",
     "title": "Allvarligt fel!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Paneldata hämtades på nytt med en mer komplex fråga för att hantera extremt små värden i serien"
   },
@@ -77,6 +86,9 @@
     "error": "Det gick inte att hämta instrumentpanelmätvärden",
     "limit-warning-body": "Din organisation har fler instrumentpaneler än denna gräns. Användningsantalen kan vara ofullständiga.",
     "limit-warning-title": "Sorteringen av instrumentpanelens användning är begränsad till 500 instrumentpaneler."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Filtrerade mätvärden"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Inga sparade frågor att ladda",
-        "button-tooltip": "Läs in sparad fråga",
+        "button-tooltip": "",
         "empty": "Inga sparade frågor att visa.",
         "load-error": "Denna fråga innehåller uttryck som inte kan återges i Metrics Drilldown. Endast enkla {label}-väljare för mätvärden stöds.",
         "load-type-error": "Välj en Prometheus-fråga.",
         "modal-title": "Läs in en tidigare sparad fråga",
         "remove": "Ta bort",
-        "saved-query-button-tooltip": "Läs in sparad fråga",
+        "saved-query-button-tooltip": "",
         "select": "Välj"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "Det finns en tidigare sparad fråga med samma uttryck: {{title}}"
         },
         "button-tooltip": "Spara fråga",
-        "button-tooltip-saved-queries": "Spara i Sparade frågor",
+        "button-tooltip-saved-queries": "",
         "cancel": "Avbryt",
         "description": "Beskrivning",
         "error": "Ett oväntat fel uppstod när denna fråga skulle sparas.",
@@ -237,7 +249,7 @@
       "commit-sha": "Commit-SHA: {{sha}}",
       "contribute": "Bidra",
       "documentation": "Dokumentation",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Rapportera ett problem"
     }

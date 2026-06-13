@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} geselecteerd",
     "selected-count_other": "{{count}} geselecteerd"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Toepassen",
     "cancel": "Annuleren",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Stacktrace weergeven",
     "title": "Fatale fout!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Paneelgegevens zijn opnieuw opgehaald met een complexere query om extreem kleine waarden in de reeks te verwerken"
   },
@@ -77,6 +86,9 @@
     "error": "Kan dashboardmetrics niet ophalen",
     "limit-warning-body": "Je organisatie heeft meer dashboards dan deze limiet. Gebruikstellingen zijn mogelijk onvolledig.",
     "limit-warning-title": "Het sorteren op dashboardgebruik is beperkt tot 500 dashboards."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Gefilterde Metrics"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Geen opgeslagen query's om te laden",
-        "button-tooltip": "Opgeslagen query laden",
+        "button-tooltip": "",
         "empty": "Geen opgeslagen query's om weer te geven.",
         "load-error": "Deze query bevat expressies die niet in Metrics Drilldown kunnen worden weergegeven. Alleen eenvoudige metric{label}-selectors worden ondersteund.",
         "load-type-error": "Selecteer een Prometheus-query.",
         "modal-title": "Een eerder opgeslagen zoekopdracht laden",
         "remove": "Verwijderen",
-        "saved-query-button-tooltip": "Opgeslagen query laden",
+        "saved-query-button-tooltip": "",
         "select": "Selecteren"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "Er is al een eerder opgeslagen zoekopdracht met dezelfde expressie: {{title}}"
         },
         "button-tooltip": "Query opslaan",
-        "button-tooltip-saved-queries": "Opslaan in Opgeslagen queries",
+        "button-tooltip-saved-queries": "",
         "cancel": "Annuleren",
         "description": "Beschrijving",
         "error": "Er is een onverwachte fout opgetreden bij het opslaan van deze zoekopdracht.",
@@ -237,7 +249,7 @@
       "commit-sha": "Commit-SHA: {{sha}} ",
       "contribute": "Bijdragen",
       "documentation": "Documentatie",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Een probleem melden"
     }

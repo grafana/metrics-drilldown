@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} ausgewählt",
     "selected-count_other": "{{count}} ausgewählt"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Anwenden",
     "cancel": "Abbrechen",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Stacktrace anzeigen",
     "title": "Schwerwiegender Fehler!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Die Panel-Daten wurden für die Verarbeitung von extrem kleinen Werten in der Reihe mit einer komplexeren Abfrage erneut abgerufen"
   },
@@ -77,6 +86,9 @@
     "error": "Dashboard-Metriken konnten nicht abgerufen werden.",
     "limit-warning-body": "Ihre Organisation hat mehr Dashboards, als diese Grenze zulässt. Die Nutzungszählungen sind möglicherweise unvollständig.",
     "limit-warning-title": "Die Sortierung der Dashboard-Nutzung ist auf 500 Dashboards beschränkt."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Gefilterte Metriken"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Keine gespeicherten Abfragen zum Laden vorhanden",
-        "button-tooltip": "Gespeicherte Abfrage laden",
+        "button-tooltip": "",
         "empty": "Keine gespeicherten Abfragen zum Anzeigen vorhanden.",
         "load-error": "Diese Abfrage enthält Ausdrücke, die in Metrics Drilldown nicht dargestellt werden können. Es werden nur einfache Metrik{label}-Selektoren unterstützt.",
         "load-type-error": "Bitte wählen Sie eine Prometheus-Abfrage aus.",
         "modal-title": "Zuvor gespeicherte Abfrage laden",
         "remove": "Entfernen",
-        "saved-query-button-tooltip": "Gespeicherte Abfrage laden",
+        "saved-query-button-tooltip": "",
         "select": "Auswählen"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "Es gibt eine zuvor gespeicherte Abfrage mit demselben Ausdruck: {{title}}"
         },
         "button-tooltip": "Abfrage speichern",
-        "button-tooltip-saved-queries": "In „Gespeicherte Abfragen“ speichern",
+        "button-tooltip-saved-queries": "",
         "cancel": "Abbrechen",
         "description": "Beschreibung",
         "error": "Beim Speichern dieser Abfrage ist ein unerwarteter Fehler aufgetreten.",
@@ -237,7 +249,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Beitragen",
       "documentation": "Dokumentation",
-      "grafana-version": "Grafana {{edition}} Ver. {{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Problem melden"
     }

@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} selezionata",
     "selected-count_other": "{{count}} selezionate"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Applica",
     "cancel": "Annulla",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Visualizza analisi dello stack",
     "title": "Errore irreversibile!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "I dati del pannello sono stati recuperati con una query più complessa per gestire valori estremamente piccoli nella serie"
   },
@@ -77,6 +86,9 @@
     "error": "Impossibile recuperare le metriche della dashboard",
     "limit-warning-body": "La tua organizzazione dispone di un numero di dashboard superiore a questo limite. I conteggi di utilizzo potrebbero essere incompleti.",
     "limit-warning-title": "L'ordinamento per utilizzo delle dashboard è limitato a 500 dashboard."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Metriche filtrate"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Nessuna query salvata da caricare",
-        "button-tooltip": "Carica query salvata",
+        "button-tooltip": "",
         "empty": "Nessuna query salvata da visualizzare.",
         "load-error": "Questa query contiene espressioni che non possono essere rappresentate in Metrics Drilldown. Sono supportati solo selettori di metriche{label} semplici.",
         "load-type-error": "Seleziona una query Prometheus.",
         "modal-title": "Carica una query salvata in precedenza",
         "remove": "Rimuovi",
-        "saved-query-button-tooltip": "Carica query salvata",
+        "saved-query-button-tooltip": "",
         "select": "Seleziona"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "È presente una query salvata in precedenza con la stessa espressione: {{title}}"
         },
         "button-tooltip": "Salva query",
-        "button-tooltip-saved-queries": "Salva in Query salvate",
+        "button-tooltip-saved-queries": "",
         "cancel": "Annulla",
         "description": "Descrizione",
         "error": "Errore imprevisto durante il salvataggio di questa query.",
@@ -237,7 +249,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Contribuisci",
       "documentation": "Documentazione",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Segnala un problema"
     }

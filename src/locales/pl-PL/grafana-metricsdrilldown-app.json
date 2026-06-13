@@ -42,6 +42,11 @@
     "selected-count_many": "Wybrano {{count}}",
     "selected-count_other": "Wybrano {{count}}"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Zastosuj",
     "cancel": "Anuluj",
@@ -69,6 +74,10 @@
     "stack-trace-label": "Wyświetl śledzenie stosu",
     "title": "Błąd krytyczny"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Dane panelu zostały ponownie pobrane za pomocą bardziej złożonego zapytania, aby obsłużyć bardzo małe wartości w szeregu"
   },
@@ -79,6 +88,9 @@
     "error": "Nie udało się pobrać wskaźników pulpitu",
     "limit-warning-body": "Liczba pulpitów w Twojej organizacji przekracza ten limit. Dane dotyczące wykorzystania mogą być niekompletne.",
     "limit-warning-title": "Sortowanie według wykorzystania jest ograniczone do 500 pulpitów."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Przefiltrowane wskaźniki"
@@ -148,13 +160,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Brak zapisanych zapytań do wczytania",
-        "button-tooltip": "Wczytaj zapisane zapytanie",
+        "button-tooltip": "",
         "empty": "Brak zapisanych zapytań do wyświetlenia.",
         "load-error": "To zapytanie zawiera wyrażenia, których nie można przedstawić w aplikacji Metrics Drilldown. Obsługiwane są tylko proste selektory metric{label}.",
         "load-type-error": "Wybierz zapytanie Prometheus.",
         "modal-title": "Wczytaj zapisane wcześniej zapytanie",
         "remove": "Usuń",
-        "saved-query-button-tooltip": "Wczytaj zapisane zapytanie",
+        "saved-query-button-tooltip": "",
         "select": "Wybierz"
       },
       "save-query": {
@@ -162,7 +174,7 @@
           "alert": "Istnieje już zapisane zapytanie z tym samym wyrażeniem: {{title}}"
         },
         "button-tooltip": "Zapisz zapytanie",
-        "button-tooltip-saved-queries": "Dodaj do zapisanych zapytań",
+        "button-tooltip-saved-queries": "",
         "cancel": "Anuluj",
         "description": "Opis",
         "error": "Podczas zapisywania tego zapytania wystąpił nieoczekiwany błąd.",
@@ -239,7 +251,7 @@
       "commit-sha": "SHA operacji commit: {{sha}}",
       "contribute": "Współtworzenie",
       "documentation": "Dokumentacja",
-      "grafana-version": "Grafana {{edition}} – wersja {{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Zgłoś problem"
     }

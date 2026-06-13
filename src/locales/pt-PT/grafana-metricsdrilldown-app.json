@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} selecionado",
     "selected-count_other": "{{count}} selecionados"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Aplicar",
     "cancel": "Cancelar",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Ver sequência da pilha",
     "title": "Erro fatal!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Os dados do painel foram novamente obtidos com uma consulta mais complexa para lidar com valores extremamente pequenos na série"
   },
@@ -77,6 +86,9 @@
     "error": "Falha ao obter as métricas do painel de controlo",
     "limit-warning-body": "A sua organização tem mais painéis do que este limite. As contagens de utilização podem estar incompletas.",
     "limit-warning-title": "A ordenação da utilização dos painéis de controlo está limitada a 500 painéis."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Métricas filtradas"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Não há consultas guardadas para carregar",
-        "button-tooltip": "Carregar consulta guardada",
+        "button-tooltip": "",
         "empty": "Não há consultas guardadas para apresentar.",
         "load-error": "Esta consulta contém expressões que não podem ser representadas em Metrics Drilldown. Apenas são suportados seletores de {label} de métricas simples.",
         "load-type-error": "Selecione uma consulta Prometheus.",
         "modal-title": "Carregar uma consulta guardada anteriormente",
         "remove": "Remover",
-        "saved-query-button-tooltip": "Carregar consulta guardada",
+        "saved-query-button-tooltip": "",
         "select": "Selecionar"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "Existe uma consulta guardada anteriormente com a mesma expressão: {{title}}"
         },
         "button-tooltip": "Guardar consulta",
-        "button-tooltip-saved-queries": "Guardar em Consultas guardadas",
+        "button-tooltip-saved-queries": "",
         "cancel": "Cancelar",
         "description": "Descrição",
         "error": "Ocorreu um erro inesperado ao guardar esta consulta.",
@@ -237,7 +249,7 @@
       "commit-sha": "Confirmar SHA: {{sha}}",
       "contribute": "Contribuir",
       "documentation": "Documentação",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Comunicar um problema"
     }
