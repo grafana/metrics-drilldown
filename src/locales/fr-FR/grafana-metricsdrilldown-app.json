@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} sélectionné",
     "selected-count_other": "{{count}} sélectionnés"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Appliquer",
     "cancel": "Annuler",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Afficher la trace de la stack",
     "title": "Erreur fatale !"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Les données du panneau ont été récupérées à nouveau à l’aide d’une requête plus complexe, afin de gérer des valeurs extrêmement faibles dans la série"
   },
@@ -77,6 +86,9 @@
     "error": "Échec du chargement des métriques du tableau de bord",
     "limit-warning-body": "Votre organisation possède un nombre de tableaux de bord supérieur à cette limite. Les décomptes de l’utilisation peuvent être incomplets.",
     "limit-warning-title": "Le tri de l’utilisation des tableaux de bord est limité à 500 tableaux de bord."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Métriques filtrées"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Aucune requête enregistrée à charger",
-        "button-tooltip": "Charger la requête enregistrée",
+        "button-tooltip": "",
         "empty": "Aucune requête enregistrée à afficher.",
         "load-error": "Cette requête contient des expressions qui ne peuvent pas être représentées dans Metrics Drilldown. Seuls les sélecteurs de métriques {label} simples sont pris en charge.",
         "load-type-error": "Veuillez sélectionner une requête Prometheus.",
         "modal-title": "Charger une requête enregistrée précédemment",
         "remove": "Supprimer",
-        "saved-query-button-tooltip": "Charger la requête enregistrée",
+        "saved-query-button-tooltip": "",
         "select": "Sélectionner"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "Une requête a été enregistrée précédemment avec la même expression : {{title}}"
         },
         "button-tooltip": "Enregistrer la requête",
-        "button-tooltip-saved-queries": "Enregistrer dans les requêtes enregistrées",
+        "button-tooltip-saved-queries": "",
         "cancel": "Annuler",
         "description": "Description",
         "error": "Erreur inattendue lors de l’enregistrement de cette requête.",
@@ -237,7 +249,7 @@
       "commit-sha": "Commit SHA : {{sha}}",
       "contribute": "Contribuer",
       "documentation": "Documentation",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Signaler un problème"
     }

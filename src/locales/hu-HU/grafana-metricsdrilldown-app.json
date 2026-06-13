@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} kiválasztva",
     "selected-count_other": "{{count}} kiválasztva"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Alkalmaz",
     "cancel": "Mégse",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Stack nyomvonalának megtekintése",
     "title": "Végzetes hiba!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "A paneladatok lekérése megismétlődött egy összetettebb lekérdezéssel a sorozat rendkívül kis értékeinek kezelése érdekében"
   },
@@ -77,6 +86,9 @@
     "error": "Az irányítópult-metrikák lekérése nem sikerült",
     "limit-warning-body": "A szervezeténél a műszerfalak száma meghaladja ezt a korlátot. Előfordulhat, hogy a használati statisztikák nem teljesek.",
     "limit-warning-title": "A műszerfalhasználat szerinti rendezés legfeljebb 500 elemre korlátozott."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Szűrt metrikák"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Nincsenek betölthető mentett lekérdezések",
-        "button-tooltip": "Mentett lekérdezés betöltése",
+        "button-tooltip": "",
         "empty": "Nincsenek megjeleníthető mentett lekérdezések.",
         "load-error": "Ez a lekérdezés olyan kifejezéseket tartalmaz, amelyeket a Metrics Drilldown nem tud megjeleníteni. Csak az egyszerű metrika{címke} választók támogatottak.",
         "load-type-error": "Válasszon ki egy Prometheus-lekérdezést.",
         "modal-title": "Korábban mentett lekérdezés betöltése",
         "remove": "Eltávolítás",
-        "saved-query-button-tooltip": "Mentett lekérdezés betöltése",
+        "saved-query-button-tooltip": "",
         "select": "Kiválasztás"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "Már létezik egy korábban mentett lekérdezés ugyanezzel a kifejezéssel: {{title}}"
         },
         "button-tooltip": "Lekérdezés mentése",
-        "button-tooltip-saved-queries": "Mentés a mentett lekérdezések közé",
+        "button-tooltip-saved-queries": "",
         "cancel": "Mégse",
         "description": "Leírás",
         "error": "Váratlan hiba történt a lekérdezés mentése közben.",
@@ -237,7 +249,7 @@
       "commit-sha": "SHA-azonosító: {{sha}}",
       "contribute": "Hozzájárulás",
       "documentation": "Dokumentáció",
-      "grafana-version": "Grafana {{edition}}, verzió: {{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Probléma bejelentése"
     }

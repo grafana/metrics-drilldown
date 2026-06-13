@@ -39,6 +39,11 @@
     "no-results": "没有结果。",
     "selected-count_other": "已选择 {{count}} 个"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "应用",
     "cancel": "取消",
@@ -66,6 +71,10 @@
     "stack-trace-label": "查看堆栈跟踪",
     "title": "致命错误！"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "使用了更复杂的查询重新获取面板数据，以处理序列中的极小值"
   },
@@ -76,6 +85,9 @@
     "error": "获取数据面板指标失败",
     "limit-warning-body": "您的组织拥有的数据面板数量超过了此上限。使用量计数可能不完整。",
     "limit-warning-title": "数据面板使用量排序最多可涵盖 500 个数据面板。"
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "已筛选的指标"
@@ -145,13 +157,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "没有可加载的已保存查询",
-        "button-tooltip": "加载已保存的查询",
+        "button-tooltip": "",
         "empty": "没有要显示的已保存查询。",
         "load-error": "此查询包含无法在指标深入分析中表示的表达式。仅支持简单的指标{label}选择器。",
         "load-type-error": "请选择一个 Prometheus 查询。",
         "modal-title": "加载之前保存的查询",
         "remove": "移除",
-        "saved-query-button-tooltip": "加载已保存的查询",
+        "saved-query-button-tooltip": "",
         "select": "选择"
       },
       "save-query": {
@@ -159,7 +171,7 @@
           "alert": "之前保存的一个查询具有相同表达式：{{title}}"
         },
         "button-tooltip": "保存查询",
-        "button-tooltip-saved-queries": "保存在“已保存的查询”中",
+        "button-tooltip-saved-queries": "",
         "cancel": "取消",
         "description": "描述",
         "error": "保存此查询时出现意外错误。",
@@ -236,7 +248,7 @@
       "commit-sha": "提交 SHA：{{sha}}",
       "contribute": "贡献",
       "documentation": "文档",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "报告问题"
     }

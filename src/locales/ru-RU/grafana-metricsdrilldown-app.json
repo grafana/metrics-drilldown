@@ -42,6 +42,11 @@
     "selected-count_many": "Выбрано: {{count}}",
     "selected-count_other": "Выбрано: {{count}}"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Применить",
     "cancel": "Отмена",
@@ -69,6 +74,10 @@
     "stack-trace-label": "Просмотр трассировки стека",
     "title": "Критическая ошибка"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Для обработки крайне малых значений в рядах выполнена повторная выборка данных дашборда с использованием более сложного запроса"
   },
@@ -79,6 +88,9 @@
     "error": "Не удалось получить метрики дашборда",
     "limit-warning-body": "В вашей организации количество дашбордов превышает этот лимит. Данные об использовании могут быть неполными.",
     "limit-warning-title": "Сортировка по использованию дашбордов ограничена 500 дашбордами."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Отфильтрованные метрики"
@@ -148,13 +160,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Нет сохраненных запросов для загрузки",
-        "button-tooltip": "Загрузить сохраненный запрос",
+        "button-tooltip": "",
         "empty": "Нет сохраненных запросов для отображения.",
         "load-error": "Этот запрос содержит выражения, которые невозможно представить в Metrics Drilldown. Поддерживаются только простые селекторы метрик {label}.",
         "load-type-error": "Выберите запрос Prometheus.",
         "modal-title": "Загрузить ранее сохраненный запрос",
         "remove": "Удалить",
-        "saved-query-button-tooltip": "Загрузить сохраненный запрос",
+        "saved-query-button-tooltip": "",
         "select": "Выбрать"
       },
       "save-query": {
@@ -162,7 +174,7 @@
           "alert": "Ранее был сохранен запрос с таким же выражением: {{title}}"
         },
         "button-tooltip": "Сохранить запрос",
-        "button-tooltip-saved-queries": "Сохранить в сохраненных запросах",
+        "button-tooltip-saved-queries": "",
         "cancel": "Отмена",
         "description": "Описание",
         "error": "Непредвиденная ошибка при сохранении этого запроса.",
@@ -239,7 +251,7 @@
       "commit-sha": "Выполнить SHA-хеширование: {{sha}}",
       "contribute": "Внести вклад",
       "documentation": "Документация",
-      "grafana-version": "Grafana {{edition}}, версия {{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}}, {{version}} ({{buildDate}})",
       "report-issue": "Сообщить о проблеме"
     }

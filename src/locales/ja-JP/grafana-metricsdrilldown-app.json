@@ -39,6 +39,11 @@
     "no-results": "結果はありません。",
     "selected-count_other": "{{count}}件選択中"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "適用",
     "cancel": "キャンセル",
@@ -66,6 +71,10 @@
     "stack-trace-label": "スタックトレースを表示",
     "title": "致命的なエラーが発生しました！"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "系列内の極小値を処理するため、より複雑なクエリでパネルデータを再取得しました"
   },
@@ -76,6 +85,9 @@
     "error": "ダッシュボードメトリクスの取得に失敗しました",
     "limit-warning-body": "お客様の組織のダッシュボード数がこの上限を超えています。使用回数のカウントが不完全である可能性があります。",
     "limit-warning-title": "ダッシュボード使用状況の並び替えは、500件のダッシュボードまでに制限されています。"
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "フィルタリングされたメトリクス"
@@ -145,13 +157,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "読み込む保存されたクエリがありません",
-        "button-tooltip": "保存されたクエリを読み込む",
+        "button-tooltip": "",
         "empty": "表示する保存されたクエリがありません。",
         "load-error": "このクエリには、Metrics Drilldownで表現できない式が含まれています。サポートされているのは、単純なメトリクス{label}セレクターのみです。",
         "load-type-error": "Prometheusクエリを選択してください。",
         "modal-title": "以前に保存したクエリを読み込む",
         "remove": "削除",
-        "saved-query-button-tooltip": "保存されたクエリを読み込む",
+        "saved-query-button-tooltip": "",
         "select": "選択"
       },
       "save-query": {
@@ -159,7 +171,7 @@
           "alert": "同じ式を使用した、以前に保存したクエリが存在します：{{title}}"
         },
         "button-tooltip": "クエリを保存",
-        "button-tooltip-saved-queries": "保存されたクエリに保存",
+        "button-tooltip-saved-queries": "",
         "cancel": "キャンセル",
         "description": "説明",
         "error": "このクエリの保存中に予期しないエラーが発生しました。",
@@ -236,7 +248,7 @@
       "commit-sha": "コミットSHA：{{sha}}",
       "contribute": "貢献",
       "documentation": "ドキュメント",
-      "grafana-version": "Grafana {{edition}} v{{version}}（{{env}}）",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "問題を報告する"
     }

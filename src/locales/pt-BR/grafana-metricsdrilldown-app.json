@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} selecionado",
     "selected-count_other": "{{count}} selecionados"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Aplicar",
     "cancel": "Cancelar",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Visualizar rastro da pilha",
     "title": "Erro fatal!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "A busca dos dados do painel foi realizada novamente usando uma consulta mais complexa para gerenciar valores extremamente pequenos na série"
   },
@@ -77,6 +86,9 @@
     "error": "Falha ao buscar métricas do painel",
     "limit-warning-body": "Sua organização tem mais painéis do que esse limite. As contagens de uso podem estar incompletas.",
     "limit-warning-title": "A classificação de uso do painel é limitada a 500 painéis."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Métricas filtradas"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Nenhuma consulta salva para carregar",
-        "button-tooltip": "Carregar consulta salva",
+        "button-tooltip": "",
         "empty": "Nenhuma consulta salva para exibir.",
         "load-error": "Esta consulta contém expressões que não podem ser representadas no detalhamento de métricas. Somente seletores simples de {label} de métricas são compatíveis.",
         "load-type-error": "Selecione uma consulta do Prometheus.",
         "modal-title": "Carregar uma consulta salva anteriormente",
         "remove": "Remover",
-        "saved-query-button-tooltip": "Carregar consulta salva",
+        "saved-query-button-tooltip": "",
         "select": "Selecionar"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "Há uma consulta salva anteriormente com a mesma expressão: {{title}}"
         },
         "button-tooltip": "Salvar consulta",
-        "button-tooltip-saved-queries": "Salvar em Consultas salvas",
+        "button-tooltip-saved-queries": "",
         "cancel": "Cancelar",
         "description": "Descrição",
         "error": "Erro inesperado ao salvar esta consulta.",
@@ -237,7 +249,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Contribuir",
       "documentation": "Documentação",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Comunicar um problema"
     }

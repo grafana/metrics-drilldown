@@ -39,6 +39,11 @@
     "no-results": "Tidak ada hasil.",
     "selected-count_other": "{{count}} dipilih"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Terapkan",
     "cancel": "Batal",
@@ -66,6 +71,10 @@
     "stack-trace-label": "Lihat jejak stack",
     "title": "Kesalahan fatal!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Data panel diambil kembali dengan kueri yang lebih kompleks untuk menangani nilai yang sangat kecil dalam seri"
   },
@@ -76,6 +85,9 @@
     "error": "Gagal mengambil metrik dasbor",
     "limit-warning-body": "Jumlah dasbor organisasi Anda melebihi batas ini. Jumlah penggunaan mungkin tidak lengkap.",
     "limit-warning-title": "Pengurutan penggunaan dasbor dibatasi 500 dasbor."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Metrik yang Difilter"
@@ -145,13 +157,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Tidak ada kueri tersimpan untuk dimuat",
-        "button-tooltip": "Muat kueri tersimpan",
+        "button-tooltip": "",
         "empty": "Tidak ada kueri tersimpan untuk ditampilkan.",
         "load-error": "Kueri ini berisi ekspresi yang tidak dapat direpresentasikan dalam Metrics Drilldown. Hanya pemilih metric{label} sederhana yang didukung.",
         "load-type-error": "Pilih kueri Prometheus.",
         "modal-title": "Muat kueri yang sudah disimpan sebelumnya",
         "remove": "Hapus",
-        "saved-query-button-tooltip": "Muat kueri tersimpan",
+        "saved-query-button-tooltip": "",
         "select": "Pilih"
       },
       "save-query": {
@@ -159,7 +171,7 @@
           "alert": "Ada kueri yang sudah disimpan sebelumnya dengan ekspresi yang sama: {{title}}"
         },
         "button-tooltip": "Simpan kueri",
-        "button-tooltip-saved-queries": "Simpan di Kueri Tersimpan",
+        "button-tooltip-saved-queries": "",
         "cancel": "Batal",
         "description": "Deskripsi",
         "error": "Terjadi kesalahan tidak terduga saat menyimpan kueri ini.",
@@ -236,7 +248,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Berkontribusi",
       "documentation": "Dokumentasi",
-      "grafana-version": "Grafana  {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Laporkan masalah"
     }

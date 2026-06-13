@@ -39,6 +39,11 @@
     "no-results": "無結果。",
     "selected-count_other": "已選取 {{count}} 個"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "套用",
     "cancel": "取消",
@@ -66,6 +71,10 @@
     "stack-trace-label": "檢視堆疊追蹤",
     "title": "致命錯誤！"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "面板資料已使用更複雜的查詢重新擷取，以處理系列中的極小值"
   },
@@ -76,6 +85,9 @@
     "error": "擷取儀表板指標失敗",
     "limit-warning-body": "Your organization has more dashboards than this limit. Usage counts may be incomplete.",
     "limit-warning-title": "Dashboard usage sort is limited to 500 dashboards."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "篩選的指標"
@@ -145,13 +157,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "No saved queries to load",
-        "button-tooltip": "Load Saved query",
+        "button-tooltip": "",
         "empty": "No saved queries to display.",
         "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
         "load-type-error": "Please select a Prometheus query.",
         "modal-title": "Load a previously saved query",
         "remove": "Remove",
-        "saved-query-button-tooltip": "Load Saved query",
+        "saved-query-button-tooltip": "",
         "select": "Select"
       },
       "save-query": {
@@ -159,7 +171,7 @@
           "alert": "There is a previously saved query with the same expression: {{title}}"
         },
         "button-tooltip": "Save query",
-        "button-tooltip-saved-queries": "Save in Saved queries",
+        "button-tooltip-saved-queries": "",
         "cancel": "Cancel",
         "description": "Description",
         "error": "Unexpected error saving this query.",
@@ -236,7 +248,7 @@
       "commit-sha": "提交 SHA：{{sha}}",
       "contribute": "貢獻",
       "documentation": "文件",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "回報問題"
     }

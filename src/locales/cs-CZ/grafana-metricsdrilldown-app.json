@@ -42,6 +42,11 @@
     "selected-count_many": "Vybráno: {{count}}",
     "selected-count_other": "Vybráno: {{count}}"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Použít",
     "cancel": "Zrušit",
@@ -69,6 +74,10 @@
     "stack-trace-label": "Zobrazit trasování stacků",
     "title": "Závažná chyba!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Data panelu byla znovu načtena pomocí složitějšího dotazu pro zpracování extrémně malých hodnot v řadě"
   },
@@ -79,6 +88,9 @@
     "error": "Nepodařilo se načíst metriky nástěnky",
     "limit-warning-body": "Vaše organizace má více nástěnek, než je tento limit. Počty využití mohou být neúplné.",
     "limit-warning-title": "Řazení podle využití nástěnky je omezeno na 500 nástěnek."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Filtrované metriky"
@@ -148,13 +160,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Žádné uložené dotazy k načtení",
-        "button-tooltip": "Načíst uložený dotaz",
+        "button-tooltip": "",
         "empty": "Žádné uložené dotazy k zobrazení.",
         "load-error": "Tento dotaz obsahuje výrazy, které nelze zastoupit v Podrobném rozpisu metrik Grafana. Podporovány jsou pouze jednoduché výběry metrik {label}.",
         "load-type-error": "Vyberte dotaz Prometheus.",
         "modal-title": "Načíst dříve uložený dotaz",
         "remove": "Odebrat",
-        "saved-query-button-tooltip": "Načíst uložený dotaz",
+        "saved-query-button-tooltip": "",
         "select": "Vybrat"
       },
       "save-query": {
@@ -162,7 +174,7 @@
           "alert": "Existuje dříve uložený dotaz se stejným výrazem: {{title}}"
         },
         "button-tooltip": "Uložit dotaz",
-        "button-tooltip-saved-queries": "Uložit do uložených dotazů",
+        "button-tooltip-saved-queries": "",
         "cancel": "Zrušit",
         "description": "Popis",
         "error": "Při ukládání tohoto dotazu došlo k neočekávané chybě.",
@@ -239,7 +251,7 @@
       "commit-sha": "Provést SHA: {{sha}}",
       "contribute": "Přispět",
       "documentation": "Dokumentace",
-      "grafana-version": "Grafana {{edition}} verze {{version}} ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Nahlásit problém"
     }

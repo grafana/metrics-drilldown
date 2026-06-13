@@ -40,6 +40,11 @@
     "selected-count_one": "{{count}} seçildi",
     "selected-count_other": "{{count}} seçildi"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Uygula",
     "cancel": "İptal et",
@@ -67,6 +72,10 @@
     "stack-trace-label": "Yığın izlemesini göster",
     "title": "Önemli hata!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Panel verileri, serideki son derece küçük değerleri işlemek için daha karmaşık bir sorgu ile yeniden alındı"
   },
@@ -77,6 +86,9 @@
     "error": "Pano metrikleri alınamadı",
     "limit-warning-body": "Kuruluşunuzun bu sınırın üzerinde panosu var. Kullanım sayıları eksik olabilir.",
     "limit-warning-title": "Pano kullanım sıralaması 500 panoyla sınırlıdır."
+  },
+  "fetch-firing-alert-metrics": {
+    "error": ""
   },
   "filtered-metrics-variable": {
     "label": "Filtrelenmiş Metrikler"
@@ -146,13 +158,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Yüklenecek kayıtlı sorgu yok",
-        "button-tooltip": "Kaydedilen sorguyu yükle",
+        "button-tooltip": "",
         "empty": "Görüntülenecek kayıtlı sorgu yok.",
         "load-error": "Bu sorgu, Metrics Drilldown içinde gösterilemeyen ifadeler içeriyor. Yalnızca basit metrik{label} seçicileri desteklenir.",
         "load-type-error": "Lütfen bir Prometheus sorgusu seçin.",
         "modal-title": "Daha önce kaydedilmiş bir sorguyu yükleyin",
         "remove": "Kaldır",
-        "saved-query-button-tooltip": "Kaydedilen sorguyu yükle",
+        "saved-query-button-tooltip": "",
         "select": "Seçin"
       },
       "save-query": {
@@ -160,7 +172,7 @@
           "alert": "Aynı ifadeye sahip, daha önceden kaydedilmiş bir sorgu var: {{title}}"
         },
         "button-tooltip": "Sorguyu kaydet",
-        "button-tooltip-saved-queries": "Kayıtlı Sorgular'a kaydet",
+        "button-tooltip-saved-queries": "",
         "cancel": "İptal et",
         "description": "Açıklama",
         "error": "Bu sorgu kaydedilirken beklenmeyen bir hata oluştu.",
@@ -237,7 +249,7 @@
       "commit-sha": "SHA'yı işle: {{sha}}",
       "contribute": "Katkıda bulunun",
       "documentation": "Belgeler",
-      "grafana-version": "Grafana {{edition}} {{version}} sürümü ({{env}})",
+      "grafana-version": "",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Sorun bildir"
     }
