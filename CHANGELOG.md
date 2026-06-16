@@ -1,5 +1,32 @@
 # Changelog
 
+## [2.1.0](https://github.com/grafana/metrics-drilldown/compare/v2.0.7...v2.1.0) (2026-06-16)
+
+
+### 🎉 Features
+
+* **sorter:** add fetchFiringAlertMetrics data layer for firing alert rules ([#1273](https://github.com/grafana/metrics-drilldown/issues/1273)) ([42add87](https://github.com/grafana/metrics-drilldown/commit/42add87b489f46df87e1b7f8adc2583355ea9f6e))
+* **sourceMetrics:** per-metric `customRateInterval` override in KG source metrics component ([#1257](https://github.com/grafana/metrics-drilldown/issues/1257)) ([f9ed7cb](https://github.com/grafana/metrics-drilldown/commit/f9ed7cb0e7f9d7792391b97d81e8194ba5dae146))
+
+
+### 🐛 Bug Fixes
+
+* **cve:** bump react-router to 6.30.4 (GHSA-2j2x-hqr9-3h42) ([#1309](https://github.com/grafana/metrics-drilldown/issues/1309)) ([547b2bb](https://github.com/grafana/metrics-drilldown/commit/547b2bb2a955f446d0346eb89f54d7c1854cc809))
+* **cve:** override vulnerable transitive deps ([#1280](https://github.com/grafana/metrics-drilldown/issues/1280)) ([42fdcb7](https://github.com/grafana/metrics-drilldown/commit/42fdcb7d734bd443525217a9da75d0c06b9b3d3e))
+* **deps:** resolve all pnpm audit vulnerabilities ([#1319](https://github.com/grafana/metrics-drilldown/issues/1319)) ([237b2bc](https://github.com/grafana/metrics-drilldown/commit/237b2bc7715634879651b013aba2ee15d721d2fa))
+* **i18n:** use fromJSON output for Crowdin token from vault secrets ([#1308](https://github.com/grafana/metrics-drilldown/issues/1308)) ([ea2d1de](https://github.com/grafana/metrics-drilldown/commit/ea2d1dea83f6793fecc8f01a238f5bfc49362869)), closes [#1307](https://github.com/grafana/metrics-drilldown/issues/1307)
+* use prerelease-inclusive semver ranges in grafanaDependency ([#1313](https://github.com/grafana/metrics-drilldown/issues/1313)) ([7661216](https://github.com/grafana/metrics-drilldown/commit/76612165d9b72d9b90cbeb6183d41f075e58681d))
+
+
+### 🏗️ Builds
+
+* **pnpm:** upgrade from v10 to v11 ([#1272](https://github.com/grafana/metrics-drilldown/issues/1272)) ([1a2e55e](https://github.com/grafana/metrics-drilldown/commit/1a2e55ec3f8535ce51a5c6f7a50c6cac88289415))
+
+
+### 🤖 Continuous Integrations
+
+* **release-please:** add release please ([#1310](https://github.com/grafana/metrics-drilldown/issues/1310)) ([5cfd4b0](https://github.com/grafana/metrics-drilldown/commit/5cfd4b07d259d91026c1fe7a24349e7804c74926))
+
 ## 2.0.7
 
 ##### Chores
