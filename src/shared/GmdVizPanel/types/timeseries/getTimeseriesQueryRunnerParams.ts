@@ -43,35 +43,44 @@ function buildGroupByQueries({
   queryConfig: QueryConfig;
   expr: string;
 }): SceneDataQuery[] {
-  let fn: PrometheusFunction = 'avg';
+  let typeDefault: PrometheusFunction = 'avg';
   if (metric.type === 'counter') {
-    fn = 'sum';
+    typeDefault = 'sum';
   } else if (metric.type === 'info') {
-    fn = 'count';
+    typeDefault = 'count';
   }
 
-  // KG-supplied customFunction (issue #1131) wins over the type default for instant aggregations.
-  // The group-by path calls `promql[fn]({expr, by})` directly on tsqtsq, so the override is only
-  // honored for instant aggregations that tsqtsq exposes and that accept a `by` clause. Range-vector
-  // functions and custom-shaped entries (histogram_quantile, time-*) fall back to the type default
-  // in group-by mode.
-  const GROUP_BY_SAFE_FUNCTIONS = new Set<PrometheusFunction>(['avg', 'sum', 'min', 'max', 'count']);
-  const customFn = queryConfig.customFunction as PrometheusFunction | undefined;
-  if (customFn && GROUP_BY_SAFE_FUNCTIONS.has(customFn)) {
-    fn = customFn;
-  }
-
+  const customFn = queryConfig.customFunction;
   const groupByLabel = utf8Support(queryConfig.groupBy as string);
-  const entry = PROMQL_FUNCTIONS.get(fn);
-  if (!entry) {
-    logger.warn(`[getTimeseriesQueryRunnerParams] Unknown PromQL function "${fn}" in group-by path, skipping query.`);
-    return [];
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
+
+  let queryExpr: string;
+  if (customFn) {
+    // KG-supplied customFunction workaround (issue #1131). Some PromQL functions take a range
+    // vector and require `[interval]`; the canonical list lives in Prometheus's parser table at
+    // https://github.com/prometheus/prometheus/blob/main/promql/parser/functions.go (entries
+    // whose ArgTypes include ValueTypeMatrix). We do not vendor that list; instead we match on
+    // the `_over_time` suffix, the Prometheus naming convention for the range-vector aggregation
+    // family. PromQL grammar does not let `by` attach to `fn(metric[interval])`, so range
+    // functions are wrapped in the type-default instant aggregation. KG owns picking a function
+    // that fits the call shape; any function name is emitted verbatim.
+    const isRange = customFn.endsWith('_over_time');
+    queryExpr = isRange
+      ? `${typeDefault} by (${groupByLabel}) (${customFn}(${expr}[${interval}]))`
+      : `${customFn} by (${groupByLabel}) (${expr})`;
+  } else {
+    const entry = PROMQL_FUNCTIONS.get(typeDefault);
+    if (!entry) {
+      logger.warn(`[getTimeseriesQueryRunnerParams] Unknown PromQL function "${typeDefault}" in group-by path, skipping query.`);
+      return [];
+    }
+    queryExpr = entry.fn({ expr, by: [groupByLabel] });
   }
 
   return [
     {
       refId: `${metric.name}-by-${queryConfig.groupBy}`,
-      expr: entry.fn({ expr, by: [groupByLabel] }),
+      expr: queryExpr,
       legendFormat: `{{${groupByLabel}}}`,
       fromExploreMetrics: true,
     },
@@ -79,24 +88,16 @@ function buildGroupByQueries({
 }
 
 // KG-supplied customFunction (issue #1131) wins over the localStorage queryConfig.queries
-// pref and over the type-driven default. URL is authoritative. The whitelist is the v1
-// accepted KG values; custom-shaped entries (histogram_quantile, time-*) are kept out.
-const CUSTOM_FUNCTION_WHITELIST = new Set<PrometheusFunction>([
-  'avg',
-  'sum',
-  'min',
-  'max',
-  'count',
-  'max_over_time',
-  'min_over_time',
-]);
-
+// pref and over the type-driven default. URL is authoritative. We trust KG to pick a function
+// whose signature matches the builder's `{expr}` or `{expr, interval}` call shape; unknown
+// names fall through to the queries pref or type default via the PROMQL_FUNCTIONS.get() check
+// below.
 function resolveQueryDefs(
   customFn: PrometheusFunction | undefined,
   queries: QueryDefs | undefined,
   defaultFn: PrometheusFunction
 ): QueryDefs {
-  if (customFn && CUSTOM_FUNCTION_WHITELIST.has(customFn)) {
+  if (customFn) {
     return [{ fn: customFn }];
   }
   if (queries?.length) {
@@ -122,10 +123,32 @@ function buildQueriesWithPresetFunctions({
     defaultPromqlFn = 'count';
   }
 
-  const customFn = queryConfig.customFunction as PrometheusFunction | undefined;
-  const queryDefs = resolveQueryDefs(customFn, queryConfig.queries, defaultPromqlFn);
-
   const interval = queryConfig.customRateInterval ?? '$__rate_interval';
+  const customFn = queryConfig.customFunction;
+
+  // KG-supplied customFunction workaround (issue #1131). Some PromQL functions take a range
+  // vector and require `[interval]`; the canonical list lives in Prometheus's parser table at
+  // https://github.com/prometheus/prometheus/blob/main/promql/parser/functions.go (entries
+  // whose ArgTypes include ValueTypeMatrix). We do not vendor that list; instead we match on
+  // the `_over_time` suffix, the Prometheus naming convention for the range-vector aggregation
+  // family. KG owns picking a function that fits the call shape; any function name is emitted
+  // verbatim.
+  if (customFn) {
+    const isRange = customFn.endsWith('_over_time');
+    const queryExpr = isRange ? `${customFn}(${expr}[${interval}])` : `${customFn}(${expr})`;
+    const fnName = metric.type === 'counter' ? `${customFn}(rate)` : customFn;
+    return [
+      {
+        refId: `${metric.name}-${fnName}`,
+        expr: queryExpr,
+        legendFormat: fnName,
+        fromExploreMetrics: true,
+      },
+    ];
+  }
+
+  // No customFunction: queries pref from the configurator, or the type default. Registry path.
+  const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
   const queries: SceneDataQuery[] = [];
 
   for (const { fn } of queryDefs) {
@@ -134,7 +157,7 @@ function buildQueriesWithPresetFunctions({
       logger.warn(`[getTimeseriesQueryRunnerParams] Unknown PromQL function "${fn}", skipping query.`);
       continue;
     }
-    const isRangeFn = entry.name === 'max_over_time' || entry.name === 'min_over_time';
+    const isRangeFn = entry.name.endsWith('_over_time');
     const query = isRangeFn ? entry.fn({ expr, interval }) : entry.fn({ expr });
     const fnName = metric.type === 'counter' ? `${entry.name}(rate)` : entry.name;
 

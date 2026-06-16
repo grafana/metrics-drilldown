@@ -280,7 +280,10 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       );
     });
 
-    test('range-vector customFunction falls back to type default in group-by path', () => {
+    test('range-vector customFunction in group-by path wraps in the type-default instant aggregation', () => {
+      // PromQL grammar does not let `by` attach to `fn(metric[interval])`. The builder wraps
+      // the range function in the type-default instant aggregation so the Breakdown summary
+      // keeps its grouping while still honouring the customFunction selection.
       const result = getTimeseriesQueryRunnerParams({
         metric: { name: 'desired_shards', type: 'gauge' },
         queryConfig: {
@@ -293,7 +296,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       });
 
       expect(result.queries[0].expr).toBe(
-        'avg by (job) (desired_shards{__ignore_usage__="", ${filters:raw}})'
+        'avg by (job) (max_over_time(desired_shards{__ignore_usage__="", ${filters:raw}}[$__rate_interval]))'
       );
     });
 
