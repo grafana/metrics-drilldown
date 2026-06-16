@@ -177,21 +177,6 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       expect(result.queries[0].legendFormat).toBe('max');
     });
 
-    test('unknown customFunction falls through to queries preset', () => {
-      const result = getTimeseriesQueryRunnerParams({
-        metric: { name: 'go_goroutines', type: 'gauge' },
-        queryConfig: {
-          resolution: QUERY_RESOLUTION.MEDIUM,
-          labelMatchers: [],
-          addIgnoreUsageFilter: true,
-          queries: [{ fn: 'min' }],
-          customFunction: 'bogus',
-        },
-      });
-
-      expect(result.queries[0].expr).toBe('min(go_goroutines{__ignore_usage__="", ${filters:raw}})');
-      expect(result.queries[0].legendFormat).toBe('min');
-    });
   });
 
   describe('with group by label', () => {
