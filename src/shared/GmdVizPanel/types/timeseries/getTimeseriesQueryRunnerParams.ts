@@ -112,7 +112,7 @@ function buildQueriesWithPresetFunctions({
   const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
   const queries: SceneDataQuery[] = [];
   for (const { fn } of queryDefs) {
-    const q = buildPresetFunctionQuery(metric.name, fn, expr, interval, isCounter, '[getTimeseriesQueryRunnerParams]');
+    const q = buildPresetFunctionQuery(metric.name, fn, expr, isCounter, '[getTimeseriesQueryRunnerParams]');
     if (q) {
       queries.push(q);
     }

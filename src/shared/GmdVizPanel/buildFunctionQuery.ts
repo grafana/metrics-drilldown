@@ -31,14 +31,10 @@ export function buildCustomFunctionQuery(
   };
 }
 
-// Preset-function path: looks up the fn in PROMQL_FUNCTIONS and applies it. Returns undefined
-// and logs a warn (prefixed with loggerLabel so the caller is identifiable) if the fn is not
-// registered.
 export function buildPresetFunctionQuery(
   metricName: string,
   fn: PrometheusFunction,
   expr: string,
-  interval: string,
   isRateQuery: boolean,
   loggerLabel: string
 ): SceneDataQuery | undefined {
@@ -47,12 +43,10 @@ export function buildPresetFunctionQuery(
     logger.warn(`${loggerLabel} Unknown PromQL function "${fn}", skipping query.`);
     return undefined;
   }
-  const isRangeFn = isRangeVectorFunction(entry.name);
-  const query = isRangeFn ? entry.fn({ expr, interval }) : entry.fn({ expr });
   const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
   return {
     refId: `${metricName}-${fnName}`,
-    expr: query,
+    expr: entry.fn({ expr }),
     legendFormat: fnName,
     fromExploreMetrics: true,
   };
