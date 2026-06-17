@@ -11,8 +11,8 @@ import { logger } from 'shared/logger/logger';
 // Scoped to the single-function-per-query shape only. Other builders (timeseries group-by,
 // percentiles, heatmap, statushistory) emit different refId/legend/by shapes and stay separate.
 
-// KG-supplied customFunction workaround (issue #1131). Range-vector functions need `[interval]`;
-// see isRangeVectorFunction for the detection rationale. Any function name is emitted verbatim.
+// Range-vector functions need `[interval]`; see isRangeVectorFunction for the rationale.
+// Any function name is emitted verbatim.
 export function buildCustomFunctionQuery(
   metricName: string,
   customFn: string,

@@ -57,10 +57,8 @@ function buildGroupByQueries({
 
   let queryExpr: string;
   if (customFn) {
-    // KG-supplied customFunction workaround (issue #1131); see isRangeVectorFunction for the
-    // detection rationale. PromQL grammar does not let `by` attach to `fn(metric[interval])`, so
-    // range functions are wrapped in the type-default instant aggregation. Any function name is
-    // emitted verbatim.
+    // PromQL grammar does not let `by` attach to `fn(metric[interval])`, so range functions
+    // (see isRangeVectorFunction) are wrapped in the type-default instant aggregation.
     const isRange = isRangeVectorFunction(customFn);
     queryExpr = isRange
       ? `${typeDefault} by (${groupByLabel}) (${customFn}(${expr}[${interval}]))`

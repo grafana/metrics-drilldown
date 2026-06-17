@@ -29,7 +29,7 @@ interface MetricSceneState extends SceneObjectState {
   metric: string;
   // KG-supplied per-metric override (issue #1130). Forwarded to MetricGraphScene and the main GmdVizPanel.
   customRateInterval?: string;
-  // KG-supplied per-metric override (issue #1131). Forwarded to MetricGraphScene and the main GmdVizPanel.
+  // KG-supplied override, forwarded to MetricGraphScene and the main GmdVizPanel.
   customFunction?: string;
   actionView?: ActionViewType;
   relatedLogsCount?: number;

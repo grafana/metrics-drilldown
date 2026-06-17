@@ -2,12 +2,7 @@ import { type SceneObjectUrlValues } from '@grafana/scenes';
 
 import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
 
-// Shared URL-sync helpers for the multi-value SourceMetrics override family. customFunction (#1131)
-// is the first; metricType (#1058) and a customRateInterval multi-metric refactor reuse the same
-// `{value}-{metricName}` shape. When the second lands, rename the parser generically and add its
-// keyed map to buildSourceMetricsOverride.
-
-// Multi-value URL value parser for the customFunction key (issue #1131).
+// Multi-value URL value parser for the customFunction key.
 // The scenes URL layer collapses a single-entry array to a bare string and keeps
 // multi-entry as an array; this helper normalises both shapes and returns a Map
 // keyed by metricName. Splits each value on the FIRST `-` so metric names
@@ -39,10 +34,10 @@ export function parseCustomFunctionValues(raw: SceneObjectUrlValues[string]): Ma
 }
 
 // Build a synthesised sourceMetrics array from URL-parsed values for standalone
-// hydration. Merges the single-entry customRateInterval payload (#1130, active
-// metric only) with the multi-entry customFunction payload (#1131). Returns
-// undefined when no metric or override entries were parsed, leaving any existing
-// state.sourceMetrics untouched.
+// hydration. Merges the single-entry customRateInterval payload (active metric
+// only) with the multi-entry customFunction payload. Returns undefined when no
+// metric or override entries were parsed, leaving any existing state.sourceMetrics
+// untouched.
 export function buildSourceMetricsOverride(
   metric: string | undefined,
   customRateInterval: string | undefined,

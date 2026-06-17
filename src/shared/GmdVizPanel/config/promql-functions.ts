@@ -72,8 +72,7 @@ export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
 // max_over_time(metric[5m]). The canonical list lives in Prometheus's parser table at
 // https://github.com/prometheus/prometheus/blob/main/promql/parser/functions.go (entries
 // whose ArgTypes include ValueTypeMatrix). We do not vendor that list; instead we match on
-// the `_over_time` suffix, the Prometheus naming convention for that family (issue #1131).
-// KG owns picking a function that fits the call shape; any function name is emitted verbatim.
+// the `_over_time` suffix, the Prometheus naming convention for that family.
 export function isRangeVectorFunction(fn: string): boolean {
   return fn.endsWith('_over_time');
 }

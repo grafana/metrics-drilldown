@@ -129,8 +129,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       ? this.state.sourceMetrics?.find((s) => s.metricName === this.state.metric)
       : undefined;
 
-    // Multi-value customFunction (issue #1131). Emit one '{fn}-{metricName}' per entry that has
-    // the override set, so every KG-known tile in the standalone view restores its function.
     const customFunctionPairs = this.state.sourceMetrics
       ?.filter((s) => s.customFunction !== undefined)
       .map((s) => `${s.customFunction}-${s.metricName}`);

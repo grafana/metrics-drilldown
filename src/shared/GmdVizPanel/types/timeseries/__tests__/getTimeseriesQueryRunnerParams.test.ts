@@ -266,9 +266,7 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
     });
 
     test('range-vector customFunction in group-by path wraps in the type-default instant aggregation', () => {
-      // PromQL grammar does not let `by` attach to `fn(metric[interval])`. The builder wraps
-      // the range function in the type-default instant aggregation so the Breakdown summary
-      // keeps its grouping while still honouring the customFunction selection.
+      // `by` cannot attach to fn(metric[interval]), so the range fn is wrapped in the type-default instant aggregation.
       const result = getTimeseriesQueryRunnerParams({
         metric: { name: 'desired_shards', type: 'gauge' },
         queryConfig: {
