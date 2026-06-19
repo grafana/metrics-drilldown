@@ -150,6 +150,91 @@ describe('DataTrail', () => {
   });
 });
 
+describe('DataTrail - URL serialization of KG overrides', () => {
+  let trail: DataTrail;
+
+  beforeEach(() => {
+    trail = new DataTrail({});
+  });
+
+  describe('getUrlState', () => {
+    it('emits metricType when active metric has one in sourceMetrics', () => {
+      trail.setState({
+        metric: 'my_recording_rule',
+        sourceMetrics: [{ metricName: 'my_recording_rule', labels: [], metricType: 'counter' }],
+      });
+
+      const urlState = trail.getUrlState();
+
+      expect(urlState.metricType).toBe('counter-my_recording_rule');
+    });
+
+    it('omits metricType when entry has no metricType', () => {
+      trail.setState({
+        metric: 'my_metric',
+        sourceMetrics: [{ metricName: 'my_metric', labels: [] }],
+      });
+
+      const urlState = trail.getUrlState();
+
+      expect(urlState.metricType).toBeUndefined();
+    });
+
+    it('omits metricType when no sourceMetrics entry matches', () => {
+      trail.setState({
+        metric: 'my_metric',
+        sourceMetrics: [{ metricName: 'other_metric', labels: [], metricType: 'gauge' }],
+      });
+
+      const urlState = trail.getUrlState();
+
+      expect(urlState.metricType).toBeUndefined();
+    });
+  });
+
+  describe('updateFromUrl', () => {
+    it('parses metricType and creates sourceMetrics override', () => {
+      trail.updateFromUrl({ metric: 'my_rule', metricType: 'counter-my_rule' });
+
+      expect(trail.state.sourceMetrics).toEqual([
+        { metricName: 'my_rule', labels: [], customRateInterval: undefined, metricType: 'counter' },
+      ]);
+    });
+
+    it('creates sourceMetrics with metricType only (no customRateInterval)', () => {
+      trail.updateFromUrl({ metric: 'my_rule', metricType: 'histogram-my_rule' });
+
+      expect(trail.state.sourceMetrics?.[0]?.metricType).toBe('histogram');
+      expect(trail.state.sourceMetrics?.[0]?.customRateInterval).toBeUndefined();
+    });
+
+    it('creates sourceMetrics with both metricType and customRateInterval', () => {
+      trail.updateFromUrl({
+        metric: 'my_rule',
+        metricType: 'counter-my_rule',
+        customRateInterval: '5m',
+      });
+
+      expect(trail.state.sourceMetrics?.[0]?.metricType).toBe('counter');
+      expect(trail.state.sourceMetrics?.[0]?.customRateInterval).toBe('5m');
+    });
+
+    it('ignores invalid metricType values', () => {
+      trail.updateFromUrl({ metric: 'my_rule', metricType: 'invalid-my_rule' });
+
+      expect(trail.state.sourceMetrics).toBeUndefined();
+    });
+
+    it('skips URL values in embedded mode', () => {
+      trail.setState({ embedded: true });
+
+      trail.updateFromUrl({ metric: 'my_rule', metricType: 'counter-my_rule' });
+
+      expect(trail.state.metric).toBeUndefined();
+    });
+  });
+});
+
 describe('DataTrail - Add to Dashboard', () => {
   let dataTrail: DataTrail;
 

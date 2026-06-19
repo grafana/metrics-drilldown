@@ -72,6 +72,7 @@ export function getActionViewsDefinitions(): ActionViewDefinition[] {
         new QueryResultsScene({
           metric: metricScene.state.metric,
           queryResultsComponent: metricScene.state.queryResultsComponent,
+          kgMetricType: metricScene.state.kgMetricType,
         }),
       description: t('action-bar.tab.query-results-description', 'Instant query data in table format'),
       backgroundTask: () => {},
@@ -108,6 +109,7 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
       new QueryResultsScene({
         metric: metricScene.state.metric,
         queryResultsComponent: metricScene.state.queryResultsComponent,
+        kgMetricType: metricScene.state.kgMetricType,
       }),
     description: 'Instant query data in table format',
     backgroundTask: () => {},
