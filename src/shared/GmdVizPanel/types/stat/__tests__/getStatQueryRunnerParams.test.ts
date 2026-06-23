@@ -152,6 +152,33 @@ describe('getStatQueryRunnerParams(options)', () => {
     ]);
   });
 
+  // Documents the KG boundary: customFunction is emitted verbatim. A range-vector function on a
+  // counter produces invalid PromQL, since a range selector cannot follow rate()'s instant
+  // vector. MD does not validate or rewrite the override; KG owns passing a function that fits
+  // the metric, and a malformed query surfaces as a Prometheus error rather than being silently
+  // corrected here.
+  test('counter with range-vector customFunction emits the verbatim (Prometheus-invalid) query', () => {
+    const result = getStatQueryRunnerParams({
+      metric: { name: 'http_requests_total', type: 'counter' },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: true,
+        queries: [],
+        customFunction: 'max_over_time',
+      },
+    });
+
+    expect(result.queries).toStrictEqual([
+      {
+        refId: 'http_requests_total-max_over_time(rate)',
+        expr: 'max_over_time(rate(http_requests_total{__ignore_usage__="", ${filters:raw}}[$__rate_interval])[$__rate_interval])',
+        legendFormat: 'max_over_time(rate)',
+        fromExploreMetrics: true,
+      },
+    ]);
+  });
+
   test('customFunction overrides queries preset (URL-wins precedence)', () => {
     const result = getStatQueryRunnerParams({
       metric: { name: 'go_goroutines', type: 'gauge' },
