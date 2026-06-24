@@ -76,10 +76,9 @@ export type QueryConfig = {
   groupBy?: string;
   queries?: QueryDefs;
   data?: SceneDataProvider;
-  // KG-supplied per-metric override (issue #1130). Replaces $__rate_interval inside rate(metric[X]).
-  // Prometheus duration string, e.g. '5m', '1h'.
+  // Replaces $__rate_interval inside rate(metric[X]). Prometheus duration string, e.g. '5m', '1h'.
   customRateInterval?: string;
-  // KG-supplied per-metric type override (issue #1058). Skips name-suffix heuristic and /api/v1/metadata fetch.
+  customFunction?: string;
   kgMetricType?: KgMetricType;
 };
 
@@ -90,6 +89,7 @@ export type QueryOptions = {
   queries?: QueryDefs;
   data?: QueryConfig['data'];
   customRateInterval?: QueryConfig['customRateInterval'];
+  customFunction?: QueryConfig['customFunction'];
   kgMetricType?: QueryConfig['kgMetricType'];
 };
 

@@ -67,3 +67,12 @@ export const PROMQL_FUNCTIONS = new Map<PrometheusFunction, MapEntry>([
     },
   ],
 ]);
+
+// A range-vector aggregation takes a range vector and requires `[interval]`, e.g.
+// max_over_time(metric[5m]). The canonical list lives in Prometheus's parser table at
+// https://github.com/prometheus/prometheus/blob/main/promql/parser/functions.go (entries
+// whose ArgTypes include ValueTypeMatrix). We do not vendor that list; instead we match on
+// the `_over_time` suffix, the Prometheus naming convention for that family.
+export function isRangeVectorFunction(fn: string): boolean {
+  return fn.endsWith('_over_time');
+}

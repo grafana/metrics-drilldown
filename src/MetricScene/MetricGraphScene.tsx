@@ -51,10 +51,12 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   public constructor({
     metric,
     customRateInterval,
+    customFunction,
     kgMetricType,
   }: {
     metric: MetricGraphSceneState['metric'];
     customRateInterval?: string;
+    customFunction?: string;
     kgMetricType?: KgMetricType;
   }) {
     super({
@@ -91,6 +93,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               queryOptions: {
                 resolution: QUERY_RESOLUTION.HIGH,
                 customRateInterval,
+                customFunction,
                 kgMetricType,
               },
             }),

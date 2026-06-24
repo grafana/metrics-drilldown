@@ -59,7 +59,6 @@ import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
-import { type KgMetricType } from '../shared/GmdVizPanel/matchers/mapKgMetricType';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
 import { buildFilterExpression } from '../shared/utils/utils.queries';
@@ -70,6 +69,7 @@ import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
 import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
+import { buildSourceMetricsOverride, parseCustomFunctionValues, parseMetricTypeValues } from './sourceMetricsUrlSync';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -119,7 +119,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'customRateInterval', 'metricType'],
+    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType'],
   });
 
   getUrlState(): SceneObjectUrlValues {
@@ -128,10 +128,20 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const entry = this.state.metric
       ? this.state.sourceMetrics?.find((s) => s.metricName === this.state.metric)
       : undefined;
+
+    const customFunctionPairs = this.state.sourceMetrics
+      ?.filter((s) => s.customFunction !== undefined)
+      .map((s) => `${s.customFunction}-${s.metricName}`);
+
+    const metricTypePairs = this.state.sourceMetrics
+      ?.filter((s) => s.metricType !== undefined)
+      .map((s) => `${s.metricType}-${s.metricName}`);
+
     return {
       metric: this.state.metric,
       customRateInterval: entry?.customRateInterval,
-      metricType: entry?.metricType ? `${entry.metricType}-${this.state.metric}` : undefined,
+      customFunction: customFunctionPairs?.length ? customFunctionPairs : undefined,
+      metricType: metricTypePairs?.length ? metricTypePairs : undefined,
     };
   }
 
@@ -148,15 +158,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         ? values.customRateInterval
         : undefined;
 
-    const parsedKgMetricType = parseKgMetricTypeFromUrl(values.metricType);
-
-    // Standalone hydration of KG overrides (issues #1130, #1058). Synthesize a single-entry
-    // sourceMetrics array so the GmdVizPanel construction sites find the override via the
-    // same lookup path used in embedded mode.
-    const sourceMetricsOverride =
-      metric && (customRateInterval || parsedKgMetricType)
-        ? [{ metricName: metric, labels: [], customRateInterval, metricType: parsedKgMetricType }]
-        : undefined;
+    const customFunctionByMetric = parseCustomFunctionValues(values.customFunction);
+    const metricTypeByMetric = parseMetricTypeValues(values.metricType);
+    const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric, metricTypeByMetric);
 
     this.updateStateForNewMetric(metric, sourceMetricsOverride);
   }
@@ -236,7 +240,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.setState({
         metric,
         topScene: metric
-          ? new MetricScene({ metric, customRateInterval: entry?.customRateInterval, kgMetricType: entry?.metricType })
+          ? new MetricScene({
+              metric,
+              customRateInterval: entry?.customRateInterval,
+              customFunction: entry?.customFunction,
+              kgMetricType: entry?.metricType,
+            })
           : new MetricsReducer(),
         controls,
         ...(sourceMetricsOverride !== undefined && { sourceMetrics: sourceMetricsOverride }),
@@ -624,20 +633,6 @@ function updateAppControlsHeight() {
 
   const { height } = appControls.getBoundingClientRect();
   document.documentElement.style.setProperty('--app-controls-height', `${height}px`);
-}
-
-const VALID_KG_METRIC_TYPES = new Set(['counter', 'gauge', 'histogram', 'summary']);
-
-function parseKgMetricTypeFromUrl(raw: unknown): KgMetricType | undefined {
-  if (typeof raw !== 'string') {
-    return undefined;
-  }
-  const dashIdx = raw.indexOf('-');
-  if (dashIdx <= 0) {
-    return undefined;
-  }
-  const type = raw.slice(0, dashIdx);
-  return VALID_KG_METRIC_TYPES.has(type) ? (type as KgMetricType) : undefined;
 }
 
 function isScopesSupported(): boolean {

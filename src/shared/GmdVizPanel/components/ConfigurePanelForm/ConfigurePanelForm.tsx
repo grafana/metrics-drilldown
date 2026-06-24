@@ -113,8 +113,8 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
               },
               queryOptions: {
                 ...option.queryOptions,
-                // KG overrides win over preset/user-pref values (issues #1130, #1058).
                 ...(entry?.customRateInterval !== undefined && { customRateInterval: entry.customRateInterval }),
+                ...(entry?.customFunction !== undefined && { customFunction: entry.customFunction }),
                 ...(entry?.metricType !== undefined && { kgMetricType: entry.metricType }),
               },
             }),

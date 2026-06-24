@@ -31,7 +31,7 @@ interface MetricSceneState extends SceneObjectState {
   metric: string;
   // KG-supplied per-metric override (issue #1130). Forwarded to MetricGraphScene and the main GmdVizPanel.
   customRateInterval?: string;
-  // KG-supplied per-metric type override (issue #1058). Forwarded to MetricGraphScene and the main GmdVizPanel.
+  customFunction?: string;
   kgMetricType?: KgMetricType;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
@@ -61,7 +61,14 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
       $variables: state.$variables ?? getVariableSet(state.metric),
-      body: state.body ?? new MetricGraphScene({ metric: state.metric, customRateInterval: state.customRateInterval, kgMetricType: state.kgMetricType }),
+      body:
+        state.body ??
+        new MetricGraphScene({
+          metric: state.metric,
+          customRateInterval: state.customRateInterval,
+          customFunction: state.customFunction,
+          kgMetricType: state.kgMetricType,
+        }),
       ...state,
     });
 

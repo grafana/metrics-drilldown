@@ -101,6 +101,108 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
 
       expect(result.queries[0].expr).toBe('avg(go_goroutines{__ignore_usage__="", ${filters:raw}})');
     });
+
+    test('applies customFunction=max_over_time on a gauge with default interval', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'desired_shards', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          customFunction: 'max_over_time',
+        },
+      });
+
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'desired_shards-max_over_time',
+          expr: 'max_over_time(desired_shards{__ignore_usage__="", ${filters:raw}}[$__rate_interval])',
+          legendFormat: 'max_over_time',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+
+    test('applies customFunction=max_over_time with customRateInterval override', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'desired_shards', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          customFunction: 'max_over_time',
+          customRateInterval: '5m',
+        },
+      });
+
+      expect(result.queries[0].expr).toBe(
+        'max_over_time(desired_shards{__ignore_usage__="", ${filters:raw}}[5m])'
+      );
+    });
+
+    test('counter with customFunction=avg still wraps in rate', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_requests_total', type: 'counter' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          customFunction: 'avg',
+        },
+      });
+
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'http_requests_total-avg(rate)',
+          expr: 'avg(rate(http_requests_total{__ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
+          legendFormat: 'avg(rate)',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+
+    // Documents the KG boundary: customFunction is emitted verbatim. A range-vector function on a
+    // counter produces invalid PromQL, since a range selector cannot follow rate()'s instant
+    // vector. MD does not validate or rewrite the override; KG owns passing a function that fits
+    // the metric, and a malformed query surfaces as a Prometheus error rather than being silently
+    // corrected here.
+    test('counter with range-vector customFunction emits the verbatim (Prometheus-invalid) query', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_requests_total', type: 'counter' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          customFunction: 'max_over_time',
+        },
+      });
+
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'http_requests_total-max_over_time(rate)',
+          expr: 'max_over_time(rate(http_requests_total{__ignore_usage__="", ${filters:raw}}[$__rate_interval])[$__rate_interval])',
+          legendFormat: 'max_over_time(rate)',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+
+    test('customFunction overrides queries preset (URL-wins precedence)', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'go_goroutines', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          queries: [{ fn: 'min' }],
+          customFunction: 'max',
+        },
+      });
+
+      expect(result.queries[0].expr).toBe('max(go_goroutines{__ignore_usage__="", ${filters:raw}})');
+      expect(result.queries[0].legendFormat).toBe('max');
+    });
+
   });
 
   describe('with group by label', () => {
@@ -170,6 +272,41 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
           fromExploreMetrics: true,
         },
       ]);
+    });
+
+    test('applies customFunction=max in group-by path (instant aggregation whitelist)', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'go_goroutines', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'job',
+          customFunction: 'max',
+        },
+      });
+
+      expect(result.queries[0].expr).toBe(
+        'max by (job) (go_goroutines{__ignore_usage__="", ${filters:raw}})'
+      );
+    });
+
+    test('range-vector customFunction in group-by path wraps in the type-default instant aggregation', () => {
+      // `by` cannot attach to fn(metric[interval]), so the range fn is wrapped in the type-default instant aggregation.
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'desired_shards', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'job',
+          customFunction: 'max_over_time',
+        },
+      });
+
+      expect(result.queries[0].expr).toBe(
+        'avg by (job) (max_over_time(desired_shards{__ignore_usage__="", ${filters:raw}}[$__rate_interval]))'
+      );
     });
 
     describe('with UTF-8 labels', () => {
