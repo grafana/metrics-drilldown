@@ -158,7 +158,7 @@ describe('DataTrail - URL serialization of KG overrides', () => {
   });
 
   describe('getUrlState', () => {
-    it('emits metricType when active metric has one in sourceMetrics', () => {
+    it('emits metricType as an array of type-metric pairs', () => {
       trail.setState({
         metric: 'my_recording_rule',
         sourceMetrics: [{ metricName: 'my_recording_rule', labels: [], metricType: 'counter' }],
@@ -166,10 +166,25 @@ describe('DataTrail - URL serialization of KG overrides', () => {
 
       const urlState = trail.getUrlState();
 
-      expect(urlState.metricType).toBe('counter-my_recording_rule');
+      expect(urlState.metricType).toEqual(['counter-my_recording_rule']);
     });
 
-    it('omits metricType when entry has no metricType', () => {
+    it('emits metricType for all source metrics with overrides, not just the active one', () => {
+      trail.setState({
+        metric: 'metric_a',
+        sourceMetrics: [
+          { metricName: 'metric_a', labels: [], metricType: 'counter' },
+          { metricName: 'metric_b', labels: [], metricType: 'gauge' },
+          { metricName: 'metric_c', labels: [] },
+        ],
+      });
+
+      const urlState = trail.getUrlState();
+
+      expect(urlState.metricType).toEqual(['counter-metric_a', 'gauge-metric_b']);
+    });
+
+    it('omits metricType when no entries have metricType', () => {
       trail.setState({
         metric: 'my_metric',
         sourceMetrics: [{ metricName: 'my_metric', labels: [] }],
@@ -179,33 +194,27 @@ describe('DataTrail - URL serialization of KG overrides', () => {
 
       expect(urlState.metricType).toBeUndefined();
     });
-
-    it('omits metricType when no sourceMetrics entry matches', () => {
-      trail.setState({
-        metric: 'my_metric',
-        sourceMetrics: [{ metricName: 'other_metric', labels: [], metricType: 'gauge' }],
-      });
-
-      const urlState = trail.getUrlState();
-
-      expect(urlState.metricType).toBeUndefined();
-    });
   });
 
   describe('updateFromUrl', () => {
-    it('parses metricType and creates sourceMetrics override', () => {
+    it('parses a single metricType and creates sourceMetrics override', () => {
       trail.updateFromUrl({ metric: 'my_rule', metricType: 'counter-my_rule' });
 
       expect(trail.state.sourceMetrics).toEqual([
-        { metricName: 'my_rule', labels: [], customRateInterval: undefined, metricType: 'counter' },
+        { metricName: 'my_rule', labels: [], metricType: 'counter' },
       ]);
     });
 
-    it('creates sourceMetrics with metricType only (no customRateInterval)', () => {
-      trail.updateFromUrl({ metric: 'my_rule', metricType: 'histogram-my_rule' });
+    it('parses multiple metricType entries', () => {
+      trail.updateFromUrl({
+        metric: 'metric_a',
+        metricType: ['counter-metric_a', 'gauge-metric_b'],
+      });
 
-      expect(trail.state.sourceMetrics?.[0]?.metricType).toBe('histogram');
-      expect(trail.state.sourceMetrics?.[0]?.customRateInterval).toBeUndefined();
+      expect(trail.state.sourceMetrics).toEqual([
+        { metricName: 'metric_a', labels: [], metricType: 'counter' },
+        { metricName: 'metric_b', labels: [], metricType: 'gauge' },
+      ]);
     });
 
     it('creates sourceMetrics with both metricType and customRateInterval', () => {
@@ -219,10 +228,25 @@ describe('DataTrail - URL serialization of KG overrides', () => {
       expect(trail.state.sourceMetrics?.[0]?.customRateInterval).toBe('5m');
     });
 
+    it('merges metricType with customFunction on different metrics', () => {
+      trail.updateFromUrl({
+        metric: 'metric_a',
+        metricType: 'counter-metric_a',
+        customFunction: 'max_over_time-metric_b',
+      });
+
+      expect(trail.state.sourceMetrics).toEqual([
+        { metricName: 'metric_a', labels: [], metricType: 'counter' },
+        { metricName: 'metric_b', labels: [], customFunction: 'max_over_time' },
+      ]);
+    });
+
     it('ignores invalid metricType values', () => {
       trail.updateFromUrl({ metric: 'my_rule', metricType: 'invalid-my_rule' });
 
-      expect(trail.state.sourceMetrics).toBeUndefined();
+      expect(trail.state.sourceMetrics).toEqual([
+        { metricName: 'my_rule', labels: [] },
+      ]);
     });
 
     it('skips URL values in embedded mode', () => {
