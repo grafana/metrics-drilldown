@@ -26,6 +26,7 @@ import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
+import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 import { useResizeObserver } from 'shared/hooks/useResizeObserver';
 
 import { MetricActionBar } from './MetricActionBar';
@@ -51,10 +52,12 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     metric,
     customRateInterval,
     customFunction,
+    kgMetricType,
   }: {
     metric: MetricGraphSceneState['metric'];
     customRateInterval?: string;
     customFunction?: string;
+    kgMetricType?: KgMetricType;
   }) {
     super({
       metric,
@@ -91,6 +94,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 resolution: QUERY_RESOLUTION.HIGH,
                 customRateInterval,
                 customFunction,
+                kgMetricType,
               },
             }),
           }),
@@ -146,13 +150,15 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
       return; // Skip the rest of the setup for embeddedMini
     }
 
-    const metadata = await trail.getMetadataForMetric(metric);
-
     const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
     const { metricType } = gmdVizPanel.state;
 
-    if (metadata) {
-      gmdVizPanel.update({ description: getMetricDescription(metadata) }, {});
+    const entry = trail.state.sourceMetrics?.find((s) => s.metricName === metric);
+    if (!entry?.metricType) {
+      const metadata = await trail.getMetadataForMetric(metric);
+      if (metadata) {
+        gmdVizPanel.update({ description: getMetricDescription(metadata) }, {});
+      }
     }
 
     if (metricType === 'classic-histogram') {

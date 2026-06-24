@@ -15,6 +15,8 @@ import { VariableHide } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
+import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
+
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
@@ -29,8 +31,8 @@ interface MetricSceneState extends SceneObjectState {
   metric: string;
   // KG-supplied per-metric override (issue #1130). Forwarded to MetricGraphScene and the main GmdVizPanel.
   customRateInterval?: string;
-  // KG-supplied override, forwarded to MetricGraphScene and the main GmdVizPanel.
   customFunction?: string;
+  kgMetricType?: KgMetricType;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
@@ -65,6 +67,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
           metric: state.metric,
           customRateInterval: state.customRateInterval,
           customFunction: state.customFunction,
+          kgMetricType: state.kgMetricType,
         }),
       ...state,
     });

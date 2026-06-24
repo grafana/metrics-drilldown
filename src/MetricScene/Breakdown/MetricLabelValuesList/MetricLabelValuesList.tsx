@@ -198,6 +198,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         data: sceneGraph.getData(this),
         customRateInterval: entry?.customRateInterval,
         customFunction: entry?.customFunction,
+        kgMetricType: entry?.metricType,
       },
     });
   }
@@ -279,6 +280,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
             labelMatchers: [{ key: label, operator: '=', value: labelValue }],
             customRateInterval: entry?.customRateInterval,
             customFunction: entry?.customFunction,
+            kgMetricType: entry?.metricType,
           },
         });
 

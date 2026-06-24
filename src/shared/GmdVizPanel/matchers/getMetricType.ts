@@ -5,6 +5,7 @@ import { isClassicHistogramMetric } from './isClassicHistogramMetric';
 import { isCounterMetric } from './isCounterMetric';
 import { isInfoMetric } from './isInfoMetric';
 import { isStatusUpDownMetric } from './isStatusUpDownMetric';
+import { mapKgMetricType, type KgMetricType } from './mapKgMetricType';
 
 export type MetricType =
   | 'info'
@@ -20,7 +21,11 @@ export type Metric = {
   type: MetricType;
 };
 
-export async function getMetricType(metric: string, dataTrail: DataTrail): Promise<MetricType> {
+export async function getMetricType(metric: string, dataTrail: DataTrail, kgMetricType?: KgMetricType): Promise<MetricType> {
+  if (kgMetricType) {
+    return mapKgMetricType(kgMetricType);
+  }
+
   const metricType = getMetricTypeSync(metric);
 
   if (metricType === 'gauge') {
@@ -48,7 +53,11 @@ export async function getMetricType(metric: string, dataTrail: DataTrail): Promi
 /**
  * A sync version to use when performance is more important than correctness. If not, use the async version above.
  */
-export function getMetricTypeSync(metric: string): Omit<MetricType, 'native-histogram'> {
+export function getMetricTypeSync(metric: string, kgMetricType?: KgMetricType): Omit<MetricType, 'native-histogram'> {
+  if (kgMetricType) {
+    return mapKgMetricType(kgMetricType);
+  }
+
   if (isCounterMetric(metric)) {
     return 'counter';
   }

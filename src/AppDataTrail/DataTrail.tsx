@@ -69,7 +69,7 @@ import { PluginInfo } from './header/PluginInfo/PluginInfo';
 import { SelectNewMetricButton } from './header/SelectNewMetricButton';
 import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
 import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
-import { buildSourceMetricsOverride, parseCustomFunctionValues } from './sourceMetricsUrlSync';
+import { buildSourceMetricsOverride, parseCustomFunctionValues, parseMetricTypeValues } from './sourceMetricsUrlSync';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -119,7 +119,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'customRateInterval', 'customFunction'],
+    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType'],
   });
 
   getUrlState(): SceneObjectUrlValues {
@@ -133,10 +133,15 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       ?.filter((s) => s.customFunction !== undefined)
       .map((s) => `${s.customFunction}-${s.metricName}`);
 
+    const metricTypePairs = this.state.sourceMetrics
+      ?.filter((s) => s.metricType !== undefined)
+      .map((s) => `${s.metricType}-${s.metricName}`);
+
     return {
       metric: this.state.metric,
       customRateInterval: entry?.customRateInterval,
       customFunction: customFunctionPairs?.length ? customFunctionPairs : undefined,
+      metricType: metricTypePairs?.length ? metricTypePairs : undefined,
     };
   }
 
@@ -154,7 +159,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         : undefined;
 
     const customFunctionByMetric = parseCustomFunctionValues(values.customFunction);
-    const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric);
+    const metricTypeByMetric = parseMetricTypeValues(values.metricType);
+    const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric, metricTypeByMetric);
 
     this.updateStateForNewMetric(metric, sourceMetricsOverride);
   }
@@ -238,6 +244,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               metric,
               customRateInterval: entry?.customRateInterval,
               customFunction: entry?.customFunction,
+              kgMetricType: entry?.metricType,
             })
           : new MetricsReducer(),
         controls,

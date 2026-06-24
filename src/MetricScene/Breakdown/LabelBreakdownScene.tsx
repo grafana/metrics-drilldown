@@ -69,10 +69,12 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
   private async updateBody(groupByVariable: QueryVariable) {
     const { metric: name } = this.state;
+    const trail = getTrailFor(this);
+    const entry = trail.state.sourceMetrics?.find((s) => s.metricName === name);
 
     const metric = {
       name,
-      type: await getMetricType(name, getTrailFor(this)),
+      type: await getMetricType(name, trail, entry?.metricType),
     };
 
     const newBody = groupByVariable.hasAllValue()
