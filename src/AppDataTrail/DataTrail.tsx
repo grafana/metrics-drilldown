@@ -140,8 +140,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return {
       metric: this.state.metric,
       customRateInterval: entry?.customRateInterval,
-      customFunction: customFunctionPairs?.length ? customFunctionPairs : undefined,
-      metricType: metricTypePairs?.length ? metricTypePairs : undefined,
+      customFunction: customFunctionPairs?.length ? customFunctionPairs : [],
+      metricType: metricTypePairs?.length ? metricTypePairs : [],
     };
   }
 

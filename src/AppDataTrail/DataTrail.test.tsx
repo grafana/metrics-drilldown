@@ -1,6 +1,6 @@
-import { dateTime, LoadingState } from '@grafana/data';
+import { dateTime, LoadingState, urlUtil } from '@grafana/data';
 import { locationService, setDataSourceSrv, setRunRequest } from '@grafana/runtime';
-import { sceneGraph } from '@grafana/scenes';
+import { sceneGraph, sceneUtils } from '@grafana/scenes';
 import { of } from 'rxjs';
 
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
@@ -153,6 +153,14 @@ describe('DataTrail', () => {
 describe('DataTrail - URL serialization of KG overrides', () => {
   let trail: DataTrail;
 
+  beforeAll(() => {
+    setDataSourceSrv(
+      new MockDataSourceSrv({
+        prom: { name: 'Prometheus', type: DataSourceType.Prometheus, uid: 'ds' },
+      })
+    );
+  });
+
   beforeEach(() => {
     trail = new DataTrail({});
   });
@@ -184,7 +192,7 @@ describe('DataTrail - URL serialization of KG overrides', () => {
       expect(urlState.metricType).toEqual(['counter-metric_a', 'gauge-metric_b']);
     });
 
-    it('omits metricType when no entries have metricType', () => {
+    it('returns empty array for metricType when no entries have metricType', () => {
       trail.setState({
         metric: 'my_metric',
         sourceMetrics: [{ metricName: 'my_metric', labels: [] }],
@@ -192,7 +200,7 @@ describe('DataTrail - URL serialization of KG overrides', () => {
 
       const urlState = trail.getUrlState();
 
-      expect(urlState.metricType).toBeUndefined();
+      expect(urlState.metricType).toEqual([]);
     });
   });
 
@@ -255,6 +263,74 @@ describe('DataTrail - URL serialization of KG overrides', () => {
       trail.updateFromUrl({ metric: 'my_rule', metricType: 'counter-my_rule' });
 
       expect(trail.state.metric).toBeUndefined();
+    });
+  });
+
+  describe('URL round-trip through Scenes sync layer', () => {
+    it('preserves multiple metricType params from a raw query string', () => {
+      activateFullSceneTree(trail);
+
+      sceneUtils.syncStateFromSearchParams(
+        trail,
+        new URLSearchParams('metric=metric_a&metricType=counter-metric_a&metricType=gauge-metric_b')
+      );
+
+      expect(trail.state.sourceMetrics).toEqual([
+        { metricName: 'metric_a', labels: [], metricType: 'counter' },
+        { metricName: 'metric_b', labels: [], metricType: 'gauge' },
+      ]);
+    });
+
+    it('preserves multiple customFunction params from a raw query string', () => {
+      activateFullSceneTree(trail);
+
+      sceneUtils.syncStateFromSearchParams(
+        trail,
+        new URLSearchParams('metric=metric_a&customFunction=max_over_time-metric_a&customFunction=min_over_time-metric_b')
+      );
+
+      expect(trail.state.sourceMetrics).toEqual([
+        { metricName: 'metric_a', labels: [], customFunction: 'max_over_time' },
+        { metricName: 'metric_b', labels: [], customFunction: 'min_over_time' },
+      ]);
+    });
+
+    it('preserves mixed metricType and customFunction params', () => {
+      activateFullSceneTree(trail);
+
+      sceneUtils.syncStateFromSearchParams(
+        trail,
+        new URLSearchParams(
+          'metric=metric_a&metricType=counter-metric_a&metricType=histogram-metric_b&customFunction=max_over_time-metric_a'
+        )
+      );
+
+      expect(trail.state.sourceMetrics).toEqual([
+        { metricName: 'metric_a', labels: [], metricType: 'counter', customFunction: 'max_over_time' },
+        { metricName: 'metric_b', labels: [], metricType: 'histogram' },
+      ]);
+    });
+
+    it('round-trips getUrlState through urlUtil.renderUrl without losing entries', () => {
+      trail.setState({
+        metric: 'metric_a',
+        sourceMetrics: [
+          { metricName: 'metric_a', labels: [], metricType: 'counter' },
+          { metricName: 'metric_b', labels: [], metricType: 'gauge' },
+        ],
+      });
+
+      const urlState = trail.getUrlState();
+      const rendered = urlUtil.renderUrl('', urlState);
+
+      const trail2 = new DataTrail({});
+      activateFullSceneTree(trail2);
+      sceneUtils.syncStateFromSearchParams(trail2, new URLSearchParams(rendered));
+
+      expect(trail2.state.sourceMetrics).toEqual([
+        { metricName: 'metric_a', labels: [], metricType: 'counter' },
+        { metricName: 'metric_b', labels: [], metricType: 'gauge' },
+      ]);
     });
   });
 });
