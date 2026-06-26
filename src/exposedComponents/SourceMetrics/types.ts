@@ -1,5 +1,5 @@
-import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 import { type KgMetricType } from '../../shared/GmdVizPanel/matchers/mapKgMetricType';
+import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 
 // KG-supplied per-metric overrides for Metrics Drilldown.
 // Mirror of asserts-app-plugin's AssertionSourceMetric.
