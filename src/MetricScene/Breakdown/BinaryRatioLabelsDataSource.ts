@@ -18,10 +18,10 @@ import { getTrailFor } from 'shared/utils/utils';
  * Runtime datasource that returns the group-by label options for a binary (ratio) insight.
  *
  * Mirrors `LabelsDataSource`: a `QueryVariable` points at this uid and `metricFindQuery` returns the
- * options. The binary query string is the KG-supplied insight query carried on `trail.state.query`
- * (not the variable query), parsed with `parseBinaryQuery`, and turned into labels via
- * `discoverBreakdownLabels` (per-operand `fetchLabels` + intersection). Returns [] when the trail
- * query is absent or not a clean binary, so the caller's single-metric `label_names` path stays in charge.
+ * options. The binary query string is carried on `trail.state.binaryQuery` (set by the SourceMetrics
+ * connector only when the insight query is a confirmed binary), parsed with `parseBinaryQuery`, and
+ * turned into labels via `discoverBreakdownLabels` (per-operand `fetchLabels` + intersection). Returns []
+ * when `binaryQuery` is absent, so the caller's single-metric `label_names` path stays in charge.
  */
 export class BinaryRatioLabelsDataSource extends RuntimeDataSource {
   static readonly uid = 'grafana-metricsdrilldown-binary-ratio-labels';
@@ -44,12 +44,12 @@ export class BinaryRatioLabelsDataSource extends RuntimeDataSource {
     }
 
     const trail = getTrailFor(sceneObject);
-    const query = trail.state.query;
-    if (!query) {
+    const binaryQuery = trail.state.binaryQuery;
+    if (!binaryQuery) {
       return [];
     }
 
-    const ratio = parseBinaryQuery(query);
+    const ratio = parseBinaryQuery(binaryQuery);
     if (!ratio) {
       return [];
     }

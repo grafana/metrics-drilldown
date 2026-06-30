@@ -101,9 +101,10 @@ export interface DataTrailState extends SceneObjectState {
   // Looked up by metric name at GmdVizPanel construction sites.
   sourceMetrics?: SourceMetrics;
 
-  // The raw KG-supplied insight query (the SourceMetrics `query` prop), carried internally so the
-  // breakdown can detect/parse a binary (ratio) query via parseBinaryQuery. Not a KG-facing field.
-  query?: string;
+  // Set only when the KG-supplied insight query is a confirmed binary (ratio) query. Carried internally
+  // so the breakdown can drive its label discovery from both operands (parsed via parseBinaryQuery).
+  // Not a KG-facing field; the connector confirms binary-ness before setting it.
+  binaryQuery?: string;
 
   // Add to dashboard feature
   isAddToDashboardAvailable: boolean;
