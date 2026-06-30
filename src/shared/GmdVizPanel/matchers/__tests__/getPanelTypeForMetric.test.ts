@@ -124,4 +124,47 @@ describe('getPanelTypeForMetric(metric, dataTrail)', () => {
       expect(result).toBe('timeseries');
     });
   });
+
+  describe('with KG metricType override', () => {
+    it('returns "heatmap" when KG says histogram', async () => {
+      const dataTrail = createMockDataTrail();
+
+      const result = await getPanelTypeForMetric('my_recording_rule', dataTrail, 'histogram');
+
+      expect(result).toBe('heatmap');
+      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
+    });
+
+    it('returns "timeseries" when KG says counter', async () => {
+      const dataTrail = createMockDataTrail();
+
+      const result = await getPanelTypeForMetric('my_recording_rule', dataTrail, 'counter');
+
+      expect(result).toBe('timeseries');
+      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
+    });
+
+    it('returns "timeseries" when KG says gauge', async () => {
+      const dataTrail = createMockDataTrail();
+
+      const result = await getPanelTypeForMetric('my_recording_rule', dataTrail, 'gauge');
+
+      expect(result).toBe('timeseries');
+      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('getPanelTypeForMetricSync with KG override', () => {
+  it('returns "heatmap" when KG says histogram', () => {
+    expect(getPanelTypeForMetricSync('my_recording_rule', 'histogram')).toBe('heatmap');
+  });
+
+  it('returns "timeseries" when KG says counter', () => {
+    expect(getPanelTypeForMetricSync('my_recording_rule', 'counter')).toBe('timeseries');
+  });
+
+  it('overrides suffix-based detection', () => {
+    expect(getPanelTypeForMetricSync('request_duration_bucket', 'counter')).toBe('timeseries');
+  });
 });

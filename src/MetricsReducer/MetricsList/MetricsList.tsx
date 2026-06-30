@@ -91,6 +91,8 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
                 },
                 queryOptions: {
                   customRateInterval: entry?.customRateInterval,
+                  customFunction: entry?.customFunction,
+                  kgMetricType: entry?.metricType,
                 },
               }),
             }),
