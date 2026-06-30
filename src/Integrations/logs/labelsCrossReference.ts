@@ -1,4 +1,5 @@
 import { type AdHocVariableFilter, type TimeRange } from '@grafana/data';
+// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
 import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type SceneObject } from '@grafana/scenes';
 
@@ -29,6 +30,7 @@ function replaceKnownLabelNames(labelName: string): string {
  * Checks if a Loki data source has labels matching the current filters
  */
 async function hasMatchingLabels(datasourceUid: string, filters: AdHocVariableFilter[], timeRange?: TimeRange) {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
   const ds = await getDataSourceSrv().get(datasourceUid);
 
   // Get all available label keys for this data source
