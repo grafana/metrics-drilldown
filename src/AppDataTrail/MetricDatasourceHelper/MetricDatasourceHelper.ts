@@ -10,6 +10,7 @@ import {
   type PromMetricsMetadataItem,
   type PromQuery,
 } from '@grafana/prometheus';
+// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
 import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
@@ -44,6 +45,7 @@ export class MetricDatasourceHelper {
 
   private async getRuntimeDatasource(): Promise<PrometheusRuntimeDatasource | undefined> {
     if (!this.datasource) {
+      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
       const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this.trail } });
       this.datasource = isPrometheusDataSource(ds) ? ds : undefined;
     }
@@ -291,6 +293,7 @@ export class MetricDatasourceHelper {
     try {
       const dsVariable = sceneGraph.findByKey(sceneObject, VAR_DATASOURCE) as DataSourceVariable;
       const uid = (dsVariable?.state.value as string) ?? '';
+      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
       const ds = await getDataSourceSrv().get({ uid });
 
       return ds as unknown as PrometheusDatasource; // we trust that VAR_DATASOURCE has been set to a Prometheus datasource

@@ -1,5 +1,6 @@
 import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
 import { type PrometheusDatasource } from '@grafana/prometheus';
+// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
@@ -72,6 +73,7 @@ export class DataSourceFetcher {
    */
   private async fetchHealthyDataSources(type: DataSourceType, limit: number): Promise<DataSource[]> {
     const allDataSourcesOfType = [
+      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
       ...getDataSourceSrv().getList({
         logs: true,
         type,
