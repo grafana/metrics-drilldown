@@ -33,6 +33,9 @@ interface MetricSceneState extends SceneObjectState {
   customRateInterval?: string;
   customFunction?: string;
   kgMetricType?: KgMetricType;
+  // Set only for a KG binary (ratio) insight. Routes the breakdown's Group by variable to the
+  // binary-ratio label datasource (operand-intersection) instead of single-metric label_names.
+  binaryQuery?: string;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
@@ -60,7 +63,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
-      $variables: state.$variables ?? getVariableSet(state.metric),
+      $variables: state.$variables ?? getVariableSet(state.metric, state.binaryQuery),
       body:
         state.body ??
         new MetricGraphScene({
@@ -188,7 +191,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   }
 }
 
-function getVariableSet(metric: string) {
+function getVariableSet(metric: string, binaryQuery?: string) {
   return new SceneVariableSet({
     variables: [
       new ConstantVariable({
@@ -196,7 +199,7 @@ function getVariableSet(metric: string) {
         value: metric,
         hide: VariableHide.hideVariable,
       }),
-      new GroupByVariable(),
+      new GroupByVariable(binaryQuery),
     ],
   });
 }

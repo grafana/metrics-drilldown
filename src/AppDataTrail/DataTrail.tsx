@@ -56,6 +56,7 @@ import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggl
 import { logger } from 'shared/logger/logger';
 
 import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
+import { BinaryRatioLabelsDataSource } from '../MetricScene/Breakdown/BinaryRatioLabelsDataSource';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
@@ -193,7 +194,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private onActivate() {
-    registerRuntimeDataSources([new LabelsDataSource()]);
+    registerRuntimeDataSources([new LabelsDataSource(), new BinaryRatioLabelsDataSource()]);
 
     evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then((enabled) => {
       if (enabled) {
@@ -250,6 +251,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               customRateInterval: entry?.customRateInterval,
               customFunction: entry?.customFunction,
               kgMetricType: entry?.metricType,
+              binaryQuery: this.state.binaryQuery,
             })
           : new MetricsReducer(),
         controls,
