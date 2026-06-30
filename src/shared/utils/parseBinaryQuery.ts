@@ -65,7 +65,7 @@ export function parseBinaryQuery(expr: string): BinaryRatio | null {
  * KG queries are commonly scalar-scaled, e.g. `100 * (errors / requests)`. The top-level
  * operator there is `*` with a scalar-only operand; the real ratio is nested. When one operand
  * has no metric selector, we recurse into the other to find the actual binary. A scalar-scaled
- * single metric (`100 * asserts:error:ratio`) yields null (no inner binary) so the caller falls
+ * single metric (`100 * kg_metric`) yields null (no inner binary) so the caller falls
  * back to the single-metric path; KG is expected to send the unwrapped binary, not the rule.
  */
 function findRatioBinary(node: SyntaxNode, expr: string): BinaryRatio | null {

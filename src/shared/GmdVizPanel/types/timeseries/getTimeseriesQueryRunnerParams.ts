@@ -18,6 +18,13 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
   // A binary (ratio) insight query is a complete expression, not a metric selector: use it verbatim as
   // the query body and never wrap it in rate() (rate requires a range-vector selector, not an expression).
   // The grouping wrapper from the convention (<aggFn> by (label) (...)) is still applied downstream.
+  //
+  // ASSUMES BARE OPERANDS, e.g. `(kg_metric{...} + 2) / (kg_metric{...} + 20)`, where each
+  // operand still carries its labels, so the outer `... by (L) (...)` can group on L. This does NOT yet
+  // handle pre-aggregated operands like `sum(rate(a)) / sum(rate(b))`: the inner sum() collapses L before
+  // the outer by(L) sees it, so the breakdown would group nothing. That case needs by(L) injected into the
+  // inner aggregation instead (parseBinaryQuery flags it via `preAggregated`); deferred until KG confirms it
+  // sends pre-aggregated operands. Label discovery is unaffected (it uses each operand's inner selector).
   const isBinaryExpr = Boolean(queryConfig.binaryExpr);
   const expression = isBinaryExpr
     ? (queryConfig.binaryExpr as string)
