@@ -168,6 +168,8 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
     initialDS: props.dataSource.uid,
     initialFilters,
     sourceMetrics: props.sourceMetrics,
+    // Carried so the breakdown can detect/parse a binary (ratio) query downstream (parseBinaryQuery).
+    query: props.query,
     $timeRange: toSceneTimeRange(props.initialStart, props.initialEnd),
     embedded: true,
     $behaviors: [new FilterGroupByAssertsLabelsBehavior({ metric }), new HistogramPercentilesDefaultBehavior()],
