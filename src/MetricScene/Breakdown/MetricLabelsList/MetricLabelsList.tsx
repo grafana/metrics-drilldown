@@ -144,6 +144,9 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
               groupBy: label,
               labelMatchers: [],
               addIgnoreUsageFilter: true,
+              // For a KG binary (ratio) insight, break down the full ratio expression rather than the
+              // anchor metric selector. Undefined for normal metrics, so the standard path is unchanged.
+              binaryExpr: trail?.state.binaryQuery,
             },
           });
 

@@ -80,6 +80,10 @@ export type QueryConfig = {
   customRateInterval?: string;
   customFunction?: string;
   kgMetricType?: KgMetricType;
+  // A complete PromQL expression (a KG binary/ratio insight query) that replaces the metric selector.
+  // When set, the builder uses it verbatim as the query body (no selector composition, no rate wrap);
+  // only the group-by aggregation wrapper from the convention is applied around it.
+  binaryExpr?: string;
 };
 
 export type QueryOptions = {

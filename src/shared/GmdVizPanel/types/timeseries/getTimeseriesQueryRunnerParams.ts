@@ -14,14 +14,21 @@ import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../pan
 
 export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
   const { metric, queryConfig } = options;
-  const expression = buildQueryExpression({
-    metric,
-    labelMatchers: queryConfig.labelMatchers,
-    addIgnoreUsageFilter: queryConfig.addIgnoreUsageFilter,
-    addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
-  });
 
-  const isRateQuery = metric.type === 'counter';
+  // A binary (ratio) insight query is a complete expression, not a metric selector: use it verbatim as
+  // the query body and never wrap it in rate() (rate requires a range-vector selector, not an expression).
+  // The grouping wrapper from the convention (<aggFn> by (label) (...)) is still applied downstream.
+  const isBinaryExpr = Boolean(queryConfig.binaryExpr);
+  const expression = isBinaryExpr
+    ? (queryConfig.binaryExpr as string)
+    : buildQueryExpression({
+        metric,
+        labelMatchers: queryConfig.labelMatchers,
+        addIgnoreUsageFilter: queryConfig.addIgnoreUsageFilter,
+        addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
+      });
+
+  const isRateQuery = !isBinaryExpr && metric.type === 'counter';
   const interval = queryConfig.customRateInterval ?? '$__rate_interval';
   const expr = isRateQuery ? promql.rate({ expr: expression, interval }) : expression;
 
