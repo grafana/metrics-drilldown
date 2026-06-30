@@ -16,7 +16,7 @@ jobs:
         github.event_name == 'push' &&
         contains(github.event.head_commit.message, 'pnpm version')
       )
-    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v9.0.0
+    uses: grafana/plugin-ci-workflows/.github/workflows/cd.yml@ci-cd-workflows/v10.1.0
     permissions:
       contents: write
       id-token: write
@@ -25,7 +25,7 @@ jobs:
     with:
       branch: ${{ github.event_name == 'push' && github.ref_name || github.ref }}
       environment: ${{ (github.event_name == 'push' && github.ref_name == 'main') && 'dev,ops' || 'none' }}
-      attestation: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+      attestation: false
       grafana-cloud-deployment-type: provisioned
       auto-merge-environments: dev,ops
       argo-workflow-slack-channel: '#proj-metricsdrilldown-cd'
