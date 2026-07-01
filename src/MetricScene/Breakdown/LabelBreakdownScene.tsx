@@ -79,7 +79,11 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
     const newBody = groupByVariable.hasAllValue()
       ? new MetricLabelsList({ metric })
-      : new MetricLabelValuesList({ metric, label: groupByVariable.state.value as string });
+      : new MetricLabelValuesList({
+          metric,
+          label: groupByVariable.state.value as string,
+          binaryQuery: trail.state.binaryQuery,
+        });
 
     this.setState({ body: newBody });
 
