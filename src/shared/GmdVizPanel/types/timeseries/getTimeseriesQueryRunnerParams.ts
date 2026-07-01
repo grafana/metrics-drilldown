@@ -39,15 +39,27 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
   const interval = queryConfig.customRateInterval ?? '$__rate_interval';
   const expr = isRateQuery ? promql.rate({ expr: expression, interval }) : expression;
 
-  const queries = queryConfig.groupBy
-    ? buildGroupByQueries({ metric, queryConfig, expr })
-    : buildQueriesWithPresetFunctions({ metric, queryConfig, expr });
+  let queries: SceneDataQuery[];
+  if (queryConfig.groupBy) {
+    queries = buildGroupByQueries({ metric, queryConfig, expr });
+  } else if (isBinaryExpr) {
+    // A binary query is already a complete expression: render it verbatim in the main panel (no
+    // aggregation wrap), matching what the user sees in Explore. Labeled "binary query".
+    queries = [{ refId: metric.name, expr, legendFormat: 'binary query', fromExploreMetrics: true }];
+  } else {
+    queries = buildQueriesWithPresetFunctions({ metric, queryConfig, expr });
+  }
 
-  // For a binary insight in the main (non-grouped) panel, label the series "binary query" instead of
-  // the default aggregation-function name (e.g. "avg"). The grouped breakdown keeps its per-label legend.
-  if (isBinaryExpr && !queryConfig.groupBy) {
-    queries.forEach((query) => {
-      query.legendFormat = 'binary query';
+  // TEMP debug (#1132): the exact PromQL GMD sends for a binary, to compare against Explore's working
+  // query. `(main panel)` = the top graph; a label value = a breakdown panel. Remove once diagnosed.
+  if (isBinaryExpr) {
+    // eslint-disable-next-line no-console
+    console.log('[binary-query-debug]', {
+      anchorMetric: metric.name,
+      metricType: metric.type,
+      groupBy: queryConfig.groupBy ?? '(main panel)',
+      isRateQuery,
+      exprs: queries.map((query) => query.expr),
     });
   }
 

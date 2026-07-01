@@ -175,25 +175,16 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
         locationService.partial({ [sortByUrlParam]: 'alphabetical' }, true);
       }
       break;
-    case 'binary_ratio': {
-      // Anchor the main panel on the first leaf metric. Surface the operand label matchers (from the
-      // first and second leaf) as filters so the user can see the binary's scope, deduped since both
-      // operands usually share matchers. They are made read-only in DataTrail.updateStateForNewMetric
-      // because the binary query is used verbatim and page filters do not apply to it.
+    case 'binary_ratio':
+      // Anchor the main panel on the first leaf metric. Do NOT surface the operand labels as page
+      // filters: the Prometheus datasource injects VAR_FILTERS into EVERY selector of the query at
+      // request time, which would stamp both operands' matchers onto both operands (making numerator ==
+      // denominator) and corrupt the binary. The operands already carry their own matchers inside the
+      // binary expression, so page filters must stay empty. (VAR_FILTERS is also made read-only for a
+      // binary in DataTrail.updateStateForNewMetric.)
       metric = fallbackQuery.metric;
-      const seenFilters = new Set<string>();
-      initialFilters = fallbackQuery.labels
-        .map((label) => labelMatcherToAdHocFilter(label))
-        .filter(({ key, operator, value }) => {
-          const dedupeKey = `${key} ${operator} ${value}`;
-          if (seenFilters.has(dedupeKey)) {
-            return false;
-          }
-          seenFilters.add(dedupeKey);
-          return true;
-        });
+      initialFilters = [];
       break;
-    }
     case 'recording_rule_fallback':
       // When sourceMetrics aren't provided, fall back to
       // selecting the metric from the provided PromQL query.

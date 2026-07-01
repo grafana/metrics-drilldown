@@ -206,7 +206,10 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   private buildByFrameRepeater() {
     const { metric, label } = this.state;
     const prefMetricConfig = getPreferredConfigForMetric(metric.name);
-    const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
+    const trail = getTrailFor(this);
+    const entry = trail.state.sourceMetrics?.find((s) => s.metricName === metric.name);
+    // For a binary (ratio) insight, page filters do not apply, so hide the per-value "Add to filters" action.
+    const isBinaryQuery = Boolean(trail.state.binaryQuery);
 
     return new SceneByFrameRepeater({
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
@@ -266,7 +269,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
             title: labelValueFromDataFrame,
             fixedColorIndex: frameIndex,
             description: '',
-            headerActions: isEmptyLabelValue
+            headerActions: isEmptyLabelValue || isBinaryQuery
               ? () => []
               : () => [new AddToFiltersGraphAction({ labelName: label, labelValue })],
             menu: () => new PanelMenu({ labelName: label }),

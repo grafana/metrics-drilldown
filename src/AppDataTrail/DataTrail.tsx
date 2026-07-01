@@ -278,22 +278,31 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.syncFiltersForBinaryQuery(binaryQuery);
   }
 
-  // A binary query is used verbatim, so page filters (VAR_FILTERS) apply to nothing. While a binary is
-  // active, make the filters variable read-only and relabel it "Binary filters"; revert both once it is
-  // cleared (new metric / reducer). Called on activation, URL load, and metric change to stay in sync.
+  // A binary query is used verbatim and carries its own matchers, so page filters (VAR_FILTERS) apply to
+  // nothing. While a binary is active, hide the filters control and clear its filters + baseFilters (the
+  // Prometheus datasource injects both, e.g. __name__=<anchor>, into every selector, which would stamp
+  // filters onto both operands or zero out a different-metric operand); show it again once the binary is
+  // cleared. baseFilters are restored for non-binary by handleMetricSelectedEvent / getVariableSet.
+  // Called on activation, URL load, and metric change to stay in sync.
   private syncFiltersForBinaryQuery(binaryQuery?: string) {
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
     if (!isAdHocFiltersVariable(filtersVariable)) {
       return;
     }
 
-    const isBinary = Boolean(binaryQuery);
-    const label = isBinary
-      ? t('data-trail.filters.binary-label', 'Binary filters')
-      : t('data-trail.filters.label', 'Filters');
+    if (binaryQuery) {
+      const needsUpdate =
+        filtersVariable.state.hide !== VariableHide.hideVariable ||
+        filtersVariable.state.filters.length > 0 ||
+        (filtersVariable.state.baseFilters?.length ?? 0) > 0;
+      if (needsUpdate) {
+        filtersVariable.setState({ hide: VariableHide.hideVariable, filters: [], baseFilters: [] });
+      }
+      return;
+    }
 
-    if (filtersVariable.state.readOnly !== isBinary || filtersVariable.state.label !== label) {
-      filtersVariable.setState({ readOnly: isBinary, label });
+    if (filtersVariable.state.hide !== VariableHide.dontHide) {
+      filtersVariable.setState({ hide: VariableHide.dontHide });
     }
   }
 
