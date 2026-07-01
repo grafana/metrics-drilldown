@@ -39,12 +39,22 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
   const interval = queryConfig.customRateInterval ?? '$__rate_interval';
   const expr = isRateQuery ? promql.rate({ expr: expression, interval }) : expression;
 
+  const queries = queryConfig.groupBy
+    ? buildGroupByQueries({ metric, queryConfig, expr })
+    : buildQueriesWithPresetFunctions({ metric, queryConfig, expr });
+
+  // For a binary insight in the main (non-grouped) panel, label the series "binary query" instead of
+  // the default aggregation-function name (e.g. "avg"). The grouped breakdown keeps its per-label legend.
+  if (isBinaryExpr && !queryConfig.groupBy) {
+    queries.forEach((query) => {
+      query.legendFormat = 'binary query';
+    });
+  }
+
   return {
     isRateQuery,
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
-    queries: queryConfig.groupBy
-      ? buildGroupByQueries({ metric, queryConfig, expr })
-      : buildQueriesWithPresetFunctions({ metric, queryConfig, expr }),
+    queries,
   };
 }
 

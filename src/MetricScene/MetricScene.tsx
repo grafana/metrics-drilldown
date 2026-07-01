@@ -71,6 +71,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
           customRateInterval: state.customRateInterval,
           customFunction: state.customFunction,
           kgMetricType: state.kgMetricType,
+          binaryQuery: state.binaryQuery,
         }),
       ...state,
     });

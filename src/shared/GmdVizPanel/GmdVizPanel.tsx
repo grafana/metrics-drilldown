@@ -95,6 +95,7 @@ export type QueryOptions = {
   customRateInterval?: QueryConfig['customRateInterval'];
   customFunction?: QueryConfig['customFunction'];
   kgMetricType?: QueryConfig['kgMetricType'];
+  binaryExpr?: QueryConfig['binaryExpr'];
 };
 
 /* GmdVizPanelState */

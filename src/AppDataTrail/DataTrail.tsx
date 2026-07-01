@@ -62,6 +62,7 @@ import { MetricScene } from '../MetricScene/MetricScene';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
+import { parseBinaryQuery } from '../shared/utils/parseBinaryQuery';
 import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
@@ -125,7 +126,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType'],
+    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType', 'binaryQuery'],
   });
 
   getUrlState(): SceneObjectUrlValues {
@@ -148,6 +149,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       customRateInterval: entry?.customRateInterval,
       customFunction: customFunctionPairs?.length ? customFunctionPairs : undefined,
       metricType: metricTypePairs?.length ? metricTypePairs : undefined,
+      // Emit the KG binary (ratio) query so the outbound "Open in Metrics Drilldown" link preserves it.
+      // Undefined once cleared (e.g. selecting a new metric), which removes it from the URL.
+      binaryQuery: this.state.binaryQuery,
     };
   }
 
@@ -168,7 +172,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const metricTypeByMetric = parseMetricTypeValues(values.metricType);
     const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric, metricTypeByMetric);
 
-    this.updateStateForNewMetric(metric, sourceMetricsOverride);
+    // Preserve the KG binary (ratio) query across an "Open in Metrics Drilldown" navigation.
+    const binaryQuery = typeof values.binaryQuery === 'string' && values.binaryQuery ? values.binaryQuery : undefined;
+
+    this.updateStateForNewMetric(metric, sourceMetricsOverride, binaryQuery);
   }
 
   public constructor(state: Partial<DataTrailState>) {
@@ -218,7 +225,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.datasourceHelper.init();
     }, 0);
 
-    this.updateStateForNewMetric(this.state.metric);
+    this.updateStateForNewMetric(this.state.metric, undefined, this.state.binaryQuery);
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
     this.subscribeToEvent(EventOpenAddToDashboard, (event) => {
       this.openAddToDashboardModal(event.payload.panelData);
@@ -228,30 +235,39 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.initConfigPrometheusFunction();
   }
 
-  private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics) {
-    if (!this.state.topScene || metric !== this.state.metric) {
+  private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics, binaryQuery?: string) {
+    // A binary (ratio) insight does not require a separate metric (KG passes none, and an "Open in
+    // Drilldown" URL may carry only `binaryQuery`). Anchor on the binary's first leaf so VAR_METRIC and
+    // panel-type detection have a valid metric, while the main graph and breakdown run the binary.
+    const effectiveMetric =
+      metric ?? (binaryQuery ? parseBinaryQuery(binaryQuery)?.left.leaves[0]?.metricName : undefined);
+
+    if (!this.state.topScene || effectiveMetric !== this.state.metric) {
       // Update controls based on whether a metric is selected
       const baseControls = [new VariableValueSelectors({ layout: 'vertical' }), new SceneControlsSpacer()];
 
       // Only add SelectNewMetricButton when a metric is selected
-      const controls = metric
+      const controls = effectiveMetric
         ? [...baseControls, new SelectNewMetricButton(), new SceneTimePicker({}), new SceneRefreshPicker({})]
         : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
 
       // Resolve KG-supplied per-metric overrides for this metric (issue #1130).
       // sourceMetricsOverride lets callers (updateFromUrl in standalone) merge a new array into the same setState.
       const effectiveSourceMetrics = sourceMetricsOverride ?? this.state.sourceMetrics;
-      const entry = metric ? effectiveSourceMetrics?.find((s) => s.metricName === metric) : undefined;
+      const entry = effectiveMetric ? effectiveSourceMetrics?.find((s) => s.metricName === effectiveMetric) : undefined;
 
       this.setState({
-        metric,
-        topScene: metric
+        metric: effectiveMetric,
+        // Written from the passed value so it is preserved on URL load / initial activation and CLEARED
+        // (undefined) when selecting a new metric or returning to the reducer, keeping it out of the URL.
+        binaryQuery,
+        topScene: effectiveMetric
           ? new MetricScene({
-              metric,
+              metric: effectiveMetric,
               customRateInterval: entry?.customRateInterval,
               customFunction: entry?.customFunction,
               kgMetricType: entry?.metricType,
-              binaryQuery: this.state.binaryQuery,
+              binaryQuery,
             })
           : new MetricsReducer(),
         controls,
