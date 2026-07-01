@@ -50,19 +50,6 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
     queries = buildQueriesWithPresetFunctions({ metric, queryConfig, expr });
   }
 
-  // TEMP debug (#1132): the exact PromQL GMD sends for a binary, to compare against Explore's working
-  // query. `(main panel)` = the top graph; a label value = a breakdown panel. Remove once diagnosed.
-  if (isBinaryExpr) {
-    // eslint-disable-next-line no-console
-    console.log('[binary-query-debug]', {
-      anchorMetric: metric.name,
-      metricType: metric.type,
-      groupBy: queryConfig.groupBy ?? '(main panel)',
-      isRateQuery,
-      exprs: queries.map((query) => query.expr),
-    });
-  }
-
   return {
     isRateQuery,
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,
