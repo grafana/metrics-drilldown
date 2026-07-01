@@ -31,18 +31,24 @@ interface DiscoverBreakdownLabelsOptions {
 /**
  * `{__name__="<metric>", <label><op>"<value>", ...}` — the `__name__` form so colon names are legal.
  *
- * The metric name comes from a bare identifier (`leaf.metricName`) or, for the `{__name__="..."}` form,
- * a `__name__` label; emit a single `__name__` matcher, never duplicated.
+ * The metric name comes from a bare identifier (`leaf.metricName`) or, when absent, from a `__name__`
+ * matcher (any operator, e.g. `=`, `=~`); emit a single `__name__` matcher, never duplicated.
  *
  * Values are emitted verbatim. `parseBinaryQuery` returns them as the raw slice between the source
  * literal's quotes, i.e. already in PromQL double-quote-escaped form (a regex `\.json$` stays `\.json$`).
  * Re-escaping here would double-escape backslashes/quotes and change matcher meaning.
  */
 export function renderLeafMatcher(leaf: BinaryLeaf): string {
-  const nameFromLabels = leaf.labels.find((m) => m.label === '__name__' && m.op === '=')?.value;
-  const metricName = leaf.metricName || nameFromLabels;
+  const nameMatcher = leaf.labels.find((m) => m.label === '__name__');
 
-  const parts = metricName ? [`__name__="${metricName}"`] : [];
+  const parts: string[] = [];
+  if (leaf.metricName) {
+    parts.push(`__name__="${leaf.metricName}"`);
+  } else if (nameMatcher) {
+    // Preserve the operator so `{__name__=~"..."}` / `{__name__!="..."}` keep their metric constraint
+    // instead of collapsing to an unconstrained `{}` that over-queries.
+    parts.push(`__name__${nameMatcher.op}"${nameMatcher.value}"`);
+  }
   for (const { label, op, value } of leaf.labels) {
     if (label === '__name__') {
       continue;

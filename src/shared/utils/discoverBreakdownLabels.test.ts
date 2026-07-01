@@ -46,6 +46,12 @@ describe('renderLeafMatcher', () => {
       '{__name__="m", path=~"\\.json$"}'
     );
   });
+
+  it('preserves a regex __name__ matcher when there is no bare identifier', () => {
+    expect(renderLeafMatcher({ metricName: '', labels: [{ label: '__name__', op: '=~', value: 'asserts:.*:ratio' }] })).toBe(
+      '{__name__=~"asserts:.*:ratio"}'
+    );
+  });
 });
 
 describe('discoverBreakdownLabels', () => {
