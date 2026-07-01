@@ -275,19 +275,25 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       });
     }
 
-    // A binary query is used verbatim, so page filters (VAR_FILTERS) apply to nothing. While a binary is
-    // active, make the filters variable read-only and relabel it "Binary filters"; revert both once it is
-    // cleared (new metric / reducer). Runs on every call so it stays in sync on activation, URL load, and
-    // metric change.
+    this.syncFiltersForBinaryQuery(binaryQuery);
+  }
+
+  // A binary query is used verbatim, so page filters (VAR_FILTERS) apply to nothing. While a binary is
+  // active, make the filters variable read-only and relabel it "Binary filters"; revert both once it is
+  // cleared (new metric / reducer). Called on activation, URL load, and metric change to stay in sync.
+  private syncFiltersForBinaryQuery(binaryQuery?: string) {
     const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
-    if (isAdHocFiltersVariable(filtersVariable)) {
-      const isBinary = Boolean(binaryQuery);
-      const label = isBinary
-        ? t('data-trail.filters.binary-label', 'Binary filters')
-        : t('data-trail.filters.label', 'Filters');
-      if (filtersVariable.state.readOnly !== isBinary || filtersVariable.state.label !== label) {
-        filtersVariable.setState({ readOnly: isBinary, label });
-      }
+    if (!isAdHocFiltersVariable(filtersVariable)) {
+      return;
+    }
+
+    const isBinary = Boolean(binaryQuery);
+    const label = isBinary
+      ? t('data-trail.filters.binary-label', 'Binary filters')
+      : t('data-trail.filters.label', 'Filters');
+
+    if (filtersVariable.state.readOnly !== isBinary || filtersVariable.state.label !== label) {
+      filtersVariable.setState({ readOnly: isBinary, label });
     }
   }
 

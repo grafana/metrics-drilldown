@@ -45,7 +45,8 @@ function intersectSets(sets: Array<Set<string>>): Set<string> {
   if (sets.length === 0) {
     return new Set();
   }
-  return sets.reduce((acc, set) => new Set([...acc].filter((name) => set.has(name))));
+  const [first, ...rest] = sets;
+  return rest.reduce((acc, set) => new Set([...acc].filter((name) => set.has(name))), new Set(first));
 }
 
 async function sideLabelNames(
@@ -80,5 +81,5 @@ export async function discoverBreakdownLabels({
   ]);
 
   const intersected = [...left].filter((name) => right.has(name) && !isReserved(name));
-  return Array.from(new Set(intersected)).sort();
+  return Array.from(new Set(intersected)).sort((a, b) => a.localeCompare(b));
 }

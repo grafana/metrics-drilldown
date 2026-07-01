@@ -154,32 +154,35 @@ function collectVectorSelectors(node: SyntaxNode, out: SyntaxNode[]): void {
   }
 }
 
+function matcherFromNode(m: SyntaxNode, expr: string): PromQLLabelMatcher | null {
+  let label = '';
+  let op = '';
+  let value = '';
+  for (let ch = m.firstChild; ch; ch = ch.nextSibling) {
+    if (ch.name === 'LabelName') {
+      label = expr.slice(ch.from, ch.to);
+    } else if (ch.name === 'MatchOp') {
+      op = expr.slice(ch.from, ch.to);
+    } else if (ch.name === 'StringLiteral') {
+      value = expr.slice(ch.from + 1, ch.to - 1); // strip quotes
+    }
+  }
+  return label && op ? { label, op, value } : null;
+}
+
 function leafFromVectorSelector(vs: SyntaxNode, expr: string): BinaryLeaf {
   const id = vs.getChild('Identifier');
   const metricName = id ? expr.slice(id.from, id.to) : '';
 
   const labels: PromQLLabelMatcher[] = [];
   const matchers = vs.getChild('LabelMatchers');
-  if (matchers) {
-    for (let m = matchers.firstChild; m; m = m.nextSibling) {
-      if (m.name !== 'UnquotedLabelMatcher') {
-        continue;
-      }
-      let label = '';
-      let op = '';
-      let value = '';
-      for (let ch = m.firstChild; ch; ch = ch.nextSibling) {
-        if (ch.name === 'LabelName') {
-          label = expr.slice(ch.from, ch.to);
-        } else if (ch.name === 'MatchOp') {
-          op = expr.slice(ch.from, ch.to);
-        } else if (ch.name === 'StringLiteral') {
-          value = expr.slice(ch.from + 1, ch.to - 1); // strip quotes
-        }
-      }
-      if (label && op) {
-        labels.push({ label, op, value });
-      }
+  for (let m = matchers?.firstChild; m; m = m.nextSibling) {
+    if (m.name !== 'UnquotedLabelMatcher') {
+      continue;
+    }
+    const matcher = matcherFromNode(m, expr);
+    if (matcher) {
+      labels.push(matcher);
     }
   }
 
