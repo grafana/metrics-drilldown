@@ -10,6 +10,7 @@ import { t } from '@grafana/i18n';
 import { RuntimeDataSource, sceneGraph, type SceneObject } from '@grafana/scenes';
 
 import { MetricDatasourceHelper } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { discoverBreakdownLabels } from 'shared/utils/discoverBreakdownLabels';
 import { parseBinaryQuery } from 'shared/utils/parseBinaryQuery';
 import { getTrailFor } from 'shared/utils/utils';
@@ -59,11 +60,21 @@ export class BinaryRatioLabelsDataSource extends RuntimeDataSource {
       return [];
     }
 
-    const labels = await discoverBreakdownLabels({
-      ratio,
-      ds,
-      timeRange: sceneGraph.getTimeRange(sceneObject).state.value,
-    });
+    // Mirror LabelsDataSource: a failing label lookup (e.g. unsupported language-provider version) must
+    // not break group-by option loading, so warn and fall back to an empty option set.
+    let labels: string[] = [];
+    try {
+      labels = await discoverBreakdownLabels({
+        ratio,
+        ds,
+        timeRange: sceneGraph.getTimeRange(sceneObject).state.value,
+      });
+    } catch (error) {
+      displayWarning([
+        'Error while discovering binary-ratio breakdown labels! Defaulting to an empty array.',
+        (error as Error).toString(),
+      ]);
+    }
 
     return labels.map((label) => ({ value: label, text: label }));
   }

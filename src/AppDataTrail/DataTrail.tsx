@@ -241,9 +241,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics, binaryQuery?: string) {
     // A binary (ratio) insight does not require a separate metric (KG passes none, and an "Open in
     // Drilldown" URL may carry only `binaryQuery`). Anchor on the binary's first leaf so VAR_METRIC and
-    // panel-type detection have a valid metric, while the main graph and breakdown run the binary.
-    const effectiveMetric =
-      metric ?? (binaryQuery ? parseBinaryQuery(binaryQuery)?.left.leaves[0]?.metricName : undefined);
+    // panel-type detection have a valid metric, while the main graph and breakdown run the binary. For the
+    // `{__name__="..."}` selector form there is no bare identifier, so fall back to the `__name__` value.
+    const leftLeaf = binaryQuery ? parseBinaryQuery(binaryQuery)?.left.leaves[0] : undefined;
+    const binaryAnchorMetric =
+      leftLeaf?.metricName || leftLeaf?.labels.find((m) => m.label === '__name__' && m.op === '=')?.value;
+    const effectiveMetric = metric ?? binaryAnchorMetric;
 
     if (!this.state.topScene || effectiveMetric !== this.state.metric || binaryQuery !== this.state.binaryQuery) {
       // Update controls based on whether a metric is selected
