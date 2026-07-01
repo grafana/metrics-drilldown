@@ -172,8 +172,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const metricTypeByMetric = parseMetricTypeValues(values.metricType);
     const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric, metricTypeByMetric);
 
-    // Preserve the KG binary (ratio) query across an "Open in Metrics Drilldown" navigation.
-    const binaryQuery = typeof values.binaryQuery === 'string' && values.binaryQuery ? values.binaryQuery : undefined;
+    // Preserve the KG binary (ratio) query across an "Open in Metrics Drilldown" navigation. Validate that
+    // it parses as a binary so a malformed or hand-edited `?binaryQuery=` cannot flip the trail into binary
+    // mode (hiding/clearing VAR_FILTERS, routing the group-by to the binary datasource).
+    const rawBinaryQuery = typeof values.binaryQuery === 'string' && values.binaryQuery ? values.binaryQuery : undefined;
+    const binaryQuery = rawBinaryQuery && parseBinaryQuery(rawBinaryQuery) ? rawBinaryQuery : undefined;
 
     this.updateStateForNewMetric(metric, sourceMetricsOverride, binaryQuery);
   }

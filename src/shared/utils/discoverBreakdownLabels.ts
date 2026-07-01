@@ -34,8 +34,17 @@ function escapeValue(value: string): string {
 
 /** `{__name__="<metric>", <label><op>"<value>", ...}` — `__name__` form so colon names are legal. */
 export function renderLeafMatcher(leaf: BinaryLeaf): string {
-  const parts = [`__name__="${escapeValue(leaf.metricName)}"`];
+  // The metric name can come from a bare identifier (`leaf.metricName`) or, for the `{__name__="..."}`
+  // selector form, from a `__name__` label. Emit a single `__name__` matcher and never duplicate it, so
+  // we can't produce a contradictory `{__name__="", __name__="foo"}`.
+  const nameFromLabels = leaf.labels.find((m) => m.label === '__name__' && m.op === '=')?.value;
+  const metricName = leaf.metricName || nameFromLabels;
+
+  const parts = metricName ? [`__name__="${escapeValue(metricName)}"`] : [];
   for (const { label, op, value } of leaf.labels) {
+    if (label === '__name__') {
+      continue;
+    }
     parts.push(`${label}${op}"${escapeValue(value)}"`);
   }
   return `{${parts.join(', ')}}`;

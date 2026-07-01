@@ -22,6 +22,24 @@ describe('renderLeafMatcher', () => {
       '{__name__="asserts:client:error:ratio", asserts_entity_type="Service", asserts_error_type=~"(http_errors|http_network_errors)"}'
     );
   });
+
+  it('folds a {__name__="..."}-form selector into a single __name__ matcher (no duplicate)', () => {
+    expect(
+      renderLeafMatcher({
+        metricName: '',
+        labels: [
+          { label: '__name__', op: '=', value: 'asserts:client:error:ratio' },
+          { label: 'env', op: '=', value: 'prod' },
+        ],
+      })
+    ).toBe('{__name__="asserts:client:error:ratio", env="prod"}');
+  });
+
+  it('renders a label-only selector (no metric name) without an empty __name__', () => {
+    expect(renderLeafMatcher({ metricName: '', labels: [{ label: 'job', op: '=', value: 'api' }] })).toBe(
+      '{job="api"}'
+    );
+  });
 });
 
 describe('discoverBreakdownLabels', () => {
