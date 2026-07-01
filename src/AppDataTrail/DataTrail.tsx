@@ -242,7 +242,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const effectiveMetric =
       metric ?? (binaryQuery ? parseBinaryQuery(binaryQuery)?.left.leaves[0]?.metricName : undefined);
 
-    if (!this.state.topScene || effectiveMetric !== this.state.metric) {
+    if (!this.state.topScene || effectiveMetric !== this.state.metric || binaryQuery !== this.state.binaryQuery) {
       // Update controls based on whether a metric is selected
       const baseControls = [new VariableValueSelectors({ layout: 'vertical' }), new SceneControlsSpacer()];
 
