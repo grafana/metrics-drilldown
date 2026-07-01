@@ -28,24 +28,26 @@ interface DiscoverBreakdownLabelsOptions {
   timeRange: TimeRange;
 }
 
-function escapeValue(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-}
-
-/** `{__name__="<metric>", <label><op>"<value>", ...}` — `__name__` form so colon names are legal. */
+/**
+ * `{__name__="<metric>", <label><op>"<value>", ...}` — the `__name__` form so colon names are legal.
+ *
+ * The metric name comes from a bare identifier (`leaf.metricName`) or, for the `{__name__="..."}` form,
+ * a `__name__` label; emit a single `__name__` matcher, never duplicated.
+ *
+ * Values are emitted verbatim. `parseBinaryQuery` returns them as the raw slice between the source
+ * literal's quotes, i.e. already in PromQL double-quote-escaped form (a regex `\.json$` stays `\.json$`).
+ * Re-escaping here would double-escape backslashes/quotes and change matcher meaning.
+ */
 export function renderLeafMatcher(leaf: BinaryLeaf): string {
-  // The metric name can come from a bare identifier (`leaf.metricName`) or, for the `{__name__="..."}`
-  // selector form, from a `__name__` label. Emit a single `__name__` matcher and never duplicate it, so
-  // we can't produce a contradictory `{__name__="", __name__="foo"}`.
   const nameFromLabels = leaf.labels.find((m) => m.label === '__name__' && m.op === '=')?.value;
   const metricName = leaf.metricName || nameFromLabels;
 
-  const parts = metricName ? [`__name__="${escapeValue(metricName)}"`] : [];
+  const parts = metricName ? [`__name__="${metricName}"`] : [];
   for (const { label, op, value } of leaf.labels) {
     if (label === '__name__') {
       continue;
     }
-    parts.push(`${label}${op}"${escapeValue(value)}"`);
+    parts.push(`${label}${op}"${value}"`);
   }
   return `{${parts.join(', ')}}`;
 }

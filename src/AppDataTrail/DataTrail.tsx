@@ -304,8 +304,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       return;
     }
 
-    if (filtersVariable.state.hide !== VariableHide.dontHide) {
-      filtersVariable.setState({ hide: VariableHide.dontHide });
+    // Leaving binary: unhide and restore the metric's baseFilters (we cleared them while binary was
+    // active). Covers URL-driven exits that do not pass through handleMetricSelectedEvent.
+    const baseFilters = getBaseFiltersForMetric(this.state.metric);
+    if (filtersVariable.state.hide !== VariableHide.dontHide || (filtersVariable.state.baseFilters?.length ?? 0) === 0) {
+      filtersVariable.setState({ hide: VariableHide.dontHide, baseFilters });
     }
   }
 

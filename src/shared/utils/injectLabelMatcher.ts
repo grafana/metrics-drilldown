@@ -28,7 +28,7 @@ export function injectLabelMatcher(expr: string, label: string, value: string): 
 
   tree.iterate({
     enter: (node) => {
-      if (node.type.isError) {
+      if (node.type.isError || node.name === '⚠') {
         hasError = true;
         return;
       }

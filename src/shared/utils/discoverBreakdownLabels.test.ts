@@ -40,6 +40,12 @@ describe('renderLeafMatcher', () => {
       '{job="api"}'
     );
   });
+
+  it('emits regex/backslash values verbatim (no double-escaping)', () => {
+    expect(renderLeafMatcher({ metricName: 'm', labels: [{ label: 'path', op: '=~', value: '\\.json$' }] })).toBe(
+      '{__name__="m", path=~"\\.json$"}'
+    );
+  });
 });
 
 describe('discoverBreakdownLabels', () => {
