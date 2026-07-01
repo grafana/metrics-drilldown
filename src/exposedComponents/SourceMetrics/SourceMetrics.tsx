@@ -175,9 +175,25 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
         locationService.partial({ [sortByUrlParam]: 'alphabetical' }, true);
       }
       break;
-    case 'binary_ratio':
-    // A binary ratio anchors the main panel on the first leaf metric, exactly like the fallback below.
-    // The difference is downstream: `binaryQuery` is carried onto the trail to drive the breakdown.
+    case 'binary_ratio': {
+      // Anchor the main panel on the first leaf metric. Surface the operand label matchers (from the
+      // first and second leaf) as filters so the user can see the binary's scope, deduped since both
+      // operands usually share matchers. They are made read-only in DataTrail.updateStateForNewMetric
+      // because the binary query is used verbatim and page filters do not apply to it.
+      metric = fallbackQuery.metric;
+      const seenFilters = new Set<string>();
+      initialFilters = fallbackQuery.labels
+        .map((label) => labelMatcherToAdHocFilter(label))
+        .filter(({ key, operator, value }) => {
+          const dedupeKey = `${key} ${operator} ${value}`;
+          if (seenFilters.has(dedupeKey)) {
+            return false;
+          }
+          seenFilters.add(dedupeKey);
+          return true;
+        });
+      break;
+    }
     case 'recording_rule_fallback':
       // When sourceMetrics aren't provided, fall back to
       // selecting the metric from the provided PromQL query.
