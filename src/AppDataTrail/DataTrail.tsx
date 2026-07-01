@@ -239,21 +239,23 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics, binaryQuery?: string) {
-    // A binary (ratio) insight does not require a separate metric (KG passes none, and an "Open in
-    // Drilldown" URL may carry only `binaryQuery`). Anchor on the binary's first leaf so VAR_METRIC and
-    // panel-type detection have a valid metric, while the main graph and breakdown run the binary. For the
-    // `{__name__="..."}` selector form there is no bare identifier, so fall back to the `__name__` value.
+    // A binary (ratio) insight may have NO metric to anchor on: its operands can be label-only series
+    // (e.g. `{asserts_metric_latency="seconds_sum"}`, no metric name). We still open the metric scene and
+    // render the binary. When the first leaf does have a name (bare identifier or a `__name__` matcher),
+    // use it as the anchor; `||` so an empty string falls through to the leaf name.
     const leftLeaf = binaryQuery ? parseBinaryQuery(binaryQuery)?.left.leaves[0] : undefined;
     const binaryAnchorMetric =
       leftLeaf?.metricName || leftLeaf?.labels.find((m) => m.label === '__name__' && m.op === '=')?.value;
-    const effectiveMetric = metric ?? binaryAnchorMetric;
+    const effectiveMetric = metric || binaryAnchorMetric;
+
+    // The metric scene shows when there is a metric OR a binary query (a binary needs no metric anchor).
+    const showMetricScene = Boolean(effectiveMetric || binaryQuery);
 
     if (!this.state.topScene || effectiveMetric !== this.state.metric || binaryQuery !== this.state.binaryQuery) {
-      // Update controls based on whether a metric is selected
       const baseControls = [new VariableValueSelectors({ layout: 'vertical' }), new SceneControlsSpacer()];
 
-      // Only add SelectNewMetricButton when a metric is selected
-      const controls = effectiveMetric
+      // Show the select-new-metric / open-in-drilldown button whenever the metric scene is shown.
+      const controls = showMetricScene
         ? [...baseControls, new SelectNewMetricButton(), new SceneTimePicker({}), new SceneRefreshPicker({})]
         : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
 
@@ -267,9 +269,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         // Written from the passed value so it is preserved on URL load / initial activation and CLEARED
         // (undefined) when selecting a new metric or returning to the reducer, keeping it out of the URL.
         binaryQuery,
-        topScene: effectiveMetric
+        topScene: showMetricScene
           ? new MetricScene({
-              metric: effectiveMetric,
+              metric: effectiveMetric ?? '',
               customRateInterval: entry?.customRateInterval,
               customFunction: entry?.customFunction,
               kgMetricType: entry?.metricType,

@@ -9,6 +9,7 @@ import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { logger } from 'shared/logger/logger';
+import { groupBinaryByLabel } from 'shared/utils/groupBinaryByLabel';
 
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
@@ -67,6 +68,26 @@ function buildGroupByQueries({
   queryConfig: QueryConfig;
   expr: string;
 }): SceneDataQuery[] {
+  const groupByLabel = utf8Support(queryConfig.groupBy as string);
+
+  // A binary (ratio) query groups by injecting `by (label)` into each operand's aggregation, NOT by
+  // wrapping the whole binary: a pre-aggregated operand (`sum(rate(...))`) has already dropped its
+  // labels, so `sum by (label) (<binary>)` would collapse everything into `<unspecified>`.
+  if (queryConfig.binaryExpr) {
+    const groupedBinary = groupBinaryByLabel(queryConfig.binaryExpr, groupByLabel);
+    if (!groupedBinary) {
+      return [];
+    }
+    return [
+      {
+        refId: `${metric.name}-by-${queryConfig.groupBy}`,
+        expr: groupedBinary,
+        legendFormat: `{{${groupByLabel}}}`,
+        fromExploreMetrics: true,
+      },
+    ];
+  }
+
   let typeDefault: PrometheusFunction = 'avg';
   if (metric.type === 'counter') {
     typeDefault = 'sum';
@@ -75,7 +96,6 @@ function buildGroupByQueries({
   }
 
   const customFn = queryConfig.customFunction;
-  const groupByLabel = utf8Support(queryConfig.groupBy as string);
   const interval = queryConfig.customRateInterval ?? '$__rate_interval';
 
   let queryExpr: string;
