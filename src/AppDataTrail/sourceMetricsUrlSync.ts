@@ -1,9 +1,9 @@
 import { type SceneObjectUrlValues } from '@grafana/scenes';
 
 import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
-import { type KgMetricType } from '../shared/GmdVizPanel/matchers/mapKgMetricType';
+import { KG_METRIC_TYPES, type KgMetricType } from '../shared/GmdVizPanel/matchers/mapKgMetricType';
 
-const VALID_KG_METRIC_TYPES = new Set<KgMetricType>(['counter', 'gauge', 'histogram', 'summary']);
+const VALID_KG_METRIC_TYPES = new Set<KgMetricType>(KG_METRIC_TYPES);
 
 // Multi-value URL value parser for the customFunction key.
 // The scenes URL layer collapses a single-entry array to a bare string and keeps

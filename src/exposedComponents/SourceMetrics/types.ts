@@ -1,3 +1,4 @@
+import { type KgMetricType } from '../../shared/GmdVizPanel/matchers/mapKgMetricType';
 import { type PromQLLabelMatcher } from '../../shared/utils/utils.promql';
 
 // KG-supplied per-metric overrides for Metrics Drilldown.
@@ -7,7 +8,7 @@ export type SourceMetrics = Array<{
   metricName: string;
   labels: PromQLLabelMatcher[];
   // Consumed in issue #1058: skips name-suffix heuristic and /api/v1/metadata fallback.
-  metricType?: 'counter' | 'gauge' | 'histogram' | 'summary';
+  metricType?: KgMetricType;
   // Consumed in issue #1130: replaces $__rate_interval inside rate(metric[X]).
   customRateInterval?: string;
   // Consumed in issue #1131: replaces default gauge aggregation (e.g. max_over_time).

@@ -147,10 +147,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return {
       metric: this.state.metric,
       customRateInterval: entry?.customRateInterval,
-      customFunction: customFunctionPairs?.length ? customFunctionPairs : undefined,
-      metricType: metricTypePairs?.length ? metricTypePairs : undefined,
-      // Emit the KG binary (ratio) query so the outbound "Open in Metrics Drilldown" link preserves it.
-      // Undefined once cleared (e.g. selecting a new metric), which removes it from the URL.
+      customFunction: customFunctionPairs?.length ? customFunctionPairs : [],
+      metricType: metricTypePairs?.length ? metricTypePairs : [],
       binaryQuery: this.state.binaryQuery,
     };
   }

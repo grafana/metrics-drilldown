@@ -1,6 +1,7 @@
 import { type MetricType } from './getMetricType';
 
-export type KgMetricType = 'counter' | 'gauge' | 'histogram' | 'summary';
+export const KG_METRIC_TYPES = ['counter', 'gauge', 'histogram', 'summary'] as const;
+export type KgMetricType = (typeof KG_METRIC_TYPES)[number];
 
 export function mapKgMetricType(kgType: KgMetricType): MetricType {
   switch (kgType) {
