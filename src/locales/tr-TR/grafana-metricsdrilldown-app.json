@@ -82,8 +82,7 @@
     "label": "Filtrelenmiş Metrikler"
   },
   "give-feedback": {
-    "button": "Geri bildirim gönder",
-    "tooltip": "Grafana'daki Metrikler hakkındaki düşüncelerinizi paylaşın."
+    "button": "Geri bildirim gönder"
   },
   "gmd-viz-panel": {
     "native-histogram": "Yerel Histogram",

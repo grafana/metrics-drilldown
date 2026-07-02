@@ -81,8 +81,7 @@
     "label": "篩選的指標"
   },
   "give-feedback": {
-    "button": "提供意見回饋",
-    "tooltip": "分享您對 Grafana 中指標的想法。"
+    "button": "提供意見回饋"
   },
   "gmd-viz-panel": {
     "native-histogram": "原生直方圖",

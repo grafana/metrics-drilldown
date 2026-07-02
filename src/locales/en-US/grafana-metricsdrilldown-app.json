@@ -94,8 +94,7 @@
     "label": "Filtered Metrics"
   },
   "give-feedback": {
-    "button": "Give feedback",
-    "tooltip": "Share your thoughts about Metrics in Grafana."
+    "button": "Give feedback"
   },
   "gmd-viz-panel": {
     "native-histogram": "Native Histogram",

@@ -82,8 +82,7 @@
     "label": "Gefilterde Metrics"
   },
   "give-feedback": {
-    "button": "Feedback geven",
-    "tooltip": "Deel uw mening over Metrics in Grafana."
+    "button": "Feedback geven"
   },
   "gmd-viz-panel": {
     "native-histogram": "Native Histogram",

@@ -27,7 +27,6 @@ import {
 import { Modal, Stack, useStyles2 } from '@grafana/ui';
 import React, { createElement, useEffect } from 'react';
 
-import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
 import { displaySuccess } from 'MetricsReducer/helpers/displayStatus';
 import { registerRuntimeDataSources } from 'MetricsReducer/helpers/registerRuntimeDataSources';
@@ -394,11 +393,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     });
   }
 
-  // we use the class field syntax with an arrow function to bind this properly so its usage is easier (see the component below)
-  private getPrometheusBuildInfo = async () => {
-    return this.datasourceHelper.getPrometheusBuildInfo();
-  };
-
   /**
    * Assuming that the change in filter was already reported with a cause other than `'adhoc_filter'`,
    * this will modify the adhoc filter variable and prevent the automatic reporting which would
@@ -502,13 +496,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             {controls && !embeddedMini && (
               <div className={styles.controls} data-testid="app-controls">
                 <Stack direction="row" gap={1} alignItems="flex-end" wrap="wrap">
-                  {!embedded && <GiveFeedbackButton />}
                   {controls.map((control) => (
                     <control.Component key={control.state.key} model={control} />
                   ))}
                   {kgAnnotationToggle && <kgAnnotationToggle.Component model={kgAnnotationToggle} />}
                   <Stack direction="row" gap={0.5}>
-                    <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
+                    <PluginInfo />
                   </Stack>
                 </Stack>
               </div>
