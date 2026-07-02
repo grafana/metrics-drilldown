@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { usePluginContext, type FeatureToggles, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
-import { Button, Dropdown, Menu, useStyles2 } from '@grafana/ui';
+import { Dropdown, Menu, ToolbarButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { reportExploreMetrics } from 'shared/tracking/interactions';
@@ -129,12 +129,11 @@ function InfoMenu() {
 export function PluginInfo() {
   return (
     <Dropdown overlay={() => <InfoMenu />} placement="bottom-end">
-      <Button
+      <ToolbarButton
         icon="info-circle"
-        variant="secondary"
+        variant="canvas"
         tooltip={t('plugin-info.button.tooltip', 'Plugin info')}
-        tooltipPlacement="top"
-        title={t('plugin-info.button.title', 'Plugin info')}
+        aria-label={t('plugin-info.button.title', 'Plugin info')}
         data-testid="plugin-info-button"
       />
     </Dropdown>
@@ -142,24 +141,6 @@ export function PluginInfo() {
 }
 
 const getStyles = (theme: GrafanaTheme2) => ({
-  button: css`
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 32px;
-    height: 32px;
-    line-height: 30px;
-    border: 1px solid ${theme.colors.border.weak};
-    border-radius: 2px;
-    border-left: 0;
-    color: ${theme.colors.text.primary};
-    background: ${theme.colors.background.secondary};
-
-    &:hover {
-      border-color: ${theme.colors.border.medium};
-      background-color: ${theme.colors.background.canvas};
-    }
-  `,
   menuHeader: css`
     padding: ${theme.spacing(0.5, 1)};
     white-space: nowrap;

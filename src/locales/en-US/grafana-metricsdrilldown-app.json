@@ -125,6 +125,11 @@
       "learn-more": "Learn more"
     }
   },
+  "query-options": {
+    "aria-label": "Query options",
+    "title": "Query options",
+    "toggle-insights": "Toggle insights annotations"
+  },
   "labels-datasource": {
     "none-option": "(none)",
     "test-success": "OK"

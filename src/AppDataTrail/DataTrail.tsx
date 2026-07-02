@@ -57,6 +57,11 @@ import { logger } from 'shared/logger/logger';
 import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
+import { PluginHeaderToolbar } from './header/PluginHeaderToolbar';
+import { SelectNewMetricButton } from './header/SelectNewMetricButton';
+import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
+import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
+import { buildSourceMetricsOverride, parseCustomFunctionValues, parseMetricTypeValues } from './sourceMetricsUrlSync';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
@@ -64,11 +69,6 @@ import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
-import { PluginInfo } from './header/PluginInfo/PluginInfo';
-import { SelectNewMetricButton } from './header/SelectNewMetricButton';
-import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
-import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
-import { buildSourceMetricsOverride, parseCustomFunctionValues, parseMetricTypeValues } from './sourceMetricsUrlSync';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -495,14 +495,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           <Stack direction="column" gap={1} grow={1}>
             {controls && !embeddedMini && (
               <div className={styles.controls} data-testid="app-controls">
-                <Stack direction="row" gap={1} alignItems="flex-end" wrap="wrap">
+                <Stack direction="row" gap={1} alignItems="center" wrap="wrap">
                   {controls.map((control) => (
                     <control.Component key={control.state.key} model={control} />
                   ))}
-                  {kgAnnotationToggle && <kgAnnotationToggle.Component model={kgAnnotationToggle} />}
-                  <Stack direction="row" gap={0.5}>
-                    <PluginInfo />
-                  </Stack>
+                  <PluginHeaderToolbar kgAnnotationToggle={kgAnnotationToggle} />
                 </Stack>
               </div>
             )}
@@ -600,7 +597,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       minHeight: 0, // Allow body to shrink below its content size
     }),
     controls: css({
-      padding: theme.spacing(1, 0),
+      paddingBottom: theme.spacing(1),
       position: 'sticky',
       background,
       zIndex: theme.zIndex.navbarFixed,
