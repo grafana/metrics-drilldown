@@ -125,11 +125,6 @@
       "learn-more": "Learn more"
     }
   },
-  "query-options": {
-    "aria-label": "Query options",
-    "title": "Query options",
-    "toggle-insights": "Toggle insights annotations"
-  },
   "labels-datasource": {
     "none-option": "(none)",
     "test-success": "OK"
@@ -261,6 +256,11 @@
     "all-metrics": "All metric names",
     "tooltip": "View by the metric prefix. A metric prefix is a single word at the beginning of the metric name, relevant to the domain the metric belongs to.",
     "view-by-label": "View by"
+  },
+  "query-options": {
+    "aria-label": "Query options",
+    "title": "Query options",
+    "toggle-insights": "Toggle insights annotations"
   },
   "query-results": {
     "aria-label": "Instant query results",
