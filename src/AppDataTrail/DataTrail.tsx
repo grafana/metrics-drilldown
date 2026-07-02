@@ -56,11 +56,13 @@ import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggl
 import { logger } from 'shared/logger/logger';
 
 import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
+import { BinaryRatioLabelsDataSource } from '../MetricScene/Breakdown/BinaryRatioLabelsDataSource';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
+import { parseBinaryQuery } from '../shared/utils/parseBinaryQuery';
 import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
@@ -101,6 +103,11 @@ export interface DataTrailState extends SceneObjectState {
   // Looked up by metric name at GmdVizPanel construction sites.
   sourceMetrics?: SourceMetrics;
 
+  // Set only when the KG-supplied insight query is a confirmed binary (ratio) query. Carried internally
+  // so the breakdown can drive its label discovery from both operands (parsed via parseBinaryQuery).
+  // Not a KG-facing field; the connector confirms binary-ness before setting it.
+  binaryQuery?: string;
+
   // Add to dashboard feature
   isAddToDashboardAvailable: boolean;
   isAddToDashboardModalOpen: boolean;
@@ -119,7 +126,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType'],
+    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType', 'binaryQuery'],
   });
 
   getUrlState(): SceneObjectUrlValues {
@@ -142,6 +149,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       customRateInterval: entry?.customRateInterval,
       customFunction: customFunctionPairs?.length ? customFunctionPairs : [],
       metricType: metricTypePairs?.length ? metricTypePairs : [],
+      binaryQuery: this.state.binaryQuery,
     };
   }
 
@@ -162,7 +170,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     const metricTypeByMetric = parseMetricTypeValues(values.metricType);
     const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric, metricTypeByMetric);
 
-    this.updateStateForNewMetric(metric, sourceMetricsOverride);
+    // Preserve the KG binary (ratio) query across an "Open in Metrics Drilldown" navigation. Validate that
+    // it parses as a binary so a malformed or hand-edited `?binaryQuery=` cannot flip the trail into binary
+    // mode (hiding/clearing VAR_FILTERS, routing the group-by to the binary datasource).
+    const rawBinaryQuery = typeof values.binaryQuery === 'string' && values.binaryQuery ? values.binaryQuery : undefined;
+    const binaryQuery = rawBinaryQuery && parseBinaryQuery(rawBinaryQuery) ? rawBinaryQuery : undefined;
+
+    this.updateStateForNewMetric(metric, sourceMetricsOverride, binaryQuery);
   }
 
   public constructor(state: Partial<DataTrailState>) {
@@ -188,7 +202,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   }
 
   private onActivate() {
-    registerRuntimeDataSources([new LabelsDataSource()]);
+    registerRuntimeDataSources([new LabelsDataSource(), new BinaryRatioLabelsDataSource()]);
 
     evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then((enabled) => {
       if (enabled) {
@@ -212,7 +226,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.datasourceHelper.init();
     }, 0);
 
-    this.updateStateForNewMetric(this.state.metric);
+    this.updateStateForNewMetric(this.state.metric, undefined, this.state.binaryQuery);
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
     this.subscribeToEvent(EventOpenAddToDashboard, (event) => {
       this.openAddToDashboardModal(event.payload.panelData);
@@ -222,34 +236,82 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.initConfigPrometheusFunction();
   }
 
-  private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics) {
-    if (!this.state.topScene || metric !== this.state.metric) {
-      // Update controls based on whether a metric is selected
+  private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics, binaryQuery?: string) {
+    // A binary (ratio) insight may have NO metric to anchor on: its operands can be label-only series
+    // (e.g. `{asserts_metric_latency="seconds_sum"}`, no metric name). We still open the metric scene and
+    // render the binary. When the first leaf does have a name (bare identifier or a `__name__` matcher),
+    // use it as the anchor; `||` so an empty string falls through to the leaf name.
+    const leftLeaf = binaryQuery ? parseBinaryQuery(binaryQuery)?.left.leaves[0] : undefined;
+    const binaryAnchorMetric =
+      leftLeaf?.metricName || leftLeaf?.labels.find((m) => m.label === '__name__' && m.op === '=')?.value;
+    const effectiveMetric = metric || binaryAnchorMetric;
+
+    // The metric scene shows when there is a metric OR a binary query (a binary needs no metric anchor).
+    const showMetricScene = Boolean(effectiveMetric || binaryQuery);
+
+    if (!this.state.topScene || effectiveMetric !== this.state.metric || binaryQuery !== this.state.binaryQuery) {
       const baseControls = [new VariableValueSelectors({ layout: 'vertical' }), new SceneControlsSpacer()];
 
-      // Only add SelectNewMetricButton when a metric is selected
-      const controls = metric
+      // Show the select-new-metric / open-in-drilldown button whenever the metric scene is shown.
+      const controls = showMetricScene
         ? [...baseControls, new SelectNewMetricButton(), new SceneTimePicker({}), new SceneRefreshPicker({})]
         : [...baseControls, new SceneTimePicker({}), new SceneRefreshPicker({})];
 
       // Resolve KG-supplied per-metric overrides for this metric (issue #1130).
       // sourceMetricsOverride lets callers (updateFromUrl in standalone) merge a new array into the same setState.
       const effectiveSourceMetrics = sourceMetricsOverride ?? this.state.sourceMetrics;
-      const entry = metric ? effectiveSourceMetrics?.find((s) => s.metricName === metric) : undefined;
+      const entry = effectiveMetric ? effectiveSourceMetrics?.find((s) => s.metricName === effectiveMetric) : undefined;
 
       this.setState({
-        metric,
-        topScene: metric
+        metric: effectiveMetric,
+        // Written from the passed value so it is preserved on URL load / initial activation and CLEARED
+        // (undefined) when selecting a new metric or returning to the reducer, keeping it out of the URL.
+        binaryQuery,
+        topScene: showMetricScene
           ? new MetricScene({
-              metric,
+              metric: effectiveMetric ?? '',
               customRateInterval: entry?.customRateInterval,
               customFunction: entry?.customFunction,
               kgMetricType: entry?.metricType,
+              binaryQuery,
             })
           : new MetricsReducer(),
         controls,
         ...(sourceMetricsOverride !== undefined && { sourceMetrics: sourceMetricsOverride }),
       });
+    }
+
+    this.syncFiltersForBinaryQuery(binaryQuery);
+  }
+
+  // A binary query is used verbatim and carries its own matchers, so page filters (VAR_FILTERS) apply to
+  // nothing. While a binary is active, hide the filters control and clear its filters + baseFilters (the
+  // Prometheus datasource injects both, e.g. __name__=<anchor>, into every selector, which would stamp
+  // filters onto both operands or zero out a different-metric operand); show it again once the binary is
+  // cleared. baseFilters are restored for non-binary by handleMetricSelectedEvent / getVariableSet.
+  // Called on activation, URL load, and metric change to stay in sync.
+  private syncFiltersForBinaryQuery(binaryQuery?: string) {
+    const filtersVariable = sceneGraph.lookupVariable(VAR_FILTERS, this);
+    if (!isAdHocFiltersVariable(filtersVariable)) {
+      return;
+    }
+
+    if (binaryQuery) {
+      const needsUpdate =
+        filtersVariable.state.hide !== VariableHide.hideVariable ||
+        filtersVariable.state.filters.length > 0 ||
+        (filtersVariable.state.baseFilters?.length ?? 0) > 0;
+      if (needsUpdate) {
+        filtersVariable.setState({ hide: VariableHide.hideVariable, filters: [], baseFilters: [] });
+      }
+      return;
+    }
+
+    // Leaving binary: unhide and restore the metric's baseFilters (we cleared them while binary was
+    // active). Covers URL-driven exits that do not pass through handleMetricSelectedEvent.
+    const baseFilters = getBaseFiltersForMetric(this.state.metric);
+    if (filtersVariable.state.hide !== VariableHide.dontHide || (filtersVariable.state.baseFilters?.length ?? 0) === 0) {
+      filtersVariable.setState({ hide: VariableHide.dontHide, baseFilters });
     }
   }
 

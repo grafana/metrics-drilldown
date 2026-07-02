@@ -80,6 +80,13 @@ export type QueryConfig = {
   customRateInterval?: string;
   customFunction?: string;
   kgMetricType?: KgMetricType;
+  // A complete PromQL expression (a KG binary/ratio insight query) that replaces the metric selector.
+  // When set, the builder uses it verbatim as the query body (no selector composition, no rate wrap);
+  // only the group-by aggregation wrapper from the convention is applied around it.
+  binaryExpr?: string;
+  // Legend for a non-grouped binaryExpr query. Defaults to "binary query" (main panel); the per-value
+  // breakdown passes the label value so each value panel legends with its value, not "binary query".
+  binaryLegend?: string;
 };
 
 export type QueryOptions = {
@@ -91,6 +98,8 @@ export type QueryOptions = {
   customRateInterval?: QueryConfig['customRateInterval'];
   customFunction?: QueryConfig['customFunction'];
   kgMetricType?: QueryConfig['kgMetricType'];
+  binaryExpr?: QueryConfig['binaryExpr'];
+  binaryLegend?: QueryConfig['binaryLegend'];
 };
 
 /* GmdVizPanelState */
