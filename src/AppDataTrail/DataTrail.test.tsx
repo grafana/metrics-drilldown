@@ -1,4 +1,4 @@
-import { dateTime, LoadingState } from '@grafana/data';
+import { dateTime, LoadingState, urlUtil } from '@grafana/data';
 import { locationService, setDataSourceSrv, setRunRequest } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 import { of } from 'rxjs';
@@ -255,6 +255,54 @@ describe('DataTrail - URL serialization of KG overrides', () => {
       trail.updateFromUrl({ metric: 'my_rule', metricType: 'counter-my_rule' });
 
       expect(trail.state.metric).toBeUndefined();
+    });
+  });
+
+  describe('binaryQuery (ratio) URL sync', () => {
+    const BINARY = 'sum(rate(errors_total{status=~"5.."}[5m])) / sum(rate(requests_total[5m]))';
+
+    it('emits binaryQuery in getUrlState when set', () => {
+      trail.setState({ binaryQuery: BINARY });
+
+      expect(trail.getUrlState().binaryQuery).toBe(BINARY);
+    });
+
+    it('omits binaryQuery when not set', () => {
+      expect(trail.getUrlState().binaryQuery).toBeUndefined();
+    });
+
+    it('accepts a valid binary query from the URL', () => {
+      trail.updateFromUrl({ binaryQuery: BINARY });
+
+      expect(trail.state.binaryQuery).toBe(BINARY);
+    });
+
+    it('rejects a malformed binaryQuery and stays in non-binary mode', () => {
+      trail.updateFromUrl({ binaryQuery: 'errors_total{' });
+
+      expect(trail.state.binaryQuery).toBeUndefined();
+      expect(trail.state.topScene).toBeInstanceOf(MetricsReducer);
+    });
+
+    it('rejects a non-binary query (single metric)', () => {
+      trail.updateFromUrl({ binaryQuery: 'just_a_metric' });
+
+      expect(trail.state.binaryQuery).toBeUndefined();
+    });
+
+    it('round-trips a binary query through renderUrl + URL parsing without corruption', () => {
+      trail.setState({ metric: 'errors_total', binaryQuery: BINARY });
+
+      const url = urlUtil.renderUrl('/drilldown', trail.getUrlState());
+      const search = new URLSearchParams(url.substring(url.indexOf('?') + 1));
+
+      const target = new DataTrail({});
+      target.updateFromUrl({
+        metric: search.get('metric') ?? undefined,
+        binaryQuery: search.get('binaryQuery') ?? undefined,
+      });
+
+      expect(target.state.binaryQuery).toBe(BINARY);
     });
   });
 });
