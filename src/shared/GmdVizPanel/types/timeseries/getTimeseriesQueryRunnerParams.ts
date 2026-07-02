@@ -44,9 +44,12 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
   if (queryConfig.groupBy) {
     queries = buildGroupByQueries({ metric, queryConfig, expr });
   } else if (isBinaryExpr) {
-    // A binary query is already a complete expression: render it verbatim in the main panel (no
-    // aggregation wrap), matching what the user sees in Explore. Labeled "binary query".
-    queries = [{ refId: metric.name, expr, legendFormat: 'binary query', fromExploreMetrics: true }];
+    // A binary query is already a complete expression: render it verbatim (no aggregation wrap), matching
+    // what the user sees in Explore. The legend defaults to "binary query" (main panel), but callers that
+    // scope the binary to a single value (the per-value breakdown) pass that value via `binaryLegend`.
+    queries = [
+      { refId: metric.name, expr, legendFormat: queryConfig.binaryLegend ?? 'binary query', fromExploreMetrics: true },
+    ];
   } else {
     queries = buildQueriesWithPresetFunctions({ metric, queryConfig, expr });
   }

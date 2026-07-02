@@ -292,7 +292,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
             // Binary: render the ratio scoped to this value by injecting {label="value"} into both
             // operands. Otherwise: the single-metric selector filtered to the value.
             ...(binaryQuery
-              ? { binaryExpr: injectLabelMatcher(binaryQuery, label, labelValue) }
+              ? { binaryExpr: injectLabelMatcher(binaryQuery, label, labelValue), binaryLegend: labelValueFromDataFrame }
               : { labelMatchers: [{ key: label, operator: '=', value: labelValue }] }),
             customRateInterval: entry?.customRateInterval,
             customFunction: entry?.customFunction,
