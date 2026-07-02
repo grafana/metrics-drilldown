@@ -249,7 +249,6 @@
       "contribute": "Contribute",
       "documentation": "Documentation",
       "grafana-version": "Grafana {{edition}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Report an issue"
     }
   },
