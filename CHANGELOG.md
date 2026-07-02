@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.2.0](https://github.com/grafana/metrics-drilldown/compare/v2.1.0...v2.2.0) (2026-07-02)
+
+
+### 🎉 Features
+
+* **sourceMetrics:** add metricType per-entry override ([#1320](https://github.com/grafana/metrics-drilldown/issues/1320)) ([6b1064b](https://github.com/grafana/metrics-drilldown/commit/6b1064b2477e6a13407b0fce69886377f7639078))
+* **SourceMetrics:** kg source metrics custom function ([#1316](https://github.com/grafana/metrics-drilldown/issues/1316)) ([c126a33](https://github.com/grafana/metrics-drilldown/commit/c126a3371231f6e21153d24cbae2c51853acc38a))
+* **SourceMetrics:** support kg ratio queries ([#1338](https://github.com/grafana/metrics-drilldown/issues/1338)) ([7ed2371](https://github.com/grafana/metrics-drilldown/commit/7ed23712573ca4538c7314500e41496f82b95146))
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump dompurify override to ^3.4.11 ([#1322](https://github.com/grafana/metrics-drilldown/issues/1322)) ([7ec03e3](https://github.com/grafana/metrics-drilldown/commit/7ec03e3d6bfecee156da13a85ffeaeb3d9ce2c86))
+* **deps:** bump dompurify override to ^3.4.11 for CVE remediation ([7ec03e3](https://github.com/grafana/metrics-drilldown/commit/7ec03e3d6bfecee156da13a85ffeaeb3d9ce2c86))
+* **deps:** upgrade @grafana/* packages to 13.1.0 to fix compatibility check ([#1337](https://github.com/grafana/metrics-drilldown/issues/1337)) ([156bc3b](https://github.com/grafana/metrics-drilldown/commit/156bc3be2efb66ae583d6c146f50daf0f95c7c7e))
+
+
+### 📝 Documentation
+
+* Add GenAI policy, contributor guide updates and issue templates ([#1339](https://github.com/grafana/metrics-drilldown/issues/1339)) ([604ea20](https://github.com/grafana/metrics-drilldown/commit/604ea20dbe42a7d4a2485ed3144b663f3449c346))
+
 ## [2.1.0](https://github.com/grafana/metrics-drilldown/compare/v2.0.7...v2.1.0) (2026-06-16)
 
 
