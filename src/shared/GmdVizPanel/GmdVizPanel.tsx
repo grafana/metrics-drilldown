@@ -27,6 +27,7 @@ import { type PrometheusFunction } from './config/promql-functions';
 import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { getMetricType, getMetricTypeSync, type Metric, type MetricType } from './matchers/getMetricType';
 import { getPanelTypeForMetricSync } from './matchers/getPanelTypeForMetric';
+import { type KgMetricType } from './matchers/mapKgMetricType';
 import { type PanelType } from './types/available-panel-types';
 import { panelBuilder } from './types/panelBuilder';
 
@@ -75,9 +76,17 @@ export type QueryConfig = {
   groupBy?: string;
   queries?: QueryDefs;
   data?: SceneDataProvider;
-  // KG-supplied per-metric override (issue #1130). Replaces $__rate_interval inside rate(metric[X]).
-  // Prometheus duration string, e.g. '5m', '1h'.
+  // Replaces $__rate_interval inside rate(metric[X]). Prometheus duration string, e.g. '5m', '1h'.
   customRateInterval?: string;
+  customFunction?: string;
+  kgMetricType?: KgMetricType;
+  // A complete PromQL expression (a KG binary/ratio insight query) that replaces the metric selector.
+  // When set, the builder uses it verbatim as the query body (no selector composition, no rate wrap);
+  // only the group-by aggregation wrapper from the convention is applied around it.
+  binaryExpr?: string;
+  // Legend for a non-grouped binaryExpr query. Defaults to "binary query" (main panel); the per-value
+  // breakdown passes the label value so each value panel legends with its value, not "binary query".
+  binaryLegend?: string;
 };
 
 export type QueryOptions = {
@@ -87,6 +96,10 @@ export type QueryOptions = {
   queries?: QueryDefs;
   data?: QueryConfig['data'];
   customRateInterval?: QueryConfig['customRateInterval'];
+  customFunction?: QueryConfig['customFunction'];
+  kgMetricType?: QueryConfig['kgMetricType'];
+  binaryExpr?: QueryConfig['binaryExpr'];
+  binaryLegend?: QueryConfig['binaryLegend'];
 };
 
 /* GmdVizPanelState */
@@ -118,7 +131,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     // we want a metric and panel type now to be able to render the panel as soon as possible after activation
     // so we use sync/fast heuristsics before using a 100% correct async method in onActivate() (fetching the metric metadata)
     // note: when the metric type changes after fetching the metadata, the correct type is cached and is available in getMetricTypeSync()
-    const metricType = getMetricTypeSync(metric) as MetricType;
+    const metricType = getMetricTypeSync(metric, queryOptions?.kgMetricType) as MetricType;
     const prefConfig = discardUserPrefs ? undefined : getPreferredConfigForMetric(metric);
 
     super({
@@ -126,7 +139,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       metric,
       metricType,
       panelConfig: {
-        type: panelOptions?.type || getPanelTypeForMetricSync(metric),
+        type: panelOptions?.type || getPanelTypeForMetricSync(metric, queryOptions?.kgMetricType),
         title: metric,
         height: PANEL_HEIGHT.M,
         headerActions: ({ metric }) => [new SelectAction({ metric: metric.name })],
@@ -158,7 +171,11 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
   }
 
   private async checkMetricMetadata() {
-    const { metric } = this.state;
+    const { metric, queryConfig } = this.state;
+
+    if (queryConfig.kgMetricType) {
+      return;
+    }
 
     const metricTypeFromMetadata = await getMetricType(metric, getTrailFor(this));
 
@@ -179,7 +196,8 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     // in addition to using the metadata fetched in src/helpers/MetricDatasourceHelper.ts to determine if the metric is a native histogram or not,
     // we give another chance to display it properly by looking into the data frame type received
-    if (!['classic-histogram', 'native-histogram'].includes(metricType)) {
+    const isKgHistogramHint = this.state.queryConfig.kgMetricType === 'histogram';
+    if (isKgHistogramHint || !['classic-histogram', 'native-histogram'].includes(metricType)) {
       const bodySub = (body?.state.$data as SceneDataProvider)?.subscribeToState((newState) => {
         if (newState.data?.state !== LoadingState.Done) {
           return;

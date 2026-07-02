@@ -4,6 +4,7 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getMetricTypeSync } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
+import { getTrailFor } from 'shared/utils/utils';
 
 /**
  * Behavior that sets histogram metrics to use percentiles as the default visualization.
@@ -29,7 +30,8 @@ export class HistogramPercentilesDefaultBehavior extends SceneObjectBase<SceneOb
           }
 
           const { metric, panelConfig } = panel.state;
-          const metricType = getMetricTypeSync(metric);
+          const entry = getTrailFor(panel).state.sourceMetrics?.find((s) => s.metricName === metric);
+          const metricType = getMetricTypeSync(metric, entry?.metricType);
 
           // Check if user already has a preference for this metric
           const userPrefs = userStorage.getItem(PREF_KEYS.METRIC_PREFS) || {};

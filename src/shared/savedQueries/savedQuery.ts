@@ -2,7 +2,6 @@ import { config } from '@grafana/runtime';
 import { type DataQuery } from '@grafana/schema';
 import { compare } from 'compare-versions';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 import { narrowSavedQueries } from './narrowSavedQuery';
 import pluginJson from '../../plugin.json';
@@ -92,7 +91,7 @@ function saveInLocalStorage({ query, title, description, dsUid }: Omit<SavedQuer
     query,
     timestamp: new Date().getTime(),
     title,
-    uid: uuidv4(),
+    uid: crypto.randomUUID(),
   });
 
   localStorage.setItem(SAVED_QUERIES_KEY, JSON.stringify(stored));

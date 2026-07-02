@@ -8,6 +8,7 @@ import { VAR_WINGMAN_SORT_BY } from 'MetricsReducer/list-controls/MetricsSorter/
 import { metricFilters } from 'MetricsReducer/SideBar/SideBar';
 import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { parseBinaryQuery } from 'shared/utils/parseBinaryQuery';
 import { embeddedTrailNamespace, newMetricsTrail } from 'shared/utils/utils';
 import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
@@ -49,21 +50,34 @@ type SourceMetricsScenario =
       scenario: 'recording_rule_fallback';
       sourceMetrics: undefined;
       fallbackQuery: ReturnType<typeof parsePromQLQuery>;
+      binaryQuery: undefined;
+    }
+  | {
+      // A binary (ratio) insight, e.g. `sum(rate(errors)) / sum(rate(requests))`. The main panel still
+      // anchors on the first leaf metric (same as recording_rule_fallback); `binaryQuery` is carried so
+      // the breakdown can drive its label discovery from both operands.
+      scenario: 'binary_ratio';
+      sourceMetrics: undefined;
+      fallbackQuery: ReturnType<typeof parsePromQLQuery>;
+      binaryQuery: string;
     }
   | {
       scenario: 'single_source_metric';
       sourceMetrics: SourceMetrics;
       fallbackQuery: undefined;
+      binaryQuery: undefined;
     }
   | {
       scenario: 'multiple_source_metrics';
       sourceMetrics: SourceMetrics;
       fallbackQuery: undefined;
+      binaryQuery: undefined;
     }
   | {
       scenario: 'missing_metric_information';
       sourceMetrics: undefined;
       fallbackQuery: undefined;
+      binaryQuery: undefined;
     };
 
 function getSourceMetricsScenario(props: Pick<SourceMetricsProps, 'query' | 'sourceMetrics'>): SourceMetricsScenario {
@@ -72,6 +86,7 @@ function getSourceMetricsScenario(props: Pick<SourceMetricsProps, 'query' | 'sou
       scenario: props.sourceMetrics.length === 1 ? 'single_source_metric' : 'multiple_source_metrics',
       sourceMetrics: props.sourceMetrics,
       fallbackQuery: undefined,
+      binaryQuery: undefined,
     };
   }
 
@@ -86,14 +101,26 @@ function getSourceMetricsScenario(props: Pick<SourceMetricsProps, 'query' | 'sou
   }
 
   if (fallbackQuery) {
+    // A binary (ratio) query parses cleanly into two operands. When it does, carry the original query so
+    // the breakdown can discover the labels common to both sides; otherwise it's a single recording rule.
+    if (props.query && parseBinaryQuery(props.query) !== null) {
+      return {
+        scenario: 'binary_ratio',
+        sourceMetrics: undefined,
+        fallbackQuery,
+        binaryQuery: props.query,
+      };
+    }
+
     return {
       scenario: 'recording_rule_fallback',
       sourceMetrics: undefined,
       fallbackQuery,
+      binaryQuery: undefined,
     };
   }
 
-  return { scenario: 'missing_metric_information', sourceMetrics: undefined, fallbackQuery: undefined };
+  return { scenario: 'missing_metric_information', sourceMetrics: undefined, fallbackQuery: undefined, binaryQuery: undefined };
 }
 
 export interface SourceMetricsProps {
@@ -118,7 +145,7 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
   let metric: string | undefined;
   let initialFilters: AdHocVariableFilter[] | undefined;
 
-  const { scenario, sourceMetrics, fallbackQuery } = getSourceMetricsScenario(props);
+  const { scenario, sourceMetrics, fallbackQuery, binaryQuery } = getSourceMetricsScenario(props);
   switch (scenario) {
     case 'single_source_metric':
       // If there's a single source metric, select it.
@@ -148,6 +175,16 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
         locationService.partial({ [sortByUrlParam]: 'alphabetical' }, true);
       }
       break;
+    case 'binary_ratio':
+      // Anchor the main panel on the first leaf metric. Do NOT surface the operand labels as page
+      // filters: the Prometheus datasource injects VAR_FILTERS into EVERY selector of the query at
+      // request time, which would stamp both operands' matchers onto both operands (making numerator ==
+      // denominator) and corrupt the binary. The operands already carry their own matchers inside the
+      // binary expression, so page filters must stay empty. (VAR_FILTERS is also made read-only for a
+      // binary in DataTrail.updateStateForNewMetric.)
+      metric = fallbackQuery.metric;
+      initialFilters = [];
+      break;
     case 'recording_rule_fallback':
       // When sourceMetrics aren't provided, fall back to
       // selecting the metric from the provided PromQL query.
@@ -168,6 +205,9 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
     initialDS: props.dataSource.uid,
     initialFilters,
     sourceMetrics: props.sourceMetrics,
+    // Set only for a confirmed binary (ratio) insight; carried so the breakdown can drive label
+    // discovery from both operands. Undefined for single-metric / recording-rule queries.
+    binaryQuery,
     $timeRange: toSceneTimeRange(props.initialStart, props.initialEnd),
     embedded: true,
     $behaviors: [new FilterGroupByAssertsLabelsBehavior({ metric }), new HistogramPercentilesDefaultBehavior()],

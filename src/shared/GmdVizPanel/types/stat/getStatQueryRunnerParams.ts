@@ -1,12 +1,11 @@
 import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
+import { buildCustomFunctionQuery, buildPresetFunctionQuery } from 'shared/GmdVizPanel/buildFunctionQuery';
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
-import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
-import { logger } from 'shared/logger/logger';
 
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
@@ -43,24 +42,20 @@ function buildQueriesWithPresetFunctions({
   expr: string;
 }): SceneDataQuery[] {
   const defaultPromqlFn = isRateQuery ? 'sum' : 'avg';
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
+  const customFn = queryConfig.customFunction;
+
+  if (customFn) {
+    return [buildCustomFunctionQuery(metric.name, customFn, expr, interval, isRateQuery)];
+  }
+
   const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
   const queries: SceneDataQuery[] = [];
-
   for (const { fn } of queryDefs) {
-    const entry = PROMQL_FUNCTIONS.get(fn);
-    if (!entry) {
-      logger.warn(`[getStatQueryRunnerParams] Unknown PromQL function "${fn}", skipping query.`);
-      continue;
+    const q = buildPresetFunctionQuery(metric.name, fn, expr, isRateQuery, '[getStatQueryRunnerParams]');
+    if (q) {
+      queries.push(q);
     }
-    const query = entry.fn({ expr });
-    const fnName = isRateQuery ? `${entry.name}(rate)` : entry.name;
-
-    queries.push({
-      refId: `${metric.name}-${fnName}`,
-      expr: query,
-      legendFormat: fnName,
-      fromExploreMetrics: true,
-    });
   }
 
   return queries;

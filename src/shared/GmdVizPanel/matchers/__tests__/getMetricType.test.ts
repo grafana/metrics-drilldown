@@ -65,6 +65,24 @@ describe('getMetricTypeSync(metric)', () => {
       expect(getMetricTypeSync('histogram_bucket_sum')).toBe('counter');
     });
   });
+
+  describe('with KG metricType override', () => {
+    it('returns mapped type when kgMetricType is set, skipping heuristic', () => {
+      expect(getMetricTypeSync('my_recording_rule', 'counter')).toBe('counter');
+    });
+
+    it('maps histogram to classic-histogram', () => {
+      expect(getMetricTypeSync('my_recording_rule', 'histogram')).toBe('classic-histogram');
+    });
+
+    it('maps summary to gauge', () => {
+      expect(getMetricTypeSync('my_recording_rule', 'summary')).toBe('gauge');
+    });
+
+    it('overrides heuristic completely — counter metric becomes gauge with KG override', () => {
+      expect(getMetricTypeSync('http_requests_total', 'gauge')).toBe('gauge');
+    });
+  });
 });
 
 describe('getMetricType(metric, dataTrail)', () => {
@@ -170,6 +188,35 @@ describe('getMetricType(metric, dataTrail)', () => {
       const result = await getMetricType('process_start_timestamp_seconds', dataTrail);
 
       expect(result).toBe('age');
+      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('with KG metricType override', () => {
+    it('returns mapped type immediately without metadata fetch', async () => {
+      const dataTrail = createMockDataTrail('gauge');
+
+      const result = await getMetricType('my_recording_rule', dataTrail, 'counter');
+
+      expect(result).toBe('counter');
+      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
+    });
+
+    it('maps histogram to classic-histogram without metadata fetch', async () => {
+      const dataTrail = createMockDataTrail('histogram');
+
+      const result = await getMetricType('my_recording_rule', dataTrail, 'histogram');
+
+      expect(result).toBe('classic-histogram');
+      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
+    });
+
+    it('maps summary to gauge without metadata fetch', async () => {
+      const dataTrail = createMockDataTrail('counter');
+
+      const result = await getMetricType('my_recording_rule', dataTrail, 'summary');
+
+      expect(result).toBe('gauge');
       expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
     });
   });
