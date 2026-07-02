@@ -68,7 +68,9 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
       visible: false,
     });
 
-    this.addActivationHandler(this.onActivate.bind(this));
+    this.addActivationHandler(() => {
+      this.onActivate();
+    });
   }
 
   private async onActivate() {
