@@ -53,11 +53,13 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     customRateInterval,
     customFunction,
     kgMetricType,
+    binaryQuery,
   }: {
     metric: MetricGraphSceneState['metric'];
     customRateInterval?: string;
     customFunction?: string;
     kgMetricType?: KgMetricType;
+    binaryQuery?: string;
   }) {
     super({
       metric,
@@ -72,6 +74,9 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               metric,
               panelOptions: {
                 height: PANEL_HEIGHT.XL,
+                // For a binary (ratio) insight, title the panel with the actual query, not the anchor
+                // metric name. Omitted for normal metrics so the default `title: metric` stands.
+                ...(binaryQuery ? { title: binaryQuery } : {}),
                 headerActions: isClassicHistogramMetric(metric)
                   ? ({ metric }) => [
                       new GmdVizPanelVariantSelector(),
@@ -95,6 +100,9 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 customRateInterval,
                 customFunction,
                 kgMetricType,
+                // For a KG binary (ratio) insight, render the full binary expression in the main graph
+                // instead of the first-leaf metric selector. Undefined for normal metrics.
+                binaryExpr: binaryQuery,
               },
             }),
           }),

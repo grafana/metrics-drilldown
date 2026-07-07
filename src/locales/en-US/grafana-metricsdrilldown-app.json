@@ -10,6 +10,9 @@
       "related-metrics-description": "Relevant metrics based on current label filters"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": "OK"
+  },
   "breakdown": {
     "add-to-filters": "Add to filters",
     "by-label": "By label",
