@@ -31,6 +31,8 @@ import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behavior
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { addUnspecifiedLabel } from 'shared/GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { trailDS } from 'shared/shared';
+import { injectLabelMatcher } from 'shared/utils/injectLabelMatcher';
+import { getTrailFor } from 'shared/utils/utils';
 
 import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
 import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
@@ -45,6 +47,9 @@ import { syncYAxis } from '../MetricLabelsList/behaviors/syncYAxis';
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: Metric;
   label: string;
+  // Set for a KG binary (ratio) insight. When present, values are enumerated from the grouped binary
+  // (sum by(label)(binary)) and each per-value panel renders the binary scoped to that value.
+  binaryQuery?: string;
   layoutSwitcher: LayoutSwitcher;
   quickSearch: QuickSearch;
   sortBySelector: SortBySelector;
@@ -55,9 +60,11 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   constructor({
     metric,
     label,
+    binaryQuery,
   }: {
     metric: MetricLabelsValuesListState['metric'];
     label: MetricLabelsValuesListState['label'];
+    binaryQuery?: string;
   }) {
     const queryParams = getTimeseriesQueryRunnerParams({
       metric,
@@ -66,6 +73,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         labelMatchers: [],
         addIgnoreUsageFilter: false,
         groupBy: label,
+        // For a binary (ratio) insight, enumerate values from the grouped binary (sum by(label)(binary))
+        // rather than the anchor metric. Requires clean/bare operands so the label survives grouping.
+        binaryExpr: binaryQuery,
       },
     });
 
@@ -73,6 +83,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       key: 'metric-label-values-list',
       metric,
       label,
+      binaryQuery,
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -181,6 +192,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
 
   private buildSinglePanel() {
     const { metric, label } = this.state;
+    const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
 
     return new GmdVizPanel({
       metric: metric.name,
@@ -194,13 +206,19 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       queryOptions: {
         groupBy: label,
         data: sceneGraph.getData(this),
+        customRateInterval: entry?.customRateInterval,
+        customFunction: entry?.customFunction,
+        kgMetricType: entry?.metricType,
       },
     });
   }
 
   private buildByFrameRepeater() {
-    const { metric, label } = this.state;
+    const { metric, label, binaryQuery } = this.state;
     const prefMetricConfig = getPreferredConfigForMetric(metric.name);
+    const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
+    // For a binary (ratio) insight, page filters do not apply, so hide the per-value "Add to filters" action.
+    const isBinaryQuery = Boolean(binaryQuery);
 
     return new SceneByFrameRepeater({
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
@@ -260,7 +278,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
             title: labelValueFromDataFrame,
             fixedColorIndex: frameIndex,
             description: '',
-            headerActions: isEmptyLabelValue
+            headerActions: isEmptyLabelValue || isBinaryQuery
               ? () => []
               : () => [new AddToFiltersGraphAction({ labelName: label, labelValue })],
             menu: () => new PanelMenu({ labelName: label }),
@@ -271,7 +289,14 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
           },
           queryOptions: {
             ...prefMetricConfig?.queryOptions,
-            labelMatchers: [{ key: label, operator: '=', value: labelValue }],
+            // Binary: render the ratio scoped to this value by injecting {label="value"} into both
+            // operands. Otherwise: the single-metric selector filtered to the value.
+            ...(binaryQuery
+              ? { binaryExpr: injectLabelMatcher(binaryQuery, label, labelValue), binaryLegend: labelValueFromDataFrame }
+              : { labelMatchers: [{ key: label, operator: '=', value: labelValue }] }),
+            customRateInterval: entry?.customRateInterval,
+            customFunction: entry?.customFunction,
+            kgMetricType: entry?.metricType,
           },
         });
 

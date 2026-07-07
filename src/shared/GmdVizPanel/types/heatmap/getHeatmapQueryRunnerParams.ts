@@ -14,7 +14,8 @@ export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions
     addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
 
-  const query = promql.sum({ expr: promql.rate({ expr: expression }), by: ['le'] });
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
+  const query = promql.sum({ expr: promql.rate({ expr: expression, interval }), by: ['le'] });
 
   return {
     maxDataPoints: queryConfig.resolution === QUERY_RESOLUTION.HIGH ? 500 : 250,

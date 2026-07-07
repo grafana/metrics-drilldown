@@ -10,6 +10,9 @@
       "related-metrics-description": "Relevant metrics based on current label filters"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": "OK"
+  },
   "breakdown": {
     "add-to-filters": "Add to filters",
     "by-label": "By label",
@@ -87,6 +90,9 @@
     "limit-warning-body": "Your organization has more dashboards than this limit. Usage counts may be incomplete.",
     "limit-warning-title": "Dashboard usage sort is limited to 500 dashboards."
   },
+  "fetch-firing-alert-metrics": {
+    "error": "Failed to fetch firing alert rules from Prometheus ruler endpoint"
+  },
   "filtered-metrics-variable": {
     "label": "Filtered Metrics"
   },
@@ -155,13 +161,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "No saved queries to load",
-        "button-tooltip": "Load saved query",
+        "button-tooltip": "Load Saved query",
         "empty": "No saved queries to display.",
         "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
         "load-type-error": "Please select a Prometheus query.",
         "modal-title": "Load a previously saved query",
         "remove": "Remove",
-        "saved-query-button-tooltip": "Load saved query",
+        "saved-query-button-tooltip": "Load Saved query",
         "select": "Select"
       },
       "save-query": {
@@ -169,7 +175,7 @@
           "alert": "There is a previously saved query with the same expression: {{title}}"
         },
         "button-tooltip": "Save query",
-        "button-tooltip-saved-queries": "Save in Saved Queries",
+        "button-tooltip-saved-queries": "Save in Saved queries",
         "cancel": "Cancel",
         "description": "Description",
         "error": "Unexpected error saving this query.",
@@ -246,7 +252,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Contribute",
       "documentation": "Documentation",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Report an issue"
     }

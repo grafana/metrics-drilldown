@@ -10,6 +10,8 @@ Resolves <!-- Paste Github issue that is resolved by this pull request -->
 
 <!-- Summary of the most important changes in the code that will help your reviewers, the choices made and why -->
 
+- [ ] This pull request was substantially generated with AI assistance ([GenAI policy](https://github.com/grafana/metrics-drilldown/blob/main/docs/genai.md))
+
 ### 🧪 How to test?
 
 <!-- Steps required to test the PR or a pointer to the relevant automated tests -->

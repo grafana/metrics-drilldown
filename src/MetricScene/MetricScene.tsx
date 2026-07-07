@@ -15,6 +15,8 @@ import { VariableHide } from '@grafana/schema';
 import { useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 
+import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
+
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
@@ -27,6 +29,13 @@ import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
 interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
   metric: string;
+  // KG-supplied per-metric override (issue #1130). Forwarded to MetricGraphScene and the main GmdVizPanel.
+  customRateInterval?: string;
+  customFunction?: string;
+  kgMetricType?: KgMetricType;
+  // Set only for a KG binary (ratio) insight. Routes the breakdown's Group by variable to the
+  // binary-ratio label datasource (operand-intersection) instead of single-metric label_names.
+  binaryQuery?: string;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
@@ -54,8 +63,16 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
 
   public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
     super({
-      $variables: state.$variables ?? getVariableSet(state.metric),
-      body: state.body ?? new MetricGraphScene({ metric: state.metric }),
+      $variables: state.$variables ?? getVariableSet(state.metric, state.binaryQuery),
+      body:
+        state.body ??
+        new MetricGraphScene({
+          metric: state.metric,
+          customRateInterval: state.customRateInterval,
+          customFunction: state.customFunction,
+          kgMetricType: state.kgMetricType,
+          binaryQuery: state.binaryQuery,
+        }),
       ...state,
     });
 
@@ -175,7 +192,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   }
 }
 
-function getVariableSet(metric: string) {
+function getVariableSet(metric: string, binaryQuery?: string) {
   return new SceneVariableSet({
     variables: [
       new ConstantVariable({
@@ -183,7 +200,7 @@ function getVariableSet(metric: string) {
         value: metric,
         hide: VariableHide.hideVariable,
       }),
-      new GroupByVariable(),
+      new GroupByVariable(binaryQuery),
     ],
   });
 }

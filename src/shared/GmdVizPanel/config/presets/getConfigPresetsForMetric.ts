@@ -1,5 +1,6 @@
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 
 import { DEFAULT_TIMESERIES_AGE_PRESETS } from './config-presets-ages';
 import { DEFAULT_HISTOGRAMS_PRESETS } from './config-presets-histograms';
@@ -8,8 +9,8 @@ import { DEFAULT_STATUS_UP_DOWN_PRESETS } from './config-presets-status-updown';
 import { DEFAULT_TIMESERIES_PRESETS, DEFAULT_TIMESERIES_RATE_PRESETS } from './config-presets-timeseries';
 import { type PanelConfigPreset } from './types';
 
-export async function getConfigPresetsForMetric(metric: string, dataTrail: DataTrail): Promise<PanelConfigPreset[]> {
-  const metricType = await getMetricType(metric, dataTrail);
+export async function getConfigPresetsForMetric(metric: string, dataTrail: DataTrail, kgMetricType?: KgMetricType): Promise<PanelConfigPreset[]> {
+  const metricType = await getMetricType(metric, dataTrail, kgMetricType);
 
   switch (metricType) {
     case 'counter':

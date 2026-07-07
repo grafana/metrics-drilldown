@@ -9,6 +9,7 @@ import { trailDS, VAR_FILTERS, VAR_GROUP_BY, VAR_METRIC_EXPR } from 'shared/shar
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
+import { BinaryRatioLabelsDataSource } from './BinaryRatioLabelsDataSource';
 import { GroupBySelector, type GroupByOptions } from './GroupBySelector/GroupBySelector';
 
 const ALL_VARIABLE_VALUE = '$__all';
@@ -22,14 +23,19 @@ export class GroupByOptionsLoadedEvent extends BusEventWithPayload<GroupByVariab
 }
 
 export class GroupByVariable extends QueryVariable {
-  constructor() {
+  constructor(binaryQuery?: string) {
+    // For a KG binary (ratio) insight, the group-by options are the labels common to both operands,
+    // served by BinaryRatioLabelsDataSource (which reads the binary query off the trail). The query
+    // string is a non-empty placeholder that datasource ignores. Otherwise: single-metric label_names.
+    const isBinary = Boolean(binaryQuery);
+
     super({
       name: VAR_GROUP_BY,
       label: t('breakdown.group-by.label', 'Group by'),
-      datasource: trailDS,
+      datasource: isBinary ? { uid: BinaryRatioLabelsDataSource.uid } : trailDS,
       includeAll: true,
       defaultToAll: true,
-      query: `label_names(${VAR_METRIC_EXPR})`,
+      query: isBinary ? 'binary_ratio_group_by' : `label_names(${VAR_METRIC_EXPR})`,
       value: '',
       text: '',
     });

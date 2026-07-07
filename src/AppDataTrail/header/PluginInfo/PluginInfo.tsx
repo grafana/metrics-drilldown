@@ -112,9 +112,8 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
       />
       <Menu.Divider />
       <Menu.Item
-        label={t('plugin-info.menu.grafana-version', 'Grafana {{edition}} v{{version}} ({{env}})', {
+        label={t('plugin-info.menu.grafana-version', 'Grafana {{edition}} ({{env}})', {
           edition: grafanaBuildInfo.edition,
-          version: grafanaBuildInfo.version,
           env: grafanaBuildInfo.env,
         })}
         icon="grafana"

@@ -36,6 +36,11 @@ const goffFeatureFlags = {
     defaultValue: 'excluded',
     trackingKey: 'experiment_grafana_assistant_quick_search_tab_test',
   },
+  'drilldown.metrics.sort_by_firing_alerts': {
+    valueType: 'boolean',
+    values: [true, false] as const,
+    defaultValue: false,
+  },
 } as const satisfies Record<string, FeatureFlag>;
 
 /**
@@ -107,7 +112,8 @@ export function initOpenFeatureProvider(): Promise<void> {
     OPEN_FEATURE_DOMAIN,
     new OFREPWebProvider({
       baseUrl: `${subPath}/apis/features.grafana.app/v0alpha1/namespaces/${config.namespace}`,
-      pollInterval: -1, // Do not poll - flags are fetched once on init
+      disableVisibilityRefresh: true, // Do not refresh
+      cacheMode: 'disabled', // Do not write to localStorage
       timeoutMs: 10_000, // Timeout after 10 seconds
     }),
     {

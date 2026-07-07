@@ -9,15 +9,12 @@ const esModules = [
   '@bsull/augurs',
   'monaco-promql',
   'tsqtsq',
-  'p-limit',
-  'yocto-queue',
   'marked',
   'react-calendar',
   'get-user-locale',
   'memoize',
   'mimic-function',
   '@wojtekmaj/date-utils',
-  'leven',
 ];
 
 module.exports = {

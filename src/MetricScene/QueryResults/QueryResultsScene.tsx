@@ -10,12 +10,13 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { useStyles2 } from '@grafana/ui';
-import { useResizeObserver } from '@react-aria/utils';
 import React, { createElement, useLayoutEffect, useRef, useState } from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { getMetricTypeSync, type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
+import { useResizeObserver } from 'shared/hooks/useResizeObserver';
 import { trailDS } from 'shared/shared';
 
 import { DEFAULT_QUERY_RESULTS_TABLE_WIDTH, type PrometheusQueryResultsV1Props } from './constants';
@@ -59,9 +60,11 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
   constructor({
     metric,
     queryResultsComponent,
+    kgMetricType,
   }: {
     metric: QueryResultsSceneState['metric'];
     queryResultsComponent?: QueryResultsSceneState['queryResultsComponent'];
+    kgMetricType?: KgMetricType;
   }) {
     super({
       metric,
@@ -72,7 +75,7 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
           {
             refId: 'instant-query-results',
             expr: buildQueryExpression({
-              metric: { name: metric, type: getMetricTypeSync(metric) as MetricType },
+              metric: { name: metric, type: getMetricTypeSync(metric, kgMetricType) as MetricType },
               addIgnoreUsageFilter: true,
             }),
             instant: true,

@@ -1,5 +1,6 @@
 import { t } from '@grafana/i18n';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
+// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
 import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 import { ToolbarButton } from '@grafana/ui';
@@ -30,6 +31,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
     [trail]
   );
   const [dsUid, setDsUid] = useState(() => dsVar.getValue().toString());
+  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
   const dsName = getDataSourceSrv().getInstanceSettings(dsUid)?.name ?? '';
 
   useEffect(() => {
@@ -104,7 +106,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
       <OpenQueryLibraryComponent
         datasourceFilters={[dsName]}
         query={query}
-        tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip-saved-queries', 'Save in Saved Queries')}
+        tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip-saved-queries', 'Save in Saved queries')}
       />
     </div>
   );
