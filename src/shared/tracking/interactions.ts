@@ -205,6 +205,11 @@ type Interactions = {
   saved_query_loaded: {};
   // User loads a saved query from Query Library
   saved_query_loaded_from_library: {};
+  // User toggles the "Has firing alerts" filter chip in the toolbar
+  firing_alert_filter_toggled: {
+    action: 'activated' | 'deactivated';
+    matching_count: number;
+  };
 };
 
 type OtherEvents = {
