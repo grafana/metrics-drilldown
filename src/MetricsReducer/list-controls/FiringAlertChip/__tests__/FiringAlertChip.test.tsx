@@ -236,12 +236,13 @@ describe('FiringAlertChip', () => {
         expect(screen.getByRole('button')).toBeDisabled();
       });
 
-      it('shows count 0 when fetch fails', async () => {
-        mockFetchFiringAlertMetrics.mockRejectedValue(new Error('network error'));
+      it('shows count 0 when fetch returns empty map (internal failure)', async () => {
+        mockFetchFiringAlertMetrics.mockResolvedValue(new Map());
 
         const chip = new FiringAlertChip();
         await activateChip(chip);
 
+        expect(chip.state.firingAlertMetrics.size).toBe(0);
         expect(chip.state.matchingCount).toBe(0);
         expect(chip.state.loading).toBe(false);
       });

@@ -18,7 +18,6 @@ import { VAR_METRICS_VARIABLE, type MetricOptions, type MetricsVariable } from '
 import { MetricsVariableFilterEngine } from 'MetricsReducer/metrics-variables/MetricsVariableFilterEngine';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
-import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { EventFiltersChanged } from '../../SideBar/sections/MetricsFilterSection/EventFiltersChanged';
@@ -83,15 +82,8 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
 
     this.setState({ visible: true });
 
-    try {
-      const metricsMap = await fetchFiringAlertMetrics();
-      this.setState({ firingAlertMetrics: metricsMap, loading: false });
-    } catch (err) {
-      logger.error(err instanceof Error ? err : new Error(String(err)), {
-        message: t('firing-alert-chip.fetch-error', 'FiringAlertChip: failed to load firing alert metrics'),
-      });
-      this.setState({ loading: false });
-    }
+    const metricsMap = await fetchFiringAlertMetrics();
+    this.setState({ firingAlertMetrics: metricsMap, loading: false });
 
     this.updateMatchingCount();
 
@@ -204,6 +196,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     chip: css({
       whiteSpace: 'nowrap',
+      alignSelf: 'center',
     }),
     chipActive: css({
       fontWeight: theme.typography.fontWeightMedium,
