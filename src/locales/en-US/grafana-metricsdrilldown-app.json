@@ -99,7 +99,6 @@
   "firing-alert-chip": {
     "aria-label-active": "Remove firing alerts filter",
     "aria-label-inactive": "Filter by firing alerts",
-    "fetch-error": "FiringAlertChip: failed to load firing alert metrics",
     "label_one": "Has firing alerts ({{count}})",
     "label_other": "Has firing alerts ({{count}})",
     "tooltip-empty": "No metrics with firing alerts in the current filtered set"
