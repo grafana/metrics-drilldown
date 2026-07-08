@@ -1,9 +1,9 @@
-import { type CustomVariable, sceneGraph, type QueryVariable } from '@grafana/scenes';
+import { sceneGraph, type CustomVariable, type QueryVariable } from '@grafana/scenes';
 
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 
-import { MetricsSorter, VAR_WINGMAN_SORT_BY } from '../MetricsSorter';
 import { MetricsVariableSortEngine } from '../../../metrics-variables/MetricsVariableSortEngine';
+import { MetricsSorter, VAR_WINGMAN_SORT_BY } from '../MetricsSorter';
 
 // =============================================================================
 // MOCKS
