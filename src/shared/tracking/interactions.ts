@@ -210,6 +210,13 @@ type Interactions = {
     action: 'activated' | 'deactivated';
     matching_count: number;
   };
+  // Firing alert metrics have been fetched from the ruler API
+  firing_alert_metrics_fetched: {
+    status: 'success' | 'error';
+    duration_ms: number;
+    metric_count: number;
+    rule_count: number;
+  };
 };
 
 type OtherEvents = {

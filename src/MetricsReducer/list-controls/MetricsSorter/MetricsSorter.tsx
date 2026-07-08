@@ -13,14 +13,16 @@ import {
 import React from 'react';
 
 import { localeCompare } from 'MetricsReducer/helpers/localCompare';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { logger } from 'shared/logger/logger';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
 import { EventSortByChanged } from './events/EventSortByChanged';
 import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
+import { fetchFiringAlertMetrics } from './fetchers/fetchFiringAlertMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
-export type SortingOption = 'default' | 'alphabetical' | 'alphabetical-reversed' | 'dashboard-usage' | 'alerting-usage';
+export type SortingOption = 'default' | 'alphabetical' | 'alphabetical-reversed' | 'dashboard-usage' | 'alerting-usage' | 'firing-alerts';
 
 const MAX_RECENT_METRICS = 6;
 const RECENT_METRICS_EXPIRY_DAYS = 30;
@@ -116,6 +118,10 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     'default',
   ]);
   private usageFetcher = new MetricUsageFetcher();
+  private firingAlertCache: { data: Map<string, number> | null; promise: Promise<Map<string, number>> | null } = {
+    data: null,
+    promise: null,
+  };
 
   constructor(state: Partial<MetricsSorterState>) {
     super({
@@ -142,10 +148,21 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   private activationHandler() {
     const sortByVar = sceneGraph.getVariables(this).getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
 
-    if (!this.supportedSortByOptions.has(sortByVar.getValue() as SortingOption)) {
-      // Migration for the old sortBy values
-      sortByVar.changeValueTo('default');
-    }
+    // Evaluate the feature flag before the migration check so that URL-restored
+    // values like `firing-alerts` are not clobbered before the option is registered.
+    evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts').then((enabled) => {
+      if (enabled) {
+        this.supportedSortByOptions.add('firing-alerts');
+        const firingAlertsLabel = t('metrics-sorter.option.firing-alerts', 'Firing Alerts');
+        sortByVar.setState({
+          query: sortByVar.state.query + `,${firingAlertsLabel} : firing-alerts`,
+        });
+      }
+
+      if (!this.supportedSortByOptions.has(sortByVar.getValue() as SortingOption)) {
+        sortByVar.changeValueTo('default');
+      }
+    });
 
     this._subs.add(
       sortByVar.subscribeToState((newState, prevState) => {
@@ -169,6 +186,29 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       }
       return metricsToCounts;
     });
+  }
+
+  public getFiringAlertCounts(): Promise<Map<string, number>> {
+    if (this.firingAlertCache.data) {
+      return Promise.resolve(this.firingAlertCache.data);
+    }
+    if (this.firingAlertCache.promise) {
+      return this.firingAlertCache.promise;
+    }
+    this.firingAlertCache.promise = fetchFiringAlertMetrics().then((data) => {
+      this.firingAlertCache.data = data;
+      this.firingAlertCache.promise = null;
+      return data;
+    });
+    return this.firingAlertCache.promise;
+  }
+
+  public getFiringAlertCountForMetric(metric: string): Promise<number> {
+    return this.getFiringAlertCounts().then((map) => map.get(metric) ?? 0);
+  }
+
+  public getFiringAlertCountsAsRecord(): Promise<Record<string, number>> {
+    return this.getFiringAlertCounts().then((map) => Object.fromEntries(map));
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {

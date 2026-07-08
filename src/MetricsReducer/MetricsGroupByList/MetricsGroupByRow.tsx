@@ -26,6 +26,7 @@ import {
 } from 'MetricsReducer/MetricsList/WithUsageDataPreviewPanel';
 import { GroupsIcon } from 'MetricsReducer/SideBar/custom-icons/GroupsIcon';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
+import { FiringAlertBadge } from 'shared/GmdVizPanel/components/FiringAlertBadge';
 import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { VAR_FILTERS } from 'shared/shared';
@@ -123,6 +124,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                 panelOptions: {
                   fixedColorIndex: colorIndex,
                   headerActions: ({ metric }) => [
+                    new FiringAlertBadge({ metric: metric.name }),
                     new SelectAction({ metric: metric.name }),
                     new ConfigurePanelAction({ metric }),
                   ],
