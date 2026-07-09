@@ -101,6 +101,7 @@ function getSortByOptions(): VariableValueOption[] {
     { label: t('metrics-sorter.option.alphabetical-reversed', 'Alphabetical [Z-A]'), value: 'alphabetical-reversed' },
     { label: t('metrics-sorter.option.dashboard-usage', 'Dashboard Usage'), value: 'dashboard-usage' },
     { label: t('metrics-sorter.option.alerting-usage', 'Alerting Usage'), value: 'alerting-usage' },
+    { label: t('metrics-sorter.option.firing-alerts', 'Firing Alerts'), value: 'firing-alerts' },
   ];
 }
 
@@ -116,6 +117,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     'alphabetical-reversed',
     'dashboard-usage',
     'default',
+    'firing-alerts',
   ]);
   private usageFetcher = new MetricUsageFetcher();
   private firingAlertCache: { data: Map<string, number> | null; promise: Promise<Map<string, number>> | null } = {
@@ -148,15 +150,15 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   private activationHandler() {
     const sortByVar = sceneGraph.getVariables(this).getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
 
-    // Evaluate the feature flag before the migration check so that URL-restored
-    // values like `firing-alerts` are not clobbered before the option is registered.
     evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts').then((enabled) => {
-      if (enabled) {
-        this.supportedSortByOptions.add('firing-alerts');
-        const firingAlertsLabel = t('metrics-sorter.option.firing-alerts', 'Firing Alerts');
-        sortByVar.setState({
-          query: sortByVar.state.query + `,${firingAlertsLabel} : firing-alerts`,
-        });
+      if (!enabled) {
+        this.supportedSortByOptions.delete('firing-alerts');
+        const query = sortByVar.state.query
+          .split(',')
+          .filter((part) => !part.includes('firing-alerts'))
+          .join(',');
+        sortByVar.setState({ query });
+        sortByVar.validateAndUpdate();
       }
 
       if (!this.supportedSortByOptions.has(sortByVar.getValue() as SortingOption)) {
