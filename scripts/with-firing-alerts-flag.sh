@@ -20,12 +20,13 @@ if ! grep -q "$FLAG_NAME" "$FLAG_FILE"; then
   exit 1
 fi
 
-# Inject an early return at the top of evaluateFeatureFlag that returns
-# defaultValue directly, bypassing the OpenFeature provider.
-sed -i '/^export async function evaluateFeatureFlag/a\  return goffFeatureFlags[flagName].defaultValue as FlagValue<T>;' "$FLAG_FILE"
-
 # Set the firing alerts flag default to true
 sed -i "/$FLAG_NAME/,/defaultValue:/{s/defaultValue: false/defaultValue: true/}" "$FLAG_FILE"
+
+# Patch evaluateFeatureFlag to return defaultValue directly, bypassing OpenFeature.
+# Adds @ts-nocheck to suppress unused-variable errors from the dead code.
+sed -i '1s;^;// @ts-nocheck\n;' "$FLAG_FILE"
+sed -i '/^export async function evaluateFeatureFlag/a\  return goffFeatureFlags[flagName].defaultValue as FlagValue<T>;' "$FLAG_FILE"
 
 echo "✓ Enabled $FLAG_NAME (bypassing OpenFeature provider)"
 
