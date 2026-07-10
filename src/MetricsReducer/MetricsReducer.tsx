@@ -20,6 +20,7 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { NULL_GROUP_BY_VALUE } from './labels/LabelsDataSource';
 import { VAR_WINGMAN_GROUP_BY, type LabelsVariable } from './labels/LabelsVariable';
+import { FiringAlertChip } from './list-controls/FiringAlertChip/FiringAlertChip';
 import { ListControls } from './list-controls/ListControls';
 import { EventSortByChanged } from './list-controls/MetricsSorter/events/EventSortByChanged';
 import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './list-controls/MetricsSorter/MetricsSorter';
@@ -150,6 +151,16 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
       for (const filterSection of filterSections) {
         filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
+      }
+
+      // Include firing alert chip state if it is active on initial load (e.g. restored from URL)
+      try {
+        const firingAlertChip = sceneGraph.findByKeyAndType(this, 'firing-alert-chip', FiringAlertChip);
+        if (firingAlertChip.state.active) {
+          filters.firingAlertMetrics = [...firingAlertChip.state.firingAlertMetrics.keys()];
+        }
+      } catch {
+        // Chip not yet in scene graph — filter will be applied via EventFiltersChanged when chip activates
       }
 
       filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });

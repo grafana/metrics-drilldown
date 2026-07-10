@@ -177,3 +177,111 @@ describe('MetricsVariableFilterEngine - hierarchical prefix filtering', () => {
     expect(setState).toHaveBeenLastCalledWith({ options });
   });
 });
+
+describe('MetricsVariableFilterEngine - firingAlertMetrics filtering', () => {
+  test('filters options to only those present in firingAlertMetrics set', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['http_requests_total', 'cpu_usage', 'memory_bytes']);
+
+    engine.setInitOptions(options);
+    engine.applyFilters(
+      { firingAlertMetrics: ['http_requests_total', 'cpu_usage'] },
+      { forceUpdate: false, notify: false }
+    );
+
+    expect(setState).toHaveBeenCalledWith({
+      options: [
+        { label: 'http_requests_total', value: 'http_requests_total' },
+        { label: 'cpu_usage', value: 'cpu_usage' },
+      ],
+    });
+  });
+
+  test('empty firingAlertMetrics array passes all options through (filter inactive)', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['http_requests_total', 'cpu_usage', 'memory_bytes']);
+
+    engine.setInitOptions(options);
+    // forceUpdate: true so the reset path runs even though the engine starts with empty filters
+    engine.applyFilters({ firingAlertMetrics: [] }, { forceUpdate: true, notify: false });
+
+    // All filters empty → reset to init options
+    expect(setState).toHaveBeenCalledWith({ options });
+  });
+
+  test('silently ignores firingAlertMetrics names not present in options', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['http_requests_total', 'cpu_usage']);
+
+    engine.setInitOptions(options);
+    engine.applyFilters(
+      { firingAlertMetrics: ['http_requests_total', 'nonexistent_metric'] },
+      { forceUpdate: false, notify: false }
+    );
+
+    expect(setState).toHaveBeenCalledWith({
+      options: [{ label: 'http_requests_total', value: 'http_requests_total' }],
+    });
+  });
+
+  test('clearing firingAlertMetrics back to [] restores all options', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['http_requests_total', 'cpu_usage', 'memory_bytes']);
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ firingAlertMetrics: ['http_requests_total'] }, { forceUpdate: false, notify: false });
+    engine.applyFilters({ firingAlertMetrics: [] }, { forceUpdate: false, notify: false });
+
+    expect(setState).toHaveBeenLastCalledWith({ options });
+  });
+
+  test('composes with prefixes filter — returns intersection', () => {
+    const { engine, setState } = setup();
+    const options = createOptions([
+      'http_requests_total',
+      'http_errors_total',
+      'cpu_usage',
+    ]);
+
+    engine.setInitOptions(options);
+    engine.applyFilters(
+      { prefixes: ['http'], firingAlertMetrics: ['http_requests_total', 'cpu_usage'] },
+      { forceUpdate: false, notify: false }
+    );
+
+    // http prefix matches http_requests_total + http_errors_total; then firingAlerts keeps only http_requests_total
+    expect(setState).toHaveBeenCalledWith({
+      options: [{ label: 'http_requests_total', value: 'http_requests_total' }],
+    });
+  });
+
+  test('composes with names filter — returns intersection', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['http_requests_total', 'http_errors_total', 'cpu_usage']);
+
+    engine.setInitOptions(options);
+    engine.applyFilters(
+      { names: ['http.*'], firingAlertMetrics: ['http_requests_total', 'cpu_usage'] },
+      { forceUpdate: false, notify: false }
+    );
+
+    // names filter keeps http_requests_total + http_errors_total; firingAlerts keeps only http_requests_total
+    expect(setState).toHaveBeenCalledWith({
+      options: [{ label: 'http_requests_total', value: 'http_requests_total' }],
+    });
+  });
+
+  test('all filter dimensions empty resets to init options', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['http_requests_total', 'cpu_usage']);
+
+    engine.setInitOptions(options);
+    // forceUpdate: true so the reset path runs even though the engine starts with empty filters
+    engine.applyFilters(
+      { categories: [], prefixes: [], suffixes: [], names: [], firingAlertMetrics: [] },
+      { forceUpdate: true, notify: false }
+    );
+
+    expect(setState).toHaveBeenCalledWith({ options });
+  });
+});
