@@ -1,33 +1,15 @@
 #!/usr/bin/env bash
 #
 # Starts the dev server with the firing alerts feature flag enabled.
-# Patches evaluateFeatureFlag to bypass the OpenFeature provider
-# (which returns false for unknown flags locally) and return true
-# for the firing alerts flag. Restores the file on exit.
+# Uses GF_FEATURE_TOGGLES_ENABLE to set the metricsExploreFireAlerts
+# toggle, which evaluateFeatureFlag checks before consulting GoFF.
+#
+# No source files are modified.
 #
 set -euo pipefail
 
-FLAG_FILE="src/shared/featureFlags/openFeature.ts"
-FLAG_NAME="drilldown.metrics.sort_by_firing_alerts"
+export GF_FEATURE_TOGGLES_ENABLE="${GF_FEATURE_TOGGLES_ENABLE:+${GF_FEATURE_TOGGLES_ENABLE},}metricsExploreFireAlerts"
 
-cleanup() {
-  git checkout -- "$FLAG_FILE" 2>/dev/null || true
-}
-trap cleanup EXIT INT TERM
-
-if ! grep -q "$FLAG_NAME" "$FLAG_FILE"; then
-  echo "Error: Could not find $FLAG_NAME in $FLAG_FILE"
-  exit 1
-fi
-
-# Set the firing alerts flag default to true
-sed -i "/$FLAG_NAME/,/defaultValue:/{s/defaultValue: false/defaultValue: true/}" "$FLAG_FILE"
-
-# Patch evaluateFeatureFlag to return defaultValue directly, bypassing OpenFeature.
-# Adds @ts-nocheck to suppress unused-variable errors from the dead code.
-sed -i '1s;^;// @ts-nocheck\n;' "$FLAG_FILE"
-sed -i '/^export async function evaluateFeatureFlag/a\  return goffFeatureFlags[flagName].defaultValue as FlagValue<T>;' "$FLAG_FILE"
-
-echo "✓ Enabled $FLAG_NAME (bypassing OpenFeature provider)"
+echo "✓ Enabled metricsExploreFireAlerts via GF_FEATURE_TOGGLES_ENABLE"
 
 docker compose up --build
