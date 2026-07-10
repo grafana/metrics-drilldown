@@ -82,8 +82,7 @@
     "label": "Szűrt metrikák"
   },
   "give-feedback": {
-    "button": "Visszajelzés küldése",
-    "tooltip": "Ossza meg gondolatait a Grafanában elérhető metrikákról."
+    "button": "Visszajelzés küldése"
   },
   "gmd-viz-panel": {
     "native-histogram": "Natív hisztogram",

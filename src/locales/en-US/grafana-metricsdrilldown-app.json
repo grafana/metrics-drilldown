@@ -108,8 +108,7 @@
     "tooltip-empty": "No metrics with firing alerts in the current filtered set"
   },
   "give-feedback": {
-    "button": "Give feedback",
-    "tooltip": "Share your thoughts about Metrics in Grafana."
+    "button": "Give feedback"
   },
   "gmd-viz-panel": {
     "native-histogram": "Native Histogram",
@@ -270,7 +269,6 @@
       "contribute": "Contribute",
       "documentation": "Documentation",
       "grafana-version": "Grafana {{edition}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Report an issue"
     }
   },
@@ -278,6 +276,11 @@
     "all-metrics": "All metric names",
     "tooltip": "View by the metric prefix. A metric prefix is a single word at the beginning of the metric name, relevant to the domain the metric belongs to.",
     "view-by-label": "View by"
+  },
+  "query-options": {
+    "aria-label": "Query options",
+    "title": "Query options",
+    "toggle-insights": "Toggle insights annotations"
   },
   "query-results": {
     "aria-label": "Instant query results",
