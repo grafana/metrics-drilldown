@@ -82,8 +82,7 @@
     "label": "Métriques filtrées"
   },
   "give-feedback": {
-    "button": "Donner votre avis",
-    "tooltip": "Partagez vos impressions sur les métriques dans Grafana."
+    "button": "Donner votre avis"
   },
   "gmd-viz-panel": {
     "native-histogram": "Histogramme natif",

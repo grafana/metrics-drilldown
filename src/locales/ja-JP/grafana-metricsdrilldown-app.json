@@ -81,8 +81,7 @@
     "label": "フィルタリングされたメトリクス"
   },
   "give-feedback": {
-    "button": "フィードバックを提供",
-    "tooltip": "Grafanaメトリクスについてのご意見をお聞かせください。"
+    "button": "フィードバックを提供"
   },
   "gmd-viz-panel": {
     "native-histogram": "ネイティブヒストグラム",

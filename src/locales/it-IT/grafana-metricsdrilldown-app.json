@@ -82,8 +82,7 @@
     "label": "Metriche filtrate"
   },
   "give-feedback": {
-    "button": "Lascia un feedback",
-    "tooltip": "Condividi i tuoi pensieri sulle Metriche in Grafana."
+    "button": "Lascia un feedback"
   },
   "gmd-viz-panel": {
     "native-histogram": "Istogramma nativo",
