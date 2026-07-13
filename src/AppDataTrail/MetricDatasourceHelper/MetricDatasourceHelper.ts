@@ -298,7 +298,7 @@ export class MetricDatasourceHelper {
 
       return ds as unknown as PrometheusDatasource; // we trust that VAR_DATASOURCE has been set to a Prometheus datasource
     } catch (error) {
-      displayError(error as Error, ['Error while getting the Prometheus data source!']);
+      displayError(error as Error, ['Error while getting the Prometheus-compatible metrics data source!']);
       return undefined;
     }
   }

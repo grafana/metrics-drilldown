@@ -50,7 +50,7 @@ function getTranslatedSectionInfo(key: string): { title: string; description: st
       title: t('sidebar.section.prefix-filters', 'Prefix filters'),
       description: t(
         'sidebar.section.prefix-filters-description',
-        'Filter metrics based on their name prefix (Prometheus namespace)'
+        'Filter metrics based on their name prefix'
       ),
     },
     'filters-suffix': {
@@ -111,7 +111,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           title: t('sidebar.section.prefix-filters', 'Prefix filters'),
           description: t(
             'sidebar.section.prefix-filters-description',
-            'Filter metrics based on their name prefix (Prometheus namespace)'
+            'Filter metrics based on their name prefix'
           ),
           icon: 'A_',
           computeGroups: computeMetricPrefixGroups,

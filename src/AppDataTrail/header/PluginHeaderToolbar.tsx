@@ -4,21 +4,23 @@ import { t, Trans } from '@grafana/i18n';
 import { Dropdown, Icon, Switch, TextLink, ToolbarButton, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { type PrometheusBuildInfo } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 
 import { PluginInfo } from './PluginInfo/PluginInfo';
 
 type PluginHeaderToolbarProps = {
   kgAnnotationToggle?: KgAnnotationToggle;
+  getPrometheusBuildInfo?: () => Promise<PrometheusBuildInfo | undefined>;
 };
 
-export function PluginHeaderToolbar({ kgAnnotationToggle }: Readonly<PluginHeaderToolbarProps>) {
+export function PluginHeaderToolbar({ kgAnnotationToggle, getPrometheusBuildInfo }: Readonly<PluginHeaderToolbarProps>) {
   const styles = useStyles2(getToolbarStyles);
 
   return (
     <div className={styles.toolbar}>
       <QueryOptionsButton kgAnnotationToggle={kgAnnotationToggle} />
-      <PluginInfo />
+      <PluginInfo getPrometheusBuildInfo={getPrometheusBuildInfo} />
     </div>
   );
 }

@@ -3,12 +3,14 @@ import { usePluginContext, type FeatureToggles, type GrafanaTheme2 } from '@graf
 import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
 import { Dropdown, Menu, ToolbarButton, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
+import { type PrometheusBuildInfo } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { GIT_COMMIT } from 'version';
 
-import { PluginLogo } from './PluginLogo';
+import { PluginLogo, PluginPromBuildIcon } from './PluginLogo';
 
 const pluginCommitSha: string = GIT_COMMIT;
 const pluginCommitURL = `https://github.com/grafana/metrics-drilldown/commit/${pluginCommitSha}`;
@@ -39,11 +41,30 @@ function InfoMenuHeader() {
   );
 }
 
-function InfoMenu() {
+function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
+  const styles = useStyles2(getStyles);
   const feedbackButtonEnabled = config.featureToggles[feedbackButtonKey] ?? true;
-
   const isDev = pluginCommitSha === 'dev';
   const shortCommitSha = isDev ? pluginCommitSha : pluginCommitSha.slice(0, 8);
+
+  const [promBuildInfo, setPromBuildInfo] = useState<PrometheusBuildInfo>();
+  useEffect(() => {
+    if (!getPrometheusBuildInfo) {
+      return;
+    }
+    getPrometheusBuildInfo()
+      .then((info) => setPromBuildInfo(info))
+      .catch((e) => {
+        logger.warn('Error while fetching Prometheus build info!');
+        logger.warn(e);
+        setPromBuildInfo(undefined);
+      });
+  }, [getPrometheusBuildInfo]);
+
+  const BuildInfoMenuItemIcon = useCallback(
+    () => (promBuildInfo ? <PluginPromBuildIcon {...promBuildInfo} /> : null),
+    [promBuildInfo]
+  );
 
   return (
     <Menu header={<InfoMenuHeader />}>
@@ -122,13 +143,33 @@ function InfoMenu() {
           )
         }
       />
+      {promBuildInfo && (
+        <Menu.Item
+          label={t('plugin-info.menu.prom-build-info', '{{application}} {{version}} {{buildDate}}', {
+            application: promBuildInfo.application || '?',
+            version: promBuildInfo.version,
+            buildDate: promBuildInfo.buildDate ? `(${promBuildInfo.buildDate})` : '',
+          })}
+          className={styles.buildInfoMenuItem}
+          component={BuildInfoMenuItemIcon}
+          onClick={() =>
+            window.open(
+              `${promBuildInfo.repository}/commit/${promBuildInfo.revision}`,
+              '_blank',
+              'noopener,noreferrer'
+            )
+          }
+        />
+      )}
     </Menu>
   );
 }
 
-export function PluginInfo() {
+type PluginInfoProps = { getPrometheusBuildInfo?: () => Promise<PrometheusBuildInfo | undefined> };
+
+export function PluginInfo({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
   return (
-    <Dropdown overlay={() => <InfoMenu />} placement="bottom-end">
+    <Dropdown overlay={() => <InfoMenu getPrometheusBuildInfo={getPrometheusBuildInfo} />} placement="bottom-end">
       <ToolbarButton
         icon="info-circle"
         variant="canvas"
@@ -148,5 +189,10 @@ const getStyles = (theme: GrafanaTheme2) => ({
   subTitle: css`
     color: ${theme.colors.text.secondary};
     font-size: ${theme.typography.bodySmall.fontSize};
+  `,
+  // Pushes the label right to make room for the absolutely-positioned icon overlay.
+  // 1.5 (menu padding) + 2 (icon 16px) + 1 (gap 8px) = 4.5 spacing units
+  buildInfoMenuItem: css`
+    padding-left: ${theme.spacing(4.5)} !important;
   `,
 });

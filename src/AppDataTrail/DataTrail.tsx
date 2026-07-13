@@ -364,7 +364,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       reportExploreMetrics('configure_panel_opened', { metricType: metric.type });
 
       this.state.drawer.open({
-        title: t('data-trail.configure-drawer.title', 'Configure the Prometheus function'),
+        title: t('data-trail.configure-drawer.title', 'Configure the PromQL function'),
         subTitle: `${metric.name} (${metric.type})`,
         body: new ConfigurePanelForm({ metric }),
       });
@@ -496,6 +496,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     });
   };
 
+  private getPrometheusBuildInfo = async () => {
+    return this.datasourceHelper.getPrometheusBuildInfo();
+  };
+
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const {
       controls,
@@ -561,7 +565,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
                   {controls.map((control) => (
                     <control.Component key={control.state.key} model={control} />
                   ))}
-                  <PluginHeaderToolbar kgAnnotationToggle={kgAnnotationToggle} />
+                  <PluginHeaderToolbar
+                    kgAnnotationToggle={kgAnnotationToggle}
+                    getPrometheusBuildInfo={model.getPrometheusBuildInfo}
+                  />
                 </Stack>
               </div>
             )}
