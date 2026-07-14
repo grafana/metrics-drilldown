@@ -45,7 +45,7 @@ jobs:
           RSDOCTOR: true
 
       - name: RsDoctor Bundle Analysis
-        uses: web-infra-dev/rsdoctor-action@main
+        uses: web-infra-dev/rsdoctor-action@96c3d1f7e1d2abf41c1203c3486364c9c4561b60 # main
         with:
           file_path: 'dist/rsdoctor-data.json'
           target_branch: 'main'
