@@ -1,9 +1,9 @@
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { merge } from 'webpack-merge';
 
-import projectConfig from './webpack.config';
+import projectConfig from './rspack.config';
 
-import type { Configuration } from 'webpack';
+import type { Configuration } from '@rspack/core';
 
 const config = async (env): Promise<Configuration> => {
   const baseConfig = await projectConfig(env);
