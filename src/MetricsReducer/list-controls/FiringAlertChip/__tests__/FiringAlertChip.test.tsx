@@ -1,7 +1,6 @@
+import { sceneGraph } from '@grafana/scenes';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-
-import { sceneGraph } from '@grafana/scenes';
 
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
