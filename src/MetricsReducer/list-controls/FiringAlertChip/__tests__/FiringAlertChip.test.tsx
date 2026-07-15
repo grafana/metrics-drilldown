@@ -1,10 +1,11 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { sceneGraph } from '@grafana/scenes';
+
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
-import { fetchFiringAlertMetrics } from '../../MetricsSorter/fetchers/fetchFiringAlertMetrics';
 import { FiringAlertChip } from '../FiringAlertChip';
 
 // =============================================================================
@@ -19,12 +20,6 @@ jest.mock('shared/tracking/interactions', () => ({
   reportExploreMetrics: jest.fn(),
 }));
 
-jest.mock('../../MetricsSorter/fetchers/fetchFiringAlertMetrics', () => ({
-  fetchFiringAlertMetrics: jest.fn(),
-}));
-
-// Mock scene graph ancestry — FiringAlertChip calls sceneGraph.getAncestor for
-// count computation; when there is no real scene, suppress the error gracefully.
 jest.mock('@grafana/scenes', () => {
   const actual = jest.requireActual('@grafana/scenes');
   return {
@@ -34,6 +29,7 @@ jest.mock('@grafana/scenes', () => {
       getAncestor: jest.fn().mockReturnValue({
         state: { enginesMap: new Map() },
       }),
+      findByKeyAndType: jest.fn(),
       lookupVariable: jest.fn().mockReturnValue({
         state: { options: [] },
       }),
@@ -43,7 +39,7 @@ jest.mock('@grafana/scenes', () => {
 
 const mockEvaluateFeatureFlag = evaluateFeatureFlag as jest.Mock;
 const mockReportExploreMetrics = reportExploreMetrics as jest.Mock;
-const mockFetchFiringAlertMetrics = fetchFiringAlertMetrics as jest.Mock;
+const mockFindByKeyAndType = sceneGraph.findByKeyAndType as jest.Mock;
 
 // =============================================================================
 // HELPERS
@@ -51,6 +47,12 @@ const mockFetchFiringAlertMetrics = fetchFiringAlertMetrics as jest.Mock;
 
 function buildFiringMap(entries: Array<[string, number]>): Map<string, number> {
   return new Map(entries);
+}
+
+function mockMetricsSorterWith(map: Map<string, number>) {
+  mockFindByKeyAndType.mockReturnValue({
+    getFiringAlertCounts: jest.fn().mockResolvedValue(map),
+  });
 }
 
 async function activateChip(chip: FiringAlertChip) {
@@ -73,7 +75,6 @@ describe('FiringAlertChip', () => {
   describe('feature flag disabled', () => {
     it('renders nothing when feature flag is off', async () => {
       mockEvaluateFeatureFlag.mockResolvedValue(false);
-      mockFetchFiringAlertMetrics.mockResolvedValue(buildFiringMap([]));
 
       const chip = new FiringAlertChip();
       await activateChip(chip);
@@ -88,7 +89,7 @@ describe('FiringAlertChip', () => {
       const chip = new FiringAlertChip();
       await activateChip(chip);
 
-      expect(mockFetchFiringAlertMetrics).not.toHaveBeenCalled();
+      expect(mockFindByKeyAndType).not.toHaveBeenCalled();
     });
   });
 
@@ -98,8 +99,7 @@ describe('FiringAlertChip', () => {
     });
 
     it('shows spinner while loading', async () => {
-      // Never resolve to keep loading state
-      mockFetchFiringAlertMetrics.mockReturnValue(new Promise(() => {}));
+      mockMetricsSorterWith(buildFiringMap([]));
 
       const chip = new FiringAlertChip();
       // Manually set visible before render to simulate flag resolved
@@ -110,7 +110,7 @@ describe('FiringAlertChip', () => {
     });
 
     it('renders chip with count label after load', async () => {
-      mockFetchFiringAlertMetrics.mockResolvedValue(
+      mockMetricsSorterWith(
         buildFiringMap([['http_requests_total', 2], ['cpu_usage', 1]])
       );
 
@@ -126,7 +126,7 @@ describe('FiringAlertChip', () => {
     });
 
     it('chip is inactive (not pressed) by default', async () => {
-      mockFetchFiringAlertMetrics.mockResolvedValue(
+      mockMetricsSorterWith(
         buildFiringMap([['http_requests_total', 1]])
       );
 
@@ -142,7 +142,7 @@ describe('FiringAlertChip', () => {
     describe('toggle behaviour', () => {
       it('toggles to active on click and publishes EventFiltersChanged with metric names', async () => {
         const firingMap = buildFiringMap([['http_requests_total', 1], ['cpu_usage', 2]]);
-        mockFetchFiringAlertMetrics.mockResolvedValue(firingMap);
+        mockMetricsSorterWith(firingMap);
 
         const chip = new FiringAlertChip();
         await activateChip(chip);
@@ -167,7 +167,7 @@ describe('FiringAlertChip', () => {
 
       it('toggles to inactive on second click and publishes empty filters', async () => {
         const firingMap = buildFiringMap([['http_requests_total', 1]]);
-        mockFetchFiringAlertMetrics.mockResolvedValue(firingMap);
+        mockMetricsSorterWith(firingMap);
 
         const chip = new FiringAlertChip();
         await activateChip(chip);
@@ -190,7 +190,7 @@ describe('FiringAlertChip', () => {
 
       it('fires tracking event with activated + matching_count on toggle on', async () => {
         const firingMap = buildFiringMap([['http_requests_total', 1]]);
-        mockFetchFiringAlertMetrics.mockResolvedValue(firingMap);
+        mockMetricsSorterWith(firingMap);
 
         const chip = new FiringAlertChip();
         await activateChip(chip);
@@ -207,7 +207,7 @@ describe('FiringAlertChip', () => {
 
       it('fires tracking event with deactivated on toggle off', async () => {
         const firingMap = buildFiringMap([['http_requests_total', 1]]);
-        mockFetchFiringAlertMetrics.mockResolvedValue(firingMap);
+        mockMetricsSorterWith(firingMap);
 
         const chip = new FiringAlertChip();
         await activateChip(chip);
@@ -225,7 +225,7 @@ describe('FiringAlertChip', () => {
 
     describe('edge cases', () => {
       it('shows count 0 and is disabled when fetch returns empty map', async () => {
-        mockFetchFiringAlertMetrics.mockResolvedValue(new Map());
+        mockMetricsSorterWith(new Map());
 
         const chip = new FiringAlertChip();
         await activateChip(chip);
@@ -237,7 +237,7 @@ describe('FiringAlertChip', () => {
       });
 
       it('shows count 0 when fetch returns empty map (internal failure)', async () => {
-        mockFetchFiringAlertMetrics.mockResolvedValue(new Map());
+        mockMetricsSorterWith(new Map());
 
         const chip = new FiringAlertChip();
         await activateChip(chip);

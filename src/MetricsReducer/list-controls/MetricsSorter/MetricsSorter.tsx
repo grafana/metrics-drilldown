@@ -150,6 +150,10 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   private activationHandler() {
     const sortByVar = sceneGraph.getVariables(this).getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
 
+    if (!this.supportedSortByOptions.has(sortByVar.getValue() as SortingOption)) {
+      sortByVar.changeValueTo('default');
+    }
+
     evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts').then((enabled) => {
       if (!enabled) {
         this.supportedSortByOptions.delete('firing-alerts');
@@ -158,11 +162,11 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
           .filter((part) => !part.includes('firing-alerts'))
           .join(',');
         sortByVar.setState({ query });
-        sortByVar.validateAndUpdate();
-      }
+        sortByVar.refreshOptions();
 
-      if (!this.supportedSortByOptions.has(sortByVar.getValue() as SortingOption)) {
-        sortByVar.changeValueTo('default');
+        if ((sortByVar.getValue() as SortingOption) === 'firing-alerts') {
+          sortByVar.changeValueTo('default');
+        }
       }
     });
 
