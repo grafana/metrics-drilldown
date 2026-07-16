@@ -147,6 +147,164 @@
           "isPaused": false
         }
       ]
+    },
+    {
+      "orgId": 1,
+      "name": "test-firing-alerts",
+      "folder": "test-sorting",
+      "interval": "1m",
+      "rules": [
+        {
+          "uid": "firing-qa-01",
+          "title": "qa-always-firing-up",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": { "from": 600, "to": 0 },
+              "datasourceUid": "gdev-prometheus",
+              "model": {
+                "datasource": { "type": "prometheus", "uid": "gdev-prometheus" },
+                "editorMode": "code",
+                "expr": "up{job=\"prometheus\"}",
+                "hide": false,
+                "instant": true,
+                "intervalMs": 1000,
+                "legendFormat": "__auto",
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "relativeTimeRange": { "from": 0, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [0], "type": "gt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["C"] },
+                    "reducer": { "params": [], "type": "last" },
+                    "type": "query"
+                  }
+                ],
+                "datasource": { "type": "__expr__", "uid": "__expr__" },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "0s",
+          "isPaused": false
+        },
+        {
+          "uid": "firing-qa-02",
+          "title": "qa-always-firing-http-requests",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": { "from": 600, "to": 0 },
+              "datasourceUid": "gdev-prometheus",
+              "model": {
+                "datasource": { "type": "prometheus", "uid": "gdev-prometheus" },
+                "editorMode": "code",
+                "expr": "sum(rate(grafana_http_request_duration_seconds_sum[5m]))",
+                "hide": false,
+                "instant": true,
+                "intervalMs": 1000,
+                "legendFormat": "__auto",
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "relativeTimeRange": { "from": 0, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [-1], "type": "gt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["C"] },
+                    "reducer": { "params": [], "type": "last" },
+                    "type": "query"
+                  }
+                ],
+                "datasource": { "type": "__expr__", "uid": "__expr__" },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "0s",
+          "isPaused": false
+        },
+        {
+          "uid": "firing-qa-03",
+          "title": "qa-always-firing-api-responses",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": { "from": 600, "to": 0 },
+              "datasourceUid": "gdev-prometheus",
+              "model": {
+                "datasource": { "type": "prometheus", "uid": "gdev-prometheus" },
+                "editorMode": "code",
+                "expr": "sum(grafana_api_response_status_total)",
+                "hide": false,
+                "instant": true,
+                "intervalMs": 1000,
+                "legendFormat": "__auto",
+                "maxDataPoints": 43200,
+                "range": false,
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "relativeTimeRange": { "from": 0, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [0], "type": "gt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["C"] },
+                    "reducer": { "params": [], "type": "last" },
+                    "type": "query"
+                  }
+                ],
+                "datasource": { "type": "__expr__", "uid": "__expr__" },
+                "expression": "A",
+                "intervalMs": 1000,
+                "maxDataPoints": 43200,
+                "refId": "C",
+                "type": "threshold"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "0s",
+          "isPaused": false
+        }
+      ]
     }
   ]
 }

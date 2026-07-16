@@ -20,6 +20,7 @@ import { InlineBanner } from 'App/InlineBanner';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
+import { FiringAlertBadge } from 'shared/GmdVizPanel/components/FiringAlertBadge';
 import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getTrailFor } from 'shared/utils/utils';
@@ -87,7 +88,10 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
                 metric: metricName,
                 panelOptions: {
                   fixedColorIndex: colorIndex,
-                  headerActions: ({ metric }) => [new SelectAction({ metric: metric.name, variant: 'secondary' })],
+                  headerActions: ({ metric }) => [
+                    new FiringAlertBadge({ metric: metric.name }),
+                    new SelectAction({ metric: metric.name, variant: 'secondary' }),
+                  ],
                 },
                 queryOptions: {
                   customRateInterval: entry?.customRateInterval,

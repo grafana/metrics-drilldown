@@ -21,7 +21,7 @@ import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { EventFiltersChanged } from '../../SideBar/sections/MetricsFilterSection/EventFiltersChanged';
-import { fetchFiringAlertMetrics } from '../MetricsSorter/fetchers/fetchFiringAlertMetrics';
+import { MetricsSorter } from '../MetricsSorter/MetricsSorter';
 
 const URL_PARAM_KEY = 'filter-firing-alerts';
 
@@ -82,7 +82,8 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
 
     this.setState({ visible: true });
 
-    const metricsMap = await fetchFiringAlertMetrics();
+    const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+    const metricsMap = await metricsSorter.getFiringAlertCounts();
     this.setState({ firingAlertMetrics: metricsMap, loading: false });
 
     this.updateMatchingCount();
