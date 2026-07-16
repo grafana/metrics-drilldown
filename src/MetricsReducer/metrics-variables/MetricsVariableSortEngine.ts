@@ -1,3 +1,4 @@
+import { t } from '@grafana/i18n';
 import { sceneGraph, SceneVariableValueChangedEvent, type QueryVariable } from '@grafana/scenes';
 
 import { sortRelatedMetrics } from 'MetricScene/RelatedMetrics/sortRelatedMetrics';
@@ -47,6 +48,10 @@ export class MetricsVariableSortEngine {
         sortedMetrics = await this.sortByUsage(metrics, sortBy);
         break;
 
+      case 'firing-alerts':
+        sortedMetrics = await this.sortByFiringAlerts(metrics);
+        break;
+
       case 'related':
         sortedMetrics = sortRelatedMetrics(metrics, options.metric);
         break;
@@ -82,6 +87,24 @@ export class MetricsVariableSortEngine {
       const error = typeof err === 'string' ? new Error(err) : (err as Error);
       logger.error(error, {
         usageType,
+      });
+      return metrics;
+    }
+  }
+
+  private async sortByFiringAlerts(metrics: string[]) {
+    try {
+      const metricsSorter = sceneGraph.findByKeyAndType(this.variable, 'metrics-sorter', MetricsSorter);
+      if (!metricsSorter) {
+        logger.warn('Metrics sorter not found. Returning unsorted metrics.');
+        return metrics;
+      }
+      const firingAlertCounts = await metricsSorter.getFiringAlertCountsAsRecord();
+      return sortMetricsByCount(metrics, firingAlertCounts);
+    } catch (err) {
+      const error = typeof err === 'string' ? new Error(err) : (err as Error);
+      logger.error(error, {
+        message: t('metrics-variable-sort-engine.error.firing-alerts', 'Failed to sort by firing alerts'),
       });
       return metrics;
     }

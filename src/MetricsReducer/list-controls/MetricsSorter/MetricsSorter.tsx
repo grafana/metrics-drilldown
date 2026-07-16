@@ -13,14 +13,16 @@ import {
 import React from 'react';
 
 import { localeCompare } from 'MetricsReducer/helpers/localCompare';
+import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { logger } from 'shared/logger/logger';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
 import { EventSortByChanged } from './events/EventSortByChanged';
 import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
+import { fetchFiringAlertMetrics } from './fetchers/fetchFiringAlertMetrics';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
-export type SortingOption = 'default' | 'alphabetical' | 'alphabetical-reversed' | 'dashboard-usage' | 'alerting-usage';
+export type SortingOption = 'default' | 'alphabetical' | 'alphabetical-reversed' | 'dashboard-usage' | 'alerting-usage' | 'firing-alerts';
 
 const MAX_RECENT_METRICS = 6;
 const RECENT_METRICS_EXPIRY_DAYS = 30;
@@ -99,6 +101,7 @@ function getSortByOptions(): VariableValueOption[] {
     { label: t('metrics-sorter.option.alphabetical-reversed', 'Alphabetical [Z-A]'), value: 'alphabetical-reversed' },
     { label: t('metrics-sorter.option.dashboard-usage', 'Dashboard Usage'), value: 'dashboard-usage' },
     { label: t('metrics-sorter.option.alerting-usage', 'Alerting Usage'), value: 'alerting-usage' },
+    { label: t('metrics-sorter.option.firing-alerts', 'Firing Alerts'), value: 'firing-alerts' },
   ];
 }
 
@@ -114,8 +117,13 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     'alphabetical-reversed',
     'dashboard-usage',
     'default',
+    'firing-alerts',
   ]);
   private usageFetcher = new MetricUsageFetcher();
+  private firingAlertCache: { data: Map<string, number> | null; promise: Promise<Map<string, number>> | null } = {
+    data: null,
+    promise: null,
+  };
 
   constructor(state: Partial<MetricsSorterState>) {
     super({
@@ -143,9 +151,24 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     const sortByVar = sceneGraph.getVariables(this).getByName(VAR_WINGMAN_SORT_BY) as CustomVariable;
 
     if (!this.supportedSortByOptions.has(sortByVar.getValue() as SortingOption)) {
-      // Migration for the old sortBy values
       sortByVar.changeValueTo('default');
     }
+
+    evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts').then((enabled) => {
+      if (!enabled) {
+        this.supportedSortByOptions.delete('firing-alerts');
+        const query = sortByVar.state.query
+          .split(',')
+          .filter((part) => !part.includes('firing-alerts'))
+          .join(',');
+        sortByVar.setState({ query });
+        sortByVar.refreshOptions();
+
+        if ((sortByVar.getValue() as SortingOption) === 'firing-alerts') {
+          sortByVar.changeValueTo('default');
+        }
+      }
+    });
 
     this._subs.add(
       sortByVar.subscribeToState((newState, prevState) => {
@@ -169,6 +192,29 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       }
       return metricsToCounts;
     });
+  }
+
+  public getFiringAlertCounts(): Promise<Map<string, number>> {
+    if (this.firingAlertCache.data) {
+      return Promise.resolve(this.firingAlertCache.data);
+    }
+    if (this.firingAlertCache.promise) {
+      return this.firingAlertCache.promise;
+    }
+    this.firingAlertCache.promise = fetchFiringAlertMetrics().then((data) => {
+      this.firingAlertCache.data = data;
+      this.firingAlertCache.promise = null;
+      return data;
+    });
+    return this.firingAlertCache.promise;
+  }
+
+  public getFiringAlertCountForMetric(metric: string): Promise<number> {
+    return this.getFiringAlertCounts().then((map) => map.get(metric) ?? 0);
+  }
+
+  public getFiringAlertCountsAsRecord(): Promise<Record<string, number>> {
+    return this.getFiringAlertCounts().then((map) => Object.fromEntries(map));
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
