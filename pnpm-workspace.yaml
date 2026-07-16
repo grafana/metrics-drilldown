@@ -42,4 +42,5 @@ overrides:
   js-cookie: ^3.0.7
   qs: ^6.15.2
   react-data-grid: 7.0.0-beta.56
+  '@lezer/common': ^1.5.2
   websocket-driver: '>=0.7.5'
