@@ -77,7 +77,7 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
     const trail = getTrailFor(this);
     const prefConfig = getPreferredConfigForMetric(metric.name);
     const entry = trail.state.sourceMetrics?.find((s) => s.metricName === metric.name);
-    const presets = await getConfigPresetsForMetric(metric.name, trail, entry?.metricType);
+    const presets = getConfigPresetsForMetric(metric.type);
 
     // if not found in the user preferences, we use the first preset
     // it always works because the presets are organized to always have the default one as the first element (see GmdVizPanel/config/presets)
