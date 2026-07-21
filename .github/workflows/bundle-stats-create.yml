@@ -1,19 +1,19 @@
-name: create bundle stats
+name: Bundle Analysis
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *' # Run once per day at midnight UTC
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
-  contents: 'read'
-  actions: 'write'
+  contents: write
+  pull-requests: write
 
 jobs:
-  build-stats:
+  bundle-analysis:
     runs-on: ubuntu-latest
 
     steps:
@@ -39,13 +39,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build frontend
-        run: pnpm run build --profile --json stats.json
+      - name: Build with RsDoctor analysis
+        run: pnpm run build
+        env:
+          RSDOCTOR: true
 
-      - name: Upload stats.json artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - name: RsDoctor Bundle Analysis
+        uses: web-infra-dev/rsdoctor-action@96c3d1f7e1d2abf41c1203c3486364c9c4561b60 # main
         with:
-          name: main-branch-stats
-          path: stats.json
-          retention-days: 90
-          overwrite: true
+          file_path: 'dist/rsdoctor-data.json'
+          target_branch: 'main'
