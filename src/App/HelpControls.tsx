@@ -1,9 +1,8 @@
 import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
-import { Stack, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { PluginInfo } from 'AppDataTrail/header/PluginInfo/PluginInfo';
 
 export function HelpControls() {
@@ -11,10 +10,7 @@ export function HelpControls() {
 
   return (
     <div className={styles.container}>
-      <Stack direction="row" gap={1} alignItems="center">
-        <GiveFeedbackButton className={styles.feedbackStatic} />
-        <PluginInfo />
-      </Stack>
+      <PluginInfo />
     </div>
   );
 }
@@ -26,9 +22,6 @@ function getStyles(theme: GrafanaTheme2) {
       top: theme.spacing(2),
       right: theme.spacing(2),
       zIndex: theme.zIndex.dropdown,
-    }),
-    feedbackStatic: css({
-      position: 'static',
     }),
   };
 }

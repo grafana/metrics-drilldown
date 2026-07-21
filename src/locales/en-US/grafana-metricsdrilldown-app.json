@@ -96,9 +96,19 @@
   "filtered-metrics-variable": {
     "label": "Filtered Metrics"
   },
+  "firing-alert-badge": {
+    "tooltip_one": "{{count}} firing alert rule(s) reference this metric",
+    "tooltip_other": "{{count}} firing alert rule(s) reference this metric"
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "Remove firing alerts filter",
+    "aria-label-inactive": "Filter by firing alerts",
+    "label_one": "Has firing alerts ({{count}})",
+    "label_other": "Has firing alerts ({{count}})",
+    "tooltip-empty": "No metrics with firing alerts in the current filtered set"
+  },
   "give-feedback": {
-    "button": "Give feedback",
-    "tooltip": "Share your thoughts about Metrics in Grafana."
+    "button": "Give feedback"
   },
   "gmd-viz-panel": {
     "native-histogram": "Native Histogram",
@@ -212,11 +222,17 @@
       "alphabetical": "Alphabetical [A-Z]",
       "alphabetical-reversed": "Alphabetical [Z-A]",
       "dashboard-usage": "Dashboard Usage",
-      "default": "Default"
+      "default": "Default",
+      "firing-alerts": "Firing Alerts"
     }
   },
   "metrics-variable": {
     "label": "Metrics"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": "Failed to sort by firing alerts"
+    }
   },
   "onboarding": {
     "learn-more": "Check <2>our docs</2> to learn more or<5></5><6>try it online</6> in Grafana Play!",
@@ -253,7 +269,6 @@
       "contribute": "Contribute",
       "documentation": "Documentation",
       "grafana-version": "Grafana {{edition}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
       "report-issue": "Report an issue"
     }
   },
@@ -261,6 +276,11 @@
     "all-metrics": "All metric names",
     "tooltip": "View by the metric prefix. A metric prefix is a single word at the beginning of the metric name, relevant to the domain the metric belongs to.",
     "view-by-label": "View by"
+  },
+  "query-options": {
+    "aria-label": "Query options",
+    "title": "Query options",
+    "toggle-insights": "Toggle insights annotations"
   },
   "query-results": {
     "aria-label": "Instant query results",

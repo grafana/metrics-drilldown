@@ -81,8 +81,7 @@
     "label": "필터링된 메트릭"
   },
   "give-feedback": {
-    "button": "피드백 제출하기",
-    "tooltip": "Grafana에서 메트릭에 대한 의견을 공유하세요."
+    "button": "피드백 제출하기"
   },
   "gmd-viz-panel": {
     "native-histogram": "기본 히스토그램",

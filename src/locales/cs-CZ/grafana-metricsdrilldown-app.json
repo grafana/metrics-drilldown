@@ -84,8 +84,7 @@
     "label": "Filtrované metriky"
   },
   "give-feedback": {
-    "button": "Poskytnout zpětnou vazbu",
-    "tooltip": "Podělte se o svůj názor na metriky v Grafaně."
+    "button": "Poskytnout zpětnou vazbu"
   },
   "gmd-viz-panel": {
     "native-histogram": "Nativní histogram",

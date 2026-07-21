@@ -82,8 +82,7 @@
     "label": "Filtrerade mätvärden"
   },
   "give-feedback": {
-    "button": "Ge feedback",
-    "tooltip": "Berätta vad du tycker om Metrics i Grafana."
+    "button": "Ge feedback"
   },
   "gmd-viz-panel": {
     "native-histogram": "Inbyggt histogram",

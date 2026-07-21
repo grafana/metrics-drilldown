@@ -27,7 +27,6 @@ import {
 import { Modal, Stack, useStyles2 } from '@grafana/ui';
 import React, { createElement, useEffect } from 'react';
 
-import { GiveFeedbackButton } from 'AppDataTrail/header/GiveFeedbackButton';
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
 import { displaySuccess } from 'MetricsReducer/helpers/displayStatus';
 import { registerRuntimeDataSources } from 'MetricsReducer/helpers/registerRuntimeDataSources';
@@ -59,6 +58,11 @@ import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
 import { BinaryRatioLabelsDataSource } from '../MetricScene/Breakdown/BinaryRatioLabelsDataSource';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
+import { PluginHeaderToolbar } from './header/PluginHeaderToolbar';
+import { SelectNewMetricButton } from './header/SelectNewMetricButton';
+import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
+import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
+import { buildSourceMetricsOverride, parseCustomFunctionValues, parseMetricTypeValues } from './sourceMetricsUrlSync';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
@@ -67,11 +71,6 @@ import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
-import { PluginInfo } from './header/PluginInfo/PluginInfo';
-import { SelectNewMetricButton } from './header/SelectNewMetricButton';
-import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
-import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
-import { buildSourceMetricsOverride, parseCustomFunctionValues, parseMetricTypeValues } from './sourceMetricsUrlSync';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;
@@ -456,11 +455,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     });
   }
 
-  // we use the class field syntax with an arrow function to bind this properly so its usage is easier (see the component below)
-  private getPrometheusBuildInfo = async () => {
-    return this.datasourceHelper.getPrometheusBuildInfo();
-  };
-
   /**
    * Assuming that the change in filter was already reported with a cause other than `'adhoc_filter'`,
    * this will modify the adhoc filter variable and prevent the automatic reporting which would
@@ -563,15 +557,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
           <Stack direction="column" gap={1} grow={1}>
             {controls && !embeddedMini && (
               <div className={styles.controls} data-testid="app-controls">
-                <Stack direction="row" gap={1} alignItems="flex-end" wrap="wrap">
-                  {!embedded && <GiveFeedbackButton />}
+                <Stack direction="row" gap={1} alignItems="center" wrap="wrap">
                   {controls.map((control) => (
                     <control.Component key={control.state.key} model={control} />
                   ))}
-                  {kgAnnotationToggle && <kgAnnotationToggle.Component model={kgAnnotationToggle} />}
-                  <Stack direction="row" gap={0.5}>
-                    <PluginInfo getPrometheusBuildInfo={model.getPrometheusBuildInfo} />
-                  </Stack>
+                  <PluginHeaderToolbar kgAnnotationToggle={kgAnnotationToggle} />
                 </Stack>
               </div>
             )}
@@ -669,7 +659,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       minHeight: 0, // Allow body to shrink below its content size
     }),
     controls: css({
-      padding: theme.spacing(1, 0),
+      paddingBottom: theme.spacing(1),
       position: 'sticky',
       background,
       zIndex: theme.zIndex.navbarFixed,

@@ -205,6 +205,18 @@ type Interactions = {
   saved_query_loaded: {};
   // User loads a saved query from Query Library
   saved_query_loaded_from_library: {};
+  // User toggles the "Has firing alerts" filter chip in the toolbar
+  firing_alert_filter_toggled: {
+    action: 'activated' | 'deactivated';
+    matching_count: number;
+  };
+  // Firing alert metrics have been fetched from the ruler API
+  firing_alert_metrics_fetched: {
+    status: 'success' | 'error';
+    duration_ms: number;
+    metric_count: number;
+    rule_count: number;
+  };
 };
 
 type OtherEvents = {

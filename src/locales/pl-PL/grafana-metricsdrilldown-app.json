@@ -84,8 +84,7 @@
     "label": "Przefiltrowane wskaźniki"
   },
   "give-feedback": {
-    "button": "Przekaż opinię",
-    "tooltip": "Podziel się swoimi przemyśleniami na temat wskaźników w usłudze Grafana."
+    "button": "Przekaż opinię"
   },
   "gmd-viz-panel": {
     "native-histogram": "Histogram natywny",

@@ -12,6 +12,7 @@ import {
 import { Stack } from '@grafana/ui';
 import React from 'react';
 
+import { FiringAlertChip } from './FiringAlertChip/FiringAlertChip';
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsSorter } from './MetricsSorter/MetricsSorter';
 import { type CountsProvider } from './QuickSearch/CountsProvider/CountsProvider';
@@ -42,6 +43,10 @@ export class ListControls extends EmbeddedScene {
               countsProvider: new MetricVariableCountsProvider() as unknown as CountsProvider,
               ariaLabel: t('list-controls.search-aria-label', 'Quick search metrics'),
             }),
+          }),
+          new SceneFlexItem({
+            width: 'auto',
+            body: new FiringAlertChip(),
           }),
           new SceneFlexItem({
             width: 'auto',

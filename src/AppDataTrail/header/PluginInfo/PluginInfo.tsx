@@ -1,18 +1,19 @@
 import { css } from '@emotion/css';
-import { usePluginContext, type GrafanaTheme2 } from '@grafana/data';
+import { usePluginContext, type FeatureToggles, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
-import { Button, Dropdown, Menu, useStyles2 } from '@grafana/ui';
-import React, { useEffect, useState } from 'react';
+import { Dropdown, Menu, ToolbarButton, useStyles2 } from '@grafana/ui';
+import React from 'react';
 
-import { type PrometheusBuildInfo } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
-import { logger } from 'shared/logger/logger';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { GIT_COMMIT } from 'version';
 
 import { PluginLogo } from './PluginLogo';
 
 const pluginCommitSha: string = GIT_COMMIT;
 const pluginCommitURL = `https://github.com/grafana/metrics-drilldown/commit/${pluginCommitSha}`;
+const FEEDBACK_FORM_URL = 'https://forms.gle/5E9JGAuHqTcS5YJ29';
+const feedbackButtonKey = 'feedbackButton' as keyof FeatureToggles;
 
 const { buildInfo: grafanaBuildInfo } = config;
 
@@ -38,25 +39,11 @@ function InfoMenuHeader() {
   );
 }
 
-function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
-  const styles = useStyles2(getStyles);
+function InfoMenu() {
+  const feedbackButtonEnabled = config.featureToggles[feedbackButtonKey] ?? true;
 
   const isDev = pluginCommitSha === 'dev';
   const shortCommitSha = isDev ? pluginCommitSha : pluginCommitSha.slice(0, 8);
-
-  const [promBuildInfo, setPromBuildInfo] = useState<PrometheusBuildInfo>();
-  useEffect(() => {
-    if (!getPrometheusBuildInfo) {
-      return;
-    }
-    getPrometheusBuildInfo()
-      .then((info) => setPromBuildInfo(info))
-      .catch((e) => {
-        logger.warn('Error while fetching Prometheus build info!');
-        logger.warn(e);
-        setPromBuildInfo(undefined);
-      });
-  }, [getPrometheusBuildInfo]);
 
   return (
     <Menu header={<InfoMenuHeader />}>
@@ -99,6 +86,16 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
           )
         }
       />
+      {feedbackButtonEnabled && (
+        <Menu.Item
+          label={t('give-feedback.button', 'Give feedback')}
+          icon="comment-alt-message"
+          onClick={() => {
+            reportExploreMetrics('give_feedback_clicked', {});
+            window.open(FEEDBACK_FORM_URL, '_blank', 'noopener,noreferrer');
+          }}
+        />
+      )}
       <Menu.Item
         label={t('plugin-info.menu.report-issue', 'Report an issue')}
         icon="bug"
@@ -125,35 +122,18 @@ function InfoMenu({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
           )
         }
       />
-      {promBuildInfo && (
-        <Menu.Item
-          className={styles.promBuildInfo}
-          label={t('plugin-info.menu.prom-build-info', '{{application}} {{version}} {{buildDate}}', {
-            application: promBuildInfo.application || '?',
-            version: promBuildInfo.version,
-            buildDate: promBuildInfo.buildDate ? `(${promBuildInfo.buildDate})` : '',
-          })}
-          icon="gf-prometheus"
-          onClick={() =>
-            window.open(`${promBuildInfo.repository}/commit/${promBuildInfo.revision}`, '_blank', 'noopener,noreferrer')
-          }
-        />
-      )}
     </Menu>
   );
 }
 
-type PluginInfoProps = { getPrometheusBuildInfo?: () => Promise<PrometheusBuildInfo | undefined> };
-
-export function PluginInfo({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>) {
+export function PluginInfo() {
   return (
-    <Dropdown overlay={() => <InfoMenu getPrometheusBuildInfo={getPrometheusBuildInfo} />} placement="bottom-end">
-      <Button
+    <Dropdown overlay={() => <InfoMenu />} placement="bottom-end">
+      <ToolbarButton
         icon="info-circle"
-        variant="secondary"
+        variant="canvas"
         tooltip={t('plugin-info.button.tooltip', 'Plugin info')}
-        tooltipPlacement="top"
-        title={t('plugin-info.button.title', 'Plugin info')}
+        aria-label={t('plugin-info.button.title', 'Plugin info')}
         data-testid="plugin-info-button"
       />
     </Dropdown>
@@ -161,24 +141,6 @@ export function PluginInfo({ getPrometheusBuildInfo }: Readonly<PluginInfoProps>
 }
 
 const getStyles = (theme: GrafanaTheme2) => ({
-  button: css`
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 32px;
-    height: 32px;
-    line-height: 30px;
-    border: 1px solid ${theme.colors.border.weak};
-    border-radius: 2px;
-    border-left: 0;
-    color: ${theme.colors.text.primary};
-    background: ${theme.colors.background.secondary};
-
-    &:hover {
-      border-color: ${theme.colors.border.medium};
-      background-color: ${theme.colors.background.canvas};
-    }
-  `,
   menuHeader: css`
     padding: ${theme.spacing(0.5, 1)};
     white-space: nowrap;
@@ -186,10 +148,5 @@ const getStyles = (theme: GrafanaTheme2) => ({
   subTitle: css`
     color: ${theme.colors.text.secondary};
     font-size: ${theme.typography.bodySmall.fontSize};
-  `,
-  promBuildInfo: css`
-    & svg {
-      color: #e5502a;
-    }
   `,
 });

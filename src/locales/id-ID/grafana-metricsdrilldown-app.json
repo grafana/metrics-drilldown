@@ -81,8 +81,7 @@
     "label": "Metrik yang Difilter"
   },
   "give-feedback": {
-    "button": "Berikan umpan balik",
-    "tooltip": "Bagikan pendapat Anda tentang Metrik di Grafana."
+    "button": "Berikan umpan balik"
   },
   "gmd-viz-panel": {
     "native-histogram": "Histogram Asli",

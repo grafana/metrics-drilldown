@@ -40,6 +40,7 @@ const goffFeatureFlags = {
     valueType: 'boolean',
     values: [true, false] as const,
     defaultValue: false,
+    featureToggle: 'metricsExploreFireAlerts',
   },
 } as const satisfies Record<string, FeatureFlag>;
 
@@ -52,24 +53,27 @@ const goffFeatureFlags = {
  * @param trackingKey - If provided, the feature flag value will be tracked using the given key.
  */
 type FeatureFlag =
-  | { valueType: 'boolean'; values: readonly boolean[]; defaultValue: boolean; trackingKey?: string }
+  | { valueType: 'boolean'; values: readonly boolean[]; defaultValue: boolean; trackingKey?: string; featureToggle?: string }
   | {
       valueType: 'object';
       values: readonly JsonValue[];
       defaultValue: JsonValue;
       trackingKey?: string;
+      featureToggle?: string;
     }
   | {
       valueType: 'number';
       values: readonly number[];
       defaultValue: number;
       trackingKey?: string;
+      featureToggle?: string;
     }
   | {
       valueType: 'string';
       values: readonly string[];
       defaultValue: string;
       trackingKey?: string;
+      featureToggle?: string;
     };
 
 const featureFlagNames = getObjectKeys(goffFeatureFlags);
@@ -147,6 +151,14 @@ function waitForClientReady(client: Client): Promise<void> {
  * @returns The value of the feature flag.
  */
 export async function evaluateFeatureFlag<T extends keyof typeof goffFeatureFlags>(flagName: T): Promise<FlagValue<T>> {
+  const flagDef = goffFeatureFlags[flagName];
+  if ('featureToggle' in flagDef && flagDef.featureToggle) {
+    const toggle = (config.featureToggles as Record<string, boolean | undefined>)[flagDef.featureToggle];
+    if (toggle !== undefined) {
+      return toggle as FlagValue<T>;
+    }
+  }
+
   try {
     const client = OpenFeature.getClient(OPEN_FEATURE_DOMAIN);
     await waitForClientReady(client);
