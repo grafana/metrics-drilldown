@@ -1,6 +1,6 @@
 import { t } from '@grafana/i18n';
 import { Alert, type AlertVariant } from '@grafana/ui';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { ensureErrorObject } from './errorUtils';
 import { logger, type ErrorContext } from '../shared/logger/logger';
@@ -28,17 +28,21 @@ function formatErrorMessage(error: any) {
 }
 
 export function InlineBanner({ severity, title, message, error, errorContext, children }: Readonly<InlineBannerProps>) {
-  let errorObject;
+  const lastReportedError = useRef<unknown>(null);
 
-  if (error) {
-    errorObject = ensureErrorObject(error, t('inline-banner.unknown-error', 'Unknown error!'));
+  useEffect(() => {
+    if (error && error !== lastReportedError.current) {
+      lastReportedError.current = error;
+      const errorObj = ensureErrorObject(error, t('inline-banner.unknown-error', 'Unknown error!'));
+      logger.error(errorObj, {
+        ...(errorObj.cause || {}),
+        ...errorContext,
+        bannerTitle: title,
+      });
+    }
+  }, [error, errorContext, title]);
 
-    logger.error(errorObject, {
-      ...(errorObject.cause || {}),
-      ...errorContext,
-      bannerTitle: title,
-    });
-  }
+  const errorObject = error ? ensureErrorObject(error, t('inline-banner.unknown-error', 'Unknown error!')) : undefined;
 
   return (
     <Alert title={title} severity={severity}>
