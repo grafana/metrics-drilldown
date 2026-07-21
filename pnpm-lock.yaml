@@ -130,8 +130,8 @@ importers:
         specifier: ^3.2.2
         version: 3.3.3
       '@grafana/tsconfig':
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.2.0
+        version: 2.2.0
       '@jest/globals':
         specifier: ^30.2.0
         version: 30.2.0
@@ -921,8 +921,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@grafana/tsconfig@2.0.1':
-    resolution: {integrity: sha512-yGNQWQDlxFfklzMfk0i8qnDqKOvIGc0Aqe62zLS4LTqptkhnyLEVsdaVmX99m3QFOcBiiFn8scREDzGeF2iNvQ==}
+  '@grafana/tsconfig@2.2.0':
+    resolution: {integrity: sha512-hhhXetqhSKTfgErStfWVPhqo4JPi+lNqBJNhBF6RT4ZIM4vwKxEfnfsyswT+NwHIXNrOz23xoOGeKWPpxmaHWQ==}
 
   '@grafana/ui@13.1.0':
     resolution: {integrity: sha512-6eOUQ4PXv965r2Nnk9VczQuKh2gko/FLHIWXYl+cULclYDQsPD09l9VWgl8x0tRKo1tf3Sl4VLLtcChFMYbnwg==}
@@ -7065,7 +7065,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.29.7
       '@babel/helper-validator-option': 7.29.7
-      browserslist: 4.28.1
+      browserslist: 4.28.6
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -7677,7 +7677,7 @@ snapshots:
 
   '@grafana/e2e-selectors@13.1.0':
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.5
       typescript: 6.0.2
 
   '@grafana/e2e-selectors@13.1.0-24448182242':
@@ -7902,7 +7902,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@grafana/tsconfig@2.0.1': {}
+  '@grafana/tsconfig@2.2.0': {}
 
   '@grafana/ui@13.1.0(@babel/runtime@7.29.7)(@codemirror/language@6.12.4)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@18.3.28)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)':
     dependencies:
