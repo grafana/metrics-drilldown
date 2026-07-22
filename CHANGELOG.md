@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.3.0](https://github.com/grafana/metrics-drilldown/compare/v2.2.0...v2.3.0) (2026-07-21)
+
+
+### 🎉 Features
+
+* **list-controls:** add "Has firing alerts" filter chip to metrics toolbar ([#1281](https://github.com/grafana/metrics-drilldown/issues/1281)) ([48c8503](https://github.com/grafana/metrics-drilldown/commit/48c850395f3a44bfd853486219350efa07483562))
+* **sea-of-metrics:** Phase 1 — firing alerts sort, visual badges, and instrumentation ([#1342](https://github.com/grafana/metrics-drilldown/issues/1342)) ([fc33fca](https://github.com/grafana/metrics-drilldown/commit/fc33fca923330e8b3d837aad8dfc44bef8292f4c))
+
+
+### 🐛 Bug Fixes
+
+* **deps:** resolve pnpm audit vulnerabilities ([#1347](https://github.com/grafana/metrics-drilldown/issues/1347)) ([c85c02c](https://github.com/grafana/metrics-drilldown/commit/c85c02ce5547a157ae7dd6e9166fe4d9fc9d09a0))
+* **faro:** deduplicate InlineBanner error reporting to prevent SLO breach ([#1349](https://github.com/grafana/metrics-drilldown/issues/1349)) ([6e207e7](https://github.com/grafana/metrics-drilldown/commit/6e207e7c357349b4897972a3c90d7de374272091))
+
 ## [2.2.0](https://github.com/grafana/metrics-drilldown/compare/v2.1.0...v2.2.0) (2026-07-02)
 
 
