@@ -96,6 +96,10 @@
   "filtered-metrics-variable": {
     "label": "Filtered Metrics"
   },
+  "firing-alert-badge": {
+    "tooltip_one": "{{count}} firing alert rule(s) reference this metric",
+    "tooltip_other": "{{count}} firing alert rule(s) reference this metric"
+  },
   "firing-alert-chip": {
     "aria-label-active": "Remove firing alerts filter",
     "aria-label-inactive": "Filter by firing alerts",
@@ -218,11 +222,17 @@
       "alphabetical": "Alphabetical [A-Z]",
       "alphabetical-reversed": "Alphabetical [Z-A]",
       "dashboard-usage": "Dashboard Usage",
-      "default": "Default"
+      "default": "Default",
+      "firing-alerts": "Firing Alerts"
     }
   },
   "metrics-variable": {
     "label": "Metrics"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": "Failed to sort by firing alerts"
+    }
   },
   "onboarding": {
     "learn-more": "Check <2>our docs</2> to learn more or<5></5><6>try it online</6> in Grafana Play!",

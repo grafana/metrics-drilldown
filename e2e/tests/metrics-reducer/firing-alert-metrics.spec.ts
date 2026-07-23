@@ -40,7 +40,7 @@ test.describe('Firing alert metrics - Ruler API integration', () => {
     }
   });
 
-  test('Ruler endpoint with state=firing filter returns empty groups when no alerts are firing', async ({ page }) => {
+  test('Ruler endpoint with state=firing returns only the expected always-firing rules', async ({ page }) => {
     const response = await page.request.get(
       `${GRAFANA_RULER_RULES_URL}?state=firing&limit_alerts=0`
     );
@@ -52,12 +52,30 @@ test.describe('Firing alert metrics - Ruler API integration', () => {
     expect(body.status).toBe('success');
     expect(Array.isArray(body.data.groups)).toBe(true);
 
-    // Older Grafana versions (≤12.0.x) return group shells with empty rules arrays
-    // instead of omitting groups entirely, so assert no rules rather than no groups
-    const totalRules = body.data.groups.reduce(
-      (sum: number, g: { rules: unknown[] }) => sum + g.rules.length,
-      0
+    const ALWAYS_FIRING_GROUP = 'test-firing-alerts';
+
+    const unexpectedRules = body.data.groups
+      .filter((g: { name: string }) => g.name !== ALWAYS_FIRING_GROUP)
+      .reduce((sum: number, g: { rules: unknown[] }) => sum + g.rules.length, 0);
+    expect(unexpectedRules).toBe(0);
+
+    // Not all always-firing rules may have entered firing state yet (depends on
+    // Grafana version and evaluation timing), so only verify that any rules
+    // present belong to the expected set.
+    const EXPECTED_FIRING_RULES = new Set([
+      'qa-always-firing-up',
+      'qa-always-firing-http-requests',
+      'qa-always-firing-api-responses',
+    ]);
+
+    const firingGroup = body.data.groups.find(
+      (g: { name: string }) => g.name === ALWAYS_FIRING_GROUP
     );
-    expect(totalRules).toBe(0);
+
+    if (firingGroup) {
+      for (const rule of firingGroup.rules) {
+        expect(EXPECTED_FIRING_RULES.has(rule.name)).toBe(true);
+      }
+    }
   });
 });

@@ -1,6 +1,6 @@
-import type { Configuration, ExternalItemFunctionData } from 'webpack';
+import type { RspackOptions, ExternalItemFunctionData } from '@rspack/core';
 
-type ExternalsType = Configuration['externals'];
+type ExternalsType = RspackOptions['externals'];
 
 export const externals: ExternalsType = [
   // Required for dynamic publicPath resolution
@@ -16,6 +16,8 @@ export const externals: ExternalsType = [
   'slate-plain-serializer',
   '@grafana/slate-react',
   'react',
+  'react/jsx-runtime',
+  'react/jsx-dev-runtime',
   'react-dom',
   'react-redux',
   'redux',

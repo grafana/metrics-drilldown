@@ -3,6 +3,7 @@ import { getBackendSrv } from '@grafana/runtime';
 
 import { ensureErrorObject } from 'App/errorUtils';
 import { logger } from 'shared/logger/logger';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { GRAFANA_RULER_RULES_URL, usageRequestOptions } from './shared';
 import { extractMetricNames } from '../../../../shared/utils/utils.promql';
@@ -50,6 +51,8 @@ interface Rule {
  * @returns A Map of metric name → count of firing alert rules that reference the metric
  */
 export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
+  const start = performance.now();
+
   try {
     const response = await getBackendSrv().get<RulerRulesResponse>(
       GRAFANA_RULER_RULES_URL,
@@ -58,8 +61,27 @@ export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
       usageRequestOptions
     );
 
-    return parseFiringRules(response);
+    const { metricCounts, ruleCount } = parseFiringRules(response);
+    const durationMs = Math.round(performance.now() - start);
+
+    reportExploreMetrics('firing_alert_metrics_fetched', {
+      status: 'success',
+      duration_ms: durationMs,
+      metric_count: metricCounts.size,
+      rule_count: ruleCount,
+    });
+
+    return metricCounts;
   } catch (err) {
+    const durationMs = Math.round(performance.now() - start);
+
+    reportExploreMetrics('firing_alert_metrics_fetched', {
+      status: 'error',
+      duration_ms: durationMs,
+      metric_count: 0,
+      rule_count: 0,
+    });
+
     logger.error(ensureErrorObject(err, 'Failed to fetch firing alert rules'), {
       message: t(
         'fetch-firing-alert-metrics.error',
@@ -70,12 +92,13 @@ export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
   }
 }
 
-function parseFiringRules(response: RulerRulesResponse): Map<string, number> {
+function parseFiringRules(response: RulerRulesResponse): { metricCounts: Map<string, number>; ruleCount: number } {
   const metricCounts = new Map<string, number>();
+  let ruleCount = 0;
 
   const groups = response?.data?.groups;
   if (!Array.isArray(groups)) {
-    return metricCounts;
+    return { metricCounts, ruleCount };
   }
 
   for (const group of groups) {
@@ -88,12 +111,14 @@ function parseFiringRules(response: RulerRulesResponse): Map<string, number> {
         rule.type === 'alerting' && typeof rule.query === 'string' && rule.query !== ''
     );
 
+    ruleCount += alertingRules.length;
+
     for (const rule of alertingRules) {
       countMetricsFromRule(rule, metricCounts);
     }
   }
 
-  return metricCounts;
+  return { metricCounts, ruleCount };
 }
 
 function countMetricsFromRule(rule: Rule & { name: string; query: string }, metricCounts: Map<string, number>): void {
