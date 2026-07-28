@@ -11,8 +11,13 @@ allowBuilds:
   unrs-resolver: true
 
 overrides:
-  '@remix-run/router': ^1.23.2
-  react-router: ^6.30.4
+  react-router: ^8.3.0
+  # @grafana/scenes wants react-router-dom@^6, whose 6.x line ends at 6.30.4 and is
+  # covered by GHSA-jjmj-jmhj-qwj2 (no 6.30.5 was ever published). v7 is a thin
+  # `export * from 'react-router'` shim, so scenes still gets Routes/Route while the
+  # whole tree shares one router core. @grafana/ui pins RRD 5.3.4 exactly, so its
+  # intentional v5 + v5-compat pairing is unaffected by this range override.
+  react-router-dom@^6: ^7.18.1
   dompurify: ^3.4.12
   lodash: ^4.18.0
   minimatch@^3: ~3.1.4
