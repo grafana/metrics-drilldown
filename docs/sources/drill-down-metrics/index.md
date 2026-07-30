@@ -26,15 +26,15 @@ To begin drilling down your data, filter the metrics that appear in Metrics Dril
 1. Navigate to the **Metrics Drilldown** page in Grafana. Refer to [Get started with Grafana Metrics Drilldown](ref:get-started).
 1. From the **Data source** dropdown, select a data source to view related metrics. Supported data sources include Prometheus and Prometheus-compatible data sources.
 
-1. (Optional) Select a label name from the **Filter by label values** dropdown. Then, follow the prompts to complete your filter criteria.
+1. (Optional) In the **Filters** control, select **Add label**. Then, select a label name, an operator, and a value to build your filter.
 
    {{< admonition type="note" >}}
    You can apply multiple filters to your metrics. If you don't see a metric you expect, refer to [Troubleshoot missing metrics](#troubleshoot-missing-metrics).
    {{< /admonition >}}
    ![Grafana Metrics Drilldown with filters and metrics that contain data](/media/docs/explore-metrics/metrics-drilldown-choose-filters.png)
 
-1. (Optional) To search for metrics, type keywords in the search bar under **Quick search metrics**.
-1. (Optional) Select how you want to sort metrics in the app. You can sort metrics alphabetically (A-Z or Z-A), with recently selected metrics first (default), by prevalence in dashboard panel queries, or by prevalence in alerting rules.
+1. (Optional) To search for metrics, type keywords in the metric search bar.
+1. (Optional) From the **Sort by** dropdown, select how to sort metrics: **Default** (alphabetical, with recently selected metrics first), **Alphabetical [A-Z]**, **Alphabetical [Z-A]**, **Dashboard Usage** (by prevalence in dashboard panel queries), or **Alerting Usage** (by prevalence in alerting rules).
 1. Use the time picker to select a date and time range from the dropdown menu, or use an absolute time range.
 1. Select the refresh interval control next to the **Refresh** icon to set a refresh rate from the dropdown menu. By default, refresh is **Off**.
 
@@ -44,7 +44,7 @@ Apply advanced filters to further refine the metrics that appear in Metrics Dril
 
 | Filter type            | Description                                                                                                       |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Rules filters          | Filter metrics based on whether they are regular metrics or recording rules.                                      |
+| Rules filters          | Filter metrics based on whether they are non-rules metrics or recording rules.                                    |
 | Prefix filters         | Filter metrics based on their name prefix in the Prometheus namespace. Multiple selected prefixes use "OR" logic. |
 | Suffix filters         | Filter metrics based on their name suffix. Multiple selected suffixes use "OR" logic.                             |
 | Recent metrics filters | Filter metrics based on when they started being ingested.                                                         |
@@ -70,9 +70,10 @@ After filtering the metrics in Metrics Drilldown, you can investigate the select
 
 A detailed view of the metric opens that shows the following details:
 
-- A **Breakdown** tab that shows time series visualizations for each of the label-value pairs for the selected metric. To add a label-value pair to your filters, you can drill down on each label and then select **Add to filter**.
+- A **Breakdown** tab that shows time series visualizations for each of the label-value pairs for the selected metric. To add a label-value pair to your filters, select **Select** to drill down into a label, then select **Add to filters** on the value you want.
 - A **Related metrics** tab that shows other metrics with similar names and common prefixes. Use it to quickly find metrics that belong to the same area or task without knowing exact metric names.
-- A **Related logs** tab that shows how many related log streams match your metric and lets you continue investigating in logs-focused workflows.
+- A **Related logs** tab that shows how many related log lines match your metric and lets you continue investigating in logs-focused workflows.
+- A **Query results** tab that shows the raw query results for the metric. This tab appears only when the Prometheus query results component is available in your Grafana instance.
 
 ### View the metric in Explore
 
@@ -88,15 +89,15 @@ You can share a metric view with others or bookmark it for yourself.
 - To bookmark, select **Add bookmark** to save your current exploration state, including the data source, filters, selected metric, label breakdowns, and time range.
 
 To revisit a bookmark, open the bookmarks list from the left-side menu.
-Bookmarks are personal and saved per user. If you want to share a specific state with others, use **Copy URL** instead.
+Bookmarks are stored locally in your browser and scoped to the selected data source, so they aren't synced across browsers or devices. If you want to share a specific state with others, use **Copy URL** instead.
 
 ## Troubleshoot missing metrics
 
-Some Prometheus metrics may not appear in Metrics Drilldown, even though you can view them in Explore. This happens in high-cardinality environments when the Prometheus data source enforces its default 40,000-metric limit.
+Some Prometheus metrics may not appear in Metrics Drilldown, even though you can view them in Explore. This happens in high-cardinality environments when the Prometheus data source enforces its **Series limit**, which defaults to 40,000 and applies to metrics, labels, and values.
 
 To resolve this issue, choose one of the following options:
 
-- Increase the metric limit in your Prometheus data source settings.
+- Increase the **Series limit** in your Prometheus data source settings. Leave the field empty to use the default of 40,000, or set it to `0` to disable the limit.
 
   {{< admonition type="caution" >}}
   Increasing this limit can affect Metrics Drilldown performance.

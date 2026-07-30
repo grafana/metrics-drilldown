@@ -26,7 +26,7 @@ The Metrics Drilldown app is installed in both Grafana Cloud and self-managed Gr
 
 | Requirement | Grafana Cloud                                          | Self-managed Grafana (OSS / Enterprise)                                                                                             |
 | ----------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Grafana     | A Grafana Cloud account with a Grafana stack           | Your own Grafana instance running version 11.6 or later                                                                             |
+| Grafana     | A Grafana Cloud account with a Grafana stack           | Your own Grafana instance running version 11.6.x or later                                                                             |
 | Data source | A configured Prometheus-compatible metrics data source | A configured Prometheus-compatible metrics data source, with the scrape interval set to match your metrics system's scrape interval |
 
 ## Access Metrics Drilldown
