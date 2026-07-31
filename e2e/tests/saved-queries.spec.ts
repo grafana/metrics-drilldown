@@ -34,6 +34,18 @@ const SEED_QUERY_2: SavedQuery = {
 };
 
 test.describe('Saved queries', () => {
+  // When Grafana's Query Library is enabled, the plugin renders the "grafana/query-library-context/v1"
+  // exposed component instead of the in-plugin buttons and modals exercised below (see
+  // isQueryLibrarySupported() in src/shared/savedQueries/savedQuery.ts). The toggle became default-on
+  // in Grafana 13.2, which is why this only affects the nightly job.
+  test.beforeEach(async ({ isLegacyFeatureToggleEnabled }) => {
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(
+      await isLegacyFeatureToggleEnabled<{ queryLibrary: boolean }>('queryLibrary'),
+      "Grafana's Query Library replaces the in-plugin saved-queries UI on this instance."
+    );
+  });
+
   test.describe('Save', () => {
     test('Buttons are visible; load button disabled when no queries exist', async ({ metricSceneView }) => {
       await metricSceneView.goto(URL_SEARCH_PARAMS_WITH_METRIC_NAME);
