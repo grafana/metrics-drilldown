@@ -33,11 +33,6 @@ const SEED_QUERY_2: SavedQuery = {
   uid: '22222222-2222-2222-2222-222222222222',
 };
 
-// When Grafana's Query Library is enabled, the plugin renders the "grafana/query-library-context/v1"
-// exposed component instead of the in-plugin buttons and modals exercised below (see
-// isQueryLibrarySupported() in src/shared/savedQueries/savedQuery.ts). The toggle became default-on in
-// Grafana 13.2, so docker-compose.yaml forces queryLibrary=false to keep these specs running on every
-// version rather than silently skipping them on nightly.
 test.describe('Saved queries', () => {
   test.describe('Save', () => {
     test('Buttons are visible; load button disabled when no queries exist', async ({ metricSceneView }) => {
