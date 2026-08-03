@@ -1,6 +1,6 @@
 import { sceneGraph, type CustomVariable, type QueryVariable } from '@grafana/scenes';
 
-import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
 
 import { MetricsVariableSortEngine } from '../../../metrics-variables/MetricsVariableSortEngine';
 import { MetricsSorter, VAR_WINGMAN_SORT_BY } from '../MetricsSorter';
@@ -10,7 +10,7 @@ import { MetricsSorter, VAR_WINGMAN_SORT_BY } from '../MetricsSorter';
 // =============================================================================
 
 jest.mock('shared/featureFlags/openFeature', () => ({
-  evaluateFeatureFlag: jest.fn(),
+  isFiringAlertsSortingEnabled: jest.fn(),
 }));
 
 jest.mock('../fetchers/fetchFiringAlertMetrics', () => ({
@@ -29,7 +29,9 @@ jest.mock('@grafana/scenes', () => {
   };
 });
 
-const mockEvaluateFeatureFlag = evaluateFeatureFlag as jest.MockedFunction<typeof evaluateFeatureFlag>;
+const mockIsFiringAlertsSortingEnabled = isFiringAlertsSortingEnabled as jest.MockedFunction<
+  typeof isFiringAlertsSortingEnabled
+>;
 const mockGetVariables = sceneGraph.getVariables as jest.MockedFunction<typeof sceneGraph.getVariables>;
 const mockFindByKeyAndType = sceneGraph.findByKeyAndType as jest.Mock;
 
@@ -61,7 +63,7 @@ describe('MetricsSorter — Firing Alerts sort option', () => {
 
   describe('feature flag enabled', () => {
     beforeEach(() => {
-      mockEvaluateFeatureFlag.mockResolvedValue(true);
+      mockIsFiringAlertsSortingEnabled.mockResolvedValue(true);
     });
 
     it('adds "firing-alerts" to supported options and variable query', async () => {
@@ -88,7 +90,7 @@ describe('MetricsSorter — Firing Alerts sort option', () => {
 
   describe('feature flag disabled', () => {
     beforeEach(() => {
-      mockEvaluateFeatureFlag.mockResolvedValue(false);
+      mockIsFiringAlertsSortingEnabled.mockResolvedValue(false);
     });
 
     it('does not add "firing-alerts" to supported options or variable query', async () => {
