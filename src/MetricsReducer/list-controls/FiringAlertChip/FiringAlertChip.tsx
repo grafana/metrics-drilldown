@@ -17,7 +17,7 @@ import { VAR_FILTERED_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/
 import { VAR_METRICS_VARIABLE, type MetricOptions, type MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsVariableFilterEngine } from 'MetricsReducer/metrics-variables/MetricsVariableFilterEngine';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
-import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { EventFiltersChanged } from '../../SideBar/sections/MetricsFilterSection/EventFiltersChanged';
@@ -73,7 +73,7 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
   }
 
   private async onActivate() {
-    const flagEnabled = await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts');
+    const flagEnabled = await isFiringAlertsSortingEnabled();
 
     if (!flagEnabled) {
       this.setState({ loading: false, visible: false });

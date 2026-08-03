@@ -2,7 +2,7 @@ import { sceneGraph } from '@grafana/scenes';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { FiringAlertChip } from '../FiringAlertChip';
@@ -12,7 +12,7 @@ import { FiringAlertChip } from '../FiringAlertChip';
 // =============================================================================
 
 jest.mock('shared/featureFlags/openFeature', () => ({
-  evaluateFeatureFlag: jest.fn(),
+  isFiringAlertsSortingEnabled: jest.fn(),
 }));
 
 jest.mock('shared/tracking/interactions', () => ({
@@ -36,7 +36,7 @@ jest.mock('@grafana/scenes', () => {
   };
 });
 
-const mockEvaluateFeatureFlag = evaluateFeatureFlag as jest.Mock;
+const mockIsFiringAlertsSortingEnabled = isFiringAlertsSortingEnabled as jest.Mock;
 const mockReportExploreMetrics = reportExploreMetrics as jest.Mock;
 const mockFindByKeyAndType = sceneGraph.findByKeyAndType as jest.Mock;
 
@@ -73,7 +73,7 @@ describe('FiringAlertChip', () => {
 
   describe('feature flag disabled', () => {
     it('renders nothing when feature flag is off', async () => {
-      mockEvaluateFeatureFlag.mockResolvedValue(false);
+      mockIsFiringAlertsSortingEnabled.mockResolvedValue(false);
 
       const chip = new FiringAlertChip();
       await activateChip(chip);
@@ -83,7 +83,7 @@ describe('FiringAlertChip', () => {
     });
 
     it('does not fetch firing alert metrics when flag is off', async () => {
-      mockEvaluateFeatureFlag.mockResolvedValue(false);
+      mockIsFiringAlertsSortingEnabled.mockResolvedValue(false);
 
       const chip = new FiringAlertChip();
       await activateChip(chip);
@@ -94,7 +94,7 @@ describe('FiringAlertChip', () => {
 
   describe('feature flag enabled', () => {
     beforeEach(() => {
-      mockEvaluateFeatureFlag.mockResolvedValue(true);
+      mockIsFiringAlertsSortingEnabled.mockResolvedValue(true);
     });
 
     it('shows spinner while loading', async () => {
