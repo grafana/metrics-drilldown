@@ -13,7 +13,7 @@ import {
 import React from 'react';
 
 import { localeCompare } from 'MetricsReducer/helpers/localCompare';
-import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
 import { logger } from 'shared/logger/logger';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
@@ -154,7 +154,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       sortByVar.changeValueTo('default');
     }
 
-    evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts').then((enabled) => {
+    isFiringAlertsSortingEnabled().then((enabled) => {
       if (!enabled) {
         this.supportedSortByOptions.delete('firing-alerts');
         const query = sortByVar.state.query

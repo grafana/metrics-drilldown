@@ -6,7 +6,7 @@ import { Icon, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { MetricsSorter } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
-import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
 
 interface FiringAlertBadgeState extends SceneObjectState {
   metric: string;
@@ -28,7 +28,7 @@ export class FiringAlertBadge extends SceneObjectBase<FiringAlertBadgeState> {
   }
 
   private async onActivate() {
-    const flagEnabled = await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts');
+    const flagEnabled = await isFiringAlertsSortingEnabled();
     if (!flagEnabled) {
       return;
     }
