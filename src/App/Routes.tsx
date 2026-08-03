@@ -1,5 +1,5 @@
 import React, { lazy } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router';
 
 import { ROUTES } from 'shared/constants/routes';
 

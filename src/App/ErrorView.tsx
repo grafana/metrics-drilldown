@@ -3,7 +3,7 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { t, Trans } from '@grafana/i18n';
 import { Collapse, TextLink, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 
 import { HelpControls } from './HelpControls';
 import { InlineBanner } from './InlineBanner';
