@@ -2,6 +2,7 @@ import { getWebInstrumentations, initializeFaro, type Faro } from '@grafana/faro
 import { config } from '@grafana/runtime';
 
 import { getFaroEnvironment } from './getFaroEnvironment';
+import { registerFaroInteractionEchoBackend } from './interactionEchoBackend';
 import { GIT_COMMIT } from '../../../version';
 import { PLUGIN_BASE_URL } from '../../constants/plugin';
 import { getPluginVersion } from '../../utils/getPluginVersion';
@@ -64,4 +65,7 @@ export async function initFaro() {
       },
     })
   );
+
+  // mirror this plugin's reportInteraction events into faro
+  registerFaroInteractionEchoBackend();
 }

@@ -20,6 +20,9 @@ jest.mock('@grafana/runtime', () => ({
       edition: 'Enterprise',
     },
   },
+  EchoEventType: { Interaction: 'interaction' },
+  isInteractionEvent: jest.fn(),
+  registerEchoBackend: jest.fn(),
 }));
 
 jest.mock('../../../utils/getPluginVersion', () => ({
