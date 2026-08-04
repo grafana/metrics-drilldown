@@ -10,6 +10,9 @@
       "related-metrics-description": "Metrik yang relevan berdasarkan filter label saat ini"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Tambahkan ke filter",
     "by-label": "Berdasarkan label",
@@ -39,6 +42,11 @@
     "no-results": "Tidak ada hasil.",
     "selected-count_other": "{{count}} dipilih"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Terapkan",
     "cancel": "Batal",
@@ -66,6 +74,10 @@
     "stack-trace-label": "Lihat jejak stack",
     "title": "Kesalahan fatal!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Data panel diambil kembali dengan kueri yang lebih kompleks untuk menangani nilai yang sangat kecil dalam seri"
   },
@@ -77,8 +89,20 @@
     "limit-warning-body": "Jumlah dasbor organisasi Anda melebihi batas ini. Jumlah penggunaan mungkin tidak lengkap.",
     "limit-warning-title": "Pengurutan penggunaan dasbor dibatasi 500 dasbor."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Metrik yang Difilter"
+  },
+  "firing-alert-badge": {
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Berikan umpan balik"
@@ -144,13 +168,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Tidak ada kueri tersimpan untuk dimuat",
-        "button-tooltip": "Muat kueri tersimpan",
+        "button-tooltip": "",
         "empty": "Tidak ada kueri tersimpan untuk ditampilkan.",
         "load-error": "Kueri ini berisi ekspresi yang tidak dapat direpresentasikan dalam Metrics Drilldown. Hanya pemilih metric{label} sederhana yang didukung.",
         "load-type-error": "Pilih kueri Prometheus.",
         "modal-title": "Muat kueri yang sudah disimpan sebelumnya",
         "remove": "Hapus",
-        "saved-query-button-tooltip": "Muat kueri tersimpan",
+        "saved-query-button-tooltip": "",
         "select": "Pilih"
       },
       "save-query": {
@@ -158,7 +182,7 @@
           "alert": "Ada kueri yang sudah disimpan sebelumnya dengan ekspresi yang sama: {{title}}"
         },
         "button-tooltip": "Simpan kueri",
-        "button-tooltip-saved-queries": "Simpan di Kueri Tersimpan",
+        "button-tooltip-saved-queries": "",
         "cancel": "Batal",
         "description": "Deskripsi",
         "error": "Terjadi kesalahan tidak terduga saat menyimpan kueri ini.",
@@ -195,11 +219,17 @@
       "alphabetical": "Sesuai abjad [A-Z]",
       "alphabetical-reversed": "Sesuai abjad [Z-A]",
       "dashboard-usage": "Penggunaan Dasbor",
-      "default": "Default"
+      "default": "Default",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Metrik"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Periksa <2>dokumen kami</2> untuk mempelajari selengkapnya atau<5></5><6>coba secara online</6> di Grafana Play!",
@@ -235,8 +265,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Berkontribusi",
       "documentation": "Dokumentasi",
-      "grafana-version": "Grafana  {{edition}} v{{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Laporkan masalah"
     }
   },
@@ -244,6 +273,11 @@
     "all-metrics": "Semua nama metrik",
     "tooltip": "Lihat berdasarkan awalan metrik. Awalan metrik adalah satu kata di awal nama metrik, yang relevan dengan domain tempat metrik berada.",
     "view-by-label": "Dilihat oleh"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Hasil kueri instan",

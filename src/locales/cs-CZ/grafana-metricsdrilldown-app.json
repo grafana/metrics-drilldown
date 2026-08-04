@@ -10,6 +10,9 @@
       "related-metrics-description": "Související metriky založené na aktuálních filtrech štítků"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Přidat do filtrů",
     "by-label": "Podle štítku",
@@ -42,6 +45,11 @@
     "selected-count_many": "Vybráno: {{count}}",
     "selected-count_other": "Vybráno: {{count}}"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Použít",
     "cancel": "Zrušit",
@@ -69,6 +77,10 @@
     "stack-trace-label": "Zobrazit trasování stacků",
     "title": "Závažná chyba!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Data panelu byla znovu načtena pomocí složitějšího dotazu pro zpracování extrémně malých hodnot v řadě"
   },
@@ -80,8 +92,26 @@
     "limit-warning-body": "Vaše organizace má více nástěnek, než je tento limit. Počty využití mohou být neúplné.",
     "limit-warning-title": "Řazení podle využití nástěnky je omezeno na 500 nástěnek."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Filtrované metriky"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_few": "",
+    "tooltip_many": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_few": "",
+    "label_many": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Poskytnout zpětnou vazbu"
@@ -147,13 +177,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Žádné uložené dotazy k načtení",
-        "button-tooltip": "Načíst uložený dotaz",
+        "button-tooltip": "",
         "empty": "Žádné uložené dotazy k zobrazení.",
         "load-error": "Tento dotaz obsahuje výrazy, které nelze zastoupit v Podrobném rozpisu metrik Grafana. Podporovány jsou pouze jednoduché výběry metrik {label}.",
         "load-type-error": "Vyberte dotaz Prometheus.",
         "modal-title": "Načíst dříve uložený dotaz",
         "remove": "Odebrat",
-        "saved-query-button-tooltip": "Načíst uložený dotaz",
+        "saved-query-button-tooltip": "",
         "select": "Vybrat"
       },
       "save-query": {
@@ -161,7 +191,7 @@
           "alert": "Existuje dříve uložený dotaz se stejným výrazem: {{title}}"
         },
         "button-tooltip": "Uložit dotaz",
-        "button-tooltip-saved-queries": "Uložit do uložených dotazů",
+        "button-tooltip-saved-queries": "",
         "cancel": "Zrušit",
         "description": "Popis",
         "error": "Při ukládání tohoto dotazu došlo k neočekávané chybě.",
@@ -198,11 +228,17 @@
       "alphabetical": "Abecedně [A–Z]",
       "alphabetical-reversed": "Abecedně [Z–A]",
       "dashboard-usage": "Využití nástěnky",
-      "default": "Výchozí"
+      "default": "Výchozí",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Metriky"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Přečtěte si <2>naši dokumentaci</2> a zjistěte víc nebo<5></5><6>to vyzkoušejte online</6> v Grafana Play.",
@@ -238,8 +274,7 @@
       "commit-sha": "Provést SHA: {{sha}}",
       "contribute": "Přispět",
       "documentation": "Dokumentace",
-      "grafana-version": "Grafana {{edition}} verze {{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Nahlásit problém"
     }
   },
@@ -247,6 +282,11 @@
     "all-metrics": "Všechny názvy metrik",
     "tooltip": "Zobrazit podle předpony metriky. Předpona metriky je jedno slovo na začátku názvu metriky, které je relevantní pro doménu, do které metrika patří.",
     "view-by-label": "Zobrazit podle"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Výsledky okamžitého dotazu",

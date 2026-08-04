@@ -10,6 +10,9 @@
       "related-metrics-description": "根據目前標籤篩選條件的相關指標"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "新增至篩選條件",
     "by-label": "按標籤",
@@ -39,6 +42,11 @@
     "no-results": "無結果。",
     "selected-count_other": "已選取 {{count}} 個"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "套用",
     "cancel": "取消",
@@ -66,6 +74,10 @@
     "stack-trace-label": "檢視堆疊追蹤",
     "title": "致命錯誤！"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "面板資料已使用更複雜的查詢重新擷取，以處理系列中的極小值"
   },
@@ -77,8 +89,20 @@
     "limit-warning-body": "Your organization has more dashboards than this limit. Usage counts may be incomplete.",
     "limit-warning-title": "Dashboard usage sort is limited to 500 dashboards."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "篩選的指標"
+  },
+  "firing-alert-badge": {
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "提供意見回饋"
@@ -144,13 +168,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "No saved queries to load",
-        "button-tooltip": "Load Saved query",
+        "button-tooltip": "",
         "empty": "No saved queries to display.",
         "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
         "load-type-error": "Please select a Prometheus query.",
         "modal-title": "Load a previously saved query",
         "remove": "Remove",
-        "saved-query-button-tooltip": "Load Saved query",
+        "saved-query-button-tooltip": "",
         "select": "Select"
       },
       "save-query": {
@@ -158,7 +182,7 @@
           "alert": "There is a previously saved query with the same expression: {{title}}"
         },
         "button-tooltip": "Save query",
-        "button-tooltip-saved-queries": "Save in Saved queries",
+        "button-tooltip-saved-queries": "",
         "cancel": "Cancel",
         "description": "Description",
         "error": "Unexpected error saving this query.",
@@ -195,11 +219,17 @@
       "alphabetical": "按字母順序排列 [A-Z]",
       "alphabetical-reversed": "按字母順序排列 [Z-A]",
       "dashboard-usage": "儀表板使用情況",
-      "default": "預設"
+      "default": "預設",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "指標"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "查看<2>我們的文件</2>以了解更多資訊，或在 Grafana Play 中<5></5><6>線上試用</6>！",
@@ -235,8 +265,7 @@
       "commit-sha": "提交 SHA：{{sha}}",
       "contribute": "貢獻",
       "documentation": "文件",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "回報問題"
     }
   },
@@ -244,6 +273,11 @@
     "all-metrics": "所有指標名稱",
     "tooltip": "依指標前綴檢視。指標前綴是指標名稱開頭的一個字，與指標所屬的網域相關。",
     "view-by-label": "檢視方式"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Instant query results",
