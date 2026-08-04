@@ -13,6 +13,7 @@ jest.mock('@grafana/runtime', () => {
       appSubUrl: '',
       namespace: 'test-namespace',
       openFeatureContext: {},
+      featureToggles: {},
     },
   };
 });
@@ -105,6 +106,41 @@ describe('evaluateFeatureFlag', () => {
 
     // 'excluded' is the default value defined in openFeature.ts for this flag
     await expect(evaluateFeatureFlag('drilldown.metrics.default_open_sidebar')).resolves.toBe('excluded');
+  });
+
+  it('evaluates the sort_by_firing_alerts A/B test flag as a string with the "excluded" default', async () => {
+    getStringValue.mockReturnValue('treatment');
+
+    const result = await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts');
+
+    // 'excluded' is the default value defined in openFeature.ts for this flag
+    expect(getStringValue).toHaveBeenCalledWith('drilldown.metrics.sort_by_firing_alerts', 'excluded');
+    expect(result).toBe('treatment');
+  });
+
+  describe('featureToggle override for string cohort flags', () => {
+    afterEach(() => {
+      delete (config.featureToggles as Record<string, boolean | undefined>).metricsExploreFireAlerts;
+    });
+
+    it('maps an enabled dev feature toggle to the "treatment" cohort', async () => {
+      (config.featureToggles as Record<string, boolean | undefined>).metricsExploreFireAlerts = true;
+
+      const result = await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts');
+
+      expect(result).toBe('treatment');
+      // The override short-circuits before consulting the OpenFeature client.
+      expect(getStringValue).not.toHaveBeenCalled();
+    });
+
+    it('maps a disabled dev feature toggle to the "control" cohort', async () => {
+      (config.featureToggles as Record<string, boolean | undefined>).metricsExploreFireAlerts = false;
+
+      const result = await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts');
+
+      expect(result).toBe('control');
+      expect(getStringValue).not.toHaveBeenCalled();
+    });
   });
 });
 

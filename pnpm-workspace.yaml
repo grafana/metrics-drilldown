@@ -11,37 +11,44 @@ allowBuilds:
   unrs-resolver: true
 
 overrides:
-  '@remix-run/router': ^1.23.2
-  react-router: ^6.30.4
-  dompurify: ^3.4.11
+  react-router: ^8.3.0
+  # @grafana/scenes wants react-router-dom@^6, whose 6.x line ends at 6.30.4 and is
+  # covered by GHSA-jjmj-jmhj-qwj2 (no 6.30.5 was ever published). v7 is a thin
+  # `export * from 'react-router'` shim, so scenes still gets Routes/Route while the
+  # whole tree shares one router core. @grafana/ui pins RRD 5.3.4 exactly, so its
+  # intentional v5 + v5-compat pairing is unaffected by this range override.
+  react-router-dom@^6: ^7.18.1
+  dompurify: ^3.4.12
   lodash: ^4.18.0
   minimatch@^3: ~3.1.4
   minimatch@^9: ~10.2.0
   minimatch@^10: ^10.2.3
   serialize-javascript: ^7.0.5
-  immutable: ^5.1.5
+  immutable: ^5.1.8
   flatted: ^3.4.0
   undici: ^7.24.0
   picomatch@^2: ~4.0.0
   picomatch@^4: ^4.0.4
   protobufjs@^7: ^8.0.0
-  protobufjs@^8: ^8.5.1
+  protobufjs@^8: ^8.6.6
   protocol-buffers-schema: ^3.6.1
   '@opentelemetry/core': ^2.8.0
-  js-yaml: ^4.2.0
+  js-yaml: ^4.3.0
   '@babel/core': ^7.29.1
   '@lezer/common': ^1.5.2
-  brace-expansion@^1: ^5.0.0
-  brace-expansion@^5: ^5.0.6
+  brace-expansion@^1: ^5.0.7
+  brace-expansion@^5: ^5.0.8
   yaml: ^2.8.3
   '@grafana/data': ^13.0.0
   '@grafana/i18n': ^13.0.0
   '@grafana/schema': ^13.0.0
   uuid: ^14.0.0
-  postcss: ^8.5.10
-  fast-uri: ^3.1.2
+  postcss: ^8.5.18
+  fast-uri: ^3.1.4
   ws: ^8.20.1
   js-cookie: ^3.0.7
   qs: ^6.15.2
   react-data-grid: 7.0.0-beta.61
   websocket-driver: '>=0.7.5'
+  brace-expansion: ^5.0.8
+  webpack-dev-server: '>=5.2.6'
