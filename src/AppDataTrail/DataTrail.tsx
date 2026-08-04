@@ -425,6 +425,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         searchTermCount: null,
         has_hierarchical_filter: hierarchicalFilters.length > 0,
         hierarchical_filter_count: hierarchicalFilters.length,
+        metric_name: metric,
       });
     } else {
       // make sure we display all the proper metrics when coming back from the MetricScene (see RelatedMetricsScene.tsx, side bar sections in SideBar.tsx and RecentMetricsSection.tsx)
