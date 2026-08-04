@@ -1,6 +1,6 @@
 import { ErrorBoundary } from '@grafana/ui';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { ErrorView } from './ErrorView';
 import { logger } from '../shared/logger/logger';

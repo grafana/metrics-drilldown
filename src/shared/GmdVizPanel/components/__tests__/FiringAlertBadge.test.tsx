@@ -2,7 +2,7 @@ import { sceneGraph } from '@grafana/scenes';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
+import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
 
 import { FiringAlertBadge } from '../FiringAlertBadge';
 
@@ -11,7 +11,7 @@ import { FiringAlertBadge } from '../FiringAlertBadge';
 // =============================================================================
 
 jest.mock('shared/featureFlags/openFeature', () => ({
-  evaluateFeatureFlag: jest.fn(),
+  isFiringAlertsSortingEnabled: jest.fn(),
 }));
 
 jest.mock('@grafana/scenes', () => {
@@ -25,7 +25,7 @@ jest.mock('@grafana/scenes', () => {
   };
 });
 
-const mockEvaluateFeatureFlag = evaluateFeatureFlag as jest.Mock;
+const mockIsFiringAlertsSortingEnabled = isFiringAlertsSortingEnabled as jest.Mock;
 const mockFindByKeyAndType = sceneGraph.findByKeyAndType as jest.Mock;
 const mockGetFiringAlertCountForMetric = jest.fn();
 
@@ -47,7 +47,7 @@ async function activateBadge(badge: FiringAlertBadge) {
 describe('FiringAlertBadge', () => {
   describe('feature flag disabled', () => {
     it('renders nothing when the feature flag is off', async () => {
-      mockEvaluateFeatureFlag.mockResolvedValue(false);
+      mockIsFiringAlertsSortingEnabled.mockResolvedValue(false);
 
       const badge = new FiringAlertBadge({ metric: 'http_requests_total' });
       await activateBadge(badge);
@@ -57,7 +57,7 @@ describe('FiringAlertBadge', () => {
     });
 
     it('does not look up MetricsSorter when flag is off', async () => {
-      mockEvaluateFeatureFlag.mockResolvedValue(false);
+      mockIsFiringAlertsSortingEnabled.mockResolvedValue(false);
 
       const badge = new FiringAlertBadge({ metric: 'http_requests_total' });
       await activateBadge(badge);
@@ -68,7 +68,7 @@ describe('FiringAlertBadge', () => {
 
   describe('feature flag enabled', () => {
     beforeEach(() => {
-      mockEvaluateFeatureFlag.mockResolvedValue(true);
+      mockIsFiringAlertsSortingEnabled.mockResolvedValue(true);
       mockFindByKeyAndType.mockReturnValue({
         getFiringAlertCountForMetric: mockGetFiringAlertCountForMetric,
       });

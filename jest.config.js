@@ -15,6 +15,8 @@ const esModules = [
   'memoize',
   'mimic-function',
   '@wojtekmaj/date-utils',
+  'react-router',
+  'cookie-es',
 ];
 
 module.exports = {
@@ -27,9 +29,16 @@ module.exports = {
     '^.+/logger/logger$': '<rootDir>/src/test/mocks/loggerMock.ts',
     '^.+/interactions$': '<rootDir>/src/test/mocks/interactionsMock.ts',
     '^.+/userStorage$': '<rootDir>/src/test/mocks/userStorage.ts',
+    // See the mock for why react-router's SSR route-module loader is stubbed.
+    // react-router imports it relatively ('./routeModules.js'), so the pattern
+    // can't be scoped to the package name and will match any module request
+    // ending in `routeModules` — don't add a src/ module by that name.
+    'routeModules(\\.js)?$': '<rootDir>/src/test/mocks/routeModulesMock.js',
   },
   transform: {
-    '^.+\\.(t|j)sx?$': [
+    // `.mjs` is matched explicitly: some ESM deps (e.g. cookie-es, via react-router)
+    // ship only .mjs, which `(t|j)sx?` would otherwise leave untransformed.
+    '^.+\\.(t|j)sx?$|^.+\\.mjs$': [
       '@swc/jest',
       {
         sourceMaps: 'inline',
