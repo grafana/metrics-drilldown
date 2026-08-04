@@ -234,7 +234,10 @@ getPluginVersion().then((v) => {
   cachedAppVersion = v;
 });
 
-function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<string, unknown> {
+function getExperimentPayloads<E extends keyof AllEvents, P extends AllEvents[E]>(
+  event: E,
+  payload: P
+): Record<string, unknown> {
   const payloads: Record<string, unknown> = {};
 
   // Enrich all sidebar-related events (e.g., metrics_sidebar_toggled, sidebar_prefix_filter_applied)
@@ -252,13 +255,29 @@ function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<stri
     Object.assign(payloads, getTrackedFlagPayload('experiment_grafana_assistant_quick_search_tab_test', true));
   }
 
+  // Enrich firing-alerts KPI events with the experiment cohort so Odin can correlate KPIs and cohort in a
+  // single query. `sorting_changed` is only enriched when the firing-alerts sort is the one being selected,
+  // to avoid polluting the generic sort KPI.
+  const isFiringAlertsSortSelected =
+    event === 'sorting_changed' &&
+    (payload as Interactions['sorting_changed']).from === 'metrics-reducer' &&
+    (payload as { sortBy?: string }).sortBy === 'firing-alerts';
+
+  if (
+    event === 'firing_alert_filter_toggled' ||
+    event === 'firing_alert_metrics_fetched' ||
+    isFiringAlertsSortSelected
+  ) {
+    Object.assign(payloads, getTrackedFlagPayload('experiment_sort_by_firing_alerts', true));
+  }
+
   return payloads;
 }
 
 function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): P {
   return {
     ...payload,
-    ...getExperimentPayloads(event),
+    ...getExperimentPayloads(event, payload),
     meta: {
       appRelease: cachedAppVersion ?? '',
       appVersion: GIT_COMMIT,

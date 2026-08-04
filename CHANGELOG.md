@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.1](https://github.com/grafana/metrics-drilldown/compare/v2.3.0...v2.3.1) (2026-07-28)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump pnpm overrides for CVE remediation ([d52aced](https://github.com/grafana/metrics-drilldown/commit/d52acedbb4407b68284d624c33a778500d77f6c8))
+* **deps:** resolve pnpm audit vulnerabilities ([#1352](https://github.com/grafana/metrics-drilldown/issues/1352)) ([d52aced](https://github.com/grafana/metrics-drilldown/commit/d52acedbb4407b68284d624c33a778500d77f6c8))
+
 ## [2.3.0](https://github.com/grafana/metrics-drilldown/compare/v2.2.0...v2.3.0) (2026-07-21)
 
 

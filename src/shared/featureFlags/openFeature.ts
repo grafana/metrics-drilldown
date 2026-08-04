@@ -37,9 +37,14 @@ const goffFeatureFlags = {
     trackingKey: 'experiment_grafana_assistant_quick_search_tab_test',
   },
   'drilldown.metrics.sort_by_firing_alerts': {
-    valueType: 'boolean',
-    values: [true, false] as const,
-    defaultValue: false,
+    valueType: 'string',
+    values: [
+      'treatment', // Firing-alerts sorting + chip + badge enabled
+      'control', // Default behavior (feature hidden)
+      'excluded', // User excluded from experiment (feature hidden)
+    ],
+    defaultValue: 'excluded',
+    trackingKey: 'experiment_sort_by_firing_alerts',
     featureToggle: 'metricsExploreFireAlerts',
   },
 } as const satisfies Record<string, FeatureFlag>;
@@ -145,18 +150,42 @@ function waitForClientReady(client: Client): Promise<void> {
 }
 
 /**
+ * Resolves a flag from its optional local-dev Grafana feature toggle override (set via
+ * `GF_FEATURE_TOGGLES_ENABLE`, e.g. through `pnpm server:firing-alerts`).
+ *
+ * Returns the override value when the toggle is set, or `undefined` to fall through to the OpenFeature provider.
+ * For string cohort flags (A/B tests) the boolean toggle is mapped to a `treatment`/`control` cohort so the
+ * local flow still enables the feature without patching source.
+ */
+function resolveFeatureToggleOverride<T extends keyof typeof goffFeatureFlags>(
+  flagDef: (typeof goffFeatureFlags)[T]
+): FlagValue<T> | undefined {
+  if (!('featureToggle' in flagDef) || !flagDef.featureToggle) {
+    return undefined;
+  }
+
+  const toggle = (config.featureToggles as Record<string, boolean | undefined>)[flagDef.featureToggle];
+  if (toggle === undefined) {
+    return undefined;
+  }
+
+  if (flagDef.valueType === 'string') {
+    return (toggle ? 'treatment' : 'control') as FlagValue<T>;
+  }
+
+  return toggle as FlagValue<T>;
+}
+
+/**
  * Evaluates a feature flag from the GoFF service.
  *
  * @param flagName - The name of the feature flag to evaluate.
  * @returns The value of the feature flag.
  */
 export async function evaluateFeatureFlag<T extends keyof typeof goffFeatureFlags>(flagName: T): Promise<FlagValue<T>> {
-  const flagDef = goffFeatureFlags[flagName];
-  if ('featureToggle' in flagDef && flagDef.featureToggle) {
-    const toggle = (config.featureToggles as Record<string, boolean | undefined>)[flagDef.featureToggle];
-    if (toggle !== undefined) {
-      return toggle as FlagValue<T>;
-    }
+  const override = resolveFeatureToggleOverride<T>(goffFeatureFlags[flagName]);
+  if (override !== undefined) {
+    return override;
   }
 
   try {
@@ -187,4 +216,16 @@ export async function evaluateFeatureFlag<T extends keyof typeof goffFeatureFlag
     logger.error(new Error(`Error evaluating ${flagName} flag.`, { cause: error }));
     return goffFeatureFlags[flagName].defaultValue as FlagValue<T>;
   }
+}
+
+/**
+ * Whether the "sort by firing alerts" experiment feature (firing-alerts sort option, "Has firing alerts" filter
+ * chip, and metric alert badges) should be shown to the current user.
+ *
+ * The `drilldown.metrics.sort_by_firing_alerts` flag is an A/B test with `treatment`/`control`/`excluded`
+ * cohorts; only the `treatment` cohort sees the feature. Evaluating the flag also records the cohort for
+ * analytics enrichment (see {@link TrackingHook}).
+ */
+export async function isFiringAlertsSortingEnabled(): Promise<boolean> {
+  return (await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts')) === 'treatment';
 }
