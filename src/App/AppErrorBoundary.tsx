@@ -7,7 +7,6 @@ import { useLocation } from 'react-router';
 
 import { ErrorView } from './ErrorView';
 import { logger } from '../shared/logger/logger';
-import { reportExploreMetrics } from '../shared/tracking/interactions';
 
 const CHUNK_RELOAD_KEY = 'mdrilldown:chunk-reload-attempted';
 
@@ -20,10 +19,8 @@ export function isChunkLoadError(error: Error): boolean {
 }
 
 function errorLogger(error: Error): void {
-  const chunkLoadError = isChunkLoadError(error);
-  reportExploreMetrics('app_error_boundary_shown', { cause: chunkLoadError ? 'chunk_load' : 'crash' });
   logger.error(error, {
-    handledBy: chunkLoadError ? 'chunk-load-recovery' : 'React error boundary',
+    handledBy: isChunkLoadError(error) ? 'chunk-load-recovery' : 'React error boundary',
   });
 }
 
@@ -48,7 +45,9 @@ function ChunkLoadRecovery() {
             A newer version of Metrics Drilldown is available but could not be loaded automatically.
           </Trans>
         </p>
-        <Button onClick={() => window.location.reload()}>{t('chunk-load-recovery.reload-button', 'Reload now')}</Button>
+        <Button onClick={() => window.location.reload()}>
+          {t('chunk-load-recovery.reload-button', 'Reload now')}
+        </Button>
       </div>
     );
   }

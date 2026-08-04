@@ -69,10 +69,6 @@ type Interactions = {
   };
   // User changed the Prometheus data source
   datasource_changed: {};
-  // The app error boundary was displayed
-  app_error_boundary_shown: {
-    cause: 'crash' | 'chunk_load';
-  };
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: // Opens Logs Drilldown
