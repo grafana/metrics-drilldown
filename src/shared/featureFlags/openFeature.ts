@@ -229,3 +229,18 @@ export async function evaluateFeatureFlag<T extends keyof typeof goffFeatureFlag
 export async function isFiringAlertsSortingEnabled(): Promise<boolean> {
   return (await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts')) === 'treatment';
 }
+
+/**
+ * Eagerly evaluates experiment flags at app initialization so their cohort is recorded (via {@link TrackingHook})
+ * before analytics events fire. This matters for A/B experiments whose primary KPI is a general event emitted by
+ * both arms — e.g. `metric_selected` for the sort-by-firing-alerts experiment: the flag must be evaluated for
+ * control users too, otherwise `getTrackedFlagPayload` returns null and the KPI event carries no cohort.
+ *
+ * Evaluating the flag is enough — the OpenFeature TrackingHook stores the cohort as a side effect; the returned
+ * value is intentionally ignored here.
+ */
+export function evaluateExperimentFlagsEarly(): void {
+  // `evaluateFeatureFlag` waits for the provider to be ready and swallows its own errors, so a failed evaluation
+  // just leaves the cohort unset rather than throwing during startup.
+  void evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts');
+}
