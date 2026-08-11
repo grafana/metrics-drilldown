@@ -3,6 +3,7 @@ import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
 import { getExploreURL, sceneGraph, VizPanel } from '@grafana/scenes';
 
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
 
 export class ExploreAction {
@@ -34,12 +35,14 @@ export class ExploreAction {
     return {
       text: t('panel-menu.action.explore', 'Explore'),
       iconClassName: 'compass',
-      onClick: () =>
-        exploreUrl?.then((url) => {
+      onClick: () => {
+        reportExploreMetrics('selected_metric_action_clicked', { action: 'panel_menu_explore' });
+        return exploreUrl?.then((url) => {
           if (url) {
             window.open(`${config.appSubUrl}${url}`, '_blank');
           }
-        }),
+        });
+      },
       shortcut: 'p x',
     };
   }

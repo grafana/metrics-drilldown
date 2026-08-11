@@ -63,8 +63,12 @@ type Interactions = {
       // Deselects the current selected metrics by clicking the "Select new metric" button
       | 'unselect'
       // When in embedded mode, clicked to open the exploration from the embedded view
-      | 'open_from_embedded';
+      | 'open_from_embedded'
+      // Opens the metric queries in Explore from the panel menu
+      | 'panel_menu_explore';
   };
+  // User changed the Prometheus data source
+  datasource_changed: {};
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: // Opens Logs Drilldown
