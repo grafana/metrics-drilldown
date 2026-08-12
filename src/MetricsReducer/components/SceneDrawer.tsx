@@ -24,9 +24,9 @@ export class SceneDrawer extends SceneObjectBase<SceneDrawerState> {
     subTitle,
     body,
   }: {
-    title?: SceneDrawerState['title'];
-    subTitle?: SceneDrawerState['subTitle'];
-    body?: SceneDrawerState['body'];
+    title?: NonNullable<SceneDrawerState['title']>;
+    subTitle?: NonNullable<SceneDrawerState['subTitle']>;
+    body?: NonNullable<SceneDrawerState['body']>;
   }) => {
     this.setState({ ...this.state, isOpen: true, title, subTitle, body });
   };

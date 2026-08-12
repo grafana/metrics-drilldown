@@ -37,14 +37,18 @@
         "/^webpack$/",
         "/^webpack-/",
         "/-webpack-plugin$/",
+        "/^@rsdoctor\\//",
+        "/^@rspack\\//",
+        "/^rspack-/",
+        "/-rspack-plugin$/",
         "/-loader$/",
         "/^@swc//",
         "/^swc-/",
         "/^terser-/",
-        "/^copy-webpack-plugin$/",
-        "/^fork-ts-checker-webpack-plugin$/",
         "/^replace-in-file-webpack-plugin$/",
-        "/^ts-node$/"
+        "/^ts-checker-rspack-plugin$/",
+        "/^ts-node$/",
+        "/^ws$/"
       ]
     },
     {

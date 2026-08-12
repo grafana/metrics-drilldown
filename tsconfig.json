@@ -1,4 +1,9 @@
 {
   "extends": "./.config/tsconfig.json",
-  "include": ["src", ".config/types", "types"]
+  "include": ["src", ".config/types", "types"],
+  "compilerOptions": {
+    // react-router v7+ ships types only via its `exports` map, which the
+    // "node" resolution inherited from @grafana/tsconfig cannot read.
+    "moduleResolution": "bundler"
+  }
 }

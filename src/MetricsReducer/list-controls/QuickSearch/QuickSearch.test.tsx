@@ -399,9 +399,28 @@ describe('QuickSearch', () => {
      * the correct variant based on the locale's pluralization rules.
      */
 
-    it('should display filtered count tag with format "current/total"', () => {
+    it.each([
+      {
+        name: 'should display filtered count tag with format "current/total"',
+        current: 1,
+        total: 10,
+        expectedText: '1/10',
+      },
+      {
+        name: 'should display filtered count tag for multiple items',
+        current: 5,
+        total: 10,
+        expectedText: '5/10',
+      },
+      {
+        name: 'should display total count tag when not filtered (current equals total)',
+        current: 10,
+        total: 10,
+        expectedText: '10',
+      },
+    ])('$name', ({ current, total, expectedText }) => {
       const countsProvider = new MockCountsProvider({});
-      jest.spyOn(countsProvider, 'useCounts').mockReturnValue({ current: 1, total: 10 });
+      jest.spyOn(countsProvider, 'useCounts').mockReturnValue({ current, total });
 
       const quickSearch = new QuickSearch({
         urlSearchParamName: 'search',
@@ -413,46 +432,7 @@ describe('QuickSearch', () => {
 
       renderQuickSearch(quickSearch);
 
-      // Tag displays filtered count
-      const tag = screen.getByText('1/10');
-      expect(tag).toBeInTheDocument();
-    });
-
-    it('should display filtered count tag for multiple items', () => {
-      const countsProvider = new MockCountsProvider({});
-      jest.spyOn(countsProvider, 'useCounts').mockReturnValue({ current: 5, total: 10 });
-
-      const quickSearch = new QuickSearch({
-        urlSearchParamName: 'search',
-        targetName: 'metric',
-        countsProvider,
-        displayCounts: true,
-        ariaLabel: 'Quick search metrics',
-      });
-
-      renderQuickSearch(quickSearch);
-
-      // Tag displays filtered count
-      const tag = screen.getByText('5/10');
-      expect(tag).toBeInTheDocument();
-    });
-
-    it('should display total count tag when not filtered (current equals total)', () => {
-      const countsProvider = new MockCountsProvider({});
-      jest.spyOn(countsProvider, 'useCounts').mockReturnValue({ current: 10, total: 10 });
-
-      const quickSearch = new QuickSearch({
-        urlSearchParamName: 'search',
-        targetName: 'metric',
-        countsProvider,
-        displayCounts: true,
-        ariaLabel: 'Quick search metrics',
-      });
-
-      renderQuickSearch(quickSearch);
-
-      // Tag displays total count only
-      const tag = screen.getByText('10');
+      const tag = screen.getByText(expectedText);
       expect(tag).toBeInTheDocument();
     });
 

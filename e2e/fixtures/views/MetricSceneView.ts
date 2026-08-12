@@ -64,6 +64,7 @@ export class MetricSceneView extends DrilldownView {
 
   async clickPanelConfigureButton() {
     await this.getMainViz().getByTestId('configure-panel').click();
+    await this.mouse.move(0, 0); // prevents the tooltip to cover the config slider
   }
 
   getConfigureSlider() {

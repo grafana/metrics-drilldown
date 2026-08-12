@@ -4,6 +4,7 @@ import { DataSourceVariable } from '@grafana/scenes';
 
 import { logger } from 'shared/logger/logger';
 import { VAR_DATASOURCE } from 'shared/shared';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
@@ -30,6 +31,7 @@ export class MetricsDrilldownDataSourceVariable extends DataSourceVariable {
 
     this.subscribeToState((newState, prevState) => {
       if (newState.value && newState.value !== prevState.value) {
+        reportExploreMetrics('datasource_changed', {});
         // store the new value for future visits
         userStorage.setItem(PREF_KEYS.DATASOURCE, newState.value as string);
       }

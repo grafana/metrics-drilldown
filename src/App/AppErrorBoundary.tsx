@@ -3,7 +3,7 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { t, Trans } from '@grafana/i18n';
 import { Button, ErrorBoundary, useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { ErrorView } from './ErrorView';
 import { logger } from '../shared/logger/logger';

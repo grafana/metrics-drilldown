@@ -9,13 +9,13 @@ import { AppErrorBoundary } from './AppErrorBoundary';
 import { Onboarding } from './Onboarding';
 import { AppRoutes } from './Routes';
 import { useReportAppInitialized } from './useReportAppInitialized';
-import { initOpenFeatureProvider } from '../shared/featureFlags/openFeature';
+import { evaluateExperimentFlagsEarly, initOpenFeatureProvider } from '../shared/featureFlags/openFeature';
 import { initFaro } from '../shared/logger/faro/faro';
 import { isPrometheusDataSource } from '../shared/utils/utils.datasource';
 import { PluginPropsContext } from '../shared/utils/utils.plugin';
 
 initFaro();
-initOpenFeatureProvider();
+initOpenFeatureProvider().then(evaluateExperimentFlagsEarly);
 
 const prometheusDatasources = Object.values(config.datasources).filter(isPrometheusDataSource);
 

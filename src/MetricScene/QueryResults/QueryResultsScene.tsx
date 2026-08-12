@@ -63,7 +63,7 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
     kgMetricType,
   }: {
     metric: QueryResultsSceneState['metric'];
-    queryResultsComponent?: QueryResultsSceneState['queryResultsComponent'];
+    queryResultsComponent?: NonNullable<QueryResultsSceneState['queryResultsComponent']>;
     kgMetricType?: KgMetricType;
   }) {
     super({

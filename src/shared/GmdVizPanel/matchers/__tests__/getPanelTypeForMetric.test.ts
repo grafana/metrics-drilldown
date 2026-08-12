@@ -74,34 +74,15 @@ describe('getPanelTypeForMetric(metric, dataTrail)', () => {
   });
 
   describe('timeseries panels', () => {
-    it('returns "timeseries" for counter metrics', async () => {
+    it.each([
+      { kind: 'counter metrics', metric: 'http_requests_total' },
+      { kind: 'age metrics', metric: 'process_start_timestamp_seconds' },
+      { kind: 'gauge metrics', metric: 'memory_usage_bytes' },
+      { kind: 'info metrics', metric: 'node_info' },
+    ])('returns "timeseries" for $kind', async ({ metric }) => {
       const dataTrail = createMockDataTrail();
 
-      const result = await getPanelTypeForMetric('http_requests_total', dataTrail);
-
-      expect(result).toBe('timeseries');
-    });
-
-    it('returns "timeseries" for age metrics', async () => {
-      const dataTrail = createMockDataTrail();
-
-      const result = await getPanelTypeForMetric('process_start_timestamp_seconds', dataTrail);
-
-      expect(result).toBe('timeseries');
-    });
-
-    it('returns "timeseries" for gauge metrics', async () => {
-      const dataTrail = createMockDataTrail();
-
-      const result = await getPanelTypeForMetric('memory_usage_bytes', dataTrail);
-
-      expect(result).toBe('timeseries');
-    });
-
-    it('returns "timeseries" for info metrics', async () => {
-      const dataTrail = createMockDataTrail();
-
-      const result = await getPanelTypeForMetric('node_info', dataTrail);
+      const result = await getPanelTypeForMetric(metric, dataTrail);
 
       expect(result).toBe('timeseries');
     });
@@ -126,30 +107,16 @@ describe('getPanelTypeForMetric(metric, dataTrail)', () => {
   });
 
   describe('with KG metricType override', () => {
-    it('returns "heatmap" when KG says histogram', async () => {
+    it.each([
+      { name: 'returns "heatmap" when KG says histogram', override: 'histogram', expected: 'heatmap' },
+      { name: 'returns "timeseries" when KG says counter', override: 'counter', expected: 'timeseries' },
+      { name: 'returns "timeseries" when KG says gauge', override: 'gauge', expected: 'timeseries' },
+    ] as const)('$name', async ({ override, expected }) => {
       const dataTrail = createMockDataTrail();
 
-      const result = await getPanelTypeForMetric('my_recording_rule', dataTrail, 'histogram');
+      const result = await getPanelTypeForMetric('my_recording_rule', dataTrail, override);
 
-      expect(result).toBe('heatmap');
-      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
-    });
-
-    it('returns "timeseries" when KG says counter', async () => {
-      const dataTrail = createMockDataTrail();
-
-      const result = await getPanelTypeForMetric('my_recording_rule', dataTrail, 'counter');
-
-      expect(result).toBe('timeseries');
-      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
-    });
-
-    it('returns "timeseries" when KG says gauge', async () => {
-      const dataTrail = createMockDataTrail();
-
-      const result = await getPanelTypeForMetric('my_recording_rule', dataTrail, 'gauge');
-
-      expect(result).toBe('timeseries');
+      expect(result).toBe(expected);
       expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
     });
   });

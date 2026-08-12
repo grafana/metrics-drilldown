@@ -1,5 +1,51 @@
 # Changelog
 
+## [2.4.0](https://github.com/grafana/metrics-drilldown/compare/v2.3.1...v2.4.0) (2026-08-04)
+
+
+### 🎉 Features
+
+* **sea-of-metrics:** make firing-alerts flag an Odin A/B test experiment ([#1357](https://github.com/grafana/metrics-drilldown/issues/1357)) ([5739295](https://github.com/grafana/metrics-drilldown/commit/57392958b30b20f92a35358c9b6405fd1bb6241f))
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump pnpm overrides for CVE remediation ([6e971a8](https://github.com/grafana/metrics-drilldown/commit/6e971a8aa8285fcde6ec6a47f345f2c797da91ff))
+* **deps:** resolve pnpm audit vulnerabilities ([#1360](https://github.com/grafana/metrics-drilldown/issues/1360)) ([3c4c3ba](https://github.com/grafana/metrics-drilldown/commit/3c4c3ba30aa27cb288449dc750afd5da0769bd62))
+* **deps:** resolve pnpm audit vulnerabilities ([#1367](https://github.com/grafana/metrics-drilldown/issues/1367)) ([6e971a8](https://github.com/grafana/metrics-drilldown/commit/6e971a8aa8285fcde6ec6a47f345f2c797da91ff))
+
+
+### 📝 Documentation
+
+* correct Metrics Drilldown UI labels and behavior claims ([#1362](https://github.com/grafana/metrics-drilldown/issues/1362)) ([857d798](https://github.com/grafana/metrics-drilldown/commit/857d798cf7c5d98b5028f0f61aebb49e7fe681cb))
+
+
+### 🧪 Tests
+
+* **e2e:** force queryLibrary off so saved-queries specs run on nightly ([#1364](https://github.com/grafana/metrics-drilldown/issues/1364)) ([eed46f6](https://github.com/grafana/metrics-drilldown/commit/eed46f6efcdaf51b963726d504a37c741eb452ba))
+
+## [2.3.1](https://github.com/grafana/metrics-drilldown/compare/v2.3.0...v2.3.1) (2026-07-28)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump pnpm overrides for CVE remediation ([d52aced](https://github.com/grafana/metrics-drilldown/commit/d52acedbb4407b68284d624c33a778500d77f6c8))
+* **deps:** resolve pnpm audit vulnerabilities ([#1352](https://github.com/grafana/metrics-drilldown/issues/1352)) ([d52aced](https://github.com/grafana/metrics-drilldown/commit/d52acedbb4407b68284d624c33a778500d77f6c8))
+
+## [2.3.0](https://github.com/grafana/metrics-drilldown/compare/v2.2.0...v2.3.0) (2026-07-21)
+
+
+### 🎉 Features
+
+* **list-controls:** add "Has firing alerts" filter chip to metrics toolbar ([#1281](https://github.com/grafana/metrics-drilldown/issues/1281)) ([48c8503](https://github.com/grafana/metrics-drilldown/commit/48c850395f3a44bfd853486219350efa07483562))
+* **sea-of-metrics:** Phase 1 — firing alerts sort, visual badges, and instrumentation ([#1342](https://github.com/grafana/metrics-drilldown/issues/1342)) ([fc33fca](https://github.com/grafana/metrics-drilldown/commit/fc33fca923330e8b3d837aad8dfc44bef8292f4c))
+
+
+### 🐛 Bug Fixes
+
+* **deps:** resolve pnpm audit vulnerabilities ([#1347](https://github.com/grafana/metrics-drilldown/issues/1347)) ([c85c02c](https://github.com/grafana/metrics-drilldown/commit/c85c02ce5547a157ae7dd6e9166fe4d9fc9d09a0))
+* **faro:** deduplicate InlineBanner error reporting to prevent SLO breach ([#1349](https://github.com/grafana/metrics-drilldown/issues/1349)) ([6e207e7](https://github.com/grafana/metrics-drilldown/commit/6e207e7c357349b4897972a3c90d7de374272091))
+
 ## [2.2.0](https://github.com/grafana/metrics-drilldown/compare/v2.1.0...v2.2.0) (2026-07-02)
 
 
