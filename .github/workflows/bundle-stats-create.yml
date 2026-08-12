@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
 
@@ -28,7 +28,7 @@ jobs:
           echo "version=$NODE_VERSION" >> $GITHUB_OUTPUT
 
       - name: Install pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Setup Node.js environment
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
@@ -45,7 +45,7 @@ jobs:
           RSDOCTOR: true
 
       - name: RsDoctor Bundle Analysis
-        uses: web-infra-dev/rsdoctor-action@bce0934b887cddb56986d16c34a445bcce9a7d65 # main
+        uses: web-infra-dev/rsdoctor-action@2fbd50933702502f12d2bbef5273afbfd829a289 # main
         with:
           file_path: 'dist/rsdoctor-data.json'
           target_branch: 'main'

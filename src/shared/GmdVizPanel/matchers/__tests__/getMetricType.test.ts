@@ -155,68 +155,32 @@ describe('getMetricType(metric, dataTrail)', () => {
   });
 
   describe('when heuristic is not gauge or counter', () => {
-    it('returns "classic-histogram" without checking metadata', async () => {
+    it.each([
+      { metric: 'request_duration_bucket', expected: 'classic-histogram' },
+      { metric: 'up', expected: 'status-updown' },
+      { metric: 'node_info', expected: 'info' },
+      { metric: 'process_start_timestamp_seconds', expected: 'age' },
+    ])('returns "$expected" without checking metadata', async ({ metric, expected }) => {
       const dataTrail = createMockDataTrail('gauge');
 
-      const result = await getMetricType('request_duration_bucket', dataTrail);
+      const result = await getMetricType(metric, dataTrail);
 
-      expect(result).toBe('classic-histogram');
-      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
-    });
-
-    it('returns "status-updown" without checking metadata', async () => {
-      const dataTrail = createMockDataTrail('gauge');
-
-      const result = await getMetricType('up', dataTrail);
-
-      expect(result).toBe('status-updown');
-      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
-    });
-
-    it('returns "info" without checking metadata', async () => {
-      const dataTrail = createMockDataTrail('gauge');
-
-      const result = await getMetricType('node_info', dataTrail);
-
-      expect(result).toBe('info');
-      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
-    });
-
-    it('returns "age" without checking metadata', async () => {
-      const dataTrail = createMockDataTrail('gauge');
-
-      const result = await getMetricType('process_start_timestamp_seconds', dataTrail);
-
-      expect(result).toBe('age');
+      expect(result).toBe(expected);
       expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
     });
   });
 
   describe('with KG metricType override', () => {
-    it('returns mapped type immediately without metadata fetch', async () => {
-      const dataTrail = createMockDataTrail('gauge');
+    it.each([
+      { name: 'returns mapped type immediately without metadata fetch', heuristic: 'gauge', override: 'counter', expected: 'counter' },
+      { name: 'maps histogram to classic-histogram without metadata fetch', heuristic: 'histogram', override: 'histogram', expected: 'classic-histogram' },
+      { name: 'maps summary to gauge without metadata fetch', heuristic: 'counter', override: 'summary', expected: 'gauge' },
+    ] as const)('$name', async ({ heuristic, override, expected }) => {
+      const dataTrail = createMockDataTrail(heuristic);
 
-      const result = await getMetricType('my_recording_rule', dataTrail, 'counter');
+      const result = await getMetricType('my_recording_rule', dataTrail, override);
 
-      expect(result).toBe('counter');
-      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
-    });
-
-    it('maps histogram to classic-histogram without metadata fetch', async () => {
-      const dataTrail = createMockDataTrail('histogram');
-
-      const result = await getMetricType('my_recording_rule', dataTrail, 'histogram');
-
-      expect(result).toBe('classic-histogram');
-      expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
-    });
-
-    it('maps summary to gauge without metadata fetch', async () => {
-      const dataTrail = createMockDataTrail('counter');
-
-      const result = await getMetricType('my_recording_rule', dataTrail, 'summary');
-
-      expect(result).toBe('gauge');
+      expect(result).toBe(expected);
       expect(dataTrail.getMetadataForMetric).not.toHaveBeenCalled();
     });
   });

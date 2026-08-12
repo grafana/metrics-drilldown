@@ -11,7 +11,7 @@ import {
 
 describe('getUnitFromMetric', () => {
   it('should return null for an empty string input', () => {
-    expect(getUnitFromMetric('')).toBe(null);
+    expect(getUnitFromMetric('')).toBeNull();
   });
 
   it('should return the last part of the metric if it is a valid unit', () => {
@@ -20,8 +20,8 @@ describe('getUnitFromMetric', () => {
   });
 
   it('should return null if no valid unit is found', () => {
-    expect(getUnitFromMetric('ALERTS')).toBe(null);
-    expect(getUnitFromMetric('utf8 metric with.dot')).toBe(null);
+    expect(getUnitFromMetric('ALERTS')).toBeNull();
+    expect(getUnitFromMetric('utf8 metric with.dot')).toBeNull();
   });
 
   it('should handle metrics with extra underscores', () => {
@@ -29,7 +29,7 @@ describe('getUnitFromMetric', () => {
   });
 
   it('should return null if the metric ends with an invalid unit', () => {
-    expect(getUnitFromMetric('go_gc_duration_invalidunit')).toBe(null);
+    expect(getUnitFromMetric('go_gc_duration_invalidunit')).toBeNull();
   });
 
   it('should return the last unit if the metric contains only valid units', () => {

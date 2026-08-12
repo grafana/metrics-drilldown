@@ -74,3 +74,6 @@ overrides:
   brace-expansion: ^5.0.9
   webpack-dev-server: '>=5.2.6'
   ip-address: '>=10.3.1'
+  # GHSA-2j2x-hqr9-3h42: open redirect via protocol-relative URL. Transitive via
+  # @grafana/ui > react-router-dom-v5-compat. Patched in 1.23.3.
+  '@remix-run/router': ^1.23.3

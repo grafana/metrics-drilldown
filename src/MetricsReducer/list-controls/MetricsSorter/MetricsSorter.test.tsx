@@ -118,7 +118,7 @@ describe('MetricsSorter', () => {
       const recentMetrics = userStorage.getItem(PREF_KEYS.RECENT_METRICS) || [];
 
       // Should have added our metric
-      expect(recentMetrics.length).toBe(1);
+      expect(recentMetrics).toHaveLength(1);
       expect(recentMetrics[0].name).toBe('test_metric');
     });
 
@@ -161,7 +161,7 @@ describe('MetricsSorter', () => {
         const updatedTimestamp = recentMetrics[0].timestamp;
 
         // Should still only have one entry
-        expect(recentMetrics.length).toBe(1);
+        expect(recentMetrics).toHaveLength(1);
 
         // Timestamp should be updated
         expect(updatedTimestamp).toBe(2000);

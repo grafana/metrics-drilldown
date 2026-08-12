@@ -45,20 +45,20 @@ export type PanelConfig = {
   menu?: (menuArgs: HeaderActionAndMenuArgs) => VizPanelState['menu'];
   legend?: Partial<VizLegendOptions>;
   mappings?: ValueMapping[];
-  behaviors?: VizPanelState['$behaviors'];
+  behaviors?: NonNullable<VizPanelState['$behaviors']>;
 };
 
 export type PanelOptions = {
   type?: PanelConfig['type'];
   height?: PanelConfig['height'];
-  fixedColorIndex?: PanelConfig['fixedColorIndex'];
+  fixedColorIndex?: NonNullable<PanelConfig['fixedColorIndex']>;
   title?: PanelConfig['title'];
-  description?: PanelConfig['description'];
+  description?: NonNullable<PanelConfig['description']>;
   headerActions?: PanelConfig['headerActions'];
-  menu?: PanelConfig['menu'];
-  legend?: PanelConfig['legend'];
-  mappings?: PanelConfig['mappings'];
-  behaviors?: PanelConfig['behaviors'];
+  menu?: NonNullable<PanelConfig['menu']>;
+  legend?: NonNullable<PanelConfig['legend']>;
+  mappings?: NonNullable<PanelConfig['mappings']>;
+  behaviors?: NonNullable<PanelConfig['behaviors']>;
 };
 
 /* Query config */
@@ -94,12 +94,12 @@ export type QueryOptions = {
   labelMatchers?: QueryConfig['labelMatchers'];
   groupBy?: string;
   queries?: QueryDefs;
-  data?: QueryConfig['data'];
-  customRateInterval?: QueryConfig['customRateInterval'];
-  customFunction?: QueryConfig['customFunction'];
-  kgMetricType?: QueryConfig['kgMetricType'];
-  binaryExpr?: QueryConfig['binaryExpr'];
-  binaryLegend?: QueryConfig['binaryLegend'];
+  data?: NonNullable<QueryConfig['data']>;
+  customRateInterval?: NonNullable<QueryConfig['customRateInterval']>;
+  customFunction?: NonNullable<QueryConfig['customFunction']>;
+  kgMetricType?: NonNullable<QueryConfig['kgMetricType']>;
+  binaryExpr?: NonNullable<QueryConfig['binaryExpr']>;
+  binaryLegend?: NonNullable<QueryConfig['binaryLegend']>;
 };
 
 /* GmdVizPanelState */

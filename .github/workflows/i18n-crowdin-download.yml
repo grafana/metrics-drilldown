@@ -18,7 +18,7 @@ jobs:
           persist-credentials: false
       - name: Get GitHub App token
         id: get-github-app-token
-        uses: grafana/shared-workflows/actions/create-github-app-token@259ba21cb3ff07724f331e26d926d655d24b317b # create-github-app-token/v0.2.3
+        uses: grafana/shared-workflows/actions/create-github-app-token@46f48da11e78ebdba7a8747ae456b11062fac83e # create-github-app-token/v0.3.1
         with:
           github_app: grafana-pr-automation
       - name: 'Get vault secrets'
@@ -30,7 +30,7 @@ jobs:
             repo_secrets: |
                 CROWDIN_TOKEN=grafana-frontend-crowdin-token:access_token
       - name: Download from Crowdin
-        uses: grafana/grafana-github-actions/crowdin-download@3cfd8aa18530171681eca2a3eb542721b8413418 # main
+        uses: grafana/grafana-github-actions/crowdin-download@26e65a1da9ffdf35d3e8cc6dbeffbccf16022d88 # main
         with:
           crowdin_token: ${{ fromJSON(steps.vault-secrets.outputs.secrets).CROWDIN_TOKEN }}
           crowdin_project_id: 38
