@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React, { act } from 'react';
-import { MemoryRouter, useNavigate } from 'react-router-dom';
+import { MemoryRouter, useNavigate } from 'react-router';
 
 import { AppErrorBoundary, isChunkLoadError } from './AppErrorBoundary';
 import { logger } from '../shared/logger/logger';

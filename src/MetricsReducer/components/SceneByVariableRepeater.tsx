@@ -57,9 +57,9 @@ export class SceneByVariableRepeater extends SceneObjectBase<SceneByVariableRepe
     variableName: SceneByVariableRepeaterState['variableName'];
     body: SceneByVariableRepeaterState['body'];
     getLayoutChild: SceneByVariableRepeaterState['getLayoutChild'];
-    getLayoutLoading?: SceneByVariableRepeaterState['getLayoutLoading'];
-    getLayoutError?: SceneByVariableRepeaterState['getLayoutError'];
-    getLayoutEmpty?: SceneByVariableRepeaterState['getLayoutEmpty'];
+    getLayoutLoading?: NonNullable<SceneByVariableRepeaterState['getLayoutLoading']>;
+    getLayoutError?: NonNullable<SceneByVariableRepeaterState['getLayoutError']>;
+    getLayoutEmpty?: NonNullable<SceneByVariableRepeaterState['getLayoutEmpty']>;
     initialPageSize?: SceneByVariableRepeaterState['initialPageSize'];
     pageSizeIncrement?: SceneByVariableRepeaterState['pageSizeIncrement'];
   }) {

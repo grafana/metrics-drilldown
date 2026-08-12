@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.4.0](https://github.com/grafana/metrics-drilldown/compare/v2.3.1...v2.4.0) (2026-08-04)
+
+
+### 🎉 Features
+
+* **sea-of-metrics:** make firing-alerts flag an Odin A/B test experiment ([#1357](https://github.com/grafana/metrics-drilldown/issues/1357)) ([5739295](https://github.com/grafana/metrics-drilldown/commit/57392958b30b20f92a35358c9b6405fd1bb6241f))
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump pnpm overrides for CVE remediation ([6e971a8](https://github.com/grafana/metrics-drilldown/commit/6e971a8aa8285fcde6ec6a47f345f2c797da91ff))
+* **deps:** resolve pnpm audit vulnerabilities ([#1360](https://github.com/grafana/metrics-drilldown/issues/1360)) ([3c4c3ba](https://github.com/grafana/metrics-drilldown/commit/3c4c3ba30aa27cb288449dc750afd5da0769bd62))
+* **deps:** resolve pnpm audit vulnerabilities ([#1367](https://github.com/grafana/metrics-drilldown/issues/1367)) ([6e971a8](https://github.com/grafana/metrics-drilldown/commit/6e971a8aa8285fcde6ec6a47f345f2c797da91ff))
+
+
+### 📝 Documentation
+
+* correct Metrics Drilldown UI labels and behavior claims ([#1362](https://github.com/grafana/metrics-drilldown/issues/1362)) ([857d798](https://github.com/grafana/metrics-drilldown/commit/857d798cf7c5d98b5028f0f61aebb49e7fe681cb))
+
+
+### 🧪 Tests
+
+* **e2e:** force queryLibrary off so saved-queries specs run on nightly ([#1364](https://github.com/grafana/metrics-drilldown/issues/1364)) ([eed46f6](https://github.com/grafana/metrics-drilldown/commit/eed46f6efcdaf51b963726d504a37c741eb452ba))
+
+## [2.3.1](https://github.com/grafana/metrics-drilldown/compare/v2.3.0...v2.3.1) (2026-07-28)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump pnpm overrides for CVE remediation ([d52aced](https://github.com/grafana/metrics-drilldown/commit/d52acedbb4407b68284d624c33a778500d77f6c8))
+* **deps:** resolve pnpm audit vulnerabilities ([#1352](https://github.com/grafana/metrics-drilldown/issues/1352)) ([d52aced](https://github.com/grafana/metrics-drilldown/commit/d52acedbb4407b68284d624c33a778500d77f6c8))
+
 ## [2.3.0](https://github.com/grafana/metrics-drilldown/compare/v2.2.0...v2.3.0) (2026-07-21)
 
 

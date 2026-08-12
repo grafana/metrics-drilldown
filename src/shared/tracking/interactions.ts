@@ -63,8 +63,12 @@ type Interactions = {
       // Deselects the current selected metrics by clicking the "Select new metric" button
       | 'unselect'
       // When in embedded mode, clicked to open the exploration from the embedded view
-      | 'open_from_embedded';
+      | 'open_from_embedded'
+      // Opens the metric queries in Explore from the panel menu
+      | 'panel_menu_explore';
   };
+  // User changed the Prometheus data source
+  datasource_changed: {};
   // User clicks on one of the action buttons associated with related logs
   related_logs_action_clicked: {
     action: // Opens Logs Drilldown
@@ -234,7 +238,11 @@ getPluginVersion().then((v) => {
   cachedAppVersion = v;
 });
 
-function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<string, unknown> {
+/** @internal Exported for unit testing. Returns the experiment-cohort enrichment for a given event/payload. */
+export function getExperimentPayloads<E extends keyof AllEvents, P extends AllEvents[E]>(
+  event: E,
+  payload: P
+): Record<string, unknown> {
   const payloads: Record<string, unknown> = {};
 
   // Enrich all sidebar-related events (e.g., metrics_sidebar_toggled, sidebar_prefix_filter_applied)
@@ -252,13 +260,35 @@ function getExperimentPayloads<E extends keyof AllEvents>(event: E): Record<stri
     Object.assign(payloads, getTrackedFlagPayload('experiment_grafana_assistant_quick_search_tab_test', true));
   }
 
+  // Enrich events with the sort-by-firing-alerts experiment cohort so Odin can correlate KPIs and cohort in a
+  // single query.
+  //
+  // `metric_selected` is the primary KPI: it fires in BOTH arms (treatment and control), so it gives Odin a
+  // comparable measure of engagement. The firing-alert-specific events below only fire when the feature is
+  // visible (treatment only), so they serve as adoption/guardrail metrics, not the primary A/B comparison.
+  // `sorting_changed` is only enriched when the firing-alerts sort is the one being selected, to avoid
+  // polluting the generic sort KPI.
+  const isFiringAlertsSortSelected =
+    event === 'sorting_changed' &&
+    (payload as Interactions['sorting_changed']).from === 'metrics-reducer' &&
+    (payload as { sortBy?: string }).sortBy === 'firing-alerts';
+
+  if (
+    event === 'metric_selected' ||
+    event === 'firing_alert_filter_toggled' ||
+    event === 'firing_alert_metrics_fetched' ||
+    isFiringAlertsSortSelected
+  ) {
+    Object.assign(payloads, getTrackedFlagPayload('experiment_sort_by_firing_alerts', true));
+  }
+
   return payloads;
 }
 
 function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): P {
   return {
     ...payload,
-    ...getExperimentPayloads(event),
+    ...getExperimentPayloads(event, payload),
     meta: {
       appRelease: cachedAppVersion ?? '',
       appVersion: GIT_COMMIT,

@@ -66,12 +66,12 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     $behaviors: SceneByFrameRepeaterState['$behaviors'];
     body: SceneByFrameRepeaterState['body'];
     getLayoutChild: SceneByFrameRepeaterState['getLayoutChild'];
-    getLayoutLoading?: SceneByFrameRepeaterState['getLayoutLoading'];
-    getLayoutError?: SceneByFrameRepeaterState['getLayoutError'];
-    getLayoutEmpty?: SceneByFrameRepeaterState['getLayoutEmpty'];
+    getLayoutLoading?: NonNullable<SceneByFrameRepeaterState['getLayoutLoading']>;
+    getLayoutError?: NonNullable<SceneByFrameRepeaterState['getLayoutError']>;
+    getLayoutEmpty?: NonNullable<SceneByFrameRepeaterState['getLayoutEmpty']>;
     initialPageSize?: SceneByFrameRepeaterState['initialPageSize'];
     pageSizeIncrement?: SceneByFrameRepeaterState['pageSizeIncrement'];
-    $data?: SceneByFrameRepeaterState['$data'];
+    $data?: NonNullable<SceneByFrameRepeaterState['$data']>;
   }) {
     super({
       key: 'breakdown-by-frame-repeater',

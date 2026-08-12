@@ -32,8 +32,8 @@ describe('fetchDashboardMetrics()', () => {
       const { get } = setup();
 
       get.mockResolvedValueOnce([
-        { uid: 42, url: 'http://42.test.com' },
-        { uid: 2025, url: 'http://2025.test.com' },
+        { uid: 42, url: 'https://42.test.com' },
+        { uid: 2025, url: 'https://2025.test.com' },
       ]);
 
       await fetchDashboardMetrics();
@@ -47,8 +47,8 @@ describe('fetchDashboardMetrics()', () => {
       const { get } = setup();
 
       get.mockResolvedValueOnce([
-        { uid: 42, url: 'http://42.test.com' },
-        { uid: 2025, url: 'http://2025.test.com' },
+        { uid: 42, url: 'https://42.test.com' },
+        { uid: 2025, url: 'https://2025.test.com' },
       ]);
 
       const promDatasource = { type: 'prometheus', uid: 'test-prom-ds' };
@@ -57,7 +57,7 @@ describe('fetchDashboardMetrics()', () => {
       get.mockResolvedValueOnce({
         dashboard: {
           uid: 2025,
-          url: 'http://2025.test.com',
+          url: 'https://2025.test.com',
           title: 'Year 2025',
           panels: [
             {
@@ -70,18 +70,18 @@ describe('fetchDashboardMetrics()', () => {
       get.mockResolvedValueOnce({
         dashboard: {
           uid: 42,
-          url: 'http://42.test.com',
+          url: 'https://42.test.com',
           panels: [{ datasource: promDatasource, targets: [{ expr: 'go_goroutines{cluster="test"}' }] }],
         },
       });
       get.mockResolvedValueOnce({
         dashboard: {
           uid: -1,
-          url: 'http://no.test.com',
+          url: 'https://no.test.com',
           panels: [{ datasource: nonPromDatasource, targets: [{ expr: '{service_name="ingester"}' }] }],
         },
       });
-      get.mockResolvedValueOnce({ dashboard: { uid: -2, url: 'http://no.test.com', panels: [] } });
+      get.mockResolvedValueOnce({ dashboard: { uid: -2, url: 'https://no.test.com', panels: [] } });
 
       const result = await fetchDashboardMetrics();
 
@@ -93,12 +93,12 @@ describe('fetchDashboardMetrics()', () => {
             'Year 2025': {
               count: 1,
               uid: 2025,
-              url: 'http://42.test.com',
+              url: 'https://42.test.com',
             },
             'Dashboard 42': {
               count: 1,
               uid: 42,
-              url: 'http://2025.test.com',
+              url: 'https://2025.test.com',
             },
           },
         },
@@ -109,7 +109,7 @@ describe('fetchDashboardMetrics()', () => {
             'Year 2025': {
               count: 1,
               uid: 2025,
-              url: 'http://42.test.com',
+              url: 'https://42.test.com',
             },
           },
         },
@@ -122,7 +122,7 @@ describe('fetchDashboardMetrics()', () => {
       const { get } = setup();
 
       get.mockResolvedValueOnce(
-        Array.from({ length: 499 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+        Array.from({ length: 499 }, (_, i) => ({ uid: `uid-${i}`, url: `https://${i}.test.com` }))
       );
 
       await fetchDashboardMetrics();
@@ -145,7 +145,7 @@ describe('fetchDashboardMetrics()', () => {
         }
         if (url === '/api/search') {
           return Promise.resolve(
-            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `https://${i}.test.com` }))
           );
         }
         return Promise.resolve({ dashboard: { panels: [] } });
@@ -167,11 +167,11 @@ describe('fetchDashboardMetrics()', () => {
 
       get.mockImplementation((url: string, params: Record<string, unknown>) => {
         if (url === '/api/search' && params?.page === 2) {
-          return Promise.resolve([{ uid: 'uid-501', url: 'http://501.test.com' }]);
+          return Promise.resolve([{ uid: 'uid-501', url: 'https://501.test.com' }]);
         }
         if (url === '/api/search') {
           return Promise.resolve(
-            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `https://${i}.test.com` }))
           );
         }
         return Promise.resolve({ dashboard: { panels: [] } });
@@ -194,7 +194,7 @@ describe('fetchDashboardMetrics()', () => {
         }
         if (url === '/api/search') {
           return Promise.resolve(
-            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `https://${i}.test.com` }))
           );
         }
         return Promise.resolve({ dashboard: { panels: [] } });
@@ -215,7 +215,7 @@ describe('fetchDashboardMetrics()', () => {
         }
         if (url === '/api/search') {
           return Promise.resolve(
-            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `http://${i}.test.com` }))
+            Array.from({ length: 500 }, (_, i) => ({ uid: `uid-${i}`, url: `https://${i}.test.com` }))
           );
         }
         return Promise.resolve({ dashboard: { panels: [] } });

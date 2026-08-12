@@ -24,6 +24,6 @@ describe('getEnvironment()', () => {
   test('when the host is empty → null', () => {
     __setWindowLocation('about:blank');
 
-    expect(getEnvironment()).toBe(null);
+    expect(getEnvironment()).toBeNull();
   });
 });
