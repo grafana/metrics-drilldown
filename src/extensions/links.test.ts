@@ -87,25 +87,32 @@ describe('parsePromQLQuery - lezer parser tests', () => {
     expect(result.labels).toEqual([]);
   });
 
-  test('should handle complex function expressions', () => {
-    const result = parsePromQLQuery('sum(rate(http_requests_total{status="200"}[5m])) by (service)');
-    expect(result.metric).toBe('http_requests_total');
-    expect(result.labels).toEqual([{ label: 'status', op: '=', value: '200' }]);
-  });
-
-  test('should handle binary operations', () => {
-    const result = parsePromQLQuery('http_requests_total{status="200"} / http_requests_total');
-    expect(result.metric).toBe('http_requests_total');
-    expect(result.labels).toEqual([{ label: 'status', op: '=', value: '200' }]);
-  });
-
-  test('should handle empty label values', () => {
-    const result = parsePromQLQuery('http_requests_total{method="",status="200"}');
-    expect(result.metric).toBe('http_requests_total');
-    expect(result.labels).toEqual([
-      { label: 'method', op: '=', value: '' },
-      { label: 'status', op: '=', value: '200' },
-    ]);
+  test.each([
+    {
+      name: 'should handle complex function expressions',
+      query: 'sum(rate(http_requests_total{status="200"}[5m])) by (service)',
+      metric: 'http_requests_total',
+      labels: [{ label: 'status', op: '=', value: '200' }],
+    },
+    {
+      name: 'should handle binary operations',
+      query: 'http_requests_total{status="200"} / http_requests_total',
+      metric: 'http_requests_total',
+      labels: [{ label: 'status', op: '=', value: '200' }],
+    },
+    {
+      name: 'should handle empty label values',
+      query: 'http_requests_total{method="",status="200"}',
+      metric: 'http_requests_total',
+      labels: [
+        { label: 'method', op: '=', value: '' },
+        { label: 'status', op: '=', value: '200' },
+      ],
+    },
+  ])('$name', ({ query, metric, labels }) => {
+    const result = parsePromQLQuery(query);
+    expect(result.metric).toBe(metric);
+    expect(result.labels).toEqual(labels);
   });
 
   test('should handle invalid queries gracefully', () => {

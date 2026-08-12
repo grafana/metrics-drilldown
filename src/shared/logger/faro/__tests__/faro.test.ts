@@ -134,7 +134,7 @@ describe('initFaro()', () => {
         captureConsole: false,
       });
       expect(instrumentations).toBeInstanceOf(Array);
-      expect(instrumentations.length).toBe(1);
+      expect(instrumentations).toHaveLength(1);
 
       expect(isolate).toBe(true);
       expect(beforeSend).toBeInstanceOf(Function);

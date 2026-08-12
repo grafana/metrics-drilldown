@@ -92,7 +92,7 @@ describe('DataTrail', () => {
       });
 
       it('Should have default empty filter', () => {
-        expect(getFilterVar(trail).state.filters.length).toBe(0);
+        expect(getFilterVar(trail).state.filters).toHaveLength(0);
       });
 
       describe('And when changing the filter to zone=a', () => {
