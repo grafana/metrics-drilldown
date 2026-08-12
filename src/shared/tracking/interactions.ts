@@ -238,7 +238,8 @@ getPluginVersion().then((v) => {
   cachedAppVersion = v;
 });
 
-function getExperimentPayloads<E extends keyof AllEvents, P extends AllEvents[E]>(
+/** @internal Exported for unit testing. Returns the experiment-cohort enrichment for a given event/payload. */
+export function getExperimentPayloads<E extends keyof AllEvents, P extends AllEvents[E]>(
   event: E,
   payload: P
 ): Record<string, unknown> {
@@ -259,15 +260,21 @@ function getExperimentPayloads<E extends keyof AllEvents, P extends AllEvents[E]
     Object.assign(payloads, getTrackedFlagPayload('experiment_grafana_assistant_quick_search_tab_test', true));
   }
 
-  // Enrich firing-alerts KPI events with the experiment cohort so Odin can correlate KPIs and cohort in a
-  // single query. `sorting_changed` is only enriched when the firing-alerts sort is the one being selected,
-  // to avoid polluting the generic sort KPI.
+  // Enrich events with the sort-by-firing-alerts experiment cohort so Odin can correlate KPIs and cohort in a
+  // single query.
+  //
+  // `metric_selected` is the primary KPI: it fires in BOTH arms (treatment and control), so it gives Odin a
+  // comparable measure of engagement. The firing-alert-specific events below only fire when the feature is
+  // visible (treatment only), so they serve as adoption/guardrail metrics, not the primary A/B comparison.
+  // `sorting_changed` is only enriched when the firing-alerts sort is the one being selected, to avoid
+  // polluting the generic sort KPI.
   const isFiringAlertsSortSelected =
     event === 'sorting_changed' &&
     (payload as Interactions['sorting_changed']).from === 'metrics-reducer' &&
     (payload as { sortBy?: string }).sortBy === 'firing-alerts';
 
   if (
+    event === 'metric_selected' ||
     event === 'firing_alert_filter_toggled' ||
     event === 'firing_alert_metrics_fetched' ||
     isFiringAlertsSortSelected
