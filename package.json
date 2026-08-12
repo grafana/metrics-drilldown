@@ -54,7 +54,7 @@
     "@lezer/common": "^1.5.0",
     "@openfeature/ofrep-web-provider": "^0.4.1",
     "@openfeature/web-sdk": "^1.7.2",
-    "@prometheus-io/lezer-promql": "^0.311.0",
+    "@prometheus-io/lezer-promql": "^0.313.0",
     "compare-versions": "^6.1.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
