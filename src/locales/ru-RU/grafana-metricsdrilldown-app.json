@@ -10,6 +10,9 @@
       "related-metrics-description": "Метрики, соответствующие текущим фильтрам меток"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Добавить к фильтрам",
     "by-label": "По меткам",
@@ -42,6 +45,11 @@
     "selected-count_many": "Выбрано: {{count}}",
     "selected-count_other": "Выбрано: {{count}}"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Применить",
     "cancel": "Отмена",
@@ -69,6 +77,10 @@
     "stack-trace-label": "Просмотр трассировки стека",
     "title": "Критическая ошибка"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Для обработки крайне малых значений в рядах выполнена повторная выборка данных дашборда с использованием более сложного запроса"
   },
@@ -80,8 +92,26 @@
     "limit-warning-body": "В вашей организации количество дашбордов превышает этот лимит. Данные об использовании могут быть неполными.",
     "limit-warning-title": "Сортировка по использованию дашбордов ограничена 500 дашбордами."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Отфильтрованные метрики"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_few": "",
+    "tooltip_many": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_few": "",
+    "label_many": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Отправить отзыв"
@@ -147,13 +177,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Нет сохраненных запросов для загрузки",
-        "button-tooltip": "Загрузить сохраненный запрос",
+        "button-tooltip": "",
         "empty": "Нет сохраненных запросов для отображения.",
         "load-error": "Этот запрос содержит выражения, которые невозможно представить в Metrics Drilldown. Поддерживаются только простые селекторы метрик {label}.",
         "load-type-error": "Выберите запрос Prometheus.",
         "modal-title": "Загрузить ранее сохраненный запрос",
         "remove": "Удалить",
-        "saved-query-button-tooltip": "Загрузить сохраненный запрос",
+        "saved-query-button-tooltip": "",
         "select": "Выбрать"
       },
       "save-query": {
@@ -161,7 +191,7 @@
           "alert": "Ранее был сохранен запрос с таким же выражением: {{title}}"
         },
         "button-tooltip": "Сохранить запрос",
-        "button-tooltip-saved-queries": "Сохранить в сохраненных запросах",
+        "button-tooltip-saved-queries": "",
         "cancel": "Отмена",
         "description": "Описание",
         "error": "Непредвиденная ошибка при сохранении этого запроса.",
@@ -198,11 +228,17 @@
       "alphabetical": "По алфавиту [A-Z]",
       "alphabetical-reversed": "По алфавиту [Z-A]",
       "dashboard-usage": "Использование дашбордов",
-      "default": "По умолчанию"
+      "default": "По умолчанию",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Метрики"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Ознакомьтесь с <2>документацией</2>, чтобы узнать больше, или<5></5><6>протестируйте онлайн</6> с помощью Grafana Play.",
@@ -238,8 +274,7 @@
       "commit-sha": "Выполнить SHA-хеширование: {{sha}}",
       "contribute": "Внести вклад",
       "documentation": "Документация",
-      "grafana-version": "Grafana {{edition}}, версия {{version}} ({{env}})",
-      "prom-build-info": "{{application}}, {{version}} ({{buildDate}})",
+      "grafana-version": "",
       "report-issue": "Сообщить о проблеме"
     }
   },
@@ -247,6 +282,11 @@
     "all-metrics": "Имена всех метрик",
     "tooltip": "Просмотр по префиксу метрики. Префикс — это одно слово в начале имени метрики, обозначающее домен, к которому она относится.",
     "view-by-label": "Просмотр по"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Результаты мгновенного запроса",

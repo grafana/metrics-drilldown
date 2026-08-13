@@ -10,6 +10,9 @@
       "related-metrics-description": "基于当前标签筛选条件的相关指标"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "添加到筛选条件",
     "by-label": "按标签",
@@ -39,6 +42,11 @@
     "no-results": "没有结果。",
     "selected-count_other": "已选择 {{count}} 个"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "应用",
     "cancel": "取消",
@@ -66,6 +74,10 @@
     "stack-trace-label": "查看堆栈跟踪",
     "title": "致命错误！"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "使用了更复杂的查询重新获取面板数据，以处理序列中的极小值"
   },
@@ -77,8 +89,20 @@
     "limit-warning-body": "您的组织拥有的数据面板数量超过了此上限。使用量计数可能不完整。",
     "limit-warning-title": "数据面板使用量排序最多可涵盖 500 个数据面板。"
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "已筛选的指标"
+  },
+  "firing-alert-badge": {
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "提供反馈"
@@ -144,13 +168,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "没有可加载的已保存查询",
-        "button-tooltip": "加载已保存的查询",
+        "button-tooltip": "",
         "empty": "没有要显示的已保存查询。",
         "load-error": "此查询包含无法在指标深入分析中表示的表达式。仅支持简单的指标{label}选择器。",
         "load-type-error": "请选择一个 Prometheus 查询。",
         "modal-title": "加载之前保存的查询",
         "remove": "移除",
-        "saved-query-button-tooltip": "加载已保存的查询",
+        "saved-query-button-tooltip": "",
         "select": "选择"
       },
       "save-query": {
@@ -158,7 +182,7 @@
           "alert": "之前保存的一个查询具有相同表达式：{{title}}"
         },
         "button-tooltip": "保存查询",
-        "button-tooltip-saved-queries": "保存在“已保存的查询”中",
+        "button-tooltip-saved-queries": "",
         "cancel": "取消",
         "description": "描述",
         "error": "保存此查询时出现意外错误。",
@@ -195,11 +219,17 @@
       "alphabetical": "按字母顺序 [A-Z]",
       "alphabetical-reversed": "按字母顺序 [Z-A]",
       "dashboard-usage": "数据面板使用量",
-      "default": "默认"
+      "default": "默认",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "指标"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "查看<2>我们的文档</2>以了解更多信息，或在 Grafana Play 中<5></5><6>在线试用</6>！",
@@ -235,8 +265,7 @@
       "commit-sha": "提交 SHA：{{sha}}",
       "contribute": "贡献",
       "documentation": "文档",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "报告问题"
     }
   },
@@ -244,6 +273,11 @@
     "all-metrics": "所有指标名称",
     "tooltip": "按指标前缀查看。指标前缀是指标名称开头的单个词，与指标所属的域相关。",
     "view-by-label": "查看方式"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "即时查询结果",
