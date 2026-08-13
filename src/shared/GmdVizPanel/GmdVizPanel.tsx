@@ -169,10 +169,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
 
-    this.checkMetricMetadata();
+    this.checkMetricMetadata(discardPanelTypeUpdates);
   }
 
-  private async checkMetricMetadata() {
+  private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
     const { metric, queryConfig } = this.state;
 
     if (queryConfig.kgMetricType) {
@@ -199,7 +199,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     if (metricTypeFromMetadata === 'gauge' && this.state.metricType === 'gauge') {
       const metadata = await getTrailFor(this).getMetadataForMetric(metric); // cached from getMetricType() above
       if (!metadata) {
-        this.detectNativeHistogram();
+        this.detectNativeHistogram(discardPanelTypeUpdates);
       }
     }
   }
@@ -215,14 +215,14 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
    * renders. Only a native-histogram (HeatmapCells) frame with rows flips the panel to a heatmap — an empty
    * result is inconclusive and is neither cached nor acted on.
    */
-  private detectNativeHistogram() {
+  private detectNativeHistogram(discardPanelTypeUpdates: boolean) {
     const { metric, queryConfig } = this.state;
     const trail = getTrailFor(this);
 
     const cached = trail.getCachedNativeHistogram(metric);
     if (cached !== undefined) {
       if (cached) {
-        this.switchToNativeHistogramHeatmap();
+        this.switchToNativeHistogramHeatmap(discardPanelTypeUpdates);
       }
       return;
     }
@@ -254,15 +254,22 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       trail.setCachedNativeHistogram(metric, isNativeHistogram);
 
       if (isNativeHistogram) {
-        this.switchToNativeHistogramHeatmap();
+        this.switchToNativeHistogramHeatmap(discardPanelTypeUpdates);
       }
     });
 
     this._subs.add(sub);
   }
 
-  private switchToNativeHistogramHeatmap() {
+  private switchToNativeHistogramHeatmap(discardPanelTypeUpdates: boolean) {
     if (this.state.metricType === 'native-histogram') {
+      return;
+    }
+
+    // When a caller pinned the panel type (discardPanelTypeUpdates), only correct the metric type and leave
+    // the requested panel type alone — mirroring the data-frame detection path in subscribeToStateChanges().
+    if (discardPanelTypeUpdates) {
+      this.setState({ metricType: 'native-histogram' });
       return;
     }
 

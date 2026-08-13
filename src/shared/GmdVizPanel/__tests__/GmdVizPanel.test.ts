@@ -162,12 +162,26 @@ describe('GmdVizPanel', () => {
       jest.mocked(SceneQueryRunner).mockImplementation(() => runner as any);
       const panel = createPanel('nh_positive');
 
-      await (panel as any).checkMetricMetadata();
+      await (panel as any).checkMetricMetadata(false);
       fireDone([{ length: 1, meta: { type: DataFrameType.HeatmapCells } }]);
 
       expect(panel.state.metricType).toBe('native-histogram');
       expect(panel.state.panelConfig.type).toBe('heatmap');
       expect(panel.state.$data).toBeUndefined();
+    });
+
+    test('sets metricType only and keeps the pinned panel type when discardPanelTypeUpdates is true', async () => {
+      mockNoMetadata();
+      const { runner, fireDone } = createProbeRunner();
+      jest.mocked(SceneQueryRunner).mockImplementation(() => runner as any);
+      const panel = createPanel('nh_pinned');
+      const originalPanelType = panel.state.panelConfig.type;
+
+      await (panel as any).checkMetricMetadata(true);
+      fireDone([{ length: 1, meta: { type: DataFrameType.HeatmapCells } }]);
+
+      expect(panel.state.metricType).toBe('native-histogram');
+      expect(panel.state.panelConfig.type).toBe(originalPanelType);
     });
 
     test('does not switch when the probe returns an empty result', async () => {
