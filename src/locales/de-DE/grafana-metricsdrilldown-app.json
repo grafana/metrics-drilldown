@@ -10,6 +10,9 @@
       "related-metrics-description": "Relevante Metriken basieren auf aktuellen Label-Filtern"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Zu Filtern hinzufügen",
     "by-label": "Nach Label",
@@ -40,6 +43,11 @@
     "selected-count_one": "{{count}} ausgewählt",
     "selected-count_other": "{{count}} ausgewählt"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Anwenden",
     "cancel": "Abbrechen",
@@ -67,6 +75,10 @@
     "stack-trace-label": "Stacktrace anzeigen",
     "title": "Schwerwiegender Fehler!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Die Panel-Daten wurden für die Verarbeitung von extrem kleinen Werten in der Reihe mit einer komplexeren Abfrage erneut abgerufen"
   },
@@ -78,8 +90,22 @@
     "limit-warning-body": "Ihre Organisation hat mehr Dashboards, als diese Grenze zulässt. Die Nutzungszählungen sind möglicherweise unvollständig.",
     "limit-warning-title": "Die Sortierung der Dashboard-Nutzung ist auf 500 Dashboards beschränkt."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Gefilterte Metriken"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Feedback geben"
@@ -145,13 +171,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Keine gespeicherten Abfragen zum Laden vorhanden",
-        "button-tooltip": "Gespeicherte Abfrage laden",
+        "button-tooltip": "",
         "empty": "Keine gespeicherten Abfragen zum Anzeigen vorhanden.",
         "load-error": "Diese Abfrage enthält Ausdrücke, die in Metrics Drilldown nicht dargestellt werden können. Es werden nur einfache Metrik{label}-Selektoren unterstützt.",
         "load-type-error": "Bitte wählen Sie eine Prometheus-Abfrage aus.",
         "modal-title": "Zuvor gespeicherte Abfrage laden",
         "remove": "Entfernen",
-        "saved-query-button-tooltip": "Gespeicherte Abfrage laden",
+        "saved-query-button-tooltip": "",
         "select": "Auswählen"
       },
       "save-query": {
@@ -159,7 +185,7 @@
           "alert": "Es gibt eine zuvor gespeicherte Abfrage mit demselben Ausdruck: {{title}}"
         },
         "button-tooltip": "Abfrage speichern",
-        "button-tooltip-saved-queries": "In „Gespeicherte Abfragen“ speichern",
+        "button-tooltip-saved-queries": "",
         "cancel": "Abbrechen",
         "description": "Beschreibung",
         "error": "Beim Speichern dieser Abfrage ist ein unerwarteter Fehler aufgetreten.",
@@ -196,11 +222,17 @@
       "alphabetical": "Alphabetisch [A–Z]",
       "alphabetical-reversed": "Alphabetisch [Z–A]",
       "dashboard-usage": "Dashboard-Nutzung",
-      "default": "Standard"
+      "default": "Standard",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Metriken"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Sehen Sie sich <2>unsere Dokumentation</2> an, um mehr zu erfahren, oder<5></5><6>testen Sie es online</6> in Grafana Play!",
@@ -236,8 +268,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Beitragen",
       "documentation": "Dokumentation",
-      "grafana-version": "Grafana {{edition}} Ver. {{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Problem melden"
     }
   },
@@ -245,6 +276,11 @@
     "all-metrics": "Alle Metriknamen",
     "tooltip": "Nach Metrik-Präfix anzeigen. Ein Metrik-Präfix ist ein einzelnes Wort am Anfang des Metrik-Namens, das für die Domäne, zu der die Metrik gehört, relevant ist.",
     "view-by-label": "Anzeigen nach"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Sofortige Abfrageergebnisse",

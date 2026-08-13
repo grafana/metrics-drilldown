@@ -10,6 +10,9 @@
       "related-metrics-description": "Releváns metrikák az aktuális címkeszűrők alapján"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Hozzáadás a szűrőkhöz",
     "by-label": "Címke szerint",
@@ -40,6 +43,11 @@
     "selected-count_one": "{{count}} kiválasztva",
     "selected-count_other": "{{count}} kiválasztva"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Alkalmaz",
     "cancel": "Mégse",
@@ -67,6 +75,10 @@
     "stack-trace-label": "Stack nyomvonalának megtekintése",
     "title": "Végzetes hiba!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "A paneladatok lekérése megismétlődött egy összetettebb lekérdezéssel a sorozat rendkívül kis értékeinek kezelése érdekében"
   },
@@ -78,8 +90,22 @@
     "limit-warning-body": "A szervezeténél a műszerfalak száma meghaladja ezt a korlátot. Előfordulhat, hogy a használati statisztikák nem teljesek.",
     "limit-warning-title": "A műszerfalhasználat szerinti rendezés legfeljebb 500 elemre korlátozott."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Szűrt metrikák"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Visszajelzés küldése"
@@ -145,13 +171,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Nincsenek betölthető mentett lekérdezések",
-        "button-tooltip": "Mentett lekérdezés betöltése",
+        "button-tooltip": "",
         "empty": "Nincsenek megjeleníthető mentett lekérdezések.",
         "load-error": "Ez a lekérdezés olyan kifejezéseket tartalmaz, amelyeket a Metrics Drilldown nem tud megjeleníteni. Csak az egyszerű metrika{címke} választók támogatottak.",
         "load-type-error": "Válasszon ki egy Prometheus-lekérdezést.",
         "modal-title": "Korábban mentett lekérdezés betöltése",
         "remove": "Eltávolítás",
-        "saved-query-button-tooltip": "Mentett lekérdezés betöltése",
+        "saved-query-button-tooltip": "",
         "select": "Kiválasztás"
       },
       "save-query": {
@@ -159,7 +185,7 @@
           "alert": "Már létezik egy korábban mentett lekérdezés ugyanezzel a kifejezéssel: {{title}}"
         },
         "button-tooltip": "Lekérdezés mentése",
-        "button-tooltip-saved-queries": "Mentés a mentett lekérdezések közé",
+        "button-tooltip-saved-queries": "",
         "cancel": "Mégse",
         "description": "Leírás",
         "error": "Váratlan hiba történt a lekérdezés mentése közben.",
@@ -196,11 +222,17 @@
       "alphabetical": "Betűrendben [A–Z]",
       "alphabetical-reversed": "Betűrendben [Z–A]",
       "dashboard-usage": "Irányítópult használata",
-      "default": "Alapértelmezett"
+      "default": "Alapértelmezett",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Metrikák"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "További információért tekintse meg <2>dokumentációnkat</2>, vagy<5></5><6>próbálja ki online</6> a Grafana Playben!",
@@ -236,8 +268,7 @@
       "commit-sha": "SHA-azonosító: {{sha}}",
       "contribute": "Hozzájárulás",
       "documentation": "Dokumentáció",
-      "grafana-version": "Grafana {{edition}}, verzió: {{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Probléma bejelentése"
     }
   },
@@ -245,6 +276,11 @@
     "all-metrics": "Összes metrikanév",
     "tooltip": "Megjelenítés a metrikaelőtag szerint. A metrikaelőtag a metrika nevének elején található egyetlen szó, amely a metrika tartományára utal.",
     "view-by-label": "Megjelenítés alapja"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Azonnali lekérdezési eredmények",

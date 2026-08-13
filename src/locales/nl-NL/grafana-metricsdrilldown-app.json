@@ -10,6 +10,9 @@
       "related-metrics-description": "Relevante metrics op basis van huidige labelfilters"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Toevoegen aan filters",
     "by-label": "Op label",
@@ -40,6 +43,11 @@
     "selected-count_one": "{{count}} geselecteerd",
     "selected-count_other": "{{count}} geselecteerd"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Toepassen",
     "cancel": "Annuleren",
@@ -67,6 +75,10 @@
     "stack-trace-label": "Stacktrace weergeven",
     "title": "Fatale fout!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Paneelgegevens zijn opnieuw opgehaald met een complexere query om extreem kleine waarden in de reeks te verwerken"
   },
@@ -78,8 +90,22 @@
     "limit-warning-body": "Je organisatie heeft meer dashboards dan deze limiet. Gebruikstellingen zijn mogelijk onvolledig.",
     "limit-warning-title": "Het sorteren op dashboardgebruik is beperkt tot 500 dashboards."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Gefilterde Metrics"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Feedback geven"
@@ -145,13 +171,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Geen opgeslagen query's om te laden",
-        "button-tooltip": "Opgeslagen query laden",
+        "button-tooltip": "",
         "empty": "Geen opgeslagen query's om weer te geven.",
         "load-error": "Deze query bevat expressies die niet in Metrics Drilldown kunnen worden weergegeven. Alleen eenvoudige metric{label}-selectors worden ondersteund.",
         "load-type-error": "Selecteer een Prometheus-query.",
         "modal-title": "Een eerder opgeslagen zoekopdracht laden",
         "remove": "Verwijderen",
-        "saved-query-button-tooltip": "Opgeslagen query laden",
+        "saved-query-button-tooltip": "",
         "select": "Selecteren"
       },
       "save-query": {
@@ -159,7 +185,7 @@
           "alert": "Er is al een eerder opgeslagen zoekopdracht met dezelfde expressie: {{title}}"
         },
         "button-tooltip": "Query opslaan",
-        "button-tooltip-saved-queries": "Opslaan in Opgeslagen queries",
+        "button-tooltip-saved-queries": "",
         "cancel": "Annuleren",
         "description": "Beschrijving",
         "error": "Er is een onverwachte fout opgetreden bij het opslaan van deze zoekopdracht.",
@@ -196,11 +222,17 @@
       "alphabetical": "Alfabetisch [A-Z]",
       "alphabetical-reversed": "Alfabetisch [Z-A]",
       "dashboard-usage": "Dashboardgebruik",
-      "default": "Standaard"
+      "default": "Standaard",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Metrics"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Bekijk <2>onze documenten</2> voor meer informatie of<5></5><6>probeer het online</6> in Grafana Play!",
@@ -236,8 +268,7 @@
       "commit-sha": "Commit-SHA: {{sha}} ",
       "contribute": "Bijdragen",
       "documentation": "Documentatie",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Een probleem melden"
     }
   },
@@ -245,6 +276,11 @@
     "all-metrics": "Alle metricnamen",
     "tooltip": "Weergeven op metricvoorvoegsel. Een metricvoorvoegsel is een enkel woord aan het begin van de metricnaam, relevant voor het domein waartoe de metric behoort.",
     "view-by-label": "Weergeven per"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Directe queryresultaten",
