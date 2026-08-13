@@ -10,6 +10,9 @@
       "related-metrics-description": "Odpowiednie dane na podstawie bieżących filtrów etykiet"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Dodaj do filtrów",
     "by-label": "Według etykiety",
@@ -42,6 +45,11 @@
     "selected-count_many": "Wybrano {{count}}",
     "selected-count_other": "Wybrano {{count}}"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Zastosuj",
     "cancel": "Anuluj",
@@ -69,6 +77,10 @@
     "stack-trace-label": "Wyświetl śledzenie stosu",
     "title": "Błąd krytyczny"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Dane panelu zostały ponownie pobrane za pomocą bardziej złożonego zapytania, aby obsłużyć bardzo małe wartości w szeregu"
   },
@@ -80,8 +92,26 @@
     "limit-warning-body": "Liczba pulpitów w Twojej organizacji przekracza ten limit. Dane dotyczące wykorzystania mogą być niekompletne.",
     "limit-warning-title": "Sortowanie według wykorzystania jest ograniczone do 500 pulpitów."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Przefiltrowane wskaźniki"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_few": "",
+    "tooltip_many": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_few": "",
+    "label_many": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Przekaż opinię"
@@ -147,13 +177,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Brak zapisanych zapytań do wczytania",
-        "button-tooltip": "Wczytaj zapisane zapytanie",
+        "button-tooltip": "",
         "empty": "Brak zapisanych zapytań do wyświetlenia.",
         "load-error": "To zapytanie zawiera wyrażenia, których nie można przedstawić w aplikacji Metrics Drilldown. Obsługiwane są tylko proste selektory metric{label}.",
         "load-type-error": "Wybierz zapytanie Prometheus.",
         "modal-title": "Wczytaj zapisane wcześniej zapytanie",
         "remove": "Usuń",
-        "saved-query-button-tooltip": "Wczytaj zapisane zapytanie",
+        "saved-query-button-tooltip": "",
         "select": "Wybierz"
       },
       "save-query": {
@@ -161,7 +191,7 @@
           "alert": "Istnieje już zapisane zapytanie z tym samym wyrażeniem: {{title}}"
         },
         "button-tooltip": "Zapisz zapytanie",
-        "button-tooltip-saved-queries": "Dodaj do zapisanych zapytań",
+        "button-tooltip-saved-queries": "",
         "cancel": "Anuluj",
         "description": "Opis",
         "error": "Podczas zapisywania tego zapytania wystąpił nieoczekiwany błąd.",
@@ -198,11 +228,17 @@
       "alphabetical": "Alfabetycznie [A–Z]",
       "alphabetical-reversed": "Alfabetycznie [Z–A]",
       "dashboard-usage": "Użycie pulpitu",
-      "default": "Domyślne"
+      "default": "Domyślne",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Wskaźniki"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Sprawdź <2>naszą dokumentację</2>, aby dowiedzieć się więcej, lub<5></5><6>wypróbuj online</6> w Grafana Play!",
@@ -238,8 +274,7 @@
       "commit-sha": "SHA operacji commit: {{sha}}",
       "contribute": "Współtworzenie",
       "documentation": "Dokumentacja",
-      "grafana-version": "Grafana {{edition}} – wersja {{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Zgłoś problem"
     }
   },
@@ -247,6 +282,11 @@
     "all-metrics": "Wszystkie nazwy wskaźników",
     "tooltip": "Wyświetl według prefiksu wskaźnika. Prefiks wskaźnika to pojedyncze słowo na początku nazwy wskaźnika, odnoszące się do domeny, do której należy wskaźnik.",
     "view-by-label": "Wyświetl według"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Wyniki zapytania natychmiastowego",

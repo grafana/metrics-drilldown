@@ -10,6 +10,9 @@
       "related-metrics-description": "Relevanta mätvärden baserat på aktuella etikettfilter"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Lägg till i filter",
     "by-label": "Efter etikett",
@@ -40,6 +43,11 @@
     "selected-count_one": "{{count}} vald",
     "selected-count_other": "{{count}} valda"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Tillämpa",
     "cancel": "Avbryt",
@@ -67,6 +75,10 @@
     "stack-trace-label": "Visa stackspårning",
     "title": "Allvarligt fel!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Paneldata hämtades på nytt med en mer komplex fråga för att hantera extremt små värden i serien"
   },
@@ -78,8 +90,22 @@
     "limit-warning-body": "Din organisation har fler instrumentpaneler än denna gräns. Användningsantalen kan vara ofullständiga.",
     "limit-warning-title": "Sorteringen av instrumentpanelens användning är begränsad till 500 instrumentpaneler."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Filtrerade mätvärden"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Ge feedback"
@@ -145,13 +171,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Inga sparade frågor att ladda",
-        "button-tooltip": "Läs in sparad fråga",
+        "button-tooltip": "",
         "empty": "Inga sparade frågor att visa.",
         "load-error": "Denna fråga innehåller uttryck som inte kan återges i Metrics Drilldown. Endast enkla {label}-väljare för mätvärden stöds.",
         "load-type-error": "Välj en Prometheus-fråga.",
         "modal-title": "Läs in en tidigare sparad fråga",
         "remove": "Ta bort",
-        "saved-query-button-tooltip": "Läs in sparad fråga",
+        "saved-query-button-tooltip": "",
         "select": "Välj"
       },
       "save-query": {
@@ -159,7 +185,7 @@
           "alert": "Det finns en tidigare sparad fråga med samma uttryck: {{title}}"
         },
         "button-tooltip": "Spara fråga",
-        "button-tooltip-saved-queries": "Spara i Sparade frågor",
+        "button-tooltip-saved-queries": "",
         "cancel": "Avbryt",
         "description": "Beskrivning",
         "error": "Ett oväntat fel uppstod när denna fråga skulle sparas.",
@@ -196,11 +222,17 @@
       "alphabetical": "Alfabetiskt [A–Ö]",
       "alphabetical-reversed": "Alfabetiskt [Ö–A]",
       "dashboard-usage": "Användning av instrumentpanel",
-      "default": "Standard"
+      "default": "Standard",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Mätvärden"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Se <2>vår dokumentation</2> för att lära dig mer eller <5></5><6>prova det online</6> i Grafana Play!",
@@ -236,8 +268,7 @@
       "commit-sha": "Commit-SHA: {{sha}}",
       "contribute": "Bidra",
       "documentation": "Dokumentation",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Rapportera ett problem"
     }
   },
@@ -245,6 +276,11 @@
     "all-metrics": "Alla mätvärdesnamn",
     "tooltip": "Visa efter mätvärdesprefix. Ett mätvärdesprefix är ett enda ord i början av mätvärdesnamnet, relevant för den domän som mätvärdet tillhör.",
     "view-by-label": "Visa efter"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Omedelbara frågeresultat",

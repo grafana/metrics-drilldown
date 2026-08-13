@@ -10,6 +10,9 @@
       "related-metrics-description": "Métricas relevantes basadas en los filtros de etiquetas actuales"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Añadir a filtros",
     "by-label": "Por etiqueta",
@@ -40,6 +43,11 @@
     "selected-count_one": "{{count}} seleccionado",
     "selected-count_other": "{{count}} seleccionados"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Aplicar",
     "cancel": "Cancelar",
@@ -67,6 +75,10 @@
     "stack-trace-label": "Ver traza de pilas",
     "title": "¡Error grave!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "Los datos del panel se volvieron a obtener con una consulta más compleja para manejar valores extremadamente pequeños en la serie"
   },
@@ -78,8 +90,22 @@
     "limit-warning-body": "Tu organización supera el límite de dashboards. Es posible que los recuentos de uso estén incompletos.",
     "limit-warning-title": "La ordenación del uso de los dashboards está limitada a 500 dashboards."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Métricas filtradas"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Enviar comentarios"
@@ -145,13 +171,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "No hay consultas guardadas para cargar",
-        "button-tooltip": "Cargar consulta guardada",
+        "button-tooltip": "",
         "empty": "No hay consultas guardadas para mostrar.",
         "load-error": "Esta consulta contiene expresiones que no se pueden representar en Metrics Drilldown. Solo se admiten selectores de {label} de métricas simples.",
         "load-type-error": "Selecciona una consulta de Prometheus.",
         "modal-title": "Carga una consulta guardada anteriormente",
         "remove": "Eliminar",
-        "saved-query-button-tooltip": "Cargar consulta guardada",
+        "saved-query-button-tooltip": "",
         "select": "Seleccionar"
       },
       "save-query": {
@@ -159,7 +185,7 @@
           "alert": "Hay una consulta guardada anteriormente con la misma expresión: {{title}}"
         },
         "button-tooltip": "Guardar la consulta",
-        "button-tooltip-saved-queries": "Guardar en Consultas guardadas",
+        "button-tooltip-saved-queries": "",
         "cancel": "Cancelar",
         "description": "Descripción",
         "error": "Se ha producido un error inesperado al guardar esta consulta.",
@@ -196,11 +222,17 @@
       "alphabetical": "Alfabético [A-Z]",
       "alphabetical-reversed": "Alfabético [Z-A]",
       "dashboard-usage": "Uso del dashboard",
-      "default": "Predeterminada"
+      "default": "Predeterminada",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Métricas"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Consulta <2>nuestra documentación</2> para obtener más información o<5></5><6>haz una prueba en línea</6> en Grafana Play.",
@@ -236,8 +268,7 @@
       "commit-sha": "Confirmar SHA: {{sha}}",
       "contribute": "Contribuir",
       "documentation": "Documentación",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Notificar un problema"
     }
   },
@@ -245,6 +276,11 @@
     "all-metrics": "Todos los nombres de métricas",
     "tooltip": "Visualiza por el prefijo de la métrica. Un prefijo métrico es una sola palabra al principio del nombre de la métrica, relevante para el dominio al que pertenece la métrica.",
     "view-by-label": "Ver por"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Resultados de la consulta instantánea",

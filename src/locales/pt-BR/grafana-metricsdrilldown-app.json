@@ -10,6 +10,9 @@
       "related-metrics-description": "Métricas relevantes com base nos filtros de rótulo em uso"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Adicionar aos filtros",
     "by-label": "Por rótulo",
@@ -40,6 +43,11 @@
     "selected-count_one": "{{count}} selecionado",
     "selected-count_other": "{{count}} selecionados"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Aplicar",
     "cancel": "Cancelar",
@@ -67,6 +75,10 @@
     "stack-trace-label": "Visualizar rastro da pilha",
     "title": "Erro fatal!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "A busca dos dados do painel foi realizada novamente usando uma consulta mais complexa para gerenciar valores extremamente pequenos na série"
   },
@@ -78,8 +90,22 @@
     "limit-warning-body": "Sua organização tem mais painéis do que esse limite. As contagens de uso podem estar incompletas.",
     "limit-warning-title": "A classificação de uso do painel é limitada a 500 painéis."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Métricas filtradas"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Enviar feedback"
@@ -145,13 +171,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Nenhuma consulta salva para carregar",
-        "button-tooltip": "Carregar consulta salva",
+        "button-tooltip": "",
         "empty": "Nenhuma consulta salva para exibir.",
         "load-error": "Esta consulta contém expressões que não podem ser representadas no detalhamento de métricas. Somente seletores simples de {label} de métricas são compatíveis.",
         "load-type-error": "Selecione uma consulta do Prometheus.",
         "modal-title": "Carregar uma consulta salva anteriormente",
         "remove": "Remover",
-        "saved-query-button-tooltip": "Carregar consulta salva",
+        "saved-query-button-tooltip": "",
         "select": "Selecionar"
       },
       "save-query": {
@@ -159,7 +185,7 @@
           "alert": "Há uma consulta salva anteriormente com a mesma expressão: {{title}}"
         },
         "button-tooltip": "Salvar consulta",
-        "button-tooltip-saved-queries": "Salvar em Consultas salvas",
+        "button-tooltip-saved-queries": "",
         "cancel": "Cancelar",
         "description": "Descrição",
         "error": "Erro inesperado ao salvar esta consulta.",
@@ -196,11 +222,17 @@
       "alphabetical": "Ordem alfabética [A-Z]",
       "alphabetical-reversed": "Ordem alfabética [Z-A]",
       "dashboard-usage": "Uso do painel",
-      "default": "Padrão"
+      "default": "Padrão",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Métricas"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Confira <2>nossa documentação</2> para saber mais ou <5></5><6>experimente online</6> na Grafana Play!",
@@ -236,8 +268,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Contribuir",
       "documentation": "Documentação",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Comunicar um problema"
     }
   },
@@ -245,6 +276,11 @@
     "all-metrics": "Todos os nomes de métricas",
     "tooltip": "Visualizar pelo prefixo da métrica. Um prefixo de métrica é uma única palavra no início do nome da métrica que tem relação com o domínio ao qual a métrica pertence.",
     "view-by-label": "Visualizado por"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Resultados imediatos da consulta",
