@@ -10,6 +10,9 @@
       "related-metrics-description": "Metriche rilevanti in base ai filtri delle etichette correnti"
     }
   },
+  "binary-ratio-labels-datasource": {
+    "test-success": ""
+  },
   "breakdown": {
     "add-to-filters": "Aggiungi ai filtri",
     "by-label": "Per etichetta",
@@ -40,6 +43,11 @@
     "selected-count_one": "{{count}} selezionata",
     "selected-count_other": "{{count}} selezionate"
   },
+  "chunk-load-recovery": {
+    "auto-message": "",
+    "manual-message": "",
+    "reload-button": ""
+  },
   "configure-panel": {
     "apply": "Applica",
     "cancel": "Annulla",
@@ -67,6 +75,10 @@
     "stack-trace-label": "Visualizza analisi dello stack",
     "title": "Errore irreversibile!"
   },
+  "exposed-component-error-boundary": {
+    "message": "",
+    "title": ""
+  },
   "extreme-value-filter": {
     "message": "I dati del pannello sono stati recuperati con una query più complessa per gestire valori estremamente piccoli nella serie"
   },
@@ -78,8 +90,22 @@
     "limit-warning-body": "La tua organizzazione dispone di un numero di dashboard superiore a questo limite. I conteggi di utilizzo potrebbero essere incompleti.",
     "limit-warning-title": "L'ordinamento per utilizzo delle dashboard è limitato a 500 dashboard."
   },
+  "fetch-firing-alert-metrics": {
+    "error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Metriche filtrate"
+  },
+  "firing-alert-badge": {
+    "tooltip_one": "",
+    "tooltip_other": ""
+  },
+  "firing-alert-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_other": ""
   },
   "give-feedback": {
     "button": "Lascia un feedback"
@@ -145,13 +171,13 @@
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Nessuna query salvata da caricare",
-        "button-tooltip": "Carica query salvata",
+        "button-tooltip": "",
         "empty": "Nessuna query salvata da visualizzare.",
         "load-error": "Questa query contiene espressioni che non possono essere rappresentate in Metrics Drilldown. Sono supportati solo selettori di metriche{label} semplici.",
         "load-type-error": "Seleziona una query Prometheus.",
         "modal-title": "Carica una query salvata in precedenza",
         "remove": "Rimuovi",
-        "saved-query-button-tooltip": "Carica query salvata",
+        "saved-query-button-tooltip": "",
         "select": "Seleziona"
       },
       "save-query": {
@@ -159,7 +185,7 @@
           "alert": "È presente una query salvata in precedenza con la stessa espressione: {{title}}"
         },
         "button-tooltip": "Salva query",
-        "button-tooltip-saved-queries": "Salva in Query salvate",
+        "button-tooltip-saved-queries": "",
         "cancel": "Annulla",
         "description": "Descrizione",
         "error": "Errore imprevisto durante il salvataggio di questa query.",
@@ -196,11 +222,17 @@
       "alphabetical": "Alfabetico [A-Z]",
       "alphabetical-reversed": "Alfabetico [Z-A]",
       "dashboard-usage": "Utilizzo della dashboard",
-      "default": "Predefinito"
+      "default": "Predefinito",
+      "firing-alerts": ""
     }
   },
   "metrics-variable": {
     "label": "Metriche"
+  },
+  "metrics-variable-sort-engine": {
+    "error": {
+      "firing-alerts": ""
+    }
   },
   "onboarding": {
     "learn-more": "Consulta <2>la nostra documentazione</2> per saperne di più oppure<5></5><6>fai una prova online</6> in Grafana Play!",
@@ -236,8 +268,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Contribuisci",
       "documentation": "Documentazione",
-      "grafana-version": "Grafana {{edition}} v{{version}} ({{env}})",
-      "prom-build-info": "{{application}} {{version}} {{buildDate}}",
+      "grafana-version": "",
       "report-issue": "Segnala un problema"
     }
   },
@@ -245,6 +276,11 @@
     "all-metrics": "Tutti i nomi delle metriche",
     "tooltip": "Visualizza per prefisso della metrica. Un prefisso della metrica è una singola parola all'inizio del nome della metrica, rilevante per il dominio a cui appartiene la metrica.",
     "view-by-label": "Visualizza per"
+  },
+  "query-options": {
+    "aria-label": "",
+    "title": "",
+    "toggle-insights": ""
   },
   "query-results": {
     "aria-label": "Risultati istantanei della query",
