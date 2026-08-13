@@ -67,7 +67,8 @@ function createProbeRunner() {
     }),
   };
   const fireDone = (series: any[]) => capturedCallback?.({ data: { state: LoadingState.Done, series } });
-  return { runner, subscription, fireDone };
+  const fire = (state: any) => capturedCallback?.(state);
+  return { runner, subscription, fireDone, fire };
 }
 
 function createMockDataProvider() {
@@ -196,6 +197,21 @@ describe('GmdVizPanel', () => {
       expect(panel.state.metricType).toBe('gauge');
       expect(panel.state.panelConfig.type).toBe('timeseries');
       expect(panel.state.$data).toBeUndefined();
+    });
+
+    test('clears $data and does not switch or cache when the probe errors', async () => {
+      mockNoMetadata();
+      const { runner, subscription, fire } = createProbeRunner();
+      jest.mocked(SceneQueryRunner).mockImplementation(() => runner as any);
+      const panel = createPanel('nh_error');
+
+      await (panel as any).checkMetricMetadata(false);
+      fire({ data: { state: LoadingState.Error, series: [] } });
+
+      expect(panel.state.metricType).toBe('gauge');
+      expect(panel.state.panelConfig.type).toBe('timeseries');
+      expect(panel.state.$data).toBeUndefined();
+      expect(subscription.unsubscribe).toHaveBeenCalledTimes(1);
     });
 
     test('does not switch when the probe returns a non-heatmap frame', async () => {

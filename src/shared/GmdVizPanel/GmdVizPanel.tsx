@@ -238,15 +238,23 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.setState({ $data: probe });
 
     const sub = probe.subscribeToState((newState) => {
-      if (newState.data?.state !== LoadingState.Done) {
+      const loadingState = newState.data?.state;
+      // Wait for a terminal state; Done and Error are the only ones for a one-shot query.
+      if (loadingState !== LoadingState.Done && loadingState !== LoadingState.Error) {
         return;
       }
+
       sub.unsubscribe();
       this.setState({ $data: undefined }); // remove the temporary probe provider (deactivates the runner)
 
-      const firstFrame = newState.data.series?.[0];
+      // A failed or empty probe is inconclusive (e.g. query error, or no data in the current time range):
+      // don't cache and don't switch, so the metric can be probed again on a later activation.
+      if (loadingState === LoadingState.Error) {
+        return;
+      }
+
+      const firstFrame = newState.data?.series?.[0];
       if (!firstFrame?.length) {
-        // Inconclusive (e.g. no data in the current time range): don't cache, allow a later re-probe.
         return;
       }
 
