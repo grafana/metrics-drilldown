@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.5.0](https://github.com/grafana/metrics-drilldown/compare/v2.4.0...v2.5.0) (2026-08-13)
+
+
+### 🎉 Features
+
+* **sea-of-metrics:** tag metric_selected with the firing-alerts cohort ([#1375](https://github.com/grafana/metrics-drilldown/issues/1375)) ([52379fa](https://github.com/grafana/metrics-drilldown/commit/52379fa502b397ade8a3fc7caf9d21dbf7724d90))
+
+
+### 🧹 Chore
+
+* **deps:** add pnpm supply-chain security settings ([#1353](https://github.com/grafana/metrics-drilldown/issues/1353)) ([ff16f76](https://github.com/grafana/metrics-drilldown/commit/ff16f76c4edd1a92ec36f07c9d8f5d39121dbeca))
+* **deps:** combine Renovate dependency updates ([#1377](https://github.com/grafana/metrics-drilldown/issues/1377)) ([2a18039](https://github.com/grafana/metrics-drilldown/commit/2a180397a340e90d0aaf931633fd6b5e8e300d9e))
+* **faro:** duplicate rudderstack events as faro events and enhance instrumentation ([#1366](https://github.com/grafana/metrics-drilldown/issues/1366)) ([6594c07](https://github.com/grafana/metrics-drilldown/commit/6594c071bb7a04b99b72adb410e9674a01f118bd))
+* **release-please:** show chores in changelog ([#1379](https://github.com/grafana/metrics-drilldown/issues/1379)) ([38ea9dd](https://github.com/grafana/metrics-drilldown/commit/38ea9dd39d958b2ed3574f74e214d0fd64952331))
+
 ## [2.4.0](https://github.com/grafana/metrics-drilldown/compare/v2.3.1...v2.4.0) (2026-08-04)
 
 
