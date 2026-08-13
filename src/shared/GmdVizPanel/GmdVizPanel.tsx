@@ -15,9 +15,11 @@ import { useStyles2, type VizLegendOptions } from '@grafana/ui';
 import { isEqual, omitBy } from 'lodash';
 import React from 'react';
 
+import { trailDS } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 import { getClickablePanelStyles } from 'shared/utils/utils.styles';
 
+import { buildNativeHistogramProbeExpr } from './buildNativeHistogramProbeExpr';
 import { type LabelMatcher } from './buildQueryExpression';
 import { EventPanelTypeChanged } from './components/EventPanelTypeChanged';
 import { SelectAction } from './components/SelectAction';
@@ -167,10 +169,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.subscribeToStateChanges(discardPanelTypeUpdates);
     this.subscribeToEvents();
 
-    this.checkMetricMetadata();
+    this.checkMetricMetadata(discardPanelTypeUpdates);
   }
 
-  private async checkMetricMetadata() {
+  private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
     const { metric, queryConfig } = this.state;
 
     if (queryConfig.kgMetricType) {
@@ -189,6 +191,104 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     if (metricTypeFromMetadata === 'counter' && metricType === 'gauge') {
       this.setState({ metricType: 'counter' });
     }
+
+    // Native histograms — notably adaptive/aggregated ones — can expose no metadata and cannot be queried
+    // without rate()+aggregation, so the default gauge query returns empty and the metric is mis-typed as a
+    // gauge. When there's no metadata and we still think it's a gauge, run a rated probe query: if it comes
+    // back as a native-histogram (HeatmapCells) frame with data, switch the panel to a heatmap.
+    if (metricTypeFromMetadata === 'gauge' && this.state.metricType === 'gauge') {
+      const metadata = await getTrailFor(this).getMetadataForMetric(metric); // cached from getMetricType() above
+      if (!metadata) {
+        this.detectNativeHistogram(discardPanelTypeUpdates);
+      }
+    }
+  }
+
+  /**
+   * Runs a one-shot rated probe query (`sum(rate(metric[interval]))`) to detect a native histogram that
+   * the sync heuristics and metadata both miss (notably adaptive/aggregated native histograms, which
+   * expose no metadata and return empty for the default gauge query).
+   *
+   * The probe runs on a temporary query runner attached to this panel's `$data` slot so it inherits scene
+   * context (time range, variables, datasource). This is safe only because the rendered `body` always owns
+   * its own `$data`, so nothing resolves upward to this probe during the probe window. The probe never
+   * renders. Only a native-histogram (HeatmapCells) frame with rows flips the panel to a heatmap — an empty
+   * result is inconclusive and is neither cached nor acted on.
+   */
+  private detectNativeHistogram(discardPanelTypeUpdates: boolean) {
+    const { metric, queryConfig } = this.state;
+    const trail = getTrailFor(this);
+
+    const cached = trail.getCachedNativeHistogram(metric);
+    if (cached !== undefined) {
+      if (cached) {
+        this.switchToNativeHistogramHeatmap(discardPanelTypeUpdates);
+      }
+      return;
+    }
+
+    const probeExpr = buildNativeHistogramProbeExpr(metric, queryConfig);
+
+    const probe = new SceneQueryRunner({
+      datasource: trailDS,
+      queries: [{ refId: `${metric}-nh-probe`, expr: probeExpr, fromExploreMetrics: true }],
+    });
+
+    // attaching to $data parents the runner (so it interpolates against the scene) and activates it
+    this.setState({ $data: probe });
+
+    const sub = probe.subscribeToState((newState) => {
+      const loadingState = newState.data?.state;
+      // Wait for a terminal state; Done and Error are the only ones for a one-shot query.
+      if (loadingState !== LoadingState.Done && loadingState !== LoadingState.Error) {
+        return;
+      }
+
+      sub.unsubscribe();
+      this.setState({ $data: undefined }); // remove the temporary probe provider (deactivates the runner)
+
+      // A failed or empty probe is inconclusive (e.g. query error, or no data in the current time range):
+      // don't cache and don't switch, so the metric can be probed again on a later activation.
+      if (loadingState === LoadingState.Error) {
+        return;
+      }
+
+      const firstFrame = newState.data?.series?.[0];
+      if (!firstFrame?.length) {
+        return;
+      }
+
+      const isNativeHistogram = firstFrame.meta?.type === DataFrameType.HeatmapCells;
+      trail.setCachedNativeHistogram(metric, isNativeHistogram);
+
+      if (isNativeHistogram) {
+        this.switchToNativeHistogramHeatmap(discardPanelTypeUpdates);
+      }
+    });
+
+    this._subs.add(sub);
+  }
+
+  private switchToNativeHistogramHeatmap(discardPanelTypeUpdates: boolean) {
+    if (this.state.metricType === 'native-histogram') {
+      return;
+    }
+
+    // When a caller pinned the panel type (discardPanelTypeUpdates), only correct the metric type and leave
+    // the requested panel type alone — mirroring the data-frame detection path in subscribeToStateChanges().
+    if (discardPanelTypeUpdates) {
+      this.setState({ metricType: 'native-histogram' });
+      return;
+    }
+
+    this.setState({
+      metricType: 'native-histogram',
+      panelConfig: {
+        description: t('gmd-viz-panel.native-histogram', 'Native Histogram'),
+        ...this.state.panelConfig,
+        type: 'heatmap',
+      },
+    });
   }
 
   private subscribeToStateChanges(discardPanelTypeUpdates: boolean) {

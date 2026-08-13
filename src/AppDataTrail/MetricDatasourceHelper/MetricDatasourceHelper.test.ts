@@ -51,4 +51,31 @@ describe('MetricDatasourceHelper', () => {
       expect(result).toEqual(metadata);
     });
   });
+
+  describe('native-histogram detection cache', () => {
+    test('returns undefined for a metric that has not been probed', async () => {
+      const { metricDatasourceHelper } = await setup();
+
+      expect(metricDatasourceHelper.getCachedNativeHistogram('not_probed')).toBeUndefined();
+    });
+
+    test('stores and returns the probe result per metric', async () => {
+      const { metricDatasourceHelper } = await setup();
+
+      metricDatasourceHelper.setCachedNativeHistogram('a_native_histogram', true);
+      metricDatasourceHelper.setCachedNativeHistogram('a_gauge', false);
+
+      expect(metricDatasourceHelper.getCachedNativeHistogram('a_native_histogram')).toBe(true);
+      expect(metricDatasourceHelper.getCachedNativeHistogram('a_gauge')).toBe(false);
+    });
+
+    test('clears the cache on reset (e.g. datasource change)', async () => {
+      const { metricDatasourceHelper } = await setup();
+
+      metricDatasourceHelper.setCachedNativeHistogram('a_native_histogram', true);
+      metricDatasourceHelper.reset();
+
+      expect(metricDatasourceHelper.getCachedNativeHistogram('a_native_histogram')).toBeUndefined();
+    });
+  });
 });
