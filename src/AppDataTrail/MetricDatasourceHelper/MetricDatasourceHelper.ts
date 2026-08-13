@@ -37,6 +37,9 @@ export class MetricDatasourceHelper {
   private datasource?: PrometheusRuntimeDatasource;
   private cache = {
     metadata: new Map<string, PromMetricsMetadataItem>(),
+    // Result of the native-histogram detection probe per metric (see GmdVizPanel.detectNativeHistogram).
+    // Only definitive probe results are stored, so a metric is probed at most once per datasource.
+    nativeHistogram: new Map<string, boolean>(),
   };
 
   constructor(trail: DataTrail) {
@@ -72,6 +75,7 @@ export class MetricDatasourceHelper {
 
     this.cache = {
       metadata: new Map(),
+      nativeHistogram: new Map(),
     };
 
     this.fetchMetricsMetadata().catch(() => {});
@@ -108,6 +112,18 @@ export class MetricDatasourceHelper {
     }
 
     return metadata;
+  }
+
+  /**
+   * Returns the cached native-histogram detection result for a metric, or `undefined` if it has not been
+   * probed yet. See GmdVizPanel.detectNativeHistogram for how the probe result is computed.
+   */
+  public getCachedNativeHistogram(metric: string): boolean | undefined {
+    return this.cache.nativeHistogram.get(metric);
+  }
+
+  public setCachedNativeHistogram(metric: string, isNativeHistogram: boolean): void {
+    this.cache.nativeHistogram.set(metric, isNativeHistogram);
   }
 
   private async fetchMetricsMetadata() {

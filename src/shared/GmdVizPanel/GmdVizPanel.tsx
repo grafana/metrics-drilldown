@@ -14,13 +14,13 @@ import {
 import { useStyles2, type VizLegendOptions } from '@grafana/ui';
 import { isEqual, omitBy } from 'lodash';
 import React from 'react';
-import { promql } from 'tsqtsq';
 
 import { trailDS } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 import { getClickablePanelStyles } from 'shared/utils/utils.styles';
 
-import { buildQueryExpression, type LabelMatcher } from './buildQueryExpression';
+import { buildNativeHistogramProbeExpr } from './buildNativeHistogramProbeExpr';
+import { type LabelMatcher } from './buildQueryExpression';
 import { EventPanelTypeChanged } from './components/EventPanelTypeChanged';
 import { SelectAction } from './components/SelectAction';
 import { getPreferredConfigForMetric } from './config/getPreferredConfigForMetric';
@@ -105,11 +105,6 @@ export type QueryOptions = {
 };
 
 /* GmdVizPanelState */
-
-// Caches the native-histogram probe result per metric so a given metric is probed at most once
-// per session. Only definitive results are cached (see detectNativeHistogram); empty/inconclusive
-// probes are intentionally left uncached so they can be retried later.
-const nativeHistogramProbeCache = new Map<string, boolean>();
 
 interface GmdVizPanelState extends SceneObjectState {
   metric: string;
@@ -222,8 +217,9 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
    */
   private detectNativeHistogram() {
     const { metric, queryConfig } = this.state;
+    const trail = getTrailFor(this);
 
-    const cached = nativeHistogramProbeCache.get(metric);
+    const cached = trail.getCachedNativeHistogram(metric);
     if (cached !== undefined) {
       if (cached) {
         this.switchToNativeHistogramHeatmap();
@@ -231,13 +227,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       return;
     }
 
-    const expression = buildQueryExpression({
-      metric: { name: metric, type: 'gauge' },
-      labelMatchers: queryConfig.labelMatchers,
-      addIgnoreUsageFilter: queryConfig.addIgnoreUsageFilter,
-    });
-    const interval = queryConfig.customRateInterval ?? '$__rate_interval';
-    const probeExpr = promql.sum({ expr: promql.rate({ expr: expression, interval }) });
+    const probeExpr = buildNativeHistogramProbeExpr(metric, queryConfig);
 
     const probe = new SceneQueryRunner({
       datasource: trailDS,
@@ -261,7 +251,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       }
 
       const isNativeHistogram = firstFrame.meta?.type === DataFrameType.HeatmapCells;
-      nativeHistogramProbeCache.set(metric, isNativeHistogram);
+      trail.setCachedNativeHistogram(metric, isNativeHistogram);
 
       if (isNativeHistogram) {
         this.switchToNativeHistogramHeatmap();

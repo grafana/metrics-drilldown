@@ -47,6 +47,16 @@ function createPanel(metric = 'go_goroutines') {
   return new GmdVizPanel({ metric });
 }
 
+function createTrailMock(metadata: unknown) {
+  const nativeHistogramCache = new Map<string, boolean>();
+  return {
+    getMetadataForMetric: jest.fn().mockResolvedValue(metadata),
+    getCachedNativeHistogram: (metric: string) => nativeHistogramCache.get(metric),
+    setCachedNativeHistogram: (metric: string, isNativeHistogram: boolean) =>
+      nativeHistogramCache.set(metric, isNativeHistogram),
+  };
+}
+
 function createProbeRunner() {
   let capturedCallback: ((state: any) => void) | undefined;
   const subscription = { unsubscribe: jest.fn() };
@@ -80,9 +90,7 @@ describe('GmdVizPanel', () => {
     jest.mocked(getPanelTypeForMetricSync).mockReturnValue('timeseries');
     jest.mocked(getPreferredConfigForMetric).mockReturnValue(undefined);
     // metadata present by default so the native-histogram probe does not run
-    jest.mocked(getTrailFor).mockReturnValue({
-      getMetadataForMetric: jest.fn().mockResolvedValue({ type: 'gauge' }),
-    } as any);
+    jest.mocked(getTrailFor).mockReturnValue(createTrailMock({ type: 'gauge' }) as any);
     jest.mocked(panelBuilder.buildVizPanel).mockReturnValue({ state: {} } as any);
     jest.mocked(SceneQueryRunner).mockReset();
   });
@@ -114,9 +122,7 @@ describe('GmdVizPanel', () => {
 
   describe('detectNativeHistogram', () => {
     function mockNoMetadata() {
-      jest.mocked(getTrailFor).mockReturnValue({
-        getMetadataForMetric: jest.fn().mockResolvedValue(undefined),
-      } as any);
+      jest.mocked(getTrailFor).mockReturnValue(createTrailMock(undefined) as any);
     }
 
     test('probes when metadata is undefined and the metric looks like a gauge', async () => {
