@@ -1,6 +1,6 @@
 {
   "name": "grafana-metricsdrilldown-app",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "author": "Grafana",
   "license": "AGPL-3.0",
   "scripts": {
