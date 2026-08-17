@@ -16,6 +16,8 @@
     "collapse": "Collapse",
     "collapse-extra-fields": "Collapse extra fields",
     "description": "Spot patterns and narrow down root causes by exploring how your data breaks down across key attributes. Click any value to filter your results.",
+    "description-counter": "Values show each label's share of this counter's total rate (activity), not how many series exist. A value can still appear at 0% if it exists but had no activity in this window.",
+    "description-gauge": "Values show what share of this metric's series come from each label value, not how much traffic or activity they represent. A label with 10 series will outweigh one with 2, regardless of the values those series report.",
     "discovering-fields": "Discovering attributes…",
     "error": "Failed to load",
     "expand": "Expand",
@@ -98,7 +100,12 @@
     "title": "Fatal error!"
   },
   "explore-attributes-action": {
-    "label": "Explore Attributes"
+    "label": "Explore Attributes",
+    "tooltip": {
+      "description": "The Attribute Explorer surfaces the labels and attribute values present for this metric so you can filter and drill down into them.",
+      "metric": "Metric:",
+      "type": "Type:"
+    }
   },
   "exposed-component-error-boundary": {
     "message": "{{componentName}} failed to load. Please try again or contact your organization admin.",
@@ -191,6 +198,9 @@
   },
   "list-controls": {
     "search-aria-label": "Quick search metrics"
+  },
+  "metric-graph": {
+    "explore-attributes": "Explore Attributes"
   },
   "metrics": {
     "metrics-drilldown": {

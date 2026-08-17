@@ -2,6 +2,7 @@ import { type ActiveFilter } from './attributeDistributionState';
 import {
   applyFiltersToSelector,
   groupFiltersByFieldAndOperator,
+  mergePresenceAndWeights,
   processDistributionResponse,
   type PrometheusRangeQueryResult,
 } from './PrometheusAttributeExplorer';
@@ -183,5 +184,59 @@ describe('processDistributionResponse', () => {
       ],
     };
     expect(processDistributionResponse(response, 'job')).toEqual([{ value: 'api', count: 2, percentage: 100 }]);
+  });
+});
+
+describe('mergePresenceAndWeights', () => {
+  it('lists a present value at 0% when its weight is zero, instead of dropping it', () => {
+    const presence: PrometheusRangeQueryResult = { result: [{ metric: { job: 'api' }, values: [[0, '1']] }] };
+    const weights: PrometheusRangeQueryResult = { result: [{ metric: { job: 'api' }, values: [[0, '0']] }] };
+    expect(mergePresenceAndWeights(presence, weights, 'job')).toEqual([{ value: 'api', count: 0, percentage: 0 }]);
+  });
+
+  it('lists a present value at 0% when it has no weight sample at all', () => {
+    const presence: PrometheusRangeQueryResult = { result: [{ metric: { job: 'idle' }, values: [[0, '1']] }] };
+    const weights: PrometheusRangeQueryResult = { result: [] };
+    expect(mergePresenceAndWeights(presence, weights, 'job')).toEqual([{ value: 'idle', count: 0, percentage: 0 }]);
+  });
+
+  it('weights present values by their rate and sorts by percentage descending', () => {
+    const presence: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { job: 'api' }, values: [[0, '1']] },
+        { metric: { job: 'worker' }, values: [[0, '1']] },
+      ],
+    };
+    const weights: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { job: 'api' }, values: [[0, '1']] },
+        { metric: { job: 'worker' }, values: [[0, '3']] },
+      ],
+    };
+    expect(mergePresenceAndWeights(presence, weights, 'job')).toEqual([
+      { value: 'worker', count: 3, percentage: 75 },
+      { value: 'api', count: 1, percentage: 25 },
+    ]);
+  });
+
+  it('treats a value found only in weights as present too, not just values the presence query saw', () => {
+    // The bare-selector presence query only sees a series scraped within the default 5m staleness
+    // window at one of the 1-2 instants a single-step range query evaluates -- a value the rate
+    // query itself found is proof enough that the series exists, even if presence missed it.
+    const presence: PrometheusRangeQueryResult = { result: [{ metric: { job: 'api' }, values: [[0, '1']] }] };
+    const weights: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { job: 'api' }, values: [[0, '1']] },
+        { metric: { job: 'ghost' }, values: [[0, '99']] },
+      ],
+    };
+    expect(mergePresenceAndWeights(presence, weights, 'job')).toEqual([
+      { value: 'ghost', count: 99, percentage: 99 },
+      { value: 'api', count: 1, percentage: 1 },
+    ]);
+  });
+
+  it('returns an empty array when nothing is present', () => {
+    expect(mergePresenceAndWeights({ result: [] }, { result: [] }, 'job')).toEqual([]);
   });
 });
