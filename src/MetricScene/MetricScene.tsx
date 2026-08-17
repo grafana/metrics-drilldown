@@ -18,6 +18,7 @@ import React, { useEffect } from 'react';
 import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
+import { AttributeExplorerScene } from './AttributeExplorer/AttributeExplorerScene';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
 import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
@@ -58,6 +59,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     [actionViews.breakdown]: false,
     [actionViews.related]: false,
     [actionViews.relatedLogs]: false,
+    [actionViews.attributeExplorer]: false,
     [actionViews.queryResults]: false,
   };
 
@@ -189,6 +191,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     return new RelatedLogsScene({
       orchestrator: this.relatedLogsOrchestrator,
     });
+  }
+
+  public createAttributeExplorerScene(): SceneObject<SceneObjectState> {
+    return new AttributeExplorerScene();
   }
 }
 
