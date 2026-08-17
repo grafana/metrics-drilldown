@@ -15,7 +15,8 @@ import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
-import { getMetricTypeSync, type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { VAR_DATASOURCE, VAR_FILTERS, VAR_METRIC } from 'shared/shared';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
@@ -25,17 +26,15 @@ import { MetricScene } from '../MetricScene';
 
 interface AttributeExplorerSceneState extends SceneObjectState {
   datasourceUid: string;
+  metricType: MetricType;
   query: string;
   selectedFilters: ActiveFilter[];
   timeRange: TimeRange;
 }
 
 export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSceneState> {
-  // Fields the sidebar itself has written into VAR_FILTERS. Used to avoid clobbering filters set by
-  // other page surfaces (Breakdown tab clicks, manual filter bar edits) when writing our own
-  // selections back, and to avoid re-expanding our own collapsed multi-value regex filters into
-  // individual values on the next sync (ambiguous with a user-typed regex on the same field) --
-  // known mistake class, see project_errors_explorer_filter_scoping in memory.
+  // Fields this sidebar has written into VAR_FILTERS avoid clobbering filters set by
+  // other page surfaces, and avoid re-expanding an already-collapsed multi-value regex.
   private _sidebarFilterKeys = new Set<string>();
 
   protected _variableDependency = new VariableDependencyConfig(this, {
@@ -53,6 +52,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     super({
       key: 'attribute-explorer',
       datasourceUid: '',
+      metricType: 'gauge',
       query: '',
       selectedFilters: [],
       timeRange: getDefaultTimeRange(),
@@ -62,6 +62,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   }
 
   private _onActivate() {
+    this._resolveMetricType();
     this._updateQueryAndDatasource();
     this._syncSelectedFiltersFromVar();
 
@@ -74,17 +75,31 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     );
   }
 
+  private _resolveMetricType() {
+    const metricScene = sceneGraph.getAncestor(this, MetricScene);
+    const [gmdVizPanel] = sceneGraph.findDescendents(metricScene.state.body, GmdVizPanel);
+    if (!gmdVizPanel) {
+      return;
+    }
+
+    this.setState({ metricType: gmdVizPanel.state.metricType });
+
+    this._subs.add(
+      gmdVizPanel.subscribeToState((newState, prevState) => {
+        if (newState.metricType !== prevState.metricType) {
+          this.setState({ metricType: newState.metricType });
+        }
+      })
+    );
+  }
+
   private _updateQueryAndDatasource() {
     const metric = sceneGraph.lookupVariable(VAR_METRIC, this)?.getValue()?.toString() ?? '';
     if (!metric) {
       return;
     }
-    // buildQueryExpression only reads metric.name, not metric.type -- getMetricTypeSync's return type
-    // (Omit<MetricType, 'native-histogram'>) is a subset of the concrete MetricType string values, so
-    // this cast is safe; it just doesn't structurally match Metric.type's declared union.
-    const expression = buildQueryExpression({
-      metric: { name: metric, type: getMetricTypeSync(metric) as MetricType },
-    });
+    
+    const expression = buildQueryExpression({ metric: { name: metric, type: this.state.metricType } });
     const query = sceneGraph.interpolate(this, expression);
 
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, this);
@@ -100,19 +115,14 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     }
 
     const stillPresentKeys = new Set(filtersVar.state.filters.map((f) => f.key));
-    // Keep our own current selections for fields we own AND that still have a corresponding entry in
-    // VAR_FILTERS (an external removal, e.g. deleting the chip from the page filter bar, clears it).
-    // Do NOT re-derive these from VAR_FILTERS: a sidebar-authored multi-value selection is collapsed
-    // into a single =~/!~ regex entry there, and expanding that regex back into individual values
-    // would be ambiguous with a user-typed regex on the same field.
+    // Keep current selections for fields we own, unless externally removed from VAR_FILTERS. Not
+    // re-derived from VAR_FILTERS: a collapsed multi-value regex can't be un-expanded unambiguously.
     const ours = this.state.selectedFilters.filter(
       (f) => this._sidebarFilterKeys.has(f.field) && stillPresentKeys.has(f.field)
     );
 
-    // Fields we don't own: pick up plain =/!= filters set by some other page surface, so a
-    // pre-existing page filter shows as already-selected if it happens to match a discovered
-    // attribute. Regex filters (=~/!~) on fields we don't own are not representable by ActiveFilter
-    // and are left alone -- they simply won't show as selected in the sidebar.
+    // Fields we don't own: pick up plain =/!= filters set elsewhere so a pre-existing page filter
+    // shows as selected. Regex filters on fields we don't own aren't representable here.
     const external: ActiveFilter[] = filtersVar.state.filters
       .filter((f) => !this._sidebarFilterKeys.has(f.key) && (f.operator === '=' || f.operator === '!='))
       .map((f) => ({ field: f.key, operator: f.operator as '=' | '!=', value: f.value }));
@@ -141,19 +151,9 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     filtersVar.setState({ filters: [...otherFilters, ...sidebarFilters] });
   }
 
-  // Persistent toggle panel opened via MetricGraphScene's "Explore Attributes" CTA. Show/hide is
-  // controlled by MetricScene.attributeExplorerOpen, but the panel still needs its own in-place close
-  // button -- once open, the CTA that opened it is no longer the only affordance a user expects to
-  // dismiss it with.
   public static readonly Component = ({ model }: SceneComponentProps<AttributeExplorerScene>) => {
-    const { datasourceUid, query, selectedFilters, timeRange } = model.useState();
+    const { datasourceUid, metricType, query, selectedFilters, timeRange } = model.useState();
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
-    // MetricGraphScene's own container only grows to its CONTENT's height (a flex item with
-    // flexGrow:1 sized by its children, not forced to viewport height), so position:absolute against
-    // it only reaches that content's bottom, not the visual bottom of the page -- the panel rendered
-    // short with dead space below it that it structurally could not reach. Fixed positioning against
-    // the real viewport, offset below Grafana's chrome via the same hook MetricGraphScene itself uses
-    // for this exact purpose, sidesteps that entirely.
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
@@ -173,6 +173,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
         />
         <PrometheusAttributeExplorer
           datasourceUid={datasourceUid}
+          metricType={metricType}
           onFiltersChange={(filters) => model.handleFiltersChange(filters)}
           query={query}
           selectedFilters={selectedFilters}
@@ -184,21 +185,15 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   };
 }
 
-// AdHocVariableFilter values are not PromQL string literals, so only regex metacharacters need
-// escaping here (no quote/backslash string-escaping) -- the variable interpolation layer applies the
-// PromQL string-literal quoting when the query is built from it.
+// Regex metacharacters only -- PromQL string-literal quoting happens at variable interpolation.
 function escapeAdHocRegexValue(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
   return {
-    // Pure positioning layer -- fixed against the real browser viewport, not a DOM ancestor, so it
-    // spans full page height regardless of how tall MetricGraphScene's own content happens to be.
-    // `top` clears Grafana's global chrome + app-controls, same calc MetricGraphScene's own stickyTop
-    // uses. zIndex above MetricActionBar's sticky tab bar (zIndex: 10). Deliberately draws no border,
-    // padding, or background of its own: AttributeDistribution renders its own bordered, padded panel
-    // that fills this wrapper, so styling here too would produce a panel-inside-a-panel double border.
+    // Fixed against the viewport (not a DOM ancestor) so height isn't limited by MetricGraphScene's
+    // own content height. No border/background here -- AttributeDistribution renders its own panel.
     container: css({
       bottom: 0,
       boxSizing: 'border-box',
@@ -208,8 +203,7 @@ function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
       width: '300px',
       zIndex: 20,
     }),
-    // Pinned into the top-right corner of AttributeDistribution's own header padding (padding: 2),
-    // so it aligns with the "Attribute Explorer" title row instead of floating over the panel border.
+    // Aligned with AttributeDistribution's own header padding so it sits on the title row.
     closeButton: css({
       position: 'absolute',
       right: theme.spacing(2),

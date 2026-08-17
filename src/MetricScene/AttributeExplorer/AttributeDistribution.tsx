@@ -19,6 +19,7 @@ import { Combobox, Icon, MenuItem, Spinner, Tooltip, useStyles2, useTheme2, With
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type Observable, type Subscription } from 'rxjs';
 
+import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { logger } from 'shared/logger/logger';
 
 import {
@@ -54,6 +55,8 @@ const EMPTY_ATTRIBUTE_LABELS: Record<string, string> = {};
 
 export interface DatasetContext {
   datasourceUid: string;
+  // Passed through opaquely, same as the rest of DatasetContext -- the component never inspects it.
+  metricType: MetricType;
   query: string;
   timeRange: { from: number; to: number };
 }

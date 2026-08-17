@@ -58,7 +58,7 @@ export type PanelOptions = {
   title?: PanelConfig['title'];
   description?: NonNullable<PanelConfig['description']>;
   headerActions?: PanelConfig['headerActions'];
-  titleItems?: PanelConfig['titleItems'];
+  titleItems?: NonNullable<PanelConfig['titleItems']>;
   menu?: NonNullable<PanelConfig['menu']>;
   legend?: NonNullable<PanelConfig['legend']>;
   mappings?: NonNullable<PanelConfig['mappings']>;
@@ -192,6 +192,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     // or the opposite
     if (metricTypeFromMetadata === 'counter' && metricType === 'gauge') {
       this.setState({ metricType: 'counter' });
+    }
+    // summaries always start out mis-detected as a gauge (no sync name heuristic)
+    if (metricTypeFromMetadata === 'summary' && metricType === 'gauge') {
+      this.setState({ metricType: 'summary' });
     }
 
     // Native histograms — notably adaptive/aggregated ones — can expose no metadata and cannot be queried

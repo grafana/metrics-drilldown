@@ -69,8 +69,7 @@ describe('applyFiltersToSelector', () => {
   });
 
   it('collapses multiple values for the same field into a single =~ regex alternation, not ANDed = matchers', () => {
-    // Two separate `job="a"` / `job="b"` matchers would AND together and match nothing -- the exact
-    // mistake class the ClickHouse/SQL adapters hit for multi-value filters.
+    // Two separate = matchers on the same label would AND together and match nothing.
     const filters: ActiveFilter[] = [
       { field: 'job', operator: '=', value: 'api' },
       { field: 'job', operator: '=', value: 'worker' },
@@ -95,11 +94,6 @@ describe('applyFiltersToSelector', () => {
   });
 
   it('strips a dangling trailing comma left by an empty ${filters:raw} interpolation before joining', () => {
-    // buildQueryExpression always appends a ${filters:raw} placeholder as its own selector entry so
-    // the query stays valid whether VAR_FILTERS is empty or not. When it's empty, that placeholder
-    // interpolates to '', leaving `metric{__ignore_usage__="", }` -- a real selector observed in the
-    // running app. Naively prepending another comma there produces a double comma
-    // (`__ignore_usage__="", , field="value"`), a genuine PromQL parse error ("unexpected ','").
     const filters: ActiveFilter[] = [{ field: 'cluster', operator: '=', value: 'dev-us-east-0' }];
     expect(applyFiltersToSelector('adaptive_logs_gateway_archival_write_duration_seconds{__ignore_usage__="", }', filters)).toBe(
       'adaptive_logs_gateway_archival_write_duration_seconds{__ignore_usage__="", cluster="dev-us-east-0"}'

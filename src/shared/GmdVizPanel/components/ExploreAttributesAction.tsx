@@ -10,8 +10,7 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 
 interface ExploreAttributesActionState extends SceneObjectState {}
 
-// Wired into MetricGraphScene's main panel headerActions only (see panelOptions there) -- assumes a
-// MetricScene ancestor exists, same as this file's siblings assume a DataTrail ancestor (getTrailFor).
+// Assumes a MetricScene ancestor exists, same as siblings here assume a DataTrail ancestor.
 export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesActionState> {
   constructor() {
     super({});

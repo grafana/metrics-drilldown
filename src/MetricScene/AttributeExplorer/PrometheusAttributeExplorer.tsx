@@ -6,13 +6,11 @@ import { from as rxFrom, map, switchMap, type Observable } from 'rxjs';
 
 
 import { MetricDatasourceHelper, type PrometheusRuntimeDatasource } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 
 import { AttributeDistribution, type ActiveFilter, type AttributeConfig, type AttributeValueCount, type DatasetContext } from './AttributeDistribution';
 
-// v1 label-name exclusion (structural, not a business/domain list -- see decision log in
-// metrics-drilldown-attribute-explorer-feature-comparison.md Section 4). __name__ is always a
-// single, constant value equal to the metric being viewed, so showing it as a breakdown attribute
-// would be pure noise. No priority list, exclusion list, or display-name map beyond this exists yet.
+// __name__ is always the metric being viewed, so it's pure noise as an attribute.
 const LABELS_TO_EXCLUDE = new Set(['__name__']);
 
 function toGrafanaTimeRange(context: DatasetContext): TimeRange {
@@ -50,13 +48,8 @@ export interface GroupedFilter {
   values: string[];
 }
 
-// Groups active filters by field+operator so multiple selected values for the same field can be
-// collapsed into a single regex alternation (OR) by callers, instead of multiple ANDed `=` matchers
-// on the same label -- which would match nothing (a label can't simultaneously equal two different
-// values). This is the PromQL analog of the ClickHouse/SQL adapters' IN/NOT IN grouping fix for the
-// exact same mistake class (see project_errors_explorer_filter_scoping in memory / the multi-value
-// bug the sql/ClickHouse adapters hit). Exported so AttributeExplorerScene can apply the same
-// grouping when writing selections back to the page's VAR_FILTERS variable.
+// Groups by field+operator so multiple values collapse into one regex alternation instead of
+// multiple ANDed `=` matchers, which would match nothing.
 export function groupFiltersByFieldAndOperator(filters: ActiveFilter[]): GroupedFilter[] {
   const byFieldAndOp = new Map<string, GroupedFilter>();
   for (const f of filters) {
@@ -96,12 +89,9 @@ export function applyFiltersToSelector(selector: string, filters: ActiveFilter[]
   if (openBrace === -1 || closeBrace === -1) {
     return `${selector}{${matchers}}`;
   }
-  // buildQueryExpression always appends a `${filters:raw}` placeholder as its own trailing selector
-  // entry so the query stays valid whether or not VAR_FILTERS is empty. When it IS empty, that
-  // placeholder interpolates to an empty string, leaving a dangling trailing comma before the closing
-  // brace (e.g. `metric{__ignore_usage__="", }`) -- confirmed via a real parse error in the running
-  // app ("unexpected ',' in label matching") when that dangling comma wasn't stripped before joining.
-  // eslint-disable-next-line sonarjs/super-linear-regex -- single quantified character class, no nested/alternating groups that could overlap; genuinely linear
+  // Strips a possible dangling trailing comma (left by an empty ${filters:raw} interpolation) before
+  // joining, to avoid producing a double comma.
+  // eslint-disable-next-line sonarjs/super-linear-regex -- single quantified character class, genuinely linear
   const existingContent = selector.slice(openBrace + 1, closeBrace).trim().replace(/[,\s]+$/, '');
   const insertion = existingContent.length > 0 ? `${existingContent}, ${matchers}` : matchers;
   return `${selector.slice(0, openBrace + 1)}${insertion}${selector.slice(closeBrace)}`;
@@ -111,8 +101,7 @@ export interface PrometheusRangeQueryResult {
   result: Array<{ metric: Record<string, string>; values: Array<[number, string]> }>;
 }
 
-// Exported for unit testing. Takes the LAST sample of each series' range (not a sum/average across
-// the window) -- this is a point-in-time series count read via a range query, not a volume metric.
+// Takes the last sample of each series' range, a point-in-time count, not a sum across the window.
 export function processDistributionResponse(
   response: PrometheusRangeQueryResult | undefined,
   field: string
@@ -140,22 +129,7 @@ export function processDistributionResponse(
 
 function fetchDistribution(context: DatasetContext, field: string, filters: ActiveFilter[]): Observable<AttributeValueCount[]> {
   const selector = applyFiltersToSelector(context.query, filters);
-  // v1 distribution strategy (decided): series-count query, `count by (<label>) (<selector>)`.
-  // Counts *series*, not event volume/occurrences -- see
-  // metrics-drilldown-attribute-explorer-feature-comparison.md Section 3 for the other 3 researched
-  // alternatives (raw /api/v1/series tally, volume-weighted increase(), native histogram_fraction())
-  // and why this one was chosen as the simplest correct v1.
-  //
-  // Run as a RANGE query (/api/v1/query_range), not an instant query. Confirmed via network
-  // inspection: an instant query at any anchored `time` (including the end of the viewed range)
-  // returned `result: []` for every label -- including near-universal ones like `job`/`instance` --
-  // even though the same metric renders fine as a range query in the main graph, and label/value
-  // discovery (also served via the resource-proxy path) works fine. Every query pattern already
-  // proven to work against this backend/metric in this app is range-based (the main graph,
-  // MetricLabelValuesList's per-value panels); only the raw instant query behaved differently. Rather
-  // than keep guessing at why instant queries return nothing here, this uses the query shape already
-  // proven to work. One step covering the whole window keeps the response to ~1 point per series;
-  // the last sample in each series is read as the current count.
+  // Series count, not event volume. Run as a range query, not instant. One step over the whole window keeps ~1 point per series.
   const query = `count by (${field}) (${selector})`;
   const startSeconds = Math.floor(context.timeRange.from / 1000);
   const endSeconds = Math.floor(context.timeRange.to / 1000);
@@ -166,8 +140,7 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
     switchMap((ds) => {
       const runtimeDs = ds as unknown as PrometheusRuntimeDatasource;
       const requestUrl = `/api/v1/query_range?query=${encodeURIComponent(query)}&start=${startSeconds}&end=${endSeconds}&step=${stepSeconds}`;
-      // Matches the existing raw languageProvider.request() call pattern in MetricDatasourceHelper
-      // (getMetadataForMetric, fetchRecentMetrics), which also casts to any for this call.
+      // Matches the raw languageProvider.request() pattern already used in MetricDatasourceHelper.
       return rxFrom((runtimeDs.languageProvider as any).request(requestUrl)) as Observable<
         PrometheusRangeQueryResult | undefined
       >;
@@ -179,6 +152,7 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
 export interface PrometheusAttributeExplorerProps {
   colorBars?: boolean;
   datasourceUid: string;
+  metricType: MetricType;
   onFiltersChange?: (filters: ActiveFilter[]) => void;
   query: string;
   queryLimitLabel?: string;
@@ -189,6 +163,7 @@ export interface PrometheusAttributeExplorerProps {
 export function PrometheusAttributeExplorer({
   colorBars,
   datasourceUid,
+  metricType,
   selectedFilters,
   onFiltersChange,
   query,
@@ -198,8 +173,8 @@ export function PrometheusAttributeExplorer({
   const numericTimeRange = useMemo(() => ({ from: timeRange.from.valueOf(), to: timeRange.to.valueOf() }), [timeRange]);
 
   const context: DatasetContext = useMemo(
-    () => ({ datasourceUid, query, timeRange: numericTimeRange }),
-    [datasourceUid, query, numericTimeRange]
+    () => ({ datasourceUid, metricType, query, timeRange: numericTimeRange }),
+    [datasourceUid, metricType, query, numericTimeRange]
   );
 
   return (

@@ -13,7 +13,7 @@ describe('mapKgMetricType', () => {
     expect(mapKgMetricType('histogram')).toBe('classic-histogram');
   });
 
-  it('maps summary to gauge', () => {
-    expect(mapKgMetricType('summary')).toBe('gauge');
+  it('maps summary to summary', () => {
+    expect(mapKgMetricType('summary')).toBe('summary');
   });
 });

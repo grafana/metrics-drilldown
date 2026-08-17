@@ -12,6 +12,7 @@ export type MetricType =
   | 'status-updown'
   | 'classic-histogram'
   | 'native-histogram'
+  | 'summary'
   | 'age'
   | 'counter'
   | 'gauge';
@@ -36,6 +37,10 @@ export async function getMetricType(metric: string, dataTrail: DataTrail, kgMetr
     // we found a counter metric that was previously identified as a gauge (see https://github.com/grafana/metrics-drilldown/issues/698)
     if (metadata?.type === 'counter') {
       return 'counter';
+    }
+    // summaries have no name heuristic, so metadata is the only way to detect one
+    if (metadata?.type === 'summary') {
+      return 'summary';
     }
   }
 

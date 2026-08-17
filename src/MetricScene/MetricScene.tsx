@@ -41,10 +41,6 @@ interface MetricSceneState extends SceneObjectState {
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
   queryResultsComponent?: React.ComponentType<PrometheusQueryResultsV1Props>;
-  // Attribute Explorer is a persistent toggle panel, not a tab -- it renders alongside whatever
-  // `body`/`selectedTab` currently shows instead of replacing it. The scene instance is created once
-  // and kept for the lifetime of MetricScene so toggling closed/open doesn't lose page identity; only
-  // its own Component's mount (gated by attributeExplorerOpen) drives its Scenes activation lifecycle.
   attributeExplorerOpen?: boolean;
   attributeExplorerScene: AttributeExplorerScene;
 }

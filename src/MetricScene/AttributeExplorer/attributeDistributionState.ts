@@ -84,10 +84,7 @@ export function computeNextFilters(
   }
 }
 
-// Copied verbatim from logs-drilldown/sql-drilldown/app-o11y-kwl (see header comment); this repo's
-// stricter complexity limit is not a reason to diverge the shared reducer. Revisit when extracting to
-// a shared library.
-// eslint-disable-next-line sonarjs/cognitive-complexity -- see comment above
+// eslint-disable-next-line sonarjs/cognitive-complexity -- copied verbatim across all 4 repos, kept identical
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'DETECTING': {
