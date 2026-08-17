@@ -1,8 +1,6 @@
 {
   "action-bar": {
     "tab": {
-      "attribute-explorer": "Attribute Explorer",
-      "attribute-explorer-description": "Explore how this metric breaks down across label values",
       "breakdown": "Breakdown",
       "query-results": "Query Results",
       "query-results-description": "Instant query data in table format",
@@ -32,8 +30,6 @@
     "show-more-fields_one": "Show {{count}} more fields",
     "show-more-fields_other": "Show {{count}} more fields",
     "title": "Attribute Explorer",
-    "toggle-aria-label": "Attribute Explorer",
-    "toggle-tooltip": "Attribute Explorer",
     "too-many-values": "Too many values to display"
   },
   "binary-ratio-labels-datasource": {
@@ -100,6 +96,9 @@
     "message": "Please <2>try reloading the page</2> or, if the problem persists, contact your organization admin. Sorry for the inconvenience.",
     "stack-trace-label": "View stack trace",
     "title": "Fatal error!"
+  },
+  "explore-attributes-action": {
+    "label": "Explore Attributes"
   },
   "exposed-component-error-boundary": {
     "message": "{{componentName}} failed to load. Please try again or contact your organization admin.",

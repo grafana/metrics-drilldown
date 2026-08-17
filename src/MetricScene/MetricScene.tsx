@@ -41,11 +41,17 @@ interface MetricSceneState extends SceneObjectState {
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
   queryResultsComponent?: React.ComponentType<PrometheusQueryResultsV1Props>;
+  // Attribute Explorer is a persistent toggle panel, not a tab -- it renders alongside whatever
+  // `body`/`selectedTab` currently shows instead of replacing it. The scene instance is created once
+  // and kept for the lifetime of MetricScene so toggling closed/open doesn't lose page identity; only
+  // its own Component's mount (gated by attributeExplorerOpen) drives its Scenes activation lifecycle.
+  attributeExplorerOpen?: boolean;
+  attributeExplorerScene: AttributeExplorerScene;
 }
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
   public readonly relatedLogsOrchestrator = new RelatedLogsOrchestrator(this);
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView'] });
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['actionView', 'attributeExplorerOpen'] });
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_FILTERS],
     onReferencedVariableValueChanged: () => {
@@ -59,11 +65,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     [actionViews.breakdown]: false,
     [actionViews.related]: false,
     [actionViews.relatedLogs]: false,
-    [actionViews.attributeExplorer]: false,
     [actionViews.queryResults]: false,
   };
 
-  public constructor(state: MakeOptional<MetricSceneState, 'body'>) {
+  public constructor(state: MakeOptional<MetricSceneState, 'body' | 'attributeExplorerScene'>) {
     super({
       $variables: state.$variables ?? getVariableSet(state.metric, state.binaryQuery),
       body:
@@ -75,6 +80,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
           kgMetricType: state.kgMetricType,
           binaryQuery: state.binaryQuery,
         }),
+      attributeExplorerScene: state.attributeExplorerScene ?? new AttributeExplorerScene(),
       ...state,
     });
 
@@ -117,7 +123,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   }
 
   getUrlState() {
-    return { actionView: this.state.actionView };
+    return {
+      actionView: this.state.actionView,
+      attributeExplorerOpen: this.state.attributeExplorerOpen ? 'true' : undefined,
+    };
   }
 
   updateFromUrl(values: SceneObjectUrlValues) {
@@ -131,6 +140,15 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     } else if (values.actionView === null) {
       this.setActionView(null);
     }
+
+    const attributeExplorerOpen = values.attributeExplorerOpen === 'true';
+    if (attributeExplorerOpen !== Boolean(this.state.attributeExplorerOpen)) {
+      this.setState({ attributeExplorerOpen });
+    }
+  }
+
+  public toggleAttributeExplorer() {
+    this.setState({ attributeExplorerOpen: !this.state.attributeExplorerOpen });
   }
 
   public setActionView(actionViewType: ActionViewType | null) {
@@ -153,7 +171,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
   }
 
   static readonly Component = ({ model }: SceneComponentProps<MetricScene>) => {
-    const { body } = model.useState();
+    const { attributeExplorerOpen, attributeExplorerScene, body } = model.useState();
     const styles = useStyles2(getStyles);
 
     // Check if Query Results component is available
@@ -183,6 +201,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     return (
       <div className={styles.container} data-testid="metric-scene">
         <body.Component model={body} />
+        {attributeExplorerOpen && <attributeExplorerScene.Component model={attributeExplorerScene} />}
       </div>
     );
   };
@@ -191,10 +210,6 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     return new RelatedLogsScene({
       orchestrator: this.relatedLogsOrchestrator,
     });
-  }
-
-  public createAttributeExplorerScene(): SceneObject<SceneObjectState> {
-    return new AttributeExplorerScene();
   }
 }
 

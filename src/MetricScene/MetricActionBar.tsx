@@ -25,7 +25,6 @@ export const actionViews = {
   breakdown: 'breakdown',
   related: 'related',
   relatedLogs: 'logs',
-  attributeExplorer: 'attributeExplorer',
   queryResults: 'results',
 } as const;
 
@@ -65,16 +64,6 @@ export function getActionViewsDefinitions(): ActionViewDefinition[] {
         'Relevant logs based on current label filters and time range'
       ),
       backgroundTask: (metricScene: MetricScene) => metricScene.relatedLogsOrchestrator.findAndCheckAllDatasources(),
-    },
-    {
-      displayName: t('action-bar.tab.attribute-explorer', 'Attribute Explorer'),
-      value: actionViews.attributeExplorer,
-      getScene: (metricScene: MetricScene) => metricScene.createAttributeExplorerScene(),
-      description: t(
-        'action-bar.tab.attribute-explorer-description',
-        'Explore how this metric breaks down across label values'
-      ),
-      backgroundTask: () => {}, // No prefetch: the sidebar fetches on its own activation.
     },
     {
       displayName: t('action-bar.tab.query-results', 'Query results'),

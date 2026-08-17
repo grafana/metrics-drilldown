@@ -42,6 +42,7 @@ export type PanelConfig = {
   title: string;
   height: PANEL_HEIGHT;
   headerActions: (headerActionsArgs: HeaderActionAndMenuArgs) => VizPanelState['headerActions'];
+  titleItems?: (titleItemsArgs: HeaderActionAndMenuArgs) => VizPanelState['titleItems'];
   fixedColorIndex?: number;
   description?: string;
   menu?: (menuArgs: HeaderActionAndMenuArgs) => VizPanelState['menu'];
@@ -57,6 +58,7 @@ export type PanelOptions = {
   title?: PanelConfig['title'];
   description?: NonNullable<PanelConfig['description']>;
   headerActions?: PanelConfig['headerActions'];
+  titleItems?: PanelConfig['titleItems'];
   menu?: NonNullable<PanelConfig['menu']>;
   legend?: NonNullable<PanelConfig['legend']>;
   mappings?: NonNullable<PanelConfig['mappings']>;
@@ -401,6 +403,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     if (update.headerActions) {
       body.setState({ headerActions: update.headerActions({ metric, panelConfig }) });
+    }
+
+    if (update.titleItems) {
+      body.setState({ titleItems: update.titleItems({ metric, panelConfig }) });
     }
 
     if (update.menu) {

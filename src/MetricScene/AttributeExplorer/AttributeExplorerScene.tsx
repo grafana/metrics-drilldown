@@ -1,6 +1,7 @@
 
 import { css } from '@emotion/css';
 import { getDefaultTimeRange, type GrafanaTheme2, type TimeRange } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   sceneGraph,
@@ -10,7 +11,7 @@ import {
   type SceneObjectState,
   type SceneVariable,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
@@ -20,8 +21,7 @@ import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
 import { type ActiveFilter } from './attributeDistributionState';
 import { groupFiltersByFieldAndOperator, PrometheusAttributeExplorer } from './PrometheusAttributeExplorer';
-import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
-import { actionViews } from '../MetricActionBar';
+import { MetricScene } from '../MetricScene';
 
 interface AttributeExplorerSceneState extends SceneObjectState {
   datasourceUid: string;
@@ -72,12 +72,6 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
         this.setState({ timeRange: newState.value });
       })
     );
-
-    // This tab has no SceneQueryRunner -- AttributeDistribution owns its own async fetch lifecycle
-    // internally via plain fetchAttributes/fetchDistribution calls. signalOnQueryComplete's
-    // "no query controller" fallback would signal completion before those fetches resolve, so this
-    // tab signals explicitly instead, per that utility's own documented caveat.
-    this.publishEvent(new EventActionViewDataLoadComplete({ currentActionView: actionViews.attributeExplorer }), true);
   }
 
   private _updateQueryAndDatasource() {
@@ -147,11 +141,13 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     filtersVar.setState({ filters: [...otherFilters, ...sidebarFilters] });
   }
 
-  // Plain always-visible panel while this tab is active -- no separate open/close toggle. The tab bar
-  // itself is the show/hide mechanism (selecting another tab unmounts this scene), matching the
-  // app-o11y reference implementation: a single docked panel, no icon rail, no in-panel close button.
+  // Persistent toggle panel opened via MetricGraphScene's "Explore Attributes" CTA. Show/hide is
+  // controlled by MetricScene.attributeExplorerOpen, but the panel still needs its own in-place close
+  // button -- once open, the CTA that opened it is no longer the only affordance a user expects to
+  // dismiss it with.
   public static readonly Component = ({ model }: SceneComponentProps<AttributeExplorerScene>) => {
     const { datasourceUid, query, selectedFilters, timeRange } = model.useState();
+    const metricScene = sceneGraph.getAncestor(model, MetricScene);
     // MetricGraphScene's own container only grows to its CONTENT's height (a flex item with
     // flexGrow:1 sized by its children, not forced to viewport height), so position:absolute against
     // it only reaches that content's bottom, not the visual bottom of the page -- the panel rendered
@@ -167,6 +163,14 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
 
     return (
       <div className={styles.container} data-testid="attribute-explorer-content">
+        <IconButton
+          className={styles.closeButton}
+          name="times"
+          aria-label={t('attribute-explorer.close-aria-label', 'Close')}
+          tooltip={t('attribute-explorer.close-tooltip', 'Close')}
+          tooltipPlacement="top"
+          onClick={() => metricScene.toggleAttributeExplorer()}
+        />
         <PrometheusAttributeExplorer
           datasourceUid={datasourceUid}
           onFiltersChange={(filters) => model.handleFiltersChange(filters)}
@@ -189,24 +193,28 @@ function escapeAdHocRegexValue(value: string): string {
 
 function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
   return {
-    // Fixed against the real browser viewport, not a DOM ancestor -- guarantees full page height
-    // regardless of how tall MetricGraphScene's own content happens to be. `top` clears Grafana's
-    // global chrome + app-controls, same calc MetricGraphScene's own stickyTop uses. zIndex above
-    // MetricActionBar's sticky tab bar (zIndex: 10). Matches the app-o11y reference: a single docked
-    // panel spanning the full page height, no icon rail, no separate toggle chrome.
+    // Pure positioning layer -- fixed against the real browser viewport, not a DOM ancestor, so it
+    // spans full page height regardless of how tall MetricGraphScene's own content happens to be.
+    // `top` clears Grafana's global chrome + app-controls, same calc MetricGraphScene's own stickyTop
+    // uses. zIndex above MetricActionBar's sticky tab bar (zIndex: 10). Deliberately draws no border,
+    // padding, or background of its own: AttributeDistribution renders its own bordered, padded panel
+    // that fills this wrapper, so styling here too would produce a panel-inside-a-panel double border.
     container: css({
-      backgroundColor: theme.colors.background.canvas,
-      border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: theme.shape.radius.default,
       bottom: 0,
       boxSizing: 'border-box',
-      overflowY: 'auto',
-      padding: theme.spacing(1.5),
       position: 'fixed',
       right: 0,
       top: `calc(var(--app-controls-height, 0px) + ${chromeHeaderHeight}px)`,
       width: '300px',
       zIndex: 20,
+    }),
+    // Pinned into the top-right corner of AttributeDistribution's own header padding (padding: 2),
+    // so it aligns with the "Attribute Explorer" title row instead of floating over the panel border.
+    closeButton: css({
+      position: 'absolute',
+      right: theme.spacing(2),
+      top: theme.spacing(2),
+      zIndex: 1,
     }),
   };
 }

@@ -20,6 +20,7 @@ import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboa
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { CreateAlertAction } from 'shared/GmdVizPanel/components/CreateAlertAction';
+import { ExploreAttributesAction } from 'shared/GmdVizPanel/components/ExploreAttributesAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { OpenAssistant } from 'shared/GmdVizPanel/components/OpenAssistant';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
@@ -77,6 +78,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 // For a binary (ratio) insight, title the panel with the actual query, not the anchor
                 // metric name. Omitted for normal metrics so the default `title: metric` stands.
                 ...(binaryQuery ? { title: binaryQuery } : {}),
+                titleItems: () => [new ExploreAttributesAction()],
                 headerActions: isClassicHistogramMetric(metric)
                   ? ({ metric }) => [
                       new GmdVizPanelVariantSelector(),
@@ -179,6 +181,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
         gmdVizPanel.update(
           {
+            titleItems: () => [new ExploreAttributesAction()],
             headerActions: () => [
               new GmdVizPanelVariantSelector(),
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),

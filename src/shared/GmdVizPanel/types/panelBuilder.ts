@@ -84,7 +84,14 @@ function getBuildersForPanelType(panelType: PanelType): Builders {
 
 export const panelBuilder = {
   buildVizPanel(options: BuildVizPanelOptions) {
-    return getBuildersForPanelType(options.panelConfig.type).buildVizPanel(options);
+    const { metric, panelConfig } = options;
+    const panel = getBuildersForPanelType(panelConfig.type).buildVizPanel(options);
+
+    if (panelConfig.titleItems) {
+      panel.setState({ titleItems: panelConfig.titleItems({ metric, panelConfig }) });
+    }
+
+    return panel;
   },
   getQueryRunnerParams(options: GetQueryRunnerParamsOptions & { panelType: PanelType }) {
     const { metric, queryConfig, panelType } = options;
