@@ -41,7 +41,15 @@ export interface HistogramRange {
 // Placeholder default, not a product decision: "over 1s" is a common latency-RCA question, but the
 // right default was never validated against this metric's actual unit or distribution. Now editable
 // via ExploreAttributesAction's tooltip (surfaced there, not hidden), which is why it's exported.
-export const DEFAULT_CLASSIC_HISTOGRAM_RANGE: HistogramRange = { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY };
+// Shared by both histogram types (classic and native): no evidence either needs a different default.
+export const DEFAULT_HISTOGRAM_RANGE: HistogramRange = { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY };
+
+// Both histogram types get an editable fraction-in-range threshold and the same tooltip treatment;
+// summary/info/etc do not, since only histogram-shaped metrics have a bucket structure for a
+// threshold to be evaluated against.
+export function isHistogramWithThreshold(metricType: MetricType): boolean {
+  return metricType === 'classic-histogram' || metricType === 'native-histogram';
+}
 
 function formatPromQLBound(seconds: number): string {
   if (seconds === Number.POSITIVE_INFINITY) {
@@ -318,12 +326,27 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
   const window = getRangeQueryWindow(context);
 
   if (context.metricType === 'classic-histogram') {
-    const range = context.histogramRange ?? DEFAULT_CLASSIC_HISTOGRAM_RANGE;
+    const range = context.histogramRange ?? DEFAULT_HISTOGRAM_RANGE;
     // le stays in the inner vector for histogram_fraction to interpolate against; it's not a
     // breakdown field itself (getLabelsToExclude already drops it from the attribute list).
     const innerVector = `sum by (${field}, le) (rate(${selector}[${window.stepSeconds}s]))`;
     const fractionQuery = `histogram_fraction(${formatPromQLBound(range.lowerSeconds)}, ${formatPromQLBound(range.upperSeconds)}, ${innerVector})`;
     const totalCountQuery = `sum by (${field}) (rate(${toCountMetricSelector(selector)}[${window.stepSeconds}s]))`;
+
+    return forkJoin([runRangeQuery(context, fractionQuery, window), runRangeQuery(context, totalCountQuery, window)]).pipe(
+      map(([fraction, totalCount]) => processFractionResponse(fraction, totalCount, field, window.stepSeconds))
+    );
+  }
+
+  if (context.metricType === 'native-histogram') {
+    const range = context.histogramRange ?? DEFAULT_HISTOGRAM_RANGE;
+    // No le: a native histogram's bucket structure is internal to the sample type, not a label to
+    // group by. histogram_count() is called directly on this same vector, no sibling-metric swap:
+    // unlike a classic bucket vector, this vector already carries native-histogram-typed samples,
+    // which is what histogram_count() requires.
+    const innerVector = `sum by (${field}) (rate(${selector}[${window.stepSeconds}s]))`;
+    const fractionQuery = `histogram_fraction(${formatPromQLBound(range.lowerSeconds)}, ${formatPromQLBound(range.upperSeconds)}, ${innerVector})`;
+    const totalCountQuery = `histogram_count(${innerVector})`;
 
     return forkJoin([runRangeQuery(context, fractionQuery, window), runRangeQuery(context, totalCountQuery, window)]).pipe(
       map(([fraction, totalCount]) => processFractionResponse(fraction, totalCount, field, window.stepSeconds))
@@ -364,8 +387,8 @@ function formatHistogramRangeLabel(range: HistogramRange): string {
 }
 
 // Explains what the percentages actually mean, since that differs by metric type and isn't obvious
-// from the UI alone: a counter's values are weighted by activity, a gauge's by series count, and a
-// classic histogram's by how much of each label's own traffic falls in the configured range.
+// from the UI alone: a counter's values are weighted by activity, a gauge's by series count, and
+// either histogram type's by how much of each label's own traffic falls in the configured range.
 function getAttributeExplorerDescription(metricType: MetricType, histogramRange: HistogramRange): string {
   switch (metricType) {
     case 'counter':
@@ -379,6 +402,7 @@ function getAttributeExplorerDescription(metricType: MetricType, histogramRange:
         "Cardinality (series-count) weighted: Values show what share of this metric's series come from each label value. A label with 10 series will outweigh one with 2, regardless of the values those series report."
       );
     case 'classic-histogram':
+    case 'native-histogram':
       return t(
         'attribute-explorer.description-histogram',
         "Fraction-in-range weighted: Values show what share of each label's own requests are {{range}}. These percentages don't add up to 100% across labels: each is that label's own share of its own traffic, not a split of the whole.",
@@ -468,17 +492,16 @@ export function PrometheusAttributeExplorer({
   timeRange,
 }: Readonly<PrometheusAttributeExplorerProps>) {
   const numericTimeRange = useMemo(() => ({ from: timeRange.from.valueOf(), to: timeRange.to.valueOf() }), [timeRange]);
-  const resolvedHistogramRange = histogramRange ?? DEFAULT_CLASSIC_HISTOGRAM_RANGE;
+  const resolvedHistogramRange = histogramRange ?? DEFAULT_HISTOGRAM_RANGE;
 
   const context: DatasetContext = useMemo(
     () => ({ datasourceUid, histogramRange: resolvedHistogramRange, metricType, query, timeRange: numericTimeRange }),
     [datasourceUid, resolvedHistogramRange, metricType, query, numericTimeRange]
   );
 
-  const getValueTooltip =
-    metricType === 'classic-histogram'
-      ? (item: AttributeValueCount) => getHistogramValueTooltip(item, resolvedHistogramRange)
-      : undefined;
+  const getValueTooltip = isHistogramWithThreshold(metricType)
+    ? (item: AttributeValueCount) => getHistogramValueTooltip(item, resolvedHistogramRange)
+    : undefined;
 
   return (
     <AttributeDistribution

@@ -5,7 +5,11 @@ import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObject
 import { Button, Field, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_CLASSIC_HISTOGRAM_RANGE, type HistogramRange } from 'MetricScene/AttributeExplorer/PrometheusAttributeExplorer';
+import {
+  DEFAULT_HISTOGRAM_RANGE,
+  isHistogramWithThreshold,
+  type HistogramRange,
+} from 'MetricScene/AttributeExplorer/PrometheusAttributeExplorer';
 import { MetricScene } from 'MetricScene/MetricScene';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getUnitFromMetric } from 'shared/GmdVizPanel/units/getUnit';
@@ -47,11 +51,9 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
     const { metric, metricType } = sceneGraph.getAncestor(model, GmdVizPanel).useState();
     const label = t('explore-attributes-action.label', 'Explore Attributes');
 
-    // Task 9 (native-histogram C2) isn't built yet, so this control only applies where the underlying
-    // query actually uses it: showing it for a type that ignores it would be its own kind of lie.
-    const isClassicHistogram = metricType === 'classic-histogram';
-    const unit = isClassicHistogram ? getUnitFromMetric(metric) : null;
-    const range = histogramRange ?? DEFAULT_CLASSIC_HISTOGRAM_RANGE;
+    const showsHistogramThreshold = isHistogramWithThreshold(metricType);
+    const unit = showsHistogramThreshold ? getUnitFromMetric(metric) : null;
+    const range = histogramRange ?? DEFAULT_HISTOGRAM_RANGE;
 
     const [lowerText, setLowerText] = useState(String(range.lowerSeconds));
     const [upperText, setUpperText] = useState(
@@ -114,7 +116,7 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
             'The Attribute Explorer surfaces the labels and attribute values present for this metric so you can filter and drill down into them.'
           )}
         </div>
-        {isClassicHistogram && (
+        {showsHistogramThreshold && (
           <div className={styles.histogramSection}>
             <div>
               {t(

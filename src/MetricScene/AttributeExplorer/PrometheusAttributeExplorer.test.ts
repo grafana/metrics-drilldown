@@ -6,6 +6,7 @@ import {
   getLabelsToExclude,
   getRangeQueryWindow,
   groupFiltersByFieldAndOperator,
+  isHistogramWithThreshold,
   mergePresenceAndWeights,
   processDistributionResponse,
   processFractionResponse,
@@ -36,6 +37,19 @@ describe('getLabelsToExclude', () => {
     'excludes only __name__ for %s',
     (metricType) => {
       expect(getLabelsToExclude(metricType)).toEqual(new Set(['__name__']));
+    }
+  );
+});
+
+describe('isHistogramWithThreshold', () => {
+  it.each([['classic-histogram'], ['native-histogram']] as const)('returns true for %s', (metricType) => {
+    expect(isHistogramWithThreshold(metricType)).toBe(true);
+  });
+
+  it.each([['gauge'], ['counter'], ['summary'], ['info'], ['status-updown'], ['age']] as const)(
+    'returns false for %s',
+    (metricType) => {
+      expect(isHistogramWithThreshold(metricType)).toBe(false);
     }
   );
 });
