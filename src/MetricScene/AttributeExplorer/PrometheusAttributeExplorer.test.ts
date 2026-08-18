@@ -1,11 +1,33 @@
 import { type ActiveFilter } from './attributeDistributionState';
 import {
   applyFiltersToSelector,
+  getLabelsToExclude,
   groupFiltersByFieldAndOperator,
   mergePresenceAndWeights,
   processDistributionResponse,
   type PrometheusRangeQueryResult,
 } from './PrometheusAttributeExplorer';
+
+describe('getLabelsToExclude', () => {
+  it('always excludes __name__', () => {
+    expect(getLabelsToExclude('gauge').has('__name__')).toBe(true);
+  });
+
+  it('excludes le for classic-histogram, in addition to __name__', () => {
+    expect(getLabelsToExclude('classic-histogram')).toEqual(new Set(['__name__', 'le']));
+  });
+
+  it('excludes quantile for summary, in addition to __name__', () => {
+    expect(getLabelsToExclude('summary')).toEqual(new Set(['__name__', 'quantile']));
+  });
+
+  it.each([['gauge'], ['counter'], ['native-histogram'], ['info'], ['status-updown'], ['age']] as const)(
+    'excludes only __name__ for %s',
+    (metricType) => {
+      expect(getLabelsToExclude(metricType)).toEqual(new Set(['__name__']));
+    }
+  );
+});
 
 describe('groupFiltersByFieldAndOperator', () => {
   it('returns one group per field when there is a single value', () => {

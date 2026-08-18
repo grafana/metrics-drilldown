@@ -14,7 +14,21 @@ import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { AttributeDistribution, type ActiveFilter, type AttributeConfig, type AttributeValueCount, type DatasetContext } from './AttributeDistribution';
 
 // __name__ is always the metric being viewed, so it's pure noise as an attribute.
-const LABELS_TO_EXCLUDE = new Set(['__name__']);
+const ALWAYS_EXCLUDED_LABELS = new Set(['__name__']);
+
+// Classic histograms and summaries carry a synthetic structural label (le / quantile) that identifies
+// which bucket/quantile series a sample belongs to -- it's part of the metric's own shape, not a real
+// dimension to explore. Native histograms have no per-bucket series, so nothing to exclude there.
+const STRUCTURAL_LABEL_BY_TYPE: Partial<Record<MetricType, string>> = {
+  'classic-histogram': 'le',
+  summary: 'quantile',
+};
+
+// Exported for unit testing.
+export function getLabelsToExclude(metricType: MetricType): Set<string> {
+  const structuralLabel = STRUCTURAL_LABEL_BY_TYPE[metricType];
+  return structuralLabel ? new Set([...ALWAYS_EXCLUDED_LABELS, structuralLabel]) : ALWAYS_EXCLUDED_LABELS;
+}
 
 function toGrafanaTimeRange(context: DatasetContext): TimeRange {
   const from = dateTime(context.timeRange.from);
@@ -32,8 +46,9 @@ async function fetchAttributes(context: DatasetContext): Promise<AttributeConfig
     timeRange: toGrafanaTimeRange(context),
   });
 
+  const labelsToExclude = getLabelsToExclude(context.metricType);
   return labels
-    .filter((label) => !LABELS_TO_EXCLUDE.has(label))
+    .filter((label) => !labelsToExclude.has(label))
     .map((label) => ({ attribute: label, attribute_name: label }));
 }
 
