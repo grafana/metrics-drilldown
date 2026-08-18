@@ -8,11 +8,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { DEFAULT_CLASSIC_HISTOGRAM_RANGE, type HistogramRange } from 'MetricScene/AttributeExplorer/PrometheusAttributeExplorer';
 import { MetricScene } from 'MetricScene/MetricScene';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
-import { getMetricUnit, type MetricUnit } from 'shared/GmdVizPanel/matchers/getMetricUnit';
+import { getUnitFromMetric } from 'shared/GmdVizPanel/units/getUnit';
 
 interface ExploreAttributesActionState extends SceneObjectState {}
 
-function getHistogramMeaningCopy(unit: MetricUnit | undefined, lowerSeconds: number): string {
+function getHistogramMeaningCopy(unit: string | null, lowerSeconds: number): string {
   if (unit === 'seconds') {
     return t(
       'explore-attributes-action.tooltip.meaning-seconds',
@@ -50,7 +50,7 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
     // Task 9 (native-histogram C2) isn't built yet, so this control only applies where the underlying
     // query actually uses it: showing it for a type that ignores it would be its own kind of lie.
     const isClassicHistogram = metricType === 'classic-histogram';
-    const unit = isClassicHistogram ? getMetricUnit(metric) : undefined;
+    const unit = isClassicHistogram ? getUnitFromMetric(metric) : null;
     const range = histogramRange ?? DEFAULT_CLASSIC_HISTOGRAM_RANGE;
 
     const [lowerText, setLowerText] = useState(String(range.lowerSeconds));
