@@ -67,6 +67,57 @@ function toGrafanaTimeRange(context: DatasetContext): TimeRange {
   return { from, to, raw: { from, to } };
 }
 
+// Canonical OTel attribute names (dotted), matched against a metric's discovered labels rather than
+// its name. Not every pipeline converts dots to underscores (Prometheus's UTF-8 label name support can
+// preserve them), so both spellings are checked. Called from AttributeExplorerScene rather than
+// fetchAttributes: shape detection needs to resolve before AttributeDistribution mounts, not during it.
+const OTEL_SHAPE_ATTRIBUTES: Record<string, string[]> = {
+  http: ['http.route', 'http.response.status_code', 'error.type'],
+  db: ['db.operation.name', 'db.collection.name', 'db.query.summary'],
+  messaging: ['messaging.destination.template', 'messaging.consumer.group.name'],
+};
+
+function toPrometheusUnderscoreForm(canonicalName: string): string {
+  return canonicalName.replace(/\./g, '_');
+}
+
+// Prefers the underscored spelling if both happen to be present.
+function findActualFieldSpelling(canonicalName: string, discovered: Set<string>): string | undefined {
+  const underscoreForm = toPrometheusUnderscoreForm(canonicalName);
+  if (discovered.has(underscoreForm)) {
+    return underscoreForm;
+  }
+  if (discovered.has(canonicalName)) {
+    return canonicalName;
+  }
+  return undefined;
+}
+
+// First shape with any field present wins; no merging across shapes. priorityAttributes uses whichever
+// spelling matched (has to match the real label name); attributeLabels always shows the canonical
+// dotted form. No match returns empty arrays. Exported for unit testing.
+export function getOtelPriorityAttributes(labels: string[]): {
+  attributeLabels: Record<string, string>;
+  priorityAttributes: string[];
+} {
+  const discovered = new Set(labels);
+  for (const shapeFields of Object.values(OTEL_SHAPE_ATTRIBUTES)) {
+    const attributeLabels: Record<string, string> = {};
+    const present: string[] = [];
+    for (const canonicalName of shapeFields) {
+      const actualField = findActualFieldSpelling(canonicalName, discovered);
+      if (actualField) {
+        present.push(actualField);
+        attributeLabels[actualField] = canonicalName;
+      }
+    }
+    if (present.length > 0) {
+      return { attributeLabels, priorityAttributes: present };
+    }
+  }
+  return { attributeLabels: {}, priorityAttributes: [] };
+}
+
 async function fetchAttributes(context: DatasetContext): Promise<AttributeConfig[]> {
   // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
   const ds = (await getDataSourceSrv().get(context.datasourceUid)) as unknown as PrometheusRuntimeDatasource;

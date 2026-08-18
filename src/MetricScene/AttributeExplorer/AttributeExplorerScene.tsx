@@ -2,7 +2,8 @@
 import { css } from '@emotion/css';
 import { getDefaultTimeRange, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { useChromeHeaderHeight } from '@grafana/runtime';
+// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
+import { getDataSourceSrv, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -14,19 +15,31 @@ import {
 import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
+import { MetricDatasourceHelper, type PrometheusRuntimeDatasource } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { logger } from 'shared/logger/logger';
 import { VAR_DATASOURCE, VAR_FILTERS, VAR_METRIC } from 'shared/shared';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
 import { type ActiveFilter } from './attributeDistributionState';
-import { groupFiltersByFieldAndOperator, PrometheusAttributeExplorer } from './PrometheusAttributeExplorer';
+import { getOtelPriorityAttributes, groupFiltersByFieldAndOperator, PrometheusAttributeExplorer } from './PrometheusAttributeExplorer';
 import { MetricScene } from '../MetricScene';
 
+function toError(e: unknown): Error {
+  return e instanceof Error ? e : new Error(String(e));
+}
+
 interface AttributeExplorerSceneState extends SceneObjectState {
+  attributeLabels: Record<string, string>;
   datasourceUid: string;
   metricType: MetricType;
+  // False while OTel-shape detection is in flight for the current query. The explorer stays unmounted
+  // until true, since AttributeDistribution reads priorityAttributes once and won't reorder if it
+  // arrives late.
+  otelPriorityReady: boolean;
+  priorityAttributes: string[];
   query: string;
   selectedFilters: ActiveFilter[];
   timeRange: TimeRange;
@@ -48,11 +61,17 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     },
   });
 
+  // Discards a stale _resolveOtelPriority response if a newer query/datasource has superseded it.
+  private _otelPriorityGeneration = 0;
+
   public constructor() {
     super({
       key: 'attribute-explorer',
+      attributeLabels: {},
       datasourceUid: '',
       metricType: 'gauge',
+      otelPriorityReady: false,
+      priorityAttributes: [],
       query: '',
       selectedFilters: [],
       timeRange: getDefaultTimeRange(),
@@ -106,6 +125,37 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     const datasourceUid = (dsVariable?.getValue()?.toString() ?? '') as string;
 
     this.setState({ datasourceUid, query });
+    this._resolveOtelPriority(datasourceUid, query);
+  }
+
+  private _resolveOtelPriority(datasourceUid: string, query: string) {
+    const generation = ++this._otelPriorityGeneration;
+    this.setState({ attributeLabels: {}, otelPriorityReady: false, priorityAttributes: [] });
+
+    if (!datasourceUid || !query) {
+      this.setState({ otelPriorityReady: true });
+      return;
+    }
+
+    this._fetchOtelPriority(datasourceUid, query, generation).catch((e) => {
+      if (generation !== this._otelPriorityGeneration) {
+        return;
+      }
+      logger.error(toError(e));
+      this.setState({ otelPriorityReady: true });
+    });
+  }
+
+  private async _fetchOtelPriority(datasourceUid: string, query: string, generation: number) {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+    const ds = (await getDataSourceSrv().get(datasourceUid)) as unknown as PrometheusRuntimeDatasource;
+    const timeRange = sceneGraph.getTimeRange(this).state.value;
+    const labels = await MetricDatasourceHelper.fetchLabels({ ds, matcher: query, timeRange });
+    if (generation !== this._otelPriorityGeneration) {
+      return;
+    }
+    const { attributeLabels, priorityAttributes } = getOtelPriorityAttributes(labels);
+    this.setState({ attributeLabels, otelPriorityReady: true, priorityAttributes });
   }
 
   private _syncSelectedFiltersFromVar() {
@@ -152,7 +202,8 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<AttributeExplorerScene>) => {
-    const { datasourceUid, metricType, query, selectedFilters, timeRange } = model.useState();
+    const { attributeLabels, datasourceUid, metricType, otelPriorityReady, priorityAttributes, query, selectedFilters, timeRange } =
+      model.useState();
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const { histogramRange } = metricScene.useState();
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
@@ -172,16 +223,20 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
           tooltipPlacement="top"
           onClick={() => metricScene.toggleAttributeExplorer()}
         />
-        <PrometheusAttributeExplorer
-          datasourceUid={datasourceUid}
-          histogramRange={histogramRange}
-          metricType={metricType}
-          onFiltersChange={(filters) => model.handleFiltersChange(filters)}
-          query={query}
-          selectedFilters={selectedFilters}
-          timeRange={timeRange}
-          colorBars={true}
-        />
+        {otelPriorityReady && (
+          <PrometheusAttributeExplorer
+            attributeLabels={attributeLabels}
+            datasourceUid={datasourceUid}
+            histogramRange={histogramRange}
+            metricType={metricType}
+            onFiltersChange={(filters) => model.handleFiltersChange(filters)}
+            priorityAttributes={priorityAttributes}
+            query={query}
+            selectedFilters={selectedFilters}
+            timeRange={timeRange}
+            colorBars={true}
+          />
+        )}
       </div>
     );
   };

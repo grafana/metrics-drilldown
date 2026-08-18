@@ -4,6 +4,7 @@ import {
   applyFiltersToSelector,
   getHistogramValueTooltip,
   getLabelsToExclude,
+  getOtelPriorityAttributes,
   getRangeQueryWindow,
   groupFiltersByFieldAndOperator,
   isHistogramWithThreshold,
@@ -52,6 +53,69 @@ describe('isHistogramWithThreshold', () => {
       expect(isHistogramWithThreshold(metricType)).toBe(false);
     }
   );
+});
+
+describe('getOtelPriorityAttributes', () => {
+  it('returns empty arrays when no labels match any shape', () => {
+    expect(getOtelPriorityAttributes(['pod', 'namespace', 'cluster'])).toEqual({
+      attributeLabels: {},
+      priorityAttributes: [],
+    });
+  });
+
+  it('detects an HTTP-shaped metric and returns only the fields actually present', () => {
+    expect(getOtelPriorityAttributes(['http_route', 'pod', 'cluster'])).toEqual({
+      attributeLabels: { http_route: 'http.route' },
+      priorityAttributes: ['http_route'],
+    });
+  });
+
+  it('preserves shape order, not discovery order, for multiple present HTTP fields', () => {
+    expect(getOtelPriorityAttributes(['error_type', 'http_response_status_code', 'http_route'])).toEqual({
+      attributeLabels: {
+        error_type: 'error.type',
+        http_response_status_code: 'http.response.status_code',
+        http_route: 'http.route',
+      },
+      priorityAttributes: ['http_route', 'http_response_status_code', 'error_type'],
+    });
+  });
+
+  it('detects a DB-shaped metric', () => {
+    expect(getOtelPriorityAttributes(['db_operation_name', 'db_collection_name'])).toEqual({
+      attributeLabels: { db_collection_name: 'db.collection.name', db_operation_name: 'db.operation.name' },
+      priorityAttributes: ['db_operation_name', 'db_collection_name'],
+    });
+  });
+
+  it('detects a messaging-shaped metric', () => {
+    expect(getOtelPriorityAttributes(['messaging_destination_template'])).toEqual({
+      attributeLabels: { messaging_destination_template: 'messaging.destination.template' },
+      priorityAttributes: ['messaging_destination_template'],
+    });
+  });
+
+  it('picks the first matching shape when labels span more than one shape', () => {
+    // http is checked before db, so a metric matching both resolves to http only.
+    expect(getOtelPriorityAttributes(['http_route', 'db_operation_name'])).toEqual({
+      attributeLabels: { http_route: 'http.route' },
+      priorityAttributes: ['http_route'],
+    });
+  });
+
+  it('detects a shape when labels keep the literal dotted OTel spelling', () => {
+    expect(getOtelPriorityAttributes(['http.route', 'pod'])).toEqual({
+      attributeLabels: { 'http.route': 'http.route' },
+      priorityAttributes: ['http.route'],
+    });
+  });
+
+  it('matches each field independently in whichever spelling it actually uses', () => {
+    expect(getOtelPriorityAttributes(['http.route', 'error_type'])).toEqual({
+      attributeLabels: { 'http.route': 'http.route', error_type: 'error.type' },
+      priorityAttributes: ['http.route', 'error_type'],
+    });
+  });
 });
 
 describe('groupFiltersByFieldAndOperator', () => {
