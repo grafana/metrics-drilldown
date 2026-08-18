@@ -61,6 +61,34 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
   };
 }
 
+const DEFAULT_HISTOGRAM_BY_LABEL_PERCENTILE = 99;
+
+// Aggregating a native histogram preserves its sample type instead of collapsing to a plain float, so
+// the usual avg-by-label query below would return a heatmap-shaped frame (yMin/yMax/count fields) that
+// a timeseries panel can't render. Reduce each label value to its own p99 line instead, the same
+// "which value is worst" comparison every other metric type's by-label panel gives.
+function buildNativeHistogramByLabelQuery(metric: Metric, queryConfig: QueryConfig, expr: string, groupByLabel: string): SceneDataQuery[] {
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
+  const innerVector = promql.sum({ expr: promql.rate({ expr, interval }), by: [groupByLabel] });
+
+  const entry = PROMQL_FUNCTIONS.get('histogram_quantile');
+  if (!entry) {
+    logger.warn('[getTimeseriesQueryRunnerParams] Unknown PromQL function "histogram_quantile", skipping query.');
+    return [];
+  }
+
+  const queryExpr = entry.fn({ expr: innerVector, parameter: DEFAULT_HISTOGRAM_BY_LABEL_PERCENTILE / 100 });
+
+  return [
+    {
+      refId: `${metric.name}-by-${queryConfig.groupBy}`,
+      expr: queryExpr,
+      legendFormat: `{{${groupByLabel}}}`,
+      fromExploreMetrics: true,
+    },
+  ];
+}
+
 // if grouped by, we don't provide support for preset functions
 function buildGroupByQueries({
   metric,
@@ -91,6 +119,14 @@ function buildGroupByQueries({
     ];
   }
 
+  if (metric.type === 'native-histogram') {
+    return buildNativeHistogramByLabelQuery(metric, queryConfig, expr, groupByLabel);
+  }
+
+  return buildDefaultByLabelQuery(metric, queryConfig, expr, groupByLabel);
+}
+
+function buildDefaultByLabelQuery(metric: Metric, queryConfig: QueryConfig, expr: string, groupByLabel: string): SceneDataQuery[] {
   let typeDefault: PrometheusFunction = 'avg';
   if (metric.type === 'counter') {
     typeDefault = 'sum';

@@ -309,6 +309,45 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       );
     });
 
+    test('handles native-histogram metrics with a p99-by-label query, not avg', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_request_duration_seconds', type: 'native-histogram' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'cluster',
+        },
+      });
+
+      expect(result.isRateQuery).toBe(false);
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'http_request_duration_seconds-by-cluster',
+          expr: 'histogram_quantile(0.99,sum by (cluster) (rate(http_request_duration_seconds{__ignore_usage__="", ${filters:raw}}[$__rate_interval])))',
+          legendFormat: '{{cluster}}',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+
+    test('applies customRateInterval override to native-histogram by-label rate window', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_request_duration_seconds', type: 'native-histogram' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'cluster',
+          customRateInterval: '1h',
+        },
+      });
+
+      expect(result.queries[0].expr).toBe(
+        'histogram_quantile(0.99,sum by (cluster) (rate(http_request_duration_seconds{__ignore_usage__="", ${filters:raw}}[1h])))'
+      );
+    });
+
     describe('with UTF-8 labels', () => {
       test('wraps UTF-8 label in quotes for by clause and legendFormat', () => {
         const result = getTimeseriesQueryRunnerParams({

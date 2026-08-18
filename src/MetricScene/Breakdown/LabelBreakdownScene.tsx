@@ -14,7 +14,8 @@ import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
@@ -23,6 +24,7 @@ import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValues
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { RefreshMetricsEvent, VAR_GROUP_BY } from '../../shared/shared';
 import { isQueryVariable } from '../../shared/utils/utils.variables';
+import { MetricScene } from '../MetricScene';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface LabelBreakdownSceneState extends SceneObjectState {
@@ -56,6 +58,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       });
     }
 
+    this.subscribeToMainPanelMetricType();
     this.updateBody(groupByVariable);
   }
 
@@ -67,15 +70,35 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return groupByVariable;
   }
 
-  private async updateBody(groupByVariable: QueryVariable) {
+  // Reuses the main graph panel's own resolved metric type (GmdVizPanel), rather than re-deriving it
+  // from metadata alone: GmdVizPanel also runs a probe query for metrics with no metadata (adaptive/
+  // aggregated native histograms), a correction this scene doesn't otherwise have access to.
+  private getMainPanel(): GmdVizPanel | undefined {
+    const metricScene = sceneGraph.getAncestor(this, MetricScene);
+    return sceneGraph.findDescendents(metricScene.state.body, GmdVizPanel)[0];
+  }
+
+  private subscribeToMainPanelMetricType() {
+    const mainPanel = this.getMainPanel();
+    if (!mainPanel) {
+      return;
+    }
+
+    this._subs.add(
+      mainPanel.subscribeToState((newState, prevState) => {
+        if (newState.metricType !== prevState.metricType) {
+          this.updateBody(this.getVariable());
+        }
+      })
+    );
+  }
+
+  private updateBody(groupByVariable: QueryVariable) {
     const { metric: name } = this.state;
     const trail = getTrailFor(this);
-    const entry = trail.state.sourceMetrics?.find((s) => s.metricName === name);
+    const type: MetricType = this.getMainPanel()?.state.metricType ?? 'gauge';
 
-    const metric = {
-      name,
-      type: await getMetricType(name, trail, entry?.metricType),
-    };
+    const metric = { name, type };
 
     const newBody = groupByVariable.hasAllValue()
       ? new MetricLabelsList({ metric })
