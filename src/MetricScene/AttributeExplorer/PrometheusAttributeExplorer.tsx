@@ -237,12 +237,12 @@ function getAttributeExplorerDescription(metricType: MetricType): string {
     case 'counter':
       return t(
         'attribute-explorer.description-counter',
-        "Values show each label's share of this counter's total rate (activity), not how many series exist. A value can still appear at 0% if it exists but had no activity in this window."
+        "Activity/rate-weighted: Values show each label's share of this counter's total rate (activity). A value can still appear at 0% if it exists but had no activity in this window."
       );
     case 'gauge':
       return t(
         'attribute-explorer.description-gauge',
-        "Values show what share of this metric's series come from each label value, not how much traffic or activity they represent. A label with 10 series will outweigh one with 2, regardless of the values those series report."
+        "Cardinality (series-count) weighted: Values show what share of this metric's series come from each label value. A label with 10 series will outweigh one with 2, regardless of the values those series report."
       );
     default:
       return t(
@@ -263,7 +263,7 @@ function AttributeExplorerHeader({ metricType, queryLimitLabel }: Readonly<Attri
     <div className={styles.header}>
       <div className={styles.title}>
         {t('attribute-explorer.title', 'Attribute Explorer')}
-        <Tooltip content={getAttributeExplorerDescription(metricType)}>
+        <Tooltip interactive content={getAttributeExplorerDescription(metricType)}>
           <Icon name="info-circle" size="sm" />
         </Tooltip>
       </div>
