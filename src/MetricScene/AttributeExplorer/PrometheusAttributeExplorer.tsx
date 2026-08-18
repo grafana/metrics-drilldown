@@ -300,10 +300,12 @@ function getHeaderStyles(theme: GrafanaTheme2) {
 }
 
 export interface PrometheusAttributeExplorerProps {
+  attributeLabels?: Record<string, string>;
   colorBars?: boolean;
   datasourceUid: string;
   metricType: MetricType;
   onFiltersChange?: (filters: ActiveFilter[]) => void;
+  priorityAttributes?: string[];
   query: string;
   queryLimitLabel?: string;
   selectedFilters?: ActiveFilter[];
@@ -311,11 +313,13 @@ export interface PrometheusAttributeExplorerProps {
 }
 
 export function PrometheusAttributeExplorer({
+  attributeLabels,
   colorBars,
   datasourceUid,
   metricType,
   selectedFilters,
   onFiltersChange,
+  priorityAttributes,
   query,
   queryLimitLabel,
   timeRange,
@@ -329,12 +333,14 @@ export function PrometheusAttributeExplorer({
 
   return (
     <AttributeDistribution
+      attributeLabels={attributeLabels}
       colorBars={colorBars}
       context={context}
       fetchAttributes={fetchAttributes}
       fetchDistribution={fetchDistribution}
       header={<AttributeExplorerHeader metricType={metricType} queryLimitLabel={queryLimitLabel} />}
       onFiltersChange={onFiltersChange}
+      priorityAttributes={priorityAttributes}
       selectedFilters={selectedFilters}
     />
   );
