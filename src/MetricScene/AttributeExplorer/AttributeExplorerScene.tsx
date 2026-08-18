@@ -154,6 +154,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   public static readonly Component = ({ model }: SceneComponentProps<AttributeExplorerScene>) => {
     const { datasourceUid, metricType, query, selectedFilters, timeRange } = model.useState();
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
+    const { histogramRange } = metricScene.useState();
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
@@ -173,6 +174,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
         />
         <PrometheusAttributeExplorer
           datasourceUid={datasourceUid}
+          histogramRange={histogramRange}
           metricType={metricType}
           onFiltersChange={(filters) => model.handleFiltersChange(filters)}
           query={query}
@@ -185,7 +187,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   };
 }
 
-// Regex metacharacters only -- PromQL string-literal quoting happens at variable interpolation.
+// Regex metacharacters only; PromQL string-literal quoting happens at variable interpolation.
 function escapeAdHocRegexValue(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -193,7 +195,7 @@ function escapeAdHocRegexValue(value: string): string {
 function getStyles(theme: GrafanaTheme2, chromeHeaderHeight: number) {
   return {
     // Fixed against the viewport (not a DOM ancestor) so height isn't limited by MetricGraphScene's
-    // own content height. No border/background here -- AttributeDistribution renders its own panel.
+    // own content height. No border/background here; AttributeDistribution renders its own panel.
     container: css({
       bottom: 0,
       boxSizing: 'border-box',

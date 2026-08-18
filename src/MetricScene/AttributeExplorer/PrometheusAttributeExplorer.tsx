@@ -16,18 +16,41 @@ import { AttributeDistribution, type ActiveFilter, type AttributeConfig, type At
 // __name__ is always the metric being viewed, so it's pure noise as an attribute.
 const ALWAYS_EXCLUDED_LABELS = new Set(['__name__']);
 
-// Classic histograms and summaries carry a synthetic structural label (le / quantile) that identifies
-// which bucket/quantile series a sample belongs to -- it's part of the metric's own shape, not a real
-// dimension to explore. Native histograms have no per-bucket series, so nothing to exclude there.
-const STRUCTURAL_LABEL_BY_TYPE: Partial<Record<MetricType, string>> = {
-  'classic-histogram': 'le',
-  summary: 'quantile',
+// Structural labels: not real dimensions of the observed request, but metadata about the metric's own
+// shape. le/quantile are Prometheus-native (identify which bucket/quantile series a sample belongs
+// to). asserts_metric_latency is Asserts-injected and structural for the same reason, confirmed live:
+// its value differs between a metric family's sibling series (e.g. "histogram_seconds" on the _bucket
+// series vs "count" on the _count series for the identical family), which a genuine per-request label
+// never does. Native histograms have no per-bucket series, so le doesn't apply there.
+const STRUCTURAL_LABELS_BY_TYPE: Partial<Record<MetricType, string[]>> = {
+  'classic-histogram': ['le', 'asserts_metric_latency'],
+  summary: ['quantile'],
 };
 
 // Exported for unit testing.
 export function getLabelsToExclude(metricType: MetricType): Set<string> {
-  const structuralLabel = STRUCTURAL_LABEL_BY_TYPE[metricType];
-  return structuralLabel ? new Set([...ALWAYS_EXCLUDED_LABELS, structuralLabel]) : ALWAYS_EXCLUDED_LABELS;
+  const structuralLabels = STRUCTURAL_LABELS_BY_TYPE[metricType] ?? [];
+  return new Set([...ALWAYS_EXCLUDED_LABELS, ...structuralLabels]);
+}
+
+export interface HistogramRange {
+  lowerSeconds: number;
+  upperSeconds: number;
+}
+
+// Placeholder default, not a product decision: "over 1s" is a common latency-RCA question, but the
+// right default was never validated against this metric's actual unit or distribution. Now editable
+// via ExploreAttributesAction's tooltip (surfaced there, not hidden), which is why it's exported.
+export const DEFAULT_CLASSIC_HISTOGRAM_RANGE: HistogramRange = { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY };
+
+function formatPromQLBound(seconds: number): string {
+  if (seconds === Number.POSITIVE_INFINITY) {
+    return '+Inf';
+  }
+  if (seconds === Number.NEGATIVE_INFINITY) {
+    return '-Inf';
+  }
+  return String(seconds);
 }
 
 function toGrafanaTimeRange(context: DatasetContext): TimeRange {
@@ -145,6 +168,15 @@ export function processDistributionResponse(
     .sort((a, b) => b.percentage - a.percentage);
 }
 
+// rate() (and, by extension, a fraction of a rate) is a per-second value, not an event count, and is
+// often under 1 for a single label value, so displaying it directly reads as a near-duplicate of
+// percentage. Per Prometheus's own docs, increase(v[d]) "is syntactic sugar for rate(v) multiplied by
+// the number of seconds," so multiplying an already-fetched rate by the query window gives the same
+// estimated absolute count increase() would, without a second query.
+function toWindowCount(ratePerSecond: number, windowSeconds: number): number {
+  return Math.round(ratePerSecond * windowSeconds);
+}
+
 function extractLastSampleByValue(response: PrometheusRangeQueryResult | undefined, field: string): Map<string, number> {
   const byValue = new Map<string, number>();
   for (const series of response?.result ?? []) {
@@ -160,30 +192,94 @@ function extractLastSampleByValue(response: PrometheusRangeQueryResult | undefin
 
 // For counters, whether a value exists and how much it weighs are separate questions: a value with
 // a real series but zero rate in this window must still be listed, just at 0%, not dropped as if it
-// doesn't exist. `presence` answers the first question, `weights` the second -- unioned, because the
+// doesn't exist. `presence` answers the first question, `weights` the second, unioned because the
 // bare-selector presence query only sees a series scraped within Prometheus's default 5m staleness
 // window at one of the 1-2 instants this single-step range query evaluates, while a value the rate
 // query itself found is proof enough that the series exists in the wider window. Exported for unit testing.
 export function mergePresenceAndWeights(
   presence: PrometheusRangeQueryResult | undefined,
   weights: PrometheusRangeQueryResult | undefined,
-  field: string
+  field: string,
+  windowSeconds: number
 ): AttributeValueCount[] {
   const weightByValue = extractLastSampleByValue(weights, field);
   const presentValues = new Set([...extractLastSampleByValue(presence, field).keys(), ...weightByValue.keys()]);
 
-  const counts = Array.from(presentValues, (value) => ({ value, count: weightByValue.get(value) ?? 0 }));
-  const total = counts.reduce((sum, c) => sum + c.count, 0);
+  const counts = Array.from(presentValues, (value) => ({ value, rate: weightByValue.get(value) ?? 0 }));
+  const total = counts.reduce((sum, c) => sum + c.rate, 0);
 
   return counts
-    .map((c) => ({ ...c, percentage: total > 0 ? Math.round((c.count / total) * 100) : 0 }))
+    .map((c) => ({
+      value: c.value,
+      count: toWindowCount(c.rate, windowSeconds),
+      percentage: total > 0 ? Math.round((c.rate / total) * 100) : 0,
+    }))
     .sort((a, b) => b.percentage - a.percentage);
 }
 
-function getRangeQueryWindow(context: DatasetContext) {
+// C2 (fraction-in-range-by-label): each label value's percentage is its own share of ITS OWN traffic
+// that falls in the configured range (a self-ratio, like a per-host error rate), not a normalized
+// split of a whole: values don't need to sum to 100%, unlike processDistributionResponse/
+// mergePresenceAndWeights. count is that label's absolute in-range volume (fraction * total); impliedTotal
+// carries its total volume through opaquely (see AttributeValueCount) for an optional per-row tooltip.
+// Presence is the union of both queries' keys, not just the fraction query's: histogram_fraction
+// returns NaN (dropped by extractLastSampleByValue) for a label with zero observations in this
+// window, so relying on the fraction map alone would silently hide a genuinely-zero label instead of
+// showing it at 0%. Exported for unit testing.
+export function processFractionResponse(
+  fraction: PrometheusRangeQueryResult | undefined,
+  totalCount: PrometheusRangeQueryResult | undefined,
+  field: string,
+  windowSeconds: number
+): AttributeValueCount[] {
+  const fractionByValue = extractLastSampleByValue(fraction, field);
+  const totalByValue = extractLastSampleByValue(totalCount, field);
+  const presentValues = new Set([...fractionByValue.keys(), ...totalByValue.keys()]);
+
+  return Array.from(presentValues, (value) => {
+    const frac = fractionByValue.get(value) ?? 0;
+    const total = totalByValue.get(value) ?? 0;
+    return {
+      value,
+      count: toWindowCount(frac * total, windowSeconds),
+      impliedTotal: toWindowCount(total, windowSeconds),
+      percentage: Math.round(frac * 100),
+    };
+  }).sort((a, b) => b.percentage - a.percentage);
+}
+
+// "Observations" rather than a noun guessed from the metric name (e.g. "requests"): Prometheus's own
+// docs use this term for what a histogram measures, and it's correct regardless of domain, whereas
+// guessing a domain noun risks a confidently-wrong label (e.g. "requests" for a connection-pool metric).
+// Exported for unit testing.
+export function getHistogramValueTooltip(item: AttributeValueCount, histogramRange: HistogramRange): string | undefined {
+  if (item.impliedTotal === undefined) {
+    return undefined;
+  }
+  return t(
+    'attribute-explorer.value-tooltip-histogram',
+    '{{count}} ({{percentage}}%) of the ~{{total}} observations are {{range}}.',
+    {
+      count: item.count,
+      percentage: item.percentage,
+      range: formatHistogramRangeLabel(histogramRange),
+      total: item.impliedTotal,
+    }
+  );
+}
+
+// stepSeconds, not Grafana's $__rate_interval macro, for every rate()/histogram_fraction() query in
+// this file. (1) $__rate_interval is only resolved by Grafana's own query pipeline (a
+// SceneQueryRunner's applyTemplateVariables); runRangeQuery bypasses that with a raw HTTP request, so
+// the literal unresolved text would reach Prometheus and error. (2) $__rate_interval is sized for a
+// smoothed per-point curve across many datapoints (roughly 4x the scrape interval); this sidebar
+// computes one aggregate value over the *entire* window instead, so the interval should be the
+// window's own width, not a per-point smoothing interval. Exported for unit testing.
+export function getRangeQueryWindow(context: DatasetContext) {
   const startSeconds = Math.floor(context.timeRange.from / 1000);
   const endSeconds = Math.floor(context.timeRange.to / 1000);
-  // Run as a range query, not instant. One step over the whole window keeps ~1 point per series.
+  // Clamped to at least 1s: a zero- or negative-width range (from === to, or a corrupted range where
+  // to < from) would otherwise produce an invalid PromQL duration like [0s] or [-30s].
   const stepSeconds = Math.max(1, endSeconds - startSeconds);
   return { startSeconds, endSeconds, stepSeconds };
 }
@@ -206,9 +302,34 @@ function runRangeQuery(
   );
 }
 
+// Classic histograms expose _bucket/_sum/_count as sibling series, a standard Prometheus convention.
+// histogram_count() only works on native histogram samples, not classic bucket vectors (confirmed
+// live: it returned an empty result against the identical inner vector a working histogram_fraction()
+// call used); the total count for a classic histogram comes from its _count sibling series instead.
+export function toCountMetricSelector(bucketSelector: string): string {
+  const openBrace = bucketSelector.indexOf('{');
+  const metricName = openBrace === -1 ? bucketSelector : bucketSelector.slice(0, openBrace);
+  const rest = openBrace === -1 ? '' : bucketSelector.slice(openBrace);
+  return `${metricName.replace(/_bucket$/, '_count')}${rest}`;
+}
+
 function fetchDistribution(context: DatasetContext, field: string, filters: ActiveFilter[]): Observable<AttributeValueCount[]> {
   const selector = applyFiltersToSelector(context.query, filters);
   const window = getRangeQueryWindow(context);
+
+  if (context.metricType === 'classic-histogram') {
+    const range = context.histogramRange ?? DEFAULT_CLASSIC_HISTOGRAM_RANGE;
+    // le stays in the inner vector for histogram_fraction to interpolate against; it's not a
+    // breakdown field itself (getLabelsToExclude already drops it from the attribute list).
+    const innerVector = `sum by (${field}, le) (rate(${selector}[${window.stepSeconds}s]))`;
+    const fractionQuery = `histogram_fraction(${formatPromQLBound(range.lowerSeconds)}, ${formatPromQLBound(range.upperSeconds)}, ${innerVector})`;
+    const totalCountQuery = `sum by (${field}) (rate(${toCountMetricSelector(selector)}[${window.stepSeconds}s]))`;
+
+    return forkJoin([runRangeQuery(context, fractionQuery, window), runRangeQuery(context, totalCountQuery, window)]).pipe(
+      map(([fraction, totalCount]) => processFractionResponse(fraction, totalCount, field, window.stepSeconds))
+    );
+  }
+
   // Bare selector, not last_over_time: some aggregated metrics (e.g. Adaptive Metrics) reject
   // last_over_time with an execution error demanding a recognized aggregation like sum by (rate(...)),
   // even though the query is otherwise correctly aggregated. The resulting default-5m staleness gap
@@ -219,20 +340,33 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
     return runRangeQuery(context, presenceQuery, window).pipe(map((response) => processDistributionResponse(response, field)));
   }
 
-  // Counters weigh by traffic, not series count -- but a value's rate can legitimately be zero in
+  // Counters weigh by traffic, not series count, but a value's rate can legitimately be zero in
   // this window without the value itself being absent, so presence and weight are queried separately.
-  // Window is the query's own step (one point over the whole range), not $__rate_interval: that macro
-  // is resolved by the datasource query pipeline, which this raw request bypasses.
   const weightQuery = `sum by (${field}) (rate(${selector}[${window.stepSeconds}s]))`;
 
   return forkJoin([runRangeQuery(context, presenceQuery, window), runRangeQuery(context, weightQuery, window)]).pipe(
-    map(([presence, weights]) => mergePresenceAndWeights(presence, weights, field))
+    map(([presence, weights]) => mergePresenceAndWeights(presence, weights, field, window.stepSeconds))
   );
 }
 
+function formatHistogramRangeLabel(range: HistogramRange): string {
+  const { lowerSeconds, upperSeconds } = range;
+  if (upperSeconds === Number.POSITIVE_INFINITY) {
+    return t('attribute-explorer.histogram-range-over', 'over {{seconds}}s', { seconds: lowerSeconds });
+  }
+  if (lowerSeconds === Number.NEGATIVE_INFINITY || lowerSeconds === 0) {
+    return t('attribute-explorer.histogram-range-under', 'under {{seconds}}s', { seconds: upperSeconds });
+  }
+  return t('attribute-explorer.histogram-range-between', '{{lower}}s-{{upper}}s', {
+    lower: lowerSeconds,
+    upper: upperSeconds,
+  });
+}
+
 // Explains what the percentages actually mean, since that differs by metric type and isn't obvious
-// from the UI alone -- a counter's values are weighted by activity, a gauge's by series count.
-function getAttributeExplorerDescription(metricType: MetricType): string {
+// from the UI alone: a counter's values are weighted by activity, a gauge's by series count, and a
+// classic histogram's by how much of each label's own traffic falls in the configured range.
+function getAttributeExplorerDescription(metricType: MetricType, histogramRange: HistogramRange): string {
   switch (metricType) {
     case 'counter':
       return t(
@@ -244,6 +378,12 @@ function getAttributeExplorerDescription(metricType: MetricType): string {
         'attribute-explorer.description-gauge',
         "Cardinality (series-count) weighted: Values show what share of this metric's series come from each label value. A label with 10 series will outweigh one with 2, regardless of the values those series report."
       );
+    case 'classic-histogram':
+      return t(
+        'attribute-explorer.description-histogram',
+        "Fraction-in-range weighted: Values show what share of each label's own requests are {{range}}. These percentages don't add up to 100% across labels: each is that label's own share of its own traffic, not a split of the whole.",
+        { range: formatHistogramRangeLabel(histogramRange) }
+      );
     default:
       return t(
         'attribute-explorer.description',
@@ -253,17 +393,18 @@ function getAttributeExplorerDescription(metricType: MetricType): string {
 }
 
 interface AttributeExplorerHeaderProps {
+  histogramRange: HistogramRange;
   metricType: MetricType;
   queryLimitLabel?: string;
 }
 
-function AttributeExplorerHeader({ metricType, queryLimitLabel }: Readonly<AttributeExplorerHeaderProps>) {
+function AttributeExplorerHeader({ histogramRange, metricType, queryLimitLabel }: Readonly<AttributeExplorerHeaderProps>) {
   const styles = useStyles2(getHeaderStyles);
   return (
     <div className={styles.header}>
       <div className={styles.title}>
         {t('attribute-explorer.title', 'Attribute Explorer')}
-        <Tooltip interactive content={getAttributeExplorerDescription(metricType)}>
+        <Tooltip interactive content={getAttributeExplorerDescription(metricType, histogramRange)}>
           <Icon name="info-circle" size="sm" />
         </Tooltip>
       </div>
@@ -303,6 +444,7 @@ export interface PrometheusAttributeExplorerProps {
   attributeLabels?: Record<string, string>;
   colorBars?: boolean;
   datasourceUid: string;
+  histogramRange?: HistogramRange;
   metricType: MetricType;
   onFiltersChange?: (filters: ActiveFilter[]) => void;
   priorityAttributes?: string[];
@@ -316,6 +458,7 @@ export function PrometheusAttributeExplorer({
   attributeLabels,
   colorBars,
   datasourceUid,
+  histogramRange,
   metricType,
   selectedFilters,
   onFiltersChange,
@@ -325,11 +468,17 @@ export function PrometheusAttributeExplorer({
   timeRange,
 }: Readonly<PrometheusAttributeExplorerProps>) {
   const numericTimeRange = useMemo(() => ({ from: timeRange.from.valueOf(), to: timeRange.to.valueOf() }), [timeRange]);
+  const resolvedHistogramRange = histogramRange ?? DEFAULT_CLASSIC_HISTOGRAM_RANGE;
 
   const context: DatasetContext = useMemo(
-    () => ({ datasourceUid, metricType, query, timeRange: numericTimeRange }),
-    [datasourceUid, metricType, query, numericTimeRange]
+    () => ({ datasourceUid, histogramRange: resolvedHistogramRange, metricType, query, timeRange: numericTimeRange }),
+    [datasourceUid, resolvedHistogramRange, metricType, query, numericTimeRange]
   );
+
+  const getValueTooltip =
+    metricType === 'classic-histogram'
+      ? (item: AttributeValueCount) => getHistogramValueTooltip(item, resolvedHistogramRange)
+      : undefined;
 
   return (
     <AttributeDistribution
@@ -338,7 +487,14 @@ export function PrometheusAttributeExplorer({
       context={context}
       fetchAttributes={fetchAttributes}
       fetchDistribution={fetchDistribution}
-      header={<AttributeExplorerHeader metricType={metricType} queryLimitLabel={queryLimitLabel} />}
+      getValueTooltip={getValueTooltip}
+      header={
+        <AttributeExplorerHeader
+          histogramRange={resolvedHistogramRange}
+          metricType={metricType}
+          queryLimitLabel={queryLimitLabel}
+        />
+      }
       onFiltersChange={onFiltersChange}
       priorityAttributes={priorityAttributes}
       selectedFilters={selectedFilters}

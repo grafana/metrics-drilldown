@@ -19,6 +19,7 @@ import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { AttributeExplorerScene } from './AttributeExplorer/AttributeExplorerScene';
+import { type HistogramRange } from './AttributeExplorer/PrometheusAttributeExplorer';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
 import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
@@ -43,6 +44,9 @@ interface MetricSceneState extends SceneObjectState {
   queryResultsComponent?: React.ComponentType<PrometheusQueryResultsV1Props>;
   attributeExplorerOpen?: boolean;
   attributeExplorerScene: AttributeExplorerScene;
+  // Editable via ExploreAttributesAction's tooltip. Lives here, not on AttributeExplorerScene, because
+  // the button that edits it and the scene that consumes it are siblings, not parent/child.
+  histogramRange?: HistogramRange;
 }
 
 export class MetricScene extends SceneObjectBase<MetricSceneState> {
@@ -141,6 +145,10 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     if (attributeExplorerOpen !== Boolean(this.state.attributeExplorerOpen)) {
       this.setState({ attributeExplorerOpen });
     }
+  }
+
+  public setHistogramRange(histogramRange: HistogramRange) {
+    this.setState({ histogramRange });
   }
 
   public toggleAttributeExplorer() {

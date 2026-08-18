@@ -55,7 +55,8 @@ const EMPTY_ATTRIBUTE_LABELS: Record<string, string> = {};
 
 export interface DatasetContext {
   datasourceUid: string;
-  // Passed through opaquely, same as the rest of DatasetContext -- the component never inspects it.
+  // Passed through opaquely, same as the rest of DatasetContext: the component never inspects it.
+  histogramRange?: { lowerSeconds: number; upperSeconds: number };
   metricType: MetricType;
   query: string;
   timeRange: { from: number; to: number };
@@ -74,7 +75,14 @@ export interface AttributeDistributionProps {
   // Returns a URL to view the full distribution for a field in the owning drilldown app.
   // Return undefined to hide the link.
   getFieldLink?: (attribute: string) => string | undefined;
+  // Returns extra context shown on hover of a value's count/percentage. Return undefined to skip the
+  // tooltip for that value (e.g. an adapter that has nothing to add for most metric types).
+  getValueTooltip?: (item: AttributeValueCount, field: string) => string | undefined;
   header?: React.ReactNode;
+  // How many non-priority fields to auto-fetch a distribution for on load. Defaults to 10; pass 0
+  // for adapters where fetching a distribution multiplies query cost (e.g. per-bucket histogram
+  // breakdowns), so nothing fires until the user explicitly expands a field.
+  initialAutoLoadCount?: number;
   onFiltersChange?: (filters: ActiveFilter[]) => void;
   priorityAttributes?: string[];
   queryLimitLabel?: string;
@@ -89,7 +97,9 @@ export function AttributeDistribution({
   fetchAttributes,
   fetchDistribution,
   getFieldLink,
+  getValueTooltip,
   header,
+  initialAutoLoadCount = 10,
   selectedFilters: selectedFiltersProp,
   onFiltersChange,
   priorityAttributes = EMPTY_PRIORITY_ATTRIBUTES,
@@ -132,6 +142,8 @@ export function AttributeDistribution({
   attributeLabelsRef.current = attributeLabels;
   const priorityAttributesRef = useRef(priorityAttributes);
   priorityAttributesRef.current = priorityAttributes;
+  const initialAutoLoadCountRef = useRef(initialAutoLoadCount);
+  initialAutoLoadCountRef.current = initialAutoLoadCount;
   const fetchAttributesRef = useRef(fetchAttributes);
   fetchAttributesRef.current = fetchAttributes;
 
@@ -277,7 +289,7 @@ export function AttributeDistribution({
       const userPinned = new Set(userPinnedRef.current);
       const pAndP = ordered.filter((a) => priorityFieldSet.has(a.attribute) || userPinned.has(a.attribute));
       const nonP = ordered.filter((a) => !priorityFieldSet.has(a.attribute) && !userPinned.has(a.attribute));
-      const initialBatch = priorityAttributesRef.current.length === 0 ? 10 : 0;
+      const initialBatch = priorityAttributesRef.current.length === 0 ? initialAutoLoadCountRef.current : 0;
       const initialVisible = [...pAndP, ...nonP.slice(0, initialBatch)];
       loadDistributions(initialVisible, contextRef.current, activeFilters);
     }
@@ -289,7 +301,13 @@ export function AttributeDistribution({
       subscriptionsRef.current.forEach((sub) => sub.unsubscribe());
       subscriptionsRef.current = [];
     };
-  }, [context.query, context.datasourceUid, context.timeRange.from, context.timeRange.to, loadDistributions]);
+    // Depends on the whole context object, not a hardcoded whitelist of its fields: context is opaque
+    // to this component by design (see DatasetContext), and PrometheusAttributeExplorer already
+    // memoizes it correctly against everything that should trigger a re-fetch (query, datasourceUid,
+    // timeRange, metricType, histogramRange). Re-listing individual fields here duplicates that
+    // memoization and silently falls out of sync whenever a new opaque field is added, which is
+    // exactly what happened: histogramRange changes never triggered a re-fetch because it wasn't here.
+  }, [context, loadDistributions]);
 
   function handleToggleFilter(field: string, value: string, operator: '!=' | '=') {
     const newFilters = computeNextFilters(state.selectedFilters, field, value, operator);
@@ -416,6 +434,7 @@ export function AttributeDistribution({
               config={attr}
               colorBars={!!colorBars}
               fieldLink={getFieldLink?.(attr.attribute)}
+              getValueTooltip={getValueTooltip}
               hasActiveFilter={fieldFilters.length > 0}
               includedValues={includedValues}
               excludedValues={excludedValues}
@@ -479,6 +498,7 @@ interface AttributeSectionProps {
   config: AttributeConfig;
   excludedValues: Set<string>;
   fieldLink?: string;
+  getValueTooltip?: (item: AttributeValueCount, field: string) => string | undefined;
   hasActiveFilter: boolean;
   includedValues: Set<string>;
   onToggle: () => void;
@@ -491,6 +511,7 @@ function AttributeSection({
   config,
   colorBars,
   fieldLink,
+  getValueTooltip,
   hasActiveFilter,
   includedValues,
   excludedValues,
@@ -578,6 +599,13 @@ function AttributeSection({
           {visibleValues.map((item) => {
             const isIncluded = includedValues.has(item.value);
             const isExcluded = excludedValues.has(item.value);
+            const valueTooltip = getValueTooltip?.(item, config.attribute);
+            const stats = (
+              <span className={styles.stats}>
+                <span className={styles.count}>{item.count}</span>
+                <span className={styles.percentage}>{`${item.percentage}%`}</span>
+              </span>
+            );
             return (
               <WithContextMenu
                 key={item.value}
@@ -616,10 +644,7 @@ function AttributeSection({
                       <span className={styles.valueLabel} title={item.value}>
                         {item.value}
                       </span>
-                      <span className={styles.stats}>
-                        <span className={styles.count}>{item.count}</span>
-                        <span className={styles.percentage}>{`${item.percentage}%`}</span>
-                      </span>
+                      {valueTooltip ? <Tooltip content={valueTooltip}>{stats}</Tooltip> : stats}
                     </div>
                     <div className={styles.barWrapper}>
                       <div

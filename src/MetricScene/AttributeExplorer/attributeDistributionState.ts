@@ -11,6 +11,9 @@ export interface AttributeConfig {
 
 export interface AttributeValueCount {
   count: number;
+  // Opaque, adapter-populated context for an optional per-row tooltip (see getValueTooltip on
+  // AttributeDistributionProps). Left undefined by adapters that have nothing extra to say.
+  impliedTotal?: number;
   percentage: number;
   value: string;
 }
@@ -90,7 +93,10 @@ export function reducer(state: State, action: Action): State {
     case 'DETECTING': {
       const resetData: Record<string, AttributeState> = {};
       for (const [field, attrState] of Object.entries(state.data)) {
-        resetData[field] = { error: false, expanded: attrState.expanded, loading: true, values: [] };
+        // false, not true: only the first initialAutoLoadCount fields get an explicit LOADING dispatch
+        // right away. A field beyond that batch (revealed later via "show more" or pinning) has no
+        // fetch in flight yet, so defaulting it to true would spin forever until the user reveals it.
+        resetData[field] = { error: false, expanded: attrState.expanded, loading: false, values: [] };
       }
       return { ...state, data: resetData, detecting: true, valueSnapshot: null };
     }
@@ -105,7 +111,8 @@ export function reducer(state: State, action: Action): State {
       const merged = [...action.configs, ...userPinned];
       const data: Record<string, AttributeState> = {};
       for (const c of merged) {
-        data[c.attribute] = state.data[c.attribute] ?? { error: false, expanded: false, loading: true, values: [] };
+        // false, not true: see the identical reasoning in the DETECTING case above.
+        data[c.attribute] = state.data[c.attribute] ?? { error: false, expanded: false, loading: false, values: [] };
       }
       return { ...state, attributes: merged, data, detecting: false };
     }
