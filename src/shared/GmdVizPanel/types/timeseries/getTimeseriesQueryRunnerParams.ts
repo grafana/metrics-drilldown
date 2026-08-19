@@ -6,7 +6,7 @@ import { buildCustomFunctionQuery, buildPresetFunctionQuery } from 'shared/GmdVi
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { isRangeVectorFunction, PROMQL_FUNCTIONS, type PrometheusFunction } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
-import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type HistogramBreakdownFn, type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { logger } from 'shared/logger/logger';
 import { groupBinaryByLabel } from 'shared/utils/groupBinaryByLabel';
@@ -61,23 +61,28 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
   };
 }
 
-const DEFAULT_HISTOGRAM_BY_LABEL_PERCENTILE = 99;
+const HISTOGRAM_BY_LABEL_PERCENTILES: Record<Exclude<HistogramBreakdownFn, 'sum'>, number> = {
+  p99: 99,
+  p95: 95,
+  p75: 75,
+  p50: 50,
+};
 
-// Aggregating a native histogram preserves its sample type instead of collapsing to a plain float, so
-// the usual avg-by-label query below would return a heatmap-shaped frame (yMin/yMax/count fields) that
-// a timeseries panel can't render. Reduce each label value to its own p99 line instead, the same
-// "which value is worst" comparison every other metric type's by-label panel gives.
-function buildNativeHistogramByLabelQuery(metric: Metric, queryConfig: QueryConfig, expr: string, groupByLabel: string): SceneDataQuery[] {
+// Classic histograms expose the total as the _sum sibling series (_bucket/_sum/_count convention).
+function toSumMetricSelector(bucketSelector: string): string {
+  const openBrace = bucketSelector.indexOf('{');
+  const metricName = openBrace === -1 ? bucketSelector : bucketSelector.slice(0, openBrace);
+  const rest = openBrace === -1 ? '' : bucketSelector.slice(openBrace);
+  return `${metricName.replace(/_bucket$/, '_sum')}${rest}`;
+}
+
+function buildHistogramSumByLabelQuery(metric: Metric, queryConfig: QueryConfig, expr: string, groupByLabel: string): SceneDataQuery[] {
   const interval = queryConfig.customRateInterval ?? '$__rate_interval';
-  const innerVector = promql.sum({ expr: promql.rate({ expr, interval }), by: [groupByLabel] });
-
-  const entry = PROMQL_FUNCTIONS.get('histogram_quantile');
-  if (!entry) {
-    logger.warn('[getTimeseriesQueryRunnerParams] Unknown PromQL function "histogram_quantile", skipping query.');
-    return [];
-  }
-
-  const queryExpr = entry.fn({ expr: innerVector, parameter: DEFAULT_HISTOGRAM_BY_LABEL_PERCENTILE / 100 });
+  const isClassic = metric.type === 'classic-histogram';
+  const sumExpr = isClassic ? toSumMetricSelector(expr) : expr;
+  const innerVector = promql.sum({ expr: promql.rate({ expr: sumExpr, interval }), by: [groupByLabel] });
+  // histogram_sum() only accepts native-histogram-typed samples; the _sum sibling is already a plain float.
+  const queryExpr = isClassic ? innerVector : `histogram_sum(${innerVector})`;
 
   return [
     {
@@ -87,6 +92,43 @@ function buildNativeHistogramByLabelQuery(metric: Metric, queryConfig: QueryConf
       fromExploreMetrics: true,
     },
   ];
+}
+
+function buildHistogramPercentileByLabelQuery(
+  metric: Metric,
+  queryConfig: QueryConfig,
+  expr: string,
+  groupByLabel: string,
+  fn: Exclude<HistogramBreakdownFn, 'sum'>
+): SceneDataQuery[] {
+  const interval = queryConfig.customRateInterval ?? '$__rate_interval';
+  const by = metric.type === 'classic-histogram' ? [groupByLabel, 'le'] : [groupByLabel];
+  const innerVector = promql.sum({ expr: promql.rate({ expr, interval }), by });
+
+  const entry = PROMQL_FUNCTIONS.get('histogram_quantile');
+  if (!entry) {
+    logger.warn('[getTimeseriesQueryRunnerParams] Unknown PromQL function "histogram_quantile", skipping query.');
+    return [];
+  }
+
+  const queryExpr = entry.fn({ expr: innerVector, parameter: HISTOGRAM_BY_LABEL_PERCENTILES[fn] / 100 });
+
+  return [
+    {
+      refId: `${metric.name}-by-${queryConfig.groupBy}`,
+      expr: queryExpr,
+      legendFormat: `{{${groupByLabel}}}`,
+      fromExploreMetrics: true,
+    },
+  ];
+}
+
+function buildHistogramByLabelQuery(metric: Metric, queryConfig: QueryConfig, expr: string, groupByLabel: string): SceneDataQuery[] {
+  const fn = queryConfig.histogramBreakdownFn ?? 'sum';
+  if (fn === 'sum') {
+    return buildHistogramSumByLabelQuery(metric, queryConfig, expr, groupByLabel);
+  }
+  return buildHistogramPercentileByLabelQuery(metric, queryConfig, expr, groupByLabel, fn);
 }
 
 // if grouped by, we don't provide support for preset functions
@@ -119,8 +161,8 @@ function buildGroupByQueries({
     ];
   }
 
-  if (metric.type === 'native-histogram') {
-    return buildNativeHistogramByLabelQuery(metric, queryConfig, expr, groupByLabel);
+  if (metric.type === 'classic-histogram' || metric.type === 'native-histogram') {
+    return buildHistogramByLabelQuery(metric, queryConfig, expr, groupByLabel);
   }
 
   return buildDefaultByLabelQuery(metric, queryConfig, expr, groupByLabel);

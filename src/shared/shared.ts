@@ -6,6 +6,7 @@ export const VAR_FILTERS_EXPR = '${filters}';
 export const VAR_METRIC = 'metric';
 export const VAR_METRIC_EXPR = '${metric}';
 export const VAR_GROUP_BY = 'groupby';
+export const VAR_HISTOGRAM_BREAKDOWN_FN = 'histogramBreakdownFn';
 export const VAR_DATASOURCE = 'ds';
 export const VAR_DATASOURCE_EXPR = '${ds}';
 export const VAR_LOGS_DATASOURCE = 'logsDs';

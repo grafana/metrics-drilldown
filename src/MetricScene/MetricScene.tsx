@@ -19,6 +19,7 @@ import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 
 import { RefreshMetricsEvent, VAR_FILTERS, VAR_METRIC, type MakeOptional } from '../shared/shared';
 import { GroupByVariable } from './Breakdown/GroupByVariable';
+import { HistogramBreakdownFnVariable } from './Breakdown/HistogramBreakdownFnVariable';
 import { EventActionViewDataLoadComplete } from './EventActionViewDataLoadComplete';
 import { actionViews, defaultActionView, getActionViewsDefinitions, type ActionViewType } from './MetricActionBar';
 import { MetricGraphScene } from './MetricGraphScene';
@@ -201,6 +202,7 @@ function getVariableSet(metric: string, binaryQuery?: string) {
         hide: VariableHide.hideVariable,
       }),
       new GroupByVariable(binaryQuery),
+      new HistogramBreakdownFnVariable(),
     ],
   });
 }
