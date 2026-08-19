@@ -116,6 +116,10 @@ The Breakdown tab helps users understand how a metric is composed across differe
 
 A dropdown lets users select which label to break down by. Choosing "All" shows a panel for each available label name (showing the metric aggregated by that label), while selecting a specific label (like `instance` or `pod`) shows a panel for each value of that label.
 
+##### Histogram breakdown function
+
+For histogram metrics, a "Function" selector controls how each label's breakdown is aggregated: sum (the default, total accumulated value) or a percentile (p99, p95, p75, p50).
+
 ##### Visual Interaction
 
 - Clicking a panel applies that label or value as a filter, narrowing the focus
