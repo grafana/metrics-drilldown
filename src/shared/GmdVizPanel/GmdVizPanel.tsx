@@ -70,6 +70,9 @@ export type QueryDefs = Array<{
   params?: Record<string, any>;
 }>;
 
+// Only used by the histogram by-label group-by query (getTimeseriesQueryRunnerParams.ts).
+export type HistogramBreakdownFn = 'sum' | 'p99' | 'p95' | 'p75' | 'p50';
+
 export type QueryConfig = {
   resolution: QUERY_RESOLUTION;
   labelMatchers: LabelMatcher[];
@@ -89,6 +92,7 @@ export type QueryConfig = {
   // Legend for a non-grouped binaryExpr query. Defaults to "binary query" (main panel); the per-value
   // breakdown passes the label value so each value panel legends with its value, not "binary query".
   binaryLegend?: string;
+  histogramBreakdownFn?: HistogramBreakdownFn;
 };
 
 export type QueryOptions = {
@@ -102,6 +106,7 @@ export type QueryOptions = {
   kgMetricType?: NonNullable<QueryConfig['kgMetricType']>;
   binaryExpr?: NonNullable<QueryConfig['binaryExpr']>;
   binaryLegend?: NonNullable<QueryConfig['binaryLegend']>;
+  histogramBreakdownFn?: NonNullable<QueryConfig['histogramBreakdownFn']>;
 };
 
 /* GmdVizPanelState */

@@ -25,12 +25,12 @@ import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'MetricsReducer/Metric
 import { getPreferredConfigForMetric } from 'shared/GmdVizPanel/config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
-import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { GmdVizPanel, type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { addUnspecifiedLabel } from 'shared/GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
-import { trailDS } from 'shared/shared';
+import { trailDS, VAR_HISTOGRAM_BREAKDOWN_FN } from 'shared/shared';
 import { injectLabelMatcher } from 'shared/utils/injectLabelMatcher';
 import { getTrailFor } from 'shared/utils/utils';
 
@@ -193,6 +193,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   private buildSinglePanel() {
     const { metric, label } = this.state;
     const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
+    const histogramBreakdownFn = sceneGraph.lookupVariable(VAR_HISTOGRAM_BREAKDOWN_FN, this)?.getValue() as
+      | HistogramBreakdownFn
+      | undefined;
 
     return new GmdVizPanel({
       metric: metric.name,
@@ -209,6 +212,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         customRateInterval: entry?.customRateInterval,
         customFunction: entry?.customFunction,
         kgMetricType: entry?.metricType,
+        histogramBreakdownFn,
       },
     });
   }

@@ -25,10 +25,11 @@ import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsRed
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'MetricsReducer/MetricsList/MetricsList';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
+import { type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
 import { buildTimeseriesPanel } from 'shared/GmdVizPanel/types/timeseries/buildTimeseriesPanel';
-import { VAR_GROUP_BY } from 'shared/shared';
+import { VAR_GROUP_BY, VAR_HISTOGRAM_BREAKDOWN_FN } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
@@ -136,6 +137,10 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
             // Not in scene graph yet, use default
           }
 
+          const histogramBreakdownFn = sceneGraph.lookupVariable(VAR_HISTOGRAM_BREAKDOWN_FN, this)?.getValue() as
+            | HistogramBreakdownFn
+            | undefined;
+
           const panel = buildTimeseriesPanel({
             metric,
             panelConfig: getLabelPanelConfig(label, labelIndex, embeddedMini),
@@ -147,6 +152,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
               // For a KG binary (ratio) insight, break down the full ratio expression rather than the
               // anchor metric selector. Undefined for normal metrics, so the standard path is unchanged.
               binaryExpr: trail?.state.binaryQuery,
+              histogramBreakdownFn,
             },
           });
 

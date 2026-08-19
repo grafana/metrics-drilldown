@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Group by"
     },
+    "histogram-fn": {
+      "default-text": "Sum",
+      "label": "Histogram breakdown function"
+    },
     "label-values-list": {
       "error-title": "Error while loading metrics!",
       "no-values": "No label values found for the current filters and time range.",

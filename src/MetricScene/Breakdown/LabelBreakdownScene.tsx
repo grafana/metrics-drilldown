@@ -10,23 +10,28 @@ import {
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
-import { useStyles2 } from '@grafana/ui';
+import { Field, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { GmdVizPanel, type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
+import { type HistogramBreakdownFnVariable } from './HistogramBreakdownFnVariable';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 import { actionViews } from '../../MetricScene/MetricActionBar';
-import { RefreshMetricsEvent, VAR_GROUP_BY } from '../../shared/shared';
+import { RefreshMetricsEvent, VAR_GROUP_BY, VAR_HISTOGRAM_BREAKDOWN_FN } from '../../shared/shared';
 import { isQueryVariable } from '../../shared/utils/utils.variables';
+import { MetricScene } from '../MetricScene';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
+  metricType: MetricType;
   body?: MetricLabelsList | MetricLabelValuesList;
 }
 
@@ -34,6 +39,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   constructor({ metric }: { metric: LabelBreakdownSceneState['metric'] }) {
     super({
       metric,
+      metricType: 'gauge',
       body: undefined,
       $behaviors: [new behaviors.SceneQueryController()],
     });
@@ -50,12 +56,20 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       }
     });
 
+    this.getHistogramBreakdownFnVariable().subscribeToState((newState, oldState) => {
+      if (newState.value !== oldState.value) {
+        reportExploreMetrics('histogram_breakdown_fn_changed', { fn: newState.value as HistogramBreakdownFn });
+        this.updateBody(groupByVariable);
+      }
+    });
+
     if (config.featureToggles.enableScopesInMetricsExplore) {
       this.subscribeToEvent(RefreshMetricsEvent, () => {
         this.updateBody(groupByVariable);
       });
     }
 
+    this.subscribeToMainPanelMetricType();
     this.updateBody(groupByVariable);
   }
 
@@ -67,15 +81,37 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return groupByVariable;
   }
 
-  private async updateBody(groupByVariable: QueryVariable) {
+  private getHistogramBreakdownFnVariable(): HistogramBreakdownFnVariable {
+    return sceneGraph.lookupVariable(VAR_HISTOGRAM_BREAKDOWN_FN, this) as HistogramBreakdownFnVariable;
+  }
+
+  // Reuses the main graph panel's own resolved metric type instead of re-deriving it from metadata alone.
+  private getMainPanel(): GmdVizPanel | undefined {
+    const metricScene = sceneGraph.getAncestor(this, MetricScene);
+    return sceneGraph.findDescendents(metricScene.state.body, GmdVizPanel)[0];
+  }
+
+  private subscribeToMainPanelMetricType() {
+    const mainPanel = this.getMainPanel();
+    if (!mainPanel) {
+      return;
+    }
+
+    this._subs.add(
+      mainPanel.subscribeToState((newState, prevState) => {
+        if (newState.metricType !== prevState.metricType) {
+          this.updateBody(this.getVariable());
+        }
+      })
+    );
+  }
+
+  private updateBody(groupByVariable: QueryVariable) {
     const { metric: name } = this.state;
     const trail = getTrailFor(this);
-    const entry = trail.state.sourceMetrics?.find((s) => s.metricName === name);
+    const type: MetricType = this.getMainPanel()?.state.metricType ?? 'gauge';
 
-    const metric = {
-      name,
-      type: await getMetricType(name, trail, entry?.metricType),
-    };
+    const metric = { name, type };
 
     const newBody = groupByVariable.hasAllValue()
       ? new MetricLabelsList({ metric })
@@ -85,7 +121,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
           binaryQuery: trail.state.binaryQuery,
         });
 
-    this.setState({ body: newBody });
+    this.setState({ body: newBody, metricType: type });
 
     // Wait for body activation, then signal when queries complete
     if (newBody.isActive) {
@@ -102,15 +138,24 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
-    const { body } = model.useState();
+    const { body, metricType } = model.useState();
     const groupByVariable = model.getVariable();
+    const histogramBreakdownFnVariable = model.getHistogramBreakdownFnVariable();
+    const isHistogram = metricType === 'classic-histogram' || metricType === 'native-histogram';
 
     return (
       <div className={styles.container}>
         {!embeddedMini && (
           <div className={styles.stickyControls} data-testid="breakdown-controls">
             <div className={styles.controls}>
-              <groupByVariable.Component model={groupByVariable} />
+              <div className={styles.leftControls}>
+                <groupByVariable.Component model={groupByVariable} />
+                {isHistogram && (
+                  <Field label={t('breakdown.histogram-fn.label', 'Histogram breakdown function')} className={styles.field}>
+                    <histogramBreakdownFnVariable.Component model={histogramBreakdownFnVariable} />
+                  </Field>
+                )}
+              </div>
               {body instanceof MetricLabelsList && <body.Controls model={body} />}
               {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
             </div>
@@ -149,6 +194,16 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       alignItems: 'end',
       flexWrap: 'wrap',
       gap: theme.spacing(1),
+    }),
+    leftControls: css({
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'end',
+      flexWrap: 'wrap',
+      gap: theme.spacing(1),
+    }),
+    field: css({
+      marginBottom: 0,
     }),
     searchField: css({
       flexGrow: 1,
