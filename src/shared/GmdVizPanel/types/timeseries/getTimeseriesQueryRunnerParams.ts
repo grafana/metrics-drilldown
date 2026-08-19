@@ -123,12 +123,15 @@ function buildHistogramPercentileByLabelQuery(
   ];
 }
 
+// queryConfig.histogramBreakdownFn ultimately comes from a scene variable (URL-settable), not a
+// closed type at runtime: an unexpected value must fall back to sum, not reach the percentile lookup
+// (a missing entry there divides by undefined, producing histogram_quantile(NaN, ...)).
 function buildHistogramByLabelQuery(metric: Metric, queryConfig: QueryConfig, expr: string, groupByLabel: string): SceneDataQuery[] {
-  const fn = queryConfig.histogramBreakdownFn ?? 'sum';
-  if (fn === 'sum') {
-    return buildHistogramSumByLabelQuery(metric, queryConfig, expr, groupByLabel);
+  const fn = queryConfig.histogramBreakdownFn;
+  if (fn && fn in HISTOGRAM_BY_LABEL_PERCENTILES) {
+    return buildHistogramPercentileByLabelQuery(metric, queryConfig, expr, groupByLabel, fn as Exclude<HistogramBreakdownFn, 'sum'>);
   }
-  return buildHistogramPercentileByLabelQuery(metric, queryConfig, expr, groupByLabel, fn);
+  return buildHistogramSumByLabelQuery(metric, queryConfig, expr, groupByLabel);
 }
 
 // if grouped by, we don't provide support for preset functions

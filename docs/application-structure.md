@@ -118,7 +118,7 @@ A dropdown lets users select which label to break down by. Choosing "All" shows 
 
 ##### Histogram breakdown function
 
-For histogram metrics, a "Function" selector controls how each label's breakdown is aggregated: sum (the default, total accumulated value) or a percentile (p99, p95, p75, p50).
+For histogram metrics, a "Function" selector controls how each label's breakdown is aggregated: sum (the default, each label's total value per second) or a percentile (p99, p95, p75, p50).
 
 ##### Visual Interaction
 
