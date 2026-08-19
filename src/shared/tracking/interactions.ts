@@ -4,6 +4,7 @@ import { reportInteraction } from '@grafana/runtime';
 import { type ExposedComponentName } from 'exposedComponents/components';
 import { getTrackedFlagPayload } from 'shared/featureFlags/tracking';
 import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
+import { type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { type PanelType } from 'shared/GmdVizPanel/types/available-panel-types';
 import { type SortSeriesByOption } from 'shared/services/sorting';
@@ -33,6 +34,8 @@ type Interactions = {
   };
   // User changed the breakdown layout
   breakdown_layout_changed: { layout: LayoutType };
+  // User changed the by-label breakdown aggregation function for a histogram metric
+  histogram_breakdown_fn_changed: { fn: HistogramBreakdownFn };
   // A metric exploration has started due to one of the following causes
   exploration_started: {
     cause: 'bookmark_clicked';

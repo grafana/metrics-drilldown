@@ -14,8 +14,9 @@ import { Field, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { GmdVizPanel, type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
@@ -57,6 +58,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
 
     this.getHistogramBreakdownFnVariable().subscribeToState((newState, oldState) => {
       if (newState.value !== oldState.value) {
+        reportExploreMetrics('histogram_breakdown_fn_changed', { fn: newState.value as HistogramBreakdownFn });
         this.updateBody(groupByVariable);
       }
     });
