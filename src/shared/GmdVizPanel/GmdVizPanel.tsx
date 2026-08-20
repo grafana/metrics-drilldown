@@ -177,7 +177,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     this.checkMetricMetadata(discardPanelTypeUpdates);
   }
 
-  // Metadata can resolve a type the sync heuristic can't guess at all (histogram, summary), not just swap
+  // Metadata can resolve a type the sync heuristic can't guess (currently only native histograms), not just swap
   // between counter and gauge. Only applied from a generic sync guess: a metric already classified more
   // specifically by name (e.g. classic-histogram) shouldn't be reprocessed here.
   private applyMetadataResolvedType(metricType: MetricType, metricTypeFromMetadata: MetricType, discardPanelTypeUpdates: boolean) {
