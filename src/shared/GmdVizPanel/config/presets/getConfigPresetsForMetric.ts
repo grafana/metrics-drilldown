@@ -1,6 +1,4 @@
-import { type DataTrail } from 'AppDataTrail/DataTrail';
-import { getMetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
-import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
+import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 
 import { DEFAULT_TIMESERIES_AGE_PRESETS } from './config-presets-ages';
 import { DEFAULT_HISTOGRAMS_PRESETS } from './config-presets-histograms';
@@ -9,9 +7,10 @@ import { DEFAULT_STATUS_UP_DOWN_PRESETS } from './config-presets-status-updown';
 import { DEFAULT_TIMESERIES_PRESETS, DEFAULT_TIMESERIES_RATE_PRESETS } from './config-presets-timeseries';
 import { type PanelConfigPreset } from './types';
 
-export async function getConfigPresetsForMetric(metric: string, dataTrail: DataTrail, kgMetricType?: KgMetricType): Promise<PanelConfigPreset[]> {
-  const metricType = await getMetricType(metric, dataTrail, kgMetricType);
-
+// Takes the already-resolved metric type instead of re-deriving it: by the time the configure drawer is
+// open, GmdVizPanel has already resolved the type via metadata and/or the native-histogram probe, and
+// re-deriving here (metadata-only, no probe) would disagree with it. See metrics-drilldown#1228.
+export function getConfigPresetsForMetric(metricType: MetricType): PanelConfigPreset[] {
   switch (metricType) {
     case 'counter':
       return Object.values(DEFAULT_TIMESERIES_RATE_PRESETS);
