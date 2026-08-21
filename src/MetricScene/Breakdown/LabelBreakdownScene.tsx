@@ -171,7 +171,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
               <div className={styles.leftControls}>
                 <groupByVariable.Component model={groupByVariable} />
                 {isHistogram && (
-                  <Field label={t('breakdown.histogram-fn.label', 'Histogram breakdown function')} className={styles.field}>
+                  <Field label={t('breakdown.histogram-fn.label', 'Histogram function')} className={styles.field}>
                     <histogramBreakdownFnVariable.Component model={histogramBreakdownFnVariable} />
                   </Field>
                 )}
