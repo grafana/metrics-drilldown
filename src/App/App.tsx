@@ -47,7 +47,8 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      backgroundColor: theme.colors.background.primary,
+      //@ts-expect-error
+      backgroundColor: theme.flags.visualDesignRefresh ? undefined : theme.colors.background.canvas,
     }),
   };
 }

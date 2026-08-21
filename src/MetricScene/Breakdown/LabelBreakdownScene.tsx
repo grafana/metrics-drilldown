@@ -13,12 +13,10 @@ import {
 import { Field, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { GmdVizPanel, type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
-import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { type HistogramBreakdownFnVariable } from './HistogramBreakdownFnVariable';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
@@ -137,7 +135,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0));
     const { body, metricType } = model.useState();
     const groupByVariable = model.getVariable();
     const histogramBreakdownFnVariable = model.getHistogramBreakdownFnVariable();
@@ -151,7 +149,10 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
               <div className={styles.leftControls}>
                 <groupByVariable.Component model={groupByVariable} />
                 {isHistogram && (
-                  <Field label={t('breakdown.histogram-fn.label', 'Histogram breakdown function')} className={styles.field}>
+                  <Field
+                    label={t('breakdown.histogram-fn.label', 'Histogram breakdown function')}
+                    className={styles.field}
+                  >
                     <histogramBreakdownFnVariable.Component model={histogramBreakdownFnVariable} />
                   </Field>
                 )}
@@ -171,7 +172,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   };
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number) {
   return {
     container: css({
       flexGrow: 1,
@@ -184,7 +185,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       position: 'sticky',
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
       zIndex: 10,
-      background: getAppBackgroundColor(theme, trail),
       paddingBottom: theme.spacing(1),
     }),
     controls: css({

@@ -14,7 +14,6 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useRef } from 'react';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboardAction';
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
@@ -33,7 +32,6 @@ import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';
 import { buildMiniBreakdownNavigationUrl } from '../exposedComponents/MiniBreakdown/buildNavigationUrl';
 import { getTrailFor } from '../shared/utils/utils';
-import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
@@ -201,7 +199,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0));
     const controlsContainer = useRef<HTMLDivElement>(null);
 
     useResizeObserver({
@@ -236,7 +234,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number) {
   return {
     container: css({
       display: 'flex',
@@ -250,7 +248,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
     stickyTop: css({
       display: 'flex',
       flexDirection: 'row',
-      background: getAppBackgroundColor(theme, trail),
       position: 'sticky',
       paddingTop: theme.spacing(1),
       zIndex: 10,

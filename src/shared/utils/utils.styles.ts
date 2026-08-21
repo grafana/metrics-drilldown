@@ -2,8 +2,6 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { compare } from 'compare-versions';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
-
 const CONTAINER_QUERIES_MIN_VERSION = '12.4.0';
 const supportsContainerQueries = !compare(config.buildInfo.version ?? '0.0.0', CONTAINER_QUERIES_MIN_VERSION, '<');
 
@@ -14,16 +12,6 @@ const supportsContainerQueries = !compare(config.buildInfo.version ?? '0.0.0', C
  */
 export function getResponsiveBreakpoints(theme: GrafanaTheme2) {
   return supportsContainerQueries ? theme.breakpoints.container : theme.breakpoints;
-}
-
-export function getAppBackgroundColor(theme: GrafanaTheme2, trail?: DataTrail): string {
-  // If DataTrail is in embedded mode, always use primary background
-  if (trail?.state.embedded) {
-    return theme.colors.background.primary;
-  }
-
-  // Otherwise, use the standard theme-based logic
-  return theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas;
 }
 
 /**

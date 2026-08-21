@@ -13,7 +13,6 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { EventQuickSearchChanged } from 'MetricsReducer/list-controls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'MetricsReducer/list-controls/QuickSearch/QuickSearch';
 import { EventMetricsVariableActivated } from 'MetricsReducer/metrics-variables/events/EventMetricsVariableActivated';
@@ -35,7 +34,6 @@ import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilt
 import { RelatedListControls } from './RelatedListControls';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { getTrailFor } from '../../shared/utils/utils';
-import { getAppBackgroundColor } from '../../shared/utils/utils.styles';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
 interface RelatedMetricsSceneState extends SceneObjectState {
@@ -159,7 +157,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   public static readonly Component = ({ model }: SceneComponentProps<RelatedMetricsScene>) => {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0));
     const { $variables, body, listControls } = model.useState();
 
     return (
@@ -180,7 +178,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   };
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number) {
   return {
     variables: css({
       display: 'none',
@@ -190,7 +188,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       position: 'sticky',
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
       zIndex: 10,
-      background: getAppBackgroundColor(theme, trail),
       paddingBottom: theme.spacing(1),
     }),
   };
