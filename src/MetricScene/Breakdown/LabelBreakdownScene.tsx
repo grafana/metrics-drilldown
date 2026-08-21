@@ -69,8 +69,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       });
     }
 
-    this.subscribeToMainPanelMetricType();
-    this.updateBody(groupByVariable);
+    this.subscribeToMainPanelMetricType(groupByVariable);
   }
 
   private getVariable(): QueryVariable {
@@ -91,27 +90,47 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return sceneGraph.findDescendents(metricScene.state.body, GmdVizPanel)[0];
   }
 
-  private subscribeToMainPanelMetricType() {
+  private subscribeToMainPanelMetricType(groupByVariable: QueryVariable) {
     const mainPanel = this.getMainPanel();
+
+    this.updateBody(groupByVariable);
+
     if (!mainPanel) {
       return;
     }
 
     this._subs.add(
       mainPanel.subscribeToState((newState, prevState) => {
-        if (newState.metricType !== prevState.metricType) {
+        if (
+          newState.metricType !== prevState.metricType ||
+          newState.metricTypeResolved !== prevState.metricTypeResolved
+        ) {
           this.updateBody(this.getVariable());
         }
       })
     );
   }
 
+  // The main panel's metricType starts as a fast sync-heuristic guess (see GmdVizPanel) and only becomes
+  // trustworthy once metricTypeResolved flips true. Building the body before that would bake the wrong
+  // function into the query, which then gets replaced a moment later when the real type resolves -- a
+  // visible flash of the wrong query. So this defers the build until the type is resolved; the mainPanel
+  // subscription above re-triggers it once resolution lands, whatever call site (groupByVariable change,
+  // histogram fn change, activation) skipped it in the meantime.
   private updateBody(groupByVariable: QueryVariable) {
+    const mainPanel = this.getMainPanel();
+    if (mainPanel && !mainPanel.state.metricTypeResolved) {
+      return;
+    }
+
     const { metric: name } = this.state;
     const trail = getTrailFor(this);
-    const type: MetricType = this.getMainPanel()?.state.metricType ?? 'gauge';
+    const type: MetricType = mainPanel?.state.metricType ?? 'gauge';
 
     const metric = { name, type };
+    // Passed to MetricLabelValuesList explicitly: its constructor runs before it's parented in the scene
+    // graph, so it can't look this variable up itself the way its other methods do later.
+    const histogramBreakdownFn = this.getHistogramBreakdownFnVariable().state.value as HistogramBreakdownFn | undefined;
 
     const newBody = groupByVariable.hasAllValue()
       ? new MetricLabelsList({ metric })
@@ -119,6 +138,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
           metric,
           label: groupByVariable.state.value as string,
           binaryQuery: trail.state.binaryQuery,
+          histogramBreakdownFn,
         });
 
     this.setState({ body: newBody, metricType: type });

@@ -1,7 +1,10 @@
-import { PanelBuilders, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
+import { type DataFrame, type PanelData } from '@grafana/data';
+import { PanelBuilders, SceneDataNode, SceneDataTransformer, SceneQueryRunner, type VizPanel } from '@grafana/scenes';
 import { SortOrder, TooltipDisplayMode, type LegendPlacement } from '@grafana/schema';
 
 import { extremeValueFilterBehavior } from 'shared/GmdVizPanel/behaviors/extremeValueFilterBehavior/extremeValueFilterBehavior';
+import { type PanelConfig } from 'shared/GmdVizPanel/GmdVizPanel';
+import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { trailDS } from 'shared/shared';
 import { getColorByIndex } from 'shared/utils/utils';
 
@@ -67,6 +70,42 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
   }
 
   return vizPanelBuilder.build();
+}
+
+// Renders one already-fetched frame with no query of its own. For a caller that already ran a query
+// with a correctly-resolved metric.type (e.g. the per-value breakdown grid's shared by-label query) and
+// just wants to display one of its resulting series per panel: reissuing a fresh, independently-typed
+// query per panel would redundantly redo work the caller already has the answer to, and would race its
+// own metric-type resolution from scratch (see MetricLabelValuesList for why that matters for histograms).
+export function buildStaticTimeseriesPanel({
+  metric,
+  panelConfig,
+  data,
+  frame,
+}: {
+  metric: Metric;
+  panelConfig: PanelConfig;
+  data: PanelData;
+  frame: DataFrame;
+}): VizPanel {
+  return PanelBuilders.timeseries()
+    .setTitle(panelConfig.title)
+    .setDescription(panelConfig.description)
+    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
+    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
+    .setShowMenuAlways(Boolean(panelConfig.menu))
+    .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
+    .setUnit(getUnit(metric.name))
+    .setOption('annotations', { multiLane: true })
+    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
+    .setCustomFieldConfig('fillOpacity', 9)
+    .setColor(
+      panelConfig.fixedColorIndex !== undefined
+        ? { mode: 'fixed', fixedColor: getColorByIndex(panelConfig.fixedColorIndex) }
+        : undefined
+    )
+    .setBehaviors(panelConfig.behaviors || [])
+    .build();
 }
 
 export const MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY = 20;
