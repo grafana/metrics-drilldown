@@ -67,10 +67,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     metric: MetricLabelsValuesListState['metric'];
     label: MetricLabelsValuesListState['label'];
     binaryQuery?: string;
-    // Passed in by LabelBreakdownScene (which already has it, for the dropdown) rather than looked up here
-    // via sceneGraph.lookupVariable: this constructor runs before `this` is parented, so the variable isn't
-    // reachable yet. This value drives the query below, which per-value panels render directly from (see
-    // getLayoutChild), so it has to be correct up front, not just for value discovery.
+    // Passed by LabelBreakdownScene rather than looked up here: this constructor runs before `this` is
+    // parented, so sceneGraph.lookupVariable can't reach it yet. Drives the query below, which per-value
+    // panels render directly from (see getLayoutChild).
     histogramBreakdownFn?: HistogramBreakdownFn;
   }) {
     const queryParams = getTimeseriesQueryRunnerParams({
@@ -231,10 +230,8 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
     // For a binary (ratio) insight, page filters do not apply, so hide the per-value "Add to filters" action.
     const isBinaryQuery = Boolean(binaryQuery);
-    // Histograms render directly from the frame this list's own shared query already produced (see the
-    // constructor: it's the same by-label, histogram-function-aware query), instead of each panel
-    // reissuing its own independent query. A fresh per-panel query would have to re-derive metric.type from
-    // just a metric name and race its own async resolution, which is exactly the bug this avoids.
+    // Histogram panels render from this list's own shared query below (see buildStaticTimeseriesPanel)
+    // instead of each reissuing its own.
     const isHistogram = metric.type === 'classic-histogram' || metric.type === 'native-histogram';
 
     return new SceneByFrameRepeater({

@@ -114,10 +114,9 @@ export type QueryOptions = {
 interface GmdVizPanelState extends SceneObjectState {
   metric: string;
   metricType: MetricType;
-  // False until the async metric type detection (metadata fetch, and the native-histogram probe if it
-  // runs) has settled. Consumers that build a query from metricType (e.g. LabelBreakdownScene) should wait
-  // for this instead of using the initial sync-heuristic guess, so they don't fire a query with the wrong
-  // function and then immediately replace it once the real type resolves.
+  // False until metric type detection (metadata fetch, or the native-histogram probe) has settled.
+  // Consumers building a query from metricType (e.g. LabelBreakdownScene) should wait for this rather
+  // than use the initial sync guess.
   metricTypeResolved: boolean;
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;

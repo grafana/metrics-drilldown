@@ -111,12 +111,9 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     );
   }
 
-  // The main panel's metricType starts as a fast sync-heuristic guess (see GmdVizPanel) and only becomes
-  // trustworthy once metricTypeResolved flips true. Building the body before that would bake the wrong
-  // function into the query, which then gets replaced a moment later when the real type resolves -- a
-  // visible flash of the wrong query. So this defers the build until the type is resolved; the mainPanel
-  // subscription above re-triggers it once resolution lands, whatever call site (groupByVariable change,
-  // histogram fn change, activation) skipped it in the meantime.
+  // metricType is a fast sync guess until metricTypeResolved flips true; building the body before then
+  // would briefly query with the wrong function. Wait here -- the mainPanel subscription above re-triggers
+  // this once it resolves, for whichever call site got skipped.
   private updateBody(groupByVariable: QueryVariable) {
     const mainPanel = this.getMainPanel();
     if (mainPanel && !mainPanel.state.metricTypeResolved) {
@@ -128,8 +125,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const type: MetricType = mainPanel?.state.metricType ?? 'gauge';
 
     const metric = { name, type };
-    // Passed to MetricLabelValuesList explicitly: its constructor runs before it's parented in the scene
-    // graph, so it can't look this variable up itself the way its other methods do later.
+    // See MetricLabelValuesList's constructor for why this is passed explicitly instead of looked up there.
     const histogramBreakdownFn = this.getHistogramBreakdownFnVariable().state.value as HistogramBreakdownFn | undefined;
 
     const newBody = groupByVariable.hasAllValue()

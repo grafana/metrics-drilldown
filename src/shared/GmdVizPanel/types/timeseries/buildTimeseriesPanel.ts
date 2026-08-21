@@ -16,6 +16,24 @@ import { addRefId } from './transformations/addRefId';
 import { addUnspecifiedLabel } from './transformations/addUnspecifiedLabel';
 import { sliceSeries } from './transformations/sliceSeries';
 
+// Shared by buildTimeseriesPanel and buildStaticTimeseriesPanel below, which both render one series (or
+// a small number sharing a color) rather than buildGroupByPanel's many-series-per-panel case.
+function applyCommonPanelOptions(
+  builder: ReturnType<typeof PanelBuilders.timeseries>,
+  metric: Metric,
+  panelConfig: PanelConfig
+) {
+  return builder
+    .setTitle(panelConfig.title)
+    .setDescription(panelConfig.description)
+    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
+    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
+    .setShowMenuAlways(Boolean(panelConfig.menu))
+    .setOption('annotations', { multiLane: true })
+    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
+    .setCustomFieldConfig('fillOpacity', 9);
+}
+
 export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
   if (options.queryConfig.groupBy) {
     return buildGroupByPanel(options as Required<BuildVizPanelOptions>);
@@ -33,17 +51,9 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
       queries: queryParams.queries,
     });
 
-  const vizPanelBuilder = PanelBuilders.timeseries()
-    .setTitle(panelConfig.title)
-    .setDescription(panelConfig.description)
-    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
-    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
-    .setShowMenuAlways(Boolean(panelConfig.menu))
+  const vizPanelBuilder = applyCommonPanelOptions(PanelBuilders.timeseries(), metric, panelConfig)
     .setData($data)
     .setUnit(unit)
-    .setOption('annotations', { multiLane: true })
-    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
-    .setCustomFieldConfig('fillOpacity', 9)
     .setBehaviors([
       extremeValueFilterBehavior,
       updateColorsWhenQueriesChange(panelConfig.fixedColorIndex),
@@ -72,11 +82,9 @@ export function buildTimeseriesPanel(options: BuildVizPanelOptions): VizPanel {
   return vizPanelBuilder.build();
 }
 
-// Renders one already-fetched frame with no query of its own. For a caller that already ran a query
-// with a correctly-resolved metric.type (e.g. the per-value breakdown grid's shared by-label query) and
-// just wants to display one of its resulting series per panel: reissuing a fresh, independently-typed
-// query per panel would redundantly redo work the caller already has the answer to, and would race its
-// own metric-type resolution from scratch (see MetricLabelValuesList for why that matters for histograms).
+// Renders one already-fetched frame with no query of its own, for a caller whose own shared query (see
+// MetricLabelValuesList) already resolved metric.type correctly. A fresh per-panel query here would redo
+// that work and re-race the same type resolution from scratch.
 export function buildStaticTimeseriesPanel({
   metric,
   panelConfig,
@@ -88,17 +96,9 @@ export function buildStaticTimeseriesPanel({
   data: PanelData;
   frame: DataFrame;
 }): VizPanel {
-  return PanelBuilders.timeseries()
-    .setTitle(panelConfig.title)
-    .setDescription(panelConfig.description)
-    .setHeaderActions(panelConfig.headerActions({ metric, panelConfig }))
-    .setMenu(panelConfig.menu?.({ metric, panelConfig }))
-    .setShowMenuAlways(Boolean(panelConfig.menu))
+  return applyCommonPanelOptions(PanelBuilders.timeseries(), metric, panelConfig)
     .setData(new SceneDataNode({ data: { ...data, series: [frame] } }))
     .setUnit(getUnit(metric.name))
-    .setOption('annotations', { multiLane: true })
-    .setOption('legend', panelConfig.legend || { showLegend: true, placement: 'bottom' as LegendPlacement })
-    .setCustomFieldConfig('fillOpacity', 9)
     .setColor(
       panelConfig.fixedColorIndex !== undefined
         ? { mode: 'fixed', fixedColor: getColorByIndex(panelConfig.fixedColorIndex) }
