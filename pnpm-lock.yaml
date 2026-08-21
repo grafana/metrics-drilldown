@@ -135,8 +135,8 @@ importers:
         specifier: ^9.0.0
         version: 9.0.0(@stylistic/eslint-plugin-ts@4.4.1(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(@typescript-eslint/eslint-plugin@8.67.0(@typescript-eslint/parser@8.67.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(@typescript-eslint/parser@8.67.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(eslint-config-prettier@10.1.8(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1)))(eslint-plugin-jsdoc@62.9.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-react-hooks@7.0.1(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-react@7.37.5(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(typescript@5.9.3)
       '@grafana/plugin-e2e':
-        specifier: 3.10.0
-        version: 3.10.0(@playwright/test@1.62.1)
+        specifier: 3.11.0
+        version: 3.11.0(@playwright/test@1.62.1)
       '@grafana/sign-plugin':
         specifier: ^3.2.2
         version: 3.3.3(supports-color@8.1.1)
@@ -823,8 +823,8 @@ packages:
   '@grafana/e2e-selectors@13.1.0':
     resolution: {integrity: sha512-g/N5gGZ4iE59g4Coi/R6+F66BRrBnP0XKa7DO7sbiGo4IgM2tGsXgVvWNcR4CCF7bza930mhVWQnREyNLhClFw==}
 
-  '@grafana/e2e-selectors@13.1.0-25644485979':
-    resolution: {integrity: sha512-2H+veZBayawey47iUTb5N69QK5KYHxzspe8uaauvLH7aSsjeyzH6nFubLkOVxz1JUOVtVrwOaH+libUwSaPMXw==}
+  '@grafana/e2e-selectors@13.2.0-30594044109':
+    resolution: {integrity: sha512-CRN0CTsSkAC3qQvufbR7duUzSX2Jfgc/g5ap+eSrjcFcS+vAVUDGfQVLK6y5ojN+B0gATNIbmVlCGngQxmm+eA==}
 
   '@grafana/eslint-config@9.0.0':
     resolution: {integrity: sha512-Jw7/kyO29iNKiHrDwsVwP3/YSNdYCt8ofCgSFNfcYQeK7+Z3zn1RrMBXWohVQ47OuwjXr6AUqo5ReQBCPq6Fzw==}
@@ -861,8 +861,8 @@ packages:
     peerDependencies:
       '@lezer/lr': ^1.0.0
 
-  '@grafana/plugin-e2e@3.10.0':
-    resolution: {integrity: sha512-KvIC4klLuDdgT9Go61yY+Mm/8+8zSqF4lqhlMomBl53h9gx4PPYjoVRdK9e272oVJqlpgy42z7+OxHrs7IYY2g==}
+  '@grafana/plugin-e2e@3.11.0':
+    resolution: {integrity: sha512-kStVAbkmuQzgMaYwzm1leRGG+vRzuFj2JgojKeLFwPyZhL80OyVLC4L96ePmx2PZGmUXA9enMtMG8YqBx3uJdw==}
     engines: {node: '>=20 <=24'}
     peerDependencies:
       '@axe-core/playwright': ^4.11.1
@@ -7677,11 +7677,9 @@ snapshots:
       semver: 7.8.5
       typescript: 6.0.2
 
-  '@grafana/e2e-selectors@13.1.0-25644485979':
+  '@grafana/e2e-selectors@13.2.0-30594044109':
     dependencies:
       semver: 7.8.5
-      tslib: 2.8.1
-      typescript: 6.0.2
 
   '@grafana/eslint-config@9.0.0(@stylistic/eslint-plugin-ts@4.4.1(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(@typescript-eslint/eslint-plugin@8.67.0(@typescript-eslint/parser@8.67.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(@typescript-eslint/parser@8.67.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(eslint-config-prettier@10.1.8(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1)))(eslint-plugin-jsdoc@62.9.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-react-hooks@7.0.1(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-react@7.37.5(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(typescript@5.9.3)':
     dependencies:
@@ -7739,9 +7737,9 @@ snapshots:
     dependencies:
       '@lezer/lr': 1.4.8
 
-  '@grafana/plugin-e2e@3.10.0(@playwright/test@1.62.1)':
+  '@grafana/plugin-e2e@3.11.0(@playwright/test@1.62.1)':
     dependencies:
-      '@grafana/e2e-selectors': 13.1.0-25644485979
+      '@grafana/e2e-selectors': 13.2.0-30594044109
       '@playwright/test': 1.62.1
       yaml: 2.8.3
 
