@@ -65,7 +65,7 @@ overrides:
   '@grafana/schema': ^13.0.0
   uuid: ^14.0.0
   postcss: ^8.5.18
-  fast-uri: ^3.1.5
+  fast-uri: ^4.0.0
   ws: ^8.20.1
   js-cookie: ^3.0.7
   qs: ^6.15.2
