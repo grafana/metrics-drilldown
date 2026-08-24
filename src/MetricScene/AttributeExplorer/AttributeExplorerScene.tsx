@@ -23,8 +23,10 @@ import { logger } from 'shared/logger/logger';
 import { VAR_DATASOURCE, VAR_FILTERS, VAR_METRIC } from 'shared/shared';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
+import { type DatasetContext } from './AttributeDistribution';
 import { type ActiveFilter } from './attributeDistributionState';
 import {
+  fetchDefaultLowerThreshold,
   getOtelPriorityAttributes,
   groupFiltersByFieldAndOperator,
   isHistogramWithThreshold,
@@ -69,6 +71,10 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
 
   // Discards a stale _resolveOtelPriority response if a newer query/datasource has superseded it.
   private _otelPriorityGeneration = 0;
+  // Discards a stale _seedHistogramRangeIfNeeded response if a newer query/datasource/metricType has
+  // superseded it. Separate from _otelPriorityGeneration since the two fetches are independent and
+  // invalidating one shouldn't imply anything about the other.
+  private _histogramSeedGeneration = 0;
 
   public constructor() {
     super({
@@ -88,15 +94,23 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   }
 
   private _onActivate() {
+    // Set before the methods below: _updateQueryAndDatasource triggers the histogram threshold seed,
+    // which reads this.state.timeRange, so it must reflect the real page range on this very first run,
+    // not the constructor's getDefaultTimeRange() placeholder.
+    const timeRangeObj = sceneGraph.getTimeRange(this);
+    this.setState({ timeRange: timeRangeObj.state.value });
+
     this._resolveMetricType();
     this._updateQueryAndDatasource();
     this._syncSelectedFiltersFromVar();
 
-    const timeRangeObj = sceneGraph.getTimeRange(this);
-    this.setState({ timeRange: timeRangeObj.state.value });
     this._subs.add(
       timeRangeObj.subscribeToState((newState) => {
         this.setState({ timeRange: newState.value });
+        // A time range change can be the first moment a seed becomes possible (e.g. the initial range
+        // had no data for this metric); harmless no-op via the guard below if a range or an explicit
+        // user edit already exists.
+        this._seedHistogramRangeIfNeeded();
       })
     );
   }
@@ -114,6 +128,10 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
       gmdVizPanel.subscribeToState((newState, prevState) => {
         if (newState.metricType !== prevState.metricType) {
           this.setState({ metricType: newState.metricType });
+          // metricType arriving late (e.g. upgraded from a name-heuristic gauge guess to
+          // native-histogram once metadata resolves) isn't caught by _updateQueryAndDatasource, which
+          // already ran under the old, non-histogram metricType and exited without seeding.
+          this._seedHistogramRangeIfNeeded();
         }
       })
     );
@@ -133,6 +151,43 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
 
     this.setState({ datasourceUid, metric, query });
     this._resolveOtelPriority(datasourceUid, query);
+    this._seedHistogramRangeIfNeeded();
+  }
+
+  // Fires a one-time query, per metric, to pick a starting histogram lower threshold scaled to what
+  // this metric actually reports (see fetchDefaultLowerThreshold). Guarded on histogramRange still
+  // being undefined so this never overwrites a value the user has already set, or a seed that already
+  // landed, regardless of how many times the surrounding lifecycle events re-fire (activation,
+  // metricType upgrade, time range change).
+  private _seedHistogramRangeIfNeeded() {
+    const { datasourceUid, metricType, query, timeRange } = this.state;
+    if (!datasourceUid || !query || !isHistogramWithThreshold(metricType)) {
+      return;
+    }
+
+    const metricScene = sceneGraph.getAncestor(this, MetricScene);
+    if (metricScene.state.histogramRange !== undefined) {
+      return;
+    }
+
+    const generation = ++this._histogramSeedGeneration;
+    const context: DatasetContext = {
+      datasourceUid,
+      metricType,
+      query,
+      timeRange: { from: timeRange.from.valueOf(), to: timeRange.to.valueOf() },
+    };
+
+    fetchDefaultLowerThreshold(context).subscribe((lowerSeconds) => {
+      if (generation !== this._histogramSeedGeneration || lowerSeconds === undefined) {
+        return;
+      }
+      // Re-checked at resolution time, not just at request time: a user could have typed an explicit
+      // value while this query was in flight, which must win over a seed arriving after the fact.
+      if (metricScene.state.histogramRange === undefined) {
+        metricScene.setHistogramRange({ lowerSeconds: Number(lowerSeconds.toPrecision(2)), upperSeconds: Number.POSITIVE_INFINITY });
+      }
+    });
   }
 
   private _resolveOtelPriority(datasourceUid: string, query: string) {

@@ -289,7 +289,11 @@ export function processFractionResponse(
 // docs use this term for what a histogram measures, and it's correct regardless of domain, whereas
 // guessing a domain noun risks a confidently-wrong label (e.g. "requests" for a connection-pool metric).
 // Exported for unit testing.
-export function getHistogramValueTooltip(item: AttributeValueCount, histogramRange: HistogramRange): string | undefined {
+export function getHistogramValueTooltip(
+  item: AttributeValueCount,
+  histogramRange: HistogramRange,
+  unit: string | null
+): string | undefined {
   if (item.impliedTotal === undefined) {
     return undefined;
   }
@@ -303,7 +307,7 @@ export function getHistogramValueTooltip(item: AttributeValueCount, histogramRan
     {
       count: item.count,
       percentage: item.percentage,
-      range: formatHistogramRangeLabel(histogramRange),
+      range: formatHistogramRangeLabel(histogramRange, unit),
       total: item.impliedTotal,
     }
   );
@@ -402,50 +406,107 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
   );
 }
 
-function formatHistogramRangeLabel(range: HistogramRange): string {
+// Returns undefined, not 0 or a NaN-derived value, when there's nothing to seed from (no traffic in
+// the window, a genuinely 0 median, or a non-finite sample): a 0 or invalid threshold would exclude
+// or include everything, which isn't a usable starting point, so the caller falls back to
+// DEFAULT_HISTOGRAM_RANGE instead. Exported for unit testing.
+export function parseDefaultLowerThreshold(response: PrometheusRangeQueryResult | undefined): number | undefined {
+  const series = response?.result?.[0];
+  const lastSample = series?.values?.[series.values.length - 1];
+  const value = Number(lastSample?.[1]);
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+// Seeds a starting lower threshold scaled to what this metric actually reports, rather than
+// DEFAULT_HISTOGRAM_RANGE's fixed 1, which is meaningless for a metric whose whole distribution lives
+// in milliseconds or nanoseconds (a "_seconds"-suffixed metric is still expressed as a plain float in
+// seconds regardless of how small its typical values are, so a threshold of 1 excludes literally
+// everything for such a metric). Seeds from the metric's overall median (p50), not its observed
+// min/max: histogram_quantile is the one PromQL function that works identically across a classic
+// bucket vector and a native histogram sample, so it's the only type-uniform way to derive a
+// representative value for both without a separate code path per type. A median is also
+// self-calibrating: as long as the metric has any traffic at all in the window, it's guaranteed to
+// land inside that metric's real range, unlike a fixed constant with no relationship to the metric's
+// actual scale.
+export function fetchDefaultLowerThreshold(context: DatasetContext): Observable<number | undefined> {
+  const window = getRangeQueryWindow(context);
+  const innerVector =
+    context.metricType === 'classic-histogram'
+      ? `sum by (le) (rate(${context.query}[${window.stepSeconds}s]))`
+      : `sum(rate(${context.query}[${window.stepSeconds}s]))`;
+  const query = `histogram_quantile(0.5, ${innerVector})`;
+
+  return runRangeQuery(context, query, window).pipe(map(parseDefaultLowerThreshold));
+}
+
+// unit is the field's own value (e.g. "seconds", "bytes"), not a fixed "s" suffix: the range field
+// names (lowerSeconds/upperSeconds) date from when this was seconds-only, but the metric behind them
+// can be any histogram unit, and hardcoding "s" produced a genuinely wrong label like "over 2s" for a
+// bytes histogram, reading as "2 seconds" rather than "2 bytes". Falls back to a bare number with no
+// unit word when the unit can't be determined, rather than guessing.
+function formatHistogramRangeLabel(range: HistogramRange, unit: string | null): string {
   const { lowerSeconds, upperSeconds } = range;
+  const withUnit = (value: number) => (unit ? `${value} ${unit}` : String(value));
+
   if (upperSeconds === Number.POSITIVE_INFINITY) {
-    return t('attribute-explorer.histogram-range-over', 'over {{seconds}}s', { seconds: lowerSeconds });
+    return t('attribute-explorer.histogram-range-over', 'over {{value}}', { value: withUnit(lowerSeconds) });
   }
   if (lowerSeconds === Number.NEGATIVE_INFINITY || lowerSeconds === 0) {
-    return t('attribute-explorer.histogram-range-under', 'under {{seconds}}s', { seconds: upperSeconds });
+    return t('attribute-explorer.histogram-range-under', 'under {{value}}', { value: withUnit(upperSeconds) });
   }
-  return t('attribute-explorer.histogram-range-between', '{{lower}}s-{{upper}}s', {
-    lower: lowerSeconds,
-    upper: upperSeconds,
+  return t('attribute-explorer.histogram-range-between', '{{lower}}-{{upper}}', {
+    lower: withUnit(lowerSeconds),
+    upper: withUnit(upperSeconds),
   });
 }
 
 // Explains what the percentages mean. Unconditional now: this component only ever handles the two
 // histogram types (see HistogramMetricType), so there's no longer a per-type branch to pick between.
-function getAttributeExplorerDescription(histogramRange: HistogramRange): string {
+function getAttributeExplorerDescription(histogramRange: HistogramRange, unit: string | null): string {
   return t(
     'attribute-explorer.description-histogram',
     'Values show each label value\'s share of the total {{range}} population across that label: percentages sum to ~100% across a label\'s values, the same as everywhere else in this sidebar. A value with no activity in this window sorts to the bottom instead of being hidden.',
-    { range: formatHistogramRangeLabel(histogramRange) }
+    { range: formatHistogramRangeLabel(histogramRange, unit) }
   );
 }
 
 interface AttributeExplorerHeaderProps {
   histogramRange: HistogramRange;
-  metric: string;
   onHistogramRangeChange: (range: HistogramRange) => void;
   queryLimitLabel?: string;
+  unit: string | null;
 }
 
 function AttributeExplorerHeader({
   histogramRange,
-  metric,
   onHistogramRangeChange,
   queryLimitLabel,
+  unit,
 }: Readonly<AttributeExplorerHeaderProps>) {
   const styles = useStyles2(getHeaderStyles);
-  const unit = getUnitFromMetric(metric);
 
   const [lowerText, setLowerText] = useState(String(histogramRange.lowerSeconds));
   const [upperText, setUpperText] = useState(
     histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds)
   );
+
+  // Tracks the last range this component itself committed, so the effect below can tell "the range
+  // changed because our own debounced commit landed" (already reflected in lowerText/upperText, no
+  // resync needed) apart from "the range changed some other way" (the async default-threshold seed
+  // resolving after this component already mounted with DEFAULT_HISTOGRAM_RANGE's placeholder, or an
+  // external reset), which is the only case that needs the text inputs pulled forward to match.
+  const lastCommittedRef = useRef(histogramRange);
+  useEffect(() => {
+    const isOwnCommit =
+      lastCommittedRef.current.lowerSeconds === histogramRange.lowerSeconds &&
+      lastCommittedRef.current.upperSeconds === histogramRange.upperSeconds;
+    if (!isOwnCommit) {
+      setLowerText(String(histogramRange.lowerSeconds));
+      setUpperText(histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds));
+    }
+    lastCommittedRef.current = histogramRange;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally re-runs only on histogramRange identity, not on every lastCommittedRef mutation
+  }, [histogramRange]);
 
   const commitTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(commitTimeoutRef.current), []);
@@ -486,7 +547,7 @@ function AttributeExplorerHeader({
     <div className={styles.header}>
       <div className={styles.title}>
         {t('attribute-explorer.title', 'Attribute Explorer')}
-        <Tooltip interactive content={getAttributeExplorerDescription(histogramRange)}>
+        <Tooltip interactive content={getAttributeExplorerDescription(histogramRange, unit)}>
           <Icon name="info-circle" size="sm" />
         </Tooltip>
       </div>
@@ -604,13 +665,14 @@ export function PrometheusAttributeExplorer({
 }: Readonly<PrometheusAttributeExplorerProps>) {
   const numericTimeRange = useMemo(() => ({ from: timeRange.from.valueOf(), to: timeRange.to.valueOf() }), [timeRange]);
   const resolvedHistogramRange = histogramRange ?? DEFAULT_HISTOGRAM_RANGE;
+  const unit = getUnitFromMetric(metric);
 
   const context: DatasetContext = useMemo(
     () => ({ datasourceUid, histogramRange: resolvedHistogramRange, metricType, query, timeRange: numericTimeRange }),
     [datasourceUid, resolvedHistogramRange, metricType, query, numericTimeRange]
   );
 
-  const getValueTooltip = (item: AttributeValueCount) => getHistogramValueTooltip(item, resolvedHistogramRange);
+  const getValueTooltip = (item: AttributeValueCount) => getHistogramValueTooltip(item, resolvedHistogramRange, unit);
 
   return (
     <AttributeDistribution
@@ -623,9 +685,9 @@ export function PrometheusAttributeExplorer({
       header={
         <AttributeExplorerHeader
           histogramRange={resolvedHistogramRange}
-          metric={metric}
           onHistogramRangeChange={onHistogramRangeChange}
           queryLimitLabel={queryLimitLabel}
+          unit={unit}
         />
       }
       onFiltersChange={onFiltersChange}

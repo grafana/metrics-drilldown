@@ -8,6 +8,7 @@ import {
   getRangeQueryWindow,
   groupFiltersByFieldAndOperator,
   isHistogramWithThreshold,
+  parseDefaultLowerThreshold,
   processFractionResponse,
   toCountMetricSelector,
   type PrometheusRangeQueryResult,
@@ -364,25 +365,97 @@ describe('processFractionResponse', () => {
 
 describe('getHistogramValueTooltip', () => {
   it('returns undefined when the item has no impliedTotal, since there is nothing extra to say', () => {
-    expect(getHistogramValueTooltip({ value: 'api', count: 5, percentage: 10 }, { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY })).toBeUndefined();
+    expect(
+      getHistogramValueTooltip(
+        { value: 'api', count: 5, percentage: 10 },
+        { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY },
+        'seconds'
+      )
+    ).toBeUndefined();
   });
 
   it('includes the count, percentage, and implied total when impliedTotal is present', () => {
     const tooltip = getHistogramValueTooltip(
       { value: 'api', count: 1440, impliedTotal: 14400, percentage: 10 },
-      { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY }
+      { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY },
+      'seconds'
     );
     expect(tooltip).toContain('1440');
     expect(tooltip).toContain('10');
     expect(tooltip).toContain('14400');
   });
 
+  it('labels the range with the metric\'s actual unit, not a hardcoded seconds suffix', () => {
+    const tooltip = getHistogramValueTooltip(
+      { value: 'api', count: 5, impliedTotal: 40, percentage: 12 },
+      { lowerSeconds: 2, upperSeconds: Number.POSITIVE_INFINITY },
+      'bytes'
+    );
+    expect(tooltip).toContain('2 bytes');
+    expect(tooltip).not.toContain('2s');
+  });
+
+  it('falls back to a bare number with no unit word when the unit is unknown', () => {
+    const tooltip = getHistogramValueTooltip(
+      { value: 'api', count: 5, impliedTotal: 40, percentage: 12 },
+      { lowerSeconds: 2, upperSeconds: Number.POSITIVE_INFINITY },
+      null
+    );
+    expect(tooltip).toContain('over 2.');
+  });
+
   it('returns a "no activity" message, not the observations sentence, when impliedTotal is present but zero', () => {
     const tooltip = getHistogramValueTooltip(
       { value: 'idle-route', count: 0, impliedTotal: 0, percentage: 0 },
-      { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY }
+      { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY },
+      'seconds'
     );
     expect(tooltip).toBe('No activity in this window.');
+  });
+});
+
+describe('parseDefaultLowerThreshold', () => {
+  it('returns the last sample value, e.g. a sub-millisecond median for a fast metric', () => {
+    const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, '0.00023']] }] };
+    expect(parseDefaultLowerThreshold(response)).toBe(0.00023);
+  });
+
+  it('takes the last sample, not the first, when the series has multiple points', () => {
+    const response: PrometheusRangeQueryResult = {
+      result: [
+        {
+          metric: {},
+          values: [
+            [0, '10'],
+            [60, '2.5'],
+          ],
+        },
+      ],
+    };
+    expect(parseDefaultLowerThreshold(response)).toBe(2.5);
+  });
+
+  it('returns undefined when the response is undefined', () => {
+    expect(parseDefaultLowerThreshold(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined when result is empty, e.g. the metric has no traffic in this window', () => {
+    expect(parseDefaultLowerThreshold({ result: [] })).toBeUndefined();
+  });
+
+  it('returns undefined for a literal 0 median, since a 0 threshold would exclude nothing', () => {
+    const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, '0']] }] };
+    expect(parseDefaultLowerThreshold(response)).toBeUndefined();
+  });
+
+  it('returns undefined for a negative value, which histogram_quantile can return for a malformed bucket set', () => {
+    const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, '-1']] }] };
+    expect(parseDefaultLowerThreshold(response)).toBeUndefined();
+  });
+
+  it('returns undefined for a NaN sample', () => {
+    const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, 'NaN']] }] };
+    expect(parseDefaultLowerThreshold(response)).toBeUndefined();
   });
 });
 

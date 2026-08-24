@@ -21,7 +21,7 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
     const styles = useStyles2(getStyles);
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const { attributeExplorerOpen } = metricScene.useState();
-    const { metric, metricType } = sceneGraph.getAncestor(model, GmdVizPanel).useState();
+    const { metricType } = sceneGraph.getAncestor(model, GmdVizPanel).useState();
     const label = t('explore-attributes-action.label', 'Explore Attributes');
 
     // The Attribute Explorer only supports histogram metrics (see PrometheusAttributeExplorerProps);
@@ -31,36 +31,16 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
       return null;
     }
 
-    // Fixed text, not branched by metric type: this button only ever renders for the two histogram
-    // types now, so there's nothing left to vary here. The threshold itself is set in the Attribute
-    // Explorer sidebar, not here; this tooltip is purely informational.
-    const tooltipContent = (
-      <div className={styles.tooltip}>
-        <div>
-          <span className={styles.tooltipLabel}>{t('explore-attributes-action.tooltip.metric', 'Metric:')}</span>{' '}
-          {metric}
-        </div>
-        <div>
-          <span className={styles.tooltipLabel}>{t('explore-attributes-action.tooltip.type', 'Type:')}</span>{' '}
-          {metricType}
-        </div>
-        <div>
-          {t(
-            'explore-attributes-action.tooltip.description',
-            'The Attribute Explorer surfaces the labels and attribute values present for this metric so you can filter and drill down into them.'
-          )}
-        </div>
-        <div>
-          {t(
-            'explore-attributes-action.tooltip.histogram-intro',
-            "This metric is a histogram. Each attribute value's own data is compared against a threshold from the histogram's buckets, shown as a percentage in the sidebar. Set that threshold from the Attribute Explorer's own header, once it's open."
-          )}
-        </div>
-      </div>
+    // One short line: the metric name and type are already visible in the panel title, and the
+    // threshold/percentage explanation lives in the Attribute Explorer's own header tooltip once it's
+    // open, so repeating either here was pure duplication.
+    const tooltipContent = t(
+      'explore-attributes-action.tooltip.description',
+      'Explore the labels and attribute values present for this metric.'
     );
 
     return (
-      <Tooltip content={tooltipContent} placement="top" interactive>
+      <Tooltip content={tooltipContent} placement="top">
         <Button
           id="explore-attributes-action"
           className={cx(styles.button)}
@@ -84,14 +64,5 @@ const getStyles = (theme: GrafanaTheme2) => ({
   button: css`
     margin: 0;
     margin-left: ${theme.spacing(1)};
-  `,
-  tooltip: css`
-    display: flex;
-    flex-direction: column;
-    gap: ${theme.spacing(0.5)};
-    max-width: 320px;
-  `,
-  tooltipLabel: css`
-    font-weight: ${theme.typography.fontWeightMedium};
   `,
 });
