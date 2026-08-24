@@ -19,6 +19,10 @@
     "group-by": {
       "label": "グループ化"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "メトリクスの読み込み中にエラーが発生しました！",
       "no-values": "現在のフィルターと時間範囲でラベル値が見つかりません。",

@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Seřadit podle"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "Při načítání metrik došlo k chybě!",
       "no-values": "Nebyly nalezeny žádné hodnoty štítků pro aktuální filtry a časový rozsah.",
