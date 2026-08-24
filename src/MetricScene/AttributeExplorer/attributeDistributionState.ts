@@ -233,6 +233,28 @@ export function orderByPriority(
   return [...priorityFirst, ...rest];
 }
 
+// Attributes with a fully-loaded, fully-quiet value list (every value at count 0, or none detected)
+// sort after every other attribute, so a genuinely inactive label doesn't sit above ones with real
+// signal. An attribute still loading or currently erroring stays in its original position instead:
+// its activity isn't known yet, and moving it the moment a fetch starts (then moving it back once data
+// arrives) would just be UI jitter. A stable sort (guaranteed by Array.prototype.sort since ES2019)
+// preserves relative order within each group, so this only ever demotes, never reshuffles arbitrarily.
+export function sortByActivity(attributes: AttributeConfig[], data: Record<string, AttributeState>): AttributeConfig[] {
+  const isConfirmedQuiet = (attribute: string): boolean => {
+    const attrState = data[attribute];
+    if (!attrState || attrState.loading || attrState.error) {
+      return false;
+    }
+    return attrState.values.every((v) => v.count === 0);
+  };
+
+  return [...attributes].sort((a, b) => {
+    const aQuiet = isConfirmedQuiet(a.attribute);
+    const bQuiet = isConfirmedQuiet(b.attribute);
+    return aQuiet === bQuiet ? 0 : Number(aQuiet) - Number(bQuiet);
+  });
+}
+
 // Merges current distribution values with snapshot values.
 // Values in the snapshot but absent from current results are appended at 0%
 // and marked retained; they remain visible and selectable after filtering.

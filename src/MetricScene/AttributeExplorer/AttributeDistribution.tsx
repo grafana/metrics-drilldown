@@ -27,6 +27,7 @@ import {
   mergeWithSnapshot,
   orderByPriority,
   reducer,
+  sortByActivity,
   type ActiveFilter,
   type AttributeConfig,
   type AttributeState,
@@ -339,16 +340,23 @@ export function AttributeDistribution({
     const totalShown = initialVisible + extraFieldsShown;
     const activeFilterFields = new Set(state.selectedFilters.map((f) => f.field));
     // Always include non-priority fields with active filters so a selected value is never hidden.
+    // Sliced from nonPriorityAttributes in its original (detection-order) indexing: this decides which
+    // fields are fetched and counted toward "show more", so it must stay stable regardless of how
+    // quiet those fields turn out to be once their data arrives.
     const visibleNonPriority = nonPriorityAttributes.filter(
       (a, i) => i < totalShown || activeFilterFields.has(a.attribute)
     );
     const remaining = Math.max(0, nonPriorityAttributes.length - visibleNonPriority.length);
+    // Sorted only for display, after the visible set is already fixed above: reordering by activity
+    // here can't change which fields are considered visible/fetched, only the order they render in,
+    // so an attribute doesn't disappear from view the moment its own "quiet" verdict comes back.
+    const sortedVisibleNonPriority = sortByActivity(visibleNonPriority, state.data);
     return {
       nextBatch: Math.min(10, remaining),
       remainingCount: remaining,
-      visibleAttributes: [...priorityAndPinned, ...visibleNonPriority],
+      visibleAttributes: [...priorityAndPinned, ...sortedVisibleNonPriority],
     };
-  }, [nonPriorityAttributes, extraFieldsShown, priorityAndPinned, priorityAttributes, state.selectedFilters]);
+  }, [nonPriorityAttributes, extraFieldsShown, priorityAndPinned, priorityAttributes, state.selectedFilters, state.data]);
 
   visibleAttributesRef.current = visibleAttributes;
 

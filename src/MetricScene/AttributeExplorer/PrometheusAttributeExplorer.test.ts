@@ -8,15 +8,13 @@ import {
   getRangeQueryWindow,
   groupFiltersByFieldAndOperator,
   isHistogramWithThreshold,
-  mergePresenceAndWeights,
-  processDistributionResponse,
   processFractionResponse,
   toCountMetricSelector,
   type PrometheusRangeQueryResult,
 } from './PrometheusAttributeExplorer';
 
 function createTestContext(from: number, to: number): DatasetContext {
-  return { datasourceUid: 'ds', metricType: 'gauge', query: 'my_metric', timeRange: { from, to } };
+  return { datasourceUid: 'ds', metricType: 'classic-histogram', query: 'my_metric', timeRange: { from, to } };
 }
 
 describe('getLabelsToExclude', () => {
@@ -30,11 +28,7 @@ describe('getLabelsToExclude', () => {
     expect(getLabelsToExclude('classic-histogram')).toEqual(new Set(['__name__', 'le', 'asserts_metric_latency']));
   });
 
-  it('excludes quantile for summary, in addition to __name__', () => {
-    expect(getLabelsToExclude('summary')).toEqual(new Set(['__name__', 'quantile']));
-  });
-
-  it.each([['gauge'], ['counter'], ['native-histogram'], ['info'], ['status-updown'], ['age']] as const)(
+  it.each([['gauge'], ['counter'], ['native-histogram'], ['summary'], ['info'], ['status-updown'], ['age']] as const)(
     'excludes only __name__ for %s',
     (metricType) => {
       expect(getLabelsToExclude(metricType)).toEqual(new Set(['__name__']));
@@ -239,136 +233,14 @@ describe('applyFiltersToSelector', () => {
   });
 });
 
-describe('processDistributionResponse', () => {
-  it('returns an empty array when the response is undefined', () => {
-    expect(processDistributionResponse(undefined, 'job')).toEqual([]);
-  });
-
-  it('returns an empty array when result is empty', () => {
-    expect(processDistributionResponse({ result: [] }, 'job')).toEqual([]);
-  });
-
-  it('computes rounded percentages and sorts by percentage descending', () => {
-    const response: PrometheusRangeQueryResult = {
-      result: [
-        { metric: { job: 'api' }, values: [[0, '1']] },
-        { metric: { job: 'worker' }, values: [[0, '3']] },
-      ],
-    };
-    expect(processDistributionResponse(response, 'job')).toEqual([
-      { value: 'worker', count: 3, percentage: 75 },
-      { value: 'api', count: 1, percentage: 25 },
-    ]);
-  });
-
-  it('takes the last sample of each series, not the first, when a series has multiple points', () => {
-    const response: PrometheusRangeQueryResult = {
-      result: [
-        {
-          metric: { job: 'api' },
-          values: [
-            [0, '10'],
-            [60, '2'],
-          ],
-        },
-      ],
-    };
-    expect(processDistributionResponse(response, 'job')).toEqual([{ value: 'api', count: 2, percentage: 100 }]);
-  });
-
-  it('skips series where the label is absent from the metric labelset', () => {
-    const response: PrometheusRangeQueryResult = {
-      result: [
-        { metric: {}, values: [[0, '5']] },
-        { metric: { job: 'api' }, values: [[0, '5']] },
-      ],
-    };
-    expect(processDistributionResponse(response, 'job')).toEqual([{ value: 'api', count: 5, percentage: 100 }]);
-  });
-
-  it('skips series with a zero or non-numeric count', () => {
-    const response: PrometheusRangeQueryResult = {
-      result: [
-        { metric: { job: 'zero' }, values: [[0, '0']] },
-        { metric: { job: 'nan' }, values: [[0, 'NaN']] },
-        { metric: { job: 'api' }, values: [[0, '2']] },
-      ],
-    };
-    expect(processDistributionResponse(response, 'job')).toEqual([{ value: 'api', count: 2, percentage: 100 }]);
-  });
-});
-
-describe('mergePresenceAndWeights', () => {
-  it('lists a present value at 0% when its weight is zero, instead of dropping it', () => {
-    const presence: PrometheusRangeQueryResult = { result: [{ metric: { job: 'api' }, values: [[0, '1']] }] };
-    const weights: PrometheusRangeQueryResult = { result: [{ metric: { job: 'api' }, values: [[0, '0']] }] };
-    expect(mergePresenceAndWeights(presence, weights, 'job', 1)).toEqual([{ value: 'api', count: 0, percentage: 0 }]);
-  });
-
-  it('lists a present value at 0% when it has no weight sample at all', () => {
-    const presence: PrometheusRangeQueryResult = { result: [{ metric: { job: 'idle' }, values: [[0, '1']] }] };
-    const weights: PrometheusRangeQueryResult = { result: [] };
-    expect(mergePresenceAndWeights(presence, weights, 'job', 1)).toEqual([{ value: 'idle', count: 0, percentage: 0 }]);
-  });
-
-  it('weights present values by their rate and sorts by percentage descending', () => {
-    const presence: PrometheusRangeQueryResult = {
-      result: [
-        { metric: { job: 'api' }, values: [[0, '1']] },
-        { metric: { job: 'worker' }, values: [[0, '1']] },
-      ],
-    };
-    const weights: PrometheusRangeQueryResult = {
-      result: [
-        { metric: { job: 'api' }, values: [[0, '1']] },
-        { metric: { job: 'worker' }, values: [[0, '3']] },
-      ],
-    };
-    expect(mergePresenceAndWeights(presence, weights, 'job', 1)).toEqual([
-      { value: 'worker', count: 3, percentage: 75 },
-      { value: 'api', count: 1, percentage: 25 },
-    ]);
-  });
-
-  it('treats a value found only in weights as present too, not just values the presence query saw', () => {
-    // The bare-selector presence query only sees a series scraped within the default 5m staleness
-    // window at one of the 1-2 instants a single-step range query evaluates; a value the rate
-    // query itself found is proof enough that the series exists, even if presence missed it.
-    const presence: PrometheusRangeQueryResult = { result: [{ metric: { job: 'api' }, values: [[0, '1']] }] };
-    const weights: PrometheusRangeQueryResult = {
-      result: [
-        { metric: { job: 'api' }, values: [[0, '1']] },
-        { metric: { job: 'ghost' }, values: [[0, '99']] },
-      ],
-    };
-    expect(mergePresenceAndWeights(presence, weights, 'job', 1)).toEqual([
-      { value: 'ghost', count: 99, percentage: 99 },
-      { value: 'api', count: 1, percentage: 1 },
-    ]);
-  });
-
-  it('converts a per-second rate into an estimated absolute count over the query window', () => {
-    // A per-second rate of ~0.1333 displayed directly would look like a near-duplicate of a 13%
-    // elsewhere on screen; multiplied by a real window (e.g. a 1-hour, 3600s query) it reads as an
-    // actual volume instead, per increase(v[d]) being rate(v) * seconds (Prometheus's own definition).
-    const presence: PrometheusRangeQueryResult = { result: [{ metric: { job: 'api' }, values: [[0, '1']] }] };
-    const weights: PrometheusRangeQueryResult = { result: [{ metric: { job: 'api' }, values: [[0, '0.1333']] }] };
-    expect(mergePresenceAndWeights(presence, weights, 'job', 3600)).toEqual([
-      { value: 'api', count: 480, percentage: 100 },
-    ]);
-  });
-
-  it('returns an empty array when nothing is present', () => {
-    expect(mergePresenceAndWeights({ result: [] }, { result: [] }, 'job', 1)).toEqual([]);
-  });
-});
-
 describe('processFractionResponse', () => {
-  it('converts a fraction to a percentage and derives an absolute count from the total rate and window', () => {
+  const noPresence: PrometheusRangeQueryResult = { result: [] };
+
+  it('derives an absolute count from the total rate and window, and gives a single value 100% of its own label', () => {
     const fraction: PrometheusRangeQueryResult = { result: [{ metric: { route: 'checkout' }, values: [[0, '0.25']] }] };
     const totalCount: PrometheusRangeQueryResult = { result: [{ metric: { route: 'checkout' }, values: [[0, '40']] }] };
-    expect(processFractionResponse(fraction, totalCount, 'route', 1)).toEqual([
-      { value: 'checkout', count: 10, impliedTotal: 40, percentage: 25 },
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
+      { value: 'checkout', count: 10, impliedTotal: 40, percentage: 100 },
     ]);
   });
 
@@ -378,12 +250,15 @@ describe('processFractionResponse', () => {
     // actual volume instead, per increase(v[d]) being rate(v) * seconds (Prometheus's own definition).
     const fraction: PrometheusRangeQueryResult = { result: [{ metric: { route: 'checkout' }, values: [[0, '0.1333']] }] };
     const totalCount: PrometheusRangeQueryResult = { result: [{ metric: { route: 'checkout' }, values: [[0, '1']] }] };
-    expect(processFractionResponse(fraction, totalCount, 'route', 3600)).toEqual([
-      { value: 'checkout', count: 480, impliedTotal: 3600, percentage: 13 },
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 3600)).toEqual([
+      { value: 'checkout', count: 480, impliedTotal: 3600, percentage: 100 },
     ]);
   });
 
-  it('does not normalize percentages across values: each is independent, not a split of a whole', () => {
+  it('normalizes percentages across values by their share of the total in-range volume, not each value\'s own self-ratio', () => {
+    // Both values have the identical 50% self-ratio (half of their own traffic is in range), but
+    // checkout has 3x search's volume, so it should get 3x the percentage, not an equal 50/50 split:
+    // that's exactly the self-ratio bug being fixed here.
     const fraction: PrometheusRangeQueryResult = {
       result: [
         { metric: { route: 'checkout' }, values: [[0, '0.5']] },
@@ -392,32 +267,50 @@ describe('processFractionResponse', () => {
     };
     const totalCount: PrometheusRangeQueryResult = {
       result: [
-        { metric: { route: 'checkout' }, values: [[0, '10']] },
+        { metric: { route: 'checkout' }, values: [[0, '30']] },
         { metric: { route: 'search' }, values: [[0, '10']] },
       ],
     };
-    expect(processFractionResponse(fraction, totalCount, 'route', 1)).toEqual([
-      { value: 'checkout', count: 5, impliedTotal: 10, percentage: 50 },
-      { value: 'search', count: 5, impliedTotal: 10, percentage: 50 },
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
+      { value: 'checkout', count: 15, impliedTotal: 30, percentage: 75 },
+      { value: 'search', count: 5, impliedTotal: 10, percentage: 25 },
     ]);
   });
 
-  it('lists a value at 0% when its fraction is zero, not dropping it', () => {
+  it('lists a value at 0% when its fraction is zero but it has real volume, not dropping it or treating it as quiet', () => {
     const fraction: PrometheusRangeQueryResult = { result: [{ metric: { route: 'checkout' }, values: [[0, '0']] }] };
     const totalCount: PrometheusRangeQueryResult = { result: [{ metric: { route: 'checkout' }, values: [[0, '40']] }] };
-    expect(processFractionResponse(fraction, totalCount, 'route', 1)).toEqual([
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
       { value: 'checkout', count: 0, impliedTotal: 40, percentage: 0 },
     ]);
   });
 
-  it('lists a value at 0% when it has zero total volume and histogram_fraction omits it as NaN', () => {
-    // histogram_fraction returns NaN for a zero-observation group, and extractLastSampleByValue drops
-    // NaN samples, so a genuinely-idle label would be entirely absent from the fraction map. Presence
-    // must come from the union of both queries' keys, not just the fraction query's, per issue #1029's
-    // own edge-case requirement: "Show 0% bar for missing values, don't hide."
+  it('lists a value at 0% when it has zero total volume and no fraction sample at all', () => {
     const fraction: PrometheusRangeQueryResult = { result: [] };
     const totalCount: PrometheusRangeQueryResult = { result: [{ metric: { route: 'idle-route' }, values: [[0, '0']] }] };
-    expect(processFractionResponse(fraction, totalCount, 'route', 1)).toEqual([
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
+      { value: 'idle-route', count: 0, impliedTotal: 0, percentage: 0 },
+    ]);
+  });
+
+  it('coalesces a literal NaN fraction sample to 0 instead of letting it poison the whole label\'s percentages', () => {
+    // histogram_fraction returns a present sample with value NaN for a zero-observation group, not an
+    // absent series. Left uncoalesced, NaN * anything is NaN, which propagates into count and then into
+    // grandTotal's sum, turning every value in the label to 0%, not just this one.
+    const fraction: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'idle-route' }, values: [[0, 'NaN']] },
+        { metric: { route: 'checkout' }, values: [[0, '0.5']] },
+      ],
+    };
+    const totalCount: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'idle-route' }, values: [[0, '0']] },
+        { metric: { route: 'checkout' }, values: [[0, '20']] },
+      ],
+    };
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
+      { value: 'checkout', count: 10, impliedTotal: 20, percentage: 100 },
       { value: 'idle-route', count: 0, impliedTotal: 0, percentage: 0 },
     ]);
   });
@@ -425,26 +318,47 @@ describe('processFractionResponse', () => {
   it('defaults count to 0 when a value has no matching total-count sample', () => {
     const fraction: PrometheusRangeQueryResult = { result: [{ metric: { route: 'checkout' }, values: [[0, '0.5']] }] };
     const totalCount: PrometheusRangeQueryResult = { result: [] };
-    expect(processFractionResponse(fraction, totalCount, 'route', 1)).toEqual([
-      { value: 'checkout', count: 0, impliedTotal: 0, percentage: 50 },
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
+      { value: 'checkout', count: 0, impliedTotal: 0, percentage: 0 },
     ]);
   });
 
-  it('sorts by percentage descending', () => {
+  it('includes a value seen only by the presence query, at 0%, instead of omitting it entirely', () => {
+    // Mirrors the counter path: count() only needs 1 raw sample to prove a series exists, cheaper than
+    // rate()'s 2-sample minimum, so a value can show up here even when a narrow window gives rate()
+    // nothing to work with for either the fraction or total-count query.
+    const presence: PrometheusRangeQueryResult = { result: [{ metric: { route: 'sparse-route' }, values: [[0, '1']] }] };
+    expect(processFractionResponse({ result: [] }, { result: [] }, presence, 'route', 1)).toEqual([
+      { value: 'sparse-route', count: 0, impliedTotal: 0, percentage: 0 },
+    ]);
+  });
+
+  it('sorts by percentage descending among active values, and sinks zero-volume values to the bottom regardless of percentage', () => {
     const fraction: PrometheusRangeQueryResult = {
       result: [
         { metric: { route: 'checkout' }, values: [[0, '0.1']] },
         { metric: { route: 'search' }, values: [[0, '0.9']] },
+        { metric: { route: 'idle-route' }, values: [[0, '0.99']] },
       ],
     };
-    expect(processFractionResponse(fraction, { result: [] }, 'route', 1)).toEqual([
-      { value: 'search', count: 0, impliedTotal: 0, percentage: 90 },
-      { value: 'checkout', count: 0, impliedTotal: 0, percentage: 10 },
+    const totalCount: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'checkout' }, values: [[0, '100']] },
+        { metric: { route: 'search' }, values: [[0, '100']] },
+        { metric: { route: 'idle-route' }, values: [[0, '0']] },
+      ],
+    };
+    // idle-route has the highest self-ratio (0.99) but zero volume, so it must sink to the bottom
+    // rather than sort first, which is exactly the bug this whole rewrite fixes.
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
+      { value: 'search', count: 90, impliedTotal: 100, percentage: 90 },
+      { value: 'checkout', count: 10, impliedTotal: 100, percentage: 10 },
+      { value: 'idle-route', count: 0, impliedTotal: 0, percentage: 0 },
     ]);
   });
 
   it('returns an empty array when the fraction response is undefined', () => {
-    expect(processFractionResponse(undefined, undefined, 'route', 1)).toEqual([]);
+    expect(processFractionResponse(undefined, undefined, undefined, 'route', 1)).toEqual([]);
   });
 });
 
@@ -461,6 +375,14 @@ describe('getHistogramValueTooltip', () => {
     expect(tooltip).toContain('1440');
     expect(tooltip).toContain('10');
     expect(tooltip).toContain('14400');
+  });
+
+  it('returns a "no activity" message, not the observations sentence, when impliedTotal is present but zero', () => {
+    const tooltip = getHistogramValueTooltip(
+      { value: 'idle-route', count: 0, impliedTotal: 0, percentage: 0 },
+      { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY }
+    );
+    expect(tooltip).toBe('No activity in this window.');
   });
 });
 

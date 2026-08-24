@@ -24,7 +24,12 @@ import { VAR_DATASOURCE, VAR_FILTERS, VAR_METRIC } from 'shared/shared';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
 import { type ActiveFilter } from './attributeDistributionState';
-import { getOtelPriorityAttributes, groupFiltersByFieldAndOperator, PrometheusAttributeExplorer } from './PrometheusAttributeExplorer';
+import {
+  getOtelPriorityAttributes,
+  groupFiltersByFieldAndOperator,
+  isHistogramWithThreshold,
+  PrometheusAttributeExplorer,
+} from './PrometheusAttributeExplorer';
 import { MetricScene } from '../MetricScene';
 
 function toError(e: unknown): Error {
@@ -34,6 +39,7 @@ function toError(e: unknown): Error {
 interface AttributeExplorerSceneState extends SceneObjectState {
   attributeLabels: Record<string, string>;
   datasourceUid: string;
+  metric: string;
   metricType: MetricType;
   // False while OTel-shape detection is in flight for the current query. The explorer stays unmounted
   // until true, since AttributeDistribution reads priorityAttributes once and won't reorder if it
@@ -69,6 +75,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
       key: 'attribute-explorer',
       attributeLabels: {},
       datasourceUid: '',
+      metric: '',
       metricType: 'gauge',
       otelPriorityReady: false,
       priorityAttributes: [],
@@ -124,7 +131,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     const dsVariable = sceneGraph.lookupVariable(VAR_DATASOURCE, this);
     const datasourceUid = (dsVariable?.getValue()?.toString() ?? '') as string;
 
-    this.setState({ datasourceUid, query });
+    this.setState({ datasourceUid, metric, query });
     this._resolveOtelPriority(datasourceUid, query);
   }
 
@@ -202,14 +209,17 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<AttributeExplorerScene>) => {
-    const { attributeLabels, datasourceUid, metricType, otelPriorityReady, priorityAttributes, query, selectedFilters, timeRange } =
+    const { attributeLabels, datasourceUid, metric, metricType, otelPriorityReady, priorityAttributes, query, selectedFilters, timeRange } =
       model.useState();
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const { histogramRange } = metricScene.useState();
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const styles = useStyles2(getStyles, chromeHeaderHeight);
 
-    if (!datasourceUid || !query) {
+    // The Attribute Explorer only supports histogram metrics (see PrometheusAttributeExplorerProps).
+    // This also narrows metricType to HistogramMetricType for the JSX below via isHistogramWithThreshold's
+    // type predicate, so the prop type-checks without a separate cast.
+    if (!datasourceUid || !query || !isHistogramWithThreshold(metricType)) {
       return null;
     }
 
@@ -228,8 +238,10 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
             attributeLabels={attributeLabels}
             datasourceUid={datasourceUid}
             histogramRange={histogramRange}
+            metric={metric}
             metricType={metricType}
             onFiltersChange={(filters) => model.handleFiltersChange(filters)}
+            onHistogramRangeChange={(range) => metricScene.setHistogramRange(range)}
             priorityAttributes={priorityAttributes}
             query={query}
             selectedFilters={selectedFilters}
