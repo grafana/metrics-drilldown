@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.5.1](https://github.com/grafana/metrics-drilldown/compare/v2.5.0...v2.5.1) (2026-08-24)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** bump pnpm overrides for CVE remediation ([6d7a43f](https://github.com/grafana/metrics-drilldown/commit/6d7a43f03ac743498f485c3efa908c98f728680f))
+* **deps:** resolve pnpm audit vulnerabilities ([#1392](https://github.com/grafana/metrics-drilldown/issues/1392)) ([6d7a43f](https://github.com/grafana/metrics-drilldown/commit/6d7a43f03ac743498f485c3efa908c98f728680f))
+* histogram breakdown values bug in applying function ([#1401](https://github.com/grafana/metrics-drilldown/issues/1401)) ([a9e9c62](https://github.com/grafana/metrics-drilldown/commit/a9e9c62e6eeef9647e6d1cd97cde830ebff219ec))
+* native histogram no data bug ([#1380](https://github.com/grafana/metrics-drilldown/issues/1380)) ([8e9d6b5](https://github.com/grafana/metrics-drilldown/commit/8e9d6b5613abfc7ee5a6c1356baead437cc9bab7))
+* show native histogram label breakdown correctly ([#1394](https://github.com/grafana/metrics-drilldown/issues/1394)) ([9582187](https://github.com/grafana/metrics-drilldown/commit/9582187327a49107434489c42301e5a326199234))
+* use derived metric type in config presets to fix native histogram bug ([#1396](https://github.com/grafana/metrics-drilldown/issues/1396)) ([b1b9831](https://github.com/grafana/metrics-drilldown/commit/b1b983113050c8e22e5a446ece6bf432e872597e))
+
+
+### 🧹 Chore
+
+* **deps:** Update dependency @grafana/plugin-e2e to v3.11.0 ([#1382](https://github.com/grafana/metrics-drilldown/issues/1382)) ([471f506](https://github.com/grafana/metrics-drilldown/commit/471f5068621273e254a3a03fd5e50497d007a0f7))
+* **deps:** Update dependency @testing-library/jest-dom to v7 ([#1387](https://github.com/grafana/metrics-drilldown/issues/1387)) ([dec381f](https://github.com/grafana/metrics-drilldown/commit/dec381f5211c5366e5c5b708e08647a5f919cbcd))
+* **deps:** Update GitHub Actions to v7 ([#1390](https://github.com/grafana/metrics-drilldown/issues/1390)) ([7cedaaf](https://github.com/grafana/metrics-drilldown/commit/7cedaafc24e122573bebfb847d880a067401db28))
+* **deps:** update grafana/plugin-ci-workflows/ci-cd-workflows action to v11.1.0 ([#1391](https://github.com/grafana/metrics-drilldown/issues/1391)) ([47a4a81](https://github.com/grafana/metrics-drilldown/commit/47a4a81471df7e364186407668badf99b71505f0))
+* **deps:** Update TypeScript and linting ([#1383](https://github.com/grafana/metrics-drilldown/issues/1383)) ([39d8161](https://github.com/grafana/metrics-drilldown/commit/39d816110e2a9ea31d5651a3f7f31165db89d906))
+* remove bottom border between filters and quicksearch ([#1400](https://github.com/grafana/metrics-drilldown/issues/1400)) ([c560967](https://github.com/grafana/metrics-drilldown/commit/c5609675e1655de38fa005332c6eeb48e5b20bd9))
+* update release-please ([#1399](https://github.com/grafana/metrics-drilldown/issues/1399)) ([1e841db](https://github.com/grafana/metrics-drilldown/commit/1e841dbf3a292ff0c33c5e24e230156ce27122ff))
+
 ## [2.5.0](https://github.com/grafana/metrics-drilldown/compare/v2.4.0...v2.5.0) (2026-08-13)
 
 

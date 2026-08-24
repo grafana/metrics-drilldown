@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Gruppieren nach"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "Beim Laden der Metriken ist ein Fehler aufgetreten!",
       "no-values": "Für die aktuellen Filter und den Zeitbereich wurden keine Label-Werte gefunden.",

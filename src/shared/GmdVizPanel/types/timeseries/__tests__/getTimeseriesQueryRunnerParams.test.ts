@@ -309,6 +309,105 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       );
     });
 
+    test('defaults native-histogram metrics to a sum-by-label query via histogram_sum, not avg', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_request_duration_seconds', type: 'native-histogram' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'cluster',
+        },
+      });
+
+      expect(result.isRateQuery).toBe(false);
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'http_request_duration_seconds-by-cluster',
+          expr: 'histogram_sum(sum by (cluster) (rate(http_request_duration_seconds{__ignore_usage__="", ${filters:raw}}[$__rate_interval])))',
+          legendFormat: '{{cluster}}',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+
+    test('defaults classic-histogram metrics to a sum-by-label query using the _sum sibling series', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_request_duration_seconds_bucket', type: 'classic-histogram' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'cluster',
+        },
+      });
+
+      expect(result.queries).toStrictEqual([
+        {
+          refId: 'http_request_duration_seconds_bucket-by-cluster',
+          expr: 'sum by (cluster) (rate(http_request_duration_seconds_sum{__ignore_usage__="", ${filters:raw}}[$__rate_interval]))',
+          legendFormat: '{{cluster}}',
+          fromExploreMetrics: true,
+        },
+      ]);
+    });
+
+    test('applies customRateInterval override to histogram sum-by-label rate window', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_request_duration_seconds', type: 'native-histogram' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'cluster',
+          customRateInterval: '1h',
+        },
+      });
+
+      expect(result.queries[0].expr).toBe(
+        'histogram_sum(sum by (cluster) (rate(http_request_duration_seconds{__ignore_usage__="", ${filters:raw}}[1h])))'
+      );
+    });
+
+    test.each([
+      ['p99', 0.99],
+      ['p95', 0.95],
+      ['p75', 0.75],
+      ['p50', 0.5],
+    ] as const)('native-histogram with histogramBreakdownFn=%s builds a histogram_quantile(%s) query', (fn, parameter) => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_request_duration_seconds', type: 'native-histogram' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'cluster',
+          histogramBreakdownFn: fn,
+        },
+      });
+
+      expect(result.queries[0].expr).toBe(
+        `histogram_quantile(${parameter},sum by (cluster) (rate(http_request_duration_seconds{__ignore_usage__="", \${filters:raw}}[$__rate_interval])))`
+      );
+    });
+
+    test('classic-histogram with histogramBreakdownFn=p99 keeps le in the inner sum', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_request_duration_seconds_bucket', type: 'classic-histogram' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          groupBy: 'cluster',
+          histogramBreakdownFn: 'p99',
+        },
+      });
+
+      expect(result.queries[0].expr).toBe(
+        'histogram_quantile(0.99,sum by (cluster, le) (rate(http_request_duration_seconds_bucket{__ignore_usage__="", ${filters:raw}}[$__rate_interval])))'
+      );
+    });
+
     describe('with UTF-8 labels', () => {
       test('wraps UTF-8 label in quotes for by clause and legendFormat', () => {
         const result = getTimeseriesQueryRunnerParams({

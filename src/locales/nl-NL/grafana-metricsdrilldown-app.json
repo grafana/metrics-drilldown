@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Groeperen op"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "Er is een fout opgetreden bij het laden van metrics!",
       "no-values": "Geen labelwaarden gevonden voor de huidige filters en het huidige tijdsbereik.",

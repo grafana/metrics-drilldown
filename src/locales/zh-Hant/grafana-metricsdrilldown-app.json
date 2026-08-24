@@ -19,6 +19,10 @@
     "group-by": {
       "label": "分組依據"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "載入指標時發生錯誤！",
       "no-values": "沒有找到目前篩選條件和時間範圍的標籤值。",
