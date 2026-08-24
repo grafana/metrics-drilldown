@@ -19,6 +19,10 @@
     "group-by": {
       "label": "分组方式"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "加载指标时出错！",
       "no-values": "找不到当前筛选条件和时间范围的标签值。",

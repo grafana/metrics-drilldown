@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Agrupar por"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "Erro ao carregar métricas!",
       "no-values": "Nenhum valor de etiqueta encontrado para os filtros e intervalo de tempo atuais.",

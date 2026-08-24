@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Grupuj według"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "Błąd podczas wczytywania wskaźników",
       "no-values": "Nie znaleziono wartości etykiet dla bieżących filtrów i zakresu czasu.",
