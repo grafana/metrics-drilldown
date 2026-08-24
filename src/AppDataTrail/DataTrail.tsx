@@ -673,7 +673,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       background,
       zIndex: theme.zIndex.navbarFixed,
       top: headerHeight,
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
   };
 }

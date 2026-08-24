@@ -19,7 +19,7 @@ export class HistogramBreakdownFnVariable extends CustomVariable {
   constructor() {
     super({
       name: VAR_HISTOGRAM_BREAKDOWN_FN,
-      label: t('breakdown.histogram-fn.label', 'Histogram breakdown function'),
+      label: t('breakdown.histogram-fn.label', 'Histogram function'),
       query: HISTOGRAM_BREAKDOWN_FN_OPTIONS.map(({ label, value }) => `${label} : ${value}`).join(','),
       value: 'sum',
       text: t('breakdown.histogram-fn.default-text', 'Sum'),
