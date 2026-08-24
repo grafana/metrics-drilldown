@@ -69,8 +69,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       });
     }
 
-    this.subscribeToMainPanelMetricType();
-    this.updateBody(groupByVariable);
+    this.subscribeToMainPanelMetricType(groupByVariable);
   }
 
   private getVariable(): QueryVariable {
@@ -91,27 +90,43 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     return sceneGraph.findDescendents(metricScene.state.body, GmdVizPanel)[0];
   }
 
-  private subscribeToMainPanelMetricType() {
+  private subscribeToMainPanelMetricType(groupByVariable: QueryVariable) {
     const mainPanel = this.getMainPanel();
+
+    this.updateBody(groupByVariable);
+
     if (!mainPanel) {
       return;
     }
 
     this._subs.add(
       mainPanel.subscribeToState((newState, prevState) => {
-        if (newState.metricType !== prevState.metricType) {
+        if (
+          newState.metricType !== prevState.metricType ||
+          newState.metricTypeResolved !== prevState.metricTypeResolved
+        ) {
           this.updateBody(this.getVariable());
         }
       })
     );
   }
 
+  // metricType is a fast sync guess until metricTypeResolved flips true; building the body before then
+  // would briefly query with the wrong function. Wait here -- the mainPanel subscription above re-triggers
+  // this once it resolves, for whichever call site got skipped.
   private updateBody(groupByVariable: QueryVariable) {
+    const mainPanel = this.getMainPanel();
+    if (mainPanel && !mainPanel.state.metricTypeResolved) {
+      return;
+    }
+
     const { metric: name } = this.state;
     const trail = getTrailFor(this);
-    const type: MetricType = this.getMainPanel()?.state.metricType ?? 'gauge';
+    const type: MetricType = mainPanel?.state.metricType ?? 'gauge';
 
     const metric = { name, type };
+    // See MetricLabelValuesList's constructor for why this is passed explicitly instead of looked up there.
+    const histogramBreakdownFn = this.getHistogramBreakdownFnVariable().state.value as HistogramBreakdownFn | undefined;
 
     const newBody = groupByVariable.hasAllValue()
       ? new MetricLabelsList({ metric })
@@ -119,6 +134,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
           metric,
           label: groupByVariable.state.value as string,
           binaryQuery: trail.state.binaryQuery,
+          histogramBreakdownFn,
         });
 
     this.setState({ body: newBody, metricType: type });
@@ -151,7 +167,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
               <div className={styles.leftControls}>
                 <groupByVariable.Component model={groupByVariable} />
                 {isHistogram && (
-                  <Field label={t('breakdown.histogram-fn.label', 'Histogram breakdown function')} className={styles.field}>
+                  <Field label={t('breakdown.histogram-fn.label', 'Histogram function')} className={styles.field}>
                     <histogramBreakdownFnVariable.Component model={histogramBreakdownFnVariable} />
                   </Field>
                 )}
