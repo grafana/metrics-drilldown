@@ -4,6 +4,7 @@ import { reportInteraction } from '@grafana/runtime';
 import { type ExposedComponentName } from 'exposedComponents/components';
 import { getTrackedFlagPayload } from 'shared/featureFlags/tracking';
 import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
+import { type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { type PanelType } from 'shared/GmdVizPanel/types/available-panel-types';
 import { type SortSeriesByOption } from 'shared/services/sorting';
@@ -33,6 +34,8 @@ type Interactions = {
   };
   // User changed the breakdown layout
   breakdown_layout_changed: { layout: LayoutType };
+  // User changed the by-label breakdown aggregation function for a histogram metric
+  histogram_breakdown_fn_changed: { fn: HistogramBreakdownFn };
   // A metric exploration has started due to one of the following causes
   exploration_started: {
     cause: 'bookmark_clicked';
@@ -197,13 +200,13 @@ type Interactions = {
   quick_search_assistant_mode_entered: { from: 'question_mark' | 'tab' | 'button' };
   // User opens the save query modal
   saved_query_save_modal_opened: {};
-  // User successfully saves a query (local storage only — Query Library save has no callback)
+  // User successfully saves a query (local storage only, Query Library save has no callback)
   saved_query_saved: { source: 'local' };
   // User opens the load query modal
   saved_query_load_modal_opened: {};
-  // User toggles between saved queries in the load list (local storage only — Query Library has no callback)
+  // User toggles between saved queries in the load list (local storage only, Query Library has no callback)
   saved_query_toggled: { source: 'local' };
-  // User deletes a saved query (local storage only — Query Library delete has no callback)
+  // User deletes a saved query (local storage only, Query Library delete has no callback)
   saved_query_deleted: { source: 'local' };
   // User loads a saved query (localStorage)
   saved_query_loaded: {};

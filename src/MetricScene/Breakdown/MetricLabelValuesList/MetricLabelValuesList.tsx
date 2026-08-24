@@ -25,12 +25,13 @@ import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'MetricsReducer/Metric
 import { getPreferredConfigForMetric } from 'shared/GmdVizPanel/config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
-import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { GmdVizPanel, type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
+import { buildStaticTimeseriesPanel } from 'shared/GmdVizPanel/types/timeseries/buildTimeseriesPanel';
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { addUnspecifiedLabel } from 'shared/GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
-import { trailDS } from 'shared/shared';
+import { trailDS, VAR_HISTOGRAM_BREAKDOWN_FN } from 'shared/shared';
 import { injectLabelMatcher } from 'shared/utils/injectLabelMatcher';
 import { getTrailFor } from 'shared/utils/utils';
 
@@ -61,10 +62,15 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     metric,
     label,
     binaryQuery,
+    histogramBreakdownFn,
   }: {
     metric: MetricLabelsValuesListState['metric'];
     label: MetricLabelsValuesListState['label'];
     binaryQuery?: string;
+    // Passed by LabelBreakdownScene rather than looked up here: this constructor runs before `this` is
+    // parented, so sceneGraph.lookupVariable can't reach it yet. Drives the query below, which per-value
+    // panels render directly from (see getLayoutChild).
+    histogramBreakdownFn?: HistogramBreakdownFn;
   }) {
     const queryParams = getTimeseriesQueryRunnerParams({
       metric,
@@ -76,6 +82,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         // For a binary (ratio) insight, enumerate values from the grouped binary (sum by(label)(binary))
         // rather than the anchor metric. Requires clean/bare operands so the label survives grouping.
         binaryExpr: binaryQuery,
+        histogramBreakdownFn,
       },
     });
 
@@ -193,6 +200,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   private buildSinglePanel() {
     const { metric, label } = this.state;
     const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
+    const histogramBreakdownFn = sceneGraph.lookupVariable(VAR_HISTOGRAM_BREAKDOWN_FN, this)?.getValue() as
+      | HistogramBreakdownFn
+      | undefined;
 
     return new GmdVizPanel({
       metric: metric.name,
@@ -209,6 +219,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         customRateInterval: entry?.customRateInterval,
         customFunction: entry?.customFunction,
         kgMetricType: entry?.metricType,
+        histogramBreakdownFn,
       },
     });
   }
@@ -219,6 +230,9 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
     // For a binary (ratio) insight, page filters do not apply, so hide the per-value "Add to filters" action.
     const isBinaryQuery = Boolean(binaryQuery);
+    // Histogram panels render from this list's own shared query below (see buildStaticTimeseriesPanel)
+    // instead of each reissuing its own.
+    const isHistogram = metric.type === 'classic-histogram' || metric.type === 'native-histogram';
 
     return new SceneByFrameRepeater({
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
@@ -270,35 +284,53 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         const isEmptyLabelValue = labelValueFromDataFrame.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
         const labelValue = isEmptyLabelValue ? '' : labelValueFromDataFrame;
 
-        const vizPanel = new GmdVizPanel({
-          metric: metric.name,
-          discardUserPrefs: true,
-          panelOptions: {
-            ...prefMetricConfig?.panelOptions,
-            title: labelValueFromDataFrame,
-            fixedColorIndex: frameIndex,
-            description: '',
-            headerActions: isEmptyLabelValue || isBinaryQuery
-              ? () => []
-              : () => [new AddToFiltersGraphAction({ labelName: label, labelValue })],
-            menu: () => new PanelMenu({ labelName: label }),
-            // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList)
-            // no worries to add it for all panel types here as it will check if the panel is a timeseries
-            // and if the data frame received is a timeseries before acting
-            behaviors: [publishTimeseriesData()],
-          },
-          queryOptions: {
-            ...prefMetricConfig?.queryOptions,
-            // Binary: render the ratio scoped to this value by injecting {label="value"} into both
-            // operands. Otherwise: the single-metric selector filtered to the value.
-            ...(binaryQuery
-              ? { binaryExpr: injectLabelMatcher(binaryQuery, label, labelValue), binaryLegend: labelValueFromDataFrame }
-              : { labelMatchers: [{ key: label, operator: '=', value: labelValue }] }),
-            customRateInterval: entry?.customRateInterval,
-            customFunction: entry?.customFunction,
-            kgMetricType: entry?.metricType,
-          },
-        });
+        const headerActions = isEmptyLabelValue || isBinaryQuery
+          ? () => []
+          : () => [new AddToFiltersGraphAction({ labelName: label, labelValue })];
+
+        const vizPanel = isHistogram
+          ? buildStaticTimeseriesPanel({
+              metric,
+              data,
+              frame,
+              panelConfig: {
+                type: 'timeseries',
+                title: labelValueFromDataFrame,
+                height: PANEL_HEIGHT.M,
+                fixedColorIndex: frameIndex,
+                description: '',
+                headerActions,
+                menu: () => new PanelMenu({ labelName: label }),
+                behaviors: [publishTimeseriesData()],
+              },
+            })
+          : new GmdVizPanel({
+              metric: metric.name,
+              discardUserPrefs: true,
+              panelOptions: {
+                ...prefMetricConfig?.panelOptions,
+                title: labelValueFromDataFrame,
+                fixedColorIndex: frameIndex,
+                description: '',
+                headerActions,
+                menu: () => new PanelMenu({ labelName: label }),
+                // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList)
+                // no worries to add it for all panel types here as it will check if the panel is a timeseries
+                // and if the data frame received is a timeseries before acting
+                behaviors: [publishTimeseriesData()],
+              },
+              queryOptions: {
+                ...prefMetricConfig?.queryOptions,
+                // Binary: render the ratio scoped to this value by injecting {label="value"} into both
+                // operands. Otherwise: the single-metric selector filtered to the value.
+                ...(binaryQuery
+                  ? { binaryExpr: injectLabelMatcher(binaryQuery, label, labelValue), binaryLegend: labelValueFromDataFrame }
+                  : { labelMatchers: [{ key: label, operator: '=', value: labelValue }] }),
+                customRateInterval: entry?.customRateInterval,
+                customFunction: entry?.customFunction,
+                kgMetricType: entry?.metricType,
+              },
+            });
 
         return new SceneCSSGridItem({ body: vizPanel });
       },

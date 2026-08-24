@@ -478,6 +478,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     return this.datasourceHelper.getMetadataForMetric(metric);
   }
 
+  public getCachedNativeHistogram(metric: string) {
+    return this.datasourceHelper.getCachedNativeHistogram(metric);
+  }
+
+  public setCachedNativeHistogram(metric: string, isNativeHistogram: boolean) {
+    this.datasourceHelper.setCachedNativeHistogram(metric, isNativeHistogram);
+  }
+
   public async fetchRecentMetrics({ interval, extraFilter }: { interval: string; extraFilter?: string }) {
     return this.datasourceHelper.fetchRecentMetrics({ interval, extraFilter });
   }
@@ -665,7 +673,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       background,
       zIndex: theme.zIndex.navbarFixed,
       top: headerHeight,
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
   };
 }
