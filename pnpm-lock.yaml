@@ -98,8 +98,8 @@ importers:
         specifier: ^1.7.2
         version: 1.7.3(@openfeature/core@1.11.0)
       '@prometheus-io/lezer-promql':
-        specifier: ^0.313.0
-        version: 0.313.2(@lezer/highlight@1.2.3)(@lezer/lr@1.4.8)
+        specifier: ^0.314.0
+        version: 0.314.0(@lezer/highlight@1.2.3)(@lezer/lr@1.4.8)
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -1749,8 +1749,8 @@ packages:
       '@lezer/highlight': ^1.1.2
       '@lezer/lr': ^1.2.3
 
-  '@prometheus-io/lezer-promql@0.313.2':
-    resolution: {integrity: sha512-pPSHrMD+MBRPZ4zvut4DH/n75+Ahq2pCuI2lkyEfWO8UfpGv3tquyjx3DhozjCXgsHQtTggoG8Q4eG+ZfVadEw==}
+  '@prometheus-io/lezer-promql@0.314.0':
+    resolution: {integrity: sha512-UAacz1+s6fY5Mh7LEFJ76Ywno/jFLwpuHgZPFi7QBKosHdolxqpybbK11LNd8OXDDQNdoSlcKsohz913GbFNWw==}
     peerDependencies:
       '@lezer/highlight': ^1.1.2
       '@lezer/lr': ^1.2.3
@@ -9010,7 +9010,7 @@ snapshots:
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.8
 
-  '@prometheus-io/lezer-promql@0.313.2(@lezer/highlight@1.2.3)(@lezer/lr@1.4.8)':
+  '@prometheus-io/lezer-promql@0.314.0(@lezer/highlight@1.2.3)(@lezer/lr@1.4.8)':
     dependencies:
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.8
