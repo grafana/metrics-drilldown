@@ -174,7 +174,13 @@ function buildFilterMatchers(filters: ActiveFilter[]): string {
       if (values.length === 1) {
         return `${field}${operator}"${escapePromQLString(values[0])}"`;
       }
-      const alternation = values.map(escapePromQLRegex).join('|');
+      // Two layers, applied in this order deliberately: escapePromQLRegex first produces a valid regex
+      // pattern (escaping regex metacharacters, e.g. "." to "\."); escapePromQLString second makes that
+      // pattern survive the outer PromQL string literal (doubling backslashes, escaping quotes). Doing
+      // only the regex pass left a literal `"` in a filter value able to break out of the string
+      // literal entirely, and left a literal `\` surviving PromQL's own string-unescaping as a single
+      // backslash instead of the escaped-backslash the regex needs, silently matching nothing.
+      const alternation = values.map((v) => escapePromQLString(escapePromQLRegex(v))).join('|');
       const regexOp = operator === '=' ? '=~' : '!~';
       return `${field}${regexOp}"^(${alternation})$"`;
     })
@@ -421,20 +427,27 @@ export function parseDefaultLowerThreshold(response: PrometheusRangeQueryResult 
 // DEFAULT_HISTOGRAM_RANGE's fixed 1, which is meaningless for a metric whose whole distribution lives
 // in milliseconds or nanoseconds (a "_seconds"-suffixed metric is still expressed as a plain float in
 // seconds regardless of how small its typical values are, so a threshold of 1 excludes literally
-// everything for such a metric). Seeds from the metric's overall median (p50), not its observed
-// min/max: histogram_quantile is the one PromQL function that works identically across a classic
-// bucket vector and a native histogram sample, so it's the only type-uniform way to derive a
-// representative value for both without a separate code path per type. A median is also
-// self-calibrating: as long as the metric has any traffic at all in the window, it's guaranteed to
-// land inside that metric's real range, unlike a fixed constant with no relationship to the metric's
-// actual scale.
+// everything for such a metric). histogram_quantile is the one PromQL function that works identically
+// across a classic bucket vector and a native histogram sample, so it's the only type-uniform way to
+// derive a representative value for both without a separate code path per type.
+//
+// p90, not the median: this is deliberately a high percentile, not a "typical value." A threshold
+// exists to highlight unusually large observations, which is a tail question, not a central-tendency
+// one. The median is also structurally fragile here in a way p90 isn't: this seed runs over the WHOLE
+// metric with no field grouping, so one label value that dominates total volume and clusters near zero
+// (e.g. a high-traffic method whose requests carry no payload) can drag the overall median down to a
+// value that falls inside the lowest bucket's interpolation range, producing a seed close to 0 that
+// then reads as "almost all traffic, on every label value" once fed through histogram_fraction,
+// regardless of what that label value's real observations look like. A dominant near-zero label would
+// need to represent over 90% of total volume to pull p90 down the same way, which is a much narrower
+// failure case than the median's over-50%.
 export function fetchDefaultLowerThreshold(context: DatasetContext): Observable<number | undefined> {
   const window = getRangeQueryWindow(context);
   const innerVector =
     context.metricType === 'classic-histogram'
       ? `sum by (le) (rate(${context.query}[${window.stepSeconds}s]))`
       : `sum(rate(${context.query}[${window.stepSeconds}s]))`;
-  const query = `histogram_quantile(0.5, ${innerVector})`;
+  const query = `histogram_quantile(0.9, ${innerVector})`;
 
   return runRangeQuery(context, query, window).pipe(map(parseDefaultLowerThreshold));
 }

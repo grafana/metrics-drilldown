@@ -193,11 +193,31 @@ describe('applyFiltersToSelector', () => {
   });
 
   it('escapes regex metacharacters in multi-value alternations', () => {
+    // Double-escaped, not single: escapePromQLRegex's own backslash must itself survive the outer
+    // PromQL string literal (which unescapes \\ back down to one \ before the regex engine ever sees
+    // it), so each metacharacter's regex-escaping backslash needs a second, string-level backslash on
+    // top of it.
     const filters: ActiveFilter[] = [
       { field: 'path', operator: '=', value: '/a.b' },
       { field: 'path', operator: '=', value: '/c(d)' },
     ];
-    expect(applyFiltersToSelector('my_metric{}', filters)).toBe('my_metric{path=~"^(/a\\.b|/c\\(d\\))$"}');
+    expect(applyFiltersToSelector('my_metric{}', filters)).toBe('my_metric{path=~"^(/a\\\\.b|/c\\\\(d\\\\))$"}');
+  });
+
+  it('escapes a literal quote in a multi-value filter, preventing it from breaking out of the string literal', () => {
+    const filters: ActiveFilter[] = [
+      { field: 'query', operator: '=', value: 'a"b' },
+      { field: 'query', operator: '=', value: 'c' },
+    ];
+    expect(applyFiltersToSelector('my_metric{}', filters)).toBe('my_metric{query=~"^(a\\"b|c)$"}');
+  });
+
+  it('escapes a literal backslash in a multi-value filter so it reaches the regex engine as one escaped backslash, not a stray one', () => {
+    const filters: ActiveFilter[] = [
+      { field: 'query', operator: '=', value: 'a\\b' },
+      { field: 'query', operator: '=', value: 'c' },
+    ];
+    expect(applyFiltersToSelector('my_metric{}', filters)).toBe('my_metric{query=~"^(a\\\\\\\\b|c)$"}');
   });
 
   it('strips a dangling trailing comma left by an empty ${filters:raw} interpolation before joining', () => {
