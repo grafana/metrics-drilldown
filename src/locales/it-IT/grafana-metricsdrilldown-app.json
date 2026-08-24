@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Raggruppa per"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "Errore durante il caricamento delle metriche!",
       "no-values": "Nessun valore di etichetta trovato per i filtri e l'intervallo di tempo correnti.",

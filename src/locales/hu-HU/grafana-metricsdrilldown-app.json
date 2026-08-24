@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Csoportosítási szempont"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "Hiba történt a metrikák betöltésekor!",
       "no-values": "Nem található címkeérték az aktuális szűrőkhöz és időtartományhoz.",
