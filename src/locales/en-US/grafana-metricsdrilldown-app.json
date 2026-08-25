@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Breakdown",
-      "query-results": "Query Results",
+      "query-results": "Query results",
       "query-results-description": "Instant query data in table format",
       "related-logs": "Related logs",
       "related-logs-description": "Relevant logs based on current label filters and time range",
@@ -20,6 +20,7 @@
     "description": "Spot patterns and narrow down root causes by exploring how your data breaks down across key attributes. Click any value to filter your results.",
     "description-aria-label": "What do these percentages mean?",
     "description-histogram": "This shows each value's share of the label's observations {{range}}. Values with no activity are sorted last.",
+    "detection-error": "Failed to load attributes for this dataset.",
     "discovering-fields": "Discovering attributes…",
     "error": "Failed to load",
     "expand": "Expand",
@@ -30,6 +31,7 @@
     "histogram-range-between": "between {{lower}} and {{upper}}",
     "histogram-range-over": "over {{value}}",
     "histogram-range-under": "under {{value}}",
+    "invalid-range": "Upper limit must be greater than lower limit",
     "lower-limit": "Lower limit",
     "lower-limit-unit": "Lower limit ({{unit}})",
     "no-extra-fields-shown": "No extra fields shown",
@@ -59,7 +61,7 @@
     },
     "histogram-fn": {
       "default-text": "Sum",
-      "label": "Histogram breakdown function"
+      "label": "Histogram function"
     },
     "label-values-list": {
       "error-title": "Error while loading metrics!",
@@ -118,9 +120,9 @@
     "title": "Fatal error!"
   },
   "explore-attributes-action": {
-    "label": "Explore Attributes",
+    "label": "Histogram distribution",
     "tooltip": {
-      "description": "The Attribute Explorer surfaces the labels and attribute values present for this metric so you can filter and drill down into them."
+      "description": "Explore the distribution of histogram observation for labels and attribute values for this metric."
     }
   },
   "exposed-component-error-boundary": {
@@ -216,7 +218,7 @@
     "search-aria-label": "Quick search metrics"
   },
   "metric-graph": {
-    "explore-attributes": "Explore Attributes"
+    "explore-attributes": "Histogram analysis"
   },
   "metrics": {
     "metrics-drilldown": {
@@ -286,8 +288,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Check <2>our docs</2> to learn more or<5></5><6>try it online</6> in Grafana Play!",
-    "no-datasource": "We noticed there is no Prometheus datasource configured.<1></1>Add a <4>Prometheus datasource</4> to view metrics.",
+    "learn-more": "Check <2>our docs</2> to learn more or<br/><6>try it online</6> in Grafana Play!",
+    "no-datasource": "We noticed there is no Prometheus datasource configured.<br/>Add a <4>Prometheus datasource</4> to view metrics.",
     "title": "Welcome to Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -387,7 +389,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Date created:",
-      "empty-state": "No bookmarks yet for the<1></1>current data source.",
+      "empty-state": "No bookmarks yet for the<br/>current data source.",
       "remove-tooltip": "Remove bookmark"
     },
     "close-aria-label": "Close",

@@ -132,6 +132,7 @@ export function AttributeDistribution({
       attributes: [],
       data: {},
       detecting: false,
+      detectionError: false,
       selectedFilters: initFilters,
       userPinnedAttributes: [],
       valueSnapshot: null,
@@ -289,11 +290,18 @@ export function AttributeDistribution({
     async function run() {
       setExtraFieldsShown(0);
       dispatch({ type: 'DETECTING' });
-      let detected: AttributeConfig[] = [];
+      let detected: AttributeConfig[];
       try {
         detected = await fetchAttributesRef.current(contextRef.current);
       } catch (e) {
         logger.error(toError(e));
+        // Stops here, not falling through to SET_ATTRIBUTES with an empty list: that would render the
+        // same "no fields detected" message a genuinely label-less dataset shows, hiding a real
+        // network/datasource/query failure from the user as if there were simply nothing to show.
+        if (!cancelled) {
+          dispatch({ type: 'DETECTION_ERROR' });
+        }
+        return;
       }
       if (cancelled) {
         return;
@@ -448,7 +456,13 @@ export function AttributeDistribution({
         </div>
       )}
 
-      {!state.detecting && state.attributes.length === 0 && (
+      {!state.detecting && state.detectionError && (
+        <div className={styles.emptyState}>
+          {t('attribute-explorer.detection-error', 'Failed to load attributes for this dataset.')}
+        </div>
+      )}
+
+      {!state.detecting && !state.detectionError && state.attributes.length === 0 && (
         <div className={styles.emptyState}>
           {t('attribute-explorer.no-fields-detected', 'No fields detected for this dataset.')}
         </div>
@@ -606,14 +620,22 @@ function AttributeSection({
         <div className={styles.sectionHeader}>
           {/* A real <button>, wrapping only the label, not the badge: nesting the badge's own
           focusable control inside this button would be invalid (a button can't contain another
-          interactive element), and a browser/screen-reader can behave unpredictably around it. */}
-          <button
-            className={cx(styles.sectionLabelButton, hasActiveFilter && styles.sectionHeaderActive)}
-            type="button"
-            onClick={isExpandable ? onToggle : undefined}
-          >
-            <span className={styles.sectionLabel}>{config.attribute_name}</span>
-          </button>
+          interactive element), and a browser/screen-reader can behave unpredictably around it.
+          Rendered only when there's something to toggle -- see sectionLabelStatic below for why. */}
+          {isExpandable ? (
+            <button
+              className={cx(styles.sectionLabelButton, hasActiveFilter && styles.sectionHeaderActive)}
+              type="button"
+              aria-expanded={expanded}
+              onClick={onToggle}
+            >
+              <span className={styles.sectionLabel}>{config.attribute_name}</span>
+            </button>
+          ) : (
+            <span className={cx(styles.sectionLabelStatic, hasActiveFilter && styles.sectionHeaderActive)}>
+              <span className={styles.sectionLabel}>{config.attribute_name}</span>
+            </span>
+          )}
           {badgeText && (
             // IconButton, not a custom role="button" span: it's a real <button> (so no ARIA role is
             // being asserted without the semantics/behavior to back it up), sitting as a sibling of
@@ -882,6 +904,19 @@ const getStyles = (theme: GrafanaTheme2) => ({
     '&:hover': {
       color: theme.colors.text.maxContrast,
     },
+  }),
+  // Used instead of sectionLabelButton when the section has nothing to expand: a real <button> is
+  // always focusable/tabbable regardless of whether it has an onClick handler, so rendering one here
+  // with onClick={undefined} would leave keyboard users landing on a control that does nothing on
+  // Enter/Space. A plain, non-interactive span has no such implicit affordance to violate.
+  sectionLabelStatic: css({
+    alignItems: 'center',
+    color: theme.colors.text.primary,
+    display: 'flex',
+    fontSize: theme.typography.bodySmall.fontSize,
+    fontWeight: theme.typography.fontWeightMedium,
+    minWidth: 0,
+    textAlign: 'left',
   }),
   expandToggle: css({
     alignItems: 'center',

@@ -41,6 +41,10 @@ export interface State {
   attributes: AttributeConfig[];
   data: Record<string, AttributeState>;
   detecting: boolean;
+  // True when fetchAttributes itself failed (network/datasource/query error), as opposed to a dataset
+  // that genuinely has no labels. Both look identical as "attributes.length === 0" otherwise, which
+  // rendered the same "no fields detected" message for a real error as for an empty dataset.
+  detectionError: boolean;
   selectedFilters: ActiveFilter[];
   // Attributes the user explicitly pinned via the search combobox.
   // Rendered between priority and non-priority fields, always visible.
@@ -52,6 +56,7 @@ export interface State {
 
 export type Action =
   | { type: 'DETECTING' }
+  | { type: 'DETECTION_ERROR' }
   | { configs: AttributeConfig[]; type: 'SET_ATTRIBUTES' }
   | { field: string; type: 'LOADING' }
   | { field: string; type: 'LOADED'; values: AttributeValueCount[] }
@@ -98,7 +103,10 @@ export function reducer(state: State, action: Action): State {
         // fetch in flight yet, so defaulting it to true would spin forever until the user reveals it.
         resetData[field] = { error: false, expanded: attrState.expanded, loading: false, values: [] };
       }
-      return { ...state, data: resetData, detecting: true, valueSnapshot: null };
+      return { ...state, data: resetData, detecting: true, detectionError: false, valueSnapshot: null };
+    }
+    case 'DETECTION_ERROR': {
+      return { ...state, detecting: false, detectionError: true };
     }
     case 'SET_ATTRIBUTES': {
       const detectedFields = new Set(action.configs.map((c) => c.attribute));
@@ -114,7 +122,7 @@ export function reducer(state: State, action: Action): State {
         // false, not true: see the identical reasoning in the DETECTING case above.
         data[c.attribute] = state.data[c.attribute] ?? { error: false, expanded: false, loading: false, values: [] };
       }
-      return { ...state, attributes: merged, data, detecting: false };
+      return { ...state, attributes: merged, data, detecting: false, detectionError: false };
     }
     case 'LOADING': {
       const existing = state.data[action.field];

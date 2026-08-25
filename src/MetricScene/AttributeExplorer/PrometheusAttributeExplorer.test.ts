@@ -471,6 +471,51 @@ describe('processFractionResponse', () => {
   it('returns an empty array when the fraction response is undefined', () => {
     expect(processFractionResponse(undefined, undefined, undefined, 'route', 1)).toEqual([]);
   });
+
+  it('keeps a sub-1 windowed estimate\'s real contribution in the percentage math instead of rounding it to 0 first', () => {
+    // A raw windowed estimate of 0.4 rounds to a display count of 0, but must still count for its true
+    // 0.4 share of grandTotal, not vanish from the denominator entirely (which would silently inflate
+    // every other value's percentage and zero this one's out, even though it has real, if tiny, volume).
+    const fraction: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'large' }, values: [[0, '1']] },
+        { metric: { route: 'small' }, values: [[0, '1']] },
+      ],
+    };
+    const totalCount: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'large' }, values: [[0, '50']] },
+        { metric: { route: 'small' }, values: [[0, '0.4']] },
+      ],
+    };
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
+      { value: 'large', count: 50, impliedTotal: 50, percentage: 99 },
+      { value: 'small', count: 0, impliedTotal: 0, percentage: 1 },
+    ]);
+  });
+
+  it('does not sink a small-but-genuinely-nonzero implied total to the bottom as if it were confirmed quiet', () => {
+    // active-but-tiny's implied total (0.4) rounds to a *displayed* 0, identical to truly-quiet's exact
+    // 0, but the sort must tell them apart using the unrounded estimate: only truly-quiet (an exact 0)
+    // belongs at the bottom.
+    const fraction: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'active-but-tiny' }, values: [[0, '1']] },
+        { metric: { route: 'some-normal' }, values: [[0, '0.5']] },
+        { metric: { route: 'truly-quiet' }, values: [[0, '0.99']] },
+      ],
+    };
+    const totalCount: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'active-but-tiny' }, values: [[0, '0.4']] },
+        { metric: { route: 'some-normal' }, values: [[0, '10']] },
+        { metric: { route: 'truly-quiet' }, values: [[0, '0']] },
+      ],
+    };
+    const result = processFractionResponse(fraction, totalCount, noPresence, 'route', 1);
+    expect(result.map((r) => r.value)).toEqual(['some-normal', 'active-but-tiny', 'truly-quiet']);
+    expect(result.find((r) => r.value === 'active-but-tiny')?.percentage).toBeGreaterThan(0);
+  });
 });
 
 describe('getHistogramValueTooltip', () => {

@@ -38,6 +38,29 @@ function toError(e: unknown): Error {
   return e instanceof Error ? e : new Error(String(e));
 }
 
+// Canonical per-field signature (operator+value pairs, order-independent so a multi-value field's
+// entries can be compared regardless of ordering), used by handleFiltersChange below to detect which
+// fields a given call actually changed. `filters` there is AttributeDistribution's full, controlled
+// list, which also includes fields it absorbed as "external" (page-set) and is merely passing through
+// unchanged -- not fields the sidebar itself touched.
+function canonicalFilterSignatures(filters: ActiveFilter[]): Map<string, string> {
+  const byField = new Map<string, Array<[string, string]>>();
+  for (const f of filters) {
+    const entries = byField.get(f.field) ?? [];
+    entries.push([f.operator, f.value]);
+    byField.set(f.field, entries);
+  }
+  // JSON.stringify over a sorted array, not manual delimiter concatenation: a delimiter character
+  // could collide with a real filter value and make two genuinely different value sets compare as
+  // equal (or vice versa), silently defeating the comparison this signature exists for.
+  const signatures = new Map<string, string>();
+  for (const [field, entries] of byField) {
+    const sorted = [...entries].sort(([opA, valA], [opB, valB]) => (opA === opB ? valA.localeCompare(valB) : opA.localeCompare(opB)));
+    signatures.set(field, JSON.stringify(sorted));
+  }
+  return signatures;
+}
+
 interface AttributeExplorerSceneState extends SceneObjectState {
   // Which OTel pass matched each priority attribute ('metric' vs 'resource'), so the sidebar can show
   // an accurate, specific reason per attribute instead of one caption for the whole priority group.
@@ -270,7 +293,28 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
 
   public handleFiltersChange(filters: ActiveFilter[]) {
     const previousSidebarFilterKeys = this._sidebarFilterKeys;
-    this._sidebarFilterKeys = new Set(filters.map((f) => f.field));
+    const previousSignatures = canonicalFilterSignatures(this.state.selectedFilters);
+    const nextSignatures = canonicalFilterSignatures(filters);
+
+    // Claim ownership only for a field this call actually changed (added, or a different value/operator
+    // than before) -- not every field present in `filters`, which is AttributeDistribution's full,
+    // controlled list and also includes fields it absorbed as "external" (page-set) that the sidebar
+    // itself never touched. Claiming those too would make the sidebar rewrite them on every future
+    // call below, ignoring later page-level edits to the same field.
+    const nextSidebarFilterKeys = new Set(previousSidebarFilterKeys);
+    for (const [field, signature] of nextSignatures) {
+      if (previousSignatures.get(field) !== signature) {
+        nextSidebarFilterKeys.add(field);
+      }
+    }
+    // Release ownership for any previously-owned field no longer present at all (removed via this UI).
+    for (const field of [...nextSidebarFilterKeys]) {
+      if (!nextSignatures.has(field)) {
+        nextSidebarFilterKeys.delete(field);
+      }
+    }
+    this._sidebarFilterKeys = nextSidebarFilterKeys;
+
     this.setState({ selectedFilters: filters });
 
     const filtersVar = sceneGraph.lookupVariable(VAR_FILTERS, this);
@@ -278,19 +322,24 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
       return;
     }
 
-    // Union of previously- and newly-owned keys, not just the new set: fully deselecting a field drops
-    // it out of the new _sidebarFilterKeys, so filtering by that set alone would reclassify its old
-    // VAR_FILTERS entry as "not ours" on the next line and write it straight back in, silently undoing
-    // the removal (and making it impossible to deselect a pre-existing page filter from this UI).
-    const replacedFilterKeys = new Set([...previousSidebarFilterKeys, ...this._sidebarFilterKeys]);
-    const otherFilters = filtersVar.state.filters.filter((f) => !replacedFilterKeys.has(f.key));
-    const sidebarFilters = groupFiltersByFieldAndOperator(filters).map(({ field, operator, values }) => {
-      if (values.length === 1) {
-        return { key: field, operator, value: values[0] };
+    // Union of previously- and newly-owned keys, not just the final set: a field fully deselected drops
+    // out of the final _sidebarFilterKeys above, so filtering by that set alone would reclassify its
+    // old VAR_FILTERS entry as "not ours" on the next line and write it straight back in, silently
+    // undoing the removal (and making it impossible to deselect a pre-existing page filter from this UI).
+    const releasedOrOwnedKeys = new Set([...previousSidebarFilterKeys, ...this._sidebarFilterKeys]);
+    const otherFilters = filtersVar.state.filters.filter((f) => !releasedOrOwnedKeys.has(f.key));
+    // Only the fields this sidebar currently owns, not the full `filters` list: an unclaimed field is
+    // already correctly present in filtersVar untouched (that's exactly why it wasn't claimed above),
+    // so re-adding it here too would duplicate its matcher alongside the untouched copy in otherFilters.
+    const sidebarFilters = groupFiltersByFieldAndOperator(filters.filter((f) => this._sidebarFilterKeys.has(f.field))).map(
+      ({ field, operator, values }) => {
+        if (values.length === 1) {
+          return { key: field, operator, value: values[0] };
+        }
+        const alternation = values.map(escapeAdHocRegexValue).join('|');
+        return { key: field, operator: operator === '=' ? '=~' : '!~', value: alternation };
       }
-      const alternation = values.map(escapeAdHocRegexValue).join('|');
-      return { key: field, operator: operator === '=' ? '=~' : '!~', value: alternation };
-    });
+    );
 
     filtersVar.setState({ filters: [...otherFilters, ...sidebarFilters] });
   }

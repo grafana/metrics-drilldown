@@ -270,15 +270,6 @@ export interface PrometheusRangeQueryResult {
   result: Array<{ metric: Record<string, string>; values: Array<[number, string]> }>;
 }
 
-// rate() (and, by extension, a fraction of a rate) is a per-second value, not an event count, and is
-// often under 1 for a single label value, so displaying it directly reads as a near-duplicate of
-// percentage. Per Prometheus's own docs, increase(v[d]) "is syntactic sugar for rate(v) multiplied by
-// the number of seconds," so multiplying an already-fetched rate by the query window gives the same
-// estimated absolute count increase() would, without a second query.
-function toWindowCount(ratePerSecond: number, windowSeconds: number): number {
-  return Math.round(ratePerSecond * windowSeconds);
-}
-
 function extractLastSampleByValue(response: PrometheusRangeQueryResult | undefined, field: string): Map<string, number> {
   const byValue = new Map<string, number>();
   for (const series of response?.result ?? []) {
@@ -327,25 +318,41 @@ export function processFractionResponse(
     ...extractLastSampleByValue(presence, field).keys(),
   ]);
 
-  const rows = Array.from(presentValues, (value) => {
+  // rate() (and, by extension, a fraction of a rate) is a per-second value, not an event count, and is
+  // often under 1 for a single label value, so displaying it directly reads as a near-duplicate of
+  // percentage. Per Prometheus's own docs, increase(v[d]) "is syntactic sugar for rate(v) multiplied by
+  // the number of seconds," so multiplying an already-fetched rate by the query window gives the same
+  // estimated absolute count increase() would, without a second query.
+  //
+  // Deliberately unrounded here: a value whose true estimate is under 1 (e.g. 0.3 observations) would
+  // round to a display count of 0 before it ever reached grandTotal or its own percentage, silently
+  // vanishing its real (if small) contribution and misclassifying it as quiet. Rounding happens exactly
+  // once, at the very end, purely for display -- everything upstream of that stays exact.
+  const rawRows = Array.from(presentValues, (value) => {
     const rawFrac = fractionByValue.get(value) ?? 0;
     const rawTotal = totalByValue.get(value) ?? 0;
     const frac = Number.isFinite(rawFrac) ? rawFrac : 0;
     const total = Number.isFinite(rawTotal) ? rawTotal : 0;
-    return { value, count: toWindowCount(frac * total, windowSeconds), impliedTotal: toWindowCount(total, windowSeconds) };
+    return { value, rawCount: frac * total * windowSeconds, rawImpliedTotal: total * windowSeconds };
   });
 
-  const grandTotal = rows.reduce((sum, r) => sum + r.count, 0);
-  return rows
+  const grandTotal = rawRows.reduce((sum, r) => sum + r.rawCount, 0);
+  // Keyed lookup, not a field on the mapped rows below: the *rounded* impliedTotal can round a
+  // genuinely nonzero (if tiny) estimate down to 0, which would sink it to the bottom as "confirmed
+  // quiet" for the exact same reason rounding early broke the percentage math above, so the sort must
+  // use this unrounded value instead.
+  const quietByValue = new Map(rawRows.map((r) => [r.value, r.rawImpliedTotal === 0]));
+
+  return rawRows
     .map((r) => ({
       value: r.value,
-      count: r.count,
-      impliedTotal: r.impliedTotal,
-      percentage: grandTotal > 0 ? Math.round((r.count / grandTotal) * 100) : 0,
+      count: Math.round(r.rawCount),
+      impliedTotal: Math.round(r.rawImpliedTotal),
+      percentage: grandTotal > 0 ? Math.round((r.rawCount / grandTotal) * 100) : 0,
     }))
     .sort((a, b) => {
-      const aQuiet = a.impliedTotal === 0;
-      const bQuiet = b.impliedTotal === 0;
+      const aQuiet = quietByValue.get(a.value) ?? false;
+      const bQuiet = quietByValue.get(b.value) ?? false;
       return aQuiet === bQuiet ? b.percentage - a.percentage : Number(aQuiet) - Number(bQuiet);
     });
 }
@@ -587,6 +594,14 @@ function AttributeExplorerHeader({
   const commitTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(commitTimeoutRef.current), []);
 
+  // True for a finite upper bound at or below the lower bound: histogram_fraction(lower, upper, ...)
+  // over such a range matches no bucket boundary at all, so the query legitimately returns 0% for
+  // every value -- indistinguishable from "no activity" unless this is surfaced as an input error
+  // instead. Positive infinity is never invalid here regardless of lowerSeconds: it's the "no upper
+  // limit" sentinel, not a real bound to compare against.
+  const isRangeInvalid =
+    pendingRange.upperSeconds !== Number.POSITIVE_INFINITY && pendingRange.upperSeconds <= pendingRange.lowerSeconds;
+
   // Debounced: each commit triggers a full re-detection cycle in AttributeDistribution (it re-fetches
   // attributes and re-queries every currently-visible field, not just the histogram range), so typing
   // a multi-digit value without debouncing fires that whole cycle once per character.
@@ -594,6 +609,12 @@ function AttributeExplorerHeader({
     const merged = { ...pendingRange, ...next };
     setPendingRange(merged);
     clearTimeout(commitTimeoutRef.current);
+    // Not committed while invalid: isRangeInvalid (recomputed above from the same pendingRange this
+    // sets) already drives the Field error state below, so there's nothing to explain to the user
+    // beyond that -- committing anyway would only fire a query guaranteed to render as a misleading 0%.
+    if (merged.upperSeconds !== Number.POSITIVE_INFINITY && merged.upperSeconds <= merged.lowerSeconds) {
+      return;
+    }
     commitTimeoutRef.current = setTimeout(() => {
       onHistogramRangeChange(merged);
     }, 500);
@@ -641,6 +662,8 @@ function AttributeExplorerHeader({
               ? t('attribute-explorer.lower-limit-unit', 'Lower limit ({{unit}})', { unit })
               : t('attribute-explorer.lower-limit', 'Lower limit')
           }
+          invalid={isRangeInvalid}
+          error={isRangeInvalid ? t('attribute-explorer.invalid-range', 'Upper limit must be greater than lower limit') : undefined}
         >
           <Input
             type="number"
@@ -656,6 +679,8 @@ function AttributeExplorerHeader({
               ? t('attribute-explorer.upper-limit-unit', 'Upper limit ({{unit}})', { unit })
               : t('attribute-explorer.upper-limit', 'Upper limit')
           }
+          invalid={isRangeInvalid}
+          error={isRangeInvalid ? t('attribute-explorer.invalid-range', 'Upper limit must be greater than lower limit') : undefined}
         >
           <Input
             type="number"
