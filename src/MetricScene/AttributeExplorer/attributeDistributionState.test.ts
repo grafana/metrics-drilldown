@@ -4,7 +4,7 @@ function attr(attribute: string): AttributeConfig {
   return { attribute, attribute_name: attribute };
 }
 
-function loaded(values: Array<{ count: number }>): AttributeState {
+function loaded(values: Array<{ count: number; impliedTotal?: number }>): AttributeState {
   return { error: false, expanded: false, loading: false, values: values as AttributeState['values'] };
 }
 
@@ -80,5 +80,35 @@ describe('sortByActivity', () => {
     const data = { quiet: loaded([{ count: 0 }]), active: loaded([{ count: 5 }]) };
     sortByActivity(attributes, data);
     expect(attributes).toEqual([attr('quiet'), attr('active')]);
+  });
+
+  it('does not sink an attribute whose value has real activity but none of it is in the current threshold range', () => {
+    // count is the in-range share, impliedTotal is the value's real total. A value can be 0% of its
+    // label's in-range population while still having genuine traffic outside the current threshold;
+    // that's "nothing matched the filter", not "this label is dead", and must not be conflated with it.
+    const attributes = [attr('out-of-range'), attr('active')];
+    const data = {
+      'out-of-range': loaded([{ count: 0, impliedTotal: 400 }]),
+      active: loaded([{ count: 5, impliedTotal: 40 }]),
+    };
+    expect(sortByActivity(attributes, data)).toEqual(attributes);
+  });
+
+  it('sinks a single-value attribute when that one value has genuinely zero total activity', () => {
+    const attributes = [attr('dead'), attr('active')];
+    const data = {
+      dead: loaded([{ count: 0, impliedTotal: 0 }]),
+      active: loaded([{ count: 5, impliedTotal: 40 }]),
+    };
+    expect(sortByActivity(attributes, data)).toEqual([attr('active'), attr('dead')]);
+  });
+
+  it('sinks an attribute only when every one of its values has zero total activity, not just some', () => {
+    const attributes = [attr('mixed'), attr('active')];
+    const data = {
+      mixed: loaded([{ count: 0, impliedTotal: 0 }, { count: 5, impliedTotal: 40 }]),
+      active: loaded([{ count: 5, impliedTotal: 40 }]),
+    };
+    expect(sortByActivity(attributes, data)).toEqual(attributes);
   });
 });

@@ -245,7 +245,13 @@ export function sortByActivity(attributes: AttributeConfig[], data: Record<strin
     if (!attrState || attrState.loading || attrState.error) {
       return false;
     }
-    return attrState.values.every((v) => v.count === 0);
+    // impliedTotal (this value's total observation count, in or out of range), not count (its in-range
+    // count): a value can have real traffic that simply doesn't fall inside the current threshold,
+    // which is a "0% of this label's in-range share" result, not "no activity". Checking count alone
+    // would demote a label with genuine traffic just because none of it currently clears the
+    // threshold, conflating "nothing matched the filter" with "this label is actually dead". Falls
+    // back to count only for an adapter that never populates impliedTotal at all.
+    return attrState.values.every((v) => (v.impliedTotal ?? v.count) === 0);
   };
 
   return [...attributes].sort((a, b) => {
