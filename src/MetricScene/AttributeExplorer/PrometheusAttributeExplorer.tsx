@@ -551,6 +551,14 @@ function getAttributeExplorerDescription(histogramRange: HistogramRange, unit: s
   );
 }
 
+// Used by AttributeExplorerHeader below, extracted purely to keep its cognitive complexity under the
+// linted threshold. -Infinity/+Infinity display as empty, not the literal string "-Infinity"/
+// "Infinity": they're the "no lower/upper limit" sentinels (see formatPromQLBound), not real numbers
+// to show back to the user.
+function formatBoundText(seconds: number, emptySentinel: number): string {
+  return seconds === emptySentinel ? '' : String(seconds);
+}
+
 // Used by handleLowerChange/handleUpperChange below, extracted purely to keep
 // AttributeExplorerHeader's cognitive complexity under the linted threshold. An empty field commits
 // emptyValue (the "no limit" sentinel: -Infinity for lower, +Infinity for upper, both already
@@ -558,7 +566,8 @@ function getAttributeExplorerDescription(histogramRange: HistogramRange, unit: s
 // left whatever debounce timer the last non-empty keystroke scheduled uncancelled (commitRange, the
 // only thing that clears it, was never called for that keystroke), so it fired 500ms later and
 // silently reinstated that stale intermediate digit, making the field look impossible to clear.
-function commitBoundFromText(
+// Exported for unit testing.
+export function commitBoundFromText(
   text: string,
   key: keyof HistogramRange,
   emptyValue: number,
@@ -589,14 +598,8 @@ function AttributeExplorerHeader({
 }: Readonly<AttributeExplorerHeaderProps>) {
   const styles = useStyles2(getHeaderStyles);
 
-  // -Infinity/+Infinity display as empty, not the literal string "-Infinity"/"Infinity": they're the
-  // "no lower/upper limit" sentinels (see formatPromQLBound), not real numbers to show back to the user.
-  const [lowerText, setLowerText] = useState(
-    histogramRange.lowerSeconds === Number.NEGATIVE_INFINITY ? '' : String(histogramRange.lowerSeconds)
-  );
-  const [upperText, setUpperText] = useState(
-    histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds)
-  );
+  const [lowerText, setLowerText] = useState(formatBoundText(histogramRange.lowerSeconds, Number.NEGATIVE_INFINITY));
+  const [upperText, setUpperText] = useState(formatBoundText(histogramRange.upperSeconds, Number.POSITIVE_INFINITY));
 
   // Adjusted during render, not in an effect (React's own recommended pattern for "reset derived state
   // when a prop changes"; an effect here would call setState after paint, causing an extra visible
@@ -619,8 +622,8 @@ function AttributeExplorerHeader({
   ) {
     setPrevHistogramRange(histogramRange);
     setPendingRange(histogramRange);
-    setLowerText(histogramRange.lowerSeconds === Number.NEGATIVE_INFINITY ? '' : String(histogramRange.lowerSeconds));
-    setUpperText(histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds));
+    setLowerText(formatBoundText(histogramRange.lowerSeconds, Number.NEGATIVE_INFINITY));
+    setUpperText(formatBoundText(histogramRange.upperSeconds, Number.POSITIVE_INFINITY));
   }
 
   const commitTimeoutRef = useRef<ReturnType<typeof setTimeout>>();

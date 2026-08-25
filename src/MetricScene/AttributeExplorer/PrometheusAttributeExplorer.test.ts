@@ -2,6 +2,7 @@ import { type DatasetContext } from './AttributeDistribution';
 import { type ActiveFilter } from './attributeDistributionState';
 import {
   applyFiltersToSelector,
+  commitBoundFromText,
   getHistogramValueTooltip,
   getLabelsToExclude,
   getOtelPriorityAttributes,
@@ -673,5 +674,34 @@ describe('getRangeQueryWindow', () => {
     const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
     const window = getRangeQueryWindow(createTestContext(0, thirtyDaysMs));
     expect(window).toEqual({ startSeconds: 0, endSeconds: 2_592_000, stepSeconds: 2_592_000 });
+  });
+});
+
+describe('commitBoundFromText', () => {
+  it('commits the emptySentinel when the field is cleared, instead of doing nothing', () => {
+    // Doing nothing here is exactly the bug this covers: it leaves the debounce timer from the last
+    // non-empty keystroke uncancelled, since commitRange (the only thing that clears it) is never
+    // called, so that stale intermediate digit gets silently reinstated 500ms later.
+    const commitRange = jest.fn();
+    commitBoundFromText('', 'lowerSeconds', Number.NEGATIVE_INFINITY, commitRange);
+    expect(commitRange).toHaveBeenCalledWith({ lowerSeconds: Number.NEGATIVE_INFINITY });
+  });
+
+  it('commits the emptySentinel for whitespace-only input too', () => {
+    const commitRange = jest.fn();
+    commitBoundFromText('   ', 'upperSeconds', Number.POSITIVE_INFINITY, commitRange);
+    expect(commitRange).toHaveBeenCalledWith({ upperSeconds: Number.POSITIVE_INFINITY });
+  });
+
+  it('commits the parsed number for valid non-empty input', () => {
+    const commitRange = jest.fn();
+    commitBoundFromText('42', 'lowerSeconds', Number.NEGATIVE_INFINITY, commitRange);
+    expect(commitRange).toHaveBeenCalledWith({ lowerSeconds: 42 });
+  });
+
+  it('commits nothing for unparseable non-empty input, leaving the prior value in place', () => {
+    const commitRange = jest.fn();
+    commitBoundFromText('abc', 'lowerSeconds', Number.NEGATIVE_INFINITY, commitRange);
+    expect(commitRange).not.toHaveBeenCalled();
   });
 });
