@@ -11,6 +11,8 @@ import { forkJoin, from as rxFrom, map, switchMap, type Observable } from 'rxjs'
 import { MetricDatasourceHelper, type PrometheusRuntimeDatasource } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { getUnitFromMetric } from 'shared/GmdVizPanel/units/getUnit';
+import { HISTOGRAM_ATTRIBUTES_BY_DOMAIN } from 'shared/otel/histogramAttributes';
+import { RESOURCE_ATTRIBUTES } from 'shared/otel/resourceAttributes';
 
 import { AttributeDistribution, type ActiveFilter, type AttributeConfig, type AttributeValueCount, type DatasetContext } from './AttributeDistribution';
 
@@ -75,12 +77,6 @@ function toGrafanaTimeRange(context: DatasetContext): TimeRange {
 // its name. Not every pipeline converts dots to underscores (Prometheus's UTF-8 label name support can
 // preserve them), so both spellings are checked. Called from AttributeExplorerScene rather than
 // fetchAttributes: shape detection needs to resolve before AttributeDistribution mounts, not during it.
-const OTEL_SHAPE_ATTRIBUTES: Record<string, string[]> = {
-  http: ['http.route', 'http.response.status_code', 'error.type'],
-  db: ['db.operation.name', 'db.collection.name', 'db.query.summary'],
-  messaging: ['messaging.destination.template', 'messaging.consumer.group.name'],
-};
-
 function toPrometheusUnderscoreForm(canonicalName: string): string {
   return canonicalName.replace(/\./g, '_');
 }
@@ -97,29 +93,62 @@ function findActualFieldSpelling(canonicalName: string, discovered: Set<string>)
   return undefined;
 }
 
-// First shape with any field present wins; no merging across shapes. priorityAttributes uses whichever
-// spelling matched (has to match the real label name); attributeLabels always shows the canonical
-// dotted form. No match returns empty arrays. Exported for unit testing.
+// Two independent passes, not one combined list: a metric's own semantic-convention attributes (see
+// HISTOGRAM_ATTRIBUTES_BY_DOMAIN) describe what kind of operation this metric measures; resource
+// attributes (see RESOURCE_ATTRIBUTES) describe which service/pod/cloud-region produced it, and
+// Grafana/Mimir's OTLP ingestion promotes those onto the metric's own label set regardless of the
+// metric's domain. A custom, non-semantic-convention histogram can still have real resource attributes
+// promoted onto it, so resource detection runs even when no domain shape matched at all.
+//
+// Domain pass: first domain with any field present wins, no merging across domains, since a metric's
+// attributes should match exactly one semantic-convention shape (an rpc.route and a db.operation.name
+// on the same metric would be a labeling bug upstream, not a metric with two shapes).
+// Resource pass: every resource attribute present is included, not just the first, since a metric can
+// legitimately carry many simultaneously (service.name AND k8s.pod.name AND cloud.region all promoted
+// at once is the normal case, not an edge case).
+// priorityAttributes uses whichever spelling matched (has to match the real label name);
+// attributeLabels always shows the canonical dotted form. attributeKinds records which pass matched
+// each field ('metric' vs 'resource'), so the UI can show a specific, accurate reason per attribute
+// (see getAttributeBadge in the component below) instead of one shared caption for the whole group,
+// which can't tell a detected attribute apart from one the user separately pinned via the combobox,
+// since both land in the same priority/pinned section with no structural boundary between them.
+// Exported for unit testing.
 export function getOtelPriorityAttributes(labels: string[]): {
+  attributeKinds: Record<string, 'metric' | 'resource'>;
   attributeLabels: Record<string, string>;
   priorityAttributes: string[];
 } {
   const discovered = new Set(labels);
-  for (const shapeFields of Object.values(OTEL_SHAPE_ATTRIBUTES)) {
-    const attributeLabels: Record<string, string> = {};
+  const attributeKinds: Record<string, 'metric' | 'resource'> = {};
+  const attributeLabels: Record<string, string> = {};
+  const priorityAttributes: string[] = [];
+
+  for (const domainFields of Object.values(HISTOGRAM_ATTRIBUTES_BY_DOMAIN)) {
     const present: string[] = [];
-    for (const canonicalName of shapeFields) {
+    for (const canonicalName of domainFields) {
       const actualField = findActualFieldSpelling(canonicalName, discovered);
       if (actualField) {
         present.push(actualField);
         attributeLabels[actualField] = canonicalName;
+        attributeKinds[actualField] = 'metric';
       }
     }
     if (present.length > 0) {
-      return { attributeLabels, priorityAttributes: present };
+      priorityAttributes.push(...present);
+      break;
     }
   }
-  return { attributeLabels: {}, priorityAttributes: [] };
+
+  for (const canonicalName of RESOURCE_ATTRIBUTES) {
+    const actualField = findActualFieldSpelling(canonicalName, discovered);
+    if (actualField && !priorityAttributes.includes(actualField)) {
+      attributeLabels[actualField] = canonicalName;
+      attributeKinds[actualField] = 'resource';
+      priorityAttributes.push(actualField);
+    }
+  }
+
+  return { attributeKinds, attributeLabels, priorityAttributes };
 }
 
 async function fetchAttributes(context: DatasetContext): Promise<AttributeConfig[]> {
@@ -646,6 +675,7 @@ function getHeaderStyles(theme: GrafanaTheme2) {
 }
 
 export interface PrometheusAttributeExplorerProps {
+  attributeKinds?: Record<string, 'metric' | 'resource'>;
   attributeLabels?: Record<string, string>;
   colorBars?: boolean;
   datasourceUid: string;
@@ -662,6 +692,7 @@ export interface PrometheusAttributeExplorerProps {
 }
 
 export function PrometheusAttributeExplorer({
+  attributeKinds,
   attributeLabels,
   colorBars,
   datasourceUid,
@@ -687,6 +718,17 @@ export function PrometheusAttributeExplorer({
 
   const getValueTooltip = (item: AttributeValueCount) => getHistogramValueTooltip(item, resolvedHistogramRange, unit);
 
+  const getAttributeBadge = (attribute: string): string | undefined => {
+    switch (attributeKinds?.[attribute]) {
+      case 'metric':
+        return t('attribute-explorer.badge-metric', 'OTel metric attribute');
+      case 'resource':
+        return t('attribute-explorer.badge-resource', 'OTel resource attribute');
+      default:
+        return undefined;
+    }
+  };
+
   return (
     <AttributeDistribution
       attributeLabels={attributeLabels}
@@ -694,6 +736,7 @@ export function PrometheusAttributeExplorer({
       context={context}
       fetchAttributes={fetchAttributes}
       fetchDistribution={fetchDistribution}
+      getAttributeBadge={getAttributeBadge}
       getValueTooltip={getValueTooltip}
       header={
         <AttributeExplorerHeader

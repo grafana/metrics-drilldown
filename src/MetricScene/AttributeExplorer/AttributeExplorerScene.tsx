@@ -39,6 +39,9 @@ function toError(e: unknown): Error {
 }
 
 interface AttributeExplorerSceneState extends SceneObjectState {
+  // Which OTel pass matched each priority attribute ('metric' vs 'resource'), so the sidebar can show
+  // an accurate, specific reason per attribute instead of one caption for the whole priority group.
+  attributeKinds: Record<string, 'metric' | 'resource'>;
   attributeLabels: Record<string, string>;
   datasourceUid: string;
   metric: string;
@@ -79,6 +82,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   public constructor() {
     super({
       key: 'attribute-explorer',
+      attributeKinds: {},
       attributeLabels: {},
       datasourceUid: '',
       metric: '',
@@ -192,7 +196,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
 
   private _resolveOtelPriority(datasourceUid: string, query: string) {
     const generation = ++this._otelPriorityGeneration;
-    this.setState({ attributeLabels: {}, otelPriorityReady: false, priorityAttributes: [] });
+    this.setState({ attributeKinds: {}, attributeLabels: {}, otelPriorityReady: false, priorityAttributes: [] });
 
     if (!datasourceUid || !query) {
       this.setState({ otelPriorityReady: true });
@@ -216,8 +220,8 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     if (generation !== this._otelPriorityGeneration) {
       return;
     }
-    const { attributeLabels, priorityAttributes } = getOtelPriorityAttributes(labels);
-    this.setState({ attributeLabels, otelPriorityReady: true, priorityAttributes });
+    const { attributeKinds, attributeLabels, priorityAttributes } = getOtelPriorityAttributes(labels);
+    this.setState({ attributeKinds, attributeLabels, otelPriorityReady: true, priorityAttributes });
   }
 
   private _syncSelectedFiltersFromVar() {
@@ -264,8 +268,18 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<AttributeExplorerScene>) => {
-    const { attributeLabels, datasourceUid, metric, metricType, otelPriorityReady, priorityAttributes, query, selectedFilters, timeRange } =
-      model.useState();
+    const {
+      attributeKinds,
+      attributeLabels,
+      datasourceUid,
+      metric,
+      metricType,
+      otelPriorityReady,
+      priorityAttributes,
+      query,
+      selectedFilters,
+      timeRange,
+    } = model.useState();
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const { histogramRange } = metricScene.useState();
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
@@ -290,6 +304,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
         />
         {otelPriorityReady && (
           <PrometheusAttributeExplorer
+            attributeKinds={attributeKinds}
             attributeLabels={attributeLabels}
             datasourceUid={datasourceUid}
             histogramRange={histogramRange}

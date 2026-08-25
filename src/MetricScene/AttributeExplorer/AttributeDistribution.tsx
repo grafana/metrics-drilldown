@@ -73,6 +73,12 @@ export interface AttributeDistributionProps {
     field: string,
     filters: ActiveFilter[]
   ) => Observable<AttributeValueCount[]>;
+  // Returns hover text for a small icon next to an attribute's label (e.g. "OTel metric attribute").
+  // Return undefined to show no icon for that attribute. Per-attribute, not a single group caption:
+  // a shared caption for the whole priority group can't distinguish adapter-detected attributes from
+  // ones the user separately pinned via the combobox, since both end up in the same priority/pinned
+  // section with no structural boundary between them.
+  getAttributeBadge?: (attribute: string) => string | undefined;
   // Returns a URL to view the full distribution for a field in the owning drilldown app.
   // Return undefined to hide the link.
   getFieldLink?: (attribute: string) => string | undefined;
@@ -97,6 +103,7 @@ export function AttributeDistribution({
   context,
   fetchAttributes,
   fetchDistribution,
+  getAttributeBadge,
   getFieldLink,
   getValueTooltip,
   header,
@@ -414,18 +421,26 @@ export function AttributeDistribution({
       <div className={styles.sections}>
         {state.detecting &&
           state.attributes.length === 0 &&
-          priorityAttributes.map((attr) => (
-            <div key={attr} className={styles.section}>
-              <div className={styles.sectionHeaderRow}>
-                <div className={styles.sectionHeader}>
-                  <span className={styles.sectionLabel}>{attributeLabels[attr] ?? attr}</span>
+          priorityAttributes.map((attr) => {
+            const badgeText = getAttributeBadge?.(attr);
+            return (
+              <div key={attr} className={styles.section}>
+                <div className={styles.sectionHeaderRow}>
+                  <div className={styles.sectionHeader}>
+                    <span className={styles.sectionLabel}>{attributeLabels[attr] ?? attr}</span>
+                    {badgeText && (
+                      <Tooltip content={badgeText}>
+                        <Icon className={styles.attributeBadgeIcon} name="info-circle" size="sm" />
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+                <div className={styles.loadingRow}>
+                  <Spinner size="sm" />
                 </div>
               </div>
-              <div className={styles.loadingRow}>
-                <Spinner size="sm" />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         {visibleAttributes.map((attr) => {
           const attrState = state.data[attr.attribute];
           if (!attrState) {
@@ -439,6 +454,7 @@ export function AttributeDistribution({
             <AttributeSection
               key={attr.attribute}
               attrState={attrState}
+              badgeText={getAttributeBadge?.(attr.attribute)}
               config={attr}
               colorBars={!!colorBars}
               fieldLink={getFieldLink?.(attr.attribute)}
@@ -502,6 +518,8 @@ export function AttributeDistribution({
 
 interface AttributeSectionProps {
   attrState: AttributeState;
+  // Hover text for a small icon next to the label (e.g. "OTel metric attribute"). Undefined shows no icon.
+  badgeText?: string;
   colorBars: boolean;
   config: AttributeConfig;
   excludedValues: Set<string>;
@@ -516,6 +534,7 @@ interface AttributeSectionProps {
 
 function AttributeSection({
   attrState,
+  badgeText,
   config,
   colorBars,
   fieldLink,
@@ -556,6 +575,17 @@ function AttributeSection({
           onClick={isExpandable ? onToggle : undefined}
         >
           <span className={styles.sectionLabel}>{config.attribute_name}</span>
+          {badgeText && (
+            // Inside the button, right next to the label, not a sibling: the button has flex: 1 to
+            // fill the row, so a sibling icon ends up pushed to the far right edge next to the
+            // chevron instead of sitting next to the text it's actually describing. stopPropagation
+            // keeps a click on the icon from also triggering the button's own expand/collapse toggle.
+            <span onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} role="presentation">
+              <Tooltip content={badgeText}>
+                <Icon className={styles.attributeBadgeIcon} name="info-circle" size="sm" />
+              </Tooltip>
+            </span>
+          )}
         </button>
         {fieldLink && (
           // DATASOURCE-SPECIFIC: link label is generic; adapters that pass getFieldLink can rely on
@@ -785,6 +815,13 @@ const getStyles = (theme: GrafanaTheme2) => ({
       color: theme.colors.text.link,
       opacity: 1,
     },
+  }),
+  // Always visible, unlike fieldLinkIcon: this marks a permanent fact about the attribute (why it's
+  // here), not a secondary action to reveal on hover.
+  attributeBadgeIcon: css({
+    color: theme.colors.text.secondary,
+    flexShrink: 0,
+    marginLeft: theme.spacing(0.5),
   }),
   sectionHeader: css({
     alignItems: 'center',

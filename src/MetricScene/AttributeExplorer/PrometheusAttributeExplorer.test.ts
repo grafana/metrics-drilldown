@@ -51,8 +51,9 @@ describe('isHistogramWithThreshold', () => {
 });
 
 describe('getOtelPriorityAttributes', () => {
-  it('returns empty arrays when no labels match any shape', () => {
+  it('returns empty results when no labels match any shape', () => {
     expect(getOtelPriorityAttributes(['pod', 'namespace', 'cluster'])).toEqual({
+      attributeKinds: {},
       attributeLabels: {},
       priorityAttributes: [],
     });
@@ -60,6 +61,7 @@ describe('getOtelPriorityAttributes', () => {
 
   it('detects an HTTP-shaped metric and returns only the fields actually present', () => {
     expect(getOtelPriorityAttributes(['http_route', 'pod', 'cluster'])).toEqual({
+      attributeKinds: { http_route: 'metric' },
       attributeLabels: { http_route: 'http.route' },
       priorityAttributes: ['http_route'],
     });
@@ -67,6 +69,7 @@ describe('getOtelPriorityAttributes', () => {
 
   it('preserves shape order, not discovery order, for multiple present HTTP fields', () => {
     expect(getOtelPriorityAttributes(['error_type', 'http_response_status_code', 'http_route'])).toEqual({
+      attributeKinds: { error_type: 'metric', http_response_status_code: 'metric', http_route: 'metric' },
       attributeLabels: {
         error_type: 'error.type',
         http_response_status_code: 'http.response.status_code',
@@ -78,6 +81,7 @@ describe('getOtelPriorityAttributes', () => {
 
   it('detects a DB-shaped metric', () => {
     expect(getOtelPriorityAttributes(['db_operation_name', 'db_collection_name'])).toEqual({
+      attributeKinds: { db_collection_name: 'metric', db_operation_name: 'metric' },
       attributeLabels: { db_collection_name: 'db.collection.name', db_operation_name: 'db.operation.name' },
       priorityAttributes: ['db_operation_name', 'db_collection_name'],
     });
@@ -85,6 +89,7 @@ describe('getOtelPriorityAttributes', () => {
 
   it('detects a messaging-shaped metric', () => {
     expect(getOtelPriorityAttributes(['messaging_destination_template'])).toEqual({
+      attributeKinds: { messaging_destination_template: 'metric' },
       attributeLabels: { messaging_destination_template: 'messaging.destination.template' },
       priorityAttributes: ['messaging_destination_template'],
     });
@@ -93,6 +98,7 @@ describe('getOtelPriorityAttributes', () => {
   it('picks the first matching shape when labels span more than one shape', () => {
     // http is checked before db, so a metric matching both resolves to http only.
     expect(getOtelPriorityAttributes(['http_route', 'db_operation_name'])).toEqual({
+      attributeKinds: { http_route: 'metric' },
       attributeLabels: { http_route: 'http.route' },
       priorityAttributes: ['http_route'],
     });
@@ -100,6 +106,7 @@ describe('getOtelPriorityAttributes', () => {
 
   it('detects a shape when labels keep the literal dotted OTel spelling', () => {
     expect(getOtelPriorityAttributes(['http.route', 'pod'])).toEqual({
+      attributeKinds: { 'http.route': 'metric' },
       attributeLabels: { 'http.route': 'http.route' },
       priorityAttributes: ['http.route'],
     });
@@ -107,8 +114,50 @@ describe('getOtelPriorityAttributes', () => {
 
   it('matches each field independently in whichever spelling it actually uses', () => {
     expect(getOtelPriorityAttributes(['http.route', 'error_type'])).toEqual({
+      attributeKinds: { 'http.route': 'metric', error_type: 'metric' },
       attributeLabels: { 'http.route': 'http.route', error_type: 'error.type' },
       priorityAttributes: ['http.route', 'error_type'],
+    });
+  });
+
+  it('detects an RPC-shaped metric', () => {
+    expect(getOtelPriorityAttributes(['rpc_system_name', 'rpc_method'])).toEqual({
+      attributeKinds: { rpc_system_name: 'metric', rpc_method: 'metric' },
+      attributeLabels: { rpc_system_name: 'rpc.system.name', rpc_method: 'rpc.method' },
+      priorityAttributes: ['rpc_system_name', 'rpc_method'],
+    });
+  });
+
+  it('detects a GenAI-shaped metric', () => {
+    expect(getOtelPriorityAttributes(['gen_ai_operation_name', 'gen_ai_provider_name'])).toEqual({
+      attributeKinds: { gen_ai_operation_name: 'metric', gen_ai_provider_name: 'metric' },
+      attributeLabels: { gen_ai_operation_name: 'gen_ai.operation.name', gen_ai_provider_name: 'gen_ai.provider.name' },
+      priorityAttributes: ['gen_ai_operation_name', 'gen_ai_provider_name'],
+    });
+  });
+
+  it('includes every present resource attribute, not just the first, since a metric can carry many at once', () => {
+    expect(getOtelPriorityAttributes(['service_name', 'k8s_pod_name', 'cloud_region'])).toEqual({
+      attributeKinds: { service_name: 'resource', k8s_pod_name: 'resource', cloud_region: 'resource' },
+      attributeLabels: { service_name: 'service.name', k8s_pod_name: 'k8s.pod.name', cloud_region: 'cloud.region' },
+      priorityAttributes: ['service_name', 'k8s_pod_name', 'cloud_region'],
+    });
+  });
+
+  it('detects resource attributes even when no histogram domain shape matches at all', () => {
+    // A custom, non-semantic-convention histogram can still have resource attributes promoted onto it.
+    expect(getOtelPriorityAttributes(['service_name', 'custom_field'])).toEqual({
+      attributeKinds: { service_name: 'resource' },
+      attributeLabels: { service_name: 'service.name' },
+      priorityAttributes: ['service_name'],
+    });
+  });
+
+  it('lists domain-matched attributes before resource attributes, not interleaved, and tags each with its actual kind', () => {
+    expect(getOtelPriorityAttributes(['service_name', 'http_route', 'k8s_pod_name'])).toEqual({
+      attributeKinds: { http_route: 'metric', service_name: 'resource', k8s_pod_name: 'resource' },
+      attributeLabels: { http_route: 'http.route', service_name: 'service.name', k8s_pod_name: 'k8s.pod.name' },
+      priorityAttributes: ['http_route', 'service_name', 'k8s_pod_name'],
     });
   });
 });
