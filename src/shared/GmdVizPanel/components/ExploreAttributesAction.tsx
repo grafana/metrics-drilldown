@@ -36,7 +36,7 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
     // open, so repeating either here was pure duplication.
     const tooltipContent = t(
       'explore-attributes-action.tooltip.description',
-      'Explore the distribution of histogram observation for labels and attribute values for this metric.'
+      'Explore the distribution of histogram observations for labels and attribute values for this metric.'
     );
 
     return (

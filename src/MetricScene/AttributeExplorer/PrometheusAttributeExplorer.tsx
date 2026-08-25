@@ -274,11 +274,14 @@ const UNSPECIFIED_LABEL_VALUE = '<unspecified>';
 function extractLastSampleByValue(response: PrometheusRangeQueryResult | undefined, field: string): Map<string, number> {
   const byValue = new Map<string, number>();
   for (const series of response?.result ?? []) {
-    // Falsy (missing key, or an empty string) means Prometheus's by(field) grouping produced this
-    // group for series that don't actually carry the label at all, not "no data" -- shown as
-    // <unspecified> instead of silently dropped, or its real volume vanishes from grandTotal below and
-    // inflates every other value's percentage in the same label.
-    const value = series.metric[field] || UNSPECIFIED_LABEL_VALUE;
+    // Raw value (including "" for a genuinely absent label), not the <unspecified> display text: a
+    // missing key means Prometheus's by(field) grouping produced this group for series that don't
+    // actually carry the label at all, not "no data" -- its real volume must still count toward
+    // grandTotal below, not vanish and inflate every other value's percentage in the same label. This
+    // map's key is also what a filter matcher needs to reproduce this exact group later (an empty-
+    // string matcher), so it must stay the real value; processFractionResponse attaches the
+    // <unspecified> display label separately, on the output row, not here.
+    const value = series.metric[field] ?? '';
     const lastSample = series.values?.[series.values.length - 1];
     const sample = Number(lastSample?.[1]);
     if (!isNaN(sample)) {
@@ -351,6 +354,10 @@ export function processFractionResponse(
   return rawRows
     .map((r) => ({
       value: r.value,
+      // Display-only decoration for the one row whose real value is "" (an absent label): value itself
+      // must stay "" since it's also what onToggleFilter sends onward, and a decorated string there
+      // would produce a filter matcher that doesn't actually match the absent-label group it claims to.
+      displayValue: r.value === '' ? UNSPECIFIED_LABEL_VALUE : undefined,
       count: Math.round(r.rawCount),
       impliedTotal: Math.round(r.rawImpliedTotal),
       percentage: grandTotal > 0 ? Math.round((r.rawCount / grandTotal) * 100) : 0,
@@ -803,8 +810,8 @@ export function PrometheusAttributeExplorer({
   const unit = getUnitFromMetric(metric);
 
   const context: DatasetContext = useMemo(
-    () => ({ datasourceUid, histogramRange: resolvedHistogramRange, metricType, query, timeRange: numericTimeRange }),
-    [datasourceUid, resolvedHistogramRange, metricType, query, numericTimeRange]
+    () => ({ datasourceUid, histogramRange: resolvedHistogramRange, metric, metricType, query, timeRange: numericTimeRange }),
+    [datasourceUid, resolvedHistogramRange, metric, metricType, query, numericTimeRange]
   );
 
   const getValueTooltip = (item: AttributeValueCount) => getHistogramValueTooltip(item, resolvedHistogramRange, unit);

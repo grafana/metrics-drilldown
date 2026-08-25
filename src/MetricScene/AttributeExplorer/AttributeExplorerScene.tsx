@@ -198,7 +198,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   // landed, regardless of how many times the surrounding lifecycle events re-fire (activation,
   // metricType upgrade, time range change).
   private _seedHistogramRangeIfNeeded() {
-    const { datasourceUid, metricType, query, timeRange } = this.state;
+    const { datasourceUid, metric, metricType, query, timeRange } = this.state;
     if (!datasourceUid || !query || !isHistogramWithThreshold(metricType)) {
       return;
     }
@@ -211,6 +211,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     const generation = ++this._histogramSeedGeneration;
     const context: DatasetContext = {
       datasourceUid,
+      metric,
       metricType,
       query,
       timeRange: { from: timeRange.from.valueOf(), to: timeRange.to.valueOf() },

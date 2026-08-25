@@ -16,7 +16,7 @@ import {
 } from './PrometheusAttributeExplorer';
 
 function createTestContext(from: number, to: number): DatasetContext {
-  return { datasourceUid: 'ds', metricType: 'classic-histogram', query: 'my_metric', timeRange: { from, to } };
+  return { datasourceUid: 'ds', metric: 'my_metric', metricType: 'classic-histogram', query: 'my_metric', timeRange: { from, to } };
 }
 
 describe('getLabelsToExclude', () => {
@@ -518,10 +518,12 @@ describe('processFractionResponse', () => {
     expect(result.find((r) => r.value === 'active-but-tiny')?.percentage).toBeGreaterThan(0);
   });
 
-  it('labels a series with no value for this label as <unspecified> instead of dropping it from the total', () => {
+  it('labels a series with no value for this label as <unspecified> instead of dropping it from the total, while keeping its real (empty-string) value for filtering', () => {
     // Prometheus's by(field) grouping still produces a group (field: '') for series that don't carry
     // the label at all. Dropping it would silently remove its volume from grandTotal and inflate
-    // checkout's percentage to 100 instead of the true 75/25 split.
+    // checkout's percentage to 100 instead of the true 75/25 split. value must stay '', not the display
+    // text: it's also what a "filter for this value" click sends onward, and only an empty-string
+    // matcher (field="") actually matches this absent-label group in Prometheus.
     const fraction: PrometheusRangeQueryResult = {
       result: [
         { metric: { route: 'checkout' }, values: [[0, '1']] },
@@ -536,7 +538,7 @@ describe('processFractionResponse', () => {
     };
     expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
       { value: 'checkout', count: 30, impliedTotal: 30, percentage: 75 },
-      { value: '<unspecified>', count: 10, impliedTotal: 10, percentage: 25 },
+      { value: '', displayValue: '<unspecified>', count: 10, impliedTotal: 10, percentage: 25 },
     ]);
   });
 });

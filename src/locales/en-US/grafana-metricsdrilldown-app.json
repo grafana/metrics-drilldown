@@ -123,7 +123,7 @@
   "explore-attributes-action": {
     "label": "Histogram distribution",
     "tooltip": {
-      "description": "Explore the distribution of histogram observation for labels and attribute values for this metric."
+      "description": "Explore the distribution of histogram observations for labels and attribute values for this metric."
     }
   },
   "exposed-component-error-boundary": {

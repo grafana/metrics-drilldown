@@ -11,6 +11,11 @@ export interface AttributeConfig {
 
 export interface AttributeValueCount {
   count: number;
+  // Rendered instead of `value` when present (e.g. "<unspecified>" for a genuinely absent label).
+  // `value` itself must stay the raw, real value (e.g. "" for absent) since it's also what gets sent
+  // to onToggleFilter -- a decorated display string there would produce a filter matcher that doesn't
+  // match what it claims to (see PrometheusAttributeExplorer's UNSPECIFIED_LABEL_VALUE usage).
+  displayValue?: string;
   // Opaque, adapter-populated context for an optional per-row tooltip (see getValueTooltip on
   // AttributeDistributionProps). Left undefined by adapters that have nothing extra to say.
   impliedTotal?: number;
@@ -55,7 +60,7 @@ export interface State {
 }
 
 export type Action =
-  | { type: 'DETECTING' }
+  | { isNewDataset: boolean; type: 'DETECTING' }
   | { type: 'DETECTION_ERROR' }
   | { configs: AttributeConfig[]; type: 'SET_ATTRIBUTES' }
   | { attributeLabels: Record<string, string>; priorityAttributes: string[]; type: 'REORDER_BY_PRIORITY' }
@@ -104,7 +109,14 @@ export function reducer(state: State, action: Action): State {
         // fetch in flight yet, so defaulting it to true would spin forever until the user reveals it.
         resetData[field] = { error: false, expanded: attrState.expanded, loading: false, values: [] };
       }
-      return { ...state, data: resetData, detecting: true, detectionError: false, valueSnapshot: null };
+      // Preserved (not unconditionally nulled) when this is the same dataset being refined, not a
+      // genuinely new one: DETECTING re-runs on every context change, including a filter toggle or
+      // time-range pan that leaves the underlying metric/datasource untouched, and this field's own
+      // contract is "retained until all filters are cleared" -- not "retained until the next
+      // re-detection cycle for any reason". See AttributeDistribution's run() effect for how
+      // isNewDataset is derived.
+      const valueSnapshot = action.isNewDataset ? null : state.valueSnapshot;
+      return { ...state, data: resetData, detecting: true, detectionError: false, valueSnapshot };
     }
     case 'DETECTION_ERROR': {
       return { ...state, detecting: false, detectionError: true };
@@ -244,13 +256,18 @@ export function orderByPriority(
     return detected;
   }
   const detectedByField = new Map(detected.map((a) => [a.attribute, a]));
-  // Always include all priority attributes. Use the detected version if present
-  // (it already has attribute_name set from attributeLabels); otherwise build a
-  // fallback config so the section still appears even when the field is absent from
-  // the detected set for this dataset.
-  const priorityFirst = priority.map(
-    (p) => detectedByField.get(p) ?? { attribute: p, attribute_name: attributeLabels[p] ?? p }
-  );
+  // Only actually-detected fields, never a fallback placeholder for a priority field absent from
+  // `detected`: the caller can retain a stale priority list across a same-dataset refresh (see
+  // AttributeExplorerScene._resolveOtelPriority), so a field left over from a previous detection cycle
+  // must not get manufactured into a permanent, never-populated section here -- it was previously
+  // demoted, not removed, by the next reorder, since it doesn't belong to `priority` anymore either.
+  // attributeLabels' canonical name is applied here unconditionally, not only in a fallback branch:
+  // fetchAttributes assigns attribute_name as the raw label (e.g. "http_route"), so a genuinely-present
+  // priority field never got its prettified canonical form ("http.route") before this.
+  const priorityFirst = priority.flatMap((field) => {
+    const config = detectedByField.get(field);
+    return config ? [{ ...config, attribute_name: attributeLabels[field] ?? config.attribute_name }] : [];
+  });
   const priorityFields = new Set(priority);
   const rest = detected.filter((a) => !priorityFields.has(a.attribute));
   return [...priorityFirst, ...rest];
@@ -298,7 +315,10 @@ export function mergeWithSnapshot(
   const result: DisplayValue[] = current.map((v) => ({ ...v, retained: false }));
   for (const snap of snapshot) {
     if (!currentByValue.has(snap.value)) {
-      result.push({ value: snap.value, count: 0, percentage: 0, retained: true });
+      // Carries displayValue through explicitly, not just the fields this branch already listed: a
+      // retained absent-label row (value: "") would otherwise lose its "<unspecified>" label the
+      // moment it's no longer in the live result set and falls into this snapshot-only branch.
+      result.push({ value: snap.value, displayValue: snap.displayValue, count: 0, percentage: 0, retained: true });
     }
   }
   return result;

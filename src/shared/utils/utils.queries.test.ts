@@ -32,6 +32,14 @@ describe('buildFilterExpression', () => {
   it('should escape quotes without disturbing regex metacharacters in a regex operator value', () => {
     expect(buildFilterExpression({ key: 'app', operator: '=~', value: '^(a|"b")$' })).toBe('app=~"^(a|\\"b\\")$"');
   });
+
+  it('should escape a literal newline in the value instead of emitting an invalid multi-line string literal', () => {
+    expect(buildFilterExpression({ key: 'app', operator: '=', value: 'line1\nline2' })).toBe('app="line1\\nline2"');
+  });
+
+  it('should escape a literal tab in the value', () => {
+    expect(buildFilterExpression({ key: 'app', operator: '=', value: 'a\tb' })).toBe('app="a\\tb"');
+  });
 });
 
 describe('removeIgnoreUsageLabel', () => {

@@ -1,4 +1,4 @@
-import { sortByActivity, type AttributeConfig, type AttributeState } from './attributeDistributionState';
+import { orderByPriority, reducer, sortByActivity, type AttributeConfig, type AttributeState, type State } from './attributeDistributionState';
 
 function attr(attribute: string): AttributeConfig {
   return { attribute, attribute_name: attribute };
@@ -110,5 +110,82 @@ describe('sortByActivity', () => {
       active: loaded([{ count: 5, impliedTotal: 40 }]),
     };
     expect(sortByActivity(attributes, data)).toEqual(attributes);
+  });
+});
+
+describe('orderByPriority', () => {
+  it('returns detected attributes unchanged when there is no priority list', () => {
+    const detected = [attr('route'), attr('status_code')];
+    expect(orderByPriority(detected, [], {})).toEqual(detected);
+  });
+
+  it('sorts a detected priority field first and applies its canonical attributeLabels name', () => {
+    // fetchAttributes assigns attribute_name as the raw label (e.g. "http_route"); a genuinely-present
+    // priority field must still get the prettified canonical form, not just a fallback-only field.
+    const detected = [attr('status_code'), { attribute: 'http_route', attribute_name: 'http_route' }];
+    const result = orderByPriority(detected, ['http_route'], { http_route: 'http.route' });
+    expect(result).toEqual([
+      { attribute: 'http_route', attribute_name: 'http.route' },
+      attr('status_code'),
+    ]);
+  });
+
+  it('does not manufacture a placeholder section for a priority field absent from detected', () => {
+    // A stale priority list (retained across a same-dataset refresh) can reference a field that isn't
+    // in the freshly-detected set for this dataset/timeframe. It must be skipped, not injected as a
+    // permanent, never-populated section.
+    const detected = [attr('status_code')];
+    const result = orderByPriority(detected, ['http_route', 'status_code'], { http_route: 'http.route' });
+    expect(result).toEqual([attr('status_code')]);
+  });
+
+  it('keeps non-priority detected attributes after the priority ones, unaffected', () => {
+    const detected = [attr('a'), attr('b'), attr('c')];
+    const result = orderByPriority(detected, ['c'], {});
+    expect(result).toEqual([attr('c'), attr('a'), attr('b')]);
+  });
+});
+
+describe('reducer DETECTING', () => {
+  function baseState(overrides: Partial<State> = {}): State {
+    return {
+      attributes: [],
+      data: {},
+      detecting: false,
+      detectionError: false,
+      selectedFilters: [],
+      userPinnedAttributes: [],
+      valueSnapshot: null,
+      ...overrides,
+    };
+  }
+
+  it('clears an existing value snapshot when the dataset genuinely changed', () => {
+    const state = baseState({
+      selectedFilters: [{ field: 'route', operator: '=', value: 'checkout' }],
+      valueSnapshot: { route: [] },
+    });
+    const result = reducer(state, { type: 'DETECTING', isNewDataset: true });
+    expect(result.valueSnapshot).toBeNull();
+  });
+
+  it('preserves an existing value snapshot when only refining the same dataset (filter or time-range change)', () => {
+    // This is the exact bug: DETECTING re-runs on every context change, including a filter toggle
+    // (which also rebuilds context.query since it embeds the current filters) or a time-range pan --
+    // neither of which clears the filters, so the "retained until all filters are cleared" contract
+    // must hold even though a re-detection cycle is happening.
+    const snapshot = { route: [] };
+    const state = baseState({
+      selectedFilters: [{ field: 'route', operator: '=', value: 'checkout' }],
+      valueSnapshot: snapshot,
+    });
+    const result = reducer(state, { type: 'DETECTING', isNewDataset: false });
+    expect(result.valueSnapshot).toBe(snapshot);
+  });
+
+  it('leaves an already-null value snapshot null when refining the same dataset with no active filters', () => {
+    const state = baseState({ selectedFilters: [], valueSnapshot: null });
+    const result = reducer(state, { type: 'DETECTING', isNewDataset: false });
+    expect(result.valueSnapshot).toBeNull();
   });
 });

@@ -81,6 +81,11 @@ export interface DatasetContext {
   datasourceUid: string;
   // Passed through opaquely, same as the rest of DatasetContext: the component never inspects it.
   histogramRange?: { lowerSeconds: number; upperSeconds: number };
+  // Used, together with datasourceUid, only to tell "still the same dataset, just refining (a filter
+  // or time-range change)" apart from "genuinely different dataset" (see the run() effect below) --
+  // not folded into `query` for this purpose, since query embeds the current filters and so changes on
+  // every filter edit even when the underlying metric/datasource haven't.
+  metric: string;
   metricType: MetricType;
   query: string;
   timeRange: { from: number; to: number };
@@ -173,6 +178,15 @@ export function AttributeDistribution({
   // the value changes on every render and would cause infinite loops).
   const contextRef = useRef(context);
   contextRef.current = context;
+  // Tracks the last dataset the run() effect below actually detected against, so it can tell "same
+  // dataset, just refining" (a filter toggle or time-range pan, which also changes context.query since
+  // that embeds the current filters) apart from "genuinely different dataset" (a metric or datasource
+  // switch) when dispatching DETECTING. null initially so the very first detection is unambiguously
+  // treated as a new dataset (harmless either way, since state.valueSnapshot is already null at mount).
+  // Compared field-by-field below, not as a concatenated string: a delimiter-joined key could make two
+  // genuinely different (datasourceUid, metric) pairs collide if either value happened to contain the
+  // delimiter.
+  const lastDatasetIdentityRef = useRef<{ datasourceUid: string; metric: string } | null>(null);
   const attributesRef = useRef(state.attributes);
   attributesRef.current = state.attributes;
   const userPinnedRef = useRef(state.userPinnedAttributes);
@@ -311,8 +325,19 @@ export function AttributeDistribution({
     let cancelled = false;
 
     async function run() {
+      // Computed and stashed before dispatching, not derived inside the reducer: DatasetContext.query
+      // embeds the current filters (see buildQueryExpression), so it changes on every filter edit even
+      // when the underlying metric/datasource haven't -- datasourceUid+metric is the part of context
+      // that only changes for a genuinely different dataset.
+      const { datasourceUid, metric } = contextRef.current;
+      const isNewDataset =
+        lastDatasetIdentityRef.current === null ||
+        lastDatasetIdentityRef.current.datasourceUid !== datasourceUid ||
+        lastDatasetIdentityRef.current.metric !== metric;
+      lastDatasetIdentityRef.current = { datasourceUid, metric };
+
       setExtraFieldsShown(0);
-      dispatch({ type: 'DETECTING' });
+      dispatch({ type: 'DETECTING', isNewDataset });
       let detected: AttributeConfig[];
       try {
         detected = await fetchAttributesRef.current(contextRef.current);
@@ -763,8 +788,12 @@ function AttributeSection({
                     tabIndex={0}
                   >
                     <div className={styles.valueRowHeader}>
-                      <span className={styles.valueLabel} title={item.value}>
-                        {item.value}
+                      {/* displayValue, not value: value is also what onToggleFilter sends onward (see
+                      the MenuItems above), so it must stay the real value (e.g. "" for an absent
+                      label) -- only the rendered text substitutes a decorated label like
+                      "<unspecified>" for it. */}
+                      <span className={styles.valueLabel} title={item.displayValue ?? item.value}>
+                        {item.displayValue ?? item.value}
                       </span>
                       {valueTooltip ? <Tooltip content={valueTooltip}>{stats}</Tooltip> : stats}
                     </div>
