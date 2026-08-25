@@ -58,6 +58,7 @@ export type Action =
   | { type: 'DETECTING' }
   | { type: 'DETECTION_ERROR' }
   | { configs: AttributeConfig[]; type: 'SET_ATTRIBUTES' }
+  | { attributeLabels: Record<string, string>; priorityAttributes: string[]; type: 'REORDER_BY_PRIORITY' }
   | { field: string; type: 'LOADING' }
   | { field: string; type: 'LOADED'; values: AttributeValueCount[] }
   | { field: string; message: string; type: 'ERROR' }
@@ -123,6 +124,20 @@ export function reducer(state: State, action: Action): State {
         data[c.attribute] = state.data[c.attribute] ?? { error: false, expanded: false, loading: false, values: [] };
       }
       return { ...state, attributes: merged, data, detecting: false, detectionError: false };
+    }
+    case 'REORDER_BY_PRIORITY': {
+      // Re-sorts already-detected attributes in place when a fresh OTel priority list arrives after
+      // the fact (e.g. a time-range or filter change re-runs priority detection independently of, and
+      // often later than, attribute detection itself). Touches only `attributes` and `data` -- nothing
+      // here resets selectedFilters, userPinnedAttributes, or valueSnapshot, unlike DETECTING/
+      // SET_ATTRIBUTES, so the caller doesn't need to unmount and remount this component (losing all of
+      // that) just to reflect an updated priority list.
+      const reordered = orderByPriority(state.attributes, action.priorityAttributes, action.attributeLabels);
+      const data: Record<string, AttributeState> = {};
+      for (const c of reordered) {
+        data[c.attribute] = state.data[c.attribute] ?? { error: false, expanded: false, loading: false, values: [] };
+      }
+      return { ...state, attributes: reordered, data };
     }
     case 'LOADING': {
       const existing = state.data[action.field];

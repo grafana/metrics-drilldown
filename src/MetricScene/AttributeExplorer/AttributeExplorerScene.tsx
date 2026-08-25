@@ -69,9 +69,11 @@ interface AttributeExplorerSceneState extends SceneObjectState {
   datasourceUid: string;
   metric: string;
   metricType: MetricType;
-  // False while OTel-shape detection is in flight for the current query. The explorer stays unmounted
-  // until true, since AttributeDistribution reads priorityAttributes once and won't reorder if it
-  // arrives late.
+  // False only until the very first OTel-priority detection has ever settled; never reset to false
+  // again after that. AttributeDistribution now re-sorts in place when a fresh priority list arrives
+  // later (see REORDER_BY_PRIORITY), so a routine refresh (time-range change, filter change) no longer
+  // needs to unmount the explorer -- doing so would discard its pinned attributes, expanded sections,
+  // and value snapshot just to reflect an updated priority list.
   otelPriorityReady: boolean;
   priorityAttributes: string[];
   query: string;
@@ -241,13 +243,18 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
 
   private _resolveOtelPriority(datasourceUid: string, query: string) {
     const generation = ++this._otelPriorityGeneration;
-    this.setState({ attributeKinds: {}, attributeLabels: {}, otelPriorityReady: false, priorityAttributes: [] });
 
     if (!datasourceUid || !query) {
-      this.setState({ otelPriorityReady: true });
+      // Genuinely nothing to detect against, unlike the in-flight case below: clears down to empty
+      // rather than leaving a stale list from a previous, now-invalid query/datasource hanging around.
+      this.setState({ attributeKinds: {}, attributeLabels: {}, otelPriorityReady: true, priorityAttributes: [] });
       return;
     }
 
+    // Deliberately does not clear attributeKinds/attributeLabels/priorityAttributes before the fetch
+    // resolves: whatever was already known (from a previous query, or this one) stays visible and
+    // valid-looking while a refresh is in flight, rather than flashing empty. AttributeDistribution's
+    // REORDER_BY_PRIORITY re-sorts in place once the fresh list actually lands.
     this._fetchOtelPriority(datasourceUid, query, generation).catch((e) => {
       if (generation !== this._otelPriorityGeneration) {
         return;
@@ -388,6 +395,9 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
           tooltipPlacement="top"
           onClick={() => metricScene.toggleAttributeExplorer()}
         />
+        {/* Gates only the very first mount, before any detection has ever settled: otelPriorityReady
+        never resets to false afterward, so a routine refresh updates priorityAttributes/
+        attributeLabels/attributeKinds in place without unmounting this. */}
         {otelPriorityReady && (
           <PrometheusAttributeExplorer
             attributeKinds={attributeKinds}

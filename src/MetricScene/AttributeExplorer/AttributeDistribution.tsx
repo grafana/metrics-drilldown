@@ -54,6 +54,29 @@ const MAX_VALUES_EXPANDED = 10;
 const EMPTY_PRIORITY_ATTRIBUTES: string[] = [];
 const EMPTY_ATTRIBUTE_LABELS: Record<string, string> = {};
 
+// Splits detected attributes into "always visible" (shown/fetched unconditionally, subject to
+// maxPriorityAndPinned) and "everything else" (subject to the normal initialAutoLoadCount/"show more"
+// gating). Pinned attributes always win a spot: pinning is a deliberate, one-at-a-time user action
+// with no inherent need for a cap, unlike OTel auto-detection, which can surface many matches at once
+// (see MAX_PRIORITY_ATTRIBUTES upstream, the reason a cap exists here at all). If pinning alone already
+// fills the cap, OTel-detected fields are pushed out entirely rather than displacing what the user
+// explicitly chose -- they fall back to ordinary non-priority treatment instead of disappearing.
+function splitAlwaysVisible(
+  attributes: AttributeConfig[],
+  priorityFieldSet: Set<string>,
+  pinnedSet: Set<string>,
+  maxPriorityAndPinned: number
+): { alwaysVisible: AttributeConfig[]; rest: AttributeConfig[] } {
+  const pinnedAttrs = attributes.filter((a) => pinnedSet.has(a.attribute));
+  const detectedPriorityAttrs = attributes.filter((a) => priorityFieldSet.has(a.attribute) && !pinnedSet.has(a.attribute));
+  const genuineNonPriority = attributes.filter((a) => !priorityFieldSet.has(a.attribute) && !pinnedSet.has(a.attribute));
+  const remainingBudget = Math.max(0, maxPriorityAndPinned - pinnedAttrs.length);
+  return {
+    alwaysVisible: [...pinnedAttrs, ...detectedPriorityAttrs.slice(0, remainingBudget)],
+    rest: [...detectedPriorityAttrs.slice(remainingBudget), ...genuineNonPriority],
+  };
+}
+
 export interface DatasetContext {
   datasourceUid: string;
   // Passed through opaquely, same as the rest of DatasetContext: the component never inspects it.
@@ -314,17 +337,12 @@ export function AttributeDistribution({
       // visible later (show more, pin) are fetched by the visibleAttributes effect.
       const priorityFieldSet = new Set(priorityAttributesRef.current);
       const userPinned = new Set(userPinnedRef.current);
-      const pAndP = ordered.filter((a) => priorityFieldSet.has(a.attribute) || userPinned.has(a.attribute));
-      const genuineNonP = ordered.filter((a) => !priorityFieldSet.has(a.attribute) && !userPinned.has(a.attribute));
-      // Capped the same way the priorityAndPinned memo below caps it: overflow beyond
-      // maxPriorityAndPinned must not be fetched here either, or capping only the render-visible set
-      // would still fetch everything up front and just hide the overflow's bars from view. The
-      // overflow falls back into the same initialAutoLoadCount-gated pool as genuinely non-priority
-      // fields, exactly like the priorityAndPinned/nonPriorityAttributes split below.
-      const cappedPAndP = pAndP.slice(0, maxPriorityAndPinnedRef.current);
-      const nonP = [...pAndP.slice(maxPriorityAndPinnedRef.current), ...genuineNonP];
+      // Split the same way the priorityAndPinned memo below does: overflow beyond maxPriorityAndPinned
+      // must not be fetched here either, or capping only the render-visible set would still fetch
+      // everything up front and just hide the overflow's bars from view.
+      const { alwaysVisible, rest } = splitAlwaysVisible(ordered, priorityFieldSet, userPinned, maxPriorityAndPinnedRef.current);
       const initialBatch = priorityAttributesRef.current.length === 0 ? initialAutoLoadCountRef.current : 0;
-      const initialVisible = [...cappedPAndP, ...nonP.slice(0, initialBatch)];
+      const initialVisible = [...alwaysVisible, ...rest.slice(0, initialBatch)];
       loadDistributions(initialVisible, contextRef.current, activeFilters);
     }
 
@@ -343,6 +361,24 @@ export function AttributeDistribution({
     // exactly what happened: histogramRange changes never triggered a re-fetch because it wasn't here.
   }, [context, loadDistributions]);
 
+  // Re-sorts already-detected attributes when a fresh priority list arrives on its own, independent of
+  // (and often later than) a full attribute re-detection: the adapter's own OTel-priority detection can
+  // resolve well after the run() effect above already dispatched SET_ATTRIBUTES with the priority list
+  // that was current at that moment. Dispatches only a reorder, not a re-detection or a remount -- the
+  // caller no longer needs to unmount this component just to reflect an updated priority list, which
+  // would otherwise discard pinned attributes, expanded sections, and the value snapshot on every
+  // routine time-range or filter change.
+  useEffect(() => {
+    // Skipped until the first real detection has landed: reordering an empty (pre-detection)
+    // attributes list against a non-empty priority list would inject placeholder configs for fields
+    // that haven't actually been detected yet, which SET_ATTRIBUTES will just discard moments later
+    // anyway once detection completes.
+    if (attributesRef.current.length === 0) {
+      return;
+    }
+    dispatch({ type: 'REORDER_BY_PRIORITY', priorityAttributes, attributeLabels });
+  }, [priorityAttributes, attributeLabels]);
+
   function handleToggleFilter(field: string, value: string, operator: '!=' | '=') {
     const newFilters = computeNextFilters(state.selectedFilters, field, value, operator);
     dispatch({ type: 'TOGGLE_FILTER', field, value, operator });
@@ -357,24 +393,16 @@ export function AttributeDistribution({
   const { nonPriorityAttributes, priorityAndPinned, comboboxOptions } = useMemo(() => {
     const priorityFieldSet = new Set(priorityAttributes);
     const pinnedSet = new Set(state.userPinnedAttributes);
-    const allPriorityOrPinned = state.attributes.filter(
-      (a) => priorityFieldSet.has(a.attribute) || pinnedSet.has(a.attribute)
-    );
-    // Capped so priority + pinned can't grow without bound (OTel priority detection is capped
-    // upstream, but pinning has no such limit): anything beyond maxPriorityAndPinned falls back into
-    // nonPriorityAttributes below, where it's subject to the same initialAutoLoadCount/"show more"
-    // gating as a genuinely non-priority field, instead of always being eagerly fetched.
-    const pinned = allPriorityOrPinned.slice(0, maxPriorityAndPinned);
-    const alwaysVisibleKeys = new Set(pinned.map((a) => a.attribute));
-    const nonPriority = state.attributes.filter((a) => !alwaysVisibleKeys.has(a.attribute));
+    const { alwaysVisible, rest } = splitAlwaysVisible(state.attributes, priorityFieldSet, pinnedSet, maxPriorityAndPinned);
     return {
-      // Excludes every priority/pinned field, not just the capped subset: an overflow field is still
-      // pinned, so it must not also appear as something the user can newly pin via the combobox.
-      comboboxOptions: nonPriority
+      // Excludes every priority/pinned field, not just the always-visible subset: a detected-priority
+      // field pushed out by pinning is still a priority field, so it must not also appear as something
+      // the user can newly pin via the combobox.
+      comboboxOptions: rest
         .filter((a) => !priorityFieldSet.has(a.attribute) && !pinnedSet.has(a.attribute))
         .map((a) => ({ label: a.attribute_name, value: a.attribute })),
-      nonPriorityAttributes: nonPriority,
-      priorityAndPinned: pinned,
+      nonPriorityAttributes: rest,
+      priorityAndPinned: alwaysVisible,
     };
   }, [priorityAttributes, state.attributes, state.userPinnedAttributes, maxPriorityAndPinned]);
 
