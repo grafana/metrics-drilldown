@@ -38,10 +38,10 @@ export interface HistogramRange {
   upperSeconds: number;
 }
 
-// Placeholder default, not a product decision: "over 1s" is a common latency-RCA question, but the
-// right default was never validated against this metric's actual unit or distribution. Now editable
-// via ExploreAttributesAction's tooltip (surfaced there, not hidden), which is why it's exported.
-// Shared by both histogram types (classic and native): no evidence either needs a different default.
+// Fallback only, used when fetchDefaultLowerThreshold has nothing to seed from yet (or returns no
+// usable value): "over 1 second" is a common latency-RCA question, but on its own has no relationship
+// to any given metric's actual unit or scale. Editable from the Attribute Explorer's own header once
+// it's open. Shared by both histogram types: no evidence either needs a different fallback.
 export const DEFAULT_HISTOGRAM_RANGE: HistogramRange = { lowerSeconds: 1, upperSeconds: Number.POSITIVE_INFINITY };
 
 // The only two metric types this component (and the button that opens it) supports. Every other
@@ -467,7 +467,7 @@ function formatHistogramRangeLabel(range: HistogramRange, unit: string | null): 
   if (lowerSeconds === Number.NEGATIVE_INFINITY || lowerSeconds === 0) {
     return t('attribute-explorer.histogram-range-under', 'under {{value}}', { value: withUnit(upperSeconds) });
   }
-  return t('attribute-explorer.histogram-range-between', '{{lower}}-{{upper}}', {
+  return t('attribute-explorer.histogram-range-between', 'between {{lower}} and {{upper}}', {
     lower: withUnit(lowerSeconds),
     upper: withUnit(upperSeconds),
   });
@@ -478,7 +478,7 @@ function formatHistogramRangeLabel(range: HistogramRange, unit: string | null): 
 function getAttributeExplorerDescription(histogramRange: HistogramRange, unit: string | null): string {
   return t(
     'attribute-explorer.description-histogram',
-    'Values show each label value\'s share of the total {{range}} population across that label: percentages sum to ~100% across a label\'s values, the same as everywhere else in this sidebar. A value with no activity in this window sorts to the bottom instead of being hidden.',
+    'This shows each value\'s share of the label\'s observations {{range}}. Values with no activity are sorted last.',
     { range: formatHistogramRangeLabel(histogramRange, unit) }
   );
 }
@@ -602,7 +602,7 @@ function AttributeExplorerHeader({
         <div className={styles.warning}>
           {t(
             'attribute-explorer.unit-unknown',
-            "We couldn't determine this metric's unit from its name. Double-check that this threshold makes sense before trusting the percentage."
+            "We couldn't determine this metric's unit from its name. Double-check the threshold before trusting the percentage."
           )}
         </div>
       )}
