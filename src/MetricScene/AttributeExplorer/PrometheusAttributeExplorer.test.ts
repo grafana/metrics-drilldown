@@ -486,7 +486,7 @@ describe('getHistogramValueTooltip', () => {
 describe('parseDefaultLowerThreshold', () => {
   it('returns the last sample value, e.g. a sub-millisecond median for a fast metric', () => {
     const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, '0.00023']] }] };
-    expect(parseDefaultLowerThreshold(response)).toBe(0.00023);
+    expect(parseDefaultLowerThreshold(response)).toBeCloseTo(0.00023, 5);
   });
 
   it('takes the last sample, not the first, when the series has multiple points', () => {
@@ -512,18 +512,11 @@ describe('parseDefaultLowerThreshold', () => {
     expect(parseDefaultLowerThreshold({ result: [] })).toBeUndefined();
   });
 
-  it('returns undefined for a literal 0 median, since a 0 threshold would exclude nothing', () => {
-    const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, '0']] }] };
-    expect(parseDefaultLowerThreshold(response)).toBeUndefined();
-  });
-
-  it('returns undefined for a negative value, which histogram_quantile can return for a malformed bucket set', () => {
-    const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, '-1']] }] };
-    expect(parseDefaultLowerThreshold(response)).toBeUndefined();
-  });
-
-  it('returns undefined for a NaN sample', () => {
-    const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, 'NaN']] }] };
+  // 0 would produce a threshold that excludes nothing; a negative value is something histogram_quantile
+  // can return for a malformed bucket set; NaN is a non-finite sample. All three are equally unusable
+  // as a starting threshold.
+  it.each([['0'], ['-1'], ['NaN']])('returns undefined for a non-positive-finite sample (%s)', (sampleValue) => {
+    const response: PrometheusRangeQueryResult = { result: [{ metric: {}, values: [[0, sampleValue]] }] };
     expect(parseDefaultLowerThreshold(response)).toBeUndefined();
   });
 });

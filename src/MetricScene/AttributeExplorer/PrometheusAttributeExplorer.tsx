@@ -547,7 +547,6 @@ function AttributeExplorerHeader({
       setUpperText(histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds));
     }
     lastCommittedRef.current = histogramRange;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally re-runs only on histogramRange identity, not on every lastCommittedRef mutation
   }, [histogramRange]);
 
   const commitTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
