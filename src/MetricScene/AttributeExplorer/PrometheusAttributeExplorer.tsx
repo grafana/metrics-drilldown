@@ -93,6 +93,22 @@ function findActualFieldSpelling(canonicalName: string, discovered: Set<string>)
   return undefined;
 }
 
+// Used by getOtelPriorityAttributes below, extracted purely to keep that function's cognitive
+// complexity under the linted threshold: this loop-plus-conditional was the nested block pushing it over.
+function findPresentFields(
+  canonicalNames: string[],
+  discovered: Set<string>
+): Array<{ actualField: string; canonicalName: string }> {
+  const present: Array<{ actualField: string; canonicalName: string }> = [];
+  for (const canonicalName of canonicalNames) {
+    const actualField = findActualFieldSpelling(canonicalName, discovered);
+    if (actualField) {
+      present.push({ actualField, canonicalName });
+    }
+  }
+  return present;
+}
+
 // Two independent passes, not one combined list: a metric's own semantic-convention attributes (see
 // HISTOGRAM_ATTRIBUTES_BY_DOMAIN) describe what kind of operation this metric measures; resource
 // attributes (see RESOURCE_ATTRIBUTES) describe which service/pod/cloud-region produced it, and
@@ -113,6 +129,7 @@ function findActualFieldSpelling(canonicalName: string, discovered: Set<string>)
 // which can't tell a detected attribute apart from one the user separately pinned via the combobox,
 // since both land in the same priority/pinned section with no structural boundary between them.
 // Exported for unit testing.
+
 export function getOtelPriorityAttributes(labels: string[]): {
   attributeKinds: Record<string, 'metric' | 'resource'>;
   attributeLabels: Record<string, string>;
@@ -124,28 +141,25 @@ export function getOtelPriorityAttributes(labels: string[]): {
   const priorityAttributes: string[] = [];
 
   for (const domainFields of Object.values(HISTOGRAM_ATTRIBUTES_BY_DOMAIN)) {
-    const present: string[] = [];
-    for (const canonicalName of domainFields) {
-      const actualField = findActualFieldSpelling(canonicalName, discovered);
-      if (actualField) {
-        present.push(actualField);
-        attributeLabels[actualField] = canonicalName;
-        attributeKinds[actualField] = 'metric';
-      }
+    const present = findPresentFields(domainFields, discovered);
+    if (present.length === 0) {
+      continue;
     }
-    if (present.length > 0) {
-      priorityAttributes.push(...present);
-      break;
-    }
-  }
-
-  for (const canonicalName of RESOURCE_ATTRIBUTES) {
-    const actualField = findActualFieldSpelling(canonicalName, discovered);
-    if (actualField && !priorityAttributes.includes(actualField)) {
+    for (const { actualField, canonicalName } of present) {
       attributeLabels[actualField] = canonicalName;
-      attributeKinds[actualField] = 'resource';
+      attributeKinds[actualField] = 'metric';
       priorityAttributes.push(actualField);
     }
+    break;
+  }
+
+  for (const { actualField, canonicalName } of findPresentFields(RESOURCE_ATTRIBUTES, discovered)) {
+    if (priorityAttributes.includes(actualField)) {
+      continue;
+    }
+    attributeLabels[actualField] = canonicalName;
+    attributeKinds[actualField] = 'resource';
+    priorityAttributes.push(actualField);
   }
 
   return { attributeKinds, attributeLabels, priorityAttributes };
@@ -532,22 +546,22 @@ function AttributeExplorerHeader({
     histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds)
   );
 
-  // Tracks the last range this component itself committed, so the effect below can tell "the range
-  // changed because our own debounced commit landed" (already reflected in lowerText/upperText, no
-  // resync needed) apart from "the range changed some other way" (the async default-threshold seed
-  // resolving after this component already mounted with DEFAULT_HISTOGRAM_RANGE's placeholder, or an
-  // external reset), which is the only case that needs the text inputs pulled forward to match.
-  const lastCommittedRef = useRef(histogramRange);
-  useEffect(() => {
-    const isOwnCommit =
-      lastCommittedRef.current.lowerSeconds === histogramRange.lowerSeconds &&
-      lastCommittedRef.current.upperSeconds === histogramRange.upperSeconds;
-    if (!isOwnCommit) {
-      setLowerText(String(histogramRange.lowerSeconds));
-      setUpperText(histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds));
-    }
-    lastCommittedRef.current = histogramRange;
-  }, [histogramRange]);
+  // Adjusted during render, not in an effect (React's own recommended pattern for "reset derived state
+  // when a prop changes"; an effect here would call setState after paint, causing an extra visible
+  // render). prevHistogramRange is the last value seen, not "the last value this component itself
+  // committed": once its own debounced commit round-trips back through this prop, resyncing from it is
+  // a no-op in practice (the text already matches), so there's no need to specifically distinguish a
+  // self-triggered change from an external one (e.g. the async default-threshold seed landing after
+  // this component already mounted with DEFAULT_HISTOGRAM_RANGE's placeholder).
+  const [prevHistogramRange, setPrevHistogramRange] = useState(histogramRange);
+  if (
+    prevHistogramRange.lowerSeconds !== histogramRange.lowerSeconds ||
+    prevHistogramRange.upperSeconds !== histogramRange.upperSeconds
+  ) {
+    setPrevHistogramRange(histogramRange);
+    setLowerText(String(histogramRange.lowerSeconds));
+    setUpperText(histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds));
+  }
 
   const commitTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(commitTimeoutRef.current), []);
