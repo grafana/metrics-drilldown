@@ -18,6 +18,7 @@
     "collapse": "Collapse",
     "collapse-extra-fields": "Collapse extra fields",
     "description": "Spot patterns and narrow down root causes by exploring how your data breaks down across key attributes. Click any value to filter your results.",
+    "description-aria-label": "What do these percentages mean?",
     "description-histogram": "Fraction-in-range weighted: Values show what share of each label's own requests are {{range}}. These percentages don't add up to 100% across labels: each is that label's own share of its own traffic, not a split of the whole.",
     "discovering-fields": "Discovering attributes…",
     "error": "Failed to load",

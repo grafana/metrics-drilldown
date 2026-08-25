@@ -114,6 +114,12 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     this._subs.add(
       timeRangeObj.subscribeToState((newState) => {
         this.setState({ timeRange: newState.value });
+        // Label discovery for OTel priority is time-range scoped (see _fetchOtelPriority), so without
+        // this, changing the dashboard range leaves priorityAttributes stuck on the old range: labels
+        // that disappeared stay shown as empty priority sections, and newly present OTel labels never
+        // get prioritized. The existing generation guard in _resolveOtelPriority/_fetchOtelPriority
+        // still discards this if a newer query/datasource change supersedes it first.
+        this._resolveOtelPriority(this.state.datasourceUid, this.state.query);
         // A time range change can be the first moment a seed becomes possible (e.g. the initial range
         // had no data for this metric); harmless no-op via the guard below if a range or an explicit
         // user edit already exists.
@@ -185,16 +191,29 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
       timeRange: { from: timeRange.from.valueOf(), to: timeRange.to.valueOf() },
     };
 
-    fetchDefaultLowerThreshold(context).subscribe((lowerSeconds) => {
-      if (generation !== this._histogramSeedGeneration || lowerSeconds === undefined) {
-        return;
-      }
-      // Re-checked at resolution time, not just at request time: a user could have typed an explicit
-      // value while this query was in flight, which must win over a seed arriving after the fact.
-      if (metricScene.state.histogramRange === undefined) {
-        metricScene.setHistogramRange({ lowerSeconds: Number(lowerSeconds.toPrecision(2)), upperSeconds: Number.POSITIVE_INFINITY });
-      }
-    });
+    this._subs.add(
+      fetchDefaultLowerThreshold(context).subscribe({
+        next: (lowerSeconds) => {
+          if (generation !== this._histogramSeedGeneration || lowerSeconds === undefined) {
+            return;
+          }
+          // Re-checked at resolution time, not just at request time: a user could have typed an
+          // explicit value while this query was in flight, which must win over a seed arriving after
+          // the fact.
+          if (metricScene.state.histogramRange === undefined) {
+            metricScene.setHistogramRange({ lowerSeconds: Number(lowerSeconds.toPrecision(2)), upperSeconds: Number.POSITIVE_INFINITY });
+          }
+        },
+        // Without this, a datasource/query failure here surfaces as an unhandled RxJS error instead of
+        // just leaving the explorer on its documented DEFAULT_HISTOGRAM_RANGE fallback.
+        error: (e) => {
+          if (generation !== this._histogramSeedGeneration) {
+            return;
+          }
+          logger.error(toError(e));
+        },
+      })
+    );
   }
 
   private _resolveOtelPriority(datasourceUid: string, query: string) {
@@ -250,6 +269,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   }
 
   public handleFiltersChange(filters: ActiveFilter[]) {
+    const previousSidebarFilterKeys = this._sidebarFilterKeys;
     this._sidebarFilterKeys = new Set(filters.map((f) => f.field));
     this.setState({ selectedFilters: filters });
 
@@ -258,7 +278,12 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
       return;
     }
 
-    const otherFilters = filtersVar.state.filters.filter((f) => !this._sidebarFilterKeys.has(f.key));
+    // Union of previously- and newly-owned keys, not just the new set: fully deselecting a field drops
+    // it out of the new _sidebarFilterKeys, so filtering by that set alone would reclassify its old
+    // VAR_FILTERS entry as "not ours" on the next line and write it straight back in, silently undoing
+    // the removal (and making it impossible to deselect a pre-existing page filter from this UI).
+    const replacedFilterKeys = new Set([...previousSidebarFilterKeys, ...this._sidebarFilterKeys]);
+    const otherFilters = filtersVar.state.filters.filter((f) => !replacedFilterKeys.has(f.key));
     const sidebarFilters = groupFiltersByFieldAndOperator(filters).map(({ field, operator, values }) => {
       if (values.length === 1) {
         return { key: field, operator, value: values[0] };

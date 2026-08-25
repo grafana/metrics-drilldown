@@ -10,6 +10,7 @@ import { forkJoin, from as rxFrom, map, switchMap, type Observable } from 'rxjs'
 
 
 import { MetricDatasourceHelper, type PrometheusRuntimeDatasource } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import { renameBucketMetricSuffix } from 'shared/GmdVizPanel/buildQueryExpression';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { getUnitFromMetric } from 'shared/GmdVizPanel/units/getUnit';
 import { HISTOGRAM_ATTRIBUTES_BY_DOMAIN } from 'shared/otel/histogramAttributes';
@@ -440,10 +441,7 @@ function runRangeQuery(
 // live: it returned an empty result against the identical inner vector a working histogram_fraction()
 // call used); the total count for a classic histogram comes from its _count sibling series instead.
 export function toCountMetricSelector(bucketSelector: string): string {
-  const openBrace = bucketSelector.indexOf('{');
-  const metricName = openBrace === -1 ? bucketSelector : bucketSelector.slice(0, openBrace);
-  const rest = openBrace === -1 ? '' : bucketSelector.slice(openBrace);
-  return `${metricName.replace(/_bucket$/, '_count')}${rest}`;
+  return renameBucketMetricSuffix(bucketSelector, '_count');
 }
 
 function fetchDistribution(context: DatasetContext, field: string, filters: ActiveFilter[]): Observable<AttributeValueCount[]> {
@@ -593,11 +591,19 @@ function AttributeExplorerHeader({
   // self-triggered change from an external one (e.g. the async default-threshold seed landing after
   // this component already mounted with DEFAULT_HISTOGRAM_RANGE's placeholder).
   const [prevHistogramRange, setPrevHistogramRange] = useState(histogramRange);
+  // Tracks edits not yet committed (still inside the debounce window below), seeded fresh from the
+  // prop each time it genuinely changes. Reading histogramRange directly in commitRange would lose an
+  // edit: editing the lower bound then the upper bound within the debounce window would have the
+  // second call's setTimeout replace the first, then merge onto the still-uncommitted histogramRange
+  // prop, silently reverting the first edit. A ref can't hold this instead: React's render-time-refs
+  // lint rule disallows writing ref.current during render, which this same-block resync needs to do.
+  const [pendingRange, setPendingRange] = useState(histogramRange);
   if (
     prevHistogramRange.lowerSeconds !== histogramRange.lowerSeconds ||
     prevHistogramRange.upperSeconds !== histogramRange.upperSeconds
   ) {
     setPrevHistogramRange(histogramRange);
+    setPendingRange(histogramRange);
     setLowerText(String(histogramRange.lowerSeconds));
     setUpperText(histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds));
   }
@@ -609,9 +615,11 @@ function AttributeExplorerHeader({
   // attributes and re-queries every currently-visible field, not just the histogram range), so typing
   // a multi-digit value without debouncing fires that whole cycle once per character.
   const commitRange = (next: Partial<HistogramRange>) => {
+    const merged = { ...pendingRange, ...next };
+    setPendingRange(merged);
     clearTimeout(commitTimeoutRef.current);
     commitTimeoutRef.current = setTimeout(() => {
-      onHistogramRangeChange({ ...histogramRange, ...next });
+      onHistogramRangeChange(merged);
     }, 500);
   };
 
@@ -802,6 +810,7 @@ export function PrometheusAttributeExplorer({
           unit={unit}
         />
       }
+      maxPriorityAndPinned={MAX_PRIORITY_ATTRIBUTES}
       onFiltersChange={onFiltersChange}
       priorityAttributes={priorityAttributes}
       selectedFilters={selectedFilters}

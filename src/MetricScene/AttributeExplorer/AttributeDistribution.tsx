@@ -90,6 +90,14 @@ export interface AttributeDistributionProps {
   // for adapters where fetching a distribution multiplies query cost (e.g. per-bucket histogram
   // breakdowns), so nothing fires until the user explicitly expands a field.
   initialAutoLoadCount?: number;
+  // Caps how many priority + user-pinned fields are always visible and eagerly fetched. Unbounded by
+  // default. OTel priority detection is already capped upstream, but a user can keep pinning
+  // attributes across the component's lifetime with no such cap, and every priority/pinned field gets
+  // its distribution fetched immediately; pass a finite value (matching whatever cap the adapter
+  // already applies to its own priority detection) for adapters where fetchDistribution's query
+  // multiplier is high, so a later re-detection cycle can't fire an unbounded number of concurrent
+  // requests. Anything beyond the cap falls back into the ordinary non-priority "show more" flow.
+  maxPriorityAndPinned?: number;
   onFiltersChange?: (filters: ActiveFilter[]) => void;
   priorityAttributes?: string[];
   queryLimitLabel?: string;
@@ -108,6 +116,7 @@ export function AttributeDistribution({
   getValueTooltip,
   header,
   initialAutoLoadCount = 10,
+  maxPriorityAndPinned = Number.POSITIVE_INFINITY,
   selectedFilters: selectedFiltersProp,
   onFiltersChange,
   priorityAttributes = EMPTY_PRIORITY_ATTRIBUTES,
@@ -152,6 +161,8 @@ export function AttributeDistribution({
   priorityAttributesRef.current = priorityAttributes;
   const initialAutoLoadCountRef = useRef(initialAutoLoadCount);
   initialAutoLoadCountRef.current = initialAutoLoadCount;
+  const maxPriorityAndPinnedRef = useRef(maxPriorityAndPinned);
+  maxPriorityAndPinnedRef.current = maxPriorityAndPinned;
   const fetchAttributesRef = useRef(fetchAttributes);
   fetchAttributesRef.current = fetchAttributes;
 
@@ -296,9 +307,16 @@ export function AttributeDistribution({
       const priorityFieldSet = new Set(priorityAttributesRef.current);
       const userPinned = new Set(userPinnedRef.current);
       const pAndP = ordered.filter((a) => priorityFieldSet.has(a.attribute) || userPinned.has(a.attribute));
-      const nonP = ordered.filter((a) => !priorityFieldSet.has(a.attribute) && !userPinned.has(a.attribute));
+      const genuineNonP = ordered.filter((a) => !priorityFieldSet.has(a.attribute) && !userPinned.has(a.attribute));
+      // Capped the same way the priorityAndPinned memo below caps it: overflow beyond
+      // maxPriorityAndPinned must not be fetched here either, or capping only the render-visible set
+      // would still fetch everything up front and just hide the overflow's bars from view. The
+      // overflow falls back into the same initialAutoLoadCount-gated pool as genuinely non-priority
+      // fields, exactly like the priorityAndPinned/nonPriorityAttributes split below.
+      const cappedPAndP = pAndP.slice(0, maxPriorityAndPinnedRef.current);
+      const nonP = [...pAndP.slice(maxPriorityAndPinnedRef.current), ...genuineNonP];
       const initialBatch = priorityAttributesRef.current.length === 0 ? initialAutoLoadCountRef.current : 0;
-      const initialVisible = [...pAndP, ...nonP.slice(0, initialBatch)];
+      const initialVisible = [...cappedPAndP, ...nonP.slice(0, initialBatch)];
       loadDistributions(initialVisible, contextRef.current, activeFilters);
     }
 
@@ -331,19 +349,29 @@ export function AttributeDistribution({
   const { nonPriorityAttributes, priorityAndPinned, comboboxOptions } = useMemo(() => {
     const priorityFieldSet = new Set(priorityAttributes);
     const pinnedSet = new Set(state.userPinnedAttributes);
-    const nonPriority = state.attributes.filter(
-      (a) => !priorityFieldSet.has(a.attribute) && !pinnedSet.has(a.attribute)
+    const allPriorityOrPinned = state.attributes.filter(
+      (a) => priorityFieldSet.has(a.attribute) || pinnedSet.has(a.attribute)
     );
-    const pinned = state.attributes.filter((a) => priorityFieldSet.has(a.attribute) || pinnedSet.has(a.attribute));
+    // Capped so priority + pinned can't grow without bound (OTel priority detection is capped
+    // upstream, but pinning has no such limit): anything beyond maxPriorityAndPinned falls back into
+    // nonPriorityAttributes below, where it's subject to the same initialAutoLoadCount/"show more"
+    // gating as a genuinely non-priority field, instead of always being eagerly fetched.
+    const pinned = allPriorityOrPinned.slice(0, maxPriorityAndPinned);
+    const alwaysVisibleKeys = new Set(pinned.map((a) => a.attribute));
+    const nonPriority = state.attributes.filter((a) => !alwaysVisibleKeys.has(a.attribute));
     return {
-      comboboxOptions: nonPriority.map((a) => ({ label: a.attribute_name, value: a.attribute })),
+      // Excludes every priority/pinned field, not just the capped subset: an overflow field is still
+      // pinned, so it must not also appear as something the user can newly pin via the combobox.
+      comboboxOptions: nonPriority
+        .filter((a) => !priorityFieldSet.has(a.attribute) && !pinnedSet.has(a.attribute))
+        .map((a) => ({ label: a.attribute_name, value: a.attribute })),
       nonPriorityAttributes: nonPriority,
       priorityAndPinned: pinned,
     };
-  }, [priorityAttributes, state.attributes, state.userPinnedAttributes]);
+  }, [priorityAttributes, state.attributes, state.userPinnedAttributes, maxPriorityAndPinned]);
 
   const { visibleAttributes, remainingCount, nextBatch } = useMemo(() => {
-    const initialVisible = priorityAttributes.length === 0 ? 10 : 0;
+    const initialVisible = priorityAttributes.length === 0 ? initialAutoLoadCount : 0;
     const totalShown = initialVisible + extraFieldsShown;
     const activeFilterFields = new Set(state.selectedFilters.map((f) => f.field));
     // Always include non-priority fields with active filters so a selected value is never hidden.
@@ -363,7 +391,15 @@ export function AttributeDistribution({
       remainingCount: remaining,
       visibleAttributes: [...priorityAndPinned, ...sortedVisibleNonPriority],
     };
-  }, [nonPriorityAttributes, extraFieldsShown, priorityAndPinned, priorityAttributes, state.selectedFilters, state.data]);
+  }, [
+    nonPriorityAttributes,
+    extraFieldsShown,
+    initialAutoLoadCount,
+    priorityAndPinned,
+    priorityAttributes,
+    state.selectedFilters,
+    state.data,
+  ]);
 
   visibleAttributesRef.current = visibleAttributes;
 

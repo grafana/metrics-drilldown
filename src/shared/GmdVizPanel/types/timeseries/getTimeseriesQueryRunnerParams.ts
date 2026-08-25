@@ -3,7 +3,7 @@ import { type SceneDataQuery } from '@grafana/scenes';
 import { promql } from 'tsqtsq';
 
 import { buildCustomFunctionQuery, buildPresetFunctionQuery } from 'shared/GmdVizPanel/buildFunctionQuery';
-import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
+import { buildQueryExpression, renameBucketMetricSuffix } from 'shared/GmdVizPanel/buildQueryExpression';
 import { isRangeVectorFunction, PROMQL_FUNCTIONS, type PrometheusFunction } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type HistogramBreakdownFn, type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
@@ -70,10 +70,7 @@ const HISTOGRAM_BY_LABEL_PERCENTILES: Record<Exclude<HistogramBreakdownFn, 'sum'
 
 // Classic histograms expose the total as the _sum sibling series (_bucket/_sum/_count convention).
 function toSumMetricSelector(bucketSelector: string): string {
-  const openBrace = bucketSelector.indexOf('{');
-  const metricName = openBrace === -1 ? bucketSelector : bucketSelector.slice(0, openBrace);
-  const rest = openBrace === -1 ? '' : bucketSelector.slice(openBrace);
-  return `${metricName.replace(/_bucket$/, '_sum')}${rest}`;
+  return renameBucketMetricSuffix(bucketSelector, '_sum');
 }
 
 function buildHistogramSumByLabelQuery(metric: Metric, queryConfig: QueryConfig, expr: string, groupByLabel: string): SceneDataQuery[] {
