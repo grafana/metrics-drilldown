@@ -15,7 +15,7 @@
 import { css, cx } from '@emotion/css';
 import { colorManipulator, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { Combobox, Icon, MenuItem, Spinner, Tooltip, useStyles2, useTheme2, WithContextMenu } from '@grafana/ui';
+import { Combobox, Icon, IconButton, MenuItem, Spinner, Tooltip, useStyles2, useTheme2, WithContextMenu } from '@grafana/ui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type Observable, type Subscription } from 'rxjs';
 
@@ -465,11 +465,7 @@ export function AttributeDistribution({
                   <div className={styles.sectionHeader}>
                     <span className={styles.sectionLabel}>{attributeLabels[attr] ?? attr}</span>
                     {badgeText && (
-                      <Tooltip content={badgeText}>
-                        <span tabIndex={0} role="button" aria-label={badgeText}>
-                          <Icon className={styles.attributeBadgeIcon} name="info-circle" size="sm" />
-                        </span>
-                      </Tooltip>
+                      <IconButton className={styles.attributeBadgeIcon} name="info-circle" size="sm" tooltip={badgeText} />
                     )}
                   </div>
                 </div>
@@ -607,34 +603,24 @@ function AttributeSection({
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeaderRow}>
-        <button
-          className={cx(styles.sectionHeader, hasActiveFilter && styles.sectionHeaderActive)}
-          type="button"
-          onClick={isExpandable ? onToggle : undefined}
-        >
-          <span className={styles.sectionLabel}>{config.attribute_name}</span>
+        <div className={styles.sectionHeader}>
+          {/* A real <button>, wrapping only the label, not the badge: nesting the badge's own
+          focusable control inside this button would be invalid (a button can't contain another
+          interactive element), and a browser/screen-reader can behave unpredictably around it. */}
+          <button
+            className={cx(styles.sectionLabelButton, hasActiveFilter && styles.sectionHeaderActive)}
+            type="button"
+            onClick={isExpandable ? onToggle : undefined}
+          >
+            <span className={styles.sectionLabel}>{config.attribute_name}</span>
+          </button>
           {badgeText && (
-            // Inside the button, right next to the label, not a sibling: the button has flex: 1 to
-            // fill the row, so a sibling icon ends up pushed to the far right edge next to the
-            // chevron instead of sitting next to the text it's actually describing. stopPropagation
-            // keeps a click (or Enter/Space while focused) on the icon from also triggering the
-            // button's own expand/collapse toggle. tabIndex + role="button" (not "presentation": that
-            // would tell screen readers to skip it entirely, and a non-interactive role like "img"
-            // can't legitimately carry tabIndex/key handlers) make it a real, keyboard-reachable,
-            // announced element rather than a hover-only mouse affordance.
-            <span
-              tabIndex={0}
-              role="button"
-              aria-label={badgeText}
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              <Tooltip content={badgeText}>
-                <Icon className={styles.attributeBadgeIcon} name="info-circle" size="sm" />
-              </Tooltip>
-            </span>
+            // IconButton, not a custom role="button" span: it's a real <button> (so no ARIA role is
+            // being asserted without the semantics/behavior to back it up), sitting as a sibling of
+            // the label button above rather than nested inside it.
+            <IconButton className={styles.attributeBadgeIcon} name="info-circle" size="sm" tooltip={badgeText} />
           )}
-        </button>
+        </div>
         {fieldLink && (
           // DATASOURCE-SPECIFIC: link label is generic; adapters that pass getFieldLink can rely on
           // the destination URL itself to communicate where the link goes.
@@ -871,18 +857,27 @@ const getStyles = (theme: GrafanaTheme2) => ({
     flexShrink: 0,
     marginLeft: theme.spacing(0.5),
   }),
+  // Holds the label button and the badge as siblings, not one inside the other (a button can't
+  // legitimately contain another interactive/focusable control): flex:1 here fills the row exactly
+  // like the old single-button version did, keeping the badge visually adjacent to the label.
   sectionHeader: css({
+    alignItems: 'center',
+    display: 'flex',
+    flex: 1,
+    minWidth: 0,
+    padding: theme.spacing(0.75, 0),
+  }),
+  sectionLabelButton: css({
     alignItems: 'center',
     background: 'none',
     border: 'none',
     color: theme.colors.text.primary,
     cursor: 'pointer',
     display: 'flex',
-    flex: 1,
     fontSize: theme.typography.bodySmall.fontSize,
     fontWeight: theme.typography.fontWeightMedium,
     minWidth: 0,
-    padding: theme.spacing(0.75, 0),
+    padding: 0,
     textAlign: 'left',
     '&:hover': {
       color: theme.colors.text.maxContrast,

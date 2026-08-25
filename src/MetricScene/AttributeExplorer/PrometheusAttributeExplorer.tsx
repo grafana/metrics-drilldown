@@ -95,7 +95,11 @@ function findActualFieldSpelling(canonicalName: string, discovered: Set<string>)
   return undefined;
 }
 
-// See the cap applied at the end of getOtelPriorityAttributes below for why this exists.
+// Passed to AttributeDistribution as maxPriorityAndPinned: bounds how many priority/pinned fields are
+// always visible and eagerly fetched, without discarding OTel detection results themselves. A
+// well-instrumented metric can easily match 7+ domain fields and 8+ resource attributes at once, and
+// every priority field gets its distribution fetched immediately on open (3 concurrent range queries
+// each), so this keeps that from becoming 40+ simultaneous queries just from opening the sidebar.
 const MAX_PRIORITY_ATTRIBUTES = 6;
 
 // Used by getOtelPriorityAttributes below, extracted purely to keep that function's cognitive
@@ -112,32 +116,6 @@ function findPresentFields(
     }
   }
   return present;
-}
-
-// Used by getOtelPriorityAttributes below, extracted purely to keep that function's cognitive
-// complexity under the linted threshold. Not left to grow with however many domain + resource fields
-// happen to match: every priority attribute gets its distribution fetched immediately on open (see
-// AttributeDistribution's initial-load logic), and each histogram fetch is 3 concurrent range queries.
-// A well-instrumented OTel metric can easily match 7+ domain fields and 8+ resource attributes at once,
-// which would otherwise mean 40+ simultaneous queries just from opening the sidebar. Domain matches are
-// kept over resource matches when something has to be cut, since they're pushed first and slice() from
-// the front, and they're more specific to what this metric itself measures.
-function capPriorityAttributes(
-  priorityAttributes: string[],
-  attributeLabels: Record<string, string>,
-  attributeKinds: Record<string, 'metric' | 'resource'>
-): void {
-  if (priorityAttributes.length <= MAX_PRIORITY_ATTRIBUTES) {
-    return;
-  }
-  const kept = new Set(priorityAttributes.slice(0, MAX_PRIORITY_ATTRIBUTES));
-  for (const field of Object.keys(attributeLabels)) {
-    if (!kept.has(field)) {
-      delete attributeLabels[field];
-      delete attributeKinds[field];
-    }
-  }
-  priorityAttributes.length = MAX_PRIORITY_ATTRIBUTES;
 }
 
 // Two independent passes, not one combined list: a metric's own semantic-convention attributes (see
@@ -199,8 +177,6 @@ export function getOtelPriorityAttributes(labels: string[]): {
     attributeKinds[actualField] = 'resource';
     priorityAttributes.push(actualField);
   }
-
-  capPriorityAttributes(priorityAttributes, attributeLabels, attributeKinds);
 
   return { attributeKinds, attributeLabels, priorityAttributes };
 }
@@ -810,6 +786,15 @@ export function PrometheusAttributeExplorer({
           unit={unit}
         />
       }
+      // A small number, not the default 10 and not 0: every histogram distribution fetch is 3
+      // concurrent range queries, so the generic default (cheap for most adapters) would fire 30
+      // queries just from opening the sidebar on a metric with no OTel-detected priority attributes.
+      // 0 goes too far the other way: this auto-load only ever fires when priorityAttributes is empty
+      // (see the initialBatch ternary in AttributeDistribution), so passing 0 left a metric with no
+      // OTel match showing nothing at all, not even a collapsed hint, until the user found the small
+      // "show more" chevron. A metric this common (no semantic-convention labels) still needs a usable
+      // default view.
+      initialAutoLoadCount={5}
       maxPriorityAndPinned={MAX_PRIORITY_ATTRIBUTES}
       onFiltersChange={onFiltersChange}
       priorityAttributes={priorityAttributes}

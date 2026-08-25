@@ -172,9 +172,10 @@ describe('getOtelPriorityAttributes', () => {
     });
   });
 
-  it('caps the combined list so a richly-instrumented metric cannot trigger an unbounded number of concurrent distribution queries', () => {
-    // 4 domain matches + 4 resource matches = 8 candidates; capped to 6, keeping all 4 domain matches
-    // (pushed first) plus only the first 2 resource matches in RESOURCE_ATTRIBUTES' own priority order.
+  it('does not cap or discard matches for a richly-instrumented metric: bounding concurrent queries is AttributeDistribution\'s job (maxPriorityAndPinned), not detection\'s', () => {
+    // 4 domain matches + 4 resource matches = 8 candidates, all of which must survive detection intact
+    // so they still sort ahead of ordinary labels and still get an accurate badge, even though only the
+    // first few are eagerly fetched (bounded downstream by AttributeDistribution's maxPriorityAndPinned).
     const labels = [
       'http_request_method',
       'url_scheme',
@@ -193,10 +194,12 @@ describe('getOtelPriorityAttributes', () => {
       'http_response_status_code',
       'service_name',
       'service_instance_id',
+      'service_namespace',
+      'deployment_environment_name',
     ]);
-    expect(result.attributeLabels).not.toHaveProperty('service_namespace');
-    expect(result.attributeKinds).not.toHaveProperty('service_namespace');
-    expect(result.attributeLabels).not.toHaveProperty('deployment_environment_name');
+    expect(result.attributeLabels).toHaveProperty('service_namespace', 'service.namespace');
+    expect(result.attributeKinds).toHaveProperty('service_namespace', 'resource');
+    expect(result.attributeLabels).toHaveProperty('deployment_environment_name', 'deployment.environment.name');
   });
 });
 
