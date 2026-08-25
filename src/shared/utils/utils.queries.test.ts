@@ -20,6 +20,18 @@ describe('buildFilterExpression', () => {
   it('should handle not-equal operator with a real value', () => {
     expect(buildFilterExpression({ key: 'env', operator: '!=', value: 'staging' })).toBe('env!="staging"');
   });
+
+  it('should escape a literal double quote in the value instead of breaking out of the string literal', () => {
+    expect(buildFilterExpression({ key: 'app', operator: '=', value: 'weird"value' })).toBe('app="weird\\"value"');
+  });
+
+  it('should escape a literal backslash in the value', () => {
+    expect(buildFilterExpression({ key: 'app', operator: '=', value: 'back\\slash' })).toBe('app="back\\\\slash"');
+  });
+
+  it('should escape quotes without disturbing regex metacharacters in a regex operator value', () => {
+    expect(buildFilterExpression({ key: 'app', operator: '=~', value: '^(a|"b")$' })).toBe('app=~"^(a|\\"b\\")$"');
+  });
 });
 
 describe('removeIgnoreUsageLabel', () => {

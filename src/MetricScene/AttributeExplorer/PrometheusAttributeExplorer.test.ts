@@ -516,6 +516,28 @@ describe('processFractionResponse', () => {
     expect(result.map((r) => r.value)).toEqual(['some-normal', 'active-but-tiny', 'truly-quiet']);
     expect(result.find((r) => r.value === 'active-but-tiny')?.percentage).toBeGreaterThan(0);
   });
+
+  it('labels a series with no value for this label as <unspecified> instead of dropping it from the total', () => {
+    // Prometheus's by(field) grouping still produces a group (field: '') for series that don't carry
+    // the label at all. Dropping it would silently remove its volume from grandTotal and inflate
+    // checkout's percentage to 100 instead of the true 75/25 split.
+    const fraction: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'checkout' }, values: [[0, '1']] },
+        { metric: { route: '' }, values: [[0, '1']] },
+      ],
+    };
+    const totalCount: PrometheusRangeQueryResult = {
+      result: [
+        { metric: { route: 'checkout' }, values: [[0, '30']] },
+        { metric: { route: '' }, values: [[0, '10']] },
+      ],
+    };
+    expect(processFractionResponse(fraction, totalCount, noPresence, 'route', 1)).toEqual([
+      { value: 'checkout', count: 30, impliedTotal: 30, percentage: 75 },
+      { value: '<unspecified>', count: 10, impliedTotal: 10, percentage: 25 },
+    ]);
+  });
 });
 
 describe('getHistogramValueTooltip', () => {

@@ -322,11 +322,20 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
       return;
     }
 
-    // Union of previously- and newly-owned keys, not just the final set: a field fully deselected drops
-    // out of the final _sidebarFilterKeys above, so filtering by that set alone would reclassify its
-    // old VAR_FILTERS entry as "not ours" on the next line and write it straight back in, silently
-    // undoing the removal (and making it impossible to deselect a pre-existing page filter from this UI).
-    const releasedOrOwnedKeys = new Set([...previousSidebarFilterKeys, ...this._sidebarFilterKeys]);
+    // Every field whose value/operator signature actually changed this call, not just currently- or
+    // previously-owned ones: a field the sidebar never owned (a pre-existing page filter, absorbed as
+    // "external") can still be fully deselected via this UI. Since it's absent from `filters` entirely,
+    // the claim loop above never visits it (it only iterates nextSignatures), so without this it would
+    // never be recognized as changed at all, and its stale VAR_FILTERS entry would survive untouched.
+    const changedFilterKeys = [...previousSignatures.keys()].filter(
+      (field) => previousSignatures.get(field) !== nextSignatures.get(field)
+    );
+    // Union of previously-owned, newly-owned, and changed keys, not just the final owned set: a field
+    // fully deselected drops out of the final _sidebarFilterKeys above, so filtering by that set alone
+    // would reclassify its old VAR_FILTERS entry as "not ours" on the next line and write it straight
+    // back in, silently undoing the removal (and making it impossible to deselect a pre-existing page
+    // filter from this UI).
+    const releasedOrOwnedKeys = new Set([...previousSidebarFilterKeys, ...this._sidebarFilterKeys, ...changedFilterKeys]);
     const otherFilters = filtersVar.state.filters.filter((f) => !releasedOrOwnedKeys.has(f.key));
     // Only the fields this sidebar currently owns, not the full `filters` list: an unclaimed field is
     // already correctly present in filtersVar untouched (that's exactly why it wasn't claimed above),

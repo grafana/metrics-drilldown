@@ -15,6 +15,7 @@ import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { getUnitFromMetric } from 'shared/GmdVizPanel/units/getUnit';
 import { HISTOGRAM_ATTRIBUTES_BY_DOMAIN } from 'shared/otel/histogramAttributes';
 import { RESOURCE_ATTRIBUTES } from 'shared/otel/resourceAttributes';
+import { escapePromQLString } from 'shared/utils/utils.queries';
 
 import { AttributeDistribution, type ActiveFilter, type AttributeConfig, type AttributeValueCount, type DatasetContext } from './AttributeDistribution';
 
@@ -197,10 +198,6 @@ async function fetchAttributes(context: DatasetContext): Promise<AttributeConfig
     .map((label) => ({ attribute: label, attribute_name: label }));
 }
 
-function escapePromQLString(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-}
-
 function escapePromQLRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -270,13 +267,21 @@ export interface PrometheusRangeQueryResult {
   result: Array<{ metric: Record<string, string>; values: Array<[number, string]> }>;
 }
 
+// Matches the existing convention for a genuinely absent label elsewhere in this codebase (see
+// getLabelValueFromDataFrame.ts), rather than inventing a second one.
+const UNSPECIFIED_LABEL_VALUE = '<unspecified>';
+
 function extractLastSampleByValue(response: PrometheusRangeQueryResult | undefined, field: string): Map<string, number> {
   const byValue = new Map<string, number>();
   for (const series of response?.result ?? []) {
-    const value = series.metric[field];
+    // Falsy (missing key, or an empty string) means Prometheus's by(field) grouping produced this
+    // group for series that don't actually carry the label at all, not "no data" -- shown as
+    // <unspecified> instead of silently dropped, or its real volume vanishes from grandTotal below and
+    // inflates every other value's percentage in the same label.
+    const value = series.metric[field] || UNSPECIFIED_LABEL_VALUE;
     const lastSample = series.values?.[series.values.length - 1];
     const sample = Number(lastSample?.[1]);
-    if (value && !isNaN(sample)) {
+    if (!isNaN(sample)) {
       byValue.set(value, sample);
     }
   }
