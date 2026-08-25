@@ -22,7 +22,7 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
     const metricScene = sceneGraph.getAncestor(model, MetricScene);
     const { attributeExplorerOpen } = metricScene.useState();
     const { metricType } = sceneGraph.getAncestor(model, GmdVizPanel).useState();
-    const label = t('explore-attributes-action.label', 'Explore Attributes');
+    const label = t('explore-attributes-action.label', 'Histogram distribution');
 
     // The Attribute Explorer only supports histogram metrics (see PrometheusAttributeExplorerProps);
     // the button that opens it is hidden for every other metric type rather than showing a control
@@ -36,7 +36,7 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
     // open, so repeating either here was pure duplication.
     const tooltipContent = t(
       'explore-attributes-action.tooltip.description',
-      'Explore the labels and attribute values present for this metric.'
+      'Explore the distribution of histogram observation for labels and attribute values for this metric.'
     );
 
     return (
@@ -53,7 +53,7 @@ export class ExploreAttributesAction extends SceneObjectBase<ExploreAttributesAc
           icon="filter"
           data-testid="explore-attributes-action"
         >
-          {t('metric-graph.explore-attributes', 'Explore Attributes')}
+          {t('metric-graph.explore-attributes', 'Histogram analysis')}
         </Button>
       </Tooltip>
     );
