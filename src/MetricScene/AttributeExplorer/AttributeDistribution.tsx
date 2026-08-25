@@ -430,7 +430,9 @@ export function AttributeDistribution({
                     <span className={styles.sectionLabel}>{attributeLabels[attr] ?? attr}</span>
                     {badgeText && (
                       <Tooltip content={badgeText}>
-                        <Icon className={styles.attributeBadgeIcon} name="info-circle" size="sm" />
+                        <span tabIndex={0} role="button" aria-label={badgeText}>
+                          <Icon className={styles.attributeBadgeIcon} name="info-circle" size="sm" />
+                        </span>
                       </Tooltip>
                     )}
                   </div>
@@ -579,8 +581,18 @@ function AttributeSection({
             // Inside the button, right next to the label, not a sibling: the button has flex: 1 to
             // fill the row, so a sibling icon ends up pushed to the far right edge next to the
             // chevron instead of sitting next to the text it's actually describing. stopPropagation
-            // keeps a click on the icon from also triggering the button's own expand/collapse toggle.
-            <span onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} role="presentation">
+            // keeps a click (or Enter/Space while focused) on the icon from also triggering the
+            // button's own expand/collapse toggle. tabIndex + role="button" (not "presentation": that
+            // would tell screen readers to skip it entirely, and a non-interactive role like "img"
+            // can't legitimately carry tabIndex/key handlers) make it a real, keyboard-reachable,
+            // announced element rather than a hover-only mouse affordance.
+            <span
+              tabIndex={0}
+              role="button"
+              aria-label={badgeText}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
               <Tooltip content={badgeText}>
                 <Icon className={styles.attributeBadgeIcon} name="info-circle" size="sm" />
               </Tooltip>

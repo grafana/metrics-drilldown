@@ -66,9 +66,12 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     onReferencedVariableValueChanged: (variable: SceneVariable) => {
       if (variable.state.name === VAR_FILTERS) {
         this._syncSelectedFiltersFromVar();
-      } else {
-        this._updateQueryAndDatasource();
       }
+      // state.query embeds a one-time snapshot of VAR_FILTERS (see buildQueryExpression.ts), taken via
+      // sceneGraph.interpolate rather than a live binding, so it must be rebuilt here too or it
+      // silently keeps querying against whatever filters existed at the last datasource/metric change
+      // instead of the page's current filters.
+      this._updateQueryAndDatasource();
     },
   });
 

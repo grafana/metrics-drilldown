@@ -123,7 +123,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const { metric } = this.state;
     const trail = getTrailFor(this);
 
-    // Hide header actions and menu in embeddedMini mode, reduce height, add click navigation
+    // Hide header actions, menu, and title items in embeddedMini mode, reduce height, add click
+    // navigation. titleItems must be cleared here too: it's set unconditionally at construction
+    // (titleItems: () => [new ExploreAttributesAction()]), and without clearing it, an embedded mini
+    // panel for a histogram metric would still show the button, which opens a viewport-fixed sidebar
+    // on top of whatever page is embedding this panel, not something an embeddedMini preview should do.
     if (trail.state.embeddedMini) {
       const [flexItem] = sceneGraph.findDescendents(this, SceneFlexItem);
       flexItem.setState({ minHeight: PANEL_HEIGHT.S, maxHeight: PANEL_HEIGHT.S });
@@ -134,6 +138,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           headerActions: () => [],
           menu: undefined,
           height: PANEL_HEIGHT.S,
+          titleItems: () => [],
         },
         {}
       );

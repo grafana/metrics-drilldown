@@ -1,6 +1,7 @@
 import { css } from '@emotion/css';
 import { dateTime, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
+import { utf8Support } from '@grafana/prometheus';
 // eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
 import { getDataSourceSrv } from '@grafana/runtime';
 import { Field, Icon, Input, Tooltip, useStyles2 } from '@grafana/ui';
@@ -93,6 +94,9 @@ function findActualFieldSpelling(canonicalName: string, discovered: Set<string>)
   return undefined;
 }
 
+// See the cap applied at the end of getOtelPriorityAttributes below for why this exists.
+const MAX_PRIORITY_ATTRIBUTES = 6;
+
 // Used by getOtelPriorityAttributes below, extracted purely to keep that function's cognitive
 // complexity under the linted threshold: this loop-plus-conditional was the nested block pushing it over.
 function findPresentFields(
@@ -107,6 +111,32 @@ function findPresentFields(
     }
   }
   return present;
+}
+
+// Used by getOtelPriorityAttributes below, extracted purely to keep that function's cognitive
+// complexity under the linted threshold. Not left to grow with however many domain + resource fields
+// happen to match: every priority attribute gets its distribution fetched immediately on open (see
+// AttributeDistribution's initial-load logic), and each histogram fetch is 3 concurrent range queries.
+// A well-instrumented OTel metric can easily match 7+ domain fields and 8+ resource attributes at once,
+// which would otherwise mean 40+ simultaneous queries just from opening the sidebar. Domain matches are
+// kept over resource matches when something has to be cut, since they're pushed first and slice() from
+// the front, and they're more specific to what this metric itself measures.
+function capPriorityAttributes(
+  priorityAttributes: string[],
+  attributeLabels: Record<string, string>,
+  attributeKinds: Record<string, 'metric' | 'resource'>
+): void {
+  if (priorityAttributes.length <= MAX_PRIORITY_ATTRIBUTES) {
+    return;
+  }
+  const kept = new Set(priorityAttributes.slice(0, MAX_PRIORITY_ATTRIBUTES));
+  for (const field of Object.keys(attributeLabels)) {
+    if (!kept.has(field)) {
+      delete attributeLabels[field];
+      delete attributeKinds[field];
+    }
+  }
+  priorityAttributes.length = MAX_PRIORITY_ATTRIBUTES;
 }
 
 // Two independent passes, not one combined list: a metric's own semantic-convention attributes (see
@@ -140,17 +170,24 @@ export function getOtelPriorityAttributes(labels: string[]): {
   const attributeLabels: Record<string, string> = {};
   const priorityAttributes: string[] = [];
 
+  // Best match, not first any-match: several domains share cross-cutting fields (error.type appears
+  // in http, rpc, database, messaging, cicd, and genai). Picking the first domain with any match at
+  // all would let a single shared field claim the wrong domain and then break, silently dropping a
+  // much stronger, domain-specific signal present in the same label set (e.g. labels error_type +
+  // db_operation_name would resolve to http on error_type alone, before database's two-field match --
+  // including its own unambiguous db_operation_name -- is ever even checked). Ties keep the
+  // first-defined domain, preserving the original "first shape wins" behavior for a genuine tie.
+  let bestDomainMatch: Array<{ actualField: string; canonicalName: string }> = [];
   for (const domainFields of Object.values(HISTOGRAM_ATTRIBUTES_BY_DOMAIN)) {
     const present = findPresentFields(domainFields, discovered);
-    if (present.length === 0) {
-      continue;
+    if (present.length > bestDomainMatch.length) {
+      bestDomainMatch = present;
     }
-    for (const { actualField, canonicalName } of present) {
-      attributeLabels[actualField] = canonicalName;
-      attributeKinds[actualField] = 'metric';
-      priorityAttributes.push(actualField);
-    }
-    break;
+  }
+  for (const { actualField, canonicalName } of bestDomainMatch) {
+    attributeLabels[actualField] = canonicalName;
+    attributeKinds[actualField] = 'metric';
+    priorityAttributes.push(actualField);
   }
 
   for (const { actualField, canonicalName } of findPresentFields(RESOURCE_ATTRIBUTES, discovered)) {
@@ -161,6 +198,8 @@ export function getOtelPriorityAttributes(labels: string[]): {
     attributeKinds[actualField] = 'resource';
     priorityAttributes.push(actualField);
   }
+
+  capPriorityAttributes(priorityAttributes, attributeLabels, attributeKinds);
 
   return { attributeKinds, attributeLabels, priorityAttributes };
 }
@@ -215,7 +254,7 @@ function buildFilterMatchers(filters: ActiveFilter[]): string {
   return groupFiltersByFieldAndOperator(filters)
     .map(({ field, operator, values }) => {
       if (values.length === 1) {
-        return `${field}${operator}"${escapePromQLString(values[0])}"`;
+        return `${utf8Support(field)}${operator}"${escapePromQLString(values[0])}"`;
       }
       // Two layers, applied in this order deliberately: escapePromQLRegex first produces a valid regex
       // pattern (escaping regex metacharacters, e.g. "." to "\."); escapePromQLString second makes that
@@ -225,7 +264,7 @@ function buildFilterMatchers(filters: ActiveFilter[]): string {
       // backslash instead of the escaped-backslash the regex needs, silently matching nothing.
       const alternation = values.map((v) => escapePromQLString(escapePromQLRegex(v))).join('|');
       const regexOp = operator === '=' ? '=~' : '!~';
-      return `${field}${regexOp}"^(${alternation})$"`;
+      return `${utf8Support(field)}${regexOp}"^(${alternation})$"`;
     })
     .join(', ');
 }
@@ -352,7 +391,7 @@ export function getHistogramValueTooltip(
   }
   return t(
     'attribute-explorer.value-tooltip-histogram',
-    '{{count}} ({{percentage}}%) of the ~{{total}} observations are {{range}}.',
+    "This value accounts for {{percentage}}% of this label's observations that are {{range}} ({{count}} of its own ~{{total}}).",
     {
       count: item.count,
       percentage: item.percentage,
@@ -415,15 +454,15 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
     const range = context.histogramRange ?? DEFAULT_HISTOGRAM_RANGE;
     // le stays in the inner vector for histogram_fraction to interpolate against; it's not a
     // breakdown field itself (getLabelsToExclude already drops it from the attribute list).
-    const innerVector = `sum by (${field}, le) (rate(${selector}[${window.stepSeconds}s]))`;
+    const innerVector = `sum by (${utf8Support(field)}, le) (rate(${selector}[${window.stepSeconds}s]))`;
     const fractionQuery = `histogram_fraction(${formatPromQLBound(range.lowerSeconds)}, ${formatPromQLBound(range.upperSeconds)}, ${innerVector})`;
-    const totalCountQuery = `sum by (${field}) (rate(${toCountMetricSelector(selector)}[${window.stepSeconds}s]))`;
+    const totalCountQuery = `sum by (${utf8Support(field)}) (rate(${toCountMetricSelector(selector)}[${window.stepSeconds}s]))`;
     // count(), not rate(): a cheaper existence check that only needs 1 raw sample, so a value with a
     // live series but too few samples in a narrow window for rate() to compute still shows up (see
     // processFractionResponse) instead of looking indistinguishable from a genuinely-gone series. The
     // +Inf bucket exists on every classic histogram series exactly once, so this counts each series
     // once regardless of how many finite le buckets it has.
-    const presenceQuery = `count by (${field}) (${applyFiltersToSelector(selector, [{ field: 'le', operator: '=', value: '+Inf' }])})`;
+    const presenceQuery = `count by (${utf8Support(field)}) (${applyFiltersToSelector(selector, [{ field: 'le', operator: '=', value: '+Inf' }])})`;
 
     return forkJoin([
       runRangeQuery(context, fractionQuery, window),
@@ -440,11 +479,11 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
   // group by. histogram_count() is called directly on this same vector, no sibling-metric swap:
   // unlike a classic bucket vector, this vector already carries native-histogram-typed samples,
   // which is what histogram_count() requires.
-  const innerVector = `sum by (${field}) (rate(${selector}[${window.stepSeconds}s]))`;
+  const innerVector = `sum by (${utf8Support(field)}) (rate(${selector}[${window.stepSeconds}s]))`;
   const fractionQuery = `histogram_fraction(${formatPromQLBound(range.lowerSeconds)}, ${formatPromQLBound(range.upperSeconds)}, ${innerVector})`;
   const totalCountQuery = `histogram_count(${innerVector})`;
   // No _bucket/_count sibling swap or le matcher needed here: the raw series itself is what to count.
-  const presenceQuery = `count by (${field}) (${selector})`;
+  const presenceQuery = `count by (${utf8Support(field)}) (${selector})`;
 
   return forkJoin([
     runRangeQuery(context, fractionQuery, window),
@@ -603,7 +642,11 @@ function AttributeExplorerHeader({
       <div className={styles.title}>
         {t('attribute-explorer.title', 'Attribute Explorer')}
         <Tooltip interactive content={getAttributeExplorerDescription(histogramRange, unit)}>
-          <Icon name="info-circle" size="sm" />
+          {/* tabIndex makes this focusable so Grafana's Tooltip shows content on keyboard focus, not
+          just mouse hover; a plain Icon has no native focusability. */}
+          <span tabIndex={0} role="button" aria-label={t('attribute-explorer.description-aria-label', 'What do these percentages mean?')}>
+            <Icon name="info-circle" size="sm" />
+          </span>
         </Tooltip>
       </div>
       {queryLimitLabel && <div className={styles.queryLimit}>{queryLimitLabel}</div>}

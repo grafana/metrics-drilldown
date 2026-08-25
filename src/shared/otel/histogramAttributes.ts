@@ -22,8 +22,11 @@ export const HISTOGRAM_ATTRIBUTES_BY_DOMAIN: Record<string, string[]> = {
     'network.protocol.name',
     'network.protocol.version',
   ],
-  // rpc.server.call.duration / rpc.client.call.duration
-  rpc: ['rpc.system.name', 'rpc.method', 'rpc.status_code', 'error.type', 'server.address', 'server.port'],
+  // rpc.server.call.duration / rpc.client.call.duration. server.address/server.port deliberately
+  // excluded: they're Conditional on the client variant but Opt-in (cardinality risk) on the server
+  // variant, and this detection doesn't distinguish client from server metrics, so including them
+  // would violate this file's own opt-in exclusion policy for exactly the server case.
+  rpc: ['rpc.system.name', 'rpc.method', 'rpc.status_code', 'error.type'],
   // db.client.operation.duration (and the sibling db.client.connection.* / db.client.response.returned_rows metrics)
   database: [
     'db.system.name',

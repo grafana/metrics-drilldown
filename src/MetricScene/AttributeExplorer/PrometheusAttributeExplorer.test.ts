@@ -95,12 +95,23 @@ describe('getOtelPriorityAttributes', () => {
     });
   });
 
-  it('picks the first matching shape when labels span more than one shape', () => {
-    // http is checked before db, so a metric matching both resolves to http only.
+  it('breaks a tie between domains matching exactly one field each by keeping the first-defined domain', () => {
+    // http is defined before db, so a genuine one-field-each tie resolves to http.
     expect(getOtelPriorityAttributes(['http_route', 'db_operation_name'])).toEqual({
       attributeKinds: { http_route: 'metric' },
       attributeLabels: { http_route: 'http.route' },
       priorityAttributes: ['http_route'],
+    });
+  });
+
+  it('picks the domain with the most matching fields, not the first domain with any match at all', () => {
+    // error.type is shared by http and database, so an any-match rule would resolve this to http (the
+    // first domain checked) on error_type alone and never even look at database's second, unambiguous
+    // field. Database has two matches (error_type, db_operation_name) to http's one, so it must win.
+    expect(getOtelPriorityAttributes(['error_type', 'db_operation_name'])).toEqual({
+      attributeKinds: { error_type: 'metric', db_operation_name: 'metric' },
+      attributeLabels: { error_type: 'error.type', db_operation_name: 'db.operation.name' },
+      priorityAttributes: ['db_operation_name', 'error_type'],
     });
   });
 
@@ -159,6 +170,33 @@ describe('getOtelPriorityAttributes', () => {
       attributeLabels: { http_route: 'http.route', service_name: 'service.name', k8s_pod_name: 'k8s.pod.name' },
       priorityAttributes: ['http_route', 'service_name', 'k8s_pod_name'],
     });
+  });
+
+  it('caps the combined list so a richly-instrumented metric cannot trigger an unbounded number of concurrent distribution queries', () => {
+    // 4 domain matches + 4 resource matches = 8 candidates; capped to 6, keeping all 4 domain matches
+    // (pushed first) plus only the first 2 resource matches in RESOURCE_ATTRIBUTES' own priority order.
+    const labels = [
+      'http_request_method',
+      'url_scheme',
+      'http_route',
+      'http_response_status_code',
+      'service_name',
+      'service_instance_id',
+      'service_namespace',
+      'deployment_environment_name',
+    ];
+    const result = getOtelPriorityAttributes(labels);
+    expect(result.priorityAttributes).toEqual([
+      'http_request_method',
+      'url_scheme',
+      'http_route',
+      'http_response_status_code',
+      'service_name',
+      'service_instance_id',
+    ]);
+    expect(result.attributeLabels).not.toHaveProperty('service_namespace');
+    expect(result.attributeKinds).not.toHaveProperty('service_namespace');
+    expect(result.attributeLabels).not.toHaveProperty('deployment_environment_name');
   });
 });
 
@@ -470,7 +508,8 @@ describe('getHistogramValueTooltip', () => {
       { lowerSeconds: 2, upperSeconds: Number.POSITIVE_INFINITY },
       null
     );
-    expect(tooltip).toContain('over 2.');
+    // "over 2 (" not "over 2 seconds (" or similar: confirms no unit word snuck in when unit is unknown.
+    expect(tooltip).toContain('over 2 (');
   });
 
   it('returns a "no activity" message, not the observations sentence, when impliedTotal is present but zero', () => {
