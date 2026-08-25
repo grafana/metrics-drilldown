@@ -12,6 +12,6 @@ export function mapKgMetricType(kgType: KgMetricType): MetricType {
     case 'histogram':
       return 'classic-histogram';
     case 'summary':
-      return 'gauge';
+      return 'summary';
   }
 }
