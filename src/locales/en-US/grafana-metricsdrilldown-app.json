@@ -11,13 +11,13 @@
     }
   },
   "attribute-explorer": {
+    "badge-metric": "OTel metric attribute",
+    "badge-resource": "OTel resource attribute",
     "close-aria-label": "Close",
     "close-tooltip": "Close",
     "collapse": "Collapse",
     "collapse-extra-fields": "Collapse extra fields",
     "description": "Spot patterns and narrow down root causes by exploring how your data breaks down across key attributes. Click any value to filter your results.",
-    "description-counter": "Activity/rate-weighted: Values show each label's share of this counter's total rate (activity). A value can still appear at 0% if it exists but had no activity in this window.",
-    "description-gauge": "Cardinality (series-count) weighted: Values show what share of this metric's series come from each label value. A label with 10 series will outweigh one with 2, regardless of the values those series report.",
     "description-histogram": "Fraction-in-range weighted: Values show what share of each label's own requests are {{range}}. These percentages don't add up to 100% across labels: each is that label's own share of its own traffic, not a split of the whole.",
     "discovering-fields": "Discovering attributes…",
     "error": "Failed to load",
@@ -29,6 +29,8 @@
     "histogram-range-between": "{{lower}}s-{{upper}}s",
     "histogram-range-over": "over {{seconds}}s",
     "histogram-range-under": "under {{seconds}}s",
+    "lower-limit": "Lower limit",
+    "lower-limit-unit": "Lower limit ({{unit}})",
     "no-extra-fields-shown": "No extra fields shown",
     "no-fields-detected": "No fields detected for this dataset.",
     "no-more-fields": "No more fields",
@@ -37,8 +39,13 @@
     "show-more-fields_other": "Show {{count}} more fields",
     "title": "Attribute Explorer",
     "too-many-values": "Too many values to display",
+    "unit-unknown": "We couldn't determine this metric's unit from its name. Double-check the threshold before trusting the percentage.",
+    "upper-limit": "Upper limit",
+    "upper-limit-placeholder": "no limit",
+    "upper-limit-unit": "Upper limit ({{unit}})",
     "value-tooltip-histogram_one": "{{count}} ({{percentage}}%) of the ~{{total}} observations are {{range}}.",
-    "value-tooltip-histogram_other": "{{count}} ({{percentage}}%) of the ~{{total}} observations are {{range}}."
+    "value-tooltip-histogram_other": "{{count}} ({{percentage}}%) of the ~{{total}} observations are {{range}}.",
+    "value-tooltip-histogram-no-activity": "No activity in this window."
   },
   "binary-ratio-labels-datasource": {
     "test-success": "OK"
@@ -112,19 +119,7 @@
   "explore-attributes-action": {
     "label": "Explore Attributes",
     "tooltip": {
-      "description": "The Attribute Explorer surfaces the labels and attribute values present for this metric so you can filter and drill down into them.",
-      "histogram-intro": "This metric is a histogram. Each attribute value's own data is compared against a threshold from the histogram's buckets, shown as a percentage in the sidebar. You can change that threshold below.",
-      "lower-limit": "Lower limit",
-      "lower-limit-unit": "Lower limit ({{unit}})",
-      "meaning-seconds": "For each attribute value, the percentage shown means: \"X% of this value's own traffic is above {{lower}}s\". We call this slow.",
-      "meaning-unit": "For each attribute value, the percentage shown means: \"X% of this value's own traffic is above {{lower}} {{unit}}\".",
-      "meaning-unknown": "For each attribute value, the percentage shown means: \"X% of this value's own traffic is above {{lower}}\".",
-      "metric": "Metric:",
-      "type": "Type:",
-      "unit-unknown": "We couldn't determine this metric's unit from its name. Double-check that this threshold makes sense before trusting the percentage.",
-      "upper-limit": "Upper limit",
-      "upper-limit-placeholder": "no limit",
-      "upper-limit-unit": "Upper limit ({{unit}})"
+      "description": "The Attribute Explorer surfaces the labels and attribute values present for this metric so you can filter and drill down into them."
     }
   },
   "exposed-component-error-boundary": {
