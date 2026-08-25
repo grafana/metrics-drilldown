@@ -33,6 +33,7 @@
     "histogram-range-under": "under {{value}}",
     "invalid-range": "Upper limit must be greater than lower limit",
     "lower-limit": "Lower limit",
+    "lower-limit-placeholder": "no limit",
     "lower-limit-unit": "Lower limit ({{unit}})",
     "no-extra-fields-shown": "No extra fields shown",
     "no-fields-detected": "No fields detected for this dataset.",

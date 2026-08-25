@@ -551,6 +551,29 @@ function getAttributeExplorerDescription(histogramRange: HistogramRange, unit: s
   );
 }
 
+// Used by handleLowerChange/handleUpperChange below, extracted purely to keep
+// AttributeExplorerHeader's cognitive complexity under the linted threshold. An empty field commits
+// emptyValue (the "no limit" sentinel: -Infinity for lower, +Infinity for upper, both already
+// understood by formatPromQLBound/formatHistogramRangeLabel) instead of doing nothing -- doing nothing
+// left whatever debounce timer the last non-empty keystroke scheduled uncancelled (commitRange, the
+// only thing that clears it, was never called for that keystroke), so it fired 500ms later and
+// silently reinstated that stale intermediate digit, making the field look impossible to clear.
+function commitBoundFromText(
+  text: string,
+  key: keyof HistogramRange,
+  emptyValue: number,
+  commitRange: (next: Partial<HistogramRange>) => void
+): void {
+  if (text.trim() === '') {
+    commitRange({ [key]: emptyValue });
+    return;
+  }
+  const parsed = Number(text);
+  if (!isNaN(parsed)) {
+    commitRange({ [key]: parsed });
+  }
+}
+
 interface AttributeExplorerHeaderProps {
   histogramRange: HistogramRange;
   onHistogramRangeChange: (range: HistogramRange) => void;
@@ -566,7 +589,11 @@ function AttributeExplorerHeader({
 }: Readonly<AttributeExplorerHeaderProps>) {
   const styles = useStyles2(getHeaderStyles);
 
-  const [lowerText, setLowerText] = useState(String(histogramRange.lowerSeconds));
+  // -Infinity/+Infinity display as empty, not the literal string "-Infinity"/"Infinity": they're the
+  // "no lower/upper limit" sentinels (see formatPromQLBound), not real numbers to show back to the user.
+  const [lowerText, setLowerText] = useState(
+    histogramRange.lowerSeconds === Number.NEGATIVE_INFINITY ? '' : String(histogramRange.lowerSeconds)
+  );
   const [upperText, setUpperText] = useState(
     histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds)
   );
@@ -592,7 +619,7 @@ function AttributeExplorerHeader({
   ) {
     setPrevHistogramRange(histogramRange);
     setPendingRange(histogramRange);
-    setLowerText(String(histogramRange.lowerSeconds));
+    setLowerText(histogramRange.lowerSeconds === Number.NEGATIVE_INFINITY ? '' : String(histogramRange.lowerSeconds));
     setUpperText(histogramRange.upperSeconds === Number.POSITIVE_INFINITY ? '' : String(histogramRange.upperSeconds));
   }
 
@@ -628,23 +655,13 @@ function AttributeExplorerHeader({
   const handleLowerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.currentTarget.value;
     setLowerText(text);
-    const parsed = Number(text);
-    if (text.trim() !== '' && !isNaN(parsed)) {
-      commitRange({ lowerSeconds: parsed });
-    }
+    commitBoundFromText(text, 'lowerSeconds', Number.NEGATIVE_INFINITY, commitRange);
   };
 
   const handleUpperChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.currentTarget.value;
     setUpperText(text);
-    if (text.trim() === '') {
-      commitRange({ upperSeconds: Number.POSITIVE_INFINITY });
-      return;
-    }
-    const parsed = Number(text);
-    if (!isNaN(parsed)) {
-      commitRange({ upperSeconds: parsed });
-    }
+    commitBoundFromText(text, 'upperSeconds', Number.POSITIVE_INFINITY, commitRange);
   };
 
   return (
@@ -673,6 +690,7 @@ function AttributeExplorerHeader({
           <Input
             type="number"
             width={12}
+            placeholder={t('attribute-explorer.lower-limit-placeholder', 'no limit')}
             value={lowerText}
             onChange={handleLowerChange}
             data-testid="histogram-lower-limit-input"
