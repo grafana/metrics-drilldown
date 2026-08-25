@@ -123,13 +123,18 @@ export function reducer(state: State, action: Action): State {
     }
     case 'SET_ATTRIBUTES': {
       const detectedFields = new Set(action.configs.map((c) => c.attribute));
-      // Only preserve attributes the user explicitly pinned via the combobox.
-      // Preserving all prior state.attributes would leak detected-only fields
-      // from a previous context (different query or datasource) into the new one.
-      const userPinned = state.userPinnedAttributes
+      // Preserve attributes the user explicitly pinned, AND any field referenced by an active filter --
+      // not just pinned ones. Selecting the <unspecified> row writes field="", and Prometheus's label
+      // discovery for the now-narrowed (absent-label) selector can genuinely stop reporting that label
+      // at all, dropping it from the next detection cycle even though the filter -- and the section
+      // that lets the user clear it -- still needs to exist. Preserving all prior state.attributes
+      // instead would leak detected-only fields from a previous context (different query or
+      // datasource) into the new one, so this stays scoped to fields something active still references.
+      const retainedFields = new Set([...state.userPinnedAttributes, ...state.selectedFilters.map((f) => f.field)]);
+      const retained = Array.from(retainedFields)
         .filter((attr) => !detectedFields.has(attr))
         .map((attr) => state.attributes.find((a) => a.attribute === attr) ?? { attribute: attr, attribute_name: attr });
-      const merged = [...action.configs, ...userPinned];
+      const merged = [...action.configs, ...retained];
       const data: Record<string, AttributeState> = {};
       for (const c of merged) {
         // false, not true: see the identical reasoning in the DETECTING case above.

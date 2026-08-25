@@ -1,6 +1,6 @@
 
 import { css } from '@emotion/css';
-import { getDefaultTimeRange, type GrafanaTheme2, type TimeRange } from '@grafana/data';
+import { getDefaultTimeRange, type AdHocVariableFilter, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
 // eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
 import { getDataSourceSrv, useChromeHeaderHeight } from '@grafana/runtime';
@@ -59,6 +59,28 @@ function canonicalFilterSignatures(filters: ActiveFilter[]): Map<string, string>
     signatures.set(field, JSON.stringify(sorted));
   }
   return signatures;
+}
+
+// Used by _syncSelectedFiltersFromVar below, extracted purely to keep its cognitive complexity under
+// the linted threshold. Reconstructs the matcher handleFiltersChange would have written for each
+// owned field's current selection (single value, or a multi-value regex alternation) and checks it
+// against what's actually in VAR_FILTERS right now, returning only the fields where they still match.
+function computeStillOwnedFields(
+  ownedSelections: ActiveFilter[],
+  actualByField: Map<string, AdHocVariableFilter>
+): Set<string> {
+  const stillOwnedFields = new Set<string>();
+  for (const { field, operator, values } of groupFiltersByFieldAndOperator(ownedSelections)) {
+    const expected =
+      values.length === 1
+        ? { operator, value: values[0] }
+        : { operator: operator === '=' ? '=~' : '!~', value: values.map(escapeAdHocRegexValue).join('|') };
+    const actual = actualByField.get(field);
+    if (actual && actual.operator === expected.operator && actual.value === expected.value) {
+      stillOwnedFields.add(field);
+    }
+  }
+  return stillOwnedFields;
 }
 
 interface AttributeExplorerSceneState extends SceneObjectState {
@@ -283,17 +305,37 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
       return;
     }
 
-    const stillPresentKeys = new Set(filtersVar.state.filters.map((f) => f.key));
-    // Keep current selections for fields we own, unless externally removed from VAR_FILTERS. Not
-    // re-derived from VAR_FILTERS: a collapsed multi-value regex can't be un-expanded unambiguously.
-    const ours = this.state.selectedFilters.filter(
-      (f) => this._sidebarFilterKeys.has(f.field) && stillPresentKeys.has(f.field)
-    );
+    const actualByField = new Map(filtersVar.state.filters.map((f) => [f.key, f]));
 
-    // Fields we don't own: pick up plain =/!= filters set elsewhere so a pre-existing page filter
-    // shows as selected. Regex filters on fields we don't own aren't representable here.
+    // Keep current selections for fields we own, but only while VAR_FILTERS still holds exactly the
+    // matcher we last wrote for that field -- not just "the key is still present". A page-level edit
+    // that changes an owned field's VALUE (not just removes it) leaves the key present with different
+    // content; keeping our stale value in that case means the query applies two contradictory matchers
+    // for the same field (ours and the page's), returning no data, and the next sidebar edit would
+    // silently overwrite the page's change back to our stale value. The expected matcher is
+    // reconstructed the same way handleFiltersChange builds it (single value vs multi-value regex), not
+    // re-derived from VAR_FILTERS: a collapsed multi-value regex can't be un-expanded unambiguously.
+    const ownedSelections = this.state.selectedFilters.filter((f) => this._sidebarFilterKeys.has(f.field));
+    const ownedFields = new Set(ownedSelections.map((f) => f.field));
+    const stillOwnedFields = computeStillOwnedFields(ownedSelections, actualByField);
+    // Release ownership for any field that failed the check above: it's now under the page's control,
+    // not ours, until the sidebar explicitly touches it again. Only deletes, never adds, so this can't
+    // widen ownership beyond what handleFiltersChange itself already granted.
+    const nextSidebarFilterKeys = new Set(this._sidebarFilterKeys);
+    for (const field of ownedFields) {
+      if (!stillOwnedFields.has(field)) {
+        nextSidebarFilterKeys.delete(field);
+      }
+    }
+    this._sidebarFilterKeys = nextSidebarFilterKeys;
+
+    const ours = this.state.selectedFilters.filter((f) => stillOwnedFields.has(f.field));
+
+    // Fields we don't own (including one just released above): pick up plain =/!= filters set
+    // elsewhere so a pre-existing or just-edited page filter shows as selected. Regex filters on
+    // fields we don't own aren't representable here.
     const external: ActiveFilter[] = filtersVar.state.filters
-      .filter((f) => !this._sidebarFilterKeys.has(f.key) && (f.operator === '=' || f.operator === '!='))
+      .filter((f) => !stillOwnedFields.has(f.key) && (f.operator === '=' || f.operator === '!='))
       .map((f) => ({ field: f.key, operator: f.operator as '=' | '!=', value: f.value }));
 
     this.setState({ selectedFilters: [...ours, ...external] });

@@ -56,20 +56,34 @@ const EMPTY_ATTRIBUTE_LABELS: Record<string, string> = {};
 
 // Splits detected attributes into "always visible" (shown/fetched unconditionally, subject to
 // maxPriorityAndPinned) and "everything else" (subject to the normal initialAutoLoadCount/"show more"
-// gating). Pinned attributes always win a spot: pinning is a deliberate, one-at-a-time user action
-// with no inherent need for a cap, unlike OTel auto-detection, which can surface many matches at once
-// (see MAX_PRIORITY_ATTRIBUTES upstream, the reason a cap exists here at all). If pinning alone already
-// fills the cap, OTel-detected fields are pushed out entirely rather than displacing what the user
-// explicitly chose -- they fall back to ordinary non-priority treatment instead of disappearing.
-function splitAlwaysVisible(
+// gating). Pinned attributes win a spot over OTel-detected ones, but are still bounded by the same
+// cap: pinning has no upstream limit the way OTel auto-detection does (see MAX_PRIORITY_ATTRIBUTES),
+// and every visible field starts 3 concurrent range queries, so leaving pinned fields uncapped would
+// make repeated pinning defeat the entire point of having a cap. Kept by recency (most-recently-pinned
+// first), not by whatever position a field happens to occupy in `attributes` (priority-first, then
+// detection order): capping by array position could silently hide the field the user just pinned if it
+// happens to sort late, instead of an older pin they've already seen. If pinning alone fills the cap,
+// OTel-detected fields are pushed out entirely rather than displacing what the user explicitly chose --
+// they fall back to ordinary non-priority treatment instead of disappearing.
+// Exported for unit testing.
+export function splitAlwaysVisible(
   attributes: AttributeConfig[],
   priorityFieldSet: Set<string>,
-  pinnedSet: Set<string>,
+  pinnedAttributes: string[],
   maxPriorityAndPinned: number
 ): { alwaysVisible: AttributeConfig[]; rest: AttributeConfig[] } {
-  const pinnedAttrs = attributes.filter((a) => pinnedSet.has(a.attribute));
-  const detectedPriorityAttrs = attributes.filter((a) => priorityFieldSet.has(a.attribute) && !pinnedSet.has(a.attribute));
-  const genuineNonPriority = attributes.filter((a) => !priorityFieldSet.has(a.attribute) && !pinnedSet.has(a.attribute));
+  // Math.max(0, length - cap) as the slice start, not slice(-maxPriorityAndPinned): when
+  // maxPriorityAndPinned is 0, -0 as a slice argument behaves like 0 (JS doesn't treat it as negative
+  // for this purpose), returning the *whole* array instead of none of it.
+  const pinnedOverflowCount = Math.max(0, pinnedAttributes.length - maxPriorityAndPinned);
+  const visiblePinnedFields = new Set(pinnedAttributes.slice(pinnedOverflowCount));
+  const pinnedAttrs = attributes.filter((a) => visiblePinnedFields.has(a.attribute));
+  const detectedPriorityAttrs = attributes.filter(
+    (a) => priorityFieldSet.has(a.attribute) && !visiblePinnedFields.has(a.attribute)
+  );
+  const genuineNonPriority = attributes.filter(
+    (a) => !priorityFieldSet.has(a.attribute) && !visiblePinnedFields.has(a.attribute)
+  );
   const remainingBudget = Math.max(0, maxPriorityAndPinned - pinnedAttrs.length);
   return {
     alwaysVisible: [...pinnedAttrs, ...detectedPriorityAttrs.slice(0, remainingBudget)],
@@ -361,11 +375,15 @@ export function AttributeDistribution({
       // Only fetch distributions for initially visible fields. Fields that become
       // visible later (show more, pin) are fetched by the visibleAttributes effect.
       const priorityFieldSet = new Set(priorityAttributesRef.current);
-      const userPinned = new Set(userPinnedRef.current);
       // Split the same way the priorityAndPinned memo below does: overflow beyond maxPriorityAndPinned
       // must not be fetched here either, or capping only the render-visible set would still fetch
       // everything up front and just hide the overflow's bars from view.
-      const { alwaysVisible, rest } = splitAlwaysVisible(ordered, priorityFieldSet, userPinned, maxPriorityAndPinnedRef.current);
+      const { alwaysVisible, rest } = splitAlwaysVisible(
+        ordered,
+        priorityFieldSet,
+        userPinnedRef.current,
+        maxPriorityAndPinnedRef.current
+      );
       const initialBatch = priorityAttributesRef.current.length === 0 ? initialAutoLoadCountRef.current : 0;
       const initialVisible = [...alwaysVisible, ...rest.slice(0, initialBatch)];
       loadDistributions(initialVisible, contextRef.current, activeFilters);
@@ -418,7 +436,12 @@ export function AttributeDistribution({
   const { nonPriorityAttributes, priorityAndPinned, comboboxOptions } = useMemo(() => {
     const priorityFieldSet = new Set(priorityAttributes);
     const pinnedSet = new Set(state.userPinnedAttributes);
-    const { alwaysVisible, rest } = splitAlwaysVisible(state.attributes, priorityFieldSet, pinnedSet, maxPriorityAndPinned);
+    const { alwaysVisible, rest } = splitAlwaysVisible(
+      state.attributes,
+      priorityFieldSet,
+      state.userPinnedAttributes,
+      maxPriorityAndPinned
+    );
     return {
       // Excludes every priority/pinned field, not just the always-visible subset: a detected-priority
       // field pushed out by pinning is still a priority field, so it must not also appear as something

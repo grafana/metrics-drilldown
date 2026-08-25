@@ -189,3 +189,57 @@ describe('reducer DETECTING', () => {
     expect(result.valueSnapshot).toBeNull();
   });
 });
+
+describe('reducer SET_ATTRIBUTES', () => {
+  function baseState(overrides: Partial<State> = {}): State {
+    return {
+      attributes: [],
+      data: {},
+      detecting: true,
+      detectionError: false,
+      selectedFilters: [],
+      userPinnedAttributes: [],
+      valueSnapshot: null,
+      ...overrides,
+    };
+  }
+
+  it('preserves a pinned field absent from the freshly-detected set', () => {
+    const state = baseState({ userPinnedAttributes: ['pinned-field'] });
+    const result = reducer(state, { type: 'SET_ATTRIBUTES', configs: [attr('detected-field')] });
+    expect(result.attributes.map((a) => a.attribute).sort((a, b) => a.localeCompare(b))).toEqual([
+      'detected-field',
+      'pinned-field',
+    ]);
+  });
+
+  it('preserves a field referenced by an active filter, even when never explicitly pinned', () => {
+    // This is the exact bug: selecting the <unspecified> row writes field="", and Prometheus's label
+    // discovery for that now-narrowed selector can genuinely stop reporting the label at all, dropping
+    // it from the next detection cycle even though the active filter (and the section that lets the
+    // user clear it) still needs to exist. The field was never pinned, so only checking
+    // userPinnedAttributes misses it.
+    const state = baseState({
+      selectedFilters: [{ field: 'route', operator: '=', value: '' }],
+      userPinnedAttributes: [],
+    });
+    const result = reducer(state, { type: 'SET_ATTRIBUTES', configs: [attr('other-field')] });
+    expect(result.attributes.map((a) => a.attribute).sort((a, b) => a.localeCompare(b))).toEqual(['other-field', 'route']);
+  });
+
+  it('does not leak a detected-only field from a previous context that is neither pinned nor filtered', () => {
+    const state = baseState({
+      attributes: [attr('stale-field')],
+      selectedFilters: [],
+      userPinnedAttributes: [],
+    });
+    const result = reducer(state, { type: 'SET_ATTRIBUTES', configs: [attr('fresh-field')] });
+    expect(result.attributes.map((a) => a.attribute)).toEqual(['fresh-field']);
+  });
+
+  it('does not duplicate a field that is both actively filtered and already in the freshly-detected set', () => {
+    const state = baseState({ selectedFilters: [{ field: 'route', operator: '=', value: 'checkout' }] });
+    const result = reducer(state, { type: 'SET_ATTRIBUTES', configs: [attr('route')] });
+    expect(result.attributes.map((a) => a.attribute)).toEqual(['route']);
+  });
+});
