@@ -75,8 +75,8 @@ describe('getMetricTypeSync(metric)', () => {
       expect(getMetricTypeSync('my_recording_rule', 'histogram')).toBe('classic-histogram');
     });
 
-    it('maps summary to gauge', () => {
-      expect(getMetricTypeSync('my_recording_rule', 'summary')).toBe('gauge');
+    it('maps summary to summary', () => {
+      expect(getMetricTypeSync('my_recording_rule', 'summary')).toBe('summary');
     });
 
     it('overrides heuristic completely — counter metric becomes gauge with KG override', () => {
@@ -93,28 +93,17 @@ describe('getMetricType(metric, dataTrail)', () => {
   };
 
   describe('when metadata overrides heuristics', () => {
-    it('returns "native-histogram" when heuristic is gauge but metadata type is histogram', async () => {
-      const dataTrail = createMockDataTrail('histogram');
+    it.each([
+      { metric: 'memory_usage_bytes', metadataType: 'histogram', expected: 'native-histogram' },
+      { metric: 'memory_usage_bytes', metadataType: 'counter', expected: 'counter' },
+      { metric: 'http_requests_total', metadataType: 'gauge', expected: 'gauge' },
+      { metric: 'memory_usage_bytes', metadataType: 'summary', expected: 'summary' },
+    ])('returns "$expected" for $metric with metadata type $metadataType', async ({ metric, metadataType, expected }) => {
+      const dataTrail = createMockDataTrail(metadataType);
 
-      const result = await getMetricType('memory_usage_bytes', dataTrail);
+      const result = await getMetricType(metric, dataTrail);
 
-      expect(result).toBe('native-histogram');
-    });
-
-    it('returns "counter" when heuristic is gauge but metadata type is counter', async () => {
-      const dataTrail = createMockDataTrail('counter');
-
-      const result = await getMetricType('memory_usage_bytes', dataTrail);
-
-      expect(result).toBe('counter');
-    });
-
-    it('returns "gauge" when heuristic is counter but metadata type is gauge', async () => {
-      const dataTrail = createMockDataTrail('gauge');
-
-      const result = await getMetricType('http_requests_total', dataTrail);
-
-      expect(result).toBe('gauge');
+      expect(result).toBe(expected);
     });
   });
 
@@ -174,7 +163,7 @@ describe('getMetricType(metric, dataTrail)', () => {
     it.each([
       { name: 'returns mapped type immediately without metadata fetch', heuristic: 'gauge', override: 'counter', expected: 'counter' },
       { name: 'maps histogram to classic-histogram without metadata fetch', heuristic: 'histogram', override: 'histogram', expected: 'classic-histogram' },
-      { name: 'maps summary to gauge without metadata fetch', heuristic: 'counter', override: 'summary', expected: 'gauge' },
+      { name: 'maps summary to summary without metadata fetch', heuristic: 'counter', override: 'summary', expected: 'summary' },
     ] as const)('$name', async ({ heuristic, override, expected }) => {
       const dataTrail = createMockDataTrail(heuristic);
 

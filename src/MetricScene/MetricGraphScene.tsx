@@ -19,6 +19,7 @@ import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboa
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { CreateAlertAction } from 'shared/GmdVizPanel/components/CreateAlertAction';
+import { ExploreAttributesAction } from 'shared/GmdVizPanel/components/ExploreAttributesAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { OpenAssistant } from 'shared/GmdVizPanel/components/OpenAssistant';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
@@ -76,6 +77,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 // For a binary (ratio) insight, title the panel with the actual query, not the anchor
                 // metric name. Omitted for normal metrics so the default `title: metric` stands.
                 ...(binaryQuery ? { title: binaryQuery } : {}),
+                titleItems: () => [new ExploreAttributesAction()],
                 headerActions: isClassicHistogramMetric(metric)
                   ? ({ metric }) => [
                       new GmdVizPanelVariantSelector(),
@@ -120,7 +122,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const { metric } = this.state;
     const trail = getTrailFor(this);
 
-    // Hide header actions and menu in embeddedMini mode, reduce height, add click navigation
+    // Hide header actions, menu, and title items in embeddedMini mode, reduce height, add click
+    // navigation. titleItems must be cleared here too: it's set unconditionally at construction
+    // (titleItems: () => [new ExploreAttributesAction()]), and without clearing it, an embedded mini
+    // panel for a histogram metric would still show the button, which opens a viewport-fixed sidebar
+    // on top of whatever page is embedding this panel, not something an embeddedMini preview should do.
     if (trail.state.embeddedMini) {
       const [flexItem] = sceneGraph.findDescendents(this, SceneFlexItem);
       flexItem.setState({ minHeight: PANEL_HEIGHT.S, maxHeight: PANEL_HEIGHT.S });
@@ -131,6 +137,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           headerActions: () => [],
           menu: undefined,
           height: PANEL_HEIGHT.S,
+          titleItems: () => [],
         },
         {}
       );
@@ -178,6 +185,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
         gmdVizPanel.update(
           {
+            titleItems: () => [new ExploreAttributesAction()],
             headerActions: () => [
               new GmdVizPanelVariantSelector(),
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),

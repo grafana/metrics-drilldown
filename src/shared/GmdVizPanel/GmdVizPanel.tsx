@@ -42,6 +42,7 @@ export type PanelConfig = {
   title: string;
   height: PANEL_HEIGHT;
   headerActions: (headerActionsArgs: HeaderActionAndMenuArgs) => VizPanelState['headerActions'];
+  titleItems?: (titleItemsArgs: HeaderActionAndMenuArgs) => VizPanelState['titleItems'];
   fixedColorIndex?: number;
   description?: string;
   menu?: (menuArgs: HeaderActionAndMenuArgs) => VizPanelState['menu'];
@@ -57,6 +58,7 @@ export type PanelOptions = {
   title?: PanelConfig['title'];
   description?: NonNullable<PanelConfig['description']>;
   headerActions?: PanelConfig['headerActions'];
+  titleItems?: NonNullable<PanelConfig['titleItems']>;
   menu?: NonNullable<PanelConfig['menu']>;
   legend?: NonNullable<PanelConfig['legend']>;
   mappings?: NonNullable<PanelConfig['mappings']>;
@@ -114,6 +116,10 @@ export type QueryOptions = {
 interface GmdVizPanelState extends SceneObjectState {
   metric: string;
   metricType: MetricType;
+  // False until metric type detection (metadata fetch, or the native-histogram probe) has settled.
+  // Consumers building a query from metricType (e.g. LabelBreakdownScene) should wait for this rather
+  // than use the initial sync guess.
+  metricTypeResolved: boolean;
   panelConfig: PanelConfig;
   queryConfig: QueryConfig;
   body?: VizPanel;
@@ -145,6 +151,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       key,
       metric,
       metricType,
+      metricTypeResolved: false,
       panelConfig: {
         type: panelOptions?.type || getPanelTypeForMetricSync(metric, queryOptions?.kgMetricType),
         title: metric,
@@ -201,6 +208,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     const { metric, queryConfig } = this.state;
 
     if (queryConfig.kgMetricType) {
+      this.setState({ metricTypeResolved: true });
       return;
     }
 
@@ -216,6 +224,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     if (metricTypeFromMetadata === 'counter' && metricType === 'gauge') {
       this.setState({ metricType: 'counter' });
     }
+    // summaries always start out mis-detected as a gauge (no sync name heuristic)
+    if (metricTypeFromMetadata === 'summary' && metricType === 'gauge') {
+      this.setState({ metricType: 'summary' });
+    }
 
     this.applyMetadataResolvedType(metricType, metricTypeFromMetadata, discardPanelTypeUpdates);
 
@@ -226,9 +238,12 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     if (metricTypeFromMetadata === 'gauge' && this.state.metricType === 'gauge') {
       const metadata = await getTrailFor(this).getMetadataForMetric(metric); // cached from getMetricType() above
       if (!metadata) {
-        this.detectNativeHistogram(discardPanelTypeUpdates);
+        this.detectNativeHistogram(discardPanelTypeUpdates); // marks metricTypeResolved once the probe settles
+        return;
       }
     }
+
+    this.setState({ metricTypeResolved: true });
   }
 
   /**
@@ -251,6 +266,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       if (cached) {
         this.switchToNativeHistogramHeatmap(discardPanelTypeUpdates);
       }
+      this.setState({ metricTypeResolved: true });
       return;
     }
 
@@ -272,7 +288,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       }
 
       sub.unsubscribe();
-      this.setState({ $data: undefined }); // remove the temporary probe provider (deactivates the runner)
+      this.setState({ $data: undefined, metricTypeResolved: true }); // remove the temporary probe provider (deactivates the runner)
 
       // A failed or empty probe is inconclusive (e.g. query error, or no data in the current time range):
       // don't cache and don't switch, so the metric can be probed again on a later activation.
@@ -386,6 +402,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
     if (update.headerActions) {
       body.setState({ headerActions: update.headerActions({ metric, panelConfig }) });
+    }
+
+    if (update.titleItems) {
+      body.setState({ titleItems: update.titleItems({ metric, panelConfig }) });
     }
 
     if (update.menu) {

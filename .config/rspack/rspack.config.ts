@@ -5,7 +5,7 @@
  * https://grafana.com/developers/plugin-tools/how-to-guides/extend-configurations#extend-the-webpack-config
  */
 
-import rspack, { type Configuration } from '@rspack/core';
+import rspack, { SubresourceIntegrityPlugin, type Configuration } from '@rspack/core';
 import ESLintPlugin from 'eslint-webpack-plugin';
 import { RsdoctorRspackPlugin } from '@rsdoctor/rspack-plugin';
 import { TsCheckerRspackPlugin } from 'ts-checker-rspack-plugin';
@@ -21,7 +21,6 @@ import { getCPConfigVersion, getEntries, getPackageJson, getPluginJson, isWSL } 
 import { externals } from '../bundler/externals.ts';
 import { copyFilePatterns } from '../bundler/copyFiles.ts';
 
-const { SubresourceIntegrityPlugin } = rspack.experiments;
 const pluginJson = getPluginJson();
 const cpVersion = getCPConfigVersion();
 const virtualPublicPath = new RspackVirtualModulePlugin({
@@ -180,7 +179,7 @@ const config = async (env): Promise<Configuration> => {
         },
       ]),
       new SubresourceIntegrityPlugin({
-        hashFuncNames: ["sha256"],
+        hashFuncNames: ['sha256'],
       }),
       ...(env.development
         ? [

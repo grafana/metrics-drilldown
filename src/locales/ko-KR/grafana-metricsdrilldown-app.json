@@ -19,6 +19,10 @@
     "group-by": {
       "label": "그룹 기준"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "메트릭을 불러오는 중 오류가 발생했습니다!",
       "no-values": "필터 및 시간 범위에 해당하는 라벨 값이 없습니다.",

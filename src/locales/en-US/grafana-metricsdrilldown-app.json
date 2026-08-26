@@ -2,13 +2,54 @@
   "action-bar": {
     "tab": {
       "breakdown": "Breakdown",
-      "query-results": "Query Results",
+      "query-results": "Query results",
       "query-results-description": "Instant query data in table format",
       "related-logs": "Related logs",
       "related-logs-description": "Relevant logs based on current label filters and time range",
       "related-metrics": "Related metrics",
       "related-metrics-description": "Relevant metrics based on current label filters"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "OTel metric attribute",
+    "badge-resource": "OTel resource attribute",
+    "close-aria-label": "Close",
+    "close-tooltip": "Close",
+    "collapse": "Collapse",
+    "collapse-extra-fields": "Collapse extra fields",
+    "description": "Spot patterns and narrow down root causes by exploring how your data breaks down across key attributes. Click any value to filter your results.",
+    "description-aria-label": "What do these percentages mean?",
+    "description-histogram": "This shows each value's share of the label's observations {{range}}. Values with no activity are sorted last.",
+    "detection-error": "Failed to load attributes for this dataset.",
+    "discovering-fields": "Discovering attributes…",
+    "error": "Failed to load",
+    "expand": "Expand",
+    "field-input-placeholder": "Search to add more attributes",
+    "field-link-label": "View {{name}}",
+    "filter-for-value": "Filter for value",
+    "filter-out-value": "Filter out value",
+    "histogram-range-between": "between {{lower}} and {{upper}}",
+    "histogram-range-over": "over {{value}}",
+    "histogram-range-under": "under {{value}}",
+    "invalid-range": "Upper limit must be greater than lower limit",
+    "lower-limit": "Lower limit",
+    "lower-limit-placeholder": "no limit",
+    "lower-limit-unit": "Lower limit ({{unit}})",
+    "no-extra-fields-shown": "No extra fields shown",
+    "no-fields-detected": "No fields detected for this dataset.",
+    "no-more-fields": "No more fields",
+    "no-values-found": "No values found",
+    "show-more-fields_one": "Show {{count}} more fields",
+    "show-more-fields_other": "Show {{count}} more fields",
+    "title": "Attribute Explorer",
+    "too-many-values": "Too many values to display",
+    "unit-unknown": "We couldn't determine this metric's unit from its name. Double-check the threshold before trusting the percentage.",
+    "upper-limit": "Upper limit",
+    "upper-limit-placeholder": "no limit",
+    "upper-limit-unit": "Upper limit ({{unit}})",
+    "value-tooltip-histogram_one": "This value accounts for {{percentage}}% of this label's observations that are {{range}} ({{count}} of its own ~{{total}}).",
+    "value-tooltip-histogram_other": "This value accounts for {{percentage}}% of this label's observations that are {{range}} ({{count}} of its own ~{{total}}).",
+    "value-tooltip-histogram-no-activity": "No activity in this window."
   },
   "binary-ratio-labels-datasource": {
     "test-success": "OK"
@@ -21,7 +62,7 @@
     },
     "histogram-fn": {
       "default-text": "Sum",
-      "label": "Histogram breakdown function"
+      "label": "Histogram function"
     },
     "label-values-list": {
       "error-title": "Error while loading metrics!",
@@ -78,6 +119,12 @@
     "message": "Please <2>try reloading the page</2> or, if the problem persists, contact your organization admin. Sorry for the inconvenience.",
     "stack-trace-label": "View stack trace",
     "title": "Fatal error!"
+  },
+  "explore-attributes-action": {
+    "label": "Histogram distribution",
+    "tooltip": {
+      "description": "Explore the distribution of histogram observations for labels and attribute values for this metric."
+    }
   },
   "exposed-component-error-boundary": {
     "message": "{{componentName}} failed to load. Please try again or contact your organization admin.",
@@ -171,6 +218,9 @@
   "list-controls": {
     "search-aria-label": "Quick search metrics"
   },
+  "metric-graph": {
+    "explore-attributes": "Histogram analysis"
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -239,8 +289,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Check <2>our docs</2> to learn more or<5></5><6>try it online</6> in Grafana Play!",
-    "no-datasource": "We noticed there is no Prometheus datasource configured.<1></1>Add a <4>Prometheus datasource</4> to view metrics.",
+    "learn-more": "Check <2>our docs</2> to learn more or<br/><6>try it online</6> in Grafana Play!",
+    "no-datasource": "We noticed there is no Prometheus datasource configured.<br/>Add a <4>Prometheus datasource</4> to view metrics.",
     "title": "Welcome to Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -340,7 +390,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Date created:",
-      "empty-state": "No bookmarks yet for the<1></1>current data source.",
+      "empty-state": "No bookmarks yet for the<br/>current data source.",
       "remove-tooltip": "Remove bookmark"
     },
     "close-aria-label": "Close",

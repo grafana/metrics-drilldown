@@ -679,7 +679,6 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
       zIndex: theme.zIndex.navbarFixed,
       top: headerHeight,
       backgroundColor: getAppBackgroundColor(theme),
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
   };
 }
