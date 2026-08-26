@@ -13,6 +13,7 @@ import { evaluateExperimentFlagsEarly, initOpenFeatureProvider } from '../shared
 import { initFaro } from '../shared/logger/faro/faro';
 import { isPrometheusDataSource } from '../shared/utils/utils.datasource';
 import { PluginPropsContext } from '../shared/utils/utils.plugin';
+import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
 initFaro();
 initOpenFeatureProvider().then(evaluateExperimentFlagsEarly);
@@ -47,7 +48,7 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      backgroundColor: theme.colors.background.primary,
+      backgroundColor: getAppBackgroundColor(theme),
     }),
   };
 }
