@@ -249,10 +249,10 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
     stickyTop: css({
       display: 'flex',
       flexDirection: 'row',
+      backgroundColor: getAppBackgroundColor(theme),
       position: 'sticky',
       paddingTop: theme.spacing(1),
       zIndex: 10,
-      backgroundColor: getAppBackgroundColor(theme),
       // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
       // This ensures the main graph sticks below the app-controls in embedded mode
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px)`,
