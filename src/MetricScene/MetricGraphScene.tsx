@@ -208,7 +208,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0));
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail.state.embedded);
     const controlsContainer = useRef<HTMLDivElement>(null);
 
     useResizeObserver({
@@ -243,7 +243,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolean) {
   return {
     container: css({
       display: 'flex',
@@ -257,7 +257,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
     stickyTop: css({
       display: 'flex',
       flexDirection: 'row',
-      backgroundColor: getAppBackgroundColor(theme),
+      backgroundColor: getAppBackgroundColor(theme, embedded),
       position: 'sticky',
       paddingTop: theme.spacing(1),
       zIndex: 10,

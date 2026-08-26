@@ -158,7 +158,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   public static readonly Component = ({ model }: SceneComponentProps<RelatedMetricsScene>) => {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0));
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail.state.embedded);
     const { $variables, body, listControls } = model.useState();
 
     return (
@@ -179,7 +179,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
   };
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolean) {
   return {
     variables: css({
       display: 'none',
@@ -189,7 +189,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
       position: 'sticky',
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
       zIndex: 10,
-      backgroundColor: getAppBackgroundColor(theme),
+      backgroundColor: getAppBackgroundColor(theme, embedded),
       paddingBottom: theme.spacing(1),
     }),
   };

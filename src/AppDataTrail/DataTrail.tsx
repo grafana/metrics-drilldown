@@ -528,7 +528,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
-    const styles = useStyles2(getStyles, headerHeight);
+    const styles = useStyles2(getStyles, headerHeight, embedded);
 
     const { component: AddToDashboardComponent, isLoading: isLoadingAddToDashboard } =
       usePluginComponent(ADD_TO_DASHBOARD_COMPONENT_ID);
@@ -662,12 +662,15 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
   });
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolean) {
+  const background = getAppBackgroundColor(theme, embedded);
+
   return {
     container: css({
       flexGrow: 1,
       padding: theme.spacing(1, 2),
       position: 'relative',
+      background,
     }),
     body: css({
       flexGrow: 1,
@@ -678,7 +681,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
       position: 'sticky',
       zIndex: theme.zIndex.navbarFixed,
       top: headerHeight,
-      backgroundColor: getAppBackgroundColor(theme),
+      background,
     }),
   };
 }

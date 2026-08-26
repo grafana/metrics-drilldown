@@ -37,6 +37,7 @@ import {
   type RuleGroupLabel,
 } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/rule-group-labels';
 import { logger } from 'shared/logger/logger';
+import { getTrailFor } from 'shared/utils/utils';
 
 import { reportExploreMetrics } from '../../../../shared/tracking/interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
@@ -383,6 +384,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsFilterSection>) => {
     const styles = useStyles2(getStyles);
+    const { embedded } = getTrailFor(model).state;
     const {
       groups,
       selectedGroups,
@@ -464,6 +466,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
             computedSublevels={computedSublevels}
             onSelectionChange={model.onSelectionChange}
             onExpandToggle={model.onExpandToggle}
+            embedded={embedded}
           />
         )}
 

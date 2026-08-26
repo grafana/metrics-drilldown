@@ -18,6 +18,7 @@ type TreeCheckBoxListProps = {
   selectedGroups: MetricsFilterSectionState['selectedGroups'];
   expandedPrefixes: Set<string>;
   computedSublevels: Map<string, Array<{ label: string; value: string; count: number }>>;
+  embedded?: boolean;
   onSelectionChange: (newGroups: MetricsFilterSectionState['selectedGroups']) => void;
   onExpandToggle: (prefix: string) => void;
 };
@@ -44,11 +45,12 @@ export function TreeCheckBoxList({
   selectedGroups,
   expandedPrefixes,
   computedSublevels,
+  embedded,
   onSelectionChange,
   onExpandToggle,
 }: Readonly<TreeCheckBoxListProps>) {
   const sharedStyles = useStyles2(getSharedListStyles);
-  const treeStyles = useStyles2(getTreeStyles);
+  const treeStyles = useStyles2(getTreeStyles, embedded);
 
   // Helper: Check if parent or any of its children are selected
   const isParentChecked = (parentValue: string) => {
@@ -202,7 +204,7 @@ export function TreeCheckBoxList({
  * Tree-specific styles for hierarchical checkbox list.
  * Base list styles (header, list, items) are imported from sharedListStyles.
  */
-function getTreeStyles(theme: GrafanaTheme2) {
+function getTreeStyles(theme: GrafanaTheme2, embedded?: boolean) {
   return {
     stickyParent: css({
       position: 'sticky',
@@ -218,7 +220,7 @@ function getTreeStyles(theme: GrafanaTheme2) {
         backgroundColor: theme.colors.background.canvas,
         zIndex: -1,
       },
-      backgroundColor: getAppBackgroundColor(theme),
+      backgroundColor: getAppBackgroundColor(theme, embedded),
       zIndex: 10,
       borderBottom: `1px solid ${theme.colors.border.weak}`,
       marginLeft: theme.spacing(-1),

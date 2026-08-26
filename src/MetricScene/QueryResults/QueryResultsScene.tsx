@@ -20,6 +20,8 @@ import { trailDS } from 'shared/shared';
 
 import { DEFAULT_QUERY_RESULTS_TABLE_WIDTH, type PrometheusQueryResultsV1Props } from './constants';
 import { InlineBanner } from '../../App/InlineBanner';
+import { getTrailFor } from '../../shared/utils/utils';
+import { getAppBackgroundColor } from '../../shared/utils/utils.styles';
 import { actionViews } from '../MetricActionBar';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
@@ -92,7 +94,8 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<QueryResultsScene>) => {
-    const styles = useStyles2(getStyles);
+    const trail = getTrailFor(model);
+    const styles = useStyles2(getStyles, trail.state.embedded);
     const { queryResultsComponent: InstantQueryResults } = model.useState();
 
     // Get data from the SceneQueryRunner
@@ -137,12 +140,13 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2) {
+function getStyles(theme: GrafanaTheme2, embedded?: boolean) {
   return {
     container: css({
       flexGrow: 1,
       display: 'flex',
       flexDirection: 'column',
+      background: getAppBackgroundColor(theme, embedded),
       padding: theme.spacing(1, 0),
     }),
   };

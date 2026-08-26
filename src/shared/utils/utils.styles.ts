@@ -14,9 +14,18 @@ export function getResponsiveBreakpoints(theme: GrafanaTheme2) {
   return supportsContainerQueries ? theme.breakpoints.container : theme.breakpoints;
 }
 
-export function getAppBackgroundColor(theme: GrafanaTheme2): string {
+export function getAppBackgroundColor(theme: GrafanaTheme2, embedded?: boolean): string | undefined {
+  if (embedded) {
+    // Embedded consumers (e.g. RCA workbench) provide their own host page chrome, which isn't
+    // guaranteed to paint the same background Grafana's <Page> would, so we always self-paint here.
+    // Independent of the toggle: background.page and background.primary are the same token, and
+    // canvas is meaningfully darker, so this must not fall through to canvas when the toggle is off.
+    return theme.colors.background.primary;
+  }
+
+  // Standalone app route: Grafana's own Page paints the background for us when the toggle is on.
   //@ts-expect-error
-  return theme.flags.visualDesignRefresh ? theme.colors.background.page : theme.colors.background.canvas;
+  return theme.flags.visualDesignRefresh ? undefined : theme.colors.background.canvas;
 }
 
 /**

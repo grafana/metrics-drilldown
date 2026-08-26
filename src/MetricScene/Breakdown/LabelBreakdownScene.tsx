@@ -152,7 +152,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0));
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail.state.embedded);
     const { body, metricType } = model.useState();
     const groupByVariable = model.getVariable();
     const histogramBreakdownFnVariable = model.getHistogramBreakdownFnVariable();
@@ -186,7 +186,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   };
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolean) {
   return {
     container: css({
       flexGrow: 1,
@@ -199,7 +199,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
       position: 'sticky',
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
       zIndex: 10,
-      backgroundColor: getAppBackgroundColor(theme),
+      backgroundColor: getAppBackgroundColor(theme, embedded),
       paddingBottom: theme.spacing(1),
     }),
     controls: css({
