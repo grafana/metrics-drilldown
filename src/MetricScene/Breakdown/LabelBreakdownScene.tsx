@@ -17,6 +17,7 @@ import { GmdVizPanel, type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVi
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { type HistogramBreakdownFnVariable } from './HistogramBreakdownFnVariable';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
@@ -185,6 +186,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
       position: 'sticky',
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
       zIndex: 10,
+      backgroundColor: getAppBackgroundColor(theme),
       paddingBottom: theme.spacing(1),
     }),
     controls: css({

@@ -7,6 +7,7 @@ import React from 'react';
 import { HIERARCHICAL_SEPARATOR } from 'MetricsReducer/metrics-variables/computeMetricPrefixSecondLevel';
 import { getSharedListStyles } from 'MetricsReducer/SideBar/sections/sharedListStyles';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { CheckboxWithCount } from './CheckboxWithCount';
 import { type MetricsFilterSectionState } from './MetricsFilterSection';
@@ -217,7 +218,7 @@ function getTreeStyles(theme: GrafanaTheme2) {
         backgroundColor: theme.colors.background.canvas,
         zIndex: -1,
       },
-      backgroundColor: theme.colors.background.canvas,
+      backgroundColor: getAppBackgroundColor(theme),
       zIndex: 10,
       borderBottom: `1px solid ${theme.colors.border.weak}`,
       marginLeft: theme.spacing(-1),

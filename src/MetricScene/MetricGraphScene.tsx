@@ -27,6 +27,7 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 import { useResizeObserver } from 'shared/hooks/useResizeObserver';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';
@@ -251,6 +252,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
       position: 'sticky',
       paddingTop: theme.spacing(1),
       zIndex: 10,
+      backgroundColor: getAppBackgroundColor(theme),
       // --app-controls-height is set dynamically by DataTrail component via ResizeObserver
       // This ensures the main graph sticks below the app-controls in embedded mode
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px)`,

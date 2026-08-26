@@ -30,6 +30,7 @@ import {
 import { MetricsVariableSortEngine } from 'MetricsReducer/metrics-variables/MetricsVariableSortEngine';
 import { MetricsList } from 'MetricsReducer/MetricsList/MetricsList';
 import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { RelatedListControls } from './RelatedListControls';
 import { actionViews } from '../../MetricScene/MetricActionBar';
@@ -188,6 +189,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
       position: 'sticky',
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
       zIndex: 10,
+      backgroundColor: getAppBackgroundColor(theme),
       paddingBottom: theme.spacing(1),
     }),
   };

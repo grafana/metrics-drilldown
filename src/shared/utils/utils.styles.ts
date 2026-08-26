@@ -14,6 +14,11 @@ export function getResponsiveBreakpoints(theme: GrafanaTheme2) {
   return supportsContainerQueries ? theme.breakpoints.container : theme.breakpoints;
 }
 
+export function getAppBackgroundColor(theme: GrafanaTheme2): string {
+  //@ts-expect-error
+  return theme.flags.visualDesignRefresh ? theme.colors.background.page : theme.colors.background.canvas;
+}
+
 /**
  * Returns CSS styles for making a panel clickable with proper cursor and hover feedback.
  * Includes an invisible overlay to ensure cursor shows over entire panel area.

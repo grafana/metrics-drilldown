@@ -53,6 +53,7 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
 import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { logger } from 'shared/logger/logger';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
 import { BinaryRatioLabelsDataSource } from '../MetricScene/Breakdown/BinaryRatioLabelsDataSource';
@@ -677,6 +678,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number) {
       position: 'sticky',
       zIndex: theme.zIndex.navbarFixed,
       top: headerHeight,
+      backgroundColor: getAppBackgroundColor(theme),
       borderBottom: `1px solid ${theme.colors.border.weak}`,
     }),
   };
