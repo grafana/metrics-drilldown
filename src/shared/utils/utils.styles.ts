@@ -20,12 +20,12 @@ export function getAppBackgroundColor(theme: GrafanaTheme2, embedded?: boolean):
     // guaranteed to paint the same background Grafana's <Page> would, so we always self-paint here.
     // Independent of the toggle: background.page and background.primary are the same token, and
     // canvas is meaningfully darker, so this must not fall through to canvas when the toggle is off.
-    return theme.colors.background.primary;
+    return theme.colors.background.page;
   }
 
   // Standalone app route: Grafana's own Page paints the background for us when the toggle is on.
   //@ts-expect-error
-  return theme.flags.visualDesignRefresh ? undefined : theme.colors.background.canvas;
+  return theme.flags.visualDesignRefresh ? theme.colors.background.page : theme.colors.background.canvas;
 }
 
 /**
