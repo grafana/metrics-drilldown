@@ -10,7 +10,7 @@ description: 'Skill for the AppDataTrail area of metrics-drilldown. 28 symbols a
 ## When to Use
 
 - Working with code in `src/`
-- Understanding how getAppBackgroundColor, isPrometheusDataSource, MetricsReducer work
+- Understanding how isPrometheusDataSource, MetricsReducer work
 - Modifying appdatatrail-related functionality
 
 ## Key Files
@@ -32,7 +32,6 @@ description: 'Skill for the AppDataTrail area of metrics-drilldown. 28 symbols a
 
 Start here when exploring this area:
 
-- **`getAppBackgroundColor`** (Function) — `src/shared/utils/utils.styles.ts:4`
 - **`isPrometheusDataSource`** (Function) — `src/shared/utils/utils.datasource.ts:18`
 - **`MetricsReducer`** (Class) — `src/MetricsReducer/MetricsReducer.tsx:47`
 - **`MetricScene`** (Class) — `src/MetricScene/MetricScene.tsx:38`
@@ -51,7 +50,6 @@ Start here when exploring this area:
 | `AdHocFiltersForMetricsVariable`     | Class    | `src/MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable.ts` | 10   |
 | `LabelsVariable`                     | Class    | `src/MetricsReducer/labels/LabelsVariable.tsx`                           | 21   |
 | `SceneDrawer`                        | Class    | `src/MetricsReducer/components/SceneDrawer.tsx`                          | 12   |
-| `getAppBackgroundColor`              | Function | `src/shared/utils/utils.styles.ts`                                       | 4    |
 | `isPrometheusDataSource`             | Function | `src/shared/utils/utils.datasource.ts`                                   | 18   |
 | `updateFromUrl`                      | Method   | `src/AppDataTrail/DataTrail.tsx`                                         | 117  |
 | `onActivate`                         | Method   | `src/AppDataTrail/DataTrail.tsx`                                         | 149  |
@@ -93,6 +91,5 @@ Start here when exploring this area:
 
 ## How to Explore
 
-1. `gitnexus_context({name: "getAppBackgroundColor"})` — see callers and callees
-2. `gitnexus_query({query: "appdatatrail"})` — find related execution flows
-3. Read key files listed above for implementation details
+1. `gitnexus_query({query: "appdatatrail"})` — find related execution flows
+2. Read key files listed above for implementation details

@@ -12,7 +12,6 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { createElement, useLayoutEffect, useRef, useState } from 'react';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { getMetricTypeSync, type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
@@ -96,7 +95,7 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
 
   public static readonly Component = ({ model }: SceneComponentProps<QueryResultsScene>) => {
     const trail = getTrailFor(model);
-    const styles = useStyles2(getStyles, trail);
+    const styles = useStyles2(getStyles, trail.state.embedded);
     const { queryResultsComponent: InstantQueryResults } = model.useState();
 
     // Get data from the SceneQueryRunner
@@ -141,13 +140,13 @@ export class QueryResultsScene extends SceneObjectBase<QueryResultsSceneState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, trail: DataTrail) {
+function getStyles(theme: GrafanaTheme2, embedded?: boolean) {
   return {
     container: css({
       flexGrow: 1,
       display: 'flex',
       flexDirection: 'column',
-      background: getAppBackgroundColor(theme, trail),
+      background: getAppBackgroundColor(theme, embedded),
       padding: theme.spacing(1, 0),
     }),
   };

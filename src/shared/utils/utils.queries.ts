@@ -7,6 +7,20 @@ export function isSceneQueryRunner(input: SceneObject | null | undefined): input
 }
 
 /**
+ * Escapes a value for safe interpolation inside a PromQL string literal. Delegates to JSON.stringify
+ * rather than hand-rolling backslash/quote escaping: PromQL string literals use Go-style escapes
+ * (\\, \", \n, \t, \uXXXX for other control characters), which JSON's own escaping already produces
+ * for every one of those cases -- including control characters like a raw newline or tab that a
+ * backslash/quote-only regex would let straight through and corrupt the query. Safe regardless of
+ * whether the value is a plain string or a regex pattern: this only concerns the outer string-literal
+ * delimiters, not regex metacharacter semantics, so it doesn't interfere with a caller that already
+ * escaped those separately.
+ */
+export function escapePromQLString(value: string): string {
+  return JSON.stringify(value).slice(1, -1);
+}
+
+/**
  * Builds a PromQL label matcher string from an AdHocVariableFilter.
  * Normalizes empty and double-quoted empty filter values to produce
  * a valid empty string matcher (e.g. `label!=""`) instead of the
@@ -17,7 +31,10 @@ export function buildFilterExpression(filter: AdHocVariableFilter): string {
   if (filter.value === '' || filter.value === '""') {
     return `${key}${filter.operator}""`;
   }
-  return `${key}${filter.operator}"${filter.value}"`;
+  // Values come directly from arbitrary Prometheus label values (typed by a user, or built from
+  // multiple selected values into a regex alternation elsewhere), not from a trusted, pre-escaped
+  // source. A literal `"` would otherwise break out of the string literal below and corrupt the query.
+  return `${key}${filter.operator}"${escapePromQLString(filter.value)}"`;
 }
 
 /**

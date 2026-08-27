@@ -104,6 +104,16 @@ describe('GmdVizPanel', () => {
       expect(panel.state.metricType).toBe('gauge');
       expect(panel.state.panelConfig.type).toBe('timeseries');
     });
+
+    test('updates metricType from gauge to summary when metadata says summary', async () => {
+      jest.mocked(getMetricTypeSync).mockReturnValue('gauge');
+      jest.mocked(getMetricType).mockResolvedValue('summary');
+      const panel = createPanel();
+
+      await (panel as any).checkMetricMetadata();
+
+      expect(panel.state.metricType).toBe('summary');
+    });
   });
 
   describe('detectNativeHistogram', () => {

@@ -2,8 +2,6 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { compare } from 'compare-versions';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
-
 const CONTAINER_QUERIES_MIN_VERSION = '12.4.0';
 const supportsContainerQueries = !compare(config.buildInfo.version ?? '0.0.0', CONTAINER_QUERIES_MIN_VERSION, '<');
 
@@ -16,14 +14,18 @@ export function getResponsiveBreakpoints(theme: GrafanaTheme2) {
   return supportsContainerQueries ? theme.breakpoints.container : theme.breakpoints;
 }
 
-export function getAppBackgroundColor(theme: GrafanaTheme2, trail?: DataTrail): string {
-  // If DataTrail is in embedded mode, always use primary background
-  if (trail?.state.embedded) {
-    return theme.colors.background.primary;
+export function getAppBackgroundColor(theme: GrafanaTheme2, embedded?: boolean): string | undefined {
+  if (embedded) {
+    // Embedded consumers (e.g. RCA workbench) provide their own host page chrome, which isn't
+    // guaranteed to paint the same background Grafana's <Page> would, so we always self-paint here.
+    // Independent of the toggle: background.page and background.primary are the same token, and
+    // canvas is meaningfully darker, so this must not fall through to canvas when the toggle is off.
+    return theme.colors.background.page;
   }
 
-  // Otherwise, use the standard theme-based logic
-  return theme.isLight ? theme.colors.background.primary : theme.colors.background.canvas;
+  // Standalone app route: Grafana's own Page paints the background for us when the toggle is on.
+  //@ts-expect-error
+  return theme.flags.visualDesignRefresh ? theme.colors.background.page : theme.colors.background.canvas;
 }
 
 /**

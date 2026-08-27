@@ -13,7 +13,6 @@ import {
 import { Field, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { GmdVizPanel, type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
@@ -153,7 +152,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail.state.embedded);
     const { body, metricType } = model.useState();
     const groupByVariable = model.getVariable();
     const histogramBreakdownFnVariable = model.getHistogramBreakdownFnVariable();
@@ -187,7 +186,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   };
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolean) {
   return {
     container: css({
       flexGrow: 1,
@@ -200,7 +199,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
       position: 'sticky',
       top: `calc(var(--app-controls-height, 0px) + ${headerHeight}px + var(--action-bar-height, 0px))`,
       zIndex: 10,
-      background: getAppBackgroundColor(theme, trail),
+      backgroundColor: getAppBackgroundColor(theme, embedded),
       paddingBottom: theme.spacing(1),
     }),
     controls: css({

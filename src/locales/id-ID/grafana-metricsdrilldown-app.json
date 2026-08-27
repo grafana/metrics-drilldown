@@ -19,6 +19,10 @@
     "group-by": {
       "label": "Kelompokkan berdasarkan"
     },
+    "histogram-fn": {
+      "default-text": "",
+      "label": ""
+    },
     "label-values-list": {
       "error-title": "Terjadi kesalahan saat memuat metrik!",
       "no-values": "Tidak ada nilai label yang ditemukan untuk filter dan rentang waktu saat ini.",

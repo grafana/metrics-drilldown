@@ -53,6 +53,7 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
 import { type KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
 import { logger } from 'shared/logger/logger';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
 import { BinaryRatioLabelsDataSource } from '../MetricScene/Breakdown/BinaryRatioLabelsDataSource';
@@ -68,7 +69,6 @@ import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../sh
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
 import { parseBinaryQuery } from '../shared/utils/parseBinaryQuery';
 import { buildFilterExpression } from '../shared/utils/utils.queries';
-import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
 
@@ -167,12 +167,18 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     const customFunctionByMetric = parseCustomFunctionValues(values.customFunction);
     const metricTypeByMetric = parseMetricTypeValues(values.metricType);
-    const sourceMetricsOverride = buildSourceMetricsOverride(metric, customRateInterval, customFunctionByMetric, metricTypeByMetric);
+    const sourceMetricsOverride = buildSourceMetricsOverride(
+      metric,
+      customRateInterval,
+      customFunctionByMetric,
+      metricTypeByMetric
+    );
 
     // Preserve the KG binary (ratio) query across an "Open in Metrics Drilldown" navigation. Validate that
     // it parses as a binary so a malformed or hand-edited `?binaryQuery=` cannot flip the trail into binary
     // mode (hiding/clearing VAR_FILTERS, routing the group-by to the binary datasource).
-    const rawBinaryQuery = typeof values.binaryQuery === 'string' && values.binaryQuery ? values.binaryQuery : undefined;
+    const rawBinaryQuery =
+      typeof values.binaryQuery === 'string' && values.binaryQuery ? values.binaryQuery : undefined;
     const binaryQuery = rawBinaryQuery && parseBinaryQuery(rawBinaryQuery) ? rawBinaryQuery : undefined;
 
     this.updateStateForNewMetric(metric, sourceMetricsOverride, binaryQuery);
@@ -309,7 +315,10 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     // Leaving binary: unhide and restore the metric's baseFilters (we cleared them while binary was
     // active). Covers URL-driven exits that do not pass through handleMetricSelectedEvent.
     const baseFilters = getBaseFiltersForMetric(this.state.metric);
-    if (filtersVariable.state.hide !== VariableHide.dontHide || (filtersVariable.state.baseFilters?.length ?? 0) === 0) {
+    if (
+      filtersVariable.state.hide !== VariableHide.dontHide ||
+      (filtersVariable.state.baseFilters?.length ?? 0) === 0
+    ) {
       filtersVariable.setState({ hide: VariableHide.dontHide, baseFilters });
     }
   }
@@ -519,7 +528,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     const chromeHeaderHeight = useChromeHeaderHeight() ?? 0;
     const headerHeight = embedded ? 0 : chromeHeaderHeight;
-    const styles = useStyles2(getStyles, headerHeight, model);
+    const styles = useStyles2(getStyles, headerHeight, embedded);
 
     const { component: AddToDashboardComponent, isLoading: isLoadingAddToDashboard } =
       usePluginComponent(ADD_TO_DASHBOARD_COMPONENT_ID);
@@ -653,8 +662,8 @@ function getVariableSet(initialDS?: string, metric?: string, initialFilters?: Ad
   });
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
-  const background = getAppBackgroundColor(theme, trail);
+function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolean) {
+  const background = getAppBackgroundColor(theme, embedded);
 
   return {
     container: css({
@@ -670,9 +679,9 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
     controls: css({
       paddingBottom: theme.spacing(1),
       position: 'sticky',
-      background,
       zIndex: theme.zIndex.navbarFixed,
       top: headerHeight,
+      background,
     }),
   };
 }

@@ -14,12 +14,12 @@ import {
 import { useStyles2 } from '@grafana/ui';
 import React, { useRef } from 'react';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboardAction';
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { CreateAlertAction } from 'shared/GmdVizPanel/components/CreateAlertAction';
+import { ExploreAttributesAction } from 'shared/GmdVizPanel/components/ExploreAttributesAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { OpenAssistant } from 'shared/GmdVizPanel/components/OpenAssistant';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
@@ -28,12 +28,12 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { isClassicHistogramMetric } from 'shared/GmdVizPanel/matchers/isClassicHistogramMetric';
 import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 import { useResizeObserver } from 'shared/hooks/useResizeObserver';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { MetricActionBar } from './MetricActionBar';
 import { PanelMenu } from './PanelMenu/PanelMenu';
 import { buildMiniBreakdownNavigationUrl } from '../exposedComponents/MiniBreakdown/buildNavigationUrl';
 import { getTrailFor } from '../shared/utils/utils';
-import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';
@@ -77,6 +77,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 // For a binary (ratio) insight, title the panel with the actual query, not the anchor
                 // metric name. Omitted for normal metrics so the default `title: metric` stands.
                 ...(binaryQuery ? { title: binaryQuery } : {}),
+                titleItems: () => [new ExploreAttributesAction()],
                 headerActions: isClassicHistogramMetric(metric)
                   ? ({ metric }) => [
                       new GmdVizPanelVariantSelector(),
@@ -121,7 +122,11 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const { metric } = this.state;
     const trail = getTrailFor(this);
 
-    // Hide header actions and menu in embeddedMini mode, reduce height, add click navigation
+    // Hide header actions, menu, and title items in embeddedMini mode, reduce height, add click
+    // navigation. titleItems must be cleared here too: it's set unconditionally at construction
+    // (titleItems: () => [new ExploreAttributesAction()]), and without clearing it, an embedded mini
+    // panel for a histogram metric would still show the button, which opens a viewport-fixed sidebar
+    // on top of whatever page is embedding this panel, not something an embeddedMini preview should do.
     if (trail.state.embeddedMini) {
       const [flexItem] = sceneGraph.findDescendents(this, SceneFlexItem);
       flexItem.setState({ minHeight: PANEL_HEIGHT.S, maxHeight: PANEL_HEIGHT.S });
@@ -132,6 +137,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
           headerActions: () => [],
           menu: undefined,
           height: PANEL_HEIGHT.S,
+          titleItems: () => [],
         },
         {}
       );
@@ -179,6 +185,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
         gmdVizPanel.update(
           {
+            titleItems: () => [new ExploreAttributesAction()],
             headerActions: () => [
               new GmdVizPanelVariantSelector(),
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
@@ -201,7 +208,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
-    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail);
+    const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail.state.embedded);
     const controlsContainer = useRef<HTMLDivElement>(null);
 
     useResizeObserver({
@@ -236,7 +243,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
   };
 }
 
-function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail) {
+function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolean) {
   return {
     container: css({
       display: 'flex',
@@ -250,7 +257,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, trail: DataTrail)
     stickyTop: css({
       display: 'flex',
       flexDirection: 'row',
-      background: getAppBackgroundColor(theme, trail),
+      backgroundColor: getAppBackgroundColor(theme, embedded),
       position: 'sticky',
       paddingTop: theme.spacing(1),
       zIndex: 10,
