@@ -2,13 +2,58 @@
   "action-bar": {
     "tab": {
       "breakdown": "Разбивка",
-      "query-results": "Результаты запроса",
+      "query-results": "",
       "query-results-description": "Данные мгновенного запроса в формате таблицы",
       "related-logs": "Связанные журналы",
       "related-logs-description": "Журналы, соответствующие текущим фильтрам меток и временному диапазону",
       "related-metrics": "Связанные метрики",
       "related-metrics-description": "Метрики, соответствующие текущим фильтрам меток"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_one": "",
+    "show-more-fields_few": "",
+    "show-more-fields_many": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_one": "",
+    "value-tooltip-histogram_few": "",
+    "value-tooltip-histogram_many": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -80,6 +125,12 @@
     "message": "<2>Попробуйте перезагрузить страницу.</2> Если проблема не исчезнет, обратитесь к администратору организации. Приносим извинения за неудобства.",
     "stack-trace-label": "Просмотр трассировки стека",
     "title": "Критическая ошибка"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -177,6 +228,9 @@
   "list-controls": {
     "search-aria-label": "Быстрый поиск метрик"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -245,8 +299,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Ознакомьтесь с <2>документацией</2>, чтобы узнать больше, или<5></5><6>протестируйте онлайн</6> с помощью Grafana Play.",
-    "no-datasource": "Источник данных Prometheus не настроен.<1></1>Для просмотра метрик добавьте <4>источник данных Prometheus</4>.",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Добро пожаловать в Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -352,7 +406,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Дата создания:",
-      "empty-state": "У вас еще нет закладок для<1></1>текущего источника данных.",
+      "empty-state": "",
       "remove-tooltip": "Удалите закладку"
     },
     "close-aria-label": "Закрыть",

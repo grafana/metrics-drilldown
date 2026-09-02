@@ -2,13 +2,58 @@
   "action-bar": {
     "tab": {
       "breakdown": "Rozpis",
-      "query-results": "Výsledky dotazu",
+      "query-results": "",
       "query-results-description": "Data okamžitého dotazu ve formátu tabulky",
       "related-logs": "Související protokoly",
       "related-logs-description": "Související protokoly založené na aktuálních filtrech štítků a časovém rozsahu",
       "related-metrics": "Související metriky",
       "related-metrics-description": "Související metriky založené na aktuálních filtrech štítků"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_one": "",
+    "show-more-fields_few": "",
+    "show-more-fields_many": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_one": "",
+    "value-tooltip-histogram_few": "",
+    "value-tooltip-histogram_many": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -80,6 +125,12 @@
     "message": "<2>Zkuste stránku znovu načíst</2> nebo, pokud problém přetrvává, kontaktujte správce organizace. Omlouváme se za nepříjemnosti.",
     "stack-trace-label": "Zobrazit trasování stacků",
     "title": "Závažná chyba!"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -177,6 +228,9 @@
   "list-controls": {
     "search-aria-label": "Rychlé vyhledávání metrik"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -245,8 +299,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Přečtěte si <2>naši dokumentaci</2> a zjistěte víc nebo<5></5><6>to vyzkoušejte online</6> v Grafana Play.",
-    "no-datasource": "Všimli jsme si, že není nakonfigurován žádný zdroj dat Prometheus.<1></1>Přidejte <4>zdroj dat Prometheus</4> pro zobrazení metrik.",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Vítejte v Podrobném rozpisu metrik Grafana"
   },
   "open-assistant": {
@@ -352,7 +406,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Datum vytvoření:",
-      "empty-state": "Nejsou k dispozici žádné záložky pro<1></1>aktuální zdroj dat.",
+      "empty-state": "",
       "remove-tooltip": "Odebrat záložku"
     },
     "close-aria-label": "Zavřít",

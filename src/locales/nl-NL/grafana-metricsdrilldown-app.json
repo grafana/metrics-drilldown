@@ -2,13 +2,54 @@
   "action-bar": {
     "tab": {
       "breakdown": "Breakdown",
-      "query-results": "Queryresultaten",
+      "query-results": "",
       "query-results-description": "Instant-querygegevens in tabelformaat",
       "related-logs": "Gerelateerde logs",
       "related-logs-description": "Relevante logs op basis van huidige labelfilters en tijdsbereik",
       "related-metrics": "Gerelateerde metrics",
       "related-metrics-description": "Relevante metrics op basis van huidige labelfilters"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_one": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_one": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -78,6 +119,12 @@
     "message": "<2>Probeer de pagina opnieuw te laden</2> of neem contact op met de beheerder van uw organisatie als het probleem zich blijft voordoen. Sorry voor het ongemak.",
     "stack-trace-label": "Stacktrace weergeven",
     "title": "Fatale fout!"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -171,6 +218,9 @@
   "list-controls": {
     "search-aria-label": "Snel zoeken op metrics"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -239,8 +289,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Bekijk <2>onze documenten</2> voor meer informatie of<5></5><6>probeer het online</6> in Grafana Play!",
-    "no-datasource": "We hebben gemerkt dat er geen Prometheus-databron is geconfigureerd.<1></1>Voeg een <4>Prometheus-databron</4> toe om metrics te bekijken.",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Welkom bij Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -340,7 +390,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Aangemaakt op:",
-      "empty-state": "Nog geen bladwijzers voor de<1></1>huidige databron.",
+      "empty-state": "",
       "remove-tooltip": "Bladwijzer verwijderen"
     },
     "close-aria-label": "Sluiten",
