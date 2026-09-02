@@ -62,12 +62,30 @@ export function getPageNav(
   return undefined;
 }
 
+interface TrailPageProps {
+  embedded?: boolean;
+  pageNav: NavModelItem | undefined;
+  children: React.ReactNode;
+}
+
+export function TrailPage({ embedded, pageNav, children }: Readonly<TrailPageProps>) {
+  if (embedded) {
+    return <>{children}</>;
+  }
+
+  return (
+    <PluginPage pageNav={pageNav} layout={PageLayoutType.Custom}>
+      {children}
+    </PluginPage>
+  );
+}
+
 export default function Trail({ trail }: Readonly<TrailProps>) {
   // Register all assistant questions for metrics drilldown
   // Questions are automatically matched based on URL patterns
   useMetricsDrilldownQuestions();
 
-  const { topScene, metric } = trail.useState();
+  const { topScene, metric, embedded } = trail.useState();
   const [currentActionViewName, setCurrentActionViewName] = useState<string>('');
 
   // Subscribe to MetricScene state changes to update breadcrumb
@@ -99,7 +117,7 @@ export default function Trail({ trail }: Readonly<TrailProps>) {
   );
 
   return (
-    <PluginPage pageNav={pageNav} layout={PageLayoutType.Custom}>
+    <TrailPage embedded={embedded} pageNav={pageNav}>
       <UrlSyncContextProvider
         scene={trail}
         createBrowserHistorySteps={true}
@@ -110,6 +128,6 @@ export default function Trail({ trail }: Readonly<TrailProps>) {
           <trail.Component model={trail} />
         </TrailErrorBoundary>
       </UrlSyncContextProvider>
-    </PluginPage>
+    </TrailPage>
   );
 }
