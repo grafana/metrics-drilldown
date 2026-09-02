@@ -2,13 +2,52 @@
   "action-bar": {
     "tab": {
       "breakdown": "세부 분류",
-      "query-results": "쿼리 결과",
+      "query-results": "",
       "query-results-description": "테이블 형식의 인스턴트 쿼리 데이터",
       "related-logs": "관련 로그",
       "related-logs-description": "현재 라벨 필터 및 시간 범위 기준 관련 로그",
       "related-metrics": "관련 메트릭",
       "related-metrics-description": "현재 라벨 필터 기준 관련 메트릭"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -77,6 +116,12 @@
     "message": "<2>페이지를 새로 고침</2>하거나 문제가 지속되면 조직 관리자에게 문의하세요. 불편을 드려 죄송합니다.",
     "stack-trace-label": "스택 트레이스 보기",
     "title": "치명적 오류!"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -168,6 +213,9 @@
   "list-controls": {
     "search-aria-label": "빠른 검색 메트릭"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -236,8 +284,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "자세한 내용은 <2>Grafana 문서</2>를 확인하거나 Grafana Play에서 <5></5><6>온라인으로 사용해보세요</6>!",
-    "no-datasource": "구성된 Prometheus 데이터 소스가 없습니다.<1></1>메트릭을 보려면 <4>Prometheus 데이터 소스</4>를 추가하세요.",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Grafana 메트릭 드릴다운에 오신 것을 환영합니다"
   },
   "open-assistant": {
@@ -334,7 +382,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "생성 날짜: ",
-      "empty-state": "현재 <1></1> 데이터 소스에 대한 북마크가 아직 없습니다.",
+      "empty-state": "",
       "remove-tooltip": "북마크 삭제"
     },
     "close-aria-label": "닫기",

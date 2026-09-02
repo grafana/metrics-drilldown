@@ -2,13 +2,54 @@
   "action-bar": {
     "tab": {
       "breakdown": "Detalhamento",
-      "query-results": "Resultados da consulta",
+      "query-results": "",
       "query-results-description": "Dados de consulta instantânea em formato de tabela",
       "related-logs": "Logs relacionados",
       "related-logs-description": "Logs relevantes com base nos filtros de rótulo em uso e no intervalo de tempo",
       "related-metrics": "Métricas relacionadas",
       "related-metrics-description": "Métricas relevantes com base nos filtros de rótulo em uso"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_one": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_one": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -78,6 +119,12 @@
     "message": "<2>Tente recarregar a página</2> ou, se o problema persistir, entre em contato com o administrador da sua organização. Pedimos desculpas pelos transtornos.",
     "stack-trace-label": "Visualizar rastro da pilha",
     "title": "Erro fatal!"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -171,6 +218,9 @@
   "list-controls": {
     "search-aria-label": "Busca rápida de métricas"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -239,8 +289,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Confira <2>nossa documentação</2> para saber mais ou <5></5><6>experimente online</6> na Grafana Play!",
-    "no-datasource": "Percebemos que nenhuma fonte de dados do Prometheus foi configurada.<1></1>Adicione uma <4>fonte de dados do Prometheus</4> para visualizar as métricas.",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Boas-vindas ao detalhamento de métricas da Grafana"
   },
   "open-assistant": {
@@ -340,7 +390,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Data de criação:",
-      "empty-state": "Ainda não há favoritos na<1></1>fonte de dados atual.",
+      "empty-state": "",
       "remove-tooltip": "Remover favorito"
     },
     "close-aria-label": "Fechar",

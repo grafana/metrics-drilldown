@@ -2,13 +2,52 @@
   "action-bar": {
     "tab": {
       "breakdown": "内訳",
-      "query-results": "クエリ結果",
+      "query-results": "",
       "query-results-description": "テーブル形式のインスタントクエリデータ",
       "related-logs": "関連ログ",
       "related-logs-description": "現在のラベルフィルターと時間範囲に基づく関連ログ",
       "related-metrics": "関連メトリクス",
       "related-metrics-description": "現在のラベルフィルターに基づく関連メトリクス"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -77,6 +116,12 @@
     "message": "<2>ページを再読み込み</2>してみてください。問題が解決しない場合は、組織の管理者に連絡してください。ご不便をおかけして申し訳ございません。",
     "stack-trace-label": "スタックトレースを表示",
     "title": "致命的なエラーが発生しました！"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -168,6 +213,9 @@
   "list-controls": {
     "search-aria-label": "メトリクスをクイック検索"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -236,8 +284,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "詳細については、<2>ドキュメント</2>をご覧いただくか、<5></5>Grafana Playで<6>オンラインでお試しください</6>！",
-    "no-datasource": "Prometheusデータソースが未設定であることが検出されました。<1></1>メトリクスを表示するには、<4>Prometheusデータソース</4>を追加してください。",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Grafana Metrics Drilldownへようこそ"
   },
   "open-assistant": {
@@ -334,7 +382,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "作成日：",
-      "empty-state": "現在のデータソースの<1></1>ブックマークはまだありません。",
+      "empty-state": "",
       "remove-tooltip": "ブックマークを削除"
     },
     "close-aria-label": "閉じる",

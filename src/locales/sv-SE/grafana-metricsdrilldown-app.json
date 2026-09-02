@@ -2,13 +2,54 @@
   "action-bar": {
     "tab": {
       "breakdown": "Uppdelning",
-      "query-results": "Frågeresultat",
+      "query-results": "",
       "query-results-description": "Direktfrågedata i tabellformat",
       "related-logs": "Relaterade loggar",
       "related-logs-description": "Relevanta loggar baserat på aktuella etikettfilter och tidsintervall",
       "related-metrics": "Relaterade mätvärden",
       "related-metrics-description": "Relevanta mätvärden baserat på aktuella etikettfilter"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_one": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_one": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -78,6 +119,12 @@
     "message": "<2>Prova att ladda om sidan</2> eller kontakta din organisationsadministratör om problemet kvarstår. Vi ber om ursäkt för besväret.",
     "stack-trace-label": "Visa stackspårning",
     "title": "Allvarligt fel!"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -171,6 +218,9 @@
   "list-controls": {
     "search-aria-label": "Snabbsök mätvärden"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -239,8 +289,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Se <2>vår dokumentation</2> för att lära dig mer eller <5></5><6>prova det online</6> i Grafana Play!",
-    "no-datasource": "Vi märkte att det inte finns någon Prometheus-datakälla konfigurerad.<1></1>Lägg till en <4>Prometheus-datakälla</4> för att visa mätvärden.",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Välkommen till detaljanalys av Metrics i Grafana"
   },
   "open-assistant": {
@@ -340,7 +390,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Datum skapat:",
-      "empty-state": "Inga bokmärken ännu för den<1></1>aktuella datakällan.",
+      "empty-state": "",
       "remove-tooltip": "Ta bort bokmärke"
     },
     "close-aria-label": "Stäng",
