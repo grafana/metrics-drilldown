@@ -78,3 +78,5 @@ overrides:
   # @grafana/ui > react-router-dom-v5-compat. Patched in 1.23.3.
   '@remix-run/router': ^1.23.3
   nanoid: '>=3.3.18'
+  postcss-selector-parser: '>=7.1.3'
+  browserslist: '>=4.28.7'
