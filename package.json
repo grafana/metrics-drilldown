@@ -114,7 +114,7 @@
     "prettier": "3.9.6",
     "replace-in-file-webpack-plugin": "^1.0.6",
     "rspack-plugin-virtual-module": "^1.0.0",
-    "sass": "1.102.0",
+    "sass": "1.103.1",
     "sass-loader": "17.0.0",
     "style-loader": "4.0.0",
     "terser-webpack-plugin": "5.6.1",
