@@ -670,7 +670,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolea
       flexGrow: 1,
       padding: theme.spacing(1, 2),
       position: 'relative',
-      background,
+      background: embedded ? background : undefined,
     }),
     body: css({
       flexGrow: 1,
