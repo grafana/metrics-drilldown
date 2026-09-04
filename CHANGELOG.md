@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.6.0](https://github.com/grafana/metrics-drilldown/compare/v2.5.1...v2.6.0) (2026-09-04)
+
+
+### 🎉 Features
+
+* metrics attribute explorer ([#1393](https://github.com/grafana/metrics-drilldown/issues/1393)) ([b80834f](https://github.com/grafana/metrics-drilldown/commit/b80834f4ec19dc5a7c07f82fe563841fcefbf051))
+
+
+### 🐛 Bug Fixes
+
+* **VisualRefresh:** Fixes background issue in visual refresh ([#1421](https://github.com/grafana/metrics-drilldown/issues/1421)) ([d58510e](https://github.com/grafana/metrics-drilldown/commit/d58510e355e6b0fad310c951c9889b898091f05e))
+* **VisualRefresh:** Fixes for visual refresh ([#1397](https://github.com/grafana/metrics-drilldown/issues/1397)) ([084591d](https://github.com/grafana/metrics-drilldown/commit/084591d04eb5a657e56556aa83dc1c6ccb758f64))
+
+
+### 🧹 Chore
+
+* **deps:** combine Renovate dependency updates ([#1407](https://github.com/grafana/metrics-drilldown/issues/1407)) ([cd1130b](https://github.com/grafana/metrics-drilldown/commit/cd1130b6f5e0ce197c536c6fcebad6dfee26f78c))
+
 ## [2.5.1](https://github.com/grafana/metrics-drilldown/compare/v2.5.0...v2.5.1) (2026-08-24)
 
 
