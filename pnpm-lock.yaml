@@ -276,11 +276,11 @@ importers:
         specifier: ^1.0.0
         version: 1.0.1
       sass:
-        specifier: 1.102.0
-        version: 1.102.0
+        specifier: 1.103.1
+        version: 1.103.1
       sass-loader:
         specifier: 17.0.0
-        version: 17.0.0(@rspack/core@2.1.10(@swc/helpers@0.5.23))(sass@1.102.0)(webpack@5.109.2(@swc/core@1.16.1(@swc/helpers@0.5.23))(postcss@8.5.25))
+        version: 17.0.0(@rspack/core@2.1.10(@swc/helpers@0.5.23))(sass@1.103.1)(webpack@5.109.2(@swc/core@1.16.1(@swc/helpers@0.5.23))(postcss@8.5.25))
       style-loader:
         specifier: 4.0.0
         version: 4.0.0(webpack@5.109.2(@swc/core@1.16.1(@swc/helpers@0.5.23))(postcss@8.5.25))
@@ -5686,8 +5686,8 @@ packages:
       webpack:
         optional: true
 
-  sass@1.102.0:
-    resolution: {integrity: sha512-NSOyTnaQF7rTAEOtI2fwb386vL+akyiQLBZu8Na7hXCb+umJy0GAqlcMIaqACZ6Z1VgTBS4K9PG6B3IdjHGJsw==}
+  sass@1.103.1:
+    resolution: {integrity: sha512-9icZURbP51S6S0QGoyaeqk9uB06GNWxsFYWfH5RgpFgqK5FA8tJcM3AdVxrZEVJ7dz+L87nG95gBKf4VuaMHGw==}
     engines: {node: '>=20.19.0'}
     hasBin: true
 
@@ -12888,13 +12888,13 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
-  sass-loader@17.0.0(@rspack/core@2.1.10(@swc/helpers@0.5.23))(sass@1.102.0)(webpack@5.109.2(@swc/core@1.16.1(@swc/helpers@0.5.23))(postcss@8.5.25)):
+  sass-loader@17.0.0(@rspack/core@2.1.10(@swc/helpers@0.5.23))(sass@1.103.1)(webpack@5.109.2(@swc/core@1.16.1(@swc/helpers@0.5.23))(postcss@8.5.25)):
     optionalDependencies:
       '@rspack/core': 2.1.10(@swc/helpers@0.5.23)
-      sass: 1.102.0
+      sass: 1.103.1
       webpack: 5.109.2(@swc/core@1.16.1(@swc/helpers@0.5.23))(postcss@8.5.25)
 
-  sass@1.102.0:
+  sass@1.103.1:
     dependencies:
       chokidar: 5.0.0
       immutable: 5.1.9
