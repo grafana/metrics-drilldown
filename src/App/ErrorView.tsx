@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from 'react-router';
 
 import { HelpControls } from './HelpControls';
 import { InlineBanner } from './InlineBanner';
+import { normalizeInternalPathname } from './routingUtils';
 
 type ErrorViewProps = { error: Error };
 
@@ -25,7 +26,7 @@ export function ErrorView({ error }: Readonly<ErrorViewProps>) {
       .filter((key) => searchParams.has(key))
       .forEach((key) => newSearchParams.set(key, searchParams.get(key)!));
 
-    navigate({ pathname, search: newSearchParams.toString() });
+    navigate({ pathname: normalizeInternalPathname(pathname), search: newSearchParams.toString() });
     window.location.reload();
   }, [navigate, pathname, search]);
 
