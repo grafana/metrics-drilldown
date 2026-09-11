@@ -2,6 +2,8 @@ packages:
   - '.'
 
 # https://pnpm.io/supply-chain-security
+# Same as passing --frozen-lockfile on every pnpm install (CI uses this via plugin-ci-workflows too).
+frozenLockfile: true
 # Disable package lifecycle scripts (postinstall, etc.) on install.
 ignoreScripts: true
 # Five days in minutes (5 × 24 × 60).
