@@ -1,4 +1,7 @@
-import { getPageNav } from './Trail';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+
+import { getPageNav, TrailPage } from './Trail';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
 
@@ -85,5 +88,28 @@ describe('Trail Component - Breadcrumb Logic Tests', () => {
 
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe('TrailPage', () => {
+  it('does not add plugin page chrome around embedded trails', () => {
+    const { container } = render(
+      <TrailPage embedded pageNav={undefined}>
+        <div>Embedded metrics</div>
+      </TrailPage>
+    );
+
+    expect(container.firstElementChild).toBe(screen.getByText('Embedded metrics'));
+  });
+
+  it('keeps plugin page chrome around standalone trails', () => {
+    const { container } = render(
+      <TrailPage embedded={false} pageNav={undefined}>
+        <div>Standalone metrics</div>
+      </TrailPage>
+    );
+
+    expect(container.firstElementChild).not.toBe(screen.getByText('Standalone metrics'));
+    expect(container.firstElementChild).toContainElement(screen.getByText('Standalone metrics'));
   });
 });
