@@ -33,9 +33,9 @@ allowBuilds:
   protobufjs: true
   unrs-resolver: true
 
-# react-router and react-router-dom stay on v6 in package.json until Grafana's
-# upstream router migration lands: https://github.com/grafana/grafana/issues/129933
-# @grafana/ui's v5 compatibility package pins router 6.30.3, so keep only that
+# react-router-dom stays on v6 in package.json until Grafana's upstream router
+# migration lands: https://github.com/grafana/grafana/issues/129933
+# @grafana/ui's v5 compatibility package pins react-router 6.30.3, so keep that
 # transitive v6 line on 6.30.6, which includes the GHSA-jjmj-jmhj-qwj2 backport.
 overrides:
   react-router@^6: ^6.30.6
