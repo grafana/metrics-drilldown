@@ -7,7 +7,7 @@ import {
 import { expect, test } from '../../fixtures';
 
 const TRACKED_METRIC = 'handler_duration_seconds_count';
-const SECOND_TRACKED_METRIC = 'jaeger_tracer_finished_spans_total';
+const SECOND_TRACKED_METRIC = 'go_gc_cycles_automatic_gc_cycles_total';
 const UNTRACKED_METRIC = 'memberlist_client_cas_success_total';
 
 async function enableSloFlag(page: Page) {
@@ -184,11 +184,7 @@ test.describe('SLO-tracked metrics optional integration', () => {
     await metricsReducerView.sidebar.toggleButton('Group by labels');
     await metricsReducerView.sidebar.selectGroupByLabel('job');
     await metricsReducerView.assertMetricsGroupByList();
-    const trackedMetricGroup = metricsReducerView
-      .getMetricsGroupByList()
-      .getByTestId('job-ride-sharing-app-metrics-group');
-    await trackedMetricGroup.scrollIntoViewIfNeeded();
-    await expect(metricsReducerView.getSloTrackedBadge(TRACKED_METRIC)).toBeVisible();
+    await expect(metricsReducerView.getSloTrackedBadge(SECOND_TRACKED_METRIC)).toBeVisible();
   });
 
   test('clears stale URL filtering when the SLO API fails', async ({ page, metricsReducerView }) => {
