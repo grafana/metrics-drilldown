@@ -184,7 +184,11 @@ test.describe('SLO-tracked metrics optional integration', () => {
     await metricsReducerView.sidebar.toggleButton('Group by labels');
     await metricsReducerView.sidebar.selectGroupByLabel('job');
     await metricsReducerView.assertMetricsGroupByList();
-    await expect(metricsReducerView.getMetricsGroupByList().getByTestId('slo-tracked-badge').first()).toBeVisible();
+    const trackedMetricGroup = metricsReducerView
+      .getMetricsGroupByList()
+      .getByTestId('job-ride-sharing-app-metrics-group');
+    await trackedMetricGroup.scrollIntoViewIfNeeded();
+    await expect(metricsReducerView.getSloTrackedBadge(TRACKED_METRIC)).toBeVisible();
   });
 
   test('clears stale URL filtering when the SLO API fails', async ({ page, metricsReducerView }) => {
