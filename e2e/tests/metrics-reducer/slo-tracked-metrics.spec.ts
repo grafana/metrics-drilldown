@@ -179,6 +179,8 @@ test.describe('SLO-tracked metrics optional integration', () => {
     await expect(metricsReducerView.getSloTrackedChip()).toHaveAttribute('aria-pressed', 'true');
     await expect(metricsReducerView.getPanelByTitle(UNTRACKED_METRIC)).toHaveCount(0);
 
+    await metricsReducerView.toggleSloTrackedFilter();
+    await expect(metricsReducerView.getSloTrackedChip()).toHaveAttribute('aria-pressed', 'false');
     await metricsReducerView.sidebar.toggleButton('Group by labels');
     await metricsReducerView.sidebar.selectGroupByLabel('job');
     await metricsReducerView.assertMetricsGroupByList();
