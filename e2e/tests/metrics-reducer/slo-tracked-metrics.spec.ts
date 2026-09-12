@@ -33,7 +33,26 @@ async function injectSloPlugin(page: Page) {
     const inject = (bootData: Record<string, any>) => {
       bootData.settings ??= {};
       bootData.settings.apps ??= {};
-      bootData.settings.apps['grafana-slo-app'] = { version: 'test-version' };
+      bootData.settings.apps['grafana-slo-app'] = {
+        id: 'grafana-slo-app',
+        path: '',
+        version: 'test-version',
+        preload: false,
+        angular: { detected: false, hideDeprecation: false },
+        loadingStrategy: 'script',
+        dependencies: {
+          grafanaVersion: '*',
+          plugins: [],
+          extensions: { exposedComponents: [] },
+        },
+        extensions: {
+          addedComponents: [],
+          addedFunctions: [],
+          addedLinks: [],
+          exposedComponents: [],
+          extensionPoints: [],
+        },
+      };
       return bootData;
     };
 
