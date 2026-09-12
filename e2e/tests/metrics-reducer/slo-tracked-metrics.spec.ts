@@ -183,7 +183,7 @@ test.describe('SLO-tracked metrics optional integration', () => {
     await metricsReducerView.sidebar.selectGroupByLabel('job');
     await metricsReducerView.assertMetricsGroupByList();
     await expect(metricsReducerView.getSloTrackedChip()).toHaveAttribute('aria-pressed', 'true');
-    await expect(metricsReducerView.getSloTrackedBadge(SECOND_TRACKED_METRIC)).toBeVisible();
+    await expect(metricsReducerView.getSloTrackedBadge(SECOND_TRACKED_METRIC).first()).toBeVisible();
     await expect(metricsReducerView.getPanelByTitle(UNTRACKED_METRIC)).toHaveCount(0);
   });
 
