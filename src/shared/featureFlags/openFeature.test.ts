@@ -45,17 +45,20 @@ jest.mock('./tracking', () => ({
 
 describe('evaluateFeatureFlag', () => {
   const getStringValue = jest.fn();
+  const getBooleanValue = jest.fn();
   const addHandler = jest.fn();
   const addHooks = jest.fn();
   let clientMock: any;
 
   beforeEach(() => {
     getStringValue.mockReset();
+    getBooleanValue.mockReset();
     addHandler.mockReset();
     addHooks.mockReset();
 
     clientMock = {
       getStringValue,
+      getBooleanValue,
       addHandler,
       addHooks,
       providerStatus: ClientProviderStatus.READY,
@@ -106,6 +109,15 @@ describe('evaluateFeatureFlag', () => {
 
     // 'excluded' is the default value defined in openFeature.ts for this flag
     await expect(evaluateFeatureFlag('drilldown.metrics.default_open_sidebar')).resolves.toBe('excluded');
+  });
+
+  it('evaluates the SLO tracking flag as a boolean with a disabled default', async () => {
+    getBooleanValue.mockReturnValue(true);
+
+    const result = await evaluateFeatureFlag('drilldown.metrics.slo_tracked_metrics');
+
+    expect(getBooleanValue).toHaveBeenCalledWith('drilldown.metrics.slo_tracked_metrics', false);
+    expect(result).toBe(true);
   });
 
   it('evaluates the sort_by_firing_alerts A/B test flag as a string with the "excluded" default', async () => {
