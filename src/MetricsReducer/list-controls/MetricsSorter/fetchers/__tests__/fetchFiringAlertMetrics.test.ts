@@ -2,7 +2,7 @@ import { getBackendSrv } from '@grafana/runtime';
 
 import { logger } from 'shared/logger/logger';
 
-import { fetchFiringAlertMetrics } from '../fetchFiringAlertMetrics';
+import { fetchFiringAlertMetrics, fetchFiringAlertRuleSignals } from '../fetchFiringAlertMetrics';
 import { GRAFANA_RULER_RULES_URL } from '../shared';
 
 jest.mock('@grafana/runtime');
@@ -39,8 +39,8 @@ function buildRulerResponse(groups: Array<{ name: string; rules: Array<Record<st
   };
 }
 
-function alertingRule(name: string, query: string) {
-  return { type: 'alerting', name, query, state: 'firing', health: 'ok', alerts: [], labels: {}, annotations: {} };
+function alertingRule(name: string, query: string, labels: Record<string, string> = {}) {
+  return { type: 'alerting', name, query, state: 'firing', health: 'ok', alerts: [], labels, annotations: {} };
 }
 
 function recordingRule(name: string, query: string) {
@@ -110,6 +110,36 @@ describe('fetchFiringAlertMetrics()', () => {
       expect(result.get('http_requests_total')).toBe(2);
     });
 
+    test('retains canonical SLO UUID and severity labels independently from metric counts', async () => {
+      const { get } = setup();
+
+      get.mockResolvedValueOnce(
+        buildRulerResponse([
+          {
+            name: 'slo-group',
+            rules: [
+              alertingRule('Fast burn', 'grafana_slo_sli_5m > 0', {
+                grafana_slo_uuid: 'slo-1',
+                grafana_slo_severity: 'critical',
+              }),
+              alertingRule('Slow burn', 'grafana_slo_sli_1h > 0', {
+                grafana_slo_uuid: 'slo-1',
+                grafana_slo_severity: 'warning',
+              }),
+              alertingRule('Unrelated', 'up == 0'),
+            ],
+          },
+        ])
+      );
+
+      const result = await fetchFiringAlertRuleSignals();
+
+      expect(result.firingSloUuids.get('slo-1')).toEqual(new Set(['critical', 'warning']));
+      expect(result.firingSloUuids.size).toBe(1);
+      expect(result.metricCounts.get('grafana_slo_sli_5m')).toBe(1);
+      expect(result.metricCounts.get('up')).toBe(1);
+    });
+
     test('extracts multiple metrics from a single PromQL expression', async () => {
       const { get } = setup();
 
@@ -161,22 +191,29 @@ describe('fetchFiringAlertMetrics()', () => {
       expect(result.get('http_requests_total')).toBe(1);
     });
 
-    test('skips rules with empty query strings', async () => {
+    test('skips empty queries for metric counts but still retains canonical SLO labels', async () => {
       const { get } = setup();
 
       get.mockResolvedValueOnce(
         buildRulerResponse([
           {
             name: 'group-1',
-            rules: [alertingRule('EmptyQuery', ''), alertingRule('ValidRule', 'up == 0')],
+            rules: [
+              alertingRule('EmptyQuery', '', {
+                grafana_slo_uuid: 'slo-with-malformed-query',
+                grafana_slo_severity: 'critical',
+              }),
+              alertingRule('ValidRule', 'up == 0'),
+            ],
           },
         ])
       );
 
-      const result = await fetchFiringAlertMetrics();
+      const result = await fetchFiringAlertRuleSignals();
 
-      expect(result.size).toBe(1);
-      expect(result.get('up')).toBe(1);
+      expect(result.metricCounts.size).toBe(1);
+      expect(result.metricCounts.get('up')).toBe(1);
+      expect(result.firingSloUuids.get('slo-with-malformed-query')).toEqual(new Set(['critical']));
     });
 
     test('returns zero metrics for malformed PromQL that yields no identifiers', async () => {

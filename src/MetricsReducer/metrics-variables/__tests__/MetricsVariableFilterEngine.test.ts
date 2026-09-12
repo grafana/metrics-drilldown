@@ -237,11 +237,7 @@ describe('MetricsVariableFilterEngine - firingAlertMetrics filtering', () => {
 
   test('composes with prefixes filter — returns intersection', () => {
     const { engine, setState } = setup();
-    const options = createOptions([
-      'http_requests_total',
-      'http_errors_total',
-      'cpu_usage',
-    ]);
+    const options = createOptions(['http_requests_total', 'http_errors_total', 'cpu_usage']);
 
     engine.setInitOptions(options);
     engine.applyFilters(
@@ -278,10 +274,57 @@ describe('MetricsVariableFilterEngine - firingAlertMetrics filtering', () => {
     engine.setInitOptions(options);
     // forceUpdate: true so the reset path runs even though the engine starts with empty filters
     engine.applyFilters(
-      { categories: [], prefixes: [], suffixes: [], names: [], firingAlertMetrics: [] },
+      { categories: [], prefixes: [], suffixes: [], names: [], firingAlertMetrics: [], sloTrackedMetrics: [] },
       { forceUpdate: true, notify: false }
     );
 
     expect(setState).toHaveBeenCalledWith({ options });
+  });
+});
+
+describe('MetricsVariableFilterEngine - sloTrackedMetrics filtering', () => {
+  test('filters to exact tracked metric names and ignores unknown names', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['http_requests_total', 'http_errors_total', 'cpu_usage']);
+
+    engine.setInitOptions(options);
+    engine.applyFilters(
+      { sloTrackedMetrics: ['http_requests_total', 'missing_metric'] },
+      { forceUpdate: false, notify: false }
+    );
+
+    expect(setState).toHaveBeenCalledWith({
+      options: [{ label: 'http_requests_total', value: 'http_requests_total' }],
+    });
+  });
+
+  test('composes with prefix, suffix, search, and firing-alert dimensions', () => {
+    const options = createOptions([
+      'http_api_requests_total',
+      'http_web_requests_total',
+      'http_api_errors_total',
+      'cpu_usage',
+    ]);
+    const filtered = MetricsVariableFilterEngine.getFilteredOptions(options, {
+      categories: [],
+      prefixes: ['http'],
+      suffixes: ['total'],
+      names: ['.*api.*'],
+      firingAlertMetrics: ['http_api_requests_total', 'http_web_requests_total'],
+      sloTrackedMetrics: ['http_api_requests_total', 'http_api_errors_total'],
+    });
+
+    expect(filtered).toEqual([{ label: 'http_api_requests_total', value: 'http_api_requests_total' }]);
+  });
+
+  test('clearing the SLO dimension restores the original options', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['http_requests_total', 'cpu_usage']);
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ sloTrackedMetrics: ['http_requests_total'] }, { forceUpdate: false, notify: false });
+    engine.applyFilters({ sloTrackedMetrics: [] }, { forceUpdate: false, notify: false });
+
+    expect(setState).toHaveBeenLastCalledWith({ options });
   });
 });

@@ -20,9 +20,11 @@ import { userStorage } from 'shared/user-preferences/userStorage';
 
 import { EventSortByChanged } from './events/EventSortByChanged';
 import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
-import { fetchFiringAlertMetrics } from './fetchers/fetchFiringAlertMetrics';
+import { fetchFiringAlertRuleSignals, type FiringAlertRuleSignals } from './fetchers/fetchFiringAlertMetrics';
+import { fetchSloMetricSignals, type SloMetricSignals } from './fetchers/fetchSloMetricSignals';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
-export type SortingOption = 'default' | 'alphabetical' | 'alphabetical-reversed' | 'dashboard-usage' | 'alerting-usage' | 'firing-alerts';
+export type SortingOption =
+  'default' | 'alphabetical' | 'alphabetical-reversed' | 'dashboard-usage' | 'alerting-usage' | 'firing-alerts';
 
 const MAX_RECENT_METRICS = 6;
 const RECENT_METRICS_EXPIRY_DAYS = 30;
@@ -120,10 +122,17 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     'firing-alerts',
   ]);
   private usageFetcher = new MetricUsageFetcher();
-  private firingAlertCache: { data: Map<string, number> | null; promise: Promise<Map<string, number>> | null } = {
+  private firingAlertCache: {
+    data: FiringAlertRuleSignals | null;
+    promise: Promise<FiringAlertRuleSignals> | null;
+  } = {
     data: null,
     promise: null,
   };
+  private sloSignalCache = new Map<
+    string,
+    { data: SloMetricSignals | null; promise: Promise<SloMetricSignals> | null }
+  >();
 
   constructor(state: Partial<MetricsSorterState>) {
     super({
@@ -194,19 +203,23 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     });
   }
 
-  public getFiringAlertCounts(): Promise<Map<string, number>> {
+  public getFiringAlertSignals(): Promise<FiringAlertRuleSignals> {
     if (this.firingAlertCache.data) {
       return Promise.resolve(this.firingAlertCache.data);
     }
     if (this.firingAlertCache.promise) {
       return this.firingAlertCache.promise;
     }
-    this.firingAlertCache.promise = fetchFiringAlertMetrics().then((data) => {
+    this.firingAlertCache.promise = fetchFiringAlertRuleSignals().then((data) => {
       this.firingAlertCache.data = data;
       this.firingAlertCache.promise = null;
       return data;
     });
     return this.firingAlertCache.promise;
+  }
+
+  public getFiringAlertCounts(): Promise<Map<string, number>> {
+    return this.getFiringAlertSignals().then((signals) => signals.metricCounts);
   }
 
   public getFiringAlertCountForMetric(metric: string): Promise<number> {
@@ -215,6 +228,31 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
 
   public getFiringAlertCountsAsRecord(): Promise<Record<string, number>> {
     return this.getFiringAlertCounts().then((map) => Object.fromEntries(map));
+  }
+
+  public getSloMetricSignals(datasourceUid: string): Promise<SloMetricSignals> {
+    const cached = this.sloSignalCache.get(datasourceUid);
+    if (cached?.data) {
+      return Promise.resolve(cached.data);
+    }
+    if (cached?.promise) {
+      return cached.promise;
+    }
+
+    const entry = cached ?? { data: null, promise: null };
+    const promise = fetchSloMetricSignals(datasourceUid, () => this.getFiringAlertSignals())
+      .then((result) => {
+        if (result.status !== 'error') {
+          entry.data = result;
+        }
+        return result;
+      })
+      .finally(() => {
+        entry.promise = null;
+      });
+    entry.promise = promise;
+    this.sloSignalCache.set(datasourceUid, entry);
+    return promise;
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {

@@ -26,6 +26,7 @@ import { EventSortByChanged } from './list-controls/MetricsSorter/events/EventSo
 import { MetricsSorter, VAR_WINGMAN_SORT_BY, type SortingOption } from './list-controls/MetricsSorter/MetricsSorter';
 import { EventQuickSearchChanged } from './list-controls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from './list-controls/QuickSearch/QuickSearch';
+import { SloTrackedChip } from './list-controls/SloTrackedChip/SloTrackedChip';
 import { EventMetricsVariableActivated } from './metrics-variables/events/EventMetricsVariableActivated';
 import { EventMetricsVariableDeactivated } from './metrics-variables/events/EventMetricsVariableDeactivated';
 import { EventMetricsVariableLoaded } from './metrics-variables/events/EventMetricsVariableLoaded';
@@ -153,14 +154,24 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         filters[filterSection.state.type] = filterSection.state.selectedGroups.map((g) => g.value);
       }
 
-      // Include firing alert chip state if it is active on initial load (e.g. restored from URL)
+      // Include async chip state when it is already ready. Otherwise the chip publishes
+      // EventFiltersChanged after its datasource-scoped data resolves.
       try {
         const firingAlertChip = sceneGraph.findByKeyAndType(this, 'firing-alert-chip', FiringAlertChip);
         if (firingAlertChip.state.active) {
           filters.firingAlertMetrics = [...firingAlertChip.state.firingAlertMetrics.keys()];
         }
       } catch {
-        // Chip not yet in scene graph — filter will be applied via EventFiltersChanged when chip activates
+        // Chip not yet in scene graph.
+      }
+
+      try {
+        const sloTrackedChip = sceneGraph.findByKeyAndType(this, 'slo-tracked-chip', SloTrackedChip);
+        if (sloTrackedChip.state.active && sloTrackedChip.state.signals.status === 'ready') {
+          filters.sloTrackedMetrics = [...sloTrackedChip.state.signals.trackedMetrics.keys()];
+        }
+      } catch {
+        // Chip not yet in scene graph.
       }
 
       filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });

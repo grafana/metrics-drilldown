@@ -41,16 +41,19 @@ interface Rule {
   duration?: number;
 }
 
+export interface FiringAlertRuleSignals {
+  metricCounts: Map<string, number>;
+  /** SLO UUID → severities found on currently firing rules. */
+  firingSloUuids: Map<string, Set<string>>;
+  ruleCount: number;
+}
+
 /**
- * Fetches currently firing alert rules from Grafana's Prometheus-compatible ruler endpoint
- * and maps them to metric names.
- *
- * Uses the `?state=firing` server-side filter to reduce payload size, and `limit_alerts=0`
- * to skip individual alert instance details.
- *
- * @returns A Map of metric name → count of firing alert rules that reference the metric
+ * Fetches currently firing alert rules from Grafana's Prometheus-compatible ruler endpoint.
+ * The normalized result retains both source metric counts and canonical SLO labels so consumers
+ * can share one ruler request without coupling SLO detection to generated recording metric names.
  */
-export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
+export async function fetchFiringAlertRuleSignals(): Promise<FiringAlertRuleSignals> {
   const start = performance.now();
 
   try {
@@ -61,17 +64,17 @@ export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
       usageRequestOptions
     );
 
-    const { metricCounts, ruleCount } = parseFiringRules(response);
+    const result = parseFiringRules(response);
     const durationMs = Math.round(performance.now() - start);
 
     reportExploreMetrics('firing_alert_metrics_fetched', {
       status: 'success',
       duration_ms: durationMs,
-      metric_count: metricCounts.size,
-      rule_count: ruleCount,
+      metric_count: result.metricCounts.size,
+      rule_count: result.ruleCount,
     });
 
-    return metricCounts;
+    return result;
   } catch (err) {
     const durationMs = Math.round(performance.now() - start);
 
@@ -88,17 +91,23 @@ export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
         'Failed to fetch firing alert rules from Prometheus ruler endpoint'
       ),
     });
-    return new Map();
+    return { metricCounts: new Map(), firingSloUuids: new Map(), ruleCount: 0 };
   }
 }
 
-function parseFiringRules(response: RulerRulesResponse): { metricCounts: Map<string, number>; ruleCount: number } {
+/** @returns A Map of metric name → count of firing alert rules that reference the metric. */
+export async function fetchFiringAlertMetrics(): Promise<Map<string, number>> {
+  return (await fetchFiringAlertRuleSignals()).metricCounts;
+}
+
+function parseFiringRules(response: RulerRulesResponse): FiringAlertRuleSignals {
   const metricCounts = new Map<string, number>();
+  const firingSloUuids = new Map<string, Set<string>>();
   let ruleCount = 0;
 
   const groups = response?.data?.groups;
   if (!Array.isArray(groups)) {
-    return { metricCounts, ruleCount };
+    return { metricCounts, firingSloUuids, ruleCount };
   }
 
   for (const group of groups) {
@@ -106,19 +115,37 @@ function parseFiringRules(response: RulerRulesResponse): { metricCounts: Map<str
       continue;
     }
 
-    const alertingRules = group.rules.filter(
+    const alertingRules = group.rules.filter((rule) => rule.type === 'alerting');
+    const alertingRulesWithQueries = alertingRules.filter(
       (rule): rule is Rule & { name: string; query: string } =>
-        rule.type === 'alerting' && typeof rule.query === 'string' && rule.query !== ''
+        typeof rule.name === 'string' && typeof rule.query === 'string' && rule.query !== ''
     );
 
-    ruleCount += alertingRules.length;
+    ruleCount += alertingRulesWithQueries.length;
 
     for (const rule of alertingRules) {
+      retainSloLabels(rule, firingSloUuids);
+    }
+    for (const rule of alertingRulesWithQueries) {
       countMetricsFromRule(rule, metricCounts);
     }
   }
 
-  return { metricCounts, ruleCount };
+  return { metricCounts, firingSloUuids, ruleCount };
+}
+
+function retainSloLabels(rule: Rule, firingSloUuids: Map<string, Set<string>>): void {
+  const uuid = rule.labels?.grafana_slo_uuid;
+  if (!uuid) {
+    return;
+  }
+
+  const severities = firingSloUuids.get(uuid) ?? new Set<string>();
+  const severity = rule.labels?.grafana_slo_severity;
+  if (severity) {
+    severities.add(severity);
+  }
+  firingSloUuids.set(uuid, severities);
 }
 
 function countMetricsFromRule(rule: Rule & { name: string; query: string }, metricCounts: Map<string, number>): void {
