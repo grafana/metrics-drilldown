@@ -195,6 +195,7 @@ test.describe('SLO-tracked metrics optional integration', () => {
 
     await expect(metricsReducerView.getSloTrackedChip()).toHaveCount(0);
     await expect(page).not.toHaveURL(/filter-slo-tracked=true/);
+    await metricsReducerView.quickSearch.enterText(UNTRACKED_METRIC);
     await expect(metricsReducerView.getPanelByTitle(UNTRACKED_METRIC)).toBeVisible();
   });
 });

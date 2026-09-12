@@ -36,13 +36,13 @@ function signals(status: SloMetricSignals['status'], metrics: string[] = [], dat
   };
 }
 
-function setup(result: SloMetricSignals, options = ['http_requests_total', 'cpu_usage']) {
+function setup(result: SloMetricSignals, options = ['http_requests_total', 'cpu_usage'], loading = false) {
   const getSloMetricSignals = jest.fn().mockResolvedValue(result);
   mockFindByKeyAndType.mockReturnValue({ getSloMetricSignals });
   mockLookupVariable.mockImplementation((name: string) =>
     name === 'ds'
       ? { getValue: () => result.datasourceUid, state: { name: 'ds' } }
-      : { state: { options: options.map((value) => ({ label: value, value })) } }
+      : { state: { options: options.map((value) => ({ label: value, value })), loading } }
   );
   mockGetAncestor.mockReturnValue({
     state: {
@@ -167,6 +167,22 @@ describe('SloTrackedChip', () => {
       true
     );
     expect(mockReportExploreMetrics).not.toHaveBeenCalled();
+  });
+
+  it('keeps restored URL state while metric options are still loading', async () => {
+    setup(signals('ready', ['http_requests_total']), [], true);
+    const chip = new SloTrackedChip();
+    chip.updateFromUrl({ 'filter-slo-tracked': 'true' });
+    const publish = jest.spyOn(chip, 'publishEvent');
+
+    await activate(chip);
+
+    expect(chip.state.active).toBe(true);
+    expect(chip.getUrlState()).toEqual({ 'filter-slo-tracked': 'true' });
+    expect(publish).toHaveBeenLastCalledWith(
+      expect.objectContaining({ payload: { type: 'sloTrackedMetrics', filters: ['http_requests_total'] } }),
+      true
+    );
   });
 
   it('replaces active membership when the datasource changes without tracking a user toggle', async () => {

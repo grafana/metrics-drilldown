@@ -150,6 +150,10 @@ export class SloTrackedChip extends SceneObjectBase<SloTrackedChipState> {
       }
 
       const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
+      if (metricsVariable.state.loading) {
+        return undefined;
+      }
+
       const originalOptions = metricsVariable.state.options as MetricOptions;
       const filtersWithoutSlo = { ...filterEngine.getFilters(), sloTrackedMetrics: [] };
       const optionsForCounting = MetricsVariableFilterEngine.getFilteredOptions(originalOptions, filtersWithoutSlo);
