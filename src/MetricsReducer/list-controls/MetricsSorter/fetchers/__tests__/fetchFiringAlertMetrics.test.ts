@@ -134,10 +134,28 @@ describe('fetchFiringAlertMetrics()', () => {
 
       const result = await fetchFiringAlertRuleSignals();
 
+      expect(result.status).toBe('ready');
       expect(result.firingSloUuids.get('slo-1')).toEqual(new Set(['critical', 'warning']));
       expect(result.firingSloUuids.size).toBe(1);
       expect(result.metricCounts.get('grafana_slo_sli_5m')).toBe(1);
       expect(result.metricCounts.get('up')).toBe(1);
+    });
+
+    test('excludes non-firing rules from canonical SLO burn signals', async () => {
+      const { get } = setup();
+      const pendingRule = {
+        ...alertingRule('Pending burn', 'grafana_slo_sli_5m > 0', {
+          grafana_slo_uuid: 'slo-pending',
+          grafana_slo_severity: 'critical',
+        }),
+        state: 'pending',
+      };
+
+      get.mockResolvedValueOnce(buildRulerResponse([{ name: 'slo-group', rules: [pendingRule] }]));
+
+      const result = await fetchFiringAlertRuleSignals();
+
+      expect(result.firingSloUuids.has('slo-pending')).toBe(false);
     });
 
     test('extracts multiple metrics from a single PromQL expression', async () => {
@@ -296,6 +314,17 @@ describe('fetchFiringAlertMetrics()', () => {
   });
 
   describe('error handling', () => {
+    test('marks rule-signal acquisition as failed so richer consumers can retry', async () => {
+      const { get } = setup();
+      get.mockRejectedValueOnce(new Error('Network error'));
+
+      const result = await fetchFiringAlertRuleSignals();
+
+      expect(result.status).toBe('error');
+      expect(result.metricCounts.size).toBe(0);
+      expect(result.firingSloUuids.size).toBe(0);
+    });
+
     test('returns empty Map and logs error when API call fails', async () => {
       const { get } = setup();
       get.mockRejectedValueOnce(new Error('Network error'));

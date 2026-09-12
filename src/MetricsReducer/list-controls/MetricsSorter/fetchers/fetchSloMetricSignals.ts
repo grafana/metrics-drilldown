@@ -81,7 +81,14 @@ export async function fetchSloMetricSignals(
       fetchFiringSignals(),
     ]);
 
-    const definitions = Array.isArray(response?.slos) ? response.slos : [];
+    if (!Array.isArray(response?.slos)) {
+      throw new Error('Unexpected SLO list response');
+    }
+    if (firingSignals.status === 'error') {
+      throw new Error('Failed to acquire active SLO burn signals');
+    }
+
+    const definitions = response.slos;
     const trackedMetrics = extractTrackedMetrics(definitions, datasourceUid);
     const firingUuids = new Set(firingSignals.firingSloUuids.keys());
     const activeBurnMetrics = new Set<string>();

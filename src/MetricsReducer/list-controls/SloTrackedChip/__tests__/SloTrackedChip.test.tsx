@@ -27,7 +27,11 @@ const mockGetAncestor = sceneGraph.getAncestor as jest.Mock;
 const mockLookupVariable = sceneGraph.lookupVariable as jest.Mock;
 const mockReportExploreMetrics = reportExploreMetrics as jest.Mock;
 
-function signals(status: SloMetricSignals['status'], metrics: string[] = [], datasourceUid = 'prom-a'): SloMetricSignals {
+function signals(
+  status: SloMetricSignals['status'],
+  metrics: string[] = [],
+  datasourceUid = 'prom-a'
+): SloMetricSignals {
   return {
     datasourceUid,
     status,
@@ -129,10 +133,7 @@ describe('SloTrackedChip', () => {
 
     expect(screen.getByText('SLO-tracked (0)')).toBeInTheDocument();
     expect(screen.getByRole('button')).toBeDisabled();
-    expect(screen.getByRole('button')).toHaveAttribute(
-      'title',
-      'No SLO-tracked metrics in the current filtered set'
-    );
+    expect(screen.getByRole('button')).toHaveAttribute('title', 'No SLO-tracked metrics in the current filtered set');
   });
 
   it('clears restored state when ready definitions do not match any metric in the selected datasource', async () => {
@@ -185,18 +186,121 @@ describe('SloTrackedChip', () => {
     );
   });
 
-  it('replaces active membership when the datasource changes without tracking a user toggle', async () => {
-    let uid = 'prom-a';
-    const getSloMetricSignals = jest.fn().mockImplementation(async (datasourceUid: string) =>
-      datasourceUid === 'prom-a'
-        ? signals('ready', ['metric_a'], datasourceUid)
-        : signals('ready', ['metric_b'], datasourceUid)
+  it('clears a restored active filter when delayed metric options resolve with no matches', async () => {
+    const metricsVariable = {
+      state: { options: [] as Array<{ label: string; value: string }>, loading: true },
+    };
+    setup(signals('ready', ['http_requests_total']), [], true);
+    mockLookupVariable.mockImplementation((name: string) =>
+      name === 'ds' ? { getValue: () => 'prom-a', state: { name: 'ds' } } : metricsVariable
     );
+    const chip = new SloTrackedChip();
+    chip.updateFromUrl({ 'filter-slo-tracked': 'true' });
+    const publish = jest.spyOn(chip, 'publishEvent');
+
+    await activate(chip);
+    expect(chip.state.active).toBe(true);
+
+    metricsVariable.state = {
+      options: [{ label: 'untracked_metric', value: 'untracked_metric' }],
+      loading: false,
+    };
+    act(() => {
+      (chip as unknown as { updateMatchingCount: () => number | undefined }).updateMatchingCount();
+    });
+
+    expect(chip.state.active).toBe(false);
+    expect(chip.getUrlState()).toEqual({ 'filter-slo-tracked': '' });
+    expect(publish).toHaveBeenLastCalledWith(
+      expect.objectContaining({ payload: { type: 'sloTrackedMetrics', filters: [] } }),
+      true
+    );
+  });
+
+  it('replaces ready signals with datasource-scoped loading state before awaiting a reload', async () => {
+    let uid = 'prom-a';
+    let resolveReload!: (value: SloMetricSignals) => void;
+    const getSloMetricSignals = jest
+      .fn()
+      .mockResolvedValueOnce(signals('ready', ['metric_a'], 'prom-a'))
+      .mockReturnValueOnce(new Promise<SloMetricSignals>((resolve) => (resolveReload = resolve)));
     mockFindByKeyAndType.mockReturnValue({ getSloMetricSignals });
     mockLookupVariable.mockImplementation((name: string) =>
       name === 'ds'
         ? { getValue: () => uid, state: { name: 'ds' } }
-        : { state: { options: [{ label: 'metric_a', value: 'metric_a' }, { label: 'metric_b', value: 'metric_b' }] } }
+        : { state: { options: [{ label: 'metric_a', value: 'metric_a' }], loading: false } }
+    );
+    mockGetAncestor.mockReturnValue({
+      state: {
+        enginesMap: new Map([
+          [
+            'filtered-metrics-wingman',
+            {
+              filterEngine: {
+                getFilters: () => ({
+                  categories: [],
+                  prefixes: [],
+                  suffixes: [],
+                  names: [],
+                  firingAlertMetrics: [],
+                  sloTrackedMetrics: [],
+                }),
+              },
+            },
+          ],
+        ]),
+      },
+    });
+    const chip = new SloTrackedChip();
+    chip.setState({ active: true });
+    const publish = jest.spyOn(chip, 'publishEvent');
+
+    await activate(chip);
+    uid = 'prom-b';
+    let reload!: Promise<void>;
+    act(() => {
+      reload = (chip as unknown as { loadSignals: () => Promise<void> }).loadSignals();
+    });
+
+    expect(chip.state.signals).toMatchObject({ datasourceUid: 'prom-b', status: 'loading' });
+    expect(chip.state.signals.trackedMetrics.size).toBe(0);
+    expect(publish).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: { type: 'sloTrackedMetrics', filters: [] } }),
+      true
+    );
+
+    resolveReload(signals('error', [], 'prom-b'));
+    await act(async () => reload);
+
+    expect(chip.state.active).toBe(false);
+    expect(chip.state.signals).toMatchObject({ datasourceUid: 'prom-b', status: 'error' });
+    expect(publish).toHaveBeenLastCalledWith(
+      expect.objectContaining({ payload: { type: 'sloTrackedMetrics', filters: [] } }),
+      true
+    );
+  });
+
+  it('replaces active membership when the datasource changes without tracking a user toggle', async () => {
+    let uid = 'prom-a';
+    const getSloMetricSignals = jest
+      .fn()
+      .mockImplementation(async (datasourceUid: string) =>
+        datasourceUid === 'prom-a'
+          ? signals('ready', ['metric_a'], datasourceUid)
+          : signals('ready', ['metric_b'], datasourceUid)
+      );
+    mockFindByKeyAndType.mockReturnValue({ getSloMetricSignals });
+    mockLookupVariable.mockImplementation((name: string) =>
+      name === 'ds'
+        ? { getValue: () => uid, state: { name: 'ds' } }
+        : {
+            state: {
+              options: [
+                { label: 'metric_a', value: 'metric_a' },
+                { label: 'metric_b', value: 'metric_b' },
+              ],
+            },
+          }
     );
     mockGetAncestor.mockReturnValue({
       state: {

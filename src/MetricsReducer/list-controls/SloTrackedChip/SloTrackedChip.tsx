@@ -38,9 +38,11 @@ const INITIAL_SIGNALS: SloMetricSignals = {
   activeBurnMetrics: new Set(),
 };
 
+type SloTrackedChipSignals = SloMetricSignals | (Omit<SloMetricSignals, 'status'> & { status: 'loading' });
+
 interface SloTrackedChipState extends SceneObjectState {
   active: boolean;
-  signals: SloMetricSignals;
+  signals: SloTrackedChipSignals;
   matchingCount: number;
   visible: boolean;
 }
@@ -94,14 +96,23 @@ export class SloTrackedChip extends SceneObjectBase<SloTrackedChipState> {
 
   private async loadSignals() {
     const generation = ++this.loadGeneration;
+    const datasourceUid = this.getDatasourceUid();
     const wasActive = this.state.active;
     if (wasActive) {
       this.publishFilterEvent(false);
     }
-    this.setState({ visible: false, matchingCount: 0 });
+    this.setState({
+      signals: {
+        datasourceUid,
+        status: 'loading',
+        trackedMetrics: new Map(),
+        activeBurnMetrics: new Set(),
+      },
+      visible: false,
+      matchingCount: 0,
+    });
 
     try {
-      const datasourceUid = this.getDatasourceUid();
       const metricsSorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
       const signals = await metricsSorter.getSloMetricSignals(datasourceUid);
       if (generation !== this.loadGeneration) {
@@ -109,17 +120,16 @@ export class SloTrackedChip extends SceneObjectBase<SloTrackedChipState> {
       }
 
       if (signals.status !== 'ready') {
+        const shouldClearFilter = wasActive || this.state.active;
         this.setState({ signals, visible: false, active: false });
+        if (shouldClearFilter) {
+          this.publishFilterEvent(false);
+        }
         return;
       }
 
       this.setState({ signals, visible: true });
-      const matchingCount = this.updateMatchingCount();
-      if (this.state.active && matchingCount === 0) {
-        this.setState({ active: false });
-        this.publishFilterEvent(false);
-        return;
-      }
+      this.updateMatchingCount();
       if (this.state.active) {
         this.publishFilterEvent(true);
       }
@@ -127,7 +137,20 @@ export class SloTrackedChip extends SceneObjectBase<SloTrackedChipState> {
       if (generation !== this.loadGeneration) {
         return;
       }
-      this.setState({ signals: INITIAL_SIGNALS, visible: false, active: false });
+      const shouldClearFilter = wasActive || this.state.active;
+      this.setState({
+        signals: {
+          datasourceUid,
+          status: 'error',
+          trackedMetrics: new Map(),
+          activeBurnMetrics: new Set(),
+        },
+        visible: false,
+        active: false,
+      });
+      if (shouldClearFilter) {
+        this.publishFilterEvent(false);
+      }
     }
   }
 
@@ -136,9 +159,12 @@ export class SloTrackedChip extends SceneObjectBase<SloTrackedChipState> {
   }
 
   private updateMatchingCount(): number | undefined {
-    if (this.state.signals.status !== 'ready' || this.state.signals.trackedMetrics.size === 0) {
+    if (this.state.signals.status !== 'ready') {
       this.setState({ matchingCount: 0 });
-      return 0;
+      return undefined;
+    }
+    if (this.state.signals.trackedMetrics.size === 0) {
+      return this.setMatchingCount(0);
     }
 
     try {
@@ -160,12 +186,20 @@ export class SloTrackedChip extends SceneObjectBase<SloTrackedChipState> {
       const count = optionsForCounting.filter((option) =>
         this.state.signals.trackedMetrics.has(option.value as string)
       ).length;
-      this.setState({ matchingCount: count });
-      return count;
+      return this.setMatchingCount(count);
     } catch {
       this.setState({ matchingCount: 0 });
       return undefined;
     }
+  }
+
+  private setMatchingCount(count: number): number {
+    this.setState({ matchingCount: count });
+    if (count === 0 && this.state.active) {
+      this.setState({ active: false });
+      this.publishFilterEvent(false);
+    }
+    return count;
   }
 
   private publishFilterEvent(active: boolean) {

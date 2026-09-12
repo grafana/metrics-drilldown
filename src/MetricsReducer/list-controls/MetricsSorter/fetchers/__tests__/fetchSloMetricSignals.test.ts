@@ -21,6 +21,7 @@ function setup(slos: unknown[] = []) {
   const get = jest.fn().mockResolvedValue({ slos });
   (getBackendSrv as jest.Mock).mockReturnValue({ get });
   const fetchFiringSignals = jest.fn().mockResolvedValue({
+    status: 'ready',
     metricCounts: new Map(),
     firingSloUuids: new Map(),
     ruleCount: 0,
@@ -197,6 +198,7 @@ describe('fetchSloMetricSignals', () => {
       definition('slo-2', { type: 'freeform', freeform: { query: 'healthy_metric' } }),
     ]);
     fetchFiringSignals.mockResolvedValue({
+      status: 'ready',
       metricCounts: new Map(),
       firingSloUuids: new Map([
         ['slo-1', new Set(['critical'])],
@@ -222,6 +224,34 @@ describe('fetchSloMetricSignals', () => {
     const emptyResult = await fetchSloMetricSignals('prom-a', empty.fetchFiringSignals);
     expect(emptyResult.status).toBe('ready');
     expect(emptyResult.trackedMetrics.size).toBe(0);
+  });
+
+  it.each([{}, null, { slos: {} }])(
+    'returns an error for malformed successful resource response %# instead of treating it as ready-empty',
+    async (response) => {
+      const { get, fetchFiringSignals } = setup();
+      get.mockResolvedValue(response);
+
+      const result = await fetchSloMetricSignals('prom-a', fetchFiringSignals);
+
+      expect(result).toMatchObject({ status: 'error', datasourceUid: 'prom-a' });
+      expect(logger.error).toHaveBeenCalled();
+    }
+  );
+
+  it('returns a retryable error when active-burn signal acquisition fails', async () => {
+    const { fetchFiringSignals } = setup([definition('slo-1', { type: 'freeform', freeform: { query: 'up' } })]);
+    fetchFiringSignals.mockResolvedValue({
+      status: 'error',
+      metricCounts: new Map(),
+      firingSloUuids: new Map(),
+      ruleCount: 0,
+    });
+
+    const result = await fetchSloMetricSignals('prom-a', fetchFiringSignals);
+
+    expect(result).toMatchObject({ status: 'error', datasourceUid: 'prom-a' });
+    expect(result.trackedMetrics.size).toBe(0);
   });
 
   it('returns an explicit retryable error state and non-sensitive telemetry when the resource request fails', async () => {

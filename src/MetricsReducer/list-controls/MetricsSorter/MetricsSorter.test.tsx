@@ -1,6 +1,7 @@
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
+import { fetchFiringAlertRuleSignals } from './fetchers/fetchFiringAlertMetrics';
 import { fetchSloMetricSignals, type SloMetricSignals } from './fetchers/fetchSloMetricSignals';
 import { addRecentMetric, getRecentMetrics, MetricsSorter, sortMetricsWithRecentFirst } from './MetricsSorter';
 
@@ -12,6 +13,9 @@ jest.mock('./fetchers/fetchFiringAlertMetrics', () => ({
   fetchFiringAlertRuleSignals: jest.fn(),
 }));
 
+const mockFetchFiringAlertRuleSignals = fetchFiringAlertRuleSignals as jest.MockedFunction<
+  typeof fetchFiringAlertRuleSignals
+>;
 const mockFetchSloMetricSignals = fetchSloMetricSignals as jest.MockedFunction<typeof fetchSloMetricSignals>;
 
 function sloResult(datasourceUid: string, status: SloMetricSignals['status'] = 'ready'): SloMetricSignals {
@@ -27,6 +31,30 @@ describe('MetricsSorter', () => {
   beforeEach(() => {
     userStorage.clear();
     jest.clearAllMocks();
+  });
+
+  describe('firing alert signal cache', () => {
+    it('does not cache acquisition errors so later consumers can retry', async () => {
+      mockFetchFiringAlertRuleSignals
+        .mockResolvedValueOnce({
+          status: 'error',
+          metricCounts: new Map(),
+          firingSloUuids: new Map(),
+          ruleCount: 0,
+        })
+        .mockResolvedValueOnce({
+          status: 'ready',
+          metricCounts: new Map([['up', 1]]),
+          firingSloUuids: new Map(),
+          ruleCount: 1,
+        });
+      const sorter = new MetricsSorter({});
+
+      await expect(sorter.getFiringAlertSignals()).resolves.toMatchObject({ status: 'error' });
+      await expect(sorter.getFiringAlertSignals()).resolves.toMatchObject({ status: 'ready' });
+
+      expect(mockFetchFiringAlertRuleSignals).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('SLO signal cache', () => {
@@ -46,16 +74,24 @@ describe('MetricsSorter', () => {
       expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(1);
     });
 
-    it('does not cache error results so the same datasource can retry', async () => {
+    it('rate-limits error retries while allowing the same datasource to recover', async () => {
+      jest.useFakeTimers().setSystemTime(1_000);
       mockFetchSloMetricSignals
         .mockResolvedValueOnce(sloResult('prom-a', 'error'))
         .mockResolvedValueOnce(sloResult('prom-a'));
       const sorter = new MetricsSorter({});
 
-      await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'error' });
-      await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'ready' });
+      try {
+        await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'error' });
+        await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'error' });
+        expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(1);
 
-      expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(2);
+        jest.advanceTimersByTime(5_000);
+        await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'ready' });
+        expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('clears an unexpected rejected promise so the same datasource can retry', async () => {

@@ -111,6 +111,8 @@ const sortByOptions: VariableValueOption[] = getSortByOptions();
 
 export const VAR_WINGMAN_SORT_BY = 'metrics-reducer-sort-by';
 
+const SLO_SIGNAL_ERROR_RETRY_DELAY_MS = 5_000;
+
 export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   initialized = false;
   supportedSortByOptions = new Set<SortingOption>([
@@ -131,7 +133,12 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   };
   private sloSignalCache = new Map<
     string,
-    { data: SloMetricSignals | null; promise: Promise<SloMetricSignals> | null }
+    {
+      data: SloMetricSignals | null;
+      error: SloMetricSignals | null;
+      promise: Promise<SloMetricSignals> | null;
+      retryAfter: number;
+    }
   >();
 
   constructor(state: Partial<MetricsSorterState>) {
@@ -210,12 +217,18 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     if (this.firingAlertCache.promise) {
       return this.firingAlertCache.promise;
     }
-    this.firingAlertCache.promise = fetchFiringAlertRuleSignals().then((data) => {
-      this.firingAlertCache.data = data;
-      this.firingAlertCache.promise = null;
-      return data;
-    });
-    return this.firingAlertCache.promise;
+    const promise = fetchFiringAlertRuleSignals()
+      .then((data) => {
+        if (data.status === 'ready') {
+          this.firingAlertCache.data = data;
+        }
+        return data;
+      })
+      .finally(() => {
+        this.firingAlertCache.promise = null;
+      });
+    this.firingAlertCache.promise = promise;
+    return promise;
   }
 
   public getFiringAlertCounts(): Promise<Map<string, number>> {
@@ -238,12 +251,20 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     if (cached?.promise) {
       return cached.promise;
     }
+    if (cached?.error && Date.now() < cached.retryAfter) {
+      return Promise.resolve(cached.error);
+    }
 
-    const entry = cached ?? { data: null, promise: null };
+    const entry = cached ?? { data: null, error: null, promise: null, retryAfter: 0 };
     const promise = fetchSloMetricSignals(datasourceUid, () => this.getFiringAlertSignals())
       .then((result) => {
-        if (result.status !== 'error') {
+        if (result.status === 'error') {
+          entry.error = result;
+          entry.retryAfter = Date.now() + SLO_SIGNAL_ERROR_RETRY_DELAY_MS;
+        } else {
           entry.data = result;
+          entry.error = null;
+          entry.retryAfter = 0;
         }
         return result;
       })

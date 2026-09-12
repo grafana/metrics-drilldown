@@ -16,6 +16,7 @@ import React from 'react';
 
 import { LoadQueryScene } from 'shared/savedQueries/LoadQueryScene';
 import { SaveQueryButton } from 'shared/savedQueries/SaveQueryButton';
+import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { NULL_GROUP_BY_VALUE } from './labels/LabelsDataSource';
@@ -167,7 +168,12 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
       try {
         const sloTrackedChip = sceneGraph.findByKeyAndType(this, 'slo-tracked-chip', SloTrackedChip);
-        if (sloTrackedChip.state.active && sloTrackedChip.state.signals.status === 'ready') {
+        const datasourceUid = sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue()?.toString() ?? '';
+        if (
+          sloTrackedChip.state.active &&
+          sloTrackedChip.state.signals.status === 'ready' &&
+          sloTrackedChip.state.signals.datasourceUid === datasourceUid
+        ) {
           filters.sloTrackedMetrics = [...sloTrackedChip.state.signals.trackedMetrics.keys()];
         }
       } catch {

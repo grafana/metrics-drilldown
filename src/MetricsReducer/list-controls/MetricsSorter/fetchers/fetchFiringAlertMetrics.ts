@@ -42,6 +42,7 @@ interface Rule {
 }
 
 export interface FiringAlertRuleSignals {
+  status: 'ready' | 'error';
   metricCounts: Map<string, number>;
   /** SLO UUID → severities found on currently firing rules. */
   firingSloUuids: Map<string, Set<string>>;
@@ -91,7 +92,7 @@ export async function fetchFiringAlertRuleSignals(): Promise<FiringAlertRuleSign
         'Failed to fetch firing alert rules from Prometheus ruler endpoint'
       ),
     });
-    return { metricCounts: new Map(), firingSloUuids: new Map(), ruleCount: 0 };
+    return { status: 'error', metricCounts: new Map(), firingSloUuids: new Map(), ruleCount: 0 };
   }
 }
 
@@ -107,7 +108,7 @@ function parseFiringRules(response: RulerRulesResponse): FiringAlertRuleSignals 
 
   const groups = response?.data?.groups;
   if (!Array.isArray(groups)) {
-    return { metricCounts, firingSloUuids, ruleCount };
+    return { status: 'ready', metricCounts, firingSloUuids, ruleCount };
   }
 
   for (const group of groups) {
@@ -124,14 +125,16 @@ function parseFiringRules(response: RulerRulesResponse): FiringAlertRuleSignals 
     ruleCount += alertingRulesWithQueries.length;
 
     for (const rule of alertingRules) {
-      retainSloLabels(rule, firingSloUuids);
+      if (rule.state === 'firing') {
+        retainSloLabels(rule, firingSloUuids);
+      }
     }
     for (const rule of alertingRulesWithQueries) {
       countMetricsFromRule(rule, metricCounts);
     }
   }
 
-  return { metricCounts, firingSloUuids, ruleCount };
+  return { status: 'ready', metricCounts, firingSloUuids, ruleCount };
 }
 
 function retainSloLabels(rule: Rule, firingSloUuids: Map<string, Set<string>>): void {
