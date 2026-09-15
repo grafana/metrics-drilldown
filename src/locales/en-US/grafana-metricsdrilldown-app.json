@@ -144,6 +144,10 @@
   "fetch-firing-alert-metrics": {
     "error": "Failed to fetch firing alert rules from Prometheus ruler endpoint"
   },
+  "fetch-slo-metric-signals": {
+    "error": "Failed to fetch SLO definitions",
+    "parse-error": "Failed to extract a metric name from an SLO definition"
+  },
   "filtered-metrics-variable": {
     "label": "Filtered Metrics"
   },
@@ -430,6 +434,17 @@
       "suffix-filters": "Suffix filters",
       "suffix-filters-description": "Filter metrics based on their name suffix"
     }
+  },
+  "slo-tracked-badge": {
+    "tooltip_one": "{{count}} SLO definition references this metric",
+    "tooltip_other": "{{count}} SLO definitions reference this metric"
+  },
+  "slo-tracked-chip": {
+    "aria-label-active": "Remove SLO-tracked filter",
+    "aria-label-inactive": "Filter by SLO-tracked metrics",
+    "label_one": "SLO-tracked ({{count}})",
+    "label_other": "SLO-tracked ({{count}})",
+    "tooltip-empty": "No SLO-tracked metrics in the current filtered set"
   },
   "sort-by": {
     "label": "Sort by",
