@@ -16,6 +16,22 @@ interface TrailProps {
   trail: DataTrail;
 }
 
+export function renderTrailPage(
+  embedded: boolean | undefined,
+  pageNav: NavModelItem | undefined,
+  children: React.ReactNode
+): React.ReactElement {
+  if (embedded) {
+    return <>{children}</>;
+  }
+
+  return (
+    <PluginPage pageNav={pageNav} layout={PageLayoutType.Custom}>
+      {children}
+    </PluginPage>
+  );
+}
+
 /**
  * Generates the page navigation breadcrumb based on the current scene state
  * @param topScene - The current top-level scene (MetricScene or MetricsReducer)
@@ -98,18 +114,18 @@ export default function Trail({ trail }: Readonly<TrailProps>) {
     [topScene, metric, currentActionViewName]
   );
 
-  return (
-    <PluginPage pageNav={pageNav} layout={PageLayoutType.Custom}>
-      <UrlSyncContextProvider
-        scene={trail}
-        createBrowserHistorySteps={true}
-        updateUrlOnInit={true}
-        namespace={trail.state.urlNamespace}
-      >
-        <TrailErrorBoundary>
-          <trail.Component model={trail} />
-        </TrailErrorBoundary>
-      </UrlSyncContextProvider>
-    </PluginPage>
+  const trailContent = (
+    <UrlSyncContextProvider
+      scene={trail}
+      createBrowserHistorySteps={true}
+      updateUrlOnInit={true}
+      namespace={trail.state.urlNamespace}
+    >
+      <TrailErrorBoundary>
+        <trail.Component model={trail} />
+      </TrailErrorBoundary>
+    </UrlSyncContextProvider>
   );
+
+  return renderTrailPage(trail.state.embedded, pageNav, trailContent);
 }
