@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React, { act } from 'react';
-import { MemoryRouter, useNavigate } from 'react-router';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 
 import { TrailErrorBoundary } from './TrailErrorBoundary';
 import { logger } from '../shared/logger/logger';

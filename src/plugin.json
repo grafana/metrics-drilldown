@@ -90,7 +90,7 @@
           "grafana/alerting/alertingrule/queryeditor",
           "grafana-assistant-app/navigateToDrilldown/v1"
         ],
-        "title": "Open in Grafana Metrics Drilldown",
+        "title": "Open in Metrics Drilldown",
         "description": "Open current query in the Grafana Metrics Drilldown view"
       },
       {

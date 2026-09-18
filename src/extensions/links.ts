@@ -15,7 +15,7 @@ import { ROUTES } from 'shared/constants/routes';
 import { parseMatcher } from './parseMatcher';
 import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../shared/utils/utils.promql';
 
-const PRODUCT_NAME = 'Grafana Metrics Drilldown';
+const PRODUCT_NAME = 'Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
 const description = `Open current query in the ${PRODUCT_NAME} view`;
 const icon = 'gf-prometheus';
