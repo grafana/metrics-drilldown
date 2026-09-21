@@ -40,6 +40,7 @@ interface MetricSceneState extends SceneObjectState {
   // binary-ratio label datasource (operand-intersection) instead of single-metric label_names.
   binaryQuery?: string;
   actionView?: ActionViewType;
+  relatedMetricsCount?: number;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
   queryResultsComponent?: React.ComponentType<PrometheusQueryResultsV1Props>;

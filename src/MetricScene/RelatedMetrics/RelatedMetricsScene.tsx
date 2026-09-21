@@ -34,6 +34,7 @@ import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { RelatedListControls } from './RelatedListControls';
 import { actionViews } from '../../MetricScene/MetricActionBar';
+import { MetricScene } from '../../MetricScene/MetricScene';
 import { getTrailFor } from '../../shared/utils/utils';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
@@ -69,6 +70,23 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
 
   private subscribeToEvents(metricsVariable: MetricsVariable) {
     this.initVariablesFilteringAndSorting();
+
+    const filteredMetricsVariable = sceneGraph.findByKeyAndType(
+      this,
+      VAR_FILTERED_METRICS_VARIABLE,
+      FilteredMetricsVariable
+    );
+
+    const updateMetricCount = () => {
+      if (!filteredMetricsVariable.state.loading) {
+        sceneGraph.getAncestor(this, MetricScene).setState({
+          relatedMetricsCount: filteredMetricsVariable.state.options.length,
+        });
+      }
+    };
+
+    updateMetricCount();
+    this._subs.add(filteredMetricsVariable.subscribeToState(updateMetricCount));
 
     // Wait for metrics to load, then signal when queries complete
     const sub = metricsVariable.subscribeToState((state) => {
