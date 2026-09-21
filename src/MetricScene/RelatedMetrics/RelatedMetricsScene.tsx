@@ -38,6 +38,10 @@ import { MetricScene } from '../../MetricScene/MetricScene';
 import { getTrailFor } from '../../shared/utils/utils';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
 
+export function getRelatedMetricsCount(loading: boolean, options: unknown[]): number | undefined {
+  return loading ? undefined : options.length;
+}
+
 interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;
   body: MetricsList;
@@ -78,10 +82,13 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
     );
 
     const updateMetricCount = () => {
-      if (!filteredMetricsVariable.state.loading) {
-        sceneGraph.getAncestor(this, MetricScene).setState({
-          relatedMetricsCount: filteredMetricsVariable.state.options.length,
-        });
+      const relatedMetricsCount = getRelatedMetricsCount(
+        Boolean(filteredMetricsVariable.state.loading),
+        filteredMetricsVariable.state.options
+      );
+
+      if (relatedMetricsCount !== undefined) {
+        sceneGraph.getAncestor(this, MetricScene).setState({ relatedMetricsCount });
       }
     };
 
