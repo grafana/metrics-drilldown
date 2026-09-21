@@ -219,7 +219,8 @@
     "search-aria-label": "Quick search metrics"
   },
   "metric-graph": {
-    "explore-attributes": "Histogram analysis"
+    "explore-attributes": "Histogram analysis",
+    "open-drilldown": "Open Metrics Drilldown for {{metric}}"
   },
   "metrics": {
     "metrics-drilldown": {
@@ -325,6 +326,9 @@
       "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Report an issue"
     }
+  },
+  "plugin-logo": {
+    "alt": "Metrics Drilldown logo"
   },
   "prefix-filter": {
     "all-metrics": "All metric names",
