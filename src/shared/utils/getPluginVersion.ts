@@ -18,6 +18,8 @@ export async function getPluginVersion(pluginId = PLUGIN_ID): Promise<string | n
     return versionCache.get(pluginId) ?? null;
   }
 
+  // TODO(2026-10-18): grafanaDependency is now >=13.1.0, so getAppPluginVersion is always available.
+  // Remove this try/catch and the config.apps fallback below; call runtime.getAppPluginVersion directly.
   try {
     const runtime = await import('@grafana/runtime');
 
