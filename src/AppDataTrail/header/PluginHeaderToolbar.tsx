@@ -26,12 +26,7 @@ export function PluginHeaderToolbar({ kgAnnotationToggle }: Readonly<PluginHeade
 function QueryOptionsButton({ kgAnnotationToggle }: Readonly<{ kgAnnotationToggle?: KgAnnotationToggle }>) {
   if (!kgAnnotationToggle) {
     return (
-      <QueryOptionsMenu
-        isEnabled={false}
-        insightsAvailable={false}
-        hasLayers={false}
-        onToggleEnabled={undefined}
-      />
+      <QueryOptionsMenu isEnabled={false} insightsAvailable={false} hasLayers={false} onToggleEnabled={undefined} />
     );
   }
 
@@ -74,7 +69,12 @@ function getInsightsTooltip(insightsAvailable: boolean, hasLayers: boolean, desc
   );
 }
 
-function QueryOptionsMenu({ isEnabled, insightsAvailable, hasLayers, onToggleEnabled }: Readonly<QueryOptionsMenuProps>) {
+function QueryOptionsMenu({
+  isEnabled,
+  insightsAvailable,
+  hasLayers,
+  onToggleEnabled,
+}: Readonly<QueryOptionsMenuProps>) {
   const styles = useStyles2(getQueryOptionsStyles);
 
   const description = t(
@@ -135,7 +135,7 @@ function getToolbarStyles(theme: GrafanaTheme2) {
       boxSizing: 'border-box',
       border: `1px solid ${theme.colors.border.weak}`,
       backgroundColor: theme.colors.background.secondary,
-      borderRadius: theme.shape.radius.sm,
+      borderRadius: theme.shape.radius.md,
       overflow: 'hidden',
 
       button: {
