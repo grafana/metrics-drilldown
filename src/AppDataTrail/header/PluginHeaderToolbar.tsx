@@ -135,7 +135,7 @@ function getToolbarStyles(theme: GrafanaTheme2) {
       boxSizing: 'border-box',
       border: `1px solid ${theme.colors.border.weak}`,
       backgroundColor: theme.colors.background.secondary,
-      borderRadius: theme.shape.radius.default,
+      borderRadius: theme.shape.radius.sm,
       overflow: 'hidden',
 
       button: {
@@ -167,7 +167,7 @@ function getQueryOptionsStyles(theme: GrafanaTheme2) {
     queryOptionsPopover: css({
       background: theme.colors.background.primary,
       border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: theme.shape.radius.default,
+      borderRadius: theme.shape.radius.lg,
       boxShadow: theme.shadows.z3,
       display: 'flex',
       flexDirection: 'column',

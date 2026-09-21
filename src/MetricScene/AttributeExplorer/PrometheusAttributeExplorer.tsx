@@ -756,7 +756,7 @@ function getHeaderStyles(theme: GrafanaTheme2) {
     queryLimit: css({
       backgroundColor: theme.colors.background.primary,
       border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: theme.shape.radius.default,
+      borderRadius: theme.shape.radius.md,
       color: theme.colors.text.secondary,
       fontSize: theme.typography.bodySmall.fontSize,
       padding: theme.spacing(0.5, 1),

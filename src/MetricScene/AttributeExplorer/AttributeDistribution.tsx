@@ -848,20 +848,20 @@ const getStyles = (theme: GrafanaTheme2) => ({
   bar: css({
     // background supplied via inline style (per-value color)
     opacity: 0.65,
-    borderRadius: theme.shape.radius.default,
+    borderRadius: theme.shape.radius.sm,
     height: '100%',
     transition: 'width 0.3s ease',
   }),
   barWrapper: css({
     background: colorManipulator.alpha(theme.colors.text.primary, 0.08),
-    borderRadius: theme.shape.radius.default,
+    borderRadius: theme.shape.radius.sm,
     height: '4px',
     overflow: 'hidden',
     width: '100%',
   }),
   container: css({
     backgroundColor: theme.colors.background.primary,
-    borderRadius: theme.shape.radius.default,
+    borderRadius: theme.shape.radius.lg,
     border: `1px solid ${theme.colors.border.weak}`,
     display: 'flex',
     flexDirection: 'column',
@@ -920,7 +920,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
   queryLimit: css({
     backgroundColor: theme.colors.background.primary,
     border: `1px solid ${theme.colors.border.weak}`,
-    borderRadius: theme.shape.radius.default,
+    borderRadius: theme.shape.radius.md,
     color: theme.colors.text.secondary,
     fontSize: theme.typography.bodySmall.fontSize,
     padding: theme.spacing(0.5, 1),
@@ -1032,7 +1032,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     alignItems: 'center',
     background: 'none',
     border: `1px solid ${theme.colors.border.medium}`,
-    borderRadius: theme.shape.radius.default,
+    borderRadius: theme.shape.radius.sm,
     color: theme.colors.text.secondary,
     cursor: 'pointer',
     display: 'flex',
@@ -1079,7 +1079,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
   valueRow: css({
     background: 'none',
     border: 'none',
-    borderRadius: theme.shape.radius.default,
+    borderRadius: theme.shape.radius.sm,
     color: theme.colors.text.primary,
     cursor: 'pointer',
     display: 'flex',
