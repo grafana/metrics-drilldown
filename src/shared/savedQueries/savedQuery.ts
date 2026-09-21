@@ -7,6 +7,8 @@ import { narrowSavedQueries } from './narrowSavedQuery';
 import pluginJson from '../../plugin.json';
 import { logger } from '../logger/logger';
 
+// TODO(2026-10-18): grafanaDependency is now >=13.1.0, so the version check in isQueryLibrarySupported below
+// is always true. Remove MIN_VERSION and the compare() call; keep only the featureToggles.queryLibrary check.
 const MIN_VERSION = '12.4.0-21256324731';
 
 const savedQueryListeners = new Set<() => void>();
