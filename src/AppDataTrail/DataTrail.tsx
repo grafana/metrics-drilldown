@@ -670,7 +670,7 @@ function getStyles(theme: GrafanaTheme2, headerHeight: number, embedded?: boolea
       flexGrow: 1,
       padding: theme.spacing(1, 2),
       position: 'relative',
-      background,
+      background: embedded ? background : undefined,
     }),
     body: css({
       flexGrow: 1,
@@ -708,8 +708,8 @@ function isScopesSupported(): boolean {
   return Boolean(
     config.featureToggles.scopeFilters &&
     config.featureToggles.enableScopesInMetricsExplore &&
-    // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
-    // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
+    // Scopes support in Grafana appears to begin with Grafana 12.0.0.
+    // TODO(2026-10-18): grafanaDependency is now >=13.1.0, so this is always true. Remove.
     !config.buildInfo.version.startsWith('11.')
   );
 }

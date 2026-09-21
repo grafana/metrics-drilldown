@@ -4,7 +4,7 @@
   "name": "Grafana Metrics Drilldown",
   "id": "grafana-metricsdrilldown-app",
   "dependencies": {
-    "grafanaDependency": ">=11.6.11-0 <12 || >=12.0.10-0 <12.1 || >=12.1.7-0 <12.2 || >=12.2.5-0",
+    "grafanaDependency": ">=13.1.0",
     "plugins": [],
     "extensions": {
       "exposedComponents": [
@@ -90,7 +90,7 @@
           "grafana/alerting/alertingrule/queryeditor",
           "grafana-assistant-app/navigateToDrilldown/v1"
         ],
-        "title": "Open in Grafana Metrics Drilldown",
+        "title": "Open in Metrics Drilldown",
         "description": "Open current query in the Grafana Metrics Drilldown view"
       },
       {

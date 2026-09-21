@@ -1,5 +1,5 @@
 import { type PromQuery } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
 import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type SceneTimeRange } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -53,7 +53,7 @@ describe('LoadQueryScene', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
     jest.mocked(getDataSourceSrv).mockReturnValue({
       getInstanceSettings: () => ({ name: 'Test Datasource' }),
     } as any);

@@ -2,13 +2,54 @@
   "action-bar": {
     "tab": {
       "breakdown": "Kırılım",
-      "query-results": "Sorgu Sonuçları",
+      "query-results": "",
       "query-results-description": "Tablo biçiminde anlık sorgu verileri",
       "related-logs": "İlgili günlük kayıtları",
       "related-logs-description": "Geçerli etiket filtrelerine ve zaman aralığına göre ilgili günlük kayıtları",
       "related-metrics": "İlgili metrikler",
       "related-metrics-description": "Geçerli etiket filtrelerine göre ilgili metrikler"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_one": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_one": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -78,6 +119,12 @@
     "message": "Lütfen <2>sayfayı yeniden yüklemeyi deneyin</2> veya sorun devam ederse kuruluş yöneticinizle iletişime geçin. Verdiğimiz rahatsızlıktan dolayı özür dileriz.",
     "stack-trace-label": "Yığın izlemesini göster",
     "title": "Önemli hata!"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -171,6 +218,9 @@
   "list-controls": {
     "search-aria-label": "Metrikleri hızlıca arayın"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -239,8 +289,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Daha fazla bilgi edinmek için <2>belgelerimize</2> göz atın veya Grafana Play'de<5></5><6>çevrim içi olarak deneyin</6>!",
-    "no-datasource": "Yapılandırılmış bir Prometheus veri kaynağı olmadığını fark ettik.<1></1>Metrikleri görüntülemek için bir <4>Prometheus veri kaynağı</4> ekleyin.",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Grafana Metrics Drilldown'a hoş geldiniz"
   },
   "open-assistant": {
@@ -340,7 +390,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Oluşturulma tarihi:",
-      "empty-state": "<1></1>Geçerli veri kaynağı için henüz yer imi yok.",
+      "empty-state": "",
       "remove-tooltip": "Yer imini kaldır"
     },
     "close-aria-label": "Kapat",

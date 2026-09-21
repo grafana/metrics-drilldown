@@ -2,13 +2,54 @@
   "action-bar": {
     "tab": {
       "breakdown": "Répartition",
-      "query-results": "Résultats de la requête",
+      "query-results": "",
       "query-results-description": "Données de la requête instantanée au format tableau",
       "related-logs": "Journaux associés",
       "related-logs-description": "Journaux correspondant aux filtres d’étiquettes et à la plage temporelle actuels",
       "related-metrics": "Métriques associées",
       "related-metrics-description": "Métriques correspondant aux filtres d’étiquettes actuels"
     }
+  },
+  "attribute-explorer": {
+    "badge-metric": "",
+    "badge-resource": "",
+    "close-aria-label": "",
+    "close-tooltip": "",
+    "collapse": "",
+    "collapse-extra-fields": "",
+    "description": "",
+    "description-aria-label": "",
+    "description-histogram": "",
+    "detection-error": "",
+    "discovering-fields": "",
+    "error": "",
+    "expand": "",
+    "field-input-placeholder": "",
+    "field-link-label": "",
+    "filter-for-value": "",
+    "filter-out-value": "",
+    "histogram-range-between": "",
+    "histogram-range-over": "",
+    "histogram-range-under": "",
+    "invalid-range": "",
+    "lower-limit": "",
+    "lower-limit-placeholder": "",
+    "lower-limit-unit": "",
+    "no-extra-fields-shown": "",
+    "no-fields-detected": "",
+    "no-more-fields": "",
+    "no-values-found": "",
+    "title": "",
+    "too-many-values": "",
+    "unit-unknown": "",
+    "upper-limit": "",
+    "upper-limit-placeholder": "",
+    "upper-limit-unit": "",
+    "value-tooltip-histogram-no-activity": "",
+    "show-more-fields_one": "",
+    "show-more-fields_other": "",
+    "value-tooltip-histogram_one": "",
+    "value-tooltip-histogram_other": ""
   },
   "binary-ratio-labels-datasource": {
     "test-success": ""
@@ -78,6 +119,12 @@
     "message": "Essayez de <2>recharger la page</2> ou, si le problème persiste, contactez l’administrateur de votre organisation. Veuillez nous excuser pour la gêne occasionnée.",
     "stack-trace-label": "Afficher la trace de la stack",
     "title": "Erreur fatale !"
+  },
+  "explore-attributes-action": {
+    "label": "",
+    "tooltip": {
+      "description": ""
+    }
   },
   "exposed-component-error-boundary": {
     "message": "",
@@ -171,6 +218,9 @@
   "list-controls": {
     "search-aria-label": "Recherche rapide de métriques"
   },
+  "metric-graph": {
+    "explore-attributes": ""
+  },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
@@ -239,8 +289,8 @@
     }
   },
   "onboarding": {
-    "learn-more": "Consultez <2>notre documentation</2> pour en savoir plus ou<5></5><6>essayez en ligne</6> sur Grafana Play !",
-    "no-datasource": "Nous avons détecté qu’aucune source de données Prometheus n’est configurée.<1></1>Ajoutez une <4>source de données Prometheus</4> pour afficher les métriques.",
+    "learn-more": "",
+    "no-datasource": "",
     "title": "Bienvenue sur Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -340,7 +390,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Date de création :",
-      "empty-state": "Aucun favori pour la<1></1>source de données actuelle.",
+      "empty-state": "",
       "remove-tooltip": "Supprimer le favori"
     },
     "close-aria-label": "Fermer",
