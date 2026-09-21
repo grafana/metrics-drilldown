@@ -11,7 +11,7 @@ import {
   type SceneObjectUrlValues,
   type SceneVariable,
 } from '@grafana/scenes';
-import { Button, useStyles2 } from '@grafana/ui';
+import { Button, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_FILTERED_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
@@ -219,7 +219,15 @@ export class SloTrackedChip extends SceneObjectBase<SloTrackedChipState> {
 
   public static readonly Component = ({ model }: SceneComponentProps<SloTrackedChip>) => {
     const styles = useStyles2(getStyles);
-    const { active, matchingCount, visible } = model.useState();
+    const { active, matchingCount, signals, visible } = model.useState();
+
+    if (signals.status === 'loading') {
+      return (
+        <div className={styles.chipContainer}>
+          <Spinner inline />
+        </div>
+      );
+    }
 
     if (!visible) {
       return null;
@@ -253,6 +261,11 @@ export class SloTrackedChip extends SceneObjectBase<SloTrackedChipState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
+    chipContainer: css({
+      display: 'flex',
+      alignItems: 'center',
+      padding: theme.spacing(0, 0.5),
+    }),
     chip: css({ whiteSpace: 'nowrap', alignSelf: 'center' }),
     chipActive: css({ fontWeight: theme.typography.fontWeightMedium }),
     chipEmpty: css({ opacity: 0.5 }),

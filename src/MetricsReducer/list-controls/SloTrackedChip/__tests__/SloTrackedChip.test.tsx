@@ -106,6 +106,28 @@ describe('SloTrackedChip', () => {
     });
   });
 
+  it('shows a spinner while SLO signals are loading', async () => {
+    let resolveSignals!: (value: SloMetricSignals) => void;
+    setup(signals('ready'));
+    mockFindByKeyAndType.mockReturnValue({
+      getSloMetricSignals: jest
+        .fn()
+        .mockReturnValue(new Promise<SloMetricSignals>((resolve) => (resolveSignals = resolve))),
+    });
+    const chip = new SloTrackedChip();
+    let load!: Promise<void>;
+
+    act(() => {
+      load = (chip as unknown as { loadSignals: () => Promise<void> }).loadSignals();
+    });
+    render(<SloTrackedChip.Component model={chip} />);
+
+    expect(screen.getByTestId('Spinner')).toBeInTheDocument();
+
+    resolveSignals(signals('ready'));
+    await act(async () => load);
+  });
+
   it.each(['disabled', 'plugin-absent', 'error'] as const)('hides and clears stale state for %s', async (status) => {
     setup(signals(status));
     const chip = new SloTrackedChip();
