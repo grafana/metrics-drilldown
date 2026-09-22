@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { type PromQuery } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
+// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
 import { getAppEvents, getDataSourceSrv, locationService, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { ToolbarButton, useStyles2 } from '@grafana/ui';
@@ -44,7 +44,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     const uid = dsVar.getValue().toString();
     this.setState({
       dsUid: uid,
-      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
       dsName: getDataSourceSrv().getInstanceSettings(uid)?.name ?? '',
     });
 
@@ -53,7 +53,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
         const uid = newState.value.toString();
         this.setState({
           dsUid: uid,
-          // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation
+          // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
           dsName: getDataSourceSrv().getInstanceSettings(uid)?.name ?? '',
         });
       })
