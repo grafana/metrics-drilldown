@@ -1,10 +1,13 @@
-import { type AdHocVariableFilter, type DataSourceApi } from '@grafana/data';
+import { css } from '@emotion/css';
+import { type AdHocVariableFilter, type DataSourceApi, type GrafanaTheme2 } from '@grafana/data';
+import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
 import { Trail } from 'App/Routes';
 import { type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { newMetricsTrail } from 'shared/utils/utils';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
@@ -25,6 +28,7 @@ const EntityMetrics = ({
   entityType,
   entityName,
 }: EntityMetricsProps) => {
+  const styles = useStyles2(getStyles);
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -63,10 +67,22 @@ const EntityMetrics = ({
   });
 
   return (
-    <div data-testid="metrics-drilldown-embedded-entity-metrics">
+    <div data-testid="metrics-drilldown-embedded-entity-metrics" className={styles.container}>
       <Trail trail={trail} />
     </div>
   );
 };
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    container: css({
+      // Host surfaces provide their own page chrome around this component, so we self-paint the
+      // background here rather than leaving it transparent to the host's own background, which
+      // isn't guaranteed to match theme.colors.background.primary.
+      background: getAppBackgroundColor(theme, true),
+      height: '100%',
+    }),
+  };
+}
 
 export default EntityMetrics;
