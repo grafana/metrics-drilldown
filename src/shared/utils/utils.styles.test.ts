@@ -47,12 +47,16 @@ describe('getResponsiveBreakpoints', () => {
 });
 
 describe('getAppBackgroundColor', () => {
+  // page and primary are intentionally given different values: in the "Visual Refresh (Dark)" theme
+  // (flag on), they are genuinely different colors (page: #090b0f, primary: #111419) -- they are NOT
+  // interchangeable, unlike in the pre-refresh theme where they happened to match.
   const page = 'page-background';
+  const primary = 'primary-background';
   const canvas = 'canvas-background';
 
   function getColor(visualDesignRefresh: boolean | undefined, embedded?: boolean) {
     const theme = {
-      colors: { background: { page, canvas } },
+      colors: { background: { page, primary, canvas } },
       flags: { visualDesignRefresh },
     } as unknown as GrafanaTheme2;
 
@@ -60,8 +64,8 @@ describe('getAppBackgroundColor', () => {
   }
 
   it.each([
-    { embedded: true, visualDesignRefresh: true, expected: page },
-    { embedded: true, visualDesignRefresh: false, expected: page },
+    { embedded: true, visualDesignRefresh: true, expected: primary },
+    { embedded: true, visualDesignRefresh: false, expected: primary },
     { embedded: false, visualDesignRefresh: true, expected: page },
     { embedded: false, visualDesignRefresh: false, expected: canvas },
     { embedded: false, visualDesignRefresh: undefined, expected: canvas },
