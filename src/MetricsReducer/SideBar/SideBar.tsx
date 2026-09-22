@@ -476,7 +476,7 @@ function getStyles(theme: GrafanaTheme2) {
       border: `1px solid ${theme.colors.border.weak}`,
       borderLeft: 'none',
       borderRadius: theme.shape.radius.default,
-      backgroundColor: theme.colors.background.canvas,
+      backgroundColor: theme.colors.background.primary,
       padding: theme.spacing(1.5),
     }),
     closeButton: css({
