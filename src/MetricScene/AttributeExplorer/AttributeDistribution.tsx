@@ -1104,9 +1104,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
     opacity: 0.45,
   }),
   valueRowIncluded: css({
-    background: colorManipulator.alpha(theme.colors.primary.main, 0.15),
+    background: colorManipulator.alpha(theme.colors.accent.main, 0.15),
     '&:hover': {
-      background: colorManipulator.alpha(theme.colors.primary.main, 0.25),
+      background: colorManipulator.alpha(theme.colors.accent.main, 0.25),
     },
   }),
   valueRowExcluded: css({

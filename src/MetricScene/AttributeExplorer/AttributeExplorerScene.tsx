@@ -2,7 +2,7 @@
 import { css } from '@emotion/css';
 import { getDefaultTimeRange, type AdHocVariableFilter, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
-// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
+// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
 import { getDataSourceSrv, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   sceneGraph,
@@ -288,7 +288,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   }
 
   private async _fetchOtelPriority(datasourceUid: string, query: string, generation: number) {
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
     const ds = (await getDataSourceSrv().get(datasourceUid)) as unknown as PrometheusRuntimeDatasource;
     const timeRange = sceneGraph.getTimeRange(this).state.value;
     const labels = await MetricDatasourceHelper.fetchLabels({ ds, matcher: query, timeRange });

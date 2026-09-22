@@ -2,6 +2,8 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { compare } from 'compare-versions';
 
+// TODO(2026-10-18): grafanaDependency is now >=13.1.0, so this is always true. Remove supportsContainerQueries and
+// the ternary in getResponsiveBreakpoints below; always return theme.breakpoints.container.
 const CONTAINER_QUERIES_MIN_VERSION = '12.4.0';
 const supportsContainerQueries = !compare(config.buildInfo.version ?? '0.0.0', CONTAINER_QUERIES_MIN_VERSION, '<');
 

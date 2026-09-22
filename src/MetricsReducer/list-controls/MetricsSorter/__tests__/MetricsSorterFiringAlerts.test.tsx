@@ -14,7 +14,7 @@ jest.mock('shared/featureFlags/openFeature', () => ({
 }));
 
 jest.mock('../fetchers/fetchFiringAlertMetrics', () => ({
-  fetchFiringAlertMetrics: jest.fn(),
+  fetchFiringAlertRuleSignals: jest.fn(),
 }));
 
 jest.mock('@grafana/scenes', () => {
