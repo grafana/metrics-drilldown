@@ -5,24 +5,18 @@ import { type ExposedComponentName } from 'exposedComponents/components';
 import { getTrackedFlagPayload } from 'shared/featureFlags/tracking';
 import { type PanelConfigPreset } from 'shared/GmdVizPanel/config/presets/types';
 import { type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
-import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { type PanelType } from 'shared/GmdVizPanel/types/available-panel-types';
 import { type SortSeriesByOption } from 'shared/services/sorting';
 import { getPluginVersion } from 'shared/utils/getPluginVersion';
 import { type SnakeCase } from 'shared/utils/utils.types';
 
 import { type ActionViewType } from '../../MetricScene/MetricActionBar';
-import { type LayoutType } from '../../MetricsReducer/list-controls/LayoutSwitcher';
 import { type SortingOption as MetricsReducerSortByOption } from '../../MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { GIT_COMMIT } from '../../version';
 
 export type ViewName = 'metrics-reducer' | 'metric-details';
 
 type Interactions = {
-  // User selected a label to view its breakdown.
-  groupby_label_changed: {
-    label: string;
-  };
   breakdown_panel_selected: {
     label: string;
   };
@@ -32,8 +26,6 @@ type Interactions = {
     action: 'added' | 'removed' | 'changed';
     cause: 'breakdown' | 'adhoc_filter';
   };
-  // User changed the breakdown layout
-  breakdown_layout_changed: { layout: LayoutType };
   // User changed the by-label breakdown aggregation function for a histogram metric
   histogram_breakdown_fn_changed: { fn: HistogramBreakdownFn };
   // A metric exploration has started due to one of the following causes
@@ -42,14 +34,13 @@ type Interactions = {
   };
   // A user has changed a bookmark
   bookmark_changed: {
-    action: // Toggled on or off from the bookmark icon
+    action:
+      // Toggled on or off from the bookmark icon
       | 'toggled_on'
       | 'toggled_off'
       // Deleted from the sidebar bookmarks list
       | 'deleted';
   };
-  // User changes metric explore settings
-  settings_changed: { stickyMainGraph?: boolean };
   // User clicks on tab to change the action view
   metric_action_view_changed: {
     view: ActionViewType;
@@ -57,31 +48,12 @@ type Interactions = {
     // The number of related logs
     related_logs_count?: number;
   };
-  // User clicks on one of the action buttons associated with a selected metric
-  selected_metric_action_clicked: {
-    action: // Opens the metric queries in Explore
-      | 'open_in_explore'
-      // Clicks on the share URL button
-      | 'share_url'
-      // Deselects the current selected metrics by clicking the "Select new metric" button
-      | 'unselect'
-      // When in embedded mode, clicked to open the exploration from the embedded view
-      | 'open_from_embedded'
-      // Opens the metric queries in Explore from the panel menu
-      | 'panel_menu_explore';
-  };
   // User changed the Prometheus data source
   datasource_changed: {};
-  // User clicks on one of the action buttons associated with related logs
-  related_logs_action_clicked: {
-    action: // Opens Logs Drilldown
-      | 'open_logs_drilldown'
-      // Logs data source changed
-      | 'logs_data_source_changed';
-  };
   // User selects a metric
   metric_selected: {
-    from: // By clicking "Select" on a metric panel when on the no-metric-selected metrics list view
+    from:
+      // By clicking "Select" on a metric panel when on the no-metric-selected metrics list view
       | 'metric_list'
       // By clicking "Select" on a metric panel when on the related metrics tab
       | 'related_metrics';
@@ -92,19 +64,6 @@ type Interactions = {
     // Number of hierarchical child filters active
     hierarchical_filter_count?: number;
   };
-  // User opens/closes the prefix filter dropdown
-  prefix_filter_clicked: {
-    from: // By clicking "Select" on a metric panel when on the no-metric-selected metrics list view
-      | 'metric_list'
-      // By clicking "Select" on a metric panel when on the related metrics tab
-      | 'related_metrics';
-    action: // Opens the dropdown
-      | 'open'
-      // Closes the dropdown
-      | 'close';
-  };
-  // User types in the quick search bar
-  quick_search_used: {};
   sorting_changed:
     | {
         // By clicking on the sort by variable in the metrics reducer
@@ -118,14 +77,10 @@ type Interactions = {
         // The sort by option selected
         sortBy: SortSeriesByOption;
       };
-  wasm_not_supported: {};
-  native_histogram_examples_closed: {};
-  native_histogram_example_clicked: {
-    metric: string;
-  };
   // User toggles the Wingman sidebar
   metrics_sidebar_toggled: {
-    action: // Opens the sidebar section
+    action:
+      // Opens the sidebar section
       | 'opened'
       // Closes the sidebar section
       | 'closed';
@@ -133,18 +88,8 @@ type Interactions = {
   };
   // User clicks into the prefix filter section of the sidebar
   sidebar_prefix_filter_section_clicked: {};
-  // User applies any prefix filter from the sidebar
-  sidebar_prefix_filter_applied: {
-    // Number of prefix filters applied (optional)
-    filter_count?: number;
-  };
   // User clicks into the suffix filter section of the sidebar
   sidebar_suffix_filter_section_clicked: {};
-  // User applies any suffix filter from the sidebar
-  sidebar_suffix_filter_applied: {
-    // Number of suffix filters applied (optional)
-    filter_count?: number;
-  };
   // User selects a rules filter from the Wingman sidebar
   sidebar_rules_filter_selected: {
     filter_type: 'non_rules_metrics' | 'recording_rules';
@@ -153,8 +98,6 @@ type Interactions = {
   sidebar_group_by_label_filter_applied: {
     label: string;
   };
-  sidebar_recent_filter_section_clicked: {};
-  sidebar_recent_filter_selected: { interval: string };
   // User expands a parent prefix to view children (hierarchical filtering)
   sidebar_hierarchical_prefix_opened: {
     prefix: string;
@@ -172,18 +115,8 @@ type Interactions = {
   exposed_component_viewed: {
     component: SnakeCase<ExposedComponentName>;
   };
-  // User selects a different layout (grid/rows/single)
-  layout_changed: { layout: LayoutType };
   // User changes the panel type for a histogram metric (e.g., from heatmap to percentiles)
   histogram_panel_type_changed: { panelType: PanelType };
-  // App migrated some legacy user prefs (see src/UserPreferences/userStorage.ts)
-  user_preferences_migrated: {};
-  // User opens the "Configure panel"
-  configure_panel_opened: { metricType: MetricType };
-  // User applies a panel config
-  panel_config_applied: { metricType: MetricType; configId: string };
-  // User restores the default panel config
-  default_panel_config_restored: { metricType: MetricType };
   // An invalid metric config has been found
   invalid_metric_config: { metricConfig: PanelConfigPreset };
   // the user has clicked on the "Give feedback" button in the app header
@@ -239,14 +172,6 @@ type Interactions = {
   };
 };
 
-type OtherEvents = {
-  extreme_value_filter_behavior_triggered: {
-    expression: string;
-  };
-};
-
-type AllEvents = Interactions & OtherEvents;
-
 const INTERACTION_NAME_PREFIX = 'grafana_explore_metrics_';
 
 let cachedAppVersion: string | null = null;
@@ -255,13 +180,13 @@ getPluginVersion().then((v) => {
 });
 
 /** @internal Exported for unit testing. Returns the experiment-cohort enrichment for a given event/payload. */
-export function getExperimentPayloads<E extends keyof AllEvents, P extends AllEvents[E]>(
+export function getExperimentPayloads<E extends keyof Interactions, P extends Interactions[E]>(
   event: E,
   payload: P
 ): Record<string, unknown> {
   const payloads: Record<string, unknown> = {};
 
-  // Enrich all sidebar-related events (e.g., metrics_sidebar_toggled, sidebar_prefix_filter_applied)
+  // Enrich all sidebar-related events (e.g., metrics_sidebar_toggled, sidebar_rules_filter_selected)
   if (event.includes('sidebar')) {
     Object.assign(payloads, getTrackedFlagPayload('experiment_default_open_sidebar', true));
   }
@@ -301,7 +226,7 @@ export function getExperimentPayloads<E extends keyof AllEvents, P extends AllEv
   return payloads;
 }
 
-function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): P {
+function enrichPayload<E extends keyof Interactions, P extends Interactions[E]>(event: E, payload: P): P {
   return {
     ...payload,
     ...getExperimentPayloads(event, payload),
@@ -312,7 +237,10 @@ function enrichPayload<E extends keyof AllEvents, P extends AllEvents[E]>(event:
   };
 }
 
-export function reportExploreMetrics<E extends keyof AllEvents, P extends AllEvents[E]>(event: E, payload: P): void {
+export function reportExploreMetrics<E extends keyof Interactions, P extends Interactions[E]>(
+  event: E,
+  payload: P
+): void {
   reportInteraction(`${INTERACTION_NAME_PREFIX}${event}`, enrichPayload(event, payload));
 }
 
