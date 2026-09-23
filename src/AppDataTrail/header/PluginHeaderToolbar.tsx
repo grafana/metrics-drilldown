@@ -167,7 +167,7 @@ function getQueryOptionsStyles(theme: GrafanaTheme2) {
     queryOptionsPopover: css({
       background: theme.colors.background.primary,
       border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: theme.shape.radius.lg,
+      borderRadius: theme.shape.radius.md,
       boxShadow: theme.shadows.z3,
       display: 'flex',
       flexDirection: 'column',

@@ -430,7 +430,7 @@ function getStyles(theme: GrafanaTheme2) {
     buttonsBar: css({
       width: '42px',
       border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: theme.shape.radius.sm,
+      borderRadius: theme.shape.radius.lg,
       backgroundColor: theme.colors.background.primary,
       position: 'relative',
     }),
