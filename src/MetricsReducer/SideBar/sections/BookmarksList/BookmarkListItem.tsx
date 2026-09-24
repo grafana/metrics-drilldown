@@ -104,7 +104,7 @@ function getStyles(theme: GrafanaTheme2) {
       borderRight: `1px solid ${theme.colors.border.weak}`,
       borderLeft: `1px solid ${theme.colors.border.weak}`,
       borderBottom: 'none', // Remove the bottom border
-      borderRadius: '2px 2px 0 0', // Top-left and top-right corners are 2px, bottom-left and bottom-right are 0; cannot use theme.shape.radius.default because need bottom corners to be 0
+      borderRadius: `${theme.shape.radius.sm} ${theme.shape.radius.sm} 0 0`,
     }),
     cardWide: css({
       width: '100%',
@@ -118,7 +118,7 @@ function getStyles(theme: GrafanaTheme2) {
     }),
     date: css({
       border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: '0 0 2px 2px',
+      borderRadius: `0 0 ${theme.shape.radius.sm} ${theme.shape.radius.sm}`,
       padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
       backgroundColor: theme.colors.background.primary,
     }),
