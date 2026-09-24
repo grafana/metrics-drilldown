@@ -28,6 +28,7 @@ import { GroupsIcon } from 'MetricsReducer/SideBar/custom-icons/GroupsIcon';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { FiringAlertBadge } from 'shared/GmdVizPanel/components/FiringAlertBadge';
 import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
+import { SloTrackedBadge } from 'shared/GmdVizPanel/components/SloTrackedBadge';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { VAR_FILTERS } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
@@ -125,6 +126,7 @@ export class MetricsGroupByRow extends SceneObjectBase<MetricsGroupByRowState> {
                   fixedColorIndex: colorIndex,
                   headerActions: ({ metric }) => [
                     new FiringAlertBadge({ metric: metric.name }),
+                    new SloTrackedBadge({ metric: metric.name }),
                     new SelectAction({ metric: metric.name }),
                     new ConfigurePanelAction({ metric }),
                   ],
