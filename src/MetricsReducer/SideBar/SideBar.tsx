@@ -428,7 +428,7 @@ function getStyles(theme: GrafanaTheme2) {
     buttonsBar: css({
       width: '42px',
       border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: theme.shape.radius.default,
+      borderRadius: theme.shape.radius.lg,
       backgroundColor: theme.colors.background.primary,
       position: 'relative',
     }),
@@ -464,7 +464,7 @@ function getStyles(theme: GrafanaTheme2) {
         width: '8px',
         height: '8px',
         backgroundColor: theme.colors.action.selectedBorder,
-        borderRadius: '50%',
+        borderRadius: theme.shape.radius.circle,
         margin: '2px 4px 0 0',
       },
     }),
