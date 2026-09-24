@@ -198,6 +198,7 @@ function SavedQueryItem({ onSelect, query, selected }: SavedQueryItemProps) {
 const getStyles = (theme: GrafanaTheme2) => ({
   query: css({
     backgroundColor: theme.colors.background.elevated,
+    borderRadius: theme.shape.radius.lg,
     fontFamily: theme.typography.fontFamilyMonospace,
     fontSize: theme.typography.bodySmall.fontSize,
     padding: theme.spacing(1),
@@ -228,7 +229,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
 
     ':has(:focus-visible)': css({
       backgroundColor: theme.colors.action.hover,
-      outline: `2px solid ${theme.colors.primary.main}`,
+      outline: `2px solid ${theme.colors.accent.main}`,
       outlineOffset: '-2px',
     }),
   }),

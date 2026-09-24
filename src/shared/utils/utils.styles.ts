@@ -18,14 +18,16 @@ export function getResponsiveBreakpoints(theme: GrafanaTheme2) {
 
 export function getAppBackgroundColor(theme: GrafanaTheme2, embedded?: boolean): string | undefined {
   if (embedded) {
-    // Embedded consumers (e.g. RCA workbench) provide their own host page chrome, which isn't
-    // guaranteed to paint the same background Grafana's <Page> would, so we always self-paint here.
-    // Independent of the toggle: background.page and background.primary are the same token, and
-    // canvas is meaningfully darker, so this must not fall through to canvas when the toggle is off.
-    return theme.colors.background.page;
+    // Embedded consumers (e.g. RCA workbench) are drawers/panels floating on top of a page, not a
+    // page themselves -- their own chrome is built at the "content pane" level, not the "page" level.
+    // Confirmed live in the "Visual Refresh (Dark)" theme (flag on): background.page (#090b0f) and
+    // background.primary (#111419) are genuinely different colors there (unlike the pre-refresh theme,
+    // where they happened to match) -- primary is the one that actually matches the host's own chrome.
+    return theme.colors.background.primary;
   }
 
-  // Standalone app route: Grafana's own Page paints the background for us when the toggle is on.
+  // Standalone app route: our own component IS the page here (rendered via Grafana's <Page>), so it
+  // should match the page-level token, not the content-pane one.
   //@ts-expect-error
   return theme.flags.visualDesignRefresh ? theme.colors.background.page : theme.colors.background.canvas;
 }

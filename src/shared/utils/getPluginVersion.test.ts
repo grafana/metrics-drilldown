@@ -71,5 +71,27 @@ describe('getPluginVersion', () => {
       expect(first).toBe('0.9.0');
       expect(second).toBe('0.9.0');
     });
+
+    it('caches versions independently by plugin id', async () => {
+      mockGetAppPluginVersion = jest.fn().mockImplementation(async (pluginId: string) => `${pluginId}-version`);
+
+      await expect(getPluginVersion('grafana-slo-app')).resolves.toBe('grafana-slo-app-version');
+      await expect(getPluginVersion(PLUGIN_ID)).resolves.toBe(`${PLUGIN_ID}-version`);
+      await expect(getPluginVersion('grafana-slo-app')).resolves.toBe('grafana-slo-app-version');
+
+      expect(mockGetAppPluginVersion).toHaveBeenCalledTimes(2);
+    });
+
+    it('can reset one plugin without invalidating another', async () => {
+      mockGetAppPluginVersion = jest.fn().mockResolvedValueOnce('slo-v1').mockResolvedValueOnce('metrics-v1');
+
+      await getPluginVersion('grafana-slo-app');
+      await getPluginVersion(PLUGIN_ID);
+      resetPluginVersionCache('grafana-slo-app');
+      mockGetAppPluginVersion.mockResolvedValueOnce('slo-v2');
+
+      await expect(getPluginVersion('grafana-slo-app')).resolves.toBe('slo-v2');
+      await expect(getPluginVersion(PLUGIN_ID)).resolves.toBe('metrics-v1');
+    });
   });
 });
