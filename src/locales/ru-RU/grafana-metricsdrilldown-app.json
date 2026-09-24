@@ -150,6 +150,10 @@
   "fetch-firing-alert-metrics": {
     "error": ""
   },
+  "fetch-slo-metric-signals": {
+    "error": "",
+    "parse-error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Отфильтрованные метрики"
   },
@@ -446,6 +450,21 @@
       "suffix-filters": "Фильтры суффиксов",
       "suffix-filters-description": "Отфильтруйте метрики по суффиксу имени"
     }
+  },
+  "slo-tracked-badge": {
+    "tooltip_one": "",
+    "tooltip_few": "",
+    "tooltip_many": "",
+    "tooltip_other": ""
+  },
+  "slo-tracked-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_few": "",
+    "label_many": "",
+    "label_other": ""
   },
   "sort-by": {
     "label": "Сортировать по",
