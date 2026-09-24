@@ -14,4 +14,4 @@ Resolves <!-- Paste Github issue that is resolved by this pull request -->
 ### 🧪 How to test?
 
 <!-- Steps required to test the PR or a pointer to the relevant automated tests -->
-<!-- For UI changes, include before/after screenshots here -->
+<!-- For UI changes, you must include before/after screenshots here -->
