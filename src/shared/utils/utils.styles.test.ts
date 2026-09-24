@@ -9,6 +9,7 @@ const mockTheme = {
 
 type UtilsStylesModule = {
   getResponsiveBreakpoints: (theme: GrafanaTheme2) => GrafanaTheme2['breakpoints'];
+  getAppBackgroundColor: (theme: GrafanaTheme2, embedded?: boolean) => string | undefined;
 };
 
 function loadWithVersion(version: string | undefined) {
@@ -43,4 +44,35 @@ describe('getResponsiveBreakpoints', () => {
       expect(getResponsiveBreakpoints(mockTheme)).toBe(mockTheme.breakpoints);
     });
   });
+});
+
+describe('getAppBackgroundColor', () => {
+  // page and primary are intentionally given different values: in the "Visual Refresh (Dark)" theme
+  // (flag on), they are genuinely different colors (page: #090b0f, primary: #111419) -- they are NOT
+  // interchangeable, unlike in the pre-refresh theme where they happened to match.
+  const page = 'page-background';
+  const primary = 'primary-background';
+  const canvas = 'canvas-background';
+
+  function getColor(visualDesignRefresh: boolean | undefined, embedded?: boolean) {
+    const theme = {
+      colors: { background: { page, primary, canvas } },
+      flags: { visualDesignRefresh },
+    } as unknown as GrafanaTheme2;
+
+    return loadWithVersion(undefined).getAppBackgroundColor(theme, embedded);
+  }
+
+  it.each([
+    { embedded: true, visualDesignRefresh: true, expected: primary },
+    { embedded: true, visualDesignRefresh: false, expected: primary },
+    { embedded: false, visualDesignRefresh: true, expected: page },
+    { embedded: false, visualDesignRefresh: false, expected: canvas },
+    { embedded: false, visualDesignRefresh: undefined, expected: canvas },
+  ])(
+    'returns $expected for embedded=$embedded and visualDesignRefresh=$visualDesignRefresh',
+    ({ embedded, visualDesignRefresh, expected }) => {
+      expect(getColor(visualDesignRefresh, embedded)).toBe(expected);
+    }
+  );
 });
