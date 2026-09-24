@@ -25,7 +25,7 @@ export function getSharedListStyles(theme: GrafanaTheme2) {
         width: '7px',
       },
       '&::-webkit-scrollbar-thumb': {
-        borderRadius: '4px',
+        borderRadius: theme.shape.radius.sm,
         backgroundColor: theme.colors.secondary.main,
         WebkitBoxShadow: `0 0 1px ${theme.colors.secondary.shade}`,
       },
