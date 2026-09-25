@@ -79,7 +79,7 @@ Human contributions must use **signed commits** so they show as verified on GitH
 
 ### Before you open a pull request
 
-- Fill out the [pull request template](../.github/pull_request_template.md) with a clear summary and test steps. For UI changes, put **before/after screenshots** in the How to test section.
+- Fill out the [pull request template](../.github/pull_request_template.md) with a clear summary and test steps. For UI changes, put **before/after screenshots** in the How to test table.
 - Sign every commit so it is verified on GitHub (see [Signed commits](#signed-commits)).
 - Use a [conventional commit](https://www.conventionalcommits.org/) style PR title (enforced by CI).
 - Run `pnpm lint`, `pnpm typecheck`, and `pnpm test:ci` locally.

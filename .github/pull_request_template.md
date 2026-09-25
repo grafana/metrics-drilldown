@@ -15,3 +15,8 @@ Resolves <!-- Paste Github issue that is resolved by this pull request -->
 
 <!-- Steps required to test the PR or a pointer to the relevant automated tests -->
 <!-- For UI changes, you must include before/after screenshots here -->
+<!--
+| Location | Before | After |
+|----------|--------|-------|
+| <e.g. metric list> | <before img url> | <after img url> |
+-->
