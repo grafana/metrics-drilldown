@@ -271,6 +271,8 @@
     "no-metrics": "No metrics found for the current filters and time range."
   },
   "metrics-sorter": {
+    "dashboard-usage-limit-warning": "Dashboard usage sorting is limited to 500 dashboards, so usage counts may be incomplete.",
+    "dashboard-usage-limit-warning-icon": "Dashboard usage limit warning",
     "error": {
       "get-recent-metrics": "Failed to get recent metrics:"
     },
