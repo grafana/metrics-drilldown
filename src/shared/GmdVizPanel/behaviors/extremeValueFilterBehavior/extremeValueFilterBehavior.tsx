@@ -7,7 +7,6 @@ import React from 'react';
 
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
-import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { isAllDataNaN } from './isAllDataNaN';
 
@@ -94,10 +93,6 @@ export function extremeValueFilterBehavior(panel: VizPanel): CancelActivationHan
           )}
         />
       ),
-    });
-
-    reportExploreMetrics('extreme_value_filter_behavior_triggered', {
-      expression: sceneGraph.interpolate(queryRunner, queryRunner.state.queries[0].expr),
     });
   });
 

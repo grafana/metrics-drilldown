@@ -6,7 +6,6 @@ import { Field, useStyles2 } from '@grafana/ui';
 import React, { useCallback } from 'react';
 
 import { trailDS, VAR_FILTERS, VAR_GROUP_BY, VAR_METRIC_EXPR } from 'shared/shared';
-import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
 import { BinaryRatioLabelsDataSource } from './BinaryRatioLabelsDataSource';
@@ -53,10 +52,6 @@ export class GroupByVariable extends QueryVariable {
     }
 
     this.subscribeToState((newState, prevState) => {
-      if (newState.value && newState.value !== prevState.value) {
-        reportExploreMetrics('groupby_label_changed', { label: String(newState.value) });
-      }
-
       if (newState.options !== prevState.options && newState.options.find((o) => o.value === 'le')) {
         this.filterOptions(newState.options);
       }

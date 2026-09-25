@@ -9,8 +9,6 @@ import {
 import { RadioButtonGroup } from '@grafana/ui';
 import React from 'react';
 
-import { reportExploreMetrics } from 'shared/tracking/interactions';
-
 export enum LayoutType {
   GRID = 'grid',
   ROWS = 'rows',
@@ -74,7 +72,6 @@ export class LayoutSwitcher extends SceneObjectBase<LayoutSwitcherState> {
   }
 
   private onChange = (layout: LayoutType) => {
-    reportExploreMetrics('layout_changed', { layout });
     this.setState({ layout });
   };
 

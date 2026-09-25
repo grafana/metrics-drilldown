@@ -103,14 +103,6 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   }, NOTIFY_VALUE_CHANGE_DELAY);
 
   private updateValue(value: string) {
-    const wasEmpty = this.state.value === '';
-    const isNewSearch = wasEmpty && value !== '';
-
-    // Only report search usage when not in question mode
-    if (isNewSearch && !this.state.isQuestionMode) {
-      reportExploreMetrics('quick_search_used', {});
-    }
-
     this.setState({ value });
 
     // Only notify for filtering when not in question mode
