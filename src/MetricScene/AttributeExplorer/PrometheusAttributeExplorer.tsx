@@ -633,7 +633,7 @@ function AttributeExplorerHeader({
     setUpperText(formatBoundText(histogramRange.upperSeconds, Number.POSITIVE_INFINITY));
   }
 
-  const commitTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const commitTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(commitTimeoutRef.current), []);
 
   // True for a finite upper bound at or below the lower bound: histogram_fraction(lower, upper, ...)

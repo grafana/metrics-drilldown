@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { type GrafanaTheme2 } from '@grafana/data';
 
 const mockContainerBreakpoints = {} as GrafanaTheme2['breakpoints'];
