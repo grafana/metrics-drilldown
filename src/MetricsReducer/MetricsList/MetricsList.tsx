@@ -171,7 +171,7 @@ function getStyles(theme: GrafanaTheme2) {
 
       '& button': {
         height: '40px',
-        borderRadius: '8px',
+        borderRadius: theme.shape.radius.md,
       },
     }),
   };

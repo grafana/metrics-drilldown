@@ -285,7 +285,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 const getStyles = (theme: GrafanaTheme2) => ({
   counts: css`
     margin-right: ${theme.spacing(1)};
-    border-radius: 11px;
+    border-radius: ${theme.shape.radius.pill};
     padding: 2px ${theme.spacing(1)};
     color: ${theme.colors.text.primary};
     background-color: ${theme.colors.background.secondary};
