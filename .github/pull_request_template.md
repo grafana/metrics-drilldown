@@ -4,7 +4,6 @@
 Resolves <!-- Paste Github issue that is resolved by this pull request -->
 
 <!-- General summary of what the PR aims to do -->
-<!-- For UI changes, don't hesitate to provide before/after screenshots -->
 
 ### 📖 Summary of the changes
 
@@ -15,3 +14,9 @@ Resolves <!-- Paste Github issue that is resolved by this pull request -->
 ### 🧪 How to test?
 
 <!-- Steps required to test the PR or a pointer to the relevant automated tests -->
+<!-- For UI changes, you must include before/after screenshots here -->
+<!--
+| Location | Before | After |
+|----------|--------|-------|
+| <e.g. metric list> | <before img url> | <after img url> |
+-->
