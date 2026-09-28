@@ -61,15 +61,33 @@ jest.mock('../FiringAlertChip/FiringAlertChip', () => {
   return { FiringAlertChip: MockFiringAlertChip };
 });
 
+jest.mock('../SloTrackedChip/SloTrackedChip', () => {
+  const { SceneObjectBase } = jest.requireActual('@grafana/scenes');
+  class MockSloTrackedChip extends SceneObjectBase {
+    constructor() {
+      super({ key: 'slo-tracked-chip' });
+    }
+    static readonly Component = () => null;
+  }
+  return { SloTrackedChip: MockSloTrackedChip };
+});
+
 import { sceneGraph } from '@grafana/scenes';
 
 import { FiringAlertChip } from '../FiringAlertChip/FiringAlertChip';
 import { ListControls } from '../ListControls';
+import { SloTrackedChip } from '../SloTrackedChip/SloTrackedChip';
 
 describe('ListControls scene-graph wiring', () => {
   test('FiringAlertChip is present in the scene graph with key "firing-alert-chip"', () => {
     const controls = new ListControls({});
     const chip = sceneGraph.findByKeyAndType(controls, 'firing-alert-chip', FiringAlertChip);
     expect(chip).toBeInstanceOf(FiringAlertChip);
+  });
+
+  test('SloTrackedChip is present in the scene graph with key "slo-tracked-chip"', () => {
+    const controls = new ListControls({});
+    const chip = sceneGraph.findByKeyAndType(controls, 'slo-tracked-chip', SloTrackedChip);
+    expect(chip).toBeInstanceOf(SloTrackedChip);
   });
 });

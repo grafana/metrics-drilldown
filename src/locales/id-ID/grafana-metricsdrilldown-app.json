@@ -141,6 +141,10 @@
   "fetch-firing-alert-metrics": {
     "error": ""
   },
+  "fetch-slo-metric-signals": {
+    "error": "",
+    "parse-error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Metrik yang Difilter"
   },
@@ -422,6 +426,15 @@
       "suffix-filters": "Filter akhiran",
       "suffix-filters-description": "Filter metrik berdasarkan akhiran namanya"
     }
+  },
+  "slo-tracked-badge": {
+    "tooltip_other": ""
+  },
+  "slo-tracked-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_other": ""
   },
   "sort-by": {
     "label": "Urutkan berdasarkan",

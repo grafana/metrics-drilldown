@@ -181,18 +181,18 @@ function getStyles(theme: GrafanaTheme2) {
 
       &:hover {
         border: 1px solid ${theme.colors.border.weak};
-        border-color: ${theme.colors.primary.border};
+        border-color: ${theme.colors.accent.border};
       }
       &:focus {
         border: 1px solid ${theme.colors.border.weak};
-        outline: 1px solid ${theme.colors.primary.main};
+        outline: 1px solid ${theme.colors.accent.main};
         outline-offset: 1px;
       }
     `,
     selected: css`
       cursor: default;
       border: 1px solid ${theme.colors.border.weak};
-      border-color: ${theme.colors.primary.border};
+      border-color: ${theme.colors.accent.border};
     `,
     bodyAndParams: css`
       display: flex;

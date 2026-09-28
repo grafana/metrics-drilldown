@@ -1,4 +1,4 @@
-// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+// eslint-disable-next-line sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 
 import { DataSourceFetcher, isPrometheusDataSource } from './utils.datasource';
@@ -35,7 +35,7 @@ describe('DataSourceFetcher', () => {
   ];
 
   let mockGetBackendSrv: jest.MockedFunction<typeof getBackendSrv>;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
   let mockGetDataSourceSrv: jest.MockedFunction<typeof getDataSourceSrv>;
 
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe('DataSourceFetcher', () => {
     jest.useFakeTimers();
 
     mockGetBackendSrv = getBackendSrv as jest.MockedFunction<typeof getBackendSrv>;
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
     mockGetDataSourceSrv = getDataSourceSrv as jest.MockedFunction<typeof getDataSourceSrv>;
 
     mockGetDataSourceSrv.mockReturnValue({

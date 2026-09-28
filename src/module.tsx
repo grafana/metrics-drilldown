@@ -23,6 +23,7 @@ const LazyApp = lazy(async () => {
   // Initialize i18n for this plugin
   // Before Grafana 12.1.0, plugins must load their own resources
   // After 12.1.0, Grafana handles resource loading
+  // TODO(2026-10-18): grafanaDependency is now >=13.1.0, so this is always the "after" case. Remove the conditional and the loadResources import.
   const { loadResources } = await import('./i18n/loadResources');
   const pluginLoaders = compare(config.buildInfo.version ?? '0.0.0', '12.1.0', '<') ? [loadResources] : [];
   await initPluginTranslations(pluginJson.id, pluginLoaders);

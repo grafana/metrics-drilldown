@@ -1,9 +1,12 @@
-import { type DataSourceApi } from '@grafana/data';
+import { css } from '@emotion/css';
+import { type DataSourceApi, type GrafanaTheme2 } from '@grafana/data';
+import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
 import { Trail } from 'App/Routes';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { newMetricsTrail } from 'shared/utils/utils';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { parsePromQLQuery } from '../../extensions/links';
 import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
@@ -16,6 +19,7 @@ export interface LabelBreakdownProps {
 }
 
 const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBreakdownProps) => {
+  const styles = useStyles2(getStyles);
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -40,10 +44,22 @@ const LabelBreakdown = ({ query, initialStart, initialEnd, dataSource }: LabelBr
   });
 
   return (
-    <div data-testid="metrics-drilldown-embedded-label-breakdown">
+    <div data-testid="metrics-drilldown-embedded-label-breakdown" className={styles.container}>
       <Trail trail={trail} />
     </div>
   );
 };
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    container: css({
+      // Host surfaces provide their own page chrome around this component, so we self-paint the
+      // background here rather than leaving it transparent to the host's own background, which
+      // isn't guaranteed to match theme.colors.background.primary.
+      background: getAppBackgroundColor(theme, true),
+      height: '100%',
+    }),
+  };
+}
 
 export default LabelBreakdown;

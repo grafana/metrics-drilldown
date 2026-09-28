@@ -3,10 +3,11 @@ import { type GrafanaTheme2 } from '@grafana/data';
 import { t, Trans } from '@grafana/i18n';
 import { Collapse, TextLink, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { HelpControls } from './HelpControls';
 import { InlineBanner } from './InlineBanner';
+import { normalizeInternalPathname } from './routingUtils';
 
 type ErrorViewProps = { error: Error };
 
@@ -25,7 +26,7 @@ export function ErrorView({ error }: Readonly<ErrorViewProps>) {
       .filter((key) => searchParams.has(key))
       .forEach((key) => newSearchParams.set(key, searchParams.get(key)!));
 
-    navigate({ pathname, search: newSearchParams.toString() });
+    navigate({ pathname: normalizeInternalPathname(pathname), search: newSearchParams.toString() });
     window.location.reload();
   }, [navigate, pathname, search]);
 
