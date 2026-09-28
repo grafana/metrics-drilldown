@@ -224,6 +224,19 @@ type Interactions = {
     metric_count: number;
     rule_count: number;
   };
+  // Datasource-scoped SLO definitions and active-burn metadata have been resolved.
+  slo_metric_signals_fetched: {
+    status: 'disabled' | 'plugin-absent' | 'ready' | 'error';
+    duration_ms: number;
+    definition_count: number;
+    metric_count: number;
+    active_burn_metric_count: number;
+  };
+  // User toggles the SLO-tracked metric filter chip.
+  slo_tracked_filter_toggled: {
+    action: 'activated' | 'deactivated';
+    matching_count: number;
+  };
 };
 
 type OtherEvents = {

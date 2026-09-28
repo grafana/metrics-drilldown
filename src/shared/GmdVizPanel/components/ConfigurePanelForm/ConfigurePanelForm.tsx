@@ -30,6 +30,7 @@ import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 import { getTrailFor } from 'shared/utils/utils';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { EventApplyPanelConfig } from './EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from './EventCancelConfigurePanel';
@@ -274,6 +275,8 @@ export class ConfigurePanelForm extends SceneObjectBase<ConfigurePanelFormState>
 }
 
 function getStyles(theme: GrafanaTheme2) {
+  const background = getAppBackgroundColor(theme);
+
   return {
     controlsContainer: css`
       display: flex;
@@ -293,7 +296,7 @@ function getStyles(theme: GrafanaTheme2) {
       gap: ${theme.spacing(2)};
       position: sticky;
       bottom: 0;
-      background: ${theme.colors.background.primary};
+      background: ${background};
       padding: ${theme.spacing(2, 0)};
       border-top: 1px solid ${theme.colors.border.weak};
     `,

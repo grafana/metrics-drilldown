@@ -129,6 +129,7 @@ export function SaveQueryModal({ dsUid, query, onClose }: Props) {
 const getStyles = (theme: GrafanaTheme2) => ({
   query: css({
     backgroundColor: theme.colors.background.elevated,
+    borderRadius: theme.shape.radius.lg,
     fontFamily: theme.typography.fontFamilyMonospace,
     fontSize: theme.typography.bodySmall.fontSize,
     padding: theme.spacing(1),

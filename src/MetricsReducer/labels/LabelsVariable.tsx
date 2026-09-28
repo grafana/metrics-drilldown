@@ -118,7 +118,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     margin: 0;
     background-color: ${theme.colors.background.primary};
     padding: ${theme.spacing(1)};
-    border-radius: ${theme.shape.radius.default};
+    border-radius: ${theme.shape.radius.md};
     border: 1px solid ${theme.colors.border.weak};
     border-right: none;
   `,

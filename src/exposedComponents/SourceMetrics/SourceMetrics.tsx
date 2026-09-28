@@ -1,5 +1,7 @@
-import { type AdHocVariableFilter, type DataSourceApi } from '@grafana/data';
+import { css } from '@emotion/css';
+import { type AdHocVariableFilter, type DataSourceApi, type GrafanaTheme2 } from '@grafana/data';
 import { locationService } from '@grafana/runtime';
+import { useStyles2 } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
 import { ErrorView } from 'App/ErrorView';
@@ -10,6 +12,7 @@ import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { parseBinaryQuery } from 'shared/utils/parseBinaryQuery';
 import { embeddedTrailNamespace, newMetricsTrail } from 'shared/utils/utils';
+import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
 import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
@@ -132,6 +135,7 @@ export interface SourceMetricsProps {
 }
 
 const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
+  const styles = useStyles2(getStyles);
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -214,10 +218,22 @@ const KnowledgeGraphSourceMetrics = (props: SourceMetricsProps) => {
   });
 
   return (
-    <div data-testid="metrics-drilldown-embedded-label-breakdown">
+    <div data-testid="metrics-drilldown-embedded-label-breakdown" className={styles.container}>
       <Trail trail={trail} />
     </div>
   );
 };
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    container: css({
+      // Host surfaces (e.g. RCA Workbench) provide their own page chrome around this component,
+      // so we self-paint the background here rather than leaving it transparent to the host's own
+      // background, which isn't guaranteed to match theme.colors.background.page.
+      background: getAppBackgroundColor(theme, true),
+      height: '100%',
+    }),
+  };
+}
 
 export default KnowledgeGraphSourceMetrics;

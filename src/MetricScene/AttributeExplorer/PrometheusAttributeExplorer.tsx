@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import { dateTime, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { utf8Support } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- unavoidable until min Grafana >= 13.1; @grafana/runtime/unstable not on host before then
+// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
 import { getDataSourceSrv } from '@grafana/runtime';
 import { Field, Icon, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -183,7 +183,7 @@ export function getOtelPriorityAttributes(labels: string[]): {
 }
 
 async function fetchAttributes(context: DatasetContext): Promise<AttributeConfig[]> {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
   const ds = (await getDataSourceSrv().get(context.datasourceUid)) as unknown as PrometheusRuntimeDatasource;
 
   const labels = await MetricDatasourceHelper.fetchLabels({
@@ -418,7 +418,7 @@ function runRangeQuery(
   query: string,
   window: ReturnType<typeof getRangeQueryWindow>
 ): Observable<PrometheusRangeQueryResult | undefined> {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- unavoidable until min Grafana >= 13.1
+  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
   return rxFrom(getDataSourceSrv().get(context.datasourceUid)).pipe(
     switchMap((ds) => {
       const runtimeDs = ds as unknown as PrometheusRuntimeDatasource;
@@ -756,7 +756,7 @@ function getHeaderStyles(theme: GrafanaTheme2) {
     queryLimit: css({
       backgroundColor: theme.colors.background.primary,
       border: `1px solid ${theme.colors.border.weak}`,
-      borderRadius: theme.shape.radius.default,
+      borderRadius: theme.shape.radius.md,
       color: theme.colors.text.secondary,
       fontSize: theme.typography.bodySmall.fontSize,
       padding: theme.spacing(0.5, 1),

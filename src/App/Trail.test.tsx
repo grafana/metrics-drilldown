@@ -1,4 +1,8 @@
-import { getPageNav } from './Trail';
+import { PageLayoutType } from '@grafana/data';
+import { PluginPage } from '@grafana/runtime';
+import React, { Fragment } from 'react';
+
+import { getPageNav, renderTrailPage } from './Trail';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
 
@@ -7,6 +11,27 @@ const DEFAULT_URL =
 
 const mockMetricScene = new MetricScene({ metric: 'test_metric' });
 const mockMetricsReducer = new MetricsReducer();
+
+describe('Trail page wrapper', () => {
+  const content = <div data-testid="trail-content" />;
+
+  it('does not add the PluginPage wrapper for embedded trails', () => {
+    const page = renderTrailPage(true, undefined, content);
+
+    expect(page.type).toBe(Fragment);
+    expect(page.props.children).toBe(content);
+  });
+
+  it('keeps the PluginPage wrapper for standalone trails', () => {
+    const pageNav = { text: 'Metrics' };
+    const page = renderTrailPage(false, pageNav, content);
+
+    expect(page.type).toBe(PluginPage);
+    expect(page.props.children).toBe(content);
+    expect(page.props.pageNav).toBe(pageNav);
+    expect(page.props.layout).toBe(PageLayoutType.Custom);
+  });
+});
 
 describe('Trail Component - Breadcrumb Logic Tests', () => {
   beforeEach(() => {

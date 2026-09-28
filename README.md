@@ -240,6 +240,6 @@ This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE)
 
 ---
 
-**Note**: Grafana Metrics Drilldown comes preinstalled by default in all Grafana 12+ instances.
+**Note**: Grafana Metrics Drilldown comes preinstalled by default in all Grafana 13.1+ instances.
 
 _Maintained by [Grafana Labs](https://grafana.com) with ❤️ from the community_

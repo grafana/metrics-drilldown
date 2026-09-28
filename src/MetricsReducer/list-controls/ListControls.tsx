@@ -18,6 +18,7 @@ import { MetricsSorter } from './MetricsSorter/MetricsSorter';
 import { type CountsProvider } from './QuickSearch/CountsProvider/CountsProvider';
 import { MetricVariableCountsProvider } from './QuickSearch/CountsProvider/MetricVariableCountsProvider';
 import { QuickSearch } from './QuickSearch/QuickSearch';
+import { SloTrackedChip } from './SloTrackedChip/SloTrackedChip';
 
 interface ListControlsState extends SceneObjectState {
   $variables?: SceneVariableSet;
@@ -47,6 +48,10 @@ export class ListControls extends EmbeddedScene {
           new SceneFlexItem({
             width: 'auto',
             body: new FiringAlertChip(),
+          }),
+          new SceneFlexItem({
+            width: 'auto',
+            body: new SloTrackedChip(),
           }),
           new SceneFlexItem({
             width: 'auto',
