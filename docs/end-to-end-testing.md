@@ -58,6 +58,18 @@ You can also run the [code generator](https://playwright.dev/docs/codegen#runnin
 pnpm run e2e:codegen -- http://localhost:3001
 ```
 
+## Run the pre-PR E2E check
+
+To run the fast PR checks plus a CI-like Playwright run:
+
+```shell
+pnpm check:pr --full
+```
+
+This command builds the plugin, prepares Chromium, starts the Docker Compose services, waits for both Grafana instances, and runs `e2e/config/playwright.config.ci.ts`. If it started the Compose stack, it also stops the stack on success, failure, or interruption. A stack that was already running is left running.
+
+The local check uses the single Grafana image and version configured in `.env`. GitHub CI additionally resolves and tests the full supported-version and nightly matrix, so a passing local run does not replace the CI matrix.
+
 ## FAQ
 
 ### The build of my PR has failed, how can I see the test reports?

@@ -12,6 +12,7 @@
     "test:watch": "pnpm run tdd",
     "test": "jest --coverage",
     "test:ci": "jest --passWithNoTests --maxWorkers 4",
+    "check:pr": "./scripts/check-pr.sh",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --cache .",
     "lint:fix": "pnpm run lint --fix && prettier --write --list-different .",
