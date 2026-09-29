@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { DashboardCursorSync, LoadingState, type DataFrame, type GrafanaTheme2, type PanelData } from '@grafana/data';
+import { DashboardCursorSync, type DataFrame, type GrafanaTheme2, type PanelData } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import {
   behaviors,
@@ -11,6 +11,7 @@ import {
   SceneQueryRunner,
   SceneReactObject,
   sceneUtils,
+  SceneVariableSet,
   type SceneComponentProps,
   type SceneObjectState,
 } from '@grafana/scenes';
@@ -18,17 +19,22 @@ import { Field, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
+import { LabelValuesVariable, VAR_LABEL_VALUES } from 'MetricsReducer/labels/LabelValuesVariable';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
 import { EventQuickSearchChanged } from 'MetricsReducer/list-controls/QuickSearch/EventQuickSearchChanged';
 import { QuickSearch } from 'MetricsReducer/list-controls/QuickSearch/QuickSearch';
 import { GRID_TEMPLATE_COLUMNS, GRID_TEMPLATE_ROWS } from 'MetricsReducer/MetricsList/MetricsList';
+import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { getPreferredConfigForMetric } from 'shared/GmdVizPanel/config/getPreferredConfigForMetric';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel, type HistogramBreakdownFn } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { addCardinalityInfo } from 'shared/GmdVizPanel/types/timeseries/behaviors/addCardinalityInfo';
-import { buildStaticTimeseriesPanel } from 'shared/GmdVizPanel/types/timeseries/buildTimeseriesPanel';
+import {
+  buildStaticTimeseriesPanel,
+  buildTimeseriesPanel,
+} from 'shared/GmdVizPanel/types/timeseries/buildTimeseriesPanel';
 import { getTimeseriesQueryRunnerParams } from 'shared/GmdVizPanel/types/timeseries/getTimeseriesQueryRunnerParams';
 import { addUnspecifiedLabel } from 'shared/GmdVizPanel/types/timeseries/transformations/addUnspecifiedLabel';
 import { trailDS, VAR_HISTOGRAM_BREAKDOWN_FN } from 'shared/shared';
@@ -45,15 +51,31 @@ import { PanelMenu } from '../../PanelMenu/PanelMenu';
 import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from '../MetricLabelsList/behaviors/syncYAxis';
 
+function getLabelValueTitle(frame: DataFrame | undefined, labelValue: string): string {
+  if (frame) {
+    return getLabelValueFromDataFrame(frame);
+  }
+  return labelValue || '<unspecified>';
+}
+
+function getValueHeaderActions(label: string, labelValue: string, binaryQuery?: string) {
+  if (labelValue === '' || binaryQuery) {
+    return () => [];
+  }
+  return () => [new AddToFiltersGraphAction({ labelName: label, labelValue })];
+}
+
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: Metric;
   label: string;
   // Set for a KG binary (ratio) insight. When present, values are enumerated from the grouped binary
   // (sum by(label)(binary)) and each per-value panel renders the binary scoped to that value.
   binaryQuery?: string;
+  histogramBreakdownFn?: HistogramBreakdownFn;
   layoutSwitcher: LayoutSwitcher;
   quickSearch: QuickSearch;
   sortBySelector: SortBySelector;
+  $variables?: SceneVariableSet;
   body?: SceneByFrameRepeater | GmdVizPanel;
 }
 
@@ -86,11 +108,23 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       },
     });
 
+    const labelValuesVariable = binaryQuery
+      ? undefined
+      : new LabelValuesVariable({
+          labelName: label,
+          matcher: buildQueryExpression({
+            metric,
+            labelMatchers: [],
+            addIgnoreUsageFilter: false,
+          }),
+        });
+
     super({
       key: 'metric-label-values-list',
       metric,
       label,
       binaryQuery,
+      histogramBreakdownFn,
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -107,6 +141,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         ariaLabel: t('breakdown.label-values-list.search-aria-label', 'Quick search label values'),
       }),
       sortBySelector: new SortBySelector({ target: 'labels' }),
+      $variables: labelValuesVariable ? new SceneVariableSet({ variables: [labelValuesVariable] }) : undefined,
       $data: new SceneDataTransformer({
         $data: new SceneQueryRunner({
           datasource: trailDS,
@@ -201,8 +236,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const { metric, label } = this.state;
     const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
     const histogramBreakdownFn = sceneGraph.lookupVariable(VAR_HISTOGRAM_BREAKDOWN_FN, this)?.getValue() as
-      | HistogramBreakdownFn
-      | undefined;
+      HistogramBreakdownFn | undefined;
 
     return new GmdVizPanel({
       metric: metric.name,
@@ -225,16 +259,10 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private buildByFrameRepeater() {
-    const { metric, label, binaryQuery } = this.state;
-    const prefMetricConfig = getPreferredConfigForMetric(metric.name);
-    const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
-    // For a binary (ratio) insight, page filters do not apply, so hide the per-value "Add to filters" action.
-    const isBinaryQuery = Boolean(binaryQuery);
-    // Histogram panels render from this list's own shared query below (see buildStaticTimeseriesPanel)
-    // instead of each reissuing its own.
-    const isHistogram = metric.type === 'classic-histogram' || metric.type === 'native-histogram';
+    const { binaryQuery } = this.state;
 
     return new SceneByFrameRepeater({
+      variableName: binaryQuery ? undefined : VAR_LABEL_VALUES,
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
       $behaviors: [
         syncYAxis(),
@@ -274,65 +302,80 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
             />
           ),
         }),
-      getLayoutChild: (data: PanelData, frame: DataFrame, frameIndex: number) => {
-        // hide frames that have less than 2 points
-        if (frame.length < 2) {
+      getLayoutChild: (data: PanelData, frame: DataFrame | undefined, frameIndex: number, labelValue: string) => {
+        // Binary expressions still enumerate from range-query frames, so preserve the existing guard.
+        if (binaryQuery && (!frame || frame.length < 2)) {
           return null;
         }
 
-        const labelValueFromDataFrame = getLabelValueFromDataFrame(frame);
-        const isEmptyLabelValue = labelValueFromDataFrame.startsWith('<unspecified'); // see the "addUnspecifiedLabel" data transformation
-        const labelValue = isEmptyLabelValue ? '' : labelValueFromDataFrame;
+        return new SceneCSSGridItem({ body: this.buildValuePanel(data, frame, frameIndex, labelValue) });
+      },
+    });
+  }
 
-        const headerActions = isEmptyLabelValue || isBinaryQuery
-          ? () => []
-          : () => [new AddToFiltersGraphAction({ labelName: label, labelValue })];
+  private buildValuePanel(data: PanelData, frame: DataFrame | undefined, frameIndex: number, labelValue: string) {
+    const { metric, label, binaryQuery, histogramBreakdownFn } = this.state;
+    const prefMetricConfig = getPreferredConfigForMetric(metric.name);
+    const entry = getTrailFor(this).state.sourceMetrics?.find(
+      (sourceMetric) => sourceMetric.metricName === metric.name
+    );
+    const labelValueFromDataFrame = getLabelValueTitle(frame, labelValue);
+    const headerActions = getValueHeaderActions(label, labelValue, binaryQuery);
+    const panelConfig = {
+      type: 'timeseries' as const,
+      title: labelValueFromDataFrame,
+      height: PANEL_HEIGHT.M,
+      fixedColorIndex: frameIndex,
+      description: '',
+      headerActions,
+      menu: () => new PanelMenu({ labelName: label }),
+      behaviors: [publishTimeseriesData()],
+    };
+    const isHistogram = metric.type === 'classic-histogram' || metric.type === 'native-histogram';
 
-        const vizPanel = isHistogram
-          ? buildStaticTimeseriesPanel({
-              metric,
-              data,
-              frame,
-              panelConfig: {
-                type: 'timeseries',
-                title: labelValueFromDataFrame,
-                height: PANEL_HEIGHT.M,
-                fixedColorIndex: frameIndex,
-                description: '',
-                headerActions,
-                menu: () => new PanelMenu({ labelName: label }),
-                behaviors: [publishTimeseriesData()],
-              },
-            })
-          : new GmdVizPanel({
-              metric: metric.name,
-              discardUserPrefs: true,
-              panelOptions: {
-                ...prefMetricConfig?.panelOptions,
-                title: labelValueFromDataFrame,
-                fixedColorIndex: frameIndex,
-                description: '',
-                headerActions,
-                menu: () => new PanelMenu({ labelName: label }),
-                // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList)
-                // no worries to add it for all panel types here as it will check if the panel is a timeseries
-                // and if the data frame received is a timeseries before acting
-                behaviors: [publishTimeseriesData()],
-              },
-              queryOptions: {
-                ...prefMetricConfig?.queryOptions,
-                // Binary: render the ratio scoped to this value by injecting {label="value"} into both
-                // operands. Otherwise: the single-metric selector filtered to the value.
-                ...(binaryQuery
-                  ? { binaryExpr: injectLabelMatcher(binaryQuery, label, labelValue), binaryLegend: labelValueFromDataFrame }
-                  : { labelMatchers: [{ key: label, operator: '=', value: labelValue }] }),
-                customRateInterval: entry?.customRateInterval,
-                customFunction: entry?.customFunction,
-                kgMetricType: entry?.metricType,
-              },
-            });
+    if (isHistogram && frame) {
+      return buildStaticTimeseriesPanel({ metric, data, frame, panelConfig });
+    }
 
-        return new SceneCSSGridItem({ body: vizPanel });
+    if (isHistogram) {
+      return buildTimeseriesPanel({
+        metric,
+        panelConfig,
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [{ key: label, operator: '=', value: labelValue }],
+          addIgnoreUsageFilter: true,
+          groupBy: label,
+          customRateInterval: entry?.customRateInterval,
+          customFunction: entry?.customFunction,
+          histogramBreakdownFn,
+        },
+      });
+    }
+
+    const scopedQueryOptions = binaryQuery
+      ? { binaryExpr: injectLabelMatcher(binaryQuery, label, labelValue), binaryLegend: labelValueFromDataFrame }
+      : { labelMatchers: [{ key: label, operator: '=', value: labelValue }] };
+
+    return new GmdVizPanel({
+      metric: metric.name,
+      discardUserPrefs: true,
+      panelOptions: {
+        ...prefMetricConfig?.panelOptions,
+        title: labelValueFromDataFrame,
+        fixedColorIndex: frameIndex,
+        description: '',
+        headerActions,
+        menu: () => new PanelMenu({ labelName: label }),
+        // publishTimeseriesData is required for the syncYAxis behavior (see MetricLabelsList).
+        behaviors: [publishTimeseriesData()],
+      },
+      queryOptions: {
+        ...prefMetricConfig?.queryOptions,
+        ...scopedQueryOptions,
+        customRateInterval: entry?.customRateInterval,
+        customFunction: entry?.customFunction,
+        kgMetricType: entry?.metricType,
       },
     });
   }
@@ -362,12 +405,20 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricLabelValuesList>) => {
-    const { body } = model.useState();
+    const { body, $variables } = model.useState();
+    const labelValuesVariable = $variables?.state.variables.find(
+      (variable) => variable.state.name === VAR_LABEL_VALUES
+    ) as LabelValuesVariable | undefined;
 
     return (
       <>
         {body instanceof GmdVizPanel && <MetricLabelValuesList.SingleMetricPanelComponent model={model} />}
         {body instanceof SceneByFrameRepeater && <MetricLabelValuesList.ByFrameRepeaterComponent model={model} />}
+        {body instanceof SceneByFrameRepeater && labelValuesVariable && (
+          <div className={css({ display: 'none' })}>
+            <labelValuesVariable.Component model={labelValuesVariable} />
+          </div>
+        )}
       </>
     );
   };
@@ -389,17 +440,12 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const styles = useStyles2(getStyles);
     const { body } = model.useState();
 
-    const dataProvider = sceneGraph.getData(model);
-    const { state, errors } = dataProvider.useState().data || {};
-
     const byFrameRepeater = body as SceneByFrameRepeater;
+    const { loadingLayout, errorLayout } = byFrameRepeater.useState();
 
     const batchSizes = byFrameRepeater.useSizes();
     const shouldDisplayShowMoreButton =
-      state !== LoadingState.Loading &&
-      !errors?.length &&
-      batchSizes.total > 0 &&
-      batchSizes.current < batchSizes.total;
+      !loadingLayout && !errorLayout && batchSizes.total > 0 && batchSizes.current < batchSizes.total;
 
     const onClickShowMore = () => {
       byFrameRepeater.increaseBatchSize();
