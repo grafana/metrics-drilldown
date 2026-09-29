@@ -102,7 +102,7 @@ Before opening or updating a PR, run the fuller local suite when Docker and netw
 pnpm check:pr --full
 ```
 
-Full mode also runs the Grafana API compatibility check, a production documentation build, and Playwright. It requires a running Docker daemon with Docker Compose v2, Make, curl, and network access. Playwright runs once against the Grafana image and version selected in `.env`. The script starts and cleans up its own Compose stack; if a stack is already running, it reuses and preserves it.
+Full mode also runs the Grafana API compatibility check, a production documentation build, and Playwright. It requires a running Docker daemon with Docker Compose v2, Make, curl, and network access. Playwright runs once against the Grafana image and version selected in `.env`; that version must satisfy `grafanaDependency` in `src/plugin.json`. The script starts and cleans up its own Compose stack; if a stack is already running, it reuses and preserves it.
 
 The script does not replace CI. GitHub still validates the PR title, CLA and commit signatures; runs the dynamically resolved Grafana-version and nightly E2E matrix; compares bundle analysis against the target branch; performs hosted workflow, dependency, and secret scans; and handles plugin packaging and publication checks.
 

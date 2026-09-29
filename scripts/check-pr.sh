@@ -112,6 +112,23 @@ fi
 section "Installing dependencies from the lockfile"
 pnpm install --frozen-lockfile
 
+if [[ "$FULL" == true ]]; then
+  section "Validating the configured Grafana version"
+  grafana_version=$(node -e "require('dotenv').config({ quiet: true }); process.stdout.write(process.env.GRAFANA_VERSION || '13.1.0')")
+  grafana_dependency=$(node -p "require('./src/plugin.json').dependencies.grafanaDependency")
+  minimum_grafana_version=$(node -p "require('./src/plugin.json').dependencies.grafanaDependency.match(/[0-9]+\\.[0-9]+\\.[0-9]+/)[0]")
+
+  if node -e "const { satisfies, validate } = require('compare-versions'); const version = process.argv[1]; if (!validate(version)) process.exit(2); process.exit(satisfies(version, process.argv[2]) ? 0 : 1)" "$grafana_version" "$grafana_dependency"; then
+    printf 'Grafana %s satisfies the plugin requirement %s.\n' "$grafana_version" "$grafana_dependency"
+  else
+    version_status=$?
+    if ((version_status == 1)); then
+      fail "Configured GRAFANA_VERSION=${grafana_version} does not satisfy ${grafana_dependency}. Set GRAFANA_VERSION to ${minimum_grafana_version} or newer in the current environment or .env (environment variables take precedence)."
+    fi
+    printf 'Warning: GRAFANA_VERSION=%s is not semver, so compatibility with %s cannot be checked locally.\n' "$grafana_version" "$grafana_dependency" >&2
+  fi
+fi
+
 section "Linting"
 pnpm run lint
 
@@ -134,7 +151,6 @@ pnpm run build
 
 if [[ "$FULL" == true ]]; then
   section "Checking Grafana API compatibility"
-  minimum_grafana_version=$(node -p "require('./src/plugin.json').dependencies.grafanaDependency.match(/[0-9]+\\.[0-9]+\\.[0-9]+/)[0]")
   levitate_targets='@grafana/data,@grafana/ui,@grafana/runtime,@grafana/schema,@grafana/e2e-selectors,@grafana/experimental'
   LEVITATE_OUTPUT=$(mktemp)
 

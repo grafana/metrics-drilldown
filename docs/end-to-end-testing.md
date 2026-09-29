@@ -68,7 +68,7 @@ pnpm check:pr --full
 
 This command builds the plugin, prepares Chromium, starts the Docker Compose services, waits for both Grafana instances, and runs `e2e/config/playwright.config.ci.ts`. If it started the Compose stack, it also stops the stack on success, failure, or interruption. A stack that was already running is left running.
 
-The local check uses the single Grafana image and version configured in `.env`. GitHub CI additionally resolves and tests the full supported-version and nightly matrix, so a passing local run does not replace the CI matrix.
+The local check uses the single Grafana image and version configured in `.env` and stops early if a semantic version does not satisfy `grafanaDependency` in `src/plugin.json`. GitHub CI additionally resolves and tests the full supported-version and nightly matrix, so a passing local run does not replace the CI matrix.
 
 ## FAQ
 
