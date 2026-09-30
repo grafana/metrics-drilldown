@@ -38,11 +38,11 @@ jobs:
           set -euo pipefail
 
           cutoff="$(date -u -d "${WINDOW_HOURS} hours ago" +%Y-%m-%dT%H:%M:%SZ)"
+          # state=all: a merged PR still counts until 24h after it was opened.
+          # This job reruns only on open or reopen, not when another PR merges.
           page_counts="$(
             gh api --paginate \
               -X GET \
-              # state=all: a merged PR still counts until 24h after it was opened.
-              # This job reruns only on open or reopen, not when another PR merges.
               -f state=all \
               -f creator="${AUTHOR}" \
               -f since="${cutoff}" \
