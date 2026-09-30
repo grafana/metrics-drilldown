@@ -48,8 +48,26 @@ type Interactions = {
     // The number of related logs
     related_logs_count?: number;
   };
+  // User clicks on one of the action buttons associated with a selected metric
+  selected_metric_action_clicked: {
+    action:
+      // Opens the metric queries in Explore
+      | 'open_in_explore'
+      // Clicks on the share URL button
+      | 'share_url'
+      // Deselects the current selected metrics by clicking the "Select new metric" button
+      | 'unselect'
+      // When in embedded mode, clicked to open the exploration from the embedded view
+      | 'open_from_embedded'
+      // Opens the metric queries in Explore from the panel menu
+      | 'panel_menu_explore';
+  };
   // User changed the Prometheus data source
   datasource_changed: {};
+  // User clicks on the action button associated with related logs
+  related_logs_action_clicked: {
+    action: 'open_logs_drilldown';
+  };
   // User selects a metric
   metric_selected: {
     from:

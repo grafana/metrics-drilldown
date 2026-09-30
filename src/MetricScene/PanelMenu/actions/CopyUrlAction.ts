@@ -6,6 +6,7 @@ import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { PLUGIN_BASE_URL } from 'shared/constants/plugin';
 
 import { displaySuccess } from '../../../MetricsReducer/helpers/displayStatus';
+import { reportExploreMetrics } from '../../../shared/tracking/interactions';
 import { getUrlForTrail } from '../../../shared/utils/utils';
 
 export class CopyUrlAction {
@@ -15,6 +16,7 @@ export class CopyUrlAction {
       iconClassName: 'copy',
       onClick: () => {
         if (navigator.clipboard) {
+          reportExploreMetrics('selected_metric_action_clicked', { action: 'share_url' });
           const appUrl = config.appUrl.endsWith('/') ? config.appUrl.slice(0, -1) : config.appUrl;
           const url = `${appUrl}${PLUGIN_BASE_URL}/${getUrlForTrail(trail)}`;
           navigator.clipboard.writeText(url);

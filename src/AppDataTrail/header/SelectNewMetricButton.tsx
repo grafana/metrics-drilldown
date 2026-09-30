@@ -6,6 +6,7 @@ import React from 'react';
 import { createAppUrl } from '../../extensions/links';
 import { UI_TEXT } from '../../shared/constants/ui';
 import { MetricSelectedEvent } from '../../shared/shared';
+import { reportExploreMetrics } from '../../shared/tracking/interactions';
 import { getTrailFor, getUrlForTrail } from '../../shared/utils/utils';
 
 interface SelectNewMetricButtonState extends SceneObjectState {}
@@ -19,6 +20,7 @@ export class SelectNewMetricButton extends SceneObjectBase<SelectNewMetricButton
 
   private onSelectNewMetric = () => {
     const trail = getTrailFor(this);
+    reportExploreMetrics('selected_metric_action_clicked', { action: 'unselect' });
     trail.publishEvent(new MetricSelectedEvent({}));
   };
 
@@ -34,6 +36,7 @@ export class SelectNewMetricButton extends SceneObjectBase<SelectNewMetricButton
           variant={'secondary'}
           icon="arrow-right"
           tooltip={t('select-new-metric.open-in-drilldown-tooltip', 'Open in Metrics Drilldown')}
+          onClick={() => reportExploreMetrics('selected_metric_action_clicked', { action: 'open_from_embedded' })}
           data-testid="open-metrics-drilldown-button"
         >
           {t('select-new-metric.metrics-drilldown', 'Metrics Drilldown')}

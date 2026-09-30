@@ -4,6 +4,8 @@ import { type SceneDataQuery, type SceneTimeRangeState } from '@grafana/scenes';
 import { LinkButton } from '@grafana/ui';
 import React, { useMemo } from 'react';
 
+import { reportExploreMetrics } from '../../shared/tracking/interactions';
+
 const extensionPointId = 'grafana-metricsdrilldown-app/open-in-logs-drilldown/v1';
 
 export interface LogsDrilldownLinkContext {
@@ -48,6 +50,7 @@ export function OpenInLogsDrilldownButton({ context }: Readonly<{ context: LogsD
       }
       variant="secondary"
       size="sm"
+      onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_logs_drilldown' })}
     >
       {logsDrilldownLinkExists
         ? t('related-logs.open-in-drilldown', 'Open in Logs Drilldown')
