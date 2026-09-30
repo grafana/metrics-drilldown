@@ -1,9 +1,9 @@
 name: PR rate limit
 
-# pull_request_target runs on the default branch (not the fork) so we can comment
-# on PRs from first-time contributors. Do not check out the PR head here.
+# Fork PRs get a read-only token, so the comment is best-effort and the job
+# fails when the limit is exceeded.
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - reopened
@@ -33,7 +33,7 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_CREATED_AT: ${{ github.event.pull_request.created_at }}
     steps:
-      - name: Comment when the author exceeds the window
+      - name: Fail check if the author exceeds the rate limit
         run: |
           set -euo pipefail
 
@@ -41,6 +41,8 @@ jobs:
           page_counts="$(
             gh api --paginate \
               -X GET \
+              # state=all: a merged PR still counts until 24h after it was opened.
+              # This job reruns only on open or reopen, not when another PR merges.
               -f state=all \
               -f creator="${AUTHOR}" \
               -f since="${cutoff}" \
@@ -64,5 +66,8 @@ jobs:
             "This pull request exceeds the rate limit: **@${AUTHOR}** opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
             "Please wait for the window to pass before opening more PRs, or ask a maintainer if this was a false positive. Combining related changes into fewer PRs helps review stay manageable.")"
 
-          gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"
-          echo "Commented on PR #${PR_NUMBER} for exceeding the rate limit."
+          if ! gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"; then
+            echo "Could not comment. Fork pull requests get a read-only token."
+          fi
+          echo "Failing the check: ${AUTHOR} exceeded the rate limit."
+          exit 1
