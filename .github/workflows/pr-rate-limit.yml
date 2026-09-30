@@ -1,0 +1,68 @@
+name: PR rate limit
+
+# pull_request_target runs on the default branch (not the fork) so we can comment
+# on PRs from first-time contributors. Do not check out the PR head here.
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+
+permissions: {}
+
+jobs:
+  enforce:
+    name: Enforce PR rate limit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # issues: read is required to list PRs via the issues API (creator filter).
+      # pull-requests: write is what gh pr comment actually checks.
+      issues: read
+      pull-requests: write
+    if: >
+      github.event.pull_request.user.type != 'Bot' &&
+      github.event.pull_request.author_association != 'OWNER' &&
+      github.event.pull_request.author_association != 'MEMBER' &&
+      github.event.pull_request.author_association != 'COLLABORATOR'
+    env:
+      MAX_PRS: 1
+      WINDOW_HOURS: 24
+      GH_TOKEN: ${{ github.token }}
+      AUTHOR: ${{ github.event.pull_request.user.login }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_CREATED_AT: ${{ github.event.pull_request.created_at }}
+    steps:
+      - name: Comment when the author exceeds the window
+        run: |
+          set -euo pipefail
+
+          cutoff="$(date -u -d "${WINDOW_HOURS} hours ago" +%Y-%m-%dT%H:%M:%SZ)"
+          page_counts="$(
+            gh api --paginate \
+              -X GET \
+              -f state=all \
+              -f creator="${AUTHOR}" \
+              -f since="${cutoff}" \
+              -f per_page=30 \
+              "/repos/${GITHUB_REPOSITORY}/issues" \
+              --jq "[.[] | select(.pull_request != null and .created_at >= \"${cutoff}\" and .created_at <= \"${PR_CREATED_AT}\")] | length"
+          )"
+          count=0
+          while IFS= read -r page_count; do
+            [ -z "${page_count}" ] && continue
+            count=$((count + page_count))
+          done <<< "${page_counts}"
+
+          echo "Author ${AUTHOR} opened ${count} PR(s) in the last ${WINDOW_HOURS}h (limit ${MAX_PRS})."
+
+          if [ "${count}" -le "${MAX_PRS}" ]; then
+            exit 0
+          fi
+
+          body="$(printf '%s\n\n%s' \
+            "This pull request exceeds the rate limit: **@${AUTHOR}** opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
+            "Please wait for the window to pass before opening more PRs, or ask a maintainer if this was a false positive. Combining related changes into fewer PRs helps review stay manageable.")"
+
+          gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"
+          echo "Commented on PR #${PR_NUMBER} for exceeding the rate limit."
