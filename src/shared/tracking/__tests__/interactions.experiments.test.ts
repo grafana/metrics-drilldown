@@ -39,9 +39,9 @@ describe('getExperimentPayloads — sort-by-firing-alerts experiment enrichment'
   });
 
   it('enriches the firing-alert adoption/guardrail events with the cohort', () => {
-    expect(getExperimentPayloads('firing_alert_filter_toggled', { action: 'activated', matching_count: 3 })).toMatchObject(
-      COHORT
-    );
+    expect(
+      getExperimentPayloads('firing_alert_filter_toggled', { action: 'activated', matching_count: 3 })
+    ).toMatchObject(COHORT);
     expect(
       getExperimentPayloads('firing_alert_metrics_fetched', {
         status: 'success',
@@ -53,21 +53,23 @@ describe('getExperimentPayloads — sort-by-firing-alerts experiment enrichment'
   });
 
   it('enriches sorting_changed only when the firing-alerts sort is selected from the metrics reducer', () => {
-    expect(getExperimentPayloads('sorting_changed', { from: 'metrics-reducer', sortBy: 'firing-alerts' })).toMatchObject(
-      COHORT
-    );
+    expect(
+      getExperimentPayloads('sorting_changed', { from: 'metrics-reducer', sortBy: 'firing-alerts' })
+    ).toMatchObject(COHORT);
 
     const otherSort = getExperimentPayloads('sorting_changed', { from: 'metrics-reducer', sortBy: 'alphabetical' });
     expect(otherSort[FIRING_ALERTS_KEY]).toBeUndefined();
   });
 
   it('does not enrich unrelated events with the cohort', () => {
-    expect(getExperimentPayloads('quick_search_used', {})[FIRING_ALERTS_KEY]).toBeUndefined();
+    expect(getExperimentPayloads('datasource_changed', {})[FIRING_ALERTS_KEY]).toBeUndefined();
   });
 
   it('omits the cohort when it has not been recorded yet (null payload)', () => {
     mockGetTrackedFlagPayload.mockReturnValue(null);
 
-    expect(getExperimentPayloads('metric_selected', { from: 'metric_list', searchTermCount: null })[FIRING_ALERTS_KEY]).toBeUndefined();
+    expect(
+      getExperimentPayloads('metric_selected', { from: 'metric_list', searchTermCount: null })[FIRING_ALERTS_KEY]
+    ).toBeUndefined();
   });
 });
