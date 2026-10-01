@@ -1,0 +1,73 @@
+name: PR rate limit
+
+# Fork PRs get a read-only token, so the comment is best-effort and the job
+# fails when the limit is exceeded.
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+
+permissions: {}
+
+jobs:
+  enforce:
+    name: Enforce PR rate limit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # issues: read is required to list PRs via the issues API (creator filter).
+      # pull-requests: write is what gh pr comment actually checks.
+      issues: read
+      pull-requests: write
+    if: >
+      github.event.pull_request.user.type != 'Bot' &&
+      github.event.pull_request.author_association != 'OWNER' &&
+      github.event.pull_request.author_association != 'MEMBER' &&
+      github.event.pull_request.author_association != 'COLLABORATOR'
+    env:
+      MAX_PRS: 1
+      WINDOW_HOURS: 24
+      GH_TOKEN: ${{ github.token }}
+      AUTHOR: ${{ github.event.pull_request.user.login }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_CREATED_AT: ${{ github.event.pull_request.created_at }}
+    steps:
+      - name: Fail check if the author exceeds the rate limit
+        run: |
+          set -euo pipefail
+
+          cutoff="$(date -u -d "${WINDOW_HOURS} hours ago" +%Y-%m-%dT%H:%M:%SZ)"
+          # state=all: a merged PR still counts until 24h after it was opened.
+          # This job reruns only on open or reopen, not when another PR merges.
+          page_counts="$(
+            gh api --paginate \
+              -X GET \
+              -f state=all \
+              -f creator="${AUTHOR}" \
+              -f since="${cutoff}" \
+              -f per_page=30 \
+              "/repos/${GITHUB_REPOSITORY}/issues" \
+              --jq "[.[] | select(.pull_request != null and .created_at >= \"${cutoff}\" and .created_at <= \"${PR_CREATED_AT}\")] | length"
+          )"
+          count=0
+          while IFS= read -r page_count; do
+            [ -z "${page_count}" ] && continue
+            count=$((count + page_count))
+          done <<< "${page_counts}"
+
+          echo "Author ${AUTHOR} opened ${count} PR(s) in the last ${WINDOW_HOURS}h (limit ${MAX_PRS})."
+
+          if [ "${count}" -le "${MAX_PRS}" ]; then
+            exit 0
+          fi
+
+          body="$(printf '%s\n\n%s' \
+            "This pull request exceeds the rate limit: **@${AUTHOR}** opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
+            "Please wait for the window to pass before opening more PRs, or ask a maintainer if this was a false positive. Combining related changes into fewer PRs helps review stay manageable.")"
+
+          if ! gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"; then
+            echo "Could not comment. Fork pull requests get a read-only token."
+          fi
+          echo "Failing the check: ${AUTHOR} exceeded the rate limit."
+          exit 1
