@@ -35,6 +35,7 @@ To begin drilling down your data, filter the metrics that appear in Metrics Dril
 
 1. (Optional) To search for metrics, type keywords in the metric search bar.
 1. (Optional) From the **Sort by** dropdown, select how to sort metrics: **Default** (alphabetical, with recently selected metrics first), **Alphabetical [A-Z]**, **Alphabetical [Z-A]**, **Dashboard Usage** (by prevalence in dashboard panel queries), or **Alerting Usage** (by prevalence in alerting rules).
+1. (Optional) Select **SLO-tracked** next to the search controls to show only metrics that appear in Grafana SLO definitions for the selected data source. The control appears when the Grafana SLO app is installed and SLO tracking is available for your instance. Metric panels that match show a badge; hover the badge to see how many SLO definitions reference the metric.
 1. Use the time picker to select a date and time range from the dropdown menu, or use an absolute time range.
 1. Select the refresh interval control next to the **Refresh** icon to set a refresh rate from the dropdown menu. By default, refresh is **Off**.
 

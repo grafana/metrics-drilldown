@@ -26,7 +26,7 @@ The Metrics Drilldown app is installed in both Grafana Cloud and self-managed Gr
 
 | Requirement | Grafana Cloud                                          | Self-managed Grafana (OSS / Enterprise)                                                                                             |
 | ----------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Grafana     | A Grafana Cloud account with a Grafana stack           | Your own Grafana instance running version 11.6.x or later                                                                             |
+| Grafana     | A Grafana Cloud account with a Grafana stack           | Your own Grafana instance running version 13.1.x or later                                                                             |
 | Data source | A configured Prometheus-compatible metrics data source | A configured Prometheus-compatible metrics data source, with the scrape interval set to match your metrics system's scrape interval |
 
 ## Access Metrics Drilldown
@@ -37,7 +37,7 @@ Access Metrics Drilldown either through the main page in Grafana or through a da
 | --------------------------------------------------------- | ------------------------------------------------------------------------- |
 | 1. From the Grafana left-side menu, select **Drilldown**. | 1. Navigate to your dashboard in Grafana.                                 |
 | 2. From the list of Drilldown apps, select **Metrics**.   | 2. Select a time series panel.                                            |
-|                                                           | 3. Open the panel menu, and select **Open in Grafana Metrics Drilldown**. |
+|                                                           | 3. Open the panel menu, and select **Open in Metrics Drilldown**. |
 
 {{< admonition type="note" >}}
 In some Grafana versions, the dashboard menu action appears under **Metrics drilldown**.
