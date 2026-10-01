@@ -370,8 +370,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(EventConfigurePanel, async (event) => {
       const { metric } = event.payload;
 
-      reportExploreMetrics('configure_panel_opened', { metricType: metric.type });
-
       this.state.drawer.open({
         title: t('data-trail.configure-drawer.title', 'Configure the Prometheus function'),
         subTitle: `${metric.name} (${metric.type})`,
@@ -385,12 +383,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     this.subscribeToEvent(EventApplyPanelConfig, async (event) => {
       const { metric, config, restoreDefault } = event.payload;
-
-      if (restoreDefault) {
-        reportExploreMetrics('default_panel_config_restored', { metricType: metric.type });
-      } else {
-        reportExploreMetrics('panel_config_applied', { metricType: metric.type, configId: config.id });
-      }
 
       this.state.drawer.close();
 
