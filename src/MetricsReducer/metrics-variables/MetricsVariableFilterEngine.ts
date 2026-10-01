@@ -200,7 +200,7 @@ export class MetricsVariableFilterEngine {
       .filter(Boolean)
       .map((r) => {
         try {
-          return new RegExp(r);
+          return new RegExp(r, 'i');
         } catch {
           return null;
         }
