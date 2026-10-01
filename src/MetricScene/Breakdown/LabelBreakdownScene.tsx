@@ -114,6 +114,12 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
   // would briefly query with the wrong function. Wait here -- the mainPanel subscription above re-triggers
   // this once it resolves, for whichever call site got skipped.
   private updateBody(groupByVariable: QueryVariable) {
+    // QueryVariable starts with an empty value before defaultToAll resolves. Do not build a
+    // selected-label scene for that transient state: an empty label name is not valid in Prometheus.
+    if (!groupByVariable.state.value) {
+      return;
+    }
+
     const mainPanel = this.getMainPanel();
     if (mainPanel && !mainPanel.state.metricTypeResolved) {
       return;

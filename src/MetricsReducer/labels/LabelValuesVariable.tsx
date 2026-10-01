@@ -2,17 +2,16 @@ import { VariableHide, VariableRefresh } from '@grafana/data';
 import { QueryVariable } from '@grafana/scenes';
 import React from 'react';
 
-import { LabelsDataSource } from './LabelsDataSource';
+import { buildLabelValuesQuery, LabelsDataSource } from './LabelsDataSource';
 
 export const VAR_LABEL_VALUES = 'wingmanLabelValues';
 
 export class LabelValuesVariable extends QueryVariable {
-  constructor({ labelName }: { labelName: string }) {
+  constructor({ labelName, matcher }: { labelName: string; matcher?: string }) {
     super({
       name: VAR_LABEL_VALUES,
       datasource: { uid: LabelsDataSource.uid },
-      // just some syntax we make up so that the data source can decide what to fetch
-      query: `valuesOf(${labelName})`,
+      query: buildLabelValuesQuery(labelName, matcher),
       isMulti: false,
       allowCustomValue: false,
       refresh: VariableRefresh.onTimeRangeChanged,
