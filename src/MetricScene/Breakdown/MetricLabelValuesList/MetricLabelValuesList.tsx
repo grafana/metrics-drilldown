@@ -51,6 +51,8 @@ import { PanelMenu } from '../../PanelMenu/PanelMenu';
 import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from '../MetricLabelsList/behaviors/syncYAxis';
 
+export const BREAKDOWN_QUICK_SEARCH_KEY = 'breakdown-quick-search';
+
 function getLabelValueTitle(frame: DataFrame | undefined, labelValue: string): string {
   if (frame) {
     return getLabelValueFromDataFrame(frame);
@@ -108,16 +110,17 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       },
     });
 
-    const labelValuesVariable = binaryQuery
-      ? undefined
-      : new LabelValuesVariable({
-          labelName: label,
-          matcher: buildQueryExpression({
-            metric,
-            labelMatchers: [],
-            addIgnoreUsageFilter: false,
-          }),
-        });
+    const labelValuesVariable =
+      binaryQuery || !label
+        ? undefined
+        : new LabelValuesVariable({
+            labelName: label,
+            matcher: buildQueryExpression({
+              metric,
+              labelMatchers: [],
+              addIgnoreUsageFilter: false,
+            }),
+          });
 
     super({
       key: 'metric-label-values-list',
@@ -134,6 +137,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         ],
       }),
       quickSearch: new QuickSearch({
+        key: BREAKDOWN_QUICK_SEARCH_KEY,
         urlSearchParamName: 'breakdownSearchText',
         targetName: 'label value',
         countsProvider: new LabelValuesCountsProvider(),
@@ -262,7 +266,8 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     const { binaryQuery } = this.state;
 
     return new SceneByFrameRepeater({
-      variableName: binaryQuery ? undefined : VAR_LABEL_VALUES,
+      variableName: this.state.$variables ? VAR_LABEL_VALUES : undefined,
+      quickSearchKey: BREAKDOWN_QUICK_SEARCH_KEY,
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
       $behaviors: [
         syncYAxis(),

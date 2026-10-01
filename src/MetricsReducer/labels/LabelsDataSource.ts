@@ -79,13 +79,19 @@ export class LabelsDataSource extends RuntimeDataSource {
 
   async metricFindQuery(matcher: string, options: LegacyMetricFindQueryOptions): Promise<MetricFindValue[]> {
     const sceneObject = options.scopedVars?.__sceneObject?.valueOf() as SceneObject;
+    const labelValuesQuery = parseLabelValuesQuery(matcher);
+
+    // Query variables can briefly evaluate before their dependent group-by variable has resolved.
+    // Avoid issuing an invalid `/label//values` request for that transient empty label name.
+    if (labelValuesQuery && !labelValuesQuery.labelName) {
+      return [];
+    }
 
     const ds = await MetricDatasourceHelper.getPrometheusDataSourceForScene(sceneObject);
     if (!ds) {
       return [];
     }
 
-    const labelValuesQuery = parseLabelValuesQuery(matcher);
     if (labelValuesQuery) {
       const interpolatedMatcher = labelValuesQuery.matcher
         ? sceneGraph.interpolate(sceneObject, labelValuesQuery.matcher)

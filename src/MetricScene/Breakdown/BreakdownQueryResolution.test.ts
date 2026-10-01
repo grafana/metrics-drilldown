@@ -9,7 +9,7 @@ import {
 import { type LabelValuesVariable } from 'MetricsReducer/labels/LabelValuesVariable';
 
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
-import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
+import { BREAKDOWN_QUICK_SEARCH_KEY, MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 
 describe('breakdown query resolution', () => {
   it('keeps the secondary selected-label range query at 250 max data points', () => {
@@ -42,6 +42,26 @@ describe('breakdown query resolution', () => {
     });
 
     expect(list.state.$variables).toBeUndefined();
+  });
+
+  it('does not add metric-scoped enumeration for a transient empty label', () => {
+    const list = new MetricLabelValuesList({
+      metric: { name: 'test_metric', type: 'gauge' },
+      label: '',
+    });
+
+    expect(list.state.$variables).toBeUndefined();
+  });
+
+  it('uses a breakdown-specific quick-search key for label-value repetition', () => {
+    const list = new MetricLabelValuesList({
+      metric: { name: 'test_metric', type: 'gauge' },
+      label: 'instance',
+    });
+    const repeater = (list as any).buildByFrameRepeater();
+
+    expect(list.state.quickSearch.state.key).toBe(BREAKDOWN_QUICK_SEARCH_KEY);
+    expect(repeater.state.quickSearchKey).toBe(BREAKDOWN_QUICK_SEARCH_KEY);
   });
 
   it('uses 500 max data points for panels in the all-labels breakdown', () => {

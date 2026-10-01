@@ -118,6 +118,7 @@ interface SceneByFrameRepeaterState extends SceneObjectState {
   $behaviors: Array<SceneObject | SceneStatelessBehavior>;
   body: SceneLayout;
   variableName?: string;
+  quickSearchKey: string;
   getLayoutChild(
     data: PanelData,
     frame: DataFrame | undefined,
@@ -150,6 +151,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     $behaviors,
     body,
     variableName,
+    quickSearchKey = 'quick-search',
     getLayoutChild,
     getLayoutLoading,
     getLayoutError,
@@ -161,6 +163,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
     $behaviors: SceneByFrameRepeaterState['$behaviors'];
     body: SceneByFrameRepeaterState['body'];
     variableName?: string;
+    quickSearchKey?: string;
     getLayoutChild: SceneByFrameRepeaterState['getLayoutChild'];
     getLayoutLoading?: NonNullable<SceneByFrameRepeaterState['getLayoutLoading']>;
     getLayoutError?: NonNullable<SceneByFrameRepeaterState['getLayoutError']>;
@@ -174,6 +177,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
       $behaviors,
       body,
       variableName,
+      quickSearchKey,
       getLayoutChild,
       getLayoutLoading,
       getLayoutError,
@@ -296,7 +300,7 @@ export class SceneByFrameRepeater extends SceneObjectBase<SceneByFrameRepeaterSt
   }
 
   private initFilterAndSort() {
-    this.searchText = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch).state.value;
+    this.searchText = sceneGraph.findByKeyAndType(this, this.state.quickSearchKey, QuickSearch).state.value;
     this.sortBy = sceneGraph.findByKeyAndType(this, 'breakdown-sort-by', SortBySelector).state.value.value;
   }
 

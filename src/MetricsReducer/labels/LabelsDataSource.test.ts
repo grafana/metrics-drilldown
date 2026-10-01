@@ -76,6 +76,16 @@ describe('LabelsDataSource label-value queries', () => {
     );
   });
 
+  it('does not query Prometheus for an empty label name', async () => {
+    const fetchLabelValues = jest.spyOn(MetricDatasourceHelper, 'fetchLabelValues');
+    const datasource = new LabelsDataSource();
+
+    await expect(datasource.metricFindQuery(buildLabelValuesQuery('', 'test_metric{}'), options)).resolves.toEqual([]);
+
+    expect(MetricDatasourceHelper.getPrometheusDataSourceForScene).not.toHaveBeenCalled();
+    expect(fetchLabelValues).not.toHaveBeenCalled();
+  });
+
   it('stores the matcher in LabelValuesVariable while retaining time-range refresh', () => {
     const variable = new LabelValuesVariable({
       labelName: '"service.name"',
