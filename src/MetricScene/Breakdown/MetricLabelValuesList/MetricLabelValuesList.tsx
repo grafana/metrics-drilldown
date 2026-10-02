@@ -44,6 +44,7 @@ import { InlineBanner } from '../../../App/InlineBanner';
 import { PanelMenu } from '../../PanelMenu/PanelMenu';
 import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from '../MetricLabelsList/behaviors/syncYAxis';
+import { type SyncYAxisSwitch } from '../SyncYAxisSwitch';
 
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: Metric;
@@ -342,7 +343,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     });
   }
 
-  public Controls({ model }: { model: MetricLabelValuesList }) {
+  public Controls({ model, syncYAxisSwitch }: { model: MetricLabelValuesList; syncYAxisSwitch: SyncYAxisSwitch }) {
     const styles = useStyles2(getStyles);
     const { body, quickSearch, layoutSwitcher, sortBySelector } = model.useState();
 
@@ -362,6 +363,8 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         <Field label={t('breakdown.label-values-list.view-label', 'View')} className={styles.field}>
           <layoutSwitcher.Component model={layoutSwitcher} />
         </Field>
+        {/* Single layout shows one panel, so there is no y-axis to share */}
+        {body instanceof SceneByFrameRepeater && <syncYAxisSwitch.Component model={syncYAxisSwitch} />}
       </>
     );
   }
