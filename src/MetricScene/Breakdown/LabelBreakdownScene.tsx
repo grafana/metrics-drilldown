@@ -128,12 +128,13 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const histogramBreakdownFn = this.getHistogramBreakdownFnVariable().state.value as HistogramBreakdownFn | undefined;
 
     const newBody = groupByVariable.hasAllValue()
-      ? new MetricLabelsList({ metric })
+      ? new MetricLabelsList({ metric, syncYAxisEnabled: true })
       : new MetricLabelValuesList({
           metric,
           label: groupByVariable.state.value as string,
           binaryQuery: trail.state.binaryQuery,
           histogramBreakdownFn,
+          syncYAxisEnabled: true,
         });
 
     this.setState({ body: newBody, metricType: type });

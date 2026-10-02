@@ -80,7 +80,14 @@ function getLabelPanelConfig(label: string, labelIndex: number, embeddedMini: bo
 }
 
 export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
-  constructor({ metric }: { metric: MetricLabelsListState['metric'] }) {
+  constructor({
+    metric,
+    syncYAxisEnabled,
+  }: {
+    metric: MetricLabelsListState['metric'];
+    // When true, attaches the syncYAxis behavior so all panels share one y-axis range.
+    syncYAxisEnabled: boolean;
+  }) {
     super({
       key: 'metric-labels-list',
       metric,
@@ -99,7 +106,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
               key: 'metricCrosshairSync',
               sync: DashboardCursorSync.Crosshair,
             }),
-            syncYAxis(),
+            ...(syncYAxisEnabled ? [syncYAxis()] : []),
           ],
         }),
         getLayoutLoading: () =>
