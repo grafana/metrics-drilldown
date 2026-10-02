@@ -120,6 +120,10 @@ A dropdown lets users select which label to break down by. Choosing "All" shows 
 
 For histogram metrics, a "Function" selector controls how each label's breakdown is aggregated: sum (the default, each label's total value per second) or a percentile (p99, p95, p75, p50).
 
+##### Sync y-axis
+
+A "Sync y-axis" switch, next to the layout control, controls whether the panels share one y-axis range. It's on by default, which helps users scan many panels and spot the one that stands out. Turning it off scales each panel to its own data, so the shape of each series stays readable even when one panel's values are much larger than the others. The setting is saved in the browser and applies to every metric. The switch is hidden in the Single layout because there's only one panel.
+
 ##### Visual Interaction
 
 - Clicking a panel applies that label or value as a filter, narrowing the focus

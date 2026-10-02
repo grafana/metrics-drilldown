@@ -39,6 +39,7 @@ import { EventTimeseriesDataReceived } from './events/EventTimeseriesDataReceive
 import { SelectLabelAction } from './SelectLabelAction';
 import { buildMiniBreakdownNavigationUrl } from '../../../exposedComponents/MiniBreakdown/buildNavigationUrl';
 import { PanelMenu } from '../../PanelMenu/PanelMenu';
+import { type SyncYAxisSwitch } from '../SyncYAxisSwitch';
 
 interface MetricLabelsListState extends SceneObjectState {
   metric: Metric;
@@ -80,7 +81,14 @@ function getLabelPanelConfig(label: string, labelIndex: number, embeddedMini: bo
 }
 
 export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
-  constructor({ metric }: { metric: MetricLabelsListState['metric'] }) {
+  constructor({
+    metric,
+    syncYAxisEnabled,
+  }: {
+    metric: MetricLabelsListState['metric'];
+    // When true, attaches the syncYAxis behavior so all panels share one y-axis range.
+    syncYAxisEnabled: boolean;
+  }) {
     super({
       key: 'metric-labels-list',
       metric,
@@ -99,7 +107,7 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
               key: 'metricCrosshairSync',
               sync: DashboardCursorSync.Crosshair,
             }),
-            syncYAxis(),
+            ...(syncYAxisEnabled ? [syncYAxis()] : []),
           ],
         }),
         getLayoutLoading: () =>
@@ -242,14 +250,18 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
     this._subs.add(layoutSwitcher.subscribeToState(onChangeState));
   }
 
-  public Controls({ model }: { model: MetricLabelsList }) {
+  public Controls({ model, syncYAxisSwitch }: { model: MetricLabelsList; syncYAxisSwitch: SyncYAxisSwitch }) {
     const styles = useStyles2(getStyles);
     const { layoutSwitcher } = model.useState();
 
     return (
-      <Field label={t('breakdown.labels-list.view-label', 'View')} className={styles.field}>
-        <layoutSwitcher.Component model={layoutSwitcher} />
-      </Field>
+      // grouped so the parent's space-between row keeps these two controls together on the right
+      <div className={styles.controls}>
+        <Field label={t('breakdown.labels-list.view-label', 'View')} className={styles.field}>
+          <layoutSwitcher.Component model={layoutSwitcher} />
+        </Field>
+        <syncYAxisSwitch.Component model={syncYAxisSwitch} />
+      </div>
     );
   }
 
@@ -285,6 +297,11 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
 
 function getStyles(theme: GrafanaTheme2) {
   return {
+    controls: css({
+      display: 'flex',
+      alignItems: 'end',
+      gap: theme.spacing(1),
+    }),
     field: css({
       marginBottom: 0,
     }),
