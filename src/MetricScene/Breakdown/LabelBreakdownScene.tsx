@@ -20,6 +20,7 @@ import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { type HistogramBreakdownFnVariable } from './HistogramBreakdownFnVariable';
+import { EventSyncYAxisChanged } from './MetricLabelsList/events/EventSyncYAxisChanged';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
 import { SyncYAxisSwitch } from './SyncYAxisSwitch';
@@ -65,14 +66,10 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       }
     });
 
-    this._subs.add(
-      this.state.syncYAxisSwitch.subscribeToState((newState, prevState) => {
-        if (newState.enabled !== prevState.enabled) {
-          reportExploreMetrics('breakdown_sync_yaxis_changed', { enabled: newState.enabled });
-          this.updateBody(groupByVariable);
-        }
-      })
-    );
+    this.subscribeToEvent(EventSyncYAxisChanged, (event) => {
+      reportExploreMetrics('breakdown_sync_yaxis_changed', { enabled: event.payload.enabled });
+      this.updateBody(groupByVariable);
+    });
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
       this.subscribeToEvent(RefreshMetricsEvent, () => {

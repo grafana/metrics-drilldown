@@ -176,6 +176,10 @@ export class MetricSceneView extends DrilldownView {
     return this.getByRole('switch', { name: 'Sync y-axis' });
   }
 
+  getFirstPanelKey() {
+    return this.getPanelsList().locator('[data-viz-panel-key]').first().getAttribute('data-viz-panel-key');
+  }
+
   async setSyncYAxis(enabled: boolean) {
     const syncYAxisSwitch = this.getSyncYAxisSwitch();
 

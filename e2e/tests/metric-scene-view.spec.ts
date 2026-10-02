@@ -67,6 +67,16 @@ test.describe('Metric Scene view', () => {
         await metricSceneView.assertPanelsList();
       });
 
+      test('Rebuilds the panels when toggled after changing the label', async ({ metricSceneView }) => {
+        // changing the label remounts the switch, which used to drop the listener that rebuilds the panels
+        await metricSceneView.selectLabel('quantile');
+        const panelKeyBefore = await metricSceneView.getFirstPanelKey();
+
+        await metricSceneView.setSyncYAxis(false);
+
+        await expect.poll(() => metricSceneView.getFirstPanelKey()).not.toBe(panelKeyBefore);
+      });
+
       test.describe('After selecting a label', () => {
         test.beforeEach(async ({ metricSceneView }) => {
           const LABEL = 'quantile'; // label chosen to test the outlying series detection (other labels won't have any outlier detected)
