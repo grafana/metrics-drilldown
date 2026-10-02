@@ -1,10 +1,10 @@
 import { createDataFrame, FieldType, LoadingState, type DataFrame, type PanelData } from '@grafana/data';
 import { SceneDataNode, SceneDataTransformer, VizPanel } from '@grafana/scenes';
 
-import { publishTimeseriesData } from '../publishTimeseriesData';
-import { EventTimeseriesDataReceived } from '../../events/EventTimeseriesDataReceived';
-import { activateFullSceneTree } from '../../../../../shared/utils/utils.testing';
 import { sliceSeries } from '../../../../../shared/GmdVizPanel/types/timeseries/transformations/sliceSeries';
+import { activateFullSceneTree } from '../../../../../shared/utils/utils.testing';
+import { EventTimeseriesDataReceived } from '../../events/EventTimeseriesDataReceived';
+import { publishTimeseriesData } from '../publishTimeseriesData';
 
 function makeFrame(refId: string, value: number): DataFrame {
   return createDataFrame({
