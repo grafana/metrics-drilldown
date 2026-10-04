@@ -91,7 +91,7 @@
     "@typescript-eslint/eslint-plugin": "8.69.0",
     "@typescript-eslint/parser": "8.69.0",
     "css-loader": "7.1.5",
-    "dotenv": "17.4.2",
+    "dotenv": "18.0.5",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-import-resolver-typescript": "4.4.5",
