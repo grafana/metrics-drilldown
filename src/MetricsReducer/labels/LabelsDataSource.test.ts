@@ -29,7 +29,7 @@ describe('LabelsDataSource label-value queries', () => {
   it('interpolates and forwards an optional metric matcher with the selected time range', async () => {
     const fetchLabelValues = jest
       .spyOn(MetricDatasourceHelper, 'fetchLabelValues')
-      .mockResolvedValue(['', 'api-1', 'api-2']);
+      .mockResolvedValue(['api-1', 'api-2']);
     jest.spyOn(sceneGraph, 'interpolate').mockReturnValue('test_metric{job="api",region=~"us-.+"}');
 
     const datasource = new LabelsDataSource();
@@ -46,7 +46,6 @@ describe('LabelsDataSource label-value queries', () => {
       matcher: 'test_metric{job="api",region=~"us-.+"}',
     });
     expect(result).toEqual([
-      { value: '', text: '' },
       { value: 'api-1', text: 'api-1' },
       { value: 'api-2', text: 'api-2' },
     ]);

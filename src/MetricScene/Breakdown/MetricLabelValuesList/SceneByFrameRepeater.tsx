@@ -54,11 +54,23 @@ export function buildLabelValueItems(values: string[] | undefined, series: DataF
     }
   }
 
-  return values.map((value) => ({
+  const items: LabelValueItem[] = values.map((value) => ({
     value,
     displayValue: getDisplayValue(value),
     frame: framesByValue.get(value),
   }));
+
+  // The label-values API never returns '' (series without the label have no value for it), and it
+  // resolves to [] on request failure. Keep any range frames absent from the list — e.g. the
+  // <unspecified> frame — so they still render, matching the frame-only behavior.
+  const listedValues = new Set(values);
+  for (const [value, frame] of framesByValue) {
+    if (!listedValues.has(value)) {
+      items.push({ value, displayValue: getDisplayValue(value), frame });
+    }
+  }
+
+  return items;
 }
 
 function matchesSearch(item: LabelValueItem, searchText: string): boolean {

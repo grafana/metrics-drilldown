@@ -22,12 +22,35 @@ function makeFrame(labelValue: string, values = [1, 2]): DataFrame {
 describe('label-value repetition', () => {
   it('keeps authoritative values that are missing from sampled range frames', () => {
     const sampled = makeFrame('sampled');
-    const items = buildLabelValueItems(['sampled', 'missing', ''], [sampled, makeFrame('<unspecified>')]);
+    const items = buildLabelValueItems(['sampled', 'missing'], [sampled]);
 
     expect(items).toEqual([
       { value: 'sampled', displayValue: 'sampled', frame: sampled },
       { value: 'missing', displayValue: 'missing', frame: undefined },
-      { value: '', displayValue: '<unspecified>', frame: expect.anything() },
+    ]);
+  });
+
+  it('keeps the <unspecified> range frame even though Prometheus label values never include an empty value', () => {
+    const sampled = makeFrame('sampled');
+    const unspecified = makeFrame('<unspecified>');
+    const items = buildLabelValueItems(['sampled', 'missing'], [sampled, unspecified]);
+
+    expect(items).toEqual([
+      { value: 'sampled', displayValue: 'sampled', frame: sampled },
+      { value: 'missing', displayValue: 'missing', frame: undefined },
+      { value: '', displayValue: '<unspecified>', frame: unspecified },
+    ]);
+  });
+
+  it('falls back to range frames when the label-values list is empty (e.g. the request failed)', () => {
+    const first = makeFrame('first');
+    const second = makeFrame('second');
+    const unspecified = makeFrame('<unspecified>');
+
+    expect(buildLabelValueItems([], [first, second, unspecified])).toEqual([
+      { value: 'first', displayValue: 'first', frame: first },
+      { value: 'second', displayValue: 'second', frame: second },
+      { value: '', displayValue: '<unspecified>', frame: unspecified },
     ]);
   });
 
@@ -50,7 +73,7 @@ describe('label-value repetition', () => {
   });
 
   it('sorts every authoritative value alphabetically in either direction', () => {
-    const items = buildLabelValueItems(['b', '', 'a'], []);
+    const items = buildLabelValueItems(['b', 'a'], [makeFrame('<unspecified>')]);
 
     expect(filterAndSortLabelValueItems(items, '', 'alphabetical').map((item) => item.displayValue)).toEqual([
       '<unspecified>',
