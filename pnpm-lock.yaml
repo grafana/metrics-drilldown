@@ -17,7 +17,7 @@ overrides:
   '@grafana/data': ^13.0.0
   '@grafana/i18n': ^13.0.0
   '@grafana/schema': ^13.0.0
-  basic-ftp: '>=6.2.1'
+  basic-ftp: ^6.2.1
 
 importers:
 
