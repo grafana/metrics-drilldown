@@ -46,7 +46,6 @@ jobs:
               -f state=all \
               -f creator="${AUTHOR}" \
               -f since="${cutoff}" \
-              -f per_page=30 \
               "/repos/${GITHUB_REPOSITORY}/issues" \
               --jq "[.[] | select(.pull_request != null and .created_at >= \"${cutoff}\" and .created_at <= \"${PR_CREATED_AT}\")] | length"
           )"
