@@ -6,6 +6,7 @@ on:
   pull_request:
     types:
       - opened
+      - synchronize
       - reopened
 
 permissions: {}
@@ -32,6 +33,7 @@ jobs:
       AUTHOR: ${{ github.event.pull_request.user.login }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_CREATED_AT: ${{ github.event.pull_request.created_at }}
+      EVENT_ACTION: ${{ github.event.action }}
     steps:
       - name: Fail check if the author exceeds the rate limit
         run: |
@@ -39,7 +41,8 @@ jobs:
 
           cutoff="$(date -u -d "${WINDOW_HOURS} hours ago" +%Y-%m-%dT%H:%M:%SZ)"
           # state=all: a merged PR still counts until 24h after it was opened.
-          # This job reruns only on open or reopen, not when another PR merges.
+          # New commits on this pull request re-run the check. Opening or
+          # merging a different pull request does not.
           page_counts="$(
             gh api --paginate \
               -X GET \
@@ -61,12 +64,15 @@ jobs:
             exit 0
           fi
 
-          body="$(printf '%s\n\n%s' \
-            "This pull request exceeds the rate limit: **@${AUTHOR}** opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
-            "Please wait for the window to pass before opening more PRs, or ask a maintainer if this was a false positive. Combining related changes into fewer PRs helps review stay manageable.")"
+          # opened and reopened already leave a comment. Skip it on later pushes.
+          if [ "${EVENT_ACTION}" != "synchronize" ]; then
+            body="$(printf '%s\n\n%s' \
+              "This pull request exceeds the rate limit: **@${AUTHOR}** opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
+              "Please wait for the window to pass before opening more PRs, or ask a maintainer if this was a false positive. Combining related changes into fewer PRs helps review stay manageable.")"
 
-          if ! gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"; then
-            echo "Could not comment. Fork pull requests get a read-only token."
+            if ! gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"; then
+              echo "Could not comment. Fork pull requests get a read-only token."
+            fi
           fi
           echo "Failing the check: ${AUTHOR} exceeded the rate limit."
           exit 1
