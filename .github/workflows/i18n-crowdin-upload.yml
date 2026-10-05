@@ -21,7 +21,7 @@ jobs:
           persist-credentials: false
       - name: 'Get vault secrets'
         id: vault-secrets
-        uses: grafana/shared-workflows/actions/get-vault-secrets@e13620090fb3919c011b44d6c2233bb4561d70e6 # main
+        uses: grafana/shared-workflows/actions/get-vault-secrets@d8353fd2c4ff821bd9a635f222305545ddb61266 # main
         with:
             # Vault secret paths:
             # - ci/repo/grafana/metrics-drilldown/grafana-frontend-crowdin-token
