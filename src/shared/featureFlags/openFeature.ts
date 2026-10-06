@@ -1,6 +1,5 @@
-import { config } from '@grafana/runtime';
-import { OFREPWebProvider } from '@openfeature/ofrep-web-provider';
-import { ClientProviderStatus, OpenFeature, ProviderEvents, type Client, type JsonValue } from '@openfeature/web-sdk';
+import { config, createOpenFeatureLocalStorageProvider, createOpenFeatureOFREPWebProvider } from '@grafana/runtime';
+import { ClientProviderStatus, MultiProvider, OpenFeature, ProviderEvents, type Client, type JsonValue } from '@openfeature/web-sdk';
 
 import { TrackingHook } from './tracking';
 import { getObjectKeys } from '../../shared/utils/utils';
@@ -126,26 +125,21 @@ export const OPEN_FEATURE_DOMAIN = 'metrics-drilldown';
  * This prevents re-initialization if the app component re-renders.
  */
 export function initOpenFeatureProvider(): Promise<void> {
-  const subPath = config.appSubUrl ?? '';
+  if (OpenFeature.getProvider(OPEN_FEATURE_DOMAIN) === OpenFeature.getProvider()) {
+    return OpenFeature.setProviderAndWait(
+      OPEN_FEATURE_DOMAIN,
+      new MultiProvider([
+        { provider: createOpenFeatureLocalStorageProvider() },
+        { provider: createOpenFeatureOFREPWebProvider() },
+      ])
+    ).catch((error) => {
+      // OpenFeature initialization may fail in environments without the feature flag service.
+      // This is expected and the app will continue to work with default flag values.
+      logger.warn('OpenFeature provider initialization failed, using default flag values', error);
+    });
+  }
 
-  return OpenFeature.setProviderAndWait(
-    OPEN_FEATURE_DOMAIN,
-    new OFREPWebProvider({
-      baseUrl: `${subPath}/apis/features.grafana.app/v0alpha1/namespaces/${config.namespace}`,
-      disableVisibilityRefresh: true, // Do not refresh
-      cacheMode: 'disabled', // Do not write to localStorage
-      timeoutMs: 10_000, // Timeout after 10 seconds
-    }),
-    {
-      targetingKey: config.namespace, // Dimension of uniqueness, to ensure flags are evaluated consistently for a given stack
-      namespace: config.namespace, // Required by the multi-tenant feature flag service
-      ...config.openFeatureContext,
-    }
-  ).catch((error) => {
-    // OpenFeature initialization may fail in environments without the feature flag service.
-    // This is expected and the app will continue to work with default flag values.
-    logger.warn('OpenFeature provider initialization failed, using default flag values', error);
-  });
+  return Promise.resolve();
 }
 
 /**
