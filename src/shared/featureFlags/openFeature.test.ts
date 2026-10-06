@@ -23,19 +23,12 @@ jest.mock('@openfeature/ofrep-web-provider', () => ({
 }));
 
 jest.mock('@openfeature/web-sdk', () => ({
+  ...jest.requireActual('@openfeature/web-sdk'),
   OpenFeature: {
+    ...jest.requireActual('@openfeature/web-sdk').OpenFeature,
     getClient: jest.fn(),
     setProviderAndWait: jest.fn().mockResolvedValue(undefined),
   },
-  ClientProviderStatus: {
-    READY: 'READY',
-    NOT_READY: 'NOT_READY',
-  },
-  ProviderEvents: {
-    Ready: 'PROVIDER_READY',
-  },
-  InMemoryProvider: class InMemoryProvider {},
-  NOOP_PROVIDER: {},
 }));
 
 // Mock the tracking hook module since it's used in the function under test

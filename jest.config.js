@@ -17,6 +17,7 @@ const esModules = [
   '@wojtekmaj/date-utils',
   'react-router',
   'cookie-es',
+  '@marcbachmann/cel-js',
 ];
 
 module.exports = {
