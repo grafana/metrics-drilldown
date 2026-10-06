@@ -52,3 +52,5 @@ overrides:
   '@grafana/i18n': ^13.0.0
   '@grafana/schema': ^13.0.0
   basic-ftp: '^6.2.1'
+  shell-quote: ^1.11.0
+  source-map-js: ^1.2.2
