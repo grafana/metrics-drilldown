@@ -1,5 +1,4 @@
 import {
-  config,
   createOpenFeatureLocalStorageProvider,
   createOpenFeatureOFREPWebProvider,
 } from '@grafana/runtime';
@@ -125,30 +124,6 @@ describe('evaluateFeatureFlag', () => {
     expect(result).toBe('treatment');
   });
 
-  describe('featureToggle override for string cohort flags', () => {
-    afterEach(() => {
-      delete (config.featureToggles as Record<string, boolean | undefined>).metricsExploreFireAlerts;
-    });
-
-    it('maps an enabled dev feature toggle to the "treatment" cohort', async () => {
-      (config.featureToggles as Record<string, boolean | undefined>).metricsExploreFireAlerts = true;
-
-      const result = await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts');
-
-      expect(result).toBe('treatment');
-      // The override short-circuits before consulting the OpenFeature client.
-      expect(getStringValue).not.toHaveBeenCalled();
-    });
-
-    it('maps a disabled dev feature toggle to the "control" cohort', async () => {
-      (config.featureToggles as Record<string, boolean | undefined>).metricsExploreFireAlerts = false;
-
-      const result = await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts');
-
-      expect(result).toBe('control');
-      expect(getStringValue).not.toHaveBeenCalled();
-    });
-  });
 });
 
 describe('initOpenFeatureProvider', () => {
