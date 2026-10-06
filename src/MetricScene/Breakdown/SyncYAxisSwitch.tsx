@@ -9,7 +9,7 @@ import { userStorage } from 'shared/user-preferences/userStorage';
 
 import { EventSyncYAxisChanged } from './MetricLabelsList/events/EventSyncYAxisChanged';
 
-export interface SyncYAxisSwitchState extends SceneObjectState {
+interface SyncYAxisSwitchState extends SceneObjectState {
   enabled: boolean;
 }
 

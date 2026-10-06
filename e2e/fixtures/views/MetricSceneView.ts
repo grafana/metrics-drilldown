@@ -153,6 +153,10 @@ export class MetricSceneView extends DrilldownView {
     return this.getByTestId('panels-list');
   }
 
+  getFirstPanel() {
+    return this.getPanelsList().locator('[data-viz-panel-key]').first();
+  }
+
   async assertPanelsList() {
     const panelsList = this.getPanelsList();
     await expect(panelsList).toBeVisible();
@@ -177,7 +181,7 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getFirstPanelKey() {
-    return this.getPanelsList().locator('[data-viz-panel-key]').first().getAttribute('data-viz-panel-key');
+    return this.getFirstPanel().getAttribute('data-viz-panel-key');
   }
 
   async setSyncYAxis(enabled: boolean) {
@@ -190,7 +194,7 @@ export class MetricSceneView extends DrilldownView {
 
     await expect(syncYAxisSwitch).toBeChecked({ checked: enabled });
     // Wait for panels to re-render after the breakdown list is rebuilt
-    await expect(this.getPanelsList().locator('[data-viz-panel-key]').first()).toBeVisible();
+    await expect(this.getFirstPanel()).toBeVisible();
   }
 
   getLabelSelectorContainer() {
