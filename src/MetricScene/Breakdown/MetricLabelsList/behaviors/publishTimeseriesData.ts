@@ -1,5 +1,5 @@
 import { LoadingState } from '@grafana/data';
-import { sceneGraph, type SceneDataProvider, type VizPanel } from '@grafana/scenes';
+import { sceneGraph, type VizPanel } from '@grafana/scenes';
 
 import { EventTimeseriesDataReceived } from '../events/EventTimeseriesDataReceived';
 
@@ -30,7 +30,7 @@ export function publishTimeseriesData() {
       );
     }
 
-    const sub = ($data as SceneDataProvider).subscribeToState((newState, prevState) => {
+    const sub = $data.subscribeToState((newState, prevState) => {
       if (
         newState.data?.state === LoadingState.Done &&
         newState.data.series?.length &&

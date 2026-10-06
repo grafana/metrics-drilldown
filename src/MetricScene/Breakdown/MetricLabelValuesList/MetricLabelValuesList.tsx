@@ -44,6 +44,7 @@ import { InlineBanner } from '../../../App/InlineBanner';
 import { PanelMenu } from '../../PanelMenu/PanelMenu';
 import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from '../MetricLabelsList/behaviors/syncYAxis';
+import { type SyncYAxisSwitch } from '../SyncYAxisSwitch';
 
 interface MetricLabelsValuesListState extends SceneObjectState {
   metric: Metric;
@@ -51,6 +52,7 @@ interface MetricLabelsValuesListState extends SceneObjectState {
   // Set for a KG binary (ratio) insight. When present, values are enumerated from the grouped binary
   // (sum by(label)(binary)) and each per-value panel renders the binary scoped to that value.
   binaryQuery?: string;
+  syncYAxisEnabled: boolean;
   layoutSwitcher: LayoutSwitcher;
   quickSearch: QuickSearch;
   sortBySelector: SortBySelector;
@@ -63,6 +65,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     label,
     binaryQuery,
     histogramBreakdownFn,
+    syncYAxisEnabled,
   }: {
     metric: MetricLabelsValuesListState['metric'];
     label: MetricLabelsValuesListState['label'];
@@ -71,6 +74,8 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     // parented, so sceneGraph.lookupVariable can't reach it yet. Drives the query below, which per-value
     // panels render directly from (see getLayoutChild).
     histogramBreakdownFn?: HistogramBreakdownFn;
+    // When true, attaches the syncYAxis behavior so all panels share one y-axis range.
+    syncYAxisEnabled: boolean;
   }) {
     const queryParams = getTimeseriesQueryRunnerParams({
       metric,
@@ -91,6 +96,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
       metric,
       label,
       binaryQuery,
+      syncYAxisEnabled,
       layoutSwitcher: new LayoutSwitcher({
         urlSearchParamName: 'breakdownLayout',
         options: [
@@ -225,7 +231,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
   }
 
   private buildByFrameRepeater() {
-    const { metric, label, binaryQuery } = this.state;
+    const { metric, label, binaryQuery, syncYAxisEnabled } = this.state;
     const prefMetricConfig = getPreferredConfigForMetric(metric.name);
     const entry = getTrailFor(this).state.sourceMetrics?.find((s) => s.metricName === metric.name);
     // For a binary (ratio) insight, page filters do not apply, so hide the per-value "Add to filters" action.
@@ -237,7 +243,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     return new SceneByFrameRepeater({
       // we set the syncYAxis behavior here to ensure that the EventResetSyncYAxis events that are published by SceneByFrameRepeater can be received
       $behaviors: [
-        syncYAxis(),
+        ...(syncYAxisEnabled ? [syncYAxis()] : []),
         new behaviors.CursorSync({
           key: 'metricCrosshairSync',
           sync: DashboardCursorSync.Crosshair,
@@ -337,7 +343,7 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
     });
   }
 
-  public Controls({ model }: { model: MetricLabelValuesList }) {
+  public Controls({ model, syncYAxisSwitch }: { model: MetricLabelValuesList; syncYAxisSwitch: SyncYAxisSwitch }) {
     const styles = useStyles2(getStyles);
     const { body, quickSearch, layoutSwitcher, sortBySelector } = model.useState();
 
@@ -357,6 +363,8 @@ export class MetricLabelValuesList extends SceneObjectBase<MetricLabelsValuesLis
         <Field label={t('breakdown.label-values-list.view-label', 'View')} className={styles.field}>
           <layoutSwitcher.Component model={layoutSwitcher} />
         </Field>
+        {/* Single layout shows one panel, so there is no y-axis to share */}
+        {body instanceof SceneByFrameRepeater && <syncYAxisSwitch.Component model={syncYAxisSwitch} />}
       </>
     );
   }

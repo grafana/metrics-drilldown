@@ -70,7 +70,7 @@ After filtering the metrics in Metrics Drilldown, you can investigate the select
 
 A detailed view of the metric opens that shows the following details:
 
-- A **Breakdown** tab that shows time series visualizations for each of the label-value pairs for the selected metric. To add a label-value pair to your filters, select **Select** to drill down into a label, then select **Add to filters** on the value you want.
+- A **Breakdown** tab that shows time series visualizations for each of the label-value pairs for the selected metric. To add a label-value pair to your filters, select **Select** to drill down into a label, then select **Add to filters** on the value you want. By default, the panels share one y-axis range so you can compare values across them. To scale each panel to its own data, turn off **Sync y-axis**. Your choice is saved in your browser and applies every time you open the **Breakdown** tab.
 - A **Related metrics** tab that shows other metrics with similar names and common prefixes. Use it to quickly find metrics that belong to the same area or task without knowing exact metric names.
 - A **Related logs** tab that shows how many related log lines match your metric and lets you continue investigating in logs-focused workflows.
 - A **Query results** tab that shows the raw query results for the metric. This tab appears only when the Prometheus query results component is available in your Grafana instance.
