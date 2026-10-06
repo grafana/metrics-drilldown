@@ -4,6 +4,14 @@ packages:
 # https://pnpm.io/supply-chain-security
 # Same as passing --frozen-lockfile on every pnpm install (CI uses this via plugin-ci-workflows too).
 frozenLockfile: true
+# Ignore advisories that require the pending React Router v7 migration or do not
+# have a patched release yet. Remove these as upstream fixes become available.
+audit:
+  ignore:
+    - GHSA-wrjc-x8rr-h8h6 # react-router; requires v7
+    - GHSA-337j-9hxr-rhxg # react-router; requires v7
+    - GHSA-vfj7-8cjw-p6xm # braces; no patched release
+    - GHSA-hp3w-g68c-fv3c # sprintf-js; no patched release
 # Disable package lifecycle scripts (postinstall, etc.) on install.
 ignoreScripts: true
 # Five days in minutes (5 × 24 × 60).
@@ -52,3 +60,5 @@ overrides:
   '@grafana/i18n': ^13.0.0
   '@grafana/schema': ^13.0.0
   basic-ftp: '^6.2.1'
+  shell-quote: ^1.11.0
+  source-map-js: ^1.2.2
