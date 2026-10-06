@@ -39,6 +39,20 @@ jobs:
         run: |
           set -euo pipefail
 
+          # GitHub reports private org members as CONTRIBUTOR, so the skip
+          # condition above misses them. The checks below skip public org
+          # members and people with access to this repository. A private org
+          # member with no access here is still rate limited.
+          if gh api --silent "/orgs/${GITHUB_REPOSITORY_OWNER}/public_members/${AUTHOR}" 2>/dev/null; then
+            echo "Author ${AUTHOR} is a public member of ${GITHUB_REPOSITORY_OWNER}. Skipping rate limit."
+            exit 0
+          fi
+
+          if gh api --silent "/repos/${GITHUB_REPOSITORY}/collaborators/${AUTHOR}" 2>/dev/null; then
+            echo "Author ${AUTHOR} is an owner, member, or collaborator on this repository. Skipping rate limit."
+            exit 0
+          fi
+
           cutoff="$(date -u -d "${WINDOW_HOURS} hours ago" +%Y-%m-%dT%H:%M:%SZ)"
           # state=all: a merged PR still counts until 24h after it was opened.
           # New commits on this pull request re-run the check. Opening or
