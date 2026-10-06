@@ -1,11 +1,121 @@
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
-import { addRecentMetric, getRecentMetrics, sortMetricsWithRecentFirst } from './MetricsSorter';
+import { fetchFiringAlertRuleSignals } from './fetchers/fetchFiringAlertMetrics';
+import { fetchSloMetricSignals, type SloMetricSignals } from './fetchers/fetchSloMetricSignals';
+import { addRecentMetric, getRecentMetrics, MetricsSorter, sortMetricsWithRecentFirst } from './MetricsSorter';
+
+jest.mock('./fetchers/fetchSloMetricSignals', () => ({
+  fetchSloMetricSignals: jest.fn(),
+}));
+
+jest.mock('./fetchers/fetchFiringAlertMetrics', () => ({
+  fetchFiringAlertRuleSignals: jest.fn(),
+}));
+
+const mockFetchFiringAlertRuleSignals = fetchFiringAlertRuleSignals as jest.MockedFunction<
+  typeof fetchFiringAlertRuleSignals
+>;
+const mockFetchSloMetricSignals = fetchSloMetricSignals as jest.MockedFunction<typeof fetchSloMetricSignals>;
+
+function sloResult(datasourceUid: string, status: SloMetricSignals['status'] = 'ready'): SloMetricSignals {
+  return {
+    datasourceUid,
+    status,
+    trackedMetrics: new Map(),
+    activeBurnMetrics: new Set(),
+  };
+}
 
 describe('MetricsSorter', () => {
   beforeEach(() => {
     userStorage.clear();
+    jest.clearAllMocks();
+  });
+
+  describe('firing alert signal cache', () => {
+    it('does not cache acquisition errors so later consumers can retry', async () => {
+      mockFetchFiringAlertRuleSignals
+        .mockResolvedValueOnce({
+          status: 'error',
+          metricCounts: new Map(),
+          firingSloUuids: new Map(),
+          ruleCount: 0,
+        })
+        .mockResolvedValueOnce({
+          status: 'ready',
+          metricCounts: new Map([['up', 1]]),
+          firingSloUuids: new Map(),
+          ruleCount: 1,
+        });
+      const sorter = new MetricsSorter({});
+
+      await expect(sorter.getFiringAlertSignals()).resolves.toMatchObject({ status: 'error' });
+      await expect(sorter.getFiringAlertSignals()).resolves.toMatchObject({ status: 'ready' });
+
+      expect(mockFetchFiringAlertRuleSignals).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('SLO signal cache', () => {
+    it('coalesces concurrent requests and caches a ready-empty result by datasource', async () => {
+      let resolve!: (value: SloMetricSignals) => void;
+      mockFetchSloMetricSignals.mockReturnValue(new Promise((done) => (resolve = done)));
+      const sorter = new MetricsSorter({});
+
+      const first = sorter.getSloMetricSignals('prom-a');
+      const second = sorter.getSloMetricSignals('prom-a');
+      expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(1);
+
+      resolve(sloResult('prom-a'));
+      await expect(first).resolves.toMatchObject({ status: 'ready' });
+      await expect(second).resolves.toMatchObject({ status: 'ready' });
+      await sorter.getSloMetricSignals('prom-a');
+      expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(1);
+    });
+
+    it('rate-limits error retries while allowing the same datasource to recover', async () => {
+      jest.useFakeTimers().setSystemTime(1_000);
+      mockFetchSloMetricSignals
+        .mockResolvedValueOnce(sloResult('prom-a', 'error'))
+        .mockResolvedValueOnce(sloResult('prom-a'));
+      const sorter = new MetricsSorter({});
+
+      try {
+        await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'error' });
+        await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'error' });
+        expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(5_000);
+        await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'ready' });
+        expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('clears an unexpected rejected promise so the same datasource can retry', async () => {
+      mockFetchSloMetricSignals
+        .mockRejectedValueOnce(new Error('unexpected failure'))
+        .mockResolvedValueOnce(sloResult('prom-a'));
+      const sorter = new MetricsSorter({});
+
+      await expect(sorter.getSloMetricSignals('prom-a')).rejects.toThrow('unexpected failure');
+      await expect(sorter.getSloMetricSignals('prom-a')).resolves.toMatchObject({ status: 'ready' });
+
+      expect(mockFetchSloMetricSignals).toHaveBeenCalledTimes(2);
+    });
+
+    it('never reuses membership from another datasource', async () => {
+      mockFetchSloMetricSignals.mockImplementation(async (uid) => sloResult(uid));
+      const sorter = new MetricsSorter({});
+
+      await sorter.getSloMetricSignals('prom-a');
+      await sorter.getSloMetricSignals('prom-b');
+
+      expect(mockFetchSloMetricSignals).toHaveBeenNthCalledWith(1, 'prom-a', expect.any(Function));
+      expect(mockFetchSloMetricSignals).toHaveBeenNthCalledWith(2, 'prom-b', expect.any(Function));
+    });
   });
 
   describe('sortMetricsWithRecentFirst', () => {

@@ -103,14 +103,6 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   }, NOTIFY_VALUE_CHANGE_DELAY);
 
   private updateValue(value: string) {
-    const wasEmpty = this.state.value === '';
-    const isNewSearch = wasEmpty && value !== '';
-
-    // Only report search usage when not in question mode
-    if (isNewSearch && !this.state.isQuestionMode) {
-      reportExploreMetrics('quick_search_used', {});
-    }
-
     this.setState({ value });
 
     // Only notify for filtering when not in question mode
@@ -285,7 +277,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
 const getStyles = (theme: GrafanaTheme2) => ({
   counts: css`
     margin-right: ${theme.spacing(1)};
-    border-radius: 11px;
+    border-radius: ${theme.shape.radius.pill};
     padding: 2px ${theme.spacing(1)};
     color: ${theme.colors.text.primary};
     background-color: ${theme.colors.background.secondary};

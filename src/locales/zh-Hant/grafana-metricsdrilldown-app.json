@@ -141,6 +141,10 @@
   "fetch-firing-alert-metrics": {
     "error": ""
   },
+  "fetch-slo-metric-signals": {
+    "error": "",
+    "parse-error": ""
+  },
   "filtered-metrics-variable": {
     "label": "篩選的指標"
   },
@@ -422,6 +426,15 @@
       "suffix-filters": "後綴篩選條件",
       "suffix-filters-description": "根據其名稱後綴篩選指標"
     }
+  },
+  "slo-tracked-badge": {
+    "tooltip_other": ""
+  },
+  "slo-tracked-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_other": ""
   },
   "sort-by": {
     "label": "排序方式",

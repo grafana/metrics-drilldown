@@ -10,6 +10,7 @@ export type MetricFilters = {
   suffixes: string[];
   names: string[];
   firingAlertMetrics: string[];
+  sloTrackedMetrics: string[];
 };
 
 export class MetricsVariableFilterEngine {
@@ -21,6 +22,7 @@ export class MetricsVariableFilterEngine {
     suffixes: [],
     names: [],
     firingAlertMetrics: [],
+    sloTrackedMetrics: [],
   };
 
   constructor(variable: QueryVariable) {
@@ -64,9 +66,16 @@ export class MetricsVariableFilterEngine {
     }
 
     if (filters.firingAlertMetrics.length > 0) {
-      filteredOptions = MetricsVariableFilterEngine.applyFiringAlertMetricsFilter(
+      filteredOptions = MetricsVariableFilterEngine.applyExactMetricNamesFilter(
         filteredOptions,
         filters.firingAlertMetrics
+      );
+    }
+
+    if (filters.sloTrackedMetrics.length > 0) {
+      filteredOptions = MetricsVariableFilterEngine.applyExactMetricNamesFilter(
+        filteredOptions,
+        filters.sloTrackedMetrics
       );
     }
 
@@ -88,7 +97,8 @@ export class MetricsVariableFilterEngine {
       !updatedFilters.prefixes.length &&
       !updatedFilters.suffixes.length &&
       !updatedFilters.names.length &&
-      !updatedFilters.firingAlertMetrics.length
+      !updatedFilters.firingAlertMetrics.length &&
+      !updatedFilters.sloTrackedMetrics.length
     ) {
       this.filters = updatedFilters;
 
@@ -176,11 +186,8 @@ export class MetricsVariableFilterEngine {
     return filteredOptions;
   }
 
-  private static applyFiringAlertMetricsFilter(
-    options: MetricOptions,
-    firingAlertMetrics: string[]
-  ): MetricOptions {
-    const metricsSet = new Set(firingAlertMetrics);
+  private static applyExactMetricNamesFilter(options: MetricOptions, metricNames: string[]): MetricOptions {
+    const metricsSet = new Set(metricNames);
     return options.filter((option) => metricsSet.has(option.value as string));
   }
 

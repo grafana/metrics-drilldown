@@ -144,6 +144,10 @@
   "fetch-firing-alert-metrics": {
     "error": ""
   },
+  "fetch-slo-metric-signals": {
+    "error": "",
+    "parse-error": ""
+  },
   "filtered-metrics-variable": {
     "label": "Métriques filtrées"
   },
@@ -430,6 +434,17 @@
       "suffix-filters": "Filtres par suffixe",
       "suffix-filters-description": "Filtrer les métriques selon le suffixe de leur nom"
     }
+  },
+  "slo-tracked-badge": {
+    "tooltip_one": "",
+    "tooltip_other": ""
+  },
+  "slo-tracked-chip": {
+    "aria-label-active": "",
+    "aria-label-inactive": "",
+    "tooltip-empty": "",
+    "label_one": "",
+    "label_other": ""
   },
   "sort-by": {
     "label": "Trier par",

@@ -50,6 +50,14 @@ export class MetricsReducerView extends DrilldownView {
     return this.getByTestId('list-controls');
   }
 
+  getSloTrackedChip() {
+    return this.getListControls().getByRole('button', { name: /SLO-tracked/i });
+  }
+
+  async toggleSloTrackedFilter() {
+    await this.getSloTrackedChip().click();
+  }
+
   async assertListControls() {
     await expect(this.getListControls()).toBeVisible();
     await expect(this.quickSearch.get()).toBeVisible();
@@ -113,6 +121,10 @@ export class MetricsReducerView extends DrilldownView {
 
   selectMetricPanel(panelTitle: string) {
     return this.getPanelByTitle(panelTitle).getByTestId(`select-action-${panelTitle}`).click();
+  }
+
+  getSloTrackedBadge(panelTitle: string) {
+    return this.getPanelByTitle(panelTitle).getByTestId('slo-tracked-badge');
   }
 
   getMetricsGroupByList() {

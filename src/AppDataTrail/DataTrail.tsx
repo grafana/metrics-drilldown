@@ -370,8 +370,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(EventConfigurePanel, async (event) => {
       const { metric } = event.payload;
 
-      reportExploreMetrics('configure_panel_opened', { metricType: metric.type });
-
       this.state.drawer.open({
         title: t('data-trail.configure-drawer.title', 'Configure the Prometheus function'),
         subTitle: `${metric.name} (${metric.type})`,
@@ -385,12 +383,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     this.subscribeToEvent(EventApplyPanelConfig, async (event) => {
       const { metric, config, restoreDefault } = event.payload;
-
-      if (restoreDefault) {
-        reportExploreMetrics('default_panel_config_restored', { metricType: metric.type });
-      } else {
-        reportExploreMetrics('panel_config_applied', { metricType: metric.type, configId: config.id });
-      }
 
       this.state.drawer.close();
 
@@ -708,8 +700,8 @@ function isScopesSupported(): boolean {
   return Boolean(
     config.featureToggles.scopeFilters &&
     config.featureToggles.enableScopesInMetricsExplore &&
-    // Scopes support in Grafana appears to begin with Grafana 12.0.0. We can remove
-    // the version check once the `dependencies.grafanaDependency` is updated to 12.0.0 or higher.
+    // Scopes support in Grafana appears to begin with Grafana 12.0.0.
+    // TODO(2026-10-18): grafanaDependency is now >=13.1.0, so this is always true. Remove.
     !config.buildInfo.version.startsWith('11.')
   );
 }

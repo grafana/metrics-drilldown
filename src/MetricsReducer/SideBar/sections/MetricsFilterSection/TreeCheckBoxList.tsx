@@ -205,11 +205,15 @@ export function TreeCheckBoxList({
  * Base list styles (header, list, items) are imported from sharedListStyles.
  */
 function getTreeStyles(theme: GrafanaTheme2, embedded?: boolean) {
+  const background = getAppBackgroundColor(theme, embedded);
+
   return {
     stickyParent: css({
       position: 'sticky',
       top: 0,
-      // Force fully opaque background using pseudo-element
+      // Force fully opaque background using pseudo-element. This paints on top of stickyParent's
+      // own background (child stacking always paints above the parent's, even at a negative
+      // z-index), so it must use the same color or it silently overrides the value above.
       '&::before': {
         content: '""',
         position: 'absolute',
@@ -217,10 +221,10 @@ function getTreeStyles(theme: GrafanaTheme2, embedded?: boolean) {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: theme.colors.background.canvas,
+        backgroundColor: background,
         zIndex: -1,
       },
-      backgroundColor: getAppBackgroundColor(theme, embedded),
+      backgroundColor: background,
       zIndex: 10,
       borderBottom: `1px solid ${theme.colors.border.weak}`,
       marginLeft: theme.spacing(-1),

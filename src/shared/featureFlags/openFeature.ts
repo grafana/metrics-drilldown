@@ -16,6 +16,11 @@ const goffFeatureFlags = {
     values: [true, false] as const,
     defaultValue: false,
   },
+  'drilldown.metrics.slo_tracked_metrics': {
+    valueType: 'boolean',
+    values: [true, false] as const,
+    defaultValue: false,
+  },
   'drilldown.metrics.default_open_sidebar': {
     valueType: 'string',
     values: [
@@ -58,7 +63,13 @@ const goffFeatureFlags = {
  * @param trackingKey - If provided, the feature flag value will be tracked using the given key.
  */
 type FeatureFlag =
-  | { valueType: 'boolean'; values: readonly boolean[]; defaultValue: boolean; trackingKey?: string; featureToggle?: string }
+  | {
+      valueType: 'boolean';
+      values: readonly boolean[];
+      defaultValue: boolean;
+      trackingKey?: string;
+      featureToggle?: string;
+    }
   | {
       valueType: 'object';
       values: readonly JsonValue[];
@@ -228,6 +239,11 @@ export async function evaluateFeatureFlag<T extends keyof typeof goffFeatureFlag
  */
 export async function isFiringAlertsSortingEnabled(): Promise<boolean> {
   return (await evaluateFeatureFlag('drilldown.metrics.sort_by_firing_alerts')) === 'treatment';
+}
+
+/** Whether SLO-tracked metric filtering and indicators are enabled for the current stack. */
+export async function isSloTrackingEnabled(): Promise<boolean> {
+  return evaluateFeatureFlag('drilldown.metrics.slo_tracked_metrics');
 }
 
 /**
