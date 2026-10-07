@@ -38,11 +38,6 @@ jobs:
           set -euo pipefail
 
           # Private org members are reported as CONTRIBUTOR, so the check above misses them.
-          if gh api --silent "/orgs/${GITHUB_REPOSITORY_OWNER}/public_members/${AUTHOR}" 2>/dev/null; then
-            echo "Author is a public member. Skipping rate limit."
-            exit 0
-          fi
-
           # Collaborator lookup needs push access. On a public repo, read means everyone.
           if ! permission="$(gh api "/repos/${GITHUB_REPOSITORY}/collaborators/${AUTHOR}/permission" --jq '.permission')"; then
             echo "Could not read repository access. The rate limit still applies."
