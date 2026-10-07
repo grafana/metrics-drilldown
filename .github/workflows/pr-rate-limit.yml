@@ -1,7 +1,6 @@
 name: PR rate limit
 
-# Fork PRs get a read-only token, so the comment is best-effort and the job
-# fails when the limit is exceeded.
+# A fork token cannot comment. The job still fails when the limit is exceeded.
 on:
   pull_request:
     types:
@@ -17,8 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      # issues: read is required to list PRs via the issues API (creator filter).
-      # pull-requests: write is what gh pr comment actually checks.
+      # issues: read lists pull requests. pull-requests: write posts the comment.
       issues: read
       pull-requests: write
     if: >
@@ -39,35 +37,26 @@ jobs:
         run: |
           set -euo pipefail
 
-          # GitHub reports private org members as CONTRIBUTOR, so the skip
-          # condition above misses them. A public membership is visible without
-          # extra token scope. A private member is not.
+          # Private org members are reported as CONTRIBUTOR, so the check above misses them.
           if gh api --silent "/orgs/${GITHUB_REPOSITORY_OWNER}/public_members/${AUTHOR}" 2>/dev/null; then
             echo "Author ${AUTHOR} is a public member of ${GITHUB_REPOSITORY_OWNER}. Skipping rate limit."
             exit 0
           fi
 
-          # GET /collaborators/{username} requires push access, and this job's
-          # token does not have it, so a 403 was treated as "not a collaborator".
-          # The permission endpoint is allowed for the metadata scope this token
-          # already has. On a public repository it returns read for everyone,
-          # and write or admin only for people who were granted access.
-          # maintain is reported as write. triage is reported as read, same as
-          # the public, so triage-only access stays rate limited.
+          # Collaborator lookup needs push access. On a public repo, read means everyone.
           if ! permission="$(gh api "/repos/${GITHUB_REPOSITORY}/collaborators/${AUTHOR}/permission" --jq '.permission')"; then
-            echo "Could not read repository permission for ${AUTHOR}. The rate limit still applies."
+            echo "Could not read repository access for ${AUTHOR}. The rate limit still applies."
             permission=""
           fi
-          echo "Author ${AUTHOR} repository permission: ${permission:-unknown}."
           case "${permission}" in
             admin|write)
-              echo "Author ${AUTHOR} has ${permission} access on this repository. Skipping rate limit."
+              echo "Skipping rate limit for ${AUTHOR}."
               exit 0
               ;;
           esac
 
           cutoff="$(date -u -d "${WINDOW_HOURS} hours ago" +%Y-%m-%dT%H:%M:%SZ)"
-          # state=all: a merged PR still counts until 24h after it was opened.
+          # Merged pull requests still count for 24 hours after they were opened.
           # New commits on this pull request re-run the check. Opening or
           # merging a different pull request does not.
           page_counts="$(
@@ -91,7 +80,7 @@ jobs:
             exit 0
           fi
 
-          # opened and reopened already leave a comment. Skip it on later pushes.
+          # opened and reopened already comment. Do not comment again on later pushes.
           if [ "${EVENT_ACTION}" != "synchronize" ]; then
             body="$(printf '%s\n\n%s' \
               "This pull request exceeds the rate limit: **@${AUTHOR}** opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
