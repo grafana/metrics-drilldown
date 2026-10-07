@@ -39,18 +39,18 @@ jobs:
 
           # Private org members are reported as CONTRIBUTOR, so the check above misses them.
           if gh api --silent "/orgs/${GITHUB_REPOSITORY_OWNER}/public_members/${AUTHOR}" 2>/dev/null; then
-            echo "Author ${AUTHOR} is a public member of ${GITHUB_REPOSITORY_OWNER}. Skipping rate limit."
+            echo "Author is a public member. Skipping rate limit."
             exit 0
           fi
 
           # Collaborator lookup needs push access. On a public repo, read means everyone.
           if ! permission="$(gh api "/repos/${GITHUB_REPOSITORY}/collaborators/${AUTHOR}/permission" --jq '.permission')"; then
-            echo "Could not read repository access for ${AUTHOR}. The rate limit still applies."
+            echo "Could not read repository access. The rate limit still applies."
             permission=""
           fi
           case "${permission}" in
             admin|write)
-              echo "Skipping rate limit for ${AUTHOR}."
+              echo "Skipping rate limit."
               exit 0
               ;;
           esac
@@ -74,7 +74,7 @@ jobs:
             count=$((count + page_count))
           done <<< "${page_counts}"
 
-          echo "Author ${AUTHOR} opened ${count} PR(s) in the last ${WINDOW_HOURS}h (limit ${MAX_PRS})."
+          echo "Author opened ${count} PR(s) in the last ${WINDOW_HOURS}h (limit ${MAX_PRS})."
 
           if [ "${count}" -le "${MAX_PRS}" ]; then
             exit 0
@@ -83,12 +83,12 @@ jobs:
           # opened and reopened already comment. Do not comment again on later pushes.
           if [ "${EVENT_ACTION}" != "synchronize" ]; then
             body="$(printf '%s\n\n%s' \
-              "This pull request exceeds the rate limit: **@${AUTHOR}** opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
+              "This pull request exceeds the rate limit: its author opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
               "Please wait for the window to pass before opening more PRs, or ask a maintainer if this was a false positive. Combining related changes into fewer PRs helps review stay manageable.")"
 
             if ! gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"; then
               echo "Could not comment. Fork pull requests get a read-only token."
             fi
           fi
-          echo "Failing the check: ${AUTHOR} exceeded the rate limit."
+          echo "Failing the check: author exceeded the rate limit."
           exit 1
