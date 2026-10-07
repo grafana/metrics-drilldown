@@ -82,7 +82,10 @@
       "view-label": "Zobrazit"
     },
     "section-label": "Rozpis",
-    "select-label": "Vybrat"
+    "select-label": "Vybrat",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "vymazat",

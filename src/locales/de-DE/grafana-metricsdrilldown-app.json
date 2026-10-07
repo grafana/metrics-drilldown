@@ -78,7 +78,10 @@
       "view-label": "Anzeigen"
     },
     "section-label": "Aufschlüsselung",
-    "select-label": "Auswählen"
+    "select-label": "Auswählen",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "löschen",

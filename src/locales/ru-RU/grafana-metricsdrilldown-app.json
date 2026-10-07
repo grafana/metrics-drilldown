@@ -82,7 +82,10 @@
       "view-label": "Просмотр"
     },
     "section-label": "Разбивка",
-    "select-label": "Выбрать"
+    "select-label": "Выбрать",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "очистить",

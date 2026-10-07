@@ -78,7 +78,10 @@
       "view-label": "Nézet"
     },
     "section-label": "Részletezés",
-    "select-label": "Kiválasztás"
+    "select-label": "Kiválasztás",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "törlés",

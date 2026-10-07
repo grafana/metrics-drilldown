@@ -78,7 +78,10 @@
       "view-label": "Göster"
     },
     "section-label": "Kırılım",
-    "select-label": "Seçin"
+    "select-label": "Seçin",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "temizle",
