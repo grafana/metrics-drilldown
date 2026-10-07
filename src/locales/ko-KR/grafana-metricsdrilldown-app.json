@@ -76,7 +76,10 @@
       "view-label": "보기"
     },
     "section-label": "세부 분류",
-    "select-label": "선택"
+    "select-label": "선택",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "지우기",

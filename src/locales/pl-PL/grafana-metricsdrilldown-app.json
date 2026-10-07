@@ -82,7 +82,10 @@
       "view-label": "Wyświetl"
     },
     "section-label": "Zestawienie",
-    "select-label": "Wybierz"
+    "select-label": "Wybierz",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "wyczyść",

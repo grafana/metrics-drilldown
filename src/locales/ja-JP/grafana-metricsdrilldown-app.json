@@ -76,7 +76,10 @@
       "view-label": "表示"
     },
     "section-label": "内訳",
-    "select-label": "選択"
+    "select-label": "選択",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "クリア",

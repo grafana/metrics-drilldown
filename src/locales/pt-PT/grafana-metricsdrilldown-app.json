@@ -78,7 +78,10 @@
       "view-label": "Ver"
     },
     "section-label": "Discriminação de custos",
-    "select-label": "Selecionar"
+    "select-label": "Selecionar",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "limpar",
