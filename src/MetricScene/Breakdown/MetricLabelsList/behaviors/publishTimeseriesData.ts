@@ -1,11 +1,15 @@
 import { LoadingState } from '@grafana/data';
-import { SceneDataTransformer, sceneGraph, type SceneDataProvider, type VizPanel } from '@grafana/scenes';
+import { sceneGraph, type VizPanel } from '@grafana/scenes';
 
 import { EventTimeseriesDataReceived } from '../events/EventTimeseriesDataReceived';
 
 /**
  * Publishes timeseries data events when new data arrives from the VizPanel data provider.
  * These events are used by the syncYAxis behaviour to coordinate updates across multiple panels.
+ *
+ * Reads from sceneGraph.getData(vizPanel) directly, not from its upstream $data, so a group-by
+ * panel's SceneDataTransformer output (after sliceSeries caps it to MAX_SERIES_TO_RENDER_WHEN_GROUPED_BY)
+ * is what feeds the sync calculation, matching what the panel actually draws.
  */
 export function publishTimeseriesData() {
   return (vizPanel: VizPanel) => {
@@ -13,10 +17,7 @@ export function publishTimeseriesData() {
       return;
     }
 
-    let $data = sceneGraph.getData(vizPanel);
-    if ($data instanceof SceneDataTransformer) {
-      $data = $data.state.$data as SceneDataProvider;
-    }
+    const $data = sceneGraph.getData(vizPanel);
     const { data } = $data.state;
 
     if (data?.state === LoadingState.Done && data.series?.length) {
@@ -29,7 +30,7 @@ export function publishTimeseriesData() {
       );
     }
 
-    const sub = ($data as SceneDataProvider).subscribeToState((newState, prevState) => {
+    const sub = $data.subscribeToState((newState, prevState) => {
       if (
         newState.data?.state === LoadingState.Done &&
         newState.data.series?.length &&

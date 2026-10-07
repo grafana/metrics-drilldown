@@ -78,7 +78,10 @@
       "view-label": "Afficher"
     },
     "section-label": "Répartition",
-    "select-label": "Sélectionner"
+    "select-label": "Sélectionner",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "effacer",

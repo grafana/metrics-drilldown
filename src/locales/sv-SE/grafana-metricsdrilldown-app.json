@@ -78,7 +78,10 @@
       "view-label": "Visa"
     },
     "section-label": "Uppdelning",
-    "select-label": "Välj"
+    "select-label": "Välj",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "radera",

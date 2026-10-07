@@ -76,7 +76,10 @@
       "view-label": "檢視"
     },
     "section-label": "明細",
-    "select-label": "選取"
+    "select-label": "選取",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "清除",

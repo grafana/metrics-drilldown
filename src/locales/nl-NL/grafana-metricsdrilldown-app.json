@@ -78,7 +78,10 @@
       "view-label": "Weergeven"
     },
     "section-label": "Breakdown",
-    "select-label": "Selecteren"
+    "select-label": "Selecteren",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "wissen",

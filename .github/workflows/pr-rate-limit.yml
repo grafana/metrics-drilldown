@@ -1,0 +1,89 @@
+name: PR rate limit
+
+# A fork token cannot comment. The job still fails when the limit is exceeded.
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions: {}
+
+jobs:
+  enforce:
+    name: Enforce PR rate limit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # issues: read lists pull requests. pull-requests: write posts the comment.
+      issues: read
+      pull-requests: write
+    if: >
+      github.event.pull_request.user.type != 'Bot' &&
+      github.event.pull_request.author_association != 'OWNER' &&
+      github.event.pull_request.author_association != 'MEMBER' &&
+      github.event.pull_request.author_association != 'COLLABORATOR'
+    env:
+      MAX_PRS: 1
+      WINDOW_HOURS: 24
+      GH_TOKEN: ${{ github.token }}
+      AUTHOR: ${{ github.event.pull_request.user.login }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_CREATED_AT: ${{ github.event.pull_request.created_at }}
+      EVENT_ACTION: ${{ github.event.action }}
+    steps:
+      - name: Fail check if the author exceeds the rate limit
+        run: |
+          set -euo pipefail
+
+          # Private org members are reported as CONTRIBUTOR, so the check above misses them.
+          # Collaborator lookup needs push access. On a public repo, read means everyone.
+          if ! permission="$(gh api "/repos/${GITHUB_REPOSITORY}/collaborators/${AUTHOR}/permission" --jq '.permission')"; then
+            echo "Could not read repository access. The rate limit still applies."
+            permission=""
+          fi
+          case "${permission}" in
+            admin|write)
+              echo "Skipping rate limit."
+              exit 0
+              ;;
+          esac
+
+          cutoff="$(date -u -d "${WINDOW_HOURS} hours ago" +%Y-%m-%dT%H:%M:%SZ)"
+          # Merged pull requests still count for 24 hours after they were opened.
+          # New commits on this pull request re-run the check. Opening or
+          # merging a different pull request does not.
+          page_counts="$(
+            gh api --paginate \
+              -X GET \
+              -f state=all \
+              -f creator="${AUTHOR}" \
+              -f since="${cutoff}" \
+              "/repos/${GITHUB_REPOSITORY}/issues" \
+              --jq "[.[] | select(.pull_request != null and .created_at >= \"${cutoff}\" and .created_at <= \"${PR_CREATED_AT}\")] | length"
+          )"
+          count=0
+          while IFS= read -r page_count; do
+            [ -z "${page_count}" ] && continue
+            count=$((count + page_count))
+          done <<< "${page_counts}"
+
+          echo "Author opened ${count} PR(s) in the last ${WINDOW_HOURS}h (limit ${MAX_PRS})."
+
+          if [ "${count}" -le "${MAX_PRS}" ]; then
+            exit 0
+          fi
+
+          # opened and reopened already comment. Do not comment again on later pushes.
+          if [ "${EVENT_ACTION}" != "synchronize" ]; then
+            body="$(printf '%s\n\n%s' \
+              "This pull request exceeds the rate limit: its author opened **${count}** pull requests in the last **${WINDOW_HOURS} hours** (limit: ${MAX_PRS})." \
+              "Please wait for the window to pass before opening more PRs, or ask a maintainer if this was a false positive. Combining related changes into fewer PRs helps review stay manageable.")"
+
+            if ! gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"; then
+              echo "Could not comment. Fork pull requests get a read-only token."
+            fi
+          fi
+          echo "Failing the check: author exceeded the rate limit."
+          exit 1

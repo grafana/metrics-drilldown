@@ -78,7 +78,10 @@
       "view-label": "View"
     },
     "section-label": "Breakdown",
-    "select-label": "Select"
+    "select-label": "Select",
+    "sync-y-axis": {
+      "label": "Sync y-axis"
+    }
   },
   "checkbox-list": {
     "clear": "clear",

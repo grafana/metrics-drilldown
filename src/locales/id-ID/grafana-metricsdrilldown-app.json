@@ -76,7 +76,10 @@
       "view-label": "Lihat"
     },
     "section-label": "Perincian",
-    "select-label": "Pilih"
+    "select-label": "Pilih",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "hapus",
