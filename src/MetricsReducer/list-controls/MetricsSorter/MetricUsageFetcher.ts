@@ -5,7 +5,7 @@ import { type ItemsInSet } from '../../../shared/utils/utils.types';
 interface MetricsUsageState {
   metrics: Record<string, MetricUsageDetails>;
   metricsPromise: Promise<Record<string, MetricUsageDetails>> | undefined;
-  fetcher: () => Promise<Record<string, MetricUsageDetails>>;
+  fetcher: (onDashboardLimitExceeded?: () => void) => Promise<Record<string, MetricUsageDetails>>;
 }
 
 const metricUsageTypes = new Set(['dashboard-usage', 'alerting-usage'] as const);
@@ -27,7 +27,10 @@ export class MetricUsageFetcher {
     },
   };
 
-  public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, MetricUsageDetails>> {
+  public getUsageMetrics(
+    usageType: MetricUsageType,
+    onDashboardLimitExceeded?: () => void
+  ): Promise<Record<string, MetricUsageDetails>> {
     const hasExistingMetrics =
       this._usageState[usageType].metrics && Object.keys(this._usageState[usageType].metrics).length > 0;
 
@@ -36,11 +39,13 @@ export class MetricUsageFetcher {
     }
 
     if (!this._usageState[usageType].metricsPromise) {
-      this._usageState[usageType].metricsPromise = this._usageState[usageType].fetcher().then((metrics) => {
-        this._usageState[usageType].metrics = metrics;
-        this._usageState[usageType].metricsPromise = undefined;
-        return metrics;
-      });
+      this._usageState[usageType].metricsPromise = this._usageState[usageType]
+        .fetcher(onDashboardLimitExceeded)
+        .then((metrics) => {
+          this._usageState[usageType].metrics = metrics;
+          this._usageState[usageType].metricsPromise = undefined;
+          return metrics;
+        });
     }
 
     return this._usageState[usageType].metricsPromise;
