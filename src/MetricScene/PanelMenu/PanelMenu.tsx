@@ -1,3 +1,4 @@
+import { isAssistantAvailable } from '@grafana/assistant';
 import { type DataFrame, type PanelMenuItem } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { SceneObjectBase, VizPanelMenu, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
@@ -5,8 +6,12 @@ import React from 'react';
 
 import { getTrailFor } from '../../shared/utils/utils';
 import { TOPVIEW_PANEL_MENU_KEY } from '../MetricGraphScene';
+import { AddToDashboardAction } from './actions/AddToDashboardAction';
+import { BookmarkAction } from './actions/BookmarkAction';
 import { CopyUrlAction } from './actions/CopyUrlAction';
+import { CreateAlertAction } from './actions/CreateAlertAction';
 import { ExploreAction } from './actions/ExploreAction';
+import { OpenAssistantAction } from './actions/OpenAssistantAction';
 
 interface PanelMenuState extends SceneObjectState {
   body?: VizPanelMenu;
@@ -27,28 +32,71 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
     });
 
     this.addActivationHandler(() => {
-      // Navigation group of options (all panels)
-      const items: PanelMenuItem[] = [
-        {
-          text: t('panel-menu.group.navigation', 'Navigation'),
-          type: 'group',
-        },
-        ExploreAction.create(this),
-      ];
+      let assistantAvailable = false;
+
+      const buildItems = () => {
+        // Navigation group of options (all panels)
+        const items: PanelMenuItem[] = [
+          {
+            text: t('panel-menu.group.navigation', 'Navigation'),
+            type: 'group',
+          },
+          ExploreAction.create(this),
+        ];
+
+        const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
+        if (isMainGraphPanel) {
+          // Only add these actions to the main metric graph panel
+          const trail = getTrailFor(this);
+          const actionItems: PanelMenuItem[] = [];
+
+          if (assistantAvailable) {
+            actionItems.push(OpenAssistantAction.create(this));
+          }
+          if (trail.state.isAddToDashboardAvailable) {
+            actionItems.push(AddToDashboardAction.create(this));
+          }
+          if (trail.state.isCreateAlertAvailable) {
+            actionItems.push(CreateAlertAction.create(this));
+          }
+          actionItems.push(BookmarkAction.create(this, buildItems));
+          actionItems.push(CopyUrlAction.create(trail));
+
+          items.push(
+            {
+              text: t('panel-menu.group.actions', 'Actions'),
+              type: 'group',
+            },
+            ...actionItems
+          );
+        }
+
+        this.state.body?.setState({ items });
+      };
+
+      buildItems();
+
+      this._subs.add(
+        isAssistantAvailable().subscribe((available) => {
+          assistantAvailable = available;
+          buildItems();
+        })
+      );
 
       const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
       if (isMainGraphPanel) {
-        // Only add Copy URL to the main metric graph panel
-        items.push(
-          {
-            text: t('panel-menu.group.actions', 'Actions'),
-            type: 'group',
-          },
-          CopyUrlAction.create(getTrailFor(this))
+        const trail = getTrailFor(this);
+        this._subs.add(
+          trail.subscribeToState((newState, prevState) => {
+            if (
+              newState.isAddToDashboardAvailable !== prevState.isAddToDashboardAvailable ||
+              newState.isCreateAlertAvailable !== prevState.isCreateAlertAvailable
+            ) {
+              buildItems();
+            }
+          })
         );
       }
-
-      this.state.body?.setState({ items });
     });
   }
 
