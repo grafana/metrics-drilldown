@@ -306,9 +306,11 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "Add bookmark",
       "copy-url": "Copy URL",
       "copy-url-success": "URL copied to clipboard",
-      "explore": "Explore"
+      "explore": "Explore",
+      "remove-bookmark": "Remove bookmark"
     },
     "group": {
       "actions": "Actions",
