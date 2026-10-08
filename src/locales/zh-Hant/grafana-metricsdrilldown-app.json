@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "明細",
-      "query-results": "",
+      "query-results": "查詢結果",
       "query-results-description": "Instant query data in table format",
       "related-logs": "相關記錄",
       "related-logs-description": "根據目前標籤篩選條件和時間範圍的相關記錄",
@@ -11,46 +11,46 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "OTel 指標屬性",
+    "badge-resource": "OTel 資源屬性",
+    "close-aria-label": "關閉",
+    "close-tooltip": "關閉",
+    "collapse": "收合",
+    "collapse-extra-fields": "收合額外欄位",
+    "description": "透過探索您的資料如何在關鍵屬性之間細分，找出模式並縮小根本原因的範圍。點選任何值以篩選您的結果。",
+    "description-aria-label": "這些百分比代表什麼？",
+    "description-histogram": "這會顯示 {{range}} 內各個值在此標籤觀測結果中所占的比例。沒有活動的值會排在最後。",
+    "detection-error": "無法載入此資料集的屬性。",
+    "discovering-fields": "正在探索屬性…",
+    "error": "無法載入",
+    "expand": "展開",
+    "field-input-placeholder": "搜尋以新增更多屬性",
+    "field-link-label": "檢視 {{name}}",
+    "filter-for-value": "篩選值",
+    "filter-out-value": "篩選出值",
+    "histogram-range-between": "介於 {{lower}} 和 {{upper}} 之間",
+    "histogram-range-over": "大於 {{value}}",
+    "histogram-range-under": "小於 {{value}}",
+    "invalid-range": "上限必須大於下限",
+    "lower-limit": "下限",
+    "lower-limit-placeholder": "無限制",
+    "lower-limit-unit": "下限（{{unit}} 個）",
+    "no-extra-fields-shown": "未顯示額外欄位",
+    "no-fields-detected": "未偵測到此資料集的欄位。",
+    "no-more-fields": "沒有其他欄位",
+    "no-values-found": "未找到數值",
+    "title": "屬性探索器",
+    "too-many-values": "值過多，無法顯示",
+    "unit-unknown": "我們無法從此指標的名稱中確定其單位。在相信百分比之前，請仔細檢查臨界值。",
+    "upper-limit": "最大限制",
+    "upper-limit-placeholder": "無限制",
+    "upper-limit-unit": "上限（{{unit}} 個）",
+    "value-tooltip-histogram-no-activity": "此時間範圍內沒有活動。",
+    "show-more-fields_other": "顯示 {{count}} 個更多欄位",
+    "value-tooltip-histogram_other": "此值占此標籤中符合 {{range}} 條件的觀測結果的 {{percentage}}%（{{count}}／約 {{total}}）。"
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "確定"
   },
   "breakdown": {
     "add-to-filters": "新增至篩選條件",
@@ -59,8 +59,8 @@
       "label": "分組依據"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "總和",
+      "label": "直方圖函數"
     },
     "label-values-list": {
       "error-title": "載入指標時發生錯誤！",
@@ -89,9 +89,9 @@
     "selected-count_other": "已選取 {{count}} 個"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "指標深入分析有較新版本可用，正在重新載入…",
+    "manual-message": "有較新版本的指標深入分析可供使用，但無法自動載入。",
+    "reload-button": "立即重新載入"
   },
   "configure-panel": {
     "apply": "套用",
@@ -121,14 +121,14 @@
     "title": "致命錯誤！"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "直方圖分佈",
     "tooltip": {
-      "description": ""
+      "description": "探索此指標各標籤與屬性值的直方圖觀測結果分布。"
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "{{componentName}} 無法載入。請再試一次，或聯絡您的組織管理員。",
+    "title": "發生錯誤"
   },
   "extreme-value-filter": {
     "message": "面板資料已使用更複雜的查詢重新擷取，以處理系列中的極小值"
@@ -142,23 +142,23 @@
     "limit-warning-title": "Dashboard usage sort is limited to 500 dashboards."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "無法從 Prometheus 規則評估器端點擷取觸發中的警示規則"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "無法擷取 SLO 定義",
+    "parse-error": "無法從 SLO 定義中擷取指標名稱"
   },
   "filtered-metrics-variable": {
     "label": "篩選的指標"
   },
   "firing-alert-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "{{count}} 個觸發警示規則參考此指標"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "移除觸發中警示篩選條件",
+    "aria-label-inactive": "依觸發警示篩選",
+    "tooltip-empty": "目前的篩選結果中，沒有含觸發中警示的指標",
+    "label_other": "有觸發警示 ({{count}})"
   },
   "give-feedback": {
     "button": "提供意見回饋"
@@ -221,19 +221,19 @@
     "search-aria-label": "Quick search metrics"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "直方圖分析"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "No saved queries to load",
-        "button-tooltip": "",
+        "button-tooltip": "載入已儲存的查詢",
         "empty": "No saved queries to display.",
         "load-error": "This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.",
         "load-type-error": "Please select a Prometheus query.",
         "modal-title": "Load a previously saved query",
         "remove": "Remove",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "載入已儲存的查詢",
         "select": "Select"
       },
       "save-query": {
@@ -241,7 +241,7 @@
           "alert": "There is a previously saved query with the same expression: {{title}}"
         },
         "button-tooltip": "Save query",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "儲存在「已儲存的查詢」中",
         "cancel": "Cancel",
         "description": "Description",
         "error": "Unexpected error saving this query.",
@@ -279,7 +279,7 @@
       "alphabetical-reversed": "按字母順序排列 [Z-A]",
       "dashboard-usage": "儀表板使用情況",
       "default": "預設",
-      "firing-alerts": ""
+      "firing-alerts": "觸發警示"
     }
   },
   "metrics-variable": {
@@ -287,12 +287,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "無法依觸發中警示排序"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "請參閱<2>我們的文件</2>以瞭解更多資訊，或在 Grafana Play <br/><6>線上試用</6>！",
+    "no-datasource": "我們發現目前尚未設定 Prometheus 資料來源。<br/>新增 <4>Prometheus 資料來源</4>以檢視指標。",
     "title": "歡迎使用 Grafana 指標深入分析"
   },
   "open-assistant": {
@@ -324,7 +324,7 @@
       "commit-sha": "提交 SHA：{{sha}}",
       "contribute": "貢獻",
       "documentation": "文件",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "回報問題"
     }
   },
@@ -334,9 +334,9 @@
     "view-by-label": "檢視方式"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "查詢選項",
+    "title": "查詢選項",
+    "toggle-insights": "切換深入解析註釋"
   },
   "query-results": {
     "aria-label": "Instant query results",
@@ -389,7 +389,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "建立日期：",
-      "empty-state": "",
+      "empty-state": "目前的資料來源<br/>尚無任何書籤。",
       "remove-tooltip": "移除書籤"
     },
     "close-aria-label": "關閉",
@@ -431,13 +431,13 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "{{count}} 個 SLO 定義參照此指標"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "移除 SLO 追蹤篩選條件",
+    "aria-label-inactive": "依 SLO 追蹤的指標篩選",
+    "tooltip-empty": "目前的篩選結果中沒有 SLO 追蹤的指標",
+    "label_other": "SLO 追蹤 ({{count}})"
   },
   "sort-by": {
     "label": "排序方式",

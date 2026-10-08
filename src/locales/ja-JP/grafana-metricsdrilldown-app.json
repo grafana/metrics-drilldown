@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "内訳",
-      "query-results": "",
+      "query-results": "クエリ結果",
       "query-results-description": "テーブル形式のインスタントクエリデータ",
       "related-logs": "関連ログ",
       "related-logs-description": "現在のラベルフィルターと時間範囲に基づく関連ログ",
@@ -11,46 +11,46 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "OTelメトリクス属性",
+    "badge-resource": "OTelリソース属性",
+    "close-aria-label": "閉じる",
+    "close-tooltip": "閉じる",
+    "collapse": "折りたたむ",
+    "collapse-extra-fields": "追加フィールドを折りたたむ",
+    "description": "主要な属性ごとにデータの内訳を確認して、パターンを見つけたり原因を絞り込んだりできます。値をクリックすると、結果をフィルタリングできます。",
+    "description-aria-label": "このパーセンテージの意味",
+    "description-histogram": "{{range}}におけるラベルの観測値全体に占める、各値の割合を示しています。アクティビティのない値は最後に並びます。",
+    "detection-error": "このデータセットの属性を読み込めませんでした。",
+    "discovering-fields": "属性を検出しています…",
+    "error": "読み込めませんでした",
+    "expand": "展開",
+    "field-input-placeholder": "属性を検索して追加",
+    "field-link-label": "{{name}}を表示",
+    "filter-for-value": "この値で絞り込む",
+    "filter-out-value": "この値を除外する",
+    "histogram-range-between": "{{lower}}～{{upper}}",
+    "histogram-range-over": "{{value}}超",
+    "histogram-range-under": "{{value}}未満",
+    "invalid-range": "上限は下限より大きい値にしてください",
+    "lower-limit": "下限",
+    "lower-limit-placeholder": "上限なし",
+    "lower-limit-unit": "下限（{{unit}}）",
+    "no-extra-fields-shown": "追加フィールドはありません",
+    "no-fields-detected": "このデータセットにはフィールドが見つかりませんでした。",
+    "no-more-fields": "これ以上フィールドはありません",
+    "no-values-found": "値が見つかりませんでした",
+    "title": "属性エクスプローラー",
+    "too-many-values": "値が多すぎて表示できません",
+    "unit-unknown": "このメトリクスの名前から単位を特定できませんでした。パーセンテージを信頼する前に、しきい値を再確認してください。",
+    "upper-limit": "上限",
+    "upper-limit-placeholder": "上限なし",
+    "upper-limit-unit": "上限（{{unit}}）",
+    "value-tooltip-histogram-no-activity": "この期間にアクティビティはありません。",
+    "show-more-fields_other": "さらに{{count}}件のフィールドを表示",
+    "value-tooltip-histogram_other": "この値は、{{range}}に該当するこのラベルの観測値のうち{{percentage}}%を占めています（このラベル自体の約{{total}}件中{{count}}件）。"
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "フィルターに追加",
@@ -59,8 +59,8 @@
       "label": "グループ化"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "合計",
+      "label": "ヒストグラム関数"
     },
     "label-values-list": {
       "error-title": "メトリクスの読み込み中にエラーが発生しました！",
@@ -89,9 +89,9 @@
     "selected-count_other": "{{count}}件選択中"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "Metrics Drilldownの新しいバージョンが利用できます。再読み込みしています…",
+    "manual-message": "Metrics Drilldownの新しいバージョンが利用できますが、自動的に読み込めませんでした。",
+    "reload-button": "今すぐ再読み込み"
   },
   "configure-panel": {
     "apply": "適用",
@@ -121,14 +121,14 @@
     "title": "致命的なエラーが発生しました！"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "ヒストグラム分布",
     "tooltip": {
-      "description": ""
+      "description": "このメトリクスのラベルと属性値について、ヒストグラムの観測値の分布を確認できます。"
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "{{componentName}}を読み込めませんでした。もう一度お試しいただくか、組織の管理者にお問い合わせください。",
+    "title": "問題が発生しました"
   },
   "extreme-value-filter": {
     "message": "系列内の極小値を処理するため、より複雑なクエリでパネルデータを再取得しました"
@@ -142,23 +142,23 @@
     "limit-warning-title": "ダッシュボード使用状況の並び替えは、500件のダッシュボードまでに制限されています。"
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Prometheus rulerエンドポイントから、発報中のアラートルールを取得できませんでした"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "SLO定義を取得できませんでした",
+    "parse-error": "SLO定義からメトリクス名を抽出できませんでした"
   },
   "filtered-metrics-variable": {
     "label": "フィルタリングされたメトリクス"
   },
   "firing-alert-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "発報中の{{count}}件のアラートルールがこのメトリクスを参照しています"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "発報中のアラートのフィルターを削除",
+    "aria-label-inactive": "発報中のアラートで絞り込む",
+    "tooltip-empty": "現在の絞り込み結果に、発報中のアラートがあるメトリクスはありません",
+    "label_other": "発報中のアラートあり（{{count}}）"
   },
   "give-feedback": {
     "button": "フィードバックを提供"
@@ -221,19 +221,19 @@
     "search-aria-label": "メトリクスをクイック検索"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "ヒストグラム分析"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "読み込む保存されたクエリがありません",
-        "button-tooltip": "",
+        "button-tooltip": "保存済みクエリを読み込む",
         "empty": "表示する保存されたクエリがありません。",
         "load-error": "このクエリには、Metrics Drilldownで表現できない式が含まれています。サポートされているのは、単純なメトリクス{label}セレクターのみです。",
         "load-type-error": "Prometheusクエリを選択してください。",
         "modal-title": "以前に保存したクエリを読み込む",
         "remove": "削除",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "保存済みクエリを読み込む",
         "select": "選択"
       },
       "save-query": {
@@ -241,7 +241,7 @@
           "alert": "同じ式を使用した、以前に保存したクエリが存在します：{{title}}"
         },
         "button-tooltip": "クエリを保存",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "保存済みクエリに保存",
         "cancel": "キャンセル",
         "description": "説明",
         "error": "このクエリの保存中に予期しないエラーが発生しました。",
@@ -279,7 +279,7 @@
       "alphabetical-reversed": "アルファベット順（Z～A）",
       "dashboard-usage": "ダッシュボードの使用",
       "default": "デフォルト",
-      "firing-alerts": ""
+      "firing-alerts": "発報中のアラート"
     }
   },
   "metrics-variable": {
@@ -287,12 +287,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "発報中のアラートによる並べ替えに失敗しました"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "詳しくは<2>ドキュメント</2>をご覧いただくか、<br/>Grafana Playで<6>オンラインで試して</6>みてください！",
+    "no-datasource": "Prometheusデータソースが設定されていません。<br/>メトリクスを表示するには、<4>Prometheusデータソース</4>を追加してください。",
     "title": "Grafana Metrics Drilldownへようこそ"
   },
   "open-assistant": {
@@ -324,7 +324,7 @@
       "commit-sha": "コミットSHA：{{sha}}",
       "contribute": "貢献",
       "documentation": "ドキュメント",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}}（{{env}}）",
       "report-issue": "問題を報告する"
     }
   },
@@ -334,9 +334,9 @@
     "view-by-label": "表示形式"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "クエリオプション",
+    "title": "クエリオプション",
+    "toggle-insights": "インサイトの注釈の表示を切り替え"
   },
   "query-results": {
     "aria-label": "インスタントクエリ結果",
@@ -389,7 +389,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "作成日：",
-      "empty-state": "",
+      "empty-state": "現在のデータソースには<br/>ブックマークがまだありません。",
       "remove-tooltip": "ブックマークを削除"
     },
     "close-aria-label": "閉じる",
@@ -431,13 +431,13 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "{{count}}件のSLO定義がこのメトリクスを参照しています"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "SLO追跡のフィルターを削除",
+    "aria-label-inactive": "SLOで追跡されているメトリクスで絞り込む",
+    "tooltip-empty": "現在の絞り込み結果に、SLOで追跡されているメトリクスはありません",
+    "label_other": "SLO追跡あり（{{count}}）"
   },
   "sort-by": {
     "label": "並べ替え",

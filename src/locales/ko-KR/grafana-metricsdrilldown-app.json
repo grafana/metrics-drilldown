@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "세부 분류",
-      "query-results": "",
+      "query-results": "쿼리 결과",
       "query-results-description": "테이블 형식의 인스턴트 쿼리 데이터",
       "related-logs": "관련 로그",
       "related-logs-description": "현재 라벨 필터 및 시간 범위 기준 관련 로그",
@@ -11,46 +11,46 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "OTel 메트릭 속성",
+    "badge-resource": "OTel 리소스 속성",
+    "close-aria-label": "닫기",
+    "close-tooltip": "닫기",
+    "collapse": "접기",
+    "collapse-extra-fields": "추가 필드 접기",
+    "description": "주요 속성별로 데이터를 세분화해 살펴보면서 패턴을 파악하고 근본 원인의 범위를 좁혀 보세요. 원하는 값을 클릭하여 결과를 필터링하세요.",
+    "description-aria-label": "이 백분율은 무엇을 의미하나요?",
+    "description-histogram": "각 값이 {{range}} 동안 해당 레이블의 관측값에서 차지하는 비율을 보여줍니다. 활동이 없는 값은 마지막에 정렬됩니다.",
+    "detection-error": "이 데이터 세트의 속성을 로드하지 못했습니다.",
+    "discovering-fields": "속성 검색 중...",
+    "error": "불러오기 실패",
+    "expand": "펼치기",
+    "field-input-placeholder": "검색하여 속성 추가",
+    "field-link-label": "{{name}} 보기",
+    "filter-for-value": "값 필터링하여 추가",
+    "filter-out-value": "값 필터링하여 제외",
+    "histogram-range-between": "{{lower}} ~ {{upper}}",
+    "histogram-range-over": "{{value}} 초과",
+    "histogram-range-under": "{{value}} 미만",
+    "invalid-range": "상한은 하한보다 커야 합니다",
+    "lower-limit": "하한",
+    "lower-limit-placeholder": "제한 없음",
+    "lower-limit-unit": "하한({{unit}})",
+    "no-extra-fields-shown": "추가 필드가 표시되지 않음",
+    "no-fields-detected": "이 데이터 집합에 대해 감지된 필드가 없습니다.",
+    "no-more-fields": "더 이상 필드 없음",
+    "no-values-found": "값을 찾을 수 없음",
+    "title": "속성 탐색기",
+    "too-many-values": "표시할 값이 너무 많음",
+    "unit-unknown": "이 메트릭의 이름에서 단위를 확인할 수 없습니다. 백분율을 신뢰하기 전에 임계값이 올바른지 다시 확인하세요.",
+    "upper-limit": "상한",
+    "upper-limit-placeholder": "제한 없음",
+    "upper-limit-unit": "상한({{unit}})",
+    "value-tooltip-histogram-no-activity": "이 창에 활동이 없습니다.",
+    "show-more-fields_other": "필드 {{count}}개 더 표시",
+    "value-tooltip-histogram_other": "이 값은 {{range}}에 해당하는 이 레이블 관측값의 {{percentage}}%를 차지합니다(이 값의 전체 약 {{total}}개 중 {{count}}개)."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "확인"
   },
   "breakdown": {
     "add-to-filters": "필터에 추가",
@@ -59,8 +59,8 @@
       "label": "그룹 기준"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "합계",
+      "label": "히스토그램 함수"
     },
     "label-values-list": {
       "error-title": "메트릭을 불러오는 중 오류가 발생했습니다!",
@@ -89,9 +89,9 @@
     "selected-count_other": "{{count}} 선택됨"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "새 버전의 Metrics Drilldown을 사용할 수 있습니다. 다시 로드 중…",
+    "manual-message": "새 버전의 Metrics Drilldown을 사용할 수 있지만 자동으로 로드할 수 없습니다.",
+    "reload-button": "지금 다시 로드"
   },
   "configure-panel": {
     "apply": "적용",
@@ -121,14 +121,14 @@
     "title": "치명적 오류!"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "히스토그램 분포",
     "tooltip": {
-      "description": ""
+      "description": "이 메트릭의 레이블 및 속성 값에 대한 히스토그램 관측값 분포를 살펴보세요."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "{{componentName}}을(를) 로드하지 못했습니다. 다시 시도하거나 조직 관리자에게 문의하세요.",
+    "title": "오류 발생"
   },
   "extreme-value-filter": {
     "message": "시리즈의 극소값 처리를 위해 더 복잡한 쿼리로 패널 데이터를 다시 가져왔습니다"
@@ -142,23 +142,23 @@
     "limit-warning-title": "대시보드 사용량 정렬은 500개 대시보드로 제한됩니다."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Prometheus ruler 엔드포인트에서 발생 중인 경보 규칙을 가져오지 못했습니다."
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "SLO 정의 가져오기 실패",
+    "parse-error": "SLO 정의에서 메트릭 이름을 추출하지 못했습니다."
   },
   "filtered-metrics-variable": {
     "label": "필터링된 메트릭"
   },
   "firing-alert-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "발생 중인 경보 규칙 {{count}}개가 이 메트릭을 참조합니다"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "발생 중인 경보 필터 제거",
+    "aria-label-inactive": "발생 중인 경보로 필터링",
+    "tooltip-empty": "현재 필터링된 항목에 발생 중인 경보가 있는 메트릭이 없습니다",
+    "label_other": "발생 중인 경보 있음({{count}}개)"
   },
   "give-feedback": {
     "button": "피드백 제출하기"
@@ -221,19 +221,19 @@
     "search-aria-label": "빠른 검색 메트릭"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "히스토그램 분석"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "불러올 저장된 쿼리가 없음",
-        "button-tooltip": "",
+        "button-tooltip": "저장된 쿼리 불러오기",
         "empty": "표시할 저장된 쿼리가 없습니다.",
         "load-error": "이 쿼리에는 메트릭 드릴다운에서 표시할 수 없는 식이 포함되어 있습니다. 간단한 메트릭{label} 선택기만 지원됩니다.",
         "load-type-error": "Prometheus 쿼리를 선택해 주세요.",
         "modal-title": "이전에 저장된 쿼리 불러오기",
         "remove": "제거",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "저장된 쿼리 불러오기",
         "select": "선택"
       },
       "save-query": {
@@ -241,7 +241,7 @@
           "alert": "동일한 식을 가진 이전에 저장된 쿼리가 있음: {{title}}"
         },
         "button-tooltip": "쿼리 저장",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "저장된 쿼리에 저장",
         "cancel": "취소",
         "description": "설명",
         "error": "이 쿼리를 저장하는 동안 예기치 않은 오류가 발생했습니다.",
@@ -279,7 +279,7 @@
       "alphabetical-reversed": "알파벳 역순 [Z-A]",
       "dashboard-usage": "대시보드 사용량",
       "default": "기본값",
-      "firing-alerts": ""
+      "firing-alerts": "발생 중인 경고"
     }
   },
   "metrics-variable": {
@@ -287,12 +287,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "발생 중인 경보를 기준으로 정렬하지 못했습니다."
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "자세한 내용은 <2>Grafana 문서</2>를 확인하거나<br/> Grafana Play에서<6>온라인으로 사용해 보세요</6>!",
+    "no-datasource": "구성된 Prometheus 데이터 소스가 없습니다.<br/>메트릭을 보려면 <4>Prometheus 데이터 소스</4>를 추가하세요.",
     "title": "Grafana 메트릭 드릴다운에 오신 것을 환영합니다"
   },
   "open-assistant": {
@@ -324,7 +324,7 @@
       "commit-sha": "SHA 커밋: {{sha}}",
       "contribute": "기여",
       "documentation": "문서",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "문제 보고"
     }
   },
@@ -334,9 +334,9 @@
     "view-by-label": "보기 기준"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "쿼리 옵션",
+    "title": "쿼리 옵션",
+    "toggle-insights": "인사이트 주석 전환"
   },
   "query-results": {
     "aria-label": "즉각적인 쿼리 결과",
@@ -389,7 +389,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "생성 날짜: ",
-      "empty-state": "",
+      "empty-state": "<br/>현재 데이터 소스에 대한 북마크가 아직 없습니다.",
       "remove-tooltip": "북마크 삭제"
     },
     "close-aria-label": "닫기",
@@ -431,13 +431,13 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "{{count}}개의 SLO 정의가 이 메트릭을 참조합니다"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "SLO 추적 필터 제거",
+    "aria-label-inactive": "SLO 추적 메트릭으로 필터링",
+    "tooltip-empty": "현재 필터링된 항목에 SLO 추적 메트릭이 없습니다.",
+    "label_other": "SLO 추적됨({{count}}개)"
   },
   "sort-by": {
     "label": "정렬 기준",
