@@ -34,7 +34,7 @@
     "i18n-extract": "i18next-cli extract -c i18next.config.ts --sync-primary",
     "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --sync-primary --ci"
   },
-  "packageManager": "pnpm@11.28.0+sha512.8ed239371de82244b6cccf9e2023c18ea8439961f2ec3fe898913b9f7ee2e76ca0a45717580aca3c7997c135f6d4f5de4524cbeee1a2ccac430c03d134e2a48c",
+  "packageManager": "pnpm@11.28.4+sha512.f905a61563f89b49a292634d3d87d024cfdea9dccf5c66b2ccc261675fa7b2774320a959db472e6caa7f9ff7314709cd50d06c8fd64addb60647377a78d250ff",
   "engines": {
     "node": ">=22"
   },
@@ -84,7 +84,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/jest": "30.0.0",
     "@types/lodash": "^4.17.23",
-    "@types/node": "24.13.6",
+    "@types/node": "24.19.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/ws": "^8.18.1",
