@@ -1,5 +1,6 @@
 import { css } from '@emotion/css';
 import { DashboardCursorSync, type GrafanaTheme2 } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { locationService, useChromeHeaderHeight } from '@grafana/runtime';
 import {
   behaviors,
@@ -158,7 +159,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
       gmdVizPanel.setState({
         onClick: () => locationService.push(url),
-        clickTitle: `Open Metrics Drilldown for ${metric}`,
+        clickTitle: t('metric-graph.open-drilldown', 'Open Metrics Drilldown for {{metric}}', { metric }),
       });
 
       return; // Skip the rest of the setup for embeddedMini

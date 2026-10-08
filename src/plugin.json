@@ -91,17 +91,17 @@
           "grafana-assistant-app/navigateToDrilldown/v1"
         ],
         "title": "Open in Metrics Drilldown",
-        "description": "Open current query in the Grafana Metrics Drilldown view"
+        "description": "Open current query in the Metrics Drilldown view"
       },
       {
         "targets": ["grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha"],
-        "title": "Navigate to metrics drilldown",
-        "description": "Build a url path to the metrics drilldown"
+        "title": "Navigate to Metrics Drilldown",
+        "description": "Build a URL path to the Metrics Drilldown"
       },
       {
         "targets": ["grafana/datasources/config/actions", "grafana/datasources/config/status"],
         "title": "Open in Metrics Drilldown",
-        "description": "Browse metrics in Grafana Metrics Drilldown"
+        "description": "Browse metrics in Metrics Drilldown"
       }
     ],
     "extensionPoints": [
