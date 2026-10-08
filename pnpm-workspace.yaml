@@ -37,7 +37,7 @@ allowBuilds:
 # @grafana/ui's v5 compatibility package pins react-router 6.30.3, so keep that
 # transitive v6 line on 6.30.6, which includes the GHSA-jjmj-jmhj-qwj2 backport.
 overrides:
-  react-router@^6: ^6.30.6
+  react-router@^6: ^7.18.0
   '@remix-run/router': ^1.23.3
   dompurify: ^3.4.16
   moment: ^2.31.0
@@ -58,3 +58,6 @@ overrides:
   'chokidar@^3': ^4.0.3
   'eslint-webpack-plugin>micromatch': 'npm:picomatch@^2.3.2'
   '@types/jest>expect': ^30.5.2
+minimumReleaseAgeExclude:
+  # Renovate security update: react-router@7.18.0
+  - react-router@7.18.0
