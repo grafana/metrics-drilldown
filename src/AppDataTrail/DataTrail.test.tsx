@@ -426,3 +426,47 @@ describe('DataTrail - Add to Dashboard', () => {
     expect(dataTrail.state.addToDashboardPanelData).toBeUndefined();
   });
 });
+
+describe('DataTrail - Create Alert', () => {
+  let dataTrail: DataTrail;
+
+  beforeEach(() => {
+    dataTrail = new DataTrail({});
+  });
+
+  it('should initialize with modal closed and component unavailable', () => {
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(false);
+    expect(dataTrail.state.isCreateAlertAvailable).toBe(false);
+    expect(dataTrail.state.createAlertPanelData).toBeUndefined();
+  });
+
+  it('should open modal with panel data', () => {
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: {
+        type: 'timeseries',
+        title: 'Test',
+        targets: [],
+        datasource: { type: 'prometheus', uid: 'test' },
+      },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.openCreateAlertModal(mockPanelData);
+
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(true);
+    expect(dataTrail.state.createAlertPanelData).toBe(mockPanelData);
+  });
+
+  it('should close modal and clear panel data', () => {
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: { type: 'timeseries', title: 'Test', targets: [], datasource: null },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.openCreateAlertModal(mockPanelData);
+    dataTrail.closeCreateAlertModal();
+
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(false);
+    expect(dataTrail.state.createAlertPanelData).toBeUndefined();
+  });
+});
