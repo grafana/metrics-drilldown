@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Részletezés",
-      "query-results": "",
+      "query-results": "Lekérdezési eredmények",
       "query-results-description": "Azonnali lekérdezési adatok táblázatos formában",
       "related-logs": "Kapcsolódó naplók",
       "related-logs-description": "Releváns naplók az aktuális címkeszűrők és időtartomány alapján",
@@ -11,48 +11,48 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_one": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_one": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "OTel-metrikaattribútum",
+    "badge-resource": "OTel-erőforrásattribútum",
+    "close-aria-label": "Bezárás",
+    "close-tooltip": "Bezárás",
+    "collapse": "Összecsukás",
+    "collapse-extra-fields": "Extra mezők összecsukása",
+    "description": "Fedezze fel a mintázatokat, és szűkítse le a kiváltó okokat azáltal, hogy megvizsgálja, hogyan oszlanak meg az adatai a kulcsfontosságú attribútumok között. Kattintson bármelyik értékre az eredmények szűréséhez.",
+    "description-aria-label": "Mit jelentenek ezek a százalékos értékek?",
+    "description-histogram": "Ez mutatja az egyes értékek arányát a címke megfigyelésein belül {{range}}. A tevékenység nélküli értékek kerülnek a sorrend végére.",
+    "detection-error": "Az adatkészlet attribútumainak betöltése nem sikerült.",
+    "discovering-fields": "Attribútumok felfedezése…",
+    "error": "Hiba a betöltés közben",
+    "expand": "Kibontás",
+    "field-input-placeholder": "Keresés további attribútumok hozzáadásához",
+    "field-link-label": "{{name}} nézet",
+    "filter-for-value": "Érték szűrése",
+    "filter-out-value": "Érték kiszűrése",
+    "histogram-range-between": "{{lower}} és {{upper}} között",
+    "histogram-range-over": "{{value}} felett",
+    "histogram-range-under": "{{value}} alatt",
+    "invalid-range": "A felső határnak nagyobbnak kell lennie az alsó határnál",
+    "lower-limit": "Alsó határ",
+    "lower-limit-placeholder": "nincs határ",
+    "lower-limit-unit": "Alsó határ ({{unit}})",
+    "no-extra-fields-shown": "Nincsenek megjelenítve extra mezők",
+    "no-fields-detected": "Nem észlelhetők mezők ehhez az adatkészlethez.",
+    "no-more-fields": "Nincs több mező",
+    "no-values-found": "Nem található érték",
+    "title": "Attribútumböngésző",
+    "too-many-values": "Túl sok megjelenítendő érték",
+    "unit-unknown": "Nem tudtuk meghatározni ennek a metrikának az egységét a neve alapján. Ellenőrizze még egyszer a küszöbértéket, mielőtt megbízna a százalékos értékben.",
+    "upper-limit": "Felső korlát",
+    "upper-limit-placeholder": "nincs határ",
+    "upper-limit-unit": "Felső határ ({{unit}})",
+    "value-tooltip-histogram-no-activity": "Nincs tevékenység ebben az ablakban.",
+    "show-more-fields_one": "{{count}} további mező megjelenítése",
+    "show-more-fields_other": "{{count}} további mező megjelenítése",
+    "value-tooltip-histogram_one": "Ez az érték a címke azon megfigyeléseinek {{percentage}}%-át teszi ki, amelyek: {{range}} ({{count}} a saját ~{{total}} közül).",
+    "value-tooltip-histogram_other": "Ez az érték a címke azon megfigyeléseinek {{percentage}}%-át teszi ki, amelyek: {{range}} ({{count}} a saját ~{{total}} közül)."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "Hozzáadás a szűrőkhöz",
@@ -61,8 +61,8 @@
       "label": "Csoportosítási szempont"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Összeg",
+      "label": "Hisztogramfüggvény"
     },
     "label-values-list": {
       "error-title": "Hiba történt a metrikák betöltésekor!",
@@ -92,9 +92,9 @@
     "selected-count_other": "{{count}} kiválasztva"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "A Metrics Drilldown újabb verziója elérhető – újratöltés…",
+    "manual-message": "A Metrics Drilldown újabb verziója elérhető, de nem sikerült automatikusan betölteni.",
+    "reload-button": "Újratöltés most"
   },
   "configure-panel": {
     "apply": "Alkalmaz",
@@ -124,14 +124,14 @@
     "title": "Végzetes hiba!"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Hisztogrameloszlás",
     "tooltip": {
-      "description": ""
+      "description": "Fedezze fel a hisztogrammegfigyelések eloszlását a címkék és az attribútumértékek tekintetében ennél a metrikánál."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "A(z) {{componentName}} betöltése nem sikerült. Próbálkozzon újra, vagy vegye fel a kapcsolatot a szervezete rendszergazdájával.",
+    "title": "Valami hiba történt"
   },
   "extreme-value-filter": {
     "message": "A paneladatok lekérése megismétlődött egy összetettebb lekérdezéssel a sorozat rendkívül kis értékeinek kezelése érdekében"
@@ -145,25 +145,25 @@
     "limit-warning-title": "A műszerfalhasználat szerinti rendezés legfeljebb 500 elemre korlátozott."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Az aktív riasztási szabályok lekérése a Prometheus Ruler végpontjáról nem sikerült"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "Az SLO-definíciók lekérése nem sikerült",
+    "parse-error": "Nem sikerült kinyerni egy metrikanevet egy SLO-definícióból"
   },
   "filtered-metrics-variable": {
     "label": "Szűrt metrikák"
   },
   "firing-alert-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} aktív riasztási szabály hivatkozik erre a metrikára",
+    "tooltip_other": "{{count}} aktív riasztási szabály hivatkozik erre a metrikára"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "Aktív riasztások szűrőjének eltávolítása",
+    "aria-label-inactive": "Szűrés aktív riasztások alapján",
+    "tooltip-empty": "Nincsenek aktív riasztásokkal rendelkező metrikák az aktuális szűrt halmazban",
+    "label_one": "Aktív riasztásokat tartalmaz ({{count}})",
+    "label_other": "Aktív riasztásokat tartalmaz ({{count}})"
   },
   "give-feedback": {
     "button": "Visszajelzés küldése"
@@ -226,19 +226,19 @@
     "search-aria-label": "Metrikák gyorskeresése"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Hisztogramelemzés"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Nincsenek betölthető mentett lekérdezések",
-        "button-tooltip": "",
+        "button-tooltip": "Mentett lekérdezés betöltése",
         "empty": "Nincsenek megjeleníthető mentett lekérdezések.",
         "load-error": "Ez a lekérdezés olyan kifejezéseket tartalmaz, amelyeket a Metrics Drilldown nem tud megjeleníteni. Csak az egyszerű metrika{címke} választók támogatottak.",
         "load-type-error": "Válasszon ki egy Prometheus-lekérdezést.",
         "modal-title": "Korábban mentett lekérdezés betöltése",
         "remove": "Eltávolítás",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Mentett lekérdezés betöltése",
         "select": "Kiválasztás"
       },
       "save-query": {
@@ -246,7 +246,7 @@
           "alert": "Már létezik egy korábban mentett lekérdezés ugyanezzel a kifejezéssel: {{title}}"
         },
         "button-tooltip": "Lekérdezés mentése",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Mentés a mentett lekérdezések közé",
         "cancel": "Mégse",
         "description": "Leírás",
         "error": "Váratlan hiba történt a lekérdezés mentése közben.",
@@ -284,7 +284,7 @@
       "alphabetical-reversed": "Betűrendben [Z–A]",
       "dashboard-usage": "Irányítópult használata",
       "default": "Alapértelmezett",
-      "firing-alerts": ""
+      "firing-alerts": "Aktív riasztások"
     }
   },
   "metrics-variable": {
@@ -292,12 +292,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Nem sikerült az aktív riasztások szerinti rendezés"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "További információért tekintse meg <2>dokumentációnkat</2>, vagy<br/><6>próbálja ki online</6> a Grafana Playben!",
+    "no-datasource": "Észrevettük, hogy nincs konfigurálva Prometheus-adatforrás.<br/>Adjon hozzá egy <4>Prometheus-adatforrást</4> a metrikák megtekintéséhez.",
     "title": "Üdvözli a Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -329,7 +329,7 @@
       "commit-sha": "SHA-azonosító: {{sha}}",
       "contribute": "Hozzájárulás",
       "documentation": "Dokumentáció",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Probléma bejelentése"
     }
   },
@@ -339,9 +339,9 @@
     "view-by-label": "Megjelenítés alapja"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Lekérdezési beállítások",
+    "title": "Lekérdezési beállítások",
+    "toggle-insights": "Információk jegyzeteinek ki- és bekapcsolása"
   },
   "query-results": {
     "aria-label": "Azonnali lekérdezési eredmények",
@@ -397,7 +397,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Létrehozás dátuma:",
-      "empty-state": "",
+      "empty-state": "Még nincsenek könyvjelzők az<br/>aktuális adatforráshoz.",
       "remove-tooltip": "Könyvjelző eltávolítása"
     },
     "close-aria-label": "Bezárás",
@@ -439,15 +439,15 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} SLO-definíció hivatkozik erre a metrikára",
+    "tooltip_other": "{{count}} SLO-definíció hivatkozik erre a metrikára"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "SLO által követett szűrő eltávolítása",
+    "aria-label-inactive": "Szűrés SLO által követett metrikák alapján",
+    "tooltip-empty": "Nincsenek SLO által követett metrikák az aktuális szűrt halmazban",
+    "label_one": "SLO által követett ({{count}})",
+    "label_other": "SLO által követett ({{count}})"
   },
   "sort-by": {
     "label": "Rendezés alapja",
