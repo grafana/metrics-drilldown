@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Kırılım",
-      "query-results": "",
+      "query-results": "Sorgu sonuçları",
       "query-results-description": "Tablo biçiminde anlık sorgu verileri",
       "related-logs": "İlgili günlük kayıtları",
       "related-logs-description": "Geçerli etiket filtrelerine ve zaman aralığına göre ilgili günlük kayıtları",
@@ -11,48 +11,48 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_one": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_one": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "OTel metrik özniteliği",
+    "badge-resource": "OTel kaynak özniteliği",
+    "close-aria-label": "Kapat",
+    "close-tooltip": "Kapat",
+    "collapse": "Daralt",
+    "collapse-extra-fields": "Ek alanları daralt",
+    "description": "Verilerinizin temel özniteliklere göre nasıl ayrıldığını inceleyerek kalıpları belirleyin ve kök nedenleri daraltın. Sonuçlarınızı filtrelemek için herhangi bir değere tıklayın.",
+    "description-aria-label": "Bu yüzdeler ne anlama geliyor?",
+    "description-histogram": "Bu, her değerin etiketin gözlemleri ({{range}}) içindeki payını gösterir. Etkinliği olmayan değerler en sonda sıralanır.",
+    "detection-error": "Bu veri kümesi için öznitelikler yüklenemedi.",
+    "discovering-fields": "Öznitelikler keşfediliyor...",
+    "error": "Yüklenemedi",
+    "expand": "Genişlet",
+    "field-input-placeholder": "Daha fazla öznitelik eklemek için arayın",
+    "field-link-label": "{{name}} ögesini göster",
+    "filter-for-value": "Değere göre filtrele",
+    "filter-out-value": "Değeri filtre dışı bırak",
+    "histogram-range-between": "{{lower}} ve {{upper}} arasında",
+    "histogram-range-over": "{{value}} üzerinde",
+    "histogram-range-under": "{{value}} altında",
+    "invalid-range": "Üst sınır, alt sınırdan büyük olmalıdır.",
+    "lower-limit": "Alt sınır",
+    "lower-limit-placeholder": "sınır yok",
+    "lower-limit-unit": "Alt sınır ({{unit}})",
+    "no-extra-fields-shown": "Gösterilen ek alan yok",
+    "no-fields-detected": "Bu veri kümesi için alan algılanmadı.",
+    "no-more-fields": "Başka alan yok",
+    "no-values-found": "Değer bulunamadı",
+    "title": "Öznitelik Gezgini",
+    "too-many-values": "Görüntülenecek çok fazla değer var",
+    "unit-unknown": "Bu metriğin birimini adından belirleyemedik. Yüzdeye güvenmeden önce eşiği tekrar kontrol edin.",
+    "upper-limit": "Üst sınır",
+    "upper-limit-placeholder": "sınır yok",
+    "upper-limit-unit": "Üst sınır ({{unit}})",
+    "value-tooltip-histogram-no-activity": "Bu pencerede etkinlik yok.",
+    "show-more-fields_one": "{{count}} alan daha göster",
+    "show-more-fields_other": "{{count}} alan daha göster",
+    "value-tooltip-histogram_one": "Bu değer, bu etiketin {{range}} olan gözlemlerinin %{{percentage}} kadarını oluşturur (kendi ~{{total}} değerinden {{count}}).",
+    "value-tooltip-histogram_other": "Bu değer, bu etiketin {{range}} olan gözlemlerinin %{{percentage}} kadarını oluşturur (kendi ~{{total}} değerinden {{count}})."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "Tamam"
   },
   "breakdown": {
     "add-to-filters": "Filtrelere ekle",
@@ -61,8 +61,8 @@
       "label": "Gruplandırma ölçütü"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Toplam",
+      "label": "Histogram işlevi"
     },
     "label-values-list": {
       "error-title": "Metrikler yüklenirken hata oluştu.",
@@ -92,9 +92,9 @@
     "selected-count_other": "{{count}} seçildi"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "Metrics Drilldown'ın daha yeni bir sürümü mevcut, yeniden yükleniyor...",
+    "manual-message": "Metrics Drilldown'ın daha yeni bir sürümü mevcut ancak otomatik olarak yüklenemedi.",
+    "reload-button": "Şimdi yeniden yükle"
   },
   "configure-panel": {
     "apply": "Uygula",
@@ -124,14 +124,14 @@
     "title": "Önemli hata!"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Histogram dağılımı",
     "tooltip": {
-      "description": ""
+      "description": "Bu metrik için etiketlerin ve öznitelik değerlerine ilişkin histogram gözlemlerinin dağılımını inceleyin."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "{{componentName}} yüklenemedi. Lütfen tekrar deneyin veya kuruluşunuzun yöneticisiyle iletişime geçin.",
+    "title": "Bir hata oluştu"
   },
   "extreme-value-filter": {
     "message": "Panel verileri, serideki son derece küçük değerleri işlemek için daha karmaşık bir sorgu ile yeniden alındı"
@@ -145,25 +145,25 @@
     "limit-warning-title": "Pano kullanım sıralaması 500 panoyla sınırlıdır."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Tetiklenen uyarı kuralları Prometheus ruler uç noktasından getirilemedi"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "SLO tanımları getirilemedi",
+    "parse-error": "Bir SLO tanımından metrik adı çıkarılamadı"
   },
   "filtered-metrics-variable": {
     "label": "Filtrelenmiş Metrikler"
   },
   "firing-alert-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "Tetiklenen {{count}} uyarı kuralı bu metriğe başvuruyor",
+    "tooltip_other": "Tetiklenen {{count}} uyarı kuralı bu metriğe başvuruyor"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "Tetiklenen uyarılar filtresini kaldır",
+    "aria-label-inactive": "Tetiklenen uyarılara göre filtrele",
+    "tooltip-empty": "Geçerli filtrelenmiş kümede tetiklenen uyarıya sahip metrik yok",
+    "label_one": "Tetiklenen uyarıları var ({{count}})",
+    "label_other": "Tetiklenen uyarıları var ({{count}})"
   },
   "give-feedback": {
     "button": "Geri bildirim gönder"
@@ -226,19 +226,19 @@
     "search-aria-label": "Metrikleri hızlıca arayın"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Histogram analizi"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Yüklenecek kayıtlı sorgu yok",
-        "button-tooltip": "",
+        "button-tooltip": "Kayıtlı sorguyu yükle",
         "empty": "Görüntülenecek kayıtlı sorgu yok.",
         "load-error": "Bu sorgu, Metrics Drilldown içinde gösterilemeyen ifadeler içeriyor. Yalnızca basit metrik{label} seçicileri desteklenir.",
         "load-type-error": "Lütfen bir Prometheus sorgusu seçin.",
         "modal-title": "Daha önce kaydedilmiş bir sorguyu yükleyin",
         "remove": "Kaldır",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Kayıtlı sorguyu yükle",
         "select": "Seçin"
       },
       "save-query": {
@@ -246,7 +246,7 @@
           "alert": "Aynı ifadeye sahip, daha önceden kaydedilmiş bir sorgu var: {{title}}"
         },
         "button-tooltip": "Sorguyu kaydet",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Kayıtlı sorgulara kaydet",
         "cancel": "İptal et",
         "description": "Açıklama",
         "error": "Bu sorgu kaydedilirken beklenmeyen bir hata oluştu.",
@@ -284,7 +284,7 @@
       "alphabetical-reversed": "Alfabetik [Z-A]",
       "dashboard-usage": "Pano Kullanımı",
       "default": "Varsayılan",
-      "firing-alerts": ""
+      "firing-alerts": "Tetiklenen Uyarılar"
     }
   },
   "metrics-variable": {
@@ -292,12 +292,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Tetiklenen uyarılara göre sıralama yapılamadı"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "Daha fazla bilgi edinmek için <2>belgelerimize</2> göz atın<br/>veya Grafana Play'de <6>çevrim içi deneyin</6>.",
+    "no-datasource": "Yapılandırılmış hiçbir Prometheus veri kaynağı olmadığını fark ettik.<br/>Metrikleri görüntülemek için bir <4>Prometheus veri kaynağı</4> ekleyin.",
     "title": "Grafana Metrics Drilldown'a hoş geldiniz"
   },
   "open-assistant": {
@@ -329,7 +329,7 @@
       "commit-sha": "SHA'yı işle: {{sha}}",
       "contribute": "Katkıda bulunun",
       "documentation": "Belgeler",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Sorun bildir"
     }
   },
@@ -339,9 +339,9 @@
     "view-by-label": "Görüntüleme ölçütü"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Sorgu seçenekleri",
+    "title": "Sorgu seçenekleri",
+    "toggle-insights": "İçgörü ek açıklamalarını aç/kapat"
   },
   "query-results": {
     "aria-label": "Anlık sorgu sonuçları",
@@ -397,7 +397,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Oluşturulma tarihi:",
-      "empty-state": "",
+      "empty-state": "Geçerli veri kaynağı için<br/>henüz yer imi yok.",
       "remove-tooltip": "Yer imini kaldır"
     },
     "close-aria-label": "Kapat",
@@ -439,15 +439,15 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} SLO tanımı bu metriğe başvuruyor",
+    "tooltip_other": "{{count}} SLO tanımı bu metriğe başvuruyor"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "SLO tarafından izlenen filtreyi kaldır",
+    "aria-label-inactive": "SLO tarafından izlenen metriklere göre filtrele",
+    "tooltip-empty": "Geçerli filtrelenmiş kümede SLO ile izlenen metrik yok",
+    "label_one": "SLO tarafından izlenen ({{count}})",
+    "label_other": "SLO tarafından izlenen ({{count}})"
   },
   "sort-by": {
     "label": "Sıralama ölçütü",
