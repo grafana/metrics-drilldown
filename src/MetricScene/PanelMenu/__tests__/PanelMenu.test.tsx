@@ -1,8 +1,12 @@
-import { isAssistantAvailable } from '@grafana/assistant';
+import { isAssistantAvailable, openAssistant } from '@grafana/assistant';
 import { type PanelMenuItem } from '@grafana/data';
+import { sceneGraph, VizPanel } from '@grafana/scenes';
 import { act } from '@testing-library/react';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
+import { getPanelData } from '../../../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
+import { EventOpenAddToDashboard } from '../../../shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
+import { EventOpenCreateAlert } from '../../../shared/GmdVizPanel/components/createAlert/EventOpenCreateAlert';
 import { reportExploreMetrics } from '../../../shared/tracking/interactions';
 import { PREF_KEYS } from '../../../shared/user-preferences/pref-keys';
 import { userStorage } from '../../../shared/user-preferences/userStorage';
@@ -16,6 +20,28 @@ import { PanelMenu } from '../PanelMenu';
 
 jest.mock('@grafana/assistant', () => ({
   isAssistantAvailable: jest.fn(),
+  openAssistant: jest.fn(),
+  createAssistantContextItem: jest.fn((type: string, data: unknown) => ({ type, data })),
+}));
+
+// Only sceneGraph.getAncestor is replaced; the action handlers under test (AddToDashboardAction,
+// CreateAlertAction, OpenAssistantAction) call it directly with no try/catch, and the real
+// implementation throws when no matching ancestor exists (there's no real VizPanel parent in
+// these tests). Everything else from @grafana/scenes (SceneObjectBase, VizPanelMenu, VizPanel, ...)
+// stays real.
+jest.mock('@grafana/scenes', () => ({
+  ...jest.requireActual('@grafana/scenes'),
+  sceneGraph: {
+    ...jest.requireActual('@grafana/scenes').sceneGraph,
+    getAncestor: jest.fn(),
+  },
+}));
+
+// getPanelData does its own real scene-graph/query-runner traversal (see addToDashboard.test.ts
+// for its own coverage); mocked here so these action tests can focus on what each action does
+// with the payload, not re-derive it from a real VizPanel.
+jest.mock('../../../shared/GmdVizPanel/components/addToDashboard/addToDashboard', () => ({
+  getPanelData: jest.fn(),
 }));
 
 // genBookmarkKey is mocked to a fixed, input-independent value rather than trying to make the
@@ -44,8 +70,11 @@ jest.mock('../../../shared/utils/utils.trail', () => ({
 }));
 
 const mockIsAssistantAvailable = isAssistantAvailable as jest.Mock;
+const mockOpenAssistant = openAssistant as jest.Mock;
 const mockGetTrailFor = getTrailFor as jest.Mock;
 const mockReportExploreMetrics = reportExploreMetrics as jest.Mock;
+const mockGetAncestor = sceneGraph.getAncestor as jest.Mock;
+const mockGetPanelData = getPanelData as jest.Mock;
 
 // =============================================================================
 // HELPERS
@@ -59,6 +88,7 @@ function createMockTrail(state: { isAddToDashboardAvailable: boolean; isCreateAl
     // No urlSync and a no-op forEachChild let the real sceneUtils.getUrlState(trail) (called by
     // BookmarkAction, unmocked) walk this fake trail without crashing; it just returns {}.
     forEachChild: jest.fn(),
+    getMetadataForMetric: jest.fn().mockResolvedValue(undefined),
     subscribeToState: jest.fn((cb: (newState: typeof state, prevState: typeof state) => void) => {
       subscriber = cb;
       return { unsubscribe: jest.fn() };
@@ -148,8 +178,11 @@ describe('PanelMenu', () => {
     ]);
   });
 
-  it('adds Explain in Assistant once isAssistantAvailable emits true', () => {
-    const availability$ = of(false);
+  it('updates an already-open menu once isAssistantAvailable emits true', () => {
+    // Uses a controllable Subject and asserts against the same menu instance throughout, rather
+    // than constructing a second PanelMenu with a different canned value: this would still pass
+    // if the subscription callback never rebuilt an already-open menu's items.
+    const availability$ = new Subject<boolean>();
     mockIsAssistantAvailable.mockReturnValue(availability$);
 
     const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: false });
@@ -160,12 +193,11 @@ describe('PanelMenu', () => {
 
     expect(itemTexts(menu)).not.toContain('Explain in Assistant');
 
-    // Re-activate with availability now true, emulating a later emission on the same observable.
-    mockIsAssistantAvailable.mockReturnValue(of(true));
-    const menu2 = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-    activate(menu2);
+    act(() => {
+      availability$.next(true);
+    });
 
-    expect(itemTexts(menu2)).toContain('Explain in Assistant');
+    expect(itemTexts(menu)).toContain('Explain in Assistant');
   });
 
   it('rebuilds items when the trail availability flags change after activation', () => {
@@ -182,6 +214,95 @@ describe('PanelMenu', () => {
     });
 
     expect(itemTexts(menu)).toContain('Add to dashboard');
+  });
+
+  describe('add to dashboard', () => {
+    it('publishes EventOpenAddToDashboard with the panel data on click', () => {
+      const fakeVizPanel = { state: { title: 'go_goroutines' } };
+      const fakePanelData = { panel: { type: 'timeseries', title: 'go_goroutines', targets: [] }, range: {} };
+      mockGetAncestor.mockReturnValue(fakeVizPanel);
+      mockGetPanelData.mockReturnValue(fakePanelData);
+
+      const trail = createMockTrail({ isAddToDashboardAvailable: true, isCreateAlertAvailable: false });
+      mockGetTrailFor.mockReturnValue(trail);
+
+      const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
+      activate(menu);
+
+      const handler = jest.fn();
+      menu.subscribeToEvent(EventOpenAddToDashboard, handler);
+
+      act(() => {
+        findItem(menu, 'Add to dashboard').onClick?.({} as any);
+      });
+
+      expect(mockGetAncestor).toHaveBeenCalledWith(menu, VizPanel);
+      expect(mockGetPanelData).toHaveBeenCalledWith(fakeVizPanel);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler.mock.calls[0][0].payload).toEqual({ panelData: fakePanelData });
+    });
+  });
+
+  describe('create alert', () => {
+    it('publishes EventOpenCreateAlert with the panel data and reports the click', () => {
+      const fakeVizPanel = { state: { title: 'go_goroutines' } };
+      const fakePanelData = { panel: { type: 'timeseries', title: 'go_goroutines', targets: [] }, range: {} };
+      mockGetAncestor.mockReturnValue(fakeVizPanel);
+      mockGetPanelData.mockReturnValue(fakePanelData);
+
+      const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: true });
+      mockGetTrailFor.mockReturnValue(trail);
+
+      const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
+      activate(menu);
+
+      const handler = jest.fn();
+      menu.subscribeToEvent(EventOpenCreateAlert, handler);
+
+      act(() => {
+        findItem(menu, 'Create alert').onClick?.({} as any);
+      });
+
+      expect(mockGetAncestor).toHaveBeenCalledWith(menu, VizPanel);
+      expect(mockGetPanelData).toHaveBeenCalledWith(fakeVizPanel);
+      expect(mockReportExploreMetrics).toHaveBeenCalledWith('create_alert_clicked', { metric: 'go_goroutines' });
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler.mock.calls[0][0].payload).toEqual({ panelData: fakePanelData });
+    });
+  });
+
+  describe('explain in assistant', () => {
+    it('opens the assistant with a prompt built from the panel data', async () => {
+      const fakeVizPanel = {};
+      const fakePanelData = {
+        panel: {
+          title: 'go_goroutines',
+          targets: [{ expr: 'rate(go_goroutines[5m])' }],
+          datasource: { uid: 'prom-uid' },
+        },
+        range: {},
+      };
+      mockGetAncestor.mockReturnValue(fakeVizPanel);
+      mockGetPanelData.mockReturnValue(fakePanelData);
+      mockIsAssistantAvailable.mockReturnValue(of(true));
+
+      const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: false });
+      mockGetTrailFor.mockReturnValue(trail);
+
+      const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
+      activate(menu);
+
+      await act(async () => {
+        await findItem(menu, 'Explain in Assistant').onClick?.({} as any);
+      });
+
+      expect(mockOpenAssistant).toHaveBeenCalledWith(
+        expect.objectContaining({
+          origin: 'grafana-metricsdrilldown-app/metric-panel',
+          prompt: expect.stringContaining('go_goroutines'),
+        })
+      );
+    });
   });
 
   describe('bookmark', () => {
