@@ -90,7 +90,7 @@ This automatic query and visualization selection means users don't need to write
 
 ### Panel Actions
 
-The metric panel provides contextual actions in its header and menu:
+The main metric panel provides contextual actions in its header and menu. Panels for individual label values, such as those in the Breakdown tab, only get the Open in Explore menu item; the rest of this section describes the main panel.
 
 #### Header actions
 
@@ -101,7 +101,7 @@ The metric panel provides contextual actions in its header and menu:
 
 - Open in Explore: Jump to Grafana Explore with this metric and its context
 - Explain in Assistant: Ask questions about the metric using Grafana Assistant (if available)
-- Add to Dashboard: Insert this metric panel into a new or existing dashboard
+- Add to Dashboard: Insert this metric panel into a new or existing dashboard (if available)
 - Create Alert: Create an alert rule for this metric (if available)
 - Bookmark: Save the metric for quick access via the sidebar
 - Copy URL: Get a shareable link to this exact view
@@ -201,7 +201,7 @@ The `SourceMetrics` component is embedded in RCA Workbench's slide-out drawer to
 
 ### Compact Views
 
-The `MiniBreakdown` component is embedded in Grafana Assistant to allow users to preview a label breakdown of a metric in the Assistant UI before opening the full Metrics Drilldown experience.
+The `MiniBreakdown` component is embedded in Grafana Assistant to allow users to preview a label breakdown of a metric in the Assistant UI before opening the full Metrics Drilldown experience. In this compact mode, the main panel's header actions and menu (Configure, Explore, Add to Dashboard, and so on) are hidden, since the preview is meant to be a minimal, click-through summary rather than a full working view.
 
 ### Linking Back
 
