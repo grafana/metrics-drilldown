@@ -86,7 +86,10 @@ export class MetricDatasourceHelper {
     return this.cache.metadata.get(metric);
   }
 
-  /** Fetches label names for one metric. Failures are intentionally handled by callers. */
+  /**
+   * Fetches label names (never values) for one metric over the trail's current time range.
+   * Failures are intentionally handled by callers.
+   */
   public async getLabelNamesForMetric(metric: string): Promise<string[]> {
     const ds = await this.getRuntimeDatasource();
     if (!ds) {
@@ -94,10 +97,9 @@ export class MetricDatasourceHelper {
     }
 
     const matcher = `{__name__="${metric.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"}`;
-    const response = await (ds.languageProvider as any).request(
-      `/api/v1/labels?match[]=${encodeURIComponent(matcher)}`
-    );
-    return Array.isArray(response?.data) ? response.data.filter((label: unknown): label is string => typeof label === 'string') : [];
+    const timeRange = sceneGraph.getTimeRange(this.trail).state.value;
+    const labels = await MetricDatasourceHelper.fetchLabels({ ds, timeRange, matcher });
+    return labels.filter((label) => typeof label === 'string' && label !== '__name__');
   }
 
   /**

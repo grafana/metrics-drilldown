@@ -4,9 +4,16 @@ describe('buildRankingRequest', () => {
   it('keeps deterministic baseline order, removes invalid/duplicate names, and limits candidates', async () => {
     const { request, candidatesById } = await buildRankingRequest({
       selectedMetric: 'http_requests_total',
-      metricNames: ['bad-name', 'http_requests_total', 'http_requests_errors', 'http_requests_errors', 'http_requests_duration'],
-      peekMetadata: (name) => name === 'http_requests_errors' ? { type: 'counter', unit: 'requests', help: 'Errors' } : undefined,
-      lookupLabelNames: async (name) => name === 'http_requests_errors' ? ['__name__', 'status', 'bad-label'] : [],
+      metricNames: [
+        'bad-name',
+        'http_requests_total',
+        'http_requests_errors',
+        'http_requests_errors',
+        'http_requests_duration',
+      ],
+      peekMetadata: (name) =>
+        name === 'http_requests_errors' ? { type: 'counter', unit: 'requests', help: 'Errors' } : undefined,
+      lookupLabelNames: async (name) => (name === 'http_requests_errors' ? ['__name__', 'status', 'bad-label'] : []),
       datasourceUid: 'prom',
     });
 
@@ -17,7 +24,12 @@ describe('buildRankingRequest', () => {
       'http_requests_errors',
       'http_requests_duration',
     ]);
-    expect(request.candidates[0]).toMatchObject({ id: 'c01', baselineRank: 1, type: 'counter', labelNames: ['status'] });
+    expect(request.candidates[0]).toMatchObject({
+      id: 'c01',
+      baselineRank: 1,
+      type: 'counter',
+      labelNames: ['status'],
+    });
     expect(candidatesById.get('c02')).toBe('http_requests_duration');
   });
 });

@@ -387,6 +387,7 @@
     "debug-cached": "Cached",
     "debug-fallback": "Fallback",
     "debug-id": "ID",
+    "debug-label-latency": "Labels",
     "debug-latency": "Latency",
     "debug-metric": "Metric",
     "debug-model": "Model",
@@ -396,6 +397,7 @@
     "debug-score": "Jev p",
     "debug-server": "Server",
     "debug-status": "Status",
+    "debug-usage": "Usage",
     "loading": "Finding recommended metrics…",
     "title": "Recommended"
   },

@@ -11,11 +11,13 @@ import {
 const METRIC_NAME = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 const LABEL_NAME = /^[a-zA-Z_]\w*$/;
 
-export type MetadataPeek = (metric: string) => {
-  type?: string;
-  unit?: string;
-  help?: string;
-} | undefined;
+export type MetadataPeek = (metric: string) =>
+  | {
+      type?: string;
+      unit?: string;
+      help?: string;
+    }
+  | undefined;
 
 export type LabelNamesLookup = (metric: string) => Promise<string[]>;
 
@@ -43,9 +45,7 @@ function metricType(metadataType: string | undefined, name: string): RankingMetr
 }
 
 function labelsOnly(labels: string[] | undefined): string[] | undefined {
-  const result = labels
-    ?.filter((label) => label !== '__name__' && LABEL_NAME.test(label))
-    .slice(0, 30);
+  const result = labels?.filter((label) => label !== '__name__' && LABEL_NAME.test(label)).slice(0, 30);
   return result?.length ? result : undefined;
 }
 
@@ -80,13 +80,15 @@ export async function buildRankingRequest({
 }): Promise<{ request: RelatedMetricsRankingRequest; candidatesById: Map<string, string> }> {
   const baseline = sortRelatedMetrics([...metricNames], selectedMetric);
   const names = [...new Set(baseline)].filter((name) => name !== selectedMetric && METRIC_NAME.test(name)).slice(0, 40);
-  const labelResults = await Promise.all(names.map(async (name) => {
-    try {
-      return await lookupLabelNames(name);
-    } catch {
-      return [];
-    }
-  }));
+  const labelResults = await Promise.all(
+    names.map(async (name) => {
+      try {
+        return await lookupLabelNames(name);
+      } catch {
+        return [];
+      }
+    })
+  );
   let selectedLabels: string[] = [];
   try {
     selectedLabels = await lookupLabelNames(selectedMetric);

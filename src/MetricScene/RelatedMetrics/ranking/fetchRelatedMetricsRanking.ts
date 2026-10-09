@@ -1,11 +1,7 @@
 import { getBackendSrv, type BackendSrvRequest } from '@grafana/runtime';
 import { lastValueFrom } from 'rxjs';
 
-import {
-  type RankingResult,
-  type RelatedMetricsRankingRequest,
-  type RelatedMetricsRankingResponse,
-} from './types';
+import { type RankingResult, type RelatedMetricsRankingRequest, type RelatedMetricsRankingResponse } from './types';
 
 const URL = '/api/plugins/grafana-asserts-app/resources/jev/v1/related-metrics/rank';
 const TIMEOUT_MS = 5000;
@@ -20,7 +16,9 @@ function parseResponse(value: unknown, candidateIds: Set<string>): RelatedMetric
     return;
   }
   const scores = objectField(raw.scores) ? filterNumericMap(raw.scores as object, candidateIds) : undefined;
-  const relationships = objectField(raw.relationships) ? filterRelationships(raw.relationships as object, candidateIds) : {};
+  const relationships = objectField(raw.relationships)
+    ? filterRelationships(raw.relationships as object, candidateIds)
+    : {};
   const usage = objectField(raw.usage) ? parseUsage(raw.usage as object) : undefined;
   return {
     status: raw.status as RelatedMetricsRankingResponse['status'],
@@ -73,11 +71,16 @@ function filterRelationships(value: object, ids: Set<string>) {
     const classes = new Set(['same_signal_family', 'investigative_companion', 'weakly_related', 'unrelated']);
     result[id] = {
       ...(typeof relationship.class === 'string' && classes.has(relationship.class)
-        ? { class: relationship.class as NonNullable<typeof result[string]>['class'] }
+        ? { class: relationship.class as NonNullable<(typeof result)[string]>['class'] }
         : {}),
       ...(typeof relationship.confidence === 'number' ? { confidence: relationship.confidence } : {}),
       ...(relationship.probabilities && typeof relationship.probabilities === 'object'
-        ? { probabilities: filterNumericMap(relationship.probabilities, new Set(Object.keys(relationship.probabilities))) }
+        ? {
+            probabilities: filterNumericMap(
+              relationship.probabilities,
+              new Set(Object.keys(relationship.probabilities))
+            ),
+          }
         : {}),
     };
   }
@@ -97,6 +100,31 @@ export function parseRankingResponse(value: unknown, candidateIds: Iterable<stri
   return parseResponse(value, new Set(candidateIds));
 }
 
+function resultFromResponse(
+  response: { ok: boolean; status: number; data: unknown },
+  candidateIds: Set<string>,
+  started: number
+): RankingResult {
+  if (!response.ok || response.status < 200 || response.status >= 300) {
+    return { ok: false, reason: 'http' };
+  }
+  const parsed = parseResponse(response.data, candidateIds);
+  if (!parsed) {
+    return { ok: false, reason: 'invalid-response' };
+  }
+  if (parsed.status !== 'ok') {
+    return { ok: false, reason: 'not-ok', response: parsed };
+  }
+  return { ok: true, response: parsed, latencyMs: performance.now() - started };
+}
+
+function resultFromError(error: unknown, candidateIds: Set<string>): RankingResult {
+  // A non-2xx response surfaces as a rejected fetch; keep the server payload for the debug overlay.
+  const data = (error as { data?: unknown } | undefined)?.data;
+  const parsed = data === undefined ? undefined : parseResponse(data, candidateIds);
+  return parsed ? { ok: false, reason: 'http', response: parsed } : { ok: false, reason: 'network' };
+}
+
 export async function fetchRelatedMetricsRanking(
   request: RelatedMetricsRankingRequest,
   candidateIds: Iterable<string>,
@@ -111,10 +139,13 @@ export async function fetchRelatedMetricsRanking(
     timedOut = true;
     controller.abort();
   }, TIMEOUT_MS);
-  let timeoutReject = 0;
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    timeoutReject = window.setTimeout(() => reject(new Error('ranking request timeout')), TIMEOUT_MS);
+  // Settles the race as soon as the caller aborts or the timeout fires, even if the transport does not.
+  let rejectOnAbort: (() => void) | undefined;
+  const aborted = new Promise<never>((_, reject) => {
+    rejectOnAbort = () => reject(new Error('ranking request aborted'));
+    controller.signal.addEventListener('abort', rejectOnAbort, { once: true });
   });
+  aborted.catch(() => undefined);
   const backendRequest: BackendSrvRequest = {
     url: URL,
     method: 'POST',
@@ -122,29 +153,25 @@ export async function fetchRelatedMetricsRanking(
     headers: { 'Content-Type': 'application/json' },
     showErrorAlert: false,
     showSuccessAlert: false,
-    signal: controller.signal,
-  } as BackendSrvRequest;
+    abortSignal: controller.signal,
+  };
+  const ids = new Set(candidateIds);
   try {
-    const response = await Promise.race([lastValueFrom(getBackendSrv().fetch(backendRequest)), timeoutPromise]);
-    if (!response.ok || response.status < 200 || response.status >= 300) {
-      return { ok: false, reason: 'http' };
-    }
-    const parsed = parseResponse(response.data, new Set(candidateIds));
-    if (!parsed) {
-      return { ok: false, reason: 'invalid-response' };
-    }
-    if (parsed.status !== 'ok') {
-      return { ok: false, reason: 'not-ok' };
-    }
-    return { ok: true, response: parsed, latencyMs: performance.now() - started };
-  } catch {
-    if (timedOut || controller.signal.aborted) {
+    const response = await Promise.race([lastValueFrom(getBackendSrv().fetch(backendRequest)), aborted]);
+    return resultFromResponse(response, ids, started);
+  } catch (error) {
+    if (timedOut) {
       return { ok: false, reason: 'timeout' };
     }
-    return { ok: false, reason: 'network' };
+    if (controller.signal.aborted) {
+      return { ok: false, reason: 'aborted' };
+    }
+    return resultFromError(error, ids);
   } finally {
     window.clearTimeout(timeout);
-    window.clearTimeout(timeoutReject);
+    if (rejectOnAbort) {
+      controller.signal.removeEventListener('abort', rejectOnAbort);
+    }
     signal?.removeEventListener('abort', abort);
   }
 }

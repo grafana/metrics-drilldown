@@ -135,7 +135,9 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
 
       filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
       sortEngine.sort('related', { metric });
-      if (key === VAR_METRICS_VARIABLE) {
+      // The scene only sees lifecycle events from its own FilteredMetricsVariable, whose initial
+      // options are the full (unfiltered) metric list. start() ignores repeated identical lists.
+      if (key === VAR_FILTERED_METRICS_VARIABLE) {
         this.state.ranking.start(options.map((option) => String(option.value)));
       }
     });

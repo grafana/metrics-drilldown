@@ -53,7 +53,14 @@ export interface RelatedMetricsRankingResponse {
 
 export type RankingResult =
   | { ok: true; response: RelatedMetricsRankingResponse; latencyMs: number }
-  | { ok: false; reason: 'disabled' | 'timeout' | 'network' | 'http' | 'invalid-response' | 'not-ok' };
+  | {
+      ok: false;
+      reason: 'timeout' | 'aborted' | 'network' | 'http' | 'invalid-response' | 'not-ok';
+      /** Parsed server payload when one was returned (e.g. status `disabled` or a 400 `invalid`), for debugging. */
+      response?: RelatedMetricsRankingResponse;
+    };
+
+export type RankingFailureReason = Extract<RankingResult, { ok: false }>['reason'] | 'unexpected';
 
 export interface RankingCandidateInfo extends RankingCandidate {
   score?: number;

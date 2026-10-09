@@ -10,10 +10,14 @@ function run<T>(task: () => Promise<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     const start = () => {
       active++;
-      task().then(resolve, reject).finally(() => {
-        active--;
-        queue.shift()?.();
-      });
+      // Promise.resolve().then() turns a synchronous throw into a rejection so the slot is always released.
+      Promise.resolve()
+        .then(task)
+        .then(resolve, reject)
+        .finally(() => {
+          active--;
+          queue.shift()?.();
+        });
     };
     if (active < MAX_CONCURRENT) {
       start();
@@ -24,7 +28,11 @@ function run<T>(task: () => Promise<T>): Promise<T> {
 }
 
 /** The helper owns the runtime datasource; this keeps label access on the active trail datasource. */
-export function lookupMetricLabelNames(trail: DataTrail, datasourceUid: string | undefined, metric: string): Promise<string[]> {
+export function lookupMetricLabelNames(
+  trail: DataTrail,
+  datasourceUid: string | undefined,
+  metric: string
+): Promise<string[]> {
   const key = `${datasourceUid ?? ''}:${metric}`;
   const existing = cache.get(key);
   if (existing) {
