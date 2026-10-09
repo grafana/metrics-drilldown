@@ -33,6 +33,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
     });
 
     this.addActivationHandler(() => {
+      const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
       let assistantAvailable = false;
 
       const buildItems = () => {
@@ -45,7 +46,6 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           ExploreAction.create(this),
         ];
 
-        const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
         if (isMainGraphPanel) {
           // Only add these actions to the main metric graph panel
           const trail = getTrailFor(this);
@@ -77,7 +77,6 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 
       buildItems();
 
-      const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
       if (isMainGraphPanel) {
         // Only the main panel ever reads `assistantAvailable` (see buildItems above), but every
         // PanelMenu instance (including one per row in MetricLabelsList/MetricLabelValuesList)

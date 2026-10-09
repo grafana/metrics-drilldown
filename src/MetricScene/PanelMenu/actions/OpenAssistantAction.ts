@@ -1,14 +1,14 @@
 import { createAssistantContextItem, openAssistant } from '@grafana/assistant';
 import { type PanelMenuItem } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { sceneGraph, VizPanel } from '@grafana/scenes';
+import { sceneGraph, VizPanel, type SceneObject } from '@grafana/scenes';
 
 import { getPanelData } from '../../../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { getTrailFor } from '../../../shared/utils/utils';
 import { removeIgnoreUsageLabel } from '../../../shared/utils/utils.queries';
 
 export class OpenAssistantAction {
-  static create(panelMenuInstance: any): PanelMenuItem {
+  static create(panelMenuInstance: SceneObject): PanelMenuItem {
     return {
       text: t('open-assistant.explain-label', 'Explain in Assistant'),
       iconClassName: 'ai-sparkle',
