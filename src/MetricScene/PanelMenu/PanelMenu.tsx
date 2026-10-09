@@ -1,6 +1,7 @@
 import { isAssistantAvailable } from '@grafana/assistant';
 import { type DataFrame, type PanelMenuItem } from '@grafana/data';
 import { t } from '@grafana/i18n';
+import { locationService } from '@grafana/runtime';
 import { SceneObjectBase, VizPanelMenu, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import React from 'react';
 
@@ -96,6 +97,14 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
             }
           })
         );
+
+        // A metric, filter, or time-range change updates the URL without changing any of the
+        // trail state watched above, which would otherwise leave the bookmark item's "Add
+        // bookmark" / "Remove bookmark" label pointing at whatever view the menu last built
+        // against. getLocationObservable() fires on every URL change regardless of which part
+        // changed, so rebuilding here keeps the label accurate without enumerating every Scene
+        // object (filters variable, $timeRange, ...) that could affect it.
+        this._subs.add(locationService.getLocationObservable().subscribe(buildItems));
       }
     });
   }

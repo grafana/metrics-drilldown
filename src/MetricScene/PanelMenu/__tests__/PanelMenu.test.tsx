@@ -234,5 +234,31 @@ describe('PanelMenu', () => {
       const stored = userStorage.getItem(PREF_KEYS.BOOKMARKS) ?? [];
       expect(stored).toHaveLength(0);
     });
+
+    it('re-checks the bookmark state at click time rather than trusting the label it was built with', () => {
+      // Regression test: the menu is built while nothing is bookmarked (item reads "Add
+      // bookmark"), but storage changes before the click, without any of the triggers that
+      // rebuild the menu (no activation, no availability change, no URL change). A fix that
+      // still branches on the value captured when the item was built would run the "add" path
+      // here and create a duplicate; the fix re-checks storage inside onClick instead.
+      const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: false });
+      mockGetTrailFor.mockReturnValue(trail);
+
+      const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
+      activate(menu);
+
+      const staleItem = findItem(menu, 'Add bookmark');
+
+      userStorage.setItem(PREF_KEYS.BOOKMARKS, [{ urlValues: {}, createdAt: 1 }]);
+
+      act(() => {
+        staleItem.onClick?.({} as any);
+      });
+
+      expect(mockReportExploreMetrics).toHaveBeenCalledWith('bookmark_changed', { action: 'toggled_off' });
+
+      const stored = userStorage.getItem(PREF_KEYS.BOOKMARKS) ?? [];
+      expect(stored).toHaveLength(0);
+    });
   });
 });

@@ -34,12 +34,17 @@ export class BookmarkAction {
         : t('panel-menu.action.add-bookmark', 'Add bookmark'),
       iconClassName: isBookmarked ? 'favorite' : 'star',
       onClick: () => {
+        // Re-checked here rather than reusing the `isBookmarked` captured above: the menu can stay
+        // open (or get clicked from a stale build) across a metric/filter/time-range change that
+        // doesn't rebuild items, so the value this item was built with can be stale by click time.
+        const isCurrentlyBookmarked = isCurrentStateBookmarked(panelMenuInstance);
+
         const trail = getTrailFor(panelMenuInstance);
         const currentUrlState = sceneUtils.getUrlState(trail);
         const currentKey = genBookmarkKey(currentUrlState);
         const bookmarksFromStorage = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
 
-        if (isBookmarked) {
+        if (isCurrentlyBookmarked) {
           reportExploreMetrics('bookmark_changed', { action: 'toggled_off' });
           const updatedBookmarks = bookmarksFromStorage.filter(
             (b: BookmarkFromStorage) => genBookmarkKey(b.urlValues) !== currentKey
