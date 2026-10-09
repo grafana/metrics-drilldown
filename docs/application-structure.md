@@ -95,13 +95,15 @@ The metric panel provides contextual actions in its header and menu:
 #### Header actions
 
 - Configure: Modify the PromQL function applied (e.g., switch between `rate()`, `increase()`, or aggregations)
-- Open Assistant: Ask questions about the metric using Grafana Assistant (if available)
-- Add to Dashboard: Insert this metric panel into a new or existing dashboard
-- Bookmark: Save the metric for quick access via the sidebar
+- Visualization variant: For histogram metrics, switch between percentile and heatmap views
 
 #### Panel menu
 
 - Open in Explore: Jump to Grafana Explore with this metric and its context
+- Explain in Assistant: Ask questions about the metric using Grafana Assistant (if available)
+- Add to Dashboard: Insert this metric panel into a new or existing dashboard
+- Create Alert: Create an alert rule for this metric (if available)
+- Bookmark: Save the metric for quick access via the sidebar
 - Copy URL: Get a shareable link to this exact view
 
 ### Actions bar
