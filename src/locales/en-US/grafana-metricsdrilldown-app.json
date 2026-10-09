@@ -472,7 +472,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Bookmark",
       "copy-url": "Copy url",
       "open-explore": "Open in explore",
       "select-new-metric-tooltip": "Remove existing metric and choose a new metric"
