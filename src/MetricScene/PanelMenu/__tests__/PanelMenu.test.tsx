@@ -107,6 +107,19 @@ describe('PanelMenu', () => {
     expect(itemTexts(menu)).toEqual(['Navigation', 'Explore']);
   });
 
+  it('never subscribes to isAssistantAvailable for a non-main panel', () => {
+    // Regression test: every PanelMenu used to subscribe regardless of panel type (one per row
+    // in MetricLabelsList/MetricLabelValuesList, for example), even though only the main panel
+    // ever reads the result, wasting a subscription and rebuild cascade on every emission.
+    const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: false });
+    mockGetTrailFor.mockReturnValue(trail);
+
+    const menu = new PanelMenu({});
+    activate(menu);
+
+    expect(mockIsAssistantAvailable).not.toHaveBeenCalled();
+  });
+
   it('adds the Actions group with Copy URL for the main graph panel, even with nothing else available', () => {
     const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: false });
     mockGetTrailFor.mockReturnValue(trail);

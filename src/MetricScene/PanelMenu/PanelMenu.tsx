@@ -77,15 +77,18 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 
       buildItems();
 
-      this._subs.add(
-        isAssistantAvailable().subscribe((available) => {
-          assistantAvailable = available;
-          buildItems();
-        })
-      );
-
       const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
       if (isMainGraphPanel) {
+        // Only the main panel ever reads `assistantAvailable` (see buildItems above), but every
+        // PanelMenu instance (including one per row in MetricLabelsList/MetricLabelValuesList)
+        // used to subscribe here regardless, triggering an unused rebuild on every emission.
+        this._subs.add(
+          isAssistantAvailable().subscribe((available) => {
+            assistantAvailable = available;
+            buildItems();
+          })
+        );
+
         const trail = getTrailFor(this);
         this._subs.add(
           trail.subscribeToState((newState, prevState) => {
