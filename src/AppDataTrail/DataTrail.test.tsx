@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { type PanelDataRequestPayload } from 'shared/GmdVizPanel/components/addToDashboard/addToDashboard';
+import { EventOpenCreateAlert } from 'shared/GmdVizPanel/components/createAlert/EventOpenCreateAlert';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from '../MetricScene/MetricScene';
@@ -424,5 +425,85 @@ describe('DataTrail - Add to Dashboard', () => {
 
     expect(dataTrail.state.isAddToDashboardModalOpen).toBe(false);
     expect(dataTrail.state.addToDashboardPanelData).toBeUndefined();
+  });
+});
+
+describe('DataTrail - Create Alert', () => {
+  let dataTrail: DataTrail;
+
+  beforeAll(() => {
+    const dataSourceSrv = new MockDataSourceSrv({
+      prom: {
+        name: 'Prometheus',
+        type: DataSourceType.Prometheus,
+        uid: 'ds',
+      },
+    });
+    setDataSourceSrv(dataSourceSrv);
+    setRunRequest(() =>
+      of({
+        state: LoadingState.Done,
+        series: [],
+        timeRange: {
+          from: dateTime(),
+          to: dateTime(),
+          raw: { from: '', to: '' },
+        },
+      })
+    );
+  });
+
+  beforeEach(() => {
+    dataTrail = new DataTrail({});
+  });
+
+  it('should initialize with modal closed and component unavailable', () => {
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(false);
+    expect(dataTrail.state.isCreateAlertAvailable).toBe(false);
+    expect(dataTrail.state.createAlertPanelData).toBeUndefined();
+  });
+
+  it('should open modal with panel data', () => {
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: {
+        type: 'timeseries',
+        title: 'Test',
+        targets: [],
+        datasource: { type: 'prometheus', uid: 'test' },
+      },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.openCreateAlertModal(mockPanelData);
+
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(true);
+    expect(dataTrail.state.createAlertPanelData).toBe(mockPanelData);
+  });
+
+  it('should close modal and clear panel data', () => {
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: { type: 'timeseries', title: 'Test', targets: [], datasource: null },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.openCreateAlertModal(mockPanelData);
+    dataTrail.closeCreateAlertModal();
+
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(false);
+    expect(dataTrail.state.createAlertPanelData).toBeUndefined();
+  });
+
+  it('should open the modal with the event payload when EventOpenCreateAlert is published', () => {
+    dataTrail.activate();
+
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: { type: 'timeseries', title: 'Test', targets: [], datasource: { type: 'prometheus', uid: 'test' } },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.publishEvent(new EventOpenCreateAlert({ panelData: mockPanelData }), true);
+
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(true);
+    expect(dataTrail.state.createAlertPanelData).toBe(mockPanelData);
   });
 });

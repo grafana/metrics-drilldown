@@ -1,4 +1,3 @@
-import { UI_TEXT } from '../../../src/shared/constants/ui';
 import { expect, test } from '../../fixtures';
 import { type SortByOptionNames } from '../../fixtures/views/MetricsReducerView';
 
@@ -95,7 +94,8 @@ test.describe('Metrics reducer view', () => {
         await metricsReducerView.selectMetricPanel(METRIC_NAME);
 
         // create bookmark and back to metrics reducer
-        await metricSceneView.getByRole('button', { name: UI_TEXT.METRIC_SELECT_SCENE.BOOKMARK_LABEL }).click();
+        await metricSceneView.openMainPanelMenu();
+        await metricSceneView.getByRole('menuitem', { name: 'Add bookmark' }).click();
         await metricSceneView.goBack();
 
         // open bookmarks and assertion

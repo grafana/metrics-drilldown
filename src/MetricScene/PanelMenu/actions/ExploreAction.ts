@@ -1,13 +1,13 @@
 import { type PanelMenuItem } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { config } from '@grafana/runtime';
-import { getExploreURL, sceneGraph, VizPanel } from '@grafana/scenes';
+import { getExploreURL, sceneGraph, VizPanel, type SceneObject } from '@grafana/scenes';
 
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
 
 export class ExploreAction {
-  static create(panelMenuInstance: any): PanelMenuItem {
+  static create(panelMenuInstance: SceneObject): PanelMenuItem {
     let exploreUrl: Promise<string | undefined> | undefined;
 
     try {
