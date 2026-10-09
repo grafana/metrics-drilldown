@@ -46,11 +46,6 @@ overrides:
   uuid: ^14.0.0
   protobufjs: ^8.6.6
   '@opentelemetry/core': ^2.8.0
-  # @grafana/assistant wants a newer @grafana/* line than package.json; without these
-  # pnpm installs a second copy of @grafana/data and friends alongside the direct one.
-  '@grafana/data': ^13.0.0
-  '@grafana/i18n': ^13.0.0
-  '@grafana/schema': ^13.0.0
   basic-ftp: '^6.2.1'
   shell-quote: ^1.11.0
   source-map-js: ^1.2.2

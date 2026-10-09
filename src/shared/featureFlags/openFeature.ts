@@ -1,6 +1,5 @@
-import { config } from '@grafana/runtime';
-import { OFREPWebProvider } from '@openfeature/ofrep-web-provider';
-import { ClientProviderStatus, OpenFeature, ProviderEvents, type Client, type JsonValue } from '@openfeature/web-sdk';
+import { createOpenFeatureLocalStorageProvider, createOpenFeatureOFREPWebProvider } from '@grafana/runtime';
+import { ClientProviderStatus, MultiProvider, OpenFeature, ProviderEvents, type Client, type JsonValue } from '@openfeature/web-sdk';
 
 import { TrackingHook } from './tracking';
 import { getObjectKeys } from '../../shared/utils/utils';
@@ -50,7 +49,6 @@ const goffFeatureFlags = {
     ],
     defaultValue: 'excluded',
     trackingKey: 'experiment_sort_by_firing_alerts',
-    featureToggle: 'metricsExploreFireAlerts',
   },
 } as const satisfies Record<string, FeatureFlag>;
 
@@ -68,28 +66,24 @@ type FeatureFlag =
       values: readonly boolean[];
       defaultValue: boolean;
       trackingKey?: string;
-      featureToggle?: string;
     }
   | {
       valueType: 'object';
       values: readonly JsonValue[];
       defaultValue: JsonValue;
       trackingKey?: string;
-      featureToggle?: string;
     }
   | {
       valueType: 'number';
       values: readonly number[];
       defaultValue: number;
       trackingKey?: string;
-      featureToggle?: string;
     }
   | {
       valueType: 'string';
       values: readonly string[];
       defaultValue: string;
       trackingKey?: string;
-      featureToggle?: string;
     };
 
 const featureFlagNames = getObjectKeys(goffFeatureFlags);
@@ -126,26 +120,21 @@ export const OPEN_FEATURE_DOMAIN = 'metrics-drilldown';
  * This prevents re-initialization if the app component re-renders.
  */
 export function initOpenFeatureProvider(): Promise<void> {
-  const subPath = config.appSubUrl ?? '';
+  if (OpenFeature.getProvider(OPEN_FEATURE_DOMAIN) === OpenFeature.getProvider()) {
+    return OpenFeature.setProviderAndWait(
+      OPEN_FEATURE_DOMAIN,
+      new MultiProvider([
+        { provider: createOpenFeatureLocalStorageProvider() },
+        { provider: createOpenFeatureOFREPWebProvider() },
+      ])
+    ).catch((error) => {
+      // OpenFeature initialization may fail in environments without the feature flag service.
+      // This is expected and the app will continue to work with default flag values.
+      logger.warn('OpenFeature provider initialization failed, using default flag values', error);
+    });
+  }
 
-  return OpenFeature.setProviderAndWait(
-    OPEN_FEATURE_DOMAIN,
-    new OFREPWebProvider({
-      baseUrl: `${subPath}/apis/features.grafana.app/v0alpha1/namespaces/${config.namespace}`,
-      disableVisibilityRefresh: true, // Do not refresh
-      cacheMode: 'disabled', // Do not write to localStorage
-      timeoutMs: 10_000, // Timeout after 10 seconds
-    }),
-    {
-      targetingKey: config.namespace, // Dimension of uniqueness, to ensure flags are evaluated consistently for a given stack
-      namespace: config.namespace, // Required by the multi-tenant feature flag service
-      ...config.openFeatureContext,
-    }
-  ).catch((error) => {
-    // OpenFeature initialization may fail in environments without the feature flag service.
-    // This is expected and the app will continue to work with default flag values.
-    logger.warn('OpenFeature provider initialization failed, using default flag values', error);
-  });
+  return Promise.resolve();
 }
 
 /**
@@ -161,44 +150,12 @@ function waitForClientReady(client: Client): Promise<void> {
 }
 
 /**
- * Resolves a flag from its optional local-dev Grafana feature toggle override (set via
- * `GF_FEATURE_TOGGLES_ENABLE`, e.g. through `pnpm server:firing-alerts`).
- *
- * Returns the override value when the toggle is set, or `undefined` to fall through to the OpenFeature provider.
- * For string cohort flags (A/B tests) the boolean toggle is mapped to a `treatment`/`control` cohort so the
- * local flow still enables the feature without patching source.
- */
-function resolveFeatureToggleOverride<T extends keyof typeof goffFeatureFlags>(
-  flagDef: (typeof goffFeatureFlags)[T]
-): FlagValue<T> | undefined {
-  if (!('featureToggle' in flagDef) || !flagDef.featureToggle) {
-    return undefined;
-  }
-
-  const toggle = (config.featureToggles as Record<string, boolean | undefined>)[flagDef.featureToggle];
-  if (toggle === undefined) {
-    return undefined;
-  }
-
-  if (flagDef.valueType === 'string') {
-    return (toggle ? 'treatment' : 'control') as FlagValue<T>;
-  }
-
-  return toggle as FlagValue<T>;
-}
-
-/**
  * Evaluates a feature flag from the GoFF service.
  *
  * @param flagName - The name of the feature flag to evaluate.
  * @returns The value of the feature flag.
  */
 export async function evaluateFeatureFlag<T extends keyof typeof goffFeatureFlags>(flagName: T): Promise<FlagValue<T>> {
-  const override = resolveFeatureToggleOverride<T>(goffFeatureFlags[flagName]);
-  if (override !== undefined) {
-    return override;
-  }
-
   try {
     const client = OpenFeature.getClient(OPEN_FEATURE_DOMAIN);
     await waitForClientReady(client);
