@@ -32,6 +32,7 @@ import { MetricsList } from 'MetricsReducer/MetricsList/MetricsList';
 import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
+import { RelatedMetricsRanking } from './ranking/RelatedMetricsRanking';
 import { RelatedListControls } from './RelatedListControls';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { getTrailFor } from '../../shared/utils/utils';
@@ -41,6 +42,7 @@ interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;
   body: MetricsList;
   listControls: RelatedListControls;
+  ranking: RelatedMetricsRanking;
 }
 
 export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneState> {
@@ -54,6 +56,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
       key: 'RelatedMetricsScene',
       body: new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }),
       listControls: new RelatedListControls({}),
+      ranking: new RelatedMetricsRanking(metric),
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -132,6 +135,9 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
 
       filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
       sortEngine.sort('related', { metric });
+      if (key === VAR_METRICS_VARIABLE) {
+        this.state.ranking.start(options.map((option) => String(option.value)));
+      }
     });
 
     /* Filters */
@@ -159,13 +165,14 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
     const chromeHeaderHeight = useChromeHeaderHeight();
     const trail = getTrailFor(model);
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail.state.embedded);
-    const { $variables, body, listControls } = model.useState();
+    const { $variables, body, listControls, ranking } = model.useState();
 
     return (
       <>
         <div className={styles.searchSticky}>
           <listControls.Component model={listControls} />
         </div>
+        <ranking.Component model={ranking} />
         <div data-testid="panels-list">
           <body.Component model={body} />
         </div>

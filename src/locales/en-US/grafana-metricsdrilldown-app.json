@@ -382,6 +382,23 @@
   "related-metrics": {
     "search-aria-label": "Quick search related metrics"
   },
+  "related-metrics-ranking": {
+    "debug": "Jev ranking details",
+    "debug-cached": "Cached",
+    "debug-fallback": "Fallback",
+    "debug-id": "ID",
+    "debug-latency": "Latency",
+    "debug-metric": "Metric",
+    "debug-model": "Model",
+    "debug-prompt": "Prompt",
+    "debug-rank": "Rank",
+    "debug-relationship": "Relationship",
+    "debug-score": "Jev p",
+    "debug-server": "Server",
+    "debug-status": "Status",
+    "loading": "Finding recommended metrics…",
+    "title": "Recommended"
+  },
   "select-action": {
     "button": "Select"
   },

@@ -81,6 +81,25 @@ export class MetricDatasourceHelper {
     this.fetchMetricsMetadata().catch(() => {});
   }
 
+  /** Returns metadata already loaded during datasource initialization without causing a request. */
+  public peekMetadata(metric: string): PromMetricsMetadataItem | undefined {
+    return this.cache.metadata.get(metric);
+  }
+
+  /** Fetches label names for one metric. Failures are intentionally handled by callers. */
+  public async getLabelNamesForMetric(metric: string): Promise<string[]> {
+    const ds = await this.getRuntimeDatasource();
+    if (!ds) {
+      return [];
+    }
+
+    const matcher = `{__name__="${metric.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"}`;
+    const response = await (ds.languageProvider as any).request(
+      `/api/v1/labels?match[]=${encodeURIComponent(matcher)}`
+    );
+    return Array.isArray(response?.data) ? response.data.filter((label: unknown): label is string => typeof label === 'string') : [];
+  }
+
   /**
    * We fetch all the metadata at once in init() but it can lead to inconsistencies in the UI because
    * it usually takes a couple of Prometheus scrape intervals to have all the metadata available.
