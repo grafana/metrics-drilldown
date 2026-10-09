@@ -46,7 +46,7 @@ import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import {
   ADD_TO_DASHBOARD_COMPONENT_ID,
-  ADD_TO_DASHBOARD_LABEL,
+  getAddToDashboardLabel,
 } from 'shared/GmdVizPanel/components/addToDashboard/constants';
 import {
   EventOpenAddToDashboard,
@@ -654,7 +654,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         </div>
         <drawer.Component model={drawer} />
         {isAddToDashboardModalOpen && AddToDashboardComponent && addToDashboardPanelData && (
-          <Modal title={ADD_TO_DASHBOARD_LABEL} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
+          <Modal title={getAddToDashboardLabel()} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
             {createElement(AddToDashboardComponent as React.ComponentType<AddToDashboardFormProps>, {
               onClose: model.closeAddToDashboardModal,
               buildPanel: () => {

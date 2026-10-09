@@ -307,8 +307,10 @@
   "panel-menu": {
     "action": {
       "add-bookmark": "Add bookmark",
+      "add-to-dashboard": "Add to dashboard",
       "copy-url": "Copy URL",
       "copy-url-success": "URL copied to clipboard",
+      "create-alert": "Create alert",
       "explore": "Explore",
       "remove-bookmark": "Remove bookmark"
     },
