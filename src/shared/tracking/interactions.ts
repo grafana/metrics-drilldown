@@ -135,6 +135,8 @@ type Interactions = {
   };
   // User changes the panel type for a histogram metric (e.g., from heatmap to percentiles)
   histogram_panel_type_changed: { panelType: PanelType };
+  // User toggles the "Enable exemplar query" checkbox on the main metric panel
+  exemplars_toggle_changed: { enabled: boolean };
   // An invalid metric config has been found
   invalid_metric_config: { metricConfig: PanelConfigPreset };
   // the user has clicked on the "Give feedback" button in the app header

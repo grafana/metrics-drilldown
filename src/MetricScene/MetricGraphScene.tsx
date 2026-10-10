@@ -19,6 +19,7 @@ import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboa
 import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
 import { CreateAlertAction } from 'shared/GmdVizPanel/components/CreateAlertAction';
+import { EnableExemplarsAction } from 'shared/GmdVizPanel/components/EnableExemplarsAction';
 import { ExploreAttributesAction } from 'shared/GmdVizPanel/components/ExploreAttributesAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { OpenAssistant } from 'shared/GmdVizPanel/components/OpenAssistant';
@@ -86,6 +87,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                       new AddToDashboardAction(),
                       new CreateAlertAction(),
                       new BookmarkHeaderAction(),
+                      new EnableExemplarsAction(),
                     ]
                   : ({ metric }) => [
                       new ConfigurePanelAction({ metric }),
@@ -93,6 +95,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                       new AddToDashboardAction(),
                       new CreateAlertAction(),
                       new BookmarkHeaderAction(),
+                      new EnableExemplarsAction(),
                     ],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
               },
@@ -193,6 +196,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
               new AddToDashboardAction(),
               new CreateAlertAction(),
               new BookmarkHeaderAction(),
+              new EnableExemplarsAction(),
             ],
           },
           {}
