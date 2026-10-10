@@ -48,7 +48,13 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
     // what the user sees in Explore. The legend defaults to "binary query" (main panel), but callers that
     // scope the binary to a single value (the per-value breakdown) pass that value via `binaryLegend`.
     queries = [
-      { refId: metric.name, expr, legendFormat: queryConfig.binaryLegend ?? 'binary query', fromExploreMetrics: true },
+      {
+        refId: metric.name,
+        expr,
+        legendFormat: queryConfig.binaryLegend ?? 'binary query',
+        fromExploreMetrics: true,
+        ...(queryConfig.exemplarsEnabled ? { exemplar: true } : {}),
+      },
     ];
   } else {
     queries = buildQueriesWithPresetFunctions({ metric, queryConfig, expr });
@@ -228,13 +234,17 @@ function buildQueriesWithPresetFunctions({
   const customFn = queryConfig.customFunction;
 
   if (customFn) {
-    return [buildCustomFunctionQuery(metric.name, customFn, expr, interval, isCounter)];
+    return [buildCustomFunctionQuery(metric.name, customFn, expr, interval, isCounter, queryConfig.exemplarsEnabled)];
   }
 
   const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
   const queries: SceneDataQuery[] = [];
-  for (const { fn } of queryDefs) {
-    const q = buildPresetFunctionQuery(metric.name, fn, expr, isCounter, '[getTimeseriesQueryRunnerParams]');
+  for (const [index, { fn }] of queryDefs.entries()) {
+    // Only the first target carries the exemplar flag: Prometheus issues a separate
+    // /api/v1/query_exemplars request per target that has it, so a panel configured with multiple
+    // preset functions (e.g. min/max/avg) would otherwise fire one exemplar query per function.
+    const exemplar = index === 0 ? queryConfig.exemplarsEnabled : undefined;
+    const q = buildPresetFunctionQuery(metric.name, fn, expr, isCounter, '[getTimeseriesQueryRunnerParams]', exemplar);
     if (q) {
       queries.push(q);
     }

@@ -12,6 +12,12 @@ import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../pan
 
 const DEFAULT_PERCENTILES = [99, 90, 50] as const;
 
+// Only the first target in a panel carries the exemplar flag; see the identical comment in
+// getTimeseriesQueryRunnerParams.ts for why (one /api/v1/query_exemplars call per target).
+function exemplarField(queryIndex: number, queryConfig: QueryConfig): { exemplar?: true } {
+  return queryIndex === 0 && queryConfig.exemplarsEnabled ? { exemplar: true } : {};
+}
+
 export function getPercentilesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
   const { metric, queryConfig } = options;
   const expression = buildQueryExpression({
@@ -73,6 +79,7 @@ function buildHistogramQueries({
         expr: query,
         legendFormat: `${percentile}th Percentile`,
         fromExploreMetrics: true,
+        ...exemplarField(queries.length, queryConfig),
       });
     }
   }
@@ -115,6 +122,7 @@ function buildNonHistogramQueries({
         expr: query,
         legendFormat: `${percentile}th Percentile`,
         fromExploreMetrics: true,
+        ...exemplarField(queries.length, queryConfig),
       });
     }
   }
