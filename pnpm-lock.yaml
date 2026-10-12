@@ -112,8 +112,8 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0(@stylistic/eslint-plugin@5.10.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1)))(@typescript-eslint/eslint-plugin@8.69.0(@typescript-eslint/parser@8.69.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/parser@8.69.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint-config-prettier@10.1.8(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1)))(eslint-plugin-jsdoc@64.5.4(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint-plugin-react-hooks@7.0.1(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-react@7.37.5(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(typescript@6.0.3)
       '@grafana/plugin-e2e':
-        specifier: 3.14.0
-        version: 3.14.0(@playwright/test@1.63.0)
+        specifier: 3.14.1
+        version: 3.14.1(@playwright/test@1.63.0)
       '@grafana/sign-plugin':
         specifier: ^3.2.2
         version: 3.3.3(supports-color@8.1.1)
@@ -857,8 +857,8 @@ packages:
     peerDependencies:
       '@lezer/lr': ^1.0.0
 
-  '@grafana/plugin-e2e@3.14.0':
-    resolution: {integrity: sha512-hbfyAp5Bh1/F8SlzicFumTgDS2Br6XEs7dPpk/SA7MHvF64ZSwxQSsmurEPapaUOO+PfQKkHLLJRIJX9ZP+Tug==}
+  '@grafana/plugin-e2e@3.14.1':
+    resolution: {integrity: sha512-zxv/Nk9lfXmtRZn8gTU5My7UNBVPq0P1D//vdN6hdrWllgHO4wfbVF+lI0qlXqbZTcDds8pgspYHovmpDkmPpg==}
     engines: {node: '>=20 <=24'}
     peerDependencies:
       '@axe-core/playwright': ^4.11.1
@@ -7356,7 +7356,7 @@ snapshots:
     dependencies:
       '@lezer/lr': 1.4.8
 
-  '@grafana/plugin-e2e@3.14.0(@playwright/test@1.63.0)':
+  '@grafana/plugin-e2e@3.14.1(@playwright/test@1.63.0)':
     dependencies:
       '@grafana/e2e-selectors': 13.2.0-30594044109
       '@playwright/test': 1.63.0
