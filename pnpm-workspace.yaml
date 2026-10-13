@@ -55,6 +55,6 @@ overrides:
   shell-quote: ^1.11.0
   source-map-js: ^1.2.2
   'js-yaml@^3': ^4.3.2
-  'chokidar@^3': ^4.0.3
+  'chokidar@^3': ^5.0.0
   'eslint-webpack-plugin>micromatch': 'npm:picomatch@^2.3.2'
   '@types/jest>expect': ^30.5.2
