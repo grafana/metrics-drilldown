@@ -19,7 +19,7 @@ description: 'Skill for the Bookmarks area of metrics-drilldown. 14 symbols acro
 | -------------------------------------------------------------------- | ------------------------------------- |
 | `src/shared/bookmarks/useBookmarks.ts`                               | useBookmarks, gotoBookmark            |
 | `src/shared/bookmarks/genBookmarkKey.ts`                             | filterUrlValues, genBookmarkKey       |
-| `src/shared/GmdVizPanel/components/BookmarkHeaderAction.tsx`         | constructor, isCurrentStateBookmarked |
+| `src/MetricScene/PanelMenu/actions/BookmarkAction.ts`                 | create, isCurrentStateBookmarked      |
 | `src/shared/user-preferences/userStorage.ts`                         | getItem                               |
 | `src/shared/GmdVizPanel/components/ConfigurePanelAction.tsx`         | constructor                           |
 | `src/MetricScene/Breakdown/MetricLabelValuesList/SortBySelector.tsx` | constructor                           |
@@ -50,8 +50,8 @@ Start here when exploring this area:
 | `displayError`               | Function | `src/MetricsReducer/helpers/displayStatus.ts`                         | 5    |
 | `onSelect`                   | Function | `src/MetricsReducer/SideBar/sections/BookmarksList/BookmarksList.tsx` | 45   |
 | `constructor`                | Method   | `src/shared/GmdVizPanel/components/ConfigurePanelAction.tsx`          | 19   |
-| `constructor`                | Method   | `src/shared/GmdVizPanel/components/BookmarkHeaderAction.tsx`          | 18   |
-| `isCurrentStateBookmarked`   | Method   | `src/shared/GmdVizPanel/components/BookmarkHeaderAction.tsx`          | 30   |
+| `create`                     | Method   | `src/MetricScene/PanelMenu/actions/BookmarkAction.ts`                  | 28   |
+| `isCurrentStateBookmarked`   | Function | `src/MetricScene/PanelMenu/actions/BookmarkAction.ts`                  | 12   |
 | `constructor`                | Method   | `src/MetricScene/Breakdown/MetricLabelValuesList/SortBySelector.tsx`  | 43   |
 | `filterUrlValues`            | Function | `src/shared/bookmarks/genBookmarkKey.ts`                              | 2    |
 | `SavedQueryItem`             | Function | `src/shared/savedQueries/LoadQueryModal.tsx`                          | 171  |

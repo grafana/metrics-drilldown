@@ -1,5 +1,11 @@
 import { css } from '@emotion/css';
-import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
+import {
+  urlUtil,
+  VariableHide,
+  type AdHocVariableFilter,
+  type GrafanaTheme2,
+  type TimeRange,
+} from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { config, useChromeHeaderHeight, usePluginComponent } from '@grafana/runtime';
 import {
@@ -24,6 +30,7 @@ import {
   type SceneObjectWithUrlSync,
   type SceneVariable,
 } from '@grafana/scenes';
+import { type Panel } from '@grafana/schema';
 import { Modal, Stack, useStyles2 } from '@grafana/ui';
 import React, { createElement, useEffect } from 'react';
 
@@ -39,7 +46,7 @@ import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import {
   ADD_TO_DASHBOARD_COMPONENT_ID,
-  ADD_TO_DASHBOARD_LABEL,
+  getAddToDashboardLabel,
 } from 'shared/GmdVizPanel/components/addToDashboard/constants';
 import {
   EventOpenAddToDashboard,
@@ -48,6 +55,8 @@ import {
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
+import { CREATE_ALERT_COMPONENT_ID } from 'shared/GmdVizPanel/components/createAlert/constants';
+import { EventOpenCreateAlert } from 'shared/GmdVizPanel/components/createAlert/EventOpenCreateAlert';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
@@ -111,6 +120,11 @@ export interface DataTrailState extends SceneObjectState {
   isAddToDashboardAvailable: boolean;
   isAddToDashboardModalOpen: boolean;
   addToDashboardPanelData?: PanelDataRequestPayload;
+
+  // Create alert feature
+  isCreateAlertAvailable: boolean;
+  isCreateAlertModalOpen: boolean;
+  createAlertPanelData?: PanelDataRequestPayload;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -200,6 +214,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       drawer: new SceneDrawer({}),
       isAddToDashboardAvailable: false,
       isAddToDashboardModalOpen: false,
+      isCreateAlertAvailable: false,
+      isCreateAlertModalOpen: false,
       ...state,
     });
 
@@ -235,6 +251,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
     this.subscribeToEvent(EventOpenAddToDashboard, (event) => {
       this.openAddToDashboardModal(event.payload.panelData);
+    });
+    this.subscribeToEvent(EventOpenCreateAlert, (event) => {
+      this.openCreateAlertModal(event.payload.panelData);
     });
 
     this.initFilters();
@@ -506,6 +525,20 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     });
   };
 
+  public openCreateAlertModal(panelData: PanelDataRequestPayload) {
+    this.setState({
+      isCreateAlertModalOpen: true,
+      createAlertPanelData: panelData,
+    });
+  }
+
+  public closeCreateAlertModal = () => {
+    this.setState({
+      isCreateAlertModalOpen: false,
+      createAlertPanelData: undefined,
+    });
+  };
+
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const {
       controls,
@@ -515,6 +548,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       drawer,
       isAddToDashboardModalOpen,
       addToDashboardPanelData,
+      isCreateAlertModalOpen,
+      createAlertPanelData,
       kgAnnotationToggle,
     } = model.useState();
 
@@ -538,6 +573,26 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         model.setState({ isAddToDashboardAvailable: isAvailable });
       }
     }, [isLoadingAddToDashboard, AddToDashboardComponent, model]);
+
+    const { component: CreateAlertComponent, isLoading: isLoadingCreateAlert } = usePluginComponent<{
+      panel: Panel;
+      range: TimeRange;
+      onDismiss: () => void;
+    }>(CREATE_ALERT_COMPONENT_ID);
+
+    // Update availability flag when component loads
+    useEffect(() => {
+      const isAvailable = !isLoadingCreateAlert && Boolean(CreateAlertComponent);
+
+      // Log warning if component failed to load
+      if (!isLoadingCreateAlert && !CreateAlertComponent) {
+        logger.warn(`Failed to load create alert component: ${CREATE_ALERT_COMPONENT_ID}`);
+      }
+
+      if (model.state.isCreateAlertAvailable !== isAvailable) {
+        model.setState({ isCreateAlertAvailable: isAvailable });
+      }
+    }, [isLoadingCreateAlert, CreateAlertComponent, model]);
 
     // Set CSS custom property for app-controls height in embedded mode
     useEffect(() => {
@@ -599,7 +654,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         </div>
         <drawer.Component model={drawer} />
         {isAddToDashboardModalOpen && AddToDashboardComponent && addToDashboardPanelData && (
-          <Modal title={ADD_TO_DASHBOARD_LABEL} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
+          <Modal title={getAddToDashboardLabel()} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
             {createElement(AddToDashboardComponent as React.ComponentType<AddToDashboardFormProps>, {
               onClose: model.closeAddToDashboardModal,
               buildPanel: () => {
@@ -612,6 +667,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             })}
           </Modal>
         )}
+        {isCreateAlertModalOpen &&
+          CreateAlertComponent &&
+          createAlertPanelData &&
+          createElement(CreateAlertComponent, {
+            panel: createAlertPanelData.panel,
+            range: createAlertPanelData.range,
+            onDismiss: model.closeCreateAlertModal,
+          })}
       </>
     );
   };
