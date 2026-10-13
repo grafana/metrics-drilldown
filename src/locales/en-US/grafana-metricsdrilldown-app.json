@@ -169,6 +169,14 @@
     "button": "Give feedback"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "No exemplars found for this metric in the current time range",
+      "label": "Show exemplars",
+      "off": "Show exemplars (counters and histograms only)",
+      "on": "Showing exemplars",
+      "switch-to-percentiles": "Switch to the Percentiles view to show exemplars",
+      "unavailable": "Exemplars aren't available for this metric"
+    },
     "native-histogram": "Native Histogram",
     "variant": {
       "heatmap": "heatmap",

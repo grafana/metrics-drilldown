@@ -1,4 +1,4 @@
-import { LoadingState } from '@grafana/data';
+import { LoadingState, type PanelData } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import {
   sceneGraph,
@@ -15,26 +15,25 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 type DataStatus = 'unknown' | 'empty' | 'has-data';
+type DisabledReason = 'metric-type' | 'panel-type' | null;
 
 interface EnableExemplarsActionState extends SceneObjectState {
   checked: boolean;
-  disabled: boolean;
+  disabledReason: DisabledReason;
   dataStatus: DataStatus;
 }
 
-// Exemplars are only defined by the OpenMetrics spec for Counter, Histogram, and GaugeHistogram
-// metric types, and only render as markers on a Grafana core timeseries panel (see ExemplarsPlugin
-// in grafana/grafana). A metric can be the right type and still have no real exemplar data for the
-// current time range, which this component can only learn after a query actually runs, so the
-// tooltip reflects that outcome rather than looking identically "on" whether or not anything happened.
-// See docs/exemplars-to-traces-drilldown-plan.md.
+// OpenMetrics defines exemplars only for Counter, Histogram, and GaugeHistogram metric types.
+// Grafana's core heatmap panel can render exemplars too, but this app's heatmap query builder
+// doesn't attach the exemplar flag yet, so a histogram still shown as a heatmap stays disabled
+// here (see 'panel-type' below) even though its metric type would otherwise qualify.
 export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsActionState> {
   private _dataSub?: { unsubscribe: () => void };
 
   constructor() {
     super({
       checked: false,
-      disabled: true,
+      disabledReason: 'metric-type',
       dataStatus: 'unknown',
     });
 
@@ -66,12 +65,21 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
   private syncFromPanel(vizPanel: GmdVizPanel) {
     const { metricType, metricTypeResolved, panelConfig, queryConfig, body } = vizPanel.state;
 
+    const supportsMetricType = metricType === 'counter' || metricType === 'classic-histogram' || metricType === 'native-histogram';
     const rendersAsTimeseries = panelConfig.type === 'timeseries' || panelConfig.type === 'percentiles';
+
+    let disabledReason: DisabledReason = null;
+    if (!metricTypeResolved || !supportsMetricType) {
+      disabledReason = 'metric-type';
+    } else if (!rendersAsTimeseries) {
+      disabledReason = 'panel-type';
+    }
+
     const checked = Boolean(queryConfig.exemplarsEnabled);
 
     this.setState({
       checked,
-      disabled: !metricTypeResolved || metricType === 'gauge' || !rendersAsTimeseries,
+      disabledReason,
       dataStatus: 'unknown',
     });
 
@@ -87,13 +95,20 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
       return;
     }
 
-    this._dataSub = queryRunner.subscribeToState((runnerState) => {
-      if (runnerState.data?.state !== LoadingState.Done) {
+    // Checked once immediately, in addition to subscribing: subscribeToState only fires on
+    // subsequent state changes, not the value already present at subscribe time, so a query that
+    // finished before this ran (e.g. the panel rebuilt with exemplarsEnabled already true) would
+    // otherwise leave dataStatus stuck at 'unknown'.
+    const checkData = (data: PanelData | undefined) => {
+      if (data?.state !== LoadingState.Done) {
         return;
       }
-      const hasExemplars = (runnerState.data.annotations ?? []).some((frame) => frame.length > 0);
+      const hasExemplars = (data.annotations ?? []).some((frame) => frame.length > 0);
       this.setState({ dataStatus: hasExemplars ? 'has-data' : 'empty' });
-    });
+    };
+
+    checkData(queryRunner.state.data);
+    this._dataSub = queryRunner.subscribeToState((runnerState) => checkData(runnerState.data));
     this._subs.add(this._dataSub);
   }
 
@@ -106,28 +121,38 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<EnableExemplarsAction>) => {
-    const { checked, disabled, dataStatus } = model.useState();
+    const { checked, disabledReason, dataStatus } = model.useState();
 
-    const label = t('gmd-viz-panel.enable-exemplars', 'Show exemplars');
+    const label = t('gmd-viz-panel.enable-exemplars.label', 'Show exemplars');
 
     return (
-      <Tooltip content={getTooltip(checked, disabled, dataStatus)} placement="top">
-        <Switch
-          value={checked}
-          disabled={disabled}
-          onChange={model.onChange}
-          label={label}
-          data-testid="enable-exemplars-action"
-          data-status={dataStatus}
-        />
+      <Tooltip content={getTooltip(checked, disabledReason, dataStatus)} placement="top">
+        {/* Tooltip attaches its hover/focus handlers to this element. Switch forwards unrecognized
+            props to its native, visually hidden <input> (opacity: 0, offscreen z-index), so putting
+            the Tooltip directly on Switch would attach those handlers to an element the pointer
+            never actually lands on; the visible surface is a sibling <label>. Wrapping in a plain
+            span gives Tooltip a real hoverable target that contains that visible label. */}
+        <span>
+          <Switch
+            value={checked}
+            disabled={disabledReason !== null}
+            onChange={model.onChange}
+            label={label}
+            data-testid="enable-exemplars-action"
+            data-status={dataStatus}
+          />
+        </span>
       </Tooltip>
     );
   };
 }
 
-export function getTooltip(checked: boolean, disabled: boolean, dataStatus: DataStatus): string {
-  if (disabled) {
+export function getTooltip(checked: boolean, disabledReason: DisabledReason, dataStatus: DataStatus): string {
+  if (disabledReason === 'metric-type') {
     return t('gmd-viz-panel.enable-exemplars.unavailable', "Exemplars aren't available for this metric");
+  }
+  if (disabledReason === 'panel-type') {
+    return t('gmd-viz-panel.enable-exemplars.switch-to-percentiles', 'Switch to the Percentiles view to show exemplars');
   }
   if (!checked) {
     return t('gmd-viz-panel.enable-exemplars.off', 'Show exemplars (counters and histograms only)');
