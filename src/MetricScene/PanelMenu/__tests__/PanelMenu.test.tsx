@@ -101,10 +101,6 @@ function createMockTrail(state: { isAddToDashboardAvailable: boolean; isCreateAl
   };
 }
 
-function activate(menu: PanelMenu) {
-  menu.activate();
-}
-
 function itemTexts(menu: PanelMenu): string[] {
   return (menu.state.body?.state.items ?? []).map((item) => String(item.text));
 }
@@ -132,7 +128,7 @@ describe('PanelMenu', () => {
     mockGetTrailFor.mockReturnValue(trail);
 
     const menu = new PanelMenu({});
-    activate(menu);
+    menu.activate();
 
     expect(itemTexts(menu)).toEqual(['Navigation', 'Explore']);
   });
@@ -145,7 +141,7 @@ describe('PanelMenu', () => {
     mockGetTrailFor.mockReturnValue(trail);
 
     const menu = new PanelMenu({});
-    activate(menu);
+    menu.activate();
 
     expect(mockIsAssistantAvailable).not.toHaveBeenCalled();
   });
@@ -155,7 +151,7 @@ describe('PanelMenu', () => {
     mockGetTrailFor.mockReturnValue(trail);
 
     const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-    activate(menu);
+    menu.activate();
 
     expect(itemTexts(menu)).toEqual(['Navigation', 'Explore', 'Actions', 'Add bookmark', 'Copy URL']);
   });
@@ -165,7 +161,7 @@ describe('PanelMenu', () => {
     mockGetTrailFor.mockReturnValue(trail);
 
     const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-    activate(menu);
+    menu.activate();
 
     expect(itemTexts(menu)).toEqual([
       'Navigation',
@@ -189,7 +185,7 @@ describe('PanelMenu', () => {
     mockGetTrailFor.mockReturnValue(trail);
 
     const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-    activate(menu);
+    menu.activate();
 
     expect(itemTexts(menu)).not.toContain('Explain in Assistant');
 
@@ -205,7 +201,7 @@ describe('PanelMenu', () => {
     mockGetTrailFor.mockReturnValue(trail);
 
     const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-    activate(menu);
+    menu.activate();
 
     expect(itemTexts(menu)).not.toContain('Add to dashboard');
 
@@ -227,7 +223,7 @@ describe('PanelMenu', () => {
       mockGetTrailFor.mockReturnValue(trail);
 
       const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-      activate(menu);
+      menu.activate();
 
       const handler = jest.fn();
       menu.subscribeToEvent(EventOpenAddToDashboard, handler);
@@ -254,7 +250,7 @@ describe('PanelMenu', () => {
       mockGetTrailFor.mockReturnValue(trail);
 
       const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-      activate(menu);
+      menu.activate();
 
       const handler = jest.fn();
       menu.subscribeToEvent(EventOpenCreateAlert, handler);
@@ -290,7 +286,7 @@ describe('PanelMenu', () => {
       mockGetTrailFor.mockReturnValue(trail);
 
       const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-      activate(menu);
+      menu.activate();
 
       await act(async () => {
         await findItem(menu, 'Explain in Assistant').onClick?.({} as any);
@@ -311,7 +307,7 @@ describe('PanelMenu', () => {
       mockGetTrailFor.mockReturnValue(trail);
 
       const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-      activate(menu);
+      menu.activate();
 
       expect(itemTexts(menu)).toContain('Add bookmark');
       expect(itemTexts(menu)).not.toContain('Remove bookmark');
@@ -323,7 +319,7 @@ describe('PanelMenu', () => {
       userStorage.setItem(PREF_KEYS.BOOKMARKS, [{ urlValues: {}, createdAt: 1 }]);
 
       const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-      activate(menu);
+      menu.activate();
 
       expect(itemTexts(menu)).toContain('Remove bookmark');
       expect(itemTexts(menu)).not.toContain('Add bookmark');
@@ -334,7 +330,7 @@ describe('PanelMenu', () => {
       mockGetTrailFor.mockReturnValue(trail);
 
       const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-      activate(menu);
+      menu.activate();
 
       act(() => {
         findItem(menu, 'Add bookmark').onClick?.({} as any);
@@ -355,7 +351,7 @@ describe('PanelMenu', () => {
       userStorage.setItem(PREF_KEYS.BOOKMARKS, [{ urlValues: {}, createdAt: 1 }]);
 
       const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-      activate(menu);
+      menu.activate();
 
       act(() => {
         findItem(menu, 'Remove bookmark').onClick?.({} as any);
@@ -379,7 +375,7 @@ describe('PanelMenu', () => {
       mockGetTrailFor.mockReturnValue(trail);
 
       const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
-      activate(menu);
+      menu.activate();
 
       const staleItem = findItem(menu, 'Add bookmark');
 

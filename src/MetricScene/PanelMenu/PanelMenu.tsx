@@ -34,9 +34,10 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
 
     this.addActivationHandler(() => {
       const isMainGraphPanel = this.state.key === TOPVIEW_PANEL_MENU_KEY;
+      const trail = isMainGraphPanel ? getTrailFor(this) : undefined;
       let assistantAvailable = false;
 
-      const buildItems = () => {
+      const buildItems = (trail: ReturnType<typeof getTrailFor> | undefined) => {
         // Navigation group of options (all panels)
         const items: PanelMenuItem[] = [
           {
@@ -46,9 +47,8 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           ExploreAction.create(this),
         ];
 
-        if (isMainGraphPanel) {
+        if (trail) {
           // Only add these actions to the main metric graph panel
-          const trail = getTrailFor(this);
           const actionItems: PanelMenuItem[] = [];
 
           if (assistantAvailable) {
@@ -60,7 +60,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           if (trail.state.isCreateAlertAvailable) {
             actionItems.push(CreateAlertAction.create(this));
           }
-          actionItems.push(BookmarkAction.create(this, buildItems));
+          actionItems.push(BookmarkAction.create(this, () => buildItems(trail)));
           actionItems.push(CopyUrlAction.create(trail));
 
           items.push(
@@ -75,27 +75,26 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
         this.state.body?.setState({ items });
       };
 
-      buildItems();
+      buildItems(trail);
 
-      if (isMainGraphPanel) {
+      if (trail) {
         // Only the main panel ever reads `assistantAvailable` (see buildItems above), but every
         // PanelMenu instance (including one per row in MetricLabelsList/MetricLabelValuesList)
         // used to subscribe here regardless, triggering an unused rebuild on every emission.
         this._subs.add(
           isAssistantAvailable().subscribe((available) => {
             assistantAvailable = available;
-            buildItems();
+            buildItems(trail);
           })
         );
 
-        const trail = getTrailFor(this);
         this._subs.add(
           trail.subscribeToState((newState, prevState) => {
             if (
               newState.isAddToDashboardAvailable !== prevState.isAddToDashboardAvailable ||
               newState.isCreateAlertAvailable !== prevState.isCreateAlertAvailable
             ) {
-              buildItems();
+              buildItems(trail);
             }
           })
         );
@@ -106,7 +105,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
         // against. getLocationObservable() fires on every URL change regardless of which part
         // changed, so rebuilding here keeps the label accurate without enumerating every Scene
         // object (filters variable, $timeRange, ...) that could affect it.
-        this._subs.add(locationService.getLocationObservable().subscribe(buildItems));
+        this._subs.add(locationService.getLocationObservable().subscribe(() => buildItems(trail)));
       }
     });
   }
