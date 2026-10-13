@@ -21,7 +21,7 @@ overrides:
   shell-quote: ^1.11.0
   source-map-js: ^1.2.2
   js-yaml@^3: ^4.3.2
-  chokidar@^3: ^4.0.3
+  chokidar@^3: ^5.0.0
   eslint-webpack-plugin>micromatch: npm:picomatch@^2.3.2
   '@types/jest>expect': ^30.5.2
 
@@ -3209,10 +3209,6 @@ packages:
   chardet@2.1.1:
     resolution: {integrity: sha512-PsezH1rqdV9VvyNhxxOW32/d75r01NY7TQCmOqomRo15ZSOKbpTFVsfjghxo6JloQUCGnH4k1LGu0R4yCLlWQQ==}
 
-  chokidar@4.0.3:
-    resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
-    engines: {node: '>= 14.16.0'}
-
   chokidar@5.0.0:
     resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
     engines: {node: '>= 20.19.0'}
@@ -5597,10 +5593,6 @@ packages:
   react@19.3.0:
     resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
     engines: {node: '>=0.10.0'}
-
-  readdirp@4.1.2:
-    resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
-    engines: {node: '>= 14.18.0'}
 
   readdirp@5.0.0:
     resolution: {integrity: sha512-9u/XQ1pvrQtYyMpZe7DXKv2p5CNvyVwzUB6uhLAnQwHMSgKMBR62lc7AHljaeteeHXn11XTAaLLUVZYVZyuRBQ==}
@@ -10074,10 +10066,6 @@ snapshots:
 
   chardet@2.1.1: {}
 
-  chokidar@4.0.3:
-    dependencies:
-      readdirp: 4.1.2
-
   chokidar@5.0.0:
     dependencies:
       readdirp: 5.0.0
@@ -12777,8 +12765,6 @@ snapshots:
 
   react@19.3.0: {}
 
-  readdirp@4.1.2: {}
-
   readdirp@5.0.0: {}
 
   redent@3.0.0:
@@ -13437,7 +13423,7 @@ snapshots:
   ts-checker-rspack-plugin@1.5.2(@rspack/core@2.1.10(@swc/helpers@0.5.23))(tslib@2.8.1)(typescript@6.0.3):
     dependencies:
       '@rspack/lite-tapable': 1.1.2
-      chokidar: 4.0.3
+      chokidar: 5.0.0
       memfs: 4.64.0(tslib@2.8.1)
       picocolors: 1.1.1
       typescript: 6.0.3
