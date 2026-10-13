@@ -17,14 +17,14 @@ export function isCurrentStateBookmarked(panelMenuInstance: SceneObject): boolea
     const bookmarksFromStorage = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
     return bookmarksFromStorage.some((b: BookmarkFromStorage) => genBookmarkKey(b.urlValues) === currentKey);
   } catch {
+    // Trail or URL state unavailable; treat as not bookmarked rather than throwing.
     return false;
   }
 }
 
 export class BookmarkAction {
-  // `onToggled` lets the caller rebuild the menu's items immediately, so the label flips from
-  // "Add bookmark" to "Remove bookmark" (and back) without the user having to close and reopen
-  // the menu. PanelMenuItem is a plain snapshot object, it has no state of its own to react to.
+  // `onToggled` rebuilds the menu immediately so the label flips without closing and reopening
+  // it; PanelMenuItem is a static snapshot with no state of its own to react to otherwise.
   static create(panelMenuInstance: SceneObject, onToggled: () => void): PanelMenuItem {
     const isBookmarked = isCurrentStateBookmarked(panelMenuInstance);
 
@@ -34,9 +34,8 @@ export class BookmarkAction {
         : t('panel-menu.action.add-bookmark', 'Add bookmark'),
       iconClassName: isBookmarked ? 'favorite' : 'star',
       onClick: () => {
-        // Re-checked here rather than reusing the `isBookmarked` captured above: the menu can stay
-        // open (or get clicked from a stale build) across a metric/filter/time-range change that
-        // doesn't rebuild items, so the value this item was built with can be stale by click time.
+        // Re-checked rather than reusing `isBookmarked` above: the menu can go stale between
+        // build and click (a filter or metric change doesn't always trigger a rebuild).
         const isCurrentlyBookmarked = isCurrentStateBookmarked(panelMenuInstance);
 
         const trail = getTrailFor(panelMenuInstance);

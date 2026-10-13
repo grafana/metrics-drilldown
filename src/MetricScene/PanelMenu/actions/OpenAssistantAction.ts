@@ -16,17 +16,11 @@ export class OpenAssistantAction {
         const vizPanel = sceneGraph.getAncestor(panelMenuInstance, VizPanel);
         const { panel } = getPanelData(vizPanel);
 
-        // Get metric name from panel title
         const metricName = panel.title || 'unknown';
-
-        // Extract the query expression and remove __ignore_usage__ label
         const rawExpr = panel.targets?.[0]?.expr;
         const query = removeIgnoreUsageLabel(typeof rawExpr === 'string' ? rawExpr : '');
-
-        // Build prompt with or without query
         const queryPart = query ? ` The current metrics drilldown query is: \`${query}\`.` : '';
 
-        // Build context with datasource and metric info when available
         const datasourceUid = panel.datasource?.uid;
         const context = datasourceUid
           ? [
@@ -39,7 +33,6 @@ export class OpenAssistantAction {
             ]
           : [];
 
-        // Try to get metric metadata and add it as context
         try {
           const trail = getTrailFor(panelMenuInstance);
           const metadata = await trail.getMetadataForMetric(metricName);
@@ -56,7 +49,7 @@ export class OpenAssistantAction {
             );
           }
         } catch {
-          // Metadata fetch failed, continue without it
+          // Metadata is optional context; proceed without it on failure.
         }
 
         openAssistant({

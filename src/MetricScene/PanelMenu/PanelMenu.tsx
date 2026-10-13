@@ -78,9 +78,9 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
       buildItems(trail);
 
       if (trail) {
-        // Only the main panel ever reads `assistantAvailable` (see buildItems above), but every
-        // PanelMenu instance (including one per row in MetricLabelsList/MetricLabelValuesList)
-        // used to subscribe here regardless, triggering an unused rebuild on every emission.
+        // Everything below only runs for the main panel: row-level menus never read
+        // `assistantAvailable` or watch trail/URL changes, so subscribing there would just
+        // trigger unused rebuilds on every emission.
         this._subs.add(
           isAssistantAvailable().subscribe((available) => {
             assistantAvailable = available;
@@ -99,12 +99,9 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           })
         );
 
-        // A metric, filter, or time-range change updates the URL without changing any of the
-        // trail state watched above, which would otherwise leave the bookmark item's "Add
-        // bookmark" / "Remove bookmark" label pointing at whatever view the menu last built
-        // against. getLocationObservable() fires on every URL change regardless of which part
-        // changed, so rebuilding here keeps the label accurate without enumerating every Scene
-        // object (filters variable, $timeRange, ...) that could affect it.
+        // Catches URL changes (metric, filter, time range) that don't touch the trail state
+        // above but can leave the bookmark label stale; cheaper than tracking every object that
+        // could affect it.
         this._subs.add(locationService.getLocationObservable().subscribe(() => buildItems(trail)));
       }
     });

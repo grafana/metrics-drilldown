@@ -24,11 +24,8 @@ jest.mock('@grafana/assistant', () => ({
   createAssistantContextItem: jest.fn((type: string, data: unknown) => ({ type, data })),
 }));
 
-// Only sceneGraph.getAncestor is replaced; the action handlers under test (AddToDashboardAction,
-// CreateAlertAction, OpenAssistantAction) call it directly with no try/catch, and the real
-// implementation throws when no matching ancestor exists (there's no real VizPanel parent in
-// these tests). Everything else from @grafana/scenes (SceneObjectBase, VizPanelMenu, VizPanel, ...)
-// stays real.
+// Only getAncestor is replaced. The action handlers under test call it directly with no
+// try/catch, and the real implementation throws when there's no VizPanel ancestor to find.
 jest.mock('@grafana/scenes', () => ({
   ...jest.requireActual('@grafana/scenes'),
   sceneGraph: {
@@ -37,30 +34,25 @@ jest.mock('@grafana/scenes', () => ({
   },
 }));
 
-// getPanelData does its own real scene-graph/query-runner traversal (see addToDashboard.test.ts
-// for its own coverage); mocked here so these action tests can focus on what each action does
-// with the payload, not re-derive it from a real VizPanel.
+// getPanelData has its own test coverage (addToDashboard.test.ts); mocked here so these tests
+// focus on what each action does with the payload.
 jest.mock('../../../shared/GmdVizPanel/components/addToDashboard/addToDashboard', () => ({
   getPanelData: jest.fn(),
 }));
 
-// genBookmarkKey is mocked to a fixed, input-independent value rather than trying to make the
-// real sceneUtils.getUrlState(trail) produce a realistic SceneObjectUrlValues from a plain
-// duck-typed fake trail. This makes "is the current state bookmarked" collapse to "does any
-// bookmark exist in storage", which is all these tests need, without depending on the real
-// Scenes URL-sync machinery at all.
+// Fixed, input-independent key: these tests only need "does any bookmark exist in storage",
+// not a realistic URL state from the duck-typed fake trail.
 jest.mock('../../../shared/bookmarks/genBookmarkKey', () => ({
   genBookmarkKey: jest.fn(() => 'fixed-bookmark-key'),
 }));
 
-// reportExploreMetrics is already auto-mocked project-wide via jest.config.js's moduleNameMapper
-// (src/test/mocks/interactionsMock.ts); no local jest.mock needed here.
+// reportExploreMetrics is already auto-mocked project-wide (jest.config.js moduleNameMapper ->
+// src/test/mocks/interactionsMock.ts); no local jest.mock needed.
 
 // Mocks utils.trail directly, not the shared/utils/utils barrel: the barrel re-exports
-// getTrailFor from here, and utils.trail itself imports DataTrail (which imports openFeature,
-// which imports back from the barrel for getObjectKeys) — requireActual-ing the barrel re-enters
-// that circular chain mid-evaluation and throws a TDZ error. Mocking this leaf module directly
-// means DataTrail's import never executes at all, sidestepping the cycle entirely.
+// getTrailFor from here, and this module's own import chain (via DataTrail, then openFeature)
+// leads back to that same barrel, so requireActual-ing the barrel re-enters the cycle mid-
+// evaluation and throws a TDZ error. Mocking the leaf module means that chain never executes.
 jest.mock('../../../shared/utils/utils.trail', () => ({
   getTrailFor: jest.fn(),
   embeddedTrailNamespace: 'gmd',
@@ -85,8 +77,8 @@ function createMockTrail(state: { isAddToDashboardAvailable: boolean; isCreateAl
 
   return {
     state,
-    // No urlSync and a no-op forEachChild let the real sceneUtils.getUrlState(trail) (called by
-    // BookmarkAction, unmocked) walk this fake trail without crashing; it just returns {}.
+    // Lets the real, unmocked sceneUtils.getUrlState(trail) walk this fake trail without
+    // crashing; with no urlSync, it just returns {}.
     forEachChild: jest.fn(),
     getMetadataForMetric: jest.fn().mockResolvedValue(undefined),
     subscribeToState: jest.fn((cb: (newState: typeof state, prevState: typeof state) => void) => {
@@ -134,9 +126,8 @@ describe('PanelMenu', () => {
   });
 
   it('never subscribes to isAssistantAvailable for a non-main panel', () => {
-    // Regression test: every PanelMenu used to subscribe regardless of panel type (one per row
-    // in MetricLabelsList/MetricLabelValuesList, for example), even though only the main panel
-    // ever reads the result, wasting a subscription and rebuild cascade on every emission.
+    // Regression test: every PanelMenu used to subscribe regardless of panel type, wasting a
+    // rebuild cascade on every emission even though only the main panel reads the result.
     const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: false });
     mockGetTrailFor.mockReturnValue(trail);
 
@@ -175,9 +166,8 @@ describe('PanelMenu', () => {
   });
 
   it('updates an already-open menu once isAssistantAvailable emits true', () => {
-    // Uses a controllable Subject and asserts against the same menu instance throughout, rather
-    // than constructing a second PanelMenu with a different canned value: this would still pass
-    // if the subscription callback never rebuilt an already-open menu's items.
+    // A controllable Subject on one menu instance, not a second PanelMenu with a canned value:
+    // the latter would still pass even if the subscription never rebuilt an open menu's items.
     const availability$ = new Subject<boolean>();
     mockIsAssistantAvailable.mockReturnValue(availability$);
 
@@ -366,11 +356,9 @@ describe('PanelMenu', () => {
     });
 
     it('re-checks the bookmark state at click time rather than trusting the label it was built with', () => {
-      // Regression test: the menu is built while nothing is bookmarked (item reads "Add
-      // bookmark"), but storage changes before the click, without any of the triggers that
-      // rebuild the menu (no activation, no availability change, no URL change). A fix that
-      // still branches on the value captured when the item was built would run the "add" path
-      // here and create a duplicate; the fix re-checks storage inside onClick instead.
+      // Regression test: storage changes between build and click, with no rebuild trigger in
+      // between. A fix that branches on the value captured at build time would add a duplicate
+      // here instead of toggling off.
       const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: false });
       mockGetTrailFor.mockReturnValue(trail);
 
