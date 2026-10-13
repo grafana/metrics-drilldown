@@ -77,9 +77,9 @@ A detailed view of the metric opens that shows the following details:
 
 ### View the metric in Explore
 
-Using the panel menu, you can view the metric in Explore or copy the URL.
+The panel menu lets you view the metric in Explore, ask Grafana Assistant about it, add it to a dashboard, create an alert, bookmark it, or copy its URL.
 
-To open the visualization in Explore, use the metric panel actions and select **Explore**.
+To open the visualization in Explore, select the panel menu and then select **Explore**.
 
 ### Share and bookmark metrics
 

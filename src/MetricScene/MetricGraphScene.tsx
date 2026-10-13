@@ -15,13 +15,9 @@ import { useStyles2 } from '@grafana/ui';
 import React, { useRef } from 'react';
 
 import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
-import { AddToDashboardAction } from 'shared/GmdVizPanel/components/AddToDashboardAction';
-import { BookmarkHeaderAction } from 'shared/GmdVizPanel/components/BookmarkHeaderAction';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
-import { CreateAlertAction } from 'shared/GmdVizPanel/components/CreateAlertAction';
 import { ExploreAttributesAction } from 'shared/GmdVizPanel/components/ExploreAttributesAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
-import { OpenAssistant } from 'shared/GmdVizPanel/components/OpenAssistant';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
@@ -79,21 +75,8 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 ...(binaryQuery ? { title: binaryQuery } : {}),
                 titleItems: () => [new ExploreAttributesAction()],
                 headerActions: isClassicHistogramMetric(metric)
-                  ? ({ metric }) => [
-                      new GmdVizPanelVariantSelector(),
-                      new ConfigurePanelAction({ metric }),
-                      new OpenAssistant(),
-                      new AddToDashboardAction(),
-                      new CreateAlertAction(),
-                      new BookmarkHeaderAction(),
-                    ]
-                  : ({ metric }) => [
-                      new ConfigurePanelAction({ metric }),
-                      new OpenAssistant(),
-                      new AddToDashboardAction(),
-                      new CreateAlertAction(),
-                      new BookmarkHeaderAction(),
-                    ],
+                  ? ({ metric }) => [new GmdVizPanelVariantSelector(), new ConfigurePanelAction({ metric })]
+                  : ({ metric }) => [new ConfigurePanelAction({ metric })],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
               },
               queryOptions: {
@@ -189,10 +172,6 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             headerActions: () => [
               new GmdVizPanelVariantSelector(),
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
-              new OpenAssistant(),
-              new AddToDashboardAction(),
-              new CreateAlertAction(),
-              new BookmarkHeaderAction(),
             ],
           },
           {}
