@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Uppdelning",
-      "query-results": "",
+      "query-results": "Frågeresultat",
       "query-results-description": "Direktfrågedata i tabellformat",
       "related-logs": "Relaterade loggar",
       "related-logs-description": "Relevanta loggar baserat på aktuella etikettfilter och tidsintervall",
@@ -11,48 +11,48 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_one": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_one": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "OTel-mätvärdesattribut",
+    "badge-resource": "OTel-resursattribut",
+    "close-aria-label": "Stäng",
+    "close-tooltip": "Stäng",
+    "collapse": "Dölj",
+    "collapse-extra-fields": "Dölj extra fält",
+    "description": "Identifiera mönster och begränsa grundorsaker genom att utforska hur dina data fördelar sig över viktiga attribut. Klicka på valfritt värde för att filtrera dina resultat.",
+    "description-aria-label": "Vad betyder dessa procentandelar?",
+    "description-histogram": "Här visas varje värdes andel av etikettens observationer {{range}}. Värden utan aktivitet sorteras sist.",
+    "detection-error": "Det gick inte att ladda attribut för denna datauppsättning.",
+    "discovering-fields": "Identifierar attribut …",
+    "error": "Misslyckades att ladda",
+    "expand": "Expandera",
+    "field-input-placeholder": "Sök för att lägga till fler attribut",
+    "field-link-label": "Visa {{name}}",
+    "filter-for-value": "Filtrera för värde",
+    "filter-out-value": "Filtrera bort värde",
+    "histogram-range-between": "mellan {{lower}} och {{upper}}",
+    "histogram-range-over": "över {{value}}",
+    "histogram-range-under": "under {{value}}",
+    "invalid-range": "Övre gränsen måste vara större än nedre gränsen",
+    "lower-limit": "Nedre gräns",
+    "lower-limit-placeholder": "ingen gräns",
+    "lower-limit-unit": "Nedre gräns ({{unit}})",
+    "no-extra-fields-shown": "Inga extra fält visas",
+    "no-fields-detected": "Inga fält upptäcktes för denna datauppsättning.",
+    "no-more-fields": "Inga fler fält",
+    "no-values-found": "Inga värden hittades",
+    "title": "Attribututforskare",
+    "too-many-values": "För många värden att visa",
+    "unit-unknown": "Vi kunde inte fastställa detta mätvärdes enhet utifrån dess namn. Dubbelkolla tröskelvärdet innan du litar på procentandelen.",
+    "upper-limit": "Övre gräns",
+    "upper-limit-placeholder": "ingen gräns",
+    "upper-limit-unit": "Övre gräns ({{unit}})",
+    "value-tooltip-histogram-no-activity": "Ingen aktivitet i det här fönstret.",
+    "show-more-fields_one": "Visa {{count}} fler fält",
+    "show-more-fields_other": "Visa {{count}} fler fält",
+    "value-tooltip-histogram_one": "Detta värde står för {{percentage}} % av denna etiketts observationer som är {{range}} ({{count}} av dess egna ~{{total}}).",
+    "value-tooltip-histogram_other": "Detta värde står för {{percentage}} % av denna etiketts observationer som är {{range}} ({{count}} av dess egna ~{{total}})."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "Lägg till i filter",
@@ -61,8 +61,8 @@
       "label": "Gruppera efter"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Summa",
+      "label": "Histogramfunktion"
     },
     "label-values-list": {
       "error-title": "Fel vid laddning av mätvärden!",
@@ -92,9 +92,9 @@
     "selected-count_other": "{{count}} valda"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "En nyare version av Metrics Drilldown är tillgänglig – läser in på nytt …",
+    "manual-message": "En nyare version av Metrics Drilldown är tillgänglig men kunde inte läsas in automatiskt.",
+    "reload-button": "Läs in på nytt nu"
   },
   "configure-panel": {
     "apply": "Tillämpa",
@@ -124,14 +124,14 @@
     "title": "Allvarligt fel!"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Histogramfördelning",
     "tooltip": {
-      "description": ""
+      "description": "Utforska fördelningen av histogramobservationer för etiketter och attributvärden för detta mätvärde."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "{{componentName}} kunde inte laddas. Försök igen eller kontakta din organisationsadministratör.",
+    "title": "Något gick fel"
   },
   "extreme-value-filter": {
     "message": "Paneldata hämtades på nytt med en mer komplex fråga för att hantera extremt små värden i serien"
@@ -145,25 +145,25 @@
     "limit-warning-title": "Sorteringen av instrumentpanelens användning är begränsad till 500 instrumentpaneler."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Det gick inte att hämta utlösta larmregler från Prometheus-regelslutpunkten"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "Det gick inte att hämta SLO-definitioner",
+    "parse-error": "Det gick inte att extrahera ett mätvärdesnamn från en SLO-definition"
   },
   "filtered-metrics-variable": {
     "label": "Filtrerade mätvärden"
   },
   "firing-alert-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} utlöst larmregel refererar till detta mätvärde",
+    "tooltip_other": "{{count}} utlösta larmregler refererar till detta mätvärde"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "Ta bort filtret för utlösta larm",
+    "aria-label-inactive": "Filtrera efter utlösta larm",
+    "tooltip-empty": "Inga mätvärden med utlösta larm i den aktuella filtrerade uppsättningen",
+    "label_one": "Har utlösta larm ({{count}})",
+    "label_other": "Har utlösta larm ({{count}})"
   },
   "give-feedback": {
     "button": "Ge feedback"
@@ -226,19 +226,19 @@
     "search-aria-label": "Snabbsök mätvärden"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Histogramanalys"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Inga sparade frågor att ladda",
-        "button-tooltip": "",
+        "button-tooltip": "Läs in sparad fråga",
         "empty": "Inga sparade frågor att visa.",
         "load-error": "Denna fråga innehåller uttryck som inte kan återges i Metrics Drilldown. Endast enkla {label}-väljare för mätvärden stöds.",
         "load-type-error": "Välj en Prometheus-fråga.",
         "modal-title": "Läs in en tidigare sparad fråga",
         "remove": "Ta bort",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Läs in sparad fråga",
         "select": "Välj"
       },
       "save-query": {
@@ -246,7 +246,7 @@
           "alert": "Det finns en tidigare sparad fråga med samma uttryck: {{title}}"
         },
         "button-tooltip": "Spara fråga",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Spara i Sparade frågor",
         "cancel": "Avbryt",
         "description": "Beskrivning",
         "error": "Ett oväntat fel uppstod när denna fråga skulle sparas.",
@@ -284,7 +284,7 @@
       "alphabetical-reversed": "Alfabetiskt [Ö–A]",
       "dashboard-usage": "Användning av instrumentpanel",
       "default": "Standard",
-      "firing-alerts": ""
+      "firing-alerts": "Aktiverade larm"
     }
   },
   "metrics-variable": {
@@ -292,12 +292,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Det gick inte att sortera efter utlösta larm"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "Se <2>vår dokumentation</2> för att lära dig mer eller<br/><6>prova det online</6> i Grafana Play!",
+    "no-datasource": "Vi märkte att det inte finns någon Prometheus-datakälla konfigurerad.<br/>Lägg till en <4>Prometheus-datakälla</4> för att visa mätvärden.",
     "title": "Välkommen till detaljanalys av Metrics i Grafana"
   },
   "open-assistant": {
@@ -329,7 +329,7 @@
       "commit-sha": "Commit-SHA: {{sha}}",
       "contribute": "Bidra",
       "documentation": "Dokumentation",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Rapportera ett problem"
     }
   },
@@ -339,9 +339,9 @@
     "view-by-label": "Visa efter"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Frågealternativ",
+    "title": "Frågealternativ",
+    "toggle-insights": "Växla insiktskommentarer"
   },
   "query-results": {
     "aria-label": "Omedelbara frågeresultat",
@@ -397,7 +397,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Datum skapat:",
-      "empty-state": "",
+      "empty-state": "Inga bokmärken ännu för den<br/>aktuella datakällan.",
       "remove-tooltip": "Ta bort bokmärke"
     },
     "close-aria-label": "Stäng",
@@ -439,15 +439,15 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} SLO-definition refererar till detta mätvärde",
+    "tooltip_other": "{{count}} SLO-definitioner refererar till detta mätvärde"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "Ta bort SLO-spårat filter",
+    "aria-label-inactive": "Filtrera efter SLO-spårade mätvärden",
+    "tooltip-empty": "Inga SLO-spårade mätvärden i den aktuella filtrerade uppsättningen",
+    "label_one": "SLO-spårad ({{count}})",
+    "label_other": "SLO-spårad ({{count}})"
   },
   "sort-by": {
     "label": "Sortera efter",

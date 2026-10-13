@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Rozpis",
-      "query-results": "",
+      "query-results": "Výsledky dotazu",
       "query-results-description": "Data okamžitého dotazu ve formátu tabulky",
       "related-logs": "Související protokoly",
       "related-logs-description": "Související protokoly založené na aktuálních filtrech štítků a časovém rozsahu",
@@ -11,52 +11,52 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_one": "",
-    "show-more-fields_few": "",
-    "show-more-fields_many": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_one": "",
-    "value-tooltip-histogram_few": "",
-    "value-tooltip-histogram_many": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "Atribut metriky OTel",
+    "badge-resource": "Atribut zdroje OTel",
+    "close-aria-label": "Zavřít",
+    "close-tooltip": "Zavřít",
+    "collapse": "Sbalit",
+    "collapse-extra-fields": "Sbalit další pole",
+    "description": "Objevte vzorce a zužte základní příčiny tím, že prozkoumáte, jak se vaše data dělí podle klíčových atributů. Kliknutím na libovolnou hodnotu můžete filtrovat výsledky.",
+    "description-aria-label": "Co znamenají tato procenta?",
+    "description-histogram": "Zobrazuje podíl jednotlivých hodnot na pozorováních štítku {{range}}. Hodnoty bez aktivity jsou řazeny jako poslední.",
+    "detection-error": "Atributy pro tuto datovou sadu se nepodařilo načíst.",
+    "discovering-fields": "Zjišťování atributů…",
+    "error": "Načtení se nezdařilo",
+    "expand": "Rozbalit",
+    "field-input-placeholder": "Vyhledat pro přidání dalších atributů",
+    "field-link-label": "Zobrazit {{name}}",
+    "filter-for-value": "Filtrovat podle hodnoty",
+    "filter-out-value": "Odfiltrovat hodnotu",
+    "histogram-range-between": "mezi {{lower}} a {{upper}}",
+    "histogram-range-over": "nad {{value}}",
+    "histogram-range-under": "pod {{value}}",
+    "invalid-range": "Horní limit musí být větší než dolní limit",
+    "lower-limit": "Dolní limit",
+    "lower-limit-placeholder": "žádný limit",
+    "lower-limit-unit": "Dolní limit ({{unit}})",
+    "no-extra-fields-shown": "Nejsou zobrazena žádná další pole",
+    "no-fields-detected": "Pro tuto datovou sadu nebyla zjištěna žádná pole.",
+    "no-more-fields": "Žádná další pole",
+    "no-values-found": "Nebyly nalezeny žádné hodnoty",
+    "title": "Attribute Explorer",
+    "too-many-values": "Příliš mnoho hodnot k zobrazení",
+    "unit-unknown": "Z názvu této metriky se nám nepodařilo určit její jednotku. Než budete věřit procentuální hodnotě, překontrolujte prahovou hodnotu.",
+    "upper-limit": "Horní limit",
+    "upper-limit-placeholder": "žádný limit",
+    "upper-limit-unit": "Horní limit ({{unit}})",
+    "value-tooltip-histogram-no-activity": "V tomto okně není žádná aktivita.",
+    "show-more-fields_one": "Zobrazit {{count}} dalších polí",
+    "show-more-fields_few": "Zobrazit {{count}} dalších polí",
+    "show-more-fields_many": "Zobrazit {{count}} dalších polí",
+    "show-more-fields_other": "Zobrazit {{count}} dalších polí",
+    "value-tooltip-histogram_one": "Tato hodnota představuje {{percentage}} % pozorování tohoto štítku, která jsou {{range}} ({{count}} z přibližně {{total}}).",
+    "value-tooltip-histogram_few": "Tato hodnota představuje {{percentage}} % pozorování tohoto štítku, která jsou {{range}} ({{count}} z přibližně {{total}}).",
+    "value-tooltip-histogram_many": "Tato hodnota představuje {{percentage}} % pozorování tohoto štítku, která jsou {{range}} ({{count}} z přibližně {{total}}).",
+    "value-tooltip-histogram_other": "Tato hodnota představuje {{percentage}} % pozorování tohoto štítku, která jsou {{range}} ({{count}} z přibližně {{total}})."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "Přidat do filtrů",
@@ -65,8 +65,8 @@
       "label": "Seřadit podle"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Součet",
+      "label": "Funkce histogramu"
     },
     "label-values-list": {
       "error-title": "Při načítání metrik došlo k chybě!",
@@ -98,9 +98,9 @@
     "selected-count_other": "Vybráno: {{count}}"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "Je k dispozici novější verze Logs Drilldown – probíhá načítání…",
+    "manual-message": "Je k dispozici novější verze Metrics Drilldown, ale nelze ji načíst automaticky.",
+    "reload-button": "Znovu načíst nyní"
   },
   "configure-panel": {
     "apply": "Použít",
@@ -130,14 +130,14 @@
     "title": "Závažná chyba!"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Rozložení histogramu",
     "tooltip": {
-      "description": ""
+      "description": "Prozkoumejte rozložení pozorování histogramu pro štítky a hodnoty atributů této metriky."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "Načtení {{componentName}} se nezdařilo. Zkuste to znovu nebo kontaktujte správce organizace.",
+    "title": "Došlo k chybě"
   },
   "extreme-value-filter": {
     "message": "Data panelu byla znovu načtena pomocí složitějšího dotazu pro zpracování extrémně malých hodnot v řadě"
@@ -151,29 +151,29 @@
     "limit-warning-title": "Řazení podle využití nástěnky je omezeno na 500 nástěnek."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Nepodařilo se načíst pravidla pro spuštění výstrah z koncového bodu nástroje Prometheus Ruler"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "Nepodařilo se načíst definice SLO",
+    "parse-error": "Nepodařilo se extrahovat název metriky z definice SLO"
   },
   "filtered-metrics-variable": {
     "label": "Filtrované metriky"
   },
   "firing-alert-badge": {
-    "tooltip_one": "",
-    "tooltip_few": "",
-    "tooltip_many": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} spuštěné pravidlo výstrahy odkazuje na tuto metriku",
+    "tooltip_few": "{{count}} spuštěná pravidla výstrahy odkazují na tuto metriku",
+    "tooltip_many": "{{count}} spuštěných pravidel výstrahy odkazuje na tuto metriku",
+    "tooltip_other": "{{count}} spuštěných pravidel výstrahy odkazuje na tuto metriku"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_few": "",
-    "label_many": "",
-    "label_other": ""
+    "aria-label-active": "Odebrat filtr spuštěných výstrah",
+    "aria-label-inactive": "Filtrovat podle spuštěných výstrah",
+    "tooltip-empty": "V aktuální filtrované sadě nejsou žádné metriky se spuštěnými výstrahami",
+    "label_one": "Obsahuje spuštěné výstrahy ({{count}})",
+    "label_few": "Obsahuje spuštěné výstrahy ({{count}})",
+    "label_many": "Obsahuje spuštěné výstrahy ({{count}})",
+    "label_other": "Obsahuje spuštěné výstrahy ({{count}})"
   },
   "give-feedback": {
     "button": "Poskytnout zpětnou vazbu"
@@ -236,19 +236,19 @@
     "search-aria-label": "Rychlé vyhledávání metrik"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Analýza histogramu"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Žádné uložené dotazy k načtení",
-        "button-tooltip": "",
+        "button-tooltip": "Načíst uložený dotaz",
         "empty": "Žádné uložené dotazy k zobrazení.",
         "load-error": "Tento dotaz obsahuje výrazy, které nelze zastoupit v Podrobném rozpisu metrik Grafana. Podporovány jsou pouze jednoduché výběry metrik {label}.",
         "load-type-error": "Vyberte dotaz Prometheus.",
         "modal-title": "Načíst dříve uložený dotaz",
         "remove": "Odebrat",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Načíst uložený dotaz",
         "select": "Vybrat"
       },
       "save-query": {
@@ -256,7 +256,7 @@
           "alert": "Existuje dříve uložený dotaz se stejným výrazem: {{title}}"
         },
         "button-tooltip": "Uložit dotaz",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Uložit do uložených dotazů",
         "cancel": "Zrušit",
         "description": "Popis",
         "error": "Při ukládání tohoto dotazu došlo k neočekávané chybě.",
@@ -294,7 +294,7 @@
       "alphabetical-reversed": "Abecedně [Z–A]",
       "dashboard-usage": "Využití nástěnky",
       "default": "Výchozí",
-      "firing-alerts": ""
+      "firing-alerts": "Aktivní výstrahy"
     }
   },
   "metrics-variable": {
@@ -302,12 +302,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Nepodařilo se seřadit podle spuštěných výstrah"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "Přečtěte si <2>naši dokumentaci</2> a zjistěte víc nebo<br/><6>to vyzkoušejte online</6> v Grafana Play.",
+    "no-datasource": "Všimli jsme si, že není nakonfigurován žádný zdroj dat Prometheus.<br/>Přidejte <4>zdroj dat Prometheus</4> pro zobrazení metrik.",
     "title": "Vítejte v Podrobném rozpisu metrik Grafana"
   },
   "open-assistant": {
@@ -339,7 +339,7 @@
       "commit-sha": "Provést SHA: {{sha}}",
       "contribute": "Přispět",
       "documentation": "Dokumentace",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Nahlásit problém"
     }
   },
@@ -349,9 +349,9 @@
     "view-by-label": "Zobrazit podle"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Možnosti dotazu",
+    "title": "Možnosti dotazu",
+    "toggle-insights": "Přepnout vysvětlivky k poznatkům"
   },
   "query-results": {
     "aria-label": "Výsledky okamžitého dotazu",
@@ -413,7 +413,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Datum vytvoření:",
-      "empty-state": "",
+      "empty-state": "Nejsou k dispozici žádné záložky pro<br/>aktuální zdroj dat.",
       "remove-tooltip": "Odebrat záložku"
     },
     "close-aria-label": "Zavřít",
@@ -455,19 +455,19 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_one": "",
-    "tooltip_few": "",
-    "tooltip_many": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} definice SLO odkazuje na tuto metriku",
+    "tooltip_few": "{{count}} definice SLO odkazují na tuto metriku",
+    "tooltip_many": "{{count}} definic SLO odkazuje na tuto metriku",
+    "tooltip_other": "{{count}} definic SLO odkazuje na tuto metriku"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_few": "",
-    "label_many": "",
-    "label_other": ""
+    "aria-label-active": "Odebrat filtr sledovaný v rámci SLO",
+    "aria-label-inactive": "Filtrovat podle metrik sledovaných v rámci SLO",
+    "tooltip-empty": "V aktuální filtrované sadě nejsou žádné metriky sledované v rámci SLO",
+    "label_one": "Sledováno v rámci SLO ({{count}})",
+    "label_few": "Sledováno v rámci SLO ({{count}})",
+    "label_many": "Sledováno v rámci SLO ({{count}})",
+    "label_other": "Sledováno v rámci SLO ({{count}})"
   },
   "sort-by": {
     "label": "Seřadit podle",

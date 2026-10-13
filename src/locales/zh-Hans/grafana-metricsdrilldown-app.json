@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "明细",
-      "query-results": "",
+      "query-results": "查询结果",
       "query-results-description": "表格格式的即时查询数据",
       "related-logs": "相关日志",
       "related-logs-description": "基于当前标签筛选条件和时间范围的相关日志",
@@ -11,46 +11,46 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "OTel 指标属性",
+    "badge-resource": "OTel 资源属性",
+    "close-aria-label": "关闭",
+    "close-tooltip": "关闭",
+    "collapse": "收起",
+    "collapse-extra-fields": "收起额外字段",
+    "description": "通过探索您的数据如何在关键属性之间细分，发现模式并缩小根本原因的范围。点击任意值以筛选结果。",
+    "description-aria-label": "这些百分比是什么意思？",
+    "description-histogram": "此处显示的是每个值在标签的观测值中所占的比例 {{range}}。没有活动的值排在最后。",
+    "detection-error": "加载此数据集的属性失败。",
+    "discovering-fields": "正在发现属性…",
+    "error": "加载失败",
+    "expand": "展开",
+    "field-input-placeholder": "搜索以添加更多属性",
+    "field-link-label": "查看 {{name}}",
+    "filter-for-value": "筛选值",
+    "filter-out-value": "筛除值",
+    "histogram-range-between": "介于 {{lower}} 和 {{upper}} 之间",
+    "histogram-range-over": "大于 {{value}}",
+    "histogram-range-under": "小于 {{value}}",
+    "invalid-range": "上限必须大于下限",
+    "lower-limit": "下限",
+    "lower-limit-placeholder": "无限制",
+    "lower-limit-unit": "下限 ({{unit}})",
+    "no-extra-fields-shown": "未显示额外字段",
+    "no-fields-detected": "未检测到此数据集的字段。",
+    "no-more-fields": "没有更多字段",
+    "no-values-found": "未找到值",
+    "title": "属性浏览器",
+    "too-many-values": "值过多，无法显示",
+    "unit-unknown": "我们无法根据此指标的名称确定其单位。在相信百分比之前，请仔细核对阈值。",
+    "upper-limit": "上限",
+    "upper-limit-placeholder": "无限制",
+    "upper-limit-unit": "上限 ({{unit}})",
+    "value-tooltip-histogram-no-activity": "此窗口中没有活动。",
+    "show-more-fields_other": "显示另外 {{count}} 个字段",
+    "value-tooltip-histogram_other": "此值占此标签处于 {{range}} 内的观测值的 {{percentage}}%（其自身约 {{total}} 个观测值中的 {{count}} 个）。"
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "确定"
   },
   "breakdown": {
     "add-to-filters": "添加到筛选条件",
@@ -59,8 +59,8 @@
       "label": "分组方式"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "总和",
+      "label": "直方图功能"
     },
     "label-values-list": {
       "error-title": "加载指标时出错！",
@@ -89,9 +89,9 @@
     "selected-count_other": "已选择 {{count}} 个"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "有更高版本的 Metrics Drilldown 可用 — 正在重新加载…",
+    "manual-message": "有更高版本的 Metrics Drilldown 可用，但无法自动加载。",
+    "reload-button": "立即重新加载"
   },
   "configure-panel": {
     "apply": "应用",
@@ -121,14 +121,14 @@
     "title": "致命错误！"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "直方图分布",
     "tooltip": {
-      "description": ""
+      "description": "浏览此指标中标签和属性值的直方图观测值的分布情况。"
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "{{componentName}} 加载失败。请重试或联系您的组织管理员。",
+    "title": "出现错误"
   },
   "extreme-value-filter": {
     "message": "使用了更复杂的查询重新获取面板数据，以处理序列中的极小值"
@@ -142,23 +142,23 @@
     "limit-warning-title": "数据面板使用量排序最多可涵盖 500 个数据面板。"
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "从 Prometheus 规则端点获取触发的警报规则失败"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "获取 SLO 定义失败",
+    "parse-error": "从 SLO 定义中提取指标名称失败"
   },
   "filtered-metrics-variable": {
     "label": "已筛选的指标"
   },
   "firing-alert-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "{{count}} 个触发警报规则引用此指标"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "移除触发中的警报筛选条件",
+    "aria-label-inactive": "按触发中的警报筛选",
+    "tooltip-empty": "当前筛选的集合中没有带触发中警报的指标",
+    "label_other": "有触发中的警报（{{count}} 个）"
   },
   "give-feedback": {
     "button": "提供反馈"
@@ -221,19 +221,19 @@
     "search-aria-label": "快速搜索指标"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "直方图分析"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "没有可加载的已保存查询",
-        "button-tooltip": "",
+        "button-tooltip": "加载已保存的查询",
         "empty": "没有要显示的已保存查询。",
         "load-error": "此查询包含无法在指标深入分析中表示的表达式。仅支持简单的指标{label}选择器。",
         "load-type-error": "请选择一个 Prometheus 查询。",
         "modal-title": "加载之前保存的查询",
         "remove": "移除",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "加载已保存的查询",
         "select": "选择"
       },
       "save-query": {
@@ -241,7 +241,7 @@
           "alert": "之前保存的一个查询具有相同表达式：{{title}}"
         },
         "button-tooltip": "保存查询",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "保存在“已保存的查询”中",
         "cancel": "取消",
         "description": "描述",
         "error": "保存此查询时出现意外错误。",
@@ -279,7 +279,7 @@
       "alphabetical-reversed": "按字母顺序 [Z-A]",
       "dashboard-usage": "数据面板使用量",
       "default": "默认",
-      "firing-alerts": ""
+      "firing-alerts": "触发中的警报"
     }
   },
   "metrics-variable": {
@@ -287,12 +287,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "按触发中的警报排序失败"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "查看<2>我们的文档</2>以了解更多信息，或在 Grafana Play 中<br/><6>在线试用</6>！",
+    "no-datasource": "我们注意到没有配置 Prometheus 数据源。<br/>添加 <4>Prometheus 数据源</4>以查看指标。",
     "title": "欢迎使用 Grafana 指标深入分析"
   },
   "open-assistant": {
@@ -324,7 +324,7 @@
       "commit-sha": "提交 SHA：{{sha}}",
       "contribute": "贡献",
       "documentation": "文档",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "报告问题"
     }
   },
@@ -334,9 +334,9 @@
     "view-by-label": "查看方式"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "查询选项",
+    "title": "查询选项",
+    "toggle-insights": "切换洞察注释"
   },
   "query-results": {
     "aria-label": "即时查询结果",
@@ -389,7 +389,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "创建日期：",
-      "empty-state": "",
+      "empty-state": "当前数据源尚无书签。<br/>",
       "remove-tooltip": "移除书签"
     },
     "close-aria-label": "关闭",
@@ -431,13 +431,13 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "{{count}} 个 SLO 定义引用此指标"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "移除 SLO 跟踪的筛选条件",
+    "aria-label-inactive": "按 SLO 跟踪的指标筛选",
+    "tooltip-empty": "当前筛选的集合中没有受 SLO 跟踪的指标",
+    "label_other": "SLO 跟踪（{{count}} 个）"
   },
   "sort-by": {
     "label": "排序方式",

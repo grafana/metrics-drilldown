@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Разбивка",
-      "query-results": "",
+      "query-results": "Результаты запроса",
       "query-results-description": "Данные мгновенного запроса в формате таблицы",
       "related-logs": "Связанные журналы",
       "related-logs-description": "Журналы, соответствующие текущим фильтрам меток и временному диапазону",
@@ -11,52 +11,52 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_one": "",
-    "show-more-fields_few": "",
-    "show-more-fields_many": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_one": "",
-    "value-tooltip-histogram_few": "",
-    "value-tooltip-histogram_many": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "Атрибут метрики OTel",
+    "badge-resource": "Атрибут ресурса OTel",
+    "close-aria-label": "Закрыть",
+    "close-tooltip": "Закрыть",
+    "collapse": "Свернуть",
+    "collapse-extra-fields": "Свернуть дополнительные поля",
+    "description": "Выявляйте закономерности и сужайте круг первопричин, анализируя распределение данных по ключевым атрибутам. Нажмите любое значение, чтобы отфильтровать результаты.",
+    "description-aria-label": "Что означают эти проценты?",
+    "description-histogram": "Показывает долю каждого значения среди наблюдений метки в диапазоне {{range}}. Значения без активности отображаются в конце.",
+    "detection-error": "Не удалось загрузить атрибуты для этого набора данных.",
+    "discovering-fields": "Обнаружение атрибутов…",
+    "error": "Сбой загрузки",
+    "expand": "Развернуть",
+    "field-input-placeholder": "Выполните поиск, чтобы добавить больше атрибутов",
+    "field-link-label": "Просмотр: {{name}}",
+    "filter-for-value": "Фильтровать по значению",
+    "filter-out-value": "Исключить значение",
+    "histogram-range-between": "от {{lower}} до {{upper}}",
+    "histogram-range-over": "больше {{value}}",
+    "histogram-range-under": "меньше {{value}}",
+    "invalid-range": "Верхний предел должен быть больше нижнего",
+    "lower-limit": "Нижний предел",
+    "lower-limit-placeholder": "без ограничений",
+    "lower-limit-unit": "Нижний предел ({{unit}})",
+    "no-extra-fields-shown": "Нет дополнительных полей для отображения",
+    "no-fields-detected": "Для этого набора данных поля не найдены.",
+    "no-more-fields": "Больше полей нет",
+    "no-values-found": "Значения не найдены",
+    "title": "Attribute Explorer",
+    "too-many-values": "Слишком много значений для отображения",
+    "unit-unknown": "Не удалось определить единицу измерения метрики по ее имени. Перепроверьте пороговое значение, прежде чем полагаться на процентные показатели.",
+    "upper-limit": "Верхний предел",
+    "upper-limit-placeholder": "без ограничений",
+    "upper-limit-unit": "Верхний предел ({{unit}})",
+    "value-tooltip-histogram-no-activity": "Нет активности в этом временном окне.",
+    "show-more-fields_one": "Показать еще {{count}} поле",
+    "show-more-fields_few": "Показать еще {{count}} поля",
+    "show-more-fields_many": "Показать еще {{count}} полей",
+    "show-more-fields_other": "Показать еще {{count}} поля",
+    "value-tooltip-histogram_one": "На это значение приходится {{percentage}}% наблюдений метки в диапазоне {{range}} ({{count}} из примерно {{total}}).",
+    "value-tooltip-histogram_few": "На это значение приходится {{percentage}}% наблюдений метки в диапазоне {{range}} ({{count}} из примерно {{total}}).",
+    "value-tooltip-histogram_many": "На это значение приходится {{percentage}}% наблюдений метки в диапазоне {{range}} ({{count}} из примерно {{total}}).",
+    "value-tooltip-histogram_other": "На это значение приходится {{percentage}}% наблюдений метки в диапазоне {{range}} ({{count}} из примерно {{total}})."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "Добавить к фильтрам",
@@ -65,8 +65,8 @@
       "label": "Группировать по"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Итого",
+      "label": "Функция гистограммы"
     },
     "label-values-list": {
       "error-title": "Ошибка при загрузке метрик.",
@@ -98,9 +98,9 @@
     "selected-count_other": "Выбрано: {{count}}"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "Доступна более новая версия Metrics Drilldown — выполняется перезагрузка…",
+    "manual-message": "Доступна более новая версия Metrics Drilldown, но ее не удалось загрузить автоматически.",
+    "reload-button": "Перезагрузить"
   },
   "configure-panel": {
     "apply": "Применить",
@@ -130,14 +130,14 @@
     "title": "Критическая ошибка"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Распределение на гистограмме",
     "tooltip": {
-      "description": ""
+      "description": "Посмотрите распределение наблюдений на гистограмме для меток и значений атрибутов этой метрики."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "Сбой загрузки компонента {{componentName}}. Повторите попытку или обратитесь к администратору организации.",
+    "title": "Неизвестная ошибка"
   },
   "extreme-value-filter": {
     "message": "Для обработки крайне малых значений в рядах выполнена повторная выборка данных дашборда с использованием более сложного запроса"
@@ -151,29 +151,29 @@
     "limit-warning-title": "Сортировка по использованию дашбордов ограничена 500 дашбордами."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Не удалось получить активные правила оповещения из конечной точки Prometheus ruler"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "Не удалось получить определения SLO",
+    "parse-error": "Не удалось извлечь имя метрики из определения SLO"
   },
   "filtered-metrics-variable": {
     "label": "Отфильтрованные метрики"
   },
   "firing-alert-badge": {
-    "tooltip_one": "",
-    "tooltip_few": "",
-    "tooltip_many": "",
-    "tooltip_other": ""
+    "tooltip_one": "Эта метрика используется в {{count}} активном правиле оповещения",
+    "tooltip_few": "Эта метрика используется в {{count}} активных правилах оповещения",
+    "tooltip_many": "Эта метрика используется в {{count}} активных правилах оповещения",
+    "tooltip_other": "Эта метрика используется в {{count}} активного правила оповещения"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_few": "",
-    "label_many": "",
-    "label_other": ""
+    "aria-label-active": "Удалить фильтр по активным оповещениям",
+    "aria-label-inactive": "Фильтр по активным оповещениям",
+    "tooltip-empty": "В текущем отфильтрованном наборе нет метрик с активными оповещениями",
+    "label_one": "Содержит активные оповещения ({{count}})",
+    "label_few": "Содержит активные оповещения ({{count}})",
+    "label_many": "Содержит активные оповещения ({{count}})",
+    "label_other": "Содержит активные оповещения ({{count}})"
   },
   "give-feedback": {
     "button": "Отправить отзыв"
@@ -236,19 +236,19 @@
     "search-aria-label": "Быстрый поиск метрик"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Анализ гистограммы"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Нет сохраненных запросов для загрузки",
-        "button-tooltip": "",
+        "button-tooltip": "Загрузить сохраненный запрос",
         "empty": "Нет сохраненных запросов для отображения.",
         "load-error": "Этот запрос содержит выражения, которые невозможно представить в Metrics Drilldown. Поддерживаются только простые селекторы метрик {label}.",
         "load-type-error": "Выберите запрос Prometheus.",
         "modal-title": "Загрузить ранее сохраненный запрос",
         "remove": "Удалить",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Загрузить сохраненный запрос",
         "select": "Выбрать"
       },
       "save-query": {
@@ -256,7 +256,7 @@
           "alert": "Ранее был сохранен запрос с таким же выражением: {{title}}"
         },
         "button-tooltip": "Сохранить запрос",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Сохранить в сохраненных запросах",
         "cancel": "Отмена",
         "description": "Описание",
         "error": "Непредвиденная ошибка при сохранении этого запроса.",
@@ -294,7 +294,7 @@
       "alphabetical-reversed": "По алфавиту [Z-A]",
       "dashboard-usage": "Использование дашбордов",
       "default": "По умолчанию",
-      "firing-alerts": ""
+      "firing-alerts": "Активные оповещения"
     }
   },
   "metrics-variable": {
@@ -302,12 +302,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Не удалось отсортировать по активным оповещениям"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "Чтобы узнать больше, ознакомьтесь с <2>документацией</2> или<br/><6>протестируйте онлайн</6> с помощью Grafana Play.",
+    "no-datasource": "Источник данных Prometheus не настроен.<br/>Для просмотра метрик добавьте <4>источник данных Prometheus</4>.",
     "title": "Добро пожаловать в Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -339,7 +339,7 @@
       "commit-sha": "Выполнить SHA-хеширование: {{sha}}",
       "contribute": "Внести вклад",
       "documentation": "Документация",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Сообщить о проблеме"
     }
   },
@@ -349,9 +349,9 @@
     "view-by-label": "Просмотр по"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Параметры запроса",
+    "title": "Параметры запроса",
+    "toggle-insights": "Переключить аннотации аналитики"
   },
   "query-results": {
     "aria-label": "Результаты мгновенного запроса",
@@ -413,7 +413,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Дата создания:",
-      "empty-state": "",
+      "empty-state": "Пока нет закладок для<br/>текущего источника данных.",
       "remove-tooltip": "Удалите закладку"
     },
     "close-aria-label": "Закрыть",
@@ -455,19 +455,19 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_one": "",
-    "tooltip_few": "",
-    "tooltip_many": "",
-    "tooltip_other": ""
+    "tooltip_one": "Эта метрика используется в {{count}} определении SLO",
+    "tooltip_few": "Эта метрика используется в {{count}} определениях SLO",
+    "tooltip_many": "Эта метрика используется в {{count}} определениях SLO",
+    "tooltip_other": "Эта метрика используется в {{count}} определения SLO"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_few": "",
-    "label_many": "",
-    "label_other": ""
+    "aria-label-active": "Удалить фильтр по метрикам, отслеживаемым в рамках SLO",
+    "aria-label-inactive": "Фильтр по метрикам, отслеживаемым в рамках SLO",
+    "tooltip-empty": "В текущем отфильтрованном наборе нет метрик, отслеживаемых в рамках SLO",
+    "label_one": "Метрики, отслеживаемые в рамках SLO ({{count}})",
+    "label_few": "Метрики, отслеживаемые в рамках SLO ({{count}})",
+    "label_many": "Метрики, отслеживаемые в рамках SLO ({{count}})",
+    "label_other": "Метрики, отслеживаемые в рамках SLO ({{count}})"
   },
   "sort-by": {
     "label": "Сортировать по",

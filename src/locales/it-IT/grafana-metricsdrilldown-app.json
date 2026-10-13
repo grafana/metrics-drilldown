@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Ripartizione",
-      "query-results": "",
+      "query-results": "Risultati della query",
       "query-results-description": "Dati della query istantanea in formato tabella",
       "related-logs": "Registri correlati",
       "related-logs-description": "Registri rilevanti in base ai filtri delle etichette e all'intervallo di tempo correnti",
@@ -11,48 +11,48 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_one": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_one": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "Attributo metrica OTel",
+    "badge-resource": "Attributo risorsa OTel",
+    "close-aria-label": "Chiudi",
+    "close-tooltip": "Chiudi",
+    "collapse": "Comprimi",
+    "collapse-extra-fields": "Comprimi campi aggiuntivi",
+    "description": "Individua i modelli e restringi le cause principali analizzando la suddivisione dei tuoi dati tra gli attributi chiave. Fai clic su un valore qualsiasi per filtrare i risultati.",
+    "description-aria-label": "Cosa significano queste percentuali?",
+    "description-histogram": "Qui viene mostrata la percentuale di ogni valore rispetto al {{range}} delle osservazioni dell'etichetta. I valori senza attività vengono ordinati per ultimi.",
+    "detection-error": "Impossibile caricare gli attributi per questo set di dati.",
+    "discovering-fields": "Rilevamento degli attributi in corso…",
+    "error": "Caricamento non riuscito",
+    "expand": "Espandi",
+    "field-input-placeholder": "Cerca per aggiungere altri attributi",
+    "field-link-label": "Visualizza {{name}}",
+    "filter-for-value": "Filtra per valore",
+    "filter-out-value": "Escludi valore",
+    "histogram-range-between": "tra {{lower}} e {{upper}}",
+    "histogram-range-over": "superiore a {{value}}",
+    "histogram-range-under": "inferiore a {{value}}",
+    "invalid-range": "Il limite superiore deve essere maggiore del limite inferiore",
+    "lower-limit": "Limite inferiore",
+    "lower-limit-placeholder": "nessun limite",
+    "lower-limit-unit": "Limite inferiore ({{unit}})",
+    "no-extra-fields-shown": "Nessun campo aggiuntivo visualizzato",
+    "no-fields-detected": "Nessun campo rilevato per questo set di dati.",
+    "no-more-fields": "Nessun altro campo",
+    "no-values-found": "Nessun valore trovato",
+    "title": "Esploratore attributi",
+    "too-many-values": "Troppi valori da visualizzare",
+    "unit-unknown": "Non è stato possibile determinare l'unità di questa metrica dal suo nome. Ricontrolla la soglia prima di considerare la percentuale affidabile.",
+    "upper-limit": "Limite superiore",
+    "upper-limit-placeholder": "nessun limite",
+    "upper-limit-unit": "Limite superiore ({{unit}})",
+    "value-tooltip-histogram-no-activity": "Nessuna attività in questa finestra.",
+    "show-more-fields_one": "Mostra {{count}} altro campo",
+    "show-more-fields_other": "Mostra {{count}} altri campi",
+    "value-tooltip-histogram_one": "Questo valore rappresenta il {{percentage}}% delle osservazioni di questa etichetta che sono {{range}} ({{count}} del proprio ~{{total}}).",
+    "value-tooltip-histogram_other": "Questo valore rappresenta il {{percentage}}% delle osservazioni di questa etichetta che sono {{range}} ({{count}} del proprio ~{{total}})."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "Aggiungi ai filtri",
@@ -61,8 +61,8 @@
       "label": "Raggruppa per"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Somma",
+      "label": "Funzione istogramma"
     },
     "label-values-list": {
       "error-title": "Errore durante il caricamento delle metriche!",
@@ -92,9 +92,9 @@
     "selected-count_other": "{{count}} selezionate"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "È disponibile una versione più recente di Metrics Drilldown. Ricaricamento in corso…",
+    "manual-message": "È disponibile una versione più recente di Metrics Drilldown, ma non è stato possibile caricarla automaticamente.",
+    "reload-button": "Ricarica ora"
   },
   "configure-panel": {
     "apply": "Applica",
@@ -124,14 +124,14 @@
     "title": "Errore irreversibile!"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Distribuzione dell'istogramma",
     "tooltip": {
-      "description": ""
+      "description": "Esplora la distribuzione delle osservazioni dell'istogramma relative alle etichette e ai valori degli attributi per questa metrica."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "Caricamento di {{componentName}} non riuscito. Riprova o contatta l'amministratore della tua organizzazione.",
+    "title": "Si è verificato un errore"
   },
   "extreme-value-filter": {
     "message": "I dati del pannello sono stati recuperati con una query più complessa per gestire valori estremamente piccoli nella serie"
@@ -145,25 +145,25 @@
     "limit-warning-title": "L'ordinamento per utilizzo delle dashboard è limitato a 500 dashboard."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Impossibile recuperare le regole di avviso di attivazione dall'endpoint del ruler di Prometheus"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "Impossibile recuperare le definizioni degli SLO",
+    "parse-error": "Impossibile estrarre un nome di metrica da una definizione SLO"
   },
   "filtered-metrics-variable": {
     "label": "Metriche filtrate"
   },
   "firing-alert-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} regola di avviso di attivazione fa riferimento a questa metrica",
+    "tooltip_other": "{{count}} regole di avviso di attivazione fanno riferimento a questa metrica"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "Rimuovi filtro avvisi in attivazione",
+    "aria-label-inactive": "Filtra per avvisi di attivazione",
+    "tooltip-empty": "Nessuna metrica con avvisi di attivazione nel set filtrato corrente",
+    "label_one": "Avviso di attivazione ({{count}})",
+    "label_other": "Avvisi di attivazione ({{count}})"
   },
   "give-feedback": {
     "button": "Lascia un feedback"
@@ -226,19 +226,19 @@
     "search-aria-label": "Metriche della ricerca rapida"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Analisi dell'istogramma"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Nessuna query salvata da caricare",
-        "button-tooltip": "",
+        "button-tooltip": "Carica query salvata",
         "empty": "Nessuna query salvata da visualizzare.",
         "load-error": "Questa query contiene espressioni che non possono essere rappresentate in Metrics Drilldown. Sono supportati solo selettori di metriche{label} semplici.",
         "load-type-error": "Seleziona una query Prometheus.",
         "modal-title": "Carica una query salvata in precedenza",
         "remove": "Rimuovi",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Carica query salvata",
         "select": "Seleziona"
       },
       "save-query": {
@@ -246,7 +246,7 @@
           "alert": "È presente una query salvata in precedenza con la stessa espressione: {{title}}"
         },
         "button-tooltip": "Salva query",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Salva in Query salvate",
         "cancel": "Annulla",
         "description": "Descrizione",
         "error": "Errore imprevisto durante il salvataggio di questa query.",
@@ -284,7 +284,7 @@
       "alphabetical-reversed": "Alfabetico [Z-A]",
       "dashboard-usage": "Utilizzo della dashboard",
       "default": "Predefinito",
-      "firing-alerts": ""
+      "firing-alerts": "Avvisi di attivazione"
     }
   },
   "metrics-variable": {
@@ -292,12 +292,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Impossibile ordinare per avvisi di attivazione"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "Consulta <2>la nostra documentazione</2> per saperne di più oppure<br/><6>fai una prova online</6> in Grafana Play!",
+    "no-datasource": "Abbiamo visto che non è stata configurata alcuna origine dati Prometheus.<br/>Aggiungi una <4>origine dati Prometheus</4> per visualizzare le metriche.",
     "title": "Ti diamo il benvenuto in Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -329,7 +329,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Contribuisci",
       "documentation": "Documentazione",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Segnala un problema"
     }
   },
@@ -339,9 +339,9 @@
     "view-by-label": "Visualizza per"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Opzioni query",
+    "title": "Opzioni query",
+    "toggle-insights": "Attiva/disattiva annotazioni sugli approfondimenti"
   },
   "query-results": {
     "aria-label": "Risultati istantanei della query",
@@ -397,7 +397,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Data di creazione:",
-      "empty-state": "",
+      "empty-state": "Non ci sono ancora segnalibri per<br/>l'origine dati corrente.",
       "remove-tooltip": "Rimuovi segnalibro"
     },
     "close-aria-label": "Chiudi",
@@ -439,15 +439,15 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} definizione SLO fa riferimento a questa metrica",
+    "tooltip_other": "{{count}} definizioni SLO fanno riferimento a questa metrica"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "Rimuovi filtro monitorato da SLO",
+    "aria-label-inactive": "Filtra per metriche monitorate da SLO",
+    "tooltip-empty": "Nessuna metrica monitorata da SLO nel set filtrato corrente",
+    "label_one": "Monitorato da SLO ({{count}})",
+    "label_other": "Monitorati da SLO ({{count}})"
   },
   "sort-by": {
     "label": "Ordina per",

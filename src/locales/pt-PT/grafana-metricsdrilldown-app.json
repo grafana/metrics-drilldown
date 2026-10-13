@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Discriminação de custos",
-      "query-results": "",
+      "query-results": "Resultados da consulta",
       "query-results-description": "Dados da consulta instantânea em formato de tabela",
       "related-logs": "Registos relacionados",
       "related-logs-description": "Registos relevantes com base nos filtros de etiqueta e intervalo de tempo atuais",
@@ -11,48 +11,48 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_one": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_one": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "Atributo de métrica OTel",
+    "badge-resource": "Atributo de recurso OTel",
+    "close-aria-label": "Fechar",
+    "close-tooltip": "Fechar",
+    "collapse": "Recolher",
+    "collapse-extra-fields": "Recolher campos adicionais",
+    "description": "Identifique padrões e restrinja as causas principais explorando como os seus dados se decompõem nos principais atributos. Clique em qualquer valor para filtrar os seus resultados.",
+    "description-aria-label": "O que significam estas percentagens?",
+    "description-histogram": "Isto mostra a percentagem de cada valor nas observações da etiqueta {{range}}. Os valores sem atividade são classificados por último.",
+    "detection-error": "Falha ao carregar os atributos para este conjunto de dados.",
+    "discovering-fields": "A descobrir atributos...",
+    "error": "Não foi possível carregar",
+    "expand": "Expandir",
+    "field-input-placeholder": "Pesquisar para adicionar mais atributos",
+    "field-link-label": "Ver {{name}}",
+    "filter-for-value": "Filtrar por valor",
+    "filter-out-value": "Retirar o filtro de valor",
+    "histogram-range-between": "entre {{lower}} e {{upper}}",
+    "histogram-range-over": "acima de {{value}}",
+    "histogram-range-under": "abaixo de {{value}}",
+    "invalid-range": "O limite superior deve ser maior queo limite inferior",
+    "lower-limit": "Limite mais baixo",
+    "lower-limit-placeholder": "sem limite",
+    "lower-limit-unit": "Limite inferior ({{unit}})",
+    "no-extra-fields-shown": "Nenhum campo adicional mostrado",
+    "no-fields-detected": "Nenhum campo detetado para este conjunto de dados.",
+    "no-more-fields": "Não há mais campos",
+    "no-values-found": "Não foram encontrados valores",
+    "title": "Explorador de atributos",
+    "too-many-values": "Demasiados valores para mostrar",
+    "unit-unknown": "Não foi possível determinar a unidade desta métrica a partir do seu nome. Verifique novamente o limite antes de confiar na percentagem.",
+    "upper-limit": "Limite superior",
+    "upper-limit-placeholder": "sem limite",
+    "upper-limit-unit": "Limite superior ({{unit}})",
+    "value-tooltip-histogram-no-activity": "Nenhuma atividade nesta janela.",
+    "show-more-fields_one": "Mostrar mais {{count}} campos",
+    "show-more-fields_other": "Mostrar mais {{count}} campos",
+    "value-tooltip-histogram_one": "Este valor representa {{percentage}}% das observações desta etiqueta que são {{range}} ({{count}} do seu próprio ~{{total}}).",
+    "value-tooltip-histogram_other": "Este valor representa {{percentage}}% das observações desta etiqueta que são {{range}} ({{count}} do seu próprio ~{{total}})."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "Adicionar aos filtros",
@@ -61,8 +61,8 @@
       "label": "Agrupar por"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Soma",
+      "label": "Função de histograma"
     },
     "label-values-list": {
       "error-title": "Erro ao carregar métricas!",
@@ -92,9 +92,9 @@
     "selected-count_other": "{{count}} selecionados"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "Está disponível uma versão mais recente de Metrics Drilldown — a recarregar…",
+    "manual-message": "Está disponível uma versão mais recente de Metrics Drilldown, mas não foi possível carregá-la automaticamente.",
+    "reload-button": "Recarregar agora"
   },
   "configure-panel": {
     "apply": "Aplicar",
@@ -124,14 +124,14 @@
     "title": "Erro fatal!"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Distribuição do histograma",
     "tooltip": {
-      "description": ""
+      "description": "Explore a distribuição das observações do histograma para etiquetas e valores de atributos para esta métrica."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "Falha ao carregar {{componentName}}. Tente novamente ou contacte o administrador da sua organização.",
+    "title": "Ocorreu um problema"
   },
   "extreme-value-filter": {
     "message": "Os dados do painel foram novamente obtidos com uma consulta mais complexa para lidar com valores extremamente pequenos na série"
@@ -145,25 +145,25 @@
     "limit-warning-title": "A ordenação da utilização dos painéis de controlo está limitada a 500 painéis."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Falha ao obter regras de alerta de ativação de endpoint do gestor do Prometheus"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "Falha ao obter as definições de SLO",
+    "parse-error": "Falha ao extrair um nome de métrica de uma definição de SLO"
   },
   "filtered-metrics-variable": {
     "label": "Métricas filtradas"
   },
   "firing-alert-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} regra(s) de alertas de ativação faz(em) referência a esta métrica",
+    "tooltip_other": "{{count}} regra(s) de alertas de ativação faz(em) referência a esta métrica"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "Remover filtro de alertas de ativação",
+    "aria-label-inactive": "Filtrar por alertas de ativação",
+    "tooltip-empty": "Nenhuma métrica com alertas de ativação no conjunto filtrado atual",
+    "label_one": "Tem alertas de ativação ({{count}})",
+    "label_other": "Tem alertas de ativação ({{count}})"
   },
   "give-feedback": {
     "button": "Dar feedback"
@@ -226,19 +226,19 @@
     "search-aria-label": "Pesquisa rápida de métricas"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Análise de histograma"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Não há consultas guardadas para carregar",
-        "button-tooltip": "",
+        "button-tooltip": "Carregar a consulta guardada",
         "empty": "Não há consultas guardadas para apresentar.",
         "load-error": "Esta consulta contém expressões que não podem ser representadas em Metrics Drilldown. Apenas são suportados seletores de {label} de métricas simples.",
         "load-type-error": "Selecione uma consulta Prometheus.",
         "modal-title": "Carregar uma consulta guardada anteriormente",
         "remove": "Remover",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Carregar a consulta guardada",
         "select": "Selecionar"
       },
       "save-query": {
@@ -246,7 +246,7 @@
           "alert": "Existe uma consulta guardada anteriormente com a mesma expressão: {{title}}"
         },
         "button-tooltip": "Guardar consulta",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Guardar em Consultas guardadas",
         "cancel": "Cancelar",
         "description": "Descrição",
         "error": "Ocorreu um erro inesperado ao guardar esta consulta.",
@@ -284,7 +284,7 @@
       "alphabetical-reversed": "Ordem alfabética [Z-A]",
       "dashboard-usage": "Utilização do painel de controlo",
       "default": "Predefinição",
-      "firing-alerts": ""
+      "firing-alerts": "Alertas ativados"
     }
   },
   "metrics-variable": {
@@ -292,12 +292,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Falha ao ordenar por alertas de ativação"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "Consulte <2>a nossa documentação</2> para saber mais ou<br/><6>experimente online</6> no Grafana Play!",
+    "no-datasource": "Reparámos que não existe uma origem de dados Prometheus configurada.<br/>Adicione uma <4>origem de dados Prometheus</4> para ver as métricas.",
     "title": "Boas-vindas à Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -329,7 +329,7 @@
       "commit-sha": "Confirmar SHA: {{sha}}",
       "contribute": "Contribuir",
       "documentation": "Documentação",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Comunicar um problema"
     }
   },
@@ -339,9 +339,9 @@
     "view-by-label": "Visualizar por"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Opções de consulta",
+    "title": "Opções de consulta",
+    "toggle-insights": "Alternar anotações de informações"
   },
   "query-results": {
     "aria-label": "Resultados instantâneos da consulta",
@@ -397,7 +397,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Data de criação:",
-      "empty-state": "",
+      "empty-state": "Ainda não há marcadores para a<br/>origem de dados atual.",
       "remove-tooltip": "Remover marcador"
     },
     "close-aria-label": "Fechar",
@@ -416,7 +416,7 @@
     },
     "labels-browser": {
       "clear-search-tooltip": "Limpar a pesquisa",
-      "search-aria-label": "",
+      "search-aria-label": "Pesquisar etiquetas",
       "search-placeholder": "Pesquisar..."
     },
     "recent-metrics": {
@@ -439,15 +439,15 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_one": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} definição de SLO faz referência a esta métrica",
+    "tooltip_other": "{{count}} definições de SLO fazem referência a esta métrica"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_other": ""
+    "aria-label-active": "Remover filtro monitorizado por SLO",
+    "aria-label-inactive": "Filtrar por métricas monitorizadas por SLO",
+    "tooltip-empty": "Nenhuma métrica monitorizada por SLO no conjunto filtrado atual",
+    "label_one": "Monitorizadas por SLO ({{count}})",
+    "label_other": "Monitorizadas por SLO ({{count}})"
   },
   "sort-by": {
     "label": "Ordenar por",

@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Perincian",
-      "query-results": "",
+      "query-results": "Hasil kueri",
       "query-results-description": "Data kueri instan dalam format tabel",
       "related-logs": "Log terkait",
       "related-logs-description": "Log yang relevan berdasarkan filter label dan rentang waktu saat ini",
@@ -11,46 +11,46 @@
     }
   },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "Atribut metrik OTel",
+    "badge-resource": "Atribut sumber daya OTel",
+    "close-aria-label": "Tutup",
+    "close-tooltip": "Tutup",
+    "collapse": "Ciutkan",
+    "collapse-extra-fields": "Ciutkan field tambahan",
+    "description": "Temukan pola dan persempit akar masalah dengan menelusuri bagaimana data Anda diuraikan di seluruh atribut utama. Klik nilai mana pun untuk memfilter hasil Anda.",
+    "description-aria-label": "Apa arti persentase ini?",
+    "description-histogram": "Ini menunjukkan proporsi setiap nilai berdasarkan observasi label {{range}}. Nilai tanpa aktivitas diurutkan paling akhir.",
+    "detection-error": "Gagal memuat atribut untuk kumpulan data ini.",
+    "discovering-fields": "Mencari atribut…",
+    "error": "Gagal dimuat",
+    "expand": "Perluas",
+    "field-input-placeholder": "Cari untuk menambahkan lebih banyak atribut",
+    "field-link-label": "Lihat {{name}}",
+    "filter-for-value": "Filter nilai",
+    "filter-out-value": "Filter nilai",
+    "histogram-range-between": "antara {{lower}} dan {{upper}}",
+    "histogram-range-over": "lebih dari {{value}}",
+    "histogram-range-under": "di bawah {{value}}",
+    "invalid-range": "Batas atas harus lebih besar dari batas bawah",
+    "lower-limit": "Batas bawah",
+    "lower-limit-placeholder": "tanpa batas",
+    "lower-limit-unit": "Batas bawah ({{unit}})",
+    "no-extra-fields-shown": "Tidak ada field tambahan yang ditampilkan",
+    "no-fields-detected": "Tidak ada field yang terdeteksi untuk kumpulan data ini.",
+    "no-more-fields": "Tidak ada field lagi",
+    "no-values-found": "Tidak ada nilai yang ditemukan",
+    "title": "Explorer Atribut",
+    "too-many-values": "Terlalu banyak nilai untuk ditampilkan",
+    "unit-unknown": "Kami tidak dapat menentukan satuan metrik ini dari namanya. Periksa kembali ambang batas sebelum memercayai persentasenya.",
+    "upper-limit": "Batas atas",
+    "upper-limit-placeholder": "tanpa batas",
+    "upper-limit-unit": "Batas atas ({{unit}})",
+    "value-tooltip-histogram-no-activity": "Tidak ada aktivitas di jendela ini.",
+    "show-more-fields_other": "Tampilkan {{count}} field lagi",
+    "value-tooltip-histogram_other": "Nilai ini mencakup {{percentage}}% dari observasi label ini yang berada dalam {{range}} ({{count}} dari total ~{{total}})."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "Tambahkan ke filter",
@@ -59,8 +59,8 @@
       "label": "Kelompokkan berdasarkan"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Jumlah",
+      "label": "Fungsi histogram"
     },
     "label-values-list": {
       "error-title": "Terjadi kesalahan saat memuat metrik!",
@@ -89,9 +89,9 @@
     "selected-count_other": "{{count}} dipilih"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "Tersedia versi Metrics Drilldown yang lebih baru—sedang memuat ulang…",
+    "manual-message": "Tersedia versi Metrics Drilldown yang lebih baru, tetapi tidak dapat dimuat secara otomatis.",
+    "reload-button": "Muat ulang sekarang"
   },
   "configure-panel": {
     "apply": "Terapkan",
@@ -121,14 +121,14 @@
     "title": "Kesalahan fatal!"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Distribusi histogram",
     "tooltip": {
-      "description": ""
+      "description": "Telusuri distribusi observasi histogram untuk label dan nilai atribut untuk metrik ini."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "{{componentName}} gagal dimuat. Silakan coba lagi atau hubungi admin organisasi Anda.",
+    "title": "Terjadi kesalahan"
   },
   "extreme-value-filter": {
     "message": "Data panel diambil kembali dengan kueri yang lebih kompleks untuk menangani nilai yang sangat kecil dalam seri"
@@ -142,23 +142,23 @@
     "limit-warning-title": "Pengurutan penggunaan dasbor dibatasi 500 dasbor."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Gagal mengambil aturan peringatan aktif dari endpoint ruler Prometheus"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "Gagal mengambil definisi SLO",
+    "parse-error": "Gagal mengekstrak nama metrik dari definisi SLO"
   },
   "filtered-metrics-variable": {
     "label": "Metrik yang Difilter"
   },
   "firing-alert-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "{{count}} aturan peringatan aktif merujuk pada metrik ini"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "Hapus filter peringatan aktif",
+    "aria-label-inactive": "Filter berdasarkan peringatan aktif",
+    "tooltip-empty": "Tidak ada metrik dengan peringatan aktif dalam kumpulan yang difilter saat ini",
+    "label_other": "Memiliki peringatan aktif ({{count}})"
   },
   "give-feedback": {
     "button": "Berikan umpan balik"
@@ -221,19 +221,19 @@
     "search-aria-label": "Cari cepat metrik"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Analisis histogram"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Tidak ada kueri tersimpan untuk dimuat",
-        "button-tooltip": "",
+        "button-tooltip": "Muat Kueri tersimpan",
         "empty": "Tidak ada kueri tersimpan untuk ditampilkan.",
         "load-error": "Kueri ini berisi ekspresi yang tidak dapat direpresentasikan dalam Metrics Drilldown. Hanya pemilih metric{label} sederhana yang didukung.",
         "load-type-error": "Pilih kueri Prometheus.",
         "modal-title": "Muat kueri yang sudah disimpan sebelumnya",
         "remove": "Hapus",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Muat Kueri tersimpan",
         "select": "Pilih"
       },
       "save-query": {
@@ -241,7 +241,7 @@
           "alert": "Ada kueri yang sudah disimpan sebelumnya dengan ekspresi yang sama: {{title}}"
         },
         "button-tooltip": "Simpan kueri",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Simpan di Kueri tersimpan",
         "cancel": "Batal",
         "description": "Deskripsi",
         "error": "Terjadi kesalahan tidak terduga saat menyimpan kueri ini.",
@@ -279,7 +279,7 @@
       "alphabetical-reversed": "Sesuai abjad [Z-A]",
       "dashboard-usage": "Penggunaan Dasbor",
       "default": "Default",
-      "firing-alerts": ""
+      "firing-alerts": "Peringatan Terpicu"
     }
   },
   "metrics-variable": {
@@ -287,12 +287,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Gagal mengurutkan berdasarkan peringatan aktif"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "Periksa <2>dokumen kami</2> untuk mempelajari selengkapnya atau<br/><6>coba secara online</6> di Grafana Play!",
+    "no-datasource": "Kami mendeteksi tidak ada sumber data Prometheus yang dikonfigurasi.<br/>Tambahkan <4>sumber data Prometheus</4> untuk melihat metrik.",
     "title": "Selamat datang di Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -324,7 +324,7 @@
       "commit-sha": "Commit SHA: {{sha}}",
       "contribute": "Berkontribusi",
       "documentation": "Dokumentasi",
-      "grafana-version": "",
+      "grafana-version": "Grafana  {{edition}} ({{env}})",
       "report-issue": "Laporkan masalah"
     }
   },
@@ -334,9 +334,9 @@
     "view-by-label": "Dilihat oleh"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Opsi kueri",
+    "title": "Opsi kueri",
+    "toggle-insights": "Alihkan tombol anotasi wawasan"
   },
   "query-results": {
     "aria-label": "Hasil kueri instan",
@@ -389,7 +389,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Tanggal pembuatan:",
-      "empty-state": "",
+      "empty-state": "Belum ada bookmark untuk<br/>sumber data saat ini.",
       "remove-tooltip": "Hapus bookmark"
     },
     "close-aria-label": "Tutup",
@@ -431,13 +431,13 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_other": ""
+    "tooltip_other": "{{count}} definisi SLO merujuk pada metrik ini"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_other": ""
+    "aria-label-active": "Hapus filter yang dilacak SLO",
+    "aria-label-inactive": "Filter berdasarkan metrik yang dilacak SLO",
+    "tooltip-empty": "Tidak ada metrik yang dilacak SLO dalam kumpulan yang difilter saat ini",
+    "label_other": "Dilacak SLO ({{count}})"
   },
   "sort-by": {
     "label": "Urutkan berdasarkan",
