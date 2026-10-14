@@ -301,9 +301,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "URL 복사",
       "copy-url-success": "클립보드에 URL 복사됨",
-      "explore": "탐색"
+      "create-alert": "",
+      "explore": "탐색",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "작업",
@@ -460,7 +464,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "북마크",
       "copy-url": "URL 복사",
       "open-explore": "탐색에서 열기",
       "select-new-metric-tooltip": "기존 메트릭을 제거하고 새 메트릭을 선택하세요"

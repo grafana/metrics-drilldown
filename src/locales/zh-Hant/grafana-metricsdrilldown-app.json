@@ -301,9 +301,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "複製網址",
       "copy-url-success": "網址已複製到剪貼簿",
-      "explore": "探索"
+      "create-alert": "",
+      "explore": "探索",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "動作",
@@ -460,7 +464,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "書籤",
       "copy-url": "複製網址",
       "open-explore": "在探索中開啟",
       "select-new-metric-tooltip": "移除現有指標並選擇新指標"

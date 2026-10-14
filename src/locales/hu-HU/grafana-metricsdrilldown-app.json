@@ -306,9 +306,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "URL-cím másolása",
       "copy-url-success": "URL-cím a vágólapra másolva",
-      "explore": "Explore"
+      "create-alert": "",
+      "explore": "Explore",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Műveletek",
@@ -470,7 +474,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Könyvjelző",
       "copy-url": "URL-cím másolása",
       "open-explore": "Megnyitás az Explore-ban",
       "select-new-metric-tooltip": "Távolítsa el a meglévő metrikát, és válasszon új metrikát"

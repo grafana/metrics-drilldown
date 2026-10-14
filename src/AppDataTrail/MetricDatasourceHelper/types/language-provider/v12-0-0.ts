@@ -7,6 +7,7 @@ import {
 } from '@grafana/data';
 import { type PrometheusDatasource, type PromMetricsMetadata, type PromQuery } from '@grafana/prometheus';
 import { type BackendSrvRequest } from '@grafana/runtime';
+import { type Grammar } from 'prismjs';
 
 import { type PrometheusRuntimeDatasource } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { type PromQLLabelMatcher } from 'shared/utils/utils.promql';
@@ -27,7 +28,7 @@ interface PromQlLanguageProviderTwelveDotZero extends LanguageProvider {
       }
     | undefined;
   cleanText(s: string): string;
-  get syntax(): Prism.Grammar;
+  get syntax(): Grammar;
   request: (url: string, defaultValue: any, params?: {}, options?: Partial<BackendSrvRequest>) => Promise<any>;
   start: (timeRange?: TimeRange) => Promise<any[]>;
   loadMetricsMetadata(): Promise<void>;

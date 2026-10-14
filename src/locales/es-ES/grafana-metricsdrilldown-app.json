@@ -306,9 +306,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "Copiar URL",
       "copy-url-success": "URL copiada al portapapeles",
-      "explore": "Explorar"
+      "create-alert": "",
+      "explore": "Explorar",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Acciones",
@@ -470,7 +474,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Marcador",
       "copy-url": "Copiar URL",
       "open-explore": "Abrir en explorar",
       "select-new-metric-tooltip": "Eliminar la métrica existente y elegir una nueva métrica"

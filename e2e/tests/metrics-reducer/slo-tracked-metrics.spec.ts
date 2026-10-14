@@ -10,23 +10,13 @@ const TRACKED_METRIC = 'handler_duration_seconds_count';
 const SECOND_TRACKED_METRIC = 'go_gc_cycles_automatic_gc_cycles_total';
 const UNTRACKED_METRIC = 'memberlist_client_cas_success_total';
 
-async function enableSloFlag(page: Page) {
-  await page.route('**/ofrep/v1/evaluate/flags', async (route) => {
-    await route.fulfill({
-      contentType: 'application/json',
-      json: {
-        flags: [
-          {
-            key: 'drilldown.metrics.slo_tracked_metrics',
-            value: true,
-            variant: 'enabled',
-            reason: 'STATIC',
-          },
-        ],
-      },
-    });
-  });
-}
+test.use({
+  openFeature: {
+    flags: {
+      'drilldown.metrics.slo_tracked_metrics': true,
+    },
+  },
+})
 
 async function injectSloPlugin(page: Page) {
   await page.addInitScript(() => {
@@ -138,7 +128,6 @@ async function stubSloDefinitions(page: Page, status = 200) {
 
 test.describe('SLO-tracked metrics optional integration', () => {
   test('keeps SLO controls hidden when the plugin is absent', async ({ page, metricsReducerView }) => {
-    await enableSloFlag(page);
     let resourceRequests = 0;
     await page.route(`**${SLO_RESOURCE_URL}`, async (route) => {
       resourceRequests++;
@@ -156,7 +145,6 @@ test.describe('SLO-tracked metrics optional integration', () => {
     page,
     metricsReducerView,
   }) => {
-    await enableSloFlag(page);
     await injectSloPlugin(page);
     await stubSloDefinitions(page);
 
@@ -188,7 +176,6 @@ test.describe('SLO-tracked metrics optional integration', () => {
   });
 
   test('clears stale URL filtering when the SLO API fails', async ({ page, metricsReducerView }) => {
-    await enableSloFlag(page);
     await injectSloPlugin(page);
     await stubSloDefinitions(page, 500);
 
