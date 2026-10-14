@@ -8,13 +8,16 @@ import { isRangeVectorFunction, PROMQL_FUNCTIONS, type PrometheusFunction } from
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type HistogramBreakdownFn, type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { supportsExemplars } from 'shared/GmdVizPanel/matchers/supportsExemplars';
 import { logger } from 'shared/logger/logger';
 import { groupBinaryByLabel } from 'shared/utils/groupBinaryByLabel';
 
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
 export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
-  const { metric, queryConfig } = options;
+  const { metric } = options;
+  // Never request exemplars the switch has disabled: exemplarsEnabled can outlive the metric type that allowed it.
+  const queryConfig = supportsExemplars(metric.type) ? options.queryConfig : { ...options.queryConfig, exemplarsEnabled: false };
 
   // A binary (ratio) insight query is a complete expression, not a metric selector: use it verbatim as
   // the query body and never wrap it in rate() (rate requires a range-vector selector, not an expression).
@@ -48,7 +51,13 @@ export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOpti
     // what the user sees in Explore. The legend defaults to "binary query" (main panel), but callers that
     // scope the binary to a single value (the per-value breakdown) pass that value via `binaryLegend`.
     queries = [
-      { refId: metric.name, expr, legendFormat: queryConfig.binaryLegend ?? 'binary query', fromExploreMetrics: true },
+      {
+        refId: metric.name,
+        expr,
+        legendFormat: queryConfig.binaryLegend ?? 'binary query',
+        fromExploreMetrics: true,
+        ...(queryConfig.exemplarsEnabled ? { exemplar: true } : {}),
+      },
     ];
   } else {
     queries = buildQueriesWithPresetFunctions({ metric, queryConfig, expr });
@@ -228,13 +237,18 @@ function buildQueriesWithPresetFunctions({
   const customFn = queryConfig.customFunction;
 
   if (customFn) {
-    return [buildCustomFunctionQuery(metric.name, customFn, expr, interval, isCounter)];
+    return [buildCustomFunctionQuery(metric.name, customFn, expr, interval, isCounter, queryConfig.exemplarsEnabled)];
   }
 
   const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
   const queries: SceneDataQuery[] = [];
   for (const { fn } of queryDefs) {
-    const q = buildPresetFunctionQuery(metric.name, fn, expr, isCounter, '[getTimeseriesQueryRunnerParams]');
+    // Only the first emitted target carries the exemplar flag: Prometheus issues a separate
+    // /api/v1/query_exemplars request per target that has it, so a panel configured with multiple
+    // preset functions (e.g. min/max/avg) would otherwise fire one exemplar query per function.
+    // Keyed on queries.length, not the definition index, because unknown functions are skipped.
+    const exemplar = queries.length === 0 ? queryConfig.exemplarsEnabled : undefined;
+    const q = buildPresetFunctionQuery(metric.name, fn, expr, isCounter, '[getTimeseriesQueryRunnerParams]', exemplar);
     if (q) {
       queries.push(q);
     }

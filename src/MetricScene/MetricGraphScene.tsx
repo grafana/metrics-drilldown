@@ -16,6 +16,7 @@ import React, { useRef } from 'react';
 
 import { getMetricDescription } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { ConfigurePanelAction } from 'shared/GmdVizPanel/components/ConfigurePanelAction';
+import { EnableExemplarsAction } from 'shared/GmdVizPanel/components/EnableExemplarsAction';
 import { ExploreAttributesAction } from 'shared/GmdVizPanel/components/ExploreAttributesAction';
 import { GmdVizPanelVariantSelector } from 'shared/GmdVizPanel/components/GmdVizPanelVariantSelector';
 import { PANEL_HEIGHT } from 'shared/GmdVizPanel/config/panel-heights';
@@ -50,12 +51,14 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     customFunction,
     kgMetricType,
     binaryQuery,
+    exemplarsEnabled,
   }: {
     metric: MetricGraphSceneState['metric'];
     customRateInterval?: string;
     customFunction?: string;
     kgMetricType?: KgMetricType;
     binaryQuery?: string;
+    exemplarsEnabled?: boolean;
   }) {
     super({
       metric,
@@ -75,8 +78,12 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 ...(binaryQuery ? { title: binaryQuery } : {}),
                 titleItems: () => [new ExploreAttributesAction()],
                 headerActions: isClassicHistogramMetric(metric)
-                  ? ({ metric }) => [new GmdVizPanelVariantSelector(), new ConfigurePanelAction({ metric })]
-                  : ({ metric }) => [new ConfigurePanelAction({ metric })],
+                  ? ({ metric }) => [
+                      new GmdVizPanelVariantSelector(),
+                      new ConfigurePanelAction({ metric }),
+                      new EnableExemplarsAction(),
+                    ]
+                  : ({ metric }) => [new ConfigurePanelAction({ metric }), new EnableExemplarsAction()],
                 menu: () => new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY, labelName: metric }),
               },
               queryOptions: {
@@ -87,6 +94,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 // For a KG binary (ratio) insight, render the full binary expression in the main graph
                 // instead of the first-leaf metric selector. Undefined for normal metrics.
                 binaryExpr: binaryQuery,
+                exemplarsEnabled,
               },
             }),
           }),
@@ -150,6 +158,23 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
     const { metricType } = gmdVizPanel.state;
 
+    // DataTrail owns the switch state (it is synced with the url), so the live panel follows it. The trail can
+    // change between this scene's construction and its activation (opening a bookmark saved with exemplars on
+    // applies its url values after the scene is built), so sync once now, then follow changes. Both come
+    // before the awaits and early returns below so they apply to every metric type.
+    const exemplarsEnabled = Boolean(trail.state.exemplarsEnabled);
+    if (exemplarsEnabled !== Boolean(gmdVizPanel.state.queryConfig.exemplarsEnabled)) {
+      gmdVizPanel.update({}, { exemplarsEnabled });
+    }
+
+    this._subs.add(
+      trail.subscribeToState((newState, prevState) => {
+        if (newState.exemplarsEnabled !== prevState.exemplarsEnabled) {
+          gmdVizPanel.update({}, { exemplarsEnabled: Boolean(newState.exemplarsEnabled) });
+        }
+      })
+    );
+
     const entry = trail.state.sourceMetrics?.find((s) => s.metricName === metric);
     if (!entry?.metricType) {
       const metadata = await trail.getMetadataForMetric(metric);
@@ -172,6 +197,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
             headerActions: () => [
               new GmdVizPanelVariantSelector(),
               new ConfigurePanelAction({ metric: { name: metric, type: newState.metricType } }),
+              new EnableExemplarsAction(),
             ],
           },
           {}

@@ -116,6 +116,11 @@ export interface DataTrailState extends SceneObjectState {
   // Not a KG-facing field; the connector confirms binary-ness before setting it.
   binaryQuery?: string;
 
+  // The main panel's opt-in "Show exemplars" switch. Synced with the url (`exemplars=true`) so a shared link
+  // opens with exemplars on. Lives here, not on the panel, because this object outlives a metric change and
+  // can clear the param: exemplar queries only run where the user asked for them.
+  exemplarsEnabled?: boolean;
+
   // Add to dashboard feature
   isAddToDashboardAvailable: boolean;
   isAddToDashboardModalOpen: boolean;
@@ -139,7 +144,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType', 'binaryQuery'],
+    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType', 'binaryQuery', 'exemplars'],
   });
 
   getUrlState(): SceneObjectUrlValues {
@@ -163,6 +168,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       customFunction: customFunctionPairs?.length ? customFunctionPairs : [],
       metricType: metricTypePairs?.length ? metricTypePairs : [],
       binaryQuery: this.state.binaryQuery,
+      exemplars: this.state.exemplarsEnabled ? 'true' : undefined,
     };
   }
 
@@ -195,7 +201,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       typeof values.binaryQuery === 'string' && values.binaryQuery ? values.binaryQuery : undefined;
     const binaryQuery = rawBinaryQuery && parseBinaryQuery(rawBinaryQuery) ? rawBinaryQuery : undefined;
 
-    this.updateStateForNewMetric(metric, sourceMetricsOverride, binaryQuery);
+    this.updateStateForNewMetric(metric, sourceMetricsOverride, binaryQuery, values.exemplars === 'true');
   }
 
   public constructor(state: Partial<DataTrailState>) {
@@ -247,7 +253,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.datasourceHelper.init();
     }, 0);
 
-    this.updateStateForNewMetric(this.state.metric, undefined, this.state.binaryQuery);
+    this.updateStateForNewMetric(this.state.metric, undefined, this.state.binaryQuery, this.state.exemplarsEnabled);
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
     this.subscribeToEvent(EventOpenAddToDashboard, (event) => {
       this.openAddToDashboardModal(event.payload.panelData);
@@ -260,7 +266,12 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.initConfigPrometheusFunction();
   }
 
-  private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics, binaryQuery?: string) {
+  private updateStateForNewMetric(
+    metric?: string,
+    sourceMetricsOverride?: SourceMetrics,
+    binaryQuery?: string,
+    exemplarsEnabled?: boolean
+  ) {
     // A binary (ratio) insight may have NO metric to anchor on: its operands can be label-only series
     // (e.g. `{asserts_metric_latency="seconds_sum"}`, no metric name). We still open the metric scene and
     // render the binary. When the first leaf does have a name (bare identifier or a `__name__` matcher),
@@ -272,6 +283,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     // The metric scene shows when there is a metric OR a binary query (a binary needs no metric anchor).
     const showMetricScene = Boolean(effectiveMetric || binaryQuery);
+    // Only meaningful with a metric scene, and never carried over from a previous metric: callers that pass
+    // nothing (selecting another metric, going back to the reducer) reset it, which also clears the url param.
+    const effectiveExemplarsEnabled = showMetricScene && Boolean(exemplarsEnabled);
 
     if (!this.state.topScene || effectiveMetric !== this.state.metric || binaryQuery !== this.state.binaryQuery) {
       const baseControls = [new VariableValueSelectors({ layout: 'vertical' }), new SceneControlsSpacer()];
@@ -291,6 +305,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         // Written from the passed value so it is preserved on URL load / initial activation and CLEARED
         // (undefined) when selecting a new metric or returning to the reducer, keeping it out of the URL.
         binaryQuery,
+        exemplarsEnabled: effectiveExemplarsEnabled,
         topScene: showMetricScene
           ? new MetricScene({
               metric: effectiveMetric ?? '',
@@ -298,11 +313,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               customFunction: entry?.customFunction,
               kgMetricType: entry?.metricType,
               binaryQuery,
+              exemplarsEnabled: effectiveExemplarsEnabled,
             })
           : new MetricsReducer(),
         controls,
         ...(sourceMetricsOverride !== undefined && { sourceMetrics: sourceMetricsOverride }),
       });
+    } else if (effectiveExemplarsEnabled !== Boolean(this.state.exemplarsEnabled)) {
+      // Same metric, only the param changed (browser back/forward, an edited url): keep the scene and let
+      // MetricGraphScene push the new value into the live panel.
+      this.setState({ exemplarsEnabled: effectiveExemplarsEnabled });
     }
 
     this.syncFiltersForBinaryQuery(binaryQuery);
