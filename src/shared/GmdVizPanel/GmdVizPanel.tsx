@@ -80,7 +80,7 @@ export type QueryConfig = {
   labelMatchers: LabelMatcher[];
   addIgnoreUsageFilter: boolean;
   addExtremeValuesFiltering?: boolean;
-  // Set only by the main panel's "Enable exemplar query" checkbox (EnableExemplarsAction); no other
+  // Set only by the main panel's "Show exemplars" switch (EnableExemplarsAction); no other
   // GmdVizPanel consumer should set this, since a second Prometheus exemplar query per target is only
   // worth the cost on the single panel a user is actively looking at.
   exemplarsEnabled?: boolean;
