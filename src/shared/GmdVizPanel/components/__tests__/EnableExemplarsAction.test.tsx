@@ -145,16 +145,33 @@ describe('EnableExemplarsAction', () => {
       expect(getTooltip(false, action.state.disabledReason, 'unknown')).toBe(expectedTooltip);
     });
 
-    it('disables the switch for a histogram rendered as a heatmap, with a panel-type tooltip pointing at Percentiles', async () => {
-      // Regression test: histograms default to the heatmap panel type (getPanelTypeForMetricSync),
-      // not percentiles, so this is the common case for a histogram metric, not an edge case. The
-      // metric type itself supports exemplars; only the panel type doesn't (core's heatmap panel can
-      // render exemplars, but this app's heatmap query builder doesn't attach the flag), so the
-      // tooltip should say so instead of the generic "not available for this metric" message.
+    it.each([['timeseries'], ['percentiles'], ['heatmap']])(
+      'enables the switch for a native histogram rendered as a %s panel',
+      async (panelType) => {
+        // Histograms default to the heatmap panel type (getPanelTypeForMetricSync), so heatmap is the common
+        // case for the metric type exemplars exist for, not an edge case.
+        const vizPanel = createMockVizPanel({
+          metricType: 'native-histogram',
+          metricTypeResolved: true,
+          panelConfig: { type: panelType },
+          queryConfig: {},
+        });
+        mockGetAncestor.mockReturnValue(vizPanel);
+
+        const action = new EnableExemplarsAction();
+        await activateAction(action);
+
+        render(<EnableExemplarsAction.Component model={action} />);
+        expect(getSwitchInput().disabled).toBe(false);
+        expect(action.state.disabledReason).toBeNull();
+      }
+    );
+
+    it('disables the switch for a panel type that sends no exemplar query, with a panel-type tooltip', async () => {
       const vizPanel = createMockVizPanel({
-        metricType: 'native-histogram',
+        metricType: 'counter',
         metricTypeResolved: true,
-        panelConfig: { type: 'heatmap' },
+        panelConfig: { type: 'stat' },
         queryConfig: {},
       });
       mockGetAncestor.mockReturnValue(vizPanel);
@@ -166,30 +183,8 @@ describe('EnableExemplarsAction', () => {
       expect(getSwitchInput().disabled).toBe(true);
       expect(action.state.disabledReason).toBe('panel-type');
       expect(getTooltip(false, action.state.disabledReason, 'unknown')).toBe(
-        'Switch to the Percentiles view to show exemplars'
+        "Exemplars aren't available for this panel type"
       );
-    });
-
-    it('enables the switch once a histogram switches from heatmap to percentiles', async () => {
-      const vizPanel = createMockVizPanel({
-        metricType: 'native-histogram',
-        metricTypeResolved: true,
-        panelConfig: { type: 'heatmap' },
-        queryConfig: {},
-      });
-      mockGetAncestor.mockReturnValue(vizPanel);
-
-      const action = new EnableExemplarsAction();
-      await activateAction(action);
-
-      render(<EnableExemplarsAction.Component model={action} />);
-      expect(getSwitchInput().disabled).toBe(true);
-
-      act(() => {
-        vizPanel.emitStateChange({ panelConfig: { type: 'percentiles' } });
-      });
-
-      expect(getSwitchInput().disabled).toBe(false);
     });
 
     it('re-enables once the ancestor resolves the metric type', async () => {
@@ -448,8 +443,8 @@ describe('EnableExemplarsAction', () => {
       expect(getTooltip(true, 'metric-type', 'has-data')).toBe("Exemplars aren't available for this metric");
     });
 
-    it('points at Percentiles when the panel type disables it', () => {
-      expect(getTooltip(false, 'panel-type', 'unknown')).toBe('Switch to the Percentiles view to show exemplars');
+    it('explains an unsupported panel type when the panel type disables it', () => {
+      expect(getTooltip(false, 'panel-type', 'unknown')).toBe("Exemplars aren't available for this panel type");
     });
 
     it('invites the user to turn it on when unchecked and enabled', () => {

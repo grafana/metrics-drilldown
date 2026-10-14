@@ -175,8 +175,8 @@
       "label": "Show exemplars",
       "off": "Show exemplars (counters and histograms only)",
       "on": "Showing exemplars",
-      "switch-to-percentiles": "Switch to the Percentiles view to show exemplars",
-      "unavailable": "Exemplars aren't available for this metric"
+      "unavailable": "Exemplars aren't available for this metric",
+      "unsupported-panel": "Exemplars aren't available for this panel type"
     },
     "native-histogram": "Native Histogram",
     "variant": {

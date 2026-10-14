@@ -34,10 +34,8 @@ interface EnableExemplarsActionState extends SceneObjectState {
   dataStatus: DataStatus;
 }
 
-// OpenMetrics defines exemplars only for Counter, Histogram, and GaugeHistogram metric types.
-// Grafana's core heatmap panel can render exemplars too, but this app's heatmap query builder
-// doesn't attach the exemplar flag yet, so a histogram still shown as a heatmap stays disabled
-// here (see 'panel-type' below) even though its metric type would otherwise qualify.
+// Exemplars are shown on the panel types whose query builders send the exemplar flag (timeseries,
+// percentiles, heatmap) and only for metric types that support them (see supportsExemplars).
 export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsActionState> {
   private _dataSub?: { unsubscribe: () => void };
 
@@ -76,12 +74,13 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
   private syncFromPanel(vizPanel: GmdVizPanel) {
     const { metricType, metricTypeResolved, panelConfig, queryConfig, body } = vizPanel.state;
 
-    const rendersAsTimeseries = panelConfig.type === 'timeseries' || panelConfig.type === 'percentiles';
+    const supportsPanelType =
+      panelConfig.type === 'timeseries' || panelConfig.type === 'percentiles' || panelConfig.type === 'heatmap';
 
     let disabledReason: DisabledReason = null;
     if (!metricTypeResolved || !supportsExemplars(metricType)) {
       disabledReason = 'metric-type';
-    } else if (!rendersAsTimeseries) {
+    } else if (!supportsPanelType) {
       disabledReason = 'panel-type';
     }
 
@@ -172,7 +171,7 @@ export function getTooltip(checked: boolean, disabledReason: DisabledReason, dat
     return t('gmd-viz-panel.enable-exemplars.unavailable', "Exemplars aren't available for this metric");
   }
   if (disabledReason === 'panel-type') {
-    return t('gmd-viz-panel.enable-exemplars.switch-to-percentiles', 'Switch to the Percentiles view to show exemplars');
+    return t('gmd-viz-panel.enable-exemplars.unsupported-panel', "Exemplars aren't available for this panel type");
   }
   if (!checked) {
     return t('gmd-viz-panel.enable-exemplars.off', 'Show exemplars (counters and histograms only)');
