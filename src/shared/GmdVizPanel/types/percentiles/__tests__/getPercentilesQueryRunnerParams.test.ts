@@ -228,7 +228,7 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
 
   test('attaches exemplar only to the first query in the non-histogram path', () => {
     const result = getPercentilesQueryRunnerParams({
-      metric: { name: 'go_goroutines', type: 'gauge' },
+      metric: { name: 'http_requests_total', type: 'counter' },
       queryConfig: {
         resolution: QUERY_RESOLUTION.MEDIUM,
         labelMatchers: [],
@@ -241,6 +241,22 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
     expect(result.queries).toHaveLength(2);
     expect(result.queries[0]).toMatchObject({ exemplar: true });
     expect(result.queries[1]).not.toHaveProperty('exemplar');
+  });
+
+  test('does not attach exemplar for an unsupported metric type, even when exemplarsEnabled is true', () => {
+    const result = getPercentilesQueryRunnerParams({
+      metric: { name: 'go_goroutines', type: 'gauge' },
+      queryConfig: {
+        resolution: QUERY_RESOLUTION.MEDIUM,
+        labelMatchers: [],
+        addIgnoreUsageFilter: false,
+        queries: [{ fn: 'quantile', params: { percentiles: [99, 90] } }],
+        exemplarsEnabled: true,
+      },
+    });
+
+    expect(result.queries).toHaveLength(2);
+    result.queries.forEach((query) => expect(query).not.toHaveProperty('exemplar'));
   });
 
   test('does not attach exemplar when exemplarsEnabled is false', () => {

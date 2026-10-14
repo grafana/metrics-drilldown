@@ -12,9 +12,10 @@ import { Switch, Tooltip } from '@grafana/ui';
 import React from 'react';
 
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { supportsExemplars } from 'shared/GmdVizPanel/matchers/supportsExemplars';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
-type DataStatus = 'unknown' | 'empty' | 'has-data';
+type DataStatus = 'unknown' | 'empty' | 'has-data' | 'error';
 type DisabledReason = 'metric-type' | 'panel-type' | null;
 
 interface EnableExemplarsActionState extends SceneObjectState {
@@ -65,11 +66,10 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
   private syncFromPanel(vizPanel: GmdVizPanel) {
     const { metricType, metricTypeResolved, panelConfig, queryConfig, body } = vizPanel.state;
 
-    const supportsMetricType = metricType === 'counter' || metricType === 'classic-histogram' || metricType === 'native-histogram';
     const rendersAsTimeseries = panelConfig.type === 'timeseries' || panelConfig.type === 'percentiles';
 
     let disabledReason: DisabledReason = null;
-    if (!metricTypeResolved || !supportsMetricType) {
+    if (!metricTypeResolved || !supportsExemplars(metricType)) {
       disabledReason = 'metric-type';
     } else if (!rendersAsTimeseries) {
       disabledReason = 'panel-type';
@@ -99,12 +99,18 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
     // subsequent state changes, not the value already present at subscribe time, so a query that
     // finished before this ran (e.g. the panel rebuilt with exemplarsEnabled already true) would
     // otherwise leave dataStatus stuck at 'unknown'.
+    // A failed run reports 'error', and any other non-Done state (a new run starting) resets to
+    // 'unknown', so the tooltip never shows the previous run's result against the current query.
     const checkData = (data: PanelData | undefined) => {
-      if (data?.state !== LoadingState.Done) {
-        return;
+      let dataStatus: DataStatus = 'unknown';
+      if (data?.state === LoadingState.Error) {
+        dataStatus = 'error';
+      } else if (data?.state === LoadingState.Done) {
+        dataStatus = (data.annotations ?? []).some((frame) => frame.length > 0) ? 'has-data' : 'empty';
       }
-      const hasExemplars = (data.annotations ?? []).some((frame) => frame.length > 0);
-      this.setState({ dataStatus: hasExemplars ? 'has-data' : 'empty' });
+      if (dataStatus !== this.state.dataStatus) {
+        this.setState({ dataStatus });
+      }
     };
 
     checkData(queryRunner.state.data);
@@ -124,18 +130,19 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
     const { checked, disabledReason, dataStatus } = model.useState();
 
     const label = t('gmd-viz-panel.enable-exemplars.label', 'Show exemplars');
+    const tooltip = getTooltip(checked, disabledReason, dataStatus);
+    const isDisabled = disabledReason !== null;
 
     return (
-      <Tooltip content={getTooltip(checked, disabledReason, dataStatus)} placement="top">
-        {/* Tooltip attaches its hover/focus handlers to this element. Switch forwards unrecognized
-            props to its native, visually hidden <input> (opacity: 0, offscreen z-index), so putting
-            the Tooltip directly on Switch would attach those handlers to an element the pointer
-            never actually lands on; the visible surface is a sibling <label>. Wrapping in a plain
-            span gives Tooltip a real hoverable target that contains that visible label. */}
-        <span>
+      <Tooltip content={tooltip} placement="top">
+        {/* The span is the Tooltip trigger: Switch puts hover/focus handlers on its hidden <input>, which
+            the pointer never reaches. Tooltip makes the span focusable (tabIndex 0). A disabled input
+            can't take focus, so while disabled the span also carries the reason as its accessible name
+            (equal to the tooltip text, so Tooltip doesn't announce it twice). */}
+        <span role={isDisabled ? 'group' : undefined} aria-label={isDisabled ? tooltip : undefined}>
           <Switch
             value={checked}
-            disabled={disabledReason !== null}
+            disabled={isDisabled}
             onChange={model.onChange}
             label={label}
             data-testid="enable-exemplars-action"
@@ -156,6 +163,9 @@ export function getTooltip(checked: boolean, disabledReason: DisabledReason, dat
   }
   if (!checked) {
     return t('gmd-viz-panel.enable-exemplars.off', 'Show exemplars (counters and histograms only)');
+  }
+  if (dataStatus === 'error') {
+    return t('gmd-viz-panel.enable-exemplars.error', "Exemplars couldn't be loaded because the query failed");
   }
   if (dataStatus === 'empty') {
     return t('gmd-viz-panel.enable-exemplars.empty', 'No exemplars found for this metric in the current time range');

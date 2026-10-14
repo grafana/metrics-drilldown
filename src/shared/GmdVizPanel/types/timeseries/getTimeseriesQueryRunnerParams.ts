@@ -8,13 +8,16 @@ import { isRangeVectorFunction, PROMQL_FUNCTIONS, type PrometheusFunction } from
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type HistogramBreakdownFn, type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { supportsExemplars } from 'shared/GmdVizPanel/matchers/supportsExemplars';
 import { logger } from 'shared/logger/logger';
 import { groupBinaryByLabel } from 'shared/utils/groupBinaryByLabel';
 
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
 export function getTimeseriesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
-  const { metric, queryConfig } = options;
+  const { metric } = options;
+  // Never request exemplars the switch has disabled: exemplarsEnabled can outlive the metric type that allowed it.
+  const queryConfig = supportsExemplars(metric.type) ? options.queryConfig : { ...options.queryConfig, exemplarsEnabled: false };
 
   // A binary (ratio) insight query is a complete expression, not a metric selector: use it verbatim as
   // the query body and never wrap it in rate() (rate requires a range-vector selector, not an expression).

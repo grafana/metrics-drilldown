@@ -171,6 +171,7 @@
   "gmd-viz-panel": {
     "enable-exemplars": {
       "empty": "No exemplars found for this metric in the current time range",
+      "error": "Exemplars couldn't be loaded because the query failed",
       "label": "Show exemplars",
       "off": "Show exemplars (counters and histograms only)",
       "on": "Showing exemplars",

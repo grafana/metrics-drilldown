@@ -302,6 +302,99 @@ describe('EnableExemplarsAction', () => {
 
       expect(getSwitchInput().getAttribute('data-status')).toBe('has-data');
     });
+
+    it('reports an error status instead of exemplars when the query fails', async () => {
+      const queryRunner = createMockQueryRunner();
+      mockFindDescendents.mockReturnValue([queryRunner]);
+
+      const vizPanel = createMockVizPanel({
+        metricType: 'counter',
+        metricTypeResolved: true,
+        panelConfig: { type: 'timeseries' },
+        queryConfig: { exemplarsEnabled: true },
+        body: {},
+      });
+      mockGetAncestor.mockReturnValue(vizPanel);
+
+      const action = new EnableExemplarsAction();
+      await activateAction(action);
+
+      render(<EnableExemplarsAction.Component model={action} />);
+
+      act(() => {
+        queryRunner.emitData({ state: LoadingState.Error });
+      });
+
+      expect(getSwitchInput().getAttribute('data-status')).toBe('error');
+    });
+
+    it('clears the previous result when a new query run starts, so a stale success is not reported', async () => {
+      const queryRunner = createMockQueryRunner();
+      mockFindDescendents.mockReturnValue([queryRunner]);
+
+      const vizPanel = createMockVizPanel({
+        metricType: 'counter',
+        metricTypeResolved: true,
+        panelConfig: { type: 'timeseries' },
+        queryConfig: { exemplarsEnabled: true },
+        body: {},
+      });
+      mockGetAncestor.mockReturnValue(vizPanel);
+
+      const action = new EnableExemplarsAction();
+      await activateAction(action);
+
+      render(<EnableExemplarsAction.Component model={action} />);
+
+      act(() => {
+        queryRunner.emitData({ state: LoadingState.Done, annotations: [{ length: 3 }] });
+      });
+      expect(getSwitchInput().getAttribute('data-status')).toBe('has-data');
+
+      act(() => {
+        queryRunner.emitData({ state: LoadingState.Loading });
+      });
+      expect(getSwitchInput().getAttribute('data-status')).toBe('unknown');
+    });
+  });
+
+  describe('accessibility', () => {
+    it('gives the disabled switch a focusable, named wrapper that carries the reason it is unavailable', async () => {
+      // A disabled <input> can't take keyboard focus, so the wrapper has to: Tooltip sets tabIndex 0 on
+      // it, and the accessible name (equal to the tooltip text) tells screen reader users why it is off.
+      const vizPanel = createMockVizPanel({
+        metricType: 'gauge',
+        metricTypeResolved: true,
+        panelConfig: { type: 'timeseries' },
+        queryConfig: {},
+      });
+      mockGetAncestor.mockReturnValue(vizPanel);
+
+      const action = new EnableExemplarsAction();
+      await activateAction(action);
+
+      render(<EnableExemplarsAction.Component model={action} />);
+
+      const group = screen.getByRole('group', { name: "Exemplars aren't available for this metric" });
+      expect(group.getAttribute('tabindex')).toBe('0');
+    });
+
+    it('does not add a group role or name to the wrapper when the switch is enabled', async () => {
+      const vizPanel = createMockVizPanel({
+        metricType: 'counter',
+        metricTypeResolved: true,
+        panelConfig: { type: 'timeseries' },
+        queryConfig: {},
+      });
+      mockGetAncestor.mockReturnValue(vizPanel);
+
+      const action = new EnableExemplarsAction();
+      await activateAction(action);
+
+      render(<EnableExemplarsAction.Component model={action} />);
+
+      expect(screen.queryByRole('group')).toBeNull();
+    });
   });
 
   describe('getTooltip', () => {
@@ -320,6 +413,10 @@ describe('EnableExemplarsAction', () => {
 
     it('flags empty results once checked and the query came back with no exemplars', () => {
       expect(getTooltip(true, null, 'empty')).toBe('No exemplars found for this metric in the current time range');
+    });
+
+    it('explains a failed query instead of reporting exemplars', () => {
+      expect(getTooltip(true, null, 'error')).toBe("Exemplars couldn't be loaded because the query failed");
     });
 
     it('confirms exemplars are showing once checked and data is present', () => {
