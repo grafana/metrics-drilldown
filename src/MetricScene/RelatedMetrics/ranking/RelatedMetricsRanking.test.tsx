@@ -1,7 +1,5 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-
-import { MetricSelectedEvent } from 'shared/shared';
 
 import { fetchRelatedMetricsRanking } from './fetchRelatedMetricsRanking';
 import { clearMetricLabelNamesCache } from './labelNames';
@@ -63,7 +61,7 @@ describe('RelatedMetricsRanking', () => {
     expect(fetchRelatedMetricsRanking).not.toHaveBeenCalled();
   });
 
-  it('ranks once per metric list, renders recommendations, and selects on click', async () => {
+  it('ranks once per metric list and shows the ranking status', async () => {
     localStorage.setItem('gmd.jev.enabled', '1');
     jest.mocked(fetchRelatedMetricsRanking).mockImplementation(async (request) => ({
       ok: true,
@@ -75,8 +73,6 @@ describe('RelatedMetricsRanking', () => {
       },
     }));
     const ranking = new RelatedMetricsRanking('demo_requests_total');
-    const publish = jest.spyOn(ranking, 'publishEvent');
-
     ranking.start(METRICS);
     ranking.start([...METRICS]); // identical list from a second load event
     await flush();
@@ -88,18 +84,62 @@ describe('RelatedMetricsRanking', () => {
     expect(ranking.state.status).toBe('ready');
 
     render(<ranking.Component model={ranking} />);
-    const item = screen.getByTestId(`related-metrics-ranking-item-${request.candidates[1].id}`);
-    expect(item).toHaveTextContent(request.candidates[1].name);
-    expect(item).toHaveTextContent('investigative companion');
-
-    fireEvent.click(item);
-    // setState also publishes (state-changed) events, so pick the selection event explicitly.
-    const selected = publish.mock.calls.map(([event]) => event).find((event) => event instanceof MetricSelectedEvent);
-    expect(publish).toHaveBeenCalledWith(expect.any(MetricSelectedEvent), true);
-    expect((selected as MetricSelectedEvent).payload.metric).toBe(request.candidates[1].name);
+    expect(screen.getByTestId('related-metrics-ranking')).toHaveTextContent('Sorted by Jev relevance');
   });
 
-  it('renders nothing on failure unless debugging', async () => {
+  it('retains completed rankings when deactivated and reactivated', async () => {
+    localStorage.setItem('gmd.jev.enabled', '1');
+    jest.mocked(fetchRelatedMetricsRanking).mockResolvedValue({
+      ok: true,
+      latencyMs: 12,
+      response: { status: 'ok', recommended: [], relationships: {} },
+    });
+    const ranking = new RelatedMetricsRanking('demo_requests_total');
+    let deactivate = ranking.activate();
+    ranking.start(METRICS);
+    await flush();
+    deactivate();
+
+    deactivate = ranking.activate();
+    ranking.start([...METRICS]);
+    await flush();
+    expect(ranking.state.status).toBe('ready');
+    expect(fetchRelatedMetricsRanking).toHaveBeenCalledTimes(1);
+    deactivate();
+  });
+
+  it('aborts an in-flight request on tab exit and retries on return', async () => {
+    localStorage.setItem('gmd.jev.enabled', '1');
+    jest.mocked(fetchRelatedMetricsRanking).mockImplementationOnce(() => new Promise(() => {}));
+    const ranking = new RelatedMetricsRanking('demo_requests_total');
+    let deactivate = ranking.activate();
+    ranking.start(METRICS);
+    await flush();
+    const signal = jest.mocked(fetchRelatedMetricsRanking).mock.calls[0][2];
+    deactivate();
+    expect(signal?.aborted).toBe(true);
+
+    jest.mocked(fetchRelatedMetricsRanking).mockResolvedValue({ ok: false, reason: 'network' });
+    deactivate = ranking.activate();
+    ranking.start(METRICS);
+    await flush();
+    expect(fetchRelatedMetricsRanking).toHaveBeenCalledTimes(2);
+    expect(ranking.state.status).toBe('failed');
+    deactivate();
+  });
+
+  it('reranks when a metric changes inside an otherwise identical list', async () => {
+    localStorage.setItem('gmd.jev.enabled', '1');
+    jest.mocked(fetchRelatedMetricsRanking).mockResolvedValue({ ok: false, reason: 'network' });
+    const ranking = new RelatedMetricsRanking('demo_requests_total');
+    ranking.start(METRICS);
+    await flush();
+    ranking.start([METRICS[0], 'demo_retries_total', ...METRICS.slice(2)]);
+    await flush();
+    expect(fetchRelatedMetricsRanking).toHaveBeenCalledTimes(2);
+  });
+
+  it('explains baseline fallback on failure and exposes details when debugging', async () => {
     localStorage.setItem('gmd.jev.enabled', '1');
     jest.mocked(fetchRelatedMetricsRanking).mockResolvedValue({
       ok: false,
@@ -112,7 +152,7 @@ describe('RelatedMetricsRanking', () => {
 
     expect(ranking.state.status).toBe('failed');
     const first = render(<ranking.Component model={ranking} />);
-    expect(first.container).toBeEmptyDOMElement();
+    expect(screen.getByTestId('related-metrics-ranking')).toHaveTextContent('Showing name-similarity order');
     first.unmount();
 
     // The scene component wrapper is memoised, so render a fresh tree after enabling debug.

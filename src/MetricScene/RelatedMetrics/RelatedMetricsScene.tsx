@@ -6,6 +6,7 @@ import {
   sceneGraph,
   SceneObjectBase,
   SceneVariableSet,
+  SceneVariableValueChangedEvent,
   type QueryVariable,
   type SceneComponentProps,
   type SceneObjectState,
@@ -32,6 +33,7 @@ import { MetricsList } from 'MetricsReducer/MetricsList/MetricsList';
 import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
+import { applyRanking } from './ranking/applyRanking';
 import { RelatedMetricsRanking } from './ranking/RelatedMetricsRanking';
 import { RelatedListControls } from './RelatedListControls';
 import { actionViews } from '../../MetricScene/MetricActionBar';
@@ -42,21 +44,21 @@ interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;
   body: MetricsList;
   listControls: RelatedListControls;
-  ranking: RelatedMetricsRanking;
+  ranking?: RelatedMetricsRanking;
 }
 
 export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneState> {
-  constructor({ metric }: { metric: RelatedMetricsSceneState['metric'] }) {
+  constructor({ metric, useJevRanking = false }: { metric: string; useJevRanking?: boolean }) {
     super({
       metric,
       $variables: new SceneVariableSet({
         variables: [new FilteredMetricsVariable()],
       }),
       $behaviors: [new behaviors.SceneQueryController()],
-      key: 'RelatedMetricsScene',
+      key: useJevRanking ? 'JevRelatedMetricsScene' : 'RelatedMetricsScene',
       body: new MetricsList({ variableName: VAR_FILTERED_METRICS_VARIABLE }),
       listControls: new RelatedListControls({}),
-      ranking: new RelatedMetricsRanking(metric),
+      ranking: useJevRanking ? new RelatedMetricsRanking(metric) : undefined,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -78,15 +80,17 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
       if (state.loading === false) {
         sub.unsubscribe();
 
+        const actionView = this.state.ranking ? actionViews.jevRelated : actionViews.related;
         if (this.state.body.isActive) {
-          signalOnQueryComplete(this, actionViews.related);
+          signalOnQueryComplete(this, actionView);
         } else {
           this.state.body.addActivationHandler(() => {
-            signalOnQueryComplete(this, actionViews.related);
+            signalOnQueryComplete(this, actionView);
           });
         }
       }
     });
+    this._subs.add(sub);
   }
 
   /**
@@ -121,6 +125,28 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
     });
 
     const quickSearch = sceneGraph.findByKeyAndType(this, 'quick-search', QuickSearch);
+    const { ranking } = this.state;
+    const sortMetrics = (key: string, sortEngine: MetricsVariableSortEngine) => {
+      sortEngine.sort('related', { metric });
+      if (ranking?.state.status !== 'ready') {
+        return;
+      }
+      const variable = sceneGraph.findByKey(this, key) as QueryVariable;
+      const metrics = variable.state.options.map((option) => String(option.value));
+      const sorted = applyRanking(metrics, ranking.state.candidates, ranking.state.response);
+      variable.setState({ options: sorted.map((name) => ({ label: name, value: name })) });
+      variable.publishEvent(new SceneVariableValueChangedEvent(variable), true);
+    };
+
+    if (ranking) {
+      this._subs.add(
+        ranking.subscribeToState(() => {
+          for (const [key, { sortEngine }] of enginesMap) {
+            sortMetrics(key, sortEngine);
+          }
+        })
+      );
+    }
 
     this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
       // filter  on initial load
@@ -134,12 +160,11 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
       };
 
       filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
-      sortEngine.sort('related', { metric });
-      // The scene only sees lifecycle events from its own FilteredMetricsVariable, whose initial
-      // options are the full (unfiltered) metric list. start() ignores repeated identical lists.
+      // Rank only in the Jev tab, using the full list rather than the search/prefix-filtered subset.
       if (key === VAR_FILTERED_METRICS_VARIABLE) {
-        this.state.ranking.start(options.map((option) => String(option.value)));
+        ranking?.start(options.map((option) => String(option.value)));
       }
+      sortMetrics(key, sortEngine);
     });
 
     /* Filters */
@@ -147,18 +172,18 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
     this.subscribeToEvent(EventQuickSearchChanged, (event) => {
       const { searchText } = event.payload;
 
-      for (const [, { filterEngine, sortEngine }] of enginesMap) {
+      for (const [key, { filterEngine, sortEngine }] of enginesMap) {
         filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
-        sortEngine.sort('related', { metric });
+        sortMetrics(key, sortEngine);
       }
     });
 
     this.subscribeToEvent(EventFiltersChanged, (event) => {
       const { type, filters } = event.payload;
 
-      for (const [, { filterEngine, sortEngine }] of enginesMap) {
+      for (const [key, { filterEngine, sortEngine }] of enginesMap) {
         filterEngine.applyFilters({ [type]: filters });
-        sortEngine.sort('related', { metric });
+        sortMetrics(key, sortEngine);
       }
     });
   }
@@ -174,7 +199,7 @@ export class RelatedMetricsScene extends SceneObjectBase<RelatedMetricsSceneStat
         <div className={styles.searchSticky}>
           <listControls.Component model={listControls} />
         </div>
-        <ranking.Component model={ranking} />
+        {ranking && <ranking.Component model={ranking} />}
         <div data-testid="panels-list">
           <body.Component model={body} />
         </div>

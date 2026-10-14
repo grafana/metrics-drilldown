@@ -2,11 +2,11 @@ import { css } from '@emotion/css';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { Button, Spinner, useStyles2 } from '@grafana/ui';
+import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { type MetricDatasourceHelper } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
-import { MetricSelectedEvent, VAR_DATASOURCE } from 'shared/shared';
+import { VAR_DATASOURCE } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
 import { buildRankingRequest } from './buildRankingRequest';
@@ -25,11 +25,6 @@ interface RelatedMetricsRankingState extends SceneObjectState {
   labelLatencyMs?: number;
 }
 
-/** Cheap identity for a metric list, so repeated load events with the same list do not re-rank. */
-function listSignature(metricNames: string[]): string {
-  return `${metricNames.length}:${metricNames[0] ?? ''}:${metricNames[metricNames.length - 1] ?? ''}`;
-}
-
 export class RelatedMetricsRanking extends SceneObjectBase<RelatedMetricsRankingState> {
   private abortController?: AbortController;
   private lastSignature?: string;
@@ -38,8 +33,10 @@ export class RelatedMetricsRanking extends SceneObjectBase<RelatedMetricsRanking
     super({ key: 'related-metrics-ranking', metric, status: isJevEnabled() ? 'loading' : 'hidden', candidates: [] });
     this.addActivationHandler(() => () => {
       this.abortController?.abort();
-      // Allow a fresh run when the scene is re-activated.
-      this.lastSignature = undefined;
+      // Keep successful results when switching tabs; retry interruptions or failures on return.
+      if (this.state.status !== 'ready') {
+        this.lastSignature = undefined;
+      }
     });
   }
 
@@ -47,7 +44,8 @@ export class RelatedMetricsRanking extends SceneObjectBase<RelatedMetricsRanking
     if (!isJevEnabled() || metricNames.length === 0) {
       return;
     }
-    const signature = listSignature(metricNames);
+    const datasourceUid = sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue()?.toString();
+    const signature = JSON.stringify([datasourceUid, metricNames]);
     if (signature === this.lastSignature) {
       return;
     }
@@ -57,7 +55,6 @@ export class RelatedMetricsRanking extends SceneObjectBase<RelatedMetricsRanking
     this.abortController = controller;
 
     const trail = getTrailFor(this);
-    const datasourceUid = sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue()?.toString();
     // datasourceHelper is private on DataTrail; the ranking spike reads it structurally to stay inside its boundary.
     const helper = (trail as unknown as { datasourceHelper: MetricDatasourceHelper }).datasourceHelper;
     const labelStart = performance.now();
@@ -131,45 +128,20 @@ export class RelatedMetricsRanking extends SceneObjectBase<RelatedMetricsRanking
       );
     }
 
-    const byId = new Map(state.candidates.map((candidate) => [candidate.id, candidate]));
-    const recommended =
-      state.status === 'ready'
-        ? (state.response?.recommended ?? []).flatMap((item) => {
-            const candidate = byId.get(item.id);
-            return candidate ? [{ candidate, p: item.p }] : [];
-          })
-        : [];
-
-    // Fail open: without recommendations there is nothing to show unless debugging.
-    if (!recommended.length && !debug) {
-      return null;
-    }
+    const hasRanking =
+      state.status === 'ready' &&
+      (Boolean(state.response?.recommended.length) || Boolean(Object.keys(state.response?.scores ?? {}).length));
 
     return (
       <div className={styles.root} data-testid="related-metrics-ranking">
-        {recommended.length > 0 && (
-          <>
-            <div className={styles.heading}>{t('related-metrics-ranking.title', 'Recommended')}</div>
-            <div className={styles.items}>
-              {recommended.slice(0, 3).map(({ candidate, p }) => (
-                <Button
-                  key={candidate.id}
-                  variant="secondary"
-                  fill="outline"
-                  size="sm"
-                  data-testid={`related-metrics-ranking-item-${candidate.id}`}
-                  onClick={() => model.publishEvent(new MetricSelectedEvent({ metric: candidate.name }), true)}
-                >
-                  {candidate.name}
-                  {candidate.relationship?.class && (
-                    <span className={styles.hint}>{candidate.relationship.class.replaceAll('_', ' ')}</span>
-                  )}
-                  {typeof p === 'number' && <span className={styles.hint}>{Math.round(p * 100)}%</span>}
-                </Button>
-              ))}
-            </div>
-          </>
-        )}
+        <div className={styles.status}>
+          {hasRanking
+            ? t(
+                'related-metrics-ranking.sorted',
+                'Sorted by Jev relevance. Unranked metrics follow in name-similarity order.'
+              )
+            : t('related-metrics-ranking.fallback', 'Jev ranking unavailable. Showing name-similarity order.')}
+        </div>
         {debug && <DebugOverlay state={state} />}
       </div>
     );
@@ -252,13 +224,7 @@ function getStyles(theme: GrafanaTheme2) {
       fontSize: theme.typography.bodySmall.fontSize,
       padding: theme.spacing(0.5, 0),
     }),
-    heading: css({ fontWeight: theme.typography.fontWeightMedium, fontSize: theme.typography.bodySmall.fontSize }),
-    items: css({ display: 'flex', flexWrap: 'wrap', gap: theme.spacing(1) }),
-    hint: css({
-      color: theme.colors.text.secondary,
-      fontSize: theme.typography.bodySmall.fontSize,
-      marginLeft: theme.spacing(1),
-    }),
+    status: css({ color: theme.colors.text.secondary, fontSize: theme.typography.bodySmall.fontSize }),
     debug: css({ marginTop: theme.spacing(1), fontSize: theme.typography.bodySmall.fontSize }),
     table: css({
       marginTop: theme.spacing(0.5),
