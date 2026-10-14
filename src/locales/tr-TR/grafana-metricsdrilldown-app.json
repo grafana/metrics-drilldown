@@ -306,9 +306,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "URL'yi kopyala",
       "copy-url-success": "URL panoya kopyalandı",
-      "explore": "Keşfet"
+      "create-alert": "",
+      "explore": "Keşfet",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "İşlemler",
@@ -470,7 +474,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Yer imi",
       "copy-url": "URL'yi kopyala",
       "open-explore": "Keşfet'te aç",
       "select-new-metric-tooltip": "Mevcut metriği kaldırın ve yeni bir metrik seçin"

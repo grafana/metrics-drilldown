@@ -301,9 +301,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "Salin URL",
       "copy-url-success": "URL disalin ke papan klip",
-      "explore": "Jelajahi"
+      "create-alert": "",
+      "explore": "Jelajahi",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Tindakan",
@@ -460,7 +464,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Bookmark",
       "copy-url": "Salin URL",
       "open-explore": "Buka di telusuri",
       "select-new-metric-tooltip": "Hapus metrik yang ada dan pilih metrik baru"
