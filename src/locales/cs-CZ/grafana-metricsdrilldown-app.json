@@ -316,9 +316,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "Kopírovat adresu URL",
       "copy-url-success": "Adresa URL byla zkopírována do schránky",
-      "explore": "Prozkoumat"
+      "create-alert": "",
+      "explore": "Prozkoumat",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Akce",
@@ -490,7 +494,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Záložka",
       "copy-url": "Kopírovat adresu URL",
       "open-explore": "Otevřít v Prozkoumat",
       "select-new-metric-tooltip": "Odebrat stávající metriku a vybrat novou metriku"

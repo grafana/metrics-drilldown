@@ -301,9 +301,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "复制 URL",
       "copy-url-success": "URL 已复制到剪贴板",
-      "explore": "探索"
+      "create-alert": "",
+      "explore": "探索",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "操作",
@@ -460,7 +464,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "书签",
       "copy-url": "复制 URL",
       "open-explore": "在探索中打开",
       "select-new-metric-tooltip": "移除现有指标并选择新指标"

@@ -316,9 +316,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "Kopiuj URL",
       "copy-url-success": "Adres URL został skopiowany do schowka",
-      "explore": "Eksploruj"
+      "create-alert": "",
+      "explore": "Eksploruj",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Działania",
@@ -490,7 +494,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Dodaj do zakładek",
       "copy-url": "Kopiuj URL",
       "open-explore": "Otwórz w widoku Eksploruj",
       "select-new-metric-tooltip": "Usuń istniejący wskaźnik i wybierz nowy"
