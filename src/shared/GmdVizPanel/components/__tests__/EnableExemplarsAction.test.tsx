@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { getTrailFor } from 'shared/utils/utils';
 
 import { EnableExemplarsAction, getTooltip } from '../EnableExemplarsAction';
 
@@ -13,6 +14,10 @@ import { EnableExemplarsAction, getTooltip } from '../EnableExemplarsAction';
 
 jest.mock('shared/tracking/interactions', () => ({
   reportExploreMetrics: jest.fn(),
+}));
+
+jest.mock('shared/utils/utils', () => ({
+  getTrailFor: jest.fn(),
 }));
 
 jest.mock('@grafana/scenes', () => {
@@ -30,6 +35,7 @@ jest.mock('@grafana/scenes', () => {
 const mockGetAncestor = sceneGraph.getAncestor as jest.Mock;
 const mockFindDescendents = sceneGraph.findDescendents as jest.Mock;
 const mockReportExploreMetrics = reportExploreMetrics as jest.Mock;
+const mockGetTrailFor = getTrailFor as jest.Mock;
 
 // =============================================================================
 // HELPERS
@@ -208,7 +214,7 @@ describe('EnableExemplarsAction', () => {
       expect(getSwitchInput().disabled).toBe(false);
     });
 
-    it('calls GmdVizPanel.update with the new value and reports the interaction on change', async () => {
+    it('writes the new value to the trail (which owns the url param) and reports the interaction on change', async () => {
       const vizPanel = createMockVizPanel({
         metricType: 'counter',
         metricTypeResolved: true,
@@ -216,6 +222,8 @@ describe('EnableExemplarsAction', () => {
         queryConfig: {},
       });
       mockGetAncestor.mockReturnValue(vizPanel);
+      const trail = { setState: jest.fn() };
+      mockGetTrailFor.mockReturnValue(trail);
 
       const action = new EnableExemplarsAction();
       await activateAction(action);
@@ -223,7 +231,7 @@ describe('EnableExemplarsAction', () => {
       render(<EnableExemplarsAction.Component model={action} />);
       fireEvent.click(getSwitchInput());
 
-      expect(vizPanel.update).toHaveBeenCalledWith({}, { exemplarsEnabled: true });
+      expect(trail.setState).toHaveBeenCalledWith({ exemplarsEnabled: true });
       expect(mockReportExploreMetrics).toHaveBeenCalledWith('exemplars_toggle_changed', { enabled: true });
     });
 
@@ -394,6 +402,43 @@ describe('EnableExemplarsAction', () => {
       render(<EnableExemplarsAction.Component model={action} />);
 
       expect(screen.queryByRole('group')).toBeNull();
+    });
+
+    it('does not add a second tab stop around the switch when it is enabled', async () => {
+      // Tooltip injects tabIndex 0 into its trigger. An enabled switch is already focusable, so the
+      // wrapper must not also be a stop; only a disabled switch (whose input can't take focus) needs it.
+      const vizPanel = createMockVizPanel({
+        metricType: 'counter',
+        metricTypeResolved: true,
+        panelConfig: { type: 'timeseries' },
+        queryConfig: {},
+      });
+      mockGetAncestor.mockReturnValue(vizPanel);
+
+      const action = new EnableExemplarsAction();
+      await activateAction(action);
+
+      render(<EnableExemplarsAction.Component model={action} />);
+
+      expect(getSwitchInput().closest('span')?.hasAttribute('tabindex')).toBe(false);
+    });
+
+    it('still shows the tooltip when the enabled switch itself receives keyboard focus', async () => {
+      const vizPanel = createMockVizPanel({
+        metricType: 'counter',
+        metricTypeResolved: true,
+        panelConfig: { type: 'timeseries' },
+        queryConfig: {},
+      });
+      mockGetAncestor.mockReturnValue(vizPanel);
+
+      const action = new EnableExemplarsAction();
+      await activateAction(action);
+
+      render(<EnableExemplarsAction.Component model={action} />);
+      fireEvent.focus(getSwitchInput());
+
+      expect((await screen.findByRole('tooltip')).textContent).toContain('Show exemplars');
     });
   });
 

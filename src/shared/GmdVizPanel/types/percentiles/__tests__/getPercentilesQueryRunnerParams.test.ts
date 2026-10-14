@@ -243,6 +243,36 @@ describe('getPercentilesQueryRunnerParams(options)', () => {
     expect(result.queries[1]).not.toHaveProperty('exemplar');
   });
 
+  test.each([
+    ['non-histogram', { name: 'http_requests_total', type: 'counter' as const }, 'quantile' as PrometheusFunction],
+    [
+      'histogram',
+      { name: 'http_request_duration_seconds', type: 'native-histogram' as const },
+      'histogram_quantile' as PrometheusFunction,
+    ],
+  ])(
+    'attaches exemplar to the first emitted query when the first definition is skipped as unknown (%s path)',
+    (_path, metric, fn) => {
+      const result = getPercentilesQueryRunnerParams({
+        metric,
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: false,
+          queries: [
+            { fn: 'unknown_fn' as PrometheusFunction, params: { percentiles: [99] } },
+            { fn, params: { percentiles: [99, 90] } },
+          ],
+          exemplarsEnabled: true,
+        },
+      });
+
+      expect(result.queries).toHaveLength(2);
+      expect(result.queries[0]).toMatchObject({ exemplar: true });
+      expect(result.queries[1]).not.toHaveProperty('exemplar');
+    }
+  );
+
   test('does not attach exemplar for an unsupported metric type, even when exemplarsEnabled is true', () => {
     const result = getPercentilesQueryRunnerParams({
       metric: { name: 'go_goroutines', type: 'gauge' },

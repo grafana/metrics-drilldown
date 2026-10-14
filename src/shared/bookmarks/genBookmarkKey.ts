@@ -4,6 +4,7 @@ function filterUrlValues(urlValues: SceneObjectUrlValues) {
   delete urlValues.actionView;
   delete urlValues.layout;
   delete urlValues.refresh;
+  delete urlValues.exemplars;
 
   if (Array.isArray(urlValues['var-filters'])) {
     urlValues['var-filters'] = urlValues['var-filters'].filter(Boolean);

@@ -9,11 +9,21 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Switch, Tooltip } from '@grafana/ui';
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { supportsExemplars } from 'shared/GmdVizPanel/matchers/supportsExemplars';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
+import { getTrailFor } from 'shared/utils/utils';
+
+// Tooltip clones its child with tabIndex={0} and its hover/focus handlers. The handlers must land on this span
+// (the switch's own hidden <input> is never under the pointer), but the tab stop should not: an enabled
+// switch is already focusable, so honoring the injected tabIndex would add a second stop in front of it.
+// A disabled <input> can't take focus, so only then does the span need to be the stop.
+const TooltipTrigger = forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement> & { focusable: boolean }>(
+  ({ focusable, tabIndex, ...rest }, ref) => <span ref={ref} tabIndex={focusable ? tabIndex : undefined} {...rest} />
+);
+TooltipTrigger.displayName = 'TooltipTrigger';
 
 type DataStatus = 'unknown' | 'empty' | 'has-data' | 'error';
 type DisabledReason = 'metric-type' | 'panel-type' | null;
@@ -123,7 +133,8 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
 
     reportExploreMetrics('exemplars_toggle_changed', { enabled: exemplarsEnabled });
 
-    sceneGraph.getAncestor(this, GmdVizPanel).update({}, { exemplarsEnabled });
+    // DataTrail owns the state (it is synced with the url); MetricGraphScene pushes it into the panel.
+    getTrailFor(this).setState({ exemplarsEnabled });
   };
 
   public static readonly Component = ({ model }: SceneComponentProps<EnableExemplarsAction>) => {
@@ -135,11 +146,13 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
 
     return (
       <Tooltip content={tooltip} placement="top">
-        {/* The span is the Tooltip trigger: Switch puts hover/focus handlers on its hidden <input>, which
-            the pointer never reaches. Tooltip makes the span focusable (tabIndex 0). A disabled input
-            can't take focus, so while disabled the span also carries the reason as its accessible name
+        {/* While disabled, the span is the keyboard stop and carries the reason as its accessible name
             (equal to the tooltip text, so Tooltip doesn't announce it twice). */}
-        <span role={isDisabled ? 'group' : undefined} aria-label={isDisabled ? tooltip : undefined}>
+        <TooltipTrigger
+          focusable={isDisabled}
+          role={isDisabled ? 'group' : undefined}
+          aria-label={isDisabled ? tooltip : undefined}
+        >
           <Switch
             value={checked}
             disabled={isDisabled}
@@ -148,7 +161,7 @@ export class EnableExemplarsAction extends SceneObjectBase<EnableExemplarsAction
             data-testid="enable-exemplars-action"
             data-status={dataStatus}
           />
-        </span>
+        </TooltipTrigger>
       </Tooltip>
     );
   };

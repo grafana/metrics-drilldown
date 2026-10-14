@@ -51,12 +51,14 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     customFunction,
     kgMetricType,
     binaryQuery,
+    exemplarsEnabled,
   }: {
     metric: MetricGraphSceneState['metric'];
     customRateInterval?: string;
     customFunction?: string;
     kgMetricType?: KgMetricType;
     binaryQuery?: string;
+    exemplarsEnabled?: boolean;
   }) {
     super({
       metric,
@@ -92,6 +94,7 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
                 // For a KG binary (ratio) insight, render the full binary expression in the main graph
                 // instead of the first-leaf metric selector. Undefined for normal metrics.
                 binaryExpr: binaryQuery,
+                exemplarsEnabled,
               },
             }),
           }),
@@ -154,6 +157,16 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
 
     const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
     const { metricType } = gmdVizPanel.state;
+
+    // DataTrail owns the switch state (it is synced with the url), so the live panel follows it. Registered
+    // before the awaits and early returns below so it applies to every metric type.
+    this._subs.add(
+      trail.subscribeToState((newState, prevState) => {
+        if (newState.exemplarsEnabled !== prevState.exemplarsEnabled) {
+          gmdVizPanel.update({}, { exemplarsEnabled: Boolean(newState.exemplarsEnabled) });
+        }
+      })
+    );
 
     const entry = trail.state.sourceMetrics?.find((s) => s.metricName === metric);
     if (!entry?.metricType) {
