@@ -250,6 +250,23 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       expect(result.queries[1]).not.toHaveProperty('exemplar');
     });
 
+    test('attaches exemplar to the first emitted query when the first definition is skipped as unknown', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'go_goroutines', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: false,
+          queries: [{ fn: 'unknown_fn' as PrometheusFunction }, { fn: 'min' }, { fn: 'max' }],
+          exemplarsEnabled: true,
+        },
+      });
+
+      expect(result.queries).toHaveLength(2);
+      expect(result.queries[0]).toMatchObject({ exemplar: true });
+      expect(result.queries[1]).not.toHaveProperty('exemplar');
+    });
+
     test('does not attach exemplar when exemplarsEnabled is false', () => {
       const result = getTimeseriesQueryRunnerParams({
         metric: { name: 'go_goroutines', type: 'gauge' },

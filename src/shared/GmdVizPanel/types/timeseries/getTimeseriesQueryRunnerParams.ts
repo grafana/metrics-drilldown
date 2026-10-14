@@ -239,11 +239,12 @@ function buildQueriesWithPresetFunctions({
 
   const queryDefs: QueryDefs = queryConfig.queries?.length ? queryConfig.queries : [{ fn: defaultPromqlFn }];
   const queries: SceneDataQuery[] = [];
-  for (const [index, { fn }] of queryDefs.entries()) {
-    // Only the first target carries the exemplar flag: Prometheus issues a separate
+  for (const { fn } of queryDefs) {
+    // Only the first emitted target carries the exemplar flag: Prometheus issues a separate
     // /api/v1/query_exemplars request per target that has it, so a panel configured with multiple
     // preset functions (e.g. min/max/avg) would otherwise fire one exemplar query per function.
-    const exemplar = index === 0 ? queryConfig.exemplarsEnabled : undefined;
+    // Keyed on queries.length, not the definition index, because unknown functions are skipped.
+    const exemplar = queries.length === 0 ? queryConfig.exemplarsEnabled : undefined;
     const q = buildPresetFunctionQuery(metric.name, fn, expr, isCounter, '[getTimeseriesQueryRunnerParams]', exemplar);
     if (q) {
       queries.push(q);
