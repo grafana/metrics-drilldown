@@ -255,4 +255,51 @@ describe('GmdVizPanel', () => {
 
     expect(provider.subscribeToState).not.toHaveBeenCalled();
   });
+
+  describe('exemplarsEnabled', () => {
+    // Toggling must build a fresh body: Scenes' VizPanel reuses cached series when the series array is
+    // unchanged, so updating the existing query runner in place would leave stale exemplar markers.
+    test('rebuilds the panel with a fresh body when exemplarsEnabled is turned on, instead of updating the existing query runner', () => {
+      const existingBody = { state: {} };
+      const rebuiltBody = { state: {} };
+      jest.mocked(panelBuilder.buildVizPanel).mockReturnValue(rebuiltBody as any);
+      const panel = createPanel();
+      panel.setState({ body: existingBody as any });
+      (panel as any).subscribeToStateChanges();
+
+      panel.update({}, { exemplarsEnabled: true });
+
+      expect(panelBuilder.buildVizPanel).toHaveBeenCalledTimes(1);
+      expect(panelBuilder.buildVizPanel).toHaveBeenCalledWith(
+        expect.objectContaining({ queryConfig: expect.objectContaining({ exemplarsEnabled: true }) })
+      );
+      expect(panel.state.body).toBe(rebuiltBody);
+      expect(panel.state.body).not.toBe(existingBody);
+      expect(panelBuilder.getQueryRunnerParams).not.toHaveBeenCalled();
+    });
+
+    test('also rebuilds the panel when exemplarsEnabled is turned back off', () => {
+      const existingBody = { state: {} };
+      const rebuiltBody = { state: {} };
+      jest.mocked(panelBuilder.buildVizPanel).mockReturnValue(rebuiltBody as any);
+      const panel = new GmdVizPanel({ metric: 'go_goroutines', queryOptions: { exemplarsEnabled: true } });
+      panel.setState({ body: existingBody as any });
+      (panel as any).subscribeToStateChanges();
+
+      panel.update({}, { exemplarsEnabled: false });
+
+      expect(panelBuilder.buildVizPanel).toHaveBeenCalledTimes(1);
+      expect(panel.state.body).toBe(rebuiltBody);
+      expect(panelBuilder.getQueryRunnerParams).not.toHaveBeenCalled();
+    });
+
+    test('does not rebuild the panel for an unrelated query option change', () => {
+      const panel = createPanel();
+      (panel as any).subscribeToStateChanges();
+
+      panel.update({}, { customRateInterval: '5m' });
+
+      expect(panelBuilder.buildVizPanel).not.toHaveBeenCalled();
+    });
+  });
 });
