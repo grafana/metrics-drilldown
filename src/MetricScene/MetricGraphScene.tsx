@@ -158,8 +158,15 @@ export class MetricGraphScene extends SceneObjectBase<MetricGraphSceneState> {
     const [gmdVizPanel] = sceneGraph.findDescendents(this, GmdVizPanel);
     const { metricType } = gmdVizPanel.state;
 
-    // DataTrail owns the switch state (it is synced with the url), so the live panel follows it. Registered
-    // before the awaits and early returns below so it applies to every metric type.
+    // DataTrail owns the switch state (it is synced with the url), so the live panel follows it. The trail can
+    // change between this scene's construction and its activation (opening a bookmark saved with exemplars on
+    // applies its url values after the scene is built), so sync once now, then follow changes. Both come
+    // before the awaits and early returns below so they apply to every metric type.
+    const exemplarsEnabled = Boolean(trail.state.exemplarsEnabled);
+    if (exemplarsEnabled !== Boolean(gmdVizPanel.state.queryConfig.exemplarsEnabled)) {
+      gmdVizPanel.update({}, { exemplarsEnabled });
+    }
+
     this._subs.add(
       trail.subscribeToState((newState, prevState) => {
         if (newState.exemplarsEnabled !== prevState.exemplarsEnabled) {

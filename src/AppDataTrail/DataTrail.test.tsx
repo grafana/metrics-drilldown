@@ -590,4 +590,17 @@ describe('DataTrail - exemplars url param', () => {
     trail.setState({ exemplarsEnabled: false });
     expect(getMainPanel().state.queryConfig.exemplarsEnabled).toBe(false);
   });
+
+  it('syncs the main panel when it activates after the trail changed since the metric scene was built', () => {
+    // Opening a bookmark saved with exemplars on builds the metric scene first, then applies the
+    // bookmark's url values to the trail, before the scene has activated and subscribed to the trail.
+    trail.updateFromUrl({ metric: 'http_requests_total' });
+    trail.updateFromUrl({ metric: 'http_requests_total', exemplars: 'true' });
+    const metricScene = trail.state.topScene as MetricScene;
+    jest.spyOn(trail, 'getMetadataForMetric').mockResolvedValue(undefined);
+
+    metricScene.state.body.activate();
+
+    expect(getMainPanel().state.queryConfig.exemplarsEnabled).toBe(true);
+  });
 });
