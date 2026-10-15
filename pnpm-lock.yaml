@@ -19,7 +19,7 @@ overrides:
   source-map-js: ^1.2.2
   js-yaml@^3: ^4.3.2
   chokidar@^3: ^5.0.0
-  eslint-webpack-plugin>micromatch: npm:picomatch@^2.3.2
+  eslint-webpack-plugin>micromatch: npm:picomatch@^4.0.0
   '@types/jest>expect': ^30.5.2
 
 importers:
@@ -10113,7 +10113,7 @@ snapshots:
     dependencies:
       '@types/eslint': 9.6.1
       eslint: 10.0.2(jiti@2.7.0)(supports-color@8.1.1)
-      micromatch: picomatch@2.3.2
+      micromatch: picomatch@4.0.4
       normalize-path: 3.0.0
       schema-utils: 4.5.0
       webpack: 5.111.1(@swc/core@1.16.13(@swc/helpers@0.5.23))(postcss@8.5.28)
