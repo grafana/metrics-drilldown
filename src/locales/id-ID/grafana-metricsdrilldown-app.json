@@ -164,6 +164,15 @@
     "button": "Berikan umpan balik"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Histogram Asli",
     "variant": {
       "heatmap": "peta panas",

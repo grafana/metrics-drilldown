@@ -169,6 +169,15 @@
     "button": "Ge feedback"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Inbyggt histogram",
     "variant": {
       "heatmap": "värmekarta",
