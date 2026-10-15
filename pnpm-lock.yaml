@@ -181,8 +181,8 @@ importers:
         specifier: 7.1.5
         version: 7.1.5(@rspack/core@2.1.10(@swc/helpers@0.5.23))(webpack@5.111.1(@swc/core@1.16.13(@swc/helpers@0.5.23))(postcss@8.5.28))
       dotenv:
-        specifier: 17.4.2
-        version: 17.4.2
+        specifier: 18.0.7
+        version: 18.0.7
       eslint:
         specifier: ^10.0.0
         version: 10.0.2(jiti@2.7.0)(supports-color@8.1.1)
@@ -3224,9 +3224,10 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  dotenv@17.4.2:
-    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
+  dotenv@18.0.7:
+    resolution: {integrity: sha512-QEvMEF8ca3GNZJJnAbOgxpj5ULhBvnMcURp+XKrtvqFNPgjBvYoswQ0Jl2cO7JzCjxZjJhr9ZuIEhlrRxMft/Q==}
     engines: {node: '>=12'}
+    hasBin: true
 
   downshift@9.3.2:
     resolution: {integrity: sha512-5VD0WZLQDhipWiDU+K5ili3VDhGrXwlvOlSaSG1Cb0eS4XpssxVuoD09JNgju+bAzxB2Wvlwx+FwTE/FNdrqow==}
@@ -9757,7 +9758,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  dotenv@17.4.2: {}
+  dotenv@18.0.7: {}
 
   downshift@9.3.2(react@19.3.0):
     dependencies:
