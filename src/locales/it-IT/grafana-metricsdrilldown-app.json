@@ -169,6 +169,15 @@
     "button": "Lascia un feedback"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Istogramma nativo",
     "variant": {
       "heatmap": "mappa di calore",

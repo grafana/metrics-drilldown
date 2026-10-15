@@ -164,6 +164,15 @@
     "button": "피드백 제출하기"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "기본 히스토그램",
     "variant": {
       "heatmap": "히트맵",

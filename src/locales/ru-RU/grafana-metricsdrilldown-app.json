@@ -179,6 +179,15 @@
     "button": "Отправить отзыв"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Встроенная гистограмма",
     "variant": {
       "heatmap": "тепловая карта",

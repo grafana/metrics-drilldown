@@ -164,6 +164,15 @@
     "button": "フィードバックを提供"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "ネイティブヒストグラム",
     "variant": {
       "heatmap": "ヒートマップ",

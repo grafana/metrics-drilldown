@@ -179,6 +179,15 @@
     "button": "Poskytnout zpětnou vazbu"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Nativní histogram",
     "variant": {
       "heatmap": "teplotní mapa",

@@ -179,6 +179,15 @@
     "button": "Przekaż opinię"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Histogram natywny",
     "variant": {
       "heatmap": "mapa intensywności",

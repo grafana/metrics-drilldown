@@ -164,6 +164,15 @@
     "button": "提供意見回饋"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "原生直方圖",
     "variant": {
       "heatmap": "熱度圖",

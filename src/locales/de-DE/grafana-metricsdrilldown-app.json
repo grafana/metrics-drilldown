@@ -169,6 +169,15 @@
     "button": "Feedback geben"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Natives Histogramm",
     "variant": {
       "heatmap": "Heatmap",
