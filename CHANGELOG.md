@@ -1,5 +1,30 @@
 # Changelog
 
+## [3.1.0](https://github.com/grafana/metrics-drilldown/compare/v3.0.0...v3.1.0) (2026-10-16)
+
+
+### 🎉 Features
+
+* metrics drilldown exemplars to traces ([#1516](https://github.com/grafana/metrics-drilldown/issues/1516)) ([1cb5746](https://github.com/grafana/metrics-drilldown/commit/1cb57468c476c4188a0de64b2ec4bc6f9b58531d))
+* use OpenFeature providers from `@grafana/runtime` ([#1497](https://github.com/grafana/metrics-drilldown/issues/1497)) ([e02fde3](https://github.com/grafana/metrics-drilldown/commit/e02fde3a86246615c6537d28939e5fa2c0de6cf2))
+
+
+### ♻️ Code Refactoring
+
+* clean panel UI actions ([#1501](https://github.com/grafana/metrics-drilldown/issues/1501)) ([cf7199d](https://github.com/grafana/metrics-drilldown/commit/cf7199d6039f89b496ea4ee19d16bc3e5bc12978))
+
+
+### 🧹 Chore
+
+* **deps:** Update dependency @playwright/test to v1.64.0 ([#1504](https://github.com/grafana/metrics-drilldown/issues/1504)) ([ab24593](https://github.com/grafana/metrics-drilldown/commit/ab245938270f9c51af3664fe7799d5ba77cd6cac))
+* **deps:** Update dependency chokidar@^3 to v5 ([#1506](https://github.com/grafana/metrics-drilldown/issues/1506)) ([2e77b0a](https://github.com/grafana/metrics-drilldown/commit/2e77b0a1e99f85ca337cb3bf349abceca6bb97aa))
+* **deps:** Update dependency dotenv to v18 ([#1508](https://github.com/grafana/metrics-drilldown/issues/1508)) ([47a0b44](https://github.com/grafana/metrics-drilldown/commit/47a0b44c8b8782ad8e3f274a7406f1d3180a4d67))
+* **deps:** Update dependency eslint-webpack-plugin&gt;micromatch to v4 ([#1509](https://github.com/grafana/metrics-drilldown/issues/1509)) ([4176e98](https://github.com/grafana/metrics-drilldown/commit/4176e98abce3cb2bc7816894cbf36427a0e1a195))
+* **deps:** Update dependency js-yaml@^3 to v5 ([#1510](https://github.com/grafana/metrics-drilldown/issues/1510)) ([6c4f4a9](https://github.com/grafana/metrics-drilldown/commit/6c4f4a9eea1b3e587089a210700cbc2f970b29e5))
+* **deps:** Update GitHub Actions ([#1507](https://github.com/grafana/metrics-drilldown/issues/1507)) ([e4275a1](https://github.com/grafana/metrics-drilldown/commit/e4275a1193696b4619b589f937ffc01ca4b132ae))
+* **deps:** Update pnpm to v11.28.5 ([#1503](https://github.com/grafana/metrics-drilldown/issues/1503)) ([ecbbf1f](https://github.com/grafana/metrics-drilldown/commit/ecbbf1fe5b93b1a9d298b28e5fe402db616a57bb))
+* remove docs ([#1520](https://github.com/grafana/metrics-drilldown/issues/1520)) ([b508e10](https://github.com/grafana/metrics-drilldown/commit/b508e10ef8f366ba44ff6eb54be0a76467bc35a5))
+
 ## [3.0.0](https://github.com/grafana/metrics-drilldown/compare/v2.5.1...v3.0.0) (2026-10-08)
 
 
