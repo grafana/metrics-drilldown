@@ -49,7 +49,7 @@ function labelsOnly(labels: string[] | undefined): string[] | undefined {
   return result?.length ? result : undefined;
 }
 
-function metricFeatures(name: string, peekMetadata: MetadataPeek, labels?: string[]): RankingMetric {
+export function metricFeatures(name: string, peekMetadata: MetadataPeek, labels?: string[]): RankingMetric {
   const metadata = peekMetadata(name);
   const feature: RankingMetric = { name, type: metricType(metadata?.type, name) };
   if (metadata?.unit) {

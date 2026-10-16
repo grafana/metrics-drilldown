@@ -180,6 +180,21 @@
   "inline-banner": {
     "unknown-error": "Unknown error!"
   },
+  "jev-sort": {
+    "alert-scope": "Direct alert counts lack datasource attribution; incident priority currently uses SLO burn evidence.",
+    "band": "Band",
+    "debug": "Jev ranking details",
+    "fallback": "Jev unavailable — using signal-based priority.",
+    "label": "Jev Sorted ✨",
+    "loading": "Finding relevant metrics…",
+    "metric": "Metric",
+    "reasons": "Local reasons",
+    "retry": "Retry Jev ranking",
+    "score": "Jev rubric",
+    "sorted_one": "Incident/SLO priority applied. Jev ranked {{count}} of {{total}} matching metrics; others use signal-based order.",
+    "sorted_other": "Incident/SLO priority applied. Jev ranked {{count}} of {{total}} matching metrics; others use signal-based order.",
+    "tooltip": "Sort metrics by incident and SLO priority, then Jev usefulness"
+  },
   "kg-annotations": {
     "layer": {
       "name": "Insights - {{severityLabel}}"

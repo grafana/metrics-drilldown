@@ -475,6 +475,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.disableReportFiltersInteraction = false;
   }
 
+  public peekMetricMetadata(metric: string) {
+    return this.datasourceHelper.peekMetadata(metric);
+  }
+
+  public getMetricLabelNames(metric: string): Promise<string[]> {
+    return this.datasourceHelper.getLabelNamesForMetric(metric);
+  }
+
   public async getMetadataForMetric(metric: string) {
     return this.datasourceHelper.getMetadataForMetric(metric);
   }

@@ -1,8 +1,7 @@
 /**
  * ListControls scene-graph wiring tests.
  *
- * Verifies that FiringAlertChip is present in the ListControls SceneFlexLayout
- * as a first-class scene-graph child, keyed 'firing-alert-chip'.
+ * Verifies Jev replaces the alert filter in the toolbar; SLO filtering stays independent.
  *
  * We test pure scene-graph structure here (no rendering, no DOM), so none of
  * the heavy Grafana/scenes rendering infrastructure is needed.
@@ -72,17 +71,20 @@ jest.mock('../SloTrackedChip/SloTrackedChip', () => {
   return { SloTrackedChip: MockSloTrackedChip };
 });
 
-import { sceneGraph } from '@grafana/scenes';
+import { sceneGraph, type SceneFlexItem, type SceneFlexLayout } from '@grafana/scenes';
 
 import { FiringAlertChip } from '../FiringAlertChip/FiringAlertChip';
+import { JevSort } from '../JevSort/JevSort';
 import { ListControls } from '../ListControls';
 import { SloTrackedChip } from '../SloTrackedChip/SloTrackedChip';
 
 describe('ListControls scene-graph wiring', () => {
-  test('FiringAlertChip is present in the scene graph with key "firing-alert-chip"', () => {
+  test('Jev occupies the former alert position, with no toolbar alert-filter scene', () => {
     const controls = new ListControls({});
-    const chip = sceneGraph.findByKeyAndType(controls, 'firing-alert-chip', FiringAlertChip);
-    expect(chip).toBeInstanceOf(FiringAlertChip);
+    const jev = sceneGraph.findByKeyAndType(controls, 'jev-sort', JevSort);
+    expect(jev).toBeInstanceOf(JevSort);
+    expect(sceneGraph.findAllObjects(controls, (obj) => obj instanceof FiringAlertChip)).toHaveLength(0);
+    expect(((controls.state.body as SceneFlexLayout).state.children[1] as SceneFlexItem).state.body).toBe(jev);
   });
 
   test('SloTrackedChip is present in the scene graph with key "slo-tracked-chip"', () => {

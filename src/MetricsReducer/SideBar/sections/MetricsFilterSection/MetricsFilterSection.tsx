@@ -8,6 +8,7 @@ import {
   VariableDependencyConfig,
   type MultiValueVariable,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
 import { Icon, IconButton, Input, Spinner, Switch, useStyles2 } from '@grafana/ui';
@@ -49,6 +50,7 @@ import { TreeCheckBoxList } from './TreeCheckBoxList';
 
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
+  control?: SceneObject;
   computeGroups: (
     options: Array<{ label: string; value: string }>
   ) => Array<{ label: string; value: string; count: number }>;
@@ -119,6 +121,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     disabled,
     active,
     hierarchical,
+    control,
   }: {
     key: MetricsFilterSectionState['key'];
     type: MetricsFilterSectionState['type'];
@@ -131,6 +134,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     disabled?: MetricsFilterSectionState['disabled'];
     active?: MetricsFilterSectionState['active'];
     hierarchical?: MetricsFilterSectionState['hierarchical'];
+    control?: SceneObject;
   }) {
     super({
       key,
@@ -149,6 +153,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       hierarchical: hierarchical ?? false,
       expandedPrefixes: new Set(),
       computedSublevels: new Map(),
+      control,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -386,6 +391,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       hierarchical,
       expandedPrefixes,
       computedSublevels,
+      control,
     } = model.useState();
 
     const [hideEmpty, setHideEmpty] = useState(false);
@@ -415,6 +421,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     return (
       <div className={styles.container}>
         <SectionTitle title={title} description={description} />
+        {control && <control.Component model={control} />}
 
         {showHideEmpty && (
           <div className={styles.switchContainer}>

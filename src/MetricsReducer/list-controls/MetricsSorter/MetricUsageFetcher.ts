@@ -46,6 +46,10 @@ export class MetricUsageFetcher {
     return this._usageState[usageType].metricsPromise;
   }
 
+  public peekUsageMetrics(usageType: MetricUsageType): Record<string, MetricUsageDetails> {
+    return this._usageState[usageType].metrics;
+  }
+
   public getUsageForMetric(metricName: string, usageType: MetricUsageType): Promise<number> {
     return this.getUsageMetrics(usageType).then((metrics) => metrics[metricName]?.count ?? 0);
   }
