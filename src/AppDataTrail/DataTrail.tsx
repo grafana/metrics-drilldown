@@ -32,6 +32,7 @@ import { displaySuccess } from 'MetricsReducer/helpers/displayStatus';
 import { registerRuntimeDataSources } from 'MetricsReducer/helpers/registerRuntimeDataSources';
 import { LabelsDataSource } from 'MetricsReducer/labels/LabelsDataSource';
 import { LabelsVariable } from 'MetricsReducer/labels/LabelsVariable';
+import { recordMetricVisit } from 'MetricsReducer/list-controls/JevSort/personalization';
 import { addRecentMetric } from 'MetricsReducer/list-controls/MetricsSorter/MetricsSorter';
 import { AdHocFiltersForMetricsVariable } from 'MetricsReducer/metrics-variables/AdHocFiltersForMetricsVariable';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
@@ -411,6 +412,11 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     if (metric) {
       addRecentMetric(metric);
+      const datasourceUid =
+        urlValues?.[`var-${VAR_DATASOURCE}`] ?? sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue();
+      if (typeof datasourceUid === 'string') {
+        recordMetricVisit(datasourceUid, metric);
+      }
 
       // Track metric selection with hierarchical filter context
       const urlParams = new URLSearchParams(window.location.search);

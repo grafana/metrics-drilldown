@@ -188,6 +188,7 @@
     "label": "Jev Sorted ✨",
     "loading": "Finding relevant metrics…",
     "metric": "Metric",
+    "personal-boost": "Local visit history and bookmarks add a small boost within priority bands.",
     "reasons": "Local reasons",
     "retry": "Retry Jev ranking",
     "score": "Jev rubric",

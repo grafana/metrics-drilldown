@@ -16,6 +16,12 @@ import { getTrailFor } from 'shared/utils/utils';
 
 import { fetchCatalogRanking } from './fetchCatalogRanking';
 import {
+  getPersonalSignals,
+  PERSONAL_SIGNALS_CHANGED,
+  personalStorageKey,
+  type PersonalSignals,
+} from './personalization';
+import {
   buildLocalBaseline,
   CATALOG_POLICY_VERSION,
   catalogRequest,
@@ -28,7 +34,11 @@ import {
 } from './ranking';
 import { acquireCatalogSignals, boundedWait, CatalogLabelEnricher, type SignalSnapshot } from './signals';
 import { EventSortByChanged } from '../MetricsSorter/events/EventSortByChanged';
-import { sortMetricsWithRecentFirst, type MetricsSorter } from '../MetricsSorter/MetricsSorter';
+import {
+  sortMetricsAlphabetically,
+  sortMetricsWithRecentFirst,
+  type MetricsSorter,
+} from '../MetricsSorter/MetricsSorter';
 
 interface CatalogRankingState extends SceneObjectState {
   status: 'hidden' | 'loading' | 'ready' | 'fallback';
@@ -66,7 +76,26 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
 
   constructor() {
     super({ key: 'catalog-ranking', status: 'hidden', total: 0, baseline: [] });
-    this.addActivationHandler(() => () => this.cancel());
+    this.addActivationHandler(() => {
+      const changed = (event: Event) => {
+        if (this.state.status === 'hidden') {
+          return;
+        }
+        const datasourceUid = String(sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue() ?? '');
+        const key = personalStorageKey(datasourceUid);
+        const changedKey = event instanceof StorageEvent ? event.key : (event as CustomEvent<string>).detail;
+        if (key && (changedKey === key || changedKey === null)) {
+          this.publishEvent(new EventSortByChanged({ sortBy: 'jev-relevance' }), true);
+        }
+      };
+      window.addEventListener(PERSONAL_SIGNALS_CHANGED, changed);
+      window.addEventListener('storage', changed);
+      return () => {
+        window.removeEventListener(PERSONAL_SIGNALS_CHANGED, changed);
+        window.removeEventListener('storage', changed);
+        this.cancel();
+      };
+    });
   }
   public cancel() {
     this.controller?.abort();
@@ -84,13 +113,16 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
     filterContext: unknown,
     applyBaseline: (names: string[]) => void
   ): Promise<string[]> {
-    const ordinary = sortMetricsWithRecentFirst(names);
-    if (!isJevEnabled() || !ordinary.length) {
+    const enabled = isJevEnabled();
+    // Legacy recents cannot prove user/org/datasource attribution. Keep them in ordinary sorting only.
+    const ordinary = enabled ? sortMetricsAlphabetically(names, 'asc') : sortMetricsWithRecentFirst(names);
+    if (!enabled || !ordinary.length) {
       this.cancel();
       return Promise.resolve(ordinary);
     }
     const trail = getTrailFor(this);
     const datasourceUid = String(sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue() ?? '');
+    const personal = getPersonalSignals(datasourceUid);
     const range = sceneGraph.getTimeRange(trail).state.value;
     const filters = (sceneGraph.lookupVariable(VAR_FILTERS, this) as AdHocFiltersVariable | undefined)?.state.filters;
     const context = JSON.stringify([
@@ -104,6 +136,8 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
     // Include metadata and the freshness window: identical names alone do not define identical evidence.
     const signature = JSON.stringify([
       context,
+      personalStorageKey(datasourceUid),
+      personal,
       ordinary.map((name) => [name, trail.peekMetricMetadata(name)]),
       Math.floor(Date.now() / 60_000),
     ]);
@@ -123,11 +157,13 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       elapsedMs: undefined,
       labelMs: undefined,
     });
-    const promise = this.run(ordinary, sorter, datasourceUid, context, controller, applyBaseline).finally(() => {
-      if (this.controller === controller) {
-        this.current = undefined;
+    const promise = this.run(ordinary, sorter, datasourceUid, personal, context, controller, applyBaseline).finally(
+      () => {
+        if (this.controller === controller) {
+          this.current = undefined;
+        }
       }
-    });
+    );
     this.current = { signature, promise };
     return promise;
   }
@@ -136,6 +172,7 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
     ordinary: string[],
     sorter: MetricsSorter,
     datasourceUid: string,
+    personal: PersonalSignals,
     context: string,
     controller: AbortController,
     applyBaseline: (names: string[]) => void
@@ -157,7 +194,20 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       if (controller.signal.aborted) {
         return ordinary;
       }
-      const snapshot = await boundedWait(acquireCatalogSignals(sorter, datasourceUid), controller.signal, 1500);
+      // Even a slow/unavailable SLO integration must retain the cheap scoped personal fallback.
+      const personalBaseline = buildLocalBaseline(
+        ordinary,
+        { trackedMetrics: new Map(), activeBurnMetrics: new Set(), attributedFiringCounts: new Map(), personal },
+        (name) => trail.peekMetricMetadata(name)
+      );
+      fallback = personalBaseline.map((candidate) => candidate.name);
+      this.setState({ baseline: personalBaseline });
+      applyBaseline(fallback);
+      const snapshot = await boundedWait(
+        acquireCatalogSignals(sorter, datasourceUid, personal),
+        controller.signal,
+        1500
+      );
       if (controller.signal.aborted) {
         return ordinary;
       }
@@ -234,6 +284,11 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
             'Direct alert counts lack datasource attribution; incident priority currently uses SLO burn evidence.'
           )}
         </div>
+        {state.baseline.some((candidate) => candidate.personalBoost > 0) && (
+          <div>
+            {t('jev-sort.personal-boost', 'Local visit history and bookmarks add a small boost within priority bands.')}
+          </div>
+        )}
         {state.status === 'fallback' && (
           <Button size="sm" variant="secondary" onClick={model.retry}>
             {t('jev-sort.retry', 'Retry Jev ranking')}
@@ -277,7 +332,9 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
                     <tr key={candidate.id}>
                       <td>{candidate.name}</td>
                       <td>{local?.band}</td>
-                      <td>{local?.reasons.join(', ')}</td>
+                      <td>
+                        {local?.reasons.join(', ')} {local?.personalBoost ? `(+${local.personalBoost.toFixed(3)})` : ''}
+                      </td>
                       <td>{JSON.stringify(state.response?.scores[candidate.id] ?? null)}</td>
                     </tr>
                   );

@@ -1,5 +1,6 @@
+import { getPersonalSignals, type PersonalSignals } from './personalization';
 import { type LocalSignals } from './ranking';
-import { getRecentMetrics, type MetricsSorter } from '../MetricsSorter/MetricsSorter';
+import { type MetricsSorter } from '../MetricsSorter/MetricsSorter';
 
 export interface SignalSnapshot {
   signals: LocalSignals;
@@ -30,7 +31,11 @@ export async function boundedWait<T>(task: Promise<T>, signal: AbortSignal, time
   }
 }
 
-export async function acquireCatalogSignals(sorter: MetricsSorter, datasourceUid: string): Promise<SignalSnapshot> {
+export async function acquireCatalogSignals(
+  sorter: MetricsSorter,
+  datasourceUid: string,
+  personal: PersonalSignals = getPersonalSignals(datasourceUid)
+): Promise<SignalSnapshot> {
   const slo = await sorter.getSloMetricSignals(datasourceUid);
   return {
     signals: {
@@ -40,7 +45,7 @@ export async function acquireCatalogSignals(sorter: MetricsSorter, datasourceUid
       attributedFiringCounts: new Map(),
       dashboardCounts: sorter.peekUsageCounts('dashboard-usage'),
       alertCounts: sorter.peekUsageCounts('alerting-usage'),
-      recentMetrics: getRecentMetrics().map(({ name }) => name),
+      personal,
     },
     status: slo.status,
     burnStatus: slo.burnStatus ?? 'unknown',
