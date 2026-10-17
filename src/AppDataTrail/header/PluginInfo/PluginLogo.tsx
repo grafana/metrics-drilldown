@@ -1,4 +1,5 @@
 import { css, cx } from '@emotion/css';
+import { t } from '@grafana/i18n';
 import { useStyles2 } from '@grafana/ui';
 import React, { memo } from 'react';
 
@@ -12,7 +13,7 @@ export const PluginLogo = memo(function PluginLogoComponent({ size }: PluginLogo
     <img
       className={cx(styles.logo, size)}
       src="public/plugins/grafana-metricsdrilldown-app/img/logo.svg"
-      alt="Metrics Drilldown Logo"
+      alt={t('plugin-logo.alt', 'Metrics Drilldown logo')}
     />
   );
 });
