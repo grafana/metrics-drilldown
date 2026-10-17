@@ -18,6 +18,7 @@ export class MetricsVariableSortEngine {
   private variable: QueryVariable;
   private lastMetrics: string[];
   private sortBy?: SortingOption | 'related';
+  private generation = 0;
 
   constructor(variable: QueryVariable) {
     this.variable = variable;
@@ -26,15 +27,30 @@ export class MetricsVariableSortEngine {
   }
 
   public async sort(sortBy = this.sortBy, options: Record<string, any> = {}) {
+    const generation = ++this.generation;
     const metrics = this.variable.state.options.map((option) => option.value as string);
+    const sorter = this.findSorter();
+    if (sortBy !== 'jev-relevance') {
+      sorter?.state?.ranking?.cancel();
+    }
 
-    if (sortBy === this.sortBy && areArraysEqual(metrics, this.lastMetrics)) {
+    if (sortBy !== 'jev-relevance' && sortBy === this.sortBy && areArraysEqual(metrics, this.lastMetrics)) {
       return;
     }
 
     let sortedMetrics: string[];
 
     switch (sortBy) {
+      case 'jev-relevance':
+        sortedMetrics = sorter
+          ? await sorter.state.ranking.rank(metrics, sorter, options.filterContext, (baseline) => {
+              if (generation === this.generation) {
+                this.applyOrder(baseline);
+              }
+            })
+          : sortMetricsWithRecentFirst(metrics);
+        break;
+
       case 'alphabetical':
         sortedMetrics = sortMetricsAlphabetically(metrics, 'asc');
         break;
@@ -61,9 +77,29 @@ export class MetricsVariableSortEngine {
         break;
     }
 
+    if (generation !== this.generation) {
+      return;
+    }
     this.sortBy = sortBy;
     this.lastMetrics = sortedMetrics;
 
+    this.applyOrder(sortedMetrics);
+  }
+
+  public dispose() {
+    this.generation++;
+    this.findSorter()?.state?.ranking?.cancel();
+  }
+
+  private findSorter(): MetricsSorter | undefined {
+    try {
+      return sceneGraph.findByKeyAndType(this.variable, 'metrics-sorter', MetricsSorter);
+    } catch {
+      return undefined;
+    }
+  }
+
+  private applyOrder(sortedMetrics: string[]) {
     this.variable.setState({
       options: sortedMetrics.map((metricName) => ({
         label: metricName,

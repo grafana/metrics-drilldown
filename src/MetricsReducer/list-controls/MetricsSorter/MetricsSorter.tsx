@@ -12,19 +12,27 @@ import {
 } from '@grafana/scenes';
 import React from 'react';
 
+import { isJevEnabled } from 'MetricScene/RelatedMetrics/ranking/toggles';
 import { localeCompare } from 'MetricsReducer/helpers/localCompare';
 import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
 import { logger } from 'shared/logger/logger';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
+import { CatalogRanking } from '../JevSort/CatalogRanking';
 import { EventSortByChanged } from './events/EventSortByChanged';
 import { type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
 import { fetchFiringAlertRuleSignals, type FiringAlertRuleSignals } from './fetchers/fetchFiringAlertMetrics';
 import { fetchSloMetricSignals, type SloMetricSignals } from './fetchers/fetchSloMetricSignals';
 import { MetricUsageFetcher, type MetricUsageType } from './MetricUsageFetcher';
 export type SortingOption =
-  'default' | 'alphabetical' | 'alphabetical-reversed' | 'dashboard-usage' | 'alerting-usage' | 'firing-alerts';
+  | 'default'
+  | 'alphabetical'
+  | 'alphabetical-reversed'
+  | 'dashboard-usage'
+  | 'alerting-usage'
+  | 'firing-alerts'
+  | 'jev-relevance';
 
 const MAX_RECENT_METRICS = 6;
 const RECENT_METRICS_EXPIRY_DAYS = 30;
@@ -94,6 +102,7 @@ export function getRecentMetrics(): RecentMetric[] {
 interface MetricsSorterState extends SceneObjectState {
   $variables: SceneVariableSet;
   inputControls: SceneObject;
+  ranking: CatalogRanking;
 }
 
 function getSortByOptions(): VariableValueOption[] {
@@ -104,14 +113,14 @@ function getSortByOptions(): VariableValueOption[] {
     { label: t('metrics-sorter.option.dashboard-usage', 'Dashboard Usage'), value: 'dashboard-usage' },
     { label: t('metrics-sorter.option.alerting-usage', 'Alerting Usage'), value: 'alerting-usage' },
     { label: t('metrics-sorter.option.firing-alerts', 'Firing Alerts'), value: 'firing-alerts' },
+    ...(isJevEnabled() ? [{ label: t('jev-sort.label', 'Jev Sorted ✨'), value: 'jev-relevance' }] : []),
   ];
 }
-
-const sortByOptions: VariableValueOption[] = getSortByOptions();
 
 export const VAR_WINGMAN_SORT_BY = 'metrics-reducer-sort-by';
 
 const SLO_SIGNAL_ERROR_RETRY_DELAY_MS = 5_000;
+const SIGNAL_TTL_MS = 60_000;
 
 export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   initialized = false;
@@ -122,14 +131,17 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     'dashboard-usage',
     'default',
     'firing-alerts',
+    ...(isJevEnabled() ? ['jev-relevance' as const] : []),
   ]);
   private usageFetcher = new MetricUsageFetcher();
   private firingAlertCache: {
     data: FiringAlertRuleSignals | null;
     promise: Promise<FiringAlertRuleSignals> | null;
+    fetchedAt: number;
   } = {
     data: null,
     promise: null,
+    fetchedAt: 0,
   };
   private sloSignalCache = new Map<
     string,
@@ -138,6 +150,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       error: SloMetricSignals | null;
       promise: Promise<SloMetricSignals> | null;
       retryAfter: number;
+      fetchedAt: number;
     }
   >();
 
@@ -151,13 +164,16 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
             name: VAR_WINGMAN_SORT_BY,
             label: t('metrics-sorter.label', 'Sort by'),
             value: 'default',
-            query: sortByOptions.map((option) => `${option.label} : ${option.value}`).join(','),
+            query: getSortByOptions()
+              .map((option) => `${option.label} : ${option.value}`)
+              .join(','),
             description:
               'Default metric sorting is alphabetical with recently-selected metrics first. Metrics can also be sorted purely alphabetically, by prevalence in dashboard panel queries, or by prevalence in alerting rules',
           }),
         ],
       }),
       inputControls: new VariableValueSelectors({ layout: 'horizontal' }),
+      ranking: new CatalogRanking(),
     });
 
     this.addActivationHandler(() => this.activationHandler());
@@ -189,6 +205,9 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
     this._subs.add(
       sortByVar.subscribeToState((newState, prevState) => {
         if (newState.value !== prevState.value) {
+          if (newState.value !== 'jev-relevance') {
+            this.state.ranking.cancel();
+          }
           this.publishEvent(new EventSortByChanged({ sortBy: newState.value as SortingOption }), true);
         }
       })
@@ -211,7 +230,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   }
 
   public getFiringAlertSignals(): Promise<FiringAlertRuleSignals> {
-    if (this.firingAlertCache.data) {
+    if (this.firingAlertCache.data && Date.now() - this.firingAlertCache.fetchedAt < SIGNAL_TTL_MS) {
       return Promise.resolve(this.firingAlertCache.data);
     }
     if (this.firingAlertCache.promise) {
@@ -221,6 +240,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       .then((data) => {
         if (data.status === 'ready') {
           this.firingAlertCache.data = data;
+          this.firingAlertCache.fetchedAt = Date.now();
         }
         return data;
       })
@@ -245,7 +265,11 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
 
   public getSloMetricSignals(datasourceUid: string): Promise<SloMetricSignals> {
     const cached = this.sloSignalCache.get(datasourceUid);
-    if (cached?.data) {
+    if (
+      cached?.data &&
+      Date.now() - cached.fetchedAt <
+        (cached.data.burnStatus === 'error' ? SLO_SIGNAL_ERROR_RETRY_DELAY_MS : SIGNAL_TTL_MS)
+    ) {
       return Promise.resolve(cached.data);
     }
     if (cached?.promise) {
@@ -255,7 +279,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       return Promise.resolve(cached.error);
     }
 
-    const entry = cached ?? { data: null, error: null, promise: null, retryAfter: 0 };
+    const entry = cached ?? { data: null, error: null, promise: null, retryAfter: 0, fetchedAt: 0 };
     const promise = fetchSloMetricSignals(datasourceUid, () => this.getFiringAlertSignals())
       .then((result) => {
         if (result.status === 'error') {
@@ -263,6 +287,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
           entry.retryAfter = Date.now() + SLO_SIGNAL_ERROR_RETRY_DELAY_MS;
         } else {
           entry.data = result;
+          entry.fetchedAt = Date.now();
           entry.error = null;
           entry.retryAfter = 0;
         }
@@ -273,7 +298,25 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
       });
     entry.promise = promise;
     this.sloSignalCache.set(datasourceUid, entry);
+    if (this.sloSignalCache.size > 8) {
+      this.sloSignalCache.delete(this.sloSignalCache.keys().next().value!);
+    }
     return promise;
+  }
+
+  public peekUsageCounts(usageType: MetricUsageType): Record<string, number> {
+    return Object.fromEntries(
+      Object.entries(this.usageFetcher.peekUsageMetrics(usageType)).map(([name, details]) => [name, details.count])
+    );
+  }
+
+  /** Cache-only reads never trigger optional integrations just to render a ranking control. */
+  public peekSloMetricSignals(datasourceUid: string): SloMetricSignals | undefined {
+    return this.sloSignalCache.get(datasourceUid)?.data ?? undefined;
+  }
+
+  public getSignalFetchedAt(datasourceUid: string): number {
+    return this.sloSignalCache.get(datasourceUid)?.fetchedAt ?? 0;
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {

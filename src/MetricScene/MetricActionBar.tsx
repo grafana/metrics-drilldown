@@ -19,11 +19,13 @@ import { getResponsiveBreakpoints } from 'shared/utils/utils.styles';
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 import { MetricScene } from './MetricScene';
 import { QueryResultsScene } from './QueryResults/QueryResultsScene';
+import { isJevEnabled } from './RelatedMetrics/ranking/toggles';
 import { RelatedMetricsScene } from './RelatedMetrics/RelatedMetricsScene';
 
 export const actionViews = {
   breakdown: 'breakdown',
   related: 'related',
+  jevRelated: 'jev-related',
   relatedLogs: 'logs',
   queryResults: 'results',
 } as const;
@@ -55,6 +57,18 @@ export function getActionViewsDefinitions(): ActionViewDefinition[] {
       description: t('action-bar.tab.related-metrics-description', 'Relevant metrics based on current label filters'),
       backgroundTask: () => {}, // TODO: Implement background task for related metrics (e.g. count related metrics)
     },
+    ...(isJevEnabled()
+      ? [
+          {
+            displayName: t('action-bar.tab.jev-related', 'Jev Related ✨'),
+            value: actionViews.jevRelated,
+            getScene: (metricScene: MetricScene) =>
+              new RelatedMetricsScene({ metric: metricScene.state.metric, useJevRanking: true }),
+            description: t('action-bar.tab.jev-related-description', 'Related metrics sorted by Jev relevance'),
+            backgroundTask: () => {},
+          },
+        ]
+      : []),
     {
       displayName: t('action-bar.tab.related-logs', 'Related logs'),
       value: actionViews.relatedLogs,
@@ -166,12 +180,15 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
                     return;
                   }
 
-                  reportExploreMetrics('metric_action_view_changed', {
-                    view: tab.value,
-                    related_logs_count: metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()
-                      ? counter
-                      : undefined,
-                  });
+                  // Keep the opt-in Jev experiment out of production interaction tracking.
+                  if (tab.value !== actionViews.jevRelated) {
+                    reportExploreMetrics('metric_action_view_changed', {
+                      view: tab.value,
+                      related_logs_count: metricScene.relatedLogsOrchestrator.checkConditionsMetForRelatedLogs()
+                        ? counter
+                        : undefined,
+                    });
+                  }
 
                   metricScene.setActionView(tab.value);
                 }}

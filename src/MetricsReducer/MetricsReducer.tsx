@@ -12,7 +12,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Stack, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { LoadQueryScene } from 'shared/savedQueries/LoadQueryScene';
 import { SaveQueryButton } from 'shared/savedQueries/SaveQueryButton';
@@ -129,6 +129,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
     this.subscribeToEvent(EventMetricsVariableDeactivated, (event) => {
       // unregister engines
+      this.state.enginesMap.get(event.payload.key)?.sortEngine.dispose();
       this.state.enginesMap.delete(event.payload.key);
     });
 
@@ -181,7 +182,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       }
 
       filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
-      sortEngine.sort(sortByVariable.state.value as SortingOption);
+      sortEngine.sort(sortByVariable.state.value as SortingOption, { filterContext: filterEngine.getFilters() });
+      this.refreshFiringFilterCount();
     });
 
     /* Filters */
@@ -191,7 +193,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
       for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
         filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
-        sortEngine.sort(sortByVariable.state.value as SortingOption);
+        this.refreshFiringFilterCount();
+        sortEngine.sort(sortByVariable.state.value as SortingOption, { filterContext: filterEngine.getFilters() });
       }
     });
 
@@ -200,7 +203,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
       for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
         filterEngine.applyFilters({ [type]: filters });
-        sortEngine.sort(sortByVariable.state.value as SortingOption);
+        this.refreshFiringFilterCount();
+        sortEngine.sort(sortByVariable.state.value as SortingOption, { filterContext: filterEngine.getFilters() });
       }
     });
 
@@ -208,12 +212,24 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
 
     this.subscribeToEvent(EventSortByChanged, (event) => {
       const { sortBy } = event.payload;
-      reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
+      if (sortBy !== 'jev-relevance') {
+        reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
+      }
 
-      for (const [, { sortEngine }] of this.state.enginesMap) {
-        sortEngine.sort(sortBy);
+      for (const [, { sortEngine, filterEngine }] of this.state.enginesMap) {
+        sortEngine.sort(sortBy, { filterContext: filterEngine.getFilters() });
       }
     });
+  }
+
+  private refreshFiringFilterCount() {
+    // A collapsed sidebar does not render the chip; options can change without a variable value
+    // change. Explicitly refresh its count after the reducer applies initial/local filters.
+    try {
+      sceneGraph.findByKeyAndType(this, 'firing-alert-chip', FiringAlertChip).refreshMatchingCount();
+    } catch {
+      /* Custom embedded layouts may omit this optional filter. */
+    }
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsReducer>) => {
@@ -221,10 +237,22 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const styles = useStyles2(getStyles);
 
     const { $variables, body, listControls, loadQueryScene, sidebar } = model.useState();
+    const ranking = sceneGraph.findByKeyAndType(model, 'metrics-sorter', MetricsSorter).state.ranking;
+    const toolbarRef = useRef<HTMLDivElement>(null);
+    const [toolbarHeight, setToolbarHeight] = useState(32);
+    useEffect(() => {
+      const toolbar = toolbarRef.current;
+      if (!toolbar || typeof ResizeObserver === 'undefined') {
+        return;
+      }
+      const observer = new ResizeObserver(() => setToolbarHeight(toolbar.getBoundingClientRect().height));
+      observer.observe(toolbar);
+      return () => observer.disconnect();
+    }, []);
 
     return (
       <>
-        <div className={styles.listControls} data-testid="list-controls">
+        <div ref={toolbarRef} className={styles.listControls} data-testid="list-controls">
           <Stack direction="row" alignItems="center" gap={1}>
             <div style={{ flex: 1 }}>
               <listControls.Component model={listControls} />
@@ -232,8 +260,13 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             <SaveQueryButton sceneRef={model} />
             <loadQueryScene.Component model={loadQueryScene} />
           </Stack>
+          <ranking.Component model={ranking} />
         </div>
-        <Stack direction="row" gap={1} height={`calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT}px)`}>
+        <Stack
+          direction="row"
+          gap={1}
+          height={`calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT + Math.max(0, toolbarHeight - 32)}px)`}
+        >
           <div className={styles.sidebar} data-testid="sidebar">
             <sidebar.Component model={sidebar} />
           </div>
