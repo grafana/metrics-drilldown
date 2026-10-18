@@ -48,8 +48,8 @@ importers:
         specifier: ^13.2.3
         version: 13.2.3(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3)
       '@grafana/lezer-logql':
-        specifier: ^0.2.9
-        version: 0.2.9(@lezer/lr@1.4.10)
+        specifier: ^0.4.0
+        version: 0.4.2(@lezer/lr@1.4.10)
       '@grafana/prometheus':
         specifier: ^13.2.2
         version: 13.2.2(a899dfbc153f141ae8a923d4de1b2d87)
@@ -780,10 +780,11 @@ packages:
     peerDependencies:
       react: '>=19'
 
-  '@grafana/lezer-logql@0.2.9':
-    resolution: {integrity: sha512-SB9E2LQ689PiI/OPuBoTF93O5hBb1n8DbS3uSXfH2YYTsQELHqwU2HSM8BAI/ThX1ggkvIN9y0JyNTqfMKjlBA==}
+  '@grafana/lezer-logql@0.4.2':
+    resolution: {integrity: sha512-oFL37nFgQq3xWN8A7rIKQ2nrftq8l3i0U6TcbtLNlrzn7aVxmPCYaibRjnYDXZQ64QhFkcWVhspXWwSguZsyzQ==}
+    engines: {node: '>=24', npm: '>=11.12.1'}
     peerDependencies:
-      '@lezer/lr': ^1.0.0
+      '@lezer/lr': 1.4.10
 
   '@grafana/plugin-e2e@3.14.0':
     resolution: {integrity: sha512-hbfyAp5Bh1/F8SlzicFumTgDS2Br6XEs7dPpk/SA7MHvF64ZSwxQSsmurEPapaUOO+PfQKkHLLJRIJX9ZP+Tug==}
@@ -6921,7 +6922,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@grafana/lezer-logql@0.2.9(@lezer/lr@1.4.10)':
+  '@grafana/lezer-logql@0.4.2(@lezer/lr@1.4.10)':
     dependencies:
       '@lezer/lr': 1.4.10
 
