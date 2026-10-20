@@ -1,3 +1,5 @@
+import { t } from '@grafana/i18n';
+
 export const OTHER_CATEGORY_ID = 'other';
 
 interface MetricCategory {
@@ -56,4 +58,50 @@ export function classifyMetric(metricName: string): string {
   }
 
   return OTHER_CATEGORY_ID;
+}
+
+// The i18n extractor needs literal `t()` calls, and they cannot run at module scope, so the labels live in a function
+export function getMetricCategoryLabel(id: string): string {
+  switch (id) {
+    case 'http':
+      return t('sidebar.metric-category.http', 'HTTP');
+    case 'url':
+      return t('sidebar.metric-category.url', 'URL');
+    case 'frontend':
+      return t('sidebar.metric-category.frontend', 'Frontend');
+    case 'service':
+      return t('sidebar.metric-category.service', 'Service');
+    case 'deployment':
+      return t('sidebar.metric-category.deployment', 'Deployment');
+    case 'database':
+      return t('sidebar.metric-category.database', 'Database');
+    case 'process':
+      return t('sidebar.metric-category.process', 'Process');
+    case 'runtime':
+      return t('sidebar.metric-category.runtime', 'Runtime-specific');
+    case 'container':
+      return t('sidebar.metric-category.container', 'Container');
+    case 'kubernetes':
+      return t('sidebar.metric-category.kubernetes', 'Kubernetes');
+    case 'host-os':
+      return t('sidebar.metric-category.host-os', 'Host / OS');
+    case 'cloud':
+      return t('sidebar.metric-category.cloud', 'Cloud');
+    case 'telemetry-sdk':
+      return t('sidebar.metric-category.telemetry-sdk', 'Telemetry SDK');
+    case 'error':
+      return t('sidebar.metric-category.error', 'Error');
+    case 'exception':
+      return t('sidebar.metric-category.exception', 'Exception');
+    case 'messaging':
+      return t('sidebar.metric-category.messaging', 'Messaging');
+    case 'network':
+      return t('sidebar.metric-category.network', 'Network');
+    case 'rpc':
+      return t('sidebar.metric-category.rpc', 'RPC');
+    case OTHER_CATEGORY_ID:
+      return t('sidebar.metric-category.other', 'Other');
+    default:
+      return id;
+  }
 }

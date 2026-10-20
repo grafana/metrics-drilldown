@@ -1,4 +1,4 @@
-import { classifyMetric, METRIC_CATEGORIES, OTHER_CATEGORY_ID } from '../metricCategories';
+import { classifyMetric, getMetricCategoryLabel, METRIC_CATEGORIES, OTHER_CATEGORY_ID } from '../metricCategories';
 
 describe('classifyMetric', () => {
   test.each([
@@ -85,5 +85,29 @@ describe('METRIC_CATEGORIES', () => {
 
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).not.toContain(OTHER_CATEGORY_ID);
+  });
+});
+
+describe('getMetricCategoryLabel', () => {
+  test('returns a label for every category and for "other"', () => {
+    for (const id of [...METRIC_CATEGORIES.map((category) => category.id), OTHER_CATEGORY_ID]) {
+      expect(getMetricCategoryLabel(id)).not.toBe(id);
+    }
+  });
+
+  test('returns unique labels (counts are matched by label)', () => {
+    const labels = [...METRIC_CATEGORIES.map((category) => category.id), OTHER_CATEGORY_ID].map(getMetricCategoryLabel);
+
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+
+  test('returns the label of a category id', () => {
+    expect(getMetricCategoryLabel('host-os')).toBe('Host / OS');
+    expect(getMetricCategoryLabel('runtime')).toBe('Runtime-specific');
+    expect(getMetricCategoryLabel(OTHER_CATEGORY_ID)).toBe('Other');
+  });
+
+  test('falls back to the id for an unknown category', () => {
+    expect(getMetricCategoryLabel('unknown')).toBe('unknown');
   });
 });
