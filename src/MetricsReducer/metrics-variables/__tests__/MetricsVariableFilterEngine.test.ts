@@ -274,7 +274,15 @@ describe('MetricsVariableFilterEngine - firingAlertMetrics filtering', () => {
     engine.setInitOptions(options);
     // forceUpdate: true so the reset path runs even though the engine starts with empty filters
     engine.applyFilters(
-      { categories: [], prefixes: [], suffixes: [], names: [], firingAlertMetrics: [], sloTrackedMetrics: [] },
+      {
+        categories: [],
+        metricCategories: [],
+        prefixes: [],
+        suffixes: [],
+        names: [],
+        firingAlertMetrics: [],
+        sloTrackedMetrics: [],
+      },
       { forceUpdate: true, notify: false }
     );
 
@@ -307,6 +315,7 @@ describe('MetricsVariableFilterEngine - sloTrackedMetrics filtering', () => {
     ]);
     const filtered = MetricsVariableFilterEngine.getFilteredOptions(options, {
       categories: [],
+      metricCategories: [],
       prefixes: ['http'],
       suffixes: ['total'],
       names: ['.*api.*'],
@@ -324,6 +333,88 @@ describe('MetricsVariableFilterEngine - sloTrackedMetrics filtering', () => {
     engine.setInitOptions(options);
     engine.applyFilters({ sloTrackedMetrics: ['http_requests_total'] }, { forceUpdate: false, notify: false });
     engine.applyFilters({ sloTrackedMetrics: [] }, { forceUpdate: false, notify: false });
+
+    expect(setState).toHaveBeenLastCalledWith({ options });
+  });
+});
+
+describe('MetricsVariableFilterEngine - metricCategories filtering', () => {
+  const options = createOptions([
+    'go_goroutines',
+    'jvm_memory_used_bytes',
+    'http_requests_total',
+    'prometheus_http_requests_total',
+    'node_cpu_seconds_total',
+  ]);
+
+  test('filters metrics by one category', () => {
+    const { engine, setState } = setup();
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ metricCategories: ['runtime'] }, { forceUpdate: false, notify: false });
+
+    expect(setState).toHaveBeenCalledWith({
+      options: [
+        { label: 'go_goroutines', value: 'go_goroutines' },
+        { label: 'jvm_memory_used_bytes', value: 'jvm_memory_used_bytes' },
+      ],
+    });
+  });
+
+  test('keeps the metrics of any of the selected categories', () => {
+    const { engine, setState } = setup();
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ metricCategories: ['runtime', 'http'] }, { forceUpdate: false, notify: false });
+
+    expect(setState).toHaveBeenCalledWith({
+      options: [
+        { label: 'go_goroutines', value: 'go_goroutines' },
+        { label: 'jvm_memory_used_bytes', value: 'jvm_memory_used_bytes' },
+        { label: 'http_requests_total', value: 'http_requests_total' },
+      ],
+    });
+  });
+
+  test('"other" keeps the metrics that match no category', () => {
+    const { engine, setState } = setup();
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ metricCategories: ['other'] }, { forceUpdate: false, notify: false });
+
+    expect(setState).toHaveBeenCalledWith({
+      options: [
+        { label: 'prometheus_http_requests_total', value: 'prometheus_http_requests_total' },
+        { label: 'node_cpu_seconds_total', value: 'node_cpu_seconds_total' },
+      ],
+    });
+  });
+
+  test('composes with the prefix filter', () => {
+    const { engine, setState } = setup();
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ metricCategories: ['runtime'], prefixes: ['go'] }, { forceUpdate: false, notify: false });
+
+    expect(setState).toHaveBeenCalledWith({ options: [{ label: 'go_goroutines', value: 'go_goroutines' }] });
+  });
+
+  test('does not touch the rules categories filter', () => {
+    const { engine } = setup();
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ metricCategories: ['runtime'] }, { forceUpdate: false, notify: false });
+
+    expect(engine.getFilters().categories).toEqual([]);
+    expect(engine.getFilters().metricCategories).toEqual(['runtime']);
+  });
+
+  test('clearing the categories restores the original options', () => {
+    const { engine, setState } = setup();
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ metricCategories: ['runtime'] }, { forceUpdate: false, notify: false });
+    engine.applyFilters({ metricCategories: [] }, { forceUpdate: false, notify: false });
 
     expect(setState).toHaveBeenLastCalledWith({ options });
   });
