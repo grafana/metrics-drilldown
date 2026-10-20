@@ -324,6 +324,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
     } else if (sectionKey === 'filters-suffix') {
       reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
+    } else if (sectionKey === 'filters-category') {
+      reportExploreMetrics('sidebar_category_filter_section_clicked', {});
     }
 
     this.setState({
