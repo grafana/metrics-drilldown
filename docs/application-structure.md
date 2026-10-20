@@ -47,6 +47,12 @@ The toolbar provides essential controls for working with metrics:
 
 The collapsible sidebar provides a graphical way to filter and navigate metrics. Users who want to narrow down the metrics list can open it to access:
 
+#### Category filters
+
+Group metrics into OpenTelemetry style categories such as HTTP, Database, or Kubernetes. Each category shows the number of matching metrics, and selecting several categories shows the metrics of any of them. A metric belongs to a category when its name starts with one of the category prefixes followed by `_` or `.`, so `k8s_pod_info` and `k8s.pod.info` are both Kubernetes. The categories and prefixes mirror the attribute categories of the Grafana trace view and are defined in `src/MetricsReducer/metrics-variables/metricCategories.ts`.
+
+The match is fuzzy, so a metric can land in a category that does not fit it. Metrics that match no prefix (e.g., `node_` or `kube_`) appear under Other.
+
 #### Rules filters
 
 For environments using Prometheus recording rules, this groups metrics by their originating rules, making it easy to find all metrics derived from a particular recording rule hierarchy.
@@ -58,12 +64,6 @@ Filter metrics based on common prefixes (e.g., `node_`, `prometheus_`) to find m
 #### Suffix filters
 
 Filter metrics based on common suffixes (e.g., `_total`, `_seconds`) to identify metric types like counters or histograms.
-
-#### Category filters
-
-Group metrics into OpenTelemetry style categories such as HTTP, Database, or Kubernetes. Each category shows the number of matching metrics, and selecting several categories shows the metrics of any of them. A metric belongs to a category when its name starts with one of the category prefixes followed by `_` or `.`, so `k8s_pod_info` and `k8s.pod.info` are both Kubernetes. The categories and prefixes mirror the attribute categories of the Grafana trace view and are defined in `src/MetricsReducer/metrics-variables/metricCategories.ts`.
-
-The match is fuzzy, so a metric can land in a category that does not fit it. Metrics that match no prefix (e.g., `node_` or `kube_`) appear under Other.
 
 #### Recent metrics filters
 

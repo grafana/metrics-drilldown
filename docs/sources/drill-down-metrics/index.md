@@ -44,10 +44,10 @@ Apply advanced filters to further refine the metrics that appear in Metrics Dril
 
 | Filter type            | Description                                                                                                       |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Category filters       | Filter metrics by OpenTelemetry style category. The match is fuzzy. Multiple selected categories use "OR" logic.  |
 | Rules filters          | Filter metrics based on whether they are non-rules metrics or recording rules.                                    |
 | Prefix filters         | Filter metrics based on their name prefix in the Prometheus namespace. Multiple selected prefixes use "OR" logic. |
 | Suffix filters         | Filter metrics based on their name suffix. Multiple selected suffixes use "OR" logic.                             |
-| Category filters       | Filter metrics by OpenTelemetry style category. The match is fuzzy. Multiple selected categories use "OR" logic.  |
 | Recent metrics filters | Filter metrics based on when they started being ingested.                                                         |
 | Group by labels        | Group metrics by their label values.                                                                              |
 | Bookmarks              | View saved metrics.                                                                                               |
