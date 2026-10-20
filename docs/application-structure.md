@@ -59,6 +59,12 @@ Filter metrics based on common prefixes (e.g., `node_`, `prometheus_`) to find m
 
 Filter metrics based on common suffixes (e.g., `_total`, `_seconds`) to identify metric types like counters or histograms.
 
+#### Category filters
+
+Group metrics into OpenTelemetry style categories such as HTTP, Database, or Kubernetes. Each category shows the number of matching metrics, and selecting several categories shows the metrics of any of them. A metric belongs to a category when its name starts with one of the category prefixes followed by `_` or `.`, so `k8s_pod_info` and `k8s.pod.info` are both Kubernetes. The categories and prefixes mirror the attribute categories of the Grafana trace view and are defined in `src/MetricsReducer/metrics-variables/metricCategories.ts`.
+
+The match is fuzzy, so a metric can land in a category that does not fit it. Metrics that match no prefix (e.g., `node_` or `kube_`) appear under Other.
+
 #### Recent metrics filters
 
 Filter the metrics list to show only newly-created metrics from a chosen time window (past 1m, 3m, 5m, etc.). This helps users discover metrics that were recently added to the data source.
