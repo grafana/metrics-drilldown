@@ -45,6 +45,11 @@ describe('getUnitFromMetric', () => {
     expect(getUnitFromMetric('node_hwmon_power_watts')).toBe('watts');
   });
 
+  it('should detect milliseconds before a histogram bucket suffix', () => {
+    expect(getUnitFromMetric('rpc_server_duration_milliseconds_bucket')).toBe('milliseconds');
+    expect(getUnit('rpc_server_duration_milliseconds_bucket')).toBe('ms');
+  });
+
   it('should return the unit for ratio suffix', () => {
     expect(getUnitFromMetric('cache_hit_ratio')).toBe('ratio');
   });
