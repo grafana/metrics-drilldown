@@ -104,6 +104,19 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       key: 'sidebar',
       visibleSection: null,
       sections: [
+        // First in the sidebar, so that users find it
+        new MetricsFilterSection({
+          key: 'filters-category',
+          type: 'metricCategories',
+          title: t('sidebar.section.category-filters', 'Category filters'),
+          description: t(
+            'sidebar.section.category-filters-description',
+            'Group metrics by OpenTelemetry style categories using the start of the metric name. This is a fuzzy match, so a metric can land in a category that does not fit it. Metrics such as node_, kube_ and grpc_ do not match any category and appear under Other.'
+          ),
+          icon: 'open-telemetry',
+          computeGroups: computeMetricCategoryGroups,
+          active: Boolean(sectionValues.get('filters-category')?.length),
+        }),
         new MetricsFilterSection({
           key: 'filters-rule',
           type: 'categories',
@@ -136,18 +149,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           icon: '_Z',
           computeGroups: computeMetricSuffixGroups,
           active: Boolean(sectionValues.get('filters-suffix')?.length),
-        }),
-        new MetricsFilterSection({
-          key: 'filters-category',
-          type: 'metricCategories',
-          title: t('sidebar.section.category-filters', 'Category filters'),
-          description: t(
-            'sidebar.section.category-filters-description',
-            'Group metrics by OpenTelemetry style categories using the start of the metric name. This is a fuzzy match, so a metric can land in a category that does not fit it. Metrics such as node_, kube_ and grpc_ do not match any category and appear under Other.'
-          ),
-          icon: 'layer-group',
-          computeGroups: computeMetricCategoryGroups,
-          active: Boolean(sectionValues.get('filters-category')?.length),
         }),
         new RecentMetricsSection({
           key: 'filters-recent',
