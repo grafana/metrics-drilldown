@@ -422,6 +422,7 @@
       "search-placeholder": "Search..."
     },
     "filter-type": {
+      "category": "category",
       "prefix": "prefix",
       "recent": "recent",
       "rule-group": "rule group",
@@ -460,6 +461,8 @@
     "section": {
       "bookmarks": "Bookmarks",
       "bookmarks-description": "Access your saved metrics for quick reference",
+      "category-filters": "Category filters",
+      "category-filters-description": "Group metrics by OpenTelemetry style categories using the start of the metric name. This is a fuzzy match, so a metric can land in a category that does not fit it. Metrics such as node_, kube_ and grpc_ do not match any category and appear under Other.",
       "group-by-labels": "Group by labels",
       "group-by-labels-description": "Group metrics by their label values",
       "prefix-filters": "Prefix filters",
