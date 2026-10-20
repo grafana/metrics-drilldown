@@ -45,7 +45,7 @@
     "@grafana/faro-core": "^2.2.4",
     "@grafana/faro-web-sdk": "^2.2.1",
     "@grafana/i18n": "^13.2.3",
-    "@grafana/lezer-logql": "^0.2.9",
+    "@grafana/lezer-logql": "^0.4.0",
     "@grafana/prometheus": "^13.2.2",
     "@grafana/runtime": "^13.2.3",
     "@grafana/scenes": "^7.0.0",
