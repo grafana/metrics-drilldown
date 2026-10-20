@@ -345,7 +345,18 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
   }
 
   private onSelectionChange = (selectedGroups: MetricsFilterSectionState['selectedGroups']) => {
+    const previousValues = new Set(this.state.selectedGroups.map((g) => g.value));
+
     this.setState({ selectedGroups, active: selectedGroups.length > 0 });
+
+    // Track the categories that were just selected. Deselecting and clearing are not tracked.
+    if (this.state.type === 'metricCategories') {
+      selectedGroups
+        .filter((group) => !previousValues.has(group.value))
+        .forEach((group) => {
+          reportExploreMetrics('sidebar_category_filter_changed', { action: 'added', category: group.value });
+        });
+    }
 
     this.publishEvent(
       new EventFiltersChanged({ type: this.state.type, filters: selectedGroups.map((g) => g.value) }),
