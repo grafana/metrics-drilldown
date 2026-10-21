@@ -1,3 +1,4 @@
+import { getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
 import { of } from 'rxjs';
 
 import { logger } from 'shared/logger/logger';
@@ -65,9 +66,6 @@ const mockRuleGroups2: RecordingRuleGroup[] = [
   },
 ];
 
-// Create spy functions
-const getListSpy = jest.fn();
-
 const defaultFetchImpl = (req: Request) => {
   if (req.url.includes('loki1')) {
     return of({
@@ -100,12 +98,6 @@ const fetchSpy = jest.fn();
 // Mock the entire @grafana/runtime module
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
-  getDataSourceSrv: () => ({
-    getList: getListSpy,
-    get: jest.fn(),
-    getInstanceSettings: jest.fn(),
-    reload: jest.fn(),
-  }),
   getBackendSrv: () => ({
     fetch: fetchSpy,
     delete: jest.fn(),
@@ -118,10 +110,14 @@ jest.mock('@grafana/runtime', () => ({
   }),
 }));
 
+jest.mock('@grafana/plugin-compat/datasources', () => ({ getDataSourceInstanceList: jest.fn() }));
+const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);
+
 describe('LokiRecordingRulesConnector', () => {
   beforeEach(() => {
-    getListSpy.mockReturnValue([mockLokiDS1, mockLokiDS2]);
+    jest.clearAllMocks();
     fetchSpy.mockImplementation(defaultFetchImpl);
+    getDataSourceInstanceListMock.mockResolvedValue([mockLokiDS1, mockLokiDS2] as any);
   });
 
   describe('getDataSources', () => {
@@ -134,7 +130,11 @@ describe('LokiRecordingRulesConnector', () => {
       expect(result).toContainEqual({ name: 'Loki Secondary', uid: 'loki2' });
 
       // Verify underlying calls
-      expect(getListSpy).toHaveBeenCalledWith({ logs: true, type: 'loki', filter: expect.any(Function) });
+      expect(getDataSourceInstanceListMock).toHaveBeenCalledWith({
+        logs: true,
+        type: 'loki',
+        filter: expect.any(Function),
+      });
       expect(fetchSpy).toHaveBeenCalledTimes(2);
     });
 

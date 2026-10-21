@@ -50,6 +50,9 @@ importers:
       '@grafana/lezer-logql':
         specifier: ^0.4.0
         version: 0.4.2(@lezer/lr@1.4.10)
+      '@grafana/plugin-compat':
+        specifier: 0.5.0
+        version: 0.5.0(@grafana/data@13.2.3(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.2.3(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/schema@13.2.3)(react@19.3.0)
       '@grafana/prometheus':
         specifier: ^13.2.2
         version: 13.2.2(a899dfbc153f141ae8a923d4de1b2d87)
@@ -785,6 +788,14 @@ packages:
     engines: {node: '>=24', npm: '>=11.12.1'}
     peerDependencies:
       '@lezer/lr': 1.4.10
+
+  '@grafana/plugin-compat@0.5.0':
+    resolution: {integrity: sha512-yt1e7u4O3U0ojWcwsMZt9QQpYAQBYiqCk3aqMKBH1E2eHG0OAUVQLt64mlXsWUd+OlCaqHf14J7aYt80en4oiw==}
+    peerDependencies:
+      '@grafana/data': '>=12.0.0'
+      '@grafana/runtime': '>=12.0.0'
+      '@grafana/schema': '>=12.0.0'
+      react: '>=18'
 
   '@grafana/plugin-e2e@3.14.0':
     resolution: {integrity: sha512-hbfyAp5Bh1/F8SlzicFumTgDS2Br6XEs7dPpk/SA7MHvF64ZSwxQSsmurEPapaUOO+PfQKkHLLJRIJX9ZP+Tug==}
@@ -6925,6 +6936,13 @@ snapshots:
   '@grafana/lezer-logql@0.4.2(@lezer/lr@1.4.10)':
     dependencies:
       '@lezer/lr': 1.4.10
+
+  '@grafana/plugin-compat@0.5.0(@grafana/data@13.2.3(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.2.3(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/schema@13.2.3)(react@19.3.0)':
+    dependencies:
+      '@grafana/data': 13.2.3(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3)
+      '@grafana/runtime': 13.2.3(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@8.1.1)(typescript@6.0.3)
+      '@grafana/schema': 13.2.3
+      react: 19.3.0
 
   '@grafana/plugin-e2e@3.14.0(@playwright/test@1.64.1)':
     dependencies:

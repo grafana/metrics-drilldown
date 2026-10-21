@@ -1,9 +1,9 @@
 import { css } from '@emotion/css';
 import { AppEvents, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
+import { getDataSourceInstanceSettings } from '@grafana/plugin-compat/datasources';
 import { type PromQuery } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getAppEvents, getDataSourceSrv, locationService, usePluginComponent } from '@grafana/runtime';
+import { getAppEvents, locationService, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
 import { ToolbarButton, useStyles2 } from '@grafana/ui';
 import React, { useCallback, useMemo } from 'react';
@@ -42,20 +42,12 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     const dsVar = sceneGraph.findByKeyAndType(trail, VAR_DATASOURCE, MetricsDrilldownDataSourceVariable);
 
     const uid = dsVar.getValue().toString();
-    this.setState({
-      dsUid: uid,
-      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-      dsName: getDataSourceSrv().getInstanceSettings(uid)?.name ?? '',
-    });
+    void this.updateDatasSourceState(uid);
 
     this._subs.add(
       dsVar.subscribeToState((newState) => {
         const uid = newState.value.toString();
-        this.setState({
-          dsUid: uid,
-          // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-          dsName: getDataSourceSrv().getInstanceSettings(uid)?.name ?? '',
-        });
+        void this.updateDatasSourceState(uid);
       })
     );
   };
@@ -71,6 +63,12 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
       isOpen: false,
     });
   };
+
+  private async updateDatasSourceState(dsUid: string) {
+    const settings = await getDataSourceInstanceSettings(dsUid);
+    const dsName = settings?.name ?? '';
+    this.setState({ dsUid, dsName });
+  }
 
   static readonly Component = ({ model }: SceneComponentProps<LoadQueryScene>) => {
     const { dsName, dsUid, isOpen } = model.useState();

@@ -1,5 +1,5 @@
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
+import { usePluginComponent } from '@grafana/runtime';
+import { useDataSourceInstanceSettings } from '@grafana/runtime/unstable';
 import { sceneGraph } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -25,16 +25,17 @@ jest.mock('@grafana/prometheus', () => ({
   utf8Support: (key: string) => key,
 }));
 
+jest.mock('@grafana/runtime/unstable', () => ({
+  useDataSourceInstanceSettings: jest.fn(),
+}));
+
+const useDataSourceInstanceSettingsMock = jest.mocked(useDataSourceInstanceSettings);
+
 describe('SaveQueryButton', () => {
   const mockSceneRef = {} as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-    jest.mocked(getDataSourceSrv).mockReturnValue({
-      getInstanceSettings: () => ({ name: 'Test Datasource' }),
-    } as any);
 
     const mockTrail = { state: { embedded: false } } as unknown as DataTrail;
     jest.spyOn(sceneGraph, 'getAncestor').mockImplementation((_ref, type) => {
@@ -68,6 +69,11 @@ describe('SaveQueryButton', () => {
 
     jest.mocked(usePluginComponent).mockReturnValue({ component: undefined, isLoading: false });
     jest.mocked(isQueryLibrarySupported).mockReturnValue(false);
+    useDataSourceInstanceSettingsMock.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      settings: { name: 'Test Datasource' } as any,
+    });
   });
 
   test('Opens the modal when the button is clicked', () => {

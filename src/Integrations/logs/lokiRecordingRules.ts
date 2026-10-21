@@ -1,8 +1,9 @@
-import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
 import { MetricExpr, parser, PipelineExpr, Selector } from '@grafana/lezer-logql';
 import { getBackendSrv, type BackendSrvRequest, type FetchResponse } from '@grafana/runtime';
 import { type SyntaxNode } from '@lezer/common';
 import { lastValueFrom } from 'rxjs';
+
+import { type DataSourceInstance } from 'shared/types';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 import { logger } from '../../shared/logger/logger';
@@ -35,7 +36,7 @@ export interface ExtractedRecordingRules {
  * @param datasourceSettings - The settings of the datasource instance.
  * @returns A promise that resolves to an array of recording rule groups.
  */
-async function fetchRecordingRuleGroups(datasourceSettings: DataSourceInstanceSettings<DataSourceJsonData>) {
+async function fetchRecordingRuleGroups(datasourceSettings: DataSourceInstance) {
   const recordingRuleUrl = `api/prometheus/${datasourceSettings.uid}/api/v1/rules`;
   const recordingRules: BackendSrvRequest = { url: recordingRuleUrl, showErrorAlert: false, showSuccessAlert: false };
   const res = await lastValueFrom<
@@ -61,7 +62,7 @@ async function fetchRecordingRuleGroups(datasourceSettings: DataSourceInstanceSe
  */
 export function extractRecordingRulesFromRuleGroups(
   ruleGroups: RecordingRuleGroup[],
-  ds: DataSourceInstanceSettings<DataSourceJsonData>
+  ds: DataSourceInstance
 ): ExtractedRecordingRule[] {
   if (ruleGroups.length === 0) {
     return [];

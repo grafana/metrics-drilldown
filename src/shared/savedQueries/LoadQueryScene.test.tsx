@@ -1,6 +1,6 @@
+import { getDataSourceInstanceSettings } from '@grafana/plugin-compat/datasources';
 import { type PromQuery } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
+import { usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type SceneTimeRange } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -28,6 +28,9 @@ jest.mock('extensions/links');
 
 const mockUseHasSavedQueries = jest.mocked(useHasSavedQueries);
 
+jest.mock('@grafana/plugin-compat/datasources', () => ({ getDataSourceInstanceSettings: jest.fn() }));
+const getDataSourceInstanceSettingsMock = jest.mocked(getDataSourceInstanceSettings);
+
 function FakeExposedComponent({ onSelectQuery }: Readonly<{ onSelectQuery(query: PromQuery): void }>) {
   return (
     <div>
@@ -53,10 +56,7 @@ describe('LoadQueryScene', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-    jest.mocked(getDataSourceSrv).mockReturnValue({
-      getInstanceSettings: () => ({ name: 'Test Datasource' }),
-    } as any);
+    getDataSourceInstanceSettingsMock.mockResolvedValue({ name: 'Test Datasource' } as any);
 
     jest.spyOn(sceneGraph, 'findByKeyAndType').mockReturnValue({
       getValue: () => 'test-datasource-uid',
