@@ -8,6 +8,7 @@ import React from 'react';
 import { getTrailFor } from '../../shared/utils/utils';
 import { TOPVIEW_PANEL_MENU_KEY } from '../MetricGraphScene';
 import { AddToDashboardAction } from './actions/AddToDashboardAction';
+import { AddToNotebookAction } from './actions/AddToNotebookAction';
 import { BookmarkAction } from './actions/BookmarkAction';
 import { CopyUrlAction } from './actions/CopyUrlAction';
 import { CreateAlertAction } from './actions/CreateAlertAction';
@@ -57,6 +58,9 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           if (trail.state.isAddToDashboardAvailable) {
             actionItems.push(AddToDashboardAction.create(this));
           }
+          if (trail.state.isAddToNotebookAvailable) {
+            actionItems.push(AddToNotebookAction.create(this));
+          }
           if (trail.state.isCreateAlertAvailable) {
             actionItems.push(CreateAlertAction.create(this));
           }
@@ -92,6 +96,7 @@ export class PanelMenu extends SceneObjectBase<PanelMenuState> implements VizPan
           trail.subscribeToState((newState, prevState) => {
             if (
               newState.isAddToDashboardAvailable !== prevState.isAddToDashboardAvailable ||
+              newState.isAddToNotebookAvailable !== prevState.isAddToNotebookAvailable ||
               newState.isCreateAlertAvailable !== prevState.isCreateAlertAvailable
             ) {
               buildItems(trail);

@@ -317,6 +317,7 @@
     "action": {
       "add-bookmark": "Add bookmark",
       "add-to-dashboard": "Add to dashboard",
+      "add-to-notebook": "Add to notebook",
       "copy-url": "Copy URL",
       "copy-url-success": "URL copied to clipboard",
       "create-alert": "Create alert",
@@ -326,6 +327,9 @@
     "group": {
       "actions": "Actions",
       "navigation": "Navigation"
+    },
+    "notebook": {
+      "unsupported": "This chart cannot be added to a notebook. Only main metric charts with resolved Prometheus queries and no custom data transformations are supported."
     }
   },
   "plugin-info": {
