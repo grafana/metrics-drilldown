@@ -72,7 +72,7 @@ describe('SaveQueryButton', () => {
     useDataSourceInstanceSettingsMock.mockReturnValue({
       isLoading: false,
       error: undefined,
-      settings: { name: 'Test Datasource' } as any,
+      settings: { uid: 'test-datasource-uid', name: 'Test Datasource' } as any,
     });
   });
 
@@ -147,5 +147,25 @@ describe('SaveQueryButton', () => {
     render(<SaveQueryButton sceneRef={mockSceneRef} />);
 
     expect(screen.getByText('Exposed component')).toBeInTheDocument();
+  });
+
+  test('should hide the save action until the selected datasource settings arrive', () => {
+    jest.mocked(isQueryLibrarySupported).mockReturnValue(true);
+    jest.mocked(usePluginComponent).mockReturnValue({
+      component: () => <button>Save query</button>,
+      isLoading: false,
+    });
+    useDataSourceInstanceSettingsMock.mockReturnValueOnce({
+      isLoading: false,
+      settings: { uid: 'previous-datasource-uid', name: 'Previous Datasource' } as any,
+    });
+
+    const { rerender } = render(<SaveQueryButton sceneRef={mockSceneRef} />);
+
+    expect(screen.queryByRole('button', { name: 'Save query' })).not.toBeInTheDocument();
+
+    rerender(<SaveQueryButton sceneRef={mockSceneRef} />);
+
+    expect(screen.getByRole('button', { name: 'Save query' })).toBeInTheDocument();
   });
 });

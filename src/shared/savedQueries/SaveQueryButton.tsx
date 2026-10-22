@@ -34,7 +34,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
   const [dsUid, setDsUid] = useState(() => dsVar.getValue().toString());
 
   const { settings } = useDataSourceInstanceSettings(dsUid);
-  const dsName = settings?.name ?? '';
+  const dsName = settings?.uid === dsUid ? settings.name : '';
 
   useEffect(() => {
     const sub = dsVar.subscribeToState((newState) => {
