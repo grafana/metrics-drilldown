@@ -1,22 +1,15 @@
-import { getAppPluginVersion } from '@grafana/runtime';
-
-import { logger } from 'shared/logger/logger';
+import { getAppPluginVersion, logDebug } from '@grafana/runtime';
 
 import { getPluginVersion } from './getPluginVersion';
 import { PLUGIN_ID } from '../constants/plugin';
 
 jest.mock('@grafana/runtime', () => ({
   getAppPluginVersion: jest.fn(),
-}));
-
-jest.mock('shared/logger/logger', () => ({
-  logger: {
-    debug: jest.fn(),
-  },
+  logDebug: jest.fn(),
 }));
 
 const getAppPluginVersionMock = jest.mocked(getAppPluginVersion);
-const loggerMock = jest.mocked(logger);
+const logDebugMock = jest.mocked(logDebug);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -32,6 +25,7 @@ describe('getPluginVersion', () => {
 
     expect(version).toBe('1.2.3');
     expect(getAppPluginVersionMock).toHaveBeenCalledWith(PLUGIN_ID);
+    expect(logDebugMock).not.toHaveBeenCalled();
   });
 
   it('should return null and log when getAppPluginVersion throws', async () => {
@@ -41,6 +35,9 @@ describe('getPluginVersion', () => {
 
     expect(version).toBeNull();
     expect(getAppPluginVersionMock).toHaveBeenCalledWith(PLUGIN_ID);
-    expect(loggerMock.debug).toHaveBeenCalled();
+    expect(logDebugMock).toHaveBeenCalledWith('grafana-metricsdrilldown-app: getPluginVersion lookup failed', {
+      error: 'Error: Service unavailable',
+      pluginId: 'grafana-metricsdrilldown-app',
+    });
   });
 });
