@@ -1,6 +1,9 @@
 import { LoadingState } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { SceneQueryRunner, type QueryRunnerState } from '@grafana/scenes';
 
+import { ensureErrorObject } from 'App/errorUtils';
+import { displayError } from 'MetricsReducer/helpers/displayStatus';
 import { type DataSourceInstances } from 'shared/types';
 
 import { type MetricsLogsConnector } from '../../Integrations/logs/base';
@@ -96,7 +99,16 @@ export class RelatedLogsOrchestrator {
    */
   public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
-    const allLokiDatasources = await this._dataSourceFetcher.getHealthyDataSources('loki');
+    let allLokiDatasources: DataSourceInstances;
+    try {
+      allLokiDatasources = await this._dataSourceFetcher.getHealthyDataSources('loki');
+    } catch (error) {
+      const message = t('related-logs.datasource-discovery-error', 'Failed to load data sources for related logs.');
+      displayError(ensureErrorObject(error, message), [message]);
+      this.lokiDataSources = [];
+      this.relatedLogsCount = 0;
+      return;
+    }
 
     // Limit to first five datasources to avoid performance issues
     // Instances with more than five Loki datasources should use Logs Drilldown or Explore to find logs of interest
