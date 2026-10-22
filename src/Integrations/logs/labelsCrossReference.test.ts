@@ -25,6 +25,7 @@ jest.mock('../../shared/utils/utils', () => ({
 jest.mock('@grafana/plugin-compat/datasources', () => ({
   getDataSourceInstance: jest.fn(),
   getDataSourceInstanceList: jest.fn(),
+  getDefaultDataSourceInstanceListItem: jest.fn().mockResolvedValue(undefined),
 }));
 const getDataSourceInstanceMock = jest.mocked(getDataSourceInstance);
 const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);

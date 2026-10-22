@@ -36,9 +36,9 @@ describe('isPrometheusDataSource', () => {
 
 describe('DataSourceFetcher', () => {
   const mockDataSources: any[] = [
-    { uid: 'ds1', name: 'Loki 1', type: 'loki', isDefault: true },
-    { uid: 'ds2', name: 'Loki 2', type: 'loki', isDefault: false },
-    { uid: 'ds3', name: 'Loki 3', type: 'loki', isDefault: false },
+    { uid: 'ds1', name: 'Loki 1', type: 'loki' },
+    { uid: 'ds2', name: 'Loki 2', type: 'loki' },
+    { uid: 'ds3', name: 'Loki 3', type: 'loki' },
   ];
 
   let mockGetBackendSrv: jest.MockedFunction<typeof getBackendSrv>;
@@ -50,7 +50,7 @@ describe('DataSourceFetcher', () => {
     mockGetBackendSrv = getBackendSrv as jest.MockedFunction<typeof getBackendSrv>;
 
     getDataSourceInstanceListMock.mockResolvedValue(mockDataSources);
-    getDefaultDataSourceInstanceListItemMock.mockImplementation(async (items) => items.find((i) => i.isDefault));
+    getDefaultDataSourceInstanceListItemMock.mockResolvedValue(mockDataSources[0]);
   });
 
   afterEach(() => {
@@ -151,12 +151,13 @@ describe('DataSourceFetcher', () => {
 
     it('should sort data sources with default first', async () => {
       const unsortedDataSources: any[] = [
-        { uid: 'ds1', name: 'Loki 1', type: 'loki', isDefault: false },
-        { uid: 'ds2', name: 'Loki 2', type: 'loki', isDefault: true },
-        { uid: 'ds3', name: 'Loki 3', type: 'loki', isDefault: false },
+        { uid: 'ds1', name: 'Loki 1', type: 'loki' },
+        { uid: 'ds2', name: 'Loki 2', type: 'loki' },
+        { uid: 'ds3', name: 'Loki 3', type: 'loki' },
       ];
 
       getDataSourceInstanceListMock.mockResolvedValue(unsortedDataSources);
+      getDefaultDataSourceInstanceListItemMock.mockResolvedValue(unsortedDataSources[1]);
 
       mockGetBackendSrv.mockReturnValue({
         get: jest.fn().mockResolvedValue({ status: 'OK' }),
@@ -167,7 +168,6 @@ describe('DataSourceFetcher', () => {
 
       // Default data source (ds2) should be first
       expect(result[0].uid).toBe('ds2');
-      expect(result[0].isDefault).toBe(true);
     });
 
     it('should pass correct parameters to health check endpoint', async () => {

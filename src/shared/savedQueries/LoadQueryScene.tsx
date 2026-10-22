@@ -71,9 +71,10 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     const generation = ++this.datasourceStateGeneration;
     this.setState({ dsUid, dsName: '' });
 
-    const settings = await getDataSourceInstanceSettings(dsUid).catch(() =>
-      logger.debug(`getDataSourceInstanceSettings lookup failed`, { dsUid })
-    );
+    const settings = await getDataSourceInstanceSettings(dsUid).catch(() => {
+      logger.debug(`getDataSourceInstanceSettings lookup failed`, { dsUid });
+      return undefined;
+    });
     if (generation !== this.datasourceStateGeneration) {
       return;
     }

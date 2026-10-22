@@ -110,7 +110,10 @@ jest.mock('@grafana/runtime', () => ({
   }),
 }));
 
-jest.mock('@grafana/plugin-compat/datasources', () => ({ getDataSourceInstanceList: jest.fn() }));
+jest.mock('@grafana/plugin-compat/datasources', () => ({
+  getDataSourceInstanceList: jest.fn(),
+  getDefaultDataSourceInstanceListItem: jest.fn().mockResolvedValue(undefined),
+}));
 const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);
 
 describe('LokiRecordingRulesConnector', () => {
