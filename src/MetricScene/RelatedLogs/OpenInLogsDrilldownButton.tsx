@@ -39,13 +39,13 @@ export function OpenInLogsDrilldownButton({ context }: Readonly<{ context: LogsD
     <LinkButton
       href={
         // We prefix with the appSubUrl for environments that don't host grafana at the root.
-        logsDrilldownLinkExists
-          ? locationUtil.assureBaseUrl(logsDrilldownLink.path ?? '')
+        logsDrilldownLinkExists && logsDrilldownLink.path
+          ? locationUtil.assureBaseUrl(logsDrilldownLink.path)
           : locationUtil.assureBaseUrl('/a/grafana-lokiexplore-app') // We fall back to the app's landing page if a link can't get generated using the supplied `context`
       }
       target="_blank"
       tooltip={
-        logsDrilldownLinkExists
+        logsDrilldownLinkExists && logsDrilldownLink.path
           ? t('related-logs.open-in-drilldown-tooltip', 'Use the Logs Drilldown app to explore these logs')
           : t('related-logs.open-drilldown-tooltip', 'Navigate to the Logs Drilldown app')
       }
@@ -53,7 +53,7 @@ export function OpenInLogsDrilldownButton({ context }: Readonly<{ context: LogsD
       size="sm"
       onClick={() => reportExploreMetrics('related_logs_action_clicked', { action: 'open_logs_drilldown' })}
     >
-      {logsDrilldownLinkExists
+      {logsDrilldownLinkExists && logsDrilldownLink.path
         ? t('related-logs.open-in-drilldown', 'Open in Logs Drilldown')
         : t('related-logs.open-drilldown', 'Open Logs Drilldown')}
     </LinkButton>
