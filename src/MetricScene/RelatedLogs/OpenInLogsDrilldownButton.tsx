@@ -1,5 +1,6 @@
+import { locationUtil } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { config, usePluginLinks } from '@grafana/runtime';
+import { usePluginLinks } from '@grafana/runtime';
 import { type SceneDataQuery, type SceneTimeRangeState } from '@grafana/scenes';
 import { LinkButton } from '@grafana/ui';
 import React, { useMemo } from 'react';
@@ -39,8 +40,8 @@ export function OpenInLogsDrilldownButton({ context }: Readonly<{ context: LogsD
       href={
         // We prefix with the appSubUrl for environments that don't host grafana at the root.
         logsDrilldownLinkExists
-          ? `${config.appSubUrl}${logsDrilldownLink.path}`
-          : `${config.appSubUrl}/a/grafana-lokiexplore-app` // We fall back to the app's landing page if a link can't get generated using the supplied `context`
+          ? locationUtil.assureBaseUrl(logsDrilldownLink.path ?? '')
+          : locationUtil.assureBaseUrl('/a/grafana-lokiexplore-app') // We fall back to the app's landing page if a link can't get generated using the supplied `context`
       }
       target="_blank"
       tooltip={
