@@ -95,7 +95,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
         {saving && <SaveQueryModal dsUid={dsUid} query={promql} onClose={() => setSaving(false)} />}
       </>
     );
-  } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent) {
+  } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent || !dsName) {
     return null;
   }
 

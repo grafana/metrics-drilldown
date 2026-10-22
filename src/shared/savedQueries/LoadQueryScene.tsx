@@ -155,7 +155,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
           {isOpen && <LoadQueryModal sceneRef={model} onClose={model.toggleClosed} />}
         </>
       );
-    } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent) {
+    } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent || !dsName) {
       return null;
     }
 
