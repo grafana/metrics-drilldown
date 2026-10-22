@@ -1,12 +1,16 @@
-import { getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
+import { getDataSourceInstanceList, getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
 import { getBackendSrv } from '@grafana/runtime';
 
 import { DataSourceFetcher, isPrometheusDataSource } from './utils.datasource';
 
 jest.mock('@grafana/runtime');
 
-jest.mock('@grafana/plugin-compat/datasources', () => ({ getDataSourceInstanceList: jest.fn() }));
+jest.mock('@grafana/plugin-compat/datasources', () => ({
+  getDataSourceInstanceList: jest.fn(),
+  getDefaultDataSourceInstanceListItem: jest.fn(),
+}));
 const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);
+const getDefaultDataSourceInstanceListItemMock = jest.mocked(getDefaultDataSourceInstanceListItem);
 
 describe('isPrometheusDataSource', () => {
   it('should return true for a core Prometheus datasource', () => {
@@ -46,6 +50,7 @@ describe('DataSourceFetcher', () => {
     mockGetBackendSrv = getBackendSrv as jest.MockedFunction<typeof getBackendSrv>;
 
     getDataSourceInstanceListMock.mockResolvedValue(mockDataSources);
+    getDefaultDataSourceInstanceListItemMock.mockImplementation(async (items) => items.find((i) => i.isDefault));
   });
 
   afterEach(() => {

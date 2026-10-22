@@ -1,4 +1,4 @@
-import { getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
+import { getDataSourceInstanceList, getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
 import { type PrometheusDatasource } from '@grafana/prometheus';
 import { getBackendSrv } from '@grafana/runtime';
 
@@ -76,13 +76,14 @@ export class DataSourceFetcher {
       type,
       filter: (ds) => ds.uid !== 'grafana',
     });
+    const defaultDs = await getDefaultDataSourceInstanceListItem(instances);
     const allDataSourcesOfType = [...instances]
       .sort((a, b) => {
         // Default data source should be first in the list
-        if (a.isDefault && !b.isDefault) {
+        if (a.uid === defaultDs?.uid && b.uid !== defaultDs?.uid) {
           return -1;
         }
-        if (!a.isDefault && b.isDefault) {
+        if (a.uid !== defaultDs?.uid && b.uid === defaultDs?.uid) {
           return 1;
         }
         return 0;

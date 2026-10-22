@@ -11,6 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { buildNavigateToMetricsParams, createAppUrl, createPromURLObject, parsePromQLQuery } from 'extensions/links';
 import { ROUTES } from 'shared/constants/routes';
+import { logger } from 'shared/logger/logger';
 import { VAR_DATASOURCE } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
@@ -26,6 +27,8 @@ export interface LoadQuerySceneState extends SceneObjectState {
 }
 
 export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
+  private datasourceStateGeneration = 0;
+
   constructor(state: Partial<LoadQuerySceneState> = {}) {
     super({
       dsUid: undefined,
@@ -65,9 +68,18 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
   };
 
   private async updateDatasSourceState(dsUid: string) {
-    const settings = await getDataSourceInstanceSettings(dsUid);
+    const generation = ++this.datasourceStateGeneration;
+    this.setState({ dsUid, dsName: '' });
+
+    const settings = await getDataSourceInstanceSettings(dsUid).catch(() =>
+      logger.debug(`getDataSourceInstanceSettings lookup failed`, { dsUid })
+    );
+    if (generation !== this.datasourceStateGeneration) {
+      return;
+    }
+
     const dsName = settings?.name ?? '';
-    this.setState({ dsUid, dsName });
+    this.setState({ dsName });
   }
 
   static readonly Component = ({ model }: SceneComponentProps<LoadQueryScene>) => {
