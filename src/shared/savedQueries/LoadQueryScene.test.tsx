@@ -2,7 +2,7 @@ import { getDataSourceInstanceSettings } from '@grafana/plugin-compat/datasource
 import { type PromQuery } from '@grafana/prometheus';
 import { usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type SceneTimeRange } from '@grafana/scenes';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
@@ -90,31 +90,37 @@ describe('LoadQueryScene', () => {
     jest.mocked(isQueryLibrarySupported).mockReturnValue(false);
   });
 
-  test('Disables button when there are no saved queries', () => {
+  test('Disables button when there are no saved queries', async () => {
     mockUseHasSavedQueries.mockReturnValue(false);
 
     const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
+    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
+
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
   });
 
-  test('Enables button when there are saved queries', () => {
+  test('Enables button when there are saved queries', async () => {
     mockUseHasSavedQueries.mockReturnValue(true);
 
     const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
+
+    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
 
     const button = screen.getByRole('button');
     expect(button).not.toBeDisabled();
   });
 
-  test('Opens modal when button is clicked', () => {
+  test('Opens modal when button is clicked', async () => {
     mockUseHasSavedQueries.mockReturnValue(true);
 
     const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
+
+    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
 
     expect(screen.queryByText('Load a previously saved query')).not.toBeInTheDocument();
 
@@ -127,7 +133,7 @@ describe('LoadQueryScene', () => {
     expect(screen.queryByText('Load a previously saved query')).not.toBeInTheDocument();
   });
 
-  test('Returns null when the scene is embedded', () => {
+  test('Returns null when the scene is embedded', async () => {
     jest.spyOn(sceneGraph, 'getAncestor').mockReturnValue({
       state: { embedded: true },
     } as unknown as DataTrail);
@@ -135,16 +141,20 @@ describe('LoadQueryScene', () => {
     const scene = new LoadQueryScene();
     const { container } = render(<scene.Component model={scene} />);
 
+    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
+
     expect(container.firstChild).toBeNull();
   });
 
-  test('Uses the exposed component if available', () => {
+  test('Uses the exposed component if available', async () => {
     const component = () => <div>Exposed component</div>;
     jest.mocked(isQueryLibrarySupported).mockReturnValue(true);
     jest.mocked(usePluginComponent).mockReturnValue({ component, isLoading: false });
 
     const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
+
+    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
 
     expect(screen.getByText('Exposed component')).toBeInTheDocument();
   });
@@ -158,9 +168,11 @@ describe('LoadQueryScene', () => {
       mockUseHasSavedQueries.mockReturnValue(true);
     });
 
-    test('Parses the query and navigates when a query is selected', () => {
+    test('Parses the query and navigates when a query is selected', async () => {
       const scene = new LoadQueryScene();
       render(<scene.Component model={scene} />);
+
+      await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
 
       fireEvent.click(screen.getByText('Select'));
 
@@ -174,7 +186,7 @@ describe('LoadQueryScene', () => {
       );
     });
 
-    test('Uses absolute time range when available', () => {
+    test('Uses absolute time range when available', async () => {
       jest.spyOn(sceneGraph, 'getTimeRange').mockReturnValue({
         state: {
           value: {
@@ -187,6 +199,8 @@ describe('LoadQueryScene', () => {
 
       const scene = new LoadQueryScene();
       render(<scene.Component model={scene} />);
+
+      await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
 
       fireEvent.click(screen.getByText('Select'));
 
