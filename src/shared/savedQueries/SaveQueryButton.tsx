@@ -1,7 +1,7 @@
 import { t } from '@grafana/i18n';
+import { useDataSourceInstance } from '@grafana/plugin-compat/datasources';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
 import { usePluginComponent } from '@grafana/runtime';
-import { useDataSourceInstanceSettings } from '@grafana/runtime/unstable';
 import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 import { ToolbarButton } from '@grafana/ui';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -14,7 +14,6 @@ import { getTrailFor } from 'shared/utils/utils';
 
 import { isQueryLibrarySupported, type OpenQueryLibraryComponentProps } from './savedQuery';
 import { SaveQueryModal } from './SaveQueryModal';
-import {} from '@grafana/plugin-compat/datasources';
 
 interface Props {
   readonly sceneRef: SceneObject;
@@ -33,8 +32,8 @@ export function SaveQueryButton({ sceneRef }: Props) {
   );
   const [dsUid, setDsUid] = useState(() => dsVar.getValue().toString());
 
-  const { settings } = useDataSourceInstanceSettings(dsUid);
-  const dsName = settings?.uid === dsUid ? settings.name : '';
+  const { dataSource } = useDataSourceInstance(dsUid);
+  const dsName = dataSource?.uid === dsUid ? dataSource.name : '';
 
   useEffect(() => {
     const sub = dsVar.subscribeToState((newState) => {

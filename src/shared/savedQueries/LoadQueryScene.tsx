@@ -45,12 +45,12 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     const dsVar = sceneGraph.findByKeyAndType(trail, VAR_DATASOURCE, MetricsDrilldownDataSourceVariable);
 
     const uid = dsVar.getValue().toString();
-    void this.updateDatasSourceState(uid);
+    void this.updateDataSourceState(uid);
 
     this._subs.add(
       dsVar.subscribeToState((newState) => {
         const uid = newState.value.toString();
-        void this.updateDatasSourceState(uid);
+        void this.updateDataSourceState(uid);
       })
     );
   };
@@ -67,7 +67,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     });
   };
 
-  private async updateDatasSourceState(dsUid: string) {
+  private async updateDataSourceState(dsUid: string) {
     const generation = ++this.datasourceStateGeneration;
     this.setState({ dsUid, dsName: '' });
 

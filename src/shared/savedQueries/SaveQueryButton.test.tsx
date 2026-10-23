@@ -1,5 +1,5 @@
+import { useDataSourceInstance } from '@grafana/plugin-compat/datasources';
 import { usePluginComponent } from '@grafana/runtime';
-import { useDataSourceInstanceSettings } from '@grafana/runtime/unstable';
 import { sceneGraph } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -25,11 +25,11 @@ jest.mock('@grafana/prometheus', () => ({
   utf8Support: (key: string) => key,
 }));
 
-jest.mock('@grafana/runtime/unstable', () => ({
-  useDataSourceInstanceSettings: jest.fn(),
+jest.mock('@grafana/plugin-compat/datasources', () => ({
+  useDataSourceInstance: jest.fn(),
 }));
 
-const useDataSourceInstanceSettingsMock = jest.mocked(useDataSourceInstanceSettings);
+const useDataSourceInstanceMock = jest.mocked(useDataSourceInstance);
 
 describe('SaveQueryButton', () => {
   const mockSceneRef = {} as any;
@@ -69,10 +69,10 @@ describe('SaveQueryButton', () => {
 
     jest.mocked(usePluginComponent).mockReturnValue({ component: undefined, isLoading: false });
     jest.mocked(isQueryLibrarySupported).mockReturnValue(false);
-    useDataSourceInstanceSettingsMock.mockReturnValue({
+    useDataSourceInstanceMock.mockReturnValue({
       isLoading: false,
       error: undefined,
-      settings: { uid: 'test-datasource-uid', name: 'Test Datasource' } as any,
+      dataSource: { uid: 'test-datasource-uid', name: 'Test Datasource' } as any,
     });
   });
 
@@ -155,9 +155,9 @@ describe('SaveQueryButton', () => {
       component: () => <button>Save query</button>,
       isLoading: false,
     });
-    useDataSourceInstanceSettingsMock.mockReturnValueOnce({
+    useDataSourceInstanceMock.mockReturnValueOnce({
       isLoading: false,
-      settings: { uid: 'previous-datasource-uid', name: 'Previous Datasource' } as any,
+      dataSource: { uid: 'previous-datasource-uid', name: 'Previous Datasource' } as any,
     });
 
     const { rerender } = render(<SaveQueryButton sceneRef={mockSceneRef} />);
