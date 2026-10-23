@@ -12,7 +12,7 @@ import {
 import { Stack } from '@grafana/ui';
 import React from 'react';
 
-import { FiringAlertChip } from './FiringAlertChip/FiringAlertChip';
+import { JevSort } from './JevSort/JevSort';
 import { LayoutSwitcher } from './LayoutSwitcher';
 import { MetricsSorter } from './MetricsSorter/MetricsSorter';
 import { type CountsProvider } from './QuickSearch/CountsProvider/CountsProvider';
@@ -35,7 +35,7 @@ export class ListControls extends EmbeddedScene {
       body: new SceneFlexLayout({
         direction: 'row',
         width: '100%',
-        maxHeight: '32px',
+        wrap: 'wrap',
         children: [
           new SceneFlexItem({
             body: new QuickSearch({
@@ -47,7 +47,7 @@ export class ListControls extends EmbeddedScene {
           }),
           new SceneFlexItem({
             width: 'auto',
-            body: new FiringAlertChip(),
+            body: new JevSort(),
           }),
           new SceneFlexItem({
             width: 'auto',

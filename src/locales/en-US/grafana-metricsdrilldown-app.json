@@ -2,6 +2,8 @@
   "action-bar": {
     "tab": {
       "breakdown": "Breakdown",
+      "jev-related": "Jev Related ✨",
+      "jev-related-description": "Related metrics sorted by Jev relevance",
       "query-results": "Query results",
       "query-results-description": "Instant query data in table format",
       "related-logs": "Related logs",
@@ -186,6 +188,21 @@
   },
   "inline-banner": {
     "unknown-error": "Unknown error!"
+  },
+  "jev-sort": {
+    "alert-scope": "Direct alert counts lack datasource attribution; incident priority currently uses SLO burn evidence.",
+    "band": "Band",
+    "debug": "Jev ranking details",
+    "fallback": "Jev unavailable — using signal-based priority.",
+    "label": "Jev Sorted ✨",
+    "loading": "Finding relevant metrics…",
+    "metric": "Metric",
+    "reasons": "Local reasons",
+    "retry": "Retry Jev ranking",
+    "score": "Jev rubric",
+    "sorted_one": "Incident/SLO priority applied. Jev ranked {{count}} of {{total}} matching metrics; others use signal-based order.",
+    "sorted_other": "Incident/SLO priority applied. Jev ranked {{count}} of {{total}} matching metrics; others use signal-based order.",
+    "tooltip": "Sort metrics by incident and SLO priority, then Jev usefulness"
   },
   "kg-annotations": {
     "layer": {
@@ -394,6 +411,26 @@
   },
   "related-metrics": {
     "search-aria-label": "Quick search related metrics"
+  },
+  "related-metrics-ranking": {
+    "debug": "Jev ranking details",
+    "debug-cached": "Cached",
+    "debug-fallback": "Fallback",
+    "debug-id": "ID",
+    "debug-label-latency": "Labels",
+    "debug-latency": "Latency",
+    "debug-metric": "Metric",
+    "debug-model": "Model",
+    "debug-prompt": "Prompt",
+    "debug-rank": "Rank",
+    "debug-relationship": "Relationship",
+    "debug-score": "Jev p",
+    "debug-server": "Server",
+    "debug-status": "Status",
+    "debug-usage": "Usage",
+    "fallback": "Jev ranking unavailable. Showing name-similarity order.",
+    "loading": "Finding recommended metrics…",
+    "sorted": "Sorted by Jev relevance. Unranked metrics follow in name-similarity order."
   },
   "select-action": {
     "button": "Select"

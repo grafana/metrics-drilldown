@@ -63,10 +63,14 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
       this.relatedLogsOrchestrator.handleFiltersChange();
     },
   });
+  // Retain the two related-metric views so comparisons preserve controls and completed rankings.
+  private relatedMetricViews = new Map<ActionViewType, SceneObject>();
+
   // Keeps track of which background tasks have run to avoid running them multiple times
   private backgroundTaskHasRun: Record<ActionViewType, boolean> = {
     [actionViews.breakdown]: false,
     [actionViews.related]: false,
+    [actionViews.jevRelated]: false,
     [actionViews.relatedLogs]: false,
     [actionViews.queryResults]: false,
   };
@@ -164,7 +168,13 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     const actionViewDef = actionViewType ? getActionViewsDefinitions().find((v) => v.value === actionViewType) : null;
 
     if (actionViewDef && actionViewDef.value !== this.state.actionView) {
-      body.setState({ selectedTab: actionViewDef.getScene(this) });
+      const isRelatedView = actionViewType === actionViews.related || actionViewType === actionViews.jevRelated;
+      const selectedTab =
+        (isRelatedView && this.relatedMetricViews.get(actionViewDef.value)) || actionViewDef.getScene(this);
+      if (isRelatedView) {
+        this.relatedMetricViews.set(actionViewDef.value, selectedTab);
+      }
+      body.setState({ selectedTab });
       this.setState({ actionView: actionViewDef.value });
     } else {
       body.setState({ selectedTab: undefined });

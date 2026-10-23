@@ -14,7 +14,11 @@ import { Button, Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_FILTERED_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
-import { VAR_METRICS_VARIABLE, type MetricOptions, type MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
+import {
+  VAR_METRICS_VARIABLE,
+  type MetricOptions,
+  type MetricsVariable,
+} from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsVariableFilterEngine } from 'MetricsReducer/metrics-variables/MetricsVariableFilterEngine';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
@@ -94,6 +98,10 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
     }
   }
 
+  public refreshMatchingCount() {
+    this.updateMatchingCount();
+  }
+
   private updateMatchingCount() {
     const { firingAlertMetrics } = this.state;
 
@@ -115,10 +123,7 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
       const metricsVariable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, this) as MetricsVariable;
       const originalOptions = metricsVariable.state.options as MetricOptions;
       const filtersWithoutFiring = { ...filterEngine.getFilters(), firingAlertMetrics: [] };
-      const optionsForCounting = MetricsVariableFilterEngine.getFilteredOptions(
-        originalOptions,
-        filtersWithoutFiring
-      );
+      const optionsForCounting = MetricsVariableFilterEngine.getFilteredOptions(originalOptions, filtersWithoutFiring);
 
       const count = optionsForCounting.filter((o) => firingAlertMetrics.has(o.value as string)).length;
       this.setState({ matchingCount: count });
