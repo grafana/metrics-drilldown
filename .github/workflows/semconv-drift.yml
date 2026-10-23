@@ -1,0 +1,35 @@
+name: Verify semconv lookup tables
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/semconv/**'
+      - 'src/shared/otel/semconv/**'
+      - '.github/workflows/semconv-drift.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/semconv/**'
+      - 'src/shared/otel/semconv/**'
+      - '.github/workflows/semconv-drift.yml'
+
+jobs:
+  drift:
+    name: Check generated semconv JSON
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      # Regenerates the JSON with the pinned Weaver and semconv versions and fails on any diff.
+      - name: Regenerate and compare
+        run: ./scripts/semconv/generate.sh --check
