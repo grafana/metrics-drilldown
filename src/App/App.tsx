@@ -4,7 +4,7 @@ import { t } from '@grafana/i18n';
 import { Alert, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { useDataSourceInstances } from 'shared/hooks/useDataSourceInstances';
+import { usePrometheusDataSourceInstances } from 'shared/hooks/usePrometheusDataSourceInstances';
 
 import { AppContext, defaultTrail } from './AppContext';
 import { AppErrorBoundary } from './AppErrorBoundary';
@@ -21,7 +21,7 @@ initOpenFeatureProvider().then(evaluateExperimentFlagsEarly);
 
 export default function App(props: Readonly<AppRootProps>) {
   const styles = useStyles2(getStyles);
-  const { error, instances, loading } = useDataSourceInstances();
+  const { error, instances, loading } = usePrometheusDataSourceInstances();
 
   useReportAppInitialized();
 

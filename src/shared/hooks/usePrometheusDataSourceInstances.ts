@@ -12,7 +12,7 @@ interface UseDataSourceInstancesState {
   error: Error | undefined;
 }
 
-export function useDataSourceInstances(): UseDataSourceInstancesState {
+export function usePrometheusDataSourceInstances(): UseDataSourceInstancesState {
   const [state, setState] = useState<UseDataSourceInstancesState>({
     error: undefined,
     instances: undefined,

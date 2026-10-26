@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { useDataSourceInstances } from 'shared/hooks/useDataSourceInstances';
+import { usePrometheusDataSourceInstances } from 'shared/hooks/usePrometheusDataSourceInstances';
 
 import App from './App';
 
 import type { AppRootProps, DataSourceInstanceListItem } from '@grafana/data';
 
-jest.mock('shared/hooks/useDataSourceInstances', () => ({
-  useDataSourceInstances: jest.fn(),
+jest.mock('shared/hooks/usePrometheusDataSourceInstances', () => ({
+  usePrometheusDataSourceInstances: jest.fn(),
 }));
 jest.mock('../shared/logger/faro/faro', () => ({ initFaro: jest.fn() }));
 jest.mock('../shared/featureFlags/openFeature', () => ({
@@ -29,7 +29,7 @@ jest.mock('./AppContext', () => ({
 jest.mock('./AppErrorBoundary', () => ({
   AppErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-const useDataSourceInstancesMock = jest.mocked(useDataSourceInstances);
+const usePrometheusDataSourceInstancesMock = jest.mocked(usePrometheusDataSourceInstances);
 const appProps = {} as AppRootProps;
 
 function renderApp() {
@@ -42,7 +42,7 @@ describe('App', () => {
   });
 
   it('should render loading placeholder while loading instances', () => {
-    useDataSourceInstancesMock.mockReturnValue({ loading: true, instances: undefined, error: undefined });
+    usePrometheusDataSourceInstancesMock.mockReturnValue({ loading: true, instances: undefined, error: undefined });
 
     renderApp();
 
@@ -51,7 +51,7 @@ describe('App', () => {
   });
 
   it('should show the load error', () => {
-    useDataSourceInstancesMock.mockReturnValue({
+    usePrometheusDataSourceInstancesMock.mockReturnValue({
       loading: false,
       instances: undefined,
       error: new Error('Datasource request failed'),
@@ -63,7 +63,7 @@ describe('App', () => {
   });
 
   it('should show onboarding when there are no instances', () => {
-    useDataSourceInstancesMock.mockReturnValue({ loading: false, instances: [], error: undefined });
+    usePrometheusDataSourceInstancesMock.mockReturnValue({ loading: false, instances: [], error: undefined });
 
     renderApp();
 
@@ -71,7 +71,7 @@ describe('App', () => {
   });
 
   it('should render app routes when there is one instance', () => {
-    useDataSourceInstancesMock.mockReturnValue({
+    usePrometheusDataSourceInstancesMock.mockReturnValue({
       loading: false,
       instances: [
         {

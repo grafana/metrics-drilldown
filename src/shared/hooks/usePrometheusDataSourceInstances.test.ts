@@ -4,7 +4,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
-import { useDataSourceInstances } from './useDataSourceInstances';
+import { usePrometheusDataSourceInstances } from './usePrometheusDataSourceInstances';
 
 jest.mock('@grafana/plugin-compat/datasources', () => ({
   getDataSourceInstanceList: jest.fn(),
@@ -16,7 +16,7 @@ jest.mock('shared/utils/utils.datasource', () => ({
 
 const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);
 
-describe('useDataSourceInstances', () => {
+describe('usePrometheusDataSourceInstances', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     getDataSourceInstanceListMock.mockResolvedValue([
@@ -30,7 +30,7 @@ describe('useDataSourceInstances', () => {
   });
 
   it('should load data source instances', async () => {
-    const { result } = renderHook(() => useDataSourceInstances());
+    const { result } = renderHook(() => usePrometheusDataSourceInstances());
 
     expect(result.current).toEqual({ loading: true, instances: undefined, error: undefined });
 
@@ -56,7 +56,7 @@ describe('useDataSourceInstances', () => {
   it('should normalize a rejected value into an error', async () => {
     getDataSourceInstanceListMock.mockRejectedValue('Unable to load instances');
 
-    const { result } = renderHook(() => useDataSourceInstances());
+    const { result } = renderHook(() => usePrometheusDataSourceInstances());
 
     await waitFor(() => {
       expect(result.current).toEqual({
