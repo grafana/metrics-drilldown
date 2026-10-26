@@ -36,7 +36,7 @@ export interface PersonalSignals {
 }
 
 /** No anonymous identity, guessed datasource, or automatic import of legacy browser records. */
-export function personalStorageKey(datasourceUid: string): string | undefined {
+export function jevStorageScope(datasourceUid: string): string | undefined {
   const user = config.bootData?.user;
   if (
     !isJevEnabled() ||
@@ -51,7 +51,12 @@ export function personalStorageKey(datasourceUid: string): string | undefined {
   ) {
     return;
   }
-  return `grafana-metricsdrilldown-app.jev-personal-v1.${JSON.stringify([user.orgId, user.id, datasourceUid])}`;
+  return JSON.stringify([user.orgId, user.id, datasourceUid]);
+}
+
+export function personalStorageKey(datasourceUid: string): string | undefined {
+  const scope = jevStorageScope(datasourceUid);
+  return scope ? `grafana-metricsdrilldown-app.jev-personal-v1.${scope}` : undefined;
 }
 
 function isMetricName(value: unknown): value is string {

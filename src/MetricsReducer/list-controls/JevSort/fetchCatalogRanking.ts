@@ -3,6 +3,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { validateCatalogScore, type CatalogRequest, type CatalogResponse } from './ranking';
 
+export const CATALOG_PROFILE_PROMPT_VERSION = 'catalog-rubric-profile-v2';
 export const CATALOG_RANK_URL = '/api/plugins/grafana-asserts-app/resources/jev/v1/catalog-metrics/rank';
 const STATUSES = new Set(['ok', 'partial', 'low_confidence', 'upstream_error', 'timeout', 'disabled', 'invalid']);
 
@@ -18,6 +19,9 @@ export function parseCatalogResponse(value: unknown, request: CatalogRequest): C
     typeof raw.scores !== 'object' ||
     Array.isArray(raw.scores)
   ) {
+    return;
+  }
+  if (!compatibleProfilePrompt(raw, request)) {
     return;
   }
   const entries = raw.scores as Record<string, unknown>;
@@ -37,6 +41,13 @@ export function parseCatalogResponse(value: unknown, request: CatalogRequest): C
     ...(typeof raw.fallbackReason === 'string' ? { fallbackReason: raw.fallbackReason } : {}),
     ...(raw.usage && typeof raw.usage === 'object' ? { usage: parseUsage(raw.usage) } : {}),
   };
+}
+function compatibleProfilePrompt(raw: Record<string, unknown>, request: CatalogRequest): boolean {
+  return (
+    request.schemaVersion !== 2 ||
+    !['ok', 'partial'].includes(String(raw.status)) ||
+    raw.promptVersion === CATALOG_PROFILE_PROMPT_VERSION
+  );
 }
 function parseUsage(value: object) {
   const usage = value as Record<string, unknown>;

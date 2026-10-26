@@ -1,7 +1,12 @@
 import { getBackendSrv } from '@grafana/runtime';
 import { NEVER, of } from 'rxjs';
 
-import { CATALOG_RANK_URL, fetchCatalogRanking, parseCatalogResponse } from '../fetchCatalogRanking';
+import {
+  CATALOG_PROFILE_PROMPT_VERSION,
+  CATALOG_RANK_URL,
+  fetchCatalogRanking,
+  parseCatalogResponse,
+} from '../fetchCatalogRanking';
 import { type CatalogRequest } from '../ranking';
 
 jest.mock('@grafana/runtime');
@@ -24,6 +29,14 @@ it('validates the rubric, ignores foreign IDs, and recomputes utility', () => {
   expect(parsed.scores.c01.utility).toBeCloseTo(0.85);
   expect(parseCatalogResponse({ ...raw(), status: 'invented' }, request)).toBeUndefined();
   expect(parseCatalogResponse({ ...raw(), scores: [] }, request)).toBeUndefined();
+});
+
+it('requires a compatible semantic prompt version for usable v2 results, but accepts fallback statuses', () => {
+  const v2: CatalogRequest = { ...request, schemaVersion: 2, profile: { intent: 'Synthetic objective' } };
+  expect(parseCatalogResponse(raw(), v2)).toBeUndefined();
+  expect(parseCatalogResponse({ ...raw(), promptVersion: 'catalog-rubric-v1' }, v2)).toBeUndefined();
+  expect(parseCatalogResponse({ ...raw(), promptVersion: CATALOG_PROFILE_PROMPT_VERSION }, v2)?.status).toBe('partial');
+  expect(parseCatalogResponse({ ...raw(), status: 'disabled' }, v2)?.status).toBe('disabled');
 });
 
 it('maps actual provider token usage and ignores invalid accounting values', () => {

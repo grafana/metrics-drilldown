@@ -21,6 +21,8 @@ import {
   personalStorageKey,
   type PersonalSignals,
 } from './personalization';
+import { type SavedRankingProfile } from './profile';
+import { RANKING_PROFILE_CHANGED, rankingProfileStorageKey, readRankingProfile } from './profileStorage';
 import {
   buildLocalBaseline,
   CATALOG_POLICY_VERSION,
@@ -84,14 +86,17 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
         const datasourceUid = String(sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue() ?? '');
         const key = personalStorageKey(datasourceUid);
         const changedKey = event instanceof StorageEvent ? event.key : (event as CustomEvent<string>).detail;
-        if (key && (changedKey === key || changedKey === null)) {
+        const profileKey = rankingProfileStorageKey(datasourceUid);
+        if (key && [key, profileKey, null].includes(changedKey)) {
           this.publishEvent(new EventSortByChanged({ sortBy: 'jev-relevance' }), true);
         }
       };
       window.addEventListener(PERSONAL_SIGNALS_CHANGED, changed);
+      window.addEventListener(RANKING_PROFILE_CHANGED, changed);
       window.addEventListener('storage', changed);
       return () => {
         window.removeEventListener(PERSONAL_SIGNALS_CHANGED, changed);
+        window.removeEventListener(RANKING_PROFILE_CHANGED, changed);
         window.removeEventListener('storage', changed);
         this.cancel();
       };
@@ -123,6 +128,7 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
     const trail = getTrailFor(this);
     const datasourceUid = String(sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue() ?? '');
     const personal = getPersonalSignals(datasourceUid);
+    const savedProfile = readRankingProfile(datasourceUid);
     const range = sceneGraph.getTimeRange(trail).state.value;
     const filters = (sceneGraph.lookupVariable(VAR_FILTERS, this) as AdHocFiltersVariable | undefined)?.state.filters;
     const context = JSON.stringify([
@@ -138,6 +144,7 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       context,
       personalStorageKey(datasourceUid),
       personal,
+      savedProfile,
       ordinary.map((name) => [name, trail.peekMetricMetadata(name)]),
       Math.floor(Date.now() / 60_000),
     ]);
@@ -157,13 +164,20 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       elapsedMs: undefined,
       labelMs: undefined,
     });
-    const promise = this.run(ordinary, sorter, datasourceUid, personal, context, controller, applyBaseline).finally(
-      () => {
-        if (this.controller === controller) {
-          this.current = undefined;
-        }
+    const promise = this.run(
+      ordinary,
+      sorter,
+      datasourceUid,
+      personal,
+      savedProfile,
+      context,
+      controller,
+      applyBaseline
+    ).finally(() => {
+      if (this.controller === controller) {
+        this.current = undefined;
       }
-    );
+    });
     this.current = { signature, promise };
     return promise;
   }
@@ -173,6 +187,7 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
     sorter: MetricsSorter,
     datasourceUid: string,
     personal: PersonalSignals,
+    savedProfile: SavedRankingProfile | undefined,
     context: string,
     controller: AbortController,
     applyBaseline: (names: string[]) => void
@@ -197,7 +212,13 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       // Even a slow/unavailable SLO integration must retain the cheap scoped personal fallback.
       const personalBaseline = buildLocalBaseline(
         ordinary,
-        { trackedMetrics: new Map(), activeBurnMetrics: new Set(), attributedFiringCounts: new Map(), personal },
+        {
+          trackedMetrics: new Map(),
+          activeBurnMetrics: new Set(),
+          attributedFiringCounts: new Map(),
+          personal,
+          rankingProfile: savedProfile?.profile,
+        },
         (name) => trail.peekMetricMetadata(name)
       );
       fallback = personalBaseline.map((candidate) => candidate.name);
@@ -211,6 +232,7 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       if (controller.signal.aborted) {
         return ordinary;
       }
+      snapshot.signals.rankingProfile = savedProfile?.profile;
       const baseline = buildLocalBaseline(ordinary, snapshot.signals, (name) => trail.peekMetricMetadata(name));
       fallback = baseline.map((candidate) => candidate.name);
       this.setState({ snapshot, baseline });
@@ -234,7 +256,7 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
         candidate.labelNames = labels.get(candidate.name);
         candidate.otelEvidence = otelEvidence(candidate.name, candidate.labelNames);
       }
-      const request = catalogRequest(selected, datasourceUid);
+      const request = catalogRequest(selected, datasourceUid, savedProfile);
       this.setState({ request, labelMs: performance.now() - labelStarted });
       // Local filter values never enter this request or the backend cache key.
       const response = await this.loadResponse(request, controller.signal);
@@ -289,6 +311,14 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
             {t('jev-sort.personal-boost', 'Local visit history and bookmarks add a small boost within priority bands.')}
           </div>
         )}
+        {state.baseline.some((candidate) => candidate.reasons.some((reason) => reason.startsWith('profile-'))) && (
+          <div>{t('jev-sort.profile-applied', 'Your saved ranking profile is applied within priority bands.')}</div>
+        )}
+        {state.status === 'ready' && state.request?.profile && (
+          <div>
+            {t('jev-sort.semantic-profile-applied', 'Jev evaluated your approved intent and matching purpose notes.')}
+          </div>
+        )}
         {state.status === 'fallback' && (
           <Button size="sm" variant="secondary" onClick={model.retry}>
             {t('jev-sort.retry', 'Retry Jev ranking')}
@@ -311,6 +341,8 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
                   burnStatus: state.snapshot?.burnStatus,
                   signalAgeMs: state.snapshot?.fetchedAt ? Date.now() - state.snapshot.fetchedAt : undefined,
                   directAlerts: state.snapshot?.directAlerts,
+                  schemaVersion: state.request?.schemaVersion,
+                  semanticProfile: Boolean(state.request?.profile),
                 },
                 null,
                 2
@@ -333,7 +365,8 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
                       <td>{candidate.name}</td>
                       <td>{local?.band}</td>
                       <td>
-                        {local?.reasons.join(', ')} {local?.personalBoost ? `(+${local.personalBoost.toFixed(3)})` : ''}
+                        {local?.reasons.join(', ')}{' '}
+                        {local?.localAdjustment ? `(${local.localAdjustment.toFixed(3)})` : ''}
                       </td>
                       <td>{JSON.stringify(state.response?.scores[candidate.id] ?? null)}</td>
                     </tr>

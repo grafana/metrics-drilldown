@@ -10,6 +10,8 @@ import { type MetricsSorter } from '../../MetricsSorter/MetricsSorter';
 import { CatalogRanking } from '../CatalogRanking';
 import { fetchCatalogRanking } from '../fetchCatalogRanking';
 import { PERSONAL_SIGNALS_CHANGED, personalStorageKey, recordMetricVisit } from '../personalization';
+import { type RankingProfile } from '../profile';
+import { rankingProfileStorageKey, readRankingProfile, saveRankingProfile } from '../profileStorage';
 import { type CatalogResponse } from '../ranking';
 
 jest.mock('../fetchCatalogRanking');
@@ -218,6 +220,101 @@ it('listens only to active matching scoped changes and removes listeners on deac
   deactivate();
   window.dispatchEvent(new CustomEvent(PERSONAL_SIGNALS_CHANGED, { detail: matching }));
   expect(sortEventCount()).toBe(2);
+});
+
+const profile = (): RankingProfile => ({
+  schemaVersion: 1,
+  name: 'Synthetic',
+  intent: 'Synthetic objective.',
+  rules: [{ match: { exact: 'b' }, purpose: 'Synthetic meaning.', priority: 'high' }],
+});
+
+it('supersedes consented profile work and isolates semantic cache entries by approved content', async () => {
+  const { sorter } = setup();
+  const key = rankingProfileStorageKey('prom')!;
+  saveRankingProfile('prom', key, profile(), true);
+  let resolve!: (value: CatalogResponse) => void;
+  jest
+    .mocked(fetchCatalogRanking)
+    .mockImplementationOnce(
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        })
+    )
+    .mockResolvedValue({ status: 'upstream_error', scores: {} });
+  const model = new CatalogRanking();
+  const first = model.rank(['a', 'b'], sorter, {}, jest.fn());
+  await debounce();
+  const changed = { ...profile(), intent: 'New approved synthetic objective.' };
+  saveRankingProfile('prom', key, changed, true);
+  const next = model.rank(['a', 'b'], sorter, {}, jest.fn());
+  expect(jest.mocked(fetchCatalogRanking).mock.calls[0][1].aborted).toBe(true);
+  await debounce();
+  expect(await next).toEqual(['b', 'a']);
+  resolve(response());
+  await first;
+  expect(model.state.request?.schemaVersion).toBe(2);
+  expect(model.state.request?.profile?.intent).toBe(changed.intent);
+  expect(fetchCatalogRanking).toHaveBeenCalledTimes(2);
+  const payload = JSON.stringify(model.state.request);
+  for (const field of ['shareWithJev', 'historyBoosts', 'bookmarks', 'orgId', 'userId', 'rules']) {
+    expect(payload).not.toContain(field);
+  }
+});
+
+it('reuses semantic scores when only local priority changes, and drops semantic fields when consent is revoked', async () => {
+  const { sorter } = setup();
+  const key = rankingProfileStorageKey('prom')!;
+  saveRankingProfile('prom', key, profile(), true);
+  jest.mocked(fetchCatalogRanking).mockResolvedValue({
+    status: 'ok',
+    scores: {
+      c01: { utility: 0.7, probabilities: { high_value: 0.7, supporting: 0, low_value: 0.3, unknown: 0 } },
+      c02: { utility: 0.69, probabilities: { high_value: 0.69, supporting: 0, low_value: 0.31, unknown: 0 } },
+    },
+  });
+  const model = new CatalogRanking();
+  const first = model.rank(['custom_requests_total', 'b'], sorter, {}, jest.fn());
+  await debounce();
+  expect(await first).toEqual(['b', 'custom_requests_total']);
+  const low = profile();
+  low.rules[0].priority = 'low';
+  saveRankingProfile('prom', key, low, true);
+  const next = model.rank(['custom_requests_total', 'b'], sorter, {}, jest.fn());
+  await debounce();
+  expect(await next).toEqual(['custom_requests_total', 'b']);
+  expect(fetchCatalogRanking).toHaveBeenCalledTimes(1);
+  expect(model.state.response?.cached).toBe(true);
+  saveRankingProfile('prom', key, low, false);
+  const revoked = model.rank(['custom_requests_total', 'b'], sorter, {}, jest.fn());
+  await debounce();
+  await revoked;
+  expect(fetchCatalogRanking).toHaveBeenCalledTimes(2);
+  expect(model.state.request?.schemaVersion).toBe(1);
+  expect(model.state.request).not.toHaveProperty('profile');
+  expect(model.state.request?.candidates.every((candidate) => !('purpose' in candidate))).toBe(true);
+  expect(readRankingProfile('prom')?.shareWithJev).toBe(false);
+});
+
+it('keeps local profile preferences on signal timeout and handles scoped profile save events', async () => {
+  const { sorter } = setup();
+  const key = rankingProfileStorageKey('prom')!;
+  saveRankingProfile('prom', key, profile(), false);
+  jest.mocked(sorter.getSloMetricSignals).mockReturnValue(new Promise(() => {}));
+  const model = new CatalogRanking();
+  const publish = jest.spyOn(model, 'publishEvent');
+  const deactivate = model.activate();
+  const work = model.rank(['a', 'b'], sorter, {}, jest.fn());
+  saveRankingProfile('other', rankingProfileStorageKey('other')!, profile());
+  expect(publish.mock.calls.filter(([event]) => event instanceof EventSortByChanged)).toHaveLength(0);
+  saveRankingProfile('prom', key, profile());
+  expect(publish).toHaveBeenCalledWith(expect.any(EventSortByChanged), true);
+  await jest.advanceTimersByTimeAsync(1700);
+  expect(await work).toEqual(['b', 'a']);
+  expect(model.state.status).toBe('fallback');
+  expect(fetchCatalogRanking).not.toHaveBeenCalled();
+  deactivate();
 });
 
 it('does no signal, label or Jev work for disabled mode or zero candidates', async () => {

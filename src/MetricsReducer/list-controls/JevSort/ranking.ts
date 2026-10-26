@@ -6,8 +6,15 @@ import {
 import { type RankingMetric, type RankingUsage } from 'MetricScene/RelatedMetrics/ranking/types';
 
 import { BOOKMARK_BOOST, MAX_HISTORY_BOOST, MAX_PERSONAL_BOOST, type PersonalSignals } from './personalization';
+import {
+  matchProfileRule,
+  profileBoost,
+  semanticProfileText,
+  type RankingProfile,
+  type SavedRankingProfile,
+} from './profile';
 
-export const CATALOG_POLICY_VERSION = 'catalog-rubric-v2-personal';
+export const CATALOG_POLICY_VERSION = 'catalog-rubric-v3-profile';
 export type OtelEvidence = 'scope-labels' | 'semantic-convention' | 'unknown';
 export type Rubric = 'high_value' | 'supporting' | 'low_value' | 'unknown';
 export type Probabilities = Record<Rubric, number>;
@@ -19,10 +26,12 @@ export interface CatalogCandidate extends RankingMetric {
   id: string;
   baselineRank: number;
   otelEvidence?: OtelEvidence;
+  purpose?: string;
 }
 export interface CatalogRequest {
-  schemaVersion: 1;
+  schemaVersion: 1 | 2;
   datasourceUid?: string;
+  profile?: { intent: string };
   candidates: CatalogCandidate[];
 }
 export interface CatalogResponse {
@@ -43,12 +52,15 @@ export interface LocalSignals {
   dashboardCounts?: Record<string, number>;
   alertCounts?: Record<string, number>;
   personal?: PersonalSignals;
+  rankingProfile?: RankingProfile;
 }
 export interface LocalCandidate extends RankingMetric {
   band: 0 | 1 | 2;
   baselineRank: number;
   localScore: number;
   personalBoost: number;
+  profileBoost: number;
+  localAdjustment: number;
   reasons: string[];
   otelEvidence: OtelEvidence;
 }
@@ -102,6 +114,10 @@ function priorityBand(burn: boolean, firing: number, tracked: boolean): 0 | 1 | 
   return tracked ? 1 : 2;
 }
 
+function boundedHistoryBoost(raw: number | undefined): number {
+  return typeof raw === 'number' && Number.isFinite(raw) ? Math.max(0, Math.min(raw, MAX_HISTORY_BOOST)) : 0;
+}
+
 export function buildLocalBaseline(names: string[], signals: LocalSignals, peek: MetadataPeek): LocalCandidate[] {
   const bookmarks = new Set(signals.personal?.bookmarks ?? []);
   return [...new Set(names)]
@@ -111,12 +127,12 @@ export function buildLocalBaseline(names: string[], signals: LocalSignals, peek:
       const tracked = signals.trackedMetrics.has(name);
       const evidence = otelEvidence(name);
       const actionable = ACTIONABLE.test(name) && !BOOKKEEPING.test(name);
-      const rawHistory = signals.personal?.historyBoosts[name];
-      const historyBoost =
-        typeof rawHistory === 'number' && Number.isFinite(rawHistory)
-          ? Math.max(0, Math.min(rawHistory, MAX_HISTORY_BOOST))
-          : 0;
+      const historyBoost = boundedHistoryBoost(signals.personal?.historyBoosts[name]);
       const personalBoost = Math.min(MAX_PERSONAL_BOOST, historyBoost + Number(bookmarks.has(name)) * BOOKMARK_BOOST);
+      const rule = matchProfileRule(signals.rankingProfile, name);
+      const preference = profileBoost(rule);
+      // One combined soft-preference budget; profile rules cannot stack with history to evade the cap.
+      const localAdjustment = Math.max(-MAX_PERSONAL_BOOST, Math.min(MAX_PERSONAL_BOOST, personalBoost + preference));
       const reasons = [
         burn && 'active-slo-burn',
         firing > 0 && 'attributed-firing',
@@ -125,6 +141,7 @@ export function buildLocalBaseline(names: string[], signals: LocalSignals, peek:
         evidence !== 'unknown' && evidence,
         historyBoost > 0 && 'personal-visit-history',
         bookmarks.has(name) && 'bookmarked',
+        rule && `profile-${rule.priority}`,
       ].filter((reason): reason is string => Boolean(reason));
       return {
         ...metricFeatures(name, peek),
@@ -132,6 +149,8 @@ export function buildLocalBaseline(names: string[], signals: LocalSignals, peek:
         band: priorityBand(burn, firing, tracked),
         otelEvidence: evidence,
         personalBoost,
+        profileBoost: preference,
+        localAdjustment,
         localScore:
           Number(burn) * 20 +
           Math.min(firing, 5) * 2 +
@@ -139,7 +158,7 @@ export function buildLocalBaseline(names: string[], signals: LocalSignals, peek:
           Number(evidence !== 'unknown' && !BOOKKEEPING.test(name)) * 2 +
           Math.min(signals.dashboardCounts?.[name] ?? 0, 3) +
           Math.min(signals.alertCounts?.[name] ?? 0, 3) +
-          personalBoost * 10,
+          localAdjustment * 10,
         reasons,
       };
     })
@@ -174,9 +193,14 @@ function diversify(candidates: LocalCandidate[]): LocalCandidate[] {
 }
 
 export function selectCatalogCandidates(baseline: LocalCandidate[]): LocalCandidate[] {
-  const bands = [0, 1, 2].map((band) =>
-    diversify(baseline.filter((c) => c.band === band && isValidMetricName(c.name)))
-  );
+  const bands = [0, 1, 2].map((band) => {
+    const spread = diversify(baseline.filter((c) => c.band === band && isValidMetricName(c.name)));
+    // Reserve at most two existing slots per band so unfamiliar business instruments can reach Jev.
+    // This changes exposure, not band guarantees, score caps, request size, or retained matching metrics.
+    const preferred = spread.filter((candidate) => candidate.profileBoost > 0).slice(0, 2);
+    const preferredNames = new Set(preferred.map((candidate) => candidate.name));
+    return [...preferred, ...spread.filter((candidate) => !preferredNames.has(candidate.name))];
+  });
   const quotas = [20, 12, 8];
   const selected = bands.flatMap((band, index) => band.slice(0, quotas[index]));
   for (const [index, band] of bands.entries()) {
@@ -201,16 +225,29 @@ function catalogFeatures(candidate: LocalCandidate): RankingMetric {
   return features;
 }
 
-export function catalogRequest(candidates: LocalCandidate[], datasourceUid: string): CatalogRequest {
-  return {
-    schemaVersion: 1,
-    datasourceUid,
-    candidates: candidates.map((candidate, index) => ({
+export function catalogRequest(
+  candidates: LocalCandidate[],
+  datasourceUid: string,
+  savedProfile?: SavedRankingProfile
+): CatalogRequest {
+  const semantic = savedProfile?.shareWithJev ? savedProfile.profile : undefined;
+  const ranked = candidates.map((candidate, index): CatalogCandidate => {
+    const purpose = semantic ? matchProfileRule(semantic, candidate.name)?.purpose : undefined;
+    return {
       ...catalogFeatures(candidate),
       otelEvidence: candidate.otelEvidence,
       id: `c${String(index + 1).padStart(2, '0')}`,
       baselineRank: index + 1,
-    })),
+      ...(purpose ? { purpose: semanticProfileText(purpose, 300) } : {}),
+    };
+  });
+  const intent = semantic ? semanticProfileText(semantic.intent, 600) : '';
+  const hasSemantic = Boolean(semantic && (intent || ranked.some((candidate) => candidate.purpose)));
+  return {
+    schemaVersion: hasSemantic ? 2 : 1,
+    datasourceUid,
+    ...(hasSemantic ? { profile: { intent } } : {}),
+    candidates: ranked,
   };
 }
 
@@ -263,7 +300,9 @@ export function mergeCatalogRanking(
       const scoreA = byName.get(a.name);
       const scoreB = byName.get(b.name);
       if (scoreA !== undefined && scoreB !== undefined) {
-        return scoreB + b.personalBoost - (scoreA + a.personalBoost) || positions.get(a.name)! - positions.get(b.name)!;
+        return (
+          scoreB + b.localAdjustment - (scoreA + a.localAdjustment) || positions.get(a.name)! - positions.get(b.name)!
+        );
       }
       return (
         Number(scoreB !== undefined) - Number(scoreA !== undefined) || positions.get(a.name)! - positions.get(b.name)!
