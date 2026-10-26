@@ -41,12 +41,13 @@ describe('App', () => {
     jest.resetAllMocks();
   });
 
-  it('should render nothing while loading instances', () => {
+  it('should render loading placeholder while loading instances', () => {
     useDataSourceInstancesMock.mockReturnValue({ loading: true, instances: undefined, error: undefined });
 
-    const { container } = renderApp();
+    renderApp();
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByTestId('loading-placeholder')).toBeVisible();
+    expect(screen.getByTestId('loading-placeholder')).toHaveTextContent('Loading...');
   });
 
   it('should show the load error', () => {

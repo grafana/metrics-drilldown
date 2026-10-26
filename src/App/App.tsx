@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { Alert, useStyles2 } from '@grafana/ui';
+import { Alert, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { useDataSourceInstances } from 'shared/hooks/useDataSourceInstances';
@@ -26,7 +26,7 @@ export default function App(props: Readonly<AppRootProps>) {
   useReportAppInitialized();
 
   if (loading) {
-    return null;
+    return <LoadingPlaceholder data-testid="loading-placeholder" text={t('App.loading', 'Loading...')} />;
   }
 
   if (error) {

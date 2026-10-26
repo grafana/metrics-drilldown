@@ -11,7 +11,8 @@
     }
   },
   "App": {
-    "error-title": "Failed to load data source instances"
+    "error-title": "Failed to load data source instances",
+    "loading": "Loading..."
   },
   "attribute-explorer": {
     "badge-metric": "OTel metric attribute",
