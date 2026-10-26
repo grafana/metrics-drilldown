@@ -51,6 +51,7 @@ describe('MetricLabelValuesList value panels', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'test_metric', type: 'gauge' },
       label: 'instance',
+      syncYAxisEnabled: true,
     });
 
     const panel = (list as any).buildValuePanel(panelData, undefined, 4, 'api-1') as GmdVizPanel;
@@ -70,6 +71,7 @@ describe('MetricLabelValuesList value panels', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'request_duration', type: 'native-histogram' },
       label: 'instance',
+      syncYAxisEnabled: true,
       histogramBreakdownFn: 'p95',
     });
 
@@ -87,6 +89,7 @@ describe('MetricLabelValuesList value panels', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'request_duration', type: 'native-histogram' },
       label: 'instance',
+      syncYAxisEnabled: true,
       histogramBreakdownFn: 'sum',
     });
     const frame = makeFrame('api-3');
@@ -101,6 +104,7 @@ describe('MetricLabelValuesList value panels', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'left_metric', type: 'gauge' },
       label: 'instance',
+      syncYAxisEnabled: true,
       binaryQuery: '(left_metric{}) / (right_metric{})',
     });
 

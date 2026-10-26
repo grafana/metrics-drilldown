@@ -16,6 +16,7 @@ describe('breakdown query resolution', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'test_metric', type: 'gauge' },
       label: 'instance',
+      syncYAxisEnabled: true,
     });
 
     const transformer = list.state.$data as SceneDataTransformer;
@@ -28,6 +29,7 @@ describe('breakdown query resolution', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'test_metric', type: 'gauge' },
       label: 'instance',
+      syncYAxisEnabled: true,
     });
     const variable = list.state.$variables?.state.variables[0] as LabelValuesVariable;
 
@@ -38,6 +40,7 @@ describe('breakdown query resolution', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'left_metric', type: 'gauge' },
       label: 'instance',
+      syncYAxisEnabled: true,
       binaryQuery: '(left_metric{}) / (right_metric{})',
     });
 
@@ -48,6 +51,7 @@ describe('breakdown query resolution', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'test_metric', type: 'gauge' },
       label: '',
+      syncYAxisEnabled: true,
     });
 
     expect(list.state.$variables).toBeUndefined();
@@ -57,6 +61,7 @@ describe('breakdown query resolution', () => {
     const list = new MetricLabelValuesList({
       metric: { name: 'test_metric', type: 'gauge' },
       label: 'instance',
+      syncYAxisEnabled: true,
     });
     const repeater = (list as any).buildByFrameRepeater();
 
@@ -65,7 +70,7 @@ describe('breakdown query resolution', () => {
   });
 
   it('uses 500 max data points for panels in the all-labels breakdown', () => {
-    const list = new MetricLabelsList({ metric: { name: 'test_metric', type: 'gauge' } });
+    const list = new MetricLabelsList({ metric: { name: 'test_metric', type: 'gauge' }, syncYAxisEnabled: true });
     const item = list.state.body.state.getLayoutChild({ value: 'instance', label: 'instance' }, 0, []);
     const panel = (item as SceneCSSGridItem).state.body as VizPanel;
     const transformer = sceneGraph.getData(panel) as SceneDataTransformer;

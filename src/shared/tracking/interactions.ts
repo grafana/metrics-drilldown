@@ -28,6 +28,8 @@ type Interactions = {
   };
   // User changed the by-label breakdown aggregation function for a histogram metric
   histogram_breakdown_fn_changed: { fn: HistogramBreakdownFn };
+  // User turned the shared y-axis on or off in the Breakdown tab
+  breakdown_sync_yaxis_changed: { enabled: boolean };
   // A metric exploration has started due to one of the following causes
   exploration_started: {
     cause: 'bookmark_clicked';
@@ -135,6 +137,8 @@ type Interactions = {
   };
   // User changes the panel type for a histogram metric (e.g., from heatmap to percentiles)
   histogram_panel_type_changed: { panelType: PanelType };
+  // User toggles the "Show exemplars" switch on the main metric panel
+  exemplars_toggle_changed: { enabled: boolean };
   // An invalid metric config has been found
   invalid_metric_config: { metricConfig: PanelConfigPreset };
   // the user has clicked on the "Give feedback" button in the app header

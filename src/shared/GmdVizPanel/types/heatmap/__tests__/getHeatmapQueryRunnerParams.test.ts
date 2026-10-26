@@ -44,4 +44,43 @@ describe('getHeatmapQueryRunnerParams(options)', () => {
       },
     ]);
   });
+
+  describe('exemplars', () => {
+    const queryConfig = {
+      resolution: QUERY_RESOLUTION.MEDIUM,
+      labelMatchers: [],
+      addIgnoreUsageFilter: false,
+    };
+
+    test.each([['classic-histogram' as const], ['native-histogram' as const]])(
+      'attaches the exemplar flag to the heatmap query for a %s when exemplarsEnabled',
+      (type) => {
+        const result = getHeatmapQueryRunnerParams({
+          metric: { name: 'http_request_duration_seconds', type },
+          queryConfig: { ...queryConfig, exemplarsEnabled: true },
+        });
+
+        expect(result.queries).toHaveLength(1);
+        expect(result.queries[0]).toMatchObject({ format: 'heatmap', exemplar: true });
+      }
+    );
+
+    test('does not attach the exemplar flag when exemplarsEnabled is false', () => {
+      const result = getHeatmapQueryRunnerParams({
+        metric: { name: 'http_request_duration_seconds', type: 'classic-histogram' },
+        queryConfig: { ...queryConfig, exemplarsEnabled: false },
+      });
+
+      expect(result.queries[0]).not.toHaveProperty('exemplar');
+    });
+
+    test('does not attach the exemplar flag for an unsupported metric type, even when exemplarsEnabled is true', () => {
+      const result = getHeatmapQueryRunnerParams({
+        metric: { name: 'go_goroutines', type: 'gauge' },
+        queryConfig: { ...queryConfig, exemplarsEnabled: true },
+      });
+
+      expect(result.queries[0]).not.toHaveProperty('exemplar');
+    });
+  });
 });
