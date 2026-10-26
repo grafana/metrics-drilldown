@@ -1,7 +1,13 @@
-import { type DataSourceInstanceSettings, type DataSourceJsonData } from '@grafana/data';
+import {
+  type DataSourceInstanceListItem,
+  type DataSourceInstanceSettings,
+  type DataSourceJsonData,
+} from '@grafana/data';
 import { type PrometheusDatasource } from '@grafana/prometheus';
 // eslint-disable-next-line sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+
+import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
 
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
@@ -26,6 +32,13 @@ export function isPrometheusDataSource(input: unknown): input is PrometheusDatas
     'uid' in input &&
     typeof input.uid === 'string'
   );
+}
+
+/**
+ * Helper function to determine if a datasource is a KnowledgeGraph datasource
+ */
+export function isKnowledgeGraphDataSource(ds: DataSourceInstanceListItem): boolean {
+  return ds.uid === KG_DATASOURCE_UID && ds.type === KG_DATASOURCE_TYPE;
 }
 
 type DataSourceType = 'prometheus' | 'loki';
