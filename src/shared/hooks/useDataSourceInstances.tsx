@@ -22,7 +22,7 @@ export function useDataSourceInstances(): UseDataSourceInstancesState {
   useEffect(() => {
     let cancelled = false;
 
-    getDataSourceInstanceList({ filter: (ds) => isPrometheusDataSource(ds) })
+    getDataSourceInstanceList({ filter: isPrometheusDataSource })
       .then((instances) => {
         if (cancelled) {
           return;

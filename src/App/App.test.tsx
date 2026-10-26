@@ -78,9 +78,7 @@ describe('App', () => {
           name: 'Prometheus',
           type: 'prometheus',
           meta: {} as DataSourceInstanceListItem['meta'],
-          readOnly: false,
-          isDefault: true,
-        },
+        } as DataSourceInstanceListItem,
       ],
       error: undefined,
     });
