@@ -67,7 +67,7 @@ describe('RelatedLogsScene datasource discovery', () => {
 
     await waitFor(() => expect(scene.state.loading).toBe(false));
 
-    expect(screen.getByText('No related logs found')).toBeInTheDocument();
+    expect(await screen.findByText('No related logs found')).toBeInTheDocument();
     expect(displayError).toHaveBeenCalledTimes(1);
     expect(displayError).toHaveBeenCalledWith(new Error('Discovery failed'), [
       'Failed to load data sources for related logs.',
@@ -90,7 +90,7 @@ describe('RelatedLogsScene datasource discovery', () => {
 
     await waitFor(() => expect(scene.state.loading).toBe(false));
 
-    expect(screen.getByText('No related logs found')).toBeInTheDocument();
+    expect(await screen.findByText('No related logs found')).toBeInTheDocument();
     expect(displayError).not.toHaveBeenCalled();
   });
 });
