@@ -1,8 +1,10 @@
 import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
-import { config } from '@grafana/runtime';
-import { useStyles2 } from '@grafana/ui';
+import { t } from '@grafana/i18n';
+import { Alert, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import React from 'react';
+
+import { usePrometheusDataSourceInstances } from 'shared/hooks/usePrometheusDataSourceInstances';
 
 import { AppContext, defaultTrail } from './AppContext';
 import { AppErrorBoundary } from './AppErrorBoundary';
@@ -11,21 +13,35 @@ import { AppRoutes } from './Routes';
 import { useReportAppInitialized } from './useReportAppInitialized';
 import { evaluateExperimentFlagsEarly, initOpenFeatureProvider } from '../shared/featureFlags/openFeature';
 import { initFaro } from '../shared/logger/faro/faro';
-import { isPrometheusDataSource } from '../shared/utils/utils.datasource';
 import { PluginPropsContext } from '../shared/utils/utils.plugin';
 import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
 initFaro();
 initOpenFeatureProvider().then(evaluateExperimentFlagsEarly);
 
-const prometheusDatasources = Object.values(config.datasources).filter(isPrometheusDataSource);
-
 export default function App(props: Readonly<AppRootProps>) {
   const styles = useStyles2(getStyles);
+  const { error, instances, loading } = usePrometheusDataSourceInstances();
 
   useReportAppInitialized();
 
-  if (!prometheusDatasources.length) {
+  if (loading) {
+    return <LoadingPlaceholder data-testid="loading-placeholder" text={t('App.loading', 'Loading...')} />;
+  }
+
+  if (error) {
+    return (
+      <Alert
+        data-testid="app-error"
+        title={t('App.error-title', 'Failed to load data source instances')}
+        severity="error"
+      >
+        {error.message}
+      </Alert>
+    );
+  }
+
+  if (!instances?.length) {
     return <Onboarding />;
   }
 
