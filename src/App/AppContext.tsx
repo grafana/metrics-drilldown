@@ -7,7 +7,7 @@ interface AppContextState {
   trail: DataTrail;
 }
 
-export const defaultTrail = newMetricsTrail();
+const defaultTrail = newMetricsTrail();
 
 export const AppContext = createContext<AppContextState>({
   trail: defaultTrail,

@@ -3,11 +3,15 @@ import {
   type DataSourceInstanceSettings,
   type DataSourceJsonData,
 } from '@grafana/data';
+import { getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
 import { type PrometheusDatasource } from '@grafana/prometheus';
 // eslint-disable-next-line sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 
 import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
+import { VAR_DATASOURCE } from 'shared/shared';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
 
 export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
@@ -181,4 +185,23 @@ export function getDataSourceFetcher(): DataSourceFetcher {
   }
 
   return dataSourceFetcherSingleton;
+}
+
+export async function getCurrentPrometheusDataSource(
+  instances?: DataSourceInstanceListItem[]
+): Promise<string | undefined> {
+  if (!instances?.length) {
+    return undefined;
+  }
+
+  const uidFromUrl = new URL(window.location.href).searchParams.get(`var-${VAR_DATASOURCE}`);
+  const uidFromStorage = userStorage.getItem(PREF_KEYS.DATASOURCE);
+  const selected = instances.find((ds) => ds.uid === uidFromUrl) ?? instances.find((ds) => ds.uid === uidFromStorage);
+
+  if (selected) {
+    return selected.uid;
+  }
+
+  const defaultInstance = await getDefaultDataSourceInstanceListItem(instances);
+  return (defaultInstance ?? instances[0]).uid;
 }
