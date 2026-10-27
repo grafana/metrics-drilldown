@@ -10,6 +10,10 @@
       "related-metrics-description": "Relevant metrics based on current label filters"
     }
   },
+  "App": {
+    "error-title": "Failed to load data source instances",
+    "loading": "Loading..."
+  },
   "attribute-explorer": {
     "badge-metric": "OTel metric attribute",
     "badge-resource": "OTel resource attribute",
@@ -403,6 +407,11 @@
     "button": "Select new metric",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Open in Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": "Failed to load data source instances"
+    }
   },
   "show-more-button": {
     "text_one": "Show {{count}} more ({{current}}/{{total}})",

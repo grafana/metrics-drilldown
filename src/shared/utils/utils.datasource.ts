@@ -1,7 +1,9 @@
+import { type DataSourceInstanceListItem } from '@grafana/data';
 import { getDataSourceInstanceList, getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
 import { type PrometheusDatasource } from '@grafana/prometheus';
 import { getBackendSrv } from '@grafana/runtime';
 
+import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
 import { type DataSourceInstances } from 'shared/types';
 
 const DS_HEALTH_CHECK_TIMEOUT_MS = 3000;
@@ -25,6 +27,13 @@ export function isPrometheusDataSource(input: unknown): input is PrometheusDatas
     'uid' in input &&
     typeof input.uid === 'string'
   );
+}
+
+/**
+ * Helper function to determine if a datasource is a KnowledgeGraph datasource
+ */
+export function isKnowledgeGraphDataSource(ds: DataSourceInstanceListItem): boolean {
+  return ds.uid === KG_DATASOURCE_UID && ds.type === KG_DATASOURCE_TYPE;
 }
 
 type DataSourceType = 'prometheus' | 'loki';

@@ -1,7 +1,9 @@
 import { getDataSourceInstanceList, getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
 import { getBackendSrv } from '@grafana/runtime';
 
-import { DataSourceFetcher, isPrometheusDataSource } from './utils.datasource';
+import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
+
+import { DataSourceFetcher, isKnowledgeGraphDataSource, isPrometheusDataSource } from './utils.datasource';
 
 jest.mock('@grafana/runtime');
 
@@ -31,6 +33,18 @@ describe('isPrometheusDataSource', () => {
   it('should return false for object without type property', () => {
     const ds = { name: 'prometheus', uid: 'prometheus' };
     expect(isPrometheusDataSource(ds)).toBe(false);
+  });
+});
+
+describe('isKnowledgeGraphDataSource', () => {
+  it('should return true for a KnowledgeGraph datasource', () => {
+    const ds: any = { type: KG_DATASOURCE_TYPE, uid: KG_DATASOURCE_UID };
+    expect(isKnowledgeGraphDataSource(ds)).toBe(true);
+  });
+
+  it('should return false for non-KnowledgeGraph datasource', () => {
+    const ds: any = { type: 'grafana-test-datasource', uid: 'grafana-test-datasource' };
+    expect(isKnowledgeGraphDataSource(ds)).toBe(false);
   });
 });
 
