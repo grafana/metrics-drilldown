@@ -1,7 +1,9 @@
 // eslint-disable-next-line sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
 import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 
-import { DataSourceFetcher, isPrometheusDataSource } from './utils.datasource';
+import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
+
+import { DataSourceFetcher, isKnowledgeGraphDataSource, isPrometheusDataSource } from './utils.datasource';
 
 jest.mock('@grafana/runtime');
 
@@ -24,6 +26,18 @@ describe('isPrometheusDataSource', () => {
   it('should return false for object without type property', () => {
     const ds = { name: 'prometheus', uid: 'prometheus' };
     expect(isPrometheusDataSource(ds)).toBe(false);
+  });
+});
+
+describe('isKnowledgeGraphDataSource', () => {
+  it('should return true for a KnowledgeGraph datasource', () => {
+    const ds: any = { type: KG_DATASOURCE_TYPE, uid: KG_DATASOURCE_UID };
+    expect(isKnowledgeGraphDataSource(ds)).toBe(true);
+  });
+
+  it('should return false for non-KnowledgeGraph datasource', () => {
+    const ds: any = { type: 'grafana-test-datasource', uid: 'grafana-test-datasource' };
+    expect(isKnowledgeGraphDataSource(ds)).toBe(false);
   });
 });
 
