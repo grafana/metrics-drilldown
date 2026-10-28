@@ -146,14 +146,13 @@ export class MetricLabelsList extends SceneObjectBase<MetricLabelsListState> {
           }
 
           const histogramBreakdownFn = sceneGraph.lookupVariable(VAR_HISTOGRAM_BREAKDOWN_FN, this)?.getValue() as
-            | HistogramBreakdownFn
-            | undefined;
+            HistogramBreakdownFn | undefined;
 
           const panel = buildTimeseriesPanel({
             metric,
             panelConfig: getLabelPanelConfig(label, labelIndex, embeddedMini),
             queryConfig: {
-              resolution: QUERY_RESOLUTION.MEDIUM,
+              resolution: QUERY_RESOLUTION.HIGH,
               groupBy: label,
               labelMatchers: [],
               addIgnoreUsageFilter: true,
