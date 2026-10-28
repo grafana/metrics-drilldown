@@ -169,6 +169,15 @@
     "button": "Ge feedback"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Inbyggt histogram",
     "variant": {
       "heatmap": "värmekarta",
@@ -306,9 +315,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "Kopiera webbadress",
       "copy-url-success": "URL kopierad till urklippet",
-      "explore": "Utforska"
+      "create-alert": "",
+      "explore": "Utforska",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Åtgärder",
@@ -470,7 +483,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Bokmärke",
       "copy-url": "Kopiera webbadress",
       "open-explore": "Öppna i utforska",
       "select-new-metric-tooltip": "Ta bort befintligt mätvärde och välj ett nytt"

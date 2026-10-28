@@ -169,6 +169,15 @@
     "button": "Feedback geben"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Natives Histogramm",
     "variant": {
       "heatmap": "Heatmap",
@@ -306,9 +315,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "URL kopieren",
       "copy-url-success": "URL in die Zwischenablage kopiert",
-      "explore": "Entdecken"
+      "create-alert": "",
+      "explore": "Entdecken",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Aktionen",
@@ -470,7 +483,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Lesezeichen",
       "copy-url": "URL kopieren",
       "open-explore": "In Explore öffnen",
       "select-new-metric-tooltip": "Vorhandene Metrik entfernen und neue Metrik auswählen"

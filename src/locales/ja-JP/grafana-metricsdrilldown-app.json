@@ -164,6 +164,15 @@
     "button": "フィードバックを提供"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "ネイティブヒストグラム",
     "variant": {
       "heatmap": "ヒートマップ",
@@ -301,9 +310,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "URLをコピー",
       "copy-url-success": "URLをクリップボードにコピーしました",
-      "explore": "探索"
+      "create-alert": "",
+      "explore": "探索",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "操作",
@@ -460,7 +473,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "ブックマーク",
       "copy-url": "URLをコピー",
       "open-explore": "エクスプローラーで開く",
       "select-new-metric-tooltip": "既存のメトリクスを削除して、新しいメトリクスを選択します"

@@ -169,6 +169,15 @@
     "button": "Feedback geven"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Native Histogram",
     "variant": {
       "heatmap": "heatmap",
@@ -306,9 +315,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "URL kopiëren",
       "copy-url-success": "URL naar klembord gekopieerd",
-      "explore": "Verkennen"
+      "create-alert": "",
+      "explore": "Verkennen",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Acties",
@@ -470,7 +483,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Bladwijzer",
       "copy-url": "URL kopiëren",
       "open-explore": "Openen in verkennen",
       "select-new-metric-tooltip": "Verwijder bestaande metric en kies een nieuwe metric"

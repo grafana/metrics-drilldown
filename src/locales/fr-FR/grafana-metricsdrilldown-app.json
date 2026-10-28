@@ -169,6 +169,15 @@
     "button": "Donner votre avis"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Histogramme natif",
     "variant": {
       "heatmap": "carte thermique",
@@ -306,9 +315,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "Copier l’URL",
       "copy-url-success": "URL copiée dans le presse-papiers",
-      "explore": "Explorer"
+      "create-alert": "",
+      "explore": "Explorer",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Actions",
@@ -470,7 +483,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Favori",
       "copy-url": "Copier l’URL",
       "open-explore": "Ouvrir dans Explorer",
       "select-new-metric-tooltip": "Supprimer la métrique actuelle et en sélectionner une nouvelle"

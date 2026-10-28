@@ -203,6 +203,106 @@ describe('getTimeseriesQueryRunnerParams(options)', () => {
       expect(result.queries[0].legendFormat).toBe('max');
     });
 
+    test('attaches exemplar to a binary query when exemplarsEnabled', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'binary_insight', type: 'counter' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: false,
+          binaryExpr: 'a / b',
+          exemplarsEnabled: true,
+        },
+      });
+
+      expect(result.queries[0]).toMatchObject({ exemplar: true });
+    });
+
+    test('attaches exemplar to a customFunction query when exemplarsEnabled', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_requests_total', type: 'counter' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: true,
+          customFunction: 'avg',
+          exemplarsEnabled: true,
+        },
+      });
+
+      expect(result.queries[0]).toMatchObject({ exemplar: true });
+    });
+
+    test('attaches exemplar only to the first preset-function query', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_requests_total', type: 'counter' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: false,
+          queries: [{ fn: 'min' }, { fn: 'max' }],
+          exemplarsEnabled: true,
+        },
+      });
+
+      expect(result.queries).toHaveLength(2);
+      expect(result.queries[0]).toMatchObject({ exemplar: true });
+      expect(result.queries[1]).not.toHaveProperty('exemplar');
+    });
+
+    test('attaches exemplar to the first emitted query when the first definition is skipped as unknown', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'http_requests_total', type: 'counter' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: false,
+          queries: [{ fn: 'unknown_fn' as PrometheusFunction }, { fn: 'min' }, { fn: 'max' }],
+          exemplarsEnabled: true,
+        },
+      });
+
+      expect(result.queries).toHaveLength(2);
+      expect(result.queries[0]).toMatchObject({ exemplar: true });
+      expect(result.queries[1]).not.toHaveProperty('exemplar');
+    });
+
+    test.each([
+      ['preset functions', {}],
+      ['a custom function', { customFunction: 'max' }],
+      ['a binary expression', { binaryExpr: 'a / b' }],
+    ])('does not attach exemplar for an unsupported metric type, even when exemplarsEnabled is true (%s)', (_name, extra) => {
+      // A saved exemplarsEnabled can outlive the metric type that allowed it (e.g. metadata later reclassifies
+      // a counter as a gauge). The query builder must not keep requesting exemplars the switch has disabled.
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'go_goroutines', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: false,
+          exemplarsEnabled: true,
+          ...extra,
+        },
+      });
+
+      expect(result.queries.length).toBeGreaterThan(0);
+      result.queries.forEach((query) => expect(query).not.toHaveProperty('exemplar'));
+    });
+
+    test('does not attach exemplar when exemplarsEnabled is false', () => {
+      const result = getTimeseriesQueryRunnerParams({
+        metric: { name: 'go_goroutines', type: 'gauge' },
+        queryConfig: {
+          resolution: QUERY_RESOLUTION.MEDIUM,
+          labelMatchers: [],
+          addIgnoreUsageFilter: false,
+          exemplarsEnabled: false,
+        },
+      });
+
+      expect(result.queries[0]).not.toHaveProperty('exemplar');
+    });
+
   });
 
   describe('with group by label', () => {

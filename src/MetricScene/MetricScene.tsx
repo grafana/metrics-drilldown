@@ -39,6 +39,8 @@ interface MetricSceneState extends SceneObjectState {
   // Set only for a KG binary (ratio) insight. Routes the breakdown's Group by variable to the
   // binary-ratio label datasource (operand-intersection) instead of single-metric label_names.
   binaryQuery?: string;
+  // Forwarded to MetricGraphScene; the live value is owned by DataTrail (url param `exemplars`).
+  exemplarsEnabled?: boolean;
   actionView?: ActionViewType;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
@@ -84,6 +86,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
           customFunction: state.customFunction,
           kgMetricType: state.kgMetricType,
           binaryQuery: state.binaryQuery,
+          exemplarsEnabled: state.exemplarsEnabled,
         }),
       attributeExplorerScene: state.attributeExplorerScene ?? new AttributeExplorerScene(),
       ...state,

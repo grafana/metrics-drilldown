@@ -18,7 +18,8 @@ export function buildCustomFunctionQuery(
   customFn: string,
   expr: string,
   interval: string,
-  isRateQuery: boolean
+  isRateQuery: boolean,
+  exemplar?: boolean
 ): SceneDataQuery {
   const isRange = isRangeVectorFunction(customFn);
   const queryExpr = isRange ? `${customFn}(${expr}[${interval}])` : `${customFn}(${expr})`;
@@ -28,6 +29,7 @@ export function buildCustomFunctionQuery(
     expr: queryExpr,
     legendFormat: fnName,
     fromExploreMetrics: true,
+    ...(exemplar ? { exemplar } : {}),
   };
 }
 
@@ -36,7 +38,8 @@ export function buildPresetFunctionQuery(
   fn: PrometheusFunction,
   expr: string,
   isRateQuery: boolean,
-  loggerLabel: string
+  loggerLabel: string,
+  exemplar?: boolean
 ): SceneDataQuery | undefined {
   const entry = PROMQL_FUNCTIONS.get(fn);
   if (!entry) {
@@ -49,5 +52,6 @@ export function buildPresetFunctionQuery(
     expr: entry.fn({ expr }),
     legendFormat: fnName,
     fromExploreMetrics: true,
+    ...(exemplar ? { exemplar } : {}),
   };
 }

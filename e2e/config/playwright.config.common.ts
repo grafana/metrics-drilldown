@@ -94,7 +94,7 @@ export function config(config: CustomEnvConfig) {
         testDir: pluginE2eAuth,
         testMatch: [/.*\.js/], // eslint-disable-line sonarjs/slow-regex
       },
-      // 2. Run tests in Google Chrome. Every test will start authenticated as admin user.
+      // 2. Run tests in Google Chrome. Every test will start authenticated as the configured user.
       {
         name: 'chromium',
         use: {
@@ -102,6 +102,8 @@ export function config(config: CustomEnvConfig) {
           viewport: CHROMIUM_VIEWPORT,
           // Used by the Copy URL test
           permissions: ['clipboard-read', 'clipboard-write'],
+          // Ensure we start with an authenticated state
+          storageState: `playwright/.auth/${getGrafanaUser().user}.json`,
         },
         dependencies: ['auth'],
       },

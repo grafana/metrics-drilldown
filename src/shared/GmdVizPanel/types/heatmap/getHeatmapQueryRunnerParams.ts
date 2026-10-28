@@ -2,6 +2,7 @@ import { promql } from 'tsqtsq';
 
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
+import { supportsExemplars } from 'shared/GmdVizPanel/matchers/supportsExemplars';
 
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
@@ -14,6 +15,7 @@ export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions
     addExtremeValuesFiltering: queryConfig.addExtremeValuesFiltering,
   });
 
+  const exemplar = queryConfig.exemplarsEnabled && supportsExemplars(metric.type);
   const interval = queryConfig.customRateInterval ?? '$__rate_interval';
   const query = promql.sum({ expr: promql.rate({ expr: expression, interval }), by: ['le'] });
 
@@ -25,6 +27,7 @@ export function getHeatmapQueryRunnerParams(options: GetQueryRunnerParamsOptions
         expr: query,
         format: 'heatmap',
         fromExploreMetrics: true,
+        ...(exemplar ? { exemplar: true } : {}),
       },
     ],
   };
