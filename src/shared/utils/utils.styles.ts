@@ -28,7 +28,6 @@ export function getAppBackgroundColor(theme: GrafanaTheme2, embedded?: boolean):
 
   // Standalone app route: our own component IS the page here (rendered via Grafana's <Page>), so it
   // should match the page-level token, not the content-pane one.
-  //@ts-expect-error
   return theme.flags.visualDesignRefresh ? theme.colors.background.page : theme.colors.background.canvas;
 }
 

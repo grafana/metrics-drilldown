@@ -1,5 +1,5 @@
 import { css } from '@emotion/css';
-import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2 } from '@grafana/data';
+import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { config, useChromeHeaderHeight, usePluginComponent } from '@grafana/runtime';
 import {
@@ -24,6 +24,7 @@ import {
   type SceneObjectWithUrlSync,
   type SceneVariable,
 } from '@grafana/scenes';
+import { type Panel } from '@grafana/schema';
 import { Modal, Stack, useStyles2 } from '@grafana/ui';
 import React, { createElement, useEffect } from 'react';
 
@@ -39,7 +40,7 @@ import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import {
   ADD_TO_DASHBOARD_COMPONENT_ID,
-  ADD_TO_DASHBOARD_LABEL,
+  getAddToDashboardLabel,
 } from 'shared/GmdVizPanel/components/addToDashboard/constants';
 import {
   EventOpenAddToDashboard,
@@ -48,6 +49,8 @@ import {
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
+import { CREATE_ALERT_COMPONENT_ID } from 'shared/GmdVizPanel/components/createAlert/constants';
+import { EventOpenCreateAlert } from 'shared/GmdVizPanel/components/createAlert/EventOpenCreateAlert';
 import { EventConfigurePanel } from 'shared/GmdVizPanel/components/EventConfigurePanel';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { getKgSceneProps, type KgEntityHint } from 'shared/knowledgeGraph/kgAnnotations';
@@ -107,10 +110,20 @@ export interface DataTrailState extends SceneObjectState {
   // Not a KG-facing field; the connector confirms binary-ness before setting it.
   binaryQuery?: string;
 
+  // The main panel's opt-in "Show exemplars" switch. Synced with the url (`exemplars=true`) so a shared link
+  // opens with exemplars on. Lives here, not on the panel, because this object outlives a metric change and
+  // can clear the param: exemplar queries only run where the user asked for them.
+  exemplarsEnabled?: boolean;
+
   // Add to dashboard feature
   isAddToDashboardAvailable: boolean;
   isAddToDashboardModalOpen: boolean;
   addToDashboardPanelData?: PanelDataRequestPayload;
+
+  // Create alert feature
+  isCreateAlertAvailable: boolean;
+  isCreateAlertModalOpen: boolean;
+  createAlertPanelData?: PanelDataRequestPayload;
 }
 
 export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneObjectWithUrlSync {
@@ -125,7 +138,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   });
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, {
-    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType', 'binaryQuery'],
+    keys: ['metric', 'customRateInterval', 'customFunction', 'metricType', 'binaryQuery', 'exemplars'],
   });
 
   getUrlState(): SceneObjectUrlValues {
@@ -149,6 +162,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       customFunction: customFunctionPairs?.length ? customFunctionPairs : [],
       metricType: metricTypePairs?.length ? metricTypePairs : [],
       binaryQuery: this.state.binaryQuery,
+      exemplars: this.state.exemplarsEnabled ? 'true' : undefined,
     };
   }
 
@@ -181,7 +195,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       typeof values.binaryQuery === 'string' && values.binaryQuery ? values.binaryQuery : undefined;
     const binaryQuery = rawBinaryQuery && parseBinaryQuery(rawBinaryQuery) ? rawBinaryQuery : undefined;
 
-    this.updateStateForNewMetric(metric, sourceMetricsOverride, binaryQuery);
+    this.updateStateForNewMetric(metric, sourceMetricsOverride, binaryQuery, values.exemplars === 'true');
   }
 
   public constructor(state: Partial<DataTrailState>) {
@@ -200,6 +214,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       drawer: new SceneDrawer({}),
       isAddToDashboardAvailable: false,
       isAddToDashboardModalOpen: false,
+      isCreateAlertAvailable: false,
+      isCreateAlertModalOpen: false,
       ...state,
     });
 
@@ -209,9 +225,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   private onActivate() {
     registerRuntimeDataSources([new LabelsDataSource(), new BinaryRatioLabelsDataSource()]);
 
-    evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then((enabled) => {
-      if (enabled) {
-        const kg = getKgSceneProps(this.state.kgEntityHint);
+    evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then(async (enabled) => {
+      if (!enabled) {
+        return;
+      }
+
+      try {
+        const kg = await getKgSceneProps(this.state.kgEntityHint);
         if (kg) {
           this.setState({
             $data: this.state.$data ?? kg.$data,
@@ -219,6 +239,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             kgAnnotationToggle: this.state.kgAnnotationToggle ?? kg.controls,
           });
         }
+      } catch (error) {
+        logger.debug('Failed to fetch kg Scene', { error });
       }
     });
 
@@ -231,17 +253,25 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       this.datasourceHelper.init();
     }, 0);
 
-    this.updateStateForNewMetric(this.state.metric, undefined, this.state.binaryQuery);
+    this.updateStateForNewMetric(this.state.metric, undefined, this.state.binaryQuery, this.state.exemplarsEnabled);
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
     this.subscribeToEvent(EventOpenAddToDashboard, (event) => {
       this.openAddToDashboardModal(event.payload.panelData);
+    });
+    this.subscribeToEvent(EventOpenCreateAlert, (event) => {
+      this.openCreateAlertModal(event.payload.panelData);
     });
 
     this.initFilters();
     this.initConfigPrometheusFunction();
   }
 
-  private updateStateForNewMetric(metric?: string, sourceMetricsOverride?: SourceMetrics, binaryQuery?: string) {
+  private updateStateForNewMetric(
+    metric?: string,
+    sourceMetricsOverride?: SourceMetrics,
+    binaryQuery?: string,
+    exemplarsEnabled?: boolean
+  ) {
     // A binary (ratio) insight may have NO metric to anchor on: its operands can be label-only series
     // (e.g. `{asserts_metric_latency="seconds_sum"}`, no metric name). We still open the metric scene and
     // render the binary. When the first leaf does have a name (bare identifier or a `__name__` matcher),
@@ -253,6 +283,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     // The metric scene shows when there is a metric OR a binary query (a binary needs no metric anchor).
     const showMetricScene = Boolean(effectiveMetric || binaryQuery);
+    // Only meaningful with a metric scene, and never carried over from a previous metric: callers that pass
+    // nothing (selecting another metric, going back to the reducer) reset it, which also clears the url param.
+    const effectiveExemplarsEnabled = showMetricScene && Boolean(exemplarsEnabled);
 
     if (!this.state.topScene || effectiveMetric !== this.state.metric || binaryQuery !== this.state.binaryQuery) {
       const baseControls = [new VariableValueSelectors({ layout: 'vertical' }), new SceneControlsSpacer()];
@@ -272,6 +305,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         // Written from the passed value so it is preserved on URL load / initial activation and CLEARED
         // (undefined) when selecting a new metric or returning to the reducer, keeping it out of the URL.
         binaryQuery,
+        exemplarsEnabled: effectiveExemplarsEnabled,
         topScene: showMetricScene
           ? new MetricScene({
               metric: effectiveMetric ?? '',
@@ -279,11 +313,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               customFunction: entry?.customFunction,
               kgMetricType: entry?.metricType,
               binaryQuery,
+              exemplarsEnabled: effectiveExemplarsEnabled,
             })
           : new MetricsReducer(),
         controls,
         ...(sourceMetricsOverride !== undefined && { sourceMetrics: sourceMetricsOverride }),
       });
+    } else if (effectiveExemplarsEnabled !== Boolean(this.state.exemplarsEnabled)) {
+      // Same metric, only the param changed (browser back/forward, an edited url): keep the scene and let
+      // MetricGraphScene push the new value into the live panel.
+      this.setState({ exemplarsEnabled: effectiveExemplarsEnabled });
     }
 
     this.syncFiltersForBinaryQuery(binaryQuery);
@@ -370,8 +409,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(EventConfigurePanel, async (event) => {
       const { metric } = event.payload;
 
-      reportExploreMetrics('configure_panel_opened', { metricType: metric.type });
-
       this.state.drawer.open({
         title: t('data-trail.configure-drawer.title', 'Configure the Prometheus function'),
         subTitle: `${metric.name} (${metric.type})`,
@@ -385,12 +422,6 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
     this.subscribeToEvent(EventApplyPanelConfig, async (event) => {
       const { metric, config, restoreDefault } = event.payload;
-
-      if (restoreDefault) {
-        reportExploreMetrics('default_panel_config_restored', { metricType: metric.type });
-      } else {
-        reportExploreMetrics('panel_config_applied', { metricType: metric.type, configId: config.id });
-      }
 
       this.state.drawer.close();
 
@@ -514,6 +545,20 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     });
   };
 
+  public openCreateAlertModal(panelData: PanelDataRequestPayload) {
+    this.setState({
+      isCreateAlertModalOpen: true,
+      createAlertPanelData: panelData,
+    });
+  }
+
+  public closeCreateAlertModal = () => {
+    this.setState({
+      isCreateAlertModalOpen: false,
+      createAlertPanelData: undefined,
+    });
+  };
+
   static readonly Component = ({ model }: SceneComponentProps<DataTrail>) => {
     const {
       controls,
@@ -523,6 +568,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       drawer,
       isAddToDashboardModalOpen,
       addToDashboardPanelData,
+      isCreateAlertModalOpen,
+      createAlertPanelData,
       kgAnnotationToggle,
     } = model.useState();
 
@@ -546,6 +593,26 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         model.setState({ isAddToDashboardAvailable: isAvailable });
       }
     }, [isLoadingAddToDashboard, AddToDashboardComponent, model]);
+
+    const { component: CreateAlertComponent, isLoading: isLoadingCreateAlert } = usePluginComponent<{
+      panel: Panel;
+      range: TimeRange;
+      onDismiss: () => void;
+    }>(CREATE_ALERT_COMPONENT_ID);
+
+    // Update availability flag when component loads
+    useEffect(() => {
+      const isAvailable = !isLoadingCreateAlert && Boolean(CreateAlertComponent);
+
+      // Log warning if component failed to load
+      if (!isLoadingCreateAlert && !CreateAlertComponent) {
+        logger.warn(`Failed to load create alert component: ${CREATE_ALERT_COMPONENT_ID}`);
+      }
+
+      if (model.state.isCreateAlertAvailable !== isAvailable) {
+        model.setState({ isCreateAlertAvailable: isAvailable });
+      }
+    }, [isLoadingCreateAlert, CreateAlertComponent, model]);
 
     // Set CSS custom property for app-controls height in embedded mode
     useEffect(() => {
@@ -607,7 +674,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         </div>
         <drawer.Component model={drawer} />
         {isAddToDashboardModalOpen && AddToDashboardComponent && addToDashboardPanelData && (
-          <Modal title={ADD_TO_DASHBOARD_LABEL} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
+          <Modal title={getAddToDashboardLabel()} isOpen={true} onDismiss={model.closeAddToDashboardModal}>
             {createElement(AddToDashboardComponent as React.ComponentType<AddToDashboardFormProps>, {
               onClose: model.closeAddToDashboardModal,
               buildPanel: () => {
@@ -620,6 +687,14 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             })}
           </Modal>
         )}
+        {isCreateAlertModalOpen &&
+          CreateAlertComponent &&
+          createAlertPanelData &&
+          createElement(CreateAlertComponent, {
+            panel: createAlertPanelData.panel,
+            range: createAlertPanelData.range,
+            onDismiss: model.closeCreateAlertModal,
+          })}
       </>
     );
   };

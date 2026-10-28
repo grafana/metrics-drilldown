@@ -20,8 +20,10 @@ import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
 import { type HistogramBreakdownFnVariable } from './HistogramBreakdownFnVariable';
+import { EventSyncYAxisChanged } from './MetricLabelsList/events/EventSyncYAxisChanged';
 import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
 import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
+import { SyncYAxisSwitch } from './SyncYAxisSwitch';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { RefreshMetricsEvent, VAR_GROUP_BY, VAR_HISTOGRAM_BREAKDOWN_FN } from '../../shared/shared';
 import { isQueryVariable } from '../../shared/utils/utils.variables';
@@ -32,6 +34,7 @@ interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;
   metricType: MetricType;
   body?: MetricLabelsList | MetricLabelValuesList;
+  syncYAxisSwitch: SyncYAxisSwitch;
 }
 
 export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneState> {
@@ -40,6 +43,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       metric,
       metricType: 'gauge',
       body: undefined,
+      syncYAxisSwitch: new SyncYAxisSwitch(),
       $behaviors: [new behaviors.SceneQueryController()],
     });
 
@@ -60,6 +64,11 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
         reportExploreMetrics('histogram_breakdown_fn_changed', { fn: newState.value as HistogramBreakdownFn });
         this.updateBody(groupByVariable);
       }
+    });
+
+    this.subscribeToEvent(EventSyncYAxisChanged, (event) => {
+      reportExploreMetrics('breakdown_sync_yaxis_changed', { enabled: event.payload.enabled });
+      this.updateBody(groupByVariable);
     });
 
     if (config.featureToggles.enableScopesInMetricsExplore) {
@@ -119,7 +128,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
       return;
     }
 
-    const { metric: name } = this.state;
+    const { metric: name, syncYAxisSwitch } = this.state;
     const trail = getTrailFor(this);
     const type: MetricType = mainPanel?.state.metricType ?? 'gauge';
 
@@ -128,12 +137,13 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const histogramBreakdownFn = this.getHistogramBreakdownFnVariable().state.value as HistogramBreakdownFn | undefined;
 
     const newBody = groupByVariable.hasAllValue()
-      ? new MetricLabelsList({ metric })
+      ? new MetricLabelsList({ metric, syncYAxisEnabled: syncYAxisSwitch.state.enabled })
       : new MetricLabelValuesList({
           metric,
           label: groupByVariable.state.value as string,
           binaryQuery: trail.state.binaryQuery,
           histogramBreakdownFn,
+          syncYAxisEnabled: syncYAxisSwitch.state.enabled,
         });
 
     this.setState({ body: newBody, metricType: type });
@@ -153,7 +163,7 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
     const trail = getTrailFor(model);
     const { embeddedMini } = trail.state;
     const styles = useStyles2(getStyles, trail.state.embedded ? 0 : (chromeHeaderHeight ?? 0), trail.state.embedded);
-    const { body, metricType } = model.useState();
+    const { body, metricType, syncYAxisSwitch } = model.useState();
     const groupByVariable = model.getVariable();
     const histogramBreakdownFnVariable = model.getHistogramBreakdownFnVariable();
     const isHistogram = metricType === 'classic-histogram' || metricType === 'native-histogram';
@@ -171,8 +181,10 @@ export class LabelBreakdownScene extends SceneObjectBase<LabelBreakdownSceneStat
                   </Field>
                 )}
               </div>
-              {body instanceof MetricLabelsList && <body.Controls model={body} />}
-              {body instanceof MetricLabelValuesList && <body.Controls model={body} />}
+              {body instanceof MetricLabelsList && <body.Controls model={body} syncYAxisSwitch={syncYAxisSwitch} />}
+              {body instanceof MetricLabelValuesList && (
+                <body.Controls model={body} syncYAxisSwitch={syncYAxisSwitch} />
+              )}
             </div>
           </div>
         )}

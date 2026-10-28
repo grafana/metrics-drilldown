@@ -10,6 +10,10 @@
       "related-metrics-description": "Relevant metrics based on current label filters"
     }
   },
+  "App": {
+    "error-title": "Failed to load data source instances",
+    "loading": "Loading..."
+  },
   "attribute-explorer": {
     "badge-metric": "OTel metric attribute",
     "badge-resource": "OTel resource attribute",
@@ -78,7 +82,10 @@
       "view-label": "View"
     },
     "section-label": "Breakdown",
-    "select-label": "Select"
+    "select-label": "Select",
+    "sync-y-axis": {
+      "label": "Sync y-axis"
+    }
   },
   "checkbox-list": {
     "clear": "clear",
@@ -166,6 +173,15 @@
     "button": "Give feedback"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "No exemplars found for this metric in the current time range",
+      "error": "Exemplars couldn't be loaded because the query failed",
+      "label": "Show exemplars",
+      "off": "Show exemplars (counters and histograms only)",
+      "on": "Showing exemplars",
+      "unavailable": "Exemplars aren't available for this metric",
+      "unsupported-panel": "Exemplars aren't available for this panel type"
+    },
     "native-histogram": "Native Histogram",
     "variant": {
       "heatmap": "heatmap",
@@ -305,9 +321,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "Add bookmark",
+      "add-to-dashboard": "Add to dashboard",
       "copy-url": "Copy URL",
       "copy-url-success": "URL copied to clipboard",
-      "explore": "Explore"
+      "create-alert": "Create alert",
+      "explore": "Explore",
+      "remove-bookmark": "Remove bookmark"
     },
     "group": {
       "actions": "Actions",
@@ -389,6 +409,11 @@
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Open in Metrics Drilldown"
   },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": "Failed to load data source instances"
+    }
+  },
   "show-more-button": {
     "text_one": "Show {{count}} more ({{current}}/{{total}})",
     "text_other": "Show {{count}} more ({{current}}/{{total}})"
@@ -469,7 +494,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Bookmark",
       "copy-url": "Copy url",
       "open-explore": "Open in explore",
       "select-new-metric-tooltip": "Remove existing metric and choose a new metric"

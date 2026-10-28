@@ -17,19 +17,21 @@ describe('Trail page wrapper', () => {
 
   it('does not add the PluginPage wrapper for embedded trails', () => {
     const page = renderTrailPage(true, undefined, content);
+    const props = page.props as { children: React.ReactNode };
 
     expect(page.type).toBe(Fragment);
-    expect(page.props.children).toBe(content);
+    expect(props.children).toBe(content);
   });
 
   it('keeps the PluginPage wrapper for standalone trails', () => {
     const pageNav = { text: 'Metrics' };
     const page = renderTrailPage(false, pageNav, content);
+    const props = page.props as { children: React.ReactNode; pageNav: typeof pageNav; layout: PageLayoutType };
 
     expect(page.type).toBe(PluginPage);
-    expect(page.props.children).toBe(content);
-    expect(page.props.pageNav).toBe(pageNav);
-    expect(page.props.layout).toBe(PageLayoutType.Custom);
+    expect(props.children).toBe(content);
+    expect(props.pageNav).toBe(pageNav);
+    expect(props.layout).toBe(PageLayoutType.Custom);
   });
 });
 

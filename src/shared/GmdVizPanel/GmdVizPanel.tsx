@@ -80,6 +80,10 @@ export type QueryConfig = {
   labelMatchers: LabelMatcher[];
   addIgnoreUsageFilter: boolean;
   addExtremeValuesFiltering?: boolean;
+  // Set only by the main panel's "Show exemplars" switch (EnableExemplarsAction); no other
+  // GmdVizPanel consumer should set this, since a second Prometheus exemplar query per target is only
+  // worth the cost on the single panel a user is actively looking at.
+  exemplarsEnabled?: boolean;
   groupBy?: string;
   queries?: QueryDefs;
   data?: SceneDataProvider;
@@ -100,6 +104,7 @@ export type QueryConfig = {
 export type QueryOptions = {
   resolution?: QueryConfig['resolution'];
   labelMatchers?: QueryConfig['labelMatchers'];
+  exemplarsEnabled?: NonNullable<QueryConfig['exemplarsEnabled']>;
   groupBy?: string;
   queries?: QueryDefs;
   data?: NonNullable<QueryConfig['data']>;
@@ -336,8 +341,16 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
 
   private subscribeToStateChanges() {
     this.subscribeToState((newState, prevState) => {
-      if (newState.panelConfig.type !== prevState.panelConfig.type) {
-        this.buildVizPanel(); // rebuild the whole panel
+      if (
+        newState.panelConfig.type !== prevState.panelConfig.type ||
+        newState.queryConfig.exemplarsEnabled !== prevState.queryConfig.exemplarsEnabled
+      ) {
+        // Rebuild the whole panel rather than just updating queries: Scenes' VizPanel caches its
+        // last-seen data by reference (applyFieldConfig in @grafana/scenes) and reuses it when the
+        // series array hasn't changed, which is exactly what happens when toggling exemplars on a
+        // panel whose series values are otherwise unchanged. A fresh VizPanel has no stale cache to
+        // collide with, so the new exemplar annotations render correctly from the first query.
+        this.buildVizPanel();
         return;
       }
 

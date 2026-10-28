@@ -13,7 +13,6 @@ import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { localeCompare } from 'MetricsReducer/helpers/localCompare';
 
 import { getLabelValueFromDataFrame } from './levels';
-import { reportExploreMetrics } from '../tracking/interactions';
 
 export type SortSeriesByOption = 'alphabetical' | 'alphabetical-reversed' | 'outliers' | ReducerID.stdDev;
 type SortSeriesDirection = 'asc' | 'desc';
@@ -153,12 +152,4 @@ function seriesIsNotEmpty(series: DataFrame[]) {
   return series.length > 0 && series[0].fields.length > 0 && series[0].fields[0].values.length > 0;
 }
 
-export const wasmSupported = () => {
-  const support = typeof WebAssembly === 'object';
-
-  if (!support) {
-    reportExploreMetrics('wasm_not_supported', {});
-  }
-
-  return support;
-};
+export const wasmSupported = () => typeof WebAssembly === 'object';

@@ -295,8 +295,6 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
     } else if (sectionKey === 'filters-suffix') {
       reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
-    } else if (sectionKey === 'filters-recent') {
-      reportExploreMetrics('sidebar_recent_filter_section_clicked', {});
     }
 
     this.setState({
@@ -314,7 +312,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
     // Focus management refs
     const closeButtonRef = useRef<HTMLButtonElement>(null);
-    const buttonRefs = useRef<Record<string, React.RefObject<HTMLButtonElement>>>({});
+    const buttonRefs = useRef<Record<string, React.RefObject<HTMLButtonElement | null>>>({});
     const lastOpenedKeyRef = useRef<string | null>(null);
 
     // Lazily create refs for each section button

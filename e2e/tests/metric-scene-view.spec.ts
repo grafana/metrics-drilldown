@@ -57,6 +57,26 @@ test.describe('Metric Scene view', () => {
         await metricSceneView.assertPanelsList();
       });
 
+      test('Remembers the sync y-axis setting after a reload', async ({ metricSceneView }) => {
+        await metricSceneView.setSyncYAxis(false);
+        await expect(metricSceneView.getSyncYAxisSwitch()).not.toBeChecked();
+
+        await metricSceneView.reload();
+
+        await expect(metricSceneView.getSyncYAxisSwitch()).not.toBeChecked();
+        await metricSceneView.assertPanelsList();
+      });
+
+      test('Rebuilds the panels when toggled after changing the label', async ({ metricSceneView }) => {
+        // changing the label remounts the switch, which used to drop the listener that rebuilds the panels
+        await metricSceneView.selectLabel('quantile');
+        const panelKeyBefore = await metricSceneView.getFirstPanelKey();
+
+        await metricSceneView.setSyncYAxis(false);
+
+        await expect.poll(() => metricSceneView.getFirstPanelKey()).not.toBe(panelKeyBefore);
+      });
+
       test.describe('After selecting a label', () => {
         test.beforeEach(async ({ metricSceneView }) => {
           const LABEL = 'quantile'; // label chosen to test the outlying series detection (other labels won't have any outlier detected)
@@ -108,6 +128,31 @@ test.describe('Metric Scene view', () => {
 
             await expect(metricSceneView.getSingleBreakdownPanel()).toBeVisible();
             await expect(metricSceneView.getPanelsList()).toBeVisible();
+          });
+        });
+
+        test.describe('Sync y-axis', () => {
+          test('Is shown in the Rows layout', async ({ metricSceneView }) => {
+            await metricSceneView.selectLayout('rows');
+
+            await expect(metricSceneView.getSyncYAxisSwitch()).toBeChecked();
+          });
+
+          test('Is hidden in the Single layout', async ({ metricSceneView }) => {
+            await metricSceneView.selectLayout('single');
+
+            await expect(metricSceneView.getSingleBreakdownPanel()).toBeVisible();
+            await expect(metricSceneView.getSyncYAxisSwitch()).toBeHidden();
+          });
+
+          test('Keeps the selected layout when turned off', async ({ metricSceneView }) => {
+            await metricSceneView.selectLayout('rows');
+            await metricSceneView.setSyncYAxis(false);
+
+            await expect(metricSceneView.getSyncYAxisSwitch()).not.toBeChecked();
+            // assertSelectedLayout reads the `checked` attribute, which React only sets on mount, so it can lag
+            // behind the URL-restored layout of the rebuilt list; toBeChecked reads the live property
+            await expect(metricSceneView.getLayoutSwitcher().getByRole('radio', { name: 'Rows' })).toBeChecked();
           });
         });
       });
