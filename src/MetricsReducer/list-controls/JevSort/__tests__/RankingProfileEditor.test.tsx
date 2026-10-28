@@ -39,6 +39,20 @@ function edit(value = profile()) {
 function preview() {
   fireEvent.click(screen.getByRole('button', { name: 'Validate and preview local ranking' }));
 }
+async function submitDraft(options: InlineAssistantOptions, draft = profile(), basis = 'metadata') {
+  const tool = options.tools!.find((tool) => tool.name === 'jev_submit_ranking_profile')!;
+  return JSON.parse(
+    String(
+      await tool.invoke(
+        {
+          profile: draft,
+          evidence: [{ ruleIndex: 0, basis, metricNames: ['metric_b'], explanation: 'Synthetic supplied meaning.' }],
+        },
+        {} as never
+      )
+    )
+  );
+}
 
 beforeEach(() => {
   localStorage.clear();
@@ -115,27 +129,85 @@ it('does not save on cancel and refuses late writes after scope or saved revisio
 
 it('Assistant generation produces only a draft with evidence; applying still needs review and fresh consent', async () => {
   jest.mocked(useAssistant).mockReturnValue({ isAvailable: true } as never);
-  generate.mockImplementation(async (options) =>
-    options.onComplete?.(
-      JSON.stringify({
-        profile: profile(),
-        evidence: [
-          { ruleIndex: 0, basis: 'user', metricNames: ['metric_b'], explanation: 'User explained purchases.' },
-        ],
-      })
-    )
-  );
+  generate.mockImplementation(async (options) => {
+    await submitDraft(options, profile(), 'user');
+    options.onComplete?.('This is the draft for your review.');
+  });
   setup();
   fireEvent.change(screen.getByLabelText('Explain what matters'), {
     target: { value: 'Synthetic metric_b counts purchases.' },
   });
   fireEvent.click(screen.getByRole('button', { name: 'Draft from explanation' }));
   await waitFor(() => expect(screen.getByLabelText('Profile JSON')).toHaveValue(JSON.stringify(profile(), null, 2)));
-  expect(screen.getByText(/User explained purchases/)).toBeInTheDocument();
+  expect(screen.getByText(/Synthetic supplied meaning/)).toBeInTheDocument();
   expect(screen.getByRole('checkbox')).not.toBeChecked();
   expect(readRankingProfile('prom')).toBeUndefined();
   expect(screen.getByRole('button', { name: 'Save reviewed profile' })).toBeDisabled();
-  expect(generate.mock.calls[0][0].tools).toEqual([]);
+  expect(generate.mock.calls[0][0].tools?.map((tool) => tool.name)).toEqual(['jev_submit_ranking_profile']);
+});
+
+it.each(['This is the suggested profile.', '```json\n{}\n```', ''])('ignores final text (%s)', async (text) => {
+  jest.mocked(useAssistant).mockReturnValue({ isAvailable: true } as never);
+  const suggested = { ...profile(), name: 'Explored profile' };
+  generate.mockImplementation(async (options) => {
+    await submitDraft(options, suggested);
+    options.onComplete?.(text);
+  });
+  setup();
+  edit();
+  fireEvent.click(screen.getByRole('checkbox'));
+  preview();
+  expect(screen.getByRole('button', { name: 'Save reviewed profile' })).toBeEnabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Explore metadata and suggest' }));
+  await waitFor(() => expect(screen.getByLabelText('Profile JSON')).toHaveValue(JSON.stringify(suggested, null, 2)));
+  expect(screen.getByText(/Synthetic supplied meaning/)).toBeInTheDocument();
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.getByRole('checkbox')).not.toBeChecked();
+  expect(screen.getByRole('button', { name: 'Save reviewed profile' })).toBeDisabled();
+  expect(readRankingProfile('prom')).toBeUndefined();
+  expect(generate.mock.calls[0][0].tools).toHaveLength(3);
+  await expect(submitDraft(generate.mock.calls[0][0])).rejects.toThrow();
+  await expect(generate.mock.calls[0][0].tools![0].invoke({ query: 'metric_' }, {} as never)).rejects.toThrow();
+});
+
+it('uses feedback to repair a mismatched citation within the same generation', async () => {
+  jest.mocked(useAssistant).mockReturnValue({ isAvailable: true } as never);
+  generate.mockImplementation(async (options) => {
+    const wrongRule = { ...profile(), rules: [{ ...profile().rules[0], match: { exact: 'metric_a' } }] };
+    expect(await submitDraft(options, wrongRule)).toMatchObject({ status: 'rejected', remainingAttempts: 1 });
+    expect(await submitDraft(options)).toMatchObject({ status: 'accepted' });
+    options.onComplete?.('Draft ready for review.');
+  });
+  setup();
+  fireEvent.click(screen.getByRole('button', { name: 'Explore metadata and suggest' }));
+  await waitFor(() => expect(screen.getByLabelText('Profile JSON')).toHaveValue(JSON.stringify(profile(), null, 2)));
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(generate).toHaveBeenCalledTimes(1);
+  expect(readRankingProfile('prom')).toBeUndefined();
+});
+
+it.each(['missing', 'rejected', 'failed'])('preserves drafts on %s submission', async (failure) => {
+  jest.mocked(useAssistant).mockReturnValue({ isAvailable: true } as never);
+  saveRankingProfile('prom', rankingProfileStorageKey('prom')!, profile(), true);
+  const manual = { ...profile(), name: 'Keep manual draft' };
+  generate.mockImplementation(async (options) => {
+    if (failure === 'rejected') {
+      await submitDraft(options, { ...profile(), rules: [{ ...profile().rules[0], match: { exact: 'metric_a' } }] });
+    } else if (failure === 'failed') {
+      await submitDraft(options);
+      options.onError?.(new Error('Synthetic failure after submission.'));
+      return;
+    }
+    // Valid JSON in final text must not bypass required structured submission.
+    options.onComplete?.(JSON.stringify({ profile: profile(), evidence: [] }));
+  });
+  setup();
+  edit(manual);
+  fireEvent.click(screen.getByRole('button', { name: 'Explore metadata and suggest' }));
+  await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
+  expect(screen.getByLabelText('Profile JSON')).toHaveValue(JSON.stringify(manual));
+  expect(readRankingProfile('prom')).toEqual({ profile: profile(), shareWithJev: true });
+  expect(screen.getByRole('button', { name: 'Save reviewed profile' })).toBeDisabled();
 });
 
 it('exploration supplies bounded read tools and ignores cancelled/superseded generation results', async () => {
@@ -150,9 +222,12 @@ it('exploration supplies bounded read tools and ignores cancelled/superseded gen
   });
   const { unmount } = setup();
   fireEvent.click(screen.getByRole('button', { name: 'Explore metadata and suggest' }));
-  expect(generate.mock.calls[0][0].tools).toHaveLength(2);
+  expect(generate.mock.calls[0][0].tools).toHaveLength(3);
+  await submitDraft(generate.mock.calls[0][0]);
   const manual = { ...profile(), name: 'Manual draft wins' };
   edit(manual);
+  await expect(submitDraft(generate.mock.calls[0][0])).rejects.toThrow();
+  await expect(generate.mock.calls[0][0].tools![0].invoke({ query: 'metric_' }, {} as never)).rejects.toThrow();
   await act(async () => {
     complete?.(
       JSON.stringify({
@@ -181,7 +256,9 @@ it('discards late Assistant results after user scope changes and cannot activate
   setup();
   const originalJson = (screen.getByLabelText('Profile JSON') as HTMLTextAreaElement).value;
   fireEvent.click(screen.getByRole('button', { name: 'Explore metadata and suggest' }));
+  await submitDraft(generate.mock.calls[0][0]);
   config.bootData.user = { ...config.bootData.user, id: 8 };
+  await expect(submitDraft(generate.mock.calls[0][0])).rejects.toThrow();
   await act(async () => {
     complete?.(
       JSON.stringify({

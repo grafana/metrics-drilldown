@@ -1,3 +1,4 @@
+import { type JSONSchema } from '@grafana/assistant';
 import { t } from '@grafana/i18n';
 
 import { isValidMetricName } from 'MetricScene/RelatedMetrics/ranking/buildRankingRequest';
@@ -24,7 +25,7 @@ export interface SavedRankingProfile {
   shareWithJev: boolean;
 }
 
-export const PROFILE_JSON_SCHEMA = {
+export const PROFILE_JSON_SCHEMA: JSONSchema = {
   type: 'object',
   additionalProperties: false,
   required: ['schemaVersion', 'name', 'intent', 'rules'],

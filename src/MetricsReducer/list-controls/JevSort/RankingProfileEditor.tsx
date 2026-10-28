@@ -89,7 +89,12 @@ export function RankingProfileEditor(props: Readonly<RankingProfileEditorProps>)
     inFlight.current = true;
     setError(undefined);
     try {
-      const session = createProfileAssistantSession(names, peekMetadata, mode, isCurrent);
+      const session = createProfileAssistantSession(
+        names,
+        peekMetadata,
+        mode,
+        () => inFlight.current && generation.current === token && isCurrent()
+      );
       let existing;
       try {
         existing = parseRankingProfile(json);
@@ -101,12 +106,12 @@ export function RankingProfileEditor(props: Readonly<RankingProfileEditorProps>)
         systemPrompt: PROFILE_SYSTEM_PROMPT,
         prompt: session.prompt(description, existing),
         tools: session.tools,
-        onComplete(text) {
+        onComplete() {
           if (generation.current !== token || !isCurrent()) {
             return;
           }
           try {
-            const proposal = session.parse(text);
+            const proposal = session.getProposal();
             setJson(formatRankingProfile(proposal.profile));
             setShare(false);
             setEvidence(proposal.evidence);
@@ -267,7 +272,7 @@ export function RankingProfileEditor(props: Readonly<RankingProfileEditorProps>)
       <p>
         {t(
           'jev-profile.exploration-limits',
-          'Exploration uses cached metadata from the matching catalog: at most 6 tool calls and 40 inspected metrics, with no datasource queries. Coverage is incomplete; review inferred meanings.'
+          'Exploration uses cached metadata from the matching catalog: at most 6 metadata tool calls, 40 inspected metrics, and 2 draft submission attempts, with no datasource queries. Coverage is incomplete; review inferred meanings.'
         )}
       </p>
       {evidence.length > 0 && (
