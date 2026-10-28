@@ -10,6 +10,10 @@
       "related-metrics-description": "Metriche rilevanti in base ai filtri delle etichette correnti"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Attributo metrica OTel",
     "badge-resource": "Attributo risorsa OTel",
@@ -402,6 +406,11 @@
     "button": "Seleziona nuova metrica",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Apri in Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Mostra {{count}} altro ({{current}}/{{total}})",

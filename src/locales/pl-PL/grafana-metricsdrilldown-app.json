@@ -10,6 +10,10 @@
       "related-metrics-description": "Odpowiednie dane na podstawie bieżących filtrów etykiet"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Atrybut wskaźnika OTel",
     "badge-resource": "Atrybut zasobu OTel",
@@ -416,6 +420,11 @@
     "button": "Wybierz nowy wskaźnik",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Otwórz w aplikacji Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Pokaż jeszcze {{count}} ({{current}}/{{total}})",
