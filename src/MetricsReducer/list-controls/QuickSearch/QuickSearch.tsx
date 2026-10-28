@@ -58,12 +58,14 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
   }
 
   public constructor({
+    key = 'quick-search',
     urlSearchParamName,
     targetName,
     countsProvider,
     displayCounts,
     ariaLabel,
   }: {
+    key?: string;
     urlSearchParamName: QuickSearchState['urlSearchParamName'];
     targetName: QuickSearchState['targetName'];
     countsProvider: QuickSearchState['countsProvider'];
@@ -71,7 +73,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     ariaLabel: QuickSearchState['ariaLabel'];
   }) {
     super({
-      key: 'quick-search',
+      key,
       urlSearchParamName,
       targetName,
       countsProvider,

@@ -14,6 +14,18 @@ function setup() {
 }
 
 describe('MetricsVariableFilterEngine - hierarchical prefix filtering', () => {
+  test('matches metric names case-insensitively', () => {
+    const { engine, setState } = setup();
+    const options = createOptions(['HTTP_Requests_Total', 'http_errors_total', 'cpu_usage']);
+
+    engine.setInitOptions(options);
+    engine.applyFilters({ names: ['http_requests'] }, { forceUpdate: false, notify: false });
+
+    expect(setState).toHaveBeenCalledWith({
+      options: [{ label: 'HTTP_Requests_Total', value: 'HTTP_Requests_Total' }],
+    });
+  });
+
   test('filters metrics by hierarchical prefix (parent:child)', () => {
     const { engine, setState } = setup();
     const options = createOptions([
