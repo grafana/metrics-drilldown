@@ -10,6 +10,10 @@
       "related-metrics-description": "Geçerli etiket filtrelerine göre ilgili metrikler"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel metrik özniteliği",
     "badge-resource": "OTel kaynak özniteliği",
@@ -402,6 +406,11 @@
     "button": "Yeni metrik seçin",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Metrics Drilldown'da aç"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "{{count}} tane daha göster ({{current}}/{{total}})",
