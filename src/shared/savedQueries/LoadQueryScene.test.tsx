@@ -120,7 +120,7 @@ describe('LoadQueryScene', () => {
 
     fireEvent.click(screen.getByRole('button'));
 
-    expect(screen.queryByText('Load a previously saved query')).toBeInTheDocument();
+    expect(screen.getByText('Load a previously saved query')).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText('Close'));
 
