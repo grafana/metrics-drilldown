@@ -6,14 +6,23 @@ import { PROMQL_FUNCTIONS } from 'shared/GmdVizPanel/config/promql-functions';
 import { QUERY_RESOLUTION } from 'shared/GmdVizPanel/config/query-resolutions';
 import { type QueryConfig, type QueryDefs } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type Metric } from 'shared/GmdVizPanel/matchers/getMetricType';
+import { supportsExemplars } from 'shared/GmdVizPanel/matchers/supportsExemplars';
 import { logger } from 'shared/logger/logger';
 
 import { type GetQueryRunnerParamsOptions, type QueryRunnerParams } from '../panelBuilder';
 
 const DEFAULT_PERCENTILES = [99, 90, 50] as const;
 
+// Only the first target in a panel carries the exemplar flag; see the identical comment in
+// getTimeseriesQueryRunnerParams.ts for why (one /api/v1/query_exemplars call per target).
+function exemplarField(queryIndex: number, queryConfig: QueryConfig): { exemplar?: true } {
+  return queryIndex === 0 && queryConfig.exemplarsEnabled ? { exemplar: true } : {};
+}
+
 export function getPercentilesQueryRunnerParams(options: GetQueryRunnerParamsOptions): QueryRunnerParams {
-  const { metric, queryConfig } = options;
+  const { metric } = options;
+  // Never request exemplars the switch has disabled: exemplarsEnabled can outlive the metric type that allowed it.
+  const queryConfig = supportsExemplars(metric.type) ? options.queryConfig : { ...options.queryConfig, exemplarsEnabled: false };
   const expression = buildQueryExpression({
     metric,
     labelMatchers: queryConfig.labelMatchers,
@@ -73,6 +82,7 @@ function buildHistogramQueries({
         expr: query,
         legendFormat: `${percentile}th Percentile`,
         fromExploreMetrics: true,
+        ...exemplarField(queries.length, queryConfig),
       });
     }
   }
@@ -115,6 +125,7 @@ function buildNonHistogramQueries({
         expr: query,
         legendFormat: `${percentile}th Percentile`,
         fromExploreMetrics: true,
+        ...exemplarField(queries.length, queryConfig),
       });
     }
   }

@@ -6,6 +6,8 @@ import { of } from 'rxjs';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { type PanelDataRequestPayload } from 'shared/GmdVizPanel/components/addToDashboard/addToDashboard';
+import { EventOpenCreateAlert } from 'shared/GmdVizPanel/components/createAlert/EventOpenCreateAlert';
+import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from '../MetricScene/MetricScene';
@@ -424,5 +426,181 @@ describe('DataTrail - Add to Dashboard', () => {
 
     expect(dataTrail.state.isAddToDashboardModalOpen).toBe(false);
     expect(dataTrail.state.addToDashboardPanelData).toBeUndefined();
+  });
+});
+
+describe('DataTrail - Create Alert', () => {
+  let dataTrail: DataTrail;
+
+  beforeAll(() => {
+    const dataSourceSrv = new MockDataSourceSrv({
+      prom: {
+        name: 'Prometheus',
+        type: DataSourceType.Prometheus,
+        uid: 'ds',
+      },
+    });
+    setDataSourceSrv(dataSourceSrv);
+    setRunRequest(() =>
+      of({
+        state: LoadingState.Done,
+        series: [],
+        timeRange: {
+          from: dateTime(),
+          to: dateTime(),
+          raw: { from: '', to: '' },
+        },
+      })
+    );
+  });
+
+  beforeEach(() => {
+    dataTrail = new DataTrail({});
+  });
+
+  it('should initialize with modal closed and component unavailable', () => {
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(false);
+    expect(dataTrail.state.isCreateAlertAvailable).toBe(false);
+    expect(dataTrail.state.createAlertPanelData).toBeUndefined();
+  });
+
+  it('should open modal with panel data', () => {
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: {
+        type: 'timeseries',
+        title: 'Test',
+        targets: [],
+        datasource: { type: 'prometheus', uid: 'test' },
+      },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.openCreateAlertModal(mockPanelData);
+
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(true);
+    expect(dataTrail.state.createAlertPanelData).toBe(mockPanelData);
+  });
+
+  it('should close modal and clear panel data', () => {
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: { type: 'timeseries', title: 'Test', targets: [], datasource: null },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.openCreateAlertModal(mockPanelData);
+    dataTrail.closeCreateAlertModal();
+
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(false);
+    expect(dataTrail.state.createAlertPanelData).toBeUndefined();
+  });
+
+  it('should open the modal with the event payload when EventOpenCreateAlert is published', () => {
+    dataTrail.activate();
+
+    const mockPanelData: PanelDataRequestPayload = {
+      panel: { type: 'timeseries', title: 'Test', targets: [], datasource: { type: 'prometheus', uid: 'test' } },
+      range: { from: 'now-1h', to: 'now', raw: { from: 'now-1h', to: 'now' } },
+    } as any;
+
+    dataTrail.publishEvent(new EventOpenCreateAlert({ panelData: mockPanelData }), true);
+
+    expect(dataTrail.state.isCreateAlertModalOpen).toBe(true);
+    expect(dataTrail.state.createAlertPanelData).toBe(mockPanelData);
+  });
+});
+
+describe('DataTrail - exemplars url param', () => {
+  let trail: DataTrail;
+
+  beforeAll(() => {
+    setDataSourceSrv(
+      new MockDataSourceSrv({
+        prom: { name: 'Prometheus', type: DataSourceType.Prometheus, uid: 'ds' },
+      })
+    );
+  });
+
+  beforeEach(() => {
+    trail = new DataTrail({});
+  });
+
+  function getMainPanel() {
+    const metricScene = trail.state.topScene as MetricScene;
+    return sceneGraph.findDescendents(metricScene.state.body, GmdVizPanel)[0];
+  }
+
+  it('emits exemplars=true in the url state only while enabled', () => {
+    trail.updateFromUrl({ metric: 'http_requests_total', exemplars: 'true' });
+    expect(trail.getUrlState().exemplars).toBe('true');
+
+    trail.updateFromUrl({ metric: 'http_requests_total' });
+    expect(trail.getUrlState().exemplars).toBeUndefined();
+  });
+
+  it('turns exemplars on from the url and starts the main panel with them enabled', () => {
+    trail.updateFromUrl({ metric: 'http_requests_total', exemplars: 'true' });
+
+    expect(trail.state.exemplarsEnabled).toBe(true);
+    expect(getMainPanel().state.queryConfig.exemplarsEnabled).toBe(true);
+  });
+
+  it('keeps exemplars off unless the url explicitly says true', () => {
+    trail.updateFromUrl({ metric: 'http_requests_total', exemplars: 'false' });
+
+    expect(trail.state.exemplarsEnabled).toBe(false);
+    expect(getMainPanel().state.queryConfig.exemplarsEnabled).toBeFalsy();
+  });
+
+  it('resets exemplars when another metric is selected, so the param does not carry over', () => {
+    trail.updateFromUrl({ metric: 'http_requests_total', exemplars: 'true' });
+
+    trail.updateFromUrl({ metric: 'go_goroutines' });
+
+    expect(trail.state.exemplarsEnabled).toBe(false);
+    expect(trail.getUrlState().exemplars).toBeUndefined();
+    expect(getMainPanel().state.queryConfig.exemplarsEnabled).toBeFalsy();
+  });
+
+  it('keeps the same metric scene when only the exemplars param changes', () => {
+    trail.updateFromUrl({ metric: 'http_requests_total' });
+    const topScene = trail.state.topScene;
+
+    trail.updateFromUrl({ metric: 'http_requests_total', exemplars: 'true' });
+
+    expect(trail.state.topScene).toBe(topScene);
+    expect(trail.state.exemplarsEnabled).toBe(true);
+  });
+
+  it('ignores the param when there is no metric to show exemplars for', () => {
+    trail.updateFromUrl({ exemplars: 'true' });
+
+    expect(trail.state.exemplarsEnabled).toBe(false);
+    expect(trail.getUrlState().exemplars).toBeUndefined();
+  });
+
+  it('pushes a change of the trail state into the live main panel', () => {
+    trail.updateFromUrl({ metric: 'http_requests_total' });
+    const metricScene = trail.state.topScene as MetricScene;
+    jest.spyOn(trail, 'getMetadataForMetric').mockResolvedValue(undefined);
+    metricScene.state.body.activate();
+
+    trail.setState({ exemplarsEnabled: true });
+    expect(getMainPanel().state.queryConfig.exemplarsEnabled).toBe(true);
+
+    trail.setState({ exemplarsEnabled: false });
+    expect(getMainPanel().state.queryConfig.exemplarsEnabled).toBe(false);
+  });
+
+  it('syncs the main panel when it activates after the trail changed since the metric scene was built', () => {
+    // Opening a bookmark saved with exemplars on builds the metric scene first, then applies the
+    // bookmark's url values to the trail, before the scene has activated and subscribed to the trail.
+    trail.updateFromUrl({ metric: 'http_requests_total' });
+    trail.updateFromUrl({ metric: 'http_requests_total', exemplars: 'true' });
+    const metricScene = trail.state.topScene as MetricScene;
+    jest.spyOn(trail, 'getMetadataForMetric').mockResolvedValue(undefined);
+
+    metricScene.state.body.activate();
+
+    expect(getMainPanel().state.queryConfig.exemplarsEnabled).toBe(true);
   });
 });

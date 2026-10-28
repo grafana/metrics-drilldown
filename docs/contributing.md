@@ -17,6 +17,8 @@ Before a piece of work is finished, it should:
 
 Use [GitHub Issues](https://github.com/grafana/metrics-drilldown/issues/new) to report bugs, ask questions, or propose larger changes.
 
+**Use the issue templates.** Do not file a blank issue. Choose [bug report](../.github/ISSUE_TEMPLATE/bug_report.md) or [feature request](../.github/ISSUE_TEMPLATE/feature_request.md).
+
 | Situation | What to do |
 |-----------|------------|
 | **Bug** — something is broken or regressed | [Open a bug report](https://github.com/grafana/metrics-drilldown/issues/new?template=bug_report.md) with reproduction steps, expected vs actual behavior, Grafana/Prometheus versions, and screenshots or recordings if helpful. |
@@ -71,13 +73,38 @@ You are welcome to create draft PRs at any stage of readiness. Before a piece of
 - Each commit should build towards the whole — don't leave in back-tracks and mistakes that you later corrected.
 - Include unit tests for new functionality or tests that would have caught the bug being fixed.
 
+### Signed commits
+
+Human contributions must use **signed commits** so they show as verified on GitHub. Approved repository automation (Dependabot, release-please, and similar) is exempt.
+
 ### Before you open a pull request
 
-- Fill out the [pull request template](../.github/pull_request_template.md) with a clear summary and test steps.
+- Fill out the [pull request template](../.github/pull_request_template.md) with a clear summary and test steps. For UI changes, put **before/after screenshots** in the How to test table.
+- Sign every commit so it is verified on GitHub (see [Signed commits](#signed-commits)).
 - Use a [conventional commit](https://www.conventionalcommits.org/) style PR title (enforced by CI).
-- Run `pnpm lint`, `pnpm typecheck`, and `pnpm test:ci` locally.
+- Run the [local PR checks](#local-pr-checks).
 - Add or update tests when behavior changes. Prefer focused unit tests (Jest) or Playwright E2E when UI flows are affected — see [E2E testing documentation](./end-to-end-testing.md).
 - Follow the pattern established by the rest of the repo for code organization. Lint and format are enforced by ESLint, Prettier, and pre-commit hooks; you can also configure your IDE to run them on save.
+
+### Local PR checks
+
+Run the fast checks while iterating:
+
+```shell
+pnpm check:pr
+```
+
+This performs a frozen dependency install, linting, type checking, Jest tests, i18n extraction verification, and a production plugin build. It stops at the first failure.
+
+Before opening or updating a PR, run the fuller local suite when Docker and network access are available:
+
+```shell
+pnpm check:pr --full
+```
+
+Full mode also runs the Grafana API compatibility check, a production documentation build, and Playwright. It requires a running Docker daemon with Docker Compose v2, Make, curl, and network access. Playwright runs once against the Grafana image and version selected in `.env`; that version must satisfy `grafanaDependency` in `src/plugin.json`. The script starts and cleans up its own Compose stack; if a stack is already running, it reuses and preserves it.
+
+The script does not replace CI. GitHub still validates the PR title, CLA and commit signatures; runs the dynamically resolved Grafana-version and nightly E2E matrix; compares bundle analysis against the target branch; performs hosted workflow, dependency, and secret scans; and handles plugin packaging and publication checks.
 
 ### Internationalization (i18n)
 

@@ -25,7 +25,6 @@ import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './Open
 import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared/shared';
-import { reportExploreMetrics } from '../../shared/tracking/interactions';
 import { DS_HEALTH_CHECK_TIMEOUT_S } from '../../shared/utils/utils.datasource';
 import { isCustomVariable } from '../../shared/utils/utils.variables';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
@@ -155,14 +154,6 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
       $variables: new SceneVariableSet({ variables: [logsDataSourceVariable] }),
       controls: [new VariableValueSelectors({ layout: 'vertical' })],
     });
-    this._subs.add(
-      logsDataSourceVariable.subscribeToState((newState, prevState) => {
-        if (newState.value !== prevState.value) {
-          reportExploreMetrics('related_logs_action_clicked', { action: 'logs_data_source_changed' });
-        }
-      })
-    );
-
     // Update Loki query
     this.updateLokiQuery();
   }

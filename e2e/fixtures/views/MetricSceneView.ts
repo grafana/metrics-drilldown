@@ -153,6 +153,10 @@ export class MetricSceneView extends DrilldownView {
     return this.getByTestId('panels-list');
   }
 
+  getFirstPanel() {
+    return this.getPanelsList().locator('[data-viz-panel-key]').first();
+  }
+
   async assertPanelsList() {
     const panelsList = this.getPanelsList();
     await expect(panelsList).toBeVisible();
@@ -169,6 +173,28 @@ export class MetricSceneView extends DrilldownView {
     await this.assertLabelSelector('All');
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
+    await expect(this.getSyncYAxisSwitch()).toBeChecked();
+  }
+
+  getSyncYAxisSwitch() {
+    return this.getByRole('switch', { name: 'Sync y-axis' });
+  }
+
+  getFirstPanelKey() {
+    return this.getFirstPanel().getAttribute('data-viz-panel-key');
+  }
+
+  async setSyncYAxis(enabled: boolean) {
+    const syncYAxisSwitch = this.getSyncYAxisSwitch();
+
+    if ((await syncYAxisSwitch.isChecked()) !== enabled) {
+      // the Switch input is visually hidden behind its sibling <label> (the rendered track), which receives clicks
+      await syncYAxisSwitch.locator('xpath=following-sibling::label').click();
+    }
+
+    await expect(syncYAxisSwitch).toBeChecked({ checked: enabled });
+    // Wait for panels to re-render after the breakdown list is rebuilt
+    await expect(this.getFirstPanel()).toBeVisible();
   }
 
   getLabelSelectorContainer() {
@@ -224,6 +250,7 @@ export class MetricSceneView extends DrilldownView {
     await this.assertSelectedSortBy(sortBy);
     await expect(this.getLayoutSwitcher()).toBeVisible();
     await this.assertSelectedLayout('Grid');
+    await expect(this.getSyncYAxisSwitch()).toBeChecked();
   }
 
   getSortByDropdown() {

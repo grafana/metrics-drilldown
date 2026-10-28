@@ -13,7 +13,6 @@ import React from 'react';
 
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
-import { reportExploreMetrics } from 'shared/tracking/interactions';
 
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
@@ -128,7 +127,6 @@ export class RecentMetricsSection extends SceneObjectBase<RecentMetricsSectionSt
   }
 
   private onChangeInterval = (interval: string) => {
-    reportExploreMetrics('sidebar_recent_filter_selected', { interval });
     this.update(interval);
   };
 

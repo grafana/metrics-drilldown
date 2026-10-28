@@ -49,6 +49,7 @@ export function Onboarding() {
             to learn more or
             <br />
             <a
+              data-testid="onboarding-try-online"
               href="https://play.grafana.org/a/grafana-metricsdrilldown-app/drilldown"
               target="_blank"
               className="external-link"

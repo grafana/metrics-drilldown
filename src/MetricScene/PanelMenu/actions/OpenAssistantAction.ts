@@ -1,0 +1,63 @@
+import { createAssistantContextItem, openAssistant } from '@grafana/assistant';
+import { type PanelMenuItem } from '@grafana/data';
+import { t } from '@grafana/i18n';
+import { sceneGraph, VizPanel, type SceneObject } from '@grafana/scenes';
+
+import { getPanelData } from '../../../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
+import { getTrailFor } from '../../../shared/utils/utils';
+import { removeIgnoreUsageLabel } from '../../../shared/utils/utils.queries';
+
+export class OpenAssistantAction {
+  static create(panelMenuInstance: SceneObject): PanelMenuItem {
+    return {
+      text: t('open-assistant.explain-label', 'Explain in Assistant'),
+      iconClassName: 'ai-sparkle',
+      onClick: async () => {
+        const vizPanel = sceneGraph.getAncestor(panelMenuInstance, VizPanel);
+        const { panel } = getPanelData(vizPanel);
+
+        const metricName = panel.title || 'unknown';
+        const rawExpr = panel.targets?.[0]?.expr;
+        const query = removeIgnoreUsageLabel(typeof rawExpr === 'string' ? rawExpr : '');
+        const queryPart = query ? ` The current metrics drilldown query is: \`${query}\`.` : '';
+
+        const datasourceUid = panel.datasource?.uid;
+        const context = datasourceUid
+          ? [
+              createAssistantContextItem('datasource', { datasourceUid }),
+              createAssistantContextItem('label_value', {
+                datasourceUid,
+                labelName: '__name__',
+                labelValue: metricName,
+              }),
+            ]
+          : [];
+
+        try {
+          const trail = getTrailFor(panelMenuInstance);
+          const metadata = await trail.getMetadataForMetric(metricName);
+          if (metadata) {
+            context.push(
+              createAssistantContextItem('structured', {
+                title: t('open-assistant.metric-metadata-title', 'Prometheus metric metadata'),
+                data: {
+                  type: metadata.type,
+                  description: metadata.help,
+                  unit: metadata.unit,
+                },
+              })
+            );
+          }
+        } catch {
+          // Metadata is optional context; proceed without it on failure.
+        }
+
+        openAssistant({
+          origin: 'grafana-metricsdrilldown-app/metric-panel',
+          prompt: `Help me understand the metric "${metricName}" and explain what it measures.${queryPart}`,
+          context,
+        });
+      },
+    };
+  }
+}
