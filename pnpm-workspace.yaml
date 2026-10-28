@@ -50,7 +50,7 @@ overrides:
   shell-quote: ^1.11.0
   source-map-js: ^1.2.2
   'js-yaml@^3': ^5.0.0
-  'chokidar@^3': ^5.0.0
+  'chokidar@^3': ^6.0.0
   'eslint-webpack-plugin>micromatch': 'npm:picomatch@^4.0.0'
   '@types/jest>expect': ^30.5.2
 
