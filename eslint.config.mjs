@@ -107,6 +107,7 @@ export default [
       'sonarjs/todo-tag': ['warn'],
       'sonarjs/fixme-tag': ['warn'],
       'sonarjs/prefer-regexp-exec': ['off'],
+      'sonarjs/deprecation': ['warn'],
       // Grafana Scenes uses a pattern where hooks are called inside static Component
       // functions on classes that extend SceneObjectBase. This is intentional and valid.
       // react-hooks v7 is stricter about detecting "class components" even when hooks
