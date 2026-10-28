@@ -201,21 +201,26 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   }
 
   public getUsageDetailsForMetric(metricName: string, usageType: MetricUsageType): Promise<MetricUsageDetails> {
-    return this.usageFetcher.getUsageDetailsForMetric(metricName, usageType);
+    return this.usageFetcher.getUsageDetailsForMetric(
+      metricName,
+      usageType,
+      this.getDashboardLimitExceededCallback(usageType)
+    );
   }
 
   // Converts MetricUsageDetails format to simple counts (Record<string, number>) for backward compatibility with sorting logic
   public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
-    const onDashboardLimitExceeded =
-      usageType === 'dashboard-usage' ? () => this.setState({ dashboardUsageLimitExceeded: true }) : undefined;
-
-    return this.usageFetcher.getUsageMetrics(usageType, onDashboardLimitExceeded).then((metrics) => {
+    return this.usageFetcher.getUsageMetrics(usageType, this.getDashboardLimitExceededCallback(usageType)).then((metrics) => {
       const metricsToCounts: Record<string, number> = {};
       for (const metric in metrics) {
         metricsToCounts[metric] = metrics[metric].count;
       }
       return metricsToCounts;
     });
+  }
+
+  private getDashboardLimitExceededCallback(usageType: MetricUsageType): (() => void) | undefined {
+    return usageType === 'dashboard-usage' ? () => this.setState({ dashboardUsageLimitExceeded: true }) : undefined;
   }
 
   public getFiringAlertSignals(): Promise<FiringAlertRuleSignals> {

@@ -55,8 +55,12 @@ export class MetricUsageFetcher {
     return this.getUsageMetrics(usageType).then((metrics) => metrics[metricName]?.count ?? 0);
   }
 
-  public getUsageDetailsForMetric(metricName: string, usageType: MetricUsageType): Promise<MetricUsageDetails> {
-    return this.getUsageMetrics(usageType).then(
+  public getUsageDetailsForMetric(
+    metricName: string,
+    usageType: MetricUsageType,
+    onDashboardLimitExceeded?: () => void
+  ): Promise<MetricUsageDetails> {
+    return this.getUsageMetrics(usageType, onDashboardLimitExceeded).then(
       (metrics) =>
         metrics[metricName] ??
         (usageType === 'dashboard-usage'
