@@ -17,6 +17,21 @@ import { getLabelValueFromDataFrame } from './levels';
 export type SortSeriesByOption = 'alphabetical' | 'alphabetical-reversed' | 'outliers' | ReducerID.stdDev;
 type SortSeriesDirection = 'asc' | 'desc';
 
+// Different metrics can have identical labels and timestamps, so cache by exact frame identity.
+const dataFrameIds = new WeakMap<DataFrame, number>();
+let nextDataFrameId = 0;
+
+function getDataFrameId(frame: DataFrame): number {
+  const existingId = dataFrameIds.get(frame);
+  if (existingId !== undefined) {
+    return existingId;
+  }
+
+  const id = nextDataFrameId++;
+  dataFrameIds.set(frame, id);
+  return id;
+}
+
 // Alphabetical sort
 const sortAlphabetical = (series: DataFrame[], direction: SortSeriesDirection = 'asc') => {
   const compareFn: (a: string, b: string) => number =
@@ -134,22 +149,9 @@ export const sortSeries = memoize(
     return sortByFieldReducer(series, sortBy, direction);
   },
   (series: DataFrame[], sortBy: string, direction: SortSeriesDirection = 'asc') => {
-    const firstTimestamp = seriesIsNotEmpty(series) ? series[0].fields[0].values[0] : 0;
-    const lastTimestamp = seriesIsNotEmpty(series)
-      ? series[series.length - 1].fields[0].values[series[series.length - 1].fields[0].values.length - 1]
-      : 0;
-
-    const firstValue = series.length > 0 ? getLabelValueFromDataFrame(series[0]) : '';
-    const lastValue = series.length > 0 ? getLabelValueFromDataFrame(series[series.length - 1]) : '';
-
-    const key = `${firstValue}_${lastValue}_${firstTimestamp}_${lastTimestamp}_${series.length}_${sortBy}_${direction}`;
-
-    return key;
+    const seriesIdentity = series.map(getDataFrameId).join('_');
+    return `${seriesIdentity}_${sortBy}_${direction}`;
   }
 );
-
-function seriesIsNotEmpty(series: DataFrame[]) {
-  return series.length > 0 && series[0].fields.length > 0 && series[0].fields[0].values.length > 0;
-}
 
 export const wasmSupported = () => typeof WebAssembly === 'object';
