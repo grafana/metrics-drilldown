@@ -10,6 +10,10 @@
       "related-metrics-description": "Relevante metrics op basis van huidige labelfilters"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel-metricattribuut",
     "badge-resource": "OTel-bronattribuut",
@@ -402,6 +406,11 @@
     "button": "Selecteer een nieuwe metric",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Openen in Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Toon nog {{count}} ({{current}}/{{total}})",
