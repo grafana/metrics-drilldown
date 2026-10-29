@@ -1,5 +1,137 @@
 # Changelog
 
+## [3.1.0](https://github.com/grafana/metrics-drilldown/compare/v3.0.0...v3.1.0) (2026-10-28)
+
+
+### 🎉 Features
+
+* metrics drilldown exemplars to traces ([#1516](https://github.com/grafana/metrics-drilldown/issues/1516)) ([1cb5746](https://github.com/grafana/metrics-drilldown/commit/1cb57468c476c4188a0de64b2ec4bc6f9b58531d))
+* replace config.appSubUrl usages ([#1541](https://github.com/grafana/metrics-drilldown/issues/1541)) ([3df59c2](https://github.com/grafana/metrics-drilldown/commit/3df59c26f5229350a86a1c33d58e8f59a22f69e2))
+* replace config.datasources in kgAnnotations ([#1556](https://github.com/grafana/metrics-drilldown/issues/1556)) ([cf5a18e](https://github.com/grafana/metrics-drilldown/commit/cf5a18e26bde766df6c54ab952a6ba5fbac8c97c))
+* replace usages of config.apps ([#1542](https://github.com/grafana/metrics-drilldown/issues/1542)) ([46f65c1](https://github.com/grafana/metrics-drilldown/commit/46f65c17827248dd87b22a19431eaa8036e237ad))
+* replaces config.datasources with getDataSourceInstanceList ([#1555](https://github.com/grafana/metrics-drilldown/issues/1555)) ([8c14b43](https://github.com/grafana/metrics-drilldown/commit/8c14b435741a689514a3b9817a16d93a95143dee))
+* use OpenFeature providers from `@grafana/runtime` ([#1497](https://github.com/grafana/metrics-drilldown/issues/1497)) ([e02fde3](https://github.com/grafana/metrics-drilldown/commit/e02fde3a86246615c6537d28939e5fa2c0de6cf2))
+
+
+### 🐛 Bug Fixes
+
+* **breakdown:** enumerate complete label values ([#1471](https://github.com/grafana/metrics-drilldown/issues/1471)) ([8431f37](https://github.com/grafana/metrics-drilldown/commit/8431f37f85b1326677c507f82cdb1d24f1adad51))
+* **search:** make metric name search case-insensitive ([#1452](https://github.com/grafana/metrics-drilldown/issues/1452)) ([ffc4840](https://github.com/grafana/metrics-drilldown/commit/ffc48408819bd41c8ff9613d3494d9ba21384c93))
+* **search:** match metric names case-insensitively ([ffc4840](https://github.com/grafana/metrics-drilldown/commit/ffc48408819bd41c8ff9613d3494d9ba21384c93))
+
+
+### ♻️ Code Refactoring
+
+* clean panel UI actions ([#1501](https://github.com/grafana/metrics-drilldown/issues/1501)) ([cf7199d](https://github.com/grafana/metrics-drilldown/commit/cf7199d6039f89b496ea4ee19d16bc3e5bc12978))
+
+
+### 🧹 Chore
+
+* **deps:** bump grafana packages and grafanaDependency ([#1560](https://github.com/grafana/metrics-drilldown/issues/1560)) ([1ba0cfa](https://github.com/grafana/metrics-drilldown/commit/1ba0cfab4e6a10d4048f90a1f260b6aeb9931be6))
+* **deps:** combined dependency updates and pnpm audit fixes ([#1564](https://github.com/grafana/metrics-drilldown/issues/1564)) ([5943f88](https://github.com/grafana/metrics-drilldown/commit/5943f88e072433011a8d6fc84a8238951c7b4b72))
+* **deps:** Update Build tools ([#1522](https://github.com/grafana/metrics-drilldown/issues/1522)) ([40f68a5](https://github.com/grafana/metrics-drilldown/commit/40f68a5b7271b91f7111a2d3058f216c7d75f05a))
+* **deps:** Update dependency @grafana/lezer-logql to ^0.4.0 ([#1525](https://github.com/grafana/metrics-drilldown/issues/1525)) ([4b6d5c2](https://github.com/grafana/metrics-drilldown/commit/4b6d5c2e5f0cae2af5ef4d219dcc5c9d40bf5183))
+* **deps:** Update dependency @grafana/plugin-e2e to v3.15.1 ([#1526](https://github.com/grafana/metrics-drilldown/issues/1526)) ([18eaf4e](https://github.com/grafana/metrics-drilldown/commit/18eaf4e5465062ddaff2d1b42aa795ac239abc4e))
+* **deps:** Update dependency @grafana/scenes to v8 ([#1528](https://github.com/grafana/metrics-drilldown/issues/1528)) ([adbb2b6](https://github.com/grafana/metrics-drilldown/commit/adbb2b609bf5b598bca613cca9cfb7e9d4ddbdd6))
+* **deps:** Update dependency @playwright/test to v1.64.0 ([#1504](https://github.com/grafana/metrics-drilldown/issues/1504)) ([ab24593](https://github.com/grafana/metrics-drilldown/commit/ab245938270f9c51af3664fe7799d5ba77cd6cac))
+* **deps:** Update dependency @playwright/test to v1.64.1 ([#1521](https://github.com/grafana/metrics-drilldown/issues/1521)) ([b8053bd](https://github.com/grafana/metrics-drilldown/commit/b8053bd61422a6576f646cbb041b2f94ce3b77ac))
+* **deps:** Update dependency chokidar@^3 to v5 ([#1506](https://github.com/grafana/metrics-drilldown/issues/1506)) ([2e77b0a](https://github.com/grafana/metrics-drilldown/commit/2e77b0a1e99f85ca337cb3bf349abceca6bb97aa))
+* **deps:** Update dependency dotenv to v18 ([#1508](https://github.com/grafana/metrics-drilldown/issues/1508)) ([47a0b44](https://github.com/grafana/metrics-drilldown/commit/47a0b44c8b8782ad8e3f274a7406f1d3180a4d67))
+* **deps:** Update dependency dotenv to v18.0.8 ([#1523](https://github.com/grafana/metrics-drilldown/issues/1523)) ([2b0a15e](https://github.com/grafana/metrics-drilldown/commit/2b0a15e927a7d3af204239946811b4133ea96769))
+* **deps:** Update dependency eslint-webpack-plugin&gt;micromatch to v4 ([#1509](https://github.com/grafana/metrics-drilldown/issues/1509)) ([4176e98](https://github.com/grafana/metrics-drilldown/commit/4176e98abce3cb2bc7816894cbf36427a0e1a195))
+* **deps:** Update dependency js-yaml@^3 to v5 ([#1510](https://github.com/grafana/metrics-drilldown/issues/1510)) ([6c4f4a9](https://github.com/grafana/metrics-drilldown/commit/6c4f4a9eea1b3e587089a210700cbc2f970b29e5))
+* **deps:** Update GitHub Actions ([#1507](https://github.com/grafana/metrics-drilldown/issues/1507)) ([e4275a1](https://github.com/grafana/metrics-drilldown/commit/e4275a1193696b4619b589f937ffc01ca4b132ae))
+* **deps:** Update Node.js to v24.22.0 ([#1527](https://github.com/grafana/metrics-drilldown/issues/1527)) ([1a76d7a](https://github.com/grafana/metrics-drilldown/commit/1a76d7a9c0150446b9776bfdd881b47d0f9da46a))
+* **deps:** Update pnpm to v11.28.5 ([#1503](https://github.com/grafana/metrics-drilldown/issues/1503)) ([ecbbf1f](https://github.com/grafana/metrics-drilldown/commit/ecbbf1fe5b93b1a9d298b28e5fe402db616a57bb))
+* **deps:** Update pnpm to v11.28.8 ([#1549](https://github.com/grafana/metrics-drilldown/issues/1549)) ([16e45b7](https://github.com/grafana/metrics-drilldown/commit/16e45b78817a0c90e4335202352a6cb0eb6e6c98))
+* **deps:** Update React ecosystem to v19.3.1 ([#1524](https://github.com/grafana/metrics-drilldown/issues/1524)) ([b9db582](https://github.com/grafana/metrics-drilldown/commit/b9db58253887a8259997c7f17425c38ab1bce271))
+* remove docs ([#1520](https://github.com/grafana/metrics-drilldown/issues/1520)) ([b508e10](https://github.com/grafana/metrics-drilldown/commit/b508e10ef8f366ba44ff6eb54be0a76467bc35a5))
+
+## [3.0.0](https://github.com/grafana/metrics-drilldown/compare/v2.5.1...v3.0.0) (2026-10-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* force breaking change bump for #1436 ([#1456](https://github.com/grafana/metrics-drilldown/issues/1456))
+
+### 🎉 Features
+
+* add SLO-tracked metric filtering and indicators ([#1429](https://github.com/grafana/metrics-drilldown/issues/1429)) ([783512e](https://github.com/grafana/metrics-drilldown/commit/783512e97e454b2bf84299695a05cb96a108600f))
+* allow users to turn on and off y axis sync in breakdown ([#1483](https://github.com/grafana/metrics-drilldown/issues/1483)) ([0a0e053](https://github.com/grafana/metrics-drilldown/commit/0a0e0536564c77d6227164ff4d931b6bf701614d))
+* metrics attribute explorer ([#1393](https://github.com/grafana/metrics-drilldown/issues/1393)) ([b80834f](https://github.com/grafana/metrics-drilldown/commit/b80834f4ec19dc5a7c07f82fe563841fcefbf051))
+
+
+### 🐛 Bug Fixes
+
+* avoid PluginPage chrome for embedded trails ([190d5bf](https://github.com/grafana/metrics-drilldown/commit/190d5bfaef1e6e6776adfb5fdf3a32449184c09d))
+* **deps:** align react-router with Grafana runtime ([#1427](https://github.com/grafana/metrics-drilldown/issues/1427)) ([ad233de](https://github.com/grafana/metrics-drilldown/commit/ad233de24c6b0e5a113f547fc8876b75d9ddf905))
+* **deps:** bump pnpm overrides for CVE remediation ([97ec532](https://github.com/grafana/metrics-drilldown/commit/97ec532836f5a28f0c3a58686c359e9a9f070876))
+* **deps:** resolve pnpm audit vulnerabilities ([#1424](https://github.com/grafana/metrics-drilldown/issues/1424)) ([97ec532](https://github.com/grafana/metrics-drilldown/commit/97ec532836f5a28f0c3a58686c359e9a9f070876))
+* **deps:** resolve pnpm audit vulnerabilities ([#1484](https://github.com/grafana/metrics-drilldown/issues/1484)) ([65026f0](https://github.com/grafana/metrics-drilldown/commit/65026f095748e9b7485f12ad0e6d5a4f58f5176f))
+* **deps:** resolve pnpm audit vulnerabilities ([#1496](https://github.com/grafana/metrics-drilldown/issues/1496)) ([53f1166](https://github.com/grafana/metrics-drilldown/commit/53f1166721fc59799d24f8a5f52266ab65a86610))
+* **embedded:** fix incorrect color in embedded app ([#1459](https://github.com/grafana/metrics-drilldown/issues/1459)) ([4e42d0b](https://github.com/grafana/metrics-drilldown/commit/4e42d0bf033788148b396a05c35f6de8960896e4))
+* include Grafana prereleases in dependency range ([#1461](https://github.com/grafana/metrics-drilldown/issues/1461)) ([0b3f6e9](https://github.com/grafana/metrics-drilldown/commit/0b3f6e92cb2f511a3c65de05e55545fc0c25e0bc))
+* remove page chrome from embedded metrics drilldown ([#1432](https://github.com/grafana/metrics-drilldown/issues/1432)) ([190d5bf](https://github.com/grafana/metrics-drilldown/commit/190d5bfaef1e6e6776adfb5fdf3a32449184c09d))
+* sync y axis bug to sync on shown data ([#1482](https://github.com/grafana/metrics-drilldown/issues/1482)) ([d585b47](https://github.com/grafana/metrics-drilldown/commit/d585b47d0db7a73f87c83439d855949b23a65dc2))
+* **theme:** align radius usage with semantic tokens ([#1448](https://github.com/grafana/metrics-drilldown/issues/1448)) ([0c6c1b1](https://github.com/grafana/metrics-drilldown/commit/0c6c1b1f049640068b222fa1e636a4c276512eb0))
+* **theme:** use accent token for secondary actions ([#1446](https://github.com/grafana/metrics-drilldown/issues/1446)) ([c1f9961](https://github.com/grafana/metrics-drilldown/commit/c1f99616af89ec78a4b42d65ef88a5da6bf9bade))
+* **theme:** use page background for configure controls ([#1447](https://github.com/grafana/metrics-drilldown/issues/1447)) ([484e7c3](https://github.com/grafana/metrics-drilldown/commit/484e7c3dc9dbbcfa63dc085ed813477be8572c09))
+* **VisualRefresh:** Fixes background issue in visual refresh ([#1421](https://github.com/grafana/metrics-drilldown/issues/1421)) ([d58510e](https://github.com/grafana/metrics-drilldown/commit/d58510e355e6b0fad310c951c9889b898091f05e))
+* **VisualRefresh:** Fixes for visual refresh ([#1397](https://github.com/grafana/metrics-drilldown/issues/1397)) ([084591d](https://github.com/grafana/metrics-drilldown/commit/084591d04eb5a657e56556aa83dc1c6ccb758f64))
+
+
+### 📝 Documentation
+
+* require signed commits in CONTRIBUTING and UI screenshots ([#1466](https://github.com/grafana/metrics-drilldown/issues/1466)) ([16d300b](https://github.com/grafana/metrics-drilldown/commit/16d300babb21bb1273223757102ae5826a1b48e6))
+
+
+### 🧪 Tests
+
+* add stable onboarding tutorial selector ([#1455](https://github.com/grafana/metrics-drilldown/issues/1455)) ([61ef2f8](https://github.com/grafana/metrics-drilldown/commit/61ef2f859176bb9d2608edace346ba47ecbceade))
+* **theme:** cover visual refresh background selection ([#1449](https://github.com/grafana/metrics-drilldown/issues/1449)) ([7fab816](https://github.com/grafana/metrics-drilldown/commit/7fab816658b7d400b198e286a1b91224d22d4b25))
+
+
+### 🤖 Continuous Integrations
+
+* add local PR checks ([#1472](https://github.com/grafana/metrics-drilldown/issues/1472)) ([8653eb5](https://github.com/grafana/metrics-drilldown/commit/8653eb5e16e035d7e4cedd2463cfdd68e3422380))
+* skip the PR rate limit for Grafana members and collaborators ([#1495](https://github.com/grafana/metrics-drilldown/issues/1495)) ([dd24b5e](https://github.com/grafana/metrics-drilldown/commit/dd24b5ed4f2310bfb435d3398f17416887b090ac))
+* warn when an external author opens more than one pull request in 24 hours ([#1475](https://github.com/grafana/metrics-drilldown/issues/1475)) ([3d7e5b3](https://github.com/grafana/metrics-drilldown/commit/3d7e5b3ce6746daa0e79e356bedb8e595e625af1))
+
+
+### 🧹 Chore
+
+* add frozenLockfile to pnpm workspace ([#1428](https://github.com/grafana/metrics-drilldown/issues/1428)) ([5dd4995](https://github.com/grafana/metrics-drilldown/commit/5dd4995a32214014b35a90feb86251f7c7682ba1))
+* bump @grafana/create-plugin configuration to 7.11.0 ([#1478](https://github.com/grafana/metrics-drilldown/issues/1478)) ([ec3127a](https://github.com/grafana/metrics-drilldown/commit/ec3127a7d6f18b8e3ed59979cddb1d11824654c0))
+* bump grafana dependency to &gt;=13.1 ([#1436](https://github.com/grafana/metrics-drilldown/issues/1436)) ([d5b2d7d](https://github.com/grafana/metrics-drilldown/commit/d5b2d7d97150b57d90b6cbe5617659ab222fc8cd))
+* **ci:** use GitHub App token broker for cp-update workflow ([#1425](https://github.com/grafana/metrics-drilldown/issues/1425)) ([00fe0c0](https://github.com/grafana/metrics-drilldown/commit/00fe0c04d4926542e11010abadc0ad1e38a99a13))
+* cleanup overrides ([#1479](https://github.com/grafana/metrics-drilldown/issues/1479)) ([b97fd31](https://github.com/grafana/metrics-drilldown/commit/b97fd312d8b77c7fb79ccd77fcccd125f4338864))
+* consolidate renovate PRs and fix type issues ([#1470](https://github.com/grafana/metrics-drilldown/issues/1470)) ([06aec12](https://github.com/grafana/metrics-drilldown/commit/06aec12ec13b58d40300913b6c89661fe27f4bbb))
+* **deps:** combine Renovate dependency updates ([#1407](https://github.com/grafana/metrics-drilldown/issues/1407)) ([cd1130b](https://github.com/grafana/metrics-drilldown/commit/cd1130b6f5e0ce197c536c6fcebad6dfee26f78c))
+* **deps:** Update Build tools ([#1486](https://github.com/grafana/metrics-drilldown/issues/1486)) ([8262e60](https://github.com/grafana/metrics-drilldown/commit/8262e608318d3fd918f2a5d67a9386f685291c7c))
+* **deps:** Update dependency @grafana/plugin-e2e to v3.12.0 ([#1431](https://github.com/grafana/metrics-drilldown/issues/1431)) ([5c1b2ea](https://github.com/grafana/metrics-drilldown/commit/5c1b2ea716c4cb4d45af17445d1b880b53558e42))
+* **deps:** Update dependency @grafana/plugin-e2e to v3.14.0 ([#1445](https://github.com/grafana/metrics-drilldown/issues/1445)) ([4a1913d](https://github.com/grafana/metrics-drilldown/commit/4a1913d2c91517f9695a3c4af60e95b182c80473))
+* **deps:** Update dependency @prometheus-io/lezer-promql to ^0.315.0 ([#1489](https://github.com/grafana/metrics-drilldown/issues/1489)) ([bfc77a3](https://github.com/grafana/metrics-drilldown/commit/bfc77a3b2ec8dcaab1f9499b3daba235f962603f))
+* **deps:** Update dependency @types/node to v24.19.1 ([#1490](https://github.com/grafana/metrics-drilldown/issues/1490)) ([e831e5c](https://github.com/grafana/metrics-drilldown/commit/e831e5cb45c0dc9ee049ddf7bc0b79e3de0c42cf))
+* **deps:** update dependency overrides ([#1499](https://github.com/grafana/metrics-drilldown/issues/1499)) ([78b7512](https://github.com/grafana/metrics-drilldown/commit/78b75121e2fc5545669a64a115530c0c6c884ae7))
+* **deps:** Update dependency sass to v1.104.0 ([#1405](https://github.com/grafana/metrics-drilldown/issues/1405)) ([10bac88](https://github.com/grafana/metrics-drilldown/commit/10bac8840e0bb43f3b113983a43e05325a454701))
+* **deps:** Update dependency sass to v1.104.1 ([#1444](https://github.com/grafana/metrics-drilldown/issues/1444)) ([700aae0](https://github.com/grafana/metrics-drilldown/commit/700aae02ea8a8524cf64428349acb7b94fc52467))
+* **deps:** Update dependency sass to v1.105.0 ([#1469](https://github.com/grafana/metrics-drilldown/issues/1469)) ([a1191fc](https://github.com/grafana/metrics-drilldown/commit/a1191fccbb89bc795bf215b478e82c01e06cf474))
+* **deps:** Update docker.io/prom/prometheus Docker tag to v3.15.0 ([#1491](https://github.com/grafana/metrics-drilldown/issues/1491)) ([81405ba](https://github.com/grafana/metrics-drilldown/commit/81405baeed27c7e2ecfa21e29ef755055af20bec))
+* **deps:** Update GitHub Actions ([#1412](https://github.com/grafana/metrics-drilldown/issues/1412)) ([38d6509](https://github.com/grafana/metrics-drilldown/commit/38d6509d0f75337a5c5237f2c103e709ffd3f31e))
+* **deps:** update grafana/plugin-ci-workflows/ci-cd-workflows action to v11.2.0 ([#1430](https://github.com/grafana/metrics-drilldown/issues/1430)) ([179e295](https://github.com/grafana/metrics-drilldown/commit/179e295142dc2fec40c28523ad45256d70778a53))
+* **deps:** update grafana/plugin-ci-workflows/ci-cd-workflows action to v11.3.0 ([#1492](https://github.com/grafana/metrics-drilldown/issues/1492)) ([f20e5ee](https://github.com/grafana/metrics-drilldown/commit/f20e5ee12d09dfd5647d209edbc26b5f83f70b32))
+* **deps:** Update grafana/shared-workflows digest to d8353fd ([#1485](https://github.com/grafana/metrics-drilldown/issues/1485)) ([669148c](https://github.com/grafana/metrics-drilldown/commit/669148c89b482375cfa4b95af42b5655978cc8c3))
+* **deps:** Update Node.js to v24.21.0 ([#1414](https://github.com/grafana/metrics-drilldown/issues/1414)) ([301ae00](https://github.com/grafana/metrics-drilldown/commit/301ae00a6ed3780be40c8bc23f3792d67ba8a020))
+* **deps:** Update pnpm to v11.28.0 ([#1415](https://github.com/grafana/metrics-drilldown/issues/1415)) ([4f3c7fe](https://github.com/grafana/metrics-drilldown/commit/4f3c7fe2d40411d082cd7501cded70aaab3a78a2))
+* **deps:** Update pnpm to v11.28.4 ([#1488](https://github.com/grafana/metrics-drilldown/issues/1488)) ([7d6b369](https://github.com/grafana/metrics-drilldown/commit/7d6b3694cf51eddb0448704dbafb663a21873f02))
+* **deps:** Update Testing tools ([#1493](https://github.com/grafana/metrics-drilldown/issues/1493)) ([76cb4a7](https://github.com/grafana/metrics-drilldown/commit/76cb4a7e1929abe313a66904e646d56615df1ebd))
+* fix color for sidebar and tree filter ([#1460](https://github.com/grafana/metrics-drilldown/issues/1460)) ([32b732f](https://github.com/grafana/metrics-drilldown/commit/32b732f8dc6ca73a3641f7154b2747ebef0f470e))
+* force breaking change bump for [#1436](https://github.com/grafana/metrics-drilldown/issues/1436) ([#1456](https://github.com/grafana/metrics-drilldown/issues/1456)) ([ed0bbda](https://github.com/grafana/metrics-drilldown/commit/ed0bbda167ced776dafbf502f35b5cc7d6cc0bae))
+* move codeowners to whole drilldown squad ([#1426](https://github.com/grafana/metrics-drilldown/issues/1426)) ([206718a](https://github.com/grafana/metrics-drilldown/commit/206718aa6f0fdab7fe694a9944b337de8b76d597))
+* remove unused RudderStack events ([#1465](https://github.com/grafana/metrics-drilldown/issues/1465)) ([6784dff](https://github.com/grafana/metrics-drilldown/commit/6784dff4afaaf184ea43187e2710c8f54c1af86f))
+* **ui:** remove Grafana from extension titles ([#1435](https://github.com/grafana/metrics-drilldown/issues/1435)) ([a5c5ac7](https://github.com/grafana/metrics-drilldown/commit/a5c5ac79d88020749126029d9b0282f72ac7554a))
+* **ui:** removes the superfluous Grafana from extension titles ([a5c5ac7](https://github.com/grafana/metrics-drilldown/commit/a5c5ac79d88020749126029d9b0282f72ac7554a))
+
 ## [2.5.1](https://github.com/grafana/metrics-drilldown/compare/v2.5.0...v2.5.1) (2026-08-24)
 
 

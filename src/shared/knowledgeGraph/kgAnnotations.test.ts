@@ -1,10 +1,15 @@
-import { config } from '@grafana/runtime';
+import { getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
 import { dataLayers, SceneDataLayerSet, SceneObjectRef } from '@grafana/scenes';
 
 import { getKgSceneProps, isKgAnnotationsAvailable } from 'shared/knowledgeGraph/kgAnnotations';
 import { KgAnnotationToggle } from 'shared/knowledgeGraph/KgAnnotationToggle';
+import { isKnowledgeGraphDataSource } from 'shared/utils/utils.datasource';
 
-const originalDatasources = config.datasources;
+jest.mock('@grafana/plugin-compat/datasources', () => ({
+  getDataSourceInstanceList: jest.fn(),
+}));
+
+const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);
 
 const KG_DATASOURCE = {
   uid: 'grafanacloud-knowledgegraph',
@@ -19,41 +24,38 @@ const KG_DATASOURCE = {
   isDefault: false,
 };
 
-afterEach(() => {
-  config.datasources = originalDatasources;
+beforeEach(() => {
+  jest.resetAllMocks();
+  getDataSourceInstanceListMock.mockResolvedValue([]);
 });
 
 describe('isKgAnnotationsAvailable', () => {
-  it('returns false when KG datasource is missing', () => {
-    config.datasources = {};
+  it('returns false when KG datasource is missing', async () => {
+    getDataSourceInstanceListMock.mockResolvedValue([]);
 
-    expect(isKgAnnotationsAvailable()).toBe(false);
+    expect(await isKgAnnotationsAvailable()).toBe(false);
+    expect(getDataSourceInstanceListMock).toHaveBeenCalledWith({ all: true, filter: isKnowledgeGraphDataSource });
   });
 
-  it('returns true when KG datasource is present', () => {
-    config.datasources = { knowledgegraph: KG_DATASOURCE };
+  it('returns true when KG datasource is present', async () => {
+    getDataSourceInstanceListMock.mockResolvedValue([KG_DATASOURCE]);
 
-    expect(isKgAnnotationsAvailable()).toBe(true);
-  });
-
-  it('returns false when uid matches but type does not', () => {
-    config.datasources = { knowledgegraph: { ...KG_DATASOURCE, type: 'some-other-datasource' } };
-
-    expect(isKgAnnotationsAvailable()).toBe(false);
+    expect(await isKgAnnotationsAvailable()).toBe(true);
+    expect(getDataSourceInstanceListMock).toHaveBeenCalledWith({ all: true, filter: isKnowledgeGraphDataSource });
   });
 });
 
 describe('getKgSceneProps', () => {
-  it('returns undefined when KG datasource is missing', () => {
-    config.datasources = {};
+  it('returns undefined when KG datasource is missing', async () => {
+    getDataSourceInstanceListMock.mockResolvedValue([]);
 
-    expect(getKgSceneProps()).toBeUndefined();
+    expect(await getKgSceneProps()).toBeUndefined();
   });
 
-  it('returns proper structure when KG datasource is present', () => {
-    config.datasources = { knowledgegraph: KG_DATASOURCE };
+  it('returns proper structure when KG datasource is present', async () => {
+    getDataSourceInstanceListMock.mockResolvedValue([KG_DATASOURCE]);
 
-    const props = getKgSceneProps();
+    const props = await getKgSceneProps();
     expect(props).toBeDefined();
     expect(props!.$data).toBeInstanceOf(SceneDataLayerSet);
     expect(props!.behaviors).toHaveLength(1);

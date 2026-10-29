@@ -2,7 +2,7 @@
   "action-bar": {
     "tab": {
       "breakdown": "Zestawienie",
-      "query-results": "",
+      "query-results": "Wyniki zapytania",
       "query-results-description": "Dane z zapytania natychmiastowego w formacie tabeli",
       "related-logs": "Powiązane logi",
       "related-logs-description": "Odpowiednie logi na podstawie bieżących filtrów etykiet i zakresu czasu",
@@ -10,53 +10,57 @@
       "related-metrics-description": "Odpowiednie dane na podstawie bieżących filtrów etykiet"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
-    "badge-metric": "",
-    "badge-resource": "",
-    "close-aria-label": "",
-    "close-tooltip": "",
-    "collapse": "",
-    "collapse-extra-fields": "",
-    "description": "",
-    "description-aria-label": "",
-    "description-histogram": "",
-    "detection-error": "",
-    "discovering-fields": "",
-    "error": "",
-    "expand": "",
-    "field-input-placeholder": "",
-    "field-link-label": "",
-    "filter-for-value": "",
-    "filter-out-value": "",
-    "histogram-range-between": "",
-    "histogram-range-over": "",
-    "histogram-range-under": "",
-    "invalid-range": "",
-    "lower-limit": "",
-    "lower-limit-placeholder": "",
-    "lower-limit-unit": "",
-    "no-extra-fields-shown": "",
-    "no-fields-detected": "",
-    "no-more-fields": "",
-    "no-values-found": "",
-    "title": "",
-    "too-many-values": "",
-    "unit-unknown": "",
-    "upper-limit": "",
-    "upper-limit-placeholder": "",
-    "upper-limit-unit": "",
-    "value-tooltip-histogram-no-activity": "",
-    "show-more-fields_one": "",
-    "show-more-fields_few": "",
-    "show-more-fields_many": "",
-    "show-more-fields_other": "",
-    "value-tooltip-histogram_one": "",
-    "value-tooltip-histogram_few": "",
-    "value-tooltip-histogram_many": "",
-    "value-tooltip-histogram_other": ""
+    "badge-metric": "Atrybut wskaźnika OTel",
+    "badge-resource": "Atrybut zasobu OTel",
+    "close-aria-label": "Zamknij",
+    "close-tooltip": "Zamknij",
+    "collapse": "Zwiń",
+    "collapse-extra-fields": "Zwiń dodatkowe pola",
+    "description": "Wykrywaj wzorce i zawężaj przyczyny źródłowe, analizując podział danych według kluczowych atrybutów. Kliknij dowolną wartość, aby filtrować wyniki.",
+    "description-aria-label": "Co oznaczają te wartości procentowe?",
+    "description-histogram": "Pokazuje udział każdej wartości w obserwacjach dla etykiety {{range}}. Wartości bez aktywności są umieszczane na końcu.",
+    "detection-error": "Nie udało się wczytać atrybutów dla tego zbioru danych.",
+    "discovering-fields": "Wykrywanie atrybutów…",
+    "error": "Wczytywanie nie powiodło się",
+    "expand": "Rozwiń",
+    "field-input-placeholder": "Wyszukaj, aby dodać więcej atrybutów",
+    "field-link-label": "Wyświetl {{name}}",
+    "filter-for-value": "Filtruj wg wartości",
+    "filter-out-value": "Odfiltruj wartość",
+    "histogram-range-between": "między {{lower}} a {{upper}}",
+    "histogram-range-over": "powyżej {{value}}",
+    "histogram-range-under": "poniżej {{value}}",
+    "invalid-range": "Limit górny musi być większy niż limit dolny",
+    "lower-limit": "Dolny limit",
+    "lower-limit-placeholder": "bez limitu",
+    "lower-limit-unit": "Dolny limit ({{unit}})",
+    "no-extra-fields-shown": "Nie są wyświetlane żadne dodatkowe pola",
+    "no-fields-detected": "Nie wykryto pól dla tego zbioru danych.",
+    "no-more-fields": "Nie ma więcej pól",
+    "no-values-found": "Nie znaleziono wartości",
+    "title": "Eksplorator atrybutów",
+    "too-many-values": "Zbyt wiele wartości do wyświetlenia",
+    "unit-unknown": "Nie udało się określić jednostki tego wskaźnika na podstawie jego nazwy. Dokładnie sprawdź próg, zanim uznasz wartość procentową za wiarygodną.",
+    "upper-limit": "Górny limit",
+    "upper-limit-placeholder": "bez limitu",
+    "upper-limit-unit": "Górny limit ({{unit}})",
+    "value-tooltip-histogram-no-activity": "Brak aktywności w tym oknie.",
+    "show-more-fields_one": "Pokaż {{count}} pole więcej",
+    "show-more-fields_few": "Pokaż {{count}} pola więcej",
+    "show-more-fields_many": "Pokaż {{count}} pól więcej",
+    "show-more-fields_other": "Pokaż {{count}} pola więcej",
+    "value-tooltip-histogram_one": "Ta wartość odpowiada za {{percentage}}% obserwacji w ramach tej etykiety, które mieszczą się w zakresie {{range}} (tj. {{count}} z ok. {{total}} jej wszystkich obserwacji).",
+    "value-tooltip-histogram_few": "Ta wartość odpowiada za {{percentage}}% obserwacji w ramach tej etykiety, które mieszczą się w zakresie {{range}} (tj. {{count}} z ok. {{total}} jej wszystkich obserwacji).",
+    "value-tooltip-histogram_many": "Ta wartość odpowiada za {{percentage}}% obserwacji w ramach tej etykiety, które mieszczą się w zakresie {{range}} (tj. {{count}} z ok. {{total}} jej wszystkich obserwacji).",
+    "value-tooltip-histogram_other": "Ta wartość odpowiada za {{percentage}}% obserwacji w ramach tej etykiety, które mieszczą się w zakresie {{range}} (tj. {{count}} z ok. {{total}} jej wszystkich obserwacji)."
   },
   "binary-ratio-labels-datasource": {
-    "test-success": ""
+    "test-success": "OK"
   },
   "breakdown": {
     "add-to-filters": "Dodaj do filtrów",
@@ -65,8 +69,8 @@
       "label": "Grupuj według"
     },
     "histogram-fn": {
-      "default-text": "",
-      "label": ""
+      "default-text": "Suma",
+      "label": "Funkcja histogramu"
     },
     "label-values-list": {
       "error-title": "Błąd podczas wczytywania wskaźników",
@@ -82,7 +86,10 @@
       "view-label": "Wyświetl"
     },
     "section-label": "Zestawienie",
-    "select-label": "Wybierz"
+    "select-label": "Wybierz",
+    "sync-y-axis": {
+      "label": ""
+    }
   },
   "checkbox-list": {
     "clear": "wyczyść",
@@ -95,9 +102,9 @@
     "selected-count_other": "Wybrano {{count}}"
   },
   "chunk-load-recovery": {
-    "auto-message": "",
-    "manual-message": "",
-    "reload-button": ""
+    "auto-message": "Dostępna jest nowsza wersja aplikacji Metrics Drilldown – trwa wczytywanie…",
+    "manual-message": "Dostępna jest nowsza wersja aplikacji Metrics Drilldown, ale nie udało się jej wczytać automatycznie.",
+    "reload-button": "Wczytaj ponownie"
   },
   "configure-panel": {
     "apply": "Zastosuj",
@@ -127,14 +134,14 @@
     "title": "Błąd krytyczny"
   },
   "explore-attributes-action": {
-    "label": "",
+    "label": "Rozkład histogramu",
     "tooltip": {
-      "description": ""
+      "description": "Zbadaj rozkład obserwacji na histogramie dla etykiet i wartości atrybutów dla tej metryki."
     }
   },
   "exposed-component-error-boundary": {
-    "message": "",
-    "title": ""
+    "message": "Wczytywanie {{componentName}} nie powiodło się. Spróbuj ponownie lub skontaktuj się z administratorem organizacji.",
+    "title": "Coś poszło nie tak"
   },
   "extreme-value-filter": {
     "message": "Dane panelu zostały ponownie pobrane za pomocą bardziej złożonego zapytania, aby obsłużyć bardzo małe wartości w szeregu"
@@ -148,34 +155,43 @@
     "limit-warning-title": "Sortowanie według wykorzystania jest ograniczone do 500 pulpitów."
   },
   "fetch-firing-alert-metrics": {
-    "error": ""
+    "error": "Nie udało się pobrać uruchomionych reguł alertów z punktu końcowego reguł Prometheus"
   },
   "fetch-slo-metric-signals": {
-    "error": "",
-    "parse-error": ""
+    "error": "Nie udało się pobrać definicji SLO",
+    "parse-error": "Nie udało się wyodrębnić nazwy wskaźnika z definicji SLO"
   },
   "filtered-metrics-variable": {
     "label": "Przefiltrowane wskaźniki"
   },
   "firing-alert-badge": {
-    "tooltip_one": "",
-    "tooltip_few": "",
-    "tooltip_many": "",
-    "tooltip_other": ""
+    "tooltip_one": "{{count}} uruchomiona reguła alertów odnosi się do tego wskaźnika",
+    "tooltip_few": "{{count}} uruchomione reguły alertów odnoszą się do tego wskaźnika",
+    "tooltip_many": "{{count}} uruchomionych reguł alertów odnosi się do tego wskaźnika",
+    "tooltip_other": "{{count}} uruchomionej reguły alertów odnosi się do tego wskaźnika"
   },
   "firing-alert-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_few": "",
-    "label_many": "",
-    "label_other": ""
+    "aria-label-active": "Usuń filtr uruchomionych alertów",
+    "aria-label-inactive": "Filtruj według uruchomionych alertów",
+    "tooltip-empty": "Brak wskaźników z uruchomionymi alertami w bieżącym przefiltrowanym zbiorze",
+    "label_one": "Zawiera uruchomione alerty ({{count}})",
+    "label_few": "Zawiera uruchomione alerty ({{count}})",
+    "label_many": "Zawiera uruchomione alerty ({{count}})",
+    "label_other": "Zawiera uruchomione alerty ({{count}})"
   },
   "give-feedback": {
     "button": "Przekaż opinię"
   },
   "gmd-viz-panel": {
+    "enable-exemplars": {
+      "empty": "",
+      "error": "",
+      "label": "",
+      "off": "",
+      "on": "",
+      "unavailable": "",
+      "unsupported-panel": ""
+    },
     "native-histogram": "Histogram natywny",
     "variant": {
       "heatmap": "mapa intensywności",
@@ -233,19 +249,19 @@
     "search-aria-label": "Szybkie wyszukiwanie wskaźników"
   },
   "metric-graph": {
-    "explore-attributes": ""
+    "explore-attributes": "Analiza histogramu"
   },
   "metrics": {
     "metrics-drilldown": {
       "load-query": {
         "button-no-query-tooltip": "Brak zapisanych zapytań do wczytania",
-        "button-tooltip": "",
+        "button-tooltip": "Wczytaj zapisane zapytanie",
         "empty": "Brak zapisanych zapytań do wyświetlenia.",
         "load-error": "To zapytanie zawiera wyrażenia, których nie można przedstawić w aplikacji Metrics Drilldown. Obsługiwane są tylko proste selektory metric{label}.",
         "load-type-error": "Wybierz zapytanie Prometheus.",
         "modal-title": "Wczytaj zapisane wcześniej zapytanie",
         "remove": "Usuń",
-        "saved-query-button-tooltip": "",
+        "saved-query-button-tooltip": "Wczytaj zapisane zapytanie",
         "select": "Wybierz"
       },
       "save-query": {
@@ -253,7 +269,7 @@
           "alert": "Istnieje już zapisane zapytanie z tym samym wyrażeniem: {{title}}"
         },
         "button-tooltip": "Zapisz zapytanie",
-        "button-tooltip-saved-queries": "",
+        "button-tooltip-saved-queries": "Dodaj do zapisanych zapytań",
         "cancel": "Anuluj",
         "description": "Opis",
         "error": "Podczas zapisywania tego zapytania wystąpił nieoczekiwany błąd.",
@@ -291,7 +307,7 @@
       "alphabetical-reversed": "Alfabetycznie [Z–A]",
       "dashboard-usage": "Użycie pulpitu",
       "default": "Domyślne",
-      "firing-alerts": ""
+      "firing-alerts": "Uruchomione alerty"
     }
   },
   "metrics-variable": {
@@ -299,12 +315,12 @@
   },
   "metrics-variable-sort-engine": {
     "error": {
-      "firing-alerts": ""
+      "firing-alerts": "Nie udało się posortować według uruchomionych alertów"
     }
   },
   "onboarding": {
-    "learn-more": "",
-    "no-datasource": "",
+    "learn-more": "Sprawdź <2>naszą dokumentację</2>, aby dowiedzieć się więcej, lub<br/><6>wypróbuj online</6> w Grafana Play!",
+    "no-datasource": "Zauważyliśmy, że nie skonfigurowano źródła danych Prometheus.<br/>Dodaj <4>źródło danych Prometheus</4>, aby wyświetlić wskaźniki.",
     "title": "Witamy w Grafana Metrics Drilldown"
   },
   "open-assistant": {
@@ -313,9 +329,13 @@
   },
   "panel-menu": {
     "action": {
+      "add-bookmark": "",
+      "add-to-dashboard": "",
       "copy-url": "Kopiuj URL",
       "copy-url-success": "Adres URL został skopiowany do schowka",
-      "explore": "Eksploruj"
+      "create-alert": "",
+      "explore": "Eksploruj",
+      "remove-bookmark": ""
     },
     "group": {
       "actions": "Działania",
@@ -336,7 +356,7 @@
       "commit-sha": "SHA operacji commit: {{sha}}",
       "contribute": "Współtworzenie",
       "documentation": "Dokumentacja",
-      "grafana-version": "",
+      "grafana-version": "Grafana {{edition}} ({{env}})",
       "report-issue": "Zgłoś problem"
     }
   },
@@ -346,9 +366,9 @@
     "view-by-label": "Wyświetl według"
   },
   "query-options": {
-    "aria-label": "",
-    "title": "",
-    "toggle-insights": ""
+    "aria-label": "Opcje zapytania",
+    "title": "Opcje zapytania",
+    "toggle-insights": "Przełącz adnotacje do analiz"
   },
   "query-results": {
     "aria-label": "Wyniki zapytania natychmiastowego",
@@ -401,6 +421,11 @@
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Otwórz w aplikacji Metrics Drilldown"
   },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
+  },
   "show-more-button": {
     "text_one": "Pokaż jeszcze {{count}} ({{current}}/{{total}})",
     "text_few": "Pokaż jeszcze {{count}} ({{current}}/{{total}})",
@@ -410,7 +435,7 @@
   "sidebar": {
     "bookmarks": {
       "date-created": "Data utworzenia:",
-      "empty-state": "",
+      "empty-state": "Brak zakładek dla<br/>bieżącego źródła danych.",
       "remove-tooltip": "Usuń zakładkę"
     },
     "close-aria-label": "Zamknij",
@@ -452,19 +477,19 @@
     }
   },
   "slo-tracked-badge": {
-    "tooltip_one": "",
-    "tooltip_few": "",
-    "tooltip_many": "",
-    "tooltip_other": ""
+    "tooltip_one": "Do tego wskaźnika odnosi się {{count}} definicja SLO",
+    "tooltip_few": "Do tego wskaźnika odnoszą się {{count}} definicje SLO",
+    "tooltip_many": "Do tego wskaźnika odnosi się {{count}} definicji SLO",
+    "tooltip_other": "Do tego wskaźnika odnosi się {{count}} definicji SLO"
   },
   "slo-tracked-chip": {
-    "aria-label-active": "",
-    "aria-label-inactive": "",
-    "tooltip-empty": "",
-    "label_one": "",
-    "label_few": "",
-    "label_many": "",
-    "label_other": ""
+    "aria-label-active": "Usuń filtr śledzenia w SLO",
+    "aria-label-inactive": "Filtruj według wskaźników śledzonych w SLO",
+    "tooltip-empty": "Brak wskaźników śledzonych w SLO w bieżącym przefiltrowanym zbiorze",
+    "label_one": "Śledzone w SLO ({{count}})",
+    "label_few": "Śledzone w SLO ({{count}})",
+    "label_many": "Śledzone w SLO ({{count}})",
+    "label_other": "Śledzone w SLO ({{count}})"
   },
   "sort-by": {
     "label": "Sortuj według",
@@ -487,7 +512,6 @@
   },
   "ui-text": {
     "metric-select": {
-      "bookmark": "Dodaj do zakładek",
       "copy-url": "Kopiuj URL",
       "open-explore": "Otwórz w widoku Eksploruj",
       "select-new-metric-tooltip": "Usuń istniejący wskaźnik i wybierz nowy"

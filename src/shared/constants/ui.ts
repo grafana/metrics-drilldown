@@ -9,7 +9,6 @@ export const UI_TEXT = {
   METRIC_SELECT_SCENE: {
     OPEN_EXPLORE_LABEL: 'Open in explore',
     COPY_URL_LABEL: 'Copy url',
-    BOOKMARK_LABEL: 'Bookmark',
     SELECT_NEW_METRIC_TOOLTIP: 'Remove existing metric and choose a new metric',
   },
 };
@@ -23,7 +22,6 @@ export function getTranslatedUIText() {
     METRIC_SELECT_SCENE: {
       OPEN_EXPLORE_LABEL: t('ui-text.metric-select.open-explore', 'Open in explore'),
       COPY_URL_LABEL: t('ui-text.metric-select.copy-url', 'Copy url'),
-      BOOKMARK_LABEL: t('ui-text.metric-select.bookmark', 'Bookmark'),
       SELECT_NEW_METRIC_TOOLTIP: t(
         'ui-text.metric-select.select-new-metric-tooltip',
         'Remove existing metric and choose a new metric'
