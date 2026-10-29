@@ -10,6 +10,10 @@
       "related-metrics-description": "Метрики, соответствующие текущим фильтрам меток"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Атрибут метрики OTel",
     "badge-resource": "Атрибут ресурса OTel",
@@ -416,6 +420,11 @@
     "button": "Выбрать новую метрику",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Откройте Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Показать еще {{count}} ({{current}}/{{total}})",

@@ -10,6 +10,10 @@
       "related-metrics-description": "Releváns metrikák az aktuális címkeszűrők alapján"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel-metrikaattribútum",
     "badge-resource": "OTel-erőforrásattribútum",
@@ -402,6 +406,11 @@
     "button": "Új metrika kiválasztása",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Megnyitás a Metrics Drilldownban"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "További {{count}} megjelenítése ({{current}}/{{total}})",

@@ -10,6 +10,10 @@
       "related-metrics-description": "Související metriky založené na aktuálních filtrech štítků"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Atribut metriky OTel",
     "badge-resource": "Atribut zdroje OTel",
@@ -416,6 +420,11 @@
     "button": "Vyberte novou metriku",
     "metrics-drilldown": "Podrobný rozpis metrik",
     "open-in-drilldown-tooltip": "Otevřít v Podrobném rozpisu metrik"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Zobrazit {{count}} další ({{current}}/{{total}})",
