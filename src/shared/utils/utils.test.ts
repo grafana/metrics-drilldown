@@ -17,17 +17,10 @@ jest.mock('@grafana/scenes', () => ({
 }));
 
 // Mock the entire @grafana/runtime module
-const getListSpy = jest.fn();
 const fetchSpy = jest.fn();
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
-  getDataSourceSrv: () => ({
-    getList: getListSpy,
-    get: jest.fn(),
-    getInstanceSettings: jest.fn(),
-    reload: jest.fn(),
-  }),
   getBackendSrv: () => ({
     fetch: fetchSpy,
     delete: jest.fn(),
@@ -46,6 +39,7 @@ describe('limitAdhocProviders', () => {
   let dataTrail: DataTrail;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     // disable console.log called in Scenes for this test
     // called in scenes/packages/scenes/src/variables/adhoc/patchGetAdhocFilters.ts
     jest.spyOn(console, 'log').mockImplementation(jest.fn());
