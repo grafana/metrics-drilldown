@@ -10,6 +10,10 @@
       "related-metrics-description": "Relevanta mätvärden baserat på aktuella etikettfilter"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel-mätvärdesattribut",
     "badge-resource": "OTel-resursattribut",
@@ -402,6 +406,11 @@
     "button": "Välj nytt mätvärde",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Öppna i Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Visa {{count}} till ({{current}}/{{total}})",

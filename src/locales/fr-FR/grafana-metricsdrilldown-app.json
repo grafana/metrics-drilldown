@@ -10,6 +10,10 @@
       "related-metrics-description": "Métriques correspondant aux filtres d’étiquettes actuels"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Attribut de métrique OTel",
     "badge-resource": "Attribut de ressource OTel",
@@ -402,6 +406,11 @@
     "button": "Sélectionner une nouvelle métrique",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Ouvrir dans Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Afficher {{count}} de plus ({{current}}/{{total}})",
