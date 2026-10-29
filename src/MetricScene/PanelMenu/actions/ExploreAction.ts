@@ -1,6 +1,5 @@
-import { type PanelMenuItem } from '@grafana/data';
+import { locationUtil, type PanelMenuItem } from '@grafana/data';
 import { t } from '@grafana/i18n';
-import { config } from '@grafana/runtime';
 import { getExploreURL, sceneGraph, VizPanel, type SceneObject } from '@grafana/scenes';
 
 import { reportExploreMetrics } from 'shared/tracking/interactions';
@@ -39,7 +38,7 @@ export class ExploreAction {
         reportExploreMetrics('selected_metric_action_clicked', { action: 'panel_menu_explore' });
         return exploreUrl?.then((url) => {
           if (url) {
-            window.open(`${config.appSubUrl}${url}`, '_blank');
+            window.open(locationUtil.assureBaseUrl(url), '_blank');
           }
         });
       },

@@ -1,11 +1,16 @@
 import { LoadingState } from '@grafana/data';
+import { t } from '@grafana/i18n';
 import { SceneQueryRunner, type QueryRunnerState } from '@grafana/scenes';
+
+import { ensureErrorObject } from 'App/errorUtils';
+import { displayError } from 'MetricsReducer/helpers/displayStatus';
+import { type DataSourceInstances } from 'shared/types';
 
 import { type MetricsLogsConnector } from '../../Integrations/logs/base';
 import { createLabelsCrossReferenceConnector } from '../../Integrations/logs/labelsCrossReference';
 import { createLokiRecordingRulesConnector } from '../../Integrations/logs/lokiRecordingRules';
 import pluginJson from '../../plugin.json';
-import { getDataSourceFetcher, type DataSource } from '../../shared/utils/utils.datasource';
+import { getDataSourceFetcher } from '../../shared/utils/utils.datasource';
 import { type MetricScene } from '../MetricScene';
 
 /**
@@ -17,7 +22,7 @@ export class RelatedLogsOrchestrator {
   private readonly _metricScene: MetricScene;
   private readonly _dataSourceFetcher = getDataSourceFetcher();
   private readonly _changeHandlers = {
-    lokiDataSources: [] as Array<(dataSources: DataSource[]) => void>,
+    lokiDataSources: [] as Array<(dataSources: DataSourceInstances) => void>,
     relatedLogsCount: [] as Array<(count: number) => void>,
   };
   /**
@@ -25,7 +30,7 @@ export class RelatedLogsOrchestrator {
    */
   private readonly _internalState = {
     relatedLogsCount: 0,
-    lokiDataSources: [] as DataSource[],
+    lokiDataSources: [] as DataSourceInstances,
   };
 
   constructor(metricScene: MetricScene) {
@@ -37,7 +42,7 @@ export class RelatedLogsOrchestrator {
     return this._internalState.lokiDataSources;
   }
 
-  set lokiDataSources(dataSources: DataSource[]) {
+  set lokiDataSources(dataSources: DataSourceInstances) {
     const currentDataSourcesSignature = this._internalState.lokiDataSources.map((ds) => ds.uid).join(',');
     const newDataSourcesSignature = dataSources.map((ds) => ds.uid).join(',');
 
@@ -57,7 +62,7 @@ export class RelatedLogsOrchestrator {
   /**
    * Add a listener that will be called when the lokiDataSources change.
    */
-  addLokiDataSourcesChangeHandler(handler: (dataSources: DataSource[]) => void) {
+  addLokiDataSourcesChangeHandler(handler: (dataSources: DataSourceInstances) => void) {
     this._changeHandlers.lokiDataSources.push(handler);
   }
 
@@ -94,7 +99,16 @@ export class RelatedLogsOrchestrator {
    */
   public async findAndCheckAllDatasources(): Promise<void> {
     // Get all available Loki datasources
-    const allLokiDatasources = await this._dataSourceFetcher.getHealthyDataSources('loki');
+    let allLokiDatasources: DataSourceInstances;
+    try {
+      allLokiDatasources = await this._dataSourceFetcher.getHealthyDataSources('loki');
+    } catch (error) {
+      const message = t('related-logs.datasource-discovery-error', 'Failed to load data sources for related logs.');
+      displayError(ensureErrorObject(error, message), [message]);
+      this.lokiDataSources = [];
+      this.relatedLogsCount = 0;
+      return;
+    }
 
     // Limit to first five datasources to avoid performance issues
     // Instances with more than five Loki datasources should use Logs Drilldown or Explore to find logs of interest
@@ -139,9 +153,9 @@ export class RelatedLogsOrchestrator {
   /**
    * Check each datasource for logs, then update the datasources and relatedLogsCount accordingly.
    */
-  private checkLogsInDataSources(datasources: DataSource[]): void {
+  private checkLogsInDataSources(datasources: DataSourceInstances): void {
     // Check each datasource for logs
-    const datasourcesWithLogs: DataSource[] = [];
+    const datasourcesWithLogs: DataSourceInstances = [];
     let totalLogsCount = 0;
     let totalChecked = 0;
 

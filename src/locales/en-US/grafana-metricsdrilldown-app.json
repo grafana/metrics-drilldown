@@ -10,6 +10,10 @@
       "related-metrics-description": "Relevant metrics based on current label filters"
     }
   },
+  "App": {
+    "error-title": "Failed to load data source instances",
+    "loading": "Loading..."
+  },
   "attribute-explorer": {
     "badge-metric": "OTel metric attribute",
     "badge-resource": "OTel resource attribute",
@@ -385,6 +389,7 @@
   },
   "related-logs": {
     "datasource-description": "Some Loki data sources might be missing from the dropdown if they took longer than {{timeout}} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.",
+    "datasource-discovery-error": "Failed to load data sources for related logs.",
     "datasource-label": "Logs data source",
     "experimental-note": "Note: Related logs is an experimental feature.",
     "loading": "Loading...",
@@ -406,6 +411,11 @@
     "button": "Select new metric",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Open in Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": "Failed to load data source instances"
+    }
   },
   "show-more-button": {
     "text_one": "Show {{count}} more ({{current}}/{{total}})",

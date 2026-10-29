@@ -238,9 +238,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   private onActivate() {
     registerRuntimeDataSources([new LabelsDataSource(), new BinaryRatioLabelsDataSource()]);
 
-    evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then((enabled) => {
-      if (enabled) {
-        const kg = getKgSceneProps(this.state.kgEntityHint);
+    evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then(async (enabled) => {
+      if (!enabled) {
+        return;
+      }
+
+      try {
+        const kg = await getKgSceneProps(this.state.kgEntityHint);
         if (kg) {
           this.setState({
             $data: this.state.$data ?? kg.$data,
@@ -248,6 +252,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             kgAnnotationToggle: this.state.kgAnnotationToggle ?? kg.controls,
           });
         }
+      } catch (error) {
+        logger.debug('Failed to fetch kg Scene', { error });
       }
     });
 

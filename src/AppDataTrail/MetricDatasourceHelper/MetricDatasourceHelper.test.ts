@@ -1,22 +1,25 @@
-import { setDataSourceSrv } from '@grafana/runtime';
+import { getDataSourceInstance } from '@grafana/plugin-compat/datasources';
 import { sceneGraph } from '@grafana/scenes';
 
 import { DataTrail } from 'AppDataTrail/DataTrail';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 
 import { MetricDatasourceHelper } from './MetricDatasourceHelper';
-import { DataSourceType, MockDataSourceSrv } from '../../test/mocks/datasource';
+import { DataSourceType } from '../../test/mocks/datasource';
+
+jest.mock('@grafana/plugin-compat/datasources', () => ({ getDataSourceInstance: jest.fn() }));
+const getDataSourceInstanceMock = jest.mocked(getDataSourceInstance);
 
 async function setup() {
-  const dataSourceSrv = new MockDataSourceSrv({
-    prom: {
-      name: 'Prometheus',
-      type: DataSourceType.Prometheus,
-      uid: 'ds',
-    },
-  });
-  setDataSourceSrv(dataSourceSrv);
-  const runtimeDatasource = await dataSourceSrv.get();
+  jest.clearAllMocks();
+
+  const runtimeDatasource: any = {
+    name: 'Prometheus',
+    type: DataSourceType.Prometheus,
+    uid: 'ds',
+    languageProvider: { request: jest.fn() },
+  };
+  getDataSourceInstanceMock.mockResolvedValue(runtimeDatasource);
 
   const trail = new DataTrail({});
   const metricsVariable = sceneGraph.findByKeyAndType(trail, VAR_METRICS_VARIABLE, MetricsVariable);

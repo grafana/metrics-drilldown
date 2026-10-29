@@ -2,11 +2,11 @@ import { getTrackedFlagPayload } from '../../featureFlags/tracking';
 
 import type * as InteractionsModule from '../interactions';
 
-// interactions.ts imports reportInteraction and (transitively, via getPluginVersion) reads config at module
+// interactions.ts imports reportInteraction and (transitively, via getPluginVersion) reads getAppPluginVersion at module
 // load; keep both mocked so requiring the real module is cheap and doesn't crash on startup.
 jest.mock('@grafana/runtime', () => ({
   reportInteraction: jest.fn(),
-  config: { apps: {} },
+  getAppPluginVersion: jest.fn().mockResolvedValue(null),
 }));
 
 jest.mock('../../featureFlags/tracking', () => ({

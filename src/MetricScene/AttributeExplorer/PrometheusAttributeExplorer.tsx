@@ -1,15 +1,16 @@
 import { css } from '@emotion/css';
 import { dateTime, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
+import { getDataSourceInstance } from '@grafana/plugin-compat/datasources';
 import { utf8Support } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getDataSourceSrv } from '@grafana/runtime';
 import { Field, Icon, Input, Tooltip, useStyles2 } from '@grafana/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { forkJoin, from as rxFrom, map, switchMap, type Observable } from 'rxjs';
 
-
-import { MetricDatasourceHelper, type PrometheusRuntimeDatasource } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import {
+  MetricDatasourceHelper,
+  type PrometheusRuntimeDatasource,
+} from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { renameBucketMetricSuffix } from 'shared/GmdVizPanel/buildQueryExpression';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
 import { getUnitFromMetric } from 'shared/GmdVizPanel/units/getUnit';
@@ -17,7 +18,13 @@ import { HISTOGRAM_ATTRIBUTES_BY_DOMAIN } from 'shared/otel/histogramAttributes'
 import { RESOURCE_ATTRIBUTES } from 'shared/otel/resourceAttributes';
 import { escapePromQLString } from 'shared/utils/utils.queries';
 
-import { AttributeDistribution, type ActiveFilter, type AttributeConfig, type AttributeValueCount, type DatasetContext } from './AttributeDistribution';
+import {
+  AttributeDistribution,
+  type ActiveFilter,
+  type AttributeConfig,
+  type AttributeValueCount,
+  type DatasetContext,
+} from './AttributeDistribution';
 
 // __name__ is always the metric being viewed, so it's pure noise as an attribute.
 const ALWAYS_EXCLUDED_LABELS = new Set(['__name__']);
@@ -183,8 +190,7 @@ export function getOtelPriorityAttributes(labels: string[]): {
 }
 
 async function fetchAttributes(context: DatasetContext): Promise<AttributeConfig[]> {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-  const ds = (await getDataSourceSrv().get(context.datasourceUid)) as unknown as PrometheusRuntimeDatasource;
+  const ds = (await getDataSourceInstance(context.datasourceUid)) as unknown as PrometheusRuntimeDatasource;
 
   const labels = await MetricDatasourceHelper.fetchLabels({
     ds,
@@ -257,8 +263,12 @@ export function applyFiltersToSelector(selector: string, filters: ActiveFilter[]
   }
   // Strips a possible dangling trailing comma (left by an empty ${filters:raw} interpolation) before
   // joining, to avoid producing a double comma.
-  // eslint-disable-next-line sonarjs/super-linear-regex -- single quantified character class, genuinely linear
-  const existingContent = selector.slice(openBrace + 1, closeBrace).trim().replace(/[,\s]+$/, '');
+
+  const existingContent = selector
+    .slice(openBrace + 1, closeBrace)
+    .trim()
+    // eslint-disable-next-line sonarjs/super-linear-regex
+    .replace(/[,\s]+$/, '');
   const insertion = existingContent.length > 0 ? `${existingContent}, ${matchers}` : matchers;
   return `${selector.slice(0, openBrace + 1)}${insertion}${selector.slice(closeBrace)}`;
 }
@@ -271,7 +281,10 @@ export interface PrometheusRangeQueryResult {
 // getLabelValueFromDataFrame.ts), rather than inventing a second one.
 const UNSPECIFIED_LABEL_VALUE = '<unspecified>';
 
-function extractLastSampleByValue(response: PrometheusRangeQueryResult | undefined, field: string): Map<string, number> {
+function extractLastSampleByValue(
+  response: PrometheusRangeQueryResult | undefined,
+  field: string
+): Map<string, number> {
   const byValue = new Map<string, number>();
   for (const series of response?.result ?? []) {
     // Raw value (including "" for a genuinely absent label), not the <unspecified> display text: a
@@ -418,8 +431,7 @@ function runRangeQuery(
   query: string,
   window: ReturnType<typeof getRangeQueryWindow>
 ): Observable<PrometheusRangeQueryResult | undefined> {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-  return rxFrom(getDataSourceSrv().get(context.datasourceUid)).pipe(
+  return rxFrom(getDataSourceInstance(context.datasourceUid)).pipe(
     switchMap((ds) => {
       const runtimeDs = ds as unknown as PrometheusRuntimeDatasource;
       const requestUrl = `/api/v1/query_range?query=${encodeURIComponent(query)}&start=${window.startSeconds}&end=${window.endSeconds}&step=${window.stepSeconds}`;
@@ -439,7 +451,11 @@ export function toCountMetricSelector(bucketSelector: string): string {
   return renameBucketMetricSuffix(bucketSelector, '_count');
 }
 
-function fetchDistribution(context: DatasetContext, field: string, filters: ActiveFilter[]): Observable<AttributeValueCount[]> {
+function fetchDistribution(
+  context: DatasetContext,
+  field: string,
+  filters: ActiveFilter[]
+): Observable<AttributeValueCount[]> {
   const selector = applyFiltersToSelector(context.query, filters);
   const window = getRangeQueryWindow(context);
 
@@ -462,7 +478,9 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
       runRangeQuery(context, totalCountQuery, window),
       runRangeQuery(context, presenceQuery, window),
     ]).pipe(
-      map(([fraction, totalCount, presence]) => processFractionResponse(fraction, totalCount, presence, field, window.stepSeconds))
+      map(([fraction, totalCount, presence]) =>
+        processFractionResponse(fraction, totalCount, presence, field, window.stepSeconds)
+      )
     );
   }
 
@@ -483,7 +501,9 @@ function fetchDistribution(context: DatasetContext, field: string, filters: Acti
     runRangeQuery(context, totalCountQuery, window),
     runRangeQuery(context, presenceQuery, window),
   ]).pipe(
-    map(([fraction, totalCount, presence]) => processFractionResponse(fraction, totalCount, presence, field, window.stepSeconds))
+    map(([fraction, totalCount, presence]) =>
+      processFractionResponse(fraction, totalCount, presence, field, window.stepSeconds)
+    )
   );
 }
 
@@ -553,7 +573,7 @@ function formatHistogramRangeLabel(range: HistogramRange, unit: string | null): 
 function getAttributeExplorerDescription(histogramRange: HistogramRange, unit: string | null): string {
   return t(
     'attribute-explorer.description-histogram',
-    'This shows each value\'s share of the label\'s observations {{range}}. Values with no activity are sorted last.',
+    "This shows each value's share of the label's observations {{range}}. Values with no activity are sorted last.",
     { range: formatHistogramRangeLabel(histogramRange, unit) }
   );
 }
@@ -681,7 +701,11 @@ function AttributeExplorerHeader({
         <Tooltip interactive content={getAttributeExplorerDescription(histogramRange, unit)}>
           {/* tabIndex makes this focusable so Grafana's Tooltip shows content on keyboard focus, not
           just mouse hover; a plain Icon has no native focusability. */}
-          <span tabIndex={0} role="button" aria-label={t('attribute-explorer.description-aria-label', 'What do these percentages mean?')}>
+          <span
+            tabIndex={0}
+            role="button"
+            aria-label={t('attribute-explorer.description-aria-label', 'What do these percentages mean?')}
+          >
             <Icon name="info-circle" size="sm" />
           </span>
         </Tooltip>
@@ -695,7 +719,11 @@ function AttributeExplorerHeader({
               : t('attribute-explorer.lower-limit', 'Lower limit')
           }
           invalid={isRangeInvalid}
-          error={isRangeInvalid ? t('attribute-explorer.invalid-range', 'Upper limit must be greater than lower limit') : undefined}
+          error={
+            isRangeInvalid
+              ? t('attribute-explorer.invalid-range', 'Upper limit must be greater than lower limit')
+              : undefined
+          }
         >
           <Input
             type="number"
@@ -713,7 +741,11 @@ function AttributeExplorerHeader({
               : t('attribute-explorer.upper-limit', 'Upper limit')
           }
           invalid={isRangeInvalid}
-          error={isRangeInvalid ? t('attribute-explorer.invalid-range', 'Upper limit must be greater than lower limit') : undefined}
+          error={
+            isRangeInvalid
+              ? t('attribute-explorer.invalid-range', 'Upper limit must be greater than lower limit')
+              : undefined
+          }
         >
           <Input
             type="number"
@@ -810,7 +842,14 @@ export function PrometheusAttributeExplorer({
   const unit = getUnitFromMetric(metric);
 
   const context: DatasetContext = useMemo(
-    () => ({ datasourceUid, histogramRange: resolvedHistogramRange, metric, metricType, query, timeRange: numericTimeRange }),
+    () => ({
+      datasourceUid,
+      histogramRange: resolvedHistogramRange,
+      metric,
+      metricType,
+      query,
+      timeRange: numericTimeRange,
+    }),
     [datasourceUid, resolvedHistogramRange, metric, metricType, query, numericTimeRange]
   );
 

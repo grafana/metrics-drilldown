@@ -10,6 +10,10 @@
       "related-metrics-description": "현재 라벨 필터 기준 관련 메트릭"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel 메트릭 속성",
     "badge-resource": "OTel 리소스 속성",
@@ -395,6 +399,11 @@
     "button": "새 메트릭 선택",
     "metrics-drilldown": "메트릭 드릴다운",
     "open-in-drilldown-tooltip": "메트릭 드릴다운에서 열기"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_other": "{{count}}개 더 표시({{current}}/{{total}})"
