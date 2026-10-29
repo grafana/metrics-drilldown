@@ -18,6 +18,8 @@ import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } 
 const PRODUCT_NAME = 'Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;
 const description = `Open current query in the ${PRODUCT_NAME} view`;
+const assistantV0Title = `Navigate to ${PRODUCT_NAME}`;
+const assistantV0Description = `Build a URL path to the ${PRODUCT_NAME}`;
 const icon = 'gf-prometheus';
 
 const ASSISTANT_TARGET_V0 = 'grafana-metricsdrilldown-app/grafana-assistant-app/navigateToDrilldown/v0-alpha';
@@ -49,8 +51,8 @@ export const linkConfigs: Array<PluginExtensionAddedLinkConfig<PluginExtensionPa
   },
   {
     targets: [ASSISTANT_TARGET_V0],
-    title: 'Navigate to metrics drilldown',
-    description: 'Build a url path to the metrics drilldown',
+    title: assistantV0Title,
+    description: assistantV0Description,
     path: createAppUrl(ROUTES.Drilldown),
     configure: (context) => {
       if (typeof context === 'undefined') {
