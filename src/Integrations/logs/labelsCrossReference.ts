@@ -1,6 +1,5 @@
 import { type AdHocVariableFilter, type TimeRange } from '@grafana/data';
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getDataSourceSrv } from '@grafana/runtime';
+import { getDataSourceInstance } from '@grafana/plugin-compat/datasources';
 import { sceneGraph, type SceneObject } from '@grafana/scenes';
 
 import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
@@ -30,8 +29,7 @@ function replaceKnownLabelNames(labelName: string): string {
  * Checks if a Loki data source has labels matching the current filters
  */
 async function hasMatchingLabels(datasourceUid: string, filters: AdHocVariableFilter[], timeRange?: TimeRange) {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-  const ds = await getDataSourceSrv().get(datasourceUid);
+  const ds = await getDataSourceInstance(datasourceUid);
 
   // Get all available label keys for this data source
   const labelKeys = await ds.getTagKeys?.({

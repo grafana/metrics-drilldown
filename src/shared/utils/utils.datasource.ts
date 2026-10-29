@@ -1,19 +1,12 @@
-import {
-  type DataSourceInstanceListItem,
-  type DataSourceInstanceSettings,
-  type DataSourceJsonData,
-} from '@grafana/data';
-import { getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
+import { type DataSourceInstanceListItem } from '@grafana/data';
+import { getDataSourceInstanceList, getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
 import { type PrometheusDatasource } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
-import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { getBackendSrv } from '@grafana/runtime';
 
 import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
 import { VAR_DATASOURCE } from 'shared/shared';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
-
-export type DataSource = DataSourceInstanceSettings<DataSourceJsonData>;
 
 const DS_HEALTH_CHECK_TIMEOUT_MS = 3000;
 export const DS_HEALTH_CHECK_TIMEOUT_S = (DS_HEALTH_CHECK_TIMEOUT_MS / 1000).toFixed(
@@ -51,8 +44,8 @@ type DataSourceType = 'prometheus' | 'loki';
  * Fetches and caches healthy data sources
  */
 export class DataSourceFetcher {
-  private readonly pendingRequests = new Map<DataSourceType, Promise<DataSource[]>>();
-  private readonly cache = new Map<DataSourceType, DataSource[]>();
+  private readonly pendingRequests = new Map<DataSourceType, Promise<DataSourceInstanceListItem[]>>();
+  private readonly cache = new Map<DataSourceType, DataSourceInstanceListItem[]>();
 
   /**
    * Retrieves healthy data sources of the specified type
@@ -61,7 +54,7 @@ export class DataSourceFetcher {
    * @param type - The type of data source to retrieve ('prometheus' or loki)
    * @returns Array of healthy data sources
    */
-  public async getHealthyDataSources(type: DataSourceType, limit = 15): Promise<DataSource[]> {
+  public async getHealthyDataSources(type: DataSourceType, limit = 15): Promise<DataSourceInstanceListItem[]> {
     // Check if we have cached results
     const cachedDataSources = this.cache.get(type);
     if (cachedDataSources?.length) {
@@ -88,29 +81,28 @@ export class DataSourceFetcher {
   /**
    * Fetches healthy data sources of the specified type
    */
-  private async fetchHealthyDataSources(type: DataSourceType, limit: number): Promise<DataSource[]> {
-    const allDataSourcesOfType = [
-      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
-      ...getDataSourceSrv().getList({
-        logs: true,
-        type,
-        filter: (ds) => ds.uid !== 'grafana',
-      }),
-    ]
+  private async fetchHealthyDataSources(type: DataSourceType, limit: number): Promise<DataSourceInstanceListItem[]> {
+    const instances = await getDataSourceInstanceList({
+      logs: true,
+      type,
+      filter: (ds) => ds.uid !== 'grafana',
+    });
+    const defaultDs = await getDefaultDataSourceInstanceListItem(instances);
+    const allDataSourcesOfType = [...instances]
       .sort((a, b) => {
         // Default data source should be first in the list
-        if (a.isDefault && !b.isDefault) {
+        if (a.uid === defaultDs?.uid && b.uid !== defaultDs?.uid) {
           return -1;
         }
-        if (!a.isDefault && b.isDefault) {
+        if (a.uid !== defaultDs?.uid && b.uid === defaultDs?.uid) {
           return 1;
         }
         return 0;
       })
       .slice(0, limit);
 
-    const healthyDataSources: DataSource[] = [];
-    const unhealthyDataSources: DataSource[] = [];
+    const healthyDataSources: DataSourceInstanceListItem[] = [];
+    const unhealthyDataSources: DataSourceInstanceListItem[] = [];
 
     await Promise.all(
       allDataSourcesOfType.map(async (ds) => {
