@@ -11,7 +11,8 @@
     }
   },
   "App": {
-    "error-title": "Failed to load data source instances",
+    "current-error-title": "Failed to load current Prometheus data source",
+    "instances-error-title": "Failed to load data sources",
     "loading": "Loading..."
   },
   "attribute-explorer": {
@@ -410,7 +411,8 @@
   },
   "shared": {
     "hooks": {
-      "useDataSourceInstances": "Failed to load data source instances"
+      "useCurrentPrometheusDataSourceUid": "Failed to get current Prometheus data source uid",
+      "usePrometheusDataSourceInstances": "Failed to load data source instances"
     }
   },
   "show-more-button": {

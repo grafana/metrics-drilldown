@@ -4,7 +4,9 @@ import { type PrometheusDatasource } from '@grafana/prometheus';
 import { getBackendSrv } from '@grafana/runtime';
 
 import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
-import { type DataSourceInstances } from 'shared/types';
+import { VAR_DATASOURCE } from 'shared/shared';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
 
 const DS_HEALTH_CHECK_TIMEOUT_MS = 3000;
 export const DS_HEALTH_CHECK_TIMEOUT_S = (DS_HEALTH_CHECK_TIMEOUT_MS / 1000).toFixed(
@@ -42,8 +44,8 @@ type DataSourceType = 'prometheus' | 'loki';
  * Fetches and caches healthy data sources
  */
 export class DataSourceFetcher {
-  private readonly pendingRequests = new Map<DataSourceType, Promise<DataSourceInstances>>();
-  private readonly cache = new Map<DataSourceType, DataSourceInstances>();
+  private readonly pendingRequests = new Map<DataSourceType, Promise<DataSourceInstanceListItem[]>>();
+  private readonly cache = new Map<DataSourceType, DataSourceInstanceListItem[]>();
 
   /**
    * Retrieves healthy data sources of the specified type
@@ -52,7 +54,7 @@ export class DataSourceFetcher {
    * @param type - The type of data source to retrieve ('prometheus' or loki)
    * @returns Array of healthy data sources
    */
-  public async getHealthyDataSources(type: DataSourceType, limit = 15): Promise<DataSourceInstances> {
+  public async getHealthyDataSources(type: DataSourceType, limit = 15): Promise<DataSourceInstanceListItem[]> {
     // Check if we have cached results
     const cachedDataSources = this.cache.get(type);
     if (cachedDataSources?.length) {
@@ -79,7 +81,7 @@ export class DataSourceFetcher {
   /**
    * Fetches healthy data sources of the specified type
    */
-  private async fetchHealthyDataSources(type: DataSourceType, limit: number): Promise<DataSourceInstances> {
+  private async fetchHealthyDataSources(type: DataSourceType, limit: number): Promise<DataSourceInstanceListItem[]> {
     const instances = await getDataSourceInstanceList({
       logs: true,
       type,
@@ -99,8 +101,8 @@ export class DataSourceFetcher {
       })
       .slice(0, limit);
 
-    const healthyDataSources: DataSourceInstances = [];
-    const unhealthyDataSources: DataSourceInstances = [];
+    const healthyDataSources: DataSourceInstanceListItem[] = [];
+    const unhealthyDataSources: DataSourceInstanceListItem[] = [];
 
     await Promise.all(
       allDataSourcesOfType.map(async (ds) => {
@@ -175,4 +177,23 @@ export function getDataSourceFetcher(): DataSourceFetcher {
   }
 
   return dataSourceFetcherSingleton;
+}
+
+export async function getCurrentPrometheusDataSource(
+  instances?: DataSourceInstanceListItem[]
+): Promise<string | undefined> {
+  if (!instances?.length) {
+    return undefined;
+  }
+
+  const uidFromUrl = new URL(window.location.href).searchParams.get(`var-${VAR_DATASOURCE}`);
+  const uidFromStorage = userStorage.getItem(PREF_KEYS.DATASOURCE);
+  const selected = instances.find((ds) => ds.uid === uidFromUrl) ?? instances.find((ds) => ds.uid === uidFromStorage);
+
+  if (selected) {
+    return selected.uid;
+  }
+
+  const defaultInstance = await getDefaultDataSourceInstanceListItem(instances);
+  return (defaultInstance ?? instances[0]).uid;
 }

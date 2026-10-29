@@ -2,11 +2,13 @@ import { css } from '@emotion/css';
 import { type AppRootProps, type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { Alert, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import { useCurrentPrometheusDataSourceUid } from 'shared/hooks/useCurrentPrometheusDataSourceUid';
 import { usePrometheusDataSourceInstances } from 'shared/hooks/usePrometheusDataSourceInstances';
+import { newMetricsTrail } from 'shared/utils/utils.trail';
 
-import { AppContext, defaultTrail } from './AppContext';
+import { AppContext } from './AppContext';
 import { AppErrorBoundary } from './AppErrorBoundary';
 import { Onboarding } from './Onboarding';
 import { AppRoutes } from './Routes';
@@ -21,35 +23,38 @@ initOpenFeatureProvider().then(evaluateExperimentFlagsEarly);
 
 export default function App(props: Readonly<AppRootProps>) {
   const styles = useStyles2(getStyles);
-  const { error, instances, loading } = usePrometheusDataSourceInstances();
+  const { error: instancesError, instances, loading: instancesLoading } = usePrometheusDataSourceInstances();
+  const { error: currentError, uid, loading: currentLoading } = useCurrentPrometheusDataSourceUid(instances);
+  const trail = useMemo(() => (uid ? newMetricsTrail({ initialDS: uid }) : undefined), [uid]);
 
   useReportAppInitialized();
 
-  if (loading) {
-    return <LoadingPlaceholder data-testid="loading-placeholder" text={t('App.loading', 'Loading...')} />;
-  }
+  if (instancesError || currentError) {
+    const title = instancesError
+      ? t('App.instances-error-title', 'Failed to load data sources')
+      : t('App.current-error-title', 'Failed to load current Prometheus data source');
 
-  if (error) {
     return (
-      <Alert
-        data-testid="app-error"
-        title={t('App.error-title', 'Failed to load data source instances')}
-        severity="error"
-      >
-        {error.message}
+      <Alert data-testid="app-error" title={title} severity="error">
+        {instancesError && instancesError.message}
+        {currentError && currentError.message}
       </Alert>
     );
   }
 
-  if (!instances?.length) {
+  if (!instancesLoading && !currentLoading && !instances?.length) {
     return <Onboarding />;
+  }
+
+  if (instancesLoading || currentLoading || !trail) {
+    return <LoadingPlaceholder data-testid="loading-placeholder" text={t('App.loading', 'Loading...')} />;
   }
 
   return (
     <div className={styles.appContainer} data-testid="metrics-drilldown-app">
       <AppErrorBoundary>
         <PluginPropsContext.Provider value={props}>
-          <AppContext.Provider value={{ trail: defaultTrail }}>
+          <AppContext.Provider value={{ trail }}>
             <AppRoutes />
           </AppContext.Provider>
         </PluginPropsContext.Provider>

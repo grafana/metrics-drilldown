@@ -39,5 +39,5 @@ jobs:
         with:
           module: ${{ steps.find-module-ts.outputs.modulets }}
           comment-pr: no
-          fail-if-incompatible: no # revert when we bump grafana dependencies to 13.3.0
+          fail-if-incompatible: yes
           targets: '@grafana/data,@grafana/ui,@grafana/runtime,@grafana/schema,@grafana/e2e-selectors,@grafana/experimental'

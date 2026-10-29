@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { useCurrentPrometheusDataSourceUid } from 'shared/hooks/useCurrentPrometheusDataSourceUid';
 import { usePrometheusDataSourceInstances } from 'shared/hooks/usePrometheusDataSourceInstances';
+import { newMetricsTrail } from 'shared/utils/utils.trail';
 
 import App from './App';
 
@@ -10,6 +12,10 @@ import type { AppRootProps, DataSourceInstanceListItem } from '@grafana/data';
 jest.mock('shared/hooks/usePrometheusDataSourceInstances', () => ({
   usePrometheusDataSourceInstances: jest.fn(),
 }));
+jest.mock('shared/hooks/useCurrentPrometheusDataSourceUid', () => ({
+  useCurrentPrometheusDataSourceUid: jest.fn(),
+}));
+jest.mock('shared/utils/utils.trail', () => ({ newMetricsTrail: jest.fn() }));
 jest.mock('../shared/logger/faro/faro', () => ({ initFaro: jest.fn() }));
 jest.mock('../shared/featureFlags/openFeature', () => ({
   evaluateExperimentFlagsEarly: jest.fn(),
@@ -24,13 +30,17 @@ jest.mock('./Routes', () => ({
 }));
 jest.mock('./AppContext', () => ({
   AppContext: require('react').createContext({}),
-  defaultTrail: {},
 }));
 jest.mock('./AppErrorBoundary', () => ({
   AppErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 const usePrometheusDataSourceInstancesMock = jest.mocked(usePrometheusDataSourceInstances);
+const useCurrentPrometheusDataSourceUidMock = jest.mocked(useCurrentPrometheusDataSourceUid);
+const newMetricsTrailMock = jest.mocked(newMetricsTrail);
 const appProps = {} as AppRootProps;
+const instances = [
+  { uid: 'prom-a', name: 'Prometheus A', type: 'prometheus', meta: {} },
+] as DataSourceInstanceListItem[];
 
 function renderApp() {
   return render(<App {...appProps} />);
@@ -39,53 +49,91 @@ function renderApp() {
 describe('App', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    newMetricsTrailMock.mockReturnValue({} as any);
+    usePrometheusDataSourceInstancesMock.mockReturnValue({ loading: false, instances, error: undefined });
+    useCurrentPrometheusDataSourceUidMock.mockReturnValue({ loading: false, uid: undefined, error: undefined });
   });
 
-  it('should render loading placeholder while loading instances', () => {
-    usePrometheusDataSourceInstancesMock.mockReturnValue({ loading: true, instances: undefined, error: undefined });
+  describe('errors', () => {
+    it('should show discovery errors before pending selection', () => {
+      usePrometheusDataSourceInstancesMock.mockReturnValue({
+        loading: false,
+        instances: undefined,
+        error: new Error('Datasource request failed'),
+      });
+      useCurrentPrometheusDataSourceUidMock.mockReturnValue({ loading: true, uid: undefined, error: undefined });
 
-    renderApp();
+      renderApp();
 
-    expect(screen.getByTestId('loading-placeholder')).toBeVisible();
-    expect(screen.getByTestId('loading-placeholder')).toHaveTextContent('Loading...');
-  });
-
-  it('should show the load error', () => {
-    usePrometheusDataSourceInstancesMock.mockReturnValue({
-      loading: false,
-      instances: undefined,
-      error: new Error('Datasource request failed'),
+      expect(screen.getByTestId('app-error')).toHaveTextContent('Failed to load data sources');
+      expect(screen.getByTestId('app-error')).toHaveTextContent('Datasource request failed');
+      expect(newMetricsTrailMock).not.toHaveBeenCalled();
     });
 
-    renderApp();
+    it('should show selection errors without constructing a trail', () => {
+      useCurrentPrometheusDataSourceUidMock.mockReturnValue({
+        loading: false,
+        uid: undefined,
+        error: new Error('Default lookup failed'),
+      });
 
-    expect(screen.getByTestId('app-error')).toHaveTextContent('Datasource request failed');
-  });
+      renderApp();
 
-  it('should show onboarding when there are no instances', () => {
-    usePrometheusDataSourceInstancesMock.mockReturnValue({ loading: false, instances: [], error: undefined });
-
-    renderApp();
-
-    expect(screen.getByTestId('onboarding')).toBeInTheDocument();
-  });
-
-  it('should render app routes when there is one instance', () => {
-    usePrometheusDataSourceInstancesMock.mockReturnValue({
-      loading: false,
-      instances: [
-        {
-          uid: 'prometheus-1',
-          name: 'Prometheus',
-          type: 'prometheus',
-          meta: {} as DataSourceInstanceListItem['meta'],
-        } as DataSourceInstanceListItem,
-      ],
-      error: undefined,
+      expect(screen.getByTestId('app-error')).toHaveTextContent('Failed to load current Prometheus data source');
+      expect(screen.getByTestId('app-error')).toHaveTextContent('Default lookup failed');
+      expect(newMetricsTrailMock).not.toHaveBeenCalled();
     });
+  });
 
-    renderApp();
+  describe('onboarding', () => {
+    it('should show onboarding when discovery and selection finish without instances', () => {
+      usePrometheusDataSourceInstancesMock.mockReturnValue({ loading: false, instances: [], error: undefined });
 
-    expect(screen.getByTestId('metrics-drilldown-app')).toBeInTheDocument();
+      renderApp();
+
+      expect(screen.getByTestId('onboarding')).toBeInTheDocument();
+      expect(newMetricsTrailMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('loading', () => {
+    it.each([
+      { scenario: 'discovery is pending', instancesLoading: true, currentLoading: false, instances: undefined },
+      {
+        scenario: 'selection is pending with no instances',
+        instancesLoading: false,
+        currentLoading: true,
+        instances: [],
+      },
+      { scenario: 'no trail is available', instancesLoading: false, currentLoading: false, instances },
+    ])('should show loading when $scenario', ({ instancesLoading, currentLoading, instances }) => {
+      usePrometheusDataSourceInstancesMock.mockReturnValue({ loading: instancesLoading, instances, error: undefined });
+      useCurrentPrometheusDataSourceUidMock.mockReturnValue({
+        loading: currentLoading,
+        uid: undefined,
+        error: undefined,
+      });
+
+      renderApp();
+
+      expect(screen.getByTestId('loading-placeholder')).toBeVisible();
+      expect(screen.getByTestId('loading-placeholder')).toHaveTextContent('Loading...');
+      expect(screen.queryByTestId('app-routes')).not.toBeInTheDocument();
+      expect(newMetricsTrailMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('routes', () => {
+    it('should render routes with the selected datasource and reuse the trail on rerender', () => {
+      useCurrentPrometheusDataSourceUidMock.mockReturnValue({ loading: false, uid: 'prom-a', error: undefined });
+
+      const { rerender } = renderApp();
+      expect(screen.getByTestId('app-routes')).toBeInTheDocument();
+      expect(newMetricsTrailMock).toHaveBeenCalledWith({ initialDS: 'prom-a' });
+
+      rerender(<App {...appProps} />);
+
+      expect(newMetricsTrailMock).toHaveBeenCalledTimes(1);
+    });
   });
 });
