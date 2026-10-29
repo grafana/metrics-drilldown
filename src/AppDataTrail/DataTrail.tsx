@@ -26,6 +26,7 @@ import {
 } from '@grafana/scenes';
 import { type Panel } from '@grafana/schema';
 import { Modal, Stack, useStyles2 } from '@grafana/ui';
+import { cloneDeep } from 'lodash';
 import React, { createElement, useEffect } from 'react';
 
 import { SceneDrawer } from 'MetricsReducer/components/SceneDrawer';
@@ -46,6 +47,14 @@ import {
   EventOpenAddToDashboard,
   type AddToDashboardFormProps,
 } from 'shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
+import { EventOpenAddToNotebook } from 'shared/GmdVizPanel/components/addToNotebook/EventOpenAddToNotebook';
+import {
+  ADD_TO_NOTEBOOK_COMPONENT_ID,
+  canAddToNotebook,
+  getAddToNotebookLabel,
+  type AddToNotebookFormProps,
+  type NotebookCapture,
+} from 'shared/GmdVizPanel/components/addToNotebook/notebookCapture';
 import { ConfigurePanelForm } from 'shared/GmdVizPanel/components/ConfigurePanelForm/ConfigurePanelForm';
 import { EventApplyPanelConfig } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventApplyPanelConfig';
 import { EventCancelConfigurePanel } from 'shared/GmdVizPanel/components/ConfigurePanelForm/EventCancelConfigurePanel';
@@ -119,6 +128,9 @@ export interface DataTrailState extends SceneObjectState {
   isAddToDashboardAvailable: boolean;
   isAddToDashboardModalOpen: boolean;
   addToDashboardPanelData?: PanelDataRequestPayload;
+
+  isAddToNotebookAvailable: boolean;
+  notebookCapture?: NotebookCapture;
 
   // Create alert feature
   isCreateAlertAvailable: boolean;
@@ -214,6 +226,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       drawer: new SceneDrawer({}),
       isAddToDashboardAvailable: false,
       isAddToDashboardModalOpen: false,
+      isAddToNotebookAvailable: false,
       isCreateAlertAvailable: false,
       isCreateAlertModalOpen: false,
       ...state,
@@ -257,6 +270,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     this.subscribeToEvent(MetricSelectedEvent, (event) => this.handleMetricSelectedEvent(event));
     this.subscribeToEvent(EventOpenAddToDashboard, (event) => {
       this.openAddToDashboardModal(event.payload.panelData);
+    });
+    this.subscribeToEvent(EventOpenAddToNotebook, (event) => {
+      this.openAddToNotebookModal(event.payload);
     });
     this.subscribeToEvent(EventOpenCreateAlert, (event) => {
       this.openCreateAlertModal(event.payload.panelData);
@@ -545,6 +561,16 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
     });
   };
 
+  public openAddToNotebookModal(capture: NotebookCapture) {
+    if (this.state.isAddToNotebookAvailable && canAddToNotebook()) {
+      this.setState({ notebookCapture: cloneDeep(capture) });
+    }
+  }
+
+  public closeAddToNotebookModal = () => {
+    this.setState({ notebookCapture: undefined });
+  };
+
   public openCreateAlertModal(panelData: PanelDataRequestPayload) {
     this.setState({
       isCreateAlertModalOpen: true,
@@ -568,6 +594,7 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
       drawer,
       isAddToDashboardModalOpen,
       addToDashboardPanelData,
+      notebookCapture,
       isCreateAlertModalOpen,
       createAlertPanelData,
       kgAnnotationToggle,
@@ -593,6 +620,19 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
         model.setState({ isAddToDashboardAvailable: isAvailable });
       }
     }, [isLoadingAddToDashboard, AddToDashboardComponent, model]);
+
+    const { component: AddToNotebookComponent, isLoading: isLoadingAddToNotebook } =
+      usePluginComponent<AddToNotebookFormProps>(ADD_TO_NOTEBOOK_COMPONENT_ID);
+    const isAddToNotebookAvailable = !isLoadingAddToNotebook && Boolean(AddToNotebookComponent) && canAddToNotebook();
+
+    useEffect(() => {
+      if (model.state.isAddToNotebookAvailable !== isAddToNotebookAvailable) {
+        model.setState({
+          isAddToNotebookAvailable,
+          ...(!isAddToNotebookAvailable ? { notebookCapture: undefined } : {}),
+        });
+      }
+    }, [isAddToNotebookAvailable, model]);
 
     const { component: CreateAlertComponent, isLoading: isLoadingCreateAlert } = usePluginComponent<{
       panel: Panel;
@@ -685,6 +725,15 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
               timeRange: addToDashboardPanelData.range,
               options: { useAbsolutePath: true },
             })}
+          </Modal>
+        )}
+        {isAddToNotebookAvailable && AddToNotebookComponent && notebookCapture && (
+          <Modal title={getAddToNotebookLabel()} isOpen={true} onDismiss={model.closeAddToNotebookModal}>
+            <AddToNotebookComponent
+              onClose={model.closeAddToNotebookModal}
+              buildPanel={() => cloneDeep(notebookCapture.panel)}
+              capturedTimeRange={notebookCapture.capturedTimeRange}
+            />
           </Modal>
         )}
         {isCreateAlertModalOpen &&
