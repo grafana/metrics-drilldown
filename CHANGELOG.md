@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/grafana/metrics-drilldown/compare/v3.1.0...v3.2.0) (2026-10-30)
+
+
+### 🎉 Features
+
+* replace getDatasourceSrv with new apis ([#1538](https://github.com/grafana/metrics-drilldown/issues/1538)) ([2198e69](https://github.com/grafana/metrics-drilldown/commit/2198e69f4a2ad7b49f70130d5b19f90dd0b66f0d))
+
 ## [3.1.0](https://github.com/grafana/metrics-drilldown/compare/v3.0.0...v3.1.0) (2026-10-28)
 
 
