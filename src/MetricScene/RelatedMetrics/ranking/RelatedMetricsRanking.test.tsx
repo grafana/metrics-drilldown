@@ -1,8 +1,8 @@
+import { sceneGraph } from '@grafana/scenes';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { fetchRelatedMetricsRanking } from './fetchRelatedMetricsRanking';
-import { clearMetricLabelNamesCache } from './labelNames';
 import { RelatedMetricsRanking } from './RelatedMetricsRanking';
 
 // Implementations are (re)installed in beforeEach because the repo's jest config uses resetMocks.
@@ -11,10 +11,13 @@ const helper = {
   getLabelNamesForMetric: jest.fn(),
 };
 
+let trail: {
+  peekMetricMetadata: typeof helper.peekMetadata;
+  getMetricLabelNames: typeof helper.getLabelNamesForMetric;
+};
+
 // Mock only getTrailFor: requiring the real module pulls in DataTrail and a circular import chain.
-jest.mock('shared/utils/utils', () => ({
-  getTrailFor: () => ({ datasourceHelper: helper }),
-}));
+jest.mock('shared/utils/utils', () => ({ getTrailFor: () => trail }));
 
 jest.mock('./fetchRelatedMetricsRanking', () => ({
   fetchRelatedMetricsRanking: jest.fn(),
@@ -31,7 +34,10 @@ async function flush() {
 describe('RelatedMetricsRanking', () => {
   beforeEach(() => {
     localStorage.clear();
-    clearMetricLabelNamesCache();
+    trail = { peekMetricMetadata: helper.peekMetadata, getMetricLabelNames: helper.getLabelNamesForMetric };
+    jest.spyOn(sceneGraph, 'getTimeRange').mockReturnValue({
+      state: { value: { from: new Date(1), to: new Date(2) } },
+    } as never);
     helper.peekMetadata.mockReturnValue(undefined);
     helper.getLabelNamesForMetric.mockResolvedValue(['job']);
   });
@@ -137,6 +143,67 @@ describe('RelatedMetricsRanking', () => {
     ranking.start([METRICS[0], 'demo_retries_total', ...METRICS.slice(2)]);
     await flush();
     expect(fetchRelatedMetricsRanking).toHaveBeenCalledTimes(2);
+  });
+
+  it('continues without labels after a one-second enrichment deadline', async () => {
+    jest.useFakeTimers();
+    try {
+      localStorage.setItem('gmd.jev.enabled', '1');
+      helper.getLabelNamesForMetric.mockReturnValue(new Promise(() => {}));
+      jest.mocked(fetchRelatedMetricsRanking).mockResolvedValue({ ok: false, reason: 'network' });
+      const ranking = new RelatedMetricsRanking('demo_requests_total');
+      ranking.start(METRICS);
+      await jest.advanceTimersByTimeAsync(1000);
+      expect(ranking.state.status).toBe('failed');
+      expect(fetchRelatedMetricsRanking).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(fetchRelatedMetricsRanking).mock.calls[0][0].selected.labelNames).toBeUndefined();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('discards enrichment on tab exit without starting Jev or queued lookups', async () => {
+    jest.useFakeTimers();
+    try {
+      localStorage.setItem('gmd.jev.enabled', '1');
+      let release!: (labels: string[]) => void;
+      const pending = new Promise<string[]>((resolve) => {
+        release = resolve;
+      });
+      helper.getLabelNamesForMetric.mockReturnValue(pending);
+      const ranking = new RelatedMetricsRanking('demo_requests_total');
+      const deactivate = ranking.activate();
+      ranking.start(Array.from({ length: 40 }, (_, i) => `demo_${i}`));
+      expect(helper.getLabelNamesForMetric).toHaveBeenCalledTimes(6);
+      deactivate();
+      await jest.advanceTimersByTimeAsync(0);
+      release(['job']);
+      await jest.advanceTimersByTimeAsync(1000);
+      expect(helper.getLabelNamesForMetric).toHaveBeenCalledTimes(6);
+      expect(fetchRelatedMetricsRanking).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('refreshes label evidence and ranking when the time range changes with the same metric names', async () => {
+    localStorage.setItem('gmd.jev.enabled', '1');
+    jest.mocked(fetchRelatedMetricsRanking).mockResolvedValue({
+      ok: true,
+      latencyMs: 1,
+      response: { status: 'ok', recommended: [], relationships: {} },
+    });
+    const ranking = new RelatedMetricsRanking('demo_requests_total');
+    ranking.start(METRICS);
+    await flush();
+    helper.getLabelNamesForMetric.mockResolvedValue(['new_range_label']);
+    jest.mocked(sceneGraph.getTimeRange).mockReturnValue({
+      state: { value: { from: new Date(3), to: new Date(4) } },
+    } as never);
+    ranking.start(METRICS);
+    await flush();
+    expect(fetchRelatedMetricsRanking).toHaveBeenCalledTimes(2);
+    expect(jest.mocked(fetchRelatedMetricsRanking).mock.calls[1][0].selected.labelNames).toEqual(['new_range_label']);
   });
 
   it('explains baseline fallback on failure and exposes details when debugging', async () => {

@@ -1,7 +1,7 @@
-import { CatalogLabelEnricher } from '../signals';
+import { MetricLabelEnricher } from 'MetricScene/RelatedMetrics/ranking/labelNames';
 
 it('bounds enrichment, retries failures and strips invalid/identity labels', async () => {
-  const enricher = new CatalogLabelEnricher();
+  const enricher = new MetricLabelEnricher();
   const signal = new AbortController().signal;
   let active = 0;
   let maximum = 0;
@@ -29,7 +29,7 @@ it('bounds enrichment, retries failures and strips invalid/identity labels', asy
 });
 
 it('stops queued lookups on abort and does not cache late results across contexts', async () => {
-  const enricher = new CatalogLabelEnricher();
+  const enricher = new MetricLabelEnricher();
   const controller = new AbortController();
   let release!: (labels: string[]) => void;
   const pending = new Promise<string[]>((resolve) => {

@@ -40,31 +40,28 @@ it('excludes the experimental value from the disabled dropdown', () => {
   );
 });
 
-it('a late Jev or usage sort cannot overwrite a newer ordinary sort, even when it was already applied', async () => {
+it('projects the shared catalog order without adding or dropping row metrics', async () => {
+  const variable = new CustomVariable({
+    name: 'row',
+    options: ['a', 'b', 'not_yet_in_catalog'].map((value) => ({ value, label: value })),
+  });
+  jest.mocked(sceneGraph.findByKeyAndType).mockReturnValue({ state: { ranking: { cancel: jest.fn() } } } as never);
+  await new MetricsVariableSortEngine(variable as never).sort('jev-relevance', {
+    rankedMetrics: ['another_row_metric', 'b', 'a'],
+  });
+  expect(variable.state.options.map((o) => o.value)).toEqual(['b', 'a', 'not_yet_in_catalog']);
+});
+
+it('a late usage sort cannot overwrite a newer ordinary sort', async () => {
   const variable = new CustomVariable({
     name: 'metrics',
     options: ['a', 'b'].map((value) => ({ value, label: value })),
   });
-  let finish!: (value: string[]) => void;
-  const ranking = {
-    rank: jest.fn(
-      () =>
-        new Promise<string[]>((resolve) => {
-          finish = resolve;
-        })
-    ),
-    cancel: jest.fn(),
-  };
+  const ranking = { cancel: jest.fn() };
   const sorter = { state: { ranking }, getUsageMetrics: jest.fn() };
   jest.mocked(sceneGraph.findByKeyAndType).mockReturnValue(sorter as never);
   const engine = new MetricsVariableSortEngine(variable as never);
   await engine.sort('alphabetical');
-  const pending = engine.sort('jev-relevance');
-  await engine.sort('alphabetical'); // same already-applied mode must still invalidate pending work
-  finish(['b', 'a']);
-  await pending;
-  expect(variable.state.options.map((o) => o.value)).toEqual(['a', 'b']);
-  expect(ranking.cancel).toHaveBeenCalled();
   let finishUsage!: (value: Record<string, number>) => void;
   sorter.getUsageMetrics.mockImplementation(
     () =>

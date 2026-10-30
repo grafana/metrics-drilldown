@@ -49,6 +49,8 @@ interface MetricsReducerState extends SceneObjectState {
 }
 
 export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
+  private sortGeneration = 0;
+
   protected _variableDependency = new VariableDependencyConfig(this, {
     variableNames: [VAR_WINGMAN_GROUP_BY],
     onReferencedVariableValueChanged: (variable) => {
@@ -78,6 +80,9 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this.updateBasedOnGroupBy(groupByValue);
 
     this.subscribeToEvents();
+    return () => {
+      this.sortGeneration++;
+    };
   }
 
   private updateBasedOnGroupBy(groupByValue: string) {
@@ -144,7 +149,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this.subscribeToEvent(EventMetricsVariableLoaded, (event) => {
       // filter and sort on initial load
       const { key, options } = event.payload;
-      const { filterEngine, sortEngine } = this.state.enginesMap.get(key)!;
+      const { filterEngine } = this.state.enginesMap.get(key)!;
 
       filterEngine.setInitOptions(options);
 
@@ -182,7 +187,7 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
       }
 
       filterEngine.applyFilters(filters, { forceUpdate: true, notify: false });
-      sortEngine.sort(sortByVariable.state.value as SortingOption, { filterContext: filterEngine.getFilters() });
+      this.sortMetrics(sortByVariable.state.value as SortingOption);
       this.refreshFiringFilterCount();
     });
 
@@ -191,21 +196,21 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     this.subscribeToEvent(EventQuickSearchChanged, (event) => {
       const { searchText } = event.payload;
 
-      for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
+      for (const [, { filterEngine }] of this.state.enginesMap) {
         filterEngine.applyFilters({ names: searchText ? [searchText] : [] });
-        this.refreshFiringFilterCount();
-        sortEngine.sort(sortByVariable.state.value as SortingOption, { filterContext: filterEngine.getFilters() });
       }
+      this.refreshFiringFilterCount();
+      this.sortMetrics(sortByVariable.state.value as SortingOption);
     });
 
     this.subscribeToEvent(EventFiltersChanged, (event) => {
       const { type, filters } = event.payload;
 
-      for (const [, { filterEngine, sortEngine }] of this.state.enginesMap) {
+      for (const [, { filterEngine }] of this.state.enginesMap) {
         filterEngine.applyFilters({ [type]: filters });
-        this.refreshFiringFilterCount();
-        sortEngine.sort(sortByVariable.state.value as SortingOption, { filterContext: filterEngine.getFilters() });
       }
+      this.refreshFiringFilterCount();
+      this.sortMetrics(sortByVariable.state.value as SortingOption);
     });
 
     /* Sorting */
@@ -216,10 +221,29 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
         reportExploreMetrics('sorting_changed', { from: 'metrics-reducer', sortBy });
       }
 
-      for (const [, { sortEngine, filterEngine }] of this.state.enginesMap) {
-        sortEngine.sort(sortBy, { filterContext: filterEngine.getFilters() });
-      }
+      this.sortMetrics(sortBy);
     });
+  }
+
+  private async sortMetrics(sortBy: SortingOption) {
+    const generation = ++this.sortGeneration;
+    const applyOrder = (rankedMetrics?: string[]) => {
+      if (generation !== this.sortGeneration) {
+        return;
+      }
+      for (const [, { sortEngine }] of this.state.enginesMap) {
+        sortEngine.sort(sortBy, { rankedMetrics });
+      }
+    };
+    if (sortBy !== 'jev-relevance') {
+      applyOrder();
+      return;
+    }
+    const catalog = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, this) as FilteredMetricsVariable | null;
+    const catalogNames = catalog?.state.options.map(({ value }) => String(value)) ?? [];
+    const filterContext = this.state.enginesMap.get(VAR_FILTERED_METRICS_VARIABLE)?.filterEngine.getFilters();
+    const sorter = sceneGraph.findByKeyAndType(this, 'metrics-sorter', MetricsSorter);
+    applyOrder(await sorter.state.ranking.rank(catalogNames, sorter, filterContext, applyOrder));
   }
 
   private refreshFiringFilterCount() {

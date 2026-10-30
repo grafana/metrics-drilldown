@@ -10,6 +10,7 @@ import {
 import { Button, Spinner } from '@grafana/ui';
 import React from 'react';
 
+import { getMetricLabelEnricher } from 'MetricScene/RelatedMetrics/ranking/labelNames';
 import { isJevDebugEnabled, isJevEnabled } from 'MetricScene/RelatedMetrics/ranking/toggles';
 import { VAR_DATASOURCE, VAR_FILTERS } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
@@ -34,7 +35,7 @@ import {
   type CatalogResponse,
   type LocalCandidate,
 } from './ranking';
-import { acquireCatalogSignals, boundedWait, CatalogLabelEnricher, type SignalSnapshot } from './signals';
+import { acquireCatalogSignals, boundedWait, type SignalSnapshot } from './signals';
 import { EventSortByChanged } from '../MetricsSorter/events/EventSortByChanged';
 import {
   sortMetricsAlphabetically,
@@ -72,8 +73,11 @@ function statusMessage(state: CatalogRankingState): string {
 
 export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
   private controller?: AbortController;
-  private current?: { signature: string; promise: Promise<string[]> };
-  private labels = new CatalogLabelEnricher();
+  private current?: {
+    signature: string;
+    promise: Promise<string[]>;
+    baselineListeners: Set<(names: string[]) => void>;
+  };
   private cache = new Map<string, { response: CatalogResponse; expires: number }>();
 
   constructor() {
@@ -149,6 +153,10 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       Math.floor(Date.now() / 60_000),
     ]);
     if (signature === this.current?.signature) {
+      this.current.baselineListeners.add(applyBaseline);
+      if (this.state.baseline.length) {
+        applyBaseline(this.state.baseline.map(({ name }) => name));
+      }
       return this.current.promise;
     }
     this.controller?.abort();
@@ -164,21 +172,16 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       elapsedMs: undefined,
       labelMs: undefined,
     });
-    const promise = this.run(
-      ordinary,
-      sorter,
-      datasourceUid,
-      personal,
-      savedProfile,
-      context,
-      controller,
-      applyBaseline
+    const baselineListeners = new Set([applyBaseline]);
+    const promise = this.run(ordinary, sorter, datasourceUid, personal, savedProfile, context, controller, (baseline) =>
+      baselineListeners.forEach((listener) => listener(baseline))
     ).finally(() => {
+      baselineListeners.clear();
       if (this.controller === controller) {
         this.current = undefined;
       }
     });
-    this.current = { signature, promise };
+    this.current = { signature, promise, baselineListeners };
     return promise;
   }
 
@@ -243,7 +246,7 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
         return fallback;
       }
       const labelStarted = performance.now();
-      const labels = await this.labels.enrich(
+      const labels = await getMetricLabelEnricher(trail).enrich(
         selected.map(({ name }) => name),
         context,
         (name) => trail.getMetricLabelNames(name),

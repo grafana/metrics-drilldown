@@ -14,16 +14,21 @@ export function applyRanking(
   const available = new Set(baseline);
   const scores = new Map<string, number>();
   const recommendationOrder = new Map<string, number>();
+  const unrelated = new Set(
+    Object.entries(response.relationships).flatMap(([id, relationship]) =>
+      (relationship.probabilities?.unrelated ?? 0) >= 0.5 ? [id] : []
+    )
+  );
   for (const [index, { id, p }] of response.recommended.entries()) {
     const name = byId.get(id);
-    if (name && available.has(name)) {
+    if (name && available.has(name) && !unrelated.has(id)) {
       scores.set(name, p ?? 0);
       recommendationOrder.set(name, index);
     }
   }
   for (const [id, score] of Object.entries(response.scores ?? {})) {
     const name = byId.get(id);
-    if (name && available.has(name)) {
+    if (name && available.has(name) && !unrelated.has(id)) {
       scores.set(name, score);
     }
   }

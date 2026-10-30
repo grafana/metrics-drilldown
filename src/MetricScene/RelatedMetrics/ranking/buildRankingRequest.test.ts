@@ -1,4 +1,5 @@
 import { buildRankingRequest } from './buildRankingRequest';
+import { MetricLabelEnricher } from './labelNames';
 
 describe('buildRankingRequest', () => {
   it('keeps deterministic baseline order, removes invalid/duplicate names, and limits candidates', async () => {
@@ -14,6 +15,9 @@ describe('buildRankingRequest', () => {
       peekMetadata: (name) =>
         name === 'http_requests_errors' ? { type: 'counter', unit: 'requests', help: 'Errors' } : undefined,
       lookupLabelNames: async (name) => (name === 'http_requests_errors' ? ['__name__', 'status', 'bad-label'] : []),
+      labelEnricher: new MetricLabelEnricher(),
+      labelContext: 'prom:time-range',
+      signal: new AbortController().signal,
       datasourceUid: 'prom',
     });
 

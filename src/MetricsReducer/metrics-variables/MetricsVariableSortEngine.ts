@@ -41,15 +41,15 @@ export class MetricsVariableSortEngine {
     let sortedMetrics: string[];
 
     switch (sortBy) {
-      case 'jev-relevance':
-        sortedMetrics = sorter
-          ? await sorter.state.ranking.rank(metrics, sorter, options.filterContext, (baseline) => {
-              if (generation === this.generation) {
-                this.applyOrder(baseline);
-              }
-            })
-          : sortMetricsWithRecentFirst(metrics);
+      case 'jev-relevance': {
+        // The reducer ranks once for the whole catalog; rows retain only their own matching metrics.
+        const order: string[] = options.rankedMetrics ?? metrics;
+        const positions = new Map(order.map((name, index) => [name, index]));
+        sortedMetrics = [...metrics].sort(
+          (a, b) => (positions.get(a) ?? order.length) - (positions.get(b) ?? order.length)
+        );
         break;
+      }
 
       case 'alphabetical':
         sortedMetrics = sortMetricsAlphabetically(metrics, 'asc');
@@ -87,8 +87,8 @@ export class MetricsVariableSortEngine {
   }
 
   public dispose() {
+    // A row owns its callbacks, not the shared catalog request.
     this.generation++;
-    this.findSorter()?.state?.ranking?.cancel();
   }
 
   private findSorter(): MetricsSorter | undefined {

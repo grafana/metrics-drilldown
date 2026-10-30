@@ -1,7 +1,10 @@
 import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 import React, { useState } from 'react';
 
-import { VAR_METRICS_VARIABLE, type MetricsVariable } from 'MetricsReducer/metrics-variables/MetricsVariable';
+import {
+  VAR_FILTERED_METRICS_VARIABLE,
+  type FilteredMetricsVariable,
+} from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
 import { VAR_DATASOURCE } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
@@ -43,7 +46,8 @@ function ScopedSettings({
       alertCounts: sorter.peekUsageCounts('alerting-usage'),
       personal: getPersonalSignals(datasourceUid),
     };
-    const variable = sceneGraph.lookupVariable(VAR_METRICS_VARIABLE, model) as MetricsVariable | undefined;
+    const variable = sceneGraph.lookupVariable(VAR_FILTERED_METRICS_VARIABLE, model) as
+      FilteredMetricsVariable | undefined;
     const options = variable?.state.options ?? [];
     const names = sortMetricsAlphabetically(options.map((option) => String(option.value)));
     const metadata = new Map(names.map((name) => [name, trail.peekMetricMetadata(name)]));

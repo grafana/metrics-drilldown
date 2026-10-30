@@ -1,6 +1,7 @@
 import { getMetricTypeSync } from 'shared/GmdVizPanel/matchers/getMetricType';
 
 import { sortRelatedMetrics } from '../sortRelatedMetrics';
+import { type MetricLabelEnricher } from './labelNames';
 import {
   type RankingCandidate,
   type RankingMetric,
@@ -70,31 +71,23 @@ export async function buildRankingRequest({
   metricNames,
   peekMetadata,
   lookupLabelNames,
+  labelEnricher,
+  labelContext,
+  signal,
   datasourceUid,
 }: {
   selectedMetric: string;
   metricNames: string[];
   peekMetadata: MetadataPeek;
   lookupLabelNames: LabelNamesLookup;
+  labelEnricher: MetricLabelEnricher;
+  labelContext: string;
+  signal: AbortSignal;
   datasourceUid?: string;
 }): Promise<{ request: RelatedMetricsRankingRequest; candidatesById: Map<string, string> }> {
   const baseline = sortRelatedMetrics([...metricNames], selectedMetric);
   const names = [...new Set(baseline)].filter((name) => name !== selectedMetric && METRIC_NAME.test(name)).slice(0, 40);
-  const labelResults = await Promise.all(
-    names.map(async (name) => {
-      try {
-        return await lookupLabelNames(name);
-      } catch {
-        return [];
-      }
-    })
-  );
-  let selectedLabels: string[] = [];
-  try {
-    selectedLabels = await lookupLabelNames(selectedMetric);
-  } catch {
-    // Labels are optional request context.
-  }
+  const labels = await labelEnricher.enrich([selectedMetric, ...names], labelContext, lookupLabelNames, signal);
 
   const candidatesById = new Map<string, string>();
   const candidates: RankingCandidate[] = names.map((name, index) => {
@@ -102,11 +95,11 @@ export async function buildRankingRequest({
     candidatesById.set(id, name);
     return {
       id,
-      ...metricFeatures(name, peekMetadata, labelResults[index]),
+      ...metricFeatures(name, peekMetadata, labels.get(name)),
       baselineRank: index + 1,
     };
   });
-  const selected = metricFeatures(selectedMetric, peekMetadata, selectedLabels);
+  const selected = metricFeatures(selectedMetric, peekMetadata, labels.get(selectedMetric));
   const request: RelatedMetricsRankingRequest = {
     schemaVersion: 1,
     ...(datasourceUid ? { datasourceUid } : {}),

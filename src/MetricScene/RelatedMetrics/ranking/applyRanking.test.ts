@@ -64,6 +64,27 @@ describe('applyRanking', () => {
     ).toEqual(['demo_errors_total', 'other_metric']);
   });
 
+  it('does not promote candidates excluded as unrelated, even with a higher full score', () => {
+    expect(
+      applyRanking(baseline, candidates, {
+        ...response,
+        recommended: [{ id: 'c0', p: 0.4 }],
+        scores: { c0: 0.4, c1: 0.6 },
+        relationships: { c1: { class: 'unrelated', probabilities: { unrelated: 0.8 } } },
+      })
+    ).toEqual(['demo_requests_total', 'selected_metric', 'demo_errors_total', 'demo_latency_seconds', 'other_metric']);
+  });
+
+  it('applies the same unrelated threshold to recommendations without a full score map', () => {
+    expect(
+      applyRanking(baseline, candidates, {
+        ...response,
+        scores: undefined,
+        relationships: { c2: { probabilities: { unrelated: 0.5 } } },
+      })
+    ).toEqual(['demo_requests_total', 'selected_metric', 'demo_errors_total', 'demo_latency_seconds', 'other_metric']);
+  });
+
   it('preserves baseline order for equal scores', () => {
     expect(
       applyRanking(baseline, candidates, {

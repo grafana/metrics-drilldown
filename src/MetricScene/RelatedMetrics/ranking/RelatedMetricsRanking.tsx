@@ -5,13 +5,12 @@ import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObject
 import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { type MetricDatasourceHelper } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { VAR_DATASOURCE } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
 import { buildRankingRequest } from './buildRankingRequest';
 import { fetchRelatedMetricsRanking } from './fetchRelatedMetricsRanking';
-import { lookupMetricLabelNames } from './labelNames';
+import { getMetricLabelEnricher } from './labelNames';
 import { isJevDebugEnabled, isJevEnabled } from './toggles';
 import { type RankingCandidateInfo, type RankingFailureReason, type RelatedMetricsRankingResponse } from './types';
 
@@ -45,7 +44,10 @@ export class RelatedMetricsRanking extends SceneObjectBase<RelatedMetricsRanking
       return;
     }
     const datasourceUid = sceneGraph.lookupVariable(VAR_DATASOURCE, this)?.getValue()?.toString();
-    const signature = JSON.stringify([datasourceUid, metricNames]);
+    const trail = getTrailFor(this);
+    const range = sceneGraph.getTimeRange(trail).state.value;
+    const labelContext = JSON.stringify([datasourceUid, range.from.valueOf(), range.to.valueOf()]);
+    const signature = JSON.stringify([labelContext, metricNames, Math.floor(Date.now() / 60_000)]);
     if (signature === this.lastSignature) {
       return;
     }
@@ -54,9 +56,6 @@ export class RelatedMetricsRanking extends SceneObjectBase<RelatedMetricsRanking
     const controller = new AbortController();
     this.abortController = controller;
 
-    const trail = getTrailFor(this);
-    // datasourceHelper is private on DataTrail; the ranking spike reads it structurally to stay inside its boundary.
-    const helper = (trail as unknown as { datasourceHelper: MetricDatasourceHelper }).datasourceHelper;
     const labelStart = performance.now();
     this.setState({
       status: 'loading',
@@ -70,8 +69,11 @@ export class RelatedMetricsRanking extends SceneObjectBase<RelatedMetricsRanking
     buildRankingRequest({
       selectedMetric: this.state.metric,
       metricNames,
-      peekMetadata: (name) => helper.peekMetadata(name),
-      lookupLabelNames: (name) => lookupMetricLabelNames(trail, datasourceUid, name),
+      peekMetadata: (name) => trail.peekMetricMetadata(name),
+      lookupLabelNames: (name) => trail.getMetricLabelNames(name),
+      labelEnricher: getMetricLabelEnricher(trail),
+      labelContext,
+      signal: controller.signal,
       datasourceUid,
     })
       .then(async ({ request }) => {
