@@ -19,7 +19,6 @@ import { getResponsiveBreakpoints } from 'shared/utils/utils.styles';
 import { LabelBreakdownScene } from './Breakdown/LabelBreakdownScene';
 import { MetricScene } from './MetricScene';
 import { QueryResultsScene } from './QueryResults/QueryResultsScene';
-import { RelatedMetricsScene } from './RelatedMetrics/RelatedMetricsScene';
 
 export const actionViews = {
   breakdown: 'breakdown',
@@ -51,9 +50,16 @@ export function getActionViewsDefinitions(): ActionViewDefinition[] {
     {
       displayName: t('action-bar.tab.related-metrics', 'Related metrics'),
       value: actionViews.related,
-      getScene: (metricScene: MetricScene) => new RelatedMetricsScene({ metric: metricScene.state.metric }),
-      description: t('action-bar.tab.related-metrics-description', 'Relevant metrics based on current label filters'),
-      backgroundTask: () => {}, // TODO: Implement background task for related metrics (e.g. count related metrics)
+      getScene: (metricScene: MetricScene) => {
+        const scene = metricScene.createRelatedMetricsScene();
+        scene.clearParent();
+        return scene;
+      },
+      description: t(
+        'action-bar.tab.related-metrics-description',
+        'Number of related metrics returned for the current label filters'
+      ),
+      backgroundTask: (metricScene: MetricScene) => metricScene.loadRelatedMetrics(),
     },
     {
       displayName: t('action-bar.tab.related-logs', 'Related logs'),
@@ -91,9 +97,13 @@ export const actionViewsDefinitions: ActionViewDefinition[] = [
   {
     displayName: 'Related metrics',
     value: actionViews.related,
-    getScene: (metricScene: MetricScene) => new RelatedMetricsScene({ metric: metricScene.state.metric }),
+    getScene: (metricScene: MetricScene) => {
+      const scene = metricScene.createRelatedMetricsScene();
+      scene.clearParent();
+      return scene;
+    },
     description: 'Relevant metrics based on current label filters',
-    backgroundTask: () => {},
+    backgroundTask: (metricScene: MetricScene) => metricScene.loadRelatedMetrics(),
   },
   {
     displayName: 'Related logs',
@@ -153,7 +163,12 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
           {translatedActionViews.map((tab, index) => {
             const label = tab.displayName;
             const isActive = actionView === tab.value;
-            const counter = tab.value === actionViews.relatedLogs ? metricScene.state.relatedLogsCount : undefined;
+            let counter: number | undefined;
+            if (tab.value === actionViews.related) {
+              counter = metricScene.state.relatedMetricsCount;
+            } else if (tab.value === actionViews.relatedLogs) {
+              counter = metricScene.state.relatedLogsCount;
+            }
 
             const tabRender = (
               <Tab
