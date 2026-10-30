@@ -399,6 +399,7 @@
   },
   "related-logs": {
     "datasource-description": "Některé zdroje dat Loki mohou v rozevírací nabídce chybět, pokud jejich odezva trvala déle než {{timeout}} sek. Chcete-li zobrazit protokoly pro všechny zdroje dat Loki, zkuste použít Podrobný rozpis protokolů.",
+    "datasource-discovery-error": "",
     "datasource-label": "Zdroj dat protokolů",
     "experimental-note": "Poznámka: Související protokoly je experimentální funkce.",
     "loading": "Načítání…",

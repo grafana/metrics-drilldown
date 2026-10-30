@@ -399,6 +399,7 @@
   },
   "related-logs": {
     "datasource-description": "Niektóre źródła danych Loki mogą nie być dostępne w menu rozwijanym, jeśli odpowiedź zajęła więcej niż {{timeout}} s. Aby wyświetlić logi dla wszystkich źródeł danych Loki, spróbuj użyć aplikacji Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Źródło danych logów",
     "experimental-note": "Uwaga: powiązane logi to funkcja eksperymentalna.",
     "loading": "Wczytywanie…",

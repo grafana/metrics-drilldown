@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Certaines sources de données Loki peuvent ne pas apparaître dans la liste déroulante si leur temps de réponse dépasse {{timeout}} secondes. Pour afficher les journaux de toutes les sources Loki, essayez d’utiliser Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Source de données des journaux",
     "experimental-note": "Remarque : la fonctionnalité Journaux associés est en phase de test.",
     "loading": "Chargement en cours…",

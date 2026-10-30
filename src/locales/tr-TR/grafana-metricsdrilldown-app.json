@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Yanıt vermesi {{timeout}} saniyeden uzun sürdüyse bazı Loki veri kaynakları açılır listede görünmeyebilir. Tüm Loki veri kaynaklarının günlük kayıtlarını görüntülemek için Logs Drilldown'u kullanmayı deneyin.",
+    "datasource-discovery-error": "",
     "datasource-label": "Günlük kayıtları veri kaynağı",
     "experimental-note": "Not: İlgili günlük kayıtları deneysel bir özelliktir.",
     "loading": "Yükleniyor...",
