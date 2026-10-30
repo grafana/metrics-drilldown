@@ -110,6 +110,14 @@ type Interactions = {
   sidebar_prefix_filter_section_clicked: {};
   // User clicks into the suffix filter section of the sidebar
   sidebar_suffix_filter_section_clicked: {};
+  // User clicks into the category filter section of the sidebar
+  sidebar_category_filter_section_clicked: {};
+  // User selects a category in the category filter section of the sidebar
+  sidebar_category_filter_changed: {
+    action: 'added';
+    // The id of the category (e.g. "kubernetes", "http", "other")
+    category: string;
+  };
   // User selects a rules filter from the Wingman sidebar
   sidebar_rules_filter_selected: {
     filter_type: 'non_rules_metrics' | 'recording_rules';
