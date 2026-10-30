@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { displayError } from 'MetricsReducer/helpers/displayStatus';
+import { recordMetricBookmark } from 'MetricsReducer/list-controls/JevSort/personalization';
 import { MetricSelectedEvent, VAR_DATASOURCE } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
@@ -52,16 +53,25 @@ export function useBookmarks(sceneObject: SceneObject) {
     const bookmarksForStorage = Object.values(allBookmarks).map((b) => ({ ...b, key: undefined }));
 
     userStorage.setItem(PREF_KEYS.BOOKMARKS, [...bookmarksForStorage, newBookmark]);
+    const datasourceUid = newBookmark.urlValues[`var-${VAR_DATASOURCE}`];
+    if (typeof datasourceUid === 'string') {
+      recordMetricBookmark(datasourceUid, newBookmark.urlValues.metric, newBookmark.createdAt, true);
+    }
 
     const newKey = genBookmarkKey(newBookmark.urlValues);
     setAllBookmarks({ ...allBookmarks, [newKey]: { ...newBookmark, key: newKey } });
   };
 
   const removeBookmark = (bookmarkKey: string) => {
+    const bookmark = allBookmarks[bookmarkKey];
     delete allBookmarks[bookmarkKey];
     const bookmarksForStorage = Object.values(allBookmarks).map((b) => ({ ...b, key: undefined }));
 
     userStorage.setItem(PREF_KEYS.BOOKMARKS, bookmarksForStorage);
+    const datasourceUid = bookmark?.urlValues[`var-${VAR_DATASOURCE}`];
+    if (typeof datasourceUid === 'string') {
+      recordMetricBookmark(datasourceUid, bookmark.urlValues.metric, bookmark.createdAt, false);
+    }
 
     setAllBookmarks({ ...allBookmarks });
   };

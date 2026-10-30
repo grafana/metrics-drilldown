@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "datasourceUid": "synthetic-prom",
+  "candidates": [
+    {
+      "id": "c01",
+      "name": "http_server_request_duration_seconds_bucket",
+      "type": "histogram",
+      "unit": "seconds",
+      "help": "HTTP request duration.",
+      "labelNames": ["http_request_method"],
+      "baselineRank": 1,
+      "otelEvidence": "semantic-convention",
+      "purpose": "Synthetic customer request duration."
+    },
+    { "id": "c02", "name": "service_build_info", "type": "info", "baselineRank": 2, "otelEvidence": "unknown" }
+  ],
+  "profile": { "intent": "Prioritize the synthetic checkout service." }
+}

@@ -3,6 +3,7 @@ import { locationService, setDataSourceSrv, setRunRequest } from '@grafana/runti
 import { sceneGraph, sceneUtils } from '@grafana/scenes';
 import { of } from 'rxjs';
 
+import { recordMetricVisit } from 'MetricsReducer/list-controls/JevSort/personalization';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { type PanelDataRequestPayload } from 'shared/GmdVizPanel/components/addToDashboard/addToDashboard';
@@ -11,10 +12,15 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 
 import { DataTrail } from './DataTrail';
 import { MetricScene } from '../MetricScene/MetricScene';
-import { MetricSelectedEvent, VAR_FILTERS } from '../shared/shared';
+import { MetricSelectedEvent, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { activateFullSceneTree } from '../shared/utils/utils.testing';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
 import { DataSourceType, MockDataSourceSrv } from '../test/mocks/datasource';
+
+jest.mock('MetricsReducer/list-controls/JevSort/personalization', () => ({
+  ...jest.requireActual('MetricsReducer/list-controls/JevSort/personalization'),
+  recordMetricVisit: jest.fn(),
+}));
 
 function getFilterVar(trail: DataTrail) {
   const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);
@@ -73,6 +79,13 @@ describe('DataTrail', () => {
       it('should switch scene to MetricScene', () => {
         expect(trail.state.metric).toBe('metric_bucket');
         expect(trail.state.topScene).toBeInstanceOf(MetricScene);
+      });
+
+      it('records a metric visit with the resolved datasource on selection', () => {
+        expect(recordMetricVisit).toHaveBeenCalledWith(
+          sceneGraph.lookupVariable(VAR_DATASOURCE, trail)?.getValue(),
+          'metric_bucket'
+        );
       });
 
       it('should sync state with url', () => {

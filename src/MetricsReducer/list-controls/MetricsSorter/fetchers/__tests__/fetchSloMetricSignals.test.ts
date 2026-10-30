@@ -239,7 +239,7 @@ describe('fetchSloMetricSignals', () => {
     }
   );
 
-  it('returns a retryable error when active-burn signal acquisition fails', async () => {
+  it('preserves membership when independent active-burn acquisition fails', async () => {
     const { fetchFiringSignals } = setup([definition('slo-1', { type: 'freeform', freeform: { query: 'up' } })]);
     fetchFiringSignals.mockResolvedValue({
       status: 'error',
@@ -250,8 +250,9 @@ describe('fetchSloMetricSignals', () => {
 
     const result = await fetchSloMetricSignals('prom-a', fetchFiringSignals);
 
-    expect(result).toMatchObject({ status: 'error', datasourceUid: 'prom-a' });
-    expect(result.trackedMetrics.size).toBe(0);
+    expect(result).toMatchObject({ status: 'ready', burnStatus: 'error', datasourceUid: 'prom-a' });
+    expect(result.trackedMetrics.get('up')).toEqual(new Set(['slo-1']));
+    expect(result.activeBurnMetrics.size).toBe(0);
   });
 
   it('returns an explicit retryable error state and non-sensitive telemetry when the resource request fails', async () => {

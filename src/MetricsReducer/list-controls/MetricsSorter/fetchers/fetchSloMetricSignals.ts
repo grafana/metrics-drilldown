@@ -18,6 +18,8 @@ export type SloMetricSignalsStatus = 'disabled' | 'plugin-absent' | 'ready' | 'e
 export interface SloMetricSignals {
   datasourceUid: string;
   status: SloMetricSignalsStatus;
+  /** Definitions remain ready even if the independent current-burn lookup fails. */
+  burnStatus?: 'ready' | 'error';
   /** Source metric → SLO UUIDs whose definitions reference it. */
   trackedMetrics: Map<string, Set<string>>;
   /** Tracked source metrics owned by an SLO with a currently firing burn rule. */
@@ -84,13 +86,9 @@ export async function fetchSloMetricSignals(
     if (!Array.isArray(response?.slos)) {
       throw new Error('Unexpected SLO list response');
     }
-    if (firingSignals.status === 'error') {
-      throw new Error('Failed to acquire active SLO burn signals');
-    }
-
     const definitions = response.slos;
     const trackedMetrics = extractTrackedMetrics(definitions, datasourceUid);
-    const firingUuids = new Set(firingSignals.firingSloUuids.keys());
+    const firingUuids = new Set(firingSignals.status === 'ready' ? firingSignals.firingSloUuids.keys() : []);
     const activeBurnMetrics = new Set<string>();
 
     for (const [metric, sloUuids] of trackedMetrics) {
@@ -100,7 +98,7 @@ export async function fetchSloMetricSignals(
     }
 
     return reportResult(
-      { datasourceUid, status: 'ready', trackedMetrics, activeBurnMetrics },
+      { datasourceUid, status: 'ready', burnStatus: firingSignals.status, trackedMetrics, activeBurnMetrics },
       start,
       definitions.length
     );

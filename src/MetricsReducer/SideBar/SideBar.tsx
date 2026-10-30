@@ -14,6 +14,7 @@ import React, { useEffect, useRef } from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/LabelsVariable';
+import { FiringAlertChip } from 'MetricsReducer/list-controls/FiringAlertChip/FiringAlertChip';
 import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'MetricsReducer/metrics-variables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'MetricsReducer/metrics-variables/computeRulesGroups';
@@ -38,6 +39,8 @@ interface SideBarState extends SceneObjectState {
   sections: Section[];
   visibleSection: Section | null;
   sectionValues: Map<string, string[]>;
+  firingAlertActive: boolean;
+  firingAlertCount: number;
 }
 
 function getTranslatedSectionInfo(key: string): { title: string; description: string } {
@@ -77,6 +80,35 @@ function getTranslatedSectionInfo(key: string): { title: string; description: st
   return sectionMap[key] || { title: key, description: '' };
 }
 
+function sectionButtonInfo(
+  section: Section,
+  values: Map<string, string[]>,
+  labelsValue: unknown,
+  firingActive: boolean,
+  firingLabel: string
+) {
+  const { key, icon, active } = section.state;
+  const { title } = getTranslatedSectionInfo(key);
+  let isActive = active;
+  let tooltip = title;
+  if (key === 'groupby-labels') {
+    isActive = Boolean(labelsValue && labelsValue !== NULL_GROUP_BY_VALUE);
+    tooltip = `${title}: ${String(labelsValue)}`;
+  } else if (values.get(key)?.length) {
+    tooltip = `${title}: ${values.get(key)?.join(', ')}`;
+  }
+  let ariaLabel = title;
+  if (!(icon in availableIconsIndex) && !CustomIcons.has(icon)) {
+    ariaLabel = `${icon} - ${title}`;
+  }
+  if (key === 'filters-rule' && firingActive) {
+    isActive = true;
+    tooltip += `; ${firingLabel}`;
+    ariaLabel += `; ${firingLabel}`;
+  }
+  return { isActive, tooltip, ariaLabel };
+}
+
 export const metricFilters = {
   rule: 'filters-rule',
   prefix: 'filters-prefix',
@@ -93,6 +125,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     super({
       key: 'sidebar',
       visibleSection: null,
+      firingAlertActive: false,
+      firingAlertCount: 0,
       sections: [
         new MetricsFilterSection({
           key: 'filters-rule',
@@ -101,6 +135,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           description: t('sidebar.section.rules-filters-description', 'Filter metrics and recording rules'),
           icon: 'rules',
           computeGroups: computeRulesGroups,
+          control: new FiringAlertChip(),
           showHideEmpty: false,
           showSearch: false,
           active: Boolean(sectionValues.get('filters-rule')?.length),
@@ -160,6 +195,20 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   private onActivate() {
     const cleanupOtherMetricsVar = this.initOtherMetricsVar();
+    // The filter lives beyond the Rules panel's render lifetime, including a collapsed sidebar.
+    const rules = this.state.sections.find((section) => section.state.key === 'filters-rule');
+    const firingFilter = rules instanceof MetricsFilterSection ? rules.state.control : undefined;
+    let cleanupFiringFilter: (() => void) | undefined;
+    if (firingFilter instanceof FiringAlertChip) {
+      const sync = () =>
+        this.setState({
+          firingAlertActive: firingFilter.state.active && firingFilter.state.visible,
+          firingAlertCount: firingFilter.state.matchingCount,
+        });
+      this._subs.add(firingFilter.subscribeToState(sync));
+      cleanupFiringFilter = firingFilter.activate();
+      sync();
+    }
 
     this.subscribeToEvent(EventSectionValueChanged, (event) => {
       const { key, values } = event.payload;
@@ -179,6 +228,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     }
 
     return () => {
+      cleanupFiringFilter?.();
       cleanupOtherMetricsVar();
     };
   }
@@ -304,7 +354,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
 
   public static readonly Component = ({ model }: SceneComponentProps<SideBar>) => {
     const styles = useStyles2(getStyles);
-    const { sections, visibleSection, sectionValues } = model.useState();
+    const { sections, visibleSection, sectionValues, firingAlertActive, firingAlertCount } = model.useState();
+    const firingLabel = t('firing-alert-chip.label', 'Has firing alerts ({{count}})', { count: firingAlertCount });
 
     const labelsVariableValue = sceneGraph
       .findByKeyAndType(model, VAR_WINGMAN_GROUP_BY, LabelsVariable)
@@ -347,26 +398,15 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           <div className={styles.buttonsBar} data-testid="sidebar-buttons">
             <Stack direction="column" alignItems="center" gap={0}>
               {sections.map((section) => {
-                const { key, icon: iconOrText, disabled, active } = section.state;
+                const { key, icon: iconOrText, disabled } = section.state;
                 const visible = visibleSection?.state.key === key;
-                const translatedInfo = getTranslatedSectionInfo(key);
-                let isActive;
-                let tooltip;
-
-                if (key === 'groupby-labels') {
-                  isActive = Boolean(labelsVariableValue && labelsVariableValue !== NULL_GROUP_BY_VALUE);
-                  tooltip = `${translatedInfo.title}: ${labelsVariableValue}`;
-                } else {
-                  isActive = active;
-                  tooltip = sectionValues.get(key)?.length
-                    ? `${translatedInfo.title}: ${sectionValues.get(key)?.join(', ')}`
-                    : translatedInfo.title;
-                }
-
-                // For text-based buttons (not icons), include the visible text in the aria-label
-                // to satisfy WCAG 2.5.3 Label in Name requirement
-                const isTextButton = !(iconOrText in availableIconsIndex) && !CustomIcons.has(iconOrText);
-                const ariaLabel = isTextButton ? `${iconOrText} - ${translatedInfo.title}` : translatedInfo.title;
+                const { isActive, tooltip, ariaLabel } = sectionButtonInfo(
+                  section,
+                  sectionValues,
+                  labelsVariableValue,
+                  firingAlertActive,
+                  firingLabel
+                );
 
                 return (
                   <div

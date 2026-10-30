@@ -23,7 +23,11 @@ jest.mock('shared/savedQueries/LoadQueryScene', () => {
 jest.mock('./list-controls/ListControls', () => {
   const { SceneObjectBase } = jest.requireActual('@grafana/scenes');
 
+  const { MetricsSorter } = jest.requireActual('./list-controls/MetricsSorter/MetricsSorter');
   class MockListControls extends SceneObjectBase {
+    constructor() {
+      super({ sorter: new MetricsSorter({}) });
+    }
     static readonly Component = () => <div data-testid="mock-list-controls">ListControls</div>;
   }
 
