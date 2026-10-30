@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Sommige Loki-databronnen ontbreken mogelijk in de vervolgkeuzelijst als het langer dan {{timeout}} seconden duurde om te reageren. Probeer Logs Drilldown te gebruiken om logs voor alle Loki-databronnen te bekijken.",
+    "datasource-discovery-error": "",
     "datasource-label": "Logs-databron",
     "experimental-note": "Let op: gerelateerde logs is een experimentele functie.",
     "loading": "Laden...",

@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Podem estar faltando algumas fontes de dados do Loki no menu suspenso se o tempo de resposta for maior que {{timeout}} segundos. Para visualizar os logs de todas as fontes de dados do Loki, tente usar o Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Fonte de dados de logs",
     "experimental-note": "Observação: o recurso de logs relacionados ainda está em testes.",
     "loading": "Carregando…",

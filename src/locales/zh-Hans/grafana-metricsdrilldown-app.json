@@ -378,6 +378,7 @@
   },
   "related-logs": {
     "datasource-description": "如果某些 Loki 数据源的响应时间超过 {{timeout}} 秒，则可能不会显示在下拉列表中。要查看所有 Loki 数据源的日志，请尝试使用日志深入分析功能。",
+    "datasource-discovery-error": "",
     "datasource-label": "日志数据源",
     "experimental-note": "注意：相关日志是一项实验性功能。",
     "loading": "正在加载…",

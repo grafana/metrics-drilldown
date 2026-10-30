@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Alcune origini dati Loki potrebbero mancare dal menu a discesa se hanno impiegato più di {{timeout}} secondi per rispondere. Per visualizzare i registri per tutte le origini dati Loki, prova a utilizzare Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Origine dati dei registri",
     "experimental-note": "Nota: i registri correlati sono una funzionalità sperimentale.",
     "loading": "Caricamento in corso...",

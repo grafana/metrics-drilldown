@@ -378,6 +378,7 @@
   },
   "related-logs": {
     "datasource-description": "Beberapa sumber data Loki mungkin tidak ada di dropdown jika butuh waktu lebih dari {{timeout}} detik untuk merespons. Untuk melihat log untuk semua sumber data Loki, coba gunakan Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Sumber data log",
     "experimental-note": "Catatan: Log terkait adalah fitur eksperimental.",
     "loading": "Memuat...",
