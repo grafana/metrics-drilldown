@@ -10,6 +10,10 @@
       "related-metrics-description": "Метрики, соответствующие текущим фильтрам меток"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Атрибут метрики OTel",
     "badge-resource": "Атрибут ресурса OTel",
@@ -395,6 +399,7 @@
   },
   "related-logs": {
     "datasource-description": "В раскрывающемся списке могут отсутствовать некоторые источники данных Loki, если их время ответа превышает {{timeout}} сек. Для просмотра журналов всех источников данных Loki попробуйте использовать приложение Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Источник данных журналов",
     "experimental-note": "Примечание. Связанные журналы — это экспериментальная функция.",
     "loading": "Загрузка…",
@@ -416,6 +421,11 @@
     "button": "Выбрать новую метрику",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Откройте Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Показать еще {{count}} ({{current}}/{{total}})",

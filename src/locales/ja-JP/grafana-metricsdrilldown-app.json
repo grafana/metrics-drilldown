@@ -10,6 +10,10 @@
       "related-metrics-description": "現在のラベルフィルターに基づく関連メトリクス"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTelメトリクス属性",
     "badge-resource": "OTelリソース属性",
@@ -374,6 +378,7 @@
   },
   "related-logs": {
     "datasource-description": "応答に{{timeout}}秒以上かかった場合、一部のLokiデータソースがドロップダウンに表示されないことがあります。すべてのLokiデータソースのログを表示するには、ログドリルダウンを使用してみてください。",
+    "datasource-discovery-error": "",
     "datasource-label": "ログデータソース",
     "experimental-note": "注：関連ログは実験的な機能です。",
     "loading": "読み込み中...",
@@ -395,6 +400,11 @@
     "button": "新しいメトリクスを選択",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Metrics Drilldownで開く"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_other": "さらに{{count}}件表示（{{current}}/{{total}}）"

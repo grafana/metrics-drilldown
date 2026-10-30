@@ -10,6 +10,10 @@
       "related-metrics-description": "Releváns metrikák az aktuális címkeszűrők alapján"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel-metrikaattribútum",
     "badge-resource": "OTel-erőforrásattribútum",
@@ -381,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Előfordulhat, hogy néhány Loki-adatforrás hiányzik a legördülő menüből, ha a több mint {{timeout}} másodpercig nem válaszoltak. Próbálja meg a Logs Drilldown használatával megtekinteni az összes Loki-adatforrás naplóját.",
+    "datasource-discovery-error": "",
     "datasource-label": "Naplók adatforrása",
     "experimental-note": "Megjegyzés: A Kapcsolódó naplók egy kísérleti funkció.",
     "loading": "Betöltés…",
@@ -402,6 +407,11 @@
     "button": "Új metrika kiválasztása",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Megnyitás a Metrics Drilldownban"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "További {{count}} megjelenítése ({{current}}/{{total}})",

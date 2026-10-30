@@ -1,7 +1,7 @@
 import { t } from '@grafana/i18n';
+import { useDataSourceInstance } from '@grafana/plugin-compat/datasources';
 import { utf8Support, type PromQuery } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
+import { usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type AdHocFiltersVariable, type SceneObject } from '@grafana/scenes';
 import { ToolbarButton } from '@grafana/ui';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -31,8 +31,9 @@ export function SaveQueryButton({ sceneRef }: Props) {
     [trail]
   );
   const [dsUid, setDsUid] = useState(() => dsVar.getValue().toString());
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-  const dsName = getDataSourceSrv().getInstanceSettings(dsUid)?.name ?? '';
+
+  const { dataSource } = useDataSourceInstance(dsUid);
+  const dsName = dataSource?.uid === dsUid ? dataSource.name : '';
 
   useEffect(() => {
     const sub = dsVar.subscribeToState((newState) => {
@@ -93,7 +94,7 @@ export function SaveQueryButton({ sceneRef }: Props) {
         {saving && <SaveQueryModal dsUid={dsUid} query={promql} onClose={() => setSaving(false)} />}
       </>
     );
-  } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent) {
+  } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent || !dsName) {
     return null;
   }
 

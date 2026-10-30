@@ -10,6 +10,10 @@
       "related-metrics-description": "Métricas relevantes basadas en los filtros de etiquetas actuales"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Atributo de métrica de OTel",
     "badge-resource": "Atributo de recurso de OTel",
@@ -381,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Es posible que falten algunas fuentes de datos de Loki en el menú desplegable si tardaron más de {{timeout}} segundos en responder. Para ver los logs de todas las fuentes de datos de Loki, prueba a usar Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Fuente de datos de logs",
     "experimental-note": "Nota: Los logs relacionados son una característica experimental.",
     "loading": "Cargando...",
@@ -402,6 +407,11 @@
     "button": "Seleccionar nueva métrica",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Abrir en Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Mostrar {{count}} más ({{current}}/{{total}})",

@@ -1,11 +1,18 @@
-// eslint-disable-next-line sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
-import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { getDataSourceInstanceList, getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
+import { getBackendSrv } from '@grafana/runtime';
 
 import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
 
 import { DataSourceFetcher, isKnowledgeGraphDataSource, isPrometheusDataSource } from './utils.datasource';
 
 jest.mock('@grafana/runtime');
+
+jest.mock('@grafana/plugin-compat/datasources', () => ({
+  getDataSourceInstanceList: jest.fn(),
+  getDefaultDataSourceInstanceListItem: jest.fn(),
+}));
+const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);
+const getDefaultDataSourceInstanceListItemMock = jest.mocked(getDefaultDataSourceInstanceListItem);
 
 describe('isPrometheusDataSource', () => {
   it('should return true for a core Prometheus datasource', () => {
@@ -42,27 +49,22 @@ describe('isKnowledgeGraphDataSource', () => {
 });
 
 describe('DataSourceFetcher', () => {
-  const mockDataSources = [
-    { uid: 'ds1', name: 'Loki 1', type: 'loki', isDefault: true },
-    { uid: 'ds2', name: 'Loki 2', type: 'loki', isDefault: false },
-    { uid: 'ds3', name: 'Loki 3', type: 'loki', isDefault: false },
+  const mockDataSources: any[] = [
+    { uid: 'ds1', name: 'Loki 1', type: 'loki' },
+    { uid: 'ds2', name: 'Loki 2', type: 'loki' },
+    { uid: 'ds3', name: 'Loki 3', type: 'loki' },
   ];
 
   let mockGetBackendSrv: jest.MockedFunction<typeof getBackendSrv>;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
-  let mockGetDataSourceSrv: jest.MockedFunction<typeof getDataSourceSrv>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
 
     mockGetBackendSrv = getBackendSrv as jest.MockedFunction<typeof getBackendSrv>;
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
-    mockGetDataSourceSrv = getDataSourceSrv as jest.MockedFunction<typeof getDataSourceSrv>;
 
-    mockGetDataSourceSrv.mockReturnValue({
-      getList: jest.fn().mockReturnValue(mockDataSources),
-    } as any);
+    getDataSourceInstanceListMock.mockResolvedValue(mockDataSources);
+    getDefaultDataSourceInstanceListItemMock.mockResolvedValue(mockDataSources[0]);
   });
 
   afterEach(() => {
@@ -123,7 +125,7 @@ describe('DataSourceFetcher', () => {
       const fetchPromise = new DataSourceFetcher().getHealthyDataSources('loki');
 
       // Fast-forward past the 3-second timeout
-      jest.advanceTimersByTime(3000);
+      await jest.advanceTimersByTimeAsync(3000);
 
       const result = await fetchPromise;
 
@@ -162,15 +164,14 @@ describe('DataSourceFetcher', () => {
     });
 
     it('should sort data sources with default first', async () => {
-      const unsortedDataSources = [
-        { uid: 'ds1', name: 'Loki 1', type: 'loki', isDefault: false },
-        { uid: 'ds2', name: 'Loki 2', type: 'loki', isDefault: true },
-        { uid: 'ds3', name: 'Loki 3', type: 'loki', isDefault: false },
+      const unsortedDataSources: any[] = [
+        { uid: 'ds1', name: 'Loki 1', type: 'loki' },
+        { uid: 'ds2', name: 'Loki 2', type: 'loki' },
+        { uid: 'ds3', name: 'Loki 3', type: 'loki' },
       ];
 
-      mockGetDataSourceSrv.mockReturnValue({
-        getList: jest.fn().mockReturnValue(unsortedDataSources),
-      } as any);
+      getDataSourceInstanceListMock.mockResolvedValue(unsortedDataSources);
+      getDefaultDataSourceInstanceListItemMock.mockResolvedValue(unsortedDataSources[1]);
 
       mockGetBackendSrv.mockReturnValue({
         get: jest.fn().mockResolvedValue({ status: 'OK' }),
@@ -181,7 +182,6 @@ describe('DataSourceFetcher', () => {
 
       // Default data source (ds2) should be first
       expect(result[0].uid).toBe('ds2');
-      expect(result[0].isDefault).toBe(true);
     });
 
     it('should pass correct parameters to health check endpoint', async () => {
