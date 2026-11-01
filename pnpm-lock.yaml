@@ -38,7 +38,7 @@ importers:
         version: 11.13.5(supports-color@8.1.1)
       '@grafana/assistant':
         specifier: ^0.1.12
-        version: 0.1.18(@grafana/data@13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/scenes@8.22.0(c72a7b35193c73ff2727f8911beb8288))(@grafana/ui@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(react@19.3.1)(rxjs@7.8.2)
+        version: 0.1.18(@grafana/data@13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/scenes@8.22.0(0a36e474300f97ca4639498853897a09))(@grafana/ui@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(react@19.3.1)(rxjs@7.8.2)
       '@grafana/data':
         specifier: ^13.3.0
         version: 13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3)
@@ -59,13 +59,13 @@ importers:
         version: 0.5.0(@grafana/data@13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/schema@13.3.0)(react@19.3.1)
       '@grafana/prometheus':
         specifier: ^13.2.2
-        version: 13.2.2(4a910a2a9ea60fb4bca95473b14c5ce0)
+        version: 13.2.2(bbef95b95a7a4b3ea7adff071a55afe2)
       '@grafana/runtime':
         specifier: ^13.3.0
         version: 13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3)
       '@grafana/scenes':
         specifier: ^8.0.0
-        version: 8.22.0(c72a7b35193c73ff2727f8911beb8288)
+        version: 8.22.0(0a36e474300f97ca4639498853897a09)
       '@grafana/schema':
         specifier: ^13.3.0
         version: 13.3.0
@@ -97,8 +97,8 @@ importers:
         specifier: ^4.2.0
         version: 4.5.0(react@19.3.1)
       react-router-dom:
-        specifier: ^6.30.6
-        version: 6.30.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: ^7.0.0
+        version: 7.18.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       rxjs:
         specifier: 7.8.2
         version: 7.8.2
@@ -3042,6 +3042,10 @@ packages:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
 
+  cookie@1.1.1:
+    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
+    engines: {node: '>=18'}
+
   copy-to-clipboard@3.3.3:
     resolution: {integrity: sha512-2KV8NhB5JqC3ky0r9PMCAZKbUHSwtEo4CwCs0KXgruG43gX5PMqDEBbVU4OUzw2MuAWUfsuFmWvEKG5QRfSnJA==}
 
@@ -5219,12 +5223,12 @@ packages:
     peerDependencies:
       react: '>=15'
 
-  react-router-dom@6.30.6:
-    resolution: {integrity: sha512-0RHKZz7wwffvkU+2MFVT2NnjK44ssLEV+m0CAJaS2Ksmorrwj7WxH00jO0SOCW26/tINUnJHToXblDs33I38YQ==}
-    engines: {node: '>=14.0.0'}
+  react-router-dom@7.18.4:
+    resolution: {integrity: sha512-yrfmJHIpDG7taCpqKjT1G5B6q3O2K+RN8/fgNf0lTjCwiPbQ0ei6vXX9ZjQR+7ld8Tr7Z5xmyMnZ8YJrphWQUw==}
+    engines: {node: '>=20.0.0'}
     peerDependencies:
-      react: '>=16.8'
-      react-dom: '>=16.8'
+      react: '>=18'
+      react-dom: '>=18'
 
   react-router@5.3.4:
     resolution: {integrity: sha512-Ys9K+ppnJah3QuaRiLxk+jDWOR1MekYQrlytiXxC1RyfbdsZkS5pvKAzCCr031xHixZwpnsYNT5xysdFHQaYsA==}
@@ -5236,6 +5240,16 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       react: '>=16.8'
+
+  react-router@7.18.4:
+    resolution: {integrity: sha512-PUPQcMhMGRAslLcvtlPz/kmzBEWPhLdgLFrL7pLNepBL6dX0lWj4WD2cUYVgYCuT3jxvghYFg81cDTj44DhetQ==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   react-select@5.10.2:
     resolution: {integrity: sha512-Z33nHdEFWq9tfnfVXaiM12rbJmk+QjFEztWLtmXqQhz6Al4UZZ9xc0wiatmGtUOCCnHN0WizL3tCMYRENX4rVQ==}
@@ -5467,6 +5481,9 @@ packages:
     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
     hasBin: true
+
+  set-cookie-parser@2.7.3:
+    resolution: {integrity: sha512-irZHtTqurLna57KQG/s+fzOwv/J6XSH4cs8M/vsrY3uCaQ3S6+QJguAH0WdN47SXlk82voMZ4naWMQf8fdEoIg==}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -6857,11 +6874,11 @@ snapshots:
     dependencies:
       '@formatjs/fast-memoize': 3.1.7
 
-  '@grafana/assistant@0.1.18(@grafana/data@13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/scenes@8.22.0(c72a7b35193c73ff2727f8911beb8288))(@grafana/ui@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(react@19.3.1)(rxjs@7.8.2)':
+  '@grafana/assistant@0.1.18(@grafana/data@13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/scenes@8.22.0(0a36e474300f97ca4639498853897a09))(@grafana/ui@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(react@19.3.1)(rxjs@7.8.2)':
     dependencies:
       '@grafana/data': 13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3)
       '@grafana/runtime': 13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3)
-      '@grafana/scenes': 8.22.0(c72a7b35193c73ff2727f8911beb8288)
+      '@grafana/scenes': 8.22.0(0a36e474300f97ca4639498853897a09)
       '@grafana/ui': 13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3)
       react: 19.3.1
       rxjs: 7.8.2
@@ -7005,7 +7022,7 @@ snapshots:
       - react-native
       - supports-color
 
-  '@grafana/prometheus@13.2.2(4a910a2a9ea60fb4bca95473b14c5ce0)':
+  '@grafana/prometheus@13.2.2(bbef95b95a7a4b3ea7adff071a55afe2)':
     dependencies:
       '@emotion/css': 11.13.5(supports-color@8.1.1)
       '@floating-ui/react': 0.27.20(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -7037,7 +7054,7 @@ snapshots:
       semver: 7.8.5
       uuid: 14.0.0
     optionalDependencies:
-      '@grafana/assistant': 0.1.18(@grafana/data@13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/scenes@8.22.0(c72a7b35193c73ff2727f8911beb8288))(@grafana/ui@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(react@19.3.1)(rxjs@7.8.2)
+      '@grafana/assistant': 0.1.18(@grafana/data@13.3.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/runtime@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(@grafana/scenes@8.22.0(0a36e474300f97ca4639498853897a09))(@grafana/ui@13.3.0(@babel/core@7.29.7(supports-color@8.1.1))(@babel/runtime@7.29.7)(@codemirror/lint@6.9.7)(@codemirror/search@6.7.1)(@codemirror/theme-one-dark@6.1.3)(@types/react@19.3.0)(codemirror@6.0.2)(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(js-cookie@3.0.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)(typescript@6.0.3))(react@19.3.1)(rxjs@7.8.2)
     transitivePeerDependencies:
       - '@codemirror/autocomplete'
       - '@codemirror/language'
@@ -7093,7 +7110,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@grafana/scenes@8.22.0(c72a7b35193c73ff2727f8911beb8288)':
+  '@grafana/scenes@8.22.0(0a36e474300f97ca4639498853897a09)':
     dependencies:
       '@emotion/css': 11.13.5(supports-color@8.1.1)
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
@@ -7111,7 +7128,7 @@ snapshots:
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
       react-grid-layout: 1.3.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      react-router-dom: 6.30.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      react-router-dom: 7.18.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react-select: 5.10.2(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1)
       react-use: 17.6.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react-virtualized-auto-sizer: 1.0.26(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -9597,6 +9614,8 @@ snapshots:
   convert-source-map@2.0.0: {}
 
   cookie@0.7.2: {}
+
+  cookie@1.1.1: {}
 
   copy-to-clipboard@3.3.3:
     dependencies:
@@ -12097,12 +12116,11 @@ snapshots:
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
-  react-router-dom@6.30.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+  react-router-dom@7.18.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
-      '@remix-run/router': 1.23.3
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
-      react-router: 6.30.6(react@19.3.1)
+      react-router: 7.18.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
 
   react-router@5.3.4(react@19.3.1):
     dependencies:
@@ -12121,6 +12139,14 @@ snapshots:
     dependencies:
       '@remix-run/router': 1.23.3
       react: 19.3.1
+
+  react-router@7.18.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+    dependencies:
+      cookie: 1.1.1
+      react: 19.3.1
+      set-cookie-parser: 2.7.3
+    optionalDependencies:
+      react-dom: 19.3.1(react@19.3.1)
 
   react-select@5.10.2(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@8.1.1):
     dependencies:
@@ -12372,6 +12398,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.8.5: {}
+
+  set-cookie-parser@2.7.3: {}
 
   set-function-length@1.2.2:
     dependencies:
