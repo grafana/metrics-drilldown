@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Előfordulhat, hogy néhány Loki-adatforrás hiányzik a legördülő menüből, ha a több mint {{timeout}} másodpercig nem válaszoltak. Próbálja meg a Logs Drilldown használatával megtekinteni az összes Loki-adatforrás naplóját.",
+    "datasource-discovery-error": "",
     "datasource-label": "Naplók adatforrása",
     "experimental-note": "Megjegyzés: A Kapcsolódó naplók egy kísérleti funkció.",
     "loading": "Betöltés…",

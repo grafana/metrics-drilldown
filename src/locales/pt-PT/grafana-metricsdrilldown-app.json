@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Algumas origens de dados Loki podem estar ausentes do menu suspenso se demorarem mais de {{timeout}} segundos a responder. Para ver os registos de todas as fontes de dados do Loki, tente usar o Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Origem de dados de registos",
     "experimental-note": "Nota: os registos relacionados são uma funcionalidade experimental.",
     "loading": "A carregar...",

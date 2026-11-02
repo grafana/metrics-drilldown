@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Einige Datenquellen von Loki fehlen möglicherweise in der Dropdown-Liste, wenn die Antwort länger als {{timeout}} Sekunden gedauert hat. Nutzen Sie Logs Drilldown, um für alle Datenquellen von Loki Logs anzuzeigen.",
+    "datasource-discovery-error": "",
     "datasource-label": "Logs-Datenquelle",
     "experimental-note": "Hinweis: Bei den zugehörigen Logs handelt es sich um eine experimentelle Funktion.",
     "loading": "Wird geladen …",

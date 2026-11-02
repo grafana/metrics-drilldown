@@ -378,6 +378,7 @@
   },
   "related-logs": {
     "datasource-description": "如果某些 Loki 資料來源的回應時間超過 {{timeout}} 秒，則可能會從下拉式選單中遺失。若要檢視所有 Loki 資料來源的記錄，請嘗試使用記錄深入分析。",
+    "datasource-discovery-error": "",
     "datasource-label": "記錄資料來源",
     "experimental-note": "注意：相關記錄是一項實驗功能。",
     "loading": "正在載入…",

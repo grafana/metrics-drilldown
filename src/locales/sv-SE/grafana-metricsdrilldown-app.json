@@ -385,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Vissa Loki-datakällor kan saknas i rullgardinsmenyn om de inte svarade inom {{timeout}} sekunder. Om du vill visa loggar för alla Loki-datakällor kan du prova att använda Logs Drilldown för detaljanalys för loggar.",
+    "datasource-discovery-error": "",
     "datasource-label": "Loggar datakälla",
     "experimental-note": "Obs! Relaterade loggar är en experimentell funktion.",
     "loading": "Laddar …",
