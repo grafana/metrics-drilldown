@@ -1,7 +1,7 @@
 import { AppPlugin } from '@grafana/data';
 import { config } from '@grafana/runtime';
 import { compare } from 'compare-versions';
-import React, { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 
 import { entityMetricsConfig } from 'exposedComponents/EntityMetrics/config';
 import { labelBreakdownConfig } from 'exposedComponents/LabelBreakdown/config';
