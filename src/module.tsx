@@ -1,6 +1,5 @@
-import { AppPlugin, type AppRootProps } from '@grafana/data';
+import { AppPlugin } from '@grafana/data';
 import { config } from '@grafana/runtime';
-import { LoadingPlaceholder } from '@grafana/ui';
 import { compare } from 'compare-versions';
 import React, { lazy, Suspense } from 'react';
 
@@ -13,7 +12,7 @@ import { linkConfigs } from 'extensions/links';
 
 import pluginJson from './plugin.json';
 
-const LazyApp = lazy(async () => {
+const App = lazy(async () => {
   const { initPluginTranslations } = await import('@grafana/i18n');
 
   // Initialize i18n for scenes library
@@ -54,12 +53,6 @@ const LazyApp = lazy(async () => {
 
   return import('./App/App');
 });
-
-const App = (props: AppRootProps) => (
-  <Suspense fallback={<LoadingPlaceholder text="" />}>
-    <LazyApp {...props} />
-  </Suspense>
-);
 
 export const plugin = new AppPlugin<{}>().setRootPage(App);
 
