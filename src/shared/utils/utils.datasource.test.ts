@@ -1,9 +1,17 @@
+import { type DataSourceInstanceListItem } from '@grafana/data';
 import { getDataSourceInstanceList, getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
 import { getBackendSrv } from '@grafana/runtime';
 
 import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
 
-import { DataSourceFetcher, isKnowledgeGraphDataSource, isPrometheusDataSource } from './utils.datasource';
+import {
+  DataSourceFetcher,
+  getCurrentPrometheusDataSource,
+  isKnowledgeGraphDataSource,
+  isPrometheusDataSource,
+} from './utils.datasource';
 
 jest.mock('@grafana/runtime');
 
@@ -204,5 +212,70 @@ describe('DataSourceFetcher', () => {
         })
       );
     });
+  });
+});
+
+describe('getCurrentPrometheusDataSource', () => {
+  const instances = [
+    { uid: 'prom-a', name: 'Prometheus A', type: 'prometheus', meta: {} },
+    { uid: 'prom-b', name: 'Prometheus B', type: 'prometheus', meta: {} },
+  ] as DataSourceInstanceListItem[];
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+
+    getDefaultDataSourceInstanceListItemMock.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    __setWindowLocation('http://localhost:3000/');
+    userStorage.clear();
+  });
+
+  it('should prefer a valid URL UID over the stored UID', async () => {
+    __setWindowLocation({ search: '?var-ds=prom-b' });
+    userStorage.setItem(PREF_KEYS.DATASOURCE, 'prom-a');
+
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBe('prom-b');
+    expect(getDefaultDataSourceInstanceListItemMock).not.toHaveBeenCalled();
+  });
+
+  it('should fall back from an invalid URL UID to the stored UID', async () => {
+    __setWindowLocation({ search: '?var-ds=deleted-uid' });
+    userStorage.setItem(PREF_KEYS.DATASOURCE, 'prom-b');
+
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBe('prom-b');
+    expect(getDefaultDataSourceInstanceListItemMock).not.toHaveBeenCalled();
+  });
+
+  it('should prefer the eligible Grafana default over the first instance', async () => {
+    getDefaultDataSourceInstanceListItemMock.mockResolvedValue(instances[1]);
+
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBe('prom-b');
+  });
+
+  it('should use the first instance when there is no eligible default', async () => {
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBe('prom-a');
+  });
+
+  it.each([undefined, []])('should skip the default lookup for empty input %j', async (instances) => {
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBeUndefined();
+    expect(getDefaultDataSourceInstanceListItemMock).not.toHaveBeenCalled();
+  });
+
+  it('should propagate a failed default lookup', async () => {
+    getDefaultDataSourceInstanceListItemMock.mockRejectedValue(new Error('Default lookup failed'));
+
+    await expect(getCurrentPrometheusDataSource(instances)).rejects.toThrow('Default lookup failed');
   });
 });
