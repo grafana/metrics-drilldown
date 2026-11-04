@@ -35,7 +35,10 @@ export function usePrometheusDataSourceInstances(): UseDataSourceInstancesState 
           return;
         }
 
-        const defaultErrorMessage = t('shared.hooks.useDataSourceInstances', 'Failed to load data source instances');
+        const defaultErrorMessage = t(
+          'shared.hooks.usePrometheusDataSourceInstances',
+          'Failed to load data source instances'
+        );
         const error = ensureErrorObject(err, defaultErrorMessage);
         setState((prevState) => ({ ...prevState, error, instances: undefined, loading: false }));
       });

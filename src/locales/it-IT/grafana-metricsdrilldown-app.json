@@ -10,6 +10,10 @@
       "related-metrics-description": "Metriche rilevanti in base ai filtri delle etichette correnti"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Attributo metrica OTel",
     "badge-resource": "Attributo risorsa OTel",
@@ -381,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Alcune origini dati Loki potrebbero mancare dal menu a discesa se hanno impiegato più di {{timeout}} secondi per rispondere. Per visualizzare i registri per tutte le origini dati Loki, prova a utilizzare Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Origine dati dei registri",
     "experimental-note": "Nota: i registri correlati sono una funzionalità sperimentale.",
     "loading": "Caricamento in corso...",
@@ -402,6 +407,11 @@
     "button": "Seleziona nuova metrica",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Apri in Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Mostra {{count}} altro ({{current}}/{{total}})",

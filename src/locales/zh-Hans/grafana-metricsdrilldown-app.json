@@ -10,6 +10,10 @@
       "related-metrics-description": "基于当前标签筛选条件的相关指标"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel 指标属性",
     "badge-resource": "OTel 资源属性",
@@ -374,6 +378,7 @@
   },
   "related-logs": {
     "datasource-description": "如果某些 Loki 数据源的响应时间超过 {{timeout}} 秒，则可能不会显示在下拉列表中。要查看所有 Loki 数据源的日志，请尝试使用日志深入分析功能。",
+    "datasource-discovery-error": "",
     "datasource-label": "日志数据源",
     "experimental-note": "注意：相关日志是一项实验性功能。",
     "loading": "正在加载…",
@@ -395,6 +400,11 @@
     "button": "选择新指标",
     "metrics-drilldown": "指标深入分析",
     "open-in-drilldown-tooltip": "在指标深入分析中打开"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_other": "显示另外 {{count}} 个 ({{current}}/{{total}})"

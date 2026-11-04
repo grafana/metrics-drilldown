@@ -11,7 +11,8 @@
     }
   },
   "App": {
-    "error-title": "Failed to load data source instances",
+    "current-error-title": "Failed to load current Prometheus data source",
+    "instances-error-title": "Failed to load data sources",
     "loading": "Loading..."
   },
   "attribute-explorer": {
@@ -385,6 +386,7 @@
   },
   "related-logs": {
     "datasource-description": "Some Loki data sources might be missing from the dropdown if they took longer than {{timeout}} seconds to respond. To view logs for all Loki data sources, try using Logs Drilldown.",
+    "datasource-discovery-error": "Failed to load data sources for related logs.",
     "datasource-label": "Logs data source",
     "experimental-note": "Note: Related logs is an experimental feature.",
     "loading": "Loading...",
@@ -409,7 +411,8 @@
   },
   "shared": {
     "hooks": {
-      "useDataSourceInstances": "Failed to load data source instances"
+      "useCurrentPrometheusDataSourceUid": "Failed to get current Prometheus data source uid",
+      "usePrometheusDataSourceInstances": "Failed to load data source instances"
     }
   },
   "show-more-button": {

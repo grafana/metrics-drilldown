@@ -1,9 +1,8 @@
-
 import { css } from '@emotion/css';
 import { getDefaultTimeRange, type AdHocVariableFilter, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getDataSourceSrv, useChromeHeaderHeight } from '@grafana/runtime';
+import { getDataSourceInstance } from '@grafana/plugin-compat/datasources';
+import { useChromeHeaderHeight } from '@grafana/runtime';
 import {
   sceneGraph,
   SceneObjectBase,
@@ -15,7 +14,10 @@ import {
 import { IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { MetricDatasourceHelper, type PrometheusRuntimeDatasource } from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import {
+  MetricDatasourceHelper,
+  type PrometheusRuntimeDatasource,
+} from 'AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
 import { buildQueryExpression } from 'shared/GmdVizPanel/buildQueryExpression';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { type MetricType } from 'shared/GmdVizPanel/matchers/getMetricType';
@@ -55,7 +57,9 @@ function canonicalFilterSignatures(filters: ActiveFilter[]): Map<string, string>
   // equal (or vice versa), silently defeating the comparison this signature exists for.
   const signatures = new Map<string, string>();
   for (const [field, entries] of byField) {
-    const sorted = [...entries].sort(([opA, valA], [opB, valB]) => (opA === opB ? valA.localeCompare(valB) : opA.localeCompare(opB)));
+    const sorted = [...entries].sort(([opA, valA], [opB, valB]) =>
+      opA === opB ? valA.localeCompare(valB) : opA.localeCompare(opB)
+    );
     signatures.set(field, JSON.stringify(sorted));
   }
   return signatures;
@@ -202,7 +206,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     if (!metric) {
       return;
     }
-    
+
     const expression = buildQueryExpression({ metric: { name: metric, type: this.state.metricType } });
     const query = sceneGraph.interpolate(this, expression);
 
@@ -249,7 +253,10 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
           // explicit value while this query was in flight, which must win over a seed arriving after
           // the fact.
           if (metricScene.state.histogramRange === undefined) {
-            metricScene.setHistogramRange({ lowerSeconds: Number(lowerSeconds.toPrecision(2)), upperSeconds: Number.POSITIVE_INFINITY });
+            metricScene.setHistogramRange({
+              lowerSeconds: Number(lowerSeconds.toPrecision(2)),
+              upperSeconds: Number.POSITIVE_INFINITY,
+            });
           }
         },
         // Without this, a datasource/query failure here surfaces as an unhandled RxJS error instead of
@@ -288,8 +295,7 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
   }
 
   private async _fetchOtelPriority(datasourceUid: string, query: string, generation: number) {
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-    const ds = (await getDataSourceSrv().get(datasourceUid)) as unknown as PrometheusRuntimeDatasource;
+    const ds = (await getDataSourceInstance(datasourceUid)) as unknown as PrometheusRuntimeDatasource;
     const timeRange = sceneGraph.getTimeRange(this).state.value;
     const labels = await MetricDatasourceHelper.fetchLabels({ ds, matcher: query, timeRange });
     if (generation !== this._otelPriorityGeneration) {
@@ -385,20 +391,24 @@ export class AttributeExplorerScene extends SceneObjectBase<AttributeExplorerSce
     // would reclassify its old VAR_FILTERS entry as "not ours" on the next line and write it straight
     // back in, silently undoing the removal (and making it impossible to deselect a pre-existing page
     // filter from this UI).
-    const releasedOrOwnedKeys = new Set([...previousSidebarFilterKeys, ...this._sidebarFilterKeys, ...changedFilterKeys]);
+    const releasedOrOwnedKeys = new Set([
+      ...previousSidebarFilterKeys,
+      ...this._sidebarFilterKeys,
+      ...changedFilterKeys,
+    ]);
     const otherFilters = filtersVar.state.filters.filter((f) => !releasedOrOwnedKeys.has(f.key));
     // Only the fields this sidebar currently owns, not the full `filters` list: an unclaimed field is
     // already correctly present in filtersVar untouched (that's exactly why it wasn't claimed above),
     // so re-adding it here too would duplicate its matcher alongside the untouched copy in otherFilters.
-    const sidebarFilters = groupFiltersByFieldAndOperator(filters.filter((f) => this._sidebarFilterKeys.has(f.field))).map(
-      ({ field, operator, values }) => {
-        if (values.length === 1) {
-          return { key: field, operator, value: values[0] };
-        }
-        const alternation = values.map(escapeAdHocRegexValue).join('|');
-        return { key: field, operator: operator === '=' ? '=~' : '!~', value: alternation };
+    const sidebarFilters = groupFiltersByFieldAndOperator(
+      filters.filter((f) => this._sidebarFilterKeys.has(f.field))
+    ).map(({ field, operator, values }) => {
+      if (values.length === 1) {
+        return { key: field, operator, value: values[0] };
       }
-    );
+      const alternation = values.map(escapeAdHocRegexValue).join('|');
+      return { key: field, operator: operator === '=' ? '=~' : '!~', value: alternation };
+    });
 
     filtersVar.setState({ filters: [...otherFilters, ...sidebarFilters] });
   }

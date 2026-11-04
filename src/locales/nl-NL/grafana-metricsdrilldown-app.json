@@ -10,6 +10,10 @@
       "related-metrics-description": "Relevante metrics op basis van huidige labelfilters"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel-metricattribuut",
     "badge-resource": "OTel-bronattribuut",
@@ -381,6 +385,7 @@
   },
   "related-logs": {
     "datasource-description": "Sommige Loki-databronnen ontbreken mogelijk in de vervolgkeuzelijst als het langer dan {{timeout}} seconden duurde om te reageren. Probeer Logs Drilldown te gebruiken om logs voor alle Loki-databronnen te bekijken.",
+    "datasource-discovery-error": "",
     "datasource-label": "Logs-databron",
     "experimental-note": "Let op: gerelateerde logs is een experimentele functie.",
     "loading": "Laden...",
@@ -402,6 +407,11 @@
     "button": "Selecteer een nieuwe metric",
     "metrics-drilldown": "Metrics Drilldown",
     "open-in-drilldown-tooltip": "Openen in Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Toon nog {{count}} ({{current}}/{{total}})",

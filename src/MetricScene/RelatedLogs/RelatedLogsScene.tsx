@@ -70,8 +70,11 @@ export class RelatedLogsScene extends SceneObjectBase<RelatedLogsSceneState> {
     // If data sources have already been loaded, we don't need to fetch them again
     if (!this.state.orchestrator.lokiDataSources.length) {
       this.setState({ loading: true });
-      await this.state.orchestrator.findAndCheckAllDatasources();
-      this.setState({ loading: false });
+      try {
+        await this.state.orchestrator.findAndCheckAllDatasources();
+      } finally {
+        this.setState({ loading: false });
+      }
     } else {
       this.setupLogsPanel();
     }

@@ -486,7 +486,6 @@ describe('MetricsReducer', () => {
 ```typescript
 // Comprehensive mocks for Grafana APIs
 jest.mock('@grafana/runtime', () => ({
-  getDataSourceSrv: () => mockDataSourceService,
   config: { theme2: mockTheme },
 }));
 ```

@@ -4,14 +4,13 @@ import {
   type MetricFindValue,
   type TimeRange,
 } from '@grafana/data';
+import { getDataSourceInstance } from '@grafana/plugin-compat/datasources';
 import {
   type PrometheusDatasource,
   type PromMetricsMetadata,
   type PromMetricsMetadataItem,
   type PromQuery,
 } from '@grafana/prometheus';
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getDataSourceSrv } from '@grafana/runtime';
 import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
 import { type DataTrail } from 'AppDataTrail/DataTrail';
@@ -48,8 +47,7 @@ export class MetricDatasourceHelper {
 
   private async getRuntimeDatasource(): Promise<PrometheusRuntimeDatasource | undefined> {
     if (!this.datasource) {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-      const ds = await getDataSourceSrv().get(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this.trail } });
+      const ds = await getDataSourceInstance(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this.trail } });
       this.datasource = isPrometheusDataSource(ds) ? ds : undefined;
     }
     return this.datasource;
@@ -309,8 +307,8 @@ export class MetricDatasourceHelper {
     try {
       const dsVariable = sceneGraph.findByKey(sceneObject, VAR_DATASOURCE) as DataSourceVariable;
       const uid = (dsVariable?.state.value as string) ?? '';
-      // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-      const ds = await getDataSourceSrv().get({ uid });
+
+      const ds = await getDataSourceInstance({ uid });
 
       return ds as unknown as PrometheusDatasource; // we trust that VAR_DATASOURCE has been set to a Prometheus datasource
     } catch (error) {

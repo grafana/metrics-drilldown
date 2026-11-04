@@ -10,6 +10,10 @@
       "related-metrics-description": "현재 라벨 필터 기준 관련 메트릭"
     }
   },
+  "App": {
+    "error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "OTel 메트릭 속성",
     "badge-resource": "OTel 리소스 속성",
@@ -374,6 +378,7 @@
   },
   "related-logs": {
     "datasource-description": "응답에 {{timeout}}초 이상 걸리는 경우 드롭다운에서 일부 Loki 데이터 소스가 누락될 수 있습니다. 모든 Loki 데이터 소스의 로그를 보려면 로그 드릴다운을 사용해 보세요.",
+    "datasource-discovery-error": "",
     "datasource-label": "데이터 소스 로그",
     "experimental-note": "참고: 관련 로그는 실험적 기능입니다.",
     "loading": "로딩 중...",
@@ -395,6 +400,11 @@
     "button": "새 메트릭 선택",
     "metrics-drilldown": "메트릭 드릴다운",
     "open-in-drilldown-tooltip": "메트릭 드릴다운에서 열기"
+  },
+  "shared": {
+    "hooks": {
+      "useDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_other": "{{count}}개 더 표시({{current}}/{{total}})"
