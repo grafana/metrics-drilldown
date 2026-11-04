@@ -1,15 +1,22 @@
 import { dateTime, LoadingState, urlUtil } from '@grafana/data';
-import { locationService, setDataSourceSrv, setRunRequest } from '@grafana/runtime';
-import { sceneGraph, sceneUtils } from '@grafana/scenes';
+import { locationService, LocationServiceProvider, setDataSourceSrv, setRunRequest } from '@grafana/runtime';
+import { sceneGraph, sceneUtils, UrlSyncContextProvider } from '@grafana/scenes';
+import { act, render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { Router } from 'react-router-dom';
 import { of } from 'rxjs';
 
+import { LabelsDataSource } from 'MetricsReducer/labels/LabelsDataSource';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { type PanelDataRequestPayload } from 'shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { EventOpenCreateAlert } from 'shared/GmdVizPanel/components/createAlert/EventOpenCreateAlert';
 import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
 
 import { DataTrail } from './DataTrail';
+import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricSelectedEvent, VAR_FILTERS } from '../shared/shared';
 import { activateFullSceneTree } from '../shared/utils/utils.testing';
@@ -32,7 +39,12 @@ describe('DataTrail', () => {
         type: DataSourceType.Prometheus,
         uid: 'ds',
       },
+      labels: {
+        uid: LabelsDataSource.uid,
+      },
     });
+    const labelsDataSource = await dataSourceSrv.get(LabelsDataSource.uid);
+    labelsDataSource.metricFindQuery = async () => [];
     setDataSourceSrv(dataSourceSrv);
     setRunRequest(() =>
       of({
@@ -381,6 +393,94 @@ describe('DataTrail - URL serialization of KG overrides', () => {
         { metricName: 'metric_a', labels: [], metricType: 'counter' },
         { metricName: 'metric_b', labels: [], metricType: 'gauge' },
       ]);
+    });
+  });
+});
+
+describe('DataTrail datasource URL synchronization', () => {
+  beforeEach(() => {
+    locationService.push('/');
+    userStorage.clear();
+  });
+
+  afterEach(() => {
+    userStorage.clear();
+  });
+
+  it('should preserve a validated standalone UID during initial URL sync', () => {
+    const trail = new DataTrail({ initialDS: 'ds' });
+
+    sceneUtils.syncStateFromSearchParams(trail, new URLSearchParams('var-ds=deleted-uid'));
+
+    expect(sceneGraph.lookupVariable('ds', trail)?.getValue()).toBe('ds');
+  });
+
+  it('should retain embedded namespaced datasource selection', () => {
+    const trail = new DataTrail({ initialDS: 'ds', embedded: true });
+
+    sceneUtils.syncStateFromSearchParams(trail, new URLSearchParams('var-ds=host-ds&gmd-var-ds=embedded-ds'), {
+      namespace: 'gmd',
+    });
+
+    expect(sceneGraph.lookupVariable('ds', trail)?.getValue()).toBe('embedded-ds');
+  });
+
+  it('should ignore the host datasource URL when the embedded namespace is absent', () => {
+    const trail = new DataTrail({ initialDS: 'embedded-ds', embedded: true });
+
+    sceneUtils.syncStateFromSearchParams(trail, new URLSearchParams('var-ds=host-ds'), { namespace: 'gmd' });
+
+    expect(sceneGraph.lookupVariable('ds', trail)?.getValue()).toBe('embedded-ds');
+  });
+
+  describe('with an activated datasource', () => {
+    let trail: DataTrail;
+    let variable: MetricsDrilldownDataSourceVariable;
+    let deactivate: () => void;
+    let rerender: ReturnType<typeof render>['rerender'];
+
+    const renderScene = () => (
+      <LocationServiceProvider service={locationService}>
+        <Router location={locationService.getLocation()} navigator={locationService.getHistory()}>
+          <UrlSyncContextProvider scene={trail} updateUrlOnInit={true} createBrowserHistorySteps={true}>
+            <span />
+          </UrlSyncContextProvider>
+        </Router>
+      </LocationServiceProvider>
+    );
+
+    beforeEach(() => {
+      locationService.push('/?var-ds=deleted-uid');
+      trail = new DataTrail({ initialDS: 'ds' });
+      variable = sceneGraph.findByKeyAndType(trail, 'ds', MetricsDrilldownDataSourceVariable);
+      ({ rerender } = render(renderScene()));
+      act(() => {
+        deactivate = variable.activate();
+      });
+    });
+
+    afterEach(() => {
+      act(() => deactivate());
+    });
+
+    it('should retain the validated UID after provider initialization and activation', () => {
+      expect(variable.getValue()).toBe('ds');
+      expect(locationService.getSearchObject()['var-ds']).toBe('ds');
+    });
+
+    it('should update the URL and stored preference when the picker changes', () => {
+      act(() => variable.changeValueTo('embedded-ds', 'Embedded Prometheus', true));
+
+      expect(locationService.getSearchObject()['var-ds']).toBe('embedded-ds');
+      expect(userStorage.getItem(PREF_KEYS.DATASOURCE)).toBe('embedded-ds');
+    });
+
+    it('should update the datasource and stored preference when navigating', async () => {
+      act(() => locationService.push('/?var-ds=embedded-ds'));
+      rerender(renderScene());
+
+      await waitFor(() => expect(variable.getValue()).toBe('embedded-ds'));
+      expect(userStorage.getItem(PREF_KEYS.DATASOURCE)).toBe('embedded-ds');
     });
   });
 });
