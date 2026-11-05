@@ -1,4 +1,11 @@
-import { classifyMetric, getMetricCategoryLabel, METRIC_CATEGORIES, OTHER_CATEGORY_ID } from '../metricCategories';
+import {
+  classifyMetric,
+  getMetricCategoryIcon,
+  getMetricCategoryLabel,
+  METRIC_CATEGORIES,
+  OTHER_CATEGORY_ID,
+  SERVICE_HEXAGON_ICON,
+} from '../metricCategories';
 
 describe('classifyMetric', () => {
   test.each([
@@ -109,5 +116,28 @@ describe('getMetricCategoryLabel', () => {
 
   test('falls back to the id for an unknown category', () => {
     expect(getMetricCategoryLabel('unknown')).toBe('unknown');
+  });
+});
+
+describe('getMetricCategoryIcon', () => {
+  test('returns an icon for every category and for "other"', () => {
+    for (const id of [...METRIC_CATEGORIES.map((category) => category.id), OTHER_CATEGORY_ID]) {
+      expect(getMetricCategoryIcon(id)).toBeTruthy();
+    }
+  });
+
+  test.each([
+    ['kubernetes', 'kubernetes'],
+    ['database', 'database'],
+    ['http', 'globe'],
+    ['network', 'globe'],
+    ['service', SERVICE_HEXAGON_ICON],
+    [OTHER_CATEGORY_ID, 'tag-alt'],
+  ])('maps %s to %s', (id, icon) => {
+    expect(getMetricCategoryIcon(id)).toBe(icon);
+  });
+
+  test('falls back to the "other" icon for an unknown category', () => {
+    expect(getMetricCategoryIcon('unknown')).toBe('tag-alt');
   });
 });

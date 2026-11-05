@@ -44,6 +44,7 @@ import { reportExploreMetrics } from '../../../../shared/tracking/interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
+import { CategoryIcon } from './CategoryIcon';
 import { CheckBoxList } from './CheckBoxList';
 import { EventFiltersChanged } from './EventFiltersChanged';
 import { TreeCheckBoxList } from './TreeCheckBoxList';
@@ -394,6 +395,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     const styles = useStyles2(getStyles);
     const { embedded } = getTrailFor(model).state;
     const {
+      type,
       groups,
       selectedGroups,
       loading,
@@ -483,6 +485,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
             groups={filteredGroups}
             selectedGroups={selectedGroups}
             onSelectionChange={model.onSelectionChange}
+            renderIcon={type === 'metricCategories' ? (value) => <CategoryIcon categoryId={value} /> : undefined}
           />
         )}
       </div>

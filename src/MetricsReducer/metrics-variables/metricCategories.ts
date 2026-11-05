@@ -1,6 +1,10 @@
+import { type IconName } from '@grafana/data';
 import { t } from '@grafana/i18n';
 
 export const OTHER_CATEGORY_ID = 'other';
+
+// The trace view draws the Service category with a custom hexagon, which is not part of the Grafana icon set
+export const SERVICE_HEXAGON_ICON = 'service-hexagon';
 
 interface MetricCategory {
   id: string;
@@ -104,4 +108,35 @@ export function getMetricCategoryLabel(id: string): string {
     default:
       return id;
   }
+}
+
+/**
+ * Icon of each category, the same as the one the Grafana trace view shows for the category
+ * (public/app/features/explore/TraceView/components/TraceTimelineViewer/SpanDetail/attributeCategories.ts).
+ * The trace view groups HTTP, URL and Network under one icon, and so does this table.
+ */
+const METRIC_CATEGORY_ICONS: Record<string, IconName | typeof SERVICE_HEXAGON_ICON> = {
+  http: 'globe',
+  url: 'globe',
+  frontend: 'frontend-observability',
+  service: SERVICE_HEXAGON_ICON,
+  deployment: 'rocket',
+  database: 'database',
+  process: 'process',
+  runtime: 'code-branch',
+  container: 'cube',
+  kubernetes: 'kubernetes',
+  'host-os': 'layer-group',
+  cloud: 'cloud-provider',
+  'telemetry-sdk': 'brackets-curly',
+  error: 'exclamation-circle',
+  exception: 'exclamation-triangle',
+  messaging: 'envelope',
+  network: 'globe',
+  rpc: 'exchange-alt',
+  [OTHER_CATEGORY_ID]: 'tag-alt',
+};
+
+export function getMetricCategoryIcon(id: string): IconName | typeof SERVICE_HEXAGON_ICON {
+  return METRIC_CATEGORY_ICONS[id] ?? 'tag-alt';
 }

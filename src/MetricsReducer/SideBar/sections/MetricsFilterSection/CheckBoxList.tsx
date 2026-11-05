@@ -12,9 +12,10 @@ type CheckBoxListProps = {
   groups: MetricsFilterSectionState['groups'];
   selectedGroups: MetricsFilterSectionState['selectedGroups'];
   onSelectionChange: (newGroups: MetricsFilterSectionState['selectedGroups']) => void;
+  renderIcon?: (groupValue: string) => React.ReactNode;
 };
 
-export function CheckBoxList({ groups, selectedGroups, onSelectionChange }: Readonly<CheckBoxListProps>) {
+export function CheckBoxList({ groups, selectedGroups, onSelectionChange, renderIcon }: Readonly<CheckBoxListProps>) {
   const styles = useStyles2(getSharedListStyles);
 
   return (
@@ -35,6 +36,7 @@ export function CheckBoxList({ groups, selectedGroups, onSelectionChange }: Read
               <CheckboxWithCount
                 label={group.label}
                 count={group.count}
+                icon={renderIcon?.(group.value)}
                 checked={selectedGroups.some((g) => g.value === group.value)}
                 onChange={(e) => {
                   const newGroups = e.currentTarget.checked
