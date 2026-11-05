@@ -59,6 +59,8 @@ overrides:
   fast-uri: ^3.1.9
   'glob@^10': '^14.0.2'
   'glob@^13': '^14.0.2'
+  'minimatch@^9': '^11.0.1'
+  'minimatch@^10': '^11.0.1'
 minimumReleaseAgeExclude:
   - '@grafana/i18n@13.3.0'
   - '@grafana/data@13.3.0'
