@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.2.0](https://github.com/grafana/metrics-drilldown/compare/v3.1.0...v3.2.0) (2026-11-05)
+
+
+### 🎉 Features
+
+* replace config.datasources in MetricsDrilldownDataSourceVariable ([#1558](https://github.com/grafana/metrics-drilldown/issues/1558)) ([aab1902](https://github.com/grafana/metrics-drilldown/commit/aab19026448db7cf210e88f96f82c47535a90e98))
+* replace getDatasourceSrv with new apis ([#1538](https://github.com/grafana/metrics-drilldown/issues/1538)) ([2198e69](https://github.com/grafana/metrics-drilldown/commit/2198e69f4a2ad7b49f70130d5b19f90dd0b66f0d))
+
+
+### 🐛 Bug Fixes
+
+* **loading:** remove top level Suspense from App ([#1578](https://github.com/grafana/metrics-drilldown/issues/1578)) ([8604254](https://github.com/grafana/metrics-drilldown/commit/86042543985ec0ba9ae3c2ec73bb8eef51003fd2))
+
+
+### 🧹 Chore
+
+* **deps:** Update Build tools ([#1570](https://github.com/grafana/metrics-drilldown/issues/1570)) ([d2cb3d4](https://github.com/grafana/metrics-drilldown/commit/d2cb3d49d3a96da299d8c9ddcc2328175984f6f1))
+* **deps:** Update dependency dotenv to v18.0.9 ([#1572](https://github.com/grafana/metrics-drilldown/issues/1572)) ([c17367a](https://github.com/grafana/metrics-drilldown/commit/c17367a6e8d22e9c3bf27301a075f0eaa4b25927))
+
 ## [3.1.0](https://github.com/grafana/metrics-drilldown/compare/v3.0.0...v3.1.0) (2026-10-28)
 
 
