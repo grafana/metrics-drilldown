@@ -1,9 +1,14 @@
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
+import { fetchDashboardMetrics } from './fetchers/fetchDashboardMetrics';
 import { fetchFiringAlertRuleSignals } from './fetchers/fetchFiringAlertMetrics';
 import { fetchSloMetricSignals, type SloMetricSignals } from './fetchers/fetchSloMetricSignals';
 import { addRecentMetric, getRecentMetrics, MetricsSorter, sortMetricsWithRecentFirst } from './MetricsSorter';
+
+jest.mock('./fetchers/fetchDashboardMetrics', () => ({
+  fetchDashboardMetrics: jest.fn(),
+}));
 
 jest.mock('./fetchers/fetchSloMetricSignals', () => ({
   fetchSloMetricSignals: jest.fn(),
@@ -16,6 +21,7 @@ jest.mock('./fetchers/fetchFiringAlertMetrics', () => ({
 const mockFetchFiringAlertRuleSignals = fetchFiringAlertRuleSignals as jest.MockedFunction<
   typeof fetchFiringAlertRuleSignals
 >;
+const mockFetchDashboardMetrics = fetchDashboardMetrics as jest.MockedFunction<typeof fetchDashboardMetrics>;
 const mockFetchSloMetricSignals = fetchSloMetricSignals as jest.MockedFunction<typeof fetchSloMetricSignals>;
 
 function sloResult(datasourceUid: string, status: SloMetricSignals['status'] = 'ready'): SloMetricSignals {
@@ -54,6 +60,21 @@ describe('MetricsSorter', () => {
       await expect(sorter.getFiringAlertSignals()).resolves.toMatchObject({ status: 'ready' });
 
       expect(mockFetchFiringAlertRuleSignals).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('dashboard usage limit warning', () => {
+    it('sets the warning when a details request starts the dashboard usage fetch', async () => {
+      mockFetchDashboardMetrics.mockImplementation(async (onDashboardLimitExceeded) => {
+        onDashboardLimitExceeded?.();
+        return {};
+      });
+      const sorter = new MetricsSorter({});
+
+      await sorter.getUsageDetailsForMetric('up', 'dashboard-usage');
+
+      expect(mockFetchDashboardMetrics).toHaveBeenCalledWith(expect.any(Function));
+      expect(sorter.state.dashboardUsageLimitExceeded).toBe(true);
     });
   });
 

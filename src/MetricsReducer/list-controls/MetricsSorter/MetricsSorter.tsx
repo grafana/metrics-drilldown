@@ -1,3 +1,5 @@
+import { css } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import {
   CustomVariable,
@@ -10,6 +12,7 @@ import {
   type SceneObjectState,
   type VariableValueOption,
 } from '@grafana/scenes';
+import { Icon, Stack, Tooltip, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { localeCompare } from 'MetricsReducer/helpers/localCompare';
@@ -94,6 +97,7 @@ export function getRecentMetrics(): RecentMetric[] {
 interface MetricsSorterState extends SceneObjectState {
   $variables: SceneVariableSet;
   inputControls: SceneObject;
+  dashboardUsageLimitExceeded: boolean;
 }
 
 function getSortByOptions(): VariableValueOption[] {
@@ -158,6 +162,7 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
         ],
       }),
       inputControls: new VariableValueSelectors({ layout: 'horizontal' }),
+      dashboardUsageLimitExceeded: false,
     });
 
     this.addActivationHandler(() => this.activationHandler());
@@ -196,18 +201,26 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   }
 
   public getUsageDetailsForMetric(metricName: string, usageType: MetricUsageType): Promise<MetricUsageDetails> {
-    return this.usageFetcher.getUsageDetailsForMetric(metricName, usageType);
+    return this.usageFetcher.getUsageDetailsForMetric(
+      metricName,
+      usageType,
+      this.getDashboardLimitExceededCallback(usageType)
+    );
   }
 
   // Converts MetricUsageDetails format to simple counts (Record<string, number>) for backward compatibility with sorting logic
   public getUsageMetrics(usageType: MetricUsageType): Promise<Record<string, number>> {
-    return this.usageFetcher.getUsageMetrics(usageType).then((metrics) => {
+    return this.usageFetcher.getUsageMetrics(usageType, this.getDashboardLimitExceededCallback(usageType)).then((metrics) => {
       const metricsToCounts: Record<string, number> = {};
       for (const metric in metrics) {
         metricsToCounts[metric] = metrics[metric].count;
       }
       return metricsToCounts;
     });
+  }
+
+  private getDashboardLimitExceededCallback(usageType: MetricUsageType): (() => void) | undefined {
+    return usageType === 'dashboard-usage' ? () => this.setState({ dashboardUsageLimitExceeded: true }) : undefined;
   }
 
   public getFiringAlertSignals(): Promise<FiringAlertRuleSignals> {
@@ -277,13 +290,39 @@ export class MetricsSorter extends SceneObjectBase<MetricsSorterState> {
   }
 
   public static readonly Component = ({ model }: SceneComponentProps<MetricsSorter>) => {
-    const { inputControls } = model.useState();
+    const { inputControls, dashboardUsageLimitExceeded } = model.useState();
+    const styles = useStyles2(getStyles);
 
     return (
       <div data-testid="sort-by-select">
-        <inputControls.Component model={inputControls} />
+        <Stack direction="row" alignItems="center" gap={1}>
+          <inputControls.Component model={inputControls} />
+          {dashboardUsageLimitExceeded && (
+            <Tooltip
+              content={t(
+                'metrics-sorter.dashboard-usage-limit-warning',
+                'Dashboard usage sorting is limited to 500 dashboards, so usage counts may be incomplete.'
+              )}
+              placement="top"
+            >
+              <Icon
+                name="exclamation-triangle"
+                size="sm"
+                className={styles.dashboardUsageWarning}
+                aria-label={t('metrics-sorter.dashboard-usage-limit-warning-icon', 'Dashboard usage limit warning')}
+                data-testid="dashboard-usage-limit-warning"
+              />
+            </Tooltip>
+          )}
+        </Stack>
       </div>
     );
+  };
+}
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    dashboardUsageWarning: css({ color: theme.colors.warning.text }),
   };
 }
 
