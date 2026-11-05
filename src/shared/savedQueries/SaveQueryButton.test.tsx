@@ -1,5 +1,5 @@
-// eslint-disable-next-line sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-import { getDataSourceSrv, usePluginComponent } from '@grafana/runtime';
+import { useDataSourceInstance } from '@grafana/plugin-compat/datasources';
+import { usePluginComponent } from '@grafana/runtime';
 import { sceneGraph } from '@grafana/scenes';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -25,16 +25,17 @@ jest.mock('@grafana/prometheus', () => ({
   utf8Support: (key: string) => key,
 }));
 
+jest.mock('@grafana/plugin-compat/datasources', () => ({
+  useDataSourceInstance: jest.fn(),
+}));
+
+const useDataSourceInstanceMock = jest.mocked(useDataSourceInstance);
+
 describe('SaveQueryButton', () => {
   const mockSceneRef = {} as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement exists only in @grafana/runtime/unstable, off-limits to community plugins per its own docs; no removal date documented
-    jest.mocked(getDataSourceSrv).mockReturnValue({
-      getInstanceSettings: () => ({ name: 'Test Datasource' }),
-    } as any);
 
     const mockTrail = { state: { embedded: false } } as unknown as DataTrail;
     jest.spyOn(sceneGraph, 'getAncestor').mockImplementation((_ref, type) => {
@@ -68,6 +69,11 @@ describe('SaveQueryButton', () => {
 
     jest.mocked(usePluginComponent).mockReturnValue({ component: undefined, isLoading: false });
     jest.mocked(isQueryLibrarySupported).mockReturnValue(false);
+    useDataSourceInstanceMock.mockReturnValue({
+      isLoading: false,
+      error: undefined,
+      dataSource: { uid: 'test-datasource-uid', name: 'Test Datasource' } as any,
+    });
   });
 
   test('Opens the modal when the button is clicked', () => {
@@ -141,5 +147,25 @@ describe('SaveQueryButton', () => {
     render(<SaveQueryButton sceneRef={mockSceneRef} />);
 
     expect(screen.getByText('Exposed component')).toBeInTheDocument();
+  });
+
+  test('should hide the save action until the selected datasource settings arrive', () => {
+    jest.mocked(isQueryLibrarySupported).mockReturnValue(true);
+    jest.mocked(usePluginComponent).mockReturnValue({
+      component: () => <button>Save query</button>,
+      isLoading: false,
+    });
+    useDataSourceInstanceMock.mockReturnValueOnce({
+      isLoading: false,
+      dataSource: { uid: 'previous-datasource-uid', name: 'Previous Datasource' } as any,
+    });
+
+    const { rerender } = render(<SaveQueryButton sceneRef={mockSceneRef} />);
+
+    expect(screen.queryByRole('button', { name: 'Save query' })).not.toBeInTheDocument();
+
+    rerender(<SaveQueryButton sceneRef={mockSceneRef} />);
+
+    expect(screen.getByRole('button', { name: 'Save query' })).toBeInTheDocument();
   });
 });

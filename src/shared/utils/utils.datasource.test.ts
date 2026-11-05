@@ -1,9 +1,26 @@
-// eslint-disable-next-line sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
-import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { type DataSourceInstanceListItem } from '@grafana/data';
+import { getDataSourceInstanceList, getDefaultDataSourceInstanceListItem } from '@grafana/plugin-compat/datasources';
+import { getBackendSrv } from '@grafana/runtime';
 
-import { DataSourceFetcher, isPrometheusDataSource } from './utils.datasource';
+import { KG_DATASOURCE_TYPE, KG_DATASOURCE_UID } from 'shared/constants';
+import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
+import { userStorage } from 'shared/user-preferences/userStorage';
+
+import {
+  DataSourceFetcher,
+  getCurrentPrometheusDataSource,
+  isKnowledgeGraphDataSource,
+  isPrometheusDataSource,
+} from './utils.datasource';
 
 jest.mock('@grafana/runtime');
+
+jest.mock('@grafana/plugin-compat/datasources', () => ({
+  getDataSourceInstanceList: jest.fn(),
+  getDefaultDataSourceInstanceListItem: jest.fn(),
+}));
+const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);
+const getDefaultDataSourceInstanceListItemMock = jest.mocked(getDefaultDataSourceInstanceListItem);
 
 describe('isPrometheusDataSource', () => {
   it('should return true for a core Prometheus datasource', () => {
@@ -27,28 +44,35 @@ describe('isPrometheusDataSource', () => {
   });
 });
 
+describe('isKnowledgeGraphDataSource', () => {
+  it('should return true for a KnowledgeGraph datasource', () => {
+    const ds: any = { type: KG_DATASOURCE_TYPE, uid: KG_DATASOURCE_UID };
+    expect(isKnowledgeGraphDataSource(ds)).toBe(true);
+  });
+
+  it('should return false for non-KnowledgeGraph datasource', () => {
+    const ds: any = { type: 'grafana-test-datasource', uid: 'grafana-test-datasource' };
+    expect(isKnowledgeGraphDataSource(ds)).toBe(false);
+  });
+});
+
 describe('DataSourceFetcher', () => {
-  const mockDataSources = [
-    { uid: 'ds1', name: 'Loki 1', type: 'loki', isDefault: true },
-    { uid: 'ds2', name: 'Loki 2', type: 'loki', isDefault: false },
-    { uid: 'ds3', name: 'Loki 3', type: 'loki', isDefault: false },
+  const mockDataSources: any[] = [
+    { uid: 'ds1', name: 'Loki 1', type: 'loki' },
+    { uid: 'ds2', name: 'Loki 2', type: 'loki' },
+    { uid: 'ds3', name: 'Loki 3', type: 'loki' },
   ];
 
   let mockGetBackendSrv: jest.MockedFunction<typeof getBackendSrv>;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
-  let mockGetDataSourceSrv: jest.MockedFunction<typeof getDataSourceSrv>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
 
     mockGetBackendSrv = getBackendSrv as jest.MockedFunction<typeof getBackendSrv>;
-    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- replacement (getDataSourceInstanceSettingsList) lives in @grafana/runtime/internal, which is stripped from this package's exports for plugins and cannot be imported; no removal date documented
-    mockGetDataSourceSrv = getDataSourceSrv as jest.MockedFunction<typeof getDataSourceSrv>;
 
-    mockGetDataSourceSrv.mockReturnValue({
-      getList: jest.fn().mockReturnValue(mockDataSources),
-    } as any);
+    getDataSourceInstanceListMock.mockResolvedValue(mockDataSources);
+    getDefaultDataSourceInstanceListItemMock.mockResolvedValue(mockDataSources[0]);
   });
 
   afterEach(() => {
@@ -109,7 +133,7 @@ describe('DataSourceFetcher', () => {
       const fetchPromise = new DataSourceFetcher().getHealthyDataSources('loki');
 
       // Fast-forward past the 3-second timeout
-      jest.advanceTimersByTime(3000);
+      await jest.advanceTimersByTimeAsync(3000);
 
       const result = await fetchPromise;
 
@@ -148,15 +172,14 @@ describe('DataSourceFetcher', () => {
     });
 
     it('should sort data sources with default first', async () => {
-      const unsortedDataSources = [
-        { uid: 'ds1', name: 'Loki 1', type: 'loki', isDefault: false },
-        { uid: 'ds2', name: 'Loki 2', type: 'loki', isDefault: true },
-        { uid: 'ds3', name: 'Loki 3', type: 'loki', isDefault: false },
+      const unsortedDataSources: any[] = [
+        { uid: 'ds1', name: 'Loki 1', type: 'loki' },
+        { uid: 'ds2', name: 'Loki 2', type: 'loki' },
+        { uid: 'ds3', name: 'Loki 3', type: 'loki' },
       ];
 
-      mockGetDataSourceSrv.mockReturnValue({
-        getList: jest.fn().mockReturnValue(unsortedDataSources),
-      } as any);
+      getDataSourceInstanceListMock.mockResolvedValue(unsortedDataSources);
+      getDefaultDataSourceInstanceListItemMock.mockResolvedValue(unsortedDataSources[1]);
 
       mockGetBackendSrv.mockReturnValue({
         get: jest.fn().mockResolvedValue({ status: 'OK' }),
@@ -167,7 +190,6 @@ describe('DataSourceFetcher', () => {
 
       // Default data source (ds2) should be first
       expect(result[0].uid).toBe('ds2');
-      expect(result[0].isDefault).toBe(true);
     });
 
     it('should pass correct parameters to health check endpoint', async () => {
@@ -190,5 +212,70 @@ describe('DataSourceFetcher', () => {
         })
       );
     });
+  });
+});
+
+describe('getCurrentPrometheusDataSource', () => {
+  const instances = [
+    { uid: 'prom-a', name: 'Prometheus A', type: 'prometheus', meta: {} },
+    { uid: 'prom-b', name: 'Prometheus B', type: 'prometheus', meta: {} },
+  ] as DataSourceInstanceListItem[];
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+
+    getDefaultDataSourceInstanceListItemMock.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    __setWindowLocation('http://localhost:3000/');
+    userStorage.clear();
+  });
+
+  it('should prefer a valid URL UID over the stored UID', async () => {
+    __setWindowLocation({ search: '?var-ds=prom-b' });
+    userStorage.setItem(PREF_KEYS.DATASOURCE, 'prom-a');
+
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBe('prom-b');
+    expect(getDefaultDataSourceInstanceListItemMock).not.toHaveBeenCalled();
+  });
+
+  it('should fall back from an invalid URL UID to the stored UID', async () => {
+    __setWindowLocation({ search: '?var-ds=deleted-uid' });
+    userStorage.setItem(PREF_KEYS.DATASOURCE, 'prom-b');
+
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBe('prom-b');
+    expect(getDefaultDataSourceInstanceListItemMock).not.toHaveBeenCalled();
+  });
+
+  it('should prefer the eligible Grafana default over the first instance', async () => {
+    getDefaultDataSourceInstanceListItemMock.mockResolvedValue(instances[1]);
+
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBe('prom-b');
+  });
+
+  it('should use the first instance when there is no eligible default', async () => {
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBe('prom-a');
+  });
+
+  it.each([undefined, []])('should skip the default lookup for empty input %j', async (instances) => {
+    const result = await getCurrentPrometheusDataSource(instances);
+
+    expect(result).toBeUndefined();
+    expect(getDefaultDataSourceInstanceListItemMock).not.toHaveBeenCalled();
+  });
+
+  it('should propagate a failed default lookup', async () => {
+    getDefaultDataSourceInstanceListItemMock.mockRejectedValue(new Error('Default lookup failed'));
+
+    await expect(getCurrentPrometheusDataSource(instances)).rejects.toThrow('Default lookup failed');
   });
 });

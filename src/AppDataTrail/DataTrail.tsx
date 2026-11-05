@@ -1,11 +1,5 @@
 import { css } from '@emotion/css';
-import {
-  urlUtil,
-  VariableHide,
-  type AdHocVariableFilter,
-  type GrafanaTheme2,
-  type TimeRange,
-} from '@grafana/data';
+import { urlUtil, VariableHide, type AdHocVariableFilter, type GrafanaTheme2, type TimeRange } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { config, useChromeHeaderHeight, usePluginComponent } from '@grafana/runtime';
 import {
@@ -93,7 +87,7 @@ export interface DataTrailState extends SceneObjectState {
   alertingMetrics?: Record<string, number>;
 
   // just for the starting data source
-  initialDS?: string;
+  initialDS: string;
   initialFilters?: AdHocVariableFilter[];
 
   // Synced with url
@@ -206,8 +200,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
 
   public constructor(state: Partial<DataTrailState>) {
     super({
+      initialDS: state.initialDS ?? '',
       $timeRange: state.$timeRange ?? new SceneTimeRange({}),
-      $variables: state.$variables ?? getVariableSet(state.initialDS, state.metric, state.initialFilters),
+      $variables: state.$variables ?? getVariableSet(state),
       controls: state.controls ?? [
         new VariableValueSelectors({ layout: 'vertical' }),
         new SceneControlsSpacer(),
@@ -231,9 +226,13 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   private onActivate() {
     registerRuntimeDataSources([new LabelsDataSource(), new BinaryRatioLabelsDataSource()]);
 
-    evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then((enabled) => {
-      if (enabled) {
-        const kg = getKgSceneProps(this.state.kgEntityHint);
+    evaluateFeatureFlag('kgAnnotationsInMetricsDrilldown').then(async (enabled) => {
+      if (!enabled) {
+        return;
+      }
+
+      try {
+        const kg = await getKgSceneProps(this.state.kgEntityHint);
         if (kg) {
           this.setState({
             $data: this.state.$data ?? kg.$data,
@@ -241,6 +240,8 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
             kgAnnotationToggle: this.state.kgAnnotationToggle ?? kg.controls,
           });
         }
+      } catch (error) {
+        logger.debug('Failed to fetch kg Scene', { error });
       }
     });
 
@@ -700,9 +701,9 @@ export class DataTrail extends SceneObjectBase<DataTrailState> implements SceneO
   };
 }
 
-function getVariableSet(initialDS?: string, metric?: string, initialFilters?: AdHocVariableFilter[]) {
+function getVariableSet({ initialDS = '', metric, initialFilters, embedded = false }: Partial<DataTrailState>) {
   let variables: SceneVariable[] = [
-    new MetricsDrilldownDataSourceVariable({ initialDS }),
+    new MetricsDrilldownDataSourceVariable({ initialDS, skipUrlSync: !embedded }),
     new MetricsVariable(),
     new AdHocFiltersForMetricsVariable(),
     new AdHocFiltersVariable({

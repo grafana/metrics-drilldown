@@ -1,19 +1,13 @@
 import { type AdHocVariableFilter } from '@grafana/data';
+import { getDataSourceInstance, getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
 import { sceneGraph, type AdHocFiltersVariable } from '@grafana/scenes';
 
 import { createLabelsCrossReferenceConnector } from './labelsCrossReference';
 import { type RelatedLogsScene } from '../../MetricScene/RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared/shared';
 
-const getListSpy = jest.fn();
-const getSpy = jest.fn();
-
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),
-  getDataSourceSrv: () => ({
-    getList: getListSpy,
-    get: getSpy,
-  }),
   getTemplateSrv: () => ({
     getAdhocFilters: jest.fn(),
   }),
@@ -27,6 +21,14 @@ jest.mock('../../shared/utils/utils', () => ({
   // sceneGraph.lookupVariable is also mocked and controls what's returned
   getTrailFor: jest.fn((scene) => scene),
 }));
+
+jest.mock('@grafana/plugin-compat/datasources', () => ({
+  getDataSourceInstance: jest.fn(),
+  getDataSourceInstanceList: jest.fn(),
+  getDefaultDataSourceInstanceListItem: jest.fn().mockResolvedValue(undefined),
+}));
+const getDataSourceInstanceMock = jest.mocked(getDataSourceInstance);
+const getDataSourceInstanceListMock = jest.mocked(getDataSourceInstanceList);
 
 function buildConnector(filters: AdHocVariableFilter[] | null) {
   const mockScene = {
@@ -77,20 +79,24 @@ function buildDataSources() {
 
   const datasources = [ds1, ds2, ds3];
 
-  getListSpy.mockReturnValue(datasources);
+  getDataSourceInstanceListMock.mockResolvedValue(datasources as any);
 
-  getSpy.mockImplementation(async (uid: string) => {
+  getDataSourceInstanceMock.mockImplementation(async (uid) => {
     const ds = datasources.find((ds) => ds.uid === uid);
     if (!ds) {
       throw new Error(`Datasource with uid ${uid} not found`);
     }
-    return ds;
+    return ds as any;
   });
 
   return datasources;
 }
 
 describe('LabelsCrossReferenceConnector', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const basicFilters: AdHocVariableFilter[] = [
     { key: 'environment', operator: '=', value: 'production' },
     { key: 'app', operator: '=', value: 'frontend' },

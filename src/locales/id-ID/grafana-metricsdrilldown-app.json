@@ -10,6 +10,11 @@
       "related-metrics-description": "Metrik yang relevan berdasarkan filter label saat ini"
     }
   },
+  "App": {
+    "current-error-title": "",
+    "instances-error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Atribut metrik OTel",
     "badge-resource": "Atribut sumber daya OTel",
@@ -374,6 +379,7 @@
   },
   "related-logs": {
     "datasource-description": "Beberapa sumber data Loki mungkin tidak ada di dropdown jika butuh waktu lebih dari {{timeout}} detik untuk merespons. Untuk melihat log untuk semua sumber data Loki, coba gunakan Logs Drilldown.",
+    "datasource-discovery-error": "",
     "datasource-label": "Sumber data log",
     "experimental-note": "Catatan: Log terkait adalah fitur eksperimental.",
     "loading": "Memuat...",
@@ -395,6 +401,12 @@
     "button": "Pilih metrik baru",
     "metrics-drilldown": "Drilldown Metrik",
     "open-in-drilldown-tooltip": "Buka di Metrics Drilldown"
+  },
+  "shared": {
+    "hooks": {
+      "useCurrentPrometheusDataSourceUid": "",
+      "usePrometheusDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_other": "Tampilkan {{count}} lainnya ({{current}}/{{total}})"
