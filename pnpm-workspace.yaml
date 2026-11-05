@@ -65,6 +65,8 @@ minimumReleaseAgeExclude:
   - '@grafana/schema@13.3.0'
   - '@grafana/ui@13.3.0'
   - '@grafana/e2e-selectors@13.3.0'
+  # Renovate security update: glob@14.0.2
+  - glob@14.0.2
 
 # deepmerge (via jest-config, dev-only) has no patched release upstream.
 auditConfig:
