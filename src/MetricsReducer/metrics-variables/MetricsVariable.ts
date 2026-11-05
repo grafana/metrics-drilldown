@@ -28,6 +28,7 @@ interface MetricsVariableState extends SceneObjectState {
 
 export class MetricsVariable extends QueryVariable {
   private extraFilter?: string;
+  private metricsRequestId = 0;
 
   constructor({ key, name, labelMatcher, addLifeCycleEvents }: MetricsVariableState = {}) {
     super({
@@ -88,6 +89,7 @@ export class MetricsVariable extends QueryVariable {
   }
 
   public fetchAllMetrics() {
+    this.metricsRequestId++;
     this.setState({
       query: this.extraFilter
         ? `label_values({${this.extraFilter},$${VAR_METRICS_VAR_FILTERS}}, __name__)`
@@ -99,6 +101,7 @@ export class MetricsVariable extends QueryVariable {
   }
 
   public async fetchRecentMetrics(interval: string) {
+    const requestId = ++this.metricsRequestId;
     this.setState({
       query: '',
       refresh: VariableRefresh.never,
@@ -110,12 +113,18 @@ export class MetricsVariable extends QueryVariable {
     try {
       const recentMetrics = await getTrailFor(this).fetchRecentMetrics({ interval, extraFilter: this.extraFilter });
 
+      if (requestId !== this.metricsRequestId) {
+        return;
+      }
+
       this.setState({
         loading: false,
         options: recentMetrics.map((value) => ({ value, label: value })),
       });
     } catch (error) {
-      this.setState({ loading: false, error });
+      if (requestId === this.metricsRequestId) {
+        this.setState({ loading: false, error });
+      }
     }
   }
 }
