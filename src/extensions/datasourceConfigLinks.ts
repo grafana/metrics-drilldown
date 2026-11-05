@@ -18,7 +18,7 @@ interface DataSourceConfigContext {
   };
 }
 
-export const EXTENSION_DESCRIPTION = `Browse metrics in Grafana Metrics Drilldown`;
+export const EXTENSION_DESCRIPTION = `Browse metrics in Metrics Drilldown`;
 
 export const datasourceConfigLinkConfigs: PluginExtensionAddedLinkConfig[] = [
   {
