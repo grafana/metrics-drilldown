@@ -4,8 +4,15 @@ import { sceneGraph, VizPanel } from '@grafana/scenes';
 import { act } from '@testing-library/react';
 import { of, Subject } from 'rxjs';
 
+import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
+
 import { getPanelData } from '../../../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { EventOpenAddToDashboard } from '../../../shared/GmdVizPanel/components/addToDashboard/EventOpenAddToDashboard';
+import { EventOpenAddToNotebook } from '../../../shared/GmdVizPanel/components/addToNotebook/EventOpenAddToNotebook';
+import {
+  buildNotebookCapture,
+  canAddToNotebook,
+} from '../../../shared/GmdVizPanel/components/addToNotebook/notebookCapture';
 import { EventOpenCreateAlert } from '../../../shared/GmdVizPanel/components/createAlert/EventOpenCreateAlert';
 import { reportExploreMetrics } from '../../../shared/tracking/interactions';
 import { PREF_KEYS } from '../../../shared/user-preferences/pref-keys';
@@ -40,6 +47,17 @@ jest.mock('../../../shared/GmdVizPanel/components/addToDashboard/addToDashboard'
   getPanelData: jest.fn(),
 }));
 
+jest.mock('../../../shared/GmdVizPanel/components/addToNotebook/notebookCapture', () => ({
+  ...jest.requireActual('../../../shared/GmdVizPanel/components/addToNotebook/notebookCapture'),
+  buildNotebookCapture: jest.fn(),
+  canAddToNotebook: jest.fn(),
+}));
+
+jest.mock('MetricsReducer/helpers/displayStatus', () => ({
+  ...jest.requireActual('MetricsReducer/helpers/displayStatus'),
+  displayWarning: jest.fn(),
+}));
+
 // Fixed, input-independent key: these tests only need "does any bookmark exist in storage",
 // not a realistic URL state from the duck-typed fake trail.
 jest.mock('../../../shared/bookmarks/genBookmarkKey', () => ({
@@ -72,7 +90,11 @@ const mockGetPanelData = getPanelData as jest.Mock;
 // HELPERS
 // =============================================================================
 
-function createMockTrail(state: { isAddToDashboardAvailable: boolean; isCreateAlertAvailable: boolean }) {
+function createMockTrail(state: {
+  isAddToDashboardAvailable: boolean;
+  isCreateAlertAvailable: boolean;
+  isAddToNotebookAvailable?: boolean;
+}) {
   let subscriber: ((newState: typeof state, prevState: typeof state) => void) | undefined;
 
   return {
@@ -226,6 +248,90 @@ describe('PanelMenu', () => {
       expect(mockGetPanelData).toHaveBeenCalledWith(fakeVizPanel);
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler.mock.calls[0][0].payload).toEqual({ panelData: fakePanelData });
+    });
+  });
+
+  describe('add to notebook', () => {
+    it('only appears on the main graph and follows live extension availability', () => {
+      const trail = createMockTrail({ isAddToDashboardAvailable: false, isCreateAlertAvailable: false });
+      mockGetTrailFor.mockReturnValue(trail);
+      const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
+      const rowMenu = new PanelMenu({});
+      menu.activate();
+      rowMenu.activate();
+
+      expect(itemTexts(menu)).not.toContain('Add to notebook');
+      act(() => trail.emitStateChange({ isAddToNotebookAvailable: true }));
+      expect(itemTexts(menu)).toContain('Add to notebook');
+      expect(itemTexts(rowMenu)).toEqual(['Navigation', 'Explore']);
+      act(() => trail.emitStateChange({ isAddToNotebookAvailable: false }));
+      expect(itemTexts(menu)).not.toContain('Add to notebook');
+    });
+
+    it('captures the panel at click time and publishes the picker event', () => {
+      const trail = createMockTrail({
+        isAddToDashboardAvailable: false,
+        isCreateAlertAvailable: false,
+        isAddToNotebookAvailable: true,
+      });
+      mockGetTrailFor.mockReturnValue(trail);
+      jest.mocked(canAddToNotebook).mockReturnValue(true);
+      const snapshot = {
+        panel: { type: 'timeseries', title: 'requests_total' },
+        capturedTimeRange: { from: 'now-1h', to: 'now', timeZone: 'UTC' },
+      };
+      jest.mocked(buildNotebookCapture).mockReturnValue(snapshot);
+      const vizPanel = {};
+      mockGetAncestor.mockReturnValue(vizPanel);
+      const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
+      menu.activate();
+      const handler = jest.fn();
+      menu.subscribeToEvent(EventOpenAddToNotebook, handler);
+      expect(buildNotebookCapture).not.toHaveBeenCalled();
+
+      act(() => findItem(menu, 'Add to notebook').onClick?.({} as any));
+
+      expect(buildNotebookCapture).toHaveBeenCalledWith(vizPanel);
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler.mock.calls[0][0].payload).toEqual(snapshot);
+    });
+
+    it('ignores a stale action after permission is revoked', () => {
+      mockGetTrailFor.mockReturnValue(
+        createMockTrail({
+          isAddToDashboardAvailable: false,
+          isCreateAlertAvailable: false,
+          isAddToNotebookAvailable: true,
+        })
+      );
+      jest.mocked(canAddToNotebook).mockReturnValue(false);
+      const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
+      menu.activate();
+      act(() => findItem(menu, 'Add to notebook').onClick?.({} as any));
+      expect(buildNotebookCapture).not.toHaveBeenCalled();
+    });
+
+    it('warns without opening the picker when a chart cannot be faithfully exported', () => {
+      mockGetTrailFor.mockReturnValue(
+        createMockTrail({
+          isAddToDashboardAvailable: false,
+          isCreateAlertAvailable: false,
+          isAddToNotebookAvailable: true,
+        })
+      );
+      jest.mocked(canAddToNotebook).mockReturnValue(true);
+      jest.mocked(buildNotebookCapture).mockImplementation(() => {
+        throw new Error('Unsupported data transformation');
+      });
+      const menu = new PanelMenu({ key: TOPVIEW_PANEL_MENU_KEY });
+      menu.activate();
+      const handler = jest.fn();
+      menu.subscribeToEvent(EventOpenAddToNotebook, handler);
+
+      act(() => findItem(menu, 'Add to notebook').onClick?.({} as any));
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(displayWarning).toHaveBeenCalledWith([expect.stringContaining('no custom data transformations')]);
     });
   });
 
