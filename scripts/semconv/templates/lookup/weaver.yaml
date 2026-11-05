@@ -1,0 +1,21 @@
+templates:
+  - template: lookup.json.j2
+    filter: >
+      {
+        metrics: (.registry.metrics | map({key: .name, value: {
+          attributes: [.attributes[]?.key],
+          brief: .brief,
+          deprecated: (.deprecated // null),
+          instrument: .instrument,
+          stability: .stability,
+          unit: .unit
+        }}) | from_entries),
+        attributes: (.registry.attributes | map({key: .key, value: {
+          brief: .brief,
+          deprecated: (.deprecated // null),
+          members: (if (.type | type) == "object" then [.type.members[] | {value, brief, deprecated: (.deprecated // null)}] else null end),
+          stability: .stability,
+          type: (if (.type | type) == "object" then "enum" else .type end)
+        }}) | from_entries)
+      }
+    application_mode: single

@@ -2,3 +2,4 @@ dist/
 playwright/
 playwright-report/
 test-results/
+src/shared/otel/semconv/semconv.generated.json
