@@ -8,17 +8,21 @@ export const CheckboxWithCount = ({
   count,
   checked,
   onChange,
+  disabled,
+  title,
 }: {
   label: string;
   count: number;
   checked: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  title?: string;
 }) => {
   const styles = useStyles2(getStyles);
 
   return (
-    <div className={styles.checkboxWrapper} title={label}>
-      <Checkbox label={label} checked={checked} onChange={onChange} />
+    <div className={styles.checkboxWrapper} title={title ?? label}>
+      <Checkbox label={label} checked={checked} onChange={onChange} disabled={disabled} />
       <span className={styles.count}>({count})</span>
     </div>
   );

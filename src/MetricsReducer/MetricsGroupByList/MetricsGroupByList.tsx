@@ -15,6 +15,7 @@ import React from 'react';
 
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
+import { CatalogRankingFooter } from 'MetricsReducer/list-controls/JevSort/CatalogRanking';
 
 import { MetricsGroupByRow } from './MetricsGroupByRow';
 import { InlineBanner } from '../../App/InlineBanner';
@@ -103,6 +104,7 @@ export class MetricsGroupByList extends SceneObjectBase<MetricsGroupByListState>
     return (
       <div data-testid="metrics-groupby-list">
         <body.Component model={body} />
+        <CatalogRankingFooter sceneRef={model} />
 
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>

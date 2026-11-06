@@ -120,11 +120,11 @@ describe('FiringAlertChip', () => {
       chip.setState({ matchingCount: 2, loading: false, visible: true });
 
       render(<FiringAlertChip.Component model={chip} />);
-      expect(screen.getByRole('button', { name: /filter by firing alerts/i })).toBeInTheDocument();
-      expect(screen.getByText(/has firing alerts \(2\)/i)).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: /has firing alerts/i })).toBeInTheDocument();
+      expect(screen.getByText('(2)')).toBeInTheDocument();
     });
 
-    it('chip is inactive (not pressed) by default', async () => {
+    it('chip is inactive (unchecked) by default', async () => {
       mockMetricsSorterWith(
         buildFiringMap([['http_requests_total', 1]])
       );
@@ -134,8 +134,8 @@ describe('FiringAlertChip', () => {
       chip.setState({ matchingCount: 1, loading: false, visible: true });
 
       render(<FiringAlertChip.Component model={chip} />);
-      const button = screen.getByRole('button', { name: /filter by firing alerts/i });
-      expect(button).toHaveAttribute('aria-pressed', 'false');
+      const checkbox = screen.getByRole('checkbox', { name: /has firing alerts/i });
+      expect(checkbox).not.toBeChecked();
     });
 
     describe('toggle behaviour', () => {
@@ -150,7 +150,7 @@ describe('FiringAlertChip', () => {
         const publishSpy = jest.spyOn(chip, 'publishEvent');
 
         render(<FiringAlertChip.Component model={chip} />);
-        fireEvent.click(screen.getByRole('button', { name: /filter by firing alerts/i }));
+        fireEvent.click(screen.getByRole('checkbox', { name: /has firing alerts/i }));
 
         expect(chip.state.active).toBe(true);
         expect(publishSpy).toHaveBeenCalledWith(
@@ -175,8 +175,7 @@ describe('FiringAlertChip', () => {
         const publishSpy = jest.spyOn(chip, 'publishEvent');
 
         render(<FiringAlertChip.Component model={chip} />);
-        // Active chip has different aria-label
-        fireEvent.click(screen.getByRole('button', { name: /remove firing alerts filter/i }));
+        fireEvent.click(screen.getByRole('checkbox', { name: /has firing alerts/i }));
 
         expect(chip.state.active).toBe(false);
         expect(publishSpy).toHaveBeenCalledWith(
@@ -196,7 +195,7 @@ describe('FiringAlertChip', () => {
         chip.setState({ matchingCount: 3, loading: false, visible: true });
 
         render(<FiringAlertChip.Component model={chip} />);
-        fireEvent.click(screen.getByRole('button', { name: /filter by firing alerts/i }));
+        fireEvent.click(screen.getByRole('checkbox', { name: /has firing alerts/i }));
 
         expect(mockReportExploreMetrics).toHaveBeenCalledWith('firing_alert_filter_toggled', {
           action: 'activated',
@@ -213,7 +212,7 @@ describe('FiringAlertChip', () => {
         chip.setState({ matchingCount: 1, loading: false, visible: true, active: true });
 
         render(<FiringAlertChip.Component model={chip} />);
-        fireEvent.click(screen.getByRole('button', { name: /remove firing alerts filter/i }));
+        fireEvent.click(screen.getByRole('checkbox', { name: /has firing alerts/i }));
 
         expect(mockReportExploreMetrics).toHaveBeenCalledWith('firing_alert_filter_toggled', {
           action: 'deactivated',
@@ -231,8 +230,8 @@ describe('FiringAlertChip', () => {
         chip.setState({ loading: false, visible: true, matchingCount: 0 });
 
         render(<FiringAlertChip.Component model={chip} />);
-        expect(screen.getByText(/has firing alerts \(0\)/i)).toBeInTheDocument();
-        expect(screen.getByRole('button')).toBeDisabled();
+        expect(screen.getByText('(0)')).toBeInTheDocument();
+        expect(screen.getByRole('checkbox')).toBeDisabled();
       });
 
       it('shows count 0 when fetch returns empty map (internal failure)', async () => {

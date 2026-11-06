@@ -54,7 +54,6 @@ export class JevSort extends SceneObjectBase<JevSortState> {
     return (
       <Stack direction="row" gap={1}>
         <Button
-          size="sm"
           variant={active ? 'primary' : 'secondary'}
           aria-pressed={active}
           onClick={model.toggle}
@@ -63,7 +62,6 @@ export class JevSort extends SceneObjectBase<JevSortState> {
           {t('jev-sort.label', 'Jev Sorted ✨')}
         </Button>
         <Button
-          size="sm"
           variant="secondary"
           icon="cog"
           aria-label={t('jev-profile.open', 'Configure ranking profile')}

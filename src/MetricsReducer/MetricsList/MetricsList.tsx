@@ -19,6 +19,7 @@ import React from 'react';
 import { InlineBanner } from 'App/InlineBanner';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
+import { CatalogRankingFooter } from 'MetricsReducer/list-controls/JevSort/CatalogRanking';
 import { LayoutSwitcher, LayoutType, type LayoutSwitcherState } from 'MetricsReducer/list-controls/LayoutSwitcher';
 import { FiringAlertBadge } from 'shared/GmdVizPanel/components/FiringAlertBadge';
 import { SelectAction } from 'shared/GmdVizPanel/components/SelectAction';
@@ -151,6 +152,7 @@ export class MetricsList extends SceneObjectBase<MetricsListState> {
         <div>
           <body.Component model={body} />
         </div>
+        <CatalogRankingFooter sceneRef={model} />
         {shouldDisplayShowMoreButton && (
           <div className={styles.footer}>
             <ShowMoreButton batchSizes={batchSizes} onClick={onClickShowMore} />

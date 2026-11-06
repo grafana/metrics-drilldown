@@ -48,9 +48,21 @@ import { CheckBoxList } from './CheckBoxList';
 import { EventFiltersChanged } from './EventFiltersChanged';
 import { TreeCheckBoxList } from './TreeCheckBoxList';
 
+/** An extra filter rendered as the first item of the section's checkbox list and counted as a selection. */
+export interface SelectableControl extends SceneObject {
+  state: SceneObject['state'] & { active: boolean; visible: boolean };
+  clear(): void;
+}
+
+function isSelectableControl(control?: SceneObject): control is SelectableControl {
+  return typeof (control as SelectableControl | undefined)?.clear === 'function';
+}
+
 export interface MetricsFilterSectionState extends SideBarSectionState {
   type: keyof MetricFilters;
   control?: SceneObject;
+  controlActive: boolean;
+  controlVisible: boolean;
   computeGroups: (
     options: Array<{ label: string; value: string }>
   ) => Array<{ label: string; value: string; count: number }>;
@@ -154,6 +166,8 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       expandedPrefixes: new Set(),
       computedSublevels: new Map(),
       control,
+      controlActive: false,
+      controlVisible: false,
     });
 
     this.addActivationHandler(this.onActivate.bind(this));
@@ -169,12 +183,19 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     this.updateLists(metricsVariable.state.options as MetricOptions);
     this.updateCounts();
 
-    const { selectedGroups, hierarchical } = this.state;
+    const { selectedGroups, hierarchical, control } = this.state;
 
     this.setState({
       loading: filteredMetricsVariable.state.loading,
       active: selectedGroups.length > 0,
     });
+
+    if (isSelectableControl(control)) {
+      const syncControl = () =>
+        this.setState({ controlActive: control.state.active, controlVisible: control.state.visible });
+      syncControl();
+      this._subs.add(control.subscribeToState(syncControl));
+    }
 
     // Auto-expand and compute Level 1 for any hierarchical selections from URL
     if (hierarchical) {
@@ -392,6 +413,8 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
       expandedPrefixes,
       computedSublevels,
       control,
+      controlActive,
+      controlVisible,
     } = model.useState();
 
     const [hideEmpty, setHideEmpty] = useState(false);
@@ -421,7 +444,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     return (
       <div className={styles.container}>
         <SectionTitle title={title} description={description} />
-        {control && <control.Component model={control} />}
+        {control && !isSelectableControl(control) && <control.Component model={control} />}
 
         {showHideEmpty && (
           <div className={styles.switchContainer}>
@@ -472,6 +495,11 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
             groups={filteredGroups}
             selectedGroups={selectedGroups}
             onSelectionChange={model.onSelectionChange}
+            control={
+              isSelectableControl(control) && controlVisible
+                ? { node: <control.Component model={control} />, active: controlActive, clear: () => control.clear() }
+                : undefined
+            }
           />
         )}
       </div>

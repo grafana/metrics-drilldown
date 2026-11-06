@@ -5,6 +5,7 @@ import {
   SceneObjectBase,
   type AdHocFiltersVariable,
   type SceneComponentProps,
+  type SceneObject,
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Button, Spinner } from '@grafana/ui';
@@ -69,6 +70,17 @@ function statusMessage(state: CatalogRankingState): string {
     );
   }
   return t('jev-sort.fallback', 'Jev unavailable — using signal-based priority.');
+}
+
+/** Renders the shared catalog ranking status below the metrics, when the catalog sorter is in the scene. */
+export function CatalogRankingFooter({ sceneRef }: Readonly<{ sceneRef: SceneObject }>) {
+  let ranking: unknown;
+  try {
+    ranking = (sceneGraph.findByKey(sceneRef, 'metrics-sorter').state as { ranking?: unknown }).ranking;
+  } catch {
+    return null;
+  }
+  return ranking instanceof CatalogRanking ? <ranking.Component model={ranking} /> : null;
 }
 
 export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
@@ -299,7 +311,10 @@ export class CatalogRanking extends SceneObjectBase<CatalogRankingState> {
       return null;
     }
     return (
-      <div className={css({ maxWidth: '100%', overflowWrap: 'anywhere' })} data-testid="catalog-ranking">
+      <div
+        className={css({ maxWidth: '100%', overflowWrap: 'anywhere', marginTop: '16px' })}
+        data-testid="catalog-ranking"
+      >
         <div role="status" aria-live="polite">
           {statusMessage(state)} {state.status === 'loading' && <Spinner inline />}
         </div>

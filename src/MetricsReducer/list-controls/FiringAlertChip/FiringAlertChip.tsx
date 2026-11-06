@@ -10,7 +10,7 @@ import {
   type SceneObjectState,
   type SceneObjectUrlValues,
 } from '@grafana/scenes';
-import { Button, Spinner, useStyles2 } from '@grafana/ui';
+import { Spinner, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
 import { VAR_FILTERED_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
@@ -24,6 +24,7 @@ import { MetricsReducer } from 'MetricsReducer/MetricsReducer';
 import { isFiringAlertsSortingEnabled } from 'shared/featureFlags/openFeature';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
+import { CheckboxWithCount } from '../../SideBar/sections/MetricsFilterSection/CheckboxWithCount';
 import { EventFiltersChanged } from '../../SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { MetricsSorter } from '../MetricsSorter/MetricsSorter';
 
@@ -149,6 +150,13 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
     });
   };
 
+  /** Used by the sidebar section's "clear" action. */
+  public clear() {
+    if (this.state.active) {
+      this.toggle();
+    }
+  }
+
   public static readonly Component = ({ model }: SceneComponentProps<FiringAlertChip>) => {
     const styles = useStyles2(getStyles);
     const { active, matchingCount, loading, visible } = model.useState();
@@ -165,30 +173,21 @@ export class FiringAlertChip extends SceneObjectBase<FiringAlertChipState> {
       );
     }
 
-    const label = t('firing-alert-chip.label', 'Has firing alerts ({{count}})', { count: matchingCount });
     const isEmpty = matchingCount === 0 && !active;
 
     return (
-      <Button
-        className={`${styles.chip} ${active ? styles.chipActive : ''} ${isEmpty ? styles.chipEmpty : ''}`}
-        variant={active ? 'primary' : 'secondary'}
-        size="sm"
-        onClick={model.toggle}
-        aria-pressed={active}
-        aria-label={
-          active
-            ? t('firing-alert-chip.aria-label-active', 'Remove firing alerts filter')
-            : t('firing-alert-chip.aria-label-inactive', 'Filter by firing alerts')
-        }
+      <CheckboxWithCount
+        label={t('firing-alert-chip.checkbox-label', 'Has firing alerts')}
+        count={matchingCount}
+        checked={active}
+        onChange={model.toggle}
         disabled={isEmpty}
         title={
           isEmpty
             ? t('firing-alert-chip.tooltip-empty', 'No metrics with firing alerts in the current filtered set')
             : undefined
         }
-      >
-        {label}
-      </Button>
+      />
     );
   };
 }
@@ -199,16 +198,6 @@ function getStyles(theme: GrafanaTheme2) {
       display: 'flex',
       alignItems: 'center',
       padding: theme.spacing(0, 0.5),
-    }),
-    chip: css({
-      whiteSpace: 'nowrap',
-      alignSelf: 'center',
-    }),
-    chipActive: css({
-      fontWeight: theme.typography.fontWeightMedium,
-    }),
-    chipEmpty: css({
-      opacity: 0.5,
     }),
   };
 }

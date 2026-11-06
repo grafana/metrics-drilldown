@@ -12,7 +12,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { Stack, useStyles2 } from '@grafana/ui';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import { LoadQueryScene } from 'shared/savedQueries/LoadQueryScene';
 import { SaveQueryButton } from 'shared/savedQueries/SaveQueryButton';
@@ -261,22 +261,10 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
     const styles = useStyles2(getStyles);
 
     const { $variables, body, listControls, loadQueryScene, sidebar } = model.useState();
-    const ranking = sceneGraph.findByKeyAndType(model, 'metrics-sorter', MetricsSorter).state.ranking;
-    const toolbarRef = useRef<HTMLDivElement>(null);
-    const [toolbarHeight, setToolbarHeight] = useState(32);
-    useEffect(() => {
-      const toolbar = toolbarRef.current;
-      if (!toolbar || typeof ResizeObserver === 'undefined') {
-        return;
-      }
-      const observer = new ResizeObserver(() => setToolbarHeight(toolbar.getBoundingClientRect().height));
-      observer.observe(toolbar);
-      return () => observer.disconnect();
-    }, []);
 
     return (
       <>
-        <div ref={toolbarRef} className={styles.listControls} data-testid="list-controls">
+        <div className={styles.listControls} data-testid="list-controls">
           <Stack direction="row" alignItems="center" gap={1}>
             <div style={{ flex: 1 }}>
               <listControls.Component model={listControls} />
@@ -284,13 +272,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             <SaveQueryButton sceneRef={model} />
             <loadQueryScene.Component model={loadQueryScene} />
           </Stack>
-          <ranking.Component model={ranking} />
         </div>
-        <Stack
-          direction="row"
-          gap={1}
-          height={`calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT + Math.max(0, toolbarHeight - 32)}px)`}
-        >
+        <Stack direction="row" gap={1} height={`calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT}px)`}>
           <div className={styles.sidebar} data-testid="sidebar">
             <sidebar.Component model={sidebar} />
           </div>
