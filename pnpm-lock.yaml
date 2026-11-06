@@ -229,7 +229,7 @@ importers:
         specifier: 6.0.0
         version: 6.0.0(eslint@10.0.2(jiti@2.7.0)(supports-color@8.1.1))(webpack@5.112.2(@swc/core@1.16.20(@swc/helpers@0.5.23))(postcss@8.5.28))
       glob:
-        specifier: ^14.0.2
+        specifier: 14.0.3
         version: 14.0.3
       globals:
         specifier: ^17.0.0
