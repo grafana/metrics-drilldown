@@ -57,7 +57,8 @@ overrides:
   ip-address: ^10.7.4
   zod@^4: ^4.6.6
   fast-uri: ^3.1.9
-
+  'glob@^10': '^14.0.2'
+  'glob@^13': '^14.0.2'
 minimumReleaseAgeExclude:
   - '@grafana/i18n@13.3.0'
   - '@grafana/data@13.3.0'
