@@ -1,4 +1,4 @@
-import { buildFilterExpression, removeIgnoreUsageLabel } from './utils.queries';
+import { buildFilterExpression, removeIgnoreUsageLabel, toExploreQuery } from './utils.queries';
 
 describe('buildFilterExpression', () => {
   it('should build a standard label matcher', () => {
@@ -62,5 +62,31 @@ describe('removeIgnoreUsageLabel', () => {
 
   it('should return empty string unchanged', () => {
     expect(removeIgnoreUsageLabel('')).toBe('');
+  });
+});
+
+describe('toExploreQuery', () => {
+  it('drops the legend so Explore does not inherit the Drilldown one', () => {
+    const query = { refId: 'A', expr: 'avg(metric)', legendFormat: 'avg', fromExploreMetrics: true };
+
+    expect(toExploreQuery(query)).toEqual({ refId: 'A', expr: 'avg(metric)', fromExploreMetrics: true });
+  });
+
+  it('removes the __ignore_usage__ label from the expression', () => {
+    const query = { refId: 'A', expr: 'avg(metric{__ignore_usage__="",job="api"})', legendFormat: '{{job}}' };
+
+    expect(toExploreQuery(query)).toEqual({ refId: 'A', expr: 'avg(metric{job="api"})' });
+  });
+
+  it('leaves the panel query untouched', () => {
+    const query = { refId: 'A', expr: 'avg(metric)', legendFormat: 'avg' };
+
+    toExploreQuery(query);
+
+    expect(query.legendFormat).toBe('avg');
+  });
+
+  it('handles queries without an expression', () => {
+    expect(toExploreQuery({ refId: 'A', legendFormat: 'avg' })).toEqual({ refId: 'A' });
   });
 });
