@@ -33,7 +33,7 @@
     "i18n-extract": "i18next-cli extract -c i18next.config.ts --sync-primary",
     "i18n-extract-check": "i18next-cli extract -c i18next.config.ts --sync-primary --ci"
   },
-  "packageManager": "pnpm@11.28.8+sha512.f6988a32046b9a3f78d7d7ee0747926bbe905ff9dff73bf19abb87bd7d1906a2ac90d93f73be32b5f9e14c2899569bcb0c9c5ec8a19e083f5d71bbab6dd9e0b8",
+  "packageManager": "pnpm@12.18.0+sha512.9d7882d5dc82147ecfc4e062aa34834e0ad0296710a1837a1115ae012127d36b7109e321ac1598a1dd0a65597681b1e99917e12ed0d749eae91187943363beb3",
   "engines": {
     "node": ">=22"
   },
