@@ -10,6 +10,11 @@
       "related-metrics-description": "根據目前標籤篩選條件的相關指標"
     }
   },
+  "App": {
+    "current-error-title": "",
+    "instances-error-title": "",
+    "loading": "正在載入…"
+  },
   "attribute-explorer": {
     "badge-metric": "OTel 指標屬性",
     "badge-resource": "OTel 資源屬性",
@@ -78,7 +83,7 @@
     "section-label": "明細",
     "select-label": "選取",
     "sync-y-axis": {
-      "label": ""
+      "label": "同步 y 軸"
     }
   },
   "checkbox-list": {
@@ -165,13 +170,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "在目前的時間範圍內找不到此指標的範例",
+      "error": "由於查詢失敗，因此無法載入範例",
+      "label": "顯示範例",
+      "off": "顯示範例（僅限計數器和長條圖）",
+      "on": "正在顯示範例",
+      "unavailable": "此指標不支援範例",
+      "unsupported-panel": "此面板類型不支援範例"
     },
     "native-histogram": "原生直方圖",
     "variant": {
@@ -310,13 +315,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "加入書籤",
+      "add-to-dashboard": "新增至儀表板",
       "copy-url": "複製網址",
       "copy-url-success": "網址已複製到剪貼簿",
-      "create-alert": "",
+      "create-alert": "建立警示",
       "explore": "探索",
-      "remove-bookmark": ""
+      "remove-bookmark": "移除書籤"
     },
     "group": {
       "actions": "動作",
@@ -374,6 +379,7 @@
   },
   "related-logs": {
     "datasource-description": "如果某些 Loki 資料來源的回應時間超過 {{timeout}} 秒，則可能會從下拉式選單中遺失。若要檢視所有 Loki 資料來源的記錄，請嘗試使用記錄深入分析。",
+    "datasource-discovery-error": "無法載入相關日誌的資料來源。",
     "datasource-label": "記錄資料來源",
     "experimental-note": "注意：相關記錄是一項實驗功能。",
     "loading": "正在載入…",
@@ -395,6 +401,12 @@
     "button": "選擇新指標",
     "metrics-drilldown": "指標深入分析",
     "open-in-drilldown-tooltip": "在「指標深入分析」中開啟"
+  },
+  "shared": {
+    "hooks": {
+      "useCurrentPrometheusDataSourceUid": "",
+      "usePrometheusDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_other": "Show {{count}} more ({{current}}/{{total}})"

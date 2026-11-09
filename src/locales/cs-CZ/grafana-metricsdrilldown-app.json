@@ -10,6 +10,11 @@
       "related-metrics-description": "Související metriky založené na aktuálních filtrech štítků"
     }
   },
+  "App": {
+    "current-error-title": "",
+    "instances-error-title": "",
+    "loading": ""
+  },
   "attribute-explorer": {
     "badge-metric": "Atribut metriky OTel",
     "badge-resource": "Atribut zdroje OTel",
@@ -395,6 +400,7 @@
   },
   "related-logs": {
     "datasource-description": "Některé zdroje dat Loki mohou v rozevírací nabídce chybět, pokud jejich odezva trvala déle než {{timeout}} sek. Chcete-li zobrazit protokoly pro všechny zdroje dat Loki, zkuste použít Podrobný rozpis protokolů.",
+    "datasource-discovery-error": "",
     "datasource-label": "Zdroj dat protokolů",
     "experimental-note": "Poznámka: Související protokoly je experimentální funkce.",
     "loading": "Načítání…",
@@ -416,6 +422,12 @@
     "button": "Vyberte novou metriku",
     "metrics-drilldown": "Podrobný rozpis metrik",
     "open-in-drilldown-tooltip": "Otevřít v Podrobném rozpisu metrik"
+  },
+  "shared": {
+    "hooks": {
+      "useCurrentPrometheusDataSourceUid": "",
+      "usePrometheusDataSourceInstances": ""
+    }
   },
   "show-more-button": {
     "text_one": "Zobrazit {{count}} další ({{current}}/{{total}})",

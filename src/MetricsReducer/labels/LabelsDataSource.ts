@@ -22,6 +22,34 @@ import { localeCompare } from '../helpers/localCompare';
 // and empty string could conflict with actual Prometheus label values.
 export const NULL_GROUP_BY_VALUE = '(none)';
 
+const LABEL_VALUES_QUERY_PREFIX = 'labelValues:';
+
+type LabelValuesQuery = {
+  labelName: string;
+  matcher?: string;
+};
+
+export function buildLabelValuesQuery(labelName: string, matcher?: string): string {
+  // Keep the matcher as plain query text rather than JSON. QueryVariable may interpolate ${filters:raw}
+  // before this datasource sees it; embedded quotes from filters must not invalidate the envelope.
+  return `${LABEL_VALUES_QUERY_PREFIX}${encodeURIComponent(labelName)}\n${matcher ?? ''}`;
+}
+
+function parseLabelValuesQuery(query: string): LabelValuesQuery | undefined {
+  if (query.startsWith(LABEL_VALUES_QUERY_PREFIX)) {
+    const newlineIndex = query.indexOf('\n');
+    const encodedLabelName =
+      newlineIndex === -1
+        ? query.slice(LABEL_VALUES_QUERY_PREFIX.length)
+        : query.slice(LABEL_VALUES_QUERY_PREFIX.length, newlineIndex);
+    const matcher = newlineIndex === -1 ? undefined : query.slice(newlineIndex + 1) || undefined;
+    return { labelName: decodeURIComponent(encodedLabelName), matcher };
+  }
+
+  const [, labelName] = query.match(/valuesOf\((.+)\)/) ?? [];
+  return labelName ? { labelName } : undefined;
+}
+
 export class LabelsDataSource extends RuntimeDataSource {
   static readonly uid = 'grafana-prometheus-labels-datasource';
 
@@ -51,15 +79,28 @@ export class LabelsDataSource extends RuntimeDataSource {
 
   async metricFindQuery(matcher: string, options: LegacyMetricFindQueryOptions): Promise<MetricFindValue[]> {
     const sceneObject = options.scopedVars?.__sceneObject?.valueOf() as SceneObject;
+    const labelValuesQuery = parseLabelValuesQuery(matcher);
+
+    // Query variables can briefly evaluate before their dependent group-by variable has resolved.
+    // Avoid issuing an invalid `/label//values` request for that transient empty label name.
+    if (labelValuesQuery && !labelValuesQuery.labelName) {
+      return [];
+    }
 
     const ds = await MetricDatasourceHelper.getPrometheusDataSourceForScene(sceneObject);
     if (!ds) {
       return [];
     }
 
-    const [, labelName] = matcher.match(/valuesOf\((.+)\)/) ?? [];
-    if (labelName) {
-      const labelValues = await LabelsDataSource.fetchLabelValues(labelName, sceneObject);
+    if (labelValuesQuery) {
+      const interpolatedMatcher = labelValuesQuery.matcher
+        ? sceneGraph.interpolate(sceneObject, labelValuesQuery.matcher)
+        : undefined;
+      const labelValues = await LabelsDataSource.fetchLabelValues(
+        labelValuesQuery.labelName,
+        sceneObject,
+        interpolatedMatcher
+      );
       return labelValues.map((value) => ({ value, text: value }));
     }
 
@@ -134,7 +175,7 @@ export class LabelsDataSource extends RuntimeDataSource {
     return options.filter(({ value }) => !value.startsWith('__')).sort((a, b) => localeCompare(a.value, b.value));
   }
 
-  static async fetchLabelValues(labelName: string, sceneObject: SceneObject): Promise<string[]> {
+  static async fetchLabelValues(labelName: string, sceneObject: SceneObject, matcher?: string): Promise<string[]> {
     const ds = await MetricDatasourceHelper.getPrometheusDataSourceForScene(sceneObject);
     if (!ds) {
       return [];
@@ -145,6 +186,7 @@ export class LabelsDataSource extends RuntimeDataSource {
         ds,
         labelName,
         timeRange: sceneGraph.getTimeRange(sceneObject).state.value,
+        matcher,
       });
     } catch (error) {
       displayWarning([
