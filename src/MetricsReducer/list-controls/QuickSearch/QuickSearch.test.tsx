@@ -102,6 +102,26 @@ describe('QuickSearch', () => {
     mockEvaluateFeatureFlag.mockResolvedValue('excluded');
   });
 
+  it('exposes stable selectors on the search input and working clear button', () => {
+    const quickSearch = createQuickSearch();
+    renderQuickSearch(quickSearch);
+
+    const input = screen.getByTestId('quick-search-input');
+    const clear = screen.getByTestId('quick-search-clear');
+    expect(input).toBe(screen.getByRole('textbox', { name: 'Search metrics' }));
+    expect(clear).toBe(screen.getByRole('button', { name: 'Clear search' }));
+    expect(clear).toBeDisabled();
+
+    fireEvent.change(input, { target: { value: 'http_requests_total' } });
+    expect(quickSearch.state.value).toBe('http_requests_total');
+    expect(input).toHaveValue('http_requests_total');
+    expect(clear).toBeEnabled();
+    fireEvent.click(clear);
+    expect(input).toHaveValue('');
+    expect(quickSearch.state.value).toBe('');
+    expect(clear).toBeDisabled();
+  });
+
   // ---------------------------------------------------------------------------
   // Initialization
   // ---------------------------------------------------------------------------
