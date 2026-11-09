@@ -14,9 +14,11 @@ import React, { useEffect, useRef } from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/LabelsVariable';
+import { computeMetricCategoryGroups } from 'MetricsReducer/metrics-variables/computeMetricCategoryGroups';
 import { computeMetricPrefixGroups } from 'MetricsReducer/metrics-variables/computeMetricPrefixGroups';
 import { computeMetricSuffixGroups } from 'MetricsReducer/metrics-variables/computeMetricSuffixGroups';
 import { computeRulesGroups } from 'MetricsReducer/metrics-variables/computeRulesGroups';
+import { getMetricCategoryLabel } from 'MetricsReducer/metrics-variables/metricCategories';
 import { evaluateFeatureFlag } from 'shared/featureFlags/openFeature';
 import { VAR_OTHER_METRIC_FILTERS } from 'shared/shared';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
@@ -57,6 +59,13 @@ function getTranslatedSectionInfo(key: string): { title: string; description: st
       title: t('sidebar.section.suffix-filters', 'Suffix filters'),
       description: t('sidebar.section.suffix-filters-description', 'Filter metrics based on their name suffix'),
     },
+    'filters-category': {
+      title: t('sidebar.section.category-filters', 'Category filters'),
+      description: t(
+        'sidebar.section.category-filters-description',
+        'Group metrics by OpenTelemetry style categories using the start of the metric name. This is a fuzzy match, so a metric can land in a category that does not fit it. Metrics such as node_, kube_ and grpc_ do not match any category and appear under Other.'
+      ),
+    },
     'filters-recent': {
       title: t('sidebar.section.recent-metrics', 'Recent metrics filters'),
       description: t(
@@ -81,6 +90,7 @@ export const metricFilters = {
   rule: 'filters-rule',
   prefix: 'filters-prefix',
   suffix: 'filters-suffix',
+  category: 'filters-category',
   recent: 'filters-recent',
 } as const;
 const metricFiltersVariables = getObjectValues(metricFilters);
@@ -94,6 +104,19 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       key: 'sidebar',
       visibleSection: null,
       sections: [
+        // First in the sidebar, so that users find it
+        new MetricsFilterSection({
+          key: 'filters-category',
+          type: 'metricCategories',
+          title: t('sidebar.section.category-filters', 'Category filters'),
+          description: t(
+            'sidebar.section.category-filters-description',
+            'Group metrics by OpenTelemetry style categories using the start of the metric name. This is a fuzzy match, so a metric can land in a category that does not fit it. Metrics such as node_, kube_ and grpc_ do not match any category and appear under Other.'
+          ),
+          icon: 'open-telemetry',
+          computeGroups: computeMetricCategoryGroups,
+          active: Boolean(sectionValues.get('filters-category')?.length),
+        }),
         new MetricsFilterSection({
           key: 'filters-rule',
           type: 'categories',
@@ -193,6 +216,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       'filters-rule': t('sidebar.filter-type.rule-group', 'rule group'),
       'filters-prefix': t('sidebar.filter-type.prefix', 'prefix'),
       'filters-suffix': t('sidebar.filter-type.suffix', 'suffix'),
+      'filters-category': t('sidebar.filter-type.category', 'category'),
       'filters-recent': t('sidebar.filter-type.recent', 'recent'),
     };
 
@@ -262,7 +286,13 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       // Check for both namespaced key (for embedded mode) and raw key (for regular mode)
       const namespacedKey = `${embeddedTrailNamespace}-${filterKey}`;
       const filterValueFromUrl = urlSearchParams.get(namespacedKey) || urlSearchParams.get(filterKey);
-      sectionValues.set(filterKey, filterValueFromUrl ? filterValueFromUrl.split(',').map((v) => v.trim()) : []);
+      const values = filterValueFromUrl ? filterValueFromUrl.split(',').map((v) => v.trim()) : [];
+
+      // The URL stores category ids (e.g. "host-os"), but the chips and tooltips of the sidebar show labels
+      sectionValues.set(
+        filterKey,
+        filterKey === metricFilters.category ? values.map((id) => getMetricCategoryLabel(id)) : values
+      );
     }
 
     return sectionValues;
@@ -295,6 +325,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       reportExploreMetrics('sidebar_prefix_filter_section_clicked', {});
     } else if (sectionKey === 'filters-suffix') {
       reportExploreMetrics('sidebar_suffix_filter_section_clicked', {});
+    } else if (sectionKey === 'filters-category') {
+      reportExploreMetrics('sidebar_category_filter_section_clicked', {});
     }
 
     this.setState({
