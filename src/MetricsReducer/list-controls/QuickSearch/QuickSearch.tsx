@@ -238,6 +238,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
     return (
       <Input
         ref={inputRef}
+        data-testid="quick-search-input"
         aria-label={ariaLabel}
         value={value}
         onChange={handleChange}
@@ -263,6 +264,7 @@ export class QuickSearch extends SceneObjectBase<QuickSearchState> {
             )}
             <IconButton
               name="times"
+              data-testid="quick-search-clear"
               variant="secondary"
               tooltip={t('quick-search.clear-search-tooltip', 'Clear search')}
               aria-label={t('quick-search.clear-search-tooltip', 'Clear search')}
