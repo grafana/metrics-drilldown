@@ -11,7 +11,7 @@ jest.mock('shared/savedQueries/LoadQueryScene', () => {
   const { SceneObjectBase } = jest.requireActual('@grafana/scenes');
   return {
     LoadQueryScene: class extends SceneObjectBase {
-      static Component = () => null;
+      static readonly Component = () => null;
     },
   };
 });
