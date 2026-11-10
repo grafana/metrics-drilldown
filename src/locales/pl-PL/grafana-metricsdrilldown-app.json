@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Wczytywanie…"
   },
   "attribute-explorer": {
     "badge-metric": "Atrybut wskaźnika OTel",
@@ -89,7 +89,7 @@
     "section-label": "Zestawienie",
     "select-label": "Wybierz",
     "sync-y-axis": {
-      "label": ""
+      "label": "Synchronizuj oś Y"
     }
   },
   "checkbox-list": {
@@ -185,13 +185,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "Nie znaleziono przykładów dla tej metryki w bieżącym zakresie czasu",
+      "error": "Nie udało się wczytać przykładów, ponieważ zapytanie się nie powiodło",
+      "label": "Pokaż przykłady",
+      "off": "Pokaż przykłady (tylko liczniki i histogramy)",
+      "on": "Wyświetlanie przykładów",
+      "unavailable": "Przykłady nie są dostępne w przypadku tej metryki",
+      "unsupported-panel": "Przykłady nie są dostępne w przypadku tego typu panelu"
     },
     "native-histogram": "Histogram natywny",
     "variant": {
@@ -330,13 +330,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Dodaj zakładkę",
+      "add-to-dashboard": "Dodaj do pulpitu",
       "copy-url": "Kopiuj URL",
       "copy-url-success": "Adres URL został skopiowany do schowka",
-      "create-alert": "",
+      "create-alert": "Utwórz alert",
       "explore": "Eksploruj",
-      "remove-bookmark": ""
+      "remove-bookmark": "Usuń zakładkę"
     },
     "group": {
       "actions": "Działania",
@@ -400,7 +400,7 @@
   },
   "related-logs": {
     "datasource-description": "Niektóre źródła danych Loki mogą nie być dostępne w menu rozwijanym, jeśli odpowiedź zajęła więcej niż {{timeout}} s. Aby wyświetlić logi dla wszystkich źródeł danych Loki, spróbuj użyć aplikacji Logs Drilldown.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "Nie udało się wczytać źródeł danych dla powiązanych logów.",
     "datasource-label": "Źródło danych logów",
     "experimental-note": "Uwaga: powiązane logi to funkcja eksperymentalna.",
     "loading": "Wczytywanie…",
@@ -450,6 +450,7 @@
       "search-placeholder": "Szukaj…"
     },
     "filter-type": {
+      "category": "",
       "prefix": "prefiks",
       "recent": "ostatnie",
       "rule-group": "grupa reguł",
@@ -460,6 +461,27 @@
       "search-aria-label": "Szukaj etykiet",
       "search-placeholder": "Szukaj…"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Cały czas",
       "past-interval": "{{interval}} w przeszłości"
@@ -467,6 +489,8 @@
     "section": {
       "bookmarks": "Zakładki",
       "bookmarks-description": "Uzyskiwanie dostępu do zapisanych wskaźników, aby szybko je sprawdzać",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Grupuj według etykiet",
       "group-by-labels-description": "Grupowanie wskaźników według wartości etykiet",
       "prefix-filters": "Filtry prefiksów",

@@ -426,6 +426,7 @@
       "search-placeholder": "搜索..."
     },
     "filter-type": {
+      "category": "",
       "prefix": "前缀",
       "recent": "最近",
       "rule-group": "规则组",
@@ -436,6 +437,27 @@
       "search-aria-label": "搜索标签",
       "search-placeholder": "搜索..."
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "所有时间",
       "past-interval": "过去{{interval}}"
@@ -443,6 +465,8 @@
     "section": {
       "bookmarks": "书签",
       "bookmarks-description": "快速访问您保存的指标",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "按标签分组",
       "group-by-labels-description": "按标签值对指标分组",
       "prefix-filters": "前缀筛选条件",

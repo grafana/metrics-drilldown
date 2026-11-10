@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Betöltés…"
   },
   "attribute-explorer": {
     "badge-metric": "OTel-metrikaattribútum",
@@ -85,7 +85,7 @@
     "section-label": "Részletezés",
     "select-label": "Kiválasztás",
     "sync-y-axis": {
-      "label": ""
+      "label": "Y tengely szinkronizálása"
     }
   },
   "checkbox-list": {
@@ -175,13 +175,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "Nem található példa erre a metrikára az aktuális időtartományban",
+      "error": "A mintapéldányokat nem sikerült betölteni, mert a lekérdezés sikertelen volt",
+      "label": "Mintapéldányok megjelenítése",
+      "off": "Mintapéldányok megjelenítése (csak számlálók és hisztogramok)",
+      "on": "Mintapéldányok megjelenítése",
+      "unavailable": "Ehhez a mutatóhoz nem érhetők el mintapéldányok",
+      "unsupported-panel": "Ehhez a paneltípushoz nem érhetők el mintapéldányok"
     },
     "native-histogram": "Natív hisztogram",
     "variant": {
@@ -320,13 +320,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Könyvjelző hozzáadása",
+      "add-to-dashboard": "Hozzáadás az irányítópulthoz",
       "copy-url": "URL-cím másolása",
       "copy-url-success": "URL-cím a vágólapra másolva",
-      "create-alert": "",
+      "create-alert": "Riasztás létrehozása",
       "explore": "Explore",
-      "remove-bookmark": ""
+      "remove-bookmark": "Könyvjelző eltávolítása"
     },
     "group": {
       "actions": "Műveletek",
@@ -386,7 +386,7 @@
   },
   "related-logs": {
     "datasource-description": "Előfordulhat, hogy néhány Loki-adatforrás hiányzik a legördülő menüből, ha a több mint {{timeout}} másodpercig nem válaszoltak. Próbálja meg a Logs Drilldown használatával megtekinteni az összes Loki-adatforrás naplóját.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "A kapcsolódó naplók adatforrásainak betöltése nem sikerült.",
     "datasource-label": "Naplók adatforrása",
     "experimental-note": "Megjegyzés: A Kapcsolódó naplók egy kísérleti funkció.",
     "loading": "Betöltés…",
@@ -434,6 +434,7 @@
       "search-placeholder": "Keresés…"
     },
     "filter-type": {
+      "category": "",
       "prefix": "előtag",
       "recent": "legújabb",
       "rule-group": "szabálycsoport",
@@ -444,6 +445,27 @@
       "search-aria-label": "Címkék keresése",
       "search-placeholder": "Keresés…"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Összes idő",
       "past-interval": "Legutóbbi {{interval}}"
@@ -451,6 +473,8 @@
     "section": {
       "bookmarks": "Könyvjelzők",
       "bookmarks-description": "Hozzáférés a mentett metrikákhoz gyors áttekintés céljából",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Csoportosítás címkék szerint",
       "group-by-labels-description": "Metrikák csoportosítása a címkeértékeik szerint",
       "prefix-filters": "Előtagszűrők",

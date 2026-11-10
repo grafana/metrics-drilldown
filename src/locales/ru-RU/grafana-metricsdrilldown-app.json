@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Загрузка…"
   },
   "attribute-explorer": {
     "badge-metric": "Атрибут метрики OTel",
@@ -89,7 +89,7 @@
     "section-label": "Разбивка",
     "select-label": "Выбрать",
     "sync-y-axis": {
-      "label": ""
+      "label": "Синхронизировать ось y"
     }
   },
   "checkbox-list": {
@@ -185,13 +185,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "Для этой метрики в текущем временном диапазоне образцы не найдены",
+      "error": "Не удалось загрузить образцы, поскольку запрос не выполнен",
+      "label": "Показать образцы",
+      "off": "Показать образцы (только счетчики и гистограммы)",
+      "on": "Отображаются образцы",
+      "unavailable": "Для этой метрики образцы недоступны",
+      "unsupported-panel": "Для этого типа панели образцы недоступны"
     },
     "native-histogram": "Встроенная гистограмма",
     "variant": {
@@ -330,13 +330,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Добавить закладку",
+      "add-to-dashboard": "Добавить на дашборд",
       "copy-url": "Копировать URL",
       "copy-url-success": "URL-адрес скопирован в буфер обмена",
-      "create-alert": "",
+      "create-alert": "Создать оповещение",
       "explore": "Explore",
-      "remove-bookmark": ""
+      "remove-bookmark": "Удалить закладку"
     },
     "group": {
       "actions": "Действия",
@@ -400,7 +400,7 @@
   },
   "related-logs": {
     "datasource-description": "В раскрывающемся списке могут отсутствовать некоторые источники данных Loki, если их время ответа превышает {{timeout}} сек. Для просмотра журналов всех источников данных Loki попробуйте использовать приложение Logs Drilldown.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "Не удалось загрузить источники данных для связанных логов.",
     "datasource-label": "Источник данных журналов",
     "experimental-note": "Примечание. Связанные журналы — это экспериментальная функция.",
     "loading": "Загрузка…",
@@ -450,6 +450,7 @@
       "search-placeholder": "Поиск…"
     },
     "filter-type": {
+      "category": "",
       "prefix": "префикс",
       "recent": "недавние",
       "rule-group": "группа правил",
@@ -460,6 +461,27 @@
       "search-aria-label": "Поиск меток",
       "search-placeholder": "Поиск…"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Все время",
       "past-interval": "Последние {{interval}}"
@@ -467,6 +489,8 @@
     "section": {
       "bookmarks": "Закладки",
       "bookmarks-description": "Используйте сохраненные метрики для быстрого просмотра информации",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Группировать по меткам",
       "group-by-labels-description": "Группировать метрики по значениям меток",
       "prefix-filters": "Фильтры префиксов",

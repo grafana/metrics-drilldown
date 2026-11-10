@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Läser in …"
   },
   "attribute-explorer": {
     "badge-metric": "OTel-mätvärdesattribut",
@@ -85,7 +85,7 @@
     "section-label": "Uppdelning",
     "select-label": "Välj",
     "sync-y-axis": {
-      "label": ""
+      "label": "Synkronisera y-axeln"
     }
   },
   "checkbox-list": {
@@ -175,13 +175,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "Inga exempel hittades för detta mätetal i det aktuella tidsintervallet",
+      "error": "Exemplar kunde inte laddas eftersom frågan misslyckades",
+      "label": "Visa exemplar",
+      "off": "Visa exemplar (endast räknare och histogram)",
+      "on": "Visar exemplar",
+      "unavailable": "Exemplar är inte tillgängliga för det här mätvärdet",
+      "unsupported-panel": "Exemplar är inte tillgängliga för den här paneltypen"
     },
     "native-histogram": "Inbyggt histogram",
     "variant": {
@@ -320,13 +320,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Lägg till bokmärke",
+      "add-to-dashboard": "Lägg till i instrumentpanelen",
       "copy-url": "Kopiera webbadress",
       "copy-url-success": "URL kopierad till urklippet",
-      "create-alert": "",
+      "create-alert": "Skapa larm",
       "explore": "Utforska",
-      "remove-bookmark": ""
+      "remove-bookmark": "Ta bort bokmärke"
     },
     "group": {
       "actions": "Åtgärder",
@@ -386,7 +386,7 @@
   },
   "related-logs": {
     "datasource-description": "Vissa Loki-datakällor kan saknas i rullgardinsmenyn om de inte svarade inom {{timeout}} sekunder. Om du vill visa loggar för alla Loki-datakällor kan du prova att använda Logs Drilldown för detaljanalys för loggar.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "Kunde inte läsa in datakällor för relaterade loggar.",
     "datasource-label": "Loggar datakälla",
     "experimental-note": "Obs! Relaterade loggar är en experimentell funktion.",
     "loading": "Laddar …",
@@ -434,6 +434,7 @@
       "search-placeholder": "Sök …"
     },
     "filter-type": {
+      "category": "",
       "prefix": "prefix",
       "recent": "senaste",
       "rule-group": "regelgrupp",
@@ -444,6 +445,27 @@
       "search-aria-label": "Sök etiketter",
       "search-placeholder": "Sök …"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Hela tiden",
       "past-interval": "Tidigare {{interval}}"
@@ -451,6 +473,8 @@
     "section": {
       "bookmarks": "Bokmärken",
       "bookmarks-description": "Få åtkomst till dina sparade mätvärden för snabb referens",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Gruppera efter etiketter",
       "group-by-labels-description": "Gruppera mätvärden efter deras etikettvärden",
       "prefix-filters": "Prefixfilter",

@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Aan het laden..."
   },
   "attribute-explorer": {
     "badge-metric": "OTel-metricattribuut",
@@ -85,7 +85,7 @@
     "section-label": "Breakdown",
     "select-label": "Selecteren",
     "sync-y-axis": {
-      "label": ""
+      "label": "Y-as synchroniseren"
     }
   },
   "checkbox-list": {
@@ -175,13 +175,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "Er zijn geen voorbeelden gevonden voor deze metric in het huidige tijdsbereik",
+      "error": "Voorbeelden konden niet worden geladen omdat de query is mislukt",
+      "label": "Voorbeelden weergeven",
+      "off": "Voorbeelden weergeven (alleen tellers en histogrammen)",
+      "on": "Voorbeelden weergeven",
+      "unavailable": "Voorbeelden zijn niet beschikbaar voor deze metric",
+      "unsupported-panel": "Voorbeelden zijn niet beschikbaar voor dit paneeltype"
     },
     "native-histogram": "Native Histogram",
     "variant": {
@@ -320,13 +320,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Bladwijzer toevoegen",
+      "add-to-dashboard": "Toevoegen aan dashboard",
       "copy-url": "URL kopiëren",
       "copy-url-success": "URL naar klembord gekopieerd",
-      "create-alert": "",
+      "create-alert": "Waarschuwing aanmaken",
       "explore": "Verkennen",
-      "remove-bookmark": ""
+      "remove-bookmark": "Bladwijzer verwijderen"
     },
     "group": {
       "actions": "Acties",
@@ -386,7 +386,7 @@
   },
   "related-logs": {
     "datasource-description": "Sommige Loki-databronnen ontbreken mogelijk in de vervolgkeuzelijst als het langer dan {{timeout}} seconden duurde om te reageren. Probeer Logs Drilldown te gebruiken om logs voor alle Loki-databronnen te bekijken.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "Kan gegevensbronnen voor gerelateerde logboeken niet laden.",
     "datasource-label": "Logs-databron",
     "experimental-note": "Let op: gerelateerde logs is een experimentele functie.",
     "loading": "Laden...",
@@ -434,6 +434,7 @@
       "search-placeholder": "Zoeken..."
     },
     "filter-type": {
+      "category": "",
       "prefix": "voorvoegsel",
       "recent": "recent",
       "rule-group": "regelgroep",
@@ -444,6 +445,27 @@
       "search-aria-label": "Labels zoeken",
       "search-placeholder": "Zoeken..."
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Altijd",
       "past-interval": "Verleden {{interval}}"
@@ -451,6 +473,8 @@
     "section": {
       "bookmarks": "Bladwijzers",
       "bookmarks-description": "Toegang tot uw opgeslagen metrics voor snelle referentie",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Groeperen op labels",
       "group-by-labels-description": "Groeperen van statistieken op hun labelwaarden",
       "prefix-filters": "Voorvoegselsfilters",

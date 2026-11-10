@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Načítání…"
   },
   "attribute-explorer": {
     "badge-metric": "Atribut metriky OTel",
@@ -89,7 +89,7 @@
     "section-label": "Rozpis",
     "select-label": "Vybrat",
     "sync-y-axis": {
-      "label": ""
+      "label": "Synchronizovat osu y"
     }
   },
   "checkbox-list": {
@@ -185,13 +185,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "V aktuálním časovém rozsahu nebyly pro tuto metriku nalezeny žádné vzorové hodnoty",
+      "error": "Příklady se nepodařilo načíst, protože dotaz selhal",
+      "label": "Zobrazit příklady",
+      "off": "Zobrazit příklady (pouze čítače a histogramy)",
+      "on": "Zobrazují se příklady",
+      "unavailable": "Vzory nejsou pro tuto metriku k dispozici",
+      "unsupported-panel": "Příklady nejsou pro tento typ panelu k dispozici"
     },
     "native-histogram": "Nativní histogram",
     "variant": {
@@ -330,13 +330,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Přidat záložku",
+      "add-to-dashboard": "Přidat na dashboard",
       "copy-url": "Kopírovat adresu URL",
       "copy-url-success": "Adresa URL byla zkopírována do schránky",
-      "create-alert": "",
+      "create-alert": "Vytvořit výstrahu",
       "explore": "Prozkoumat",
-      "remove-bookmark": ""
+      "remove-bookmark": "Odebrat záložku"
     },
     "group": {
       "actions": "Akce",
@@ -400,7 +400,7 @@
   },
   "related-logs": {
     "datasource-description": "Některé zdroje dat Loki mohou v rozevírací nabídce chybět, pokud jejich odezva trvala déle než {{timeout}} sek. Chcete-li zobrazit protokoly pro všechny zdroje dat Loki, zkuste použít Podrobný rozpis protokolů.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "Zdroje dat pro související protokoly se nepodařilo načíst.",
     "datasource-label": "Zdroj dat protokolů",
     "experimental-note": "Poznámka: Související protokoly je experimentální funkce.",
     "loading": "Načítání…",
@@ -450,6 +450,7 @@
       "search-placeholder": "Vyhledávání…"
     },
     "filter-type": {
+      "category": "",
       "prefix": "předpona",
       "recent": "nedávné",
       "rule-group": "skupina pravidel",
@@ -460,6 +461,27 @@
       "search-aria-label": "Hledat štítky",
       "search-placeholder": "Vyhledávání…"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Kdykoliv",
       "past-interval": "Minulý {{interval}}"
@@ -467,6 +489,8 @@
     "section": {
       "bookmarks": "Záložky",
       "bookmarks-description": "Přístup k uloženým metrikám pro rychlou referenci",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Seřadit podle štítků",
       "group-by-labels-description": "Seřadit metriky podle hodnot štítků",
       "prefix-filters": "Filtry předpon",
