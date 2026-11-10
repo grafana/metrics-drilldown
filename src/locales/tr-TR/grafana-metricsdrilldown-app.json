@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Yükleniyor..."
   },
   "attribute-explorer": {
     "badge-metric": "OTel metrik özniteliği",
@@ -85,7 +85,7 @@
     "section-label": "Kırılım",
     "select-label": "Seçin",
     "sync-y-axis": {
-      "label": ""
+      "label": "Y eksenini senkronize et"
     }
   },
   "checkbox-list": {
@@ -175,13 +175,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "Geçerli zaman aralığında bu metrik için örnek bulunamadı",
+      "error": "Sorgu başarısız olduğu için temsilî veriler yüklenemedi",
+      "label": "Temsilî verileri göster",
+      "off": "Temsilî verileri göster (yalnızca sayaçlar ve histogramlar)",
+      "on": "Temsilî veriler gösteriliyor",
+      "unavailable": "Temsilî veriler bu metrik için kullanılamıyor",
+      "unsupported-panel": "Temsilî veriler bu panel türü için kullanılamıyor"
     },
     "native-histogram": "Yerel Histogram",
     "variant": {
@@ -320,13 +320,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Yer imi ekle",
+      "add-to-dashboard": "Panoya ekle",
       "copy-url": "URL'yi kopyala",
       "copy-url-success": "URL panoya kopyalandı",
-      "create-alert": "",
+      "create-alert": "Uyarı oluştur",
       "explore": "Keşfet",
-      "remove-bookmark": ""
+      "remove-bookmark": "Yer imini kaldır"
     },
     "group": {
       "actions": "İşlemler",
@@ -386,7 +386,7 @@
   },
   "related-logs": {
     "datasource-description": "Yanıt vermesi {{timeout}} saniyeden uzun sürdüyse bazı Loki veri kaynakları açılır listede görünmeyebilir. Tüm Loki veri kaynaklarının günlük kayıtlarını görüntülemek için Logs Drilldown'u kullanmayı deneyin.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "İlgili günlükler için veri kaynakları yüklenemedi.",
     "datasource-label": "Günlük kayıtları veri kaynağı",
     "experimental-note": "Not: İlgili günlük kayıtları deneysel bir özelliktir.",
     "loading": "Yükleniyor...",
@@ -434,6 +434,7 @@
       "search-placeholder": "Ara..."
     },
     "filter-type": {
+      "category": "",
       "prefix": "ön ek",
       "recent": "son",
       "rule-group": "kural grubu",
@@ -444,6 +445,27 @@
       "search-aria-label": "Etiket ara",
       "search-placeholder": "Ara..."
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Tüm zamanlar",
       "past-interval": "Geçen {{interval}}"
@@ -451,6 +473,8 @@
     "section": {
       "bookmarks": "Yer imleri",
       "bookmarks-description": "Hızlı erişim için kaydedilen metriklere erişin",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Etiketlere göre grupla",
       "group-by-labels-description": "Metrikleri etiket değerlerine göre gruplandırın",
       "prefix-filters": "Ön ek filtreleri",
