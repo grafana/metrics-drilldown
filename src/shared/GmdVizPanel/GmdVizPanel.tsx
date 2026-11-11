@@ -30,8 +30,10 @@ import { QUERY_RESOLUTION } from './config/query-resolutions';
 import { getMetricType, getMetricTypeSync, type Metric, type MetricType } from './matchers/getMetricType';
 import { getPanelTypeForMetricSync } from './matchers/getPanelTypeForMetric';
 import { type KgMetricType } from './matchers/mapKgMetricType';
+import { type MetricMetadataContext } from './MetricMetadataContext';
 import { type PanelType } from './types/available-panel-types';
 import { panelBuilder } from './types/panelBuilder';
+import { getPerSecondRateUnit, getUnit } from './units/getUnit';
 
 /* Panel config */
 
@@ -139,12 +141,14 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     panelOptions,
     queryOptions,
     discardUserPrefs,
+    metadataContext,
   }: {
     key?: string;
     metric: GmdVizPanelState['metric'];
     panelOptions?: PanelOptions;
     queryOptions?: QueryOptions;
     discardUserPrefs?: boolean;
+    metadataContext?: MetricMetadataContext;
   }) {
     // we want a metric and panel type now to be able to render the panel as soon as possible after activation
     // so we use sync/fast heuristsics before using a 100% correct async method in onActivate() (fetching the metric metadata)
@@ -175,24 +179,39 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       body: undefined,
     });
 
+    this.metadataContext = metadataContext;
     this.addActivationHandler(() => {
-      this.onActivate(Boolean(panelOptions?.type || prefConfig?.panelOptions.type));
+      let active = true;
+      this.onActivate(Boolean(panelOptions?.type || prefConfig?.panelOptions.type), () => active);
+      return () => {
+        active = false;
+      };
     });
   }
 
-  private async onActivate(discardPanelTypeUpdates: boolean) {
+  private readonly metadataContext?: MetricMetadataContext;
+
+  private getMetadataContext(): MetricMetadataContext {
+    return this.metadataContext ?? getTrailFor(this);
+  }
+
+  private onActivate(discardPanelTypeUpdates: boolean, isCurrent: () => boolean) {
     this.buildVizPanel();
 
     this.subscribeToStateChanges();
     this.subscribeToEvents();
 
-    this.checkMetricMetadata(discardPanelTypeUpdates);
+    this.checkMetricMetadata(discardPanelTypeUpdates, isCurrent);
   }
 
   // Metadata can resolve a type the sync heuristic can't guess (currently only native histograms), not just swap
   // between counter and gauge. Only applied from a generic sync guess: a metric already classified more
   // specifically by name (e.g. classic-histogram) shouldn't be reprocessed here.
-  private applyMetadataResolvedType(metricType: MetricType, metricTypeFromMetadata: MetricType, discardPanelTypeUpdates: boolean) {
+  private applyMetadataResolvedType(
+    metricType: MetricType,
+    metricTypeFromMetadata: MetricType,
+    discardPanelTypeUpdates: boolean
+  ) {
     if (metricType !== 'gauge' && metricType !== 'counter') {
       return;
     }
@@ -209,7 +228,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
   }
 
-  private async checkMetricMetadata(discardPanelTypeUpdates: boolean) {
+  private async checkMetricMetadata(discardPanelTypeUpdates: boolean, isCurrent = () => true) {
     const { metric, queryConfig } = this.state;
 
     if (queryConfig.kgMetricType) {
@@ -217,22 +236,15 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       return;
     }
 
-    const metricTypeFromMetadata = await getMetricType(metric, getTrailFor(this));
+    const metadataContext = this.getMetadataContext();
+    const metricTypeFromMetadata = await getMetricType(metric, metadataContext);
+    if (!isCurrent()) {
+      return;
+    }
 
     const { metricType } = this.state;
 
-    // we found a gauge metric that was previously identified as a counter (see https://github.com/grafana/metrics-drilldown/issues/698)
-    if (metricTypeFromMetadata === 'gauge' && metricType === 'counter') {
-      this.setState({ metricType: 'gauge' });
-    }
-    // or the opposite
-    if (metricTypeFromMetadata === 'counter' && metricType === 'gauge') {
-      this.setState({ metricType: 'counter' });
-    }
-    // summaries always start out mis-detected as a gauge (no sync name heuristic)
-    if (metricTypeFromMetadata === 'summary' && metricType === 'gauge') {
-      this.setState({ metricType: 'summary' });
-    }
+    this.correctGenericMetricType(metricType, metricTypeFromMetadata);
 
     this.applyMetadataResolvedType(metricType, metricTypeFromMetadata, discardPanelTypeUpdates);
 
@@ -241,7 +253,10 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     // still think it's a gauge, run a rated probe query instead: if it comes back as a native-histogram
     // (HeatmapCells) frame with data, switch the panel to a heatmap.
     if (metricTypeFromMetadata === 'gauge' && this.state.metricType === 'gauge') {
-      const metadata = await getTrailFor(this).getMetadataForMetric(metric); // cached from getMetricType() above
+      const metadata = await metadataContext.getMetadataForMetric(metric); // cached from getMetricType() above
+      if (!isCurrent()) {
+        return;
+      }
       if (!metadata) {
         this.detectNativeHistogram(discardPanelTypeUpdates); // marks metricTypeResolved once the probe settles
         return;
@@ -249,6 +264,16 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
     }
 
     this.setState({ metricTypeResolved: true });
+  }
+
+  private correctGenericMetricType(metricType: MetricType, metadataType: MetricType) {
+    // Metadata can correct counter/gauge heuristics; summaries have no sync name heuristic.
+    if (
+      (metricType === 'counter' && metadataType === 'gauge') ||
+      (metricType === 'gauge' && (metadataType === 'counter' || metadataType === 'summary'))
+    ) {
+      this.setState({ metricType: metadataType });
+    }
   }
 
   /**
@@ -264,9 +289,9 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
    */
   private detectNativeHistogram(discardPanelTypeUpdates: boolean) {
     const { metric, queryConfig } = this.state;
-    const trail = getTrailFor(this);
+    const metadataContext = this.getMetadataContext();
 
-    const cached = trail.getCachedNativeHistogram(metric);
+    const cached = metadataContext.getCachedNativeHistogram(metric);
     if (cached !== undefined) {
       if (cached) {
         this.switchToNativeHistogramHeatmap(discardPanelTypeUpdates);
@@ -307,7 +332,7 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       }
 
       const isNativeHistogram = firstFrame.meta?.type === DataFrameType.HeatmapCells;
-      trail.setCachedNativeHistogram(metric, isNativeHistogram);
+      metadataContext.setCachedNativeHistogram(metric, isNativeHistogram);
 
       if (isNativeHistogram) {
         this.switchToNativeHistogramHeatmap(discardPanelTypeUpdates);
@@ -442,6 +467,18 @@ export class GmdVizPanel extends SceneObjectBase<GmdVizPanelState> {
       metric: { name: metric, type: metricType },
       queryConfig,
     });
+
+    if (body.state.pluginId === 'timeseries') {
+      body.setState({
+        fieldConfig: {
+          ...body.state.fieldConfig,
+          defaults: {
+            ...body.state.fieldConfig.defaults,
+            unit: queryRunnerParams.isRateQuery ? getPerSecondRateUnit(metric) : getUnit(metric),
+          },
+        },
+      });
+    }
 
     queryRunner.setState({
       queries: queryRunnerParams.queries,
