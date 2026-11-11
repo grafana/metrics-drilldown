@@ -1,8 +1,8 @@
 import { PageLayoutType, type NavModelItem } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { PluginPage } from '@grafana/runtime';
-import { UrlSyncContextProvider, type SceneObject } from '@grafana/scenes';
-import React, { useEffect, useMemo, useState } from 'react';
+import { UrlSyncContextProvider, useSceneObjectState, type SceneObject } from '@grafana/scenes';
+import React, { useMemo } from 'react';
 
 import { TrailErrorBoundary } from './TrailErrorBoundary';
 import { type DataTrail } from '../AppDataTrail/DataTrail';
@@ -84,29 +84,8 @@ export default function Trail({ trail }: Readonly<TrailProps>) {
   useMetricsDrilldownQuestions();
 
   const { topScene, metric } = trail.useState();
-  const [currentActionViewName, setCurrentActionViewName] = useState<string>('');
-
-  // Subscribe to MetricScene state changes to update breadcrumb
-  useEffect(() => {
-    if (!(topScene instanceof MetricScene)) {
-      setCurrentActionViewName('');
-      return undefined;
-    }
-
-    // Get current action view name
-    setCurrentActionViewName(topScene.getActionViewName());
-
-    // Subscribe to action view state changes
-    const topSceneSubscription = topScene.subscribeToState(() => {
-      setCurrentActionViewName(topScene.getActionViewName());
-    });
-
-    return () => {
-      if (topSceneSubscription) {
-        topSceneSubscription.unsubscribe();
-      }
-    };
-  }, [topScene]);
+  useSceneObjectState(topScene ?? trail);
+  const currentActionViewName = topScene instanceof MetricScene ? topScene.getActionViewName() : '';
 
   // Create pageNav based on current state
   const pageNav = useMemo(
