@@ -3,7 +3,7 @@ import { t } from '@grafana/i18n';
 import { getExploreURL, sceneGraph, VizPanel, type SceneObject } from '@grafana/scenes';
 
 import { reportExploreMetrics } from 'shared/tracking/interactions';
-import { removeIgnoreUsageLabel } from 'shared/utils/utils.queries';
+import { toExploreQuery } from 'shared/utils/utils.queries';
 
 export class ExploreAction {
   static create(panelMenuInstance: SceneObject): PanelMenuItem {
@@ -19,16 +19,7 @@ export class ExploreAction {
       // when used in the metric select scene case,
       // this will get the explore url with interpolated variables and include the labels __ignore_usage__, this is a known issue
       // in the metric scene we do not get use the __ignore_usage__ labels in the explore url
-      exploreUrl = getExploreURL(panelData, panelMenuInstance, panelData.timeRange, (query) => {
-        if ('expr' in query && typeof query.expr === 'string') {
-          return {
-            ...query,
-            expr: removeIgnoreUsageLabel(query.expr),
-          };
-        }
-
-        return query;
-      });
+      exploreUrl = getExploreURL(panelData, panelMenuInstance, panelData.timeRange, toExploreQuery);
     } catch {}
 
     return {
