@@ -65,12 +65,12 @@ describe('extreme value filtering', () => {
     [
       'non-utf8',
       'go_goroutines',
-      'go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", ${filters:raw}} and go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", ${filters:raw}} > -Inf',
+      '(go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", ${filters:raw}} and go_goroutines{cluster="test", instance!="us-east:5000", __ignore_usage__="", ${filters:raw}} > -Inf)',
     ],
     [
       'utf8',
       '🔥go_goroutines',
-      '{cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} and {cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} > -Inf',
+      '({cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} and {cluster="test", instance!="us-east:5000", __ignore_usage__="", "🔥go_goroutines", ${filters:raw}} > -Inf)',
     ],
   ])('supports extreme value filtering  (%s)', (_, name, expected) => {
     const expression = buildQueryExpression({

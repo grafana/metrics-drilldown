@@ -1,5 +1,5 @@
 import { sceneGraph, sceneUtils, type SceneObject, type SceneObjectUrlValues } from '@grafana/scenes';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { displayError } from 'MetricsReducer/helpers/displayStatus';
@@ -19,10 +19,7 @@ export type Bookmark = {
 export type BookmarkFromStorage = Omit<Bookmark, 'key'>;
 
 export function useBookmarks(sceneObject: SceneObject) {
-  const [allBookmarks, setAllBookmarks] = useState<Record<string, Bookmark>>({});
-  const trail = getTrailFor(sceneObject);
-
-  useEffect(() => {
+  const [allBookmarks, setAllBookmarks] = useState<Record<string, Bookmark>>(() => {
     const bookmarksFromStorage: BookmarkFromStorage[] = userStorage.getItem(PREF_KEYS.BOOKMARKS) || [];
     const bookmarks: Record<string, Bookmark> = {};
 
@@ -32,8 +29,9 @@ export function useBookmarks(sceneObject: SceneObject) {
       bookmarks[key] = { ...b, key };
     }
 
-    setAllBookmarks(bookmarks);
-  }, []);
+    return bookmarks;
+  });
+  const trail = getTrailFor(sceneObject);
 
   const { value: dsValue } = sceneGraph
     .findByKeyAndType(trail, VAR_DATASOURCE, MetricsDrilldownDataSourceVariable)
@@ -58,12 +56,13 @@ export function useBookmarks(sceneObject: SceneObject) {
   };
 
   const removeBookmark = (bookmarkKey: string) => {
-    delete allBookmarks[bookmarkKey];
-    const bookmarksForStorage = Object.values(allBookmarks).map((b) => ({ ...b, key: undefined }));
+    const nextBookmarks = { ...allBookmarks };
+    delete nextBookmarks[bookmarkKey];
+    const bookmarksForStorage = Object.values(nextBookmarks).map((b) => ({ ...b, key: undefined }));
 
     userStorage.setItem(PREF_KEYS.BOOKMARKS, bookmarksForStorage);
 
-    setAllBookmarks({ ...allBookmarks });
+    setAllBookmarks(nextBookmarks);
   };
 
   const gotoBookmark = (bookmarkKey: string) => {
