@@ -13,7 +13,6 @@ import {
 } from '@grafana/prometheus';
 import { sceneGraph, type DataSourceVariable, type SceneObject } from '@grafana/scenes';
 
-import { type DataTrail } from 'AppDataTrail/DataTrail';
 import { displayError, displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { isPrometheusDataSource } from 'shared/utils/utils.datasource';
 
@@ -32,7 +31,7 @@ export type PrometheusRuntimeDatasource = Omit<PrometheusDatasource, 'languagePr
 
 export class MetricDatasourceHelper {
   private initialized = false;
-  private trail: DataTrail;
+  private scene: SceneObject;
   private datasource?: PrometheusRuntimeDatasource;
   private cache = {
     metadata: new Map<string, PromMetricsMetadataItem>(),
@@ -41,13 +40,13 @@ export class MetricDatasourceHelper {
     nativeHistogram: new Map<string, boolean>(),
   };
 
-  constructor(trail: DataTrail) {
-    this.trail = trail;
+  constructor(scene: SceneObject) {
+    this.scene = scene;
   }
 
   private async getRuntimeDatasource(): Promise<PrometheusRuntimeDatasource | undefined> {
     if (!this.datasource) {
-      const ds = await getDataSourceInstance(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this.trail } });
+      const ds = await getDataSourceInstance(VAR_DATASOURCE_EXPR, { __sceneObject: { value: this.scene } });
       this.datasource = isPrometheusDataSource(ds) ? ds : undefined;
     }
     return this.datasource;
@@ -89,15 +88,16 @@ export class MetricDatasourceHelper {
       return this.cache.metadata.get(metric)!;
     }
 
-    const ds = await this.getRuntimeDatasource();
-    if (!ds) {
-      return;
-    }
-
     let metadata = undefined;
 
     try {
-      const response = await (ds.languageProvider as any).request(`/api/v1/metadata?metric=${metric}`);
+      const ds = await this.getRuntimeDatasource();
+      if (!ds) {
+        return;
+      }
+      const response = await (ds.languageProvider as any).request(
+        `/api/v1/metadata?metric=${encodeURIComponent(metric)}`
+      );
       if (response && typeof response === 'object') {
         metadata = response[metric]?.[0];
       }
@@ -151,7 +151,7 @@ export class MetricDatasourceHelper {
       return [];
     }
 
-    const filters = ['__name__!=""', extraFilter, sceneGraph.interpolate(this.trail, VAR_FILTERS_EXPR)]
+    const filters = ['__name__!=""', extraFilter, sceneGraph.interpolate(this.scene, VAR_FILTERS_EXPR)]
       .filter(Boolean)
       .join(',');
 

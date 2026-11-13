@@ -1,5 +1,4 @@
-import { type DataTrail } from 'AppDataTrail/DataTrail';
-
+import { type MetricMetadataContext } from '../MetricMetadataContext';
 import { isAgeMetric } from './isAgeMetric';
 import { isClassicHistogramMetric } from './isClassicHistogramMetric';
 import { isCounterMetric } from './isCounterMetric';
@@ -8,21 +7,18 @@ import { isStatusUpDownMetric } from './isStatusUpDownMetric';
 import { mapKgMetricType, type KgMetricType } from './mapKgMetricType';
 
 export type MetricType =
-  | 'info'
-  | 'status-updown'
-  | 'classic-histogram'
-  | 'native-histogram'
-  | 'summary'
-  | 'age'
-  | 'counter'
-  | 'gauge';
+  'info' | 'status-updown' | 'classic-histogram' | 'native-histogram' | 'summary' | 'age' | 'counter' | 'gauge';
 
 export type Metric = {
   name: string;
   type: MetricType;
 };
 
-export async function getMetricType(metric: string, dataTrail: DataTrail, kgMetricType?: KgMetricType): Promise<MetricType> {
+export async function getMetricType(
+  metric: string,
+  metadataContext: Pick<MetricMetadataContext, 'getMetadataForMetric'>,
+  kgMetricType?: KgMetricType
+): Promise<MetricType> {
   if (kgMetricType) {
     return mapKgMetricType(kgMetricType);
   }
@@ -30,7 +26,7 @@ export async function getMetricType(metric: string, dataTrail: DataTrail, kgMetr
   const metricType = getMetricTypeSync(metric);
 
   if (metricType === 'gauge') {
-    const metadata = await dataTrail.getMetadataForMetric(metric);
+    const metadata = await metadataContext.getMetadataForMetric(metric);
     if (metadata?.type === 'histogram') {
       return 'native-histogram';
     }
@@ -45,7 +41,7 @@ export async function getMetricType(metric: string, dataTrail: DataTrail, kgMetr
   }
 
   if (metricType === 'counter') {
-    const metadata = await dataTrail.getMetadataForMetric(metric);
+    const metadata = await metadataContext.getMetadataForMetric(metric);
     // same as above (see https://github.com/grafana/metrics-drilldown/issues/698)
     if (metadata?.type === 'gauge') {
       return 'gauge';

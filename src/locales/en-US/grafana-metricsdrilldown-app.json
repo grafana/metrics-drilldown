@@ -239,8 +239,32 @@
   "list-controls": {
     "search-aria-label": "Quick search metrics"
   },
+  "metric-chart": {
+    "invalid-scope": "Invalid metric chart scope"
+  },
   "metric-graph": {
     "explore-attributes": "Histogram analysis"
+  },
+  "metric-handoff": {
+    "check-inputs": "Provide a valid data source, time range and queries or metric context.",
+    "drilldown": "Open metric in Metrics Drilldown",
+    "drilldown-description": "Opens the metric and filters, not the Explore expressions.",
+    "explore": "Open in Explore",
+    "navigation": "Metric navigation",
+    "unavailable": "No navigation available"
+  },
+  "metric-value-breakdown": {
+    "empty-value": "(empty label value)",
+    "invalid-scope": "Invalid metric breakdown scope or label",
+    "label": "Break down by label",
+    "labels-error": "Unable to load label names",
+    "loading": "Loading breakdown",
+    "no-samples": "No samples in this time range",
+    "omitted_one": "{{count}} sampled values omitted (display limit {{limit}}).",
+    "omitted_other": "{{count}} sampled values omitted (display limit {{limit}}).",
+    "query-error": "Unable to load breakdown",
+    "sampled-notice": "Grouped default computation, ordered alphabetically. Only values returned by the sampled range query are shown; this is not an exhaustive list of label values. Charts share a y-axis range.",
+    "select-filter": "Filter by {{label}}={{value}}"
   },
   "metrics": {
     "metrics-drilldown": {

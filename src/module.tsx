@@ -5,6 +5,9 @@ import { lazy } from 'react';
 
 import { entityMetricsConfig } from 'exposedComponents/EntityMetrics/config';
 import { labelBreakdownConfig } from 'exposedComponents/LabelBreakdown/config';
+import { metricChartConfig } from 'exposedComponents/MetricChart/config';
+import { metricHandoffConfig } from 'exposedComponents/MetricHandoff/config';
+import { metricValueBreakdownConfig } from 'exposedComponents/MetricValueBreakdown/config';
 import { miniBreakdownConfig } from 'exposedComponents/MiniBreakdown/config';
 import { sourceMetricsConfig } from 'exposedComponents/SourceMetrics/config';
 import { datasourceConfigLinkConfigs } from 'extensions/datasourceConfigLinks';
@@ -65,3 +68,6 @@ plugin.exposeComponent(entityMetricsConfig);
 plugin.exposeComponent(labelBreakdownConfig);
 plugin.exposeComponent(miniBreakdownConfig);
 plugin.exposeComponent(sourceMetricsConfig);
+plugin.exposeComponent(metricChartConfig);
+plugin.exposeComponent(metricValueBreakdownConfig);
+plugin.exposeComponent(metricHandoffConfig);
