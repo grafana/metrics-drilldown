@@ -12,7 +12,10 @@ import { updateColorsWhenQueriesChange } from '../timeseries/behaviors/updateCol
 export function buildPercentilesPanel(options: BuildVizPanelOptions) {
   const { metric, panelConfig, queryConfig } = options;
   const queryParams = getPercentilesQueryRunnerParams({ metric, queryConfig });
-  const unit = queryParams.isRateQuery ? getPerSecondRateUnit(metric.name) : getUnit(metric.name);
+  // Histogram quantiles use rate() to calculate the percentile, but the result is still a bucket
+  // boundary (for example, milliseconds), not a rate. Counters, on the other hand, display a rate.
+  const unit =
+    queryParams.isRateQuery && metric.type === 'counter' ? getPerSecondRateUnit(metric.name) : getUnit(metric.name);
 
   const $data =
     queryConfig.data ||

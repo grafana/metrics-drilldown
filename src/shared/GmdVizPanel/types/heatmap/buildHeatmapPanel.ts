@@ -41,6 +41,7 @@ export function buildHeatmapPanel(options: BuildVizPanelOptions): VizPanel {
     .setShowMenuAlways(Boolean(panelConfig.menu))
     .setData($data)
     .setUnit(unit)
+    .setOption('yAxis', { unit })
     .setOption('calculate', false)
     .setOption('color', {
       mode: HeatmapColorMode.Scheme,
