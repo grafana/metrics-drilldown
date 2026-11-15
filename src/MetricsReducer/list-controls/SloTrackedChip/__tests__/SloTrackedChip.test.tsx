@@ -57,6 +57,7 @@ function setup(result: SloMetricSignals, options = ['http_requests_total', 'cpu_
             filterEngine: {
               getFilters: () => ({
                 categories: [],
+                metricCategories: [],
                 prefixes: [],
                 suffixes: [],
                 names: [],
@@ -261,6 +262,7 @@ describe('SloTrackedChip', () => {
               filterEngine: {
                 getFilters: () => ({
                   categories: [],
+                  metricCategories: [],
                   prefixes: [],
                   suffixes: [],
                   names: [],
@@ -333,6 +335,7 @@ describe('SloTrackedChip', () => {
               filterEngine: {
                 getFilters: () => ({
                   categories: [],
+                  metricCategories: [],
                   prefixes: [],
                   suffixes: [],
                   names: [],

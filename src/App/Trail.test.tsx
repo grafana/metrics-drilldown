@@ -1,10 +1,21 @@
-import { PageLayoutType } from '@grafana/data';
+import { PageLayoutType, type NavModelItem } from '@grafana/data';
 import { PluginPage } from '@grafana/runtime';
+import { act, render, screen } from '@testing-library/react';
 import React, { Fragment } from 'react';
 
-import { getPageNav, renderTrailPage } from './Trail';
+import Trail, { getPageNav, renderTrailPage } from './Trail';
+import { DataTrail } from '../AppDataTrail/DataTrail';
+import { actionViews } from '../MetricScene/MetricActionBar';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
+
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  PluginPage: ({ pageNav }: { pageNav?: NavModelItem }) => <div>{pageNav?.text}</div>,
+}));
+jest.mock('./assistant/useMetricsDrilldownQuestions', () => ({
+  useMetricsDrilldownQuestions: jest.fn(),
+}));
 
 const DEFAULT_URL =
   'http://localhost:3001/a/grafana-metricsdrilldown-app/drilldown?metric=test_metric&actionView=breakdown';
@@ -32,6 +43,36 @@ describe('Trail page wrapper', () => {
     expect(props.children).toBe(content);
     expect(props.pageNav).toBe(pageNav);
     expect(props.layout).toBe(PageLayoutType.Custom);
+  });
+});
+
+describe('Trail breadcrumb subscription', () => {
+  it('updates for action-view and scene changes without retaining the previous scene subscription', () => {
+    const metricScene = new MetricScene({ metric: 'test_metric', actionView: actionViews.breakdown });
+    const trail = new DataTrail({ metric: 'test_metric', topScene: metricScene });
+    const subscription = jest.spyOn(metricScene, 'subscribeToState');
+    const { unmount } = render(<Trail trail={trail} />);
+    const unsubscribe = jest.spyOn(subscription.mock.results[0].value, 'unsubscribe');
+
+    expect(screen.getByText('Breakdown')).toBeInTheDocument();
+
+    act(() => metricScene.setState({ actionView: actionViews.related }));
+    expect(screen.getByText('Related metrics')).toBeInTheDocument();
+
+    const nextMetricScene = new MetricScene({ metric: 'next_metric', actionView: actionViews.relatedLogs });
+    const nextSubscription = jest.spyOn(nextMetricScene, 'subscribeToState');
+    act(() => trail.setState({ metric: 'next_metric', topScene: nextMetricScene }));
+    const nextUnsubscribe = jest.spyOn(nextSubscription.mock.results[0].value, 'unsubscribe');
+    expect(screen.getByText('Related logs')).toBeInTheDocument();
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+
+    act(() => trail.setState({ metric: undefined, topScene: new MetricsReducer() }));
+    expect(screen.getByText('All metrics')).toBeInTheDocument();
+    expect(nextUnsubscribe).toHaveBeenCalledTimes(1);
+
+    act(() => trail.setState({ topScene: undefined }));
+    expect(screen.queryByText('All metrics')).not.toBeInTheDocument();
+    unmount();
   });
 });
 

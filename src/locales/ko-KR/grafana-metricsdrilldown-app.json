@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "로딩 중..."
   },
   "attribute-explorer": {
     "badge-metric": "OTel 메트릭 속성",
@@ -83,7 +83,7 @@
     "section-label": "세부 분류",
     "select-label": "선택",
     "sync-y-axis": {
-      "label": ""
+      "label": "y축 동기화"
     }
   },
   "checkbox-list": {
@@ -170,13 +170,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "현재 시간 범위에서 이 메트릭에 대한 예시 데이터가 없습니다",
+      "error": "쿼리가 실패하여 예시 데이터를 불러오지 못했습니다",
+      "label": "예시 표시",
+      "off": "예시 표시(카운터 및 히스토그램만 해당)",
+      "on": "예시 표시 중",
+      "unavailable": "이 메트릭에는 예시가 제공되지 않습니다",
+      "unsupported-panel": "이 패널 유형에서는 예시가 제공되지 않습니다"
     },
     "native-histogram": "기본 히스토그램",
     "variant": {
@@ -315,13 +315,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "북마크 추가",
+      "add-to-dashboard": "대시보드에 추가",
       "copy-url": "URL 복사",
       "copy-url-success": "클립보드에 URL 복사됨",
-      "create-alert": "",
+      "create-alert": "경보 생성",
       "explore": "탐색",
-      "remove-bookmark": ""
+      "remove-bookmark": "북마크 삭제"
     },
     "group": {
       "actions": "작업",
@@ -379,7 +379,7 @@
   },
   "related-logs": {
     "datasource-description": "응답에 {{timeout}}초 이상 걸리는 경우 드롭다운에서 일부 Loki 데이터 소스가 누락될 수 있습니다. 모든 Loki 데이터 소스의 로그를 보려면 로그 드릴다운을 사용해 보세요.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "관련 로그에 대한 데이터 소스를 불러오지 못했습니다.",
     "datasource-label": "데이터 소스 로그",
     "experimental-note": "참고: 관련 로그는 실험적 기능입니다.",
     "loading": "로딩 중...",
@@ -426,6 +426,7 @@
       "search-placeholder": "검색..."
     },
     "filter-type": {
+      "category": "",
       "prefix": "접두사",
       "recent": "최근",
       "rule-group": "규칙 그룹",
@@ -436,6 +437,27 @@
       "search-aria-label": "라벨 검색",
       "search-placeholder": "검색..."
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "전체 기간",
       "past-interval": "과거 {{interval}}"
@@ -443,6 +465,8 @@
     "section": {
       "bookmarks": "북마크",
       "bookmarks-description": "빠른 참조를 위해 저장된 메트릭에 접근하세요",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "라벨별로 그룹화",
       "group-by-labels-description": "라벨 값별로 메트릭 그룹화",
       "prefix-filters": "접두사 필터",

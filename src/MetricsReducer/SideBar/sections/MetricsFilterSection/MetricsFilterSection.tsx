@@ -21,6 +21,7 @@ import {
   VAR_FILTERED_METRICS_VARIABLE,
   type FilteredMetricsVariable,
 } from 'MetricsReducer/metrics-variables/FilteredMetricsVariable';
+import { getMetricCategoryLabel } from 'MetricsReducer/metrics-variables/metricCategories';
 import {
   VAR_METRICS_VARIABLE,
   type MetricOptions,
@@ -43,6 +44,7 @@ import { reportExploreMetrics } from '../../../../shared/tracking/interactions';
 import { EventSectionValueChanged } from '../EventSectionValueChanged';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
+import { CategoryIcon } from './CategoryIcon';
 import { CheckBoxList } from './CheckBoxList';
 import { EventFiltersChanged } from './EventFiltersChanged';
 import { TreeCheckBoxList } from './TreeCheckBoxList';
@@ -322,6 +324,12 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
    * @returns Formatted label for display
    */
   private parseLabel(value: string): string {
+    // The values of the category filter are category ids (e.g. "host-os"). Only this filter translates them, because
+    // an id can equal the value of another filter (e.g. the "http" category and the "http" prefix)
+    if (this.state.type === 'metricCategories') {
+      return getMetricCategoryLabel(value);
+    }
+
     // Check if it's a rule regex pattern first
     if (value in RULE_REGEX_TO_LABEL) {
       return RULE_REGEX_TO_LABEL[value];
@@ -338,7 +346,18 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
   }
 
   private onSelectionChange = (selectedGroups: MetricsFilterSectionState['selectedGroups']) => {
+    const previousValues = new Set(this.state.selectedGroups.map((g) => g.value));
+
     this.setState({ selectedGroups, active: selectedGroups.length > 0 });
+
+    // Track the categories that were just selected. Deselecting and clearing are not tracked.
+    if (this.state.type === 'metricCategories') {
+      selectedGroups
+        .filter((group) => !previousValues.has(group.value))
+        .forEach((group) => {
+          reportExploreMetrics('sidebar_category_filter_changed', { action: 'added', category: group.value });
+        });
+    }
 
     this.publishEvent(
       new EventFiltersChanged({ type: this.state.type, filters: selectedGroups.map((g) => g.value) }),
@@ -376,6 +395,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
     const styles = useStyles2(getStyles);
     const { embedded } = getTrailFor(model).state;
     const {
+      type,
       groups,
       selectedGroups,
       loading,
@@ -465,6 +485,7 @@ export class MetricsFilterSection extends SceneObjectBase<MetricsFilterSectionSt
             groups={filteredGroups}
             selectedGroups={selectedGroups}
             onSelectionChange={model.onSelectionChange}
+            renderIcon={type === 'metricCategories' ? (value) => <CategoryIcon categoryId={value} /> : undefined}
           />
         )}
       </div>

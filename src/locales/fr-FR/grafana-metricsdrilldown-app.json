@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Chargement…"
   },
   "attribute-explorer": {
     "badge-metric": "Attribut de métrique OTel",
@@ -85,7 +85,7 @@
     "section-label": "Répartition",
     "select-label": "Sélectionner",
     "sync-y-axis": {
-      "label": ""
+      "label": "Synchroniser l’axe Y"
     }
   },
   "checkbox-list": {
@@ -175,13 +175,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "Aucun exemplaire trouvé pour cette métrique sur la plage horaire actuelle",
+      "error": "Impossible de charger les exemplaires, car la requête a échoué",
+      "label": "Afficher les exemplaires",
+      "off": "Afficher les exemplaires (compteurs et histogrammes uniquement)",
+      "on": "Affichage des exemplaires",
+      "unavailable": "Les exemplaires ne sont pas disponibles pour cette métrique",
+      "unsupported-panel": "Les exemplaires ne sont pas disponibles pour ce type de panneau"
     },
     "native-histogram": "Histogramme natif",
     "variant": {
@@ -320,13 +320,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Ajouter un signet",
+      "add-to-dashboard": "Ajouter au tableau de bord",
       "copy-url": "Copier l’URL",
       "copy-url-success": "URL copiée dans le presse-papiers",
-      "create-alert": "",
+      "create-alert": "Créer une alerte",
       "explore": "Explorer",
-      "remove-bookmark": ""
+      "remove-bookmark": "Supprimer le signet"
     },
     "group": {
       "actions": "Actions",
@@ -386,7 +386,7 @@
   },
   "related-logs": {
     "datasource-description": "Certaines sources de données Loki peuvent ne pas apparaître dans la liste déroulante si leur temps de réponse dépasse {{timeout}} secondes. Pour afficher les journaux de toutes les sources Loki, essayez d’utiliser Logs Drilldown.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "Échec du chargement des sources de données pour les journaux associés.",
     "datasource-label": "Source de données des journaux",
     "experimental-note": "Remarque : la fonctionnalité Journaux associés est en phase de test.",
     "loading": "Chargement en cours…",
@@ -434,6 +434,7 @@
       "search-placeholder": "Rechercher…"
     },
     "filter-type": {
+      "category": "",
       "prefix": "préfixe",
       "recent": "récent",
       "rule-group": "groupe de règles",
@@ -444,6 +445,27 @@
       "search-aria-label": "Rechercher des étiquettes",
       "search-placeholder": "Rechercher…"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Tout le temps",
       "past-interval": "Depuis {{interval}}"
@@ -451,6 +473,8 @@
     "section": {
       "bookmarks": "Favoris",
       "bookmarks-description": "Accédez à vos métriques enregistrées pour les consulter rapidement",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Regrouper par étiquettes",
       "group-by-labels-description": "Regrouper les métriques selon les valeurs de leurs étiquettes",
       "prefix-filters": "Filtres par préfixe",

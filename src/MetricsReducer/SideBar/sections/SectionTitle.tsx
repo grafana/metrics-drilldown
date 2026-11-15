@@ -24,6 +24,8 @@ export function SectionTitle({ title, description }: Readonly<SectionTitleProps>
 function getStyles(theme: GrafanaTheme2) {
   return {
     title: css({
+      display: 'flex',
+      alignItems: 'center',
       fontSize: '15px',
       fontWeight: theme.typography.fontWeightLight,
       borderBottom: `1px solid ${theme.colors.border.weak}`,
@@ -33,8 +35,6 @@ function getStyles(theme: GrafanaTheme2) {
       marginLeft: theme.spacing(1),
       cursor: 'pointer',
       color: theme.colors.text.secondary,
-      position: 'relative',
-      top: '-4px',
     }),
   };
 }

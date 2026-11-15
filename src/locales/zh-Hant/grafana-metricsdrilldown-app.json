@@ -426,6 +426,7 @@
       "search-placeholder": "搜尋…"
     },
     "filter-type": {
+      "category": "",
       "prefix": "前綴",
       "recent": "最近",
       "rule-group": "規則群組",
@@ -436,6 +437,27 @@
       "search-aria-label": "Search labels",
       "search-placeholder": "搜尋…"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "所有時間",
       "past-interval": "過去 {{interval}}"
@@ -443,6 +465,8 @@
     "section": {
       "bookmarks": "書籤",
       "bookmarks-description": "存取已儲存的指標以供快速參考",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "按標籤分組",
       "group-by-labels-description": "按標籤值將指標分組",
       "prefix-filters": "前綴篩選條件",

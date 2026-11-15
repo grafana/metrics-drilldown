@@ -2,10 +2,13 @@ import { SceneVariableValueChangedEvent, type QueryVariable, type VariableValueO
 import { cloneDeep, isEqual } from 'lodash';
 
 import { HIERARCHICAL_SEPARATOR } from './computeMetricPrefixSecondLevel';
+import { classifyMetric } from './metricCategories';
 import { type MetricOptions } from './MetricsVariable';
 
 export type MetricFilters = {
   categories: string[];
+  // Ids of the OTel style categories (see metricCategories.ts), not to be confused with the rules regexes in `categories`
+  metricCategories: string[];
   prefixes: string[];
   suffixes: string[];
   names: string[];
@@ -18,6 +21,7 @@ export class MetricsVariableFilterEngine {
   private initOptions: VariableValueOption[] = [];
   private filters: MetricFilters = {
     categories: [],
+    metricCategories: [],
     prefixes: [],
     suffixes: [],
     names: [],
@@ -51,6 +55,13 @@ export class MetricsVariableFilterEngine {
 
     if (filters.categories.length > 0) {
       filteredOptions = MetricsVariableFilterEngine.applyCategoryFilters(filteredOptions, filters.categories);
+    }
+
+    if (filters.metricCategories.length > 0) {
+      filteredOptions = MetricsVariableFilterEngine.applyMetricCategoryFilters(
+        filteredOptions,
+        filters.metricCategories
+      );
     }
 
     if (filters.prefixes.length > 0) {
@@ -94,6 +105,7 @@ export class MetricsVariableFilterEngine {
 
     if (
       !updatedFilters.categories.length &&
+      !updatedFilters.metricCategories.length &&
       !updatedFilters.prefixes.length &&
       !updatedFilters.suffixes.length &&
       !updatedFilters.names.length &&
@@ -131,6 +143,12 @@ export class MetricsVariableFilterEngine {
     }
 
     return filteredOptions;
+  }
+
+  private static applyMetricCategoryFilters(options: MetricOptions, categoryIds: string[]): MetricOptions {
+    const ids = new Set(categoryIds);
+
+    return options.filter((option) => ids.has(classifyMetric(option.value as string)));
   }
 
   private static applyPrefixFilters(options: MetricOptions, prefixes: string[]): MetricOptions {
