@@ -5,7 +5,7 @@ import { getDataSourceInstanceSettings } from '@grafana/plugin-compat/datasource
 import { type PromQuery } from '@grafana/prometheus';
 import { getAppEvents, locationService, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, SceneObjectBase, type SceneComponentProps, type SceneObjectState } from '@grafana/scenes';
-import { ToolbarButton, useStyles2 } from '@grafana/ui';
+import { useStyles2 } from '@grafana/ui';
 import React, { useCallback, useMemo } from 'react';
 
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
@@ -17,13 +17,10 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
 import { getResponsiveBreakpoints } from 'shared/utils/utils.styles';
 
-import { LoadQueryModal } from './LoadQueryModal';
-import { isQueryLibrarySupported, useHasSavedQueries, type OpenQueryLibraryComponentProps } from './savedQuery';
+import { type OpenQueryLibraryComponentProps } from './savedQuery';
 
 export interface LoadQuerySceneState extends SceneObjectState {
   dsName: string;
-  dsUid: string | undefined;
-  isOpen: boolean;
 }
 
 export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
@@ -31,9 +28,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
 
   constructor(state: Partial<LoadQuerySceneState> = {}) {
     super({
-      dsUid: undefined,
       dsName: '',
-      isOpen: false,
       ...state,
     });
 
@@ -55,21 +50,9 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
     );
   };
 
-  toggleOpen = () => {
-    this.setState({
-      isOpen: true,
-    });
-  };
-
-  toggleClosed = () => {
-    this.setState({
-      isOpen: false,
-    });
-  };
-
   private async updateDataSourceState(dsUid: string) {
     const generation = ++this.datasourceStateGeneration;
-    this.setState({ dsUid, dsName: '' });
+    this.setState({ dsName: '' });
 
     const settings = await getDataSourceInstanceSettings(dsUid).catch(() => {
       logger.debug(`getDataSourceInstanceSettings lookup failed`, { dsUid });
@@ -84,9 +67,8 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
   }
 
   static readonly Component = ({ model }: SceneComponentProps<LoadQueryScene>) => {
-    const { dsName, dsUid, isOpen } = model.useState();
+    const { dsName } = model.useState();
     const styles = useStyles2(getStyles);
-    const hasSavedQueries = useHasSavedQueries(dsUid);
 
     const { component: OpenQueryLibraryComponent, isLoading: isLoadingExposedComponent } =
       usePluginComponent<OpenQueryLibraryComponentProps>('grafana/query-library-context/v1');
@@ -137,25 +119,7 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
       return null;
     }
 
-    if (!isQueryLibrarySupported()) {
-      return (
-        <>
-          <ToolbarButton
-            icon="folder-open"
-            variant="canvas"
-            disabled={!hasSavedQueries}
-            onClick={model.toggleOpen}
-            className={styles.button}
-            tooltip={
-              hasSavedQueries
-                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Load Saved query')
-                : t('metrics.metrics-drilldown.load-query.button-no-query-tooltip', 'No saved queries to load')
-            }
-          />
-          {isOpen && <LoadQueryModal sceneRef={model} onClose={model.toggleClosed} />}
-        </>
-      );
-    } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent || !dsName) {
+    if (isLoadingExposedComponent || !OpenQueryLibraryComponent || !dsName) {
       return null;
     }
 

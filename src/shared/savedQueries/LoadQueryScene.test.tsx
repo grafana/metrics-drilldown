@@ -1,6 +1,6 @@
 import { getDataSourceInstanceSettings } from '@grafana/plugin-compat/datasources';
 import { type PromQuery } from '@grafana/prometheus';
-import { usePluginComponent } from '@grafana/runtime';
+import { getAppEvents, locationService, usePluginComponent } from '@grafana/runtime';
 import { sceneGraph, type SceneTimeRange } from '@grafana/scenes';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -10,40 +10,27 @@ import { type MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDri
 import { buildNavigateToMetricsParams, createAppUrl, createPromURLObject, parsePromQLQuery } from 'extensions/links';
 
 import { LoadQueryScene } from './LoadQueryScene';
-import { isQueryLibrarySupported, useHasSavedQueries } from './savedQuery';
-
-jest.mock('./savedQuery');
-jest.mock('./LoadQueryModal', () => ({
-  LoadQueryModal: ({ onClose }: { onClose(): void }) => (
-    <div data-testid="load-query-modal">
-      Load a previously saved query
-      <button aria-label="Close" onClick={onClose}>
-        Close
-      </button>
-    </div>
-  ),
-}));
+import { type OpenQueryLibraryComponentProps } from './savedQuery';
 jest.mock('@grafana/runtime');
 jest.mock('extensions/links');
 
-const mockUseHasSavedQueries = jest.mocked(useHasSavedQueries);
-
 jest.mock('@grafana/plugin-compat/datasources', () => ({ getDataSourceInstanceSettings: jest.fn() }));
 const getDataSourceInstanceSettingsMock = jest.mocked(getDataSourceInstanceSettings);
+const openQueryLibraryComponentMock = jest.fn();
+const publishMock = jest.fn();
 
-function FakeExposedComponent({ onSelectQuery }: Readonly<{ onSelectQuery(query: PromQuery): void }>) {
+function FakeExposedComponent({ onSelectQuery }: Readonly<OpenQueryLibraryComponentProps>) {
+  const query: PromQuery = {
+    refId: 'A',
+    datasource: { type: 'prometheus', uid: 'test-ds' },
+    expr: 'http_requests_total{method="GET"}',
+  };
+
   return (
     <div>
       <button
         onClick={() => {
-          onSelectQuery({
-            refId: 'A',
-            datasource: {
-              type: 'prometheus',
-              uid: 'test-ds',
-            },
-            expr: 'http_requests_total{method="GET"}',
-          });
+          onSelectQuery?.(query);
         }}
       >
         Select
@@ -86,107 +73,127 @@ describe('LoadQueryScene', () => {
     jest.mocked(buildNavigateToMetricsParams).mockReturnValue(new URLSearchParams());
     jest.mocked(createAppUrl).mockReturnValue('/a/grafana-metricsdrilldown-app/drilldown');
 
-    jest.mocked(usePluginComponent).mockReturnValue({ component: undefined, isLoading: false });
-    jest.mocked(isQueryLibrarySupported).mockReturnValue(false);
+    openQueryLibraryComponentMock.mockImplementation(FakeExposedComponent);
+    jest.mocked(usePluginComponent).mockReturnValue({ component: openQueryLibraryComponentMock, isLoading: false });
+    jest.mocked(getAppEvents).mockReturnValue({ publish: publishMock } as unknown as ReturnType<typeof getAppEvents>);
   });
 
-  test('Disables button when there are no saved queries', async () => {
-    mockUseHasSavedQueries.mockReturnValue(false);
+  test.each([true, false])('should hide loading when Query Library is unavailable (loading: %s)', async (isLoading) => {
+    jest.mocked(usePluginComponent).mockReturnValue({
+      component: isLoading ? openQueryLibraryComponentMock : undefined,
+      isLoading,
+    });
 
     const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
-    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
+    await waitFor(() => expect(scene.state.dsName).toBe('Test Datasource'));
 
-    const button = screen.getByRole('button');
-    expect(button).toBeDisabled();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  test('Enables button when there are saved queries', async () => {
-    mockUseHasSavedQueries.mockReturnValue(true);
+  test('should hide loading when the datasource cannot be resolved', async () => {
+    getDataSourceInstanceSettingsMock.mockResolvedValueOnce(undefined);
 
     const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
-    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
+    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalledWith('test-datasource-uid'));
 
-    const button = screen.getByRole('button');
-    expect(button).not.toBeDisabled();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  test('Opens modal when button is clicked', async () => {
-    mockUseHasSavedQueries.mockReturnValue(true);
+  test('should leave legacy local saved queries untouched', async () => {
+    localStorage.setItem('grafana-metricsdrilldown-app.savedQueries', '[{"uid":"legacy","query":"up"}]');
 
     const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
-    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
-
-    expect(screen.queryByText('Load a previously saved query')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button'));
-
-    expect(screen.getByText('Load a previously saved query')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByLabelText('Close'));
-
-    expect(screen.queryByText('Load a previously saved query')).not.toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Select' })).toBeInTheDocument();
+    expect(localStorage.getItem('grafana-metricsdrilldown-app.savedQueries')).toBe('[{"uid":"legacy","query":"up"}]');
+    localStorage.removeItem('grafana-metricsdrilldown-app.savedQueries');
   });
 
-  test('Returns null when the scene is embedded', async () => {
+  test('should hide the load action when embedded', async () => {
     jest.spyOn(sceneGraph, 'getAncestor').mockReturnValue({
       state: { embedded: true },
     } as unknown as DataTrail);
 
     const scene = new LoadQueryScene();
-    const { container } = render(<scene.Component model={scene} />);
+    render(<scene.Component model={scene} />);
 
-    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
+    await waitFor(() => expect(scene.state.dsName).toBe('Test Datasource'));
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
-  test('Uses the exposed component if available', async () => {
-    const component = () => <div>Exposed component</div>;
-    jest.mocked(isQueryLibrarySupported).mockReturnValue(true);
-    jest.mocked(usePluginComponent).mockReturnValue({ component, isLoading: false });
-
+  test('should pass the selected datasource and drilldown context to Query Library', async () => {
     const scene = new LoadQueryScene();
     render(<scene.Component model={scene} />);
 
-    await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
-
-    expect(screen.getByText('Exposed component')).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Select' })).toBeInTheDocument();
+    expect(openQueryLibraryComponentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ context: 'drilldown', datasourceFilters: ['Test Datasource'], icon: 'folder-open' }),
+      undefined
+    );
   });
 
   describe('Loading a query', () => {
-    beforeEach(() => {
-      jest.mocked(parsePromQLQuery).mockClear();
-      jest.mocked(isQueryLibrarySupported).mockReturnValue(true);
-      // @ts-expect-error FakeExposedComponent has different shape
-      jest.mocked(usePluginComponent).mockReturnValue({ component: FakeExposedComponent, isLoading: false });
-      mockUseHasSavedQueries.mockReturnValue(true);
-    });
-
-    test('Parses the query and navigates when a query is selected', async () => {
+    test('should parse the selected query and navigate with the current time range', async () => {
       const scene = new LoadQueryScene();
       render(<scene.Component model={scene} />);
 
-      await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
-
-      fireEvent.click(screen.getByText('Select'));
+      fireEvent.click(await screen.findByRole('button', { name: 'Select' }));
 
       expect(parsePromQLQuery).toHaveBeenCalledWith('http_requests_total{method="GET"}');
       expect(createPromURLObject).toHaveBeenCalledWith(
         'test-ds',
-        expect.any(Array),
+        [{ label: 'method', op: '=', value: 'GET' }],
         'http_requests_total',
         'now-1h',
         'now'
       );
+      expect(locationService.push).toHaveBeenCalledWith('/a/grafana-metricsdrilldown-app/drilldown');
     });
 
-    test('Uses absolute time range when available', async () => {
+    test('should reject non-Prometheus queries without navigating', async () => {
+      const scene = new LoadQueryScene();
+      render(<scene.Component model={scene} />);
+
+      await screen.findByRole('button', { name: 'Select' });
+      openQueryLibraryComponentMock.mock.calls[0][0].onSelectQuery({
+        refId: 'A',
+        datasource: { type: 'loki', uid: 'test-ds' },
+      });
+
+      expect(publishMock).toHaveBeenCalledWith({
+        payload: ['Please select a Prometheus query.'],
+        type: 'alert-error',
+      });
+      expect(parsePromQLQuery).not.toHaveBeenCalled();
+      expect(locationService.push).not.toHaveBeenCalled();
+    });
+
+    test('should show an error for queries that cannot be represented in Drilldown', async () => {
+      jest.mocked(parsePromQLQuery).mockImplementationOnce(() => {
+        throw new Error('Unsupported expression');
+      });
+
+      const scene = new LoadQueryScene();
+      render(<scene.Component model={scene} />);
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Select' }));
+
+      expect(publishMock).toHaveBeenCalledWith({
+        payload: [
+          'This query contains expressions that cannot be represented in Metrics Drilldown. Only simple metric{label} selectors are supported.',
+        ],
+        type: 'alert-error',
+      });
+      expect(locationService.push).not.toHaveBeenCalled();
+    });
+
+    test('should use the absolute time range when available', async () => {
       jest.spyOn(sceneGraph, 'getTimeRange').mockReturnValue({
         state: {
           value: {
@@ -200,13 +207,11 @@ describe('LoadQueryScene', () => {
       const scene = new LoadQueryScene();
       render(<scene.Component model={scene} />);
 
-      await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
-
-      fireEvent.click(screen.getByText('Select'));
+      fireEvent.click(await screen.findByRole('button', { name: 'Select' }));
 
       expect(createPromURLObject).toHaveBeenCalledWith(
         'test-ds',
-        expect.any(Array),
+        [{ label: 'method', op: '=', value: 'GET' }],
         'http_requests_total',
         '2026-02-05T11:26:55.860Z',
         '2026-02-05T11:31:55.860Z'
