@@ -28,6 +28,7 @@ import { MetricGraphScene } from './MetricGraphScene';
 import { PROMETHEUS_QUERY_RESULTS_COMPONENT_ID, type PrometheusQueryResultsV1Props } from './QueryResults/constants';
 import { RelatedLogsOrchestrator } from './RelatedLogs/RelatedLogsOrchestrator';
 import { RelatedLogsScene } from './RelatedLogs/RelatedLogsScene';
+import { RelatedMetricsScene } from './RelatedMetrics/RelatedMetricsScene';
 
 interface MetricSceneState extends SceneObjectState {
   body: MetricGraphScene;
@@ -42,6 +43,8 @@ interface MetricSceneState extends SceneObjectState {
   // Forwarded to MetricGraphScene; the live value is owned by DataTrail (url param `exemplars`).
   exemplarsEnabled?: boolean;
   actionView?: ActionViewType;
+  relatedMetricsCount?: number;
+  relatedMetricsScene?: RelatedMetricsScene;
   relatedLogsCount?: number;
   isQueryResultsAvailable?: boolean;
   queryResultsComponent?: React.ComponentType<PrometheusQueryResultsV1Props>;
@@ -70,6 +73,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     [actionViews.relatedLogs]: false,
     [actionViews.queryResults]: false,
   };
+  private relatedMetricsDeactivation?: () => void;
 
   public constructor(state: MakeOptional<MetricSceneState, 'body' | 'attributeExplorerScene'>) {
     super({
@@ -85,6 +89,7 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
           exemplarsEnabled: state.exemplarsEnabled,
         }),
       attributeExplorerScene: state.attributeExplorerScene ?? new AttributeExplorerScene(),
+      relatedMetricsScene: state.relatedMetricsScene ?? new RelatedMetricsScene({ metric: state.metric }),
       ...state,
     });
 
@@ -101,6 +106,11 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     });
 
     this.subscribeToEvents();
+
+    return () => {
+      this.relatedMetricsDeactivation?.();
+      this.relatedMetricsDeactivation = undefined;
+    };
   }
 
   private subscribeToEvents() {
@@ -218,6 +228,18 @@ export class MetricScene extends SceneObjectBase<MetricSceneState> {
     return new RelatedLogsScene({
       orchestrator: this.relatedLogsOrchestrator,
     });
+  }
+
+  public createRelatedMetricsScene(): RelatedMetricsScene {
+    return this.state.relatedMetricsScene!;
+  }
+
+  public loadRelatedMetrics() {
+    const relatedMetricsScene = this.createRelatedMetricsScene();
+
+    if (!relatedMetricsScene.isActive) {
+      this.relatedMetricsDeactivation = relatedMetricsScene.activate();
+    }
   }
 }
 
