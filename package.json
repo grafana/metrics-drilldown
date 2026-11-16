@@ -54,7 +54,7 @@
     "@grafana/ui": "^13.3.0",
     "@lezer/common": "^1.5.0",
     "@openfeature/web-sdk": "^1.7.2",
-    "@prometheus-io/lezer-promql": "^0.315.0",
+    "@prometheus-io/lezer-promql": "^0.316.0",
     "compare-versions": "^6.1.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
