@@ -72,7 +72,9 @@ const getDashboardLimited = limitFunction(
  * Fetches metric usage data from dashboards
  * @returns A record mapping metric names to their dashboard usage data
  */
-export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsageDetails>> {
+export async function fetchDashboardMetrics(
+  onDashboardLimitExceeded?: () => void
+): Promise<Record<string, MetricUsageDetails>> {
   try {
     const dashboards = await getBackendSrv().get<DashboardSearchItem[]>(
       '/api/search',
@@ -85,7 +87,7 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
     );
 
     if (dashboards.length >= 500) {
-      checkDashboardLimitExceeded();
+      checkDashboardLimitExceeded(onDashboardLimitExceeded);
     }
 
     let dashboardRequestsFailedCount = 0;
@@ -104,7 +106,7 @@ export async function fetchDashboardMetrics(): Promise<Record<string, MetricUsag
   }
 }
 
-function checkDashboardLimitExceeded() {
+function checkDashboardLimitExceeded(onDashboardLimitExceeded?: () => void) {
   getBackendSrv()
     .get<DashboardSearchItem[]>(
       '/api/search',
@@ -118,6 +120,7 @@ function checkDashboardLimitExceeded() {
     )
     .then((response) => {
       if (response.length > 0) {
+        onDashboardLimitExceeded?.();
         displayWarning([
           t('fetch-dashboard-metrics.limit-warning-title', 'Dashboard usage sort is limited to 500 dashboards.'),
           t(

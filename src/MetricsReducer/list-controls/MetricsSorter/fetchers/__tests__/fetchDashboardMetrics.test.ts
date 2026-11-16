@@ -164,6 +164,7 @@ describe('fetchDashboardMetrics()', () => {
 
     test('shows warning when there are more than 500 dashboards', async () => {
       const { get } = setup();
+      const onDashboardLimitExceeded = jest.fn();
 
       get.mockImplementation((url: string, params: Record<string, unknown>) => {
         if (url === '/api/search' && params?.page === 2) {
@@ -177,9 +178,10 @@ describe('fetchDashboardMetrics()', () => {
         return Promise.resolve({ dashboard: { panels: [] } });
       });
 
-      await fetchDashboardMetrics();
+      await fetchDashboardMetrics(onDashboardLimitExceeded);
       await Promise.resolve();
 
+      expect(onDashboardLimitExceeded).toHaveBeenCalledTimes(1);
       expect(displayWarning).toHaveBeenCalledWith(
         expect.arrayContaining([expect.stringContaining('500'), expect.stringContaining('incomplete')])
       );
