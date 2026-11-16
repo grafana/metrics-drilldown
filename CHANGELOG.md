@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.2.1](https://github.com/grafana/metrics-drilldown/compare/v3.2.0...v3.2.1) (2026-11-16)
+
+
+### 🧹 Chore
+
+* **deps:** Update dependency @playwright/test to v1.65.0 ([#1599](https://github.com/grafana/metrics-drilldown/issues/1599)) ([c788d6b](https://github.com/grafana/metrics-drilldown/commit/c788d6b7106a7ab3a40c6a590deda13c597134d8))
+* **deps:** Update dependency @prometheus-io/lezer-promql to ^0.316.0 ([#1600](https://github.com/grafana/metrics-drilldown/issues/1600)) ([ea23416](https://github.com/grafana/metrics-drilldown/commit/ea23416721091022094fd371a4739234fe3735e5))
+* **deps:** Update dependency dotenv to v18.0.10 ([#1594](https://github.com/grafana/metrics-drilldown/issues/1594)) ([ac730c5](https://github.com/grafana/metrics-drilldown/commit/ac730c5629b2297cf9cfef1da96d8dd1d2f86398))
+* **deps:** Update docker.io/prom/prometheus Docker tag to v3.16.0 ([#1601](https://github.com/grafana/metrics-drilldown/issues/1601)) ([b498b3e](https://github.com/grafana/metrics-drilldown/commit/b498b3e1cd35139a170866de098ed664e801deab))
+* **deps:** update grafana/plugin-ci-workflows/ci-cd-workflows action to v12.1.1 ([#1603](https://github.com/grafana/metrics-drilldown/issues/1603)) ([3f2ad8a](https://github.com/grafana/metrics-drilldown/commit/3f2ad8a5be3fcff3f3f937475e0776587cc45923))
+
 ## [3.2.0](https://github.com/grafana/metrics-drilldown/compare/v3.1.0...v3.2.0) (2026-11-12)
 
 
