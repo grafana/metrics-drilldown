@@ -12,15 +12,13 @@ import { VAR_DATASOURCE, VAR_FILTERS } from 'shared/shared';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
 
-import { isQueryLibrarySupported, type OpenQueryLibraryComponentProps } from './savedQuery';
-import { SaveQueryModal } from './SaveQueryModal';
+import { type OpenQueryLibraryComponentProps } from './savedQuery';
 
 interface Props {
   readonly sceneRef: SceneObject;
 }
 
 export function SaveQueryButton({ sceneRef }: Props) {
-  const [saving, setSaving] = useState(false);
   const { component: OpenQueryLibraryComponent, isLoading: isLoadingExposedComponent } =
     usePluginComponent<OpenQueryLibraryComponentProps>('grafana/query-library-context/v1');
 
@@ -81,20 +79,18 @@ export function SaveQueryButton({ sceneRef }: Props) {
     return null;
   }
 
-  if (!isQueryLibrarySupported() || !promql) {
+  if (!promql) {
     return (
-      <>
-        <ToolbarButton
-          variant="canvas"
-          icon="save"
-          disabled={!promql}
-          onClick={() => setSaving(true)}
-          tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip', 'Save query')}
-        />
-        {saving && <SaveQueryModal dsUid={dsUid} query={promql} onClose={() => setSaving(false)} />}
-      </>
+      <ToolbarButton
+        variant="canvas"
+        icon="save"
+        disabled
+        tooltip={t('metrics.metrics-drilldown.save-query.button-tooltip', 'Save query')}
+      />
     );
-  } else if (isLoadingExposedComponent || !OpenQueryLibraryComponent || !dsName) {
+  }
+
+  if (isLoadingExposedComponent || !OpenQueryLibraryComponent || !dsName) {
     return null;
   }
 

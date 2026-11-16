@@ -114,7 +114,7 @@ pnpm install --frozen-lockfile
 
 if [[ "$FULL" == true ]]; then
   section "Validating the configured Grafana version"
-  grafana_version=$(node -e "require('dotenv').config({ quiet: true }); process.stdout.write(process.env.GRAFANA_VERSION || '13.1.0')")
+  grafana_version=$(node -e "require('dotenv').config({ quiet: true }); process.stdout.write(process.env.GRAFANA_VERSION || '13.3.0')")
   grafana_dependency=$(node -p "require('./src/plugin.json').dependencies.grafanaDependency")
   minimum_grafana_version=$(node -p "require('./src/plugin.json').dependencies.grafanaDependency.match(/[0-9]+\\.[0-9]+\\.[0-9]+/)[0]")
 
