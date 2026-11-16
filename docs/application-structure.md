@@ -24,6 +24,8 @@ Users can navigate to Metrics Drilldown from other parts of Grafana via extensio
 
 Metrics Drilldown can be embedded in dashboards or other apps through exposed components like `SourceMetrics` and `MiniBreakdown`. These provide scoped views that can link to the full app experience.
 
+For hosts that compose smaller investigation views, `MetricChart`, `MetricValueBreakdown`, and `MetricHandoff` expose explicit datasource/time/filter contracts without mounting the full app. See [Composable metrics components](./metrics-molecules.md) for extension IDs, props, and limits.
+
 ### Direct URLs
 
 Deep links enable jumping directly to specific metrics or filtered views. URLs preserve the selected metric, active tab, filters, and time range, making it easy to share specific views with teammates.

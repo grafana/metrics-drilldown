@@ -129,6 +129,21 @@
         "id": "grafana-metricsdrilldown-app/entity-metrics-component/v1",
         "title": "Entity Metrics",
         "description": "A metrics exploration view for entity labels from the Metrics Drilldown app."
+      },
+      {
+        "id": "grafana-metricsdrilldown-app/metric-chart/v1",
+        "title": "Metric Chart",
+        "description": "A scoped, type-aware metric chart from Metrics Drilldown."
+      },
+      {
+        "id": "grafana-metricsdrilldown-app/metric-value-breakdown/v1",
+        "title": "Metric Value Breakdown",
+        "description": "A scoped, chosen-label breakdown of the default grouped metric computation."
+      },
+      {
+        "id": "grafana-metricsdrilldown-app/metric-handoff/v1",
+        "title": "Metric Handoff",
+        "description": "Scoped links to Explore and Metrics Drilldown without owning host navigation or state."
       }
     ]
   }

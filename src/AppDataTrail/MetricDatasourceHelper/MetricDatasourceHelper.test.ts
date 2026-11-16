@@ -1,5 +1,5 @@
 import { getDataSourceInstance } from '@grafana/plugin-compat/datasources';
-import { sceneGraph } from '@grafana/scenes';
+import { EmbeddedScene, SceneFlexLayout, sceneGraph } from '@grafana/scenes';
 
 import { DataTrail } from 'AppDataTrail/DataTrail';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
@@ -52,6 +52,41 @@ describe('MetricDatasourceHelper', () => {
       );
 
       expect(result).toEqual(metadata);
+    });
+  });
+
+  describe('standalone scene context', () => {
+    test('fetches encoded metric metadata using a plain scene, without a DataTrail', async () => {
+      const scene = new EmbeddedScene({ body: new SceneFlexLayout({ children: [] }) });
+      const helper = new MetricDatasourceHelper(scene);
+      const metric = 'http.server.🔥&metric=other';
+      const metadata = { type: 'histogram', help: '', unit: '' };
+      const request = jest.fn().mockResolvedValue({ [metric]: [metadata] });
+      getDataSourceInstanceMock.mockResolvedValue({
+        type: 'prometheus',
+        uid: 'standalone',
+        languageProvider: { request },
+      } as any);
+
+      expect(await helper.getMetadataForMetric(metric)).toEqual(metadata);
+      expect(request).toHaveBeenCalledWith(`/api/v1/metadata?metric=${encodeURIComponent(metric)}`);
+      expect(getDataSourceInstanceMock).toHaveBeenCalledWith('${ds}', { __sceneObject: { value: scene } });
+      expect(await helper.getMetadataForMetric(metric)).toEqual(metadata);
+      expect(request).toHaveBeenCalledTimes(1);
+    });
+
+    test('datasource lookup failures are inconclusive metadata, not unhandled rejections', async () => {
+      const scene = new EmbeddedScene({ body: new SceneFlexLayout({ children: [] }) });
+      const helper = new MetricDatasourceHelper(scene);
+      getDataSourceInstanceMock.mockRejectedValue(new Error('Datasource unavailable'));
+      await expect(helper.getMetadataForMetric('temperature')).resolves.toBeUndefined();
+    });
+
+    test('separate scene helpers do not share native histogram probe results', () => {
+      const a = new MetricDatasourceHelper(new EmbeddedScene({ body: new SceneFlexLayout({ children: [] }) }));
+      const b = new MetricDatasourceHelper(new EmbeddedScene({ body: new SceneFlexLayout({ children: [] }) }));
+      a.setCachedNativeHistogram('temperature', true);
+      expect(b.getCachedNativeHistogram('temperature')).toBeUndefined();
     });
   });
 
