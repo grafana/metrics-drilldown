@@ -1,6 +1,7 @@
 import { type AdHocVariableFilter } from '@grafana/data';
 import { utf8Support } from '@grafana/prometheus';
 import { type SceneObject, type SceneQueryRunner } from '@grafana/scenes';
+import { type DataQuery } from '@grafana/schema';
 
 export function isSceneQueryRunner(input: SceneObject | null | undefined): input is SceneQueryRunner {
   return typeof input !== 'undefined' && input !== null && 'state' in input && 'runQueries' in input;
@@ -47,4 +48,19 @@ export function removeIgnoreUsageLabel(query: string): string {
     return query.replace(/,?__ignore_usage__="",?/, '');
   }
   return query;
+}
+
+/**
+ * Prepares a panel query for an Explore link. Drops the legend, since it only describes
+ * the Drilldown panel and would stay stuck on screen after the query is edited in Explore.
+ */
+export function toExploreQuery(query: DataQuery & { expr?: unknown; legendFormat?: string }): DataQuery {
+  const exploreQuery = { ...query };
+  delete exploreQuery.legendFormat;
+
+  if (typeof exploreQuery.expr === 'string') {
+    exploreQuery.expr = removeIgnoreUsageLabel(exploreQuery.expr);
+  }
+
+  return exploreQuery;
 }
