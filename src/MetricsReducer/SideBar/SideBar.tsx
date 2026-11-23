@@ -26,13 +26,13 @@ import { userStorage } from 'shared/user-preferences/userStorage';
 import { embeddedTrailNamespace, getObjectValues, getTrailFor } from 'shared/utils/utils';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
+import { reportExploreMetrics } from '../../shared/tracking/interactions';
 import { BookmarksList } from './sections/BookmarksList/BookmarksList';
 import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetricsSection';
 import { CustomIcons, SideBarButton } from './SideBarButton';
-import { reportExploreMetrics } from '../../shared/tracking/interactions';
 
 type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList;
 

@@ -27,10 +27,10 @@ import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 import { useResizeObserver } from 'shared/hooks/useResizeObserver';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
-import { MetricActionBar } from './MetricActionBar';
-import { PanelMenu } from './PanelMenu/PanelMenu';
 import { buildMiniBreakdownNavigationUrl } from '../exposedComponents/MiniBreakdown/buildNavigationUrl';
 import { getTrailFor } from '../shared/utils/utils';
+import { MetricActionBar } from './MetricActionBar';
+import { PanelMenu } from './PanelMenu/PanelMenu';
 
 const MAIN_PANEL_MIN_HEIGHT = PANEL_HEIGHT.XL;
 const MAIN_PANEL_MAX_HEIGHT = '40%';

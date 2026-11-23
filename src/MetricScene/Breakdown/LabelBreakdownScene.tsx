@@ -19,16 +19,16 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { getTrailFor } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
-import { type HistogramBreakdownFnVariable } from './HistogramBreakdownFnVariable';
-import { EventSyncYAxisChanged } from './MetricLabelsList/events/EventSyncYAxisChanged';
-import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
-import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
-import { SyncYAxisSwitch } from './SyncYAxisSwitch';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { RefreshMetricsEvent, VAR_GROUP_BY, VAR_HISTOGRAM_BREAKDOWN_FN } from '../../shared/shared';
 import { isQueryVariable } from '../../shared/utils/utils.variables';
 import { MetricScene } from '../MetricScene';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
+import { type HistogramBreakdownFnVariable } from './HistogramBreakdownFnVariable';
+import { EventSyncYAxisChanged } from './MetricLabelsList/events/EventSyncYAxisChanged';
+import { MetricLabelsList } from './MetricLabelsList/MetricLabelsList';
+import { MetricLabelValuesList } from './MetricLabelValuesList/MetricLabelValuesList';
+import { SyncYAxisSwitch } from './SyncYAxisSwitch';
 
 interface LabelBreakdownSceneState extends SceneObjectState {
   metric: string;

@@ -13,11 +13,11 @@ import {
 
 import { DataTrail, type DataTrailState } from 'AppDataTrail/DataTrail';
 
+import { type MetricDatasourceHelper } from '../../AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
+import { ROUTES } from '../constants/routes';
 import { isSceneQueryRunner } from './utils.queries';
 import { getClosestScopesFacade } from './utils.scopes';
 import { isAdHocFiltersVariable } from './utils.variables';
-import { type MetricDatasourceHelper } from '../../AppDataTrail/MetricDatasourceHelper/MetricDatasourceHelper';
-import { ROUTES } from '../constants/routes';
 
 /**
  * Get the DataTrail ancestor for a given scene object.

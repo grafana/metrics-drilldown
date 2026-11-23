@@ -1,9 +1,9 @@
 import { createOpenFeatureLocalStorageProvider, createOpenFeatureOFREPWebProvider } from '@grafana/runtime';
 import { ClientProviderStatus, MultiProvider, OpenFeature, ProviderEvents, type Client, type JsonValue } from '@openfeature/web-sdk';
 
-import { TrackingHook } from './tracking';
 import { getObjectKeys } from '../../shared/utils/utils';
 import { logger } from '../logger/logger';
+import { TrackingHook } from './tracking';
 
 /**
  * All feature flags that we intend to use from the GoFF service are defined here.

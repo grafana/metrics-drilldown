@@ -1,9 +1,9 @@
 // CAUTION: Imports in this file will contribute to the module.tsx bundle size
 import { PluginExtensionPoints, type PluginExtensionAddedLinkConfig } from '@grafana/data';
 
-import { appendUrlParameters, createAppUrl, UrlParameters } from './links';
 import { ROUTES } from '../shared/constants/routes';
 import { isPrometheusDataSource } from '../shared/utils/utils.datasource';
+import { appendUrlParameters, createAppUrl, UrlParameters } from './links';
 
 export function createDatasourceUrl(datasourceUid: string, route: string = ROUTES.Drilldown): string {
   const params = appendUrlParameters([[UrlParameters.DatasourceId, datasourceUid]]);

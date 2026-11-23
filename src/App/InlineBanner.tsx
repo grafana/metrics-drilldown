@@ -2,8 +2,8 @@ import { t } from '@grafana/i18n';
 import { Alert, type AlertVariant } from '@grafana/ui';
 import React, { useEffect, useRef } from 'react';
 
-import { ensureErrorObject } from './errorUtils';
 import { logger, type ErrorContext } from '../shared/logger/logger';
+import { ensureErrorObject } from './errorUtils';
 
 type InlineBannerProps = {
   severity: AlertVariant;

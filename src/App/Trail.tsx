@@ -4,13 +4,13 @@ import { PluginPage } from '@grafana/runtime';
 import { UrlSyncContextProvider, useSceneObjectState, type SceneObject } from '@grafana/scenes';
 import React, { useMemo } from 'react';
 
-import { TrailErrorBoundary } from './TrailErrorBoundary';
 import { type DataTrail } from '../AppDataTrail/DataTrail';
 import { defaultActionView } from '../MetricScene/MetricActionBar';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
 import { VAR_GROUP_BY } from '../shared/shared';
 import { useMetricsDrilldownQuestions } from './assistant/useMetricsDrilldownQuestions';
+import { TrailErrorBoundary } from './TrailErrorBoundary';
 
 interface TrailProps {
   trail: DataTrail;

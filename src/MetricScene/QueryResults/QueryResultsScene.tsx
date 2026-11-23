@@ -18,12 +18,12 @@ import { type KgMetricType } from 'shared/GmdVizPanel/matchers/mapKgMetricType';
 import { useResizeObserver } from 'shared/hooks/useResizeObserver';
 import { trailDS } from 'shared/shared';
 
-import { DEFAULT_QUERY_RESULTS_TABLE_WIDTH, type PrometheusQueryResultsV1Props } from './constants';
 import { InlineBanner } from '../../App/InlineBanner';
 import { getTrailFor } from '../../shared/utils/utils';
 import { getAppBackgroundColor } from '../../shared/utils/utils.styles';
 import { actionViews } from '../MetricActionBar';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
+import { DEFAULT_QUERY_RESULTS_TABLE_WIDTH, type PrometheusQueryResultsV1Props } from './constants';
 
 function useElementWidth<T extends HTMLElement>() {
   const ref = useRef<T>(null);

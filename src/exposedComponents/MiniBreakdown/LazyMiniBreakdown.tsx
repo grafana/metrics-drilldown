@@ -1,8 +1,8 @@
 import { Trans } from '@grafana/i18n';
 import React, { lazy, Suspense } from 'react';
 
-import { type MiniBreakdownProps } from './MiniBreakdown';
 import { ExposedComponentErrorBoundary } from '../ExposedComponentErrorBoundary';
+import { type MiniBreakdownProps } from './MiniBreakdown';
 
 const MiniBreakdown = lazy(async () => {
   // Initialize i18n for scenes library before loading the component

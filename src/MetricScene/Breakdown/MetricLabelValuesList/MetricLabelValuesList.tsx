@@ -41,16 +41,16 @@ import { trailDS, VAR_HISTOGRAM_BREAKDOWN_FN } from 'shared/shared';
 import { injectLabelMatcher } from 'shared/utils/injectLabelMatcher';
 import { getTrailFor } from 'shared/utils/utils';
 
-import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
-import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
-import { LabelValuesCountsProvider } from './LabelValuesCountProvider';
-import { SceneByFrameRepeater } from './SceneByFrameRepeater';
-import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 import { InlineBanner } from '../../../App/InlineBanner';
 import { PanelMenu } from '../../PanelMenu/PanelMenu';
 import { publishTimeseriesData } from '../MetricLabelsList/behaviors/publishTimeseriesData';
 import { syncYAxis } from '../MetricLabelsList/behaviors/syncYAxis';
 import { type SyncYAxisSwitch } from '../SyncYAxisSwitch';
+import { AddToFiltersGraphAction } from './AddToFiltersGraphAction';
+import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
+import { LabelValuesCountsProvider } from './LabelValuesCountProvider';
+import { SceneByFrameRepeater } from './SceneByFrameRepeater';
+import { SortBySelector, type SortBySelectorState } from './SortBySelector';
 
 export const BREAKDOWN_QUICK_SEARCH_KEY = 'breakdown-quick-search';
 

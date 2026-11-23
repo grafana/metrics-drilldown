@@ -1,8 +1,8 @@
 import { type SceneDataQuery, type VizPanel } from '@grafana/scenes';
 
 import { type PanelConfig, type QueryConfig } from '../GmdVizPanel';
-import { type PanelType } from './available-panel-types';
 import { type Metric } from '../matchers/getMetricType';
+import { type PanelType } from './available-panel-types';
 import { buildHeatmapPanel } from './heatmap/buildHeatmapPanel';
 import { getHeatmapQueryRunnerParams } from './heatmap/getHeatmapQueryRunnerParams';
 import { buildPercentilesPanel } from './percentiles/buildPercentilesPanel';

@@ -15,11 +15,11 @@ import { embeddedTrailNamespace, newMetricsTrail } from 'shared/utils/utils';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 import { labelMatcherToAdHocFilter } from 'shared/utils/utils.variables';
 
+import { parsePromQLQuery } from '../../extensions/links';
+import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 import { FilterGroupByAssertsLabelsBehavior } from './behaviors/FilterGroupByAssertsLabelsBehavior';
 import { HistogramPercentilesDefaultBehavior } from './behaviors/HistogramPercentilesDefaultBehavior';
 import { type SourceMetrics } from './types';
-import { parsePromQLQuery } from '../../extensions/links';
-import { toSceneTimeRange } from '../../shared/utils/utils.timerange';
 
 /**
  * Extracts the prefix from a Prometheus metric name.

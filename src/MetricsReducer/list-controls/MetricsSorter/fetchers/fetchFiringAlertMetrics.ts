@@ -5,8 +5,8 @@ import { ensureErrorObject } from 'App/errorUtils';
 import { logger } from 'shared/logger/logger';
 import { reportExploreMetrics } from 'shared/tracking/interactions';
 
-import { GRAFANA_RULER_RULES_URL, usageRequestOptions } from './shared';
 import { extractMetricNames } from '../../../../shared/utils/utils.promql';
+import { GRAFANA_RULER_RULES_URL, usageRequestOptions } from './shared';
 
 /**
  * Prometheus-compatible ruler API response shape.

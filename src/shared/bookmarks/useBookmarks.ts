@@ -6,9 +6,9 @@ import { displayError } from 'MetricsReducer/helpers/displayStatus';
 import { MetricSelectedEvent, VAR_DATASOURCE } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
-import { genBookmarkKey } from './genBookmarkKey';
 import { PREF_KEYS } from '../user-preferences/pref-keys';
 import { userStorage } from '../user-preferences/userStorage';
+import { genBookmarkKey } from './genBookmarkKey';
 
 export type Bookmark = {
   key: string;

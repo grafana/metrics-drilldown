@@ -1,8 +1,8 @@
 import { type PluginExtensionExposedComponentConfig } from '@grafana/data';
 
+import pluginJson from '../../plugin.json';
 import { type LabelBreakdownProps } from './LabelBreakdown';
 import { LazyLabelBreakdown } from './LazyLabelBreakdown';
-import pluginJson from '../../plugin.json';
 
 export const labelBreakdownConfig = {
   id: `${pluginJson.id}/label-breakdown-component/v1`,

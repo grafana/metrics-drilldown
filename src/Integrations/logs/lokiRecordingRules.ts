@@ -5,9 +5,9 @@ import { lastValueFrom } from 'rxjs';
 
 import { type DataSourceInstance } from 'shared/types';
 
-import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 import { logger } from '../../shared/logger/logger';
 import { getDataSourceFetcher } from '../../shared/utils/utils.datasource';
+import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 
 export interface RecordingRuleGroup {
   name: string;
