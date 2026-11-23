@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.2.1](https://github.com/grafana/metrics-drilldown/compare/v3.2.0...v3.2.1) (2026-11-23)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** upgrade import-x for patched minimatch ([#1613](https://github.com/grafana/metrics-drilldown/issues/1613)) ([a6d41bb](https://github.com/grafana/metrics-drilldown/commit/a6d41bb204280e4d5b2ee08706e75919ce7b198f))
+* **explore:** drop the Drilldown legend from Explore links ([#1582](https://github.com/grafana/metrics-drilldown/issues/1582)) ([5da38ac](https://github.com/grafana/metrics-drilldown/commit/5da38aceec344619ac9c7bb6c373560d7afbd600))
+* remove the SceneQueryRunner __name__ patch  ([#1544](https://github.com/grafana/metrics-drilldown/issues/1544)) ([cb7f405](https://github.com/grafana/metrics-drilldown/commit/cb7f40563b14353127b7a6e98b767b9a5b7b0680))
+* remove the SceneQueryRunner __name__ patch now that Scenes 8 skips manual ad hoc filters. Scenes 8.14.0 stopped sending ad hoc variables with applyMode manual as request.filters, and VAR_FILTERS is manual, so nothing injects __name__ into panel queries anymore. ([cb7f405](https://github.com/grafana/metrics-drilldown/commit/cb7f40563b14353127b7a6e98b767b9a5b7b0680))
+
+
+### 🧹 Chore
+
+* **deps:** Update dependency @playwright/test to v1.65.0 ([#1599](https://github.com/grafana/metrics-drilldown/issues/1599)) ([c788d6b](https://github.com/grafana/metrics-drilldown/commit/c788d6b7106a7ab3a40c6a590deda13c597134d8))
+* **deps:** Update dependency @playwright/test to v1.65.1 ([#1609](https://github.com/grafana/metrics-drilldown/issues/1609)) ([e7abf1d](https://github.com/grafana/metrics-drilldown/commit/e7abf1dcd8df7b52c1aae5ddff72881a06e6a0bd))
+* **deps:** Update dependency @prometheus-io/lezer-promql to ^0.316.0 ([#1600](https://github.com/grafana/metrics-drilldown/issues/1600)) ([ea23416](https://github.com/grafana/metrics-drilldown/commit/ea23416721091022094fd371a4739234fe3735e5))
+* **deps:** Update dependency dotenv to v18.0.10 ([#1594](https://github.com/grafana/metrics-drilldown/issues/1594)) ([ac730c5](https://github.com/grafana/metrics-drilldown/commit/ac730c5629b2297cf9cfef1da96d8dd1d2f86398))
+* **deps:** Update docker.io/prom/prometheus Docker tag to v3.16.0 ([#1601](https://github.com/grafana/metrics-drilldown/issues/1601)) ([b498b3e](https://github.com/grafana/metrics-drilldown/commit/b498b3e1cd35139a170866de098ed664e801deab))
+* **deps:** update grafana/plugin-ci-workflows/ci-cd-workflows action to v12.1.1 ([#1603](https://github.com/grafana/metrics-drilldown/issues/1603)) ([3f2ad8a](https://github.com/grafana/metrics-drilldown/commit/3f2ad8a5be3fcff3f3f937475e0776587cc45923))
+* **deps:** Update grafana/shared-workflows digest to 661b226 ([#1608](https://github.com/grafana/metrics-drilldown/issues/1608)) ([af26548](https://github.com/grafana/metrics-drilldown/commit/af26548aa1ddc03894bb252612e17eb7e041946f))
+
 ## [3.2.0](https://github.com/grafana/metrics-drilldown/compare/v3.1.0...v3.2.0) (2026-11-12)
 
 
