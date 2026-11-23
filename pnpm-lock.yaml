@@ -81,8 +81,8 @@ importers:
         specifier: ^1.7.2
         version: 1.10.0(@openfeature/core@1.12.0)
       '@prometheus-io/lezer-promql':
-        specifier: ^0.315.0
-        version: 0.315.1(@lezer/highlight@1.2.5)(@lezer/lr@1.4.10)
+        specifier: ^0.316.0
+        version: 0.316.0(@lezer/highlight@1.2.5)(@lezer/lr@1.4.10)
       compare-versions:
         specifier: ^6.1.1
         version: 6.1.1
@@ -116,7 +116,7 @@ importers:
         version: 10.0.0(@stylistic/eslint-plugin@5.10.0(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1)))(@typescript-eslint/eslint-plugin@8.72.1(@typescript-eslint/parser@8.72.1(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(@typescript-eslint/parser@8.72.1(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint-config-prettier@10.1.8(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint-plugin-jsdoc@64.5.4(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint-plugin-react-hooks@7.1.1(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1))(eslint-plugin-react@7.37.5(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(typescript@6.0.3)
       '@grafana/plugin-e2e':
         specifier: 4.0.0
-        version: 4.0.0(@playwright/test@1.64.1)
+        version: 4.0.0(@playwright/test@1.65.1)
       '@grafana/sign-plugin':
         specifier: ^3.2.2
         version: 3.3.3(supports-color@8.1.1)
@@ -127,8 +127,8 @@ importers:
         specifier: ^30.5.2
         version: 30.5.2(supports-color@8.1.1)
       '@playwright/test':
-        specifier: 1.64.1
-        version: 1.64.1
+        specifier: 1.65.1
+        version: 1.65.1
       '@rsdoctor/rspack-plugin':
         specifier: ^1.5.18
         version: 1.6.5(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@rspack/core@2.3.1(@swc/helpers@0.5.24))(supports-color@8.1.1)(webpack@5.112.2(@swc/core@1.16.22(@swc/helpers@0.5.24))(postcss@8.5.32))
@@ -190,8 +190,8 @@ importers:
         specifier: 7.1.5
         version: 7.1.5(@rspack/core@2.3.1(@swc/helpers@0.5.24))(webpack@5.112.2(@swc/core@1.16.22(@swc/helpers@0.5.24))(postcss@8.5.32))
       dotenv:
-        specifier: 18.0.9
-        version: 18.0.9
+        specifier: 18.0.10
+        version: 18.0.10
       eslint:
         specifier: ^10.0.0
         version: 10.14.0(jiti@2.7.0)(supports-color@8.1.1)
@@ -1467,8 +1467,8 @@ packages:
     resolution: {integrity: sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
-  '@playwright/test@1.64.1':
-    resolution: {integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==}
+  '@playwright/test@1.65.1':
+    resolution: {integrity: sha512-y+NCIRm2LvY4slUVWvGh1nujJ8RF/hEisIsq2mtUPgdQC4L701bq5hZGMhrpeXjACvwvO9tj5dJqhvM6TP9lbw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -1507,8 +1507,8 @@ packages:
       '@lezer/highlight': ^1.1.2
       '@lezer/lr': ^1.2.3
 
-  '@prometheus-io/lezer-promql@0.315.1':
-    resolution: {integrity: sha512-+D/FSMFCOBbErvkJ7rTw97RCewzEs3GcmlpmebM9a4NpfhOJQOwLVWw6Ea5sZq4phaxuE7OpYRosX5QuXdrqYw==}
+  '@prometheus-io/lezer-promql@0.316.0':
+    resolution: {integrity: sha512-TUah9OVcOODM5/tupfz7MdfztwounKPK8g7C927euHQBkOmlEOamtyaHXC4OKI0IJ0zVfJKb0r9CoFQRtTkx0Q==}
     peerDependencies:
       '@lezer/highlight': ^1.1.2
       '@lezer/lr': ^1.2.3
@@ -3069,8 +3069,8 @@ packages:
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
-  dotenv@18.0.9:
-    resolution: {integrity: sha512-3fVOW4cB02R066PUSwn8O4TJyz9NckQl7F81blIbaq9jKBm2tSmOKky7ZHIXzGvkVPXCSn6jkpziBPZdGFs8Tw==}
+  dotenv@18.0.10:
+    resolution: {integrity: sha512-89FAA1xchzK2mxVWdr5F/0rldwiueXs6zJM86rO66EzekR1iBdiXRthyG+m5GvkJaFH3C2LESzamTkgndmLT2A==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -4640,13 +4640,13 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  playwright-core@1.64.1:
-    resolution: {integrity: sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ==}
+  playwright-core@1.65.1:
+    resolution: {integrity: sha512-hqPpz7blSMPxWVdoeE1yiBSzXsKiVOd2k+kjCvmUywD2GPO2Dd9HfcWnq9NN0GHbNZDFgZ9JfBFr+X5/BLo0qw==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.64.1:
-    resolution: {integrity: sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==}
+  playwright@1.65.1:
+    resolution: {integrity: sha512-vJ1FuoOrNwOKHUIVEvSt3jT1L+wjjDpwhwIstKtfvTh8XIG4FG4bIFuvNdMxi81LGfAhUgUZleVFaOLY4RIUUw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -6684,9 +6684,9 @@ snapshots:
       '@grafana/schema': 13.3.0
       react: 19.3.1
 
-  '@grafana/plugin-e2e@4.0.0(@playwright/test@1.64.1)':
+  '@grafana/plugin-e2e@4.0.0(@playwright/test@1.65.1)':
     dependencies:
-      '@playwright/test': 1.64.1
+      '@playwright/test': 1.65.1
       yaml: 2.9.1
 
   '@grafana/plugin-ui@0.17.6(cf1920d90a3d40603d07c050618e20ef)':
@@ -7647,9 +7647,9 @@ snapshots:
 
   '@pkgr/core@0.3.6': {}
 
-  '@playwright/test@1.64.1':
+  '@playwright/test@1.65.1':
     dependencies:
-      playwright: 1.64.1
+      playwright: 1.65.1
 
   '@polka/url@1.0.0-next.29': {}
 
@@ -7684,7 +7684,7 @@ snapshots:
       '@lezer/highlight': 1.2.5
       '@lezer/lr': 1.4.10
 
-  '@prometheus-io/lezer-promql@0.315.1(@lezer/highlight@1.2.5)(@lezer/lr@1.4.10)':
+  '@prometheus-io/lezer-promql@0.316.0(@lezer/highlight@1.2.5)(@lezer/lr@1.4.10)':
     dependencies:
       '@lezer/highlight': 1.2.5
       '@lezer/lr': 1.4.10
@@ -9301,7 +9301,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
 
-  dotenv@18.0.9: {}
+  dotenv@18.0.10: {}
 
   downshift@9.4.0(react@19.3.1):
     dependencies:
@@ -11206,11 +11206,11 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  playwright-core@1.64.1: {}
+  playwright-core@1.65.1: {}
 
-  playwright@1.64.1:
+  playwright@1.65.1:
     dependencies:
-      playwright-core: 1.64.1
+      playwright-core: 1.65.1
 
   pluralize@8.0.0: {}
 
