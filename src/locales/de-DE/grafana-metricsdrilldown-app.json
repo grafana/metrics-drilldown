@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Wird geladen …"
   },
   "attribute-explorer": {
     "badge-metric": "OTel-Metrik-Attribut",
@@ -85,7 +85,7 @@
     "section-label": "Aufschlüsselung",
     "select-label": "Auswählen",
     "sync-y-axis": {
-      "label": ""
+      "label": "y-Achse synchronisieren"
     }
   },
   "checkbox-list": {
@@ -175,13 +175,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "Im aktuellen Zeitbereich wurden keine Exemplare für diese Metrik gefunden",
+      "error": "Exemplare konnten nicht geladen werden, da die Abfrage fehlgeschlagen ist",
+      "label": "Exemplare anzeigen",
+      "off": "Exemplare anzeigen (nur Zähler und Histogramme)",
+      "on": "Exemplare werden angezeigt",
+      "unavailable": "Für diese Metrik sind keine Exemplare verfügbar",
+      "unsupported-panel": "Für diesen Panel-Typ sind keine Exemplare verfügbar"
     },
     "native-histogram": "Natives Histogramm",
     "variant": {
@@ -320,13 +320,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Lesezeichen hinzufügen",
+      "add-to-dashboard": "Zum Dashboard hinzufügen",
       "copy-url": "URL kopieren",
       "copy-url-success": "URL in die Zwischenablage kopiert",
-      "create-alert": "",
+      "create-alert": "Warnung erstellen",
       "explore": "Entdecken",
-      "remove-bookmark": ""
+      "remove-bookmark": "Lesezeichen entfernen"
     },
     "group": {
       "actions": "Aktionen",
@@ -386,7 +386,7 @@
   },
   "related-logs": {
     "datasource-description": "Einige Datenquellen von Loki fehlen möglicherweise in der Dropdown-Liste, wenn die Antwort länger als {{timeout}} Sekunden gedauert hat. Nutzen Sie Logs Drilldown, um für alle Datenquellen von Loki Logs anzuzeigen.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "Die Datenquellen für zugehörige Logs konnten nicht geladen werden.",
     "datasource-label": "Logs-Datenquelle",
     "experimental-note": "Hinweis: Bei den zugehörigen Logs handelt es sich um eine experimentelle Funktion.",
     "loading": "Wird geladen …",
@@ -434,6 +434,7 @@
       "search-placeholder": "Suche …"
     },
     "filter-type": {
+      "category": "",
       "prefix": "Präfix",
       "recent": "neu",
       "rule-group": "Regelgruppe",
@@ -444,6 +445,27 @@
       "search-aria-label": "Labels suchen",
       "search-placeholder": "Suche …"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Gesamte Zeit",
       "past-interval": "Vergangene {{interval}}"
@@ -451,6 +473,8 @@
     "section": {
       "bookmarks": "Lesezeichen",
       "bookmarks-description": "Zur schnellen Bezugnahme auf Ihre gespeicherten Metriken zugreifen",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Nach Labels gruppieren",
       "group-by-labels-description": "Metriken nach ihren Label-Werten gruppieren",
       "prefix-filters": "Präfixfilter",

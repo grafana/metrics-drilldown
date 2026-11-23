@@ -13,7 +13,7 @@
   "App": {
     "current-error-title": "",
     "instances-error-title": "",
-    "loading": ""
+    "loading": "Cargando..."
   },
   "attribute-explorer": {
     "badge-metric": "Atributo de métrica de OTel",
@@ -85,7 +85,7 @@
     "section-label": "Desglose",
     "select-label": "Seleccionar",
     "sync-y-axis": {
-      "label": ""
+      "label": "Sincronizar eje y"
     }
   },
   "checkbox-list": {
@@ -175,13 +175,13 @@
   },
   "gmd-viz-panel": {
     "enable-exemplars": {
-      "empty": "",
-      "error": "",
-      "label": "",
-      "off": "",
-      "on": "",
-      "unavailable": "",
-      "unsupported-panel": ""
+      "empty": "No se han encontrado ejemplos para esta métrica en el intervalo de tiempo actual",
+      "error": "No se han podido cargar los ejemplos porque la consulta ha fallado",
+      "label": "Mostrar ejemplos",
+      "off": "Mostrar ejemplos (solo contadores e histogramas)",
+      "on": "Mostrando ejemplos",
+      "unavailable": "No hay ejemplos disponibles para esta métrica",
+      "unsupported-panel": "No hay ejemplos disponibles para este tipo de panel"
     },
     "native-histogram": "Histograma nativo",
     "variant": {
@@ -320,13 +320,13 @@
   },
   "panel-menu": {
     "action": {
-      "add-bookmark": "",
-      "add-to-dashboard": "",
+      "add-bookmark": "Añadir marcador",
+      "add-to-dashboard": "Añadir al dashboard",
       "copy-url": "Copiar URL",
       "copy-url-success": "URL copiada al portapapeles",
-      "create-alert": "",
+      "create-alert": "Crear alerta",
       "explore": "Explorar",
-      "remove-bookmark": ""
+      "remove-bookmark": "Eliminar marcador"
     },
     "group": {
       "actions": "Acciones",
@@ -386,7 +386,7 @@
   },
   "related-logs": {
     "datasource-description": "Es posible que falten algunas fuentes de datos de Loki en el menú desplegable si tardaron más de {{timeout}} segundos en responder. Para ver los logs de todas las fuentes de datos de Loki, prueba a usar Logs Drilldown.",
-    "datasource-discovery-error": "",
+    "datasource-discovery-error": "Error al cargar las fuentes de datos para los logs relacionados.",
     "datasource-label": "Fuente de datos de logs",
     "experimental-note": "Nota: Los logs relacionados son una característica experimental.",
     "loading": "Cargando...",
@@ -434,6 +434,7 @@
       "search-placeholder": "Buscar…"
     },
     "filter-type": {
+      "category": "",
       "prefix": "prefijo",
       "recent": "reciente",
       "rule-group": "grupo de reglas",
@@ -444,6 +445,27 @@
       "search-aria-label": "Buscar etiquetas",
       "search-placeholder": "Buscar…"
     },
+    "metric-category": {
+      "cloud": "",
+      "container": "",
+      "database": "",
+      "deployment": "",
+      "error": "",
+      "exception": "",
+      "frontend": "",
+      "host-os": "",
+      "http": "",
+      "kubernetes": "",
+      "messaging": "",
+      "network": "",
+      "other": "",
+      "process": "",
+      "rpc": "",
+      "runtime": "",
+      "service": "",
+      "telemetry-sdk": "",
+      "url": ""
+    },
     "recent-metrics": {
       "all-time": "Todo el tiempo",
       "past-interval": "Últimos {{interval}}"
@@ -451,6 +473,8 @@
     "section": {
       "bookmarks": "Marcadores",
       "bookmarks-description": "Accede a tus métricas guardadas para obtener una referencia rápida.",
+      "category-filters": "",
+      "category-filters-description": "",
       "group-by-labels": "Agrupar por etiquetas",
       "group-by-labels-description": "Agrupa métricas por sus valores de etiqueta.",
       "prefix-filters": "Filtros de prefijos",

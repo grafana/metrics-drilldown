@@ -2,8 +2,8 @@ import { render, screen } from '@testing-library/react';
 import React, { act } from 'react';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 
-import { AppErrorBoundary, isChunkLoadError } from './AppErrorBoundary';
 import { logger } from '../shared/logger/logger';
+import { AppErrorBoundary, isChunkLoadError } from './AppErrorBoundary';
 
 jest.mock('@grafana/i18n', () => ({
   ...jest.requireActual('@grafana/i18n'),

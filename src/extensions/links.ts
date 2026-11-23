@@ -12,8 +12,8 @@ import { parser } from '@prometheus-io/lezer-promql';
 import { PLUGIN_BASE_URL } from 'shared/constants/plugin';
 import { ROUTES } from 'shared/constants/routes';
 
-import { parseMatcher } from './parseMatcher';
 import { processLabelMatcher, type ParsedPromQLQuery, type PromQLLabelMatcher } from '../shared/utils/utils.promql';
+import { parseMatcher } from './parseMatcher';
 
 const PRODUCT_NAME = 'Metrics Drilldown';
 const title = `Open in ${PRODUCT_NAME}`;

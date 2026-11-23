@@ -1,6 +1,6 @@
+import { type ItemsInSet } from '../../../shared/utils/utils.types';
 import { fetchAlertingMetrics } from './fetchers/fetchAlertingMetrics';
 import { fetchDashboardMetrics, type MetricUsageDetails } from './fetchers/fetchDashboardMetrics';
-import { type ItemsInSet } from '../../../shared/utils/utils.types';
 
 interface MetricsUsageState {
   metrics: Record<string, MetricUsageDetails>;

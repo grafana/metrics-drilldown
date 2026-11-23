@@ -2,11 +2,11 @@ import { type AdHocVariableFilter, type TimeRange } from '@grafana/data';
 import { getDataSourceInstance } from '@grafana/plugin-compat/datasources';
 import { sceneGraph, type SceneObject } from '@grafana/scenes';
 
-import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 import { VAR_FILTERS } from '../../shared/shared';
 import { getTrailFor } from '../../shared/utils/utils';
 import { getDataSourceFetcher } from '../../shared/utils/utils.datasource';
 import { isAdHocFiltersVariable } from '../../shared/utils/utils.variables';
+import { createMetricsLogsConnector, type FoundLokiDataSource } from './base';
 
 const knownLabelNameDiscrepancies = {
   job: 'service_name', // `service.name` is `job` in Mimir and `service_name` in Loki

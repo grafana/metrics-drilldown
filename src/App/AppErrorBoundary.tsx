@@ -5,8 +5,8 @@ import { Button, ErrorBoundary, useStyles2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { ErrorView } from './ErrorView';
 import { logger } from '../shared/logger/logger';
+import { ErrorView } from './ErrorView';
 
 const CHUNK_RELOAD_KEY = 'mdrilldown:chunk-reload-attempted';
 

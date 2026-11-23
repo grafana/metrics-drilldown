@@ -159,6 +159,7 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
               <Tab
                 key={index}
                 label={label}
+                data-testid={`metric-action-tab-${tab.value}`}
                 counter={counter}
                 active={isActive}
                 onChangeTab={() => {

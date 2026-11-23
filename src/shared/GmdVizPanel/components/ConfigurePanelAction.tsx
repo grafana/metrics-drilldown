@@ -7,8 +7,8 @@ import React from 'react';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
-import { EventConfigurePanel } from './EventConfigurePanel';
 import { type Metric } from '../matchers/getMetricType';
+import { EventConfigurePanel } from './EventConfigurePanel';
 
 interface ConfigurePanelActionState extends SceneObjectState {
   metric: Metric;

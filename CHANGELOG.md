@@ -1,5 +1,37 @@
 # Changelog
 
+## [3.2.0](https://github.com/grafana/metrics-drilldown/compare/v3.1.0...v3.2.0) (2026-11-12)
+
+
+### 🎉 Features
+
+* add sidebar otel filtering by semantic convention categories ([#1536](https://github.com/grafana/metrics-drilldown/issues/1536)) ([7c03a8e](https://github.com/grafana/metrics-drilldown/commit/7c03a8e0bc42ae20e2d776c51bcbed5a6781c50c))
+* replace config.datasources in MetricsDrilldownDataSourceVariable ([#1558](https://github.com/grafana/metrics-drilldown/issues/1558)) ([aab1902](https://github.com/grafana/metrics-drilldown/commit/aab19026448db7cf210e88f96f82c47535a90e98))
+* replace getDatasourceSrv with new apis ([#1538](https://github.com/grafana/metrics-drilldown/issues/1538)) ([2198e69](https://github.com/grafana/metrics-drilldown/commit/2198e69f4a2ad7b49f70130d5b19f90dd0b66f0d))
+
+
+### 🐛 Bug Fixes
+
+* **deps:** remediate glob CVEs ([#1591](https://github.com/grafana/metrics-drilldown/issues/1591)) ([54f1e61](https://github.com/grafana/metrics-drilldown/commit/54f1e6189e290f186cb742f33be03ee18ecab5b0))
+* **loading:** remove top level Suspense from App ([#1578](https://github.com/grafana/metrics-drilldown/issues/1578)) ([8604254](https://github.com/grafana/metrics-drilldown/commit/86042543985ec0ba9ae3c2ec73bb8eef51003fd2))
+
+
+### 🧪 Tests
+
+* add stable selectors for Metrics Drilldown introductions ([#1589](https://github.com/grafana/metrics-drilldown/issues/1589)) ([8a2dfd7](https://github.com/grafana/metrics-drilldown/commit/8a2dfd76757a6d8ecba569ef6141a8a603029e0b))
+
+
+### 🧹 Chore
+
+* **deps:** combine dependency updates ([#1592](https://github.com/grafana/metrics-drilldown/issues/1592)) ([e2bb14f](https://github.com/grafana/metrics-drilldown/commit/e2bb14f8356380a6d860c2e14d25c19c678134da))
+* **deps:** Update Build tools ([#1570](https://github.com/grafana/metrics-drilldown/issues/1570)) ([d2cb3d4](https://github.com/grafana/metrics-drilldown/commit/d2cb3d49d3a96da299d8c9ddcc2328175984f6f1))
+* **deps:** Update Build tools ([#1583](https://github.com/grafana/metrics-drilldown/issues/1583)) ([074a5c0](https://github.com/grafana/metrics-drilldown/commit/074a5c0d563c89087b9fae22ddf55f1acc855463))
+* **deps:** Update dependency @grafana/plugin-e2e to v4 ([#1587](https://github.com/grafana/metrics-drilldown/issues/1587)) ([3d6e738](https://github.com/grafana/metrics-drilldown/commit/3d6e738f1cd0aefa0237e5e2d560a3e40675bb37))
+* **deps:** Update dependency dotenv to v18.0.9 ([#1572](https://github.com/grafana/metrics-drilldown/issues/1572)) ([c17367a](https://github.com/grafana/metrics-drilldown/commit/c17367a6e8d22e9c3bf27301a075f0eaa4b25927))
+* **deps:** Update dependency sass to v1.108.1 ([#1585](https://github.com/grafana/metrics-drilldown/issues/1585)) ([ff68062](https://github.com/grafana/metrics-drilldown/commit/ff68062f7df069d7956da98c0b211aca16afeaab))
+* **deps:** Update pnpm to v11.28.11 ([#1584](https://github.com/grafana/metrics-drilldown/issues/1584)) ([caa7633](https://github.com/grafana/metrics-drilldown/commit/caa763377d2b65c2fb54bc02a3bdcb273abc9a7c))
+* **deps:** Update TypeScript and linting ([#1586](https://github.com/grafana/metrics-drilldown/issues/1586)) ([781eec7](https://github.com/grafana/metrics-drilldown/commit/781eec7cafb104379fd372c5ff568bdd01b8136c))
+
 ## [3.1.0](https://github.com/grafana/metrics-drilldown/compare/v3.0.0...v3.1.0) (2026-10-28)
 
 

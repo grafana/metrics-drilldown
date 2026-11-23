@@ -1,8 +1,8 @@
 import { Trans } from '@grafana/i18n';
 import React, { lazy, Suspense } from 'react';
 
-import { type EntityMetricsProps } from './EntityMetrics';
 import { ExposedComponentErrorBoundary } from '../ExposedComponentErrorBoundary';
+import { type EntityMetricsProps } from './EntityMetrics';
 
 const EntityMetrics = lazy(async () => {
   // Initialize i18n for scenes library before loading the component

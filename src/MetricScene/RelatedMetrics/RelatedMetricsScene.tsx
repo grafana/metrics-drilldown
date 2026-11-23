@@ -32,10 +32,10 @@ import { MetricsList } from 'MetricsReducer/MetricsList/MetricsList';
 import { EventFiltersChanged } from 'MetricsReducer/SideBar/sections/MetricsFilterSection/EventFiltersChanged';
 import { getAppBackgroundColor } from 'shared/utils/utils.styles';
 
-import { RelatedListControls } from './RelatedListControls';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { getTrailFor } from '../../shared/utils/utils';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
+import { RelatedListControls } from './RelatedListControls';
 
 interface RelatedMetricsSceneState extends SceneObjectState {
   metric: string;

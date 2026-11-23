@@ -7,10 +7,10 @@ import React from 'react';
 
 import { useBookmarks } from 'shared/bookmarks/useBookmarks';
 
-import { BookmarkListItem } from './BookmarkListItem';
 import { reportExploreMetrics } from '../../../../shared/tracking/interactions';
 import { SectionTitle } from '../SectionTitle';
 import { type SideBarSectionState } from '../types';
+import { BookmarkListItem } from './BookmarkListItem';
 
 interface BookmarksListState extends SideBarSectionState {}
 

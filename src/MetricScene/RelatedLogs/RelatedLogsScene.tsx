@@ -20,14 +20,14 @@ import {
 import { Spinner, Stack, useStyles2 } from '@grafana/ui';
 import React from 'react';
 
-import { NoRelatedLogs } from './NoRelatedLogsFound';
-import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './OpenInLogsDrilldownButton';
-import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 import { actionViews } from '../../MetricScene/MetricActionBar';
 import { VAR_FILTERS, VAR_LOGS_DATASOURCE, VAR_LOGS_DATASOURCE_EXPR } from '../../shared/shared';
 import { DS_HEALTH_CHECK_TIMEOUT_S } from '../../shared/utils/utils.datasource';
 import { isCustomVariable } from '../../shared/utils/utils.variables';
 import { signalOnQueryComplete } from '../utils/signalOnQueryComplete';
+import { NoRelatedLogs } from './NoRelatedLogsFound';
+import { OpenInLogsDrilldownButton, type LogsDrilldownLinkContext } from './OpenInLogsDrilldownButton';
+import { type RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
 
 interface RelatedLogsSceneProps {
   orchestrator: RelatedLogsOrchestrator;
