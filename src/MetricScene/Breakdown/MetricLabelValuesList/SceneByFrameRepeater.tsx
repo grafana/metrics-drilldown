@@ -18,10 +18,10 @@ import { type CountsData } from 'MetricsReducer/list-controls/QuickSearch/Counts
 import { QuickSearch } from 'MetricsReducer/list-controls/QuickSearch/QuickSearch';
 import { sortSeries, type SortSeriesByOption } from 'shared/services/sorting';
 
-import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
-import { SortBySelector } from './SortBySelector';
 import { EventForceSyncYAxis } from '../MetricLabelsList/events/EventForceSyncYAxis';
 import { EventResetSyncYAxis } from '../MetricLabelsList/events/EventResetSyncYAxis';
+import { getLabelValueFromDataFrame } from './getLabelValueFromDataFrame';
+import { SortBySelector } from './SortBySelector';
 
 export type LabelValueItem = {
   value: string;

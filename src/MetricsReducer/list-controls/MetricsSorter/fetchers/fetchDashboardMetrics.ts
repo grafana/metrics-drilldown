@@ -6,9 +6,9 @@ import { displayWarning } from 'MetricsReducer/helpers/displayStatus';
 import { logger } from 'shared/logger/logger';
 import { limitFunction } from 'shared/utils/limitFunction';
 
-import { usageRequestOptions } from './shared';
 import { isPrometheusDataSource } from '../../../../shared/utils/utils.datasource';
 import { extractMetricNames } from '../../../../shared/utils/utils.promql';
+import { usageRequestOptions } from './shared';
 
 interface DashboardSearchItem {
   id: number;

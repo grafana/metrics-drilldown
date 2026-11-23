@@ -62,11 +62,6 @@ import { type SourceMetrics } from '../exposedComponents/SourceMetrics/types';
 import { BinaryRatioLabelsDataSource } from '../MetricScene/Breakdown/BinaryRatioLabelsDataSource';
 import { resetYAxisSync } from '../MetricScene/Breakdown/MetricLabelsList/behaviors/syncYAxis';
 import { MetricScene } from '../MetricScene/MetricScene';
-import { PluginHeaderToolbar } from './header/PluginHeaderToolbar';
-import { SelectNewMetricButton } from './header/SelectNewMetricButton';
-import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
-import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
-import { buildSourceMetricsOverride, parseCustomFunctionValues, parseMetricTypeValues } from './sourceMetricsUrlSync';
 import { type PanelDataRequestPayload } from '../shared/GmdVizPanel/components/addToDashboard/addToDashboard';
 import { MetricSelectedEvent, trailDS, VAR_DATASOURCE, VAR_FILTERS } from '../shared/shared';
 import { reportChangeInLabelFilters, reportExploreMetrics } from '../shared/tracking/interactions';
@@ -74,6 +69,11 @@ import { parseBinaryQuery } from '../shared/utils/parseBinaryQuery';
 import { buildFilterExpression } from '../shared/utils/utils.queries';
 import { limitAdhocProviders } from '../shared/utils/utils.trail';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
+import { PluginHeaderToolbar } from './header/PluginHeaderToolbar';
+import { SelectNewMetricButton } from './header/SelectNewMetricButton';
+import { MetricDatasourceHelper } from './MetricDatasourceHelper/MetricDatasourceHelper';
+import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
+import { buildSourceMetricsOverride, parseCustomFunctionValues, parseMetricTypeValues } from './sourceMetricsUrlSync';
 
 export interface DataTrailState extends SceneObjectState {
   topScene?: SceneObject;

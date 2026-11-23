@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { InlineBanner } from './InlineBanner';
 import { logger } from '../shared/logger/logger';
+import { InlineBanner } from './InlineBanner';
 
 jest.mock('@grafana/i18n', () => ({
   ...jest.requireActual('@grafana/i18n'),

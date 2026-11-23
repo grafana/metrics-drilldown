@@ -5,10 +5,10 @@ import { DataTrail } from 'AppDataTrail/DataTrail';
 import { MetricsDrilldownDataSourceVariable } from 'AppDataTrail/MetricsDrilldownDataSourceVariable';
 import { MetricSelectedEvent, VAR_DATASOURCE } from 'shared/shared';
 
-import { genBookmarkKey } from './genBookmarkKey';
-import { useBookmarks, type BookmarkFromStorage } from './useBookmarks';
 import { PREF_KEYS } from '../user-preferences/pref-keys';
 import { userStorage } from '../user-preferences/userStorage';
+import { genBookmarkKey } from './genBookmarkKey';
+import { useBookmarks, type BookmarkFromStorage } from './useBookmarks';
 
 const storedBookmarks: BookmarkFromStorage[] = [
   { urlValues: { metric: 'http_requests_total', 'var-ds': 'prom' }, createdAt: 1 },

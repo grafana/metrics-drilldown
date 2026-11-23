@@ -1,7 +1,7 @@
 import { getAppPluginVersion, logDebug } from '@grafana/runtime';
 
-import { getPluginVersion } from './getPluginVersion';
 import { PLUGIN_ID } from '../constants/plugin';
+import { getPluginVersion } from './getPluginVersion';
 
 jest.mock('@grafana/runtime', () => ({
   getAppPluginVersion: jest.fn(),

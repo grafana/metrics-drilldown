@@ -4,8 +4,8 @@ import { sceneGraph } from '@grafana/scenes';
 import { DataTrail } from 'AppDataTrail/DataTrail';
 import { MetricsVariable, VAR_METRICS_VARIABLE } from 'MetricsReducer/metrics-variables/MetricsVariable';
 
-import { MetricDatasourceHelper } from './MetricDatasourceHelper';
 import { DataSourceType } from '../../test/mocks/datasource';
+import { MetricDatasourceHelper } from './MetricDatasourceHelper';
 
 jest.mock('@grafana/plugin-compat/datasources', () => ({ getDataSourceInstance: jest.fn() }));
 const getDataSourceInstanceMock = jest.mocked(getDataSourceInstance);

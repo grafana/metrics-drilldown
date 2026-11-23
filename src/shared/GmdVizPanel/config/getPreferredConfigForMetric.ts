@@ -3,9 +3,9 @@ import { reportExploreMetrics } from 'shared/tracking/interactions';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
+import { AVAILABLE_PANEL_TYPES } from '../types/available-panel-types';
 import { CONFIG_PRESETS, type PanelConfigPreset } from './presets/types';
 import { PROMQL_FUNCTIONS } from './promql-functions';
-import { AVAILABLE_PANEL_TYPES } from '../types/available-panel-types';
 
 const availableConfigPresetIds = new Set<string>(Object.values(CONFIG_PRESETS));
 const availablePanelTypes = new Set<string>(AVAILABLE_PANEL_TYPES);

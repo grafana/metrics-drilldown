@@ -2,8 +2,8 @@ import { render, screen } from '@testing-library/react';
 import React, { act } from 'react';
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 
-import { TrailErrorBoundary } from './TrailErrorBoundary';
 import { logger } from '../shared/logger/logger';
+import { TrailErrorBoundary } from './TrailErrorBoundary';
 
 jest.mock('@grafana/i18n', () => ({
   ...jest.requireActual('@grafana/i18n'),

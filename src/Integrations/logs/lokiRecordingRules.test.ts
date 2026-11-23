@@ -3,9 +3,9 @@ import { of } from 'rxjs';
 
 import { logger } from 'shared/logger/logger';
 
+import { getMockPlugin } from '../../test/mocks/plugin';
 import { type MetricsLogsConnector } from './base';
 import { createLokiRecordingRulesConnector, type RecordingRuleGroup } from './lokiRecordingRules';
-import { getMockPlugin } from '../../test/mocks/plugin';
 
 import type { DataSourceInstanceSettings, DataSourceJsonData } from '@grafana/data';
 import type * as runtime from '@grafana/runtime';

@@ -1,8 +1,8 @@
 import { type DataTrail } from 'AppDataTrail/DataTrail';
 
+import { type PanelType } from '../types/available-panel-types';
 import { getMetricType, getMetricTypeSync } from './getMetricType';
 import { type KgMetricType } from './mapKgMetricType';
-import { type PanelType } from '../types/available-panel-types';
 
 /**
  * These are functions that receive a metric name to determine in which panel type they should be displayed.
