@@ -16,9 +16,9 @@ import React from 'react';
 import { SceneByVariableRepeater } from 'MetricsReducer/components/SceneByVariableRepeater';
 import { ShowMoreButton } from 'MetricsReducer/components/ShowMoreButton';
 
-import { MetricsGroupByRow } from './MetricsGroupByRow';
 import { InlineBanner } from '../../App/InlineBanner';
 import { LabelValuesVariable, VAR_LABEL_VALUES } from '../labels/LabelValuesVariable';
+import { MetricsGroupByRow } from './MetricsGroupByRow';
 
 interface MetricsGroupByListState extends SceneObjectState {
   labelName: string;

@@ -1,8 +1,8 @@
 import { type PluginExtensionExposedComponentConfig } from '@grafana/data';
 
+import pluginJson from '../../plugin.json';
 import { LazySourceMetrics } from './LazySourceMetrics';
 import { type SourceMetricsProps } from './SourceMetrics';
-import pluginJson from '../../plugin.json';
 
 export const sourceMetricsConfig = {
   id: `${pluginJson.id}/knowledge-graph-insight-metrics/v1`,

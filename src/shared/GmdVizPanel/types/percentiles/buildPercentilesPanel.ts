@@ -6,8 +6,8 @@ import { trailDS } from 'shared/shared';
 import { getColorByIndex } from 'shared/utils/utils';
 
 import { type BuildVizPanelOptions } from '../panelBuilder';
-import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
 import { updateColorsWhenQueriesChange } from '../timeseries/behaviors/updateColorsWhenQueriesChange';
+import { getPercentilesQueryRunnerParams } from './getPercentilesQueryRunnerParams';
 
 export function buildPercentilesPanel(options: BuildVizPanelOptions) {
   const { metric, panelConfig, queryConfig } = options;

@@ -4,8 +4,8 @@ import { trailDS } from 'shared/shared';
 import { getColorByIndex } from 'shared/utils/utils';
 
 import { type BuildVizPanelOptions } from '../panelBuilder';
-import { getStatQueryRunnerParams } from './getStatQueryRunnerParams';
 import { UP_DOWN_VALUE_MAPPINGS } from '../statushistory/value-mappings';
+import { getStatQueryRunnerParams } from './getStatQueryRunnerParams';
 
 export function buildStatPanel(options: BuildVizPanelOptions): VizPanel {
   const { metric, panelConfig, queryConfig } = options;

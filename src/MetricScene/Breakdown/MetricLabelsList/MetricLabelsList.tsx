@@ -32,14 +32,14 @@ import { buildTimeseriesPanel } from 'shared/GmdVizPanel/types/timeseries/buildT
 import { VAR_GROUP_BY, VAR_HISTOGRAM_BREAKDOWN_FN } from 'shared/shared';
 import { getTrailFor } from 'shared/utils/utils';
 
+import { buildMiniBreakdownNavigationUrl } from '../../../exposedComponents/MiniBreakdown/buildNavigationUrl';
+import { PanelMenu } from '../../PanelMenu/PanelMenu';
+import { type SyncYAxisSwitch } from '../SyncYAxisSwitch';
 import { publishTimeseriesData } from './behaviors/publishTimeseriesData';
 import { syncYAxis } from './behaviors/syncYAxis';
 import { ClickablePanelWrapper } from './ClickablePanelWrapper';
 import { EventTimeseriesDataReceived } from './events/EventTimeseriesDataReceived';
 import { SelectLabelAction } from './SelectLabelAction';
-import { buildMiniBreakdownNavigationUrl } from '../../../exposedComponents/MiniBreakdown/buildNavigationUrl';
-import { PanelMenu } from '../../PanelMenu/PanelMenu';
-import { type SyncYAxisSwitch } from '../SyncYAxisSwitch';
 
 interface MetricLabelsListState extends SceneObjectState {
   metric: Metric;

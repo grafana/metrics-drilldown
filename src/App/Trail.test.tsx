@@ -3,11 +3,11 @@ import { PluginPage } from '@grafana/runtime';
 import { act, render, screen } from '@testing-library/react';
 import React, { Fragment } from 'react';
 
-import Trail, { getPageNav, renderTrailPage } from './Trail';
 import { DataTrail } from '../AppDataTrail/DataTrail';
 import { actionViews } from '../MetricScene/MetricActionBar';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricsReducer } from '../MetricsReducer/MetricsReducer';
+import Trail, { getPageNav, renderTrailPage } from './Trail';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),

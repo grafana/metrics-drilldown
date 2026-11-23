@@ -2,9 +2,9 @@ import { type AdHocVariableFilter } from '@grafana/data';
 import { getDataSourceInstance, getDataSourceInstanceList } from '@grafana/plugin-compat/datasources';
 import { sceneGraph, type AdHocFiltersVariable } from '@grafana/scenes';
 
-import { createLabelsCrossReferenceConnector } from './labelsCrossReference';
 import { type RelatedLogsScene } from '../../MetricScene/RelatedLogs/RelatedLogsScene';
 import { VAR_FILTERS } from '../../shared/shared';
+import { createLabelsCrossReferenceConnector } from './labelsCrossReference';
 
 jest.mock('@grafana/runtime', () => ({
   ...jest.requireActual('@grafana/runtime'),

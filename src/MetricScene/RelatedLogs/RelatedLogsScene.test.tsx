@@ -7,10 +7,10 @@ import { displayError } from 'MetricsReducer/helpers/displayStatus';
 import { DataSourceFetcher, getDataSourceFetcher } from 'shared/utils/utils.datasource';
 import { activateFullSceneTree } from 'shared/utils/utils.testing';
 
-import { RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
-import { RelatedLogsScene } from './RelatedLogsScene';
 import { EventActionViewDataLoadComplete } from '../EventActionViewDataLoadComplete';
 import { type MetricScene } from '../MetricScene';
+import { RelatedLogsOrchestrator } from './RelatedLogsOrchestrator';
+import { RelatedLogsScene } from './RelatedLogsScene';
 
 jest.mock('@grafana/plugin-compat/datasources', () => ({
   getDataSourceInstanceList: jest.fn(),

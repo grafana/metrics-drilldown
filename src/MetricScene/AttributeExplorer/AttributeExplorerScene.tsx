@@ -25,6 +25,7 @@ import { logger } from 'shared/logger/logger';
 import { VAR_DATASOURCE, VAR_FILTERS, VAR_METRIC } from 'shared/shared';
 import { isAdHocFiltersVariable } from 'shared/utils/utils.variables';
 
+import { MetricScene } from '../MetricScene';
 import { type DatasetContext } from './AttributeDistribution';
 import { type ActiveFilter } from './attributeDistributionState';
 import {
@@ -34,7 +35,6 @@ import {
   isHistogramWithThreshold,
   PrometheusAttributeExplorer,
 } from './PrometheusAttributeExplorer';
-import { MetricScene } from '../MetricScene';
 
 function toError(e: unknown): Error {
   return e instanceof Error ? e : new Error(String(e));

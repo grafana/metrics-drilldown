@@ -15,13 +15,13 @@ import { GmdVizPanel } from 'shared/GmdVizPanel/GmdVizPanel';
 import { PREF_KEYS } from 'shared/user-preferences/pref-keys';
 import { userStorage } from 'shared/user-preferences/userStorage';
 
-import { DataTrail } from './DataTrail';
-import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
 import { MetricScene } from '../MetricScene/MetricScene';
 import { MetricSelectedEvent, VAR_FILTERS } from '../shared/shared';
 import { activateFullSceneTree } from '../shared/utils/utils.testing';
 import { isAdHocFiltersVariable } from '../shared/utils/utils.variables';
 import { DataSourceType, MockDataSourceSrv } from '../test/mocks/datasource';
+import { DataTrail } from './DataTrail';
+import { MetricsDrilldownDataSourceVariable } from './MetricsDrilldownDataSourceVariable';
 
 function getFilterVar(trail: DataTrail) {
   const variable = sceneGraph.lookupVariable(VAR_FILTERS, trail);

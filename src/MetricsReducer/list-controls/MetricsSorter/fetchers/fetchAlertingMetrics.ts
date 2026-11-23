@@ -3,8 +3,8 @@ import { getBackendSrv } from '@grafana/runtime';
 
 import { logger } from 'shared/logger/logger';
 
-import { usageRequestOptions } from './shared';
 import { extractMetricNames } from '../../../../shared/utils/utils.promql';
+import { usageRequestOptions } from './shared';
 
 import type { MetricUsageDetails } from './fetchDashboardMetrics';
 interface AlertingRule {

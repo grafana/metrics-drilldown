@@ -2,9 +2,9 @@ import { dateTime, LoadingState } from '@grafana/data';
 import { setDataSourceSrv, setRunRequest } from '@grafana/runtime';
 import { of } from 'rxjs';
 
-import { QueryResultsScene } from './QueryResultsScene';
 import { activateFullSceneTree } from '../../shared/utils/utils.testing';
 import { DataSourceType, MockDataSourceSrv } from '../../test/mocks/datasource';
+import { QueryResultsScene } from './QueryResultsScene';
 
 describe('QueryResultsScene', () => {
   beforeAll(() => {

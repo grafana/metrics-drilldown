@@ -1,8 +1,8 @@
 import { Trans } from '@grafana/i18n';
 import React, { lazy, Suspense } from 'react';
 
-import { type SourceMetricsProps } from './SourceMetrics';
 import { ExposedComponentErrorBoundary } from '../ExposedComponentErrorBoundary';
+import { type SourceMetricsProps } from './SourceMetrics';
 
 const LabelBreakdown = lazy(async () => {
   // Initialize i18n for scenes library

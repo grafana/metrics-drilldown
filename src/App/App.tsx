@@ -8,15 +8,15 @@ import { useCurrentPrometheusDataSourceUid } from 'shared/hooks/useCurrentPromet
 import { usePrometheusDataSourceInstances } from 'shared/hooks/usePrometheusDataSourceInstances';
 import { newMetricsTrail } from 'shared/utils/utils.trail';
 
+import { evaluateExperimentFlagsEarly, initOpenFeatureProvider } from '../shared/featureFlags/openFeature';
+import { initFaro } from '../shared/logger/faro/faro';
+import { PluginPropsContext } from '../shared/utils/utils.plugin';
+import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 import { AppContext } from './AppContext';
 import { AppErrorBoundary } from './AppErrorBoundary';
 import { Onboarding } from './Onboarding';
 import { AppRoutes } from './Routes';
 import { useReportAppInitialized } from './useReportAppInitialized';
-import { evaluateExperimentFlagsEarly, initOpenFeatureProvider } from '../shared/featureFlags/openFeature';
-import { initFaro } from '../shared/logger/faro/faro';
-import { PluginPropsContext } from '../shared/utils/utils.plugin';
-import { getAppBackgroundColor } from '../shared/utils/utils.styles';
 
 initFaro();
 initOpenFeatureProvider().then(evaluateExperimentFlagsEarly);

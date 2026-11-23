@@ -3,9 +3,9 @@ import { type DataQuery } from '@grafana/schema';
 import { compare } from 'compare-versions';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
-import { narrowSavedQueries } from './narrowSavedQuery';
 import pluginJson from '../../plugin.json';
 import { logger } from '../logger/logger';
+import { narrowSavedQueries } from './narrowSavedQuery';
 
 // TODO(2026-10-18): grafanaDependency is now >=13.1.0, so the version check in isQueryLibrarySupported below
 // is always true. Remove MIN_VERSION and the compare() call; keep only the featureToggles.queryLibrary check.

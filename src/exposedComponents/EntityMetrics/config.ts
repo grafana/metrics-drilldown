@@ -1,8 +1,8 @@
 import { type PluginExtensionExposedComponentConfig } from '@grafana/data';
 
+import pluginJson from '../../plugin.json';
 import { type EntityMetricsProps } from './EntityMetrics';
 import { LazyEntityMetrics } from './LazyEntityMetrics';
-import pluginJson from '../../plugin.json';
 
 export const entityMetricsConfig = {
   id: `${pluginJson.id}/entity-metrics-component/v1`,

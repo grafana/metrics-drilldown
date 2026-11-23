@@ -1,8 +1,8 @@
 import { type PluginExtensionExposedComponentConfig } from '@grafana/data';
 
+import pluginJson from '../../plugin.json';
 import { LazyMiniBreakdown } from './LazyMiniBreakdown';
 import { type MiniBreakdownProps } from './MiniBreakdown';
-import pluginJson from '../../plugin.json';
 
 export const miniBreakdownConfig = {
   id: `${pluginJson.id}/mini-breakdown-component/v1`,
