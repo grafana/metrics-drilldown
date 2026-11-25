@@ -116,6 +116,40 @@ describe('GmdVizPanel', () => {
     });
   });
 
+  describe('injected metadata context', () => {
+    test('uses the provided metadata and probe cache without a DataTrail', async () => {
+      const context = createTrailMock(undefined);
+      context.setCachedNativeHistogram('standalone', true);
+      const panel = new GmdVizPanel({ metric: 'standalone', metadataContext: context });
+
+      await (panel as any).checkMetricMetadata(false);
+
+      expect(getMetricType).toHaveBeenCalledWith('standalone', context);
+      expect(getTrailFor).not.toHaveBeenCalled();
+      expect(SceneQueryRunner).not.toHaveBeenCalled();
+      expect(panel.state.metricType).toBe('native-histogram');
+      expect(panel.state.metricTypeResolved).toBe(true);
+    });
+
+    test('does not apply metadata from a deactivated panel', async () => {
+      let resolve!: (value: 'native-histogram') => void;
+      jest.mocked(getMetricType).mockReturnValue(
+        new Promise((done) => {
+          resolve = done;
+        })
+      );
+      const panel = new GmdVizPanel({ metric: 'standalone', metadataContext: createTrailMock(undefined) });
+      const stop = panel.activate();
+      stop();
+      resolve('native-histogram');
+      await Promise.resolve();
+
+      expect(panel.state.metricType).toBe('gauge');
+      expect(panel.state.metricTypeResolved).toBe(false);
+      expect(SceneQueryRunner).not.toHaveBeenCalled();
+    });
+  });
+
   describe('detectNativeHistogram', () => {
     function mockNoMetadata() {
       jest.mocked(getTrailFor).mockReturnValue(createTrailMock(undefined) as any);
