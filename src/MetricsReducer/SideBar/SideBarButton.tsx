@@ -15,6 +15,8 @@ type SideBarButtonProps = {
   ariaLabel: string;
   disabled: boolean;
   visible: boolean;
+  /** id of the pane this button opens, referenced by aria-controls while the pane is open */
+  paneId: string;
   active: boolean;
   tooltip: string;
   onClick: () => void;
@@ -22,7 +24,7 @@ type SideBarButtonProps = {
 };
 
 export const SideBarButton = React.forwardRef<HTMLButtonElement, Readonly<SideBarButtonProps>>(function SideBarButton(
-  { ariaLabel, disabled, visible, active, tooltip, iconOrText, onClick },
+  { ariaLabel, disabled, visible, paneId, active, tooltip, iconOrText, onClick },
   ref
 ) {
   const styles = useStyles2(getStyles);
@@ -50,6 +52,8 @@ export const SideBarButton = React.forwardRef<HTMLButtonElement, Readonly<SideBa
       fill="text"
       icon={buttonIcon}
       aria-label={ariaLabel}
+      aria-expanded={visible}
+      aria-controls={visible ? paneId : undefined}
       tooltip={tooltip}
       tooltipPlacement="right"
       onClick={onClick}

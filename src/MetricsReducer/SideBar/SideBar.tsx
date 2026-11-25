@@ -10,7 +10,7 @@ import {
   type SceneObjectState,
 } from '@grafana/scenes';
 import { IconButton, Stack, useStyles2 } from '@grafana/ui';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 
 import { NULL_GROUP_BY_VALUE } from 'MetricsReducer/labels/LabelsDataSource';
 import { LabelsVariable, VAR_WINGMAN_GROUP_BY } from 'MetricsReducer/labels/LabelsVariable';
@@ -342,6 +342,8 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       .findByKeyAndType(model, VAR_WINGMAN_GROUP_BY, LabelsVariable)
       .useState().value;
 
+    const paneId = useId();
+
     // Focus management refs
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const buttonRefs = useRef<Record<string, React.RefObject<HTMLButtonElement | null>>>({});
@@ -416,6 +418,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
                       ariaLabel={ariaLabel}
                       disabled={disabled}
                       visible={visible}
+                      paneId={paneId}
                       active={isActive}
                       tooltip={tooltip}
                       onClick={() => model.setActiveSection(key)}
@@ -427,7 +430,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
             </Stack>
           </div>
           {visibleSection && (
-            <div className={styles.content} data-testid="sidebar-content">
+            <div id={paneId} className={styles.content} data-testid="sidebar-content">
               <IconButton
                 ref={closeButtonRef}
                 className={styles.closeButton}
