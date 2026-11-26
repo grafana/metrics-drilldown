@@ -1,4 +1,5 @@
 import { getWebInstrumentations, initializeFaro, type Faro } from '@grafana/faro-web-sdk';
+import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 import { config } from '@grafana/runtime';
 
 import { GIT_COMMIT } from '../../../version';
@@ -53,6 +54,15 @@ export async function initFaro() {
       instrumentations: [
         ...getWebInstrumentations({
           captureConsole: false,
+        }),
+        new TracingInstrumentation({
+          mode: 'routing',
+          pageRouteMatchers: [
+            {
+              pattern: new RegExp(`^${PLUGIN_BASE_URL}(?:/|$)`),
+              target: 'pathname',
+            },
+          ],
         }),
       ],
       isolate: true,
