@@ -305,11 +305,11 @@ export class MetricSceneView extends DrilldownView {
   }
 
   getSaveModal() {
-    return this.getByRole('dialog', { name: /Save current query/i });
+    return this.getByRole('dialog', { name: /Save query/i });
   }
 
   getLoadModal() {
-    return this.getByRole('dialog', { name: /Load a previously saved query/i });
+    return this.getByRole('dialog', { name: /Saved queries/i });
   }
 
   async openSaveModal() {

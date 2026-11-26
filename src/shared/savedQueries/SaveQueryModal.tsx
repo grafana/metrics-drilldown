@@ -61,7 +61,7 @@ export function SaveQueryModal({ dsUid, query, onClose }: Props) {
 
   return (
     <Modal
-      title={t('metrics.metrics-drilldown.save-query.modal-title', 'Save current query')}
+      title={t('metrics.metrics-drilldown.save-query.modal-title', 'Save query')}
       isOpen={true}
       onDismiss={onClose}
     >

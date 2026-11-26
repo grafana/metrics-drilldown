@@ -91,7 +91,7 @@ export function LoadQueryModal({ onClose, sceneRef }: Props) {
 
   return (
     <Modal
-      title={t('metrics.metrics-drilldown.load-query.modal-title', 'Load a previously saved query')}
+      title={t('metrics.metrics-drilldown.load-query.modal-title', 'Saved queries')}
       isOpen={true}
       onDismiss={onClose}
     >
