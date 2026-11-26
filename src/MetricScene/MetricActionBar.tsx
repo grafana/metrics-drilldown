@@ -144,8 +144,8 @@ export class MetricActionBar extends SceneObjectBase<MetricActionBarState> {
       <Box paddingY={1} data-testid="action-bar" width="100%">
         <div className={styles.actions}>
           <Stack gap={1}>
-            <SaveQueryButton sceneRef={model} />
             <loadQueryScene.Component model={loadQueryScene} />
+            <SaveQueryButton sceneRef={model} />
           </Stack>
         </div>
 

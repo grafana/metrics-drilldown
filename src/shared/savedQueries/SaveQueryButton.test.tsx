@@ -15,7 +15,7 @@ jest.mock('./savedQuery');
 jest.mock('./SaveQueryModal', () => ({
   SaveQueryModal: ({ onClose }: { onClose(): void }) => (
     <div data-testid="save-query-modal">
-      Save current query
+      Save query
       <button onClick={onClose}>Cancel</button>
     </div>
   ),
@@ -79,15 +79,15 @@ describe('SaveQueryButton', () => {
   test('Opens the modal when the button is clicked', () => {
     render(<SaveQueryButton sceneRef={mockSceneRef} />);
 
-    expect(screen.queryByText('Save current query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save query')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Save/i }));
 
-    expect(screen.getByText('Save current query')).toBeInTheDocument();
+    expect(screen.getByText('Save query')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Cancel/i }));
 
-    expect(screen.queryByText('Save current query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Save query')).not.toBeInTheDocument();
   });
 
   test('Returns null when the scene is embedded', () => {
@@ -136,7 +136,7 @@ describe('SaveQueryButton', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Save/i }));
 
-    expect(screen.getByText('Save current query')).toBeInTheDocument();
+    expect(screen.getByText('Save query')).toBeInTheDocument();
   });
 
   test('Uses the exposed component if available', () => {

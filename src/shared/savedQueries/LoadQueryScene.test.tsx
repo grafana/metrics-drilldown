@@ -16,7 +16,7 @@ jest.mock('./savedQuery');
 jest.mock('./LoadQueryModal', () => ({
   LoadQueryModal: ({ onClose }: { onClose(): void }) => (
     <div data-testid="load-query-modal">
-      Load a previously saved query
+      Saved queries
       <button aria-label="Close" onClick={onClose}>
         Close
       </button>
@@ -122,15 +122,15 @@ describe('LoadQueryScene', () => {
 
     await waitFor(() => expect(getDataSourceInstanceSettingsMock).toHaveBeenCalled());
 
-    expect(screen.queryByText('Load a previously saved query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Saved queries')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button'));
 
-    expect(screen.getByText('Load a previously saved query')).toBeInTheDocument();
+    expect(screen.getByText('Saved queries')).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText('Close'));
 
-    expect(screen.queryByText('Load a previously saved query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Saved queries')).not.toBeInTheDocument();
   });
 
   test('Returns null when the scene is embedded', async () => {

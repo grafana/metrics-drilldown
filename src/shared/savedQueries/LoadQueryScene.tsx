@@ -141,15 +141,15 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
       return (
         <>
           <ToolbarButton
-            icon="folder-open"
+            icon="book-open"
             variant="canvas"
             disabled={!hasSavedQueries}
             onClick={model.toggleOpen}
             className={styles.button}
             tooltip={
               hasSavedQueries
-                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Load Saved query')
-                : t('metrics.metrics-drilldown.load-query.button-no-query-tooltip', 'No saved queries to load')
+                ? t('metrics.metrics-drilldown.load-query.button-tooltip', 'Use saved query')
+                : t('metrics.metrics-drilldown.load-query.button-no-query-tooltip', 'No saved queries')
             }
           />
           {isOpen && <LoadQueryModal sceneRef={model} onClose={model.toggleClosed} />}
@@ -169,9 +169,9 @@ export class LoadQueryScene extends SceneObjectBase<LoadQuerySceneState> {
           className={styles.button}
           context="drilldown"
           datasourceFilters={[dsName]}
-          icon="folder-open"
+          icon="book-open"
           onSelectQuery={onSelectQuery}
-          tooltip={t('metrics.metrics-drilldown.load-query.saved-query-button-tooltip', 'Load Saved query')}
+          tooltip={t('metrics.metrics-drilldown.load-query.saved-query-button-tooltip', 'Use saved query')}
         />
       </div>
     );

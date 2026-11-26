@@ -55,7 +55,7 @@ describe('SaveQueryModal', () => {
   test('renders the modal with query', () => {
     render(<SaveQueryModal dsUid="test-ds" query='http_requests_total{method="GET"}' onClose={mockOnClose} />);
 
-    expect(screen.getByText('Save current query')).toBeInTheDocument();
+    expect(screen.getByText('Save query')).toBeInTheDocument();
     expect(screen.getByText('http_requests_total{method="GET"}')).toBeInTheDocument();
   });
 

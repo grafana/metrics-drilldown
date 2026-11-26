@@ -229,8 +229,8 @@ export class MetricsReducer extends SceneObjectBase<MetricsReducerState> {
             <div style={{ flex: 1 }}>
               <listControls.Component model={listControls} />
             </div>
-            <SaveQueryButton sceneRef={model} />
             <loadQueryScene.Component model={loadQueryScene} />
+            <SaveQueryButton sceneRef={model} />
           </Stack>
         </div>
         <Stack direction="row" gap={1} height={`calc(100vh - ${chromeHeaderHeight + APP_HEADER_HEIGHT}px)`}>
