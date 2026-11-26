@@ -1,11 +1,16 @@
 import { getWebInstrumentations, initializeFaro } from '@grafana/faro-web-sdk';
+import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
 import { GIT_COMMIT } from '../../../../version';
+import { PLUGIN_BASE_URL } from '../../../constants/plugin';
 import { getPluginVersion } from '../../../utils/getPluginVersion';
 import { ignoreErrorPatterns, initFaro, setFaro } from '../faro';
 
 // Faro dependencies
 jest.mock('@grafana/faro-web-sdk');
+jest.mock('@grafana/faro-web-tracing', () => ({
+  TracingInstrumentation: jest.fn(),
+}));
 
 // Grafana dependency
 jest.mock('@grafana/runtime', () => ({
@@ -118,8 +123,7 @@ describe('initFaro()', () => {
 
       await initFaro();
 
-      const { app, user, instrumentations, isolate, beforeSend, ignoreErrors } =
-        initializeFaro.mock.lastCall[0];
+      const { app, user, instrumentations, isolate, beforeSend, ignoreErrors } = initializeFaro.mock.lastCall[0];
 
       expect(app).toStrictEqual({
         name: 'grafana-metricsdrilldown-app-prod',
@@ -134,7 +138,29 @@ describe('initFaro()', () => {
         captureConsole: false,
       });
       expect(instrumentations).toBeInstanceOf(Array);
-      expect(instrumentations).toHaveLength(1);
+      expect(instrumentations).toHaveLength(2);
+      expect(TracingInstrumentation).toHaveBeenCalledWith({
+        mode: 'routing',
+        pageRouteMatchers: [
+          {
+            pattern: expect.any(RegExp),
+            target: 'pathname',
+          },
+        ],
+      });
+
+      const tracingOptions = jest.mocked(TracingInstrumentation).mock.lastCall?.[0];
+      const routeMatcher = tracingOptions?.pageRouteMatchers?.[0]?.pattern;
+      expect(routeMatcher).toBeInstanceOf(RegExp);
+      if (!(routeMatcher instanceof RegExp)) {
+        throw new Error('Expected Faro routing mode to configure a route matcher');
+      }
+
+      expect(routeMatcher.test(PLUGIN_BASE_URL)).toBe(true);
+      expect(routeMatcher.test(`${PLUGIN_BASE_URL}/`)).toBe(true);
+      expect(routeMatcher.test(`${PLUGIN_BASE_URL}/metrics/foo`)).toBe(true);
+      expect(routeMatcher.test(`${PLUGIN_BASE_URL}-other`)).toBe(false);
+      expect(routeMatcher.test('/a/another-plugin')).toBe(false);
 
       expect(isolate).toBe(true);
       expect(beforeSend).toBeInstanceOf(Function);
@@ -169,12 +195,12 @@ describe('ignoreErrorPatterns', () => {
     expect(matchesAnyPattern(message)).toBe(true);
   });
 
-  it.each([
-    'chrome-extension://some-extension-id/something.js',
-    'moz-extension://some-extension-id/something.js',
-  ])('matches extension URL: %s', (message) => {
-    expect(matchesAnyPattern(message)).toBe(true);
-  });
+  it.each(['chrome-extension://some-extension-id/something.js', 'moz-extension://some-extension-id/something.js'])(
+    'matches extension URL: %s',
+    (message) => {
+      expect(matchesAnyPattern(message)).toBe(true);
+    }
+  );
 
   it('matches Safari extension error prefix', () => {
     expect(
