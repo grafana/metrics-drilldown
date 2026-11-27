@@ -32,9 +32,15 @@ import { EventSectionValueChanged } from './sections/EventSectionValueChanged';
 import { LabelsBrowser } from './sections/LabelsBrowser/LabelsBrowser';
 import { MetricsFilterSection } from './sections/MetricsFilterSection/MetricsFilterSection';
 import { RecentMetricsSection } from './sections/RecentMetricsSection/RecentMetricsSection';
+import {
+  SERVICE_FILTER_SECTION_KEY,
+  SERVICE_FILTER_URL_KEYS,
+  ServiceFilterSection,
+} from './sections/ServiceFilterSection/ServiceFilterSection';
+import { splitUrlValues } from './sections/ServiceFilterSection/serviceUrlValues';
 import { CustomIcons, SideBarButton } from './SideBarButton';
 
-type Section = MetricsFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList;
+type Section = MetricsFilterSection | ServiceFilterSection | RecentMetricsSection | LabelsBrowser | BookmarksList;
 
 interface SideBarState extends SceneObjectState {
   sections: Section[];
@@ -64,6 +70,13 @@ function getTranslatedSectionInfo(key: string): { title: string; description: st
       description: t(
         'sidebar.section.category-filters-description',
         'Group metrics by OpenTelemetry style categories using the start of the metric name. This is a fuzzy match, so a metric can land in a category that does not fit it. Metrics such as node_, kube_ and grpc_ do not match any category and appear under Other.'
+      ),
+    },
+    [SERVICE_FILTER_SECTION_KEY]: {
+      title: t('sidebar.section.service-filters', 'Service filters'),
+      description: t(
+        'sidebar.section.service-filters-description',
+        'Filter metrics by service. Services come from the Knowledge Graph when this stack has one that lists services of this data source, and are read from the job label otherwise. With the Knowledge Graph, you can also list the jobs that it does not list.'
       ),
     },
     'filters-recent': {
@@ -116,6 +129,16 @@ export class SideBar extends SceneObjectBase<SideBarState> {
           icon: 'open-telemetry',
           computeGroups: computeMetricCategoryGroups,
           active: Boolean(sectionValues.get('filters-category')?.length),
+        }),
+        new ServiceFilterSection({
+          key: SERVICE_FILTER_SECTION_KEY,
+          title: t('sidebar.section.service-filters', 'Service filters'),
+          description: t(
+            'sidebar.section.service-filters-description',
+            'Filter metrics by service. Services come from the Knowledge Graph when this stack has one that lists services of this data source, and are read from the job label otherwise. With the Knowledge Graph, you can also list the jobs that it does not list.'
+          ),
+          icon: 'share-alt',
+          active: Boolean(sectionValues.get(SERVICE_FILTER_SECTION_KEY)?.length),
         }),
         new MetricsFilterSection({
           key: 'filters-rule',
@@ -184,6 +207,11 @@ export class SideBar extends SceneObjectBase<SideBarState> {
   private onActivate() {
     const cleanupOtherMetricsVar = this.initOtherMetricsVar();
 
+    // The service filter keeps its selection and the top filters consistent, whether or not its section is open
+    const cleanupServiceFilter = this.state.sections
+      .filter((section) => section instanceof ServiceFilterSection)
+      .map((section) => section.watchFilters());
+
     this.subscribeToEvent(EventSectionValueChanged, (event) => {
       const { key, values } = event.payload;
       const { sectionValues } = this.state;
@@ -202,6 +230,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     }
 
     return () => {
+      cleanupServiceFilter.forEach((cleanup) => cleanup());
       cleanupOtherMetricsVar();
     };
   }
@@ -283,10 +312,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
     const sectionValues = new Map();
 
     for (const filterKey of metricFiltersVariables) {
-      // Check for both namespaced key (for embedded mode) and raw key (for regular mode)
-      const namespacedKey = `${embeddedTrailNamespace}-${filterKey}`;
-      const filterValueFromUrl = urlSearchParams.get(namespacedKey) || urlSearchParams.get(filterKey);
-      const values = filterValueFromUrl ? filterValueFromUrl.split(',').map((v) => v.trim()) : [];
+      const values = SideBar.getValuesFromUrl(urlSearchParams, filterKey);
 
       // The URL stores category ids (e.g. "host-os"), but the chips and tooltips of the sidebar show labels
       sectionValues.set(
@@ -295,7 +321,32 @@ export class SideBar extends SceneObjectBase<SideBarState> {
       );
     }
 
+    // The service filter has no chip next to the label filters, because its filter shows in the top bar.
+    // The button still needs the selected services, for its active dot and its tooltip.
+    sectionValues.set(
+      SERVICE_FILTER_SECTION_KEY,
+      Object.values(SERVICE_FILTER_URL_KEYS).flatMap((urlKey) =>
+        SideBar.getServiceValuesFromUrl(urlSearchParams, urlKey)
+      )
+    );
+
     return sectionValues;
+  }
+
+  /** The service filter escapes the commas that its values contain, so it reads its URL values with its own parser */
+  private static getServiceValuesFromUrl(urlSearchParams: URLSearchParams, urlKey: string) {
+    const namespacedKey = `${embeddedTrailNamespace}-${urlKey}`;
+    const valueFromUrl = urlSearchParams.get(namespacedKey) || urlSearchParams.get(urlKey);
+
+    return valueFromUrl ? splitUrlValues(valueFromUrl) : [];
+  }
+
+  private static getValuesFromUrl(urlSearchParams: URLSearchParams, urlKey: string) {
+    // Check for both namespaced key (for embedded mode) and raw key (for regular mode)
+    const namespacedKey = `${embeddedTrailNamespace}-${urlKey}`;
+    const valueFromUrl = urlSearchParams.get(namespacedKey) || urlSearchParams.get(urlKey);
+
+    return valueFromUrl ? valueFromUrl.split(',').map((v) => v.trim()) : [];
   }
 
   private setActiveSection(sectionKey: string) {
@@ -439,6 +490,7 @@ export class SideBar extends SceneObjectBase<SideBarState> {
               />
               {/* TODO: find a better way */}
               {visibleSection instanceof MetricsFilterSection && <visibleSection.Component model={visibleSection} />}
+              {visibleSection instanceof ServiceFilterSection && <visibleSection.Component model={visibleSection} />}
               {visibleSection instanceof RecentMetricsSection && <visibleSection.Component model={visibleSection} />}
               {visibleSection instanceof LabelsBrowser && <visibleSection.Component model={visibleSection} />}
               {visibleSection instanceof BookmarksList && <visibleSection.Component model={visibleSection} />}

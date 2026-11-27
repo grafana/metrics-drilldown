@@ -53,6 +53,29 @@ Group metrics into OpenTelemetry style categories such as HTTP, Database, or Kub
 
 The match is fuzzy, so a metric can land in a category that does not fit it. Metrics that match no prefix (e.g., `node_` or `kube_`) appear under Other.
 
+#### Service filters
+
+Narrow the metrics list to one or more services. The section shows one list of checkboxes with a search field and a count of the selected services. Every selection is stored as the exact values of the `job` label, because the filter has to match metrics and Prometheus sets `job` on every scraped series. In Prometheus a job is a group of scrape targets with the same purpose. Prometheus with OpenTelemetry sets `job` to `<service.namespace>/<service.name>`, or to `<service.name>` when the service has no namespace. A job can also name infrastructure such as an exporter, so the job label alone cannot tell a service from an exporter.
+
+The section asks two sources, and both rest on the `job` label:
+
+- The job label of the selected data source says which job values exist, so which filters can match metrics. The section always fetches these values, and it names a service after the part of its job that follows the first slash. One service can have several jobs, one per namespace, and selecting a service selects all of its jobs. The first slash is a heuristic, so a job that does not come from OpenTelemetry, such as `integrations/kubernetes/kubelet`, shows as `kubernetes/kubelet`.
+- The Knowledge Graph says which jobs are services. It is asked only when the stack has a Knowledge Graph data source. The request is one `property_values` call for the distinct `job` values of the Service entities with the `service_type` property `instrumented`, over the selected time range, for up to 10,000 jobs. When it returns that many, the list shows a notice that it may be incomplete.
+
+The list is chosen this way:
+
+- With a Knowledge Graph that lists services, the list holds the Knowledge Graph services and the caption reads "Services from the Knowledge Graph". Only the jobs that exist in the selected data source are kept, and a service left without such a job is dropped, because its filter would match no metric. When the job label has jobs that the Knowledge Graph does not list, the checkbox "Include all jobs" appears below the caption. Checking it adds those jobs. A job whose service name is the name of a Knowledge Graph service joins the row of that service, whatever its namespace, so the name is listed once and selecting the row selects all of its jobs. A row is shown as partly selected when only some of its jobs are selected. The other jobs are listed under the heading "Other jobs", below the Knowledge Graph services. Checking the box makes no new request, because the jobs are already loaded. Unchecking it removes the added jobs from the rows and from the selection, so that the filter never applies jobs that the list no longer shows. The choice is kept in the URL key `filters-service-more`.
+- Without a Knowledge Graph data source, or when its request fails, the list holds the services read from the job label and the caption reads "No Knowledge Graph found, so services are read from the job label". A failed request is not shown to the user, because a Grafana outside of Grafana Cloud has no Knowledge Graph to answer. It is logged with `logger.error`.
+- When the Knowledge Graph lists no service that has a job in the selected data source, the list also holds the services read from the job label, and the caption reads "The Knowledge Graph lists no services for this data source, so services are read from the job label".
+
+An info button next to the caption explains where the list comes from, with links to the Prometheus definition of jobs and instances, the OpenTelemetry Prometheus compatibility specification, the Grafana Cloud OTLP format considerations and the Knowledge Graph introduction.
+
+The lists are fetched the first time you open the section. They are fetched again when the other filters at the top of the app change or when you pick another time range. Auto refresh does not fetch them again. An empty list and a failed Knowledge Graph request are not remembered, so the next change of the filters or of the time range tries again.
+
+A selection adds one filter to the label filters at the top of the app, and `job` matches the exact selected values. Because every query reads those label filters, the filter applies to the metrics list, the recent metrics, the metric panels, and the metric view. The selection is stored in the URL key `filters-service-job`, with the values separated by commas and a backslash before any comma or backslash inside a value.
+
+A filter that you add yourself at the top of the app for `job` also applies, and the results match both. If you already added the exact same filter, the sidebar takes it over. Removing the sidebar's filter from the top of the app clears the selection. A binary query clears all filters at the top of the app, so it clears the selection too, and changing the data source clears it as well, because services belong to a data source.
+
 #### Rules filters
 
 For environments using Prometheus recording rules, this groups metrics by their originating rules, making it easy to find all metrics derived from a particular recording rule hierarchy.

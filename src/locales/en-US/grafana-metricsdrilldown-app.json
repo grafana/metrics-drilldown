@@ -483,8 +483,31 @@
       "recent-metrics-description": "Filter metrics based on when they started being ingested",
       "rules-filters": "Rules filters",
       "rules-filters-description": "Filter metrics and recording rules",
+      "service-filters": "Service filters",
+      "service-filters-description": "Filter metrics by service. Services come from the Knowledge Graph when this stack has one that lists services of this data source, and are read from the job label otherwise. With the Knowledge Graph, you can also list the jobs that it does not list.",
       "suffix-filters": "Suffix filters",
       "suffix-filters-description": "Filter metrics based on their name suffix"
+    },
+    "service-filter": {
+      "extras-heading": "Other jobs ({{total}})",
+      "help-grafana-otlp-link": "Grafana Cloud: OTLP format considerations",
+      "help-job": "Services are read from the job label. In Prometheus, a job is a group of scrape targets with the same purpose, set in the scrape configuration.",
+      "help-jobs": "The Include all jobs option also lists the values of the job label that the Knowledge Graph does not list. In Prometheus, a job is a group of scrape targets with the same purpose, so these can be exporters and other infrastructure as well as services.",
+      "help-kg": "Services come from the Knowledge Graph, which lists services that are instrumented with OpenTelemetry or other APM tools. Selecting a service filters the metrics by its job values. Only jobs that exist in this data source are used.",
+      "help-kg-link": "Knowledge graph introduction",
+      "help-limit": "This list reads the part after the first slash as the service name, so a job that does not come from OpenTelemetry can appear as a service.",
+      "help-otel": "OpenTelemetry metrics get the job service.namespace/service.name, or service.name when there is no namespace.",
+      "help-otel-link": "OpenTelemetry: Prometheus compatibility",
+      "help-prometheus-link": "Prometheus: jobs and instances",
+      "include-jobs": "Include all jobs",
+      "include-jobs-description": "Adds the other values of the job label in this data source. A value with the same service name as a Knowledge Graph service joins that service, and the other values are listed below. A job is a group of scrape targets, so these can include exporters and other infrastructure.",
+      "kg-truncated": "The list may be incomplete. The Knowledge Graph returned more services than the list loads.",
+      "manual-filter-notice": "A filter on {{label}} in the top bar also applies. Results match both.",
+      "selected-count": "{{selected}} of {{total}} selected",
+      "source-help-label": "About this list",
+      "source-job": "No Knowledge Graph found, so services are read from the job label",
+      "source-job-no-services": "The Knowledge Graph lists no services for this data source, so services are read from the job label",
+      "source-kg": "Services from the Knowledge Graph"
     }
   },
   "slo-tracked-badge": {
