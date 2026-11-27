@@ -73,3 +73,24 @@ describe('getExperimentPayloads — sort-by-firing-alerts experiment enrichment'
     ).toBeUndefined();
   });
 });
+
+describe('getExperimentPayloads — assistant quick search experiment enrichment', () => {
+  const ASSISTANT_KEY = 'experiment_grafana_assistant_quick_search_tab_test';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetTrackedFlagPayload.mockImplementation((key: string) =>
+      key === ASSISTANT_KEY ? { [ASSISTANT_KEY]: 'treatment' } : null
+    );
+  });
+
+  it('enriches explain_in_assistant_clicked with the assistant cohort', () => {
+    expect(
+      getExperimentPayloads('explain_in_assistant_clicked', {
+        has_query: true,
+        has_datasource: true,
+        has_metadata: false,
+      })
+    ).toMatchObject({ [ASSISTANT_KEY]: 'treatment' });
+  });
+});

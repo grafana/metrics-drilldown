@@ -7,6 +7,7 @@
 - [Engineering Intent & Philosophy](./docs/project-intent.md): Read this to understand the "Why" behind our code decisions and our stance on abstraction vs. performance.
 - [Application Structure](./docs/application-structure.md): Read this to understand the overall application structure and how the different parts of the application are related.
 - [Contributing](./docs/contributing.md): Dev setup, issues vs PRs, i18n, PR checklist, and link to GenAI policy.
+- [Assistant evals](./docs/evals.md): How the Grafana Assistant handoff surfaces are evaluated, and how to add a case.
 - [Generative AI Contribution Policy](./docs/genai.md): Disclosure, acceptable use, and Metrics Drilldown-specific pitfalls for AI-assisted contributions.
 
 ## Usage

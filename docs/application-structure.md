@@ -106,7 +106,7 @@ The main metric panel provides contextual actions in its header and menu. Panels
 #### Panel menu
 
 - Open in Explore: Jump to Grafana Explore with this metric and its context
-- Explain in Assistant: Ask questions about the metric using Grafana Assistant (if available)
+- Explain in Assistant: Ask questions about the metric using Grafana Assistant (if available). Prompt and context builders are covered by [Assistant evals](./evals.md)
 - Add to Dashboard: Insert this metric panel into a new or existing dashboard (if available)
 - Create Alert: Create an alert rule for this metric (if available)
 - Bookmark: Save the metric for quick access via the sidebar
